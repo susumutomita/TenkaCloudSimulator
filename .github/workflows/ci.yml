@@ -1,0 +1,57 @@
+name: ci
+
+# Supply Chain Security:
+# - All actions pinned to full SHA for immutable references
+# - Safe Chain runs before dependency installation
+# - Lifecycle scripts disabled during install
+# - Minimal permissions following principle of least privilege
+
+permissions:
+  contents: read
+  packages: read
+  actions: read
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the code
+        # actions/checkout v4.3.1
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          submodules: true
+
+      - name: Setup Bun
+        # oven-sh/setup-bun v2.0.2
+        uses: oven-sh/setup-bun@735343b667d3e6f658f44d0eca948eb6282f2b76
+
+      # Supply Chain Security: Setup safe-chain before dependency installation
+      # safe-chain 自体のサプライチェイン経由侵入を防ぐため、
+      # (1) --ignore-scripts を必ず付ける (Bun は npm_config_ignore_scripts を読まない)
+      # (2) version を明示固定する (latest を引かない)
+      # version を上げるときは ADR / 別 PR でレビューする。
+      - name: Setup safe-chain
+        run: |
+          bun add -g --ignore-scripts @aikidosec/safe-chain@1.5.3
+          safe-chain setup-ci
+
+      # Supply Chain Security: Disable lifecycle scripts during install
+      # Note: --safe-chain-skip-minimum-package-age is used because transitive
+      # dependencies (e.g. textlint -> @modelcontextprotocol/sdk -> hono) may
+      # include recently released packages that have not yet aged out of the
+      # safe-chain minimum age check.
+      - name: Install packages via packages.json
+        env:
+          npm_config_ignore_scripts: "true"
+          CI: "true"
+        run: make install_ci
+
+      - name: Run quality gates
+        run: |
+          bun scripts/architecture-harness.ts --fail-on=error
+          make before-commit
