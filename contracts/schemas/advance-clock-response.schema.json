@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.tenkacloud.dev/simulator/v1/advance-clock-response.schema.json",
+  "title": "Advance simulator world clock response",
+  "type": "object",
+  "required": ["clock", "appliedTransitions"],
+  "properties": {
+    "clock": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "appliedTransitions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["provider", "transitionId"],
+        "properties": {
+          "provider": {
+            "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+          },
+          "transitionId": {
+            "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

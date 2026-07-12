@@ -1,0 +1,289 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Parameters:
+  NamePrefix:
+    Type: String
+    Default: tc-fixture
+  FlagSeed:
+    Type: String
+  Stage:
+    Type: String
+    Default: prod
+Conditions:
+  AIsProd: !Equals [!Ref Stage, prod]
+  BNotDev: !Not [!Equals [!Ref Stage, dev]]
+  CAllEnabled: !And
+    - Condition: AIsProd
+    - Condition: BNotDev
+  DOneEnabled: !Or
+    - Condition: AIsProd
+    - !Equals [!Ref Stage, test]
+Resources:
+  Vpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+  Subnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      CidrBlock: 10.0.1.0/24
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+  GatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref Vpc
+      InternetGatewayId: !Ref InternetGateway
+  RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Vpc
+  Route:
+    Type: AWS::EC2::Route
+    DependsOn: GatewayAttachment
+    Properties:
+      RouteTableId: !Ref RouteTable
+      GatewayId: !Ref InternetGateway
+      DestinationCidrBlock: 0.0.0.0/0
+  RouteAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RouteTable
+      SubnetId: !Ref Subnet
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub "${NamePrefix}-sg"
+      GroupDescription: fixture
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: "-1"
+          CidrIp: 0.0.0.0/0
+  InstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${NamePrefix}-role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement: []
+      Policies:
+        - PolicyName: ReadParameters
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: ssm:GetParameter
+                Resource: "*"
+  InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: !Sub "${NamePrefix}-profile"
+      Roles: [!Ref InstanceRole]
+  Instance:
+    Type: AWS::EC2::Instance
+    DependsOn:
+      - Route
+      - RouteAssociation
+    Properties:
+      ImageId: ami-fixture
+      InstanceType: t3.micro
+      SubnetId: !Ref Subnet
+      SecurityGroupIds: [!GetAtt SecurityGroup.GroupId]
+      IamInstanceProfile: !Ref InstanceProfile
+      UserData:
+        Fn::Base64: !Sub |
+          systemctl start nginx
+          systemctl start tenkacloud-vibe
+  Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${NamePrefix}-bucket-${AWS::AccountId}"
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${NamePrefix}"
+      RetentionInDays: 7
+  GateFunction:
+    Type: AWS::Lambda::Function
+    DependsOn: LogGroup
+    Properties:
+      FunctionName: !Sub "${NamePrefix}-gate"
+      Runtime: python3.12
+      Handler: index.handler
+      Role: !GetAtt InstanceRole.Arn
+      Environment:
+        Variables:
+          NAME_PREFIX: !Ref NamePrefix
+          FLAG: !Sub "TC{${FlagSeed}}"
+      Code:
+        ZipFile: "def handler(event, context): return event"
+  SearchFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "${NamePrefix}-search"
+      Runtime: nodejs22.x
+      Handler: index.handler
+      Role: !GetAtt InstanceRole.Arn
+      Environment:
+        Variables:
+          FLAG: !Sub "TC{${FlagSeed}}"
+      Code:
+        ZipFile: "exports.handler = async (event) => event;"
+  HelloFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "${NamePrefix}-hello"
+      Runtime: python3.12
+      Handler: index.handler
+      Role: !GetAtt InstanceRole.Arn
+      Code:
+        ZipFile: "def handler(event, context): return event"
+  EvaluatorFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "${NamePrefix}-evaluator"
+      Runtime: python3.12
+      Handler: index.handler
+      Role: !GetAtt InstanceRole.Arn
+      Environment:
+        Variables:
+          FLAG: !Sub "TC{${FlagSeed}}"
+      Code:
+        ZipFile: "def handler(event, context): return event"
+  FunctionUrl:
+    Type: AWS::Lambda::Url
+    Properties:
+      TargetFunctionArn: !GetAtt HelloFunction.Arn
+      AuthType: NONE
+  FunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt HelloFunction.Arn
+      Action: lambda:InvokeFunctionUrl
+      Principal: "*"
+  UploadObject:
+    Type: AWS::CloudFormation::CustomResource
+    Properties:
+      ServiceToken: !GetAtt GateFunction.Arn
+      Bucket: !Ref Bucket
+      Key: tool.sh
+      Body: "#!/bin/sh\necho fixture\n"
+  EmptyBuckets:
+    Type: Custom::EmptyStackBuckets
+    Properties:
+      ServiceToken: !GetAtt GateFunction.Arn
+      Buckets: [!Ref Bucket]
+  MonetizedPath:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub "/${NamePrefix}/config/monetized_path"
+      Type: String
+      Value: /content/*
+      Description: !Sub "configuration for ${Bucket}"
+  PayToWallet:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub "/${NamePrefix}/config/pay_to_wallet"
+      Type: String
+      Value: ""
+  CurrencyMode:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub "/${NamePrefix}/config/currency_mode"
+      Type: String
+      Value: test
+  Price:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub "/${NamePrefix}/config/price_usdc"
+      Type: String
+      Value: "10000"
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      TargetType: lambda
+      Targets:
+        - Id: !GetAtt SearchFunction.Arn
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Subnets: [!Ref Subnet]
+      SecurityGroups: [!Ref SecurityGroup]
+  Listener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroup
+  ListenerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      ListenerArn: !Ref Listener
+      Priority: 10
+      Conditions:
+        - Field: http-request-method
+          HttpRequestMethodConfig:
+            Values: [GET]
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroup
+  DbSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupName: !Sub "${NamePrefix}-db-subnets"
+      DBSubnetGroupDescription: fixture
+      SubnetIds: [!Ref Subnet]
+  Database:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: !Sub "${NamePrefix}-db"
+      DBInstanceClass: db.t4g.micro
+      Engine: postgres
+      MasterUsername: app
+      MasterUserPassword: secret
+      DBName: app
+      DBSubnetGroupName: !Ref DbSubnetGroup
+      VPCSecurityGroups: [!GetAtt SecurityGroup.GroupId]
+  WebAcl:
+    Type: AWS::WAFv2::WebACL
+    Condition: CAllEnabled
+    Properties:
+      Name: !Sub "${NamePrefix}-acl"
+      Scope: REGIONAL
+      DefaultAction: { Allow: {} }
+      VisibilityConfig:
+        CloudWatchMetricsEnabled: true
+        MetricName: fixture
+        SampledRequestsEnabled: true
+Outputs:
+  InstanceId:
+    Value: !Ref Instance
+  BucketName:
+    Value: !Ref Bucket
+  BucketArn:
+    Value: !GetAtt Bucket.Arn
+  FunctionUrl:
+    Value: !GetAtt FunctionUrl.FunctionUrl
+  Joined:
+    Value: !Join [":", [!Ref NamePrefix, !Ref Stage]]
+  Selected:
+    Value: !Select [1, [zero, one]]
+  Encoded:
+    Value: !Base64 hello
+  Conditional:
+    Condition: DOneEnabled
+    Value: !If [AIsProd, production, development]
+  Substituted:
+    Value: !Sub
+      - "${Prefix}-${Resource}-${AWS::Region}"
+      - Prefix: mapped
+        Resource: !Ref Bucket

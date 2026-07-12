@@ -1,7 +1,11 @@
 ---
 paths:
-  - "packages/**"
-  - "src/**"
+  - "contracts/**"
+  - "core/**"
+  - "providers/**"
+  - "apps/**"
+  - "tools/**"
+  - "conformance/**"
   - "scripts/**"
 ---
 

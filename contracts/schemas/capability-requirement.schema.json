@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.tenkacloud.dev/simulator/v1/capability-requirement.schema.json",
+  "title": "Catalog capability requirement",
+  "$defs": {
+    "plane": {
+      "type": "string",
+      "enum": [
+        "deploy",
+        "participant",
+        "workload",
+        "scoring",
+        "operator",
+        "access"
+      ]
+    },
+    "sourceKind": {
+      "type": "string",
+      "enum": [
+        "iac-resource",
+        "iam-policy",
+        "metadata-probe",
+        "metadata-disruption",
+        "code-analysis",
+        "simulation-overlay"
+      ]
+    },
+    "source": {
+      "type": "object",
+      "required": ["kind", "location"],
+      "properties": {
+        "kind": { "$ref": "#/$defs/sourceKind" },
+        "location": {
+          "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/sourceLocation"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "type": "object",
+  "required": [
+    "problemId",
+    "provider",
+    "service",
+    "resourceType",
+    "operation",
+    "requiredFidelity",
+    "plane",
+    "source"
+  ],
+  "properties": {
+    "problemId": {
+      "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+    },
+    "targetId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,31}$"
+    },
+    "provider": {
+      "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+    },
+    "engine": {
+      "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+    },
+    "entry": {
+      "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+    },
+    "service": {
+      "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+    },
+    "resourceType": {
+      "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+    },
+    "operation": {
+      "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+    },
+    "requiredFidelity": {
+      "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/fidelitySet"
+    },
+    "plane": { "$ref": "#/$defs/plane" },
+    "source": { "$ref": "#/$defs/source" }
+  },
+  "additionalProperties": false
+}

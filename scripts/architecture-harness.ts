@@ -22,19 +22,10 @@ import type {
   Rule,
   Severity,
 } from './architecture-harness-types';
+import { isApplicationSource } from './architecture-harness-types';
 import { PRE_RELEASE_RULES } from './pre-release-rules';
 
 // --- File-level invariants ---
-
-// packages/ src/ scripts/ のアプリ・ツール実装 (テスト・モック・fixture を除く)。
-// anti-MVP 系ルールが共有する scope。
-const isImplSource = (p: string, ext = /\.(ts|tsx|js|jsx)$/): boolean =>
-  (p.startsWith('packages/') ||
-    p.startsWith('src/') ||
-    p.startsWith('scripts/')) &&
-  ext.test(p) &&
-  !/\.(test|spec)\.(ts|tsx|js|jsx)$/.test(p) &&
-  !/(^|\/)(__mocks__|__fixtures__|__tests__|tests?)\//.test(p);
 
 // INVARIANT_NO_GIT_DEPENDENCY: version specifier の許可形 (registry-style のみ)。
 // semver ranges, ^x.y.z, ~x.y.z, x.y.z, *, latest, workspace:* など。
@@ -71,6 +62,78 @@ function inspectDependencySpec(
   };
 }
 
+const PROVIDER_IMPLEMENTATION_PACKAGE =
+  /(^|\/)providers?(\/|$)|(^|[/@_-])providers?[-_/](aws|azure|gcp|sakura)([-_/]|$)/i;
+const PROVIDER_LITERAL = '(?:aws|azure|gcp|sakura(?:[-_ ]?cloud)?)';
+const PROVIDER_LITERAL_COMPARISON = new RegExp(
+  `(?:===?|!==?)\\s*["'\`]${PROVIDER_LITERAL}["'\`]|["'\`]${PROVIDER_LITERAL}["'\`]\\s*(?:===?|!==?)`,
+  'i'
+);
+const PROVIDER_LITERAL_CASE = new RegExp(
+  `\\bcase\\s*["'\`]${PROVIDER_LITERAL}["'\`]\\s*:`,
+  'i'
+);
+
+function lineAtOffset(content: string, offset: number): number {
+  return content.slice(0, offset).split('\n').length;
+}
+
+function isProviderImplementationPackage(specifier: string): boolean {
+  return PROVIDER_IMPLEMENTATION_PACKAGE.test(specifier);
+}
+
+function inspectCoreProviderImports(
+  filePath: string,
+  content: string
+): Finding[] {
+  const findings: Finding[] = [];
+  const specifierPatterns = [
+    /\bfrom\s*(["'`])([^"'`]+)\1/g,
+    /\bimport\s*(["'`])([^"'`]+)\1/g,
+    /\b(?:import|require)\s*\(\s*(["'`])([^"'`]+)\1\s*\)/g,
+  ];
+  for (const pattern of specifierPatterns) {
+    for (const match of content.matchAll(pattern)) {
+      const specifier = match[2];
+      if (!specifier || !isProviderImplementationPackage(specifier)) continue;
+      findings.push({
+        rule: 'INVARIANT_CORE_PROVIDER_INDEPENDENT',
+        severity: 'error',
+        file: filePath,
+        line: lineAtOffset(content, match.index),
+        message:
+          'core から provider implementation を import しない。起動側が plugin registry に注入する',
+      });
+    }
+  }
+  return findings;
+}
+
+function inspectCoreProviderLiteralBranches(
+  filePath: string,
+  content: string
+): Finding[] {
+  const findings: Finding[] = [];
+  const lines = content.split('\n');
+  for (const [index, line] of lines.entries()) {
+    if (
+      !PROVIDER_LITERAL_COMPARISON.test(line) &&
+      !PROVIDER_LITERAL_CASE.test(line)
+    ) {
+      continue;
+    }
+    findings.push({
+      rule: 'INVARIANT_CORE_PROVIDER_INDEPENDENT',
+      severity: 'error',
+      file: filePath,
+      line: index + 1,
+      message:
+        'core で provider literal による分岐をしない。provider 固有挙動は plugin implementation に置く',
+    });
+  }
+  return findings;
+}
+
 const RULES: Rule[] = [
   {
     id: 'INVARIANT_NO_NPX',
@@ -83,8 +146,7 @@ const RULES: Rule[] = [
     check: ({ path: filePath, content }) => {
       const findings: Finding[] = [];
       const lines = content.split('\n');
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
+      for (const [i, line] of lines.entries()) {
         // `npx ` (空白付き) を検出。`bunx`/`nlx` は許可。コメントの可能性は許容して error 扱い。
         if (/(^|\s|"|`|\$\()npx\s/.test(line)) {
           findings.push({
@@ -102,17 +164,19 @@ const RULES: Rule[] = [
   {
     id: 'INVARIANT_NO_MOCK_DATA',
     description: 'アプリケーション実装にスタブ/モックデータを混ぜない',
-    scope: (p) =>
-      (p.startsWith('packages/') || p.startsWith('src/')) &&
-      /\.(ts|tsx|js|jsx)$/.test(p) &&
-      !/\.(test|spec)\.(ts|tsx|js|jsx)$/.test(p) &&
-      !/__mocks__|__fixtures__|test\//.test(p),
+    scope: (p) => isApplicationSource(p),
     check: ({ path: filePath, content }) => {
       const findings: Finding[] = [];
+      const upperMarker = ['MO', 'CK_'].join('');
+      const camelMarker = ['mock', 'Data'].join('');
+      const stubMarker = ['stub', 'Api'].join('');
+      const fakeMarker = ['fake', 'Users'].join('');
+      const suspicious = new RegExp(
+        `\\b(${upperMarker}[A-Z_]+|${camelMarker}|${stubMarker}|${fakeMarker})\\b`
+      );
       const lines = content.split('\n');
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        if (/\b(MOCK_[A-Z_]+|mockData|stubApi|fakeUsers)\b/.test(line)) {
+      for (const [i, line] of lines.entries()) {
+        if (suspicious.test(line)) {
           findings.push({
             rule: 'INVARIANT_NO_MOCK_DATA',
             severity: 'error',
@@ -133,8 +197,7 @@ const RULES: Rule[] = [
     check: ({ path: filePath, content }) => {
       const findings: Finding[] = [];
       const lines = content.split('\n');
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
+      for (const [i, line] of lines.entries()) {
         if (
           /\b(it|test|describe)\.(only|skip)\b/.test(line) ||
           /\b(xit|xdescribe)\s*\(/.test(line)
@@ -177,8 +240,7 @@ const RULES: Rule[] = [
       // CLI フラグで明示的に止める。例外: コメント行、`npm install -g typescript` のような
       // グローバルインストールも同じ扱い (危険なので明示的に --ignore-scripts を付けさせる)。
       const INSTALL_VERB = /\b(bun|npm|pnpm|yarn)\s+(install|add|i|ci|a)\b/;
-      for (let i = 0; i < lines.length; i++) {
-        const raw = lines[i];
+      for (const [i, raw] of lines.entries()) {
         const line = raw.replace(/#.*$/, '').trim();
         if (!line) continue;
         if (!INSTALL_VERB.test(line)) continue;
@@ -268,7 +330,7 @@ const RULES: Rule[] = [
       } catch {
         return findings;
       }
-      const scripts = pkg.scripts;
+      const scripts = pkg['scripts'];
       if (!scripts || typeof scripts !== 'object') return findings;
       const HOOKS = [
         'preinstall',
@@ -306,7 +368,7 @@ const RULES: Rule[] = [
         filePath,
         content,
         // スキル名はディレクトリ名と同期させる (公開 API として扱う)。
-        expectedName: filePath.split('/')[2],
+        expectedName: filePath.split('/')[2] ?? '',
         docLabel: 'SKILL.md',
         nameSource: 'ディレクトリ名',
       }),
@@ -379,10 +441,10 @@ const RULES: Rule[] = [
         },
       ];
       const lines = content.split('\n');
-      for (let i = 0; i < lines.length; i++) {
+      for (const [i, line] of lines.entries()) {
         for (const channel of CHANNELS) {
           if (channel.mdOnly && !isMarkdown) continue;
-          if (!channel.pattern.test(lines[i])) continue;
+          if (!channel.pattern.test(line)) continue;
           findings.push({
             rule: 'INVARIANT_SKILL_NO_HIDDEN_INSTRUCTIONS',
             severity: channel.severity,
@@ -421,8 +483,7 @@ const RULES: Rule[] = [
       const EVAL_REMOTE =
         /\b(eval|\w*sh\s+(-\w+\s+)*-c)\s+["']?\$\(\s*(curl|wget)\b/;
       const lines = content.split('\n');
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
+      for (const [i, line] of lines.entries()) {
         if (
           FETCH_PIPE_SHELL.test(line) ||
           BASE64_EXEC.test(line) ||
@@ -449,7 +510,7 @@ const RULES: Rule[] = [
     description:
       '実装に手抜き・未完成のシグナル (作業中マーカー / 未実装 throw) を残さない。空 catch・any は Biome が拾う',
     standalone: true,
-    scope: (p) => isImplSource(p),
+    scope: (p) => isApplicationSource(p),
     check: ({ path: filePath, content }) => {
       const findings: Finding[] = [];
       const flag = (line: number, message: string) =>
@@ -479,8 +540,7 @@ const RULES: Rule[] = [
       const notImpl = new RegExp(`(not[\\s_-]*${impl}|un${impl})`, 'i');
       const throwKeyword = /\bthrow\b/;
       const lines = content.split('\n');
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
+      for (const [i, line] of lines.entries()) {
         if (commentMarker.test(line)) {
           flag(
             i + 1,
@@ -502,7 +562,7 @@ const RULES: Rule[] = [
     description:
       'TypeScript の型エスケープのうち Biome が拾わないもの (unknown 経由の二段キャスト / nocheck・expect-error ディレクティブ) を残さない',
     standalone: true,
-    scope: (p) => isImplSource(p, /\.(ts|tsx)$/),
+    scope: (p) => isApplicationSource(p, /\.(ts|tsx)$/),
     check: ({ path: filePath, content }) => {
       const findings: Finding[] = [];
       // 役割分担: any 系のキャストは Biome の noExplicitAny、ts-ignore ディレクティブは
@@ -513,8 +573,7 @@ const RULES: Rule[] = [
         `@ts-(${['noche', 'ck'].join('')}|${['expect', '-error'].join('')})`
       );
       const lines = content.split('\n');
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
+      for (const [i, line] of lines.entries()) {
         if (asUnknownAs.test(line) || suppress.test(line)) {
           findings.push({
             rule: 'INVARIANT_NO_TYPE_ESCAPE_HATCH',
@@ -528,6 +587,16 @@ const RULES: Rule[] = [
       }
       return findings;
     },
+  },
+  {
+    id: 'INVARIANT_CORE_PROVIDER_INDEPENDENT',
+    description:
+      'core は provider implementation を import せず、provider literal による分岐を持たない',
+    scope: (p) => p.startsWith('core/') && isApplicationSource(p),
+    check: ({ path: filePath, content }) => [
+      ...inspectCoreProviderImports(filePath, content),
+      ...inspectCoreProviderLiteralBranches(filePath, content),
+    ],
   },
   ...PRE_RELEASE_RULES,
 ];
@@ -554,7 +623,7 @@ function checkFrontmatterDoc(spec: FrontmatterDocSpec): Finding[] {
       rule: spec.rule,
       severity,
       file: spec.filePath,
-      line,
+      ...(line === undefined ? {} : { line }),
       message,
     });
   const fm = parseFrontmatter(spec.content);
@@ -566,7 +635,7 @@ function checkFrontmatterDoc(spec: FrontmatterDocSpec): Finding[] {
     );
     return findings;
   }
-  const name = fm.name?.trim();
+  const name = fm['name']?.trim();
   if (!name) {
     flag('frontmatter に name が無い');
   } else if (name !== spec.expectedName) {
@@ -574,7 +643,7 @@ function checkFrontmatterDoc(spec: FrontmatterDocSpec): Finding[] {
       `frontmatter の name (${name}) が${spec.nameSource} (${spec.expectedName}) と一致しない。名前は公開 API として扱い、${spec.nameSource}と同期させる`
     );
   }
-  const description = fm.description?.trim();
+  const description = fm['description']?.trim();
   if (!description) {
     flag('frontmatter に description が無い');
   } else {
@@ -921,30 +990,45 @@ async function collectFileFindings(opts: CliOptions): Promise<Finding[]> {
   return findings;
 }
 
-async function main(): Promise<void> {
-  const opts = parseArgs(process.argv.slice(2));
-  const findings = [
-    ...(await collectRepoFindings(opts)),
-    ...(await collectFileFindings(opts)),
-  ];
+type HarnessLogger = (...values: readonly unknown[]) => void;
 
-  console.log(formatReport(findings));
-
-  if (opts.failOn) {
-    const hit = findings.some((f) =>
-      opts.failOn === 'warning' ? true : f.severity === 'error'
+async function main(
+  argv = process.argv.slice(2),
+  log: HarnessLogger = console.log,
+  logError: HarnessLogger = console.error
+): Promise<number> {
+  try {
+    const opts = parseArgs(argv);
+    const findings = [
+      ...(await collectRepoFindings(opts)),
+      ...(await collectFileFindings(opts)),
+    ];
+    log(formatReport(findings));
+    if (!opts.failOn) return 0;
+    const hit = findings.some((finding) =>
+      opts.failOn === 'warning' ? true : finding.severity === 'error'
     );
-    if (hit) process.exitCode = 2;
+    return hit ? 2 : 0;
+  } catch (error) {
+    logError('[architecture-harness] failed:', error);
+    return 1;
   }
 }
 
-if (import.meta.main) {
-  main().catch((err: unknown) => {
-    console.error('[architecture-harness] failed:', err);
-    process.exitCode = 1;
-  });
-}
+if (import.meta.main) process.exitCode = await main();
 
 export type { Finding, RepoCheck, Rule, Severity };
 // テスト (scripts/architecture-harness.test.ts) から invariant を直接検証するための export。
-export { parseFrontmatter, REPO_CHECKS, RULES };
+export {
+  collectFileFindings,
+  collectRepoFindings,
+  formatReport,
+  listStagedFiles,
+  main,
+  parseArgs,
+  parseFrontmatter,
+  REPO_CHECKS,
+  RULES,
+  selectRules,
+  walkRepo,
+};

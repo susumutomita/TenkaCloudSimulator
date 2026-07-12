@@ -1,0 +1,21 @@
+{
+  "endpoints": [
+    {
+      "slot": "app",
+      "default": {
+        "from": "cfn-output",
+        "key": "FunctionUrl",
+        "appendPath": "/healthz"
+      },
+      "overridable": true
+    },
+    {
+      "slot": "fixed",
+      "default": {
+        "from": "cfn-output",
+        "key": "FunctionUrl"
+      },
+      "overridable": false
+    }
+  ]
+}

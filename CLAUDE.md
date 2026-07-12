@@ -49,18 +49,11 @@ PR 作成前の必須ゲート（順序・コマンドは AGENTS.md の「品質
 | `/architecture-harness` | invariant の機械検証と `why <RULE_ID>` での意図表示 |
 | `/skill-audit` | スキル・フック・設定の監査。`.claude/` を変更したら必須 |
 | `/follow-up` | scope 外発見の記録・解消管理 |
-| `/init-project` | 初回スキャフォールド（ユーザー専用） |
-| `/frontend-design` | 高品質なフロントエンド実装 |
+| `/blindspot-pass` | 設計・実装・検証経路の未知を証拠付きで探索 |
 
 スキルの書き方は AGENTS.md の「スキルの書き方」を正本とし、`.claude/rules/skill-authoring.md`（path-scoped rule）が `.claude/skills/` 配下の作業時に自動で読み込まれる。
 
 同梱の subagent として、コードレビュー用の [`.claude/agents/code-reviewer.md`](./.claude/agents/code-reviewer.md) とデバッグ用の [`.claude/agents/debugger.md`](./.claude/agents/debugger.md) を用意する。それぞれ専用コンテキストでレビュー・障害調査を担う。
-
-## AI 機能を実装するときのモデル指針
-
-- Claude モデルを使う実装では最新世代を既定にする（2026-06 時点: `claude-fable-5` / `claude-opus-4-8` / `claude-sonnet-4-6` / `claude-haiku-4-5`）。
-- モデル ID をコードに直書きせず、設定または環境変数に切り出す。
-- 選定・移行の根拠はモデル世代が変わるたびに ADR で残す。
 
 ## ドキュメント規則
 

@@ -1,13 +1,18 @@
 # Architecture Harness
 
-このリポジトリで「セッションが変わっても壊してはいけない原則」を機械可読な ID 付きで固定する正本です。テンプレート利用者は、自分のプロジェクトに合わせて Invariants を追加・調整してください。
+このリポジトリで「セッションが変わっても壊してはいけない原則」を機械可読な ID 付きで固定する正本です。
+
+application source root は `contracts/`、`core/`、`providers/`、`apps/`、`tools/`、
+`conformance/`、`scripts/` です。application source を対象にする invariant と公開品質
+rule は、特定 package layout の例外を作らず、この全 root を検査します。判断の根拠は
+[ADR-0008](../adr/0008-simulator-source-roots-and-gates.md) です。
 
 ## Invariants
 
 - `INVARIANT_NO_NPX`
   パッケージ実行は `nlx` または `bunx` を使う。`npx` を package.json scripts や CI スクリプト、ドキュメントに残さない。
 - `INVARIANT_NO_MOCK_DATA`
-  `mockData` / `stubApi` / `MOCK_*` などの固定スタブをアプリケーション実装に混ぜない。テストでは Real DB / Real API を使う (`CLAUDE.md` の No Mock 原則と整合)。
+  `mockData` / `stubApi` / `MOCK_*` などの固定スタブを application source に混ぜない。テストでは Real DB / Real API を使う (`CLAUDE.md` の No Mock 原則と整合)。
 - `INVARIANT_HARNESS_DOC_AUTHORITATIVE`
   本ファイル (`docs/architecture/harness.md`) と ADR (`docs/adr/`) の内容を仕様の正本とする。コード変更が invariant に違反する場合は、コードを直すのが第一手で、invariant 緩和は ADR で明示的に supersede する。
 - `INVARIANT_PLAN_MD_REQUIRED`
@@ -23,25 +28,25 @@
 - `INVARIANT_NO_KNOWN_IOC`
   Shai-Hulud 系で観測された IOC (`tanstack_runner.js`, `router_init.js`, `gh-token-monitor.*`, `com.user.gh-token-monitor.plist`, `.claude/setup.mjs`, `.vscode/setup.mjs`, `codeql_analysis.yml` 等) のファイル名がコミットに含まれたら error で止める。
 - `INVARIANT_LOCKFILE_NO_GIT_RESOLUTION`
-  `bun.lock` / `package-lock.json` / `pnpm-lock.yaml` などのロックファイルに git / github で解決された依存が無いことを保証する。`bun.lockb` (バイナリ) は静的検査困難として警告。
+  `bun.lock` / `package-lock.json` / `pnpm-lock.yaml` などのロックファイルに Git / GitHub で解決された依存が無いことを保証する。`bun.lockb` (バイナリ) は静的検査困難として警告。
 - `INVARIANT_SUPPLY_CHAIN_CONFIG_PRESENT`
   `bunfig.toml` に `trustedDependencies = []` が明示されていることを確認する。Bun が暗黙信頼する「top 500 npm パッケージ」の lifecycle script をゼロにする。`.npmrc` は Bun が読まないため意図的に置かない (security theater の排除)。詳細は [ADR-0001](../adr/0001-supply-chain-hardening.md) を参照。
 - `INVARIANT_SKILL_FRONTMATTER_VALID`
   `.claude/skills/<dir>/SKILL.md` は YAML frontmatter に `name` と `description` を持ち、`name` はディレクトリ名と一致させる (スキル名は公開 API。リネームは breaking change)。`description` は 50 文字以上 1024 文字以下で、トリガー語彙と「いつ使うか」を明示する。曖昧な description はスキルの誤発火 (trigger abuse) を招くため warning で検出する。詳細は [ADR-0002](../adr/0002-skill-audit-invariants.md) を参照。
 - `INVARIANT_AGENT_FRONTMATTER_VALID`
-  `.claude/agents/<name>.md` (subagent 定義) は YAML frontmatter に `name` と `description` を持ち、`name` はファイル名 (拡張子を除く) と一致させる (subagent 名は公開 API。リネームは breaking change)。`description` は 50 文字以上 1024 文字以下で、トリガー語彙と「いつ使うか」を明示する。曖昧な description は subagent の誤発火を招くため warning で検出する。検証ロジックは skill 用と共有し、`name` の期待値の出所だけを差し替える。subagent も skill と同じくモデルのコンテキストへ注入されるサプライチェーン成果物として扱う。`.claude/agents/` が未存在のリポジトリでは発火しない。詳細は [ADR-0005](../adr/0005-agents-frontmatter-invariant.md) を参照。
+  `.claude/agents/<name>.md` (subagent 定義) は YAML frontmatter に `name` と `description` を持ち、`name` はファイル名 (拡張子を除く) と一致させる (subagent 名は公開 API。リネームは breaking change)。`description` は 50 文字以上 1024 文字以下で、トリガー語彙と「いつ使うか」を明示する。曖昧な description は subagent の誤発火を招くため warning で検出する。検証ロジックは skill 用と共有し、`name` の期待値の出所だけを差し替える。subagent も skill と同じくモデルのコンテキストへ注入されるサプライチェイン成果物として扱う。`.claude/agents/` が未存在のリポジトリでは発火しない。詳細は [ADR-0005](../adr/0005-agents-frontmatter-invariant.md) を参照。
 - `INVARIANT_SKILL_NO_HIDDEN_INSTRUCTIONS`
-  `.claude/` 配下の全ファイルに、ゼロ幅/双方向 Unicode 制御文字や 120 文字以上の base64 ブロックを混入させない (error)。markdown では HTML コメントも隠し prompt injection のチャネルになりうるため warning。スキル・フックはモデルのコンテキストに注入される成果物であり、サプライチェーンの一部として扱う。
+  `.claude/` 配下の全ファイルに、ゼロ幅/双方向 Unicode 制御文字や 120 文字以上の base64 ブロックを混入させない (error)。markdown では HTML コメントも隠し prompt injection のチャネルになりうるため warning。スキル・フックはモデルのコンテキストに注入される成果物であり、サプライチェインの一部として扱う。
 - `INVARIANT_SKILL_NO_EXFIL_EXEC`
   `.claude/skills/`、`.claude/scripts/`、`.claude/rules/`、`.claude/settings.json` に、リモート取得をシェルへパイプする実行、base64 デコードの実行、`eval` や `sh -c` とコマンド置換でリモート取得結果を実行するパターンを置かない。サードパーティスキルの導入前検査は `/skill-audit` スキル (`--skills-only` モード) で行う。
 - `INVARIANT_NO_MVP_PLACEHOLDER`
-  `packages/` / `src/` / `scripts/` のアプリ・ツール実装に、手抜き・未完成の客観的シグナルを残さない (error)。対象はコメント内の作業中マーカー (TODO / FIXME / HACK / XXX、大小無視) と `not implemented` / `unimplemented` 系の throw。やり残しは `/follow-up` に切るか、その場で完了させる。役割分担: 空 catch は Biome の `noEmptyBlockStatements`、`any` は `noExplicitAny` が AST で拾う (linter で取れるものは linter に任せ、harness は linter に対応ルールが無いものだけを見る)。MVP を完了条件にしない原則 ([quality-bar.md](./quality-bar.md)) の機械的な裏打ち。
+  全 application source のアプリ・ツール実装に、手抜き・未完成の客観的シグナルを残さない (error)。対象はコメント内の作業中マーカー (TODO / FIXME / HACK / XXX、大小無視) と `not implemented` / `unimplemented` 系の throw。やり残しは `/follow-up` に切るか、その場で完了させる。役割分担: 空 catch は Biome の `noEmptyBlockStatements`、`any` は `noExplicitAny` が AST で拾う (linter で取れるものは linter に任せ、harness は linter に対応ルールが無いものだけを見る)。MVP を完了条件にしない原則 ([quality-bar.md](./quality-bar.md)) の機械的な裏打ち。
 - `INVARIANT_NO_TYPE_ESCAPE_HATCH`
-  `packages/` / `src/` / `scripts/` の TypeScript に、Biome が拾わない型エスケープを残さない (error)。対象は `as unknown as` の二段キャストと `@ts-nocheck` / `@ts-expect-error`。型を回避せず、外部入力は境界で検証して内部では検証済みの型だけを扱う。`any` / `as any` は Biome `noExplicitAny`、`@ts-ignore` は Biome `noTsIgnore` が担当する。
+  全 application source の TypeScript に、Biome が拾わない型エスケープを残さない (error)。対象は `as unknown as` の二段キャストと `@ts-nocheck` / `@ts-expect-error`。型を回避せず、外部入力は境界で検証して内部では検証済みの型だけを扱う。`any` / `as any` は Biome `noExplicitAny`、`@ts-ignore` は Biome `noTsIgnore` が担当する。
 - `INVARIANT_NO_CLIENT_AUTH_STORAGE`
-  `packages/` / `src/` のブラウザ実装で、token / auth / session / credential を示すキーや値を `localStorage` / `sessionStorage` に保存しない (error)。認証情報は JavaScript から読めない HttpOnly Cookie など、脅威モデルに合うサーバー管理方式を使う。
+  application source のブラウザ実装で、token / auth / セッション / credential を示すキーや値を `localStorage` / `sessionStorage` に保存しない (error)。認証情報は JavaScript から読めない HttpOnly Cookie など、脅威モデルに合うサーバー管理方式を使う。
 - `INVARIANT_NO_DANGEROUS_HTML`
-  `packages/` / `src/` の実装で `dangerouslySetInnerHTML` や DOM `innerHTML` 代入を使わない (error)。ユーザー入力を HTML として直接解釈せず、例外が必要なら sanitizer と threat model を ADR で設計して invariant を supersede する。
+  application source の実装で `dangerouslySetInnerHTML` や DOM `innerHTML` 代入を使わない (error)。ユーザー入力を HTML として直接解釈せず、例外が必要なら sanitizer と threat model を ADR で設計して invariant を supersede する。
 - `INVARIANT_EXTERNAL_LINK_SAFE`
   JSX / HTML の `target="_blank"` には `rel="noopener noreferrer"` を両方指定する (error)。複数行タグと動的な属性値も属性の存在を検査する。
 - `INVARIANT_IMAGE_ALT_REQUIRED`
@@ -51,7 +56,11 @@
 - `INVARIANT_PUBLIC_METADATA_PRESENT`
   公開ページの入口となる `index.html` は `html lang`、meta description、canonical URL、Open Graph (`og:title` / `og:description` / `og:url` / `og:image`)、Twitter Card を持つ (error)。
 - `INVARIANT_NO_PRODUCTION_NOINDEX`
-  `packages/` / `src/` の本番向け HTML / JSX / TSX に `noindex` を残さない (error)。検索非公開が製品要件の場合は対象 path を分離し、設計判断を ADR に残す。
+  application source の本番向け HTML / JSX / TSX に `noindex` を残さない (error)。検索非公開が製品要件の場合は対象 path を分離し、設計判断を ADR に残す。
+- `INVARIANT_CORE_PROVIDER_INDEPENDENT`
+  `core/` は `providers/` を import せず、AWS、Azure、GCP、Sakura の provider literal に
+  よる分岐を持たない (error)。provider implementation は起動側が plugin registry に注入
+  する。manifest の test fixture は対象外とする。
 
 上記 7 件は `pre-release` ルールグループに属する。通常 harness では他の invariant と
 一緒に実行し、`bun scripts/architecture-harness.ts --pre-release` では公開品質規則だけを
@@ -86,6 +95,8 @@
 - `bun scripts/architecture-harness.ts --staged --fail-on=error`
 - `make before-commit`
 - `.claude/settings.json` の hooks (rm -rf 等の危険コマンドブロック、リンター設定編集ブロック、PreCompact 状態保存)
+- `make before-commit` の root script と全 workspace に対する typecheck、test、coverage、
+  build、harness、lint
 
 ## Harness Commands
 

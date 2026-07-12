@@ -2,29 +2,42 @@
 
 ## サポート対象
 
-本リポジトリは Claude Code 向けモノレポテンプレートです。最新の `main` ブランチのみをサポートします。派生プロジェクト側のセキュリティ対応はそれぞれの責任で行ってください。
+TenkaCloud Simulator は最新の `main` branch と、TenkaCloud が pin する release image を
+サポートします。protocol compatibility は
+[Simulator Protocol](./docs/architecture/protocol.md) を正本とします。
 
 ## 脆弱性の報告
 
-セキュリティ上の問題を見つけた場合は、**Public な Issue で開示せず**、以下のいずれかで連絡してください。
+security issue は public Issue に書かず、次の private 経路で報告してください。
 
-- GitHub の **[Private vulnerability reporting](https://github.com/susumutomita/typescript-template/security/advisories/new)** を使う（推奨）
-- メール: `oyster880@gmail.com`
+- [GitHub Private vulnerability reporting](https://github.com/susumutomita/TenkaCloudSimulator/security/advisories/new)
+- `oyster880@gmail.com`
 
-48 時間以内に受領確認を返します。修正方針と公開時期は、必要であれば調整可能なリードタイムで合意します。
+48 時間以内に受領確認を返します。報告には影響する protocol version、provider、resource、
+operation、再現手順を含めてください。実 credential や participant secret は添付しないで
+ください。
 
-## サプライチェイン防御の前提
+## Security boundary
 
-本テンプレートは Shai-Hulud 系のサプライチェイン攻撃を多層で防ぐ設定を既定にしています。設計判断と invariant の詳細:
+Simulator は untrusted IaC、metadata、snapshot、provider request、workload image を処理します。
+主な security invariant は次のとおりです。
 
-- [ADR-0001: サプライチェイン攻撃 (Shai-Hulud 系) への多層防御を既定にする](./docs/adr/0001-supply-chain-hardening.md)
-- [docs/architecture/harness.md](./docs/architecture/harness.md) (invariant 一覧)
+- 実 cloud credential を受け付けません。
+- world を tenant、event、team、deployment で隔離する。
+- workload は non-privileged、resource bounded、egress deny をデフォルトにする。
+- image は digest と allowlist を検証する。
+- archive、template、snapshot の path traversal と symlink escape を拒否する。
+- event、log、diagnostic に secret と credential を保存しません。
+- unsupported operation を成功扱いにしません。
 
-これらの invariant が誤検知 / 取りこぼしを起こしている場合も、上記の報告経路で連絡してください。
+設計は [Simulator 設計](./docs/design/2026-07-12-tenkacloud-simulator.md)、supply chain
+invariant は [ADR-0001](./docs/adr/0001-supply-chain-hardening.md) と
+[harness](./docs/architecture/harness.md) を参照してください。
 
-## 報告に含めると助かる情報
+## 報告に含める情報
 
-- 影響範囲（テンプレート派生プロジェクトに継承される / 本リポジトリ単独）
-- 再現手順（PoC スクリプト、コマンド列）
-- 関連する invariant ID または該当ファイル名
-- 提案する修正方針があれば
+- 影響する release、protocol identifier、provider、operation。
+- namespace isolation または privilege boundary への影響。
+- network request と event sequence を含む最小再現手順。
+- secret を除いた log と diagnostic。
+- 回避策または修正案があればその内容。

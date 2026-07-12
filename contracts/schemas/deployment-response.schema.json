@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.tenkacloud.dev/simulator/v1/deployment-response.schema.json",
+  "title": "Simulator deployment response",
+  "$defs": {
+    "status": {
+      "type": "string",
+      "enum": [
+        "accepted",
+        "deploying",
+        "running",
+        "failed",
+        "deleting",
+        "deleted"
+      ]
+    },
+    "outputs": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "target": {
+      "type": "object",
+      "required": ["id", "provider", "engine", "status", "outputs"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,31}$"
+        },
+        "provider": {
+          "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+        },
+        "engine": {
+          "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+        },
+        "status": { "$ref": "#/$defs/status" },
+        "outputs": { "$ref": "#/$defs/outputs" },
+        "diagnostics": {
+          "type": "array",
+          "items": {
+            "$ref": "https://schemas.tenkacloud.dev/simulator/v1/error-envelope.schema.json#/$defs/diagnostic"
+          }
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "type": "object",
+  "required": ["deploymentId", "status", "outputs"],
+  "properties": {
+    "deploymentId": {
+      "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+    },
+    "status": { "$ref": "#/$defs/status" },
+    "outputs": { "$ref": "#/$defs/outputs" },
+    "targets": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/target" },
+      "x-uniqueBy": "id"
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": {
+        "$ref": "https://schemas.tenkacloud.dev/simulator/v1/error-envelope.schema.json#/$defs/diagnostic"
+      }
+    }
+  },
+  "additionalProperties": true
+}

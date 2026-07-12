@@ -29,7 +29,14 @@
     },
     {
       "description": "Bun ワークスペースパッケージ",
-      "matchFileNames": ["packages/*/package.json"],
+      "matchFileNames": [
+        "contracts/package.json",
+        "core/package.json",
+        "providers/*/package.json",
+        "apps/*/package.json",
+        "tools/*/package.json",
+        "conformance/package.json"
+      ],
       "groupName": "workspace dependencies"
     }
   ],

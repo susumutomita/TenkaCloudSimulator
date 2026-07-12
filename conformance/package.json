@@ -1,0 +1,17 @@
+{
+  "name": "@tenkacloud/simulator-conformance",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "scripts": {
+    "dev": "bun test --watch src",
+    "build": "bun build src/index.ts --outdir dist --target bun",
+    "test": "bun test src",
+    "test:coverage": "bun test --coverage src",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@tenkacloud/simulator-core": "workspace:*"
+  }
+}

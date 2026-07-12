@@ -67,6 +67,10 @@ format_check:
 architecture_harness:
 	bun scripts/architecture-harness.ts --staged --fail-on=error
 
+.PHONY: harness
+harness:
+	bun scripts/architecture-harness.ts --fail-on=error
+
 .PHONY: harness_test
 # harness 自体の invariant 検出ロジックを検証する。workspace 構成に依存しないため
 # 既定ゲートに含める (workspace 側のテストは利用プロジェクトで before-commit に足す)。
@@ -78,10 +82,7 @@ pre_release_check:
 	bun run check:pre-release
 
 .PHONY: before-commit
-# typecheck / test / build は各 workspace が該当 script を持つ前提に依存するため、本テンプレートの
-# 既定ゲートには含めない。利用プロジェクト側で `before-commit: ... typecheck test build` のように
-# 拡張するか、"no script ならスキップ" 型 runner を用意して取り込むこと。
-before-commit: architecture_harness harness_test pre_release_check lint_text lint
+before-commit: harness harness_test pre_release_check lint_text lint typecheck test test_coverage build
 
 .PHONY: dev
 dev:

@@ -2,7 +2,7 @@
 
 このリポジトリには Claude Code を統制する機構が複数ある。Hook / CLAUDE.md（AGENTS.md import 含む）/ Skill / Subagent / path-scoped Rule / 決定論的 harness の 6 つである。本書はそれぞれを「いつ・何に使うか」で配分する正本である。配分を誤ると、常時ロードされる文脈が肥大して薄まり、機械で止められるはずの違反が人間のレビュー頼みになる。設計判断の根拠は [ADR-0004](../adr/0004-steering-mechanism-alignment.md)。
 
-機構の選定モデルは Anthropic の記事「Steering Claude Code: skills, hooks, rules, subagents, and more」の配分原則を、本テンプレートの実体にマッピングしたものである。
+機構の選定モデルは Anthropic の記事「Steering Claude Code: skills, hooks, rules, subagents, and more」の配分原則を、本リポジトリの実体にマッピングしたものである。
 
 ## 判断フロー
 
@@ -23,9 +23,9 @@
 | 決定論的 harness | 機械可読な invariant の全件・差分スキャン。守られたかを真偽で判定する正本 | `scripts/architecture-harness.ts`（検出ロジック）、`scripts/architecture-harness.test.ts`（検出のテスト）、`docs/architecture/harness.md`（invariant の文章正本） |
 | Hook | ツール実行の前後・セッション境界で決定論的に走るシェル | `.claude/settings.json` の `hooks`（PreToolUse の危険コマンド・設定ファイル編集ブロック、PostToolUse の Biome 自動修正・テストスタイル確認、Stop / SessionStart / PreCompact）、`.claude/scripts/*.sh`（`check-test-style.sh`、`follow-up-reminder.sh`、`stop-gate-reminder.sh`） |
 | CLAUDE.md / AGENTS.md | 常時ロードされる不変の方針・ツールスタック・作業順序・制約 | `CLAUDE.md`（Claude Code 固有の運用ルール。`AGENTS.md` を import）、`AGENTS.md`（ツールスタック・品質ゲート・制約の共通正本） |
-| Skill | 状況に応じて踏む手順とサブコマンド。description が発火条件 | `.claude/skills/<name>/SKILL.md`（`feature`、`architecture-harness`、`follow-up`、`skill-audit`、`init-project`） |
-| Subagent | 並列・隔離実行し最終結果のみ親へ戻す | `.claude/skills/feature/SKILL.md` のフェーズ 4 が Agent ツールで 5 役割（PM / Designer / Developer / QA / User）を同時起動する。専用の `.claude/agents/*.md` 定義は現状置かず、`/feature` のオーケストレーションに集約している |
-| path-scoped Rule | 特定パスで作業するときだけ自動でロードされるルール | `.claude/rules/*.md`（frontmatter の `paths` でスコープ限定。`quality-bar.md` は `packages/`・`src/`・`scripts/`、`skill-authoring.md` は `.claude/skills/`・`.claude/scripts/`） |
+| Skill | 状況に応じて踏む手順とサブコマンド。description が発火条件 | `.claude/skills/<name>/SKILL.md`（`feature`、`architecture-harness`、`follow-up`、`skill-audit`、`blindspot-pass`） |
+| Subagent | 並列・隔離実行し最終結果のみ親へ戻す | `.claude/agents/code-reviewer.md` と `.claude/agents/debugger.md`。`feature` skill は作業 phase ごとに複数視点を起動する |
+| path-scoped Rule | 特定パスで作業するときだけ自動でロードされるルール | `.claude/rules/*.md`（frontmatter の `paths` でスコープ限定。`quality-bar.md` は全 application source、`skill-authoring.md` は `.claude/skills/`・`.claude/scripts/`） |
 
 決定論的 harness と Hook は近いが役割が違う。harness は「リポジトリの状態（コミット・差分）が invariant に反していないか」をスキャンする。Hook は「ツール呼び出しというイベント」に反応して走る。両者は補完関係で、harness の判定を PR 直前ゲートと Stop hook の双方から呼ぶ。
 
@@ -39,9 +39,9 @@
 | セッション開始・終了時のリマインド | Hook（SessionStart / Stop） | `follow-up-reminder.sh` / `stop-gate-reminder.sh` |
 | ツールスタック・品質ゲートの順序・常時守る制約 | CLAUDE.md / AGENTS.md | `AGENTS.md` の「ツールスタック」「品質ゲート」「制約」 |
 | サブコマンドを持つ反復手順 | Skill | `/follow-up add`、`/architecture-harness why <RULE_ID>` |
-| ユーザーが明示的にだけ起動する操作 | Skill（`disable-model-invocation: true`） | `/init-project` |
+| ユーザーが明示的にだけ起動する操作 | Skill（`disable-model-invocation: true`） | `/follow-up resolve` のような state mutation |
 | 並列に視点を分けて走らせ結果を統合する作業 | Subagent | `/feature` フェーズ 4 の 5 役割 |
-| `packages/`・`src/`・`scripts/` でだけ効かせたい品質基準 | path-scoped Rule | `.claude/rules/quality-bar.md` |
+| application source でだけ効かせたい品質基準 | path-scoped Rule | `.claude/rules/quality-bar.md` |
 | `.claude/` 配下でだけ効かせたい authoring 規律 | path-scoped Rule | `.claude/rules/skill-authoring.md` |
 | 設計判断の記録（不変・追記型） | ADR | `docs/adr/NNNN-*.md` |
 
@@ -49,7 +49,7 @@
 
 ## アンチパターン
 
-- パス固有ルールを常時ロードの CLAUDE.md に書く。`packages/` でだけ効く品質基準を CLAUDE.md に置くと、`.claude/` を触っているだけのセッションでも文脈を消費し、全体が薄まる。path-scoped Rule（`.claude/rules/*.md` の `paths`）に置く。本リポジトリでは品質バーを `.claude/rules/quality-bar.md` に切り出し済みである。
+- パス固有ルールを常時ロードの CLAUDE.md に書く。`packages/` でだけ効く品質基準を CLAUDE.md に置くと、`.claude/` を触っているだけのセッションでも文脈を消費し、全体が薄まる。パス-scoped Rule（`.claude/rules/*.md` の `paths`）に置く。本リポジトリでは品質バーを `.claude/rules/quality-bar.md` に切り出し済みである。
 - 「毎回 X したら必ず Y する」を CLAUDE.md の散文で書く。常時かつ決定論的な要求はモデルの遵守に頼らず Hook で強制する。コード変更後のフォーマットは PostToolUse hook、セッション境界のリマインドは SessionStart / Stop hook が担う。
 - 機械判定できる禁止を散文の「お願い」で済ませる。`npx` 禁止のような真偽判定できるものは invariant にして harness で止める。散文だけだと違反が CI 前に検出されない。
 - CLAUDE.md を肥大させて owner が中身を見失う。常時ロードの文脈は希少資源である。手順は Skill、パス固有は Rule、機械強制は Hook / harness に逃がし、CLAUDE.md には不変の骨子だけ残す。本リポジトリの CLAUDE.md / AGENTS.md は重複定義を避けるため、制約の正本を AGENTS.md に一本化し、CLAUDE.md からは再掲せず import している。

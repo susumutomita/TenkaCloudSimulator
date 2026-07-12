@@ -1,166 +1,102 @@
-# Plan.md
+# Issue 2574 実装計画
 
-### 公開品質ガードと blindspot pass - 2026-07-04
+## 目的
 
-#### 目的
+TenkaCloud の current catalog が必要とする cloud runtime をローカルで再現し、
+Docker 問題と simulated-cloud 問題を `make local` の同じ導線から操作できるように
+します。完了条件は GitHub Issue 2574 の受け入れ条件と
+`docs/architecture/quality-bar.md` の両方です。
 
-Issue 112 と Issue 120 を実装し、テンプレートから生成したプロジェクトに
-公開前チェック、機械検査、PR / CI 導線、未知を証拠付きで探索する
-review-only スキルを標準搭載する。
+## 作業順序
 
-#### 制約
+1. protocol、設計、ADR、受け入れ証跡を先に確定します。
+2. TypeScript template の残骸を project 固有構成へ整理します。
+3. contract、core、scanner をテスト先行で実装します。
+4. provider module、API、CLI、Console を実装します。
+5. TenkaCloud と TenkaCloudChallenge を公開契約だけで接続します。
+6. catalog compatibility、fresh clone、全品質 gate を検証します。
 
-- 作業順序は docs 更新、harness の責務整理、テスト、機能実装とする。
-- 新 invariant は `docs/architecture/harness.md` と ADR-0006 を正本にする。
-- 自動検出が不確実な項目は error にせず、人間向けチェックリストに残す。
-- 既存の未コミット `package.json` 変更を保持する。
-- `.claude/` を変更するため、通常ゲートに加えて skill-audit を通す。
+## 実装スライス
 
-#### タスク
+### 1. Protocol と catalog scanner
 
-1. 設計、ADR、harness 正本を先に更新する。
-2. architecture harness に `pre-release` ルールグループを追加する。
-3. 公開品質ルールをテスト先行で追加する。
-4. チェックリスト、PR テンプレート、CI、README、package script を接続する。
-5. `blindspot-pass` スキル、fixture、実行例、skills index を追加する。
-6. architecture harness、before-commit、skill-audit、review、
-   security-review、simplify の各ゲートを通す。
+- 5 operation lifecycle API と共通 error envelope を JSON Schema と OpenAPI で
+  固定します。
+- protocol version、snapshot version、capability version の互換規則を固定します。
+- CloudFormation、Bicep、Terraform、AppRun descriptor、optional simulation overlay
+  から capability requirement を抽出します。
+- JSON coverage report と人間向け診断を同じ中間表現から生成します。
 
-#### 検証手順
+### 2. Simulation Core
 
-- `bun test scripts/`
-- `bun run check:pre-release`
-- `bun scripts/architecture-harness.ts --fail-on=warning`
-- `make before-commit`
-- `.claude/skills/skill-audit/SKILL.md` の Quick Workflow
+- namespace、event log、snapshot、resource graph、virtual clock、idempotency を
+  実装します。
+- capability preflight は resource event より前に全 target を一括検査します。
+- provider registry は plugin contract のみを参照し、provider 固有分岐を core に
+  持ちません。
 
-#### 進捗ログ
+### 3. Provider と共有 UI
 
-- 2026-07-04: 設計と ADR-0006 を先に追加し、専用スキャナではなく既存 harness の
-  rule group として公開品質検査を統合した。
-- 2026-07-04: 7 invariant、`--pre-release`、複数行 JSX / 動的属性、
-  ローカル worktree 除外をテスト先行で実装した。68 tests が Green。
-- 2026-07-04: 5 チェックリスト、PR テンプレート、GitHub Actions、
-  init-project、README、package command を接続した。
-- 2026-07-04: review-only の `blindspot-pass` と fixture / 実行例を追加した。
-  skill-audit の機械検査と目視レビューは指摘なし。
-- 2026-07-04: 全 harness、公開品質検査、変更対象の Biome / textlint、
-  `git diff --check` は Green。開始時から存在した未コミットの
-  `package.json` 変更が textlint を過去の immutable ADR まで拡張し、
-  既存文書 60 件で `make before-commit` を停止させるため、このユーザー変更は
-  上書きせず判断待ちとした。
-- 2026-07-04: workspace は未生成のため、ルートの typecheck / test / build は
-  `No packages matched the filter` となる。harness の 68 tests は個別に完了した。
+- AWS CloudFormation、IAM、SSM と Sakura AppRun の vertical slice を作ります。
+- AWS catalog が使う S3、Lambda、EC2、VPC、ELBv2、RDS、WAF、Logs と workload
+  data plane を順次追加します。
+- GCP Cloud Run、Azure sample、Sakura sample、Composite target を追加します。
+- API、CLI、Console が同じ world を操作する end-to-end test を追加します。
 
-#### 振り返り
+### 4. Platform integration
 
-- 高シグナルな構文検査と、人間が実行経路や運用環境を判断するチェックを分離した。
-- 通常 harness と公開前専用 command が同じ rule 実装を使うため、判定差分を作らない。
-- 動的 `rel` の安全性は断定せず warning とし、fail-open を避けた。
+- TenkaCloud には lifecycle client、image launcher、portal wiring だけを追加します。
+- Docker runtime は現行 `/verify` 経路を維持し、cloud runtime だけ Simulator へ
+  dispatch します。
+- start、stop、reset、Console URL、snapshot transfer、Codespaces proxy を接続します。
+- TenkaCloudChallenge には versioned simulation overlay と compatibility workflow
+  だけを追加します。
 
----
+### 5. Hardening と release
 
-### 品質ファースト化（MVP・三流コードの再発防止） - 2026-06-13
+- 実 credential 拒否、egress deny、quota、request size、snapshot validation を
+  強制します。
+- disposable cloud を使う differential conformance は manual または nightly に
+  分離します。
+- 3 repository の protocol version、image digest、compatibility matrix を固定します。
 
-#### 目的
+## 受け入れ証跡
 
-「すぐ MVP・手抜きの三流コードを生成してしまう」問題を、根本原因分析にもとづいて構造的に止める。MVP は完了条件ではない。シンプルさとは思いつきのハリボテではなく、考え抜いた最高の構成が結果としてシンプルに見えることである、という原則をテンプレートに固定する。プロのエンジニアが初回からそのまま使える品質を既定にする。
+| 要件 | 証跡 |
+| --- | --- |
+| coverage の不足表示 | scanner fixture と current catalog の JSON report |
+| unsupported capability の preflight 拒否 | event log に resource event がない integration test |
+| API、CLI、Console の shared world | browser と CLI を同じ API process へ接続する test |
+| AWS と Sakura の共通 plugin | provider contract suite と core import-boundary scan |
+| Docker と simulated-cloud の `make local` | TenkaCloud local-play integration test |
+| current catalog の local-playable | pinned catalog commit の coverage report が不足 0 |
+| Codespaces の browser-only 導線 | forwarded URL の end-to-end smoke test |
+| TenkaCloud の薄い境界 | path 単位の architecture test と review |
+| quality gate | fresh clone で harness、before-commit、build、test |
 
-#### 根本原因（なぜ三流コードが出るか）
+## 失敗条件
 
-1. 「動く」が完了条件になっている（機能の合格ラインを品質の合格ラインと取り違える）。
-2. 「プロ品質」の操作的定義が無い（狙えない的は当たらない）。TDD/No-Mock/カバレッジは必要だが浅い設計でも満たせる。
-3. コード前に「考え抜く」設計ゲートが無い。最初に動いた構造がそのまま出荷される＝ハリボテの発生機序。
-4. 早期収束。first-working で止まり「最善か、最初に動いただけか」を問い直さない。
-5. 検証が機能のみ（lint/型/test/CI は通るが、TODO・as any・空 catch・浅い設計は素通り）。
-6. 品質基準が書いている最中のコンテキストに無い。
-7. 「シンプル」を「小さく速く」と誤読する。本質的シンプルさと手抜きを区別する記述が無い。
+- 未実装 operation を空の成功 response にします。
+- provider 固有の resource model を core に追加します。
+- Console だけが持つ state を作ります。
+- problem の採点条件や答えを Simulator または TenkaCloud に移します。
+- current catalog の不足を follow-up 扱いにして完了とします。
 
-#### 制約
+## 進捗
 
-- 作業順序: ドキュメント更新 → リファクタリング → 機能追加。
-- invariant の追加は `docs/architecture/harness.md` への明文化と ADR を伴う。検出ロジックには `scripts/architecture-harness.test.ts` のテストを添える。
-- biome.json の編集は「問題を黙らせる」用途ではなく「品質バーを上げる」用途のみ（ユーザー承認済み）。
-- ゲート（architecture-harness → make before-commit → /review → /security-review → /simplify）を全て Green にするまで未完了。`.claude/` を変更するので `/skill-audit` も通す。
-
-#### タスク
-
-1. `docs/architecture/quality-bar.md`（品質基準 = Definition of Done の正本）を新設。
-2. `docs/adr/0003-quality-first-no-mvp.md` で根本原因分析と 3 層強制の判断を記録。
-3. `scripts/architecture-harness.ts` に anti-MVP invariant 2 件（プレースホルダ/手抜きシグナル・型エスケープハッチ）を追加 + テスト。
-4. `docs/architecture/harness.md` に新 invariant と DoD・Banned Assumptions を明文化。
-5. biome.json を最大強度に（no-explicit-any・複雑度・未使用検出等）。bunfig.toml に coverage 100% 閾値。
-6. `.claude/rules/quality-bar.md`（path-scoped）で書いている最中に品質基準を読み込ませる。
-7. `/feature` に設計フェーズ（独立設計ドキュメント + 代替案比較）を追加、Developer 役を品質基準準拠に。
-8. CLAUDE.md / AGENTS.md / README / init-project を同期。
-9. ゲート実行 → PR。
-
-#### 検証手順
-
-- `bun scripts/architecture-harness.ts --fail-on=warning` で全件スキャンが Green。
-- 故意に TODO / `as any` / 空 catch を含む一時ファイルで新 invariant が error を出すことをテストで確認（`bun test scripts/`）。
-- `make before-commit` が Green。biome の新ルールでリポジトリ既存コードが落ちないことを確認（落ちたらコードを直す）。
-- CI Green。
-
-#### 進捗ログ
-
-- 2026-06-13: ブランチ `chore/quality-first-no-mvp` 作成。全ファイル精読のうえ根本原因 7 件を特定。最大強度・独立設計ドキュメント方針でユーザー承認。
-- 2026-06-13: 「今の AI には長さより軽さ」というユーザー指針を受け、設計方針を「重さは機械（harness/Biome/coverage）に寄せ、AI が読む文章は極限まで蒸留」に転換。初稿の 120 行 quality-bar.md を 30 行に削減。
-- 2026-06-13: 実装完了。quality-bar.md / ADR-0003 新設。harness に `INVARIANT_NO_MVP_PLACEHOLDER` `INVARIANT_NO_TYPE_ESCAPE_HATCH` を追加（自己検出を断片組み立てで回避）+ テスト 12 件（計 43 pass）。bunfig に coverage 100% 閾値。path-scoped rule・/feature 設計フェーズ・CLAUDE/AGENTS/README 同期。biome 厳格化で露見した `INVARIANT_NO_GIT_DEPENDENCY` の複雑度超過を単一責務リファクタで解消（設定を緩めずコードを直す）。`make before-commit` Green、提案 biome 設定でも lint 0 error を確認。
-
-- 2026-06-14: レビュー指摘を反映。さらに「linter で取れるものは linter で取れ」という指針を受け、Biome の AST ルール（`noEmptyBlockStatements` で空 catch、`noExplicitAny` で any、`noTsIgnore` で @ts-ignore）に役割を移譲。harness の手書き正規表現は linter に対応ルールが無いもの（作業中マーカー・未実装 throw・`as unknown as`・nocheck/expect-error）だけに縮小。テスト・docs・ADR を分担に合わせて同期。
-
-#### 振り返り
-
-- **問題**: 機能的に「動く」ことだけを完了条件にすると、設計・型・異常系・完成度が落ち、MVP・三流コードになる。これは速度ではなく「測っていないものは強制されない」「考え抜くゲートが無い」「品質の的が定義されていない」という構造の問題。
-- **根本原因**: 上記 7 件（Plan の根本原因セクション / ADR-0003）。要約すると、完了の定義が機能止まりで、品質が機械でも文章でも担保されておらず、設計を考え抜く契機が flow に無かった。
-- **予防策**: Definition of Done を 1 つ定義し、書く前（設計ゲート・原則）/ 書く中（path-scoped rule）/ 書いた後（harness invariant・Biome・coverage）の 3 層で強制。重さは機械に寄せ、AI が読む文章は蒸留して軽く保つ。緩和には ADR を要する。
-- **残作業**: biome.json はフックで保護されており未適用。提案差分をユーザー承認のうえ適用する（フォローアップ）。`/skill-audit` `/review` `/security-review` `/simplify` は PR 前ゲートとして実行する。
-
----
-
-### Claude Code ハーネス近代化（最新モデル・最新プラクティス対応） - 2026-06-10
-
-#### 目的
-
-既存テンプレートを最新の Claude Code プラクティスに合わせて作り直す。参考: [nvidia/skillspector](https://github.com/nvidia/skillspector)（スキルのセキュリティ検査）と [SnailSploit/claude-red](https://github.com/SnailSploit/claude-red)（スキル集の構成）。スキル・フック自体が攻撃面になる時代に合わせ、ハーネスにスキル監査の invariant を足し、スキルの書き方を最新仕様に揃える。
-
-#### 制約
-
-- 作業順序: ドキュメント更新 → リファクタリング → 機能追加。
-- invariant の追加は `docs/architecture/harness.md` への明文化と ADR を伴う。
-- 設定ファイル（biome.json 等）は直接編集しない。
-- ゲート（architecture-harness → make before-commit → /review → /security-review → /simplify）を全て Green にするまで未完了。
-
-#### タスク
-
-1. docs 更新 — `harness.md` の `INVARIANT_SUPPLY_CHAIN_CONFIG_PRESENT` が `.npmrc` 前提のまま（PR #104 で削除済み）の stale 記述を修正。スキル監査 invariant の ADR-0002 を作成。
-2. `scripts/architecture-harness.ts` にスキル監査 invariant を追加（SKILL.md frontmatter 検証、prompt injection・危険パターン検出）+ テスト。
-3. 既存スキルの frontmatter を最新プラクティス（リサーチ結果に基づく）に更新。
-4. `/skill-audit` スキルを追加。
-5. README / CLAUDE.md / AGENTS.md を同期（最新モデル指針を含む）。
-6. ゲート実行 → PR。
-
-#### 検証手順
-
-- `bun scripts/architecture-harness.ts --fail-on=warning` で全件スキャンが Green。
-- 故意に injection パターンを含むスキルを置いた一時ファイルで新 invariant が error を出すことをテストで確認（`bun test`）。
-- `make before-commit` が Green。
-- CI Green。
-
-#### 進捗ログ
-
-- 2026-06-10: ブランチ `chore/modernize-claude-harness` 作成。skillspector / claude-red のリサーチをバックグラウンドで開始。harness.md の stale な `.npmrc` 記述を発見。
-- 2026-06-10: docs 更新完了（harness.md 修正 + ADR-0002 + スキル invariant 3 件の明文化）。
-- 2026-06-10: `scripts/architecture-harness.ts` にスキル invariant 3 件を実装、`scripts/architecture-harness.test.ts` で 24 テスト Green。`make harness_test` を before-commit ゲートに追加。
-- 2026-06-10: `.claude/scripts/check-test-style.sh` の日本語検出が macOS (BSD grep / bash 3.2) で常に誤検知するバグを修正。
-- 2026-06-10: スキル frontmatter を最新仕様に更新（argument-hint / allowed-tools / disable-model-invocation）。`/skill-audit` スキル追加。CLAUDE.md を `@AGENTS.md` import 方式に再構成、`.claude/rules/skill-authoring.md` (path-scoped rule) 追加、README 同期。
-- 2026-06-10: settings.json への permissions.allow 追加は権限分類器に拒否されたためフォローアップ化（ユーザー判断事項）。フォローアップ 3 件記録。
-- 2026-06-10: /review 指摘を反映 — `--skills-only` モード追加（pre-install 検査がリポジトリ前提で必ず失敗する問題の解消）、EXFIL 検出強化（`sh -c "$(curl ...)"` / `| sudo sh`）、ZWNJ/ZWJ を warning に分離。/security-review は指摘 0 件。
-- 2026-06-10: /simplify 指摘を反映 — `standalone` フィールドで rule タグ化（id プレフィックス依存を解消）、隠し指示検出をテーブル化し `.claude` 配下全ファイルへ拡張、EXFIL スコープに settings.json 追加、`parseFrontmatter` を `Bun.YAML.parse` に置換、CLAUDE.md 禁止事項の重複を AGENTS.md 参照に一本化、テストの一時ディレクトリ掃除。最終 31 テスト Green、全ゲート Green。
-
-#### 振り返り
-
-- **問題**: harness.md の `INVARIANT_SUPPLY_CHAIN_CONFIG_PRESENT` 記述が PR #104 の `.npmrc` 削除に追随しておらず stale だった。`.claude/scripts/check-test-style.sh` の日本語検出は macOS で常に誤検知していた。
-- **根本原因**: 実装と正本ドキュメントの同期を機械検証する仕組みが invariant 本文には無い。hook スクリプトは GNU 前提で書かれ、BSD 環境でテストされていなかった。
-- **予防策**: スキル・フックを harness の検査対象に含めた（本 PR の invariant 3 件）。hook スクリプトの環境差異はポータブルな構文（C ロケール + POSIX 文字クラス）に寄せた。description 等の宣言と実装の整合は `/skill-audit` のチェックリストでレビュー時に確認する。
+- 2026-07-12: Issue 2574 と既存 local play、Composite Runtime の契約を再確認し、
+  protocol、event-sourced world、provider plugin、coverage gate の設計を固定しました。
+- 2026-07-13: PR 1 の CI で Safe-chain が公開直後の transitive dependency を
+  minimum-age policy により拒否したため、検査を無効化せず、十分な公開期間を持つ
+  互換版を root override と lockfile で固定する方針にしました。
+- 2026-07-13: package coverage は product package だけでなく application root である
+  architecture harness も 100％を要求するため、CLI、repo check、file walk を process
+  spawn だけでなく in-process で検証できる境界へ整理し、閾値は緩和しません。
+- 2026-07-13: 実 Docker を使う workload runner テストは、独立した gate 実行が同じ
+  daemon 上で競合しないよう、実行ごとに固有の world ID を使う方針にしました。
+  また runner は `docker stop` の受付だけで成功とせず、auto-remove 完了を bounded wait
+  してから cleanup 成功を返し、直後の一覧や network prune に tombstone を残しません。
+- 2026-07-13: production image smoke test の native credential fixture も各 provider gateway
+  の実入力境界を満たす値に固定します。起動前 validation に失敗した場合は、auto-remove で
+  原因を消さず container log を出力してから bounded cleanup し、EXIT trap が元の失敗を
+  上書きしないようにします。

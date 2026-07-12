@@ -1,0 +1,471 @@
+openapi: 3.1.0
+info:
+  title: TenkaCloud Simulator API
+  version: 2026-07-11
+  description: >-
+    Versioned lifecycle API shared by TenkaCloud, TenkaCloudChallenge, and
+    TenkaCloudSimulator.
+servers:
+  - url: http://127.0.0.1:7777
+paths:
+  /v1/capabilities:
+    get:
+      operationId: getCapabilities
+      summary: Discover implemented providers and fidelity
+      responses:
+        '200':
+          description: Simulator capability manifest
+          headers:
+            x-tenkacloud-simulator-protocol:
+              $ref: '#/components/headers/ProtocolVersion'
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/capabilities.schema.json'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/worlds:
+    post:
+      operationId: createWorld
+      summary: Create or recover an idempotent simulation world
+      parameters:
+        - $ref: '#/components/parameters/ProtocolVersion'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/create-world-request.schema.json'
+      responses:
+        '201':
+          description: The created or previously created world
+          headers:
+            x-tenkacloud-simulator-protocol:
+              $ref: '#/components/headers/ProtocolVersion'
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/create-world-response.schema.json'
+        '400':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/worlds/{worldId}/deployments:
+    parameters:
+      - $ref: '#/components/parameters/WorldId'
+    post:
+      operationId: createDeployment
+      summary: Preflight and deploy every runtime target atomically
+      parameters:
+        - $ref: '#/components/parameters/ProtocolVersion'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/create-deployment-request.schema.json'
+      responses:
+        '201':
+          description: Deployment completed synchronously
+          headers:
+            x-tenkacloud-simulator-protocol:
+              $ref: '#/components/headers/ProtocolVersion'
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/deployment-response.schema.json'
+        '202':
+          description: Deployment accepted for virtual-clock transitions
+          headers:
+            x-tenkacloud-simulator-protocol:
+              $ref: '#/components/headers/ProtocolVersion'
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/deployment-response.schema.json'
+        '400':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/worlds/{worldId}/deployments/{deploymentId}:
+    parameters:
+      - $ref: '#/components/parameters/WorldId'
+      - $ref: '#/components/parameters/DeploymentId'
+    get:
+      operationId: getDeployment
+      summary: Read a deployment projection without changing event order
+      responses:
+        '200':
+          description: Current deployment projection
+          headers:
+            x-tenkacloud-simulator-protocol:
+              $ref: '#/components/headers/ProtocolVersion'
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/deployment-response.schema.json'
+        '404':
+          $ref: '#/components/responses/Error'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/worlds/{worldId}/workloads/materialize:
+    parameters:
+      - $ref: '#/components/parameters/WorldId'
+    post:
+      operationId: materializeWorkloads
+      summary: Retry materialization for a deploying or failed deployment
+      parameters:
+        - $ref: '#/components/parameters/ProtocolVersion'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/materialize-workloads-request.schema.json'
+      responses:
+        '200':
+          description: Workloads materialized and deployment ready
+          headers:
+            x-tenkacloud-simulator-protocol:
+              $ref: '#/components/headers/ProtocolVersion'
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/deployment-response.schema.json'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/worlds/{worldId}:
+    parameters:
+      - $ref: '#/components/parameters/WorldId'
+    delete:
+      operationId: deleteWorld
+      summary: Tombstone a world and stop its workloads idempotently
+      parameters:
+        - $ref: '#/components/parameters/ProtocolVersion'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '204':
+          description: The world is deleted or was already deleted
+          headers:
+            x-tenkacloud-simulator-protocol:
+              $ref: '#/components/headers/ProtocolVersion'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/worlds/{worldId}/clock/advance:
+    parameters:
+      - $ref: '#/components/parameters/WorldId'
+    post:
+      operationId: advanceWorldClock
+      summary: Advance virtual time and apply due provider transitions atomically
+      parameters:
+        - $ref: '#/components/parameters/ProtocolVersion'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/advance-clock-request.schema.json'
+      responses:
+        '200':
+          description: Updated clock and provider transitions applied in this step
+          headers:
+            x-tenkacloud-simulator-protocol:
+              $ref: '#/components/headers/ProtocolVersion'
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/advance-clock-response.schema.json'
+        '400':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/worlds/{worldId}/data-plane/{provider}/{targetId}/{path}:
+    parameters:
+      - $ref: '#/components/parameters/WorldId'
+      - $ref: '#/components/parameters/Provider'
+      - $ref: '#/components/parameters/TargetId'
+      - name: path
+        in: path
+        required: true
+        description: Origin-relative provider data-plane path, including nested segments
+        schema:
+          type: string
+          minLength: 1
+    x-hono-wildcard: true
+    x-tenkacloud-all-methods: true
+    get:
+      operationId: proxyDataPlaneRequest
+      summary: Execute an authenticated raw provider HTTP data-plane request
+      security:
+        - LaunchToken: []
+      responses:
+        default:
+          description: Provider-defined raw HTTP response
+  /v1/worlds/{worldId}/providers/{provider}/operations/{operation}:
+    parameters:
+      - $ref: '#/components/parameters/WorldId'
+      - $ref: '#/components/parameters/Provider'
+      - $ref: '#/components/parameters/Operation'
+    post:
+      operationId: executeProviderCommand
+      summary: Execute a provider command against the shared world
+      parameters:
+        - $ref: '#/components/parameters/ProtocolVersion'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - deploymentId
+                - targetId
+                - engine
+                - service
+                - resourceType
+                - input
+              properties:
+                deploymentId:
+                  type: string
+                  minLength: 1
+                targetId:
+                  type: string
+                  minLength: 1
+                engine:
+                  type: string
+                  minLength: 1
+                service:
+                  type: string
+                  minLength: 1
+                resourceType:
+                  type: string
+                  minLength: 1
+                input:
+                  type: object
+      responses:
+        '200':
+          description: Provider-defined JSON response
+          headers:
+            x-tenkacloud-simulator-protocol:
+              $ref: '#/components/headers/ProtocolVersion'
+          content:
+            application/json:
+              schema:
+                type: object
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/worlds/{worldId}/resources:
+    parameters:
+      - $ref: '#/components/parameters/WorldId'
+    get:
+      operationId: listResources
+      summary: Read the shared resource projection
+      responses:
+        '200':
+          description: Current resource projection
+          headers:
+            x-tenkacloud-simulator-protocol:
+              $ref: '#/components/headers/ProtocolVersion'
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/resource-projection.schema.json'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/worlds/{worldId}/events:
+    parameters:
+      - $ref: '#/components/parameters/WorldId'
+      - $ref: '#/components/parameters/AfterCursor'
+    get:
+      operationId: listEvents
+      summary: Replay at most 100 events after a sequence cursor
+      responses:
+        '200':
+          description: Bounded event replay page
+          headers:
+            x-tenkacloud-simulator-protocol:
+              $ref: '#/components/headers/ProtocolVersion'
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/event-page.schema.json'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/worlds/{worldId}/events/stream:
+    parameters:
+      - $ref: '#/components/parameters/WorldId'
+      - $ref: '#/components/parameters/AfterCursor'
+    get:
+      operationId: streamEvents
+      summary: Stream a bounded event replay as server-sent events
+      parameters:
+        - name: Last-Event-ID
+          in: header
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 9007199254740991
+      responses:
+        '200':
+          description: SSE replay that closes after the current bounded page
+          headers:
+            x-tenkacloud-simulator-protocol:
+              $ref: '#/components/headers/ProtocolVersion'
+            x-tenkacloud-next-cursor:
+              description: Sequence to use for the next replay
+              schema:
+                type: integer
+                minimum: 0
+          content:
+            text/event-stream:
+              schema:
+                type: string
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/worlds/{worldId}/snapshots:
+    parameters:
+      - $ref: '#/components/parameters/WorldId'
+    get:
+      operationId: exportSnapshot
+      summary: Export a versioned world snapshot
+      responses:
+        '200':
+          description: Versioned snapshot
+          headers:
+            x-tenkacloud-simulator-protocol:
+              $ref: '#/components/headers/ProtocolVersion'
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/snapshot.schema.json'
+        default:
+          $ref: '#/components/responses/Error'
+    post:
+      operationId: restoreSnapshot
+      summary: Validate a snapshot and restore it as a new world
+      parameters:
+        - $ref: '#/components/parameters/ProtocolVersion'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/snapshot.schema.json'
+      responses:
+        '201':
+          description: Restored world
+          headers:
+            x-tenkacloud-simulator-protocol:
+              $ref: '#/components/headers/ProtocolVersion'
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/create-world-response.schema.json'
+        default:
+          $ref: '#/components/responses/Error'
+components:
+  securitySchemes:
+    LaunchToken:
+      type: http
+      scheme: bearer
+      bearerFormat: tc_sim_v1
+  parameters:
+    ProtocolVersion:
+      name: x-tenkacloud-simulator-protocol
+      in: header
+      required: true
+      description: Protocol identifier pinned by the caller
+      schema:
+        type: string
+        const: 2026-07-11
+    IdempotencyKey:
+      name: idempotency-key
+      in: header
+      required: false
+      description: >-
+        Retry identity within a namespace. Existing TenkaCloud clients may use
+        the caller-assigned deploymentId as the lifecycle identity.
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 1024
+    WorldId:
+      name: worldId
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+    DeploymentId:
+      name: deploymentId
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+    Provider:
+      name: provider
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+    TargetId:
+      name: targetId
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+    Operation:
+      name: operation
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+    AfterCursor:
+      name: after
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+        maximum: 9007199254740991
+  headers:
+    ProtocolVersion:
+      description: Protocol identifier implemented by this response
+      schema:
+        type: string
+        const: 2026-07-11
+  responses:
+    Error:
+      description: Typed Simulator failure
+      headers:
+        x-tenkacloud-simulator-protocol:
+          $ref: '#/components/headers/ProtocolVersion'
+      content:
+        application/json:
+          schema:
+            $ref: './schemas/error-envelope.schema.json'

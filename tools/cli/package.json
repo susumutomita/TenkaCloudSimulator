@@ -1,0 +1,25 @@
+{
+  "name": "@tenkacloud/simulator-cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "tenkacloud-simulator": "src/bin.ts"
+  },
+  "exports": "./src/index.ts",
+  "scripts": {
+    "dev": "bun src/bin.ts --help",
+    "build": "bun build src/bin.ts --outdir dist --target bun",
+    "test": "bun test test",
+    "test:coverage": "bun test --coverage test",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@tenkacloud/simulator-contracts": "workspace:*"
+  },
+  "devDependencies": {
+    "@tenkacloud/simulator-api": "workspace:*",
+    "@tenkacloud/simulator-core": "workspace:*",
+    "@tenkacloud/simulator-provider-gcp": "workspace:*"
+  }
+}
