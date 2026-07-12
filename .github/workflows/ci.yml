@@ -66,7 +66,7 @@ jobs:
           secret="$(openssl rand -hex 32)"
           container_name="tenkacloud-simulator-ci-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           state_dir="${RUNNER_TEMP}/tenkacloud-simulator-state-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
-          install -d -m 700 "${state_dir}"
+          sudo install -d -m 700 -o 1000 -g 1000 "${state_dir}"
           container=""
           cleanup() {
             exit_code="$?"
