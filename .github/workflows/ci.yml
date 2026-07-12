@@ -65,12 +65,24 @@ jobs:
           docker pull "${WORKLOAD_IMAGE}"
           secret="$(openssl rand -hex 32)"
           container_name="tenkacloud-simulator-ci-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          container=""
+          cleanup() {
+            exit_code="$?"
+            if test -n "${container}"; then
+              if test "${exit_code}" -ne 0; then
+                docker logs "${container}" || true
+              fi
+              docker container rm --force --volumes "${container}" >/dev/null 2>&1 || true
+            fi
+            exit "${exit_code}"
+          }
+          trap cleanup EXIT
           socket_group="$(docker run --rm \
             --mount type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock,readonly \
             --entrypoint /usr/bin/stat \
             tenkacloud-simulator:test \
             -c %g /var/run/docker.sock)"
-          container="$(docker run --rm --detach \
+          container="$(docker run --detach \
             --name "${container_name}" \
             --read-only \
             --cap-drop=ALL \
@@ -84,7 +96,7 @@ jobs:
             --env TENKACLOUD_SIMULATOR_AWS_ACCESS_KEY_ID=TCSIMABCDEFGHIJKLMNO \
             --env TENKACLOUD_SIMULATOR_AZURE_CREDENTIAL=tcsim_azure_ci_credential \
             --env TENKACLOUD_SIMULATOR_GCP_CREDENTIAL=tcsim_google_ci_credential \
-            --env TENKACLOUD_SIMULATOR_SAKURA_CREDENTIAL=tcsim_sakura_ci_token:tcsim_sakura_ci_secret \
+            --env TENKACLOUD_SIMULATOR_SAKURA_CREDENTIAL=tcsim_sakura_ci_credential_a:tcsim_sakura_ci_credential_b \
             --env TENKACLOUD_SIMULATOR_PUBLIC_ORIGIN=http://127.0.0.1:17777 \
             --env "TENKACLOUD_SIMULATOR_WORKLOAD_ALLOWED_IMAGES=[\"${WORKLOAD_IMAGE}\"]" \
             --env TENKACLOUD_SIMULATOR_WORKLOAD_CONTROL_CONTAINER="${container_name}" \
@@ -93,7 +105,6 @@ jobs:
             --env TENKACLOUD_SIMULATOR_WORKLOAD_MAX_PIDS=128 \
             --env TENKACLOUD_SIMULATOR_WORKLOAD_PROXY_IMAGE="${WORKLOAD_IMAGE}" \
             tenkacloud-simulator:test)"
-          trap 'docker stop "${container}"' EXIT
           for _ in $(seq 1 30); do
             if curl --fail --silent http://127.0.0.1:17777/v1/capabilities >/dev/null; then
               break

@@ -96,3 +96,7 @@ Docker 問題と simulated-cloud 問題を `make local` の同じ導線から操
   daemon 上で競合しないよう、実行ごとに固有の world ID を使う方針にしました。
   また runner は `docker stop` の受付だけで成功とせず、auto-remove 完了を bounded wait
   してから cleanup 成功を返し、直後の一覧や network prune に tombstone を残しません。
+- 2026-07-13: production image smoke test の native credential fixture も各 provider gateway
+  の実入力境界を満たす値に固定します。起動前 validation に失敗した場合は、auto-remove で
+  原因を消さず container log を出力してから bounded cleanup し、EXIT trap が元の失敗を
+  上書きしないようにします。
