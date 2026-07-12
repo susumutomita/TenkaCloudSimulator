@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json",
+  "title": "TenkaCloud Simulator common values",
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024
+    },
+    "fidelityDimension": {
+      "type": "string",
+      "enum": ["contract", "control", "security", "network", "data-plane"]
+    },
+    "fidelitySet": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/fidelityDimension"
+      },
+      "uniqueItems": true
+    },
+    "jsonValue": {
+      "oneOf": [
+        { "type": "null" },
+        { "type": "boolean" },
+        { "type": "number" },
+        { "type": "string" },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/jsonValue"
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/jsonValue"
+          }
+        }
+      ]
+    },
+    "jsonObject": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/jsonValue"
+      }
+    },
+    "namespace": {
+      "type": "object",
+      "required": ["tenantId", "eventId", "teamId"],
+      "properties": {
+        "tenantId": { "$ref": "#/$defs/nonEmptyString" },
+        "eventId": { "$ref": "#/$defs/nonEmptyString" },
+        "teamId": { "$ref": "#/$defs/nonEmptyString" }
+      },
+      "additionalProperties": false
+    },
+    "sourceLocation": {
+      "type": "object",
+      "required": ["file"],
+      "properties": {
+        "file": { "$ref": "#/$defs/nonEmptyString" },
+        "line": { "type": "integer", "minimum": 1 },
+        "column": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^(sha256:)?[a-f0-9]{64}$"
+    }
+  }
+}

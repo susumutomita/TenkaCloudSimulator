@@ -29,6 +29,8 @@ jobs:
       - name: Setup Bun
         # oven-sh/setup-bun v2.0.2
         uses: oven-sh/setup-bun@735343b667d3e6f658f44d0eca948eb6282f2b76
+        with:
+          bun-version: "1.3.11"
 
       # Supply Chain Security: Setup safe-chain before dependency installation
       # safe-chain 自体のサプライチェイン経由侵入を防ぐため、
@@ -40,11 +42,9 @@ jobs:
           bun add -g --ignore-scripts @aikidosec/safe-chain@1.5.3
           safe-chain setup-ci
 
-      # Supply Chain Security: Disable lifecycle scripts during install
-      # Note: --safe-chain-skip-minimum-package-age is used because transitive
-      # dependencies (e.g. textlint -> @modelcontextprotocol/sdk -> hono) may
-      # include recently released packages that have not yet aged out of the
-      # safe-chain minimum age check.
+      # Supply Chain Security: Disable lifecycle scripts during install.
+      # minimum-package-age は迂回しない。公開直後の transitive dependency は
+      # review 済みの互換版を root override と lockfile で固定する。
       - name: Install packages via packages.json
         env:
           npm_config_ignore_scripts: "true"
@@ -53,5 +53,56 @@ jobs:
 
       - name: Run quality gates
         run: |
-          bun scripts/architecture-harness.ts --fail-on=error
+          make harness
           make before-commit
+
+      - name: Build and smoke-test the production image
+        shell: bash
+        env:
+          WORKLOAD_IMAGE: busybox@sha256:73aaf090f3d85aa34ee199857f03fa3a95c8ede2ffd4cc2cdb5b94e566b11662
+        run: |
+          docker build --tag tenkacloud-simulator:test .
+          docker pull "${WORKLOAD_IMAGE}"
+          secret="$(openssl rand -hex 32)"
+          container_name="tenkacloud-simulator-ci-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          socket_group="$(docker run --rm \
+            --mount type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock,readonly \
+            --entrypoint /usr/bin/stat \
+            tenkacloud-simulator:test \
+            -c %g /var/run/docker.sock)"
+          container="$(docker run --rm --detach \
+            --name "${container_name}" \
+            --read-only \
+            --cap-drop=ALL \
+            --security-opt=no-new-privileges:true \
+            --tmpfs /tmp:rw,noexec,nosuid,nodev,size=16777216 \
+            --publish 127.0.0.1:17777:7777 \
+            --mount type=volume,dst=/var/lib/tenkacloud-simulator \
+            --mount type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock,readonly \
+            --group-add "${socket_group}" \
+            --env TENKACLOUD_SIMULATOR_LAUNCH_SECRET="${secret}" \
+            --env TENKACLOUD_SIMULATOR_AWS_ACCESS_KEY_ID=TCSIMABCDEFGHIJKLMNO \
+            --env TENKACLOUD_SIMULATOR_AZURE_CREDENTIAL=tcsim_azure_ci_credential \
+            --env TENKACLOUD_SIMULATOR_GCP_CREDENTIAL=tcsim_google_ci_credential \
+            --env TENKACLOUD_SIMULATOR_SAKURA_CREDENTIAL=tcsim_sakura_ci_token:tcsim_sakura_ci_secret \
+            --env TENKACLOUD_SIMULATOR_PUBLIC_ORIGIN=http://127.0.0.1:17777 \
+            --env "TENKACLOUD_SIMULATOR_WORKLOAD_ALLOWED_IMAGES=[\"${WORKLOAD_IMAGE}\"]" \
+            --env TENKACLOUD_SIMULATOR_WORKLOAD_CONTROL_CONTAINER="${container_name}" \
+            --env TENKACLOUD_SIMULATOR_WORKLOAD_MAX_MEMORY_BYTES=536870912 \
+            --env TENKACLOUD_SIMULATOR_WORKLOAD_MAX_MILLI_CPU=1000 \
+            --env TENKACLOUD_SIMULATOR_WORKLOAD_MAX_PIDS=128 \
+            --env TENKACLOUD_SIMULATOR_WORKLOAD_PROXY_IMAGE="${WORKLOAD_IMAGE}" \
+            tenkacloud-simulator:test)"
+          trap 'docker stop "${container}"' EXIT
+          for _ in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:17777/v1/capabilities >/dev/null; then
+              break
+            fi
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:17777/v1/capabilities >/dev/null
+          test "$(docker exec "${container}" id -u)" = "1000"
+          SIMULATOR_URL=http://127.0.0.1:17777 \
+            SIMULATOR_LAUNCH_SECRET="${secret}" \
+            SIMULATOR_WORKLOAD_IMAGE="${WORKLOAD_IMAGE}" \
+            bun scripts/verify-container-workload.ts

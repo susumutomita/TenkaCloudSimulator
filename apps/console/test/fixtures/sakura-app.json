@@ -1,0 +1,21 @@
+{
+  "name": "console-observability",
+  "timeout_seconds": 60,
+  "port": 8080,
+  "min_scale": 0,
+  "max_scale": 2,
+  "components": [
+    {
+      "name": "web",
+      "max_cpu": "0.5",
+      "max_memory": "1Gi",
+      "deploy_source": {
+        "container_registry": {
+          "image": "registry.example/console-observability@sha256:5e9f5be0d355ec0401b614d760ecb0aa4ed6d9d9767261ee61d72601f622f3a6"
+        }
+      },
+      "env": [{ "key": "MODE", "value": "simulation" }],
+      "probe": { "http_get": { "path": "/healthz", "port": 8080 } }
+    }
+  ]
+}

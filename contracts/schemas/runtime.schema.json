@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.tenkacloud.dev/simulator/v1/runtime.schema.json",
+  "title": "Problem runtime descriptor",
+  "$defs": {
+    "singleRuntime": {
+      "type": "object",
+      "required": ["provider", "engine", "entry"],
+      "properties": {
+        "provider": {
+          "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+        },
+        "engine": {
+          "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+        },
+        "entry": {
+          "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+        }
+      },
+      "additionalProperties": false
+    },
+    "compositeTarget": {
+      "type": "object",
+      "required": ["id", "provider", "engine", "entry"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,31}$"
+        },
+        "provider": {
+          "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+        },
+        "engine": {
+          "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+        },
+        "entry": {
+          "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+        }
+      },
+      "additionalProperties": false
+    },
+    "compositeRuntime": {
+      "type": "object",
+      "required": ["kind", "targets"],
+      "properties": {
+        "kind": { "const": "composite" },
+        "targets": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 8,
+          "items": {
+            "$ref": "#/$defs/compositeTarget"
+          },
+          "x-uniqueBy": "id"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "oneOf": [
+    { "$ref": "#/$defs/singleRuntime" },
+    { "$ref": "#/$defs/compositeRuntime" }
+  ]
+}

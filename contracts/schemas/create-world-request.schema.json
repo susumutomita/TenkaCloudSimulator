@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.tenkacloud.dev/simulator/v1/create-world-request.schema.json",
+  "title": "Create simulator world request",
+  "type": "object",
+  "required": ["tenantId", "eventId", "teamId", "deploymentId"],
+  "properties": {
+    "tenantId": {
+      "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+    },
+    "eventId": {
+      "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+    },
+    "teamId": {
+      "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+    },
+    "deploymentId": {
+      "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+    },
+    "seed": {
+      "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+    },
+    "virtualClock": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": false
+}

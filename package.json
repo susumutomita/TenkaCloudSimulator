@@ -1,60 +1,65 @@
 {
-  "name": "typescript-template",
-  "version": "1.0.0",
-  "description": "TypeScript + Bun + Hono + Vite + React + Biome の Claude Code 向けモノレポテンプレート。サプライチェイン防御 (ADR-0001) と architecture-harness invariant が既定で入っている。",
+  "name": "tenkacloud-simulator",
+  "version": "0.1.0",
+  "description": "Deterministic multi-cloud API simulator for the TenkaCloud problem catalog.",
   "author": "Susumu Tomita <oyster880@gmail.com>",
   "license": "MIT",
   "private": true,
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/susumutomita/typescript-template.git"
+    "url": "git+https://github.com/susumutomita/TenkaCloudSimulator.git"
   },
-  "homepage": "https://github.com/susumutomita/typescript-template#readme",
+  "homepage": "https://github.com/susumutomita/TenkaCloudSimulator#readme",
   "bugs": {
-    "url": "https://github.com/susumutomita/typescript-template/issues"
+    "url": "https://github.com/susumutomita/TenkaCloudSimulator/issues"
   },
   "packageManager": "bun@1.3.11",
   "engines": {
-    "bun": ">=1.3.0",
+    "bun": ">=1.3.11",
     "node": ">=22.0.0"
   },
   "workspaces": [
-    "packages/*"
+    "contracts",
+    "core",
+    "providers/*",
+    "apps/*",
+    "tools/*",
+    "conformance"
   ],
   "overrides": {
-    "hono": "4.12.23"
+    "postcss": "8.5.16"
   },
   "scripts": {
     "dev": "bun run --filter '*' dev",
     "build": "bun run --filter '*' build",
-    "test": "bun run --filter '*' test",
-    "test:coverage": "bun run --filter '*' test:coverage",
-    "typecheck": "bun run --filter '*' typecheck",
-    "clean": "bun rimraf node_modules 'packages/*/node_modules' 'packages/*/dist' 'packages/*/coverage'",
+    "test": "bun test",
+    "test:coverage": "bun test --coverage",
+    "typecheck": "tsc --noEmit -p tsconfig.scripts.json && bun run --filter '*' typecheck",
+    "clean": "bun rimraf contracts/dist core/dist 'providers/*/dist' 'apps/*/dist' 'tools/*/dist' conformance/dist coverage",
     "lint": "bun biome check .",
     "lint:fix": "bun biome check --write .",
-    "lint:text": "bun textlint ./README.md",
+    "lint:text": "bun textlint README.md SECURITY.md Plan.md docs/architecture/protocol.md docs/architecture/harness.md docs/architecture/quality-bar.md docs/design/2026-07-12-tenkacloud-simulator.md docs/adr/0007-event-sourced-provider-plugin-architecture.md docs/adr/0008-simulator-source-roots-and-gates.md docs/adr/0009-retire-generic-init-skill.md docs/adr/0010-pinned-multi-platform-oci-distribution.md docs/adr/0011-provider-neutral-clock-transitions.md docs/adr/0012-bounded-host-docker-workload-runner.md docs/adr/0013-strict-typecheck-for-root-scripts.md",
     "check:pre-release": "bun scripts/architecture-harness.ts --pre-release --fail-on=error",
-    "lint-staged": "lint-staged",
     "format": "bun biome format --write .",
     "format:check": "bun biome format .",
     "prepare": "husky"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.16",
-    "husky": "^9.1.7",
-    "lint-staged": "^17.0.7",
-    "rimraf": "^6.1.3",
-    "textlint": "^15.7.1",
-    "@textlint-ja/textlint-rule-preset-ai-writing": "^1.7.0",
-    "textlint-rule-ja-no-abusage": "^3.0.0",
-    "textlint-rule-ja-no-inappropriate-words": "^2.0.0",
-    "textlint-rule-no-double-negative-ja": "^2.0.1",
-    "textlint-rule-no-dropping-the-ra": "^3.0.0",
-    "textlint-rule-prefer-tari-tari": "^1.0.3",
-    "textlint-rule-preset-ja-spacing": "^2.2.0",
-    "textlint-rule-preset-ja-technical-writing": "^12.0.2",
-    "textlint-rule-spellcheck-tech-word": "^5.0.0"
+    "@biomejs/biome": "2.4.16",
+    "@types/bun": "1.3.14",
+    "@textlint-ja/textlint-rule-preset-ai-writing": "1.7.0",
+    "husky": "9.1.7",
+    "rimraf": "6.1.3",
+    "textlint": "15.7.1",
+    "textlint-rule-ja-no-abusage": "3.0.0",
+    "textlint-rule-ja-no-inappropriate-words": "2.0.0",
+    "textlint-rule-no-double-negative-ja": "2.0.1",
+    "textlint-rule-no-dropping-the-ra": "3.0.0",
+    "textlint-rule-prefer-tari-tari": "1.0.3",
+    "textlint-rule-preset-ja-spacing": "2.2.0",
+    "textlint-rule-preset-ja-technical-writing": "12.0.2",
+    "textlint-rule-spellcheck-tech-word": "5.0.0",
+    "typescript": "7.0.2"
   }
 }

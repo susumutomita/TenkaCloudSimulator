@@ -1,0 +1,839 @@
+{
+  "schemaVersion": "1",
+  "version": "tenkacloud-simulator-0.1.0",
+  "capabilities": [
+    {
+      "provider": "aws",
+      "service": "cloudformation",
+      "resourceType": "*",
+      "operation": "DescribeStackResources",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "aws",
+      "service": "cloudformation",
+      "resourceType": "*",
+      "operation": "DescribeStacks",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "aws",
+      "service": "cloudformation",
+      "resourceType": "*",
+      "operation": "ListStackResources",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "aws",
+      "service": "cloudformation",
+      "resourceType": "*",
+      "operation": "ListStacks",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "aws",
+      "service": "cloudformation",
+      "resourceType": "*",
+      "operation": "UpdateStack",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "aws",
+      "service": "cloudformation",
+      "resourceType": "AWS::CloudFormation::CustomResource",
+      "operation": "lifecycle",
+      "fidelity": "L4"
+    },
+    {
+      "provider": "aws",
+      "service": "cloudformation",
+      "resourceType": "AWS::CloudFormation::Stack",
+      "operation": "deploy",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "aws",
+      "service": "cloudformation",
+      "resourceType": "Custom::EmptyStackBuckets",
+      "operation": "lifecycle",
+      "fidelity": "L4"
+    },
+    {
+      "provider": "aws",
+      "service": "ec2",
+      "resourceType": "*",
+      "operation": "DescribeInstances",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "aws",
+      "service": "ec2",
+      "resourceType": "*",
+      "operation": "DescribeSecurityGroups",
+      "fidelity": "L3"
+    },
+    {
+      "provider": "aws",
+      "service": "ec2",
+      "resourceType": "*",
+      "operation": "RevokeSecurityGroupEgress",
+      "fidelity": "L3"
+    },
+    {
+      "provider": "aws",
+      "service": "ec2",
+      "resourceType": "*",
+      "operation": "RevokeSecurityGroupIngress",
+      "fidelity": "L3"
+    },
+    {
+      "provider": "aws",
+      "service": "ec2",
+      "resourceType": "AWS::EC2::Instance",
+      "operation": "EvaluateReachability",
+      "fidelity": "L3"
+    },
+    {
+      "provider": "aws",
+      "service": "ec2",
+      "resourceType": "AWS::EC2::Instance",
+      "operation": "lifecycle",
+      "fidelity": "L3"
+    },
+    {
+      "provider": "aws",
+      "service": "ec2",
+      "resourceType": "AWS::EC2::InternetGateway",
+      "operation": "lifecycle",
+      "fidelity": "L3"
+    },
+    {
+      "provider": "aws",
+      "service": "ec2",
+      "resourceType": "AWS::EC2::Route",
+      "operation": "lifecycle",
+      "fidelity": "L3"
+    },
+    {
+      "provider": "aws",
+      "service": "ec2",
+      "resourceType": "AWS::EC2::RouteTable",
+      "operation": "lifecycle",
+      "fidelity": "L3"
+    },
+    {
+      "provider": "aws",
+      "service": "ec2",
+      "resourceType": "AWS::EC2::SecurityGroup",
+      "operation": "lifecycle",
+      "fidelity": "L3"
+    },
+    {
+      "provider": "aws",
+      "service": "ec2",
+      "resourceType": "AWS::EC2::Subnet",
+      "operation": "lifecycle",
+      "fidelity": "L3"
+    },
+    {
+      "provider": "aws",
+      "service": "ec2",
+      "resourceType": "AWS::EC2::SubnetRouteTableAssociation",
+      "operation": "lifecycle",
+      "fidelity": "L3"
+    },
+    {
+      "provider": "aws",
+      "service": "ec2",
+      "resourceType": "AWS::EC2::VPC",
+      "operation": "lifecycle",
+      "fidelity": "L3"
+    },
+    {
+      "provider": "aws",
+      "service": "ec2",
+      "resourceType": "AWS::EC2::VPCGatewayAttachment",
+      "operation": "lifecycle",
+      "fidelity": "L3"
+    },
+    {
+      "provider": "aws",
+      "service": "elasticloadbalancing",
+      "resourceType": "*",
+      "operation": "DescribeRules",
+      "fidelity": "L3"
+    },
+    {
+      "provider": "aws",
+      "service": "elasticloadbalancing",
+      "resourceType": "*",
+      "operation": "ModifyRule",
+      "fidelity": "L3"
+    },
+    {
+      "provider": "aws",
+      "service": "elasticloadbalancing",
+      "resourceType": "AWS::ElasticLoadBalancingV2::Listener",
+      "operation": "lifecycle",
+      "fidelity": "L3"
+    },
+    {
+      "provider": "aws",
+      "service": "elasticloadbalancing",
+      "resourceType": "AWS::ElasticLoadBalancingV2::ListenerRule",
+      "operation": "lifecycle",
+      "fidelity": "L3"
+    },
+    {
+      "provider": "aws",
+      "service": "elasticloadbalancing",
+      "resourceType": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+      "operation": "lifecycle",
+      "fidelity": "L3"
+    },
+    {
+      "provider": "aws",
+      "service": "elasticloadbalancing",
+      "resourceType": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "operation": "lifecycle",
+      "fidelity": "L3"
+    },
+    {
+      "provider": "aws",
+      "service": "http",
+      "resourceType": "HTTP::Endpoint",
+      "operation": "AttackProbe",
+      "fidelity": "L4"
+    },
+    {
+      "provider": "aws",
+      "service": "http",
+      "resourceType": "HTTP::Endpoint",
+      "operation": "Poll",
+      "fidelity": "L4"
+    },
+    {
+      "provider": "aws",
+      "service": "http",
+      "resourceType": "HTTP::Endpoint",
+      "operation": "Probe",
+      "fidelity": "L4"
+    },
+    {
+      "provider": "aws",
+      "service": "http",
+      "resourceType": "HTTP::Endpoint",
+      "operation": "Request",
+      "fidelity": "L4"
+    },
+    {
+      "provider": "aws",
+      "service": "iam",
+      "resourceType": "*",
+      "operation": "DeleteRolePolicy",
+      "fidelity": "L2"
+    },
+    {
+      "provider": "aws",
+      "service": "iam",
+      "resourceType": "*",
+      "operation": "GetRole",
+      "fidelity": "L2"
+    },
+    {
+      "provider": "aws",
+      "service": "iam",
+      "resourceType": "*",
+      "operation": "GetRolePolicy",
+      "fidelity": "L2"
+    },
+    {
+      "provider": "aws",
+      "service": "iam",
+      "resourceType": "*",
+      "operation": "ListRolePolicies",
+      "fidelity": "L2"
+    },
+    {
+      "provider": "aws",
+      "service": "iam",
+      "resourceType": "*",
+      "operation": "ListRoles",
+      "fidelity": "L2"
+    },
+    {
+      "provider": "aws",
+      "service": "iam",
+      "resourceType": "*",
+      "operation": "PutRolePolicy",
+      "fidelity": "L2"
+    },
+    {
+      "provider": "aws",
+      "service": "iam",
+      "resourceType": "AWS::IAM::InstanceProfile",
+      "operation": "lifecycle",
+      "fidelity": "L2"
+    },
+    {
+      "provider": "aws",
+      "service": "iam",
+      "resourceType": "AWS::IAM::Role",
+      "operation": "lifecycle",
+      "fidelity": "L2"
+    },
+    {
+      "provider": "aws",
+      "service": "lambda",
+      "resourceType": "*",
+      "operation": "CreateFunction",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "aws",
+      "service": "lambda",
+      "resourceType": "*",
+      "operation": "GetFunction",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "aws",
+      "service": "lambda",
+      "resourceType": "*",
+      "operation": "InvokeFunction",
+      "fidelity": "L4"
+    },
+    {
+      "provider": "aws",
+      "service": "lambda",
+      "resourceType": "AWS::Lambda::Function",
+      "operation": "lifecycle",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "aws",
+      "service": "lambda",
+      "resourceType": "AWS::Lambda::Permission",
+      "operation": "lifecycle",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "aws",
+      "service": "lambda",
+      "resourceType": "AWS::Lambda::Url",
+      "operation": "lifecycle",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "aws",
+      "service": "logs",
+      "resourceType": "*",
+      "operation": "CreateLogGroup",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "aws",
+      "service": "logs",
+      "resourceType": "*",
+      "operation": "CreateLogStream",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "aws",
+      "service": "logs",
+      "resourceType": "*",
+      "operation": "DescribeLogGroups",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "aws",
+      "service": "logs",
+      "resourceType": "*",
+      "operation": "DescribeLogStreams",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "aws",
+      "service": "logs",
+      "resourceType": "*",
+      "operation": "FilterLogEvents",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "aws",
+      "service": "logs",
+      "resourceType": "*",
+      "operation": "GetLogEvents",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "aws",
+      "service": "logs",
+      "resourceType": "*",
+      "operation": "PutLogEvents",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "aws",
+      "service": "logs",
+      "resourceType": "AWS::Logs::LogGroup",
+      "operation": "lifecycle",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "aws",
+      "service": "rds",
+      "resourceType": "*",
+      "operation": "DescribeDBInstances",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "aws",
+      "service": "rds",
+      "resourceType": "AWS::RDS::DBInstance",
+      "operation": "lifecycle",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "aws",
+      "service": "rds",
+      "resourceType": "AWS::RDS::DBSubnetGroup",
+      "operation": "lifecycle",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "aws",
+      "service": "runtime",
+      "resourceType": "Runtime::Endpoint",
+      "operation": "ResolveEndpoint",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "aws",
+      "service": "runtime",
+      "resourceType": "Runtime::Workload",
+      "operation": "Materialize",
+      "fidelity": "L4"
+    },
+    {
+      "provider": "aws",
+      "service": "s3",
+      "resourceType": "*",
+      "operation": "DeleteObject",
+      "fidelity": "L4"
+    },
+    {
+      "provider": "aws",
+      "service": "s3",
+      "resourceType": "*",
+      "operation": "GetBucketLocation",
+      "fidelity": "L4"
+    },
+    {
+      "provider": "aws",
+      "service": "s3",
+      "resourceType": "*",
+      "operation": "GetObject",
+      "fidelity": "L4"
+    },
+    {
+      "provider": "aws",
+      "service": "s3",
+      "resourceType": "*",
+      "operation": "ListBucket",
+      "fidelity": "L4"
+    },
+    {
+      "provider": "aws",
+      "service": "s3",
+      "resourceType": "*",
+      "operation": "PutObject",
+      "fidelity": "L4"
+    },
+    {
+      "provider": "aws",
+      "service": "s3",
+      "resourceType": "AWS::S3::Bucket",
+      "operation": "lifecycle",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "aws",
+      "service": "ssm",
+      "resourceType": "*",
+      "operation": "DescribeParameters",
+      "fidelity": "L2"
+    },
+    {
+      "provider": "aws",
+      "service": "ssm",
+      "resourceType": "*",
+      "operation": "GetParameter",
+      "fidelity": "L2"
+    },
+    {
+      "provider": "aws",
+      "service": "ssm",
+      "resourceType": "*",
+      "operation": "GetParameters",
+      "fidelity": "L2"
+    },
+    {
+      "provider": "aws",
+      "service": "ssm",
+      "resourceType": "*",
+      "operation": "GetParametersByPath",
+      "fidelity": "L2"
+    },
+    {
+      "provider": "aws",
+      "service": "ssm",
+      "resourceType": "*",
+      "operation": "PutParameter",
+      "fidelity": "L2"
+    },
+    {
+      "provider": "aws",
+      "service": "ssm",
+      "resourceType": "AWS::EC2::Instance",
+      "operation": "SendCommand",
+      "fidelity": "L4"
+    },
+    {
+      "provider": "aws",
+      "service": "ssm",
+      "resourceType": "AWS::SSM::Command",
+      "operation": "SendCommand",
+      "fidelity": "L4"
+    },
+    {
+      "provider": "aws",
+      "service": "ssm",
+      "resourceType": "AWS::SSM::Parameter",
+      "operation": "lifecycle",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "aws",
+      "service": "ssm",
+      "resourceType": "AWS::SSM::Session",
+      "operation": "ResumeSession",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "aws",
+      "service": "ssm",
+      "resourceType": "AWS::SSM::Session",
+      "operation": "StartSession",
+      "fidelity": "L4"
+    },
+    {
+      "provider": "aws",
+      "service": "ssm",
+      "resourceType": "AWS::SSM::Session",
+      "operation": "TerminateSession",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "aws",
+      "service": "sts",
+      "resourceType": "*",
+      "operation": "GetCallerIdentity",
+      "fidelity": "L2"
+    },
+    {
+      "provider": "aws",
+      "service": "wafv2",
+      "resourceType": "*",
+      "operation": "AssociateWebACL",
+      "fidelity": "L3"
+    },
+    {
+      "provider": "aws",
+      "service": "wafv2",
+      "resourceType": "*",
+      "operation": "DisassociateWebACL",
+      "fidelity": "L3"
+    },
+    {
+      "provider": "aws",
+      "service": "wafv2",
+      "resourceType": "*",
+      "operation": "GetWebACL",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "aws",
+      "service": "wafv2",
+      "resourceType": "*",
+      "operation": "GetWebACLForResource",
+      "fidelity": "L3"
+    },
+    {
+      "provider": "aws",
+      "service": "wafv2",
+      "resourceType": "*",
+      "operation": "ListWebACLs",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "aws",
+      "service": "wafv2",
+      "resourceType": "AWS::WAFv2::WebACL",
+      "operation": "lifecycle",
+      "fidelity": "L3"
+    },
+    {
+      "provider": "azure",
+      "service": "authorization",
+      "resourceType": "Microsoft.Authorization/roleAssignments",
+      "operation": "GetRoleAssignment",
+      "fidelity": "L2"
+    },
+    {
+      "provider": "azure",
+      "service": "authorization",
+      "resourceType": "Microsoft.Authorization/roleAssignments",
+      "operation": "lifecycle",
+      "fidelity": "L2"
+    },
+    {
+      "provider": "azure",
+      "service": "authorization",
+      "resourceType": "Microsoft.Authorization/roleAssignments",
+      "operation": "SetRoleAssignment",
+      "fidelity": "L2"
+    },
+    {
+      "provider": "azure",
+      "service": "bicep",
+      "resourceType": "*",
+      "operation": "deploy",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "azure",
+      "service": "containerapps",
+      "resourceType": "Microsoft.App/containerApps",
+      "operation": "DeleteContainerApp",
+      "fidelity": "L2"
+    },
+    {
+      "provider": "azure",
+      "service": "containerapps",
+      "resourceType": "Microsoft.App/containerApps",
+      "operation": "GetContainerApp",
+      "fidelity": "L2"
+    },
+    {
+      "provider": "azure",
+      "service": "containerapps",
+      "resourceType": "Microsoft.App/containerApps",
+      "operation": "lifecycle",
+      "fidelity": "L4"
+    },
+    {
+      "provider": "azure",
+      "service": "containerapps",
+      "resourceType": "Microsoft.App/containerApps",
+      "operation": "UpdateContainerApp",
+      "fidelity": "L2"
+    },
+    {
+      "provider": "azure",
+      "service": "http",
+      "resourceType": "HTTP::Endpoint",
+      "operation": "Probe",
+      "fidelity": "L4"
+    },
+    {
+      "provider": "azure",
+      "service": "http",
+      "resourceType": "HTTP::Endpoint",
+      "operation": "Request",
+      "fidelity": "L4"
+    },
+    {
+      "provider": "azure",
+      "service": "runtime",
+      "resourceType": "Runtime::Workload",
+      "operation": "Materialize",
+      "fidelity": "L4"
+    },
+    {
+      "provider": "gcp",
+      "service": "http",
+      "resourceType": "HTTP::Endpoint",
+      "operation": "Probe",
+      "fidelity": "L4"
+    },
+    {
+      "provider": "gcp",
+      "service": "http",
+      "resourceType": "HTTP::Endpoint",
+      "operation": "Request",
+      "fidelity": "L4"
+    },
+    {
+      "provider": "gcp",
+      "service": "infra-manager",
+      "resourceType": "*",
+      "operation": "deploy",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "gcp",
+      "service": "run",
+      "resourceType": "google_cloud_run_v2_service_iam_member",
+      "operation": "GetIamPolicy",
+      "fidelity": "L2"
+    },
+    {
+      "provider": "gcp",
+      "service": "run",
+      "resourceType": "google_cloud_run_v2_service_iam_member",
+      "operation": "lifecycle",
+      "fidelity": "L2"
+    },
+    {
+      "provider": "gcp",
+      "service": "run",
+      "resourceType": "google_cloud_run_v2_service_iam_member",
+      "operation": "SetIamPolicy",
+      "fidelity": "L2"
+    },
+    {
+      "provider": "gcp",
+      "service": "run",
+      "resourceType": "google_cloud_run_v2_service",
+      "operation": "DeleteService",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "gcp",
+      "service": "run",
+      "resourceType": "google_cloud_run_v2_service",
+      "operation": "GetService",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "gcp",
+      "service": "run",
+      "resourceType": "google_cloud_run_v2_service",
+      "operation": "lifecycle",
+      "fidelity": "L4"
+    },
+    {
+      "provider": "gcp",
+      "service": "run",
+      "resourceType": "google_cloud_run_v2_service",
+      "operation": "UpdateService",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "gcp",
+      "service": "runtime",
+      "resourceType": "Runtime::Workload",
+      "operation": "Materialize",
+      "fidelity": "L4"
+    },
+    {
+      "provider": "sakura",
+      "service": "apprun",
+      "resourceType": "sakura.apprun.Application",
+      "operation": "deleteApplication",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "sakura",
+      "service": "apprun",
+      "resourceType": "sakura.apprun.Application",
+      "operation": "deploy",
+      "fidelity": "L2"
+    },
+    {
+      "provider": "sakura",
+      "service": "apprun",
+      "resourceType": "sakura.apprun.Application",
+      "operation": "getApplication",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "sakura",
+      "service": "apprun",
+      "resourceType": "sakura.apprun.Application",
+      "operation": "getPacketFilter",
+      "fidelity": "L3"
+    },
+    {
+      "provider": "sakura",
+      "service": "apprun",
+      "resourceType": "sakura.apprun.Application",
+      "operation": "getTraffics",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "sakura",
+      "service": "apprun",
+      "resourceType": "sakura.apprun.Application",
+      "operation": "listApplications",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "sakura",
+      "service": "apprun",
+      "resourceType": "sakura.apprun.Application",
+      "operation": "patchApplication",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "sakura",
+      "service": "apprun",
+      "resourceType": "sakura.apprun.Application",
+      "operation": "patchPacketFilter",
+      "fidelity": "L3"
+    },
+    {
+      "provider": "sakura",
+      "service": "apprun",
+      "resourceType": "sakura.apprun.Application",
+      "operation": "postApplication",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "sakura",
+      "service": "apprun",
+      "resourceType": "sakura.apprun.Application",
+      "operation": "putTraffics",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "sakura",
+      "service": "apprun",
+      "resourceType": "sakura.apprun.ApplicationVersion",
+      "operation": "deleteVersion",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "sakura",
+      "service": "apprun",
+      "resourceType": "sakura.apprun.ApplicationVersion",
+      "operation": "getVersion",
+      "fidelity": "L1"
+    },
+    {
+      "provider": "sakura",
+      "service": "http",
+      "resourceType": "HTTP::Endpoint",
+      "operation": "Request",
+      "fidelity": "L4"
+    },
+    {
+      "provider": "sakura",
+      "service": "runtime",
+      "resourceType": "Runtime::Workload",
+      "operation": "Materialize",
+      "fidelity": "L4"
+    }
+  ]
+}

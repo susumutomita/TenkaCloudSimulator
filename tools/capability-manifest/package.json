@@ -1,0 +1,25 @@
+{
+  "name": "@tenkacloud/simulator-capability-manifest",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "bin": {
+    "tenkacloud-simulator-capabilities": "src/bin.ts"
+  },
+  "scripts": {
+    "dev": "bun src/bin.ts --help",
+    "build": "bun build src/bin.ts src/index.ts --outdir dist --target bun",
+    "test": "bun test test",
+    "test:coverage": "bun test --coverage test",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@tenkacloud/catalog-scanner": "workspace:*",
+    "@tenkacloud/simulator-core": "workspace:*",
+    "@tenkacloud/simulator-provider-aws": "workspace:*",
+    "@tenkacloud/simulator-provider-azure": "workspace:*",
+    "@tenkacloud/simulator-provider-gcp": "workspace:*",
+    "@tenkacloud/simulator-provider-sakura": "workspace:*"
+  }
+}

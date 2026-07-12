@@ -1,0 +1,18 @@
+{
+  "name": "@tenkacloud/simulator-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "scripts": {
+    "build": "bun build src/index.ts --outdir dist --target bun",
+    "test": "bun test test",
+    "test:coverage": "bun test --coverage test",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@tenkacloud/simulator-contracts": "workspace:*",
+    "@tenkacloud/simulator-core": "workspace:*",
+    "hono": "4.12.23"
+  }
+}

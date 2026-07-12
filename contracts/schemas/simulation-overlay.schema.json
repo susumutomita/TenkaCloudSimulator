@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.tenkacloud.dev/simulator/v1/simulation-overlay.schema.json",
+  "title": "TenkaCloud Simulator problem overlay",
+  "description": "IaC, IAM, and metadata cannot describe these additional simulator capabilities and workloads. Scoring, answers, secrets, environment variables, and host mounts are intentionally not representable.",
+  "$defs": {
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]*$",
+          "maxLength": 256
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "targetId": {
+      "type": "string",
+      "pattern": "^(default|[a-z][a-z0-9-]{0,31})$"
+    },
+    "requirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "targetId",
+        "service",
+        "resourceType",
+        "operation",
+        "fidelity",
+        "plane"
+      ],
+      "properties": {
+        "targetId": { "$ref": "#/$defs/targetId" },
+        "service": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9.-]{0,63}$"
+        },
+        "resourceType": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "operation": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9.:_-]{0,127}$"
+        },
+        "fidelity": {
+          "type": "string",
+          "enum": ["L0", "L1", "L2", "L3", "L4"]
+        },
+        "plane": {
+          "type": "string",
+          "enum": [
+            "deploy",
+            "participant",
+            "workload",
+            "scoring",
+            "operator",
+            "access"
+          ]
+        },
+        "artifact": { "$ref": "#/$defs/artifact" }
+      }
+    },
+    "workload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "targetId", "resourceRef", "image", "containerPort"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,63}$"
+        },
+        "targetId": { "$ref": "#/$defs/targetId" },
+        "resourceRef": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "image": {
+          "type": "string",
+          "pattern": "^(?:[a-z0-9][a-z0-9._/-]*/)?[a-z0-9][a-z0-9._/-]*@sha256:[a-f0-9]{64}$"
+        },
+        "command": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          }
+        },
+        "containerPort": {
+          "type": "integer",
+          "minimum": 1024,
+          "maximum": 65535
+        },
+        "healthPath": {
+          "type": "string",
+          "pattern": "^/[^?#\\s]*$",
+          "maxLength": 256
+        },
+        "artifact": { "$ref": "#/$defs/artifact" }
+      }
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion"],
+  "anyOf": [
+    {
+      "properties": { "requirements": true },
+      "required": ["requirements"]
+    },
+    {
+      "properties": { "workloads": true },
+      "required": ["workloads"]
+    }
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": "1" },
+    "requirements": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 128,
+      "items": { "$ref": "#/$defs/requirement" }
+    },
+    "workloads": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "items": { "$ref": "#/$defs/workload" }
+    }
+  }
+}

@@ -1,4 +1,5 @@
 import type { Finding, Rule, Severity } from './architecture-harness-types';
+import { isApplicationSource } from './architecture-harness-types';
 
 const PRE_RELEASE_GROUP = ['pre-release'] as const;
 const CHECKLIST = 'docs/checklists/pre-release.md';
@@ -13,19 +14,8 @@ interface OpeningTag {
   line: number;
 }
 
-function isTestArtifact(filePath: string): boolean {
-  return (
-    /\.(test|spec)\.[^.]+$/.test(filePath) ||
-    /(^|\/)(__fixtures__|__mocks__|__tests__|tests?)\//.test(filePath)
-  );
-}
-
 function isAppFile(filePath: string, extension: RegExp): boolean {
-  return (
-    (filePath.startsWith('packages/') || filePath.startsWith('src/')) &&
-    extension.test(filePath) &&
-    !isTestArtifact(filePath)
-  );
+  return isApplicationSource(filePath, extension);
 }
 
 function lineAt(content: string, offset: number): number {
@@ -48,6 +38,7 @@ function findTagEnd(content: string, start: number): number {
   let braceDepth = 0;
   for (let index = start; index < content.length; index++) {
     const char = content[index];
+    if (char === undefined) break;
     const updatedQuote = nextQuote(quote, char, content[index - 1] ?? '');
     if (updatedQuote !== quote) {
       quote = updatedQuote;
@@ -65,10 +56,12 @@ function openingTags(content: string): OpeningTag[] {
   const startPattern = /<([A-Za-z][\w.:-]*)\b/g;
   for (const match of content.matchAll(startPattern)) {
     const start = match.index;
+    const name = match[1];
+    if (name === undefined) continue;
     const end = findTagEnd(content, start + match[0].length);
     if (end === -1) continue;
     tags.push({
-      name: match[1],
+      name,
       source: content.slice(start, end + 1),
       start,
       end: end + 1,
@@ -82,6 +75,7 @@ function hasVisibleText(content: string): boolean {
   let cursor = 0;
   while (cursor < content.length) {
     const char = content[cursor];
+    if (char === undefined) break;
     if (/\s/.test(char)) {
       cursor++;
       continue;
@@ -180,7 +174,7 @@ const PRE_RELEASE_RULES: Rule[] = [
       const sensitive =
         /\b(?:accessToken|refreshToken|idToken|token|auth|session|credential)s?\b/i;
       const findings = Array.from(content.matchAll(setItem))
-        .filter((match) => sensitive.test(match[1]))
+        .filter((match) => sensitive.test(match[1] ?? ''))
         .map((match) =>
           finding(
             'INVARIANT_NO_CLIENT_AUTH_STORAGE',

@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.tenkacloud.dev/simulator/v1/event.schema.json",
+  "title": "Simulator event",
+  "$defs": {
+    "commandIdentity": {
+      "type": "object",
+      "required": ["id", "operation"],
+      "properties": {
+        "id": {
+          "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+        },
+        "deploymentId": {
+          "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+        },
+        "provider": {
+          "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+        },
+        "operation": {
+          "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+        },
+        "idempotencyKey": {
+          "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "type": "object",
+  "required": [
+    "worldId",
+    "sequence",
+    "virtualTimestamp",
+    "command",
+    "type",
+    "schemaVersion",
+    "payloadHash",
+    "payload"
+  ],
+  "properties": {
+    "worldId": {
+      "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+    },
+    "sequence": { "type": "integer", "minimum": 1 },
+    "virtualTimestamp": { "type": "string", "format": "date-time" },
+    "command": { "$ref": "#/$defs/commandIdentity" },
+    "type": {
+      "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+    },
+    "schemaVersion": {
+      "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+    },
+    "payloadHash": {
+      "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/sha256"
+    },
+    "payload": {
+      "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/jsonValue"
+    }
+  },
+  "additionalProperties": true
+}

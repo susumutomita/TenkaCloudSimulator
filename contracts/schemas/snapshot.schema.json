@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.tenkacloud.dev/simulator/v1/snapshot.schema.json",
+  "title": "Simulator snapshot",
+  "type": "object",
+  "required": [
+    "snapshotVersion",
+    "protocolVersion",
+    "worldId",
+    "namespace",
+    "seed",
+    "clock",
+    "lastSequence",
+    "resourceGraph",
+    "providerProjections",
+    "hash"
+  ],
+  "properties": {
+    "snapshotVersion": { "const": "1" },
+    "protocolVersion": { "const": "2026-07-11" },
+    "worldId": {
+      "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+    },
+    "namespace": {
+      "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/namespace"
+    },
+    "seed": {
+      "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+    },
+    "clock": { "type": "string", "format": "date-time" },
+    "lastSequence": { "type": "integer", "minimum": 0 },
+    "resourceGraph": {
+      "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/jsonObject"
+    },
+    "providerProjections": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/jsonObject"
+      }
+    },
+    "scheduledTransitions": {
+      "type": "array",
+      "items": {
+        "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/jsonObject"
+      }
+    },
+    "hash": {
+      "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/sha256"
+    }
+  },
+  "additionalProperties": false
+}

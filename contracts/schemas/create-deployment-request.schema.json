@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.tenkacloud.dev/simulator/v1/create-deployment-request.schema.json",
+  "title": "Create simulator deployment request",
+  "type": "object",
+  "required": ["problemId", "runtime", "templateBody"],
+  "properties": {
+    "problemId": {
+      "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+    },
+    "runtime": {
+      "$ref": "https://schemas.tenkacloud.dev/simulator/v1/runtime.schema.json"
+    },
+    "templateBody": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 5242880
+    },
+    "metadata": {
+      "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/jsonValue"
+    },
+    "simulationOverlay": {
+      "$ref": "https://schemas.tenkacloud.dev/simulator/v1/simulation-overlay.schema.json"
+    }
+  },
+  "additionalProperties": false
+}

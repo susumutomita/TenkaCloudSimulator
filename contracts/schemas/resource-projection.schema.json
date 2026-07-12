@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.tenkacloud.dev/simulator/v1/resource-projection.schema.json",
+  "title": "Simulator resource projection",
+  "$defs": {
+    "resource": {
+      "type": "object",
+      "required": [
+        "worldId",
+        "deploymentId",
+        "provider",
+        "resourceType",
+        "resourceId",
+        "properties",
+        "status"
+      ],
+      "properties": {
+        "worldId": {
+          "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+        },
+        "deploymentId": {
+          "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+        },
+        "provider": {
+          "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+        },
+        "resourceType": {
+          "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+        },
+        "resourceId": {
+          "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+        },
+        "properties": {
+          "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/jsonObject"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "ready", "failed", "deleted"]
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "type": "object",
+  "required": ["resources"],
+  "properties": {
+    "resources": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/resource" }
+    }
+  },
+  "additionalProperties": true
+}

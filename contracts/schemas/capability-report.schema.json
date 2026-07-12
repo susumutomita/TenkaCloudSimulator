@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.tenkacloud.dev/simulator/v1/capability-report.schema.json",
+  "title": "Catalog capability coverage report",
+  "$defs": {
+    "status": {
+      "type": "string",
+      "enum": ["covered", "missing", "insufficient", "invalid"]
+    },
+    "summary": {
+      "type": "object",
+      "required": ["total", "covered", "missing", "insufficient", "invalid"],
+      "properties": {
+        "total": { "type": "integer", "minimum": 0 },
+        "covered": { "type": "integer", "minimum": 0 },
+        "missing": { "type": "integer", "minimum": 0 },
+        "insufficient": { "type": "integer", "minimum": 0 },
+        "invalid": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "entry": {
+      "type": "object",
+      "required": [
+        "requirement",
+        "status",
+        "implementedFidelity",
+        "diagnostics"
+      ],
+      "properties": {
+        "requirement": {
+          "$ref": "https://schemas.tenkacloud.dev/simulator/v1/capability-requirement.schema.json"
+        },
+        "status": { "$ref": "#/$defs/status" },
+        "implementedFidelity": {
+          "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/fidelitySet"
+        },
+        "diagnostics": {
+          "type": "array",
+          "items": {
+            "$ref": "https://schemas.tenkacloud.dev/simulator/v1/error-envelope.schema.json#/$defs/diagnostic"
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "type": "object",
+  "required": [
+    "protocolVersion",
+    "simulatorVersion",
+    "catalogCommit",
+    "reportHash",
+    "supported",
+    "summary",
+    "requirements"
+  ],
+  "properties": {
+    "protocolVersion": { "const": "2026-07-11" },
+    "simulatorVersion": {
+      "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+    },
+    "catalogCommit": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$"
+    },
+    "reportHash": {
+      "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/sha256"
+    },
+    "supported": { "type": "boolean" },
+    "summary": { "$ref": "#/$defs/summary" },
+    "requirements": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/entry" }
+    }
+  },
+  "additionalProperties": true
+}
