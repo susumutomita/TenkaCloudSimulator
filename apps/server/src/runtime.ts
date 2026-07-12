@@ -274,6 +274,10 @@ function launchSecret(environment: SimulatorRuntimeEnvironment): Uint8Array {
   return secret;
 }
 
+export function needsPrivateDirectoryModeCorrection(mode: number): boolean {
+  return (mode & 0o7777) !== 0o700;
+}
+
 async function privateDirectory(path: string): Promise<string> {
   const requested = resolve(path);
   await mkdir(requested, { recursive: true, mode: 0o700 });
@@ -281,7 +285,9 @@ async function privateDirectory(path: string): Promise<string> {
   if (!stat.isDirectory() || stat.isSymbolicLink()) {
     throw new TypeError('TENKACLOUD_SIMULATOR_STATE_DIR must be a directory');
   }
-  await chmod(requested, 0o700);
+  if (needsPrivateDirectoryModeCorrection(stat.mode)) {
+    await chmod(requested, 0o700);
+  }
   const canonical = await realpath(requested);
   if (canonical !== requested) {
     throw new TypeError(
