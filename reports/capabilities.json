@@ -8,10 +8,7 @@
       "service": "cloudformation",
       "resourceType": "*",
       "operation": "DescribeStackResources",
-      "fidelity": [
-        "L0",
-        "L1"
-      ]
+      "fidelity": ["L0", "L1"]
     },
     {
       "provider": "aws",
@@ -19,10 +16,7 @@
       "service": "cloudformation",
       "resourceType": "*",
       "operation": "DescribeStacks",
-      "fidelity": [
-        "L0",
-        "L1"
-      ]
+      "fidelity": ["L0", "L1"]
     },
     {
       "provider": "aws",
@@ -30,10 +24,7 @@
       "service": "cloudformation",
       "resourceType": "*",
       "operation": "ListStackResources",
-      "fidelity": [
-        "L0",
-        "L1"
-      ]
+      "fidelity": ["L0", "L1"]
     },
     {
       "provider": "aws",
@@ -41,10 +32,7 @@
       "service": "cloudformation",
       "resourceType": "*",
       "operation": "ListStacks",
-      "fidelity": [
-        "L0",
-        "L1"
-      ]
+      "fidelity": ["L0", "L1"]
     },
     {
       "provider": "aws",
@@ -52,10 +40,7 @@
       "service": "cloudformation",
       "resourceType": "*",
       "operation": "UpdateStack",
-      "fidelity": [
-        "L0",
-        "L1"
-      ]
+      "fidelity": ["L0", "L1"]
     },
     {
       "provider": "aws",
@@ -63,10 +48,7 @@
       "service": "cloudformation",
       "resourceType": "AWS::CloudFormation::CustomResource",
       "operation": "lifecycle",
-      "fidelity": [
-        "L1",
-        "L4"
-      ]
+      "fidelity": ["L1", "L4"]
     },
     {
       "provider": "aws",
@@ -74,9 +56,7 @@
       "service": "cloudformation",
       "resourceType": "AWS::CloudFormation::Stack",
       "operation": "deploy",
-      "fidelity": [
-        "L1"
-      ]
+      "fidelity": ["L1"]
     },
     {
       "provider": "aws",
@@ -84,10 +64,7 @@
       "service": "cloudformation",
       "resourceType": "Custom::EmptyStackBuckets",
       "operation": "lifecycle",
-      "fidelity": [
-        "L1",
-        "L4"
-      ]
+      "fidelity": ["L1", "L4"]
     },
     {
       "provider": "aws",
@@ -95,10 +72,7 @@
       "service": "ec2",
       "resourceType": "*",
       "operation": "DescribeInstances",
-      "fidelity": [
-        "L0",
-        "L1"
-      ]
+      "fidelity": ["L0", "L1"]
     },
     {
       "provider": "aws",
@@ -106,11 +80,7 @@
       "service": "ec2",
       "resourceType": "*",
       "operation": "DescribeSecurityGroups",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L3"
-      ]
+      "fidelity": ["L0", "L1", "L3"]
     },
     {
       "provider": "aws",
@@ -118,11 +88,7 @@
       "service": "ec2",
       "resourceType": "*",
       "operation": "RevokeSecurityGroupEgress",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L3"
-      ]
+      "fidelity": ["L0", "L1", "L3"]
     },
     {
       "provider": "aws",
@@ -130,11 +96,7 @@
       "service": "ec2",
       "resourceType": "*",
       "operation": "RevokeSecurityGroupIngress",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L3"
-      ]
+      "fidelity": ["L0", "L1", "L3"]
     },
     {
       "provider": "aws",
@@ -142,11 +104,7 @@
       "service": "ec2",
       "resourceType": "AWS::EC2::Instance",
       "operation": "EvaluateReachability",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L3"
-      ]
+      "fidelity": ["L0", "L1", "L3"]
     },
     {
       "provider": "aws",
@@ -154,10 +112,7 @@
       "service": "ec2",
       "resourceType": "AWS::EC2::Instance",
       "operation": "lifecycle",
-      "fidelity": [
-        "L1",
-        "L3"
-      ]
+      "fidelity": ["L1", "L3"]
     },
     {
       "provider": "aws",
@@ -165,10 +120,7 @@
       "service": "ec2",
       "resourceType": "AWS::EC2::InternetGateway",
       "operation": "lifecycle",
-      "fidelity": [
-        "L1",
-        "L3"
-      ]
+      "fidelity": ["L1", "L3"]
     },
     {
       "provider": "aws",
@@ -176,10 +128,7 @@
       "service": "ec2",
       "resourceType": "AWS::EC2::Route",
       "operation": "lifecycle",
-      "fidelity": [
-        "L1",
-        "L3"
-      ]
+      "fidelity": ["L1", "L3"]
     },
     {
       "provider": "aws",
@@ -187,10 +136,7 @@
       "service": "ec2",
       "resourceType": "AWS::EC2::RouteTable",
       "operation": "lifecycle",
-      "fidelity": [
-        "L1",
-        "L3"
-      ]
+      "fidelity": ["L1", "L3"]
     },
     {
       "provider": "aws",
@@ -198,10 +144,7 @@
       "service": "ec2",
       "resourceType": "AWS::EC2::SecurityGroup",
       "operation": "lifecycle",
-      "fidelity": [
-        "L1",
-        "L3"
-      ]
+      "fidelity": ["L1", "L3"]
     },
     {
       "provider": "aws",
@@ -209,10 +152,7 @@
       "service": "ec2",
       "resourceType": "AWS::EC2::Subnet",
       "operation": "lifecycle",
-      "fidelity": [
-        "L1",
-        "L3"
-      ]
+      "fidelity": ["L1", "L3"]
     },
     {
       "provider": "aws",
@@ -220,10 +160,7 @@
       "service": "ec2",
       "resourceType": "AWS::EC2::SubnetRouteTableAssociation",
       "operation": "lifecycle",
-      "fidelity": [
-        "L1",
-        "L3"
-      ]
+      "fidelity": ["L1", "L3"]
     },
     {
       "provider": "aws",
@@ -231,10 +168,7 @@
       "service": "ec2",
       "resourceType": "AWS::EC2::VPC",
       "operation": "lifecycle",
-      "fidelity": [
-        "L1",
-        "L3"
-      ]
+      "fidelity": ["L1", "L3"]
     },
     {
       "provider": "aws",
@@ -242,10 +176,7 @@
       "service": "ec2",
       "resourceType": "AWS::EC2::VPCGatewayAttachment",
       "operation": "lifecycle",
-      "fidelity": [
-        "L1",
-        "L3"
-      ]
+      "fidelity": ["L1", "L3"]
     },
     {
       "provider": "aws",
@@ -253,11 +184,7 @@
       "service": "elasticloadbalancing",
       "resourceType": "*",
       "operation": "DescribeRules",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L3"
-      ]
+      "fidelity": ["L0", "L1", "L3"]
     },
     {
       "provider": "aws",
@@ -265,11 +192,7 @@
       "service": "elasticloadbalancing",
       "resourceType": "*",
       "operation": "ModifyRule",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L3"
-      ]
+      "fidelity": ["L0", "L1", "L3"]
     },
     {
       "provider": "aws",
@@ -277,10 +200,7 @@
       "service": "elasticloadbalancing",
       "resourceType": "AWS::ElasticLoadBalancingV2::Listener",
       "operation": "lifecycle",
-      "fidelity": [
-        "L1",
-        "L3"
-      ]
+      "fidelity": ["L1", "L3"]
     },
     {
       "provider": "aws",
@@ -288,10 +208,7 @@
       "service": "elasticloadbalancing",
       "resourceType": "AWS::ElasticLoadBalancingV2::ListenerRule",
       "operation": "lifecycle",
-      "fidelity": [
-        "L1",
-        "L3"
-      ]
+      "fidelity": ["L1", "L3"]
     },
     {
       "provider": "aws",
@@ -299,10 +216,7 @@
       "service": "elasticloadbalancing",
       "resourceType": "AWS::ElasticLoadBalancingV2::LoadBalancer",
       "operation": "lifecycle",
-      "fidelity": [
-        "L1",
-        "L3"
-      ]
+      "fidelity": ["L1", "L3"]
     },
     {
       "provider": "aws",
@@ -310,10 +224,7 @@
       "service": "elasticloadbalancing",
       "resourceType": "AWS::ElasticLoadBalancingV2::TargetGroup",
       "operation": "lifecycle",
-      "fidelity": [
-        "L1",
-        "L3"
-      ]
+      "fidelity": ["L1", "L3"]
     },
     {
       "provider": "aws",
@@ -321,11 +232,7 @@
       "service": "http",
       "resourceType": "HTTP::Endpoint",
       "operation": "AttackProbe",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L4"
-      ]
+      "fidelity": ["L0", "L1", "L4"]
     },
     {
       "provider": "aws",
@@ -333,11 +240,7 @@
       "service": "http",
       "resourceType": "HTTP::Endpoint",
       "operation": "Poll",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L4"
-      ]
+      "fidelity": ["L0", "L1", "L4"]
     },
     {
       "provider": "aws",
@@ -345,11 +248,7 @@
       "service": "http",
       "resourceType": "HTTP::Endpoint",
       "operation": "Probe",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L4"
-      ]
+      "fidelity": ["L0", "L1", "L4"]
     },
     {
       "provider": "aws",
@@ -357,11 +256,7 @@
       "service": "http",
       "resourceType": "HTTP::Endpoint",
       "operation": "Request",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L4"
-      ]
+      "fidelity": ["L0", "L1", "L4"]
     },
     {
       "provider": "aws",
@@ -369,11 +264,7 @@
       "service": "iam",
       "resourceType": "*",
       "operation": "DeleteRolePolicy",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L2"
-      ]
+      "fidelity": ["L0", "L1", "L2"]
     },
     {
       "provider": "aws",
@@ -381,11 +272,7 @@
       "service": "iam",
       "resourceType": "*",
       "operation": "GetRole",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L2"
-      ]
+      "fidelity": ["L0", "L1", "L2"]
     },
     {
       "provider": "aws",
@@ -393,11 +280,7 @@
       "service": "iam",
       "resourceType": "*",
       "operation": "GetRolePolicy",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L2"
-      ]
+      "fidelity": ["L0", "L1", "L2"]
     },
     {
       "provider": "aws",
@@ -405,11 +288,7 @@
       "service": "iam",
       "resourceType": "*",
       "operation": "ListRolePolicies",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L2"
-      ]
+      "fidelity": ["L0", "L1", "L2"]
     },
     {
       "provider": "aws",
@@ -417,11 +296,7 @@
       "service": "iam",
       "resourceType": "*",
       "operation": "ListRoles",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L2"
-      ]
+      "fidelity": ["L0", "L1", "L2"]
     },
     {
       "provider": "aws",
@@ -429,11 +304,7 @@
       "service": "iam",
       "resourceType": "*",
       "operation": "PutRolePolicy",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L2"
-      ]
+      "fidelity": ["L0", "L1", "L2"]
     },
     {
       "provider": "aws",
@@ -441,10 +312,7 @@
       "service": "iam",
       "resourceType": "AWS::IAM::InstanceProfile",
       "operation": "lifecycle",
-      "fidelity": [
-        "L1",
-        "L2"
-      ]
+      "fidelity": ["L1", "L2"]
     },
     {
       "provider": "aws",
@@ -452,10 +320,7 @@
       "service": "iam",
       "resourceType": "AWS::IAM::Role",
       "operation": "lifecycle",
-      "fidelity": [
-        "L1",
-        "L2"
-      ]
+      "fidelity": ["L1", "L2"]
     },
     {
       "provider": "aws",
@@ -463,10 +328,7 @@
       "service": "lambda",
       "resourceType": "*",
       "operation": "CreateFunction",
-      "fidelity": [
-        "L0",
-        "L1"
-      ]
+      "fidelity": ["L0", "L1"]
     },
     {
       "provider": "aws",
@@ -474,10 +336,7 @@
       "service": "lambda",
       "resourceType": "*",
       "operation": "GetFunction",
-      "fidelity": [
-        "L0",
-        "L1"
-      ]
+      "fidelity": ["L0", "L1"]
     },
     {
       "provider": "aws",
@@ -485,11 +344,7 @@
       "service": "lambda",
       "resourceType": "*",
       "operation": "InvokeFunction",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L4"
-      ]
+      "fidelity": ["L0", "L1", "L4"]
     },
     {
       "provider": "aws",
@@ -497,9 +352,7 @@
       "service": "lambda",
       "resourceType": "AWS::Lambda::Function",
       "operation": "lifecycle",
-      "fidelity": [
-        "L1"
-      ]
+      "fidelity": ["L1"]
     },
     {
       "provider": "aws",
@@ -507,9 +360,7 @@
       "service": "lambda",
       "resourceType": "AWS::Lambda::Permission",
       "operation": "lifecycle",
-      "fidelity": [
-        "L1"
-      ]
+      "fidelity": ["L1"]
     },
     {
       "provider": "aws",
@@ -517,9 +368,7 @@
       "service": "lambda",
       "resourceType": "AWS::Lambda::Url",
       "operation": "lifecycle",
-      "fidelity": [
-        "L1"
-      ]
+      "fidelity": ["L1"]
     },
     {
       "provider": "aws",
@@ -527,10 +376,7 @@
       "service": "logs",
       "resourceType": "*",
       "operation": "CreateLogGroup",
-      "fidelity": [
-        "L0",
-        "L1"
-      ]
+      "fidelity": ["L0", "L1"]
     },
     {
       "provider": "aws",
@@ -538,10 +384,7 @@
       "service": "logs",
       "resourceType": "*",
       "operation": "CreateLogStream",
-      "fidelity": [
-        "L0",
-        "L1"
-      ]
+      "fidelity": ["L0", "L1"]
     },
     {
       "provider": "aws",
@@ -549,10 +392,7 @@
       "service": "logs",
       "resourceType": "*",
       "operation": "DescribeLogGroups",
-      "fidelity": [
-        "L0",
-        "L1"
-      ]
+      "fidelity": ["L0", "L1"]
     },
     {
       "provider": "aws",
@@ -560,10 +400,7 @@
       "service": "logs",
       "resourceType": "*",
       "operation": "DescribeLogStreams",
-      "fidelity": [
-        "L0",
-        "L1"
-      ]
+      "fidelity": ["L0", "L1"]
     },
     {
       "provider": "aws",
@@ -571,10 +408,7 @@
       "service": "logs",
       "resourceType": "*",
       "operation": "FilterLogEvents",
-      "fidelity": [
-        "L0",
-        "L1"
-      ]
+      "fidelity": ["L0", "L1"]
     },
     {
       "provider": "aws",
@@ -582,10 +416,7 @@
       "service": "logs",
       "resourceType": "*",
       "operation": "GetLogEvents",
-      "fidelity": [
-        "L0",
-        "L1"
-      ]
+      "fidelity": ["L0", "L1"]
     },
     {
       "provider": "aws",
@@ -593,10 +424,7 @@
       "service": "logs",
       "resourceType": "*",
       "operation": "PutLogEvents",
-      "fidelity": [
-        "L0",
-        "L1"
-      ]
+      "fidelity": ["L0", "L1"]
     },
     {
       "provider": "aws",
@@ -604,9 +432,7 @@
       "service": "logs",
       "resourceType": "AWS::Logs::LogGroup",
       "operation": "lifecycle",
-      "fidelity": [
-        "L1"
-      ]
+      "fidelity": ["L1"]
     },
     {
       "provider": "aws",
@@ -614,10 +440,7 @@
       "service": "rds",
       "resourceType": "*",
       "operation": "DescribeDBInstances",
-      "fidelity": [
-        "L0",
-        "L1"
-      ]
+      "fidelity": ["L0", "L1"]
     },
     {
       "provider": "aws",
@@ -625,9 +448,7 @@
       "service": "rds",
       "resourceType": "AWS::RDS::DBInstance",
       "operation": "lifecycle",
-      "fidelity": [
-        "L1"
-      ]
+      "fidelity": ["L1"]
     },
     {
       "provider": "aws",
@@ -635,9 +456,7 @@
       "service": "rds",
       "resourceType": "AWS::RDS::DBSubnetGroup",
       "operation": "lifecycle",
-      "fidelity": [
-        "L1"
-      ]
+      "fidelity": ["L1"]
     },
     {
       "provider": "aws",
@@ -645,10 +464,7 @@
       "service": "runtime",
       "resourceType": "Runtime::Endpoint",
       "operation": "ResolveEndpoint",
-      "fidelity": [
-        "L0",
-        "L1"
-      ]
+      "fidelity": ["L0", "L1"]
     },
     {
       "provider": "aws",
@@ -656,9 +472,7 @@
       "service": "runtime",
       "resourceType": "Runtime::Workload",
       "operation": "Materialize",
-      "fidelity": [
-        "L4"
-      ]
+      "fidelity": ["L4"]
     },
     {
       "provider": "aws",
@@ -666,11 +480,7 @@
       "service": "s3",
       "resourceType": "*",
       "operation": "DeleteObject",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L4"
-      ]
+      "fidelity": ["L0", "L1", "L4"]
     },
     {
       "provider": "aws",
@@ -678,11 +488,7 @@
       "service": "s3",
       "resourceType": "*",
       "operation": "GetBucketLocation",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L4"
-      ]
+      "fidelity": ["L0", "L1", "L4"]
     },
     {
       "provider": "aws",
@@ -690,11 +496,7 @@
       "service": "s3",
       "resourceType": "*",
       "operation": "GetObject",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L4"
-      ]
+      "fidelity": ["L0", "L1", "L4"]
     },
     {
       "provider": "aws",
@@ -702,11 +504,7 @@
       "service": "s3",
       "resourceType": "*",
       "operation": "ListBucket",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L4"
-      ]
+      "fidelity": ["L0", "L1", "L4"]
     },
     {
       "provider": "aws",
@@ -714,11 +512,7 @@
       "service": "s3",
       "resourceType": "*",
       "operation": "PutObject",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L4"
-      ]
+      "fidelity": ["L0", "L1", "L4"]
     },
     {
       "provider": "aws",
@@ -726,9 +520,7 @@
       "service": "s3",
       "resourceType": "AWS::S3::Bucket",
       "operation": "lifecycle",
-      "fidelity": [
-        "L1"
-      ]
+      "fidelity": ["L1"]
     },
     {
       "provider": "aws",
@@ -736,11 +528,7 @@
       "service": "ssm",
       "resourceType": "*",
       "operation": "DescribeParameters",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L2"
-      ]
+      "fidelity": ["L0", "L1", "L2"]
     },
     {
       "provider": "aws",
@@ -748,11 +536,7 @@
       "service": "ssm",
       "resourceType": "*",
       "operation": "GetParameter",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L2"
-      ]
+      "fidelity": ["L0", "L1", "L2"]
     },
     {
       "provider": "aws",
@@ -760,11 +544,7 @@
       "service": "ssm",
       "resourceType": "*",
       "operation": "GetParameters",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L2"
-      ]
+      "fidelity": ["L0", "L1", "L2"]
     },
     {
       "provider": "aws",
@@ -772,11 +552,7 @@
       "service": "ssm",
       "resourceType": "*",
       "operation": "GetParametersByPath",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L2"
-      ]
+      "fidelity": ["L0", "L1", "L2"]
     },
     {
       "provider": "aws",
@@ -784,11 +560,7 @@
       "service": "ssm",
       "resourceType": "*",
       "operation": "PutParameter",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L2"
-      ]
+      "fidelity": ["L0", "L1", "L2"]
     },
     {
       "provider": "aws",
@@ -796,11 +568,7 @@
       "service": "ssm",
       "resourceType": "AWS::EC2::Instance",
       "operation": "SendCommand",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L4"
-      ]
+      "fidelity": ["L0", "L1", "L4"]
     },
     {
       "provider": "aws",
@@ -808,11 +576,7 @@
       "service": "ssm",
       "resourceType": "AWS::SSM::Command",
       "operation": "SendCommand",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L4"
-      ]
+      "fidelity": ["L0", "L1", "L4"]
     },
     {
       "provider": "aws",
@@ -820,9 +584,7 @@
       "service": "ssm",
       "resourceType": "AWS::SSM::Parameter",
       "operation": "lifecycle",
-      "fidelity": [
-        "L1"
-      ]
+      "fidelity": ["L1"]
     },
     {
       "provider": "aws",
@@ -830,10 +592,7 @@
       "service": "ssm",
       "resourceType": "AWS::SSM::Session",
       "operation": "ResumeSession",
-      "fidelity": [
-        "L0",
-        "L1"
-      ]
+      "fidelity": ["L0", "L1"]
     },
     {
       "provider": "aws",
@@ -841,11 +600,7 @@
       "service": "ssm",
       "resourceType": "AWS::SSM::Session",
       "operation": "StartSession",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L4"
-      ]
+      "fidelity": ["L0", "L1", "L4"]
     },
     {
       "provider": "aws",
@@ -853,10 +608,7 @@
       "service": "ssm",
       "resourceType": "AWS::SSM::Session",
       "operation": "TerminateSession",
-      "fidelity": [
-        "L0",
-        "L1"
-      ]
+      "fidelity": ["L0", "L1"]
     },
     {
       "provider": "aws",
@@ -864,11 +616,7 @@
       "service": "sts",
       "resourceType": "*",
       "operation": "GetCallerIdentity",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L2"
-      ]
+      "fidelity": ["L0", "L1", "L2"]
     },
     {
       "provider": "aws",
@@ -876,11 +624,7 @@
       "service": "wafv2",
       "resourceType": "*",
       "operation": "AssociateWebACL",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L3"
-      ]
+      "fidelity": ["L0", "L1", "L3"]
     },
     {
       "provider": "aws",
@@ -888,11 +632,7 @@
       "service": "wafv2",
       "resourceType": "*",
       "operation": "DisassociateWebACL",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L3"
-      ]
+      "fidelity": ["L0", "L1", "L3"]
     },
     {
       "provider": "aws",
@@ -900,10 +640,7 @@
       "service": "wafv2",
       "resourceType": "*",
       "operation": "GetWebACL",
-      "fidelity": [
-        "L0",
-        "L1"
-      ]
+      "fidelity": ["L0", "L1"]
     },
     {
       "provider": "aws",
@@ -911,11 +648,7 @@
       "service": "wafv2",
       "resourceType": "*",
       "operation": "GetWebACLForResource",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L3"
-      ]
+      "fidelity": ["L0", "L1", "L3"]
     },
     {
       "provider": "aws",
@@ -923,10 +656,7 @@
       "service": "wafv2",
       "resourceType": "*",
       "operation": "ListWebACLs",
-      "fidelity": [
-        "L0",
-        "L1"
-      ]
+      "fidelity": ["L0", "L1"]
     },
     {
       "provider": "aws",
@@ -934,10 +664,7 @@
       "service": "wafv2",
       "resourceType": "AWS::WAFv2::WebACL",
       "operation": "lifecycle",
-      "fidelity": [
-        "L1",
-        "L3"
-      ]
+      "fidelity": ["L1", "L3"]
     },
     {
       "provider": "azure",
@@ -945,11 +672,7 @@
       "service": "authorization",
       "resourceType": "Microsoft.Authorization/roleAssignments",
       "operation": "GetRoleAssignment",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L2"
-      ]
+      "fidelity": ["L0", "L1", "L2"]
     },
     {
       "provider": "azure",
@@ -957,11 +680,7 @@
       "service": "authorization",
       "resourceType": "Microsoft.Authorization/roleAssignments",
       "operation": "lifecycle",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L2"
-      ]
+      "fidelity": ["L0", "L1", "L2"]
     },
     {
       "provider": "azure",
@@ -969,11 +688,7 @@
       "service": "authorization",
       "resourceType": "Microsoft.Authorization/roleAssignments",
       "operation": "SetRoleAssignment",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L2"
-      ]
+      "fidelity": ["L0", "L1", "L2"]
     },
     {
       "provider": "azure",
@@ -981,10 +696,7 @@
       "service": "bicep",
       "resourceType": "*",
       "operation": "deploy",
-      "fidelity": [
-        "L0",
-        "L1"
-      ]
+      "fidelity": ["L0", "L1"]
     },
     {
       "provider": "azure",
@@ -992,11 +704,7 @@
       "service": "containerapps",
       "resourceType": "Microsoft.App/containerApps",
       "operation": "DeleteContainerApp",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L2"
-      ]
+      "fidelity": ["L0", "L1", "L2"]
     },
     {
       "provider": "azure",
@@ -1004,11 +712,7 @@
       "service": "containerapps",
       "resourceType": "Microsoft.App/containerApps",
       "operation": "GetContainerApp",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L2"
-      ]
+      "fidelity": ["L0", "L1", "L2"]
     },
     {
       "provider": "azure",
@@ -1016,13 +720,7 @@
       "service": "containerapps",
       "resourceType": "Microsoft.App/containerApps",
       "operation": "lifecycle",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L2",
-        "L3",
-        "L4"
-      ]
+      "fidelity": ["L0", "L1", "L2", "L3", "L4"]
     },
     {
       "provider": "azure",
@@ -1030,11 +728,7 @@
       "service": "containerapps",
       "resourceType": "Microsoft.App/containerApps",
       "operation": "UpdateContainerApp",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L2"
-      ]
+      "fidelity": ["L0", "L1", "L2"]
     },
     {
       "provider": "azure",
@@ -1042,11 +736,7 @@
       "service": "containerapps",
       "resourceType": "Microsoft.App/managedEnvironments",
       "operation": "lifecycle",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L2"
-      ]
+      "fidelity": ["L0", "L1", "L2"]
     },
     {
       "provider": "azure",
@@ -1054,13 +744,7 @@
       "service": "http",
       "resourceType": "HTTP::Endpoint",
       "operation": "Probe",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L2",
-        "L3",
-        "L4"
-      ]
+      "fidelity": ["L0", "L1", "L2", "L3", "L4"]
     },
     {
       "provider": "azure",
@@ -1068,13 +752,7 @@
       "service": "http",
       "resourceType": "HTTP::Endpoint",
       "operation": "Request",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L2",
-        "L3",
-        "L4"
-      ]
+      "fidelity": ["L0", "L1", "L2", "L3", "L4"]
     },
     {
       "provider": "azure",
@@ -1082,9 +760,7 @@
       "service": "runtime",
       "resourceType": "Runtime::Workload",
       "operation": "Materialize",
-      "fidelity": [
-        "L4"
-      ]
+      "fidelity": ["L4"]
     },
     {
       "provider": "gcp",
@@ -1092,13 +768,7 @@
       "service": "http",
       "resourceType": "HTTP::Endpoint",
       "operation": "Probe",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L2",
-        "L3",
-        "L4"
-      ]
+      "fidelity": ["L0", "L1", "L2", "L3", "L4"]
     },
     {
       "provider": "gcp",
@@ -1106,13 +776,7 @@
       "service": "http",
       "resourceType": "HTTP::Endpoint",
       "operation": "Request",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L2",
-        "L3",
-        "L4"
-      ]
+      "fidelity": ["L0", "L1", "L2", "L3", "L4"]
     },
     {
       "provider": "gcp",
@@ -1120,10 +784,7 @@
       "service": "infra-manager",
       "resourceType": "*",
       "operation": "deploy",
-      "fidelity": [
-        "L0",
-        "L1"
-      ]
+      "fidelity": ["L0", "L1"]
     },
     {
       "provider": "gcp",
@@ -1131,11 +792,7 @@
       "service": "run",
       "resourceType": "google_cloud_run_v2_service_iam_member",
       "operation": "GetIamPolicy",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L2"
-      ]
+      "fidelity": ["L0", "L1", "L2"]
     },
     {
       "provider": "gcp",
@@ -1143,11 +800,7 @@
       "service": "run",
       "resourceType": "google_cloud_run_v2_service_iam_member",
       "operation": "lifecycle",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L2"
-      ]
+      "fidelity": ["L0", "L1", "L2"]
     },
     {
       "provider": "gcp",
@@ -1155,11 +808,7 @@
       "service": "run",
       "resourceType": "google_cloud_run_v2_service_iam_member",
       "operation": "SetIamPolicy",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L2"
-      ]
+      "fidelity": ["L0", "L1", "L2"]
     },
     {
       "provider": "gcp",
@@ -1167,10 +816,7 @@
       "service": "run",
       "resourceType": "google_cloud_run_v2_service",
       "operation": "DeleteService",
-      "fidelity": [
-        "L0",
-        "L1"
-      ]
+      "fidelity": ["L0", "L1"]
     },
     {
       "provider": "gcp",
@@ -1178,10 +824,7 @@
       "service": "run",
       "resourceType": "google_cloud_run_v2_service",
       "operation": "GetService",
-      "fidelity": [
-        "L0",
-        "L1"
-      ]
+      "fidelity": ["L0", "L1"]
     },
     {
       "provider": "gcp",
@@ -1189,13 +832,7 @@
       "service": "run",
       "resourceType": "google_cloud_run_v2_service",
       "operation": "lifecycle",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L2",
-        "L3",
-        "L4"
-      ]
+      "fidelity": ["L0", "L1", "L2", "L3", "L4"]
     },
     {
       "provider": "gcp",
@@ -1203,10 +840,7 @@
       "service": "run",
       "resourceType": "google_cloud_run_v2_service",
       "operation": "UpdateService",
-      "fidelity": [
-        "L0",
-        "L1"
-      ]
+      "fidelity": ["L0", "L1"]
     },
     {
       "provider": "gcp",
@@ -1214,9 +848,7 @@
       "service": "runtime",
       "resourceType": "Runtime::Workload",
       "operation": "Materialize",
-      "fidelity": [
-        "L4"
-      ]
+      "fidelity": ["L4"]
     },
     {
       "provider": "sakura",
@@ -1224,10 +856,7 @@
       "service": "apprun",
       "resourceType": "sakura.apprun.Application",
       "operation": "deleteApplication",
-      "fidelity": [
-        "L0",
-        "L1"
-      ]
+      "fidelity": ["L0", "L1"]
     },
     {
       "provider": "sakura",
@@ -1235,11 +864,7 @@
       "service": "apprun",
       "resourceType": "sakura.apprun.Application",
       "operation": "deploy",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L2"
-      ]
+      "fidelity": ["L0", "L1", "L2"]
     },
     {
       "provider": "sakura",
@@ -1247,10 +872,7 @@
       "service": "apprun",
       "resourceType": "sakura.apprun.Application",
       "operation": "getApplication",
-      "fidelity": [
-        "L0",
-        "L1"
-      ]
+      "fidelity": ["L0", "L1"]
     },
     {
       "provider": "sakura",
@@ -1258,11 +880,7 @@
       "service": "apprun",
       "resourceType": "sakura.apprun.Application",
       "operation": "getPacketFilter",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L3"
-      ]
+      "fidelity": ["L0", "L1", "L3"]
     },
     {
       "provider": "sakura",
@@ -1270,10 +888,7 @@
       "service": "apprun",
       "resourceType": "sakura.apprun.Application",
       "operation": "getTraffics",
-      "fidelity": [
-        "L0",
-        "L1"
-      ]
+      "fidelity": ["L0", "L1"]
     },
     {
       "provider": "sakura",
@@ -1281,10 +896,7 @@
       "service": "apprun",
       "resourceType": "sakura.apprun.Application",
       "operation": "listApplications",
-      "fidelity": [
-        "L0",
-        "L1"
-      ]
+      "fidelity": ["L0", "L1"]
     },
     {
       "provider": "sakura",
@@ -1292,10 +904,7 @@
       "service": "apprun",
       "resourceType": "sakura.apprun.Application",
       "operation": "patchApplication",
-      "fidelity": [
-        "L0",
-        "L1"
-      ]
+      "fidelity": ["L0", "L1"]
     },
     {
       "provider": "sakura",
@@ -1303,11 +912,7 @@
       "service": "apprun",
       "resourceType": "sakura.apprun.Application",
       "operation": "patchPacketFilter",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L3"
-      ]
+      "fidelity": ["L0", "L1", "L3"]
     },
     {
       "provider": "sakura",
@@ -1315,10 +920,7 @@
       "service": "apprun",
       "resourceType": "sakura.apprun.Application",
       "operation": "postApplication",
-      "fidelity": [
-        "L0",
-        "L1"
-      ]
+      "fidelity": ["L0", "L1"]
     },
     {
       "provider": "sakura",
@@ -1326,10 +928,7 @@
       "service": "apprun",
       "resourceType": "sakura.apprun.Application",
       "operation": "putTraffics",
-      "fidelity": [
-        "L0",
-        "L1"
-      ]
+      "fidelity": ["L0", "L1"]
     },
     {
       "provider": "sakura",
@@ -1337,10 +936,7 @@
       "service": "apprun",
       "resourceType": "sakura.apprun.ApplicationVersion",
       "operation": "deleteVersion",
-      "fidelity": [
-        "L0",
-        "L1"
-      ]
+      "fidelity": ["L0", "L1"]
     },
     {
       "provider": "sakura",
@@ -1348,10 +944,7 @@
       "service": "apprun",
       "resourceType": "sakura.apprun.ApplicationVersion",
       "operation": "getVersion",
-      "fidelity": [
-        "L0",
-        "L1"
-      ]
+      "fidelity": ["L0", "L1"]
     },
     {
       "provider": "sakura",
@@ -1359,13 +952,7 @@
       "service": "http",
       "resourceType": "HTTP::Endpoint",
       "operation": "Probe",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L2",
-        "L3",
-        "L4"
-      ]
+      "fidelity": ["L0", "L1", "L2", "L3", "L4"]
     },
     {
       "provider": "sakura",
@@ -1373,13 +960,7 @@
       "service": "http",
       "resourceType": "HTTP::Endpoint",
       "operation": "Request",
-      "fidelity": [
-        "L0",
-        "L1",
-        "L2",
-        "L3",
-        "L4"
-      ]
+      "fidelity": ["L0", "L1", "L2", "L3", "L4"]
     },
     {
       "provider": "sakura",
@@ -1387,9 +968,7 @@
       "service": "runtime",
       "resourceType": "Runtime::Workload",
       "operation": "Materialize",
-      "fidelity": [
-        "L4"
-      ]
+      "fidelity": ["L4"]
     }
   ]
 }
