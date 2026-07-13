@@ -125,7 +125,7 @@ function endpointRequirements(
         service: 'runtime',
         resourceType: 'Runtime::Endpoint',
         operation: 'ResolveEndpoint',
-        fidelity: 'L1',
+        fidelity: ['L1'],
         plane: 'scoring',
         origin: 'metadata-endpoint',
         classification: 'binding',
@@ -155,7 +155,7 @@ function httpRequirement(
     service: 'http',
     resourceType: 'HTTP::Endpoint',
     operation,
-    fidelity: 'L4',
+    fidelity: ['L4'],
     plane: operation === 'AttackProbe' ? 'operator' : 'scoring',
     origin:
       operation === 'AttackProbe' ? 'metadata-disruption' : 'metadata-probe',
@@ -354,7 +354,7 @@ function disruptionActionRequirement(
       service: 'ssm',
       resourceType: 'AWS::EC2::Instance',
       operation: 'SendCommand',
-      fidelity: 'L4',
+      fidelity: ['L4'],
     });
   }
   if (kind === 'lambda-invoke') {
@@ -363,7 +363,7 @@ function disruptionActionRequirement(
       service: 'lambda',
       resourceType: 'AWS::Lambda::Function',
       operation: 'InvokeFunction',
-      fidelity: 'L4',
+      fidelity: ['L4'],
     });
   }
   if (kind === 'cfn-stack-update') {
@@ -372,7 +372,7 @@ function disruptionActionRequirement(
       service: 'cloudformation',
       resourceType: 'AWS::CloudFormation::Stack',
       operation: 'UpdateStack',
-      fidelity: 'L1',
+      fidelity: ['L1'],
     });
   }
   return undefined;

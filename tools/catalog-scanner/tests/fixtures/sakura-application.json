@@ -1,0 +1,26 @@
+{
+  "name": "scanner-apprun-app",
+  "timeout_seconds": 60,
+  "port": 8080,
+  "min_scale": 0,
+  "max_scale": 2,
+  "scale_target_concurrency": 100,
+  "components": [
+    {
+      "name": "web",
+      "max_cpu": "0.5",
+      "max_memory": "1Gi",
+      "deploy_source": {
+        "container_registry": {
+          "image": "registry.example/scanner-app:1"
+        }
+      },
+      "probe": {
+        "http_get": {
+          "path": "/healthz",
+          "port": 8080
+        }
+      }
+    }
+  ]
+}

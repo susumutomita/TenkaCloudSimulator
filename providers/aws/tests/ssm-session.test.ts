@@ -132,6 +132,7 @@ describe('AWS SSM Session Manager reducer', () => {
     expect(streamUrl.searchParams.get('deploymentId')).toBe(
       context.deploymentId
     );
+    expect(streamUrl.searchParams.get('targetId')).toBe('default');
     expect(streamUrl.searchParams.has('tokenValue')).toBeFalse();
     expect(
       context.store
@@ -140,6 +141,38 @@ describe('AWS SSM Session Manager reducer', () => {
         'target'
       ]
     ).toBe(instanceId(context));
+  });
+
+  it('同じ instance と request の session identity を Composite target ごとに分離する', async () => {
+    const context = await createContext();
+    const command = providerCommand(
+      context,
+      'StartSession',
+      sessionInput(context, '9')
+    );
+    const base = providerWorld(context);
+    const primary = reduceSsmSession(command, base);
+    const secondary = reduceSsmSession(command, {
+      ...base,
+      resources: base.resources.map((resource) => ({
+        ...resource,
+        targetId: 'secondary',
+      })),
+    });
+    const primaryId = responseString(primary.response, 'SessionId');
+    const secondaryId = responseString(secondary.response, 'SessionId');
+
+    expect(primaryId).not.toBe(secondaryId);
+    expect(
+      new URL(responseString(primary.response, 'StreamUrl')).searchParams.get(
+        'targetId'
+      )
+    ).toBe('default');
+    expect(
+      new URL(responseString(secondary.response, 'StreamUrl')).searchParams.get(
+        'targetId'
+      )
+    ).toBe('secondary');
   });
 
   it('ResumeSession はtokenをrotateしTerminate後の再接続を拒否する', async () => {
@@ -221,7 +254,7 @@ describe('AWS SSM Session Manager reducer', () => {
     ).toThrow('SSM session has timed out');
   });
 
-  it('別deployment routeと未対応session documentを成功扱いしない', async () => {
+  it('存在しないdeployment routeと未対応session documentを成功扱いしない', async () => {
     const context = await createContext();
     const started = execute(
       context,
@@ -241,6 +274,19 @@ describe('AWS SSM Session Manager reducer', () => {
           'another-deployment'
         ),
         'cross-deployment-session'
+      )
+    ).toThrow('deployment does not exist');
+    expect(() =>
+      execute(
+        context,
+        'ssm',
+        'ResumeSession',
+        {
+          SessionId: 'session-does-not-exist',
+          __SimulatorOrigin: 'http://127.0.0.1:7777',
+          __SimulatorRequestId: `tcsim-${'0'.repeat(24)}`,
+        },
+        SSM_SESSION_RESOURCE
       )
     ).toThrow('SSM session does not exist');
     expect(() =>
@@ -302,6 +348,19 @@ describe('AWS SSM Session Manager reducer', () => {
     expect(() => startSession(stateContext, '3')).toThrow(
       'SSM session target is not running'
     );
+    expect(() =>
+      reduceSsmSession(
+        providerCommand(stateContext, 'StartSession', {
+          ...sessionInput(stateContext, 'b'),
+        }),
+        {
+          ...providerWorld(stateContext),
+          resources: providerWorld(stateContext).resources.filter(
+            (resource) => resource.resourceType !== 'AWS::EC2::Instance'
+          ),
+        }
+      )
+    ).toThrow('SSM session target does not exist');
   });
 
   it('壊れたsession projectionと純粋reducerのunknown operationを成功扱いしない', async () => {

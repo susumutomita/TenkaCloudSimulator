@@ -21,6 +21,8 @@ const LISTENER_RESOURCE = 'AWS::ElasticLoadBalancingV2::Listener';
 const RULE_RESOURCE = 'AWS::ElasticLoadBalancingV2::ListenerRule';
 const TARGET_GROUP_RESOURCE = 'AWS::ElasticLoadBalancingV2::TargetGroup';
 const LAMBDA_RESOURCE = 'AWS::Lambda::Function';
+const LAMBDA_URL_RESOURCE = 'AWS::Lambda::Url';
+const LAMBDA_PERMISSION_RESOURCE = 'AWS::Lambda::Permission';
 const SQLI_AUTH_PROBE = 'redteam/probes/sqli-auth-bypass.sh';
 const SQLI_UNION_PROBE = 'redteam/probes/sqli-data-exfil.sh';
 const AVAILABILITY_PROBE = 'redteam/probes/availability-flood.sh';
@@ -253,6 +255,11 @@ interface HttpRequest {
   readonly body: string;
 }
 
+interface FunctionUrlTarget {
+  readonly functionResource: ResourceRecord;
+  readonly url: string;
+}
+
 function requestHeaders(value: unknown): Readonly<Record<string, string>> {
   const headers = objectValue(value ?? {}, 'Headers');
   if (Object.keys(headers).length > 64) {
@@ -307,6 +314,192 @@ function httpRequest(command: ProviderCommandInput): HttpRequest {
     headers: requestHeaders(command.input['Headers']),
     body,
   };
+}
+
+function requestedFunctionUrl(command: ProviderCommandInput): URL | undefined {
+  const value = optionalString(command.input['Url'], 'Url');
+  if (value === undefined) return undefined;
+  if (value.length > 2048) {
+    throw new CoreError('ValidationFailed', 'Lambda Function URL is too long');
+  }
+  let parsed: URL;
+  try {
+    parsed = new URL(value);
+  } catch {
+    throw new CoreError(
+      'ValidationFailed',
+      'Lambda Function URL must be a URL'
+    );
+  }
+  if (
+    parsed.protocol !== 'https:' ||
+    parsed.username ||
+    parsed.password ||
+    parsed.hash
+  ) {
+    throw new CoreError(
+      'ValidationFailed',
+      'Lambda Function URL must be credential-free HTTPS without a fragment'
+    );
+  }
+  return parsed;
+}
+
+function functionUrlIdentity(value: string): string {
+  const parsed = new URL(value);
+  parsed.pathname = '/';
+  parsed.search = '';
+  parsed.hash = '';
+  return parsed.toString();
+}
+
+function functionUrlTarget(
+  command: ProviderCommandInput,
+  world: ProviderWorldView,
+  requested: URL | undefined
+): FunctionUrlTarget {
+  const urls = resourcesForDeployment(
+    world,
+    command.deploymentId,
+    LAMBDA_URL_RESOURCE
+  ).filter((resource) => {
+    if (requested === undefined) return true;
+    const value = storedProperties(resource).attributes['FunctionUrl'];
+    return (
+      typeof value === 'string' &&
+      functionUrlIdentity(value) === functionUrlIdentity(requested.toString())
+    );
+  });
+  if (urls.length === 0) {
+    throw new CoreError(
+      'NotFound',
+      'Lambda Function URL endpoint does not exist'
+    );
+  }
+  if (!isSingleton(urls)) {
+    throw new CoreError(
+      'Conflict',
+      'Lambda Function URL endpoint is ambiguous'
+    );
+  }
+  const urlResource = storedProperties(urls[0]);
+  if (urlResource.templateProperties['AuthType'] !== 'NONE') {
+    throw new CoreError(
+      'UnsupportedCapability',
+      'Lambda Function URL requires unsupported AWS authentication'
+    );
+  }
+  const targetArn = stringValue(
+    urlResource.templateProperties['TargetFunctionArn'],
+    'Lambda Function URL TargetFunctionArn'
+  );
+  const functions = resourcesForDeployment(
+    world,
+    command.deploymentId,
+    LAMBDA_RESOURCE
+  ).filter((resource) => {
+    const stored = storedProperties(resource);
+    return (
+      stored.refValue === targetArn || stored.attributes['Arn'] === targetArn
+    );
+  });
+  if (!isSingleton(functions)) {
+    throw new CoreError(
+      'Conflict',
+      'Lambda Function URL target is missing or ambiguous'
+    );
+  }
+  const permissions = resourcesForDeployment(
+    world,
+    command.deploymentId,
+    LAMBDA_PERMISSION_RESOURCE
+  );
+  const forTargetFunction = (resource: ResourceRecord): boolean => {
+    const properties = storedProperties(resource).templateProperties;
+    const functionName = properties['FunctionName'];
+    return (
+      functionName === targetArn ||
+      functionName === storedProperties(functions[0]).refValue
+    );
+  };
+  const functionUrlPermissions = permissions.filter((resource) => {
+    const properties = storedProperties(resource).templateProperties;
+    return (
+      forTargetFunction(resource) &&
+      properties['Action'] === 'lambda:InvokeFunctionUrl' &&
+      properties['Principal'] === '*' &&
+      (properties['FunctionUrlAuthType'] === undefined ||
+        properties['FunctionUrlAuthType'] === 'NONE')
+    );
+  });
+  const functionInvokePermissions = permissions.filter((resource) => {
+    const properties = storedProperties(resource).templateProperties;
+    return (
+      forTargetFunction(resource) &&
+      properties['Action'] === 'lambda:InvokeFunction' &&
+      properties['Principal'] === '*' &&
+      properties['InvokedViaFunctionUrl'] === true
+    );
+  });
+  if (
+    functionUrlPermissions.length !== 1 ||
+    functionInvokePermissions.length !== 1
+  ) {
+    throw new CoreError(
+      'Conflict',
+      'Lambda Function URL public invoke permissions are missing or ambiguous'
+    );
+  }
+  const url = urlResource.attributes['FunctionUrl'];
+  if (typeof url !== 'string') {
+    throw new CoreError(
+      'ValidationFailed',
+      'Lambda Function URL projection is invalid'
+    );
+  }
+  return { functionResource: functions[0], url };
+}
+
+function functionUrlRequest(command: ProviderCommandInput): HttpRequest {
+  const requested = requestedFunctionUrl(command);
+  const method = optionalString(command.input['Method'], 'Method') ?? 'GET';
+  const path =
+    optionalString(command.input['Path'], 'Path') ??
+    (requested ? `${requested.pathname}${requested.search}` : '/');
+  return httpRequest({
+    ...command,
+    input: {
+      Method: method,
+      Path: path,
+      Headers: command.input['Headers'] ?? {},
+      Body: command.input['Body'] ?? '',
+    },
+  });
+}
+
+export function isDeployedFunctionUrl(
+  command: ProviderCommandInput,
+  world: ProviderWorldView
+): boolean {
+  const value = command.input['Url'];
+  if (typeof value !== 'string') return false;
+  let requested: URL;
+  try {
+    requested = new URL(value);
+  } catch {
+    return false;
+  }
+  return resourcesForDeployment(
+    world,
+    command.deploymentId,
+    LAMBDA_URL_RESOURCE
+  ).some((resource) => {
+    const url = storedProperties(resource).attributes['FunctionUrl'];
+    return (
+      typeof url === 'string' &&
+      functionUrlIdentity(url) === functionUrlIdentity(requested.toString())
+    );
+  });
 }
 
 function objectArray(
@@ -587,10 +780,96 @@ function forwardedResponse(
   };
 }
 
+function functionUrlResponse(
+  command: ProviderCommandInput,
+  world: ProviderWorldView,
+  probe: boolean
+): ProviderCommandResult {
+  const requested = requestedFunctionUrl(command);
+  const request = functionUrlRequest(command);
+  const target = functionUrlTarget(command, world, requested);
+  const payloadUrl = new URL(request.path, target.url);
+  const rawPath = payloadUrl.pathname;
+  const queryIndex = request.path.indexOf('?');
+  const rawQueryString =
+    queryIndex < 0 ? '' : request.path.slice(queryIndex + 1);
+  const functionName = storedProperties(target.functionResource).refValue;
+  const invoked = reduceLambda(
+    {
+      ...command,
+      service: 'lambda',
+      operation: 'InvokeFunction',
+      resourceType: '*',
+      input: {
+        FunctionName: functionName,
+        Payload: {
+          version: '2.0',
+          httpMethod: request.method,
+          rawPath,
+          rawQueryString,
+          path: rawPath,
+          headers: request.headers,
+          body: request.body,
+          isBase64Encoded: false,
+          requestContext: {
+            http: { method: request.method, path: rawPath },
+          },
+        },
+      },
+    },
+    world
+  );
+  const response = validatedLambdaHttpResponse(invoked.response['Payload']);
+  const event = {
+    type: probe ? 'AwsHttpEndpointProbed' : 'AwsHttpRequestExecuted',
+    payload: {
+      endpointType: 'lambda-function-url',
+      functionName,
+      method: request.method,
+      path: rawPath,
+      rawQueryString,
+      statusCode: response.statusCode,
+      url: target.url,
+    },
+  };
+  return {
+    ...invoked,
+    events: [...invoked.events, event],
+    response: probe
+      ? {
+          Ok: response.statusCode >= 200 && response.statusCode < 300,
+          StatusCode: response.statusCode,
+          Headers: response.headers,
+          Body: response.body,
+          Truncated: false,
+          ResponseTimeMilliseconds: 0,
+        }
+      : {
+          StatusCode: response.statusCode,
+          Headers: response.headers,
+          Body: response.body,
+        },
+  };
+}
+
 function executeRequest(
   command: ProviderCommandInput,
   world: ProviderWorldView
 ): ProviderCommandResult {
+  const requestedUrl = requestedFunctionUrl(command);
+  const listeners = resourcesForDeployment(
+    world,
+    command.deploymentId,
+    LISTENER_RESOURCE
+  );
+  if (
+    requestedUrl !== undefined ||
+    (listeners.length === 0 &&
+      resourcesForDeployment(world, command.deploymentId, LAMBDA_URL_RESOURCE)
+        .length > 0)
+  ) {
+    return functionUrlResponse(command, world, false);
+  }
   const request = httpRequest(command);
   const rule = matchingRule(command, world, request);
   const action = rule
@@ -616,6 +895,9 @@ export function reduceHttp(
   command: ProviderCommandInput,
   world: ProviderWorldView
 ): ProviderCommandResult {
+  if (command.operation === 'Probe') {
+    return functionUrlResponse(command, world, true);
+  }
   if (command.operation === 'Request') {
     return executeRequest(command, world);
   }

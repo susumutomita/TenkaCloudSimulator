@@ -16,6 +16,7 @@ import type {
   ProviderTargetPlan,
   ProviderWorldView,
   SingleRuntimeTarget,
+  SnapshotPayload,
   WorkloadDeclaration,
   WorkloadEffectPort,
   WorldNamespace,
@@ -1176,6 +1177,99 @@ describe('SimulationCore の振る舞い', () => {
   });
 
   describe('shared command mutation', () => {
+    it('同じ provider と resource ID を使う Composite target 間で read write output を分離する', () => {
+      const world = createWorld();
+      const deployment = createReadyDeployment(world.worldId, {
+        deploymentId: 'same-provider-composite',
+        problemId: 'same-provider-problem',
+        runtime: {
+          kind: 'composite',
+          targets: [
+            {
+              id: 'primary',
+              provider: 'alpha',
+              engine: 'engine-a',
+              entry: 'primary.yaml',
+            },
+            {
+              id: 'secondary',
+              provider: 'alpha',
+              engine: 'engine-a',
+              entry: 'secondary.yaml',
+            },
+          ],
+        },
+        templateBody: 'resources: []',
+      });
+      const targetCommand = (
+        targetId: string,
+        operation: 'put' | 'delete',
+        value?: string
+      ): ExecuteCommandInput => ({
+        ...commandInput(deployment.deploymentId, operation, {
+          resourceId: 'shared-resource',
+          ...(value === undefined ? {} : { value }),
+        }),
+        targetId,
+      });
+
+      core.executeCommand(
+        world.worldId,
+        targetCommand('primary', 'put', 'primary-value'),
+        'primary-put'
+      );
+      core.executeCommand(
+        world.worldId,
+        targetCommand('secondary', 'put', 'secondary-value'),
+        'secondary-put'
+      );
+
+      const sharedResources = core
+        .resources(world.worldId)
+        .filter((resource) => resource.resourceId === 'shared-resource');
+      expect(sharedResources).toHaveLength(2);
+      expect(
+        sharedResources.map((resource) => ({
+          targetId: resource.targetId,
+          value: resource.properties['value'],
+          observedResources: resource.properties['observedResources'],
+        }))
+      ).toEqual([
+        {
+          targetId: 'primary',
+          value: 'primary-value',
+          observedResources: 1,
+        },
+        {
+          targetId: 'secondary',
+          value: 'secondary-value',
+          observedResources: 1,
+        },
+      ]);
+
+      core.executeCommand(
+        world.worldId,
+        targetCommand('primary', 'delete'),
+        'primary-delete'
+      );
+
+      expect(
+        core
+          .resources(world.worldId)
+          .filter((resource) => resource.resourceId === 'shared-resource')
+          .map(({ targetId, status }) => ({ targetId, status }))
+      ).toEqual([
+        { targetId: 'primary', status: 'deleted' },
+        { targetId: 'secondary', status: 'ready' },
+      ]);
+      expect(
+        core.deployment(world.worldId, deployment.deploymentId).outputs
+      ).toMatchObject({
+        primary: { lastMutation: 'delete' },
+        secondary: { lastMutation: 'put' },
+      });
+    });
+
     it('async reducer と sync fallback を同じidempotent commit境界で実行する', async () => {
       const world = createWorld();
       const deployment = createReadyDeployment(world.worldId);
@@ -1300,6 +1394,31 @@ describe('SimulationCore の振る舞い', () => {
       expect(store.resources(world.worldId)).toEqual(resourcesBefore);
     });
 
+    it('deployment に属さない target identity を reducer 実行前に拒否する', () => {
+      const world = createWorld();
+      const deployment = createReadyDeployment(world.worldId);
+      const eventsBefore = core.events(world.worldId);
+      const resourcesBefore = store.resources(world.worldId);
+      const invalidInputs: ExecuteCommandInput[] = [
+        { ...commandInput(deployment.deploymentId), targetId: 'ghost' },
+        { ...commandInput(deployment.deploymentId), provider: 'beta' },
+        { ...commandInput(deployment.deploymentId), engine: 'engine-b' },
+      ];
+
+      for (const [index, input] of invalidInputs.entries()) {
+        const error = captureCoreError(() =>
+          core.executeCommand(world.worldId, input, `invalid-target-${index}`)
+        );
+        expect(error.code).toBe('ValidationFailed');
+        expect(error.message).toContain('does not belong');
+      }
+      expect(core.events(world.worldId)).toEqual(eventsBefore);
+      expect(store.resources(world.worldId)).toEqual(resourcesBefore);
+      expect(
+        core.deployment(world.worldId, deployment.deploymentId).outputs['ghost']
+      ).toBeUndefined();
+    });
+
     it('存在しない deployment への mutation は SQLite transaction を rollback する', () => {
       const world = createWorld();
       const eventsBefore = core.events(world.worldId);
@@ -1402,7 +1521,7 @@ describe('SimulationCore の振る舞い', () => {
               },
             ],
             resources: [],
-            deletedResourceIds: [],
+            deletedResourceRefs: [],
             appliedTransitionIds: ['transition-beta'],
           })),
           new ClockProvider('alpha', 'engine-a', (input, view) => ({
@@ -1430,7 +1549,7 @@ describe('SimulationCore の振る舞い', () => {
                 properties: { transitionedAt: input.virtualTime },
               },
             ],
-            deletedResourceIds: [],
+            deletedResourceRefs: [],
             appliedTransitionIds: ['transition-z', 'transition-a'],
           })),
         ])
@@ -1487,7 +1606,13 @@ describe('SimulationCore の振る舞い', () => {
           new ClockProvider('alpha', 'engine-a', () => ({
             events: [],
             resources: [],
-            deletedResourceIds: [original.resourceId],
+            deletedResourceRefs: [
+              {
+                deploymentId: original.deploymentId,
+                targetId: original.targetId,
+                resourceId: original.resourceId,
+              },
+            ],
             appliedTransitionIds: ['transition-delete'],
           })),
         ])
@@ -1496,6 +1621,73 @@ describe('SimulationCore の振る舞い', () => {
       clockCore.advanceClock(world.worldId, 1);
 
       expect(clockCore.resources(world.worldId)[0]?.status).toBe('deleted');
+    });
+
+    it('同じ provider と resource ID の Composite target は指定した target だけ clock 削除する', () => {
+      const world = createWorld();
+      const deployment = createReadyDeployment(world.worldId, {
+        deploymentId: 'clock-composite',
+        problemId: 'clock-composite-problem',
+        runtime: {
+          kind: 'composite',
+          targets: [
+            {
+              id: 'primary',
+              provider: 'alpha',
+              engine: 'engine-a',
+              entry: 'primary.yaml',
+            },
+            {
+              id: 'secondary',
+              provider: 'alpha',
+              engine: 'engine-a',
+              entry: 'secondary.yaml',
+            },
+          ],
+        },
+        templateBody: 'resources: []',
+      });
+      for (const targetId of ['primary', 'secondary']) {
+        store.saveResource({
+          worldId: world.worldId,
+          deploymentId: deployment.deploymentId,
+          targetId,
+          provider: 'alpha',
+          resourceType: 'Object',
+          resourceId: 'shared-clock-resource',
+          properties: { targetId },
+          status: 'ready',
+        });
+      }
+      const clockCore = new SimulationCore(
+        store,
+        new ProviderRegistry([
+          new ClockProvider('alpha', 'engine-a', () => ({
+            events: [],
+            resources: [],
+            deletedResourceRefs: [
+              {
+                deploymentId: deployment.deploymentId,
+                targetId: 'primary',
+                resourceId: 'shared-clock-resource',
+              },
+            ],
+            appliedTransitionIds: ['transition-target-delete'],
+          })),
+        ])
+      );
+
+      clockCore.advanceClock(world.worldId, 1);
+
+      expect(
+        clockCore
+          .resources(world.worldId)
+          .filter((resource) => resource.resourceId === 'shared-clock-resource')
+          .map(({ targetId, status }) => ({ targetId, status }))
+      ).toEqual([
+        { targetId: 'primary', status: 'deleted' },
+        { targetId: 'secondary', status: 'ready' },
+      ]);
     });
 
     it('provider event と新規 resource を含めて clock quota を反映前に検証する', () => {
@@ -1511,7 +1703,7 @@ describe('SimulationCore の振る舞い', () => {
             resourceId: 'new-clock-resource',
           },
         ],
-        deletedResourceIds: [],
+        deletedResourceRefs: [],
         appliedTransitionIds: [],
       }));
       const eventLimited = new SimulationCore(
@@ -1546,31 +1738,90 @@ describe('SimulationCore の振る舞い', () => {
         {
           events: [invalidEvent],
           resources: [],
-          deletedResourceIds: [],
+          deletedResourceRefs: [],
           appliedTransitionIds: [],
         },
         {
           events: [],
           resources: [{ ...original, provider: 'beta' }],
-          deletedResourceIds: [],
+          deletedResourceRefs: [],
           appliedTransitionIds: [],
         },
         {
           events: [],
           resources: [original, original],
-          deletedResourceIds: [],
+          deletedResourceRefs: [],
           appliedTransitionIds: [],
         },
         {
           events: [],
           resources: [],
-          deletedResourceIds: ['missing-resource'],
+          deletedResourceRefs: [
+            {
+              deploymentId: original.deploymentId,
+              targetId: original.targetId,
+              resourceId: 'missing-resource',
+            },
+          ],
           appliedTransitionIds: [],
         },
         {
           events: [],
           resources: [],
-          deletedResourceIds: [],
+          deletedResourceRefs: [
+            {
+              deploymentId: 'missing-deployment',
+              targetId: original.targetId,
+              resourceId: original.resourceId,
+            },
+          ],
+          appliedTransitionIds: [],
+        },
+        {
+          events: [],
+          resources: [],
+          deletedResourceRefs: [
+            {
+              deploymentId: original.deploymentId,
+              targetId: 'missing-target',
+              resourceId: original.resourceId,
+            },
+          ],
+          appliedTransitionIds: [],
+        },
+        {
+          events: [],
+          resources: [],
+          deletedResourceRefs: [
+            {
+              deploymentId: original.deploymentId,
+              targetId: original.targetId,
+              resourceId: original.resourceId,
+            },
+            {
+              deploymentId: original.deploymentId,
+              targetId: original.targetId,
+              resourceId: original.resourceId,
+            },
+          ],
+          appliedTransitionIds: [],
+        },
+        {
+          events: [],
+          resources: [original],
+          deletedResourceRefs: [
+            {
+              deploymentId: original.deploymentId,
+              targetId: original.targetId,
+              resourceId: original.resourceId,
+            },
+          ],
+          appliedTransitionIds: [],
+        },
+        {
+          events: [],
+          resources: [],
+          deletedResourceRefs: [],
           appliedTransitionIds: [
             'duplicate-transition',
             'duplicate-transition',
@@ -1737,6 +1988,204 @@ describe('SimulationCore の振る舞い', () => {
       expect(
         captureCoreError(() => core.restoreSnapshot(snapshot, '   ')).code
       ).toBe('ValidationFailed');
+    });
+
+    it('再計算済み hash を持つ forged target resource を永続化前に拒否する', () => {
+      const world = createWorld();
+      createReadyDeployment(world.worldId);
+      const snapshot = core.exportSnapshot(world.worldId);
+      const resource = snapshot.payload.resources.at(0);
+      if (!resource) throw new Error('snapshot resource がありません');
+      const forgedPayload: SnapshotPayload = {
+        ...snapshot.payload,
+        resources: [{ ...resource, targetId: 'forged-target' }],
+      };
+      const forged: WorldSnapshot = {
+        payload: forgedPayload,
+        hash: contentHash(forgedPayload),
+      };
+      const countsBefore = store.database
+        .query<{ worlds: number; idempotency: number }, []>(
+          `SELECT
+             (SELECT COUNT(*) FROM worlds) AS worlds,
+             (SELECT COUNT(*) FROM idempotency) AS idempotency`
+        )
+        .get();
+
+      const error = captureCoreError(() =>
+        core.restoreSnapshot(forged, 'forged-target-restore')
+      );
+
+      expect(error.code).toBe('SnapshotIncompatible');
+      expect(
+        store.database
+          .query<{ worlds: number; idempotency: number }, []>(
+            `SELECT
+               (SELECT COUNT(*) FROM worlds) AS worlds,
+               (SELECT COUNT(*) FROM idempotency) AS idempotency`
+          )
+          .get()
+      ).toEqual(countsBefore);
+    });
+
+    it('再計算済み hash でも forged workload endpoint を信頼済み projection として復元しない', async () => {
+      enableWorkloadEffects();
+      const world = createWorld();
+      const deployment = core.createDeployment(
+        world.worldId,
+        workloadDeployment(),
+        'workload-snapshot-deployment'
+      );
+      await core.materializeWorkloads(world.worldId, deployment.deploymentId);
+      const snapshot = core.exportSnapshot(world.worldId);
+      const workload = snapshot.payload.resources.find(
+        (resource) => resource.resourceType === 'Runtime::Workload'
+      );
+      if (!workload) throw new Error('workload resource がありません');
+      const forgedPayload: SnapshotPayload = {
+        ...snapshot.payload,
+        resources: snapshot.payload.resources.map((resource) =>
+          resource === workload
+            ? {
+                ...resource,
+                properties: {
+                  ...resource.properties,
+                  materialization: { endpoint: 'http://127.0.0.1:1' },
+                },
+              }
+            : resource
+        ),
+      };
+      const countsBefore = store.database
+        .query<{ worlds: number; idempotency: number }, []>(
+          `SELECT
+             (SELECT COUNT(*) FROM worlds) AS worlds,
+             (SELECT COUNT(*) FROM idempotency) AS idempotency`
+        )
+        .get();
+
+      const error = captureCoreError(() =>
+        core.restoreSnapshot(
+          { payload: forgedPayload, hash: contentHash(forgedPayload) },
+          'forged-workload-restore'
+        )
+      );
+
+      expect(error.code).toBe('SnapshotIncompatible');
+      expect(
+        store.database
+          .query<{ worlds: number; idempotency: number }, []>(
+            `SELECT
+               (SELECT COUNT(*) FROM worlds) AS worlds,
+               (SELECT COUNT(*) FROM idempotency) AS idempotency`
+          )
+          .get()
+      ).toEqual(countsBefore);
+    });
+
+    it('正規の workload snapshot も world と idempotency を追加せず拒否する', async () => {
+      enableWorkloadEffects();
+      const world = createWorld();
+      const deployment = core.createDeployment(
+        world.worldId,
+        workloadDeployment(),
+        'workload-snapshot-deployment'
+      );
+      await core.materializeWorkloads(world.worldId, deployment.deploymentId);
+      const snapshot = core.exportSnapshot(world.worldId);
+      const countsBefore = store.database
+        .query<{ worlds: number; idempotency: number }, []>(
+          `SELECT
+             (SELECT COUNT(*) FROM worlds) AS worlds,
+             (SELECT COUNT(*) FROM idempotency) AS idempotency`
+        )
+        .get();
+
+      const first = captureCoreError(() =>
+        core.restoreSnapshot(snapshot, 'workload-restore')
+      );
+      const repeated = captureCoreError(() =>
+        core.restoreSnapshot(snapshot, 'workload-restore')
+      );
+
+      expect(first.code).toBe('SnapshotIncompatible');
+      expect(repeated.code).toBe('SnapshotIncompatible');
+      expect(first.message).toContain('rematerialization');
+      expect(
+        store.database
+          .query<{ worlds: number; idempotency: number }, []>(
+            `SELECT
+               (SELECT COUNT(*) FROM worlds) AS worlds,
+               (SELECT COUNT(*) FROM idempotency) AS idempotency`
+          )
+          .get()
+      ).toEqual(countsBefore);
+    });
+
+    it('閉じていない deployment target resource graph を import 前に拒否する', () => {
+      const world = createWorld();
+      createReadyDeployment(world.worldId);
+      const snapshot = core.exportSnapshot(world.worldId);
+      const deployment = snapshot.payload.deployments.at(0);
+      const resource = snapshot.payload.resources.at(0);
+      const event = snapshot.payload.events.at(0);
+      if (!(deployment && resource && event)) {
+        throw new Error('snapshot graph がありません');
+      }
+      const target = deployment.targets.at(0);
+      if (!target) throw new Error('snapshot target がありません');
+      const invalidPayloads: readonly SnapshotPayload[] = [
+        {
+          ...snapshot.payload,
+          events: [{ ...event, worldId: 'foreign-world' }],
+        },
+        {
+          ...snapshot.payload,
+          deployments: [{ ...deployment, worldId: 'foreign-world' }],
+        },
+        {
+          ...snapshot.payload,
+          deployments: [deployment, deployment],
+        },
+        {
+          ...snapshot.payload,
+          deployments: [{ ...deployment, targets: [] }],
+        },
+        {
+          ...snapshot.payload,
+          deployments: [{ ...deployment, targets: [{ ...target, id: ' ' }] }],
+        },
+        {
+          ...snapshot.payload,
+          deployments: [{ ...deployment, targets: [target, { ...target }] }],
+        },
+        {
+          ...snapshot.payload,
+          resources: [{ ...resource, worldId: 'foreign-world' }],
+        },
+        {
+          ...snapshot.payload,
+          resources: [{ ...resource, deploymentId: 'missing-deployment' }],
+        },
+        {
+          ...snapshot.payload,
+          resources: [{ ...resource, provider: 'beta' }],
+        },
+        {
+          ...snapshot.payload,
+          resources: [resource, resource],
+        },
+      ];
+
+      for (const [index, payload] of invalidPayloads.entries()) {
+        const error = captureCoreError(() =>
+          core.restoreSnapshot(
+            { payload, hash: contentHash(payload) },
+            `invalid-graph-${index}`
+          )
+        );
+        expect(error.code).toBe('SnapshotIncompatible');
+      }
     });
 
     it('snapshot event quota と resource quota を import 前に検証する', () => {

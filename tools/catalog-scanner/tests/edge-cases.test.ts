@@ -8,6 +8,12 @@ import {
   readCapabilityManifest,
   validateCapabilityManifest,
 } from '../src/index.ts';
+import type { Fidelity } from '../src/model.ts';
+import {
+  compareRequirements,
+  createRequirement,
+  type RequirementInput,
+} from '../src/requirements.ts';
 import { recordValue } from '../src/value.ts';
 
 const temporaryDirectories: string[] = [];
@@ -108,19 +114,19 @@ Outputs:
       expect.objectContaining({
         resourceType: 'Custom::LifecycleHook',
         service: 'cloudformation',
-        fidelity: 'L4',
+        fidelity: ['L4'],
       })
     );
     expect(inventory.requirements).toContainEqual(
       expect.objectContaining({
         resourceType: 'AWS::EC2::SecurityGroup',
-        fidelity: 'L3',
+        fidelity: ['L3'],
       })
     );
     expect(inventory.requirements).toContainEqual(
       expect.objectContaining({
         operation: 'InvokeFunction',
-        fidelity: 'L4',
+        fidelity: ['L4'],
         plane: 'deploy',
         classification: 'authorization-inventory',
       })
@@ -128,23 +134,26 @@ Outputs:
     expect(inventory.requirements).toContainEqual(
       expect.objectContaining({
         operation: 'CreateSession',
-        fidelity: 'L0',
+        fidelity: ['L0'],
         plane: 'access',
       })
     );
     expect(inventory.requirements).toContainEqual(
       expect.objectContaining({
         operation: 'CreateSecurityGroup',
-        fidelity: 'L3',
+        fidelity: ['L3'],
       })
     );
     expect(inventory.requirements).toContainEqual(
-      expect.objectContaining({ operation: 'FilterLogEvents', fidelity: 'L1' })
+      expect.objectContaining({
+        operation: 'FilterLogEvents',
+        fidelity: ['L1'],
+      })
     );
     expect(inventory.requirements).toContainEqual(
       expect.objectContaining({
         operation: 'PassRole',
-        fidelity: 'L2',
+        fidelity: ['L2'],
         plane: 'workload',
         classification: 'authorization-inventory',
       })
@@ -571,10 +580,10 @@ resource "aws_instance" "wrong" {}
     const inventory = await collectCatalog(root);
 
     expect(inventory.requirements).toContainEqual(
-      expect.objectContaining({ service: 'compute', fidelity: 'L3' })
+      expect.objectContaining({ service: 'compute', fidelity: ['L3'] })
     );
     expect(inventory.requirements).toContainEqual(
-      expect.objectContaining({ service: 'storage', fidelity: 'L1' })
+      expect.objectContaining({ service: 'storage', fidelity: ['L1'] })
     );
     expect(inventory.diagnostics).toContainEqual(
       expect.objectContaining({ code: 'TERRAFORM_PROVIDER_MISMATCH' })
@@ -666,10 +675,11 @@ describe('capability manifest の各不正 shape を読むとき', () => {
         capabilities: [
           {
             provider: 'aws',
+            engine: 'cloudformation',
             service: 'ssm',
             resourceType: '*',
             operation: 'GetParameter',
-            fidelity: 'L2',
+            fidelity: ['L2'],
             extra: true,
           },
         ],
@@ -684,10 +694,11 @@ describe('capability manifest の各不正 shape を読むとき', () => {
     ).toThrow(/missing fields/);
     const duplicate = {
       provider: 'aws',
+      engine: 'cloudformation',
       service: 'ssm',
       resourceType: '*',
       operation: 'GetParameter',
-      fidelity: 'L2',
+      fidelity: ['L2'],
     };
     expect(() =>
       validateCapabilityManifest({
@@ -698,6 +709,52 @@ describe('capability manifest の各不正 shape を読むとき', () => {
     ).toThrow(/duplicate identity/);
   });
 
+  it('fidelity set は非空・一意・canonical 順の L0..L4 だけを受理する', () => {
+    const entry = (fidelity: unknown) => ({
+      provider: 'aws',
+      engine: 'cloudformation',
+      service: 'ssm',
+      resourceType: '*',
+      operation: 'GetParameter',
+      fidelity,
+    });
+    const manifest = (fidelity: unknown) => ({
+      schemaVersion: '1',
+      version: 'v',
+      capabilities: [entry(fidelity)],
+    });
+
+    expect(validateCapabilityManifest(manifest(['L0', 'L2', 'L4']))).toEqual({
+      schemaVersion: '1',
+      version: 'v',
+      capabilities: [
+        {
+          provider: 'aws',
+          engine: 'cloudformation',
+          service: 'ssm',
+          resourceType: '*',
+          operation: 'GetParameter',
+          fidelity: ['L0', 'L2', 'L4'],
+        },
+      ],
+    });
+    expect(() => validateCapabilityManifest(manifest('L2'))).toThrow(
+      /fidelity.*array/i
+    );
+    expect(() => validateCapabilityManifest(manifest([]))).toThrow(
+      /fidelity.*non-empty/i
+    );
+    expect(() => validateCapabilityManifest(manifest(['L1', 'L1']))).toThrow(
+      /fidelity.*unique/i
+    );
+    expect(() => validateCapabilityManifest(manifest(['L2', 'L1']))).toThrow(
+      /fidelity.*canonical/i
+    );
+    expect(() => validateCapabilityManifest(manifest(['L5']))).toThrow(
+      /invalid fidelity/i
+    );
+  });
+
   it('壊れた manifest JSON を読み取りエラーにする', async () => {
     const root = await temporaryDirectory();
     const path = join(root, 'capabilities.json');
@@ -705,6 +762,46 @@ describe('capability manifest の各不正 shape を読むとき', () => {
 
     await expect(readCapabilityManifest(path)).rejects.toThrow(
       /JSON is invalid/
+    );
+  });
+});
+
+describe('catalog requirement fidelity set を作るとき', () => {
+  const requirementInput = (
+    fidelity: readonly Fidelity[]
+  ): RequirementInput => ({
+    problemId: 'fidelity-set',
+    targetId: 'default',
+    provider: 'aws',
+    engine: 'cloudformation',
+    service: 'ec2',
+    resourceType: 'AWS::EC2::Instance',
+    operation: 'lifecycle',
+    fidelity,
+    plane: 'deploy',
+    origin: 'iac-resource',
+    classification: 'binding',
+    source: { path: 'template.yaml', line: 1, jsonPointer: null },
+  });
+
+  it('集合全体を identity と sort に含める', () => {
+    const control = createRequirement(requirementInput(['L1']));
+    const controlAndNetwork = createRequirement(requirementInput(['L1', 'L3']));
+
+    expect(control.id).not.toBe(controlAndNetwork.id);
+    const comparison = compareRequirements(control, controlAndNetwork);
+    expect(comparison).not.toBe(0);
+    expect(compareRequirements(controlAndNetwork, control)).toBe(-comparison);
+    expect(controlAndNetwork.fidelity).toEqual(['L1', 'L3']);
+  });
+
+  it('非空・一意・canonical 順でない集合を拒否する', () => {
+    expect(() => createRequirement(requirementInput([]))).toThrow(/non-empty/);
+    expect(() => createRequirement(requirementInput(['L1', 'L1']))).toThrow(
+      /unique/
+    );
+    expect(() => createRequirement(requirementInput(['L3', 'L1']))).toThrow(
+      /canonical/
     );
   });
 });

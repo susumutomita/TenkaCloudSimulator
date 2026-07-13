@@ -54,6 +54,7 @@ function detailedCapability(
 ): SimulatorCapability {
   return {
     provider: capability.provider,
+    engine: capability.engine,
     service: capability.service,
     resourceType: capability.resourceType,
     operation: capability.operation,

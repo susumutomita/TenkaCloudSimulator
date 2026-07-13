@@ -1,5 +1,12 @@
 import { readFile, stat } from 'node:fs/promises';
 import { dirname, extname } from 'node:path';
+import {
+  isAppRunImageReference,
+  isPinnedAppRunImage,
+  parseAppRun,
+  parseAppRunImage,
+} from './apprun.ts';
+import { parseBicep } from './bicep.ts';
 import { parseCloudFormation } from './cloudformation.ts';
 import { errorMessage } from './errors.ts';
 import { parseMetadataRequirements } from './metadata.ts';
@@ -43,7 +50,12 @@ interface ScanContext {
 function diagnosticForEntry(
   context: ScanContext,
   target: NormalizedTarget,
-  code: 'ENTRY_OUTSIDE_PROBLEM' | 'MISSING_ENTRY' | 'INVALID_CLOUDFORMATION',
+  code:
+    | 'ENTRY_OUTSIDE_PROBLEM'
+    | 'MISSING_ENTRY'
+    | 'INVALID_APPRUN'
+    | 'INVALID_BICEP'
+    | 'INVALID_CLOUDFORMATION',
   message: string
 ): Diagnostic {
   return {
@@ -62,13 +74,88 @@ function diagnosticForEntry(
   };
 }
 
+async function scanBicepTarget(
+  context: ScanContext,
+  target: NormalizedTarget,
+  absoluteEntry: string
+): Promise<{
+  requirements: Requirement[];
+  diagnostics: Diagnostic[];
+  sources: SourceDigest[];
+}> {
+  const entryStats = await stat(absoluteEntry);
+  if (
+    !entryStats.isFile() ||
+    extname(absoluteEntry).toLowerCase() !== '.bicep'
+  ) {
+    return {
+      requirements: [],
+      diagnostics: [
+        diagnosticForEntry(
+          context,
+          target,
+          'INVALID_BICEP',
+          'Bicep entry must be a .bicep file'
+        ),
+      ],
+      sources: [],
+    };
+  }
+  const source = await readSource(context.catalogRoot, absoluteEntry);
+  const parsed = parseBicep(
+    source.contents,
+    source.path,
+    target,
+    context.problemId
+  );
+  return { ...parsed, sources: [source.digest] };
+}
+
+async function scanAppRunTarget(
+  context: ScanContext,
+  target: NormalizedTarget,
+  absoluteEntry: string
+): Promise<{
+  requirements: Requirement[];
+  diagnostics: Diagnostic[];
+  sources: SourceDigest[];
+}> {
+  const entryStats = await stat(absoluteEntry);
+  if (
+    !entryStats.isFile() ||
+    extname(absoluteEntry).toLowerCase() !== '.json'
+  ) {
+    return {
+      requirements: [],
+      diagnostics: [
+        diagnosticForEntry(
+          context,
+          target,
+          'INVALID_APPRUN',
+          'AppRun entry must be a JSON file'
+        ),
+      ],
+      sources: [],
+    };
+  }
+  const source = await readSource(context.catalogRoot, absoluteEntry);
+  const parsed = parseAppRun(
+    source.contents,
+    source.path,
+    target,
+    context.problemId
+  );
+  return { ...parsed, sources: [source.digest] };
+}
+
 async function readSource(
   catalogRoot: string,
   absolutePath: string
 ): Promise<{ path: string; contents: string; digest: SourceDigest }> {
   const path = portableRelativePath(catalogRoot, absolutePath);
-  const contents = await readFile(absolutePath, 'utf8');
-  return { path, contents, digest: contentDigest(path, contents) };
+  const bytes = await readFile(absolutePath);
+  const contents = new TextDecoder('utf-8').decode(bytes);
+  return { path, contents, digest: contentDigest(path, bytes) };
 }
 
 async function scanCloudFormationTarget(
@@ -155,6 +242,16 @@ async function scanContainerEntry(
   return [(await readSource(catalogRoot, absoluteEntry)).digest];
 }
 
+function usesAppRunImageEntry(target: NormalizedTarget): boolean {
+  if (target.provider !== 'sakura' || target.engine !== 'apprun') return false;
+  return (
+    isPinnedAppRunImage(target.entry) ||
+    isAppRunImageReference(target.entry) ||
+    target.entry.includes('@sha256:') ||
+    target.entry.includes('://')
+  );
+}
+
 async function scanTarget(
   context: ScanContext,
   target: NormalizedTarget
@@ -163,6 +260,17 @@ async function scanTarget(
   diagnostics: Diagnostic[];
   sources: SourceDigest[];
 }> {
+  if (usesAppRunImageEntry(target)) {
+    return {
+      ...parseAppRunImage(
+        target.entry,
+        context.metadataPath,
+        target,
+        context.problemId
+      ),
+      sources: [],
+    };
+  }
   const resolved = await resolveProblemEntry(
     context.problemDirectory,
     target.entry
@@ -205,7 +313,16 @@ async function scanTarget(
   if (target.provider === 'aws' && target.engine === 'cloudformation') {
     return scanCloudFormationTarget(context, target, resolved.path);
   }
-  return scanTerraformTarget(context, target, resolved.path);
+  if (target.provider === 'azure' && target.engine === 'bicep') {
+    return scanBicepTarget(context, target, resolved.path);
+  }
+  if (
+    target.provider === 'gcp' &&
+    (target.engine === 'infra-manager' || target.engine === 'terraform')
+  ) {
+    return scanTerraformTarget(context, target, resolved.path);
+  }
+  return scanAppRunTarget(context, target, resolved.path);
 }
 
 function invalidJsonDiagnostic(path: string, message: string): Diagnostic {
@@ -223,8 +340,9 @@ async function scanProblemMetadata(
   absoluteMetadataPath: string
 ): Promise<ProblemScanResult> {
   const metadataPath = portableRelativePath(catalogRoot, absoluteMetadataPath);
-  const metadataContents = await readFile(absoluteMetadataPath, 'utf8');
-  const sources = [contentDigest(metadataPath, metadataContents)];
+  const metadataBytes = await readFile(absoluteMetadataPath);
+  const metadataContents = new TextDecoder('utf-8').decode(metadataBytes);
+  const sources = [contentDigest(metadataPath, metadataBytes)];
   let parsed: unknown;
   try {
     parsed = JSON.parse(metadataContents);
@@ -344,29 +462,37 @@ function isProblemMetadata(catalogRoot: string, path: string): boolean {
   return /^(battles|challenges)\/[^/]+\/metadata\.json$/.test(relativePath);
 }
 
-export async function collectCatalog(
+export interface CatalogCollection {
+  inventory: CatalogInventory;
+  sources: readonly SourceDigest[];
+}
+
+export async function collectCatalogWithSources(
   catalogRoot: string
-): Promise<CatalogInventory> {
+): Promise<CatalogCollection> {
   const allFiles = await walkFiles(catalogRoot);
   const metadataFiles = allFiles
     .filter((path) => isProblemMetadata(catalogRoot, path))
     .sort();
   if (metadataFiles.length === 0) {
     return {
-      schemaVersion: '1',
-      catalogHash: combinedDigest([]),
-      problems: [],
-      requirements: [],
-      diagnostics: [
-        {
-          code: 'NO_PROBLEMS',
-          message:
-            'catalog has no battles/*/metadata.json or challenges/*/metadata.json',
-          problemId: null,
-          targetId: null,
-          source: { path: '.', line: 1, jsonPointer: null },
-        },
-      ],
+      sources: [],
+      inventory: {
+        schemaVersion: '1',
+        catalogHash: combinedDigest([]),
+        problems: [],
+        requirements: [],
+        diagnostics: [
+          {
+            code: 'NO_PROBLEMS',
+            message:
+              'catalog has no battles/*/metadata.json or challenges/*/metadata.json',
+            problemId: null,
+            targetId: null,
+            source: { path: '.', line: 1, jsonPointer: null },
+          },
+        ],
+      },
     };
   }
   const results = await Promise.all(
@@ -385,10 +511,19 @@ export async function collectCatalog(
     .sort(compareDiagnostics);
   const sources = results.flatMap((result) => result.sources);
   return {
-    schemaVersion: '1',
-    catalogHash: combinedDigest(sources),
-    problems,
-    requirements,
-    diagnostics,
+    sources,
+    inventory: {
+      schemaVersion: '1',
+      catalogHash: combinedDigest(sources),
+      problems,
+      requirements,
+      diagnostics,
+    },
   };
+}
+
+export async function collectCatalog(
+  catalogRoot: string
+): Promise<CatalogInventory> {
+  return (await collectCatalogWithSources(catalogRoot)).inventory;
 }

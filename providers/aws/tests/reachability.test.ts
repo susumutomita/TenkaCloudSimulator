@@ -261,7 +261,7 @@ describe('AWS L3 reachability projection', () => {
     ).toMatchObject({
       service: 'ec2',
       resourceType: INSTANCE_RESOURCE,
-      fidelity: 'L3',
+      fidelity: ['L0', 'L1', 'L3'],
     });
   });
 

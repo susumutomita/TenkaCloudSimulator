@@ -2,17 +2,17 @@ param tenkacloudNamePrefix string
 param tenkacloudProblemId string
 param tenkacloudTeam string
 
-resource helloEnvironment 'Microsoft.App/managedEnvironments@2024-03-01' = {
+resource environment 'Microsoft.App/managedEnvironments@2024-03-01' = {
   name: 'tc-${uniqueString(tenkacloudNamePrefix, tenkacloudProblemId, tenkacloudTeam)}-env'
   location: 'japaneast'
   properties: {}
 }
 
-resource helloApp 'Microsoft.App/containerApps@2024-03-01' = {
+resource app 'Microsoft.App/containerApps@2024-03-01' = {
   name: 'tc-${uniqueString(tenkacloudNamePrefix, tenkacloudProblemId, tenkacloudTeam)}-app'
   location: 'japaneast'
   properties: {
-    environmentId: helloEnvironment.id
+    environmentId: environment.id
     configuration: {
       ingress: {
         external: true
@@ -28,17 +28,17 @@ resource helloApp 'Microsoft.App/containerApps@2024-03-01' = {
       ]
       scale: {
         minReplicas: 0
-        maxReplicas: 3
+        maxReplicas: 2
       }
     }
   }
 }
 
 resource participantRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: 'participant-container-app-reader'
-  scope: helloApp
+  name: 'scanner-container-app-reader'
+  scope: app
   dependsOn: [
-    helloApp
+    app
   ]
   properties: {
     roleDefinitionId: 'ContainerAppReader'
@@ -46,6 +46,4 @@ resource participantRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = 
   }
 }
 
-output containerAppId string = helloApp.id
-output containerAppFqdn string = helloApp.properties.configuration.ingress.fqdn
-output roleAssignmentId string = participantRole.id
+output AzureHelloUrl string = 'https://${app.properties.configuration.ingress.fqdn}'

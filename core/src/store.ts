@@ -2,6 +2,7 @@ import { Database } from 'bun:sqlite';
 import { canonicalJson, contentHash } from './canonical';
 import type {
   DeploymentRecord,
+  DeploymentTargetIdentity,
   EventRecord,
   ResourceRecord,
   WorldRecord,
@@ -35,13 +36,27 @@ interface DeploymentRow {
   deployment_id: string;
   problem_id: string;
   status: string;
+  targets: string;
   outputs: string;
   diagnostics: string;
+}
+
+interface TableColumnRow {
+  name: string;
+}
+
+interface TableCountRow {
+  count: number;
+}
+
+interface TableExistsRow {
+  found: number;
 }
 
 interface ResourceRow {
   world_id: string;
   deployment_id: string;
+  target_id: string;
   provider: string;
   resource_type: string;
   resource_id: string;
@@ -52,6 +67,71 @@ interface ResourceRow {
 interface IdempotencyRow {
   request_hash: string;
   response: string;
+}
+
+const RESOURCE_TABLE_SQL = `
+  CREATE TABLE IF NOT EXISTS resources (
+    world_id TEXT NOT NULL,
+    deployment_id TEXT NOT NULL,
+    target_id TEXT NOT NULL,
+    provider TEXT NOT NULL,
+    resource_type TEXT NOT NULL,
+    resource_id TEXT NOT NULL,
+    properties TEXT NOT NULL,
+    status TEXT NOT NULL,
+    PRIMARY KEY (world_id, deployment_id, target_id, provider, resource_id),
+    FOREIGN KEY (world_id) REFERENCES worlds(world_id)
+  );
+`;
+
+function assertResourceMigrationCompatibility(database: Database): void {
+  const table = database
+    .query<TableExistsRow, []>(
+      `SELECT 1 AS found FROM sqlite_master
+       WHERE type = 'table' AND name = 'resources'`
+    )
+    .get();
+  if (!table) return;
+  const columns = database
+    .query<TableColumnRow, []>('PRAGMA table_info(resources)')
+    .all();
+  if (columns.some((column) => column.name === 'target_id')) return;
+  const row = database
+    .query<TableCountRow, []>('SELECT COUNT(*) AS count FROM resources')
+    .get();
+  if ((row?.count ?? 0) > 0) {
+    throw new CoreError(
+      'ValidationFailed',
+      'stored resources have no target identity'
+    );
+  }
+}
+
+function assertDeploymentMigrationCompatibility(database: Database): void {
+  const table = database
+    .query<TableExistsRow, []>(
+      `SELECT 1 AS found FROM sqlite_master
+       WHERE type = 'table' AND name = 'deployments'`
+    )
+    .get();
+  if (!table) return;
+  const columns = database
+    .query<TableColumnRow, []>('PRAGMA table_info(deployments)')
+    .all();
+  if (columns.some((column) => column.name === 'targets')) return;
+  const row = database
+    .query<TableCountRow, []>('SELECT COUNT(*) AS count FROM deployments')
+    .get();
+  if ((row?.count ?? 0) > 0) {
+    throw new CoreError(
+      'ValidationFailed',
+      'stored deployments have no target identity'
+    );
+  }
+}
+
+function isRecord(value: unknown): value is Readonly<Record<string, unknown>> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
 function parseObject(value: string): Readonly<Record<string, unknown>> {
@@ -73,6 +153,28 @@ function parseStringMapMap(
   >;
 }
 
+function parseDeploymentTargets(
+  value: string
+): readonly DeploymentTargetIdentity[] {
+  const parsed: unknown = JSON.parse(value);
+  if (
+    !Array.isArray(parsed) ||
+    parsed.some(
+      (target) =>
+        !isRecord(target) ||
+        typeof target['id'] !== 'string' ||
+        typeof target['provider'] !== 'string' ||
+        typeof target['engine'] !== 'string'
+    )
+  ) {
+    throw new CoreError(
+      'ValidationFailed',
+      'stored deployment targets are invalid'
+    );
+  }
+  return parsed;
+}
+
 function worldFromRow(row: WorldRow): WorldRecord {
   return {
     worldId: row.world_id,
@@ -91,6 +193,13 @@ export class SimulationStore {
 
   constructor(path: string) {
     this.database = new Database(path, { create: true, strict: true });
+    try {
+      assertDeploymentMigrationCompatibility(this.database);
+      assertResourceMigrationCompatibility(this.database);
+    } catch (error) {
+      this.database.close();
+      throw error;
+    }
     this.database.exec('PRAGMA foreign_keys = ON');
     this.database.exec('PRAGMA journal_mode = WAL');
     this.database.exec(`
@@ -121,20 +230,10 @@ export class SimulationStore {
         deployment_id TEXT NOT NULL,
         problem_id TEXT NOT NULL,
         status TEXT NOT NULL,
+        targets TEXT NOT NULL,
         outputs TEXT NOT NULL,
         diagnostics TEXT NOT NULL,
         PRIMARY KEY (world_id, deployment_id),
-        FOREIGN KEY (world_id) REFERENCES worlds(world_id)
-      );
-      CREATE TABLE IF NOT EXISTS resources (
-        world_id TEXT NOT NULL,
-        deployment_id TEXT NOT NULL,
-        provider TEXT NOT NULL,
-        resource_type TEXT NOT NULL,
-        resource_id TEXT NOT NULL,
-        properties TEXT NOT NULL,
-        status TEXT NOT NULL,
-        PRIMARY KEY (world_id, provider, resource_id),
         FOREIGN KEY (world_id) REFERENCES worlds(world_id)
       );
       CREATE TABLE IF NOT EXISTS idempotency (
@@ -145,6 +244,22 @@ export class SimulationStore {
         PRIMARY KEY (scope, key)
       );
     `);
+    this.database.exec(RESOURCE_TABLE_SQL);
+    const deploymentColumns = this.database
+      .query<TableColumnRow, []>('PRAGMA table_info(deployments)')
+      .all();
+    if (!deploymentColumns.some((column) => column.name === 'targets')) {
+      this.database.exec(
+        "ALTER TABLE deployments ADD COLUMN targets TEXT NOT NULL DEFAULT '[]'"
+      );
+    }
+    const resourceColumns = this.database
+      .query<TableColumnRow, []>('PRAGMA table_info(resources)')
+      .all();
+    if (!resourceColumns.some((column) => column.name === 'target_id')) {
+      this.database.exec('DROP TABLE resources');
+      this.database.exec(RESOURCE_TABLE_SQL);
+    }
   }
 
   close(): void {
@@ -278,9 +393,12 @@ export class SimulationStore {
   saveDeployment(deployment: DeploymentRecord): void {
     this.database
       .query(
-        `INSERT INTO deployments VALUES (?, ?, ?, ?, ?, ?)
+        `INSERT INTO deployments (
+           world_id, deployment_id, problem_id, status, targets, outputs, diagnostics
+         ) VALUES (?, ?, ?, ?, ?, ?, ?)
          ON CONFLICT(world_id, deployment_id) DO UPDATE SET
            status = excluded.status,
+           targets = excluded.targets,
            outputs = excluded.outputs,
            diagnostics = excluded.diagnostics`
       )
@@ -289,6 +407,7 @@ export class SimulationStore {
         deployment.deploymentId,
         deployment.problemId,
         deployment.status,
+        canonicalJson(deployment.targets),
         canonicalJson(deployment.outputs),
         canonicalJson(deployment.diagnostics)
       );
@@ -318,6 +437,7 @@ export class SimulationStore {
               : row.status === 'deleted'
                 ? 'deleted'
                 : 'ready',
+      targets: parseDeploymentTargets(row.targets),
       outputs: parseStringMapMap(row.outputs),
       diagnostics: JSON.parse(row.diagnostics),
     };
@@ -338,11 +458,20 @@ export class SimulationStore {
   }
 
   saveResource(resource: ResourceRecord): void {
+    if (typeof resource.targetId !== 'string' || !resource.targetId.trim()) {
+      throw new CoreError(
+        'ValidationFailed',
+        'resource target identity must not be empty'
+      );
+    }
     this.database
       .query(
-        `INSERT INTO resources VALUES (?, ?, ?, ?, ?, ?, ?)
-         ON CONFLICT(world_id, provider, resource_id) DO UPDATE SET
-           deployment_id = excluded.deployment_id,
+        `INSERT INTO resources (
+           world_id, deployment_id, target_id, provider, resource_type,
+           resource_id, properties, status
+         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+         ON CONFLICT(world_id, deployment_id, target_id, provider, resource_id)
+         DO UPDATE SET
            resource_type = excluded.resource_type,
            properties = excluded.properties,
            status = excluded.status`
@@ -350,6 +479,7 @@ export class SimulationStore {
       .run(
         resource.worldId,
         resource.deploymentId,
+        resource.targetId,
         resource.provider,
         resource.resourceType,
         resource.resourceId,
@@ -358,35 +488,53 @@ export class SimulationStore {
       );
   }
 
-  deleteResource(worldId: string, provider: string, resourceId: string): void {
+  deleteResource(
+    worldId: string,
+    deploymentId: string,
+    targetId: string,
+    provider: string,
+    resourceId: string
+  ): void {
     this.database
       .query(
-        "UPDATE resources SET status = 'deleted' WHERE world_id = ? AND provider = ? AND resource_id = ?"
+        `UPDATE resources SET status = 'deleted'
+         WHERE world_id = ? AND deployment_id = ? AND target_id = ?
+           AND provider = ? AND resource_id = ?`
       )
-      .run(worldId, provider, resourceId);
+      .run(worldId, deploymentId, targetId, provider, resourceId);
   }
 
   resources(worldId: string): readonly ResourceRecord[] {
     return this.database
       .query<ResourceRow, [string]>(
-        'SELECT * FROM resources WHERE world_id = ? ORDER BY provider, resource_id'
+        `SELECT * FROM resources WHERE world_id = ?
+         ORDER BY provider, deployment_id, target_id, resource_id`
       )
       .all(worldId)
-      .map((row) => ({
-        worldId: row.world_id,
-        deploymentId: row.deployment_id,
-        provider: row.provider,
-        resourceType: row.resource_type,
-        resourceId: row.resource_id,
-        properties: parseObject(row.properties),
-        status:
-          row.status === 'pending'
-            ? 'pending'
-            : row.status === 'failed'
-              ? 'failed'
-              : row.status === 'deleted'
-                ? 'deleted'
-                : 'ready',
-      }));
+      .map((row) => {
+        if (!row.target_id.trim()) {
+          throw new CoreError(
+            'ValidationFailed',
+            'stored resource target identity is invalid'
+          );
+        }
+        return {
+          worldId: row.world_id,
+          deploymentId: row.deployment_id,
+          targetId: row.target_id,
+          provider: row.provider,
+          resourceType: row.resource_type,
+          resourceId: row.resource_id,
+          properties: parseObject(row.properties),
+          status:
+            row.status === 'pending'
+              ? 'pending'
+              : row.status === 'failed'
+                ? 'failed'
+                : row.status === 'deleted'
+                  ? 'deleted'
+                  : 'ready',
+        };
+      });
   }
 }

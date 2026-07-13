@@ -113,6 +113,8 @@ provider native API と共通 command API は、上記 lifecycle が所有する
 - workload container は非特権かつ egress deny をデフォルトにする。
 - 未実装 operation を成功扱いにしません。
 - snapshot の import は schema と size limit の検証後に適用する。
+- workload を含む snapshot は、[TenkaCloud Issue 2605](https://github.com/susumutomita/TenkaCloud/issues/2605)
+  の async rematerialization が入るまで、新しい world の container を共有しないよう import を拒否する。
 
 ## ライセンス
 

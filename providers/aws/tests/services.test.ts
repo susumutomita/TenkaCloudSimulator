@@ -401,6 +401,88 @@ describe('AWS participant and operator reducers', () => {
     });
   });
 
+  it('同じresource identityを持つ別AWS targetのSSM revertを分離する', async () => {
+    const context = await createContext();
+    const deployment = context.core.deployment(
+      context.worldId,
+      context.deploymentId
+    );
+    context.store.saveDeployment({
+      ...deployment,
+      targets: [
+        ...deployment.targets,
+        { id: 'secondary', provider: 'aws', engine: 'cloudformation' },
+      ],
+      outputs: {
+        ...deployment.outputs,
+        secondary: deployment.outputs['default'] ?? {},
+      },
+    });
+    const defaultResources = context.store
+      .resources(context.worldId)
+      .filter((resource) => resource.targetId === 'default');
+    for (const resource of defaultResources) {
+      context.store.saveResource({
+        ...resource,
+        targetId: 'secondary',
+        properties:
+          resource.resourceType === 'AWS::CloudFormation::Stack'
+            ? { ...resource.properties, targetId: 'secondary' }
+            : resource.properties,
+      });
+    }
+    const instance = defaultResources.find(
+      (resource) => resource.resourceType === 'AWS::EC2::Instance'
+    );
+    if (!instance) throw new Error('EC2 fixture resource がありません');
+    const instanceId = String(instance.properties['refValue']);
+
+    context.core.executeCommand(
+      context.worldId,
+      {
+        deploymentId: context.deploymentId,
+        targetId: 'secondary',
+        provider: 'aws',
+        engine: 'cloudformation',
+        service: 'ssm',
+        operation: 'SendCommand',
+        resourceType: 'AWS::SSM::Command',
+        input: {
+          targetRef: 'InstanceId',
+          targetResource: instanceId,
+          documentName: 'AWS-RunShellScript',
+          parameters: { commands: ['systemctl stop nginx || true'] },
+          revert: {
+            afterSeconds: 600,
+            paramTemplate: { commands: ['systemctl start nginx || true'] },
+          },
+        },
+      },
+      'secondary-ssm-command'
+    );
+    const nginxState = (targetId: string): unknown => {
+      const target = context.store
+        .resources(context.worldId)
+        .find(
+          (resource) =>
+            resource.targetId === targetId &&
+            resource.resourceType === 'AWS::EC2::Instance'
+        );
+      if (!target) throw new Error(`${targetId} EC2 resource がありません`);
+      return objectField(objectField(target.properties, 'state'), 'services')[
+        'nginx'
+      ];
+    };
+    expect(nginxState('default')).toBe('unknown');
+    expect(nginxState('secondary')).toBe('stopped');
+
+    expect(
+      context.core.advanceClock(context.worldId, 600_000).appliedTransitions
+    ).toHaveLength(1);
+    expect(nginxState('default')).toBe('unknown');
+    expect(nginxState('secondary')).toBe('running');
+  });
+
   it('SSM clock projectionの不正時刻 document targetを成功扱いしない', async () => {
     const context = await createContext();
     const instanceId = String(

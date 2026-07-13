@@ -118,6 +118,7 @@ describe('ProviderRegistry の振る舞い', () => {
     const duplicatedIdentity = {
       ...ALPHA_CAPABILITY,
       capabilityId: 'different-id-for-the-same-identity',
+      fidelity: ['L0'] as const,
     };
 
     const error = captureCoreError(
@@ -132,6 +133,27 @@ describe('ProviderRegistry の振る舞い', () => {
     );
 
     expect(error.code).toBe('Conflict');
+  });
+
+  it('engine が異なる capability identity は同じ provider module に共存できる', () => {
+    const alternateEngine = {
+      ...ALPHA_CAPABILITY,
+      capabilityId: 'alpha-object-read-engine-b',
+      engine: 'engine-b',
+    };
+
+    const registry = new ProviderRegistry([
+      createProviderModule(
+        'alpha',
+        ['engine-a', 'engine-b'],
+        [ALPHA_CAPABILITY, alternateEngine]
+      ),
+    ]);
+
+    expect(registry.capabilities()).toEqual([
+      ALPHA_CAPABILITY,
+      alternateEngine,
+    ]);
   });
 
   it('provider、engine、capability、fidelity の不足を区別して返す', () => {

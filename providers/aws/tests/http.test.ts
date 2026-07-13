@@ -5,7 +5,11 @@ import type {
   ResourceRecord,
 } from '@tenkacloud/simulator-core';
 import { reduceElb } from '../src/elb';
-import { reduceHttp, validatedLambdaHttpResponse } from '../src/http';
+import {
+  isDeployedFunctionUrl,
+  reduceHttp,
+  validatedLambdaHttpResponse,
+} from '../src/http';
 
 const SQLI_AUTH_PROBE = 'redteam/probes/sqli-auth-bypass.sh';
 const SQLI_UNION_PROBE = 'redteam/probes/sqli-data-exfil.sh';
@@ -21,6 +25,7 @@ function endpoint(
   return {
     worldId: 'world',
     deploymentId: 'deployment',
+    targetId,
     provider: 'aws',
     resourceType: 'Runtime::Endpoint',
     resourceId: `endpoint-${slot}-${problemId}`,
@@ -47,6 +52,7 @@ function instance(
   return {
     worldId: 'world',
     deploymentId: 'deployment',
+    targetId: 'default',
     provider: 'aws',
     resourceType: 'AWS::EC2::Instance',
     resourceId: `instance-${JSON.stringify(state)}`,
@@ -123,6 +129,7 @@ function awsResource(
   return {
     worldId: 'world',
     deploymentId: 'deployment',
+    targetId: 'default',
     provider: 'aws',
     resourceType,
     resourceId: `resource-${logicalId}`,
@@ -208,6 +215,54 @@ function requestResources(): readonly ResourceRecord[] {
           },
         ],
         Actions: [{ Type: 'forward', TargetGroupArn: targetGroupArn }],
+      }
+    ),
+  ];
+}
+
+const FUNCTION_URL = 'https://hello-fixture.lambda-url.us-east-1.on.aws/';
+
+function functionUrlResources(): readonly ResourceRecord[] {
+  const functionArn = 'arn:aws:lambda:us-east-1:123456789012:function:tc-hello';
+  return [
+    awsResource(
+      'AWS::Lambda::Function',
+      'HelloFunction',
+      'tc-hello',
+      {
+        Runtime: 'python3.12',
+        Handler: 'index.handler',
+        Role: 'arn:aws:iam::123456789012:role/hello',
+      },
+      { Arn: functionArn }
+    ),
+    awsResource(
+      'AWS::Lambda::Url',
+      'HelloFunctionUrl',
+      'function-url-fixture',
+      { TargetFunctionArn: functionArn, AuthType: 'NONE' },
+      { FunctionUrl: FUNCTION_URL }
+    ),
+    awsResource(
+      'AWS::Lambda::Permission',
+      'HelloFunctionUrlPublicAccess',
+      'function-url-permission-fixture',
+      {
+        FunctionName: functionArn,
+        Action: 'lambda:InvokeFunctionUrl',
+        Principal: '*',
+        FunctionUrlAuthType: 'NONE',
+      }
+    ),
+    awsResource(
+      'AWS::Lambda::Permission',
+      'HelloFunctionPublicInvoke',
+      'function-invoke-permission-fixture',
+      {
+        FunctionName: functionArn,
+        Action: 'lambda:InvokeFunction',
+        Principal: '*',
+        InvokedViaFunctionUrl: true,
       }
     ),
   ];
@@ -501,6 +556,225 @@ describe('AWS HTTP attack probe reducer', () => {
       'AwsLambdaFunctionInvoked',
       'AwsHttpRequestExecuted',
     ]);
+  });
+
+  it('Lambda Function URLをALBなしで解決しRequestとProbeをhandlerへdispatchする', () => {
+    const resources = functionUrlResources();
+    expect(
+      isDeployedFunctionUrl(
+        command({ Url: FUNCTION_URL }, 'Probe'),
+        world(resources)
+      )
+    ).toBe(true);
+    expect(isDeployedFunctionUrl(command({}, 'Probe'), world(resources))).toBe(
+      false
+    );
+    expect(
+      isDeployedFunctionUrl(
+        command({ Url: 'not-a-url' }, 'Probe'),
+        world(resources)
+      )
+    ).toBe(false);
+    expect(
+      isDeployedFunctionUrl(
+        command({ Url: FUNCTION_URL }, 'Probe'),
+        world(
+          resources.map((resource) =>
+            resource.properties['logicalId'] === 'HelloFunctionUrl'
+              ? {
+                  ...resource,
+                  properties: { ...resource.properties, attributes: {} },
+                }
+              : resource
+          )
+        )
+      )
+    ).toBe(false);
+    const request = reduceHttp(
+      command({ ...validRequest({ Path: '/' }), Url: FUNCTION_URL }, 'Request'),
+      world(resources)
+    );
+    const defaultRequest = reduceHttp(
+      command(
+        {
+          Url: `${FUNCTION_URL}hello?source=request&space=%20&plus=+&slash=%2f%2F`,
+        },
+        'Request'
+      ),
+      world(resources)
+    );
+    const implicit = reduceHttp(
+      command(validRequest({ Path: '/' }), 'Request'),
+      world(resources)
+    );
+    const probe = reduceHttp(
+      command({ Url: `${FUNCTION_URL}hello?source=scorer` }, 'Probe'),
+      world(resources)
+    );
+
+    expect(request.response).toMatchObject({ StatusCode: 200 });
+    expect(defaultRequest.response).toMatchObject({ StatusCode: 200 });
+    expect(defaultRequest.events.at(-1)?.payload).toMatchObject({
+      method: 'GET',
+      path: '/hello',
+      rawQueryString: 'source=request&space=%20&plus=+&slash=%2f%2F',
+    });
+    expect(implicit.response).toMatchObject({ StatusCode: 200 });
+    expect(probe.response).toMatchObject({
+      Ok: true,
+      StatusCode: 200,
+      Truncated: false,
+      ResponseTimeMilliseconds: 0,
+    });
+    expect(probe.events.at(-1)?.payload).toMatchObject({
+      endpointType: 'lambda-function-url',
+      path: '/hello',
+      rawQueryString: 'source=scorer',
+      url: FUNCTION_URL,
+    });
+  });
+
+  it('ALBとFunction URLが共存するときURLなしRequestは従来のlistener経路を維持する', () => {
+    const resources = [...requestResources(), ...functionUrlResources()];
+    const alb = reduceHttp(
+      command(
+        validRequest({
+          Method: 'QUERY',
+          Body: JSON.stringify({ query: { match: 'tenkacloud' } }),
+        }),
+        'Request'
+      ),
+      world(resources)
+    );
+    const functionUrl = reduceHttp(
+      command({ ...validRequest({ Path: '/' }), Url: FUNCTION_URL }, 'Request'),
+      world(resources)
+    );
+
+    expect(alb.response).toMatchObject({
+      StatusCode: 405,
+      Body: 'QUERY is blocked at the edge',
+    });
+    expect(functionUrl.response).toMatchObject({
+      StatusCode: 200,
+      Body: expect.stringContaining('hello-multicloud'),
+    });
+  });
+
+  it('Lambda Function URLのURL形式とresource graph境界を曖昧なまま成功にしない', () => {
+    const resources = functionUrlResources();
+    for (const Url of [
+      `https://example.test/${'x'.repeat(2048)}`,
+      'not-a-url',
+      'http://hello-fixture.lambda-url.us-east-1.on.aws/',
+      'https://user:secret@hello-fixture.lambda-url.us-east-1.on.aws/',
+      `${FUNCTION_URL}#fragment`,
+    ]) {
+      expect(() =>
+        reduceHttp(
+          command({ ...validRequest({ Path: '/' }), Url }, 'Request'),
+          world(resources)
+        )
+      ).toThrow();
+    }
+    expect(() =>
+      reduceHttp(
+        command(
+          { ...validRequest({ Path: '/' }), Url: 'https://unknown.example/' },
+          'Request'
+        ),
+        world(resources)
+      )
+    ).toThrow('does not exist');
+    expect(() =>
+      reduceHttp(
+        command(validRequest({ Path: '/' }), 'Request'),
+        world([
+          ...resources,
+          cloneResource(resources, 'HelloFunctionUrl', 'second-function-url'),
+        ])
+      )
+    ).toThrow('ambiguous');
+  });
+
+  it('Lambda Function URLの認証、target、permission、URL projectionを検証する', () => {
+    const resources = functionUrlResources();
+    const request = command(validRequest({ Path: '/' }), 'Request');
+    const cases: readonly [readonly ResourceRecord[], string][] = [
+      [
+        patchTemplate(resources, 'HelloFunctionUrl', { AuthType: 'AWS_IAM' }),
+        'unsupported AWS authentication',
+      ],
+      [
+        resources.filter(
+          (resource) => resource.properties['logicalId'] !== 'HelloFunction'
+        ),
+        'target is missing',
+      ],
+      [
+        [
+          ...resources,
+          cloneResource(resources, 'HelloFunction', 'second-hello-function'),
+        ],
+        'target is missing or ambiguous',
+      ],
+      [
+        resources.filter(
+          (resource) =>
+            resource.properties['logicalId'] !== 'HelloFunctionUrlPublicAccess'
+        ),
+        'public invoke permissions are missing',
+      ],
+      [
+        resources.filter(
+          (resource) =>
+            resource.properties['logicalId'] !== 'HelloFunctionPublicInvoke'
+        ),
+        'public invoke permissions are missing',
+      ],
+      [
+        [
+          ...resources,
+          cloneResource(
+            resources,
+            'HelloFunctionUrlPublicAccess',
+            'second-function-url-permission'
+          ),
+        ],
+        'public invoke permissions are missing or ambiguous',
+      ],
+      [
+        [
+          ...resources,
+          cloneResource(
+            resources,
+            'HelloFunctionPublicInvoke',
+            'second-function-invoke-permission'
+          ),
+        ],
+        'public invoke permissions are missing or ambiguous',
+      ],
+      [
+        patchTemplate(resources, 'HelloFunctionPublicInvoke', {
+          InvokedViaFunctionUrl: false,
+        }),
+        'public invoke permissions are missing',
+      ],
+      [
+        resources.map((resource) =>
+          resource.properties['logicalId'] === 'HelloFunctionUrl'
+            ? {
+                ...resource,
+                properties: { ...resource.properties, attributes: {} },
+              }
+            : resource
+        ),
+        'projection is invalid',
+      ],
+    ];
+    for (const [caseResources, message] of cases) {
+      expect(() => reduceHttp(request, world(caseResources))).toThrow(message);
+    }
   });
 
   it('HTTP Requestのmethod path header body境界をstrictに拒否する', () => {

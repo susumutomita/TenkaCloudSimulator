@@ -4,6 +4,7 @@ import type {
   SimulatorEvent,
   SimulatorResourceRecord,
 } from '@tenkacloud/simulator-contracts';
+import { useActionState, useRef } from 'react';
 import {
   type ConsoleLoadState,
   diagnostics,
@@ -15,6 +16,52 @@ import {
 export interface WorldConsoleViewProps {
   readonly state: ConsoleLoadState;
   readonly onRefresh: () => void;
+  readonly onOperation: (formData: FormData) => Promise<void>;
+}
+
+export type ConsoleOperationActionState =
+  | { readonly kind: 'idle' }
+  | { readonly kind: 'success'; readonly message: string }
+  | { readonly kind: 'error'; readonly message: string };
+
+const INITIAL_OPERATION_STATE: ConsoleOperationActionState = { kind: 'idle' };
+
+export async function runConsoleOperationAction(
+  onOperation: (formData: FormData) => Promise<void>,
+  _current: ConsoleOperationActionState,
+  formData: FormData
+): Promise<ConsoleOperationActionState> {
+  try {
+    await onOperation(formData);
+    return {
+      kind: 'success',
+      message: 'Command accepted. Waiting for the shared projection.',
+    };
+  } catch (error) {
+    return {
+      kind: 'error',
+      message:
+        error instanceof Error
+          ? error.message
+          : 'The provider operation failed.',
+    };
+  }
+}
+
+export function ConsoleOperationResult({
+  state,
+}: {
+  readonly state: ConsoleOperationActionState;
+}): React.JSX.Element | null {
+  if (state.kind === 'idle') return null;
+  return (
+    <p
+      className={`operation-result operation-result-${state.kind}`}
+      role={state.kind === 'error' ? 'alert' : 'status'}
+    >
+      {state.message}
+    </p>
+  );
 }
 
 function BrandMark(): React.JSX.Element {
@@ -136,6 +183,8 @@ function ResourceCard({
         <StatusBadge status={resource.status} />
       </div>
       <div className="resource-meta">
+        <span>Target</span>
+        <code>{resource.targetId}</code>
         <span>Deployment</span>
         <code>{resource.deploymentId}</code>
       </div>
@@ -178,7 +227,7 @@ function ResourceGraph({
           <div className="resource-list">
             {group.resources.map((resource) => (
               <ResourceCard
-                key={`${resource.resourceType}:${resource.resourceId}`}
+                key={`${resource.deploymentId}:${resource.targetId}:${resource.provider}:${resource.resourceType}:${resource.resourceId}`}
                 resource={resource}
               />
             ))}
@@ -293,12 +342,123 @@ function Diagnostics({
   );
 }
 
+function OperationField({
+  label,
+  name,
+  defaultValue,
+  placeholder,
+}: {
+  readonly label: string;
+  readonly name: string;
+  readonly defaultValue?: string;
+  readonly placeholder?: string;
+}): React.JSX.Element {
+  return (
+    <label className="operation-field">
+      <span>{label}</span>
+      <input
+        name={name}
+        required
+        defaultValue={defaultValue}
+        placeholder={placeholder}
+        autoComplete="off"
+      />
+    </label>
+  );
+}
+
+function ProviderOperationPanel({
+  deploymentId,
+  onOperation,
+}: {
+  readonly deploymentId?: string;
+  readonly onOperation: (formData: FormData) => Promise<void>;
+}): React.JSX.Element {
+  const idempotencyKey = useRef(`console-${crypto.randomUUID()}`).current;
+  const [actionState, formAction, pending] = useActionState(
+    runConsoleOperationAction.bind(null, onOperation),
+    INITIAL_OPERATION_STATE
+  );
+  return (
+    <section
+      className="panel operation-panel"
+      aria-labelledby="operation-title"
+    >
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">Shared command API</p>
+          <h2 id="operation-title">Provider operation</h2>
+        </div>
+      </div>
+      {deploymentId ? (
+        <form action={formAction} className="operation-form">
+          <p>
+            Deployment <code>{deploymentId}</code>. The command appends to this
+            world and refreshes from its event stream.
+          </p>
+          <div className="operation-fields">
+            <OperationField
+              label="Provider"
+              name="provider"
+              placeholder="gcp"
+            />
+            <OperationField
+              label="Target ID"
+              name="targetId"
+              defaultValue="default"
+            />
+            <OperationField
+              label="Engine"
+              name="engine"
+              placeholder="infra-manager"
+            />
+            <OperationField label="Service" name="service" placeholder="run" />
+            <OperationField
+              label="Resource type"
+              name="resourceType"
+              placeholder="google_cloud_run_v2_service"
+            />
+            <OperationField
+              label="Operation"
+              name="operation"
+              placeholder="UpdateService"
+            />
+          </div>
+          <label className="operation-field">
+            <span>Input JSON object</span>
+            <textarea name="input" required defaultValue="{}" rows={7} />
+          </label>
+          <label className="operation-field">
+            <span>Idempotency key</span>
+            <input
+              name="idempotencyKey"
+              required
+              defaultValue={idempotencyKey}
+              autoComplete="off"
+            />
+          </label>
+          <ConsoleOperationResult state={actionState} />
+          <button className="primary-button" type="submit" disabled={pending}>
+            {pending ? 'Executing…' : 'Execute command'}
+          </button>
+        </form>
+      ) : (
+        <p className="empty-state compact">
+          Select a deployment in the Console URL before executing a command.
+        </p>
+      )}
+    </section>
+  );
+}
+
 function ReadyConsole({
   state,
   onRefresh,
+  onOperation,
 }: {
   readonly state: Extract<ConsoleLoadState, { readonly kind: 'ready' }>;
   readonly onRefresh: () => void;
+  readonly onOperation: (formData: FormData) => Promise<void>;
 }): React.JSX.Element {
   const { data } = state;
   const providers = groupResources(data.resources);
@@ -345,6 +505,12 @@ function ReadyConsole({
         </section>
 
         <aside className="side-column">
+          <ProviderOperationPanel
+            {...(data.deployment
+              ? { deploymentId: data.deployment.deploymentId }
+              : {})}
+            onOperation={onOperation}
+          />
           <section className="panel" aria-labelledby="outputs-title">
             <div className="section-heading">
               <div>
@@ -391,6 +557,7 @@ function ReadyConsole({
 export function WorldConsoleView({
   state,
   onRefresh,
+  onOperation,
 }: WorldConsoleViewProps): React.JSX.Element {
   return (
     <div className="app-shell">
@@ -406,7 +573,11 @@ export function WorldConsoleView({
         />
       ) : null}
       {state.kind === 'ready' ? (
-        <ReadyConsole state={state} onRefresh={onRefresh} />
+        <ReadyConsole
+          state={state}
+          onRefresh={onRefresh}
+          onOperation={onOperation}
+        />
       ) : null}
       <footer className="shell-footer">
         <span>TenkaCloud Simulator</span>

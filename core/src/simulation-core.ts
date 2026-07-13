@@ -8,9 +8,11 @@ import type {
   CreateWorldInput,
   DeploymentInput,
   DeploymentRecord,
+  DeploymentTargetIdentity,
   EventRecord,
   ExecuteCommandInput,
   MaterializedWorkload,
+  ProviderClockResult,
   ProviderCommandInput,
   ProviderCommandResult,
   ProviderDeploymentResult,
@@ -40,6 +42,7 @@ interface SimulationCoreOptions {
 }
 
 interface CompiledDeployment {
+  readonly targets: readonly DeploymentTargetIdentity[];
   readonly plans: readonly ProviderTargetPlan[];
   readonly diagnostics: readonly CapabilityDiagnostic[];
   readonly workloads: readonly WorkloadDeclaration[];
@@ -50,11 +53,16 @@ interface TargetResult {
   readonly result: ProviderDeploymentResult;
 }
 
+interface TargetResourceDeclaration extends ResourceDeclaration {
+  readonly targetId: string;
+}
+
 interface ProviderClockEvaluation {
   readonly module: ProviderModule;
   readonly events: readonly ProviderEvent[];
   readonly resources: readonly ResourceRecord[];
-  readonly deletedResourceIds: readonly string[];
+  readonly deletedResourceRefs: ProviderClockResult['deletedResourceRefs'];
+  readonly resolvedDeletedResources: readonly ResourceRecord[];
   readonly appliedTransitionIds: readonly string[];
 }
 
@@ -144,16 +152,18 @@ function bootstrapRequirement(
 function mergeResources(
   plan: ProviderTargetPlan,
   result: ProviderDeploymentResult
-): readonly ResourceDeclaration[] {
+): readonly TargetResourceDeclaration[] {
   const resources = new Map<string, ResourceDeclaration>();
   for (const resource of [...plan.resources, ...result.resources]) {
     resources.set(`${resource.provider}:${resource.resourceId}`, resource);
   }
-  return Array.from(resources.values()).sort((left, right) =>
-    `${left.provider}:${left.resourceId}`.localeCompare(
-      `${right.provider}:${right.resourceId}`
+  return Array.from(resources.values())
+    .sort((left, right) =>
+      `${left.provider}:${left.resourceId}`.localeCompare(
+        `${right.provider}:${right.resourceId}`
+      )
     )
-  );
+    .map((resource) => ({ ...resource, targetId: plan.targetId }));
 }
 
 function namespaceOf(world: WorldRecord): WorldNamespace {
@@ -209,6 +219,7 @@ function workloadResource(
   return {
     worldId,
     deploymentId,
+    targetId: declaration.targetId,
     provider: WORKLOAD_PROVIDER,
     resourceType: WORKLOAD_RESOURCE_TYPE,
     resourceId: workloadResourceId(declaration),
@@ -392,56 +403,217 @@ function validateTransitionIds(
   }
 }
 
+function deploymentTargetKey(
+  deploymentId: string,
+  targetId: string,
+  provider: string
+): string {
+  return JSON.stringify([deploymentId, targetId, provider]);
+}
+
+function resourceProjectionKey(
+  resource: Pick<
+    ResourceRecord,
+    'deploymentId' | 'targetId' | 'provider' | 'resourceId'
+  >
+): string {
+  return JSON.stringify([
+    resource.deploymentId,
+    resource.targetId,
+    resource.provider,
+    resource.resourceId,
+  ]);
+}
+
 function validateClockEvaluation(
-  evaluation: ProviderClockEvaluation,
+  evaluation: Omit<ProviderClockEvaluation, 'resolvedDeletedResources'>,
   view: ProviderWorldView,
-  deploymentIds: ReadonlySet<string>
-): void {
+  deploymentTargets: ReadonlySet<string>
+): readonly ResourceRecord[] {
   const provider = evaluation.module.provider;
   const resourceIds = new Set<string>();
-  const deletedIds = new Set<string>();
-  const existingIds = new Set(
+  const deletedResourceKeys = new Set<string>();
+  const existingByIdentity = new Map(
     view.resources
-      .filter((resource) => resource.provider === provider)
-      .map((resource) => resource.resourceId)
+      .filter(
+        (resource) =>
+          resource.provider === provider && resource.status !== 'deleted'
+      )
+      .map((resource) => [resourceProjectionKey(resource), resource])
   );
+  const deletedResources: ResourceRecord[] = [];
 
   validateClockEvents(provider, evaluation.events);
   for (const resource of evaluation.resources) {
     requireText(resource.resourceId, 'provider clock resource id');
+    const identity = resourceProjectionKey(resource);
     if (
       resource.provider !== provider ||
       resource.worldId !== view.world.worldId ||
-      !deploymentIds.has(resource.deploymentId)
+      !deploymentTargets.has(
+        deploymentTargetKey(resource.deploymentId, resource.targetId, provider)
+      )
     ) {
       throw new CoreError(
         'ValidationFailed',
         `provider ${provider} returned a clock resource outside its world projection`
       );
     }
-    if (resourceIds.has(resource.resourceId)) {
+    if (resourceIds.has(identity)) {
       throw new CoreError(
         'ValidationFailed',
         `provider ${provider} returned duplicate clock resource ${resource.resourceId}`
       );
     }
-    resourceIds.add(resource.resourceId);
+    resourceIds.add(identity);
   }
-  for (const resourceId of evaluation.deletedResourceIds) {
-    requireText(resourceId, 'provider clock deleted resource id');
+  for (const reference of evaluation.deletedResourceRefs) {
+    requireText(
+      reference.deploymentId,
+      'provider clock deleted resource deployment id'
+    );
+    requireText(
+      reference.targetId,
+      'provider clock deleted resource target id'
+    );
+    requireText(reference.resourceId, 'provider clock deleted resource id');
+    const deploymentTarget = deploymentTargetKey(
+      reference.deploymentId,
+      reference.targetId,
+      provider
+    );
+    const identity = resourceProjectionKey({ ...reference, provider });
+    const resource = existingByIdentity.get(identity);
     if (
-      deletedIds.has(resourceId) ||
-      resourceIds.has(resourceId) ||
-      !existingIds.has(resourceId)
+      deletedResourceKeys.has(identity) ||
+      !deploymentTargets.has(deploymentTarget) ||
+      !resource ||
+      resourceIds.has(identity)
     ) {
       throw new CoreError(
         'ValidationFailed',
-        `provider ${provider} returned an invalid deleted clock resource ${resourceId}`
+        `provider ${provider} returned an invalid deleted clock resource ${reference.resourceId}`
       );
     }
-    deletedIds.add(resourceId);
+    deletedResourceKeys.add(identity);
+    deletedResources.push(resource);
   }
   validateTransitionIds(provider, evaluation.appliedTransitionIds);
+  return deletedResources;
+}
+
+function snapshotIncompatible(message: string): never {
+  throw new CoreError('SnapshotIncompatible', message);
+}
+
+function assertSnapshotEvents(
+  payload: SnapshotPayload,
+  sourceWorldId: string
+): void {
+  if (payload.events.length === 0) {
+    snapshotIncompatible('snapshot event graph is empty');
+  }
+  for (const [index, event] of payload.events.entries()) {
+    if (
+      event.worldId !== sourceWorldId ||
+      event.sequence !== index + 1 ||
+      event.payloadHash !== contentHash(event.payload)
+    ) {
+      snapshotIncompatible('snapshot event graph is inconsistent');
+    }
+  }
+}
+
+function snapshotDeploymentTargets(
+  payload: SnapshotPayload,
+  sourceWorldId: string
+): ReadonlyMap<string, ReadonlyMap<string, DeploymentTargetIdentity>> {
+  const targetsByDeployment = new Map<
+    string,
+    ReadonlyMap<string, DeploymentTargetIdentity>
+  >();
+  for (const deployment of payload.deployments) {
+    if (
+      deployment.worldId !== sourceWorldId ||
+      !deployment.deploymentId.trim() ||
+      targetsByDeployment.has(deployment.deploymentId) ||
+      deployment.targets.length === 0
+    ) {
+      snapshotIncompatible('snapshot deployment graph is inconsistent');
+    }
+    const targets = new Map<string, DeploymentTargetIdentity>();
+    for (const target of deployment.targets) {
+      const identityFields = [target.id, target.provider, target.engine];
+      if (
+        identityFields.some((field) => !field.trim()) ||
+        targets.has(target.id)
+      ) {
+        snapshotIncompatible('snapshot deployment targets are invalid');
+      }
+      targets.set(target.id, target);
+    }
+    for (const outputTargetId of Object.keys(deployment.outputs)) {
+      if (!targets.has(outputTargetId)) {
+        snapshotIncompatible('snapshot deployment output target is invalid');
+      }
+    }
+    targetsByDeployment.set(deployment.deploymentId, targets);
+  }
+  return targetsByDeployment;
+}
+
+function assertSnapshotResources(
+  payload: SnapshotPayload,
+  sourceWorldId: string,
+  targetsByDeployment: ReadonlyMap<
+    string,
+    ReadonlyMap<string, DeploymentTargetIdentity>
+  >
+): void {
+  const resourceIdentities = new Set<string>();
+  for (const resource of payload.resources) {
+    const target = targetsByDeployment
+      .get(resource.deploymentId)
+      ?.get(resource.targetId);
+    const coreWorkload =
+      resource.provider === WORKLOAD_PROVIDER &&
+      resource.resourceType === WORKLOAD_RESOURCE_TYPE;
+    const identity = resourceProjectionKey(resource);
+    if (
+      resource.worldId !== sourceWorldId ||
+      !target ||
+      (resource.provider !== target.provider && !coreWorkload) ||
+      resourceIdentities.has(identity)
+    ) {
+      snapshotIncompatible('snapshot resource graph is inconsistent');
+    }
+    resourceIdentities.add(identity);
+  }
+}
+
+function isWorkloadResource(resource: ResourceRecord): boolean {
+  return (
+    resource.provider === WORKLOAD_PROVIDER &&
+    resource.resourceType === WORKLOAD_RESOURCE_TYPE
+  );
+}
+
+function assertSnapshotHasNoWorkloads(payload: SnapshotPayload): void {
+  if (payload.resources.some(isWorkloadResource)) {
+    snapshotIncompatible(
+      'snapshot workload restore requires asynchronous rematerialization'
+    );
+  }
+}
+
+function assertSnapshotGraph(payload: SnapshotPayload): void {
+  const sourceWorldId = payload.world.worldId;
+  if (!sourceWorldId.trim()) {
+    snapshotIncompatible('snapshot world identity is empty');
+  }
+  assertSnapshotEvents(payload, sourceWorldId);
+  const targetsByDeployment = snapshotDeploymentTargets(payload, sourceWorldId);
+  assertSnapshotResources(payload, sourceWorldId, targetsByDeployment);
 }
 
 export class SimulationCore {
@@ -524,6 +696,22 @@ export class SimulationCore {
     };
   }
 
+  #targetView(
+    worldId: string,
+    deploymentId: string,
+    targetId: string
+  ): ProviderWorldView {
+    const view = this.#view(worldId);
+    return {
+      world: view.world,
+      resources: view.resources.filter(
+        (resource) =>
+          resource.deploymentId === deploymentId &&
+          resource.targetId === targetId
+      ),
+    };
+  }
+
   #compile(input: DeploymentInput): CompiledDeployment {
     requireText(input.deploymentId, 'deploymentId');
     requireText(input.problemId, 'problemId');
@@ -591,7 +779,16 @@ export class SimulationCore {
         ? []
         : workloadRequirements.map(unavailableWorkloadDiagnostic)),
     ];
-    return { plans, diagnostics, workloads: overlay.workloads };
+    return {
+      targets: identifiedTargets.map(({ id, provider, engine }) => ({
+        id,
+        provider,
+        engine,
+      })),
+      plans,
+      diagnostics,
+      workloads: overlay.workloads,
+    };
   }
 
   createDeployment(
@@ -627,6 +824,7 @@ export class SimulationCore {
         deploymentId: input.deploymentId,
         problemId: input.problemId,
         status: 'rejected',
+        targets: compiled.targets,
         outputs: {},
         diagnostics: compiled.diagnostics,
       };
@@ -677,6 +875,7 @@ export class SimulationCore {
       deploymentId: input.deploymentId,
       problemId: input.problemId,
       status: workloadResources.length === 0 ? 'ready' : 'deploying',
+      targets: compiled.targets,
       outputs,
       diagnostics: [],
     };
@@ -936,6 +1135,20 @@ export class SimulationCore {
       input
     );
     if (existing) return { kind: 'existing', response: existing };
+    const deployment = this.deployment(worldId, input.deploymentId);
+    const target = deployment.targets.find(
+      (candidate) => candidate.id === input.targetId
+    );
+    if (
+      !target ||
+      target.provider !== input.provider ||
+      target.engine !== input.engine
+    ) {
+      throw new CoreError(
+        'ValidationFailed',
+        'command target does not belong to the deployment'
+      );
+    }
     const requirement: CapabilityRequirement = {
       provider: input.provider,
       engine: input.engine,
@@ -966,7 +1179,7 @@ export class SimulationCore {
         resourceType: input.resourceType,
         input: input.input,
       },
-      view: this.#view(worldId),
+      view: this.#targetView(worldId, input.deploymentId, input.targetId),
     };
   }
 
@@ -986,11 +1199,18 @@ export class SimulationCore {
           ...resource,
           worldId,
           deploymentId: input.deploymentId,
+          targetId: input.targetId,
           status: 'ready',
         });
       }
       for (const resourceId of result.deletedResourceIds) {
-        this.store.deleteResource(worldId, input.provider, resourceId);
+        this.store.deleteResource(
+          worldId,
+          input.deploymentId,
+          input.targetId,
+          input.provider,
+          resourceId
+        );
       }
       for (const event of result.events) {
         this.store.appendEvent(worldId, event.type, commandId, event.payload);
@@ -1026,26 +1246,39 @@ export class SimulationCore {
       Date.parse(world.virtualTime) + milliseconds
     ).toISOString();
     const view = this.#view(worldId);
-    const deploymentIds = new Set(
+    const deploymentTargets = new Set(
       this.store
         .deployments(worldId)
-        .map((deployment) => deployment.deploymentId)
+        .flatMap((deployment) =>
+          deployment.targets.map((target) =>
+            deploymentTargetKey(
+              deployment.deploymentId,
+              target.id,
+              target.provider
+            )
+          )
+        )
     );
-    const evaluations: ProviderClockEvaluation[] = this.providers
-      .modules()
-      .flatMap((module) => {
-        const result = module.advanceClock?.(
-          {
-            previousVirtualTime: world.virtualTime,
-            virtualTime,
-          },
-          view
-        );
-        return result ? [{ module, ...result }] : [];
-      });
-    for (const evaluation of evaluations) {
-      validateClockEvaluation(evaluation, view, deploymentIds);
-    }
+    const rawEvaluations = this.providers.modules().flatMap((module) => {
+      const result = module.advanceClock?.(
+        {
+          previousVirtualTime: world.virtualTime,
+          virtualTime,
+        },
+        view
+      );
+      return result ? [{ module, ...result }] : [];
+    });
+    const evaluations: ProviderClockEvaluation[] = rawEvaluations.map(
+      (evaluation) => ({
+        ...evaluation,
+        resolvedDeletedResources: validateClockEvaluation(
+          evaluation,
+          view,
+          deploymentTargets
+        ),
+      })
+    );
     const transitions: AppliedTransition[] = evaluations
       .flatMap((evaluation) =>
         evaluation.appliedTransitionIds.map((transitionId) => ({
@@ -1066,7 +1299,7 @@ export class SimulationCore {
     const activeResourceKeys = new Set(
       view.resources
         .filter((resource) => resource.status === 'ready')
-        .map((resource) => `${resource.provider}\u0000${resource.resourceId}`)
+        .map(resourceProjectionKey)
     );
     const newResourceCount = evaluations.reduce(
       (total, evaluation) =>
@@ -1074,9 +1307,7 @@ export class SimulationCore {
         evaluation.resources.filter(
           (resource) =>
             resource.status === 'ready' &&
-            !activeResourceKeys.has(
-              `${resource.provider}\u0000${resource.resourceId}`
-            )
+            !activeResourceKeys.has(resourceProjectionKey(resource))
         ).length,
       0
     );
@@ -1099,11 +1330,13 @@ export class SimulationCore {
         for (const resource of evaluation.resources) {
           this.store.saveResource(resource);
         }
-        for (const resourceId of evaluation.deletedResourceIds) {
+        for (const resource of evaluation.resolvedDeletedResources) {
           this.store.deleteResource(
             worldId,
-            evaluation.module.provider,
-            resourceId
+            resource.deploymentId,
+            resource.targetId,
+            resource.provider,
+            resource.resourceId
           );
         }
         for (const event of evaluation.events) {
@@ -1146,6 +1379,8 @@ export class SimulationCore {
       for (const resource of this.store.resources(worldId)) {
         this.store.deleteResource(
           worldId,
+          resource.deploymentId,
+          resource.targetId,
           resource.provider,
           resource.resourceId
         );
@@ -1198,6 +1433,8 @@ export class SimulationCore {
         'snapshot hash or version is invalid'
       );
     }
+    assertSnapshotGraph(snapshot.payload);
+    assertSnapshotHasNoWorkloads(snapshot.payload);
     const scope = `restore-snapshot:${snapshot.payload.world.worldId}`;
     const existing = this.store.idempotent<WorldRecord>(
       scope,

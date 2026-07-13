@@ -19,11 +19,13 @@ import {
 } from '@tenkacloud/simulator-core';
 import {
   BICEP_CONTAINER_APP,
+  BICEP_MANAGED_ENVIRONMENT,
   BICEP_ROLE_ASSIGNMENT,
   compileBicep,
 } from './bicep';
 
 export const AZURE_CONTAINER_APP = BICEP_CONTAINER_APP;
+export const AZURE_MANAGED_ENVIRONMENT = BICEP_MANAGED_ENVIRONMENT;
 export const AZURE_ROLE_ASSIGNMENT = BICEP_ROLE_ASSIGNMENT;
 export const HTTP_ENDPOINT = HTTP_ENDPOINT_RESOURCE;
 
@@ -49,6 +51,15 @@ const CAPABILITIES: readonly ProviderCapability[] = [
     resourceType: AZURE_CONTAINER_APP,
     operation: 'lifecycle',
     fidelity: ['L0', 'L1', 'L2', 'L3', 'L4'],
+  },
+  {
+    capabilityId: 'azure.containerapps.managed-environment.lifecycle',
+    provider: PROVIDER,
+    engine: ENGINE,
+    service: 'containerapps',
+    resourceType: AZURE_MANAGED_ENVIRONMENT,
+    operation: 'lifecycle',
+    fidelity: ['L0', 'L1', 'L2'],
   },
   {
     capabilityId: 'azure.authorization.role-assignment.lifecycle',
@@ -472,7 +483,9 @@ export class AzureProvider implements ProviderModule {
         provider: PROVIDER,
         engine: ENGINE,
         service:
-          item.type === AZURE_CONTAINER_APP ? 'containerapps' : 'authorization',
+          item.type === AZURE_ROLE_ASSIGNMENT
+            ? 'authorization'
+            : 'containerapps',
         resourceType: item.type,
         operation: 'lifecycle',
         fidelity:

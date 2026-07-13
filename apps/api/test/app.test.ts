@@ -671,15 +671,18 @@ describe('Simulator HTTP protocol', () => {
     expect(failedSnapshotResponse.status).toBe(200);
     const failedSnapshot: unknown = await failedSnapshotResponse.json();
     assertSimulatorSnapshot(failedSnapshot);
-    expect(
-      (
-        await fetch(`${runtime.baseUrl}/v1/worlds/${world.worldId}/snapshots`, {
-          method: 'POST',
-          headers: protocolHeaders(),
-          body: JSON.stringify(failedSnapshot),
-        })
-      ).status
-    ).toBe(201);
+    const workloadRestore = await fetch(
+      `${runtime.baseUrl}/v1/worlds/${world.worldId}/snapshots`,
+      {
+        method: 'POST',
+        headers: protocolHeaders(),
+        body: JSON.stringify(failedSnapshot),
+      }
+    );
+    expect(workloadRestore.status).toBe(422);
+    expect(await workloadRestore.json()).toMatchObject({
+      error: { code: 'SnapshotIncompatible' },
+    });
 
     const retryUrl = `${runtime.baseUrl}/v1/worlds/${world.worldId}/workloads/materialize`;
     const invalidRetry = await fetch(retryUrl, {
@@ -925,7 +928,14 @@ describe('Simulator HTTP protocol', () => {
     expect(await response.json()).toMatchObject({
       error: {
         code: 'UnsupportedCapability',
-        diagnostics: [{ code: 'MissingProvider' }],
+        diagnostics: [
+          {
+            code: 'MissingProvider',
+            provider: 'missing-provider',
+            engine: 'missing-engine',
+            message: 'missing-provider/missing-engine/missing-engine/*/deploy',
+          },
+        ],
       },
     });
     expect(runtime.store.resources(world.worldId)).toEqual([]);
@@ -1103,6 +1113,7 @@ describe('Simulator HTTP protocol', () => {
     expect(graphJson).toContain(`"worldId":"${world.worldId}"`);
     expect(graphJson).toContain('WorldCreated');
     expect(graphJson).toContain('"deploymentId":"deployment-snapshot"');
+    expect(graphJson).toContain('"targetId":"default"');
     expect(graphJson).toContain('"resourceId":"default-resource"');
 
     const restoredResponse = await fetch(
@@ -1151,6 +1162,33 @@ describe('Simulator HTTP protocol', () => {
     );
     expect(malformed.status).toBe(400);
     expect(await malformed.json()).toMatchObject({
+      error: { code: 'ValidationFailed' },
+    });
+
+    const targetlessSnapshot = structuredClone(snapshot);
+    const targetlessResources = targetlessSnapshot.resourceGraph['resources'];
+    if (!Array.isArray(targetlessResources)) {
+      throw new Error('snapshot resource fixture がありません');
+    }
+    const targetlessResource = targetlessResources[0];
+    if (
+      typeof targetlessResource !== 'object' ||
+      targetlessResource === null ||
+      Array.isArray(targetlessResource)
+    ) {
+      throw new Error('snapshot resource fixture が不正です');
+    }
+    Reflect.deleteProperty(targetlessResource, 'targetId');
+    const targetless = await fetch(
+      `${runtime.baseUrl}/v1/worlds/${world.worldId}/snapshots`,
+      {
+        method: 'POST',
+        headers: protocolHeaders(),
+        body: JSON.stringify(targetlessSnapshot),
+      }
+    );
+    expect(targetless.status).toBe(400);
+    expect(await targetless.json()).toMatchObject({
       error: { code: 'ValidationFailed' },
     });
 

@@ -1,9 +1,9 @@
 import { writeFile } from 'node:fs/promises';
 import { simulatorCapabilityManifest } from './index';
 
-const HELP = `Usage: tenkacloud-simulator-capabilities [--output <file>]
+const HELP = `Usage: tenkacloud-simulator-capabilities --source-commit <sha> [--output <file>]
 
-Writes the deterministic provider capability manifest to stdout or a file.
+Writes the deterministic provider capability manifest bound to an immutable source commit.
 `;
 
 export interface CapabilityCommandResult {
@@ -18,11 +18,26 @@ export async function runCapabilityCommand(
   if (args.length === 1 && args[0] === '--help') {
     return { exitCode: 0, stdout: HELP, stderr: '' };
   }
-  if (args.length !== 0 && (args.length !== 2 || args[0] !== '--output')) {
+  const values = new Map<string, string>();
+  for (let index = 0; index < args.length; index += 2) {
+    const option = args[index];
+    const value = args[index + 1];
+    if (
+      (option !== '--source-commit' && option !== '--output') ||
+      value === undefined ||
+      value.startsWith('--') ||
+      values.has(option)
+    ) {
+      return { exitCode: 2, stdout: '', stderr: HELP };
+    }
+    values.set(option, value);
+  }
+  const sourceCommit = values.get('--source-commit');
+  if (sourceCommit === undefined || !/^[0-9a-f]{40}$/.test(sourceCommit)) {
     return { exitCode: 2, stdout: '', stderr: HELP };
   }
-  const output = `${JSON.stringify(simulatorCapabilityManifest(), null, 2)}\n`;
-  const outputPath = args[1];
+  const output = `${JSON.stringify(simulatorCapabilityManifest(sourceCommit), null, 2)}\n`;
+  const outputPath = values.get('--output');
   if (outputPath) {
     await writeFile(outputPath, output);
     return { exitCode: 0, stdout: '', stderr: '' };

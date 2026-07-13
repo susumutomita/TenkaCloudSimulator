@@ -27,6 +27,7 @@ export {
 } from './bicep';
 export {
   AZURE_CONTAINER_APP,
+  AZURE_MANAGED_ENVIRONMENT,
   AZURE_ROLE_ASSIGNMENT,
   AzureProvider,
   HTTP_ENDPOINT,

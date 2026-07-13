@@ -46,6 +46,7 @@ interface SnapshotRecord extends Record<string, unknown> {
   readonly source?: unknown;
   readonly status?: unknown;
   readonly teamId?: unknown;
+  readonly targetId?: unknown;
   readonly tenantId?: unknown;
   readonly type?: unknown;
   readonly virtualTime?: unknown;
@@ -146,6 +147,15 @@ function isOutputMap(
   return isRecord(value) && Object.values(value).every(isStringMap);
 }
 
+function isDeploymentTarget(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    typeof value['id'] === 'string' &&
+    typeof value.provider === 'string' &&
+    typeof value.engine === 'string'
+  );
+}
+
 function isDeploymentRecord(value: unknown): value is DeploymentRecord {
   return (
     isRecord(value) &&
@@ -157,6 +167,8 @@ function isDeploymentRecord(value: unknown): value is DeploymentRecord {
       value.status === 'failed' ||
       value.status === 'rejected' ||
       value.status === 'deleted') &&
+    Array.isArray(value['targets']) &&
+    value['targets'].every(isDeploymentTarget) &&
     isOutputMap(value.outputs) &&
     Array.isArray(value.diagnostics) &&
     value.diagnostics.every(isCapabilityDiagnostic)
@@ -168,6 +180,7 @@ function isResourceRecord(value: unknown): value is ResourceRecord {
     isRecord(value) &&
     typeof value.worldId === 'string' &&
     typeof value.deploymentId === 'string' &&
+    typeof value.targetId === 'string' &&
     typeof value.provider === 'string' &&
     typeof value.resourceType === 'string' &&
     typeof value.resourceId === 'string' &&

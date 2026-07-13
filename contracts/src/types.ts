@@ -33,6 +33,7 @@ export interface SimulatorProviderCapabilities {
 
 export interface SimulatorCapability {
   readonly provider: string;
+  readonly engine: string;
   readonly service: string;
   readonly resourceType: string;
   readonly operation: string;
@@ -163,6 +164,7 @@ export interface SimulatorDiagnostic {
   readonly code: string;
   readonly message: string;
   readonly provider?: string;
+  readonly engine?: string;
   readonly service?: string;
   readonly resourceType?: string;
   readonly operation?: string;
@@ -245,6 +247,7 @@ export type SimulatorResourceStatus =
 export interface SimulatorResourceRecord {
   readonly worldId: string;
   readonly deploymentId: string;
+  readonly targetId: string;
   readonly provider: string;
   readonly resourceType: string;
   readonly resourceId: string;
@@ -287,6 +290,7 @@ export type CapabilityPlane =
 export type CapabilitySourceKind =
   | 'iac-resource'
   | 'iam-policy'
+  | 'metadata-endpoint'
   | 'metadata-probe'
   | 'metadata-disruption'
   | 'code-analysis'
@@ -301,7 +305,7 @@ export interface CapabilityRequirement {
   readonly problemId: string;
   readonly targetId?: string;
   readonly provider: string;
-  readonly engine?: string;
+  readonly engine: string;
   readonly entry?: string;
   readonly service: string;
   readonly resourceType: string;

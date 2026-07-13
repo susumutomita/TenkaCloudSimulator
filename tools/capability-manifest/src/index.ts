@@ -1,11 +1,9 @@
 import {
   type CapabilityEntry,
   type CapabilityManifest,
-  type Fidelity,
   validateCapabilityManifest,
 } from '@tenkacloud/catalog-scanner';
 import type {
-  FidelityLevel,
   ProviderCapability,
   ProviderModule,
 } from '@tenkacloud/simulator-core';
@@ -17,43 +15,29 @@ import { AzureProvider } from '@tenkacloud/simulator-provider-azure';
 import { GcpProvider } from '@tenkacloud/simulator-provider-gcp';
 import { SakuraProvider } from '@tenkacloud/simulator-provider-sakura';
 
-const FIDELITY_RANK: Readonly<Record<FidelityLevel, number>> = {
-  L0: 0,
-  L1: 1,
-  L2: 2,
-  L3: 3,
-  L4: 4,
-};
-
-function maximumFidelity(levels: readonly FidelityLevel[]): Fidelity {
-  return (
-    [...levels].sort(
-      (left, right) => FIDELITY_RANK[right] - FIDELITY_RANK[left]
-    )[0] ?? 'L0'
-  );
-}
-
 function manifestCapability(capability: ProviderCapability): CapabilityEntry {
   return {
     provider: capability.provider,
+    engine: capability.engine,
     service: capability.service,
     resourceType: capability.resourceType,
     operation: capability.operation,
-    fidelity: maximumFidelity(capability.fidelity),
+    fidelity: [...capability.fidelity],
   };
 }
 
 function workloadCapabilities(
   modules: readonly ProviderModule[]
 ): readonly CapabilityEntry[] {
-  return [...new Set(modules.map((module) => module.provider))].map(
-    (provider) => ({
-      provider,
+  return modules.flatMap((module) =>
+    module.engines.map((engine) => ({
+      provider: module.provider,
+      engine,
       service: 'runtime',
       resourceType: 'Runtime::Workload',
       operation: 'Materialize',
-      fidelity: 'L4',
-    })
+      fidelity: ['L4'],
+    }))
   );
 }
 
@@ -72,7 +56,12 @@ export function createCapabilityManifest(
   });
 }
 
-export function simulatorCapabilityManifest(): CapabilityManifest {
+export function simulatorCapabilityManifest(
+  sourceCommit: string
+): CapabilityManifest {
+  if (!/^[0-9a-f]{40}$/.test(sourceCommit)) {
+    throw new Error('sourceCommit must be an immutable 40-character Git SHA');
+  }
   const modules = [
     new AwsProvider(),
     new AzureProvider(),
@@ -81,7 +70,7 @@ export function simulatorCapabilityManifest(): CapabilityManifest {
   ];
   return createCapabilityManifest(
     modules.slice(1).flatMap((module) => module.capabilities),
-    'tenkacloud-simulator-0.1.0',
+    `tenkacloud-simulator-0.1.0+git.${sourceCommit}`,
     [
       ...AWS_CATALOG_CAPABILITY_MANIFEST.capabilities,
       ...workloadCapabilities(modules),

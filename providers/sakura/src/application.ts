@@ -222,7 +222,7 @@ function componentValue(value: unknown, index: number): ApplicationComponent {
         image: stringValue(
           registry['image'],
           `components[${index}].deploy_source.container_registry.image`,
-          128
+          512
         ),
         ...(server === undefined ? {} : { server }),
         ...(username === undefined ? {} : { username }),

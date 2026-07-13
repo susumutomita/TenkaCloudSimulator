@@ -1,5 +1,6 @@
 export {
   compareInventory,
+  coverageReportHash,
   readCapabilityManifest,
   serializeReport,
   validateCapabilityManifest,
@@ -9,6 +10,7 @@ export type {
   CapabilityManifest,
   CatalogInventory,
   CoverageReport,
+  CoverageReportIdentity,
   Diagnostic,
   Fidelity,
   Requirement,

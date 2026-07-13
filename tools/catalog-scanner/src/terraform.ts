@@ -92,7 +92,7 @@ export function parseTerraform(
           service: terraformService(resourceType),
           resourceType,
           operation: 'lifecycle',
-          fidelity: terraformFidelity(resourceType),
+          fidelity: [terraformFidelity(resourceType)],
           plane: 'deploy',
           origin: 'iac-resource',
           classification: 'binding',

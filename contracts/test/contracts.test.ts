@@ -101,6 +101,7 @@ const capabilities = {
   capabilities: [
     {
       provider: 'aws',
+      engine: 'cloudformation',
       service: 'iam',
       resourceType: 'AWS::IAM::Role',
       operation: 'CreateRole',
@@ -190,6 +191,7 @@ const errorEnvelope = {
         code: 'CAPABILITY_MISSING',
         message: 'CreateRole is unavailable',
         provider: 'aws',
+        engine: 'cloudformation',
         service: 'iam',
         resourceType: 'AWS::IAM::Role',
         operation: 'CreateRole',
@@ -228,6 +230,7 @@ const resourceProjection = {
     {
       worldId: 'world-1',
       deploymentId: 'deployment-1',
+      targetId: 'default',
       provider: 'aws',
       resourceType: 'AWS::IAM::Role',
       resourceId: 'role-1',
@@ -465,6 +468,14 @@ describe('runtime と lifecycle 契約', () => {
     expect(
       isSimulatorCapabilities({
         ...capabilities,
+        capabilities: capabilities.capabilities.map(
+          ({ engine: _engine, ...capability }) => capability
+        ),
+      })
+    ).toBe(false);
+    expect(
+      isSimulatorCapabilities({
+        ...capabilities,
         providers: {
           aws: {
             engines: {
@@ -682,7 +693,13 @@ describe('error、event、snapshot 契約', () => {
   });
 
   it('resource projection の JSON property と状態を検証する', () => {
+    const resource = resourceProjection.resources[0];
+    if (!resource) throw new Error('resource fixture がありません');
+    const { targetId: _targetId, ...targetlessResource } = resource;
     expect(isSimulatorResourceProjection(resourceProjection)).toBe(true);
+    expect(
+      isSimulatorResourceProjection({ resources: [targetlessResource] })
+    ).toBe(false);
     expect(
       isSimulatorResourceProjection({
         resources: [{ ...resourceProjection.resources[0], properties: [] }],
@@ -726,6 +743,8 @@ describe('capability coverage 契約', () => {
     expect(isCapabilityRequirement({ ...requirement, plane: 'unknown' })).toBe(
       false
     );
+    const { engine: _engine, ...enginelessRequirement } = requirement;
+    expect(isCapabilityRequirement(enginelessRequirement)).toBe(false);
     assertCapabilityRequirement(requirement);
   });
 

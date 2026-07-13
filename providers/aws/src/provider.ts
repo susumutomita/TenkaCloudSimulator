@@ -19,7 +19,7 @@ import {
   type ExternalEvaluatorOptions,
   validatedTrustedWorkerOrigins,
 } from './external-evaluator';
-import { reduceHttp } from './http';
+import { isDeployedFunctionUrl, reduceHttp } from './http';
 import { reduceHttpProbe } from './http-probe';
 import { reduceIam } from './iam';
 import { reduceLambda, reduceLambdaAsync } from './lambda';
@@ -114,6 +114,12 @@ export class AwsProvider implements ProviderModule {
       command.service === 'http' &&
       (command.operation === 'Probe' || command.operation === 'Poll')
     ) {
+      if (
+        command.operation === 'Probe' &&
+        isDeployedFunctionUrl(command, world)
+      ) {
+        return reduceHttp(command, world);
+      }
       return reduceHttpProbe(command);
     }
     return this.reduce(command, world);

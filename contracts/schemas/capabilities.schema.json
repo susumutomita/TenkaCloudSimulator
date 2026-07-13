@@ -48,6 +48,7 @@
       "type": "object",
       "required": [
         "provider",
+        "engine",
         "service",
         "resourceType",
         "operation",
@@ -55,6 +56,9 @@
       ],
       "properties": {
         "provider": {
+          "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+        },
+        "engine": {
           "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
         },
         "service": {
