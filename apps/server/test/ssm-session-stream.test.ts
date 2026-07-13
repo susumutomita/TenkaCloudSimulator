@@ -177,6 +177,16 @@ function responseString(body: Record<string, unknown>, key: string): string {
   return value;
 }
 
+function requiredRecord(
+  value: unknown,
+  label: string
+): Readonly<Record<string, unknown>> {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error(`${label} is missing`);
+  }
+  return value as Readonly<Record<string, unknown>>;
+}
+
 function socketInbox(socket: WebSocket): Inbox {
   const inbox: Inbox = { messages: [], waiters: [] };
   socket.binaryType = 'arraybuffer';
@@ -424,6 +434,87 @@ describe('SSM Session Manager streaming endpoint', () => {
       reconnected.inbox,
       responseString(resumed.body, 'TokenValue')
     );
+  });
+
+  it('snapshot は接続tokenを除外しrestore後のResumeで新しいtokenだけを受理する', async () => {
+    const context = await createSessionContext();
+    const started = await nativeJson(context, 'StartSession', {
+      Target: context.instanceId,
+    });
+    const sessionId = responseString(started.body, 'SessionId');
+    const sourceToken = responseString(started.body, 'TokenValue');
+
+    const providerUnavailableCore = new SimulationCore(
+      store,
+      new ProviderRegistry([])
+    );
+    expect(() =>
+      providerUnavailableCore.exportSnapshot(context.worldId)
+    ).toThrow('snapshot contains an unredacted connection credential');
+
+    const snapshot = core.exportSnapshot(context.worldId);
+    const snapshotSession = snapshot.payload.resources.find(
+      (resource) => resource.resourceId === sessionId
+    );
+    const snapshotState = requiredRecord(
+      snapshotSession?.properties['state'],
+      'snapshot session state'
+    );
+    expect(snapshotState['tokenValue']).toBe('');
+    expect(JSON.stringify(snapshot)).not.toContain(sourceToken);
+    const sourceSession = store
+      .resources(context.worldId)
+      .find((resource) => resource.resourceId === sessionId);
+    const sourceState = requiredRecord(
+      sourceSession?.properties['state'],
+      'source session state'
+    );
+    expect(sourceState['tokenValue']).toBe(sourceToken);
+
+    const restored = core.restoreSnapshot(snapshot, 'restore-session-world');
+    const restoredStream = new SsmSessionStreamGateway({
+      core,
+      idleTimeoutMilliseconds: 5_000,
+    });
+    const restoredServer = Bun.serve<SsmSessionSocketData>({
+      hostname: '127.0.0.1',
+      port: 0,
+      fetch: (request, bunServer) =>
+        restoredStream.handles(request)
+          ? restoredStream.upgrade(request, bunServer)
+          : new Response('Not Found', { status: 404 }),
+      websocket: restoredStream.websocket,
+    });
+    servers.push(restoredServer);
+    const redactedUrl = new URL(responseString(started.body, 'StreamUrl'));
+    redactedUrl.host = restoredServer.url.host;
+    redactedUrl.searchParams.set('worldId', restored.worldId);
+    await expect(openSocket(redactedUrl.toString())).rejects.toThrow(
+      'WebSocket open failed'
+    );
+
+    const resumed = core.executeCommand(
+      restored.worldId,
+      {
+        deploymentId: context.deploymentId,
+        targetId: 'default',
+        provider: 'aws',
+        engine: 'cloudformation',
+        service: 'ssm',
+        operation: 'ResumeSession',
+        resourceType: 'AWS::SSM::Session',
+        input: {
+          SessionId: sessionId,
+          __SimulatorOrigin: restoredServer.url.origin,
+          __SimulatorRequestId: 'tcsim-abcdef0123456789abcdef01',
+        },
+      },
+      'resume-restored-session'
+    );
+    const resumedToken = responseString(resumed, 'TokenValue');
+    expect(resumedToken).not.toBe(sourceToken);
+    const opened = await openSocket(responseString(resumed, 'StreamUrl'));
+    await authenticate(opened.socket, opened.inbox, resumedToken);
   });
 
   it('idle timeoutがsessionをTerminateしてdata channelを閉じる', async () => {

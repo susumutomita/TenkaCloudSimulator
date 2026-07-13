@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'bun:test';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
@@ -25,6 +25,15 @@ const DEFAULT_TARGET_ID = 'default';
 const APPLICATION_ID_OUTPUT = 'ApplicationId';
 const APPLICATION_IMAGE =
   'ghcr.io/example/catalog-app@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+
+async function helloMulticloudFixture(
+  name: 'application.json' | 'simulation.json'
+): Promise<string> {
+  return readFile(
+    new URL(`./fixtures/hello-multicloud/${name}`, import.meta.url),
+    'utf8'
+  );
+}
 
 const APPLICATION = {
   name: 'catalog-app',
@@ -198,6 +207,90 @@ function providerView(testContext: TestContext): ProviderWorldView {
 }
 
 describe('Sakura AppRun provider の振る舞い', () => {
+  it('catalog と同形の descriptor path と overlay workload を descriptor の値で照合する', async () => {
+    const provider = new SakuraProvider();
+    const templateBody = await helloMulticloudFixture('application.json');
+    const overlayContents = await helloMulticloudFixture('simulation.json');
+    const compileInput: ProviderCompileInput = {
+      target: {
+        provider: 'sakura',
+        engine: 'apprun',
+        entry: 'sakura/application.json',
+      },
+      targetId: 'sakura-hello',
+      problemId: 'hello-multicloud',
+      templateBody,
+      artifacts: [],
+    };
+
+    const plan = provider.compile({
+      ...compileInput,
+      simulationOverlay: JSON.parse(overlayContents),
+    });
+
+    expect(plan.targetId).toBe('sakura-hello');
+    expect(plan.requirements).toEqual([
+      expect.objectContaining({
+        provider: 'sakura',
+        engine: 'apprun',
+        operation: 'deploy',
+        source: { path: 'sakura/application.json' },
+      }),
+    ]);
+
+    const mismatchedOverlays = [
+      overlayContents.replace(
+        'ghcr.io/susumutomita/tenkacloud-challenge-microservice-migration@sha256:96c7ca29de82b7d0c041e98f9cd9494de283102509134e5fb524d6e89da27cf2',
+        APPLICATION_IMAGE
+      ),
+      overlayContents.replace('"containerPort": 8080', '"containerPort": 8081'),
+      overlayContents.replace(
+        '"healthPath": "/healthz"',
+        '"healthPath": "/ready"'
+      ),
+    ];
+    for (const simulationOverlay of mismatchedOverlays) {
+      expect(() =>
+        provider.compile({
+          ...compileInput,
+          simulationOverlay: JSON.parse(simulationOverlay),
+        })
+      ).toThrow('does not match the application descriptor');
+    }
+  });
+
+  it('direct image entry は overlay workload と同じ digest だけを受理する', () => {
+    const provider = new SakuraProvider();
+    const mismatchedImage = `ghcr.io/example/catalog-app@sha256:${'b'.repeat(64)}`;
+
+    expect(() =>
+      provider.compile({
+        target: {
+          provider: 'sakura',
+          engine: 'apprun',
+          entry: mismatchedImage,
+        },
+        targetId: DEFAULT_TARGET_ID,
+        problemId: 'sakura-direct-image',
+        templateBody: JSON.stringify(APPLICATION),
+        artifacts: [],
+        simulationOverlay: {
+          schemaVersion: '1',
+          workloads: [
+            {
+              id: 'sakura-direct-image',
+              targetId: DEFAULT_TARGET_ID,
+              resourceRef: 'BaseUrl',
+              image: APPLICATION_IMAGE,
+              containerPort: 8080,
+              healthPath: '/healthz',
+            },
+          ],
+        },
+      })
+    ).toThrow('does not match the application descriptor');
+  });
+
   it('公式 create schema を配備し secret を event state へ残さない', async () => {
     const testContext = await context();
     const resources = testContext.store.resources(testContext.worldId);

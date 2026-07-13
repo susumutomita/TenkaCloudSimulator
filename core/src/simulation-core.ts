@@ -1,3 +1,4 @@
+import { SIMULATOR_RUNTIME_TARGET_ID_PATTERN } from '@tenkacloud/simulator-contracts';
 import { resolveTargetSources } from './artifact-bundle';
 import { contentHash, deterministicId } from './canonical';
 import type {
@@ -15,6 +16,7 @@ import type {
   ProviderClockResult,
   ProviderCommandInput,
   ProviderCommandResult,
+  ProviderCompileInput,
   ProviderDeploymentResult,
   ProviderEvent,
   ProviderModule,
@@ -117,14 +119,21 @@ function runtimeTargets(
     }
     const ids = new Set<string>();
     for (const target of runtime.targets) {
-      requireText(target.id ?? '', 'composite target id');
-      if (ids.has(target.id ?? '')) {
+      const id = target.id ?? '';
+      requireText(id, 'composite target id');
+      if (!SIMULATOR_RUNTIME_TARGET_ID_PATTERN.test(id)) {
+        throw new CoreError(
+          'ValidationFailed',
+          'composite target id must match ^[a-z][a-z0-9-]{0,31}$'
+        );
+      }
+      if (ids.has(id)) {
         throw new CoreError(
           'ValidationFailed',
           'composite target ids must be unique'
         );
       }
-      ids.add(target.id ?? '');
+      ids.add(id);
     }
     return runtime.targets;
   }
@@ -164,6 +173,62 @@ function mergeResources(
       )
     )
     .map((resource) => ({ ...resource, targetId: plan.targetId }));
+}
+
+function assertProviderResources(
+  provider: string,
+  resources: readonly ResourceDeclaration[],
+  boundary: string
+): void {
+  const invalid = resources.find((resource) => resource.provider !== provider);
+  if (invalid) {
+    throw new CoreError(
+      'ValidationFailed',
+      `${boundary} resource ${invalid.resourceId} does not belong to provider ${provider}`
+    );
+  }
+}
+
+function assertProviderPlan(
+  plan: ProviderTargetPlan,
+  target: Readonly<{
+    id: string;
+    provider: string;
+    engine: string;
+  }>
+): void {
+  if (
+    plan.targetId !== target.id ||
+    plan.provider !== target.provider ||
+    plan.engine !== target.engine
+  ) {
+    throw new CoreError(
+      'ValidationFailed',
+      `provider plan identity does not match target ${target.id}`
+    );
+  }
+  assertProviderResources(plan.provider, plan.resources, 'provider plan');
+}
+
+function assertProviderPlanUnchanged(
+  expectedHash: string,
+  plan: ProviderTargetPlan
+): void {
+  let actualHash: string;
+  try {
+    actualHash = contentHash(plan);
+  } catch {
+    throw new CoreError(
+      'ValidationFailed',
+      'provider deploy mutated provider plan'
+    );
+  }
+  if (actualHash !== expectedHash) {
+    throw new CoreError(
+      'ValidationFailed',
+      'provider deploy mutated provider plan'
+    );
+  }
 }
 
 function namespaceOf(world: WorldRecord): WorldNamespace {
@@ -606,6 +671,29 @@ function assertSnapshotHasNoWorkloads(payload: SnapshotPayload): void {
   }
 }
 
+function assertSnapshotHasNoConnectionCredential(
+  properties: Readonly<Record<string, unknown>>
+): void {
+  const state = properties['state'];
+  if (
+    isRecord(state) &&
+    typeof state['tokenValue'] === 'string' &&
+    state['tokenValue'].length > 0
+  ) {
+    snapshotIncompatible(
+      'snapshot contains an unredacted connection credential'
+    );
+  }
+}
+
+function assertSnapshotHasNoConnectionCredentials(
+  payload: SnapshotPayload
+): void {
+  for (const resource of payload.resources) {
+    assertSnapshotHasNoConnectionCredential(resource.properties);
+  }
+}
+
 function assertSnapshotGraph(payload: SnapshotPayload): void {
   const sourceWorldId = payload.world.worldId;
   if (!sourceWorldId.trim()) {
@@ -750,19 +838,27 @@ export class SimulationCore {
           `artifact source is missing for target ${target.id}`
         );
       }
-      plans.push(
-        module.compile({
-          target,
-          targetId: target.id,
-          problemId: input.problemId,
-          templateBody: source.templateBody,
-          artifacts: source.artifacts,
-          ...(input.metadata === undefined ? {} : { metadata: input.metadata }),
-          ...(overlay.document === undefined
-            ? {}
-            : { simulationOverlay: overlay.document }),
-        })
+      const expectedTarget = {
+        id: target.id,
+        provider: target.provider,
+        engine: target.engine,
+      } as const;
+      const compileInput: ProviderCompileInput = {
+        target,
+        targetId: expectedTarget.id,
+        problemId: input.problemId,
+        templateBody: source.templateBody,
+        artifacts: source.artifacts,
+        ...(input.metadata === undefined ? {} : { metadata: input.metadata }),
+        ...(overlay.document === undefined
+          ? {}
+          : { simulationOverlay: overlay.document }),
+      };
+      const plan = structuredClone(
+        module.compile(structuredClone(compileInput))
       );
+      assertProviderPlan(plan, expectedTarget);
+      plans.push(plan);
     });
     const requirements = [
       ...bootstrap,
@@ -852,7 +948,16 @@ export class SimulationCore {
     const results: TargetResult[] = compiled.plans.map((plan) => {
       const module = this.providers.get(plan.provider);
       if (!module) throw new CoreError('NotFound', 'provider disappeared');
-      return { plan, result: module.deploy(plan, view) };
+      const expectedPlanHash = contentHash(plan);
+      const deployPlan = structuredClone(plan);
+      const result = module.deploy(deployPlan, view);
+      assertProviderPlanUnchanged(expectedPlanHash, deployPlan);
+      assertProviderResources(
+        plan.provider,
+        result.resources,
+        'provider deploy'
+      );
+      return { plan, result };
     });
     const providerResources = results.flatMap(({ plan, result }) =>
       mergeResources(plan, result)
@@ -1190,6 +1295,11 @@ export class SimulationCore {
     scope: string,
     result: ProviderCommandResult
   ): Readonly<Record<string, unknown>> {
+    assertProviderResources(
+      input.provider,
+      result.resources,
+      'provider command'
+    );
     this.#assertEventQuota(worldId, result.events.length);
     this.#assertResourceQuota(worldId, result.resources.length);
     const commandId = deterministicId('command', { scope, idempotencyKey });
@@ -1414,7 +1524,16 @@ export class SimulationCore {
       world: this.world(worldId),
       events: this.store.events(worldId),
       deployments: this.store.deployments(worldId),
-      resources: this.store.resources(worldId),
+      resources: this.store.resources(worldId).map((resource) => {
+        const properties =
+          this.providers
+            .get(resource.provider)
+            ?.snapshotProperties?.(resource) ?? resource.properties;
+        assertSnapshotHasNoConnectionCredential(properties);
+        return properties === resource.properties
+          ? resource
+          : { ...resource, properties };
+      }),
     };
     return { payload, hash: contentHash(payload) };
   }
@@ -1435,6 +1554,7 @@ export class SimulationCore {
     }
     assertSnapshotGraph(snapshot.payload);
     assertSnapshotHasNoWorkloads(snapshot.payload);
+    assertSnapshotHasNoConnectionCredentials(snapshot.payload);
     const scope = `restore-snapshot:${snapshot.payload.world.worldId}`;
     const existing = this.store.idempotent<WorldRecord>(
       scope,

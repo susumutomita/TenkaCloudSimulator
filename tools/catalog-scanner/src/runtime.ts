@@ -1,4 +1,5 @@
 import { basename } from 'node:path';
+import { SIMULATOR_RUNTIME_TARGET_ID_PATTERN } from '@tenkacloud/simulator-contracts';
 import type { Diagnostic, NormalizedTarget, SourceLocation } from './model.ts';
 import { sourceLocation } from './source.ts';
 import { isRecord, recordValue, stringValue } from './value.ts';
@@ -140,6 +141,7 @@ function normalizeCompositeTarget(
     provider === undefined ||
     engine === undefined ||
     entry === undefined ||
+    !SIMULATOR_RUNTIME_TARGET_ID_PATTERN.test(id) ||
     seenIds.has(id)
   ) {
     return undefined;

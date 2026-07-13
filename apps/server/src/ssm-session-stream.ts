@@ -457,6 +457,7 @@ export class SsmSessionStreamGateway {
       state?.['status'] !== 'Active' ||
       typeof target !== 'string' ||
       typeof storedToken !== 'string' ||
+      storedToken.length === 0 ||
       typeof expiresAt !== 'string' ||
       Date.parse(expiresAt) <= Date.parse(world.virtualTime) ||
       (expectedToken !== undefined &&

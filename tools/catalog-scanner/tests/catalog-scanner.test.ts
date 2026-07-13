@@ -482,6 +482,46 @@ resource "google_cloud_run_v2_service_iam_member" "public" {
       )
     ).toHaveLength(2);
   });
+
+  it('公開 target ID 形式に一致しない Composite target を invalid にする', async () => {
+    const root = await temporaryDirectory();
+    await writeText(
+      root,
+      'challenges/invalid-target/metadata.json',
+      `${JSON.stringify({
+        id: 'invalid-target',
+        category: 'Challenge',
+        status: 'draft',
+        runtime: {
+          kind: 'composite',
+          targets: [
+            {
+              id: 'AWS-main',
+              provider: 'aws',
+              engine: 'cloudformation',
+              entry: 'template.yaml',
+            },
+            {
+              id: 'gcp-edge',
+              provider: 'gcp',
+              engine: 'infra-manager',
+              entry: 'main.tf',
+            },
+          ],
+        },
+      })}\n`
+    );
+
+    const inventory = await collectCatalog(root);
+
+    expect(inventory.problems[0]?.targets).toEqual([]);
+    expect(inventory.diagnostics).toContainEqual(
+      expect.objectContaining({
+        code: 'INVALID_RUNTIME',
+        message: expect.stringContaining('composite target'),
+      })
+    );
+  });
 });
 
 describe('Docker local-play catalog を走査するとき', () => {

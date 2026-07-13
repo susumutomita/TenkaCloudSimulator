@@ -348,6 +348,19 @@ export function reduceSsmSession(
   }
 }
 
+export function ssmSnapshotProperties(
+  resource: ResourceRecord
+): Readonly<Record<string, unknown>> {
+  if (resource.resourceType !== SSM_SESSION_RESOURCE) {
+    return resource.properties;
+  }
+  const state = stateObject(storedProperties(resource));
+  return {
+    ...resource.properties,
+    state: { ...state, tokenValue: '' },
+  };
+}
+
 export function expireSsmSessions(
   input: ProviderClockInput,
   world: ProviderWorldView
