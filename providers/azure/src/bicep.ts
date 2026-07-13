@@ -283,10 +283,7 @@ function propertyExpression(
     'm'
   ).exec(searchable);
   if (!match?.[1]) return undefined;
-  return match[1]
-    .trim()
-    .replace(/,\\s*$/, '')
-    .trim();
+  return match[1].trim().replace(/,\s*$/, '').trim();
 }
 
 function unsupportedPropertyExpression(

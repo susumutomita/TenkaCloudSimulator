@@ -287,6 +287,27 @@ resource helloEnvironment`
     expect(error.message).toContain('actual');
   });
 
+  it('comment projection 後の environmentId は末尾 comma と空白を除いて解決する', async () => {
+    const source = await fixture();
+
+    for (const suffix of [',', ',   ']) {
+      const withTrailingComma = source.replace(
+        'environmentId: helloEnvironment.id',
+        `/* environmentId: missing.id */
+    environmentId: helloEnvironment.id${suffix}`
+      );
+      const compiled = compileBicep(withTrailingComma, CONTEXT);
+      const app = compiled.resources.find(
+        (resource) => resource.type === BICEP_CONTAINER_APP
+      );
+      const environment = compiled.resources.find(
+        (resource) => resource.type === BICEP_MANAGED_ENVIRONMENT
+      );
+
+      expect(app?.properties['environmentId']).toBe(environment?.resourceId);
+    }
+  });
+
   it('別 symbol が同じ generated resource ID へ解決される場合は決定論的に拒否する', () => {
     const duplicate = containerSource().replace(
       'resource app ',
