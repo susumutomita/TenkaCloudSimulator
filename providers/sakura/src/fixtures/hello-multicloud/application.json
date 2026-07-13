@@ -1,0 +1,26 @@
+{
+  "name": "hello-multicloud",
+  "timeout_seconds": 60,
+  "port": 8080,
+  "min_scale": 0,
+  "max_scale": 1,
+  "scale_target_concurrency": 100,
+  "components": [
+    {
+      "name": "hello",
+      "max_cpu": "0.5",
+      "max_memory": "1Gi",
+      "deploy_source": {
+        "container_registry": {
+          "image": "ghcr.io/susumutomita/tenkacloud-challenge-microservice-migration@sha256:96c7ca29de82b7d0c041e98f9cd9494de283102509134e5fb524d6e89da27cf2"
+        }
+      },
+      "probe": {
+        "http_get": {
+          "path": "/healthz",
+          "port": 8080
+        }
+      }
+    }
+  ]
+}

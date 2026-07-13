@@ -217,6 +217,9 @@ export interface ProviderModule {
     input: ProviderClockInput,
     world: ProviderWorldView
   ): ProviderClockResult;
+  snapshotProperties?(
+    resource: ResourceRecord
+  ): Readonly<Record<string, unknown>>;
 }
 
 export interface DeploymentRecord {

@@ -1,0 +1,32 @@
+{
+  "$schema": "../../SIMULATION_SCHEMA.json",
+  "schemaVersion": "1",
+  "requirements": [
+    {
+      "targetId": "sakura-hello",
+      "service": "http",
+      "resourceType": "HTTP::Endpoint",
+      "operation": "Request",
+      "fidelity": "L4",
+      "plane": "workload"
+    },
+    {
+      "targetId": "sakura-hello",
+      "service": "http",
+      "resourceType": "HTTP::Endpoint",
+      "operation": "Probe",
+      "fidelity": "L4",
+      "plane": "scoring"
+    }
+  ],
+  "workloads": [
+    {
+      "id": "sakura-hello",
+      "targetId": "sakura-hello",
+      "resourceRef": "BaseUrl",
+      "image": "ghcr.io/susumutomita/tenkacloud-challenge-microservice-migration@sha256:96c7ca29de82b7d0c041e98f9cd9494de283102509134e5fb524d6e89da27cf2",
+      "containerPort": 8080,
+      "healthPath": "/healthz"
+    }
+  ]
+}

@@ -1,6 +1,7 @@
 export const SIMULATOR_PROTOCOL_VERSION = '2026-07-11' as const;
 export const SIMULATOR_SNAPSHOT_VERSION = '1' as const;
 export const SIMULATOR_EVENT_PAGE_SIZE = 100 as const;
+export const SIMULATOR_RUNTIME_TARGET_ID_PATTERN = /^[a-z][a-z0-9-]{0,31}$/;
 
 export type JsonPrimitive = boolean | null | number | string;
 export type JsonValue = JsonPrimitive | JsonObject | readonly JsonValue[];
@@ -33,7 +34,7 @@ export interface SimulatorProviderCapabilities {
 
 export interface SimulatorCapability {
   readonly provider: string;
-  readonly engine: string;
+  readonly engine?: string;
   readonly service: string;
   readonly resourceType: string;
   readonly operation: string;

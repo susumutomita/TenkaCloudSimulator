@@ -399,6 +399,11 @@ describe('Simulator HTTP protocol', () => {
         (capability) => capability.resourceType === 'Runtime::Workload'
       )
     ).toBe(false);
+    expect(
+      capabilities.capabilities?.every(
+        (capability) => capability.engine === 'declarative'
+      )
+    ).toBe(true);
 
     const requestBody = JSON.stringify({
       tenantId: 'tenant-a',

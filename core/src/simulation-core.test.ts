@@ -11,7 +11,9 @@ import type {
   ProviderCapability,
   ProviderClockInput,
   ProviderClockResult,
+  ProviderCommandResult,
   ProviderCompileInput,
+  ProviderDeploymentResult,
   ProviderModule,
   ProviderTargetPlan,
   ProviderWorldView,
@@ -177,7 +179,7 @@ class DeterministicProvider implements ProviderModule {
   deploy(
     plan: ProviderTargetPlan,
     world: Parameters<ProviderModule['deploy']>[1]
-  ) {
+  ): ProviderDeploymentResult {
     return {
       events: [
         {
@@ -207,7 +209,7 @@ class DeterministicProvider implements ProviderModule {
   reduce(
     command: Parameters<ProviderModule['reduce']>[0],
     world: Parameters<ProviderModule['reduce']>[1]
-  ) {
+  ): ProviderCommandResult {
     const { resourceId: requestedResourceId, value } = command.input;
     const resourceId =
       typeof requestedResourceId === 'string' && requestedResourceId.length > 0
@@ -260,9 +262,95 @@ class DeterministicProvider implements ProviderModule {
   }
 }
 
-class MisroutedProvider extends DeterministicProvider {
+type InvalidPlanIdentity =
+  | 'targetId'
+  | 'provider'
+  | 'engine'
+  | 'resourceProvider';
+
+class InvalidPlanIdentityProvider extends DeterministicProvider {
+  constructor(
+    provider: string,
+    engine: string,
+    readonly invalidIdentity: InvalidPlanIdentity
+  ) {
+    super(provider, engine);
+  }
+
   override compile(input: ProviderCompileInput): ProviderTargetPlan {
-    return { ...super.compile(input), provider: 'provider-not-registered' };
+    const plan = super.compile(input);
+    switch (this.invalidIdentity) {
+      case 'targetId':
+        return { ...plan, targetId: 'different-target' };
+      case 'provider':
+        return { ...plan, provider: 'different-provider' };
+      case 'engine':
+        return { ...plan, engine: 'different-engine' };
+      case 'resourceProvider':
+        return {
+          ...plan,
+          resources: plan.resources.map((resource) => ({
+            ...resource,
+            provider: 'different-provider',
+          })),
+        };
+    }
+  }
+}
+
+class InvalidDeploymentResultProvider extends DeterministicProvider {
+  override deploy(
+    plan: ProviderTargetPlan,
+    world: ProviderWorldView
+  ): ProviderDeploymentResult {
+    const result = super.deploy(plan, world);
+    return {
+      ...result,
+      resources: result.resources.map((resource) => ({
+        ...resource,
+        provider: 'different-provider',
+      })),
+    };
+  }
+}
+
+class MutatingDeploymentPlanProvider extends DeterministicProvider {
+  override deploy(
+    plan: ProviderTargetPlan,
+    world: ProviderWorldView
+  ): ProviderDeploymentResult {
+    Reflect.set(plan, 'targetId', 'mutated-target');
+    Reflect.set(plan, 'provider', 'mutated-provider');
+    for (const resource of plan.resources) {
+      Reflect.set(resource, 'provider', 'mutated-provider');
+    }
+    return super.deploy(plan, world);
+  }
+}
+
+class MutatingCompileInputProvider extends DeterministicProvider {
+  override compile(input: ProviderCompileInput): ProviderTargetPlan {
+    Reflect.set(input.target, 'id', 'hijacked-target');
+    return {
+      ...super.compile(input),
+      targetId: input.target.id ?? 'hijacked-target',
+    };
+  }
+}
+
+class InvalidCommandResultProvider extends DeterministicProvider {
+  override reduce(
+    command: Parameters<ProviderModule['reduce']>[0],
+    world: Parameters<ProviderModule['reduce']>[1]
+  ): ProviderCommandResult {
+    const result = super.reduce(command, world);
+    return {
+      ...result,
+      resources: result.resources.map((resource) => ({
+        ...resource,
+        provider: 'different-provider',
+      })),
+    };
   }
 }
 
@@ -1015,7 +1103,7 @@ describe('SimulationCore の振る舞い', () => {
       ).toBe(true);
     });
 
-    it('Composite の target 数、ID 必須、一意性を検証する', () => {
+    it('Composite の target 数、ID 形式、必須、一意性を検証する', () => {
       const world = createWorld();
       const target = {
         id: 'one',
@@ -1036,6 +1124,9 @@ describe('SimulationCore の振る舞い', () => {
         })),
         [target, withoutId],
         [target, { ...target }],
+        [target, { ...target, id: 'Invalid' }],
+        [target, { ...target, id: 'invalid_target' }],
+        [target, { ...target, id: `a${'b'.repeat(32)}` }],
       ];
 
       invalidTargets.forEach((targets, index) => {
@@ -1084,24 +1175,127 @@ describe('SimulationCore の振る舞い', () => {
       ).toBe('ValidationFailed');
     });
 
-    it('provider が compile 後に未登録 provider の plan を返したら NotFound にする', () => {
+    it('provider plan の target identity と resource provider が入力と違えば永続化前に拒否する', () => {
       const world = createWorld();
-      const isolatedRegistry = new ProviderRegistry([
-        new MisroutedProvider('misrouted', 'engine-m'),
-      ]);
-      const isolatedCore = new SimulationCore(store, isolatedRegistry);
+      const invalidIdentities: readonly InvalidPlanIdentity[] = [
+        'targetId',
+        'provider',
+        'engine',
+        'resourceProvider',
+      ];
+
+      invalidIdentities.forEach((invalidIdentity, index) => {
+        const provider = `invalid-plan-${index}`;
+        const engine = `engine-${index}`;
+        const deploymentId = `invalid-plan-deployment-${index}`;
+        const isolatedCore = new SimulationCore(
+          store,
+          new ProviderRegistry([
+            new InvalidPlanIdentityProvider(provider, engine, invalidIdentity),
+          ])
+        );
+
+        const error = captureCoreError(() =>
+          isolatedCore.createDeployment(
+            world.worldId,
+            singleDeployment(deploymentId, provider, engine),
+            `invalid-plan-key-${index}`
+          )
+        );
+
+        expect(error.code).toBe('ValidationFailed');
+        expect(store.deployment(world.worldId, deploymentId)).toBeUndefined();
+      });
+      expect(store.resources(world.worldId)).toEqual([]);
+    });
+
+    it('provider deploy result の resource provider が plan と違えば永続化前に拒否する', () => {
+      const world = createWorld();
+      const isolatedCore = new SimulationCore(
+        store,
+        new ProviderRegistry([
+          new InvalidDeploymentResultProvider('invalid-result', 'engine-r'),
+        ])
+      );
 
       const error = captureCoreError(() =>
         isolatedCore.createDeployment(
           world.worldId,
-          singleDeployment('misrouted-deployment', 'misrouted', 'engine-m'),
-          'misrouted-key'
+          singleDeployment(
+            'invalid-result-deployment',
+            'invalid-result',
+            'engine-r'
+          ),
+          'invalid-result-key'
         )
       );
 
-      expect(error.code).toBe('NotFound');
+      expect(error.code).toBe('ValidationFailed');
+      expect(store.resources(world.worldId)).toEqual([]);
       expect(
-        store.deployment(world.worldId, 'misrouted-deployment')
+        store.deployment(world.worldId, 'invalid-result-deployment')
+      ).toBeUndefined();
+    });
+
+    it('provider が compile 入力の target を変更しても検証基準と永続化 identity を変更しない', () => {
+      const world = createWorld();
+      const isolatedCore = new SimulationCore(
+        store,
+        new ProviderRegistry([
+          new MutatingCompileInputProvider('mutating-input', 'engine-i'),
+        ])
+      );
+      const eventsBefore = isolatedCore.events(world.worldId);
+
+      const error = captureCoreError(() =>
+        isolatedCore.createDeployment(
+          world.worldId,
+          singleDeployment(
+            'mutating-input-deployment',
+            'mutating-input',
+            'engine-i'
+          ),
+          'mutating-input-key'
+        )
+      );
+
+      expect(error.code).toBe('ValidationFailed');
+      expect(error.message).toContain('does not match target default');
+      expect(isolatedCore.events(world.worldId)).toEqual(eventsBefore);
+      expect(store.resources(world.worldId)).toEqual([]);
+      expect(
+        store.deployment(world.worldId, 'mutating-input-deployment')
+      ).toBeUndefined();
+    });
+
+    it('provider が deploy 中に検証済み plan を変更しても永続化しない', () => {
+      const world = createWorld();
+      const isolatedCore = new SimulationCore(
+        store,
+        new ProviderRegistry([
+          new MutatingDeploymentPlanProvider('mutating-plan', 'engine-p'),
+        ])
+      );
+      const eventsBefore = isolatedCore.events(world.worldId);
+
+      const error = captureCoreError(() =>
+        isolatedCore.createDeployment(
+          world.worldId,
+          singleDeployment(
+            'mutating-plan-deployment',
+            'mutating-plan',
+            'engine-p'
+          ),
+          'mutating-plan-key'
+        )
+      );
+
+      expect(error.code).toBe('ValidationFailed');
+      expect(error.message).toContain('mutated provider plan');
+      expect(isolatedCore.events(world.worldId)).toEqual(eventsBefore);
+      expect(store.resources(world.worldId)).toEqual([]);
+      expect(
+        store.deployment(world.worldId, 'mutating-plan-deployment')
       ).toBeUndefined();
     });
 
@@ -1391,6 +1585,41 @@ describe('SimulationCore の振る舞い', () => {
       expect(error.code).toBe('UnsupportedCapability');
       expect(error.diagnostics[0]?.code).toBe('MissingCapability');
       expect(core.events(world.worldId)).toEqual(eventsBefore);
+      expect(store.resources(world.worldId)).toEqual(resourcesBefore);
+    });
+
+    it('provider command result の resource provider が入力と違えば state を変更しない', () => {
+      const world = createWorld();
+      const provider = 'invalid-command';
+      const engine = 'engine-c';
+      const isolatedCore = new SimulationCore(
+        store,
+        new ProviderRegistry([
+          new InvalidCommandResultProvider(provider, engine),
+        ])
+      );
+      const deployment = isolatedCore.createDeployment(
+        world.worldId,
+        singleDeployment('invalid-command-deployment', provider, engine),
+        'invalid-command-deployment-key'
+      );
+      const eventsBefore = isolatedCore.events(world.worldId);
+      const resourcesBefore = store.resources(world.worldId);
+
+      const error = captureCoreError(() =>
+        isolatedCore.executeCommand(
+          world.worldId,
+          {
+            ...commandInput(deployment.deploymentId),
+            provider,
+            engine,
+          },
+          'invalid-command-key'
+        )
+      );
+
+      expect(error.code).toBe('ValidationFailed');
+      expect(isolatedCore.events(world.worldId)).toEqual(eventsBefore);
       expect(store.resources(world.worldId)).toEqual(resourcesBefore);
     });
 
@@ -2022,6 +2251,79 @@ describe('SimulationCore の振る舞い', () => {
           .query<{ worlds: number; idempotency: number }, []>(
             `SELECT
                (SELECT COUNT(*) FROM worlds) AS worlds,
+               (SELECT COUNT(*) FROM idempotency) AS idempotency`
+          )
+          .get()
+      ).toEqual(countsBefore);
+    });
+
+    it('再計算済み hash でも接続 token を持つ resource を一件も永続化しない', () => {
+      const world = createWorld();
+      createReadyDeployment(world.worldId);
+      const snapshot = core.exportSnapshot(world.worldId);
+      const resource = snapshot.payload.resources.at(0);
+      if (!resource) throw new Error('snapshot resource がありません');
+      const forgedPayload: SnapshotPayload = {
+        ...snapshot.payload,
+        resources: snapshot.payload.resources.map((candidate) =>
+          candidate === resource
+            ? {
+                ...candidate,
+                properties: {
+                  ...candidate.properties,
+                  state: { tokenValue: 'forged-connection-token' },
+                },
+              }
+            : candidate
+        ),
+      };
+      const forged: WorldSnapshot = {
+        payload: forgedPayload,
+        hash: contentHash(forgedPayload),
+      };
+      const countsBefore = store.database
+        .query<
+          {
+            worlds: number;
+            events: number;
+            deployments: number;
+            resources: number;
+            idempotency: number;
+          },
+          []
+        >(
+          `SELECT
+             (SELECT COUNT(*) FROM worlds) AS worlds,
+             (SELECT COUNT(*) FROM events) AS events,
+             (SELECT COUNT(*) FROM deployments) AS deployments,
+             (SELECT COUNT(*) FROM resources) AS resources,
+             (SELECT COUNT(*) FROM idempotency) AS idempotency`
+        )
+        .get();
+
+      const error = captureCoreError(() =>
+        core.restoreSnapshot(forged, 'forged-token-restore')
+      );
+
+      expect(error.code).toBe('SnapshotIncompatible');
+      expect(error.message).toContain('unredacted connection credential');
+      expect(
+        store.database
+          .query<
+            {
+              worlds: number;
+              events: number;
+              deployments: number;
+              resources: number;
+              idempotency: number;
+            },
+            []
+          >(
+            `SELECT
+               (SELECT COUNT(*) FROM worlds) AS worlds,
+               (SELECT COUNT(*) FROM events) AS events,
+               (SELECT COUNT(*) FROM deployments) AS deployments,
+               (SELECT COUNT(*) FROM resources) AS resources,
                (SELECT COUNT(*) FROM idempotency) AS idempotency`
           )
           .get()

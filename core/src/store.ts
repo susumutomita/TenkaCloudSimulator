@@ -43,6 +43,10 @@ interface DeploymentRow {
 
 interface TableColumnRow {
   name: string;
+  type: string;
+  notnull: number;
+  dflt_value: string | null;
+  pk: number;
 }
 
 interface TableCountRow {
@@ -51,6 +55,30 @@ interface TableCountRow {
 
 interface TableExistsRow {
   found: number;
+}
+
+interface SchemaVersionRow {
+  user_version: number;
+}
+
+interface ForeignKeyRow {
+  id: number;
+  seq: number;
+  table: string;
+  from: string;
+  to: string;
+  on_update: string;
+  on_delete: string;
+  match: string;
+}
+
+interface SchemaObjectRow {
+  type: string;
+  name: string;
+}
+
+interface ForeignKeyViolationRow {
+  table: string;
 }
 
 interface ResourceRow {
@@ -84,49 +112,509 @@ const RESOURCE_TABLE_SQL = `
   );
 `;
 
-function assertResourceMigrationCompatibility(database: Database): void {
-  const table = database
-    .query<TableExistsRow, []>(
-      `SELECT 1 AS found FROM sqlite_master
-       WHERE type = 'table' AND name = 'resources'`
-    )
-    .get();
-  if (!table) return;
-  const columns = database
-    .query<TableColumnRow, []>('PRAGMA table_info(resources)')
+const BASE_TABLES_SQL = `
+  CREATE TABLE IF NOT EXISTS worlds (
+    world_id TEXT PRIMARY KEY,
+    tenant_id TEXT NOT NULL,
+    event_id TEXT NOT NULL,
+    team_id TEXT NOT NULL,
+    deployment_id TEXT NOT NULL,
+    seed TEXT NOT NULL,
+    virtual_time TEXT NOT NULL,
+    status TEXT NOT NULL,
+    next_sequence INTEGER NOT NULL
+  );
+  CREATE TABLE IF NOT EXISTS events (
+    world_id TEXT NOT NULL,
+    sequence INTEGER NOT NULL,
+    type TEXT NOT NULL,
+    virtual_time TEXT NOT NULL,
+    command_id TEXT NOT NULL,
+    payload TEXT NOT NULL,
+    payload_hash TEXT NOT NULL,
+    PRIMARY KEY (world_id, sequence),
+    FOREIGN KEY (world_id) REFERENCES worlds(world_id)
+  );
+  CREATE TABLE IF NOT EXISTS deployments (
+    world_id TEXT NOT NULL,
+    deployment_id TEXT NOT NULL,
+    problem_id TEXT NOT NULL,
+    status TEXT NOT NULL,
+    targets TEXT NOT NULL,
+    outputs TEXT NOT NULL,
+    diagnostics TEXT NOT NULL,
+    PRIMARY KEY (world_id, deployment_id),
+    FOREIGN KEY (world_id) REFERENCES worlds(world_id)
+  );
+  CREATE TABLE IF NOT EXISTS idempotency (
+    scope TEXT NOT NULL,
+    key TEXT NOT NULL,
+    request_hash TEXT NOT NULL,
+    response TEXT NOT NULL,
+    PRIMARY KEY (scope, key)
+  );
+`;
+
+const CURRENT_SCHEMA_VERSION = 1;
+const CURRENT_TABLE_NAMES = [
+  'worlds',
+  'events',
+  'deployments',
+  'idempotency',
+  'resources',
+] as const;
+type CurrentTableName = (typeof CURRENT_TABLE_NAMES)[number];
+const CURRENT_TABLE_COLUMNS = {
+  worlds: [
+    'world_id',
+    'tenant_id',
+    'event_id',
+    'team_id',
+    'deployment_id',
+    'seed',
+    'virtual_time',
+    'status',
+    'next_sequence',
+  ],
+  events: [
+    'world_id',
+    'sequence',
+    'type',
+    'virtual_time',
+    'command_id',
+    'payload',
+    'payload_hash',
+  ],
+  deployments: [
+    'world_id',
+    'deployment_id',
+    'problem_id',
+    'status',
+    'targets',
+    'outputs',
+    'diagnostics',
+  ],
+  idempotency: ['scope', 'key', 'request_hash', 'response'],
+  resources: [
+    'world_id',
+    'deployment_id',
+    'target_id',
+    'provider',
+    'resource_type',
+    'resource_id',
+    'properties',
+    'status',
+  ],
+} as const;
+
+const LEGACY_DEPLOYMENT_COLUMNS = [
+  'world_id',
+  'deployment_id',
+  'problem_id',
+  'status',
+  'outputs',
+  'diagnostics',
+] as const;
+
+const LEGACY_RESOURCE_COLUMNS = [
+  'world_id',
+  'deployment_id',
+  'provider',
+  'resource_type',
+  'resource_id',
+  'properties',
+  'status',
+] as const;
+
+const PREVIOUSLY_MIGRATED_DEPLOYMENT_COLUMNS = [
+  ...LEGACY_DEPLOYMENT_COLUMNS,
+  'targets',
+] as const;
+
+const CURRENT_PRIMARY_KEYS = {
+  worlds: ['world_id'],
+  events: ['world_id', 'sequence'],
+  deployments: ['world_id', 'deployment_id'],
+  idempotency: ['scope', 'key'],
+  resources: [
+    'world_id',
+    'deployment_id',
+    'target_id',
+    'provider',
+    'resource_id',
+  ],
+} as const;
+
+interface LegacyTableShape {
+  readonly columns: readonly string[];
+  readonly primaryKey: readonly string[];
+  readonly defaults?: Readonly<Record<string, string>>;
+}
+
+const LEGACY_DEPLOYMENT_SHAPE: LegacyTableShape = {
+  columns: LEGACY_DEPLOYMENT_COLUMNS,
+  primaryKey: ['world_id', 'deployment_id'],
+};
+
+const LEGACY_RESOURCE_SHAPE: LegacyTableShape = {
+  columns: LEGACY_RESOURCE_COLUMNS,
+  primaryKey: ['world_id', 'provider', 'resource_id'],
+};
+
+const HISTORICAL_DEPLOYMENT_SHAPE: LegacyTableShape = {
+  columns: PREVIOUSLY_MIGRATED_DEPLOYMENT_COLUMNS,
+  primaryKey: ['world_id', 'deployment_id'],
+  defaults: { targets: "'[]'" },
+};
+
+type SchemaShape = 'missing' | 'current' | 'historical' | 'legacy';
+type SchemaShapes = Readonly<Record<CurrentTableName, SchemaShape>>;
+
+function sameColumns(
+  actual: readonly string[],
+  expected: readonly string[]
+): boolean {
+  return (
+    actual.length === expected.length &&
+    actual.every((column, index) => column === expected[index])
+  );
+}
+
+function primaryKey(columns: readonly TableColumnRow[]): readonly string[] {
+  return columns
+    .filter((column) => column.pk > 0)
+    .sort((left, right) => left.pk - right.pk)
+    .map((column) => column.name);
+}
+
+function columnDefinitionsMatch(
+  tableName: CurrentTableName,
+  columns: readonly TableColumnRow[],
+  defaults: Readonly<Record<string, string>> = {}
+): boolean {
+  return columns.every((column) => {
+    const expectedType =
+      column.name === 'sequence' || column.name === 'next_sequence'
+        ? 'INTEGER'
+        : 'TEXT';
+    const expectedNotNull =
+      tableName === 'worlds' && column.name === 'world_id' ? 0 : 1;
+    return (
+      column.type === expectedType &&
+      column.notnull === expectedNotNull &&
+      column.dflt_value === (defaults[column.name] ?? null)
+    );
+  });
+}
+
+function foreignKeysMatch(
+  database: Database,
+  tableName: CurrentTableName
+): boolean {
+  const foreignKeys = database
+    .query<ForeignKeyRow, []>(`PRAGMA foreign_key_list(${tableName})`)
     .all();
-  if (columns.some((column) => column.name === 'target_id')) return;
+  const expectsWorld = ['events', 'deployments', 'resources'].includes(
+    tableName
+  );
+  if (!expectsWorld) return foreignKeys.length === 0;
+  const foreignKey = foreignKeys[0];
+  return (
+    foreignKeys.length === 1 &&
+    foreignKey?.id === 0 &&
+    foreignKey.seq === 0 &&
+    foreignKey.table === 'worlds' &&
+    foreignKey.from === 'world_id' &&
+    foreignKey.to === 'world_id' &&
+    foreignKey.on_update === 'NO ACTION' &&
+    foreignKey.on_delete === 'NO ACTION' &&
+    foreignKey.match === 'NONE'
+  );
+}
+
+function matchesShape(
+  database: Database,
+  tableName: CurrentTableName,
+  columns: readonly TableColumnRow[],
+  expectedColumns: readonly string[],
+  expectedPrimaryKey: readonly string[],
+  defaults: Readonly<Record<string, string>> = {}
+): boolean {
+  return (
+    sameColumns(
+      columns.map((column) => column.name),
+      expectedColumns
+    ) &&
+    sameColumns(primaryKey(columns), expectedPrimaryKey) &&
+    columnDefinitionsMatch(tableName, columns, defaults) &&
+    foreignKeysMatch(database, tableName)
+  );
+}
+
+function tableShape(
+  database: Database,
+  tableName: CurrentTableName,
+  legacyShape?: LegacyTableShape
+): SchemaShape {
+  const table = database
+    .query<TableExistsRow, [string]>(
+      `SELECT 1 AS found FROM sqlite_master
+       WHERE type = 'table' AND name = ?`
+    )
+    .get(tableName);
+  if (!table) return 'missing';
+  const columns = database
+    .query<TableColumnRow, []>(`PRAGMA table_info(${tableName})`)
+    .all();
+  const currentPrimaryKey = CURRENT_PRIMARY_KEYS[tableName];
+  if (
+    matchesShape(
+      database,
+      tableName,
+      columns,
+      CURRENT_TABLE_COLUMNS[tableName],
+      currentPrimaryKey
+    )
+  ) {
+    return 'current';
+  }
+  if (
+    tableName === 'deployments' &&
+    (matchesShape(
+      database,
+      tableName,
+      columns,
+      PREVIOUSLY_MIGRATED_DEPLOYMENT_COLUMNS,
+      currentPrimaryKey
+    ) ||
+      matchesShape(
+        database,
+        tableName,
+        columns,
+        HISTORICAL_DEPLOYMENT_SHAPE.columns,
+        HISTORICAL_DEPLOYMENT_SHAPE.primaryKey,
+        HISTORICAL_DEPLOYMENT_SHAPE.defaults
+      ))
+  ) {
+    return 'historical';
+  }
+  if (
+    legacyShape &&
+    matchesShape(
+      database,
+      tableName,
+      columns,
+      legacyShape.columns,
+      legacyShape.primaryKey,
+      legacyShape.defaults
+    )
+  ) {
+    return 'legacy';
+  }
+  throw new CoreError(
+    'ValidationFailed',
+    `${tableName} schema is incompatible with version ${CURRENT_SCHEMA_VERSION}`
+  );
+}
+
+function assertLegacyTableIsEmpty(
+  database: Database,
+  tableName: 'deployments' | 'resources',
+  message: string
+): void {
   const row = database
-    .query<TableCountRow, []>('SELECT COUNT(*) AS count FROM resources')
+    .query<TableCountRow, []>(`SELECT COUNT(*) AS count FROM ${tableName}`)
     .get();
   if ((row?.count ?? 0) > 0) {
+    throw new CoreError('ValidationFailed', message);
+  }
+}
+
+function schemaVersion(database: Database): number {
+  const version = database
+    .query<SchemaVersionRow, []>('PRAGMA user_version')
+    .get()?.user_version;
+  if (
+    version === undefined ||
+    !Number.isSafeInteger(version) ||
+    version < 0 ||
+    version > CURRENT_SCHEMA_VERSION
+  ) {
     throw new CoreError(
       'ValidationFailed',
+      `SQLite schema version ${String(version)} is not supported`
+    );
+  }
+  return version;
+}
+
+function assertCurrentTable(
+  database: Database,
+  tableName: CurrentTableName
+): void {
+  if (tableShape(database, tableName) !== 'current') {
+    throw new CoreError(
+      'ValidationFailed',
+      `${tableName} schema is missing from version ${CURRENT_SCHEMA_VERSION}`
+    );
+  }
+}
+
+function assertKnownSchemaObjects(database: Database): void {
+  const unexpected = database
+    .query<SchemaObjectRow, []>(
+      `SELECT type, name FROM sqlite_master
+       WHERE name NOT LIKE 'sqlite_%'
+       ORDER BY type, name`
+    )
+    .all()
+    .filter(
+      (object) =>
+        object.type !== 'table' ||
+        !CURRENT_TABLE_NAMES.includes(object.name as CurrentTableName)
+    );
+  if (unexpected.length > 0) {
+    throw new CoreError(
+      'ValidationFailed',
+      `simulator state contains unknown schema object ${unexpected[0]?.name ?? '<unknown>'}`
+    );
+  }
+}
+
+function assertNoForeignKeyViolations(database: Database): void {
+  const violation = database
+    .query<ForeignKeyViolationRow, []>('PRAGMA foreign_key_check')
+    .get();
+  if (violation) {
+    throw new CoreError(
+      'ValidationFailed',
+      `simulator state has a foreign key violation in ${violation.table}`
+    );
+  }
+}
+
+function inspectSchema(database: Database, allowLegacy: boolean): SchemaShapes {
+  return {
+    worlds: tableShape(database, 'worlds'),
+    events: tableShape(database, 'events'),
+    deployments: tableShape(
+      database,
+      'deployments',
+      allowLegacy ? LEGACY_DEPLOYMENT_SHAPE : undefined
+    ),
+    idempotency: tableShape(database, 'idempotency'),
+    resources: tableShape(
+      database,
+      'resources',
+      allowLegacy ? LEGACY_RESOURCE_SHAPE : undefined
+    ),
+  };
+}
+
+function assertCompatibleSchemaSet(
+  version: number,
+  shapes: SchemaShapes
+): void {
+  const shapesPresent = Object.values(shapes).filter(
+    (shape) => shape !== 'missing'
+  );
+  if (
+    version === 0 &&
+    shapesPresent.length > 0 &&
+    shapesPresent.length !== CURRENT_TABLE_NAMES.length
+  ) {
+    throw new CoreError(
+      'ValidationFailed',
+      'simulator state schema is partial or incompatible'
+    );
+  }
+  if (version === CURRENT_SCHEMA_VERSION) {
+    for (const [tableName, shape] of Object.entries(shapes)) {
+      if (shape !== 'current') {
+        throw new CoreError(
+          'ValidationFailed',
+          `${tableName} schema is missing from version ${CURRENT_SCHEMA_VERSION}`
+        );
+      }
+    }
+  }
+  if (
+    version === 0 &&
+    shapesPresent.length === CURRENT_TABLE_NAMES.length &&
+    (shapes.deployments === 'legacy') !== (shapes.resources === 'legacy')
+  ) {
+    throw new CoreError(
+      'ValidationFailed',
+      'simulator state schema is partially migrated or incompatible'
+    );
+  }
+}
+
+function assertLegacyTablesAreEmpty(
+  database: Database,
+  shapes: SchemaShapes
+): void {
+  if (shapes.deployments === 'legacy') {
+    assertLegacyTableIsEmpty(
+      database,
+      'deployments',
+      'stored deployments have no target identity'
+    );
+  }
+  if (shapes.resources === 'legacy') {
+    assertLegacyTableIsEmpty(
+      database,
+      'resources',
       'stored resources have no target identity'
     );
   }
 }
 
-function assertDeploymentMigrationCompatibility(database: Database): void {
-  const table = database
-    .query<TableExistsRow, []>(
-      `SELECT 1 AS found FROM sqlite_master
-       WHERE type = 'table' AND name = 'deployments'`
-    )
-    .get();
-  if (!table) return;
-  const columns = database
-    .query<TableColumnRow, []>('PRAGMA table_info(deployments)')
-    .all();
-  if (columns.some((column) => column.name === 'targets')) return;
-  const row = database
-    .query<TableCountRow, []>('SELECT COUNT(*) AS count FROM deployments')
-    .get();
-  if ((row?.count ?? 0) > 0) {
-    throw new CoreError(
-      'ValidationFailed',
-      'stored deployments have no target identity'
-    );
+function migrateLegacyTables(database: Database, shapes: SchemaShapes): void {
+  database.exec(BASE_TABLES_SQL);
+  database.exec(RESOURCE_TABLE_SQL);
+  if (shapes.deployments === 'legacy') {
+    database.exec('DROP TABLE deployments');
+    database.exec(BASE_TABLES_SQL);
+  }
+  if (shapes.deployments === 'historical') {
+    database.exec('ALTER TABLE deployments RENAME TO deployments_historical');
+    database.exec(BASE_TABLES_SQL);
+    database.exec(`
+      INSERT INTO deployments (
+        world_id, deployment_id, problem_id, status, targets, outputs, diagnostics
+      )
+      SELECT
+        world_id, deployment_id, problem_id, status, targets, outputs, diagnostics
+      FROM deployments_historical
+    `);
+    database.exec('DROP TABLE deployments_historical');
+  }
+  if (shapes.resources === 'legacy') {
+    database.exec('DROP TABLE resources');
+    database.exec(RESOURCE_TABLE_SQL);
+  }
+}
+
+function migrateSchema(database: Database): void {
+  database.exec('BEGIN IMMEDIATE');
+  try {
+    const version = schemaVersion(database);
+    assertKnownSchemaObjects(database);
+    const shapes = inspectSchema(database, version === 0);
+    assertCompatibleSchemaSet(version, shapes);
+    assertLegacyTablesAreEmpty(database, shapes);
+    migrateLegacyTables(database, shapes);
+    assertKnownSchemaObjects(database);
+    for (const tableName of CURRENT_TABLE_NAMES) {
+      assertCurrentTable(database, tableName);
+    }
+    assertNoForeignKeyViolations(database);
+    database.exec(`PRAGMA user_version = ${CURRENT_SCHEMA_VERSION}`);
+    database.exec('COMMIT');
+  } catch (error) {
+    if (database.inTransaction) database.exec('ROLLBACK');
+    throw error;
   }
 }
 
@@ -194,71 +682,12 @@ export class SimulationStore {
   constructor(path: string) {
     this.database = new Database(path, { create: true, strict: true });
     try {
-      assertDeploymentMigrationCompatibility(this.database);
-      assertResourceMigrationCompatibility(this.database);
+      this.database.exec('PRAGMA foreign_keys = ON');
+      migrateSchema(this.database);
+      this.database.exec('PRAGMA journal_mode = WAL');
     } catch (error) {
       this.database.close();
       throw error;
-    }
-    this.database.exec('PRAGMA foreign_keys = ON');
-    this.database.exec('PRAGMA journal_mode = WAL');
-    this.database.exec(`
-      CREATE TABLE IF NOT EXISTS worlds (
-        world_id TEXT PRIMARY KEY,
-        tenant_id TEXT NOT NULL,
-        event_id TEXT NOT NULL,
-        team_id TEXT NOT NULL,
-        deployment_id TEXT NOT NULL,
-        seed TEXT NOT NULL,
-        virtual_time TEXT NOT NULL,
-        status TEXT NOT NULL,
-        next_sequence INTEGER NOT NULL
-      );
-      CREATE TABLE IF NOT EXISTS events (
-        world_id TEXT NOT NULL,
-        sequence INTEGER NOT NULL,
-        type TEXT NOT NULL,
-        virtual_time TEXT NOT NULL,
-        command_id TEXT NOT NULL,
-        payload TEXT NOT NULL,
-        payload_hash TEXT NOT NULL,
-        PRIMARY KEY (world_id, sequence),
-        FOREIGN KEY (world_id) REFERENCES worlds(world_id)
-      );
-      CREATE TABLE IF NOT EXISTS deployments (
-        world_id TEXT NOT NULL,
-        deployment_id TEXT NOT NULL,
-        problem_id TEXT NOT NULL,
-        status TEXT NOT NULL,
-        targets TEXT NOT NULL,
-        outputs TEXT NOT NULL,
-        diagnostics TEXT NOT NULL,
-        PRIMARY KEY (world_id, deployment_id),
-        FOREIGN KEY (world_id) REFERENCES worlds(world_id)
-      );
-      CREATE TABLE IF NOT EXISTS idempotency (
-        scope TEXT NOT NULL,
-        key TEXT NOT NULL,
-        request_hash TEXT NOT NULL,
-        response TEXT NOT NULL,
-        PRIMARY KEY (scope, key)
-      );
-    `);
-    this.database.exec(RESOURCE_TABLE_SQL);
-    const deploymentColumns = this.database
-      .query<TableColumnRow, []>('PRAGMA table_info(deployments)')
-      .all();
-    if (!deploymentColumns.some((column) => column.name === 'targets')) {
-      this.database.exec(
-        "ALTER TABLE deployments ADD COLUMN targets TEXT NOT NULL DEFAULT '[]'"
-      );
-    }
-    const resourceColumns = this.database
-      .query<TableColumnRow, []>('PRAGMA table_info(resources)')
-      .all();
-    if (!resourceColumns.some((column) => column.name === 'target_id')) {
-      this.database.exec('DROP TABLE resources');
-      this.database.exec(RESOURCE_TABLE_SQL);
     }
   }
 

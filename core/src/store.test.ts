@@ -70,6 +70,90 @@ function captureCoreError(operation: () => unknown): CoreError {
   throw new Error('CoreError が発生しませんでした');
 }
 
+function createLegacyTargetlessSchema(database: Database): void {
+  database.exec(`
+    CREATE TABLE worlds (
+      world_id TEXT PRIMARY KEY,
+      tenant_id TEXT NOT NULL,
+      event_id TEXT NOT NULL,
+      team_id TEXT NOT NULL,
+      deployment_id TEXT NOT NULL,
+      seed TEXT NOT NULL,
+      virtual_time TEXT NOT NULL,
+      status TEXT NOT NULL,
+      next_sequence INTEGER NOT NULL
+    );
+    CREATE TABLE events (
+      world_id TEXT NOT NULL,
+      sequence INTEGER NOT NULL,
+      type TEXT NOT NULL,
+      virtual_time TEXT NOT NULL,
+      command_id TEXT NOT NULL,
+      payload TEXT NOT NULL,
+      payload_hash TEXT NOT NULL,
+      PRIMARY KEY (world_id, sequence),
+      FOREIGN KEY (world_id) REFERENCES worlds(world_id)
+    );
+    CREATE TABLE deployments (
+      world_id TEXT NOT NULL,
+      deployment_id TEXT NOT NULL,
+      problem_id TEXT NOT NULL,
+      status TEXT NOT NULL,
+      outputs TEXT NOT NULL,
+      diagnostics TEXT NOT NULL,
+      PRIMARY KEY (world_id, deployment_id),
+      FOREIGN KEY (world_id) REFERENCES worlds(world_id)
+    );
+    CREATE TABLE resources (
+      world_id TEXT NOT NULL,
+      deployment_id TEXT NOT NULL,
+      provider TEXT NOT NULL,
+      resource_type TEXT NOT NULL,
+      resource_id TEXT NOT NULL,
+      properties TEXT NOT NULL,
+      status TEXT NOT NULL,
+      PRIMARY KEY (world_id, provider, resource_id),
+      FOREIGN KEY (world_id) REFERENCES worlds(world_id)
+    );
+    CREATE TABLE idempotency (
+      scope TEXT NOT NULL,
+      key TEXT NOT NULL,
+      request_hash TEXT NOT NULL,
+      response TEXT NOT NULL,
+      PRIMARY KEY (scope, key)
+    )
+  `);
+}
+
+function replayDeploymentTargetAlter(
+  database: Database,
+  defaultValue: '[]' | '{}'
+): void {
+  database.exec(`
+    PRAGMA foreign_keys = OFF;
+    ALTER TABLE deployments RENAME TO deployments_canonical;
+    CREATE TABLE deployments (
+      world_id TEXT NOT NULL,
+      deployment_id TEXT NOT NULL,
+      problem_id TEXT NOT NULL,
+      status TEXT NOT NULL,
+      outputs TEXT NOT NULL,
+      diagnostics TEXT NOT NULL,
+      PRIMARY KEY (world_id, deployment_id),
+      FOREIGN KEY (world_id) REFERENCES worlds(world_id)
+    );
+    INSERT INTO deployments (
+      world_id, deployment_id, problem_id, status, outputs, diagnostics
+    ) SELECT
+      world_id, deployment_id, problem_id, status, outputs, diagnostics
+    FROM deployments_canonical;
+    DROP TABLE deployments_canonical;
+    ALTER TABLE deployments
+      ADD COLUMN targets TEXT NOT NULL DEFAULT '${defaultValue}';
+    PRAGMA user_version = 0;
+  `);
+}
+
 describe('SimulationStore の振る舞い', () => {
   let directory = '';
   let store: SimulationStore;
@@ -100,6 +184,244 @@ describe('SimulationStore の振る舞い', () => {
       })
     ).toThrow('rollback');
     expect(store.world('rolled-back-world')).toBeUndefined();
+  });
+
+  it('fresh schema を current user_version として一つの migration transaction で初期化する', () => {
+    const version = store.database
+      .query<{ user_version: number }, []>('PRAGMA user_version')
+      .get()?.user_version;
+
+    expect(version).toBe(1);
+  });
+
+  it('未来の user_version は table を追加せず起動時に拒否する', () => {
+    const futurePath = path.join(directory, 'future.sqlite');
+    const future = new Database(futurePath, { create: true });
+    future.exec('PRAGMA user_version = 2');
+    future.close();
+
+    const error = captureCoreError(() => new SimulationStore(futurePath));
+
+    expect(error.code).toBe('ValidationFailed');
+    expect(error.message).toContain('schema version');
+    const rejected = new Database(futurePath, { readonly: true });
+    expect(
+      rejected.query<{ user_version: number }, []>('PRAGMA user_version').get()
+        ?.user_version
+    ).toBe(2);
+    expect(
+      rejected.query<{ journal_mode: string }, []>('PRAGMA journal_mode').get()
+        ?.journal_mode
+    ).toBe('delete');
+    expect(
+      rejected
+        .query<{ count: number }, []>(
+          "SELECT COUNT(*) AS count FROM sqlite_master WHERE type = 'table'"
+        )
+        .get()?.count
+    ).toBe(0);
+    rejected.close();
+  });
+
+  it('既知の legacy shape ではない部分 schema を変更せず拒否する', () => {
+    const partialPath = path.join(directory, 'partial.sqlite');
+    const partial = new Database(partialPath, { create: true });
+    partial.exec(`
+      CREATE TABLE resources (
+        world_id TEXT NOT NULL,
+        deployment_id TEXT NOT NULL,
+        target_id TEXT NOT NULL,
+        provider TEXT NOT NULL,
+        resource_type TEXT NOT NULL,
+        resource_id TEXT NOT NULL,
+        status TEXT NOT NULL,
+        PRIMARY KEY (world_id, deployment_id, target_id, provider, resource_id)
+      )
+    `);
+    const schemaBefore = partial
+      .query<{ name: string; sql: string }, []>(
+        `SELECT name, sql FROM sqlite_master
+         WHERE type = 'table' AND name NOT LIKE 'sqlite_%'
+         ORDER BY name`
+      )
+      .all();
+    partial.close();
+
+    const error = captureCoreError(() => new SimulationStore(partialPath));
+
+    expect(error.code).toBe('ValidationFailed');
+    expect(error.message).toContain('resources schema');
+    const rejected = new Database(partialPath, { readonly: true });
+    const schemaAfter = rejected
+      .query<{ name: string; sql: string }, []>(
+        `SELECT name, sql FROM sqlite_master
+         WHERE type = 'table' AND name NOT LIKE 'sqlite_%'
+         ORDER BY name`
+      )
+      .all();
+    expect(schemaAfter).toEqual(schemaBefore);
+    expect(
+      rejected.query<{ user_version: number }, []>('PRAGMA user_version').get()
+        ?.user_version
+    ).toBe(0);
+    rejected.close();
+  });
+
+  it('current table の一部だけを持つ unversioned schema は不足 table を補完せず拒否する', () => {
+    const partialPath = path.join(directory, 'partial-current.sqlite');
+    const partial = new Database(partialPath, { create: true });
+    partial.exec(`
+      CREATE TABLE worlds (
+        world_id TEXT PRIMARY KEY,
+        tenant_id TEXT NOT NULL,
+        event_id TEXT NOT NULL,
+        team_id TEXT NOT NULL,
+        deployment_id TEXT NOT NULL,
+        seed TEXT NOT NULL,
+        virtual_time TEXT NOT NULL,
+        status TEXT NOT NULL,
+        next_sequence INTEGER NOT NULL
+      )
+    `);
+    partial.close();
+
+    const error = captureCoreError(() => new SimulationStore(partialPath));
+
+    expect(error.code).toBe('ValidationFailed');
+    expect(error.message).toContain('partial');
+    const rejected = new Database(partialPath, { readonly: true });
+    expect(
+      rejected
+        .query<{ count: number }, []>(
+          `SELECT COUNT(*) AS count FROM sqlite_master
+           WHERE type = 'table' AND name NOT LIKE 'sqlite_%'`
+        )
+        .get()?.count
+    ).toBe(1);
+    rejected.close();
+  });
+
+  it('legacy table が一部だけ存在する unversioned schema も補完せず拒否する', () => {
+    const partialPath = path.join(directory, 'partial-legacy.sqlite');
+    const partial = new Database(partialPath, { create: true });
+    partial.exec(`
+      CREATE TABLE resources (
+        world_id TEXT NOT NULL,
+        deployment_id TEXT NOT NULL,
+        provider TEXT NOT NULL,
+        resource_type TEXT NOT NULL,
+        resource_id TEXT NOT NULL,
+        properties TEXT NOT NULL,
+        status TEXT NOT NULL,
+        PRIMARY KEY (world_id, provider, resource_id),
+        FOREIGN KEY (world_id) REFERENCES worlds(world_id)
+      )
+    `);
+    partial.close();
+
+    const error = captureCoreError(() => new SimulationStore(partialPath));
+
+    expect(error.code).toBe('ValidationFailed');
+    expect(error.message).toContain('partial');
+  });
+
+  it('column が揃っていても resource primary key が違う schema を拒否する', () => {
+    const invalidPath = path.join(directory, 'invalid-primary-key.sqlite');
+    const invalid = new Database(invalidPath, { create: true });
+    invalid.exec(`
+      CREATE TABLE resources (
+        world_id TEXT NOT NULL,
+        deployment_id TEXT NOT NULL,
+        target_id TEXT NOT NULL,
+        provider TEXT NOT NULL,
+        resource_type TEXT NOT NULL,
+        resource_id TEXT NOT NULL,
+        properties TEXT NOT NULL,
+        status TEXT NOT NULL,
+        PRIMARY KEY (world_id, provider, resource_id)
+      )
+    `);
+    invalid.close();
+
+    const error = captureCoreError(() => new SimulationStore(invalidPath));
+
+    expect(error.code).toBe('ValidationFailed');
+    expect(error.message).toContain('resources schema');
+  });
+
+  it('column type・NOT NULL・foreign key が current 定義と違う schema を拒否する', () => {
+    const invalidPath = path.join(directory, 'invalid-column-shape.sqlite');
+    const seeded = new SimulationStore(invalidPath);
+    seeded.close();
+    const invalid = new Database(invalidPath);
+    invalid.exec(`
+      PRAGMA foreign_keys = OFF;
+      ALTER TABLE resources RENAME TO resources_original;
+      CREATE TABLE resources (
+        world_id TEXT NOT NULL,
+        deployment_id TEXT NOT NULL,
+        target_id TEXT NOT NULL,
+        provider TEXT NOT NULL,
+        resource_type TEXT NOT NULL,
+        resource_id TEXT NOT NULL,
+        properties BLOB,
+        status TEXT NOT NULL,
+        PRIMARY KEY (world_id, deployment_id, target_id, provider, resource_id)
+      );
+      DROP TABLE resources_original;
+    `);
+    invalid.close();
+
+    const error = captureCoreError(() => new SimulationStore(invalidPath));
+
+    expect(error.code).toBe('ValidationFailed');
+    expect(error.message).toContain('resources schema');
+  });
+
+  it('current schema に追加された trigger や未知 schema object を拒否する', () => {
+    const invalidPath = path.join(directory, 'unexpected-trigger.sqlite');
+    const seeded = new SimulationStore(invalidPath);
+    seeded.close();
+    const invalid = new Database(invalidPath);
+    invalid.exec(`
+      CREATE TRIGGER unexpected_world_trigger
+      AFTER INSERT ON worlds
+      BEGIN
+        SELECT 1;
+      END
+    `);
+    invalid.close();
+
+    const error = captureCoreError(() => new SimulationStore(invalidPath));
+
+    expect(error.code).toBe('ValidationFailed');
+    expect(error.message).toContain('schema object');
+  });
+
+  it('current schema に保存された foreign key 違反を起動時に拒否する', () => {
+    const invalidPath = path.join(directory, 'orphan-resource.sqlite');
+    const seeded = new SimulationStore(invalidPath);
+    seeded.close();
+    const invalid = new Database(invalidPath);
+    invalid.exec('PRAGMA foreign_keys = OFF');
+    invalid
+      .query('INSERT INTO resources VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
+      .run(
+        'missing-world',
+        'deployment-a',
+        'default',
+        'alpha',
+        'Object',
+        'orphan',
+        '{}',
+        'ready'
+      );
+    invalid.close();
+
+    const error = captureCoreError(() => new SimulationStore(invalidPath));
+
+    expect(error.code).toBe('ValidationFailed');
+    expect(error.message).toContain('foreign key');
   });
 
   it('idempotency response を canonical JSON で保存し、別 request の key 再利用を拒否する', () => {
@@ -250,17 +572,7 @@ describe('SimulationStore の振る舞い', () => {
   it('既存 deployment table に target identity column を fail-closed migration する', () => {
     const legacyPath = path.join(directory, 'legacy.sqlite');
     const legacy = new Database(legacyPath, { create: true });
-    legacy.exec(`
-      CREATE TABLE deployments (
-        world_id TEXT NOT NULL,
-        deployment_id TEXT NOT NULL,
-        problem_id TEXT NOT NULL,
-        status TEXT NOT NULL,
-        outputs TEXT NOT NULL,
-        diagnostics TEXT NOT NULL,
-        PRIMARY KEY (world_id, deployment_id)
-      )
-    `);
+    createLegacyTargetlessSchema(legacy);
     legacy.close();
 
     const migrated = new SimulationStore(legacyPath);
@@ -268,22 +580,125 @@ describe('SimulationStore の振る舞い', () => {
       .query<{ name: string }, []>('PRAGMA table_info(deployments)')
       .all();
     expect(columns.map((column) => column.name)).toContain('targets');
+    expect(
+      migrated.database
+        .query<{ user_version: number }, []>('PRAGMA user_version')
+        .get()?.user_version
+    ).toBe(1);
     migrated.close();
+  });
+
+  it("旧migrationの実 ALTER で DEFAULT '[]' が付いた populated deployment を正規化して保持する", () => {
+    const migratedPath = path.join(directory, 'previously-migrated.sqlite');
+    const seeded = new SimulationStore(migratedPath);
+    const world = worldRecord('previously-migrated-world');
+    const deployment = deploymentRecord(world.worldId, 'preserved-deployment');
+    seeded.insertWorld(world);
+    seeded.saveDeployment(deployment);
+    seeded.close();
+    const previous = new Database(migratedPath);
+    replayDeploymentTargetAlter(previous, '[]');
+    const historicalColumns = previous
+      .query<{ name: string; dflt_value: string | null }, []>(
+        'PRAGMA table_info(deployments)'
+      )
+      .all();
+    expect(historicalColumns.map((column) => column.name)).toEqual([
+      'world_id',
+      'deployment_id',
+      'problem_id',
+      'status',
+      'outputs',
+      'diagnostics',
+      'targets',
+    ]);
+    expect(
+      historicalColumns.find((column) => column.name === 'targets')?.dflt_value
+    ).toBe("'[]'");
+    previous.close();
+
+    const reopened = new SimulationStore(migratedPath);
+
+    expect(reopened.deployment(world.worldId, deployment.deploymentId)).toEqual(
+      { ...deployment, targets: [] }
+    );
+    const normalizedColumns = reopened.database
+      .query<{ name: string; dflt_value: string | null }, []>(
+        'PRAGMA table_info(deployments)'
+      )
+      .all();
+    expect(normalizedColumns.map((column) => column.name)).toEqual([
+      'world_id',
+      'deployment_id',
+      'problem_id',
+      'status',
+      'targets',
+      'outputs',
+      'diagnostics',
+    ]);
+    expect(
+      normalizedColumns.find((column) => column.name === 'targets')?.dflt_value
+    ).toBeNull();
+    expect(
+      reopened.database
+        .query<{ user_version: number }, []>('PRAGMA user_version')
+        .get()?.user_version
+    ).toBe(1);
+    reopened.close();
+  });
+
+  it('末尾 targets の未知の DEFAULT は schema と populated row を変更せず拒否する', () => {
+    const invalidPath = path.join(directory, 'unknown-target-default.sqlite');
+    const seeded = new SimulationStore(invalidPath);
+    const world = worldRecord('unknown-default-world');
+    const deployment = deploymentRecord(world.worldId, 'preserved-deployment');
+    seeded.insertWorld(world);
+    seeded.saveDeployment(deployment);
+    seeded.close();
+    const invalid = new Database(invalidPath);
+    replayDeploymentTargetAlter(invalid, '{}');
+    const schemaBefore = invalid
+      .query<{ name: string; sql: string }, []>(
+        `SELECT name, sql FROM sqlite_master
+         WHERE type = 'table' AND name NOT LIKE 'sqlite_%'
+         ORDER BY name`
+      )
+      .all();
+    invalid.close();
+
+    const error = captureCoreError(() => new SimulationStore(invalidPath));
+
+    expect(error.code).toBe('ValidationFailed');
+    expect(error.message).toContain('deployments schema');
+    const rejected = new Database(invalidPath, { readonly: true });
+    expect(
+      rejected
+        .query<{ name: string; sql: string }, []>(
+          `SELECT name, sql FROM sqlite_master
+           WHERE type = 'table' AND name NOT LIKE 'sqlite_%'
+           ORDER BY name`
+        )
+        .all()
+    ).toEqual(schemaBefore);
+    expect(
+      rejected
+        .query<{ count: number }, []>(
+          'SELECT COUNT(*) AS count FROM deployments'
+        )
+        .get()?.count
+    ).toBe(1);
+    expect(
+      rejected.query<{ user_version: number }, []>('PRAGMA user_version').get()
+        ?.user_version
+    ).toBe(0);
+    rejected.close();
   });
 
   it('target identity のない既存 deployment row があれば schema 変更前に migration を拒否する', () => {
     const legacyPath = path.join(directory, 'legacy-deployments.sqlite');
     const legacy = new Database(legacyPath, { create: true });
+    createLegacyTargetlessSchema(legacy);
     legacy.exec(`
-      CREATE TABLE deployments (
-        world_id TEXT NOT NULL,
-        deployment_id TEXT NOT NULL,
-        problem_id TEXT NOT NULL,
-        status TEXT NOT NULL,
-        outputs TEXT NOT NULL,
-        diagnostics TEXT NOT NULL,
-        PRIMARY KEY (world_id, deployment_id)
-      );
       INSERT INTO deployments VALUES (
         'world-one', 'deployment-a', 'problem-a', 'ready', '{}', '[]'
       )
@@ -333,17 +748,8 @@ describe('SimulationStore の振る舞い', () => {
   it('target identity のない既存 resource row があれば migration を拒否する', () => {
     const legacyPath = path.join(directory, 'legacy-resources.sqlite');
     const legacy = new Database(legacyPath, { create: true });
+    createLegacyTargetlessSchema(legacy);
     legacy.exec(`
-      CREATE TABLE resources (
-        world_id TEXT NOT NULL,
-        deployment_id TEXT NOT NULL,
-        provider TEXT NOT NULL,
-        resource_type TEXT NOT NULL,
-        resource_id TEXT NOT NULL,
-        properties TEXT NOT NULL,
-        status TEXT NOT NULL,
-        PRIMARY KEY (world_id, provider, resource_id)
-      );
       INSERT INTO resources VALUES (
         'world-one', 'deployment-a', 'alpha', 'Object', 'shared', '{}', 'ready'
       )
@@ -371,6 +777,75 @@ describe('SimulationStore の振る舞い', () => {
       .all();
     rejected.close();
     expect(schemaAfter).toEqual(schemaBefore);
+  });
+
+  it('空の完全な legacy schema を target identity 付き schema へ移行する', () => {
+    const legacyPath = path.join(directory, 'empty-legacy-resources.sqlite');
+    const legacy = new Database(legacyPath, { create: true });
+    createLegacyTargetlessSchema(legacy);
+    legacy.close();
+
+    const migrated = new SimulationStore(legacyPath);
+
+    const columns = migrated.database
+      .query<{ name: string }, []>('PRAGMA table_info(resources)')
+      .all();
+    expect(columns.map((column) => column.name)).toEqual([
+      'world_id',
+      'deployment_id',
+      'target_id',
+      'provider',
+      'resource_type',
+      'resource_id',
+      'properties',
+      'status',
+    ]);
+    expect(
+      migrated.database
+        .query<{ user_version: number }, []>('PRAGMA user_version')
+        .get()?.user_version
+    ).toBe(1);
+    migrated.close();
+  });
+
+  it('legacy DDL 後の整合性検証が失敗したら schema と version を rollback する', () => {
+    const legacyPath = path.join(directory, 'rollback-legacy.sqlite');
+    const legacy = new Database(legacyPath, { create: true });
+    createLegacyTargetlessSchema(legacy);
+    legacy.exec(`
+      PRAGMA foreign_keys = OFF;
+      INSERT INTO events VALUES (
+        'missing-world', 1, 'OrphanEvent', '2026-07-12T00:00:00.000Z',
+        'command', '{}', 'hash'
+      )
+    `);
+    const schemaBefore = legacy
+      .query<{ name: string; sql: string }, []>(
+        `SELECT name, sql FROM sqlite_master
+         WHERE type = 'table' AND name NOT LIKE 'sqlite_%'
+         ORDER BY name`
+      )
+      .all();
+    legacy.close();
+
+    const error = captureCoreError(() => new SimulationStore(legacyPath));
+
+    expect(error.code).toBe('ValidationFailed');
+    expect(error.message).toContain('foreign key');
+    const rejected = new Database(legacyPath, { readonly: true });
+    const schemaAfter = rejected
+      .query<{ name: string; sql: string }, []>(
+        `SELECT name, sql FROM sqlite_master
+         WHERE type = 'table' AND name NOT LIKE 'sqlite_%'
+         ORDER BY name`
+      )
+      .all();
+    expect(schemaAfter).toEqual(schemaBefore);
+    expect(
+      rejected.query<{ user_version: number }, []>('PRAGMA user_version').get()
+        ?.user_version
+    ).toBe(0);
+    rejected.close();
   });
 
   it('resource を target 単位で upsert、取得し、論理削除する', () => {

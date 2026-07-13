@@ -117,6 +117,49 @@ describe('targeted Bicep compiler の振る舞い', () => {
     expect(outputs.every((output) => output.line > 1)).toBe(true);
   });
 
+  it('line と block comment 内の ghost output と dependency を compile 対象にしない', async () => {
+    const source = (await fixture())
+      .replace(
+        'resource helloEnvironment',
+        `/*
+output ghostOutput string = missing.id
+*/
+// output lineGhost string = missing.id
+resource helloEnvironment`
+      )
+      .replace(
+        `dependsOn: [
+    helloApp
+  ]`,
+        `/*
+  dependsOn: [missing]
+  */
+  // dependsOn: [lineMissing]
+  dependsOn: [
+    helloApp
+  ]`
+      );
+
+    const outputs = bicepOutputs(source);
+    const compiled = compileBicep(source, CONTEXT);
+    const role = compiled.resources.find(
+      (resource) => resource.type === BICEP_ROLE_ASSIGNMENT
+    );
+    const app = compiled.resources.find(
+      (resource) => resource.type === BICEP_CONTAINER_APP
+    );
+    if (!role || !app) {
+      throw new Error('comment 除外後の compiled resource がありません');
+    }
+
+    expect(outputs.map((output) => output.name)).toEqual([
+      'containerAppId',
+      'containerAppFqdn',
+      'roleAssignmentId',
+    ]);
+    expect(role.dependencies).toEqual([app.resourceId]);
+  });
+
   it('resource ID、dependency ID、output を決定論的に compile する', async () => {
     const source = await fixture();
     const first = compileBicep(source, CONTEXT);
@@ -209,6 +252,54 @@ describe('targeted Bicep compiler の振る舞い', () => {
 
     expect(missing.message).toContain('unknown Managed Environment missing');
     expect(expression.code).toBe('UnsupportedCapability');
+  });
+
+  it('comment 内の environmentId ではなく実際の property 式だけを評価する', async () => {
+    const source = await fixture();
+    const commentedUnsupported = source.replace(
+      'environmentId: helloEnvironment.id',
+      `/*
+      environmentId: resourceId('Microsoft.App/managedEnvironments', 'ignored')
+    */
+    // environmentId: ignored.id
+    environmentId: helloEnvironment.id`
+    );
+    const actualUnsupported = source.replace(
+      'environmentId: helloEnvironment.id',
+      `/*
+      environmentId: helloEnvironment.id
+    */
+    // environmentId: helloEnvironment.id
+    environmentId: resourceId('Microsoft.App/managedEnvironments', 'actual')`
+    );
+
+    const compiled = compileBicep(commentedUnsupported, CONTEXT);
+    const app = compiled.resources.find(
+      (resource) => resource.type === BICEP_CONTAINER_APP
+    );
+    const environment = compiled.resources.find(
+      (resource) => resource.type === BICEP_MANAGED_ENVIRONMENT
+    );
+    const error = coreError(() => compileBicep(actualUnsupported, CONTEXT));
+
+    expect(app?.properties['environmentId']).toBe(environment?.resourceId);
+    expect(error.code).toBe('UnsupportedCapability');
+    expect(error.message).toContain('actual');
+  });
+
+  it('別 symbol が同じ generated resource ID へ解決される場合は決定論的に拒否する', () => {
+    const duplicate = containerSource().replace(
+      'resource app ',
+      'resource peer '
+    );
+
+    const error = coreError(() =>
+      compileBicep(`${containerSource()}\n${duplicate}`, CONTEXT)
+    );
+
+    expect(error.code).toBe('Conflict');
+    expect(error.message).toContain('symbols app and peer');
+    expect(error.message).toContain('duplicate resource ID');
   });
 
   it('quote 内の brace と line/block comment を block 終端と誤認しない', () => {

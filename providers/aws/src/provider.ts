@@ -9,6 +9,7 @@ import {
   type ProviderModule,
   type ProviderTargetPlan,
   type ProviderWorldView,
+  type ResourceRecord,
 } from '@tenkacloud/simulator-core';
 import { compileCloudFormation } from './cloudformation';
 import { reduceCloudFormation } from './cloudformation-state';
@@ -29,6 +30,7 @@ import { reduceRds } from './rds';
 import { reduceRuntime } from './runtime';
 import { reduceS3 } from './s3';
 import { advanceSsmClock, reduceSsm } from './ssm';
+import { ssmSnapshotProperties } from './ssm-session';
 import { reduceSts } from './sts';
 import { reduceWaf } from './waf';
 
@@ -130,5 +132,11 @@ export class AwsProvider implements ProviderModule {
     world: ProviderWorldView
   ): ProviderClockResult {
     return advanceSsmClock(input, world);
+  }
+
+  snapshotProperties(
+    resource: ResourceRecord
+  ): Readonly<Record<string, unknown>> {
+    return ssmSnapshotProperties(resource);
   }
 }

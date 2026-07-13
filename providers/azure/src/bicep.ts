@@ -250,31 +250,13 @@ export function bicepResources(source: string): readonly BicepResource[] {
   return resources;
 }
 
-function withoutLineComment(value: string): string {
-  let mode: ScanMode = 'code';
-  for (let index = 0; index < value.length - 1; index++) {
-    const character = value[index] ?? '';
-    const step = scanStep(
-      mode,
-      character,
-      value[index + 1] ?? '',
-      value[index - 1] ?? ''
-    );
-    if (mode === 'code' && step.mode === 'line-comment') {
-      return value.slice(0, index).trim();
-    }
-    mode = step.mode;
-    if (step.consumeNext) index++;
-  }
-  return value.trim();
-}
-
 export function bicepOutputs(source: string): readonly BicepOutput[] {
   const outputs: BicepOutput[] = [];
   const names = new Set<string>();
+  const searchable = commentProjection(source);
   const pattern =
     /(?:^|\n)\s*output\s+([A-Za-z_][\w]*)\s+([A-Za-z_][\w]*)\s*=\s*([^\n]+)/g;
-  for (const match of source.matchAll(pattern)) {
+  for (const match of searchable.matchAll(pattern)) {
     const name = match[1] ?? '';
     if (names.has(name)) {
       throw new CoreError('Conflict', `Bicep output ${name} is duplicated`);
@@ -284,7 +266,7 @@ export function bicepOutputs(source: string): readonly BicepOutput[] {
     outputs.push({
       name,
       type: match[2] ?? '',
-      expression: withoutLineComment(match[3] ?? ''),
+      expression: (match[3] ?? '').trim(),
       line: lineAt(source, outputOffset),
     });
   }
@@ -295,12 +277,14 @@ function propertyExpression(
   body: string,
   property: string
 ): string | undefined {
+  const searchable = commentProjection(body);
   const match = new RegExp(
     `(?:^|\\n)\\s*${property}\\s*:\\s*([^\\n]+)`,
     'm'
-  ).exec(body);
+  ).exec(searchable);
   if (!match?.[1]) return undefined;
-  return withoutLineComment(match[1])
+  return match[1]
+    .trim()
     .replace(/,\\s*$/, '')
     .trim();
 }
@@ -476,10 +460,11 @@ function topLevelReferenceProperty(
 }
 
 function dependencySymbols(body: string): readonly string[] {
-  const match = /(?:^|\n)\s*dependsOn\s*:\s*\[([\s\S]*?)\]/m.exec(body);
+  const match = /(?:^|\n)\s*dependsOn\s*:\s*\[([\s\S]*?)\]/m.exec(
+    commentProjection(body)
+  );
   if (!match?.[1]) return [];
-  const source = match[1].replace(/\/\/[^\n]*/g, ' ');
-  return source.match(/[A-Za-z_][\w]*/g) ?? [];
+  return match[1].match(/[A-Za-z_][\w]*/g) ?? [];
 }
 
 function requiredString(
@@ -909,9 +894,21 @@ function identifyResources(
       );
     }
   }
-  return named.map((item) =>
+  const identified = named.map((item) =>
     identifyResource(item, context, environmentIds, containerIds)
   );
+  const resourceSymbols = new Map<string, string>();
+  for (const item of identified) {
+    const previous = resourceSymbols.get(item.resourceId);
+    if (previous) {
+      throw new CoreError(
+        'Conflict',
+        `Bicep symbols ${previous} and ${item.resource.symbol} resolve to duplicate resource ID ${item.resourceId}`
+      );
+    }
+    resourceSymbols.set(item.resourceId, item.resource.symbol);
+  }
+  return identified;
 }
 
 function compileResource(

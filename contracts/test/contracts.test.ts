@@ -445,6 +445,7 @@ describe('runtime と lifecycle 契約', () => {
         entry: `target-${index}.yaml`,
       })),
     };
+    const invalidTargetIds = ['AWS-main', 'aws_main', `a${'b'.repeat(32)}`];
 
     expect(isProblemRuntimeDescriptor({ kind: 'composite', targets: [] })).toBe(
       false
@@ -452,9 +453,20 @@ describe('runtime と lifecycle 契約', () => {
     expect(isProblemRuntimeDescriptor(duplicateIds)).toBe(false);
     expect(isProblemRuntimeDescriptor(nestedTarget)).toBe(false);
     expect(isProblemRuntimeDescriptor(nineTargets)).toBe(false);
+    for (const id of invalidTargetIds) {
+      expect(
+        isProblemRuntimeDescriptor({
+          ...compositeRuntime,
+          targets: [
+            { ...compositeRuntime.targets[0], id },
+            compositeRuntime.targets[1],
+          ],
+        })
+      ).toBe(false);
+    }
   });
 
-  it('capability の互換 shape と詳細 entry を検証する', () => {
+  it('capability の初期 shape と optional engine を後方互換に検証する', () => {
     expect(isSimulatorCapabilities(capabilities)).toBe(true);
     expect(
       isSimulatorCapabilities({ ...capabilities, futureResponseField: true })
@@ -472,7 +484,7 @@ describe('runtime と lifecycle 契約', () => {
           ({ engine: _engine, ...capability }) => capability
         ),
       })
-    ).toBe(false);
+    ).toBe(true);
     expect(
       isSimulatorCapabilities({
         ...capabilities,
