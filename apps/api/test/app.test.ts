@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
+import { createHmac, timingSafeEqual } from 'node:crypto';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -10,7 +11,13 @@ import {
   assertSimulatorResourceProjection,
   assertSimulatorSnapshot,
   assertSimulatorWorldResponse,
+  canonicalSimulatorSnapshotIntegrityPayload,
   SIMULATOR_PROTOCOL_VERSION,
+  SIMULATOR_SNAPSHOT_INTEGRITY_ALGORITHM,
+  SIMULATOR_SNAPSHOT_INTEGRITY_VERSION,
+  type SimulatorSnapshot,
+  type SimulatorSnapshotEnvelope,
+  type SimulatorSnapshotIntegrityProof,
 } from '@tenkacloud/simulator-contracts';
 import {
   type ProviderCommandInput,
@@ -51,6 +58,42 @@ const CONTRACT_HTTP_RESPONSES: Readonly<
     Body: 'invalid',
   },
 };
+
+const SNAPSHOT_INTEGRITY_SECRET = 'api-test-snapshot-secret-0123456789abcdef';
+
+function snapshotProofValue(envelope: SimulatorSnapshotEnvelope): string {
+  return createHmac('sha256', SNAPSHOT_INTEGRITY_SECRET)
+    .update(canonicalSimulatorSnapshotIntegrityPayload(envelope))
+    .digest('base64url');
+}
+
+function signSnapshot(
+  envelope: SimulatorSnapshotEnvelope
+): SimulatorSnapshotIntegrityProof {
+  return {
+    version: SIMULATOR_SNAPSHOT_INTEGRITY_VERSION,
+    algorithm: SIMULATOR_SNAPSHOT_INTEGRITY_ALGORITHM,
+    value: snapshotProofValue(envelope),
+  };
+}
+
+function signedSnapshot(
+  envelope: SimulatorSnapshotEnvelope
+): SimulatorSnapshot {
+  const snapshot: unknown = {
+    ...envelope,
+    integrityProof: signSnapshot(envelope),
+  };
+  assertSimulatorSnapshot(snapshot);
+  return snapshot;
+}
+
+function verifySnapshot(snapshot: SimulatorSnapshot): boolean {
+  const { integrityProof, ...envelope } = snapshot;
+  const expected = Buffer.from(snapshotProofValue(envelope), 'ascii');
+  const provided = Buffer.from(integrityProof.value, 'ascii');
+  return timingSafeEqual(expected, provided);
+}
 
 function contractHttpRequest(
   input: ProviderCommandInput
@@ -338,6 +381,13 @@ function openRuntime(workloadEffects?: HttpWorkloadEffects): TestRuntime {
     core,
     registry,
     consoleBaseUrl: 'http://127.0.0.1:9444/console/',
+    resolveWorldNamespace: () => ({
+      tenantId: 'tenant-a',
+      eventId: 'event-a',
+      teamId: 'team-a',
+    }),
+    signSnapshot,
+    verifySnapshot,
   });
   const server = Bun.serve({
     hostname: '127.0.0.1',
@@ -377,6 +427,27 @@ afterEach(async () => {
 });
 
 describe('Simulator HTTP protocol', () => {
+  it('generic API は snapshot signer と verifier の明示 injection を必須にする', () => {
+    const baseOptions = {
+      core: runtime.core,
+      registry: new ProviderRegistry([CONTRACT_PROVIDER]),
+      consoleBaseUrl: 'http://127.0.0.1:9444/console/',
+      resolveWorldNamespace: () => ({
+        tenantId: 'tenant-a',
+        eventId: 'event-a',
+        teamId: 'team-a',
+      }),
+    };
+    for (const incompleteOptions of [
+      { ...baseOptions, signSnapshot },
+      { ...baseOptions, verifySnapshot },
+    ]) {
+      expect(() =>
+        Reflect.apply(createSimulatorApp, undefined, [incompleteOptions])
+      ).toThrow('snapshot signer and verifier are required');
+    }
+  });
+
   it('capability は header なしで取得でき、mutation は完全一致 header を要求する', async () => {
     const capabilitiesResponse = await fetch(
       `${runtime.baseUrl}/v1/capabilities`
@@ -617,6 +688,97 @@ describe('Simulator HTTP protocol', () => {
     expect(deletedResources.resources[0]?.status).toBe('deleted');
   });
 
+  it('create response loss 後に deployment lookup で world を回復し replay と delete を完了できる', async () => {
+    const recoveryKey = 'response-loss-create-key';
+    const createResponse = await fetch(`${runtime.baseUrl}/v1/worlds`, {
+      method: 'POST',
+      headers: { ...protocolHeaders(), 'idempotency-key': recoveryKey },
+      body: JSON.stringify({
+        tenantId: 'tenant-a',
+        eventId: 'event-a',
+        teamId: 'team-a',
+        deploymentId: 'response-loss-deployment',
+      }),
+    });
+    expect(createResponse.status).toBe(201);
+    await createResponse.body?.cancel();
+
+    const lookupUrl = `${runtime.baseUrl}/v1/worlds/by-deployment/response-loss-deployment`;
+    expect((await fetch(lookupUrl)).status).toBe(404);
+    const lookup = await fetch(lookupUrl, {
+      headers: { 'idempotency-key': recoveryKey },
+    });
+    expect(lookup.status).toBe(200);
+    expect(lookup.headers.get(PROTOCOL_HEADER)).toBe(
+      SIMULATOR_PROTOCOL_VERSION
+    );
+    const recovered: unknown = await lookup.json();
+    assertSimulatorWorldResponse(recovered);
+
+    const replayResponse = await fetch(`${runtime.baseUrl}/v1/worlds`, {
+      method: 'POST',
+      headers: { ...protocolHeaders(), 'idempotency-key': recoveryKey },
+      body: JSON.stringify({
+        tenantId: 'tenant-a',
+        eventId: 'event-a',
+        teamId: 'team-a',
+        deploymentId: 'response-loss-deployment',
+      }),
+    });
+    expect(replayResponse.status).toBe(201);
+    const replayed: unknown = await replayResponse.json();
+    assertSimulatorWorldResponse(replayed);
+    expect(replayed).toEqual(recovered);
+    expect(
+      (
+        await fetch(`${runtime.baseUrl}/v1/worlds/${replayed.worldId}`, {
+          method: 'DELETE',
+          headers: protocolHeaders(),
+        })
+      ).status
+    ).toBe(204);
+
+    const deletedLookup = await fetch(lookupUrl, {
+      headers: { 'idempotency-key': recoveryKey },
+    });
+    expect(deletedLookup.status).toBe(200);
+    expect(await deletedLookup.json()).toEqual(recovered);
+    expect(
+      (
+        await fetch(`${runtime.baseUrl}/v1/worlds/${replayed.worldId}`, {
+          method: 'DELETE',
+          headers: protocolHeaders(),
+        })
+      ).status
+    ).toBe(204);
+    expect(
+      (
+        await fetch(
+          `${runtime.baseUrl}/v1/worlds/by-deployment/missing-deployment`
+        )
+      ).status
+    ).toBe(404);
+
+    const defaultCreate = await fetch(`${runtime.baseUrl}/v1/worlds`, {
+      method: 'POST',
+      headers: protocolHeaders(),
+      body: JSON.stringify({
+        tenantId: 'tenant-a',
+        eventId: 'event-a',
+        teamId: 'team-a',
+        deploymentId: 'default-recovery-deployment',
+      }),
+    });
+    expect(defaultCreate.status).toBe(201);
+    const defaultCreated: unknown = await defaultCreate.json();
+    assertSimulatorWorldResponse(defaultCreated);
+    const defaultLookup = await fetch(
+      `${runtime.baseUrl}/v1/worlds/by-deployment/default-recovery-deployment`
+    );
+    expect(defaultLookup.status).toBe(200);
+    expect(await defaultLookup.json()).toEqual(defaultCreated);
+  });
+
   it('deployment POST で workload を自動 materialize し失敗後は専用 route から再試行する', async () => {
     const effects = new HttpWorkloadEffects();
     await replaceRuntime(effects);
@@ -684,9 +846,24 @@ describe('Simulator HTTP protocol', () => {
         body: JSON.stringify(failedSnapshot),
       }
     );
-    expect(workloadRestore.status).toBe(422);
-    expect(await workloadRestore.json()).toMatchObject({
-      error: { code: 'SnapshotIncompatible' },
+    expect(workloadRestore.status).toBe(201);
+    const restoredWorld: unknown = await workloadRestore.json();
+    assertSimulatorWorldResponse(restoredWorld);
+    expect(restoredWorld.worldId).not.toBe(world.worldId);
+    expect(
+      runtime.core.deployment(restoredWorld.worldId, 'deployment-workload')
+        .status
+    ).toBe('ready');
+    const restoredWorkload = runtime.core
+      .resources(restoredWorld.worldId)
+      .find((resource) => resource.resourceType === 'Runtime::Workload');
+    expect(restoredWorkload).toMatchObject({
+      status: 'ready',
+      properties: {
+        materialization: {
+          endpoint: expect.stringMatching(/^http:\/\/127\.0\.0\.1:/),
+        },
+      },
     });
 
     const retryUrl = `${runtime.baseUrl}/v1/worlds/${world.worldId}/workloads/materialize`;
@@ -737,6 +914,14 @@ describe('Simulator HTTP protocol', () => {
     expect(runtime.core.world(world.worldId).status).toBe('active');
 
     effects.cleanupFails = false;
+    expect(
+      (
+        await fetch(`${runtime.baseUrl}/v1/worlds/${restoredWorld.worldId}`, {
+          method: 'DELETE',
+          headers: protocolHeaders(),
+        })
+      ).status
+    ).toBe(204);
     expect(
       (
         await fetch(`${runtime.baseUrl}/v1/worlds/${world.worldId}`, {
@@ -1121,18 +1306,76 @@ describe('Simulator HTTP protocol', () => {
     expect(graphJson).toContain('"targetId":"default"');
     expect(graphJson).toContain('"resourceId":"default-resource"');
 
-    const restoredResponse = await fetch(
+    const { integrityProof: _integrityProof, ...unsignedSnapshot } = snapshot;
+    const unsignedRestore = await fetch(
       `${runtime.baseUrl}/v1/worlds/${world.worldId}/snapshots`,
       {
         method: 'POST',
         headers: protocolHeaders(),
+        body: JSON.stringify(unsignedSnapshot),
+      }
+    );
+    expect(unsignedRestore.status).toBe(400);
+    expect(await unsignedRestore.json()).toMatchObject({
+      error: { code: 'ValidationFailed' },
+    });
+    const invalidProofRestore = await fetch(
+      `${runtime.baseUrl}/v1/worlds/${world.worldId}/snapshots`,
+      {
+        method: 'POST',
+        headers: protocolHeaders(),
+        body: JSON.stringify({
+          ...snapshot,
+          integrityProof: {
+            ...snapshot.integrityProof,
+            value: 'B'.repeat(43),
+          },
+        }),
+      }
+    );
+    expect(invalidProofRestore.status).toBe(400);
+
+    const restoreKey = 'snapshot-response-loss-key';
+    const restoredResponse = await fetch(
+      `${runtime.baseUrl}/v1/worlds/${world.worldId}/snapshots`,
+      {
+        method: 'POST',
+        headers: { ...protocolHeaders(), 'idempotency-key': restoreKey },
         body: JSON.stringify(snapshot),
       }
     );
     expect(restoredResponse.status).toBe(201);
-    const restored: unknown = await restoredResponse.json();
+    await restoredResponse.body?.cancel();
+
+    const restoreLookupUrl = `${runtime.baseUrl}/v1/worlds/${world.worldId}/snapshots/restores/${snapshot.hash}`;
+    expect((await fetch(restoreLookupUrl)).status).toBe(404);
+    for (const invalidHash of ['A'.repeat(64), 'a'.repeat(65)]) {
+      expect(
+        (
+          await fetch(
+            `${runtime.baseUrl}/v1/worlds/${world.worldId}/snapshots/restores/${invalidHash}`,
+            { headers: { 'idempotency-key': restoreKey } }
+          )
+        ).status
+      ).toBe(404);
+    }
+    const restoreLookup = await fetch(restoreLookupUrl, {
+      headers: { 'idempotency-key': restoreKey },
+    });
+    expect(restoreLookup.status).toBe(200);
+    const restored: unknown = await restoreLookup.json();
     assertSimulatorWorldResponse(restored);
     expect(restored.worldId).not.toBe(world.worldId);
+    const restoreReplay = await fetch(
+      `${runtime.baseUrl}/v1/worlds/${world.worldId}/snapshots`,
+      {
+        method: 'POST',
+        headers: { ...protocolHeaders(), 'idempotency-key': restoreKey },
+        body: JSON.stringify(snapshot),
+      }
+    );
+    expect(restoreReplay.status).toBe(201);
+    expect(await restoreReplay.json()).toEqual(restored);
 
     const restoredEvents = await fetch(
       `${runtime.baseUrl}/v1/worlds/${restored.worldId}/events`
@@ -1145,8 +1388,10 @@ describe('Simulator HTTP protocol', () => {
       `${runtime.baseUrl}/v1/worlds/${world.worldId}/snapshots`,
       {
         method: 'POST',
-        headers: protocolHeaders(),
-        body: JSON.stringify({ ...snapshot, hash: 'b'.repeat(64) }),
+        headers: { ...protocolHeaders(), 'idempotency-key': restoreKey },
+        body: JSON.stringify(
+          signedSnapshot({ ...unsignedSnapshot, hash: 'b'.repeat(64) })
+        ),
       }
     );
     expect(incompatible.status).toBe(422);
@@ -1159,10 +1404,15 @@ describe('Simulator HTTP protocol', () => {
       {
         method: 'POST',
         headers: protocolHeaders(),
-        body: JSON.stringify({
-          ...snapshot,
-          resourceGraph: { ...snapshot.resourceGraph, resources: 'invalid' },
-        }),
+        body: JSON.stringify(
+          signedSnapshot({
+            ...unsignedSnapshot,
+            resourceGraph: {
+              ...snapshot.resourceGraph,
+              resources: 'invalid',
+            },
+          })
+        ),
       }
     );
     expect(malformed.status).toBe(400);
@@ -1170,7 +1420,7 @@ describe('Simulator HTTP protocol', () => {
       error: { code: 'ValidationFailed' },
     });
 
-    const targetlessSnapshot = structuredClone(snapshot);
+    const targetlessSnapshot = structuredClone(unsignedSnapshot);
     const targetlessResources = targetlessSnapshot.resourceGraph['resources'];
     if (!Array.isArray(targetlessResources)) {
       throw new Error('snapshot resource fixture がありません');
@@ -1189,7 +1439,7 @@ describe('Simulator HTTP protocol', () => {
       {
         method: 'POST',
         headers: protocolHeaders(),
-        body: JSON.stringify(targetlessSnapshot),
+        body: JSON.stringify(signedSnapshot(targetlessSnapshot)),
       }
     );
     expect(targetless.status).toBe(400);
@@ -1212,7 +1462,9 @@ describe('Simulator HTTP protocol', () => {
       {
         method: 'POST',
         headers: protocolHeaders(),
-        body: JSON.stringify({ ...snapshot, seed: 'different-seed' }),
+        body: JSON.stringify(
+          signedSnapshot({ ...unsignedSnapshot, seed: 'different-seed' })
+        ),
       }
     );
     expect(mismatchedEnvelope.status).toBe(400);

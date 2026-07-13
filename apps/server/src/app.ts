@@ -22,7 +22,11 @@ import {
   LaunchTokenError,
 } from './auth';
 
-export interface AuthenticatedSimulatorOptions extends SimulatorAppOptions {
+export interface AuthenticatedSimulatorOptions
+  extends Omit<
+    SimulatorAppOptions,
+    'resolveWorldNamespace' | 'signSnapshot' | 'verifySnapshot'
+  > {
   readonly launchTokens: LaunchTokenAuthority;
 }
 
@@ -62,6 +66,10 @@ function sameNamespace(
   );
 }
 
+function isRecord(value: unknown): value is Readonly<Record<string, unknown>> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
 async function limitedJson(request: Request): Promise<unknown> {
   const reader = request.clone().body?.getReader();
   if (!reader) return undefined;
@@ -87,7 +95,18 @@ async function limitedJson(request: Request): Promise<unknown> {
 }
 
 function routeWorldId(pathname: string): string | undefined {
+  if (pathname.startsWith('/v1/worlds/by-deployment/')) return undefined;
   const encoded = /^\/v1\/worlds\/([^/]+)/.exec(pathname)?.[1];
+  if (!encoded) return undefined;
+  try {
+    return decodeURIComponent(encoded);
+  } catch {
+    return undefined;
+  }
+}
+
+function routeLookupDeploymentId(pathname: string): string | undefined {
+  const encoded = /^\/v1\/worlds\/by-deployment\/([^/]+)$/.exec(pathname)?.[1];
   if (!encoded) return undefined;
   try {
     return decodeURIComponent(encoded);
@@ -124,7 +143,15 @@ async function authorizeBody(
   if (c.req.path.endsWith('/snapshots')) {
     const value = await limitedJson(c.req.raw);
     assertSimulatorSnapshot(value);
-    return sameNamespace(value.namespace, namespace(claims));
+    const projectedWorld = value.resourceGraph['world'];
+    return (
+      sameNamespace(value.namespace, namespace(claims)) &&
+      isRecord(projectedWorld) &&
+      projectedWorld['tenantId'] === claims.tenantId &&
+      projectedWorld['eventId'] === claims.eventId &&
+      projectedWorld['teamId'] === claims.teamId &&
+      projectedWorld['deploymentId'] === claims.deploymentId
+    );
   }
   return true;
 }
@@ -135,6 +162,13 @@ async function authorizeRequest(
 ): Promise<Response | undefined> {
   const token = bearerLaunchToken(c.req.header('authorization'));
   const claims = options.launchTokens.verify(token);
+  const lookupDeploymentId = routeLookupDeploymentId(c.req.path);
+  if (lookupDeploymentId !== undefined) {
+    if (lookupDeploymentId !== claims.deploymentId) {
+      return c.json(errorEnvelope('NotFound', 'world does not exist'), 404);
+    }
+    return undefined;
+  }
   const isCreation = c.req.path === '/v1/worlds';
   if (!isCreation && !authorizeExistingWorld(options, claims, c.req.path)) {
     return c.json(errorEnvelope('NotFound', 'world does not exist'), 404);
@@ -188,6 +222,22 @@ export function createAuthenticatedSimulatorApp(
   const authorize = authorizationMiddleware(options);
   app.use('/v1/worlds', authorize);
   app.use('/v1/worlds/*', authorize);
-  app.route('/', createSimulatorApp(options));
+  app.route(
+    '/',
+    createSimulatorApp({
+      core: options.core,
+      registry: options.registry,
+      consoleBaseUrl: options.consoleBaseUrl,
+      resolveWorldNamespace: (request) =>
+        namespace(
+          options.launchTokens.verify(
+            bearerLaunchToken(request.headers.get('authorization') ?? undefined)
+          )
+        ),
+      signSnapshot: (envelope) => options.launchTokens.signSnapshot(envelope),
+      verifySnapshot: (snapshot) =>
+        options.launchTokens.verifySnapshot(snapshot),
+    })
+  );
   return app;
 }

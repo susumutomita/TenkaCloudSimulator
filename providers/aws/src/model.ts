@@ -14,6 +14,8 @@ export const SSM_COMMAND_RESOURCE = 'AWS::SSM::Command';
 export const SSM_SESSION_RESOURCE = 'AWS::SSM::Session';
 export const RUNTIME_ENDPOINT_RESOURCE = 'Runtime::Endpoint';
 export const HTTP_ENDPOINT_RESOURCE = 'HTTP::Endpoint';
+export const ECS_SERVICE_RESOURCE = 'AWS::ECS::Service';
+export const APP_RUNNER_SERVICE_RESOURCE = 'AWS::AppRunner::Service';
 
 export const CLOUDFORMATION_RESOURCE_TYPES = [
   'AWS::CloudFormation::CustomResource',
@@ -259,6 +261,42 @@ const OPERATION_CAPABILITIES: readonly OperationCapability[] = [
     fidelity: ['L0', 'L1'],
   },
   {
+    service: 'lambda',
+    operation: 'CreateManagedFunction',
+    resourceType: 'AWS::Lambda::Function',
+    fidelity: ['L0', 'L1'],
+  },
+  {
+    service: 'lambda',
+    operation: 'DescribeManagedFunction',
+    resourceType: 'AWS::Lambda::Function',
+    fidelity: ['L0', 'L1'],
+  },
+  {
+    service: 'ecs',
+    operation: 'CreateManagedService',
+    resourceType: ECS_SERVICE_RESOURCE,
+    fidelity: ['L0', 'L1'],
+  },
+  {
+    service: 'ecs',
+    operation: 'DescribeManagedService',
+    resourceType: ECS_SERVICE_RESOURCE,
+    fidelity: ['L0', 'L1'],
+  },
+  {
+    service: 'apprunner',
+    operation: 'CreateManagedService',
+    resourceType: APP_RUNNER_SERVICE_RESOURCE,
+    fidelity: ['L0', 'L1'],
+  },
+  {
+    service: 'apprunner',
+    operation: 'DescribeManagedService',
+    resourceType: APP_RUNNER_SERVICE_RESOURCE,
+    fidelity: ['L0', 'L1'],
+  },
+  {
     service: 'elasticloadbalancing',
     operation: 'DescribeRules',
     resourceType: '*',
@@ -387,6 +425,18 @@ const OPERATION_CAPABILITIES: readonly OperationCapability[] = [
   {
     service: 'runtime',
     operation: 'ResolveEndpoint',
+    resourceType: RUNTIME_ENDPOINT_RESOURCE,
+    fidelity: ['L0', 'L1'],
+  },
+  {
+    service: 'runtime',
+    operation: 'BindManagedResource',
+    resourceType: RUNTIME_ENDPOINT_RESOURCE,
+    fidelity: ['L0', 'L1'],
+  },
+  {
+    service: 'runtime',
+    operation: 'DescribeEndpointPlacement',
     resourceType: RUNTIME_ENDPOINT_RESOURCE,
     fidelity: ['L0', 'L1'],
   },

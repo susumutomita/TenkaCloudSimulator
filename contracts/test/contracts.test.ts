@@ -20,6 +20,7 @@ import {
   assertSimulatorWorldRequest,
   assertSimulatorWorldResponse,
   ContractValidationError,
+  canonicalSimulatorSnapshotIntegrityPayload,
   capabilitiesSchema,
   capabilityReportSchema,
   capabilityRequirementSchema,
@@ -46,6 +47,7 @@ import {
   isSimulatorResourceProjection,
   isSimulatorSimulationOverlay,
   isSimulatorSnapshot,
+  isSimulatorSnapshotEnvelope,
   isSimulatorWorldRequest,
   isSimulatorWorldResponse,
   materializeWorkloadsRequestSchema,
@@ -256,6 +258,11 @@ const simulatorSnapshot = {
   providerProjections: { aws: { roles: [{ id: 'role-1' }] } },
   scheduledTransitions: [{ at: '2026-07-11T00:01:00.000Z' }],
   hash: `sha256:${HASH}`,
+  integrityProof: {
+    version: '1',
+    algorithm: 'HMAC-SHA256',
+    value: 'A'.repeat(43),
+  },
 };
 
 const requirement = {
@@ -354,6 +361,12 @@ describe('公開 JSON Schema', () => {
       paths: {
         '/v1/capabilities': { get: { operationId: 'getCapabilities' } },
         '/v1/worlds': { post: { operationId: 'createWorld' } },
+        '/v1/worlds/by-deployment/{deploymentId}': {
+          get: {
+            operationId: 'getWorldByDeployment',
+            parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }],
+          },
+        },
         '/v1/worlds/{worldId}/deployments': {
           post: { operationId: 'createDeployment' },
         },
@@ -386,8 +399,17 @@ describe('公開 JSON Schema', () => {
           get: { operationId: 'streamEvents' },
         },
         '/v1/worlds/{worldId}/snapshots': {
-          get: { operationId: 'exportSnapshot' },
-          post: { operationId: 'restoreSnapshot' },
+          get: {
+            operationId: 'exportSnapshot',
+            security: [{ LaunchToken: [] }],
+          },
+          post: {
+            operationId: 'restoreSnapshot',
+            security: [{ LaunchToken: [] }],
+          },
+        },
+        '/v1/worlds/{worldId}/snapshots/restores/{snapshotHash}': {
+          get: { operationId: 'getSnapshotRestore' },
         },
         '/v1/worlds/{worldId}/providers/{provider}/operations/{operation}': {
           post: { operationId: 'executeProviderCommand' },
@@ -399,7 +421,7 @@ describe('公開 JSON Schema', () => {
         },
       },
     });
-    expect(text.match(/operationId:/g)).toHaveLength(14);
+    expect(text.match(/operationId:/g)).toHaveLength(16);
     expect(text).toContain('./schemas/error-envelope.schema.json');
     expect(text).toContain('./schemas/event-page.schema.json');
     expect(text).toContain('./schemas/resource-projection.schema.json');
@@ -725,10 +747,11 @@ describe('error、event、snapshot 契約', () => {
     assertSimulatorResourceProjection(resourceProjection);
   });
 
-  it('snapshot の独立 version、namespace、projection を検証する', () => {
+  it('snapshot の独立 version、namespace、projection、integrity proof を検証する', () => {
+    expect(SIMULATOR_SNAPSHOT_VERSION).toBe('2');
     expect(isSimulatorSnapshot(simulatorSnapshot)).toBe(true);
     expect(
-      isSimulatorSnapshot({ ...simulatorSnapshot, snapshotVersion: '2' })
+      isSimulatorSnapshot({ ...simulatorSnapshot, snapshotVersion: '1' })
     ).toBe(false);
     expect(
       isSimulatorSnapshot({ ...simulatorSnapshot, lastSequence: -1 })
@@ -737,6 +760,73 @@ describe('error、event、snapshot 契約', () => {
       isSimulatorSnapshot({
         ...simulatorSnapshot,
         namespace: { ...simulatorSnapshot.namespace, deploymentId: 'no' },
+      })
+    ).toBe(false);
+    const { integrityProof: _integrityProof, ...unsignedSnapshot } =
+      simulatorSnapshot;
+    expect(isSimulatorSnapshotEnvelope(unsignedSnapshot)).toBe(true);
+    expect(isSimulatorSnapshotEnvelope(simulatorSnapshot)).toBe(false);
+    expect(isSimulatorSnapshot(unsignedSnapshot)).toBe(false);
+    const unicodeLeft = {
+      ...unsignedSnapshot,
+      providerProjections: {
+        unicode: {
+          é: 'precomposed',
+          é: 'decomposed',
+          empty: null,
+        },
+      },
+    };
+    const unicodeRight = {
+      ...unsignedSnapshot,
+      providerProjections: {
+        unicode: {
+          empty: null,
+          é: 'decomposed',
+          é: 'precomposed',
+        },
+      },
+    };
+    expect(canonicalSimulatorSnapshotIntegrityPayload(unicodeRight)).toBe(
+      canonicalSimulatorSnapshotIntegrityPayload(unicodeLeft)
+    );
+    expect(
+      canonicalSimulatorSnapshotIntegrityPayload(unsignedSnapshot)
+    ).toContain('"domain":"tenkacloud-simulator.snapshot-integrity"');
+    expect(
+      isSimulatorSnapshot({
+        ...simulatorSnapshot,
+        integrityProof: {
+          ...simulatorSnapshot.integrityProof,
+          version: '2',
+        },
+      })
+    ).toBe(false);
+    expect(
+      isSimulatorSnapshot({
+        ...simulatorSnapshot,
+        integrityProof: {
+          ...simulatorSnapshot.integrityProof,
+          algorithm: 'SHA-256',
+        },
+      })
+    ).toBe(false);
+    expect(
+      isSimulatorSnapshot({
+        ...simulatorSnapshot,
+        integrityProof: {
+          ...simulatorSnapshot.integrityProof,
+          value: `${simulatorSnapshot.integrityProof.value}=`,
+        },
+      })
+    ).toBe(false);
+    expect(
+      isSimulatorSnapshot({
+        ...simulatorSnapshot,
+        integrityProof: {
+          ...simulatorSnapshot.integrityProof,
+          source: 'caller',
+        },
       })
     ).toBe(false);
     assertSimulatorSnapshot(simulatorSnapshot);

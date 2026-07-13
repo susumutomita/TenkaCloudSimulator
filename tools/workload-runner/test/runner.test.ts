@@ -11,14 +11,23 @@ const IMAGE =
 const RUN_ID = crypto.randomUUID();
 const WORLD_ID = `world-workload-contract-${RUN_ID}`;
 const CONTROL_WORLD_ID = `world-control-container-contract-${RUN_ID}`;
+const TEST_CLEANUP_QUIET_MILLISECONDS = 2_000;
+const TEST_CONTROL_TIMEOUT_MILLISECONDS = 2_000;
 
-const runner = new DockerWorkloadRunner({
+const policy = {
   allowedImages: new Set([IMAGE]),
   proxyImage: IMAGE,
   maxMemoryBytes: 134_217_728,
   maxMilliCpu: 500,
   maxPids: 64,
-});
+};
+const runner = new DockerWorkloadRunner(policy);
+const cleanupRunner = new DockerWorkloadRunner(
+  policy,
+  'docker',
+  TEST_CLEANUP_QUIET_MILLISECONDS,
+  TEST_CLEANUP_QUIET_MILLISECONDS
+);
 
 const containers: string[] = [];
 const controlContainers: string[] = [];
@@ -69,8 +78,10 @@ afterEach(async () => {
   for (const container of controlContainers.splice(0)) {
     docker(['container', 'stop', '--time=1', container]);
   }
-  await runner.cleanup(WORLD_ID);
-  await runner.cleanup(CONTROL_WORLD_ID);
+  await Promise.all([
+    cleanupRunner.cleanup(WORLD_ID),
+    cleanupRunner.cleanup(CONTROL_WORLD_ID),
+  ]);
 }, 60_000);
 
 function workload(overrides: Partial<WorkloadSpec> = {}): WorkloadSpec {
@@ -173,13 +184,174 @@ describe('Docker workload runner', () => {
   );
 
   it.serial(
+    'same owned workload identity の旧specだけを入れ替えて他workloadを保持する',
+    async () => {
+      const originalSpec = workload({
+        workloadId: 'stale-spec-service',
+      });
+      const unrelatedSpec = workload({
+        workloadId: 'unrelated-service',
+      });
+      const original = await runner.start(originalSpec);
+      const unrelated = await runner.start(unrelatedSpec);
+      containers.push(original.containerId, unrelated.containerId);
+
+      const replacement = await runner.start({
+        ...originalSpec,
+        environment: {
+          ...originalSpec.environment,
+          REVISION: 'two',
+        },
+      });
+      containers.push(replacement.containerId);
+
+      expect(replacement.containerId).not.toBe(original.containerId);
+      expect(replacement.proxyContainerId).not.toBe(original.proxyContainerId);
+      await expect(runner.inspect(original.containerId)).rejects.toBeInstanceOf(
+        WorkloadRunnerError
+      );
+      await expect(
+        runner.inspect(original.proxyContainerId ?? '')
+      ).rejects.toBeInstanceOf(WorkloadRunnerError);
+      expect(await runner.inspect(unrelated.containerId)).toMatchObject({
+        running: true,
+        workloadId: unrelatedSpec.workloadId,
+        worldId: WORLD_ID,
+      });
+      expect(
+        await runner.inspect(unrelated.proxyContainerId ?? '')
+      ).toMatchObject({
+        running: true,
+        workloadId: unrelatedSpec.workloadId,
+        worldId: WORLD_ID,
+      });
+      expect(
+        (await runner.listWorld(WORLD_ID)).map((item) => item.workloadId)
+      ).toEqual(['stale-spec-service', 'unrelated-service']);
+    },
+    60_000
+  );
+
+  it.serial(
+    'world network から外れた owned proxy だけを再生成する',
+    async () => {
+      const declaration: WorkloadDeclaration = {
+        id: 'detached-proxy-service',
+        targetId: 'default',
+        resourceRef: 'DetachedProxyService',
+        image: IMAGE,
+        command: workload().command ?? [],
+        containerPort: 8080,
+        healthPath: '/healthz',
+      };
+      const spec: WorkloadSpec = {
+        worldId: WORLD_ID,
+        workloadId: declaration.id,
+        targetId: declaration.targetId,
+        resourceRef: declaration.resourceRef,
+        image: declaration.image,
+        containerPort: declaration.containerPort,
+        ...(declaration.command === undefined
+          ? {}
+          : { command: declaration.command }),
+        ...(declaration.healthPath === undefined
+          ? {}
+          : { healthPath: declaration.healthPath }),
+      };
+      const unrelatedSpec = workload({
+        workloadId: 'detached-proxy-unrelated',
+      });
+      const started = await runner.start(spec);
+      const unrelated = await runner.start(unrelatedSpec);
+      containers.push(started.containerId, unrelated.containerId);
+      requiredDocker([
+        'network',
+        'disconnect',
+        started.networkName,
+        started.proxyContainerId ?? '',
+      ]);
+
+      const repaired = (await runner.materialize(WORLD_ID, [declaration]))[0];
+
+      expect(repaired?.containerId).toBe(started.containerId);
+      expect(repaired?.proxyContainerId).not.toBe(started.proxyContainerId);
+      expect(await runner.inspect(unrelated.containerId)).toMatchObject({
+        running: true,
+        workloadId: unrelatedSpec.workloadId,
+      });
+      expect(
+        await runner.inspect(unrelated.proxyContainerId ?? '')
+      ).toMatchObject({
+        running: true,
+        workloadId: unrelatedSpec.workloadId,
+      });
+    },
+    60_000
+  );
+
+  it.serial(
+    'deterministic proxy name の foreign container を停止せずfail closedにする',
+    async () => {
+      const spec = workload({ workloadId: 'foreign-proxy-service' });
+      const started = await runner.start(spec);
+      containers.push(started.containerId);
+      const proxyId = started.proxyContainerId ?? '';
+      const proxyName = requiredDocker([
+        'container',
+        'inspect',
+        proxyId,
+        '--format={{.Name}}',
+      ]).replace(/^\//, '');
+      requiredDocker(['container', 'stop', '--time=1', proxyId]);
+      for (let attempt = 0; attempt < 80; attempt += 1) {
+        if (docker(['container', 'inspect', proxyId]).exitCode !== 0) break;
+        await Bun.sleep(25);
+      }
+      expect(docker(['container', 'inspect', proxyId]).exitCode).not.toBe(0);
+      const foreignId = requiredDocker([
+        'run',
+        '--detach',
+        '--rm',
+        `--name=${proxyName}`,
+        '--label=tenkacloud.simulator.role=foreign',
+        IMAGE,
+        'sleep',
+        '60',
+      ]);
+      controlContainers.push(foreignId);
+
+      await expect(runner.start(spec)).rejects.toMatchObject({
+        code: 'WorkloadFailed',
+      });
+      expect(
+        requiredDocker([
+          'container',
+          'inspect',
+          foreignId,
+          '--format={{.State.Running}}',
+        ])
+      ).toBe('true');
+      expect(await runner.inspect(started.containerId)).toMatchObject({
+        running: true,
+        workloadId: spec.workloadId,
+      });
+    },
+    60_000
+  );
+
+  it.serial(
     'control container名をworld networkへ冪等接続しprune前に切断する',
     async () => {
       const { controlName, controlContainerId } = startControlContainer();
-      const controlledByName = new DockerWorkloadRunner({
-        ...runner.policy,
-        controlContainer: controlName,
-      });
+      const controlledByName = new DockerWorkloadRunner(
+        {
+          ...runner.policy,
+          controlContainer: controlName,
+        },
+        'docker',
+        TEST_CONTROL_TIMEOUT_MILLISECONDS,
+        TEST_CONTROL_TIMEOUT_MILLISECONDS
+      );
       const spec = internalWorkload({
         workloadId: 'internal-health-service',
         command: [
@@ -195,10 +367,15 @@ describe('Docker workload runner', () => {
       expect(started.proxyContainerId).toBeUndefined();
       expect(await controlledByName.start(spec)).toEqual(started);
 
-      const controlledById = new DockerWorkloadRunner({
-        ...runner.policy,
-        controlContainer: controlContainerId,
-      });
+      const controlledById = new DockerWorkloadRunner(
+        {
+          ...runner.policy,
+          controlContainer: controlContainerId,
+        },
+        'docker',
+        TEST_CONTROL_TIMEOUT_MILLISECONDS,
+        TEST_CONTROL_TIMEOUT_MILLISECONDS
+      );
       expect(await controlledById.start(spec)).toEqual(started);
 
       const membership = JSON.parse(
@@ -284,10 +461,15 @@ describe('Docker workload runner', () => {
       containers.push(started.containerId);
       expect(started.endpoint).toStartWith('http://127.0.0.1:');
       const { controlName, controlContainerId } = startControlContainer();
-      const controlled = new DockerWorkloadRunner({
-        ...runner.policy,
-        controlContainer: controlName,
-      });
+      const controlled = new DockerWorkloadRunner(
+        {
+          ...runner.policy,
+          controlContainer: controlName,
+        },
+        'docker',
+        TEST_CONTROL_TIMEOUT_MILLISECONDS,
+        TEST_CONTROL_TIMEOUT_MILLISECONDS
+      );
 
       await expect(controlled.start(spec)).rejects.toThrow(
         'workload proxy did not become reachable'
@@ -361,10 +543,15 @@ describe('Docker workload runner', () => {
         ).toThrow('non-empty');
       }
 
-      const missing = new DockerWorkloadRunner({
-        ...runner.policy,
-        controlContainer: 'tenkacloud-simulator-missing',
-      });
+      const missing = new DockerWorkloadRunner(
+        {
+          ...runner.policy,
+          controlContainer: 'tenkacloud-simulator-missing',
+        },
+        'docker',
+        TEST_CONTROL_TIMEOUT_MILLISECONDS,
+        TEST_CONTROL_TIMEOUT_MILLISECONDS
+      );
       await expect(
         missing.start(
           internalWorkload({
@@ -472,7 +659,7 @@ describe('Docker workload runner', () => {
       );
       expect(await runner.listWorld(WORLD_ID)).toEqual(materialized);
 
-      await runner.pruneWorld(WORLD_ID);
+      await cleanupRunner.pruneWorld(WORLD_ID);
       containers.splice(0);
       expect(await runner.listWorld(WORLD_ID)).toEqual([]);
       const network = Bun.spawnSync([
@@ -482,7 +669,85 @@ describe('Docker workload runner', () => {
         materialized[0]?.networkName ?? '',
       ]);
       expect(network.exitCode).not.toBe(0);
-      await runner.pruneWorld(WORLD_ID);
+      await cleanupRunner.pruneWorld(WORLD_ID);
+    },
+    60_000
+  );
+
+  it.serial(
+    'cleanup scan 後に遅延生成された owned proxy もbounded rescanで回収する',
+    async () => {
+      const spec = workload({ workloadId: 'late-cleanup-proxy' });
+      const started = await runner.start(spec);
+      const proxyName = requiredDocker([
+        'container',
+        'inspect',
+        started.proxyContainerId ?? '',
+        '--format={{.Name}}',
+      ]).replace(/^\//, '');
+      containers.push(started.containerId);
+      const lateCreation = (async (): Promise<string> => {
+        await Bun.sleep(50);
+        for (let attempt = 0; attempt < 80; attempt += 1) {
+          const created = docker([
+            'run',
+            '--detach',
+            '--rm',
+            `--name=${proxyName}`,
+            `--label=tenkacloud.simulator.world=${WORLD_ID}`,
+            `--label=tenkacloud.simulator.workload=${spec.workloadId}`,
+            '--label=tenkacloud.simulator.role=proxy',
+            IMAGE,
+            'sleep',
+            '60',
+          ]);
+          if (created.exitCode === 0) return created.stdout;
+          await Bun.sleep(25);
+        }
+        throw new Error('late proxy was never admitted by Docker');
+      })();
+
+      await cleanupRunner.cleanup(WORLD_ID);
+      const lateProxyId = await lateCreation;
+
+      expect(docker(['container', 'inspect', lateProxyId]).exitCode).not.toBe(
+        0
+      );
+      containers.splice(0);
+    },
+    60_000
+  );
+
+  it.serial(
+    'cleanup scan 後に遅延再生成された world network もquiet windowで回収する',
+    async () => {
+      const spec = workload({ workloadId: 'late-cleanup-network' });
+      const started = await runner.start(spec);
+      containers.push(started.containerId);
+      const lateCreation = (async (): Promise<string> => {
+        await Bun.sleep(50);
+        for (let attempt = 0; attempt < 80; attempt += 1) {
+          const created = docker([
+            'network',
+            'create',
+            '--driver=bridge',
+            '--internal',
+            `--label=tenkacloud.simulator.world=${WORLD_ID}`,
+            started.networkName,
+          ]);
+          if (created.exitCode === 0) return created.stdout;
+          await Bun.sleep(25);
+        }
+        throw new Error('late network was never admitted by Docker');
+      })();
+
+      await cleanupRunner.cleanup(WORLD_ID);
+      const lateNetworkId = await lateCreation;
+
+      expect(docker(['network', 'inspect', lateNetworkId]).exitCode).not.toBe(
+        0
+      );
+      containers.splice(0);
     },
     60_000
   );
@@ -623,6 +888,9 @@ describe('Docker workload runner', () => {
             0
           )
       ).toThrow('non-empty');
+      expect(() => new DockerWorkloadRunner(policy, 'docker', 2, 1)).toThrow(
+        'non-empty'
+      );
       await expect(runner.inspect('not-a-container')).rejects.toMatchObject({
         code: 'WorkloadFailed',
       });

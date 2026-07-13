@@ -19,6 +19,12 @@ import {
   SIMULATOR_PROTOCOL_VERSION,
 } from '@tenkacloud/simulator-contracts';
 import {
+  deterministicId,
+  ProviderRegistry,
+  SimulationCore,
+  SimulationStore,
+} from '@tenkacloud/simulator-core';
+import {
   AWS_NATIVE_DEPLOYMENT_HEADER,
   AWS_NATIVE_TARGET_HEADER,
   AWS_NATIVE_WORLD_HEADER,
@@ -560,6 +566,44 @@ describe('Simulator runtime entrypoint', () => {
     );
     runtimes.push(runtime);
     expect((await lstat(permissionState)).mode & 0o777).toBe(0o700);
+  });
+
+  it('should reconcile a persisted delete intent before returning a runtime', async () => {
+    const configured = environment();
+    const stateDirectory = configured.TENKACLOUD_SIMULATOR_STATE_DIR ?? '';
+    await mkdir(stateDirectory, { recursive: true });
+    const seededStore = new SimulationStore(
+      join(stateDirectory, 'simulator.sqlite')
+    );
+    const seededCore = new SimulationCore(seededStore, new ProviderRegistry());
+    const world = seededCore.createWorld(
+      {
+        tenantId: 'startup-reconcile-tenant',
+        eventId: 'startup-reconcile-event',
+        teamId: 'startup-reconcile-team',
+        deploymentId: 'startup-reconcile-deployment',
+      },
+      'startup-reconcile-world'
+    );
+    seededStore.reserveEvents(
+      world.worldId,
+      deterministicId('command', {
+        worldId: world.worldId,
+        operation: 'delete',
+      }),
+      1,
+      'deletion'
+    );
+    await expect(createSimulatorRuntime(configured)).rejects.toMatchObject({
+      code: 'Conflict',
+    });
+    expect(seededStore.pendingDeletionWorldIds()).toEqual([world.worldId]);
+    seededStore.close();
+
+    const runtime = await createSimulatorRuntime(configured);
+    runtimes.push(runtime);
+    expect(runtime.store.world(world.worldId)?.status).toBe('deleted');
+    expect(runtime.store.pendingDeletionWorldIds()).toEqual([]);
   });
 
   it('workload policy は全項目の厳密設定時だけ runner capability を広告する', async () => {

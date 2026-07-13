@@ -1,8 +1,9 @@
 import {
-  assertSimulatorSnapshot,
+  assertSimulatorSnapshotEnvelope,
   SIMULATOR_PROTOCOL_VERSION,
   SIMULATOR_SNAPSHOT_VERSION,
   type SimulatorSnapshot,
+  type SimulatorSnapshotEnvelope,
 } from '@tenkacloud/simulator-contracts';
 import type {
   CapabilityDiagnostic,
@@ -226,7 +227,9 @@ function lastSequence(events: readonly EventRecord[]): number {
   );
 }
 
-export function simulatorSnapshot(snapshot: WorldSnapshot): SimulatorSnapshot {
+export function simulatorSnapshot(
+  snapshot: WorldSnapshot
+): SimulatorSnapshotEnvelope {
   const { world } = snapshot.payload;
   const response: unknown = {
     snapshotVersion: SIMULATOR_SNAPSHOT_VERSION,
@@ -249,7 +252,7 @@ export function simulatorSnapshot(snapshot: WorldSnapshot): SimulatorSnapshot {
     providerProjections: {},
     hash: snapshot.hash,
   };
-  assertSimulatorSnapshot(response);
+  assertSimulatorSnapshotEnvelope(response);
   return response;
 }
 
@@ -258,7 +261,7 @@ export function coreSnapshot(snapshot: SimulatorSnapshot): WorldSnapshot {
   const { deployments, events, resources, world: projectedWorld } = graph;
   const candidate: unknown = {
     payload: {
-      snapshotVersion: snapshot.snapshotVersion,
+      snapshotVersion: '1',
       world: projectedWorld,
       events,
       deployments,

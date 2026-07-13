@@ -379,6 +379,12 @@ export async function createSimulatorRuntime(
       ? {}
       : { workloadEffects: new DockerWorkloadRunner(policy) }),
   });
+  try {
+    await core.reconcilePendingLifecycleOperations();
+  } catch (error) {
+    store.close();
+    throw error;
+  }
   const simulator = createAuthenticatedSimulatorApp({
     core,
     registry,

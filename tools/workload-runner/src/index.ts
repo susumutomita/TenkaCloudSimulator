@@ -9,6 +9,7 @@ const MAX_ENVIRONMENT_VALUE_LENGTH = 4096;
 const DEFAULT_DOCKER_TIMEOUT_MILLISECONDS = 30_000;
 const CONTAINER_REMOVAL_ATTEMPTS = 40;
 const CONTAINER_REMOVAL_INTERVAL_MILLISECONDS = 50;
+const CLEANUP_HARD_WINDOW_MULTIPLIER = 4;
 const MAX_WORKLOADS_PER_MATERIALIZATION = 32;
 const WORLD_ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,255}$/;
 const WORKLOAD_ID = /^[a-z][a-z0-9-]{0,63}$/;
@@ -441,7 +442,8 @@ export class DockerWorkloadRunner {
   constructor(
     readonly policy: WorkloadPolicy,
     readonly dockerBinary = 'docker',
-    readonly dockerTimeoutMilliseconds = DEFAULT_DOCKER_TIMEOUT_MILLISECONDS
+    readonly dockerTimeoutMilliseconds = DEFAULT_DOCKER_TIMEOUT_MILLISECONDS,
+    readonly cleanupQuietMilliseconds = dockerTimeoutMilliseconds
   ) {
     if (
       policy.allowedImages.size < 1 ||
@@ -458,7 +460,9 @@ export class DockerWorkloadRunner {
         (HEX_CONTAINER_SELECTOR.test(policy.controlContainer) ||
           !CONTROL_CONTAINER_NAME.test(policy.controlContainer))) ||
       !Number.isSafeInteger(dockerTimeoutMilliseconds) ||
-      dockerTimeoutMilliseconds < 1
+      dockerTimeoutMilliseconds < 1 ||
+      !Number.isSafeInteger(cleanupQuietMilliseconds) ||
+      cleanupQuietMilliseconds < dockerTimeoutMilliseconds
     ) {
       throw new WorkloadRunnerError(
         'InvalidWorkload',
@@ -517,6 +521,26 @@ export class DockerWorkloadRunner {
       );
     }
     return result.stdout.trim();
+  }
+
+  async #ensureImage(image: string): Promise<void> {
+    const inspected = await this.#docker(['image', 'inspect', image]);
+    if (inspected.exitCode === 0) return;
+    await this.#requiredDocker(['image', 'pull', image], 'workload image pull');
+    await this.#requiredDocker(
+      ['image', 'inspect', image],
+      'workload image verification'
+    );
+  }
+
+  async #ensureImages(spec: WorkloadSpec): Promise<void> {
+    await this.#ensureImage(spec.image);
+    if (
+      spec.containerPort !== undefined &&
+      this.policy.proxyImage !== spec.image
+    ) {
+      await this.#ensureImage(this.policy.proxyImage);
+    }
   }
 
   async #waitForContainerRemoval(container: string): Promise<boolean> {
@@ -584,6 +608,72 @@ export class DockerWorkloadRunner {
 
   #proxyName(spec: WorkloadSpec): string {
     return identifier('tc-sim-proxy', spec.worldId, spec.workloadId);
+  }
+
+  #assertReplacementOwnership(
+    inspection: WorkloadInspection,
+    spec: WorkloadSpec,
+    role: 'workload' | 'proxy'
+  ): void {
+    if (
+      inspection.role !== role ||
+      inspection.worldId !== spec.worldId ||
+      inspection.workloadId !== spec.workloadId
+    ) {
+      throw new WorkloadRunnerError(
+        'WorkloadFailed',
+        'workload identity is occupied by a different container state'
+      );
+    }
+  }
+
+  async #inspectionIfPresent(
+    containerName: string
+  ): Promise<WorkloadInspection | undefined> {
+    const inspected = await this.#docker([
+      'container',
+      'inspect',
+      containerName,
+    ]);
+    if (inspected.exitCode === 0) return this.inspect(containerName);
+    const listed = await this.#docker([
+      'container',
+      'ls',
+      '--all',
+      `--filter=name=^/${containerName}$`,
+      '--format={{.ID}}',
+    ]);
+    if (listed.exitCode !== 0 || listed.stdout.trim()) {
+      throw new WorkloadRunnerError(
+        'WorkloadFailed',
+        'Docker could not establish that the workload container is absent'
+      );
+    }
+    return undefined;
+  }
+
+  async #replaceOwnedWorkload(
+    spec: WorkloadSpec,
+    workload: WorkloadInspection
+  ): Promise<void> {
+    this.#assertReplacementOwnership(workload, spec, 'workload');
+    const proxyName = this.#proxyName(spec);
+    const proxy = await this.#inspectionIfPresent(proxyName);
+    if (proxy) {
+      this.#assertReplacementOwnership(proxy, spec, 'proxy');
+    }
+    if (proxy && !(await this.#stopAndAwaitRemoval(proxy.containerId))) {
+      throw new WorkloadRunnerError(
+        'WorkloadFailed',
+        'stale workload proxy could not be removed'
+      );
+    }
+    if (!(await this.#stopAndAwaitRemoval(workload.containerId))) {
+      throw new WorkloadRunnerError(
+        'WorkloadFailed',
+        'stale workload container could not be removed'
+      );
+    }
   }
 
   async #resolvedControlContainerId(): Promise<string | undefined> {
@@ -802,6 +892,7 @@ export class DockerWorkloadRunner {
 
   async start(spec: WorkloadSpec): Promise<RunningWorkload> {
     const limits = this.#validate(spec);
+    await this.#ensureImages(spec);
     const networkName = await this.#ensureNetwork(spec.worldId);
     const containerName = this.#containerName(spec);
     const existing = await this.#docker([
@@ -811,26 +902,26 @@ export class DockerWorkloadRunner {
     ]);
     if (existing.exitCode === 0) {
       const inspection = await this.inspect(containerName);
+      this.#assertReplacementOwnership(inspection, spec, 'workload');
       if (
-        inspection.image !== spec.image ||
-        inspection.specHash !== this.#specHash(spec) ||
-        !inspection.running
+        inspection.image === spec.image &&
+        inspection.specHash === this.#specHash(spec) &&
+        inspection.networkName === networkName &&
+        inspection.running
       ) {
-        throw new WorkloadRunnerError(
-          'WorkloadFailed',
-          'workload identity is occupied by a different container state'
-        );
+        const proxy =
+          spec.containerPort === undefined
+            ? undefined
+            : await this.#ensureProxy(spec, containerName, networkName);
+        return runningWorkload(inspection, networkName, proxy);
       }
-      const proxy =
-        spec.containerPort === undefined
-          ? undefined
-          : await this.#ensureProxy(spec, containerName, networkName);
-      return runningWorkload(inspection, networkName, proxy);
+      await this.#replaceOwnedWorkload(spec, inspection);
     }
     const args = [
       'run',
       '--detach',
       '--rm',
+      '--pull=never',
       `--name=${containerName}`,
       `--label=tenkacloud.simulator.spec=${this.#specHash(spec)}`,
       ...workloadLabels(spec, 'workload'),
@@ -878,25 +969,36 @@ export class DockerWorkloadRunner {
     const existing = await this.#docker(['container', 'inspect', proxyName]);
     if (existing.exitCode === 0) {
       const inspection = await this.inspect(proxyName);
+      this.#assertReplacementOwnership(inspection, spec, 'proxy');
+      const reusableState =
+        inspection.running &&
+        Boolean(inspection.endpoint) &&
+        inspection.image === this.policy.proxyImage &&
+        inspection.specHash === this.#specHash(spec);
+      const connected =
+        reusableState &&
+        (await this.#networkContainsContainer(
+          networkName,
+          inspection.containerId
+        ));
       if (
-        !inspection.running ||
-        !inspection.endpoint ||
-        inspection.image !== this.policy.proxyImage ||
-        inspection.role !== 'proxy' ||
-        inspection.worldId !== spec.worldId ||
-        inspection.workloadId !== spec.workloadId ||
-        inspection.specHash !== this.#specHash(spec)
+        reusableState &&
+        connected &&
+        inspection.endpoint &&
+        inspection.running
       ) {
+        await this.#waitForEndpoint(
+          this.#healthEndpoint(spec, proxyName, inspection.endpoint),
+          spec.healthPath ?? '/'
+        );
+        return inspection;
+      }
+      if (!(await this.#stopAndAwaitRemoval(inspection.containerId))) {
         throw new WorkloadRunnerError(
           'WorkloadFailed',
-          'workload proxy is not in a reusable state'
+          'stale workload proxy could not be removed'
         );
       }
-      await this.#waitForEndpoint(
-        this.#healthEndpoint(spec, proxyName, inspection.endpoint),
-        spec.healthPath ?? '/'
-      );
-      return inspection;
     }
     const proxyScript = [
       `printf '%s\\n' '#!/bin/sh' 'exec nc ${workloadName} ${port}' > /tmp/tenkacloud-proxy`,
@@ -908,6 +1010,7 @@ export class DockerWorkloadRunner {
         'run',
         '--detach',
         '--rm',
+        '--pull=never',
         `--name=${proxyName}`,
         ...workloadLabels(spec, 'proxy'),
         `--label=tenkacloud.simulator.spec=${this.#specHash(spec)}`,
@@ -1044,8 +1147,14 @@ export class DockerWorkloadRunner {
       try {
         inspections.push(await this.inspect(id));
       } catch (error) {
-        const stillExists = await this.#docker(['container', 'inspect', id]);
-        if (stillExists.exitCode === 0) throw error;
+        const listed = await this.#docker([
+          'container',
+          'ls',
+          '--all',
+          `--filter=id=${id}`,
+          '--format={{.ID}}',
+        ]);
+        if (listed.exitCode !== 0 || listed.stdout.trim()) throw error;
       }
     }
     return inspections
@@ -1131,7 +1240,9 @@ export class DockerWorkloadRunner {
     );
     for (const spec of specs) this.#validate(spec);
     const existing = new Set(
-      (await this.listWorld(worldId)).map((workload) => workload.containerId)
+      (await this.#worldInspections(worldId))
+        .filter((inspection) => inspection.role === 'workload')
+        .map((inspection) => inspection.containerId)
     );
     const created: RunningWorkload[] = [];
     try {
@@ -1255,6 +1366,71 @@ export class DockerWorkloadRunner {
   }
 
   async pruneWorld(worldId: string): Promise<void> {
+    await this.#removeWorldContainers(worldId);
+    await this.#removeWorldNetwork(worldId);
+    const deadline =
+      Date.now() +
+      this.cleanupQuietMilliseconds * CLEANUP_HARD_WINDOW_MULTIPLIER;
+    let quietSince: number | undefined;
+    while (Date.now() <= deadline) {
+      const passStartedAt = Date.now();
+      const removedContainers = await this.#removeWorldContainers(worldId);
+      const network = await this.#removeWorldNetwork(worldId);
+      const now = Date.now();
+      if (removedContainers === 0 && network.absent && !network.observed) {
+        quietSince ??= now;
+        if (passStartedAt - quietSince >= this.cleanupQuietMilliseconds) {
+          return;
+        }
+      } else {
+        quietSince = undefined;
+      }
+      const remaining = deadline - now;
+      if (remaining <= 0) break;
+      await Bun.sleep(
+        Math.min(CONTAINER_REMOVAL_INTERVAL_MILLISECONDS, remaining)
+      );
+    }
+    throw new WorkloadRunnerError(
+      'WorkloadFailed',
+      'workload world cleanup did not reach a stable empty state'
+    );
+  }
+
+  async #networkIsAbsent(networkName: string): Promise<boolean> {
+    const inspected = await this.#docker(['network', 'inspect', networkName]);
+    if (inspected.exitCode === 0) return false;
+    const listed = await this.#docker([
+      'network',
+      'ls',
+      `--filter=name=^${networkName}$`,
+      '--format={{.Name}}',
+    ]);
+    if (listed.exitCode !== 0) {
+      throw new WorkloadRunnerError(
+        'WorkloadFailed',
+        'Docker could not establish that the workload network is absent'
+      );
+    }
+    return listed.stdout.trim().length === 0;
+  }
+
+  async #removeWorldNetwork(
+    worldId: string
+  ): Promise<{ readonly absent: boolean; readonly observed: boolean }> {
+    const networkName = this.#networkName(worldId);
+    if (await this.#networkIsAbsent(networkName)) {
+      return { absent: true, observed: false };
+    }
+    await this.#disconnectControlContainer(networkName);
+    await this.#docker(['network', 'rm', networkName]);
+    return {
+      absent: await this.#networkIsAbsent(networkName),
+      observed: true,
+    };
+  }
+
+  async #removeWorldContainers(worldId: string): Promise<number> {
     const inspections = await this.#worldInspections(worldId);
     const ordered = [...inspections].sort((left, right) => {
       if (left.role === right.role) {
@@ -1262,32 +1438,18 @@ export class DockerWorkloadRunner {
       }
       return left.role === 'proxy' ? -1 : 1;
     });
-    for (const inspection of ordered) {
-      if (!(await this.#stopAndAwaitRemoval(inspection.containerId))) {
-        throw new WorkloadRunnerError(
-          'WorkloadFailed',
-          'workload world cleanup did not remove a container'
-        );
-      }
+    const removed = await Promise.all(
+      ordered.map((inspection) =>
+        this.#stopAndAwaitRemoval(inspection.containerId)
+      )
+    );
+    if (removed.some((result) => !result)) {
+      throw new WorkloadRunnerError(
+        'WorkloadFailed',
+        'workload world cleanup did not remove a container'
+      );
     }
-    const networkName = this.#networkName(worldId);
-    const network = await this.#docker(['network', 'inspect', networkName]);
-    if (network.exitCode !== 0) return;
-    await this.#disconnectControlContainer(networkName);
-    const removed = await this.#docker(['network', 'rm', networkName]);
-    if (removed.exitCode !== 0) {
-      const stillExists = await this.#docker([
-        'network',
-        'inspect',
-        networkName,
-      ]);
-      if (stillExists.exitCode === 0) {
-        throw new WorkloadRunnerError(
-          'WorkloadFailed',
-          `workload network cleanup failed: ${safeDockerMessage(removed.stderr)}`
-        );
-      }
-    }
+    return ordered.length;
   }
 
   async cleanup(worldId: string): Promise<void> {

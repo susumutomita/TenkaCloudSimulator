@@ -1,5 +1,7 @@
 export const SIMULATOR_PROTOCOL_VERSION = '2026-07-11' as const;
-export const SIMULATOR_SNAPSHOT_VERSION = '1' as const;
+export const SIMULATOR_SNAPSHOT_VERSION = '2' as const;
+export const SIMULATOR_SNAPSHOT_INTEGRITY_VERSION = '1' as const;
+export const SIMULATOR_SNAPSHOT_INTEGRITY_ALGORITHM = 'HMAC-SHA256' as const;
 export const SIMULATOR_EVENT_PAGE_SIZE = 100 as const;
 export const SIMULATOR_RUNTIME_TARGET_ID_PATTERN = /^[a-z][a-z0-9-]{0,31}$/;
 
@@ -266,7 +268,7 @@ export interface SimulatorNamespace {
   readonly teamId: string;
 }
 
-export interface SimulatorSnapshot {
+export interface SimulatorSnapshotEnvelope {
   readonly snapshotVersion: typeof SIMULATOR_SNAPSHOT_VERSION;
   readonly protocolVersion: typeof SIMULATOR_PROTOCOL_VERSION;
   readonly worldId: string;
@@ -278,6 +280,16 @@ export interface SimulatorSnapshot {
   readonly providerProjections: Readonly<Record<string, JsonObject>>;
   readonly scheduledTransitions?: readonly JsonObject[];
   readonly hash: string;
+}
+
+export interface SimulatorSnapshotIntegrityProof {
+  readonly version: typeof SIMULATOR_SNAPSHOT_INTEGRITY_VERSION;
+  readonly algorithm: typeof SIMULATOR_SNAPSHOT_INTEGRITY_ALGORITHM;
+  readonly value: string;
+}
+
+export interface SimulatorSnapshot extends SimulatorSnapshotEnvelope {
+  readonly integrityProof: SimulatorSnapshotIntegrityProof;
 }
 
 export type CapabilityPlane =

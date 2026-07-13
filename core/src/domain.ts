@@ -150,6 +150,7 @@ export interface ProviderCompileInput {
 export interface ProviderCommandInput {
   readonly worldId: string;
   readonly deploymentId: string;
+  readonly targetId?: string;
   readonly service: string;
   readonly operation: string;
   readonly resourceType: string;
@@ -168,6 +169,8 @@ export interface ProviderWorldView {
   readonly world: WorldRecord;
   readonly resources: readonly ResourceRecord[];
 }
+
+export type ProviderCommandMode = 'mutation' | 'projection-read';
 
 export interface ProviderClockInput {
   readonly previousVirtualTime: string;
@@ -209,6 +212,7 @@ export interface ProviderModule {
     command: ProviderCommandInput,
     world: ProviderWorldView
   ): ProviderCommandResult;
+  commandMode?(command: ProviderCommandInput): ProviderCommandMode;
   reduceAsync?(
     command: ProviderCommandInput,
     world: ProviderWorldView

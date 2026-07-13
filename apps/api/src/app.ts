@@ -5,6 +5,9 @@ import {
   assertSimulatorSnapshot,
   assertSimulatorWorldRequest,
   SIMULATOR_PROTOCOL_VERSION,
+  type SimulatorSnapshot,
+  type SimulatorSnapshotEnvelope,
+  type SimulatorSnapshotIntegrityProof,
 } from '@tenkacloud/simulator-contracts';
 import type {
   CreateWorldInput,
@@ -12,6 +15,7 @@ import type {
   ExecuteCommandInput,
   ProviderRegistry,
   SimulationCore,
+  WorldNamespace,
 } from '@tenkacloud/simulator-core';
 import { Hono } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
@@ -25,6 +29,7 @@ import {
   MAX_REQUEST_BODY_BYTES,
   PROTOCOL_HEADER,
   protocolMismatchResponse,
+  RequestValidationError,
 } from './errors.js';
 import { eventCursor, eventPage, NEXT_CURSOR_HEADER } from './events.js';
 import {
@@ -39,6 +44,11 @@ export interface SimulatorAppOptions {
   readonly core: SimulationCore;
   readonly registry: ProviderRegistry;
   readonly consoleBaseUrl: string;
+  readonly resolveWorldNamespace: (request: Request) => WorldNamespace;
+  readonly signSnapshot: (
+    envelope: SimulatorSnapshotEnvelope
+  ) => SimulatorSnapshotIntegrityProof;
+  readonly verifySnapshot: (snapshot: SimulatorSnapshot) => boolean;
 }
 
 function normalizedConsoleBaseUrl(value: string): string {
@@ -51,6 +61,12 @@ function requiresProtocol(method: string): boolean {
 }
 
 export function createSimulatorApp(options: SimulatorAppOptions): Hono {
+  if (
+    typeof options.signSnapshot !== 'function' ||
+    typeof options.verifySnapshot !== 'function'
+  ) {
+    throw new TypeError('snapshot signer and verifier are required');
+  }
   const app = new Hono();
   const consoleBaseUrl = normalizedConsoleBaseUrl(options.consoleBaseUrl);
 
@@ -83,6 +99,16 @@ export function createSimulatorApp(options: SimulatorAppOptions): Hono {
         options.core.workloadEffectsAvailable
       )
     );
+  });
+
+  app.get('/v1/worlds/by-deployment/:deploymentId', (c) => {
+    const deploymentId = c.req.param('deploymentId');
+    const world = options.core.worldByDeployment(
+      options.resolveWorldNamespace(c.req.raw),
+      deploymentId,
+      idempotencyKey(c, deploymentId, 'create-world')
+    );
+    return c.json(worldResponse(world, consoleBaseUrl));
   });
 
   app.post('/v1/worlds', async (c) => {
@@ -233,14 +259,38 @@ export function createSimulatorApp(options: SimulatorAppOptions): Hono {
   });
 
   app.get('/v1/worlds/:worldId/snapshots', (c) => {
-    return c.json(
-      simulatorSnapshot(options.core.exportSnapshot(c.req.param('worldId')))
+    const envelope = simulatorSnapshot(
+      options.core.exportSnapshot(c.req.param('worldId'))
     );
+    const response: unknown = {
+      ...envelope,
+      integrityProof: options.signSnapshot(envelope),
+    };
+    assertSimulatorSnapshot(response);
+    return c.json(response);
+  });
+
+  app.get('/v1/worlds/:worldId/snapshots/restores/:snapshotHash', (c) => {
+    const sourceWorldId = c.req.param('worldId');
+    const source = options.core.world(
+      sourceWorldId,
+      options.resolveWorldNamespace(c.req.raw)
+    );
+    const restored = options.core.restoredWorld(
+      sourceWorldId,
+      c.req.param('snapshotHash'),
+      idempotencyKey(c, source.deploymentId, 'restore-snapshot'),
+      source
+    );
+    return c.json(worldResponse(restored, consoleBaseUrl));
   });
 
   app.post('/v1/worlds/:worldId/snapshots', async (c) => {
     const request = await readJson(c);
     assertSimulatorSnapshot(request);
+    if (!options.verifySnapshot(request)) {
+      throw new RequestValidationError('snapshot integrity proof is invalid');
+    }
     if (request.worldId !== c.req.param('worldId')) {
       return errorResponse(
         c,
@@ -250,7 +300,7 @@ export function createSimulatorApp(options: SimulatorAppOptions): Hono {
       );
     }
     const snapshot = coreSnapshot(request);
-    const restored = options.core.restoreSnapshot(
+    const restored = await options.core.restoreSnapshot(
       snapshot,
       idempotencyKey(c, snapshot.payload.world.deploymentId, 'restore-snapshot')
     );

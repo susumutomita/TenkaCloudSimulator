@@ -1,4 +1,5 @@
 import { Database } from 'bun:sqlite';
+import { randomUUID } from 'node:crypto';
 import { canonicalJson, contentHash } from './canonical';
 import type {
   DeploymentRecord,
@@ -99,15 +100,73 @@ interface IdempotencyRow {
   response: string;
 }
 
-const CURRENT_SCHEMA_VERSION = 1;
+interface EventReservationRow {
+  event_count: number;
+  operation_kind: EventReservationKind;
+  owner_id: string;
+}
+
+interface EventReservationOwnerRow {
+  owner_id: string;
+}
+
+interface WorldIdRow {
+  world_id: string;
+}
+
+interface EventReservationOwnerIdentity {
+  readonly version: 1;
+  readonly pid: number;
+  readonly startIdentity: string | null;
+  readonly nonce: string;
+}
+
+export type EventReservationKind = 'materialization' | 'deletion';
+
+function readProcessStartIdentity(pid: number): string | undefined {
+  try {
+    const result = Bun.spawnSync({
+      cmd: ['/bin/ps', '-o', 'lstart=', '-p', String(pid)],
+      env: { ...process.env, LC_ALL: 'C' },
+      stderr: 'ignore',
+      stdout: 'pipe',
+    });
+    if (result.exitCode !== 0) return undefined;
+    const identity = new TextDecoder().decode(result.stdout).trim();
+    return identity.length > 0 ? identity : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+const PROCESS_START_IDENTITY = readProcessStartIdentity(process.pid) ?? null;
+const ACTIVE_EVENT_RESERVATION_OWNERS = new Set<string>();
+
+function eventReservationOwner(): string {
+  return JSON.stringify({
+    version: 1,
+    pid: process.pid,
+    startIdentity: PROCESS_START_IDENTITY,
+    nonce: randomUUID(),
+  } satisfies EventReservationOwnerIdentity);
+}
+const CURRENT_SCHEMA_VERSION = 2;
 const CURRENT_TABLE_NAMES = [
   'worlds',
   'events',
   'deployments',
   'idempotency',
   'resources',
+  'event_reservations',
 ] as const;
 type CurrentTableName = (typeof CURRENT_TABLE_NAMES)[number];
+const PRE_RESERVATION_TABLE_NAMES = [
+  'worlds',
+  'events',
+  'deployments',
+  'idempotency',
+  'resources',
+] as const satisfies readonly CurrentTableName[];
 
 const CURRENT_TABLE_SQL = {
   worlds: `CREATE TABLE worlds (
@@ -162,6 +221,15 @@ const CURRENT_TABLE_SQL = {
     PRIMARY KEY (world_id, deployment_id, target_id, provider, resource_id),
     FOREIGN KEY (world_id) REFERENCES worlds(world_id)
   )`,
+  event_reservations: `CREATE TABLE event_reservations (
+    world_id TEXT NOT NULL,
+    reservation_id TEXT NOT NULL,
+    operation_kind TEXT NOT NULL CHECK (operation_kind IN ('materialization', 'deletion')),
+    owner_id TEXT NOT NULL,
+    event_count INTEGER NOT NULL CHECK (event_count > 0),
+    PRIMARY KEY (world_id, reservation_id),
+    FOREIGN KEY (world_id) REFERENCES worlds(world_id)
+  )`,
 } as const satisfies Readonly<Record<CurrentTableName, string>>;
 
 function createTableIfMissing(tableSql: string): string {
@@ -173,6 +241,7 @@ const BASE_TABLES_SQL = [
   CURRENT_TABLE_SQL.events,
   CURRENT_TABLE_SQL.deployments,
   CURRENT_TABLE_SQL.idempotency,
+  CURRENT_TABLE_SQL.event_reservations,
 ]
   .map(createTableIfMissing)
   .join('\n');
@@ -218,6 +287,13 @@ const CURRENT_TABLE_COLUMNS = {
     'resource_id',
     'properties',
     'status',
+  ],
+  event_reservations: [
+    'world_id',
+    'reservation_id',
+    'operation_kind',
+    'owner_id',
+    'event_count',
   ],
 } as const;
 
@@ -292,6 +368,7 @@ const CURRENT_PRIMARY_KEYS = {
     'provider',
     'resource_id',
   ],
+  event_reservations: ['world_id', 'reservation_id'],
 } as const;
 
 interface LegacyTableShape {
@@ -356,10 +433,11 @@ function columnDefinitionsMatch(
   defaults: Readonly<Record<string, string>> = {}
 ): boolean {
   return columns.every((column) => {
-    const expectedType =
-      column.name === 'sequence' || column.name === 'next_sequence'
-        ? 'INTEGER'
-        : 'TEXT';
+    const expectedType = ['sequence', 'next_sequence', 'event_count'].includes(
+      column.name
+    )
+      ? 'INTEGER'
+      : 'TEXT';
     const expectedNotNull =
       tableName === 'worlds' && column.name === 'world_id' ? 0 : 1;
     return (
@@ -377,9 +455,12 @@ function foreignKeysMatch(
   const foreignKeys = database
     .query<ForeignKeyRow, []>(`PRAGMA foreign_key_list(${tableName})`)
     .all();
-  const expectsWorld = ['events', 'deployments', 'resources'].includes(
-    tableName
-  );
+  const expectsWorld = [
+    'events',
+    'deployments',
+    'resources',
+    'event_reservations',
+  ].includes(tableName);
   if (!expectsWorld) return foreignKeys.length === 0;
   const foreignKey = foreignKeys[0];
   return (
@@ -578,39 +659,37 @@ function inspectSchema(database: Database, allowLegacy: boolean): SchemaShapes {
       'resources',
       allowLegacy ? LEGACY_RESOURCE_SHAPE : undefined
     ),
+    event_reservations: tableShape(database, 'event_reservations'),
   };
 }
 
-function assertCompatibleSchemaSet(
-  version: number,
-  shapes: SchemaShapes
-): void {
+function hasExactlyKnownTables(
+  shapes: SchemaShapes,
+  expected: readonly CurrentTableName[]
+): boolean {
+  const expectedNames = new Set(expected);
+  return CURRENT_TABLE_NAMES.every(
+    (tableName) =>
+      (shapes[tableName] !== 'missing') === expectedNames.has(tableName)
+  );
+}
+
+function assertUnversionedSchemaSet(shapes: SchemaShapes): void {
   const shapesPresent = Object.values(shapes).filter(
     (shape) => shape !== 'missing'
   );
   if (
-    version === 0 &&
     shapesPresent.length > 0 &&
-    shapesPresent.length !== CURRENT_TABLE_NAMES.length
+    !hasExactlyKnownTables(shapes, PRE_RESERVATION_TABLE_NAMES) &&
+    !hasExactlyKnownTables(shapes, CURRENT_TABLE_NAMES)
   ) {
     throw new CoreError(
       'ValidationFailed',
       'simulator state schema is partial or incompatible'
     );
   }
-  if (version === CURRENT_SCHEMA_VERSION) {
-    for (const [tableName, shape] of Object.entries(shapes)) {
-      if (shape !== 'current') {
-        throw new CoreError(
-          'ValidationFailed',
-          `${tableName} schema is missing from version ${CURRENT_SCHEMA_VERSION}`
-        );
-      }
-    }
-  }
   if (
-    version === 0 &&
-    shapesPresent.length === CURRENT_TABLE_NAMES.length &&
+    shapesPresent.length > 0 &&
     (shapes.deployments === 'legacy') !== (shapes.resources === 'legacy')
   ) {
     throw new CoreError(
@@ -618,6 +697,49 @@ function assertCompatibleSchemaSet(
       'simulator state schema is partially migrated or incompatible'
     );
   }
+}
+
+function assertVersionOneSchemaSet(shapes: SchemaShapes): void {
+  for (const tableName of PRE_RESERVATION_TABLE_NAMES) {
+    if (shapes[tableName] !== 'current') {
+      throw new CoreError(
+        'ValidationFailed',
+        `${tableName} schema is incompatible with version 1`
+      );
+    }
+  }
+  if (shapes.event_reservations !== 'missing') {
+    throw new CoreError(
+      'ValidationFailed',
+      'event_reservations schema is incompatible with version 1'
+    );
+  }
+}
+
+function assertCurrentSchemaSet(shapes: SchemaShapes): void {
+  for (const [tableName, shape] of Object.entries(shapes)) {
+    if (shape !== 'current') {
+      throw new CoreError(
+        'ValidationFailed',
+        `${tableName} schema is missing from version ${CURRENT_SCHEMA_VERSION}`
+      );
+    }
+  }
+}
+
+function assertCompatibleSchemaSet(
+  version: number,
+  shapes: SchemaShapes
+): void {
+  if (version === 0) {
+    assertUnversionedSchemaSet(shapes);
+    return;
+  }
+  if (version === 1) {
+    assertVersionOneSchemaSet(shapes);
+    return;
+  }
+  assertCurrentSchemaSet(shapes);
 }
 
 function assertLegacyTablesAreEmpty(
@@ -692,6 +814,82 @@ function isRecord(value: unknown): value is Readonly<Record<string, unknown>> {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
+function parseEventReservationOwner(
+  ownerId: string
+): EventReservationOwnerIdentity | undefined {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(ownerId);
+  } catch {
+    return undefined;
+  }
+  if (!isRecord(parsed)) return undefined;
+  const version = parsed['version'];
+  const pid = parsed['pid'];
+  const startIdentity = parsed['startIdentity'];
+  const nonce = parsed['nonce'];
+  if (
+    version !== 1 ||
+    typeof pid !== 'number' ||
+    !Number.isSafeInteger(pid) ||
+    pid < 1 ||
+    (startIdentity !== null && typeof startIdentity !== 'string') ||
+    typeof nonce !== 'string' ||
+    nonce.length === 0
+  ) {
+    return undefined;
+  }
+  return { version, pid, startIdentity, nonce };
+}
+
+function isEventReservationOwnerProvablyDead(ownerId: string): boolean {
+  const owner = parseEventReservationOwner(ownerId);
+  if (!owner) return false;
+  if (owner.pid === process.pid) {
+    return !ACTIVE_EVENT_RESERVATION_OWNERS.has(ownerId);
+  }
+  try {
+    process.kill(owner.pid, 0);
+  } catch (error) {
+    return (error as NodeJS.ErrnoException).code === 'ESRCH';
+  }
+  if (owner.startIdentity === null) return false;
+  const currentIdentity = readProcessStartIdentity(owner.pid);
+  return (
+    currentIdentity !== undefined && currentIdentity !== owner.startIdentity
+  );
+}
+
+function recoverDeadEventReservations(database: Database): void {
+  const owners = database
+    .query<EventReservationOwnerRow, []>(
+      `SELECT DISTINCT owner_id FROM event_reservations
+       WHERE operation_kind = 'materialization'`
+    )
+    .all();
+  const removeOwner = database.query(
+    `DELETE FROM event_reservations
+     WHERE owner_id = ? AND operation_kind = 'materialization'`
+  );
+  for (const { owner_id: ownerId } of owners) {
+    if (isEventReservationOwnerProvablyDead(ownerId)) {
+      removeOwner.run(ownerId);
+    }
+  }
+}
+
+function isSqliteContention(error: unknown): boolean {
+  if (!isRecord(error)) return false;
+  const code = error['code'];
+  const errno = error['errno'];
+  return (
+    errno === 5 ||
+    code === 'SQLITE_BUSY' ||
+    code === 'SQLITE_BUSY_SNAPSHOT' ||
+    code === 'SQLITE_LOCKED'
+  );
+}
+
 function parseObject(value: string): Readonly<Record<string, unknown>> {
   const parsed: unknown = JSON.parse(value);
   if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
@@ -748,25 +946,189 @@ function worldFromRow(row: WorldRow): WorldRecord {
 
 export class SimulationStore {
   readonly database: Database;
+  readonly #eventReservationOwner = eventReservationOwner();
+  #closed = false;
 
   constructor(path: string) {
-    this.database = new Database(path, { create: true, strict: true });
+    ACTIVE_EVENT_RESERVATION_OWNERS.add(this.#eventReservationOwner);
     try {
+      this.database = new Database(path, { create: true, strict: true });
+    } catch (error) {
+      ACTIVE_EVENT_RESERVATION_OWNERS.delete(this.#eventReservationOwner);
+      throw error;
+    }
+    try {
+      this.database.exec('PRAGMA busy_timeout = 5000');
       this.database.exec('PRAGMA foreign_keys = ON');
       migrateSchema(this.database);
+      this.database
+        .transaction(() => recoverDeadEventReservations(this.database))
+        .immediate();
       this.database.exec('PRAGMA journal_mode = WAL');
     } catch (error) {
+      ACTIVE_EVENT_RESERVATION_OWNERS.delete(this.#eventReservationOwner);
       this.database.close();
       throw error;
     }
   }
 
   close(): void {
-    this.database.close();
+    if (this.#closed) return;
+    try {
+      this.transaction(() => {
+        this.database
+          .query(
+            `DELETE FROM event_reservations
+             WHERE owner_id = ? AND operation_kind = 'materialization'`
+          )
+          .run(this.#eventReservationOwner);
+      });
+    } finally {
+      this.#closed = true;
+      ACTIVE_EVENT_RESERVATION_OWNERS.delete(this.#eventReservationOwner);
+      this.database.close();
+    }
   }
 
   transaction<T>(operation: () => T): T {
-    return this.database.transaction(operation)();
+    const transaction = this.database.transaction(operation);
+    try {
+      return this.database.inTransaction
+        ? transaction()
+        : transaction.immediate();
+    } catch (error) {
+      if (isSqliteContention(error)) {
+        throw new CoreError(
+          'Conflict',
+          'simulation store is busy; retry the operation'
+        );
+      }
+      throw error;
+    }
+  }
+
+  recoverDeadEventReservations(): void {
+    if (!this.database.inTransaction) {
+      this.transaction(() => recoverDeadEventReservations(this.database));
+      return;
+    }
+    recoverDeadEventReservations(this.database);
+  }
+
+  reservedEventCount(worldId: string): number {
+    return (
+      this.database
+        .query<TableCountRow, [string]>(
+          'SELECT COALESCE(SUM(event_count), 0) AS count FROM event_reservations WHERE world_id = ?'
+        )
+        .get(worldId)?.count ?? 0
+    );
+  }
+
+  reserveEvents(
+    worldId: string,
+    reservationId: string,
+    eventCount: number,
+    operationKind: EventReservationKind = 'materialization'
+  ): void {
+    if (!this.database.inTransaction) {
+      this.transaction(() =>
+        this.reserveEvents(worldId, reservationId, eventCount, operationKind)
+      );
+      return;
+    }
+    if (!Number.isSafeInteger(eventCount) || eventCount < 1) {
+      throw new CoreError(
+        'ValidationFailed',
+        'event reservation count is invalid'
+      );
+    }
+    this.recoverDeadEventReservations();
+    const existing = this.database
+      .query<EventReservationRow, [string, string]>(
+        `SELECT operation_kind, owner_id, event_count FROM event_reservations
+         WHERE world_id = ? AND reservation_id = ?`
+      )
+      .get(worldId, reservationId);
+    if (existing) {
+      if (
+        existing.event_count !== eventCount ||
+        existing.operation_kind !== operationKind
+      ) {
+        throw new CoreError(
+          'Conflict',
+          'event reservation identity is inconsistent'
+        );
+      }
+      if (existing.owner_id === this.#eventReservationOwner) return;
+      if (
+        operationKind === 'deletion' &&
+        isEventReservationOwnerProvablyDead(existing.owner_id)
+      ) {
+        const adopted = this.database
+          .query(
+            `UPDATE event_reservations SET owner_id = ?
+             WHERE world_id = ? AND reservation_id = ? AND owner_id = ?
+               AND operation_kind = 'deletion'`
+          )
+          .run(
+            this.#eventReservationOwner,
+            worldId,
+            reservationId,
+            existing.owner_id
+          );
+        if (adopted.changes === 1) return;
+      }
+      throw new CoreError(
+        'Conflict',
+        'event reservation identity is inconsistent'
+      );
+    }
+    this.database
+      .query(
+        `INSERT INTO event_reservations(
+           world_id, reservation_id, operation_kind, owner_id, event_count
+         ) VALUES (?, ?, ?, ?, ?)`
+      )
+      .run(
+        worldId,
+        reservationId,
+        operationKind,
+        this.#eventReservationOwner,
+        eventCount
+      );
+  }
+
+  hasOtherEventReservation(worldId: string, reservationId: string): boolean {
+    const row = this.database
+      .query<{ present: number }, [string, string]>(
+        `SELECT 1 AS present FROM event_reservations
+         WHERE world_id = ? AND reservation_id <> ? LIMIT 1`
+      )
+      .get(worldId, reservationId);
+    return Boolean(row);
+  }
+
+  pendingDeletionWorldIds(): readonly string[] {
+    return this.database
+      .query<WorldIdRow, []>(
+        `SELECT DISTINCT world_id FROM event_reservations
+         WHERE operation_kind = 'deletion' ORDER BY world_id`
+      )
+      .all()
+      .map((row) => row.world_id);
+  }
+
+  releaseEvents(worldId: string, reservationId: string): void {
+    if (!this.database.inTransaction) {
+      this.transaction(() => this.releaseEvents(worldId, reservationId));
+      return;
+    }
+    this.database
+      .query(
+        'DELETE FROM event_reservations WHERE world_id = ? AND reservation_id = ? AND owner_id = ?'
+      )
+      .run(worldId, reservationId, this.#eventReservationOwner);
   }
 
   idempotent<T>(scope: string, key: string, request: unknown): T | undefined {
@@ -783,6 +1145,15 @@ export class SimulationStore {
       );
     }
     return JSON.parse(row.response) as T;
+  }
+
+  idempotentResponse<T = unknown>(scope: string, key: string): T | undefined {
+    const row = this.database
+      .query<Pick<IdempotencyRow, 'response'>, [string, string]>(
+        'SELECT response FROM idempotency WHERE scope = ? AND key = ?'
+      )
+      .get(scope, key);
+    return row ? (JSON.parse(row.response) as T) : undefined;
   }
 
   saveIdempotent(

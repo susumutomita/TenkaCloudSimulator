@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
+import { createHmac, timingSafeEqual } from 'node:crypto';
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -10,6 +11,12 @@ import {
   assertSimulatorResourceProjection,
   assertSimulatorSnapshot,
   assertSimulatorWorldResponse,
+  canonicalSimulatorSnapshotIntegrityPayload,
+  SIMULATOR_SNAPSHOT_INTEGRITY_ALGORITHM,
+  SIMULATOR_SNAPSHOT_INTEGRITY_VERSION,
+  type SimulatorSnapshot,
+  type SimulatorSnapshotEnvelope,
+  type SimulatorSnapshotIntegrityProof,
 } from '@tenkacloud/simulator-contracts';
 import {
   ProviderRegistry,
@@ -52,6 +59,31 @@ interface TestRuntime {
 
 let runtime: TestRuntime;
 
+const SNAPSHOT_INTEGRITY_SECRET = 'cli-test-snapshot-secret-0123456789abcdef';
+
+function snapshotProofValue(envelope: SimulatorSnapshotEnvelope): string {
+  return createHmac('sha256', SNAPSHOT_INTEGRITY_SECRET)
+    .update(canonicalSimulatorSnapshotIntegrityPayload(envelope))
+    .digest('base64url');
+}
+
+function signSnapshot(
+  envelope: SimulatorSnapshotEnvelope
+): SimulatorSnapshotIntegrityProof {
+  return {
+    version: SIMULATOR_SNAPSHOT_INTEGRITY_VERSION,
+    algorithm: SIMULATOR_SNAPSHOT_INTEGRITY_ALGORITHM,
+    value: snapshotProofValue(envelope),
+  };
+}
+
+function verifySnapshot(snapshot: SimulatorSnapshot): boolean {
+  const { integrityProof, ...envelope } = snapshot;
+  const expected = Buffer.from(snapshotProofValue(envelope), 'ascii');
+  const provided = Buffer.from(integrityProof.value, 'ascii');
+  return timingSafeEqual(expected, provided);
+}
+
 async function invoke(args: readonly string[]): Promise<Invocation> {
   const stdout = new BufferOutput();
   const stderr = new BufferOutput();
@@ -72,6 +104,13 @@ beforeEach(async () => {
     core,
     registry,
     consoleBaseUrl: 'http://127.0.0.1:9444/console',
+    resolveWorldNamespace: () => ({
+      tenantId: 'tenant-cli',
+      eventId: 'event-cli',
+      teamId: 'team-cli',
+    }),
+    signSnapshot,
+    verifySnapshot,
   });
   const server = Bun.serve({
     hostname: '127.0.0.1',
