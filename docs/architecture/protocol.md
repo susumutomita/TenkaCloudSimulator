@@ -164,6 +164,14 @@ caller が処理を中断する場合だけ `deleteWorld` へ明示的な `Abort
 timeout policy は維持します。これにより Docker timeout を緩和せず、server が完了を返す前に client
 だけが失敗する状態を避けます。
 
+production HTTP transport も同じ completion boundary を所有します。Bun server の global
+`idleTimeout` はデフォルトの 10 秒を維持し、query のない exact
+`DELETE /v1/worlds/{worldId}` の処理中だけ `server.timeout(request, 0)` で request 単位の idle timeout を
+解除します。response、例外、response 未生成のすべてで `finally` によりデフォルト値へ復元してから socket
+を再利用可能にします。別 method、query 付き、trailing slash、nested path には解除を適用しません。
+これにより短い read / write と認証失敗後の keep-alive は fail-fast のまま、cleanup 中に response bytes が
+流れない時間だけで同期 DELETE の接続を切断しません。
+
 ### `POST /v1/worlds/{worldId}/clock/advance`
 
 launch token で認証した world mutation として `{ "milliseconds": <positive safe integer> }` を

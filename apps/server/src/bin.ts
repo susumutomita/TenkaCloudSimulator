@@ -1,4 +1,8 @@
 #!/usr/bin/env bun
+import {
+  PRODUCTION_SERVER_IDLE_TIMEOUT_SECONDS,
+  productionServerFetch,
+} from './production-server';
 import { createSimulatorRuntime } from './runtime';
 
 const runtime = await createSimulatorRuntime({
@@ -104,7 +108,11 @@ const runtime = await createSimulatorRuntime({
 const server = Bun.serve({
   hostname: runtime.host,
   port: runtime.port,
-  fetch: runtime.fetch,
+  idleTimeout: PRODUCTION_SERVER_IDLE_TIMEOUT_SECONDS,
+  fetch: productionServerFetch(
+    runtime.fetch,
+    PRODUCTION_SERVER_IDLE_TIMEOUT_SECONDS
+  ),
   websocket: runtime.websocket,
 });
 
