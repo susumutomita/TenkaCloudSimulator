@@ -154,6 +154,116 @@ function replayDeploymentTargetAlter(
   `);
 }
 
+interface SchemaSnapshotRow {
+  readonly type: string;
+  readonly name: string;
+  readonly tbl_name: string;
+  readonly sql: string | null;
+}
+
+interface IdempotencySnapshotRow {
+  readonly scope: string;
+  readonly key: string;
+  readonly request_hash: string;
+  readonly response: string;
+}
+
+interface IdempotencySchemaVariant {
+  readonly keyDefinition?: string;
+  readonly tableConstraint?: string;
+  readonly tableOptions?: string;
+}
+
+function schemaSnapshot(database: Database): readonly SchemaSnapshotRow[] {
+  return database
+    .query<SchemaSnapshotRow, []>(
+      `SELECT type, name, tbl_name, sql
+       FROM sqlite_master
+       ORDER BY type, name`
+    )
+    .all();
+}
+
+function idempotencySnapshot(
+  database: Database
+): readonly IdempotencySnapshotRow[] {
+  return database
+    .query<IdempotencySnapshotRow, []>(
+      `SELECT scope, key, request_hash, response
+       FROM idempotency
+       ORDER BY scope, key`
+    )
+    .all();
+}
+
+function replaceIdempotencySchema(
+  database: Database,
+  variant: IdempotencySchemaVariant
+): void {
+  const keyDefinition = variant.keyDefinition ?? 'TEXT NOT NULL';
+  const tableConstraint = variant.tableConstraint
+    ? `${variant.tableConstraint},`
+    : '';
+  const tableOptions = variant.tableOptions ? ` ${variant.tableOptions}` : '';
+  database.exec(`
+    ALTER TABLE idempotency RENAME TO idempotency_original;
+    CREATE TABLE idempotency (
+      scope TEXT NOT NULL,
+      key ${keyDefinition},
+      request_hash TEXT NOT NULL,
+      response TEXT NOT NULL,
+      ${tableConstraint}
+      PRIMARY KEY (scope, key)
+    )${tableOptions};
+    INSERT INTO idempotency (scope, key, request_hash, response)
+    SELECT scope, key, request_hash, response
+    FROM idempotency_original;
+    DROP TABLE idempotency_original;
+    PRAGMA user_version = 1;
+  `);
+}
+
+function expectIdempotencySchemaRejectedUnchanged(
+  databasePath: string,
+  variant: IdempotencySchemaVariant
+): void {
+  const seeded = new SimulationStore(databasePath);
+  seeded.saveIdempotent(
+    'scope-a',
+    'key',
+    { request: 'preserved' },
+    {
+      response: 'preserved',
+    }
+  );
+  seeded.close();
+  const invalid = new Database(databasePath);
+  replaceIdempotencySchema(invalid, variant);
+  const schemaBefore = schemaSnapshot(invalid);
+  const rowsBefore = idempotencySnapshot(invalid);
+  const versionBefore = invalid
+    .query<{ user_version: number }, []>('PRAGMA user_version')
+    .get()?.user_version;
+  invalid.close();
+
+  const error = captureCoreError(() => {
+    const accepted = new SimulationStore(databasePath);
+    accepted.close();
+  });
+
+  expect(error.code).toBe('ValidationFailed');
+  expect(error.message).toContain('schema');
+  expect(rowsBefore).toHaveLength(1);
+  const rejected = new Database(databasePath, { readonly: true });
+  expect(schemaSnapshot(rejected)).toEqual(schemaBefore);
+  expect(idempotencySnapshot(rejected)).toEqual(rowsBefore);
+  expect(
+    rejected.query<{ user_version: number }, []>('PRAGMA user_version').get()
+      ?.user_version
+  ).toBe(versionBefore);
+  rejected.close();
+}
+
 describe('SimulationStore の振る舞い', () => {
   let directory = '';
   let store: SimulationStore;
@@ -376,6 +486,35 @@ describe('SimulationStore の振る舞い', () => {
 
     expect(error.code).toBe('ValidationFailed');
     expect(error.message).toContain('resources schema');
+  });
+
+  it('同じ column と primary key でも CHECK 制約を加えた schema を変更せず拒否する', () => {
+    const invalidPath = path.join(directory, 'unexpected-check.sqlite');
+    expectIdempotencySchemaRejectedUnchanged(invalidPath, {
+      keyDefinition: 'TEXT NOT NULL CHECK (length(key) < 5)',
+    });
+  });
+
+  it('同じ column と primary key でも UNIQUE 制約を加えた schema を変更せず拒否する', () => {
+    const invalidPath = path.join(directory, 'unexpected-unique.sqlite');
+    expectIdempotencySchemaRejectedUnchanged(invalidPath, {
+      tableConstraint: 'UNIQUE (request_hash)',
+    });
+  });
+
+  it('COLLATE・STRICT・WITHOUT ROWID を加えた未知 DDL も変更せず拒否する', () => {
+    const variants: readonly (IdempotencySchemaVariant & {
+      readonly name: string;
+    })[] = [
+      { name: 'collate', keyDefinition: 'TEXT COLLATE NOCASE NOT NULL' },
+      { name: 'strict', tableOptions: 'STRICT' },
+      { name: 'without-rowid', tableOptions: 'WITHOUT ROWID' },
+    ];
+
+    for (const variant of variants) {
+      const invalidPath = path.join(directory, `${variant.name}.sqlite`);
+      expectIdempotencySchemaRejectedUnchanged(invalidPath, variant);
+    }
   });
 
   it('current schema に追加された trigger や未知 schema object を拒否する', () => {

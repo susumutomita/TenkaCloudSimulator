@@ -53,8 +53,8 @@ interface TableCountRow {
   count: number;
 }
 
-interface TableExistsRow {
-  found: number;
+interface TableDefinitionRow {
+  sql: string | null;
 }
 
 interface SchemaVersionRow {
@@ -75,6 +75,8 @@ interface ForeignKeyRow {
 interface SchemaObjectRow {
   type: string;
   name: string;
+  tbl_name: string;
+  sql: string | null;
 }
 
 interface ForeignKeyViolationRow {
@@ -97,8 +99,58 @@ interface IdempotencyRow {
   response: string;
 }
 
-const RESOURCE_TABLE_SQL = `
-  CREATE TABLE IF NOT EXISTS resources (
+const CURRENT_SCHEMA_VERSION = 1;
+const CURRENT_TABLE_NAMES = [
+  'worlds',
+  'events',
+  'deployments',
+  'idempotency',
+  'resources',
+] as const;
+type CurrentTableName = (typeof CURRENT_TABLE_NAMES)[number];
+
+const CURRENT_TABLE_SQL = {
+  worlds: `CREATE TABLE worlds (
+    world_id TEXT PRIMARY KEY,
+    tenant_id TEXT NOT NULL,
+    event_id TEXT NOT NULL,
+    team_id TEXT NOT NULL,
+    deployment_id TEXT NOT NULL,
+    seed TEXT NOT NULL,
+    virtual_time TEXT NOT NULL,
+    status TEXT NOT NULL,
+    next_sequence INTEGER NOT NULL
+  )`,
+  events: `CREATE TABLE events (
+    world_id TEXT NOT NULL,
+    sequence INTEGER NOT NULL,
+    type TEXT NOT NULL,
+    virtual_time TEXT NOT NULL,
+    command_id TEXT NOT NULL,
+    payload TEXT NOT NULL,
+    payload_hash TEXT NOT NULL,
+    PRIMARY KEY (world_id, sequence),
+    FOREIGN KEY (world_id) REFERENCES worlds(world_id)
+  )`,
+  deployments: `CREATE TABLE deployments (
+    world_id TEXT NOT NULL,
+    deployment_id TEXT NOT NULL,
+    problem_id TEXT NOT NULL,
+    status TEXT NOT NULL,
+    targets TEXT NOT NULL,
+    outputs TEXT NOT NULL,
+    diagnostics TEXT NOT NULL,
+    PRIMARY KEY (world_id, deployment_id),
+    FOREIGN KEY (world_id) REFERENCES worlds(world_id)
+  )`,
+  idempotency: `CREATE TABLE idempotency (
+    scope TEXT NOT NULL,
+    key TEXT NOT NULL,
+    request_hash TEXT NOT NULL,
+    response TEXT NOT NULL,
+    PRIMARY KEY (scope, key)
+  )`,
+  resources: `CREATE TABLE resources (
     world_id TEXT NOT NULL,
     deployment_id TEXT NOT NULL,
     target_id TEXT NOT NULL,
@@ -109,61 +161,23 @@ const RESOURCE_TABLE_SQL = `
     status TEXT NOT NULL,
     PRIMARY KEY (world_id, deployment_id, target_id, provider, resource_id),
     FOREIGN KEY (world_id) REFERENCES worlds(world_id)
-  );
-`;
+  )`,
+} as const satisfies Readonly<Record<CurrentTableName, string>>;
 
-const BASE_TABLES_SQL = `
-  CREATE TABLE IF NOT EXISTS worlds (
-    world_id TEXT PRIMARY KEY,
-    tenant_id TEXT NOT NULL,
-    event_id TEXT NOT NULL,
-    team_id TEXT NOT NULL,
-    deployment_id TEXT NOT NULL,
-    seed TEXT NOT NULL,
-    virtual_time TEXT NOT NULL,
-    status TEXT NOT NULL,
-    next_sequence INTEGER NOT NULL
-  );
-  CREATE TABLE IF NOT EXISTS events (
-    world_id TEXT NOT NULL,
-    sequence INTEGER NOT NULL,
-    type TEXT NOT NULL,
-    virtual_time TEXT NOT NULL,
-    command_id TEXT NOT NULL,
-    payload TEXT NOT NULL,
-    payload_hash TEXT NOT NULL,
-    PRIMARY KEY (world_id, sequence),
-    FOREIGN KEY (world_id) REFERENCES worlds(world_id)
-  );
-  CREATE TABLE IF NOT EXISTS deployments (
-    world_id TEXT NOT NULL,
-    deployment_id TEXT NOT NULL,
-    problem_id TEXT NOT NULL,
-    status TEXT NOT NULL,
-    targets TEXT NOT NULL,
-    outputs TEXT NOT NULL,
-    diagnostics TEXT NOT NULL,
-    PRIMARY KEY (world_id, deployment_id),
-    FOREIGN KEY (world_id) REFERENCES worlds(world_id)
-  );
-  CREATE TABLE IF NOT EXISTS idempotency (
-    scope TEXT NOT NULL,
-    key TEXT NOT NULL,
-    request_hash TEXT NOT NULL,
-    response TEXT NOT NULL,
-    PRIMARY KEY (scope, key)
-  );
-`;
+function createTableIfMissing(tableSql: string): string {
+  return `${tableSql.replace('CREATE TABLE', 'CREATE TABLE IF NOT EXISTS')};`;
+}
 
-const CURRENT_SCHEMA_VERSION = 1;
-const CURRENT_TABLE_NAMES = [
-  'worlds',
-  'events',
-  'deployments',
-  'idempotency',
-  'resources',
-] as const;
-type CurrentTableName = (typeof CURRENT_TABLE_NAMES)[number];
+const BASE_TABLES_SQL = [
+  CURRENT_TABLE_SQL.worlds,
+  CURRENT_TABLE_SQL.events,
+  CURRENT_TABLE_SQL.deployments,
+  CURRENT_TABLE_SQL.idempotency,
+]
+  .map(createTableIfMissing)
+  .join('\n');
+
+const RESOURCE_TABLE_SQL = createTableIfMissing(CURRENT_TABLE_SQL.resources);
 const CURRENT_TABLE_COLUMNS = {
   worlds: [
     'world_id',
@@ -231,6 +245,41 @@ const PREVIOUSLY_MIGRATED_DEPLOYMENT_COLUMNS = [
   'targets',
 ] as const;
 
+const LEGACY_DEPLOYMENT_TABLE_SQL = `CREATE TABLE deployments (
+  world_id TEXT NOT NULL,
+  deployment_id TEXT NOT NULL,
+  problem_id TEXT NOT NULL,
+  status TEXT NOT NULL,
+  outputs TEXT NOT NULL,
+  diagnostics TEXT NOT NULL,
+  PRIMARY KEY (world_id, deployment_id),
+  FOREIGN KEY (world_id) REFERENCES worlds(world_id)
+)`;
+
+const LEGACY_RESOURCE_TABLE_SQL = `CREATE TABLE resources (
+  world_id TEXT NOT NULL,
+  deployment_id TEXT NOT NULL,
+  provider TEXT NOT NULL,
+  resource_type TEXT NOT NULL,
+  resource_id TEXT NOT NULL,
+  properties TEXT NOT NULL,
+  status TEXT NOT NULL,
+  PRIMARY KEY (world_id, provider, resource_id),
+  FOREIGN KEY (world_id) REFERENCES worlds(world_id)
+)`;
+
+const HISTORICAL_DEPLOYMENT_TABLE_SQL = `CREATE TABLE deployments (
+  world_id TEXT NOT NULL,
+  deployment_id TEXT NOT NULL,
+  problem_id TEXT NOT NULL,
+  status TEXT NOT NULL,
+  outputs TEXT NOT NULL,
+  diagnostics TEXT NOT NULL,
+  targets TEXT NOT NULL DEFAULT '[]',
+  PRIMARY KEY (world_id, deployment_id),
+  FOREIGN KEY (world_id) REFERENCES worlds(world_id)
+)`;
+
 const CURRENT_PRIMARY_KEYS = {
   worlds: ['world_id'],
   events: ['world_id', 'sequence'],
@@ -249,26 +298,40 @@ interface LegacyTableShape {
   readonly columns: readonly string[];
   readonly primaryKey: readonly string[];
   readonly defaults?: Readonly<Record<string, string>>;
+  readonly tableSql: string;
 }
 
 const LEGACY_DEPLOYMENT_SHAPE: LegacyTableShape = {
   columns: LEGACY_DEPLOYMENT_COLUMNS,
   primaryKey: ['world_id', 'deployment_id'],
+  tableSql: LEGACY_DEPLOYMENT_TABLE_SQL,
 };
 
 const LEGACY_RESOURCE_SHAPE: LegacyTableShape = {
   columns: LEGACY_RESOURCE_COLUMNS,
   primaryKey: ['world_id', 'provider', 'resource_id'],
+  tableSql: LEGACY_RESOURCE_TABLE_SQL,
 };
 
 const HISTORICAL_DEPLOYMENT_SHAPE: LegacyTableShape = {
   columns: PREVIOUSLY_MIGRATED_DEPLOYMENT_COLUMNS,
   primaryKey: ['world_id', 'deployment_id'],
   defaults: { targets: "'[]'" },
+  tableSql: HISTORICAL_DEPLOYMENT_TABLE_SQL,
 };
 
 type SchemaShape = 'missing' | 'current' | 'historical' | 'legacy';
 type SchemaShapes = Readonly<Record<CurrentTableName, SchemaShape>>;
+
+const SCHEMA_SQL_TOKEN =
+  /'(?:''|[^'])*'|[A-Za-z_][A-Za-z0-9_$]*|\d+(?:\.\d+)?|[^\s]/g;
+
+function normalizedSchemaSql(sql: string | null): string {
+  return Array.from(String(sql).matchAll(SCHEMA_SQL_TOKEN), (match) => {
+    const token = match[0];
+    return token.startsWith("'") ? token : token.toLowerCase();
+  }).join('\u001f');
+}
 
 function sameColumns(
   actual: readonly string[],
@@ -338,6 +401,8 @@ function matchesShape(
   columns: readonly TableColumnRow[],
   expectedColumns: readonly string[],
   expectedPrimaryKey: readonly string[],
+  actualTableSql: string | null,
+  expectedTableSql: string,
   defaults: Readonly<Record<string, string>> = {}
 ): boolean {
   return (
@@ -347,7 +412,9 @@ function matchesShape(
     ) &&
     sameColumns(primaryKey(columns), expectedPrimaryKey) &&
     columnDefinitionsMatch(tableName, columns, defaults) &&
-    foreignKeysMatch(database, tableName)
+    foreignKeysMatch(database, tableName) &&
+    normalizedSchemaSql(actualTableSql) ===
+      normalizedSchemaSql(expectedTableSql)
   );
 }
 
@@ -357,8 +424,8 @@ function tableShape(
   legacyShape?: LegacyTableShape
 ): SchemaShape {
   const table = database
-    .query<TableExistsRow, [string]>(
-      `SELECT 1 AS found FROM sqlite_master
+    .query<TableDefinitionRow, [string]>(
+      `SELECT sql FROM sqlite_master
        WHERE type = 'table' AND name = ?`
     )
     .get(tableName);
@@ -373,28 +440,25 @@ function tableShape(
       tableName,
       columns,
       CURRENT_TABLE_COLUMNS[tableName],
-      currentPrimaryKey
+      currentPrimaryKey,
+      table.sql,
+      CURRENT_TABLE_SQL[tableName]
     )
   ) {
     return 'current';
   }
   if (
     tableName === 'deployments' &&
-    (matchesShape(
+    matchesShape(
       database,
       tableName,
       columns,
-      PREVIOUSLY_MIGRATED_DEPLOYMENT_COLUMNS,
-      currentPrimaryKey
-    ) ||
-      matchesShape(
-        database,
-        tableName,
-        columns,
-        HISTORICAL_DEPLOYMENT_SHAPE.columns,
-        HISTORICAL_DEPLOYMENT_SHAPE.primaryKey,
-        HISTORICAL_DEPLOYMENT_SHAPE.defaults
-      ))
+      HISTORICAL_DEPLOYMENT_SHAPE.columns,
+      HISTORICAL_DEPLOYMENT_SHAPE.primaryKey,
+      table.sql,
+      HISTORICAL_DEPLOYMENT_SHAPE.tableSql,
+      HISTORICAL_DEPLOYMENT_SHAPE.defaults
+    )
   ) {
     return 'historical';
   }
@@ -406,6 +470,8 @@ function tableShape(
       columns,
       legacyShape.columns,
       legacyShape.primaryKey,
+      table.sql,
+      legacyShape.tableSql,
       legacyShape.defaults
     )
   ) {
@@ -463,16 +529,20 @@ function assertCurrentTable(
 function assertKnownSchemaObjects(database: Database): void {
   const unexpected = database
     .query<SchemaObjectRow, []>(
-      `SELECT type, name FROM sqlite_master
-       WHERE name NOT LIKE 'sqlite_%'
+      `SELECT type, name, tbl_name, sql FROM sqlite_master
        ORDER BY type, name`
     )
     .all()
-    .filter(
-      (object) =>
-        object.type !== 'table' ||
-        !CURRENT_TABLE_NAMES.includes(object.name as CurrentTableName)
-    );
+    .filter((object) => {
+      const tableName = object.tbl_name as CurrentTableName;
+      if (!CURRENT_TABLE_NAMES.includes(tableName)) return true;
+      if (object.type === 'table') return object.name !== tableName;
+      return (
+        object.type !== 'index' ||
+        object.name !== `sqlite_autoindex_${tableName}_1` ||
+        object.sql !== null
+      );
+    });
   if (unexpected.length > 0) {
     throw new CoreError(
       'ValidationFailed',
