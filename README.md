@@ -71,6 +71,7 @@ production image は API と Console を同じ origin で提供します。mutab
 
 ```bash
 docker build --tag tenkacloud-simulator:local .
+install -d -m 700 "$PWD/.simulator-state"
 docker run --read-only --tmpfs /tmp:rw,noexec,nosuid,size=16m \
   --publish 127.0.0.1:7777:7777 \
   --env TENKACLOUD_SIMULATOR_LAUNCH_SECRET="$TENKACLOUD_SIMULATOR_LAUNCH_SECRET" \
@@ -85,7 +86,11 @@ docker run --read-only --tmpfs /tmp:rw,noexec,nosuid,size=16m \
 
 image は non-root で起動し、container mode だけが内部 `0.0.0.0` bind を使います。host publish
 address は必ず loopback にします。`.devcontainer/` は同じ Bun version を持ち、port 7777 を
-Codespaces の private forwarded port として宣言します。
+Codespaces の private forwarded port として宣言します。state directory は launcher が host 側で
+mode `0700` にしてから mount します。Simulator は既に private な directory に redundant な
+`chmod` を行わないため、Linux native volume に加えて macOS Colima/virtiofs の bind mount でも
+同じ directory を停止後に再利用できます。mode が `0700` でなければ起動時に狭め、変更できない
+directory は拒否します。
 
 ## 5 operation lifecycle API
 

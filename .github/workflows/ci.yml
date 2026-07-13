@@ -65,6 +65,8 @@ jobs:
           docker pull "${WORKLOAD_IMAGE}"
           secret="$(openssl rand -hex 32)"
           container_name="tenkacloud-simulator-ci-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          state_dir="${RUNNER_TEMP}/tenkacloud-simulator-state-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          sudo install -d -m 700 -o 1000 -g 1000 "${state_dir}"
           container=""
           cleanup() {
             exit_code="$?"
@@ -82,35 +84,47 @@ jobs:
             --entrypoint /usr/bin/stat \
             tenkacloud-simulator:test \
             -c %g /var/run/docker.sock)"
-          container="$(docker run --detach \
-            --name "${container_name}" \
-            --read-only \
-            --cap-drop=ALL \
-            --security-opt=no-new-privileges:true \
-            --tmpfs /tmp:rw,noexec,nosuid,nodev,size=16777216 \
-            --publish 127.0.0.1:17777:7777 \
-            --mount type=volume,dst=/var/lib/tenkacloud-simulator \
-            --mount type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock,readonly \
-            --group-add "${socket_group}" \
-            --env TENKACLOUD_SIMULATOR_LAUNCH_SECRET="${secret}" \
-            --env TENKACLOUD_SIMULATOR_AWS_ACCESS_KEY_ID=TCSIMABCDEFGHIJKLMNO \
-            --env TENKACLOUD_SIMULATOR_AZURE_CREDENTIAL=tcsim_azure_ci_credential \
-            --env TENKACLOUD_SIMULATOR_GCP_CREDENTIAL=tcsim_google_ci_credential \
-            --env TENKACLOUD_SIMULATOR_SAKURA_CREDENTIAL=tcsim_sakura_ci_credential_a:tcsim_sakura_ci_credential_b \
-            --env TENKACLOUD_SIMULATOR_PUBLIC_ORIGIN=http://127.0.0.1:17777 \
-            --env "TENKACLOUD_SIMULATOR_WORKLOAD_ALLOWED_IMAGES=[\"${WORKLOAD_IMAGE}\"]" \
-            --env TENKACLOUD_SIMULATOR_WORKLOAD_CONTROL_CONTAINER="${container_name}" \
-            --env TENKACLOUD_SIMULATOR_WORKLOAD_MAX_MEMORY_BYTES=536870912 \
-            --env TENKACLOUD_SIMULATOR_WORKLOAD_MAX_MILLI_CPU=1000 \
-            --env TENKACLOUD_SIMULATOR_WORKLOAD_MAX_PIDS=128 \
-            --env TENKACLOUD_SIMULATOR_WORKLOAD_PROXY_IMAGE="${WORKLOAD_IMAGE}" \
-            tenkacloud-simulator:test)"
-          for _ in $(seq 1 30); do
-            if curl --fail --silent http://127.0.0.1:17777/v1/capabilities >/dev/null; then
-              break
-            fi
-            sleep 1
-          done
+          start_container() {
+            docker run --detach \
+              --name "${container_name}" \
+              --read-only \
+              --cap-drop=ALL \
+              --security-opt=no-new-privileges:true \
+              --tmpfs /tmp:rw,noexec,nosuid,nodev,size=16777216 \
+              --publish 127.0.0.1:17777:7777 \
+              --mount type=bind,src="${state_dir}",dst=/var/lib/tenkacloud-simulator \
+              --mount type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock,readonly \
+              --group-add "${socket_group}" \
+              --env TENKACLOUD_SIMULATOR_LAUNCH_SECRET="${secret}" \
+              --env TENKACLOUD_SIMULATOR_AWS_ACCESS_KEY_ID=TCSIMABCDEFGHIJKLMNO \
+              --env TENKACLOUD_SIMULATOR_AZURE_CREDENTIAL=tcsim_azure_ci_credential \
+              --env TENKACLOUD_SIMULATOR_GCP_CREDENTIAL=tcsim_google_ci_credential \
+              --env TENKACLOUD_SIMULATOR_SAKURA_CREDENTIAL=tcsim_sakura_ci_credential_a:tcsim_sakura_ci_credential_b \
+              --env TENKACLOUD_SIMULATOR_PUBLIC_ORIGIN=http://127.0.0.1:17777 \
+              --env "TENKACLOUD_SIMULATOR_WORKLOAD_ALLOWED_IMAGES=[\"${WORKLOAD_IMAGE}\"]" \
+              --env TENKACLOUD_SIMULATOR_WORKLOAD_CONTROL_CONTAINER="${container_name}" \
+              --env TENKACLOUD_SIMULATOR_WORKLOAD_MAX_MEMORY_BYTES=536870912 \
+              --env TENKACLOUD_SIMULATOR_WORKLOAD_MAX_MILLI_CPU=1000 \
+              --env TENKACLOUD_SIMULATOR_WORKLOAD_MAX_PIDS=128 \
+              --env TENKACLOUD_SIMULATOR_WORKLOAD_PROXY_IMAGE="${WORKLOAD_IMAGE}" \
+              tenkacloud-simulator:test
+          }
+          wait_until_ready() {
+            for _ in $(seq 1 30); do
+              if curl --fail --silent http://127.0.0.1:17777/v1/capabilities >/dev/null; then
+                return 0
+              fi
+              sleep 1
+            done
+            return 1
+          }
+          container="$(start_container)"
+          wait_until_ready
+          curl --fail --silent http://127.0.0.1:17777/v1/capabilities >/dev/null
+          docker container rm --force "${container}" >/dev/null
+          container=""
+          container="$(start_container)"
+          wait_until_ready
           curl --fail --silent http://127.0.0.1:17777/v1/capabilities >/dev/null
           test "$(docker exec "${container}" id -u)" = "1000"
           SIMULATOR_URL=http://127.0.0.1:17777 \

@@ -26,6 +26,7 @@ import {
 import { LaunchTokenAuthority } from '../src/auth';
 import {
   createSimulatorRuntime,
+  needsPrivateDirectoryModeCorrection,
   type SimulatorRuntime,
   type SimulatorRuntimeEnvironment,
   workloadPolicy,
@@ -244,6 +245,13 @@ afterEach(async () => {
 });
 
 describe('Simulator runtime entrypoint', () => {
+  it('mode 0700 の state directory では bind mount 非互換の chmod を省略する', () => {
+    expect(needsPrivateDirectoryModeCorrection(0o40_700)).toBe(false);
+    expect(needsPrivateDirectoryModeCorrection(0o40_755)).toBe(true);
+    expect(needsPrivateDirectoryModeCorrection(0o40_600)).toBe(true);
+    expect(needsPrivateDirectoryModeCorrection(0o42_700)).toBe(true);
+  });
+
   it('実 HTTP で Console asset と認証済み lifecycle API を同じ origin から提供する', async () => {
     const runtime = await openRuntime();
     const server = serve(runtime);
