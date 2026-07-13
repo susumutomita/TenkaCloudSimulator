@@ -1,5 +1,78 @@
 # Issue 2574 実装計画
 
+### Issue 4 final four-cloud evidence - 2026-07-13
+
+#### 目的
+
+merged TenkaCloudChallenge commit
+`488ed4a2d103cbe596295c940620d68d8f420c99` の `hello-multicloud` 契約を
+Simulator の同一 world で再現し、merged Simulator source
+`463c7a1650925b1d5177d67540b2399c86783916` と catalog commit を結び付けた
+最終 compatibility evidence を固定します。
+
+#### 制約と設計判断
+
+- Challenge の production metadata と 4 provider の IaC bytes を fixture の正本にします。
+  テスト専用の scoring 条件や別形式の target は作りません。
+- 選択肢 A は E2E 内へ metadata と IaC を inline 化する案、選択肢 B は provider ごとの
+  fixture と catalog metadata fixture を分けて digest 検証する案です。review 時に差分を
+  照合でき、provider 単体テストからも再利用できるため選択肢 B を採用します。
+- 選択肢 A は外部 Challenge checkout をテスト時に読む案、選択肢 B は reviewed commit の
+  bytes を repository fixture として保持する案です。offline、deterministic、100％ coverage
+  gate を維持するため選択肢 B を採用し、SHA-256 と production metadata の構造を E2E で
+  検証します。
+- world は 1 件、deployment は 1 件とし、AWS、GCP、Azure、Sakura の 4 target を同時に
+  deploy します。各 output と実装済み HTTP data plane を target ごとに probe し、metadata
+  の `success: all` と 4 件の `expectStatus` から得点を算出します。
+- clean catalog HEAD、clean Simulator source SHA、manifest version、canonical report hash の
+  いずれかが drift した場合は evidence generation を失敗させます。
+
+#### データの流れと責務
+
+1. catalog fixture が runtime targets、IaC artifact、scoring metadata を提供します。
+2. Simulation Core が 4 provider module を同じ world に登録し、1 deployment を作成します。
+3. provider が namespaced output と HTTP endpoint を materialize します。
+4. E2E が metadata の output key と path だけを使って 4 endpoint を probe します。
+5. capability manifest generator が clean Simulator SHA を version に埋め込みます。
+6. catalog scanner が clean Challenge commit の tracked blobs と capability manifest を照合し、
+   canonical hash 付き report を生成します。
+
+#### エッジケース
+
+- target、output key、scoring path の不足や重複を成功扱いしません。
+- AWS/GCP は `/`、Azure/Sakura は `/healthz` を使い、root path の誤った hello 仮定を
+  持ち込みません。
+- 4 probe のうち 1 件でも status が metadata の `expectStatus` 外なら 0 点です。
+- dirty checkout、可変 ref、manifest version 不一致、canonical hash drift を拒否します。
+
+#### タスク
+
+1. final catalog fixture と 4-cloud E2E の期待をテスト先行で追加します。
+2. Azure/Sakura provider を含む同一 world deploy と scoring probe を実装します。
+3. final source/catalog provenance で 2 report を再生成して整形します。
+4. architecture harness、before-commit、review、security review、simplify review を実行します。
+
+#### 検証手順
+
+```bash
+bun test apps/server/test/hello-multicloud.test.ts
+bun test tools/catalog-scanner/tests/catalog-scanner.test.ts tools/capability-manifest/test/manifest.test.ts
+make before-commit
+```
+
+#### 進捗ログ
+
+- 2026-07-13: merged Simulator と Challenge の immutable SHA を確認し、fixture、world、
+  scoring、provenance の責務を上記の構造に固定しました。
+- 2026-07-13: Challenge の 6 fixture を byte-for-byte で固定し、同一 world の 4 target
+  deploy、4 HTTP probe、`success: all` の 100 点判定を実行する E2E を通しました。
+- 2026-07-13: catalog coverage を 174/174、missing 0、insufficient 0、invalid 0 で再生成し、
+  canonical report hash を検証しました。`make before-commit` は 493 tests、100％ coverage、
+  build を含めて通過しました。
+- 2026-07-13: security review で source commit の自己申告リスクを確認したため、Simulator
+  `463c7a1650925b1d5177d67540b2399c86783916` の `git archive` から依存関係を再構成し、2 report
+  を再生成しました。作業 branch の report と byte-for-byte で一致しました。
+
 ## 目的
 
 TenkaCloud の current catalog が必要とする cloud runtime をローカルで再現し、

@@ -10,237 +10,372 @@ import {
   SimulationStore,
 } from '@tenkacloud/simulator-core';
 import { AwsProvider } from '@tenkacloud/simulator-provider-aws';
-import {
-  CLOUD_RUN_SERVICE,
-  GcpProvider,
-} from '@tenkacloud/simulator-provider-gcp';
+import { AzureProvider } from '@tenkacloud/simulator-provider-azure';
+import { GcpProvider } from '@tenkacloud/simulator-provider-gcp';
+import { SakuraProvider } from '@tenkacloud/simulator-provider-sakura';
+import { DockerWorkloadRunner } from '@tenkacloud/simulator-workload-runner';
 
-const contexts: Array<{
+interface RuntimeTarget {
+  readonly id: string;
+  readonly provider: string;
+  readonly engine: string;
+  readonly entry: string;
+}
+
+interface ScoringTarget {
+  readonly targetId: string;
+  readonly probe: 'https';
+  readonly outputKey: string;
+  readonly path?: string;
+  readonly expectStatus: readonly number[];
+}
+
+interface CatalogMetadata {
+  readonly id: string;
+  readonly runtime: {
+    readonly kind: 'composite';
+    readonly targets: readonly RuntimeTarget[];
+  };
+  readonly scoring: {
+    readonly kind: 'composite-probe';
+    readonly success: 'all';
+    readonly pointsAllOk: number;
+    readonly targets: readonly ScoringTarget[];
+  };
+}
+
+interface TestContext {
+  readonly core: SimulationCore;
   readonly directory: string;
   readonly store: SimulationStore;
-}> = [];
+  readonly worldId: string;
+}
 
-const AWS_TEMPLATE_SHA256 =
-  'e231363a8af30b98ddd7985740af611b3c2e31b6b62f6abd072e8243129381d0';
-const GCP_TERRAFORM_SHA256 =
-  'fa63e59f577edb0ea0e6bd7b78cd3cb41ef8032a85ec5118db3d77d25af7f20b';
+interface ReviewedCatalogFixture {
+  readonly metadata: CatalogMetadata;
+  readonly simulationOverlay: unknown;
+  readonly sourceByTarget: ReadonlyMap<string, string>;
+}
+
+const CATALOG_COMMIT = '488ed4a2d103cbe596295c940620d68d8f420c99';
+const WORKLOAD_IMAGE =
+  'ghcr.io/susumutomita/tenkacloud-challenge-microservice-migration@sha256:96c7ca29de82b7d0c041e98f9cd9494de283102509134e5fb524d6e89da27cf2';
+const PROXY_IMAGE =
+  'busybox@sha256:73aaf090f3d85aa34ee199857f03fa3a95c8ede2ffd4cc2cdb5b94e566b11662';
+const FIXTURES = {
+  metadata: {
+    path: './fixtures/hello-multicloud/metadata.json.fixture',
+    sha256: 'e179875594123f0c063a732f4e263a0279f3a59c813d085de9053a388b048246',
+  },
+  overlay: {
+    path: './fixtures/hello-multicloud/simulation.json',
+    sha256: '21f0ff18fa5bacd5430e2859193957ef307e4f9c65c7fe177000678043439188',
+  },
+  aws: {
+    path: '../../../providers/aws/tests/fixtures/hello-multicloud.yaml',
+    sha256: '1dc0dba2f1c1ad5bae88bf2736debb67d6d7b9024ba117abd0fb769eabd523e6',
+  },
+  gcp: {
+    path: '../../../providers/gcp/test/fixtures/hello-multicloud/main.tf',
+    sha256: '9d205c898bf977b344db1c737ebf9c497a04f2718cf7262c43ffeafc460be1bf',
+  },
+  azure: {
+    path: '../../../providers/azure/src/fixtures/hello-multicloud.bicep',
+    sha256: 'b342cc2281ec113d7c73953f87566b2a0e43c2dcb5fba0d87531d1f19b6abe74',
+  },
+  sakura: {
+    path: '../../../providers/sakura/src/fixtures/hello-multicloud.json',
+    sha256: 'f8d2e2279be29f6698bd5d228d880bbaa0ecbca1f5369cdb20b4f36e26985ad2',
+  },
+} as const;
+
+const contexts: TestContext[] = [];
+const runner = new DockerWorkloadRunner({
+  allowedImages: new Set([PROXY_IMAGE, WORKLOAD_IMAGE]),
+  proxyImage: PROXY_IMAGE,
+  maxMemoryBytes: 134_217_728,
+  maxMilliCpu: 500,
+  maxPids: 64,
+});
 
 afterEach(async () => {
   while (contexts.length > 0) {
     const context = contexts.pop();
     if (!context) continue;
+    await context.core.deleteWorld(context.worldId);
     context.store.close();
     await rm(context.directory, { recursive: true, force: true });
   }
-});
+}, 60_000);
 
-async function pinnedFixture(
-  path: string,
-  expectedSha256: string
-): Promise<string> {
-  const contents = await readFile(new URL(path, import.meta.url), 'utf8');
+async function reviewedFixture(fixture: {
+  readonly path: string;
+  readonly sha256: string;
+}): Promise<string> {
+  const contents = await readFile(
+    new URL(fixture.path, import.meta.url),
+    'utf8'
+  );
   const actualSha256 = createHash('sha256').update(contents).digest('hex');
-  if (actualSha256 !== expectedSha256) {
+  if (actualSha256 !== fixture.sha256) {
     throw new Error(
-      `${path} drifted from the reviewed composite regression fixture: ${actualSha256}`
+      `${fixture.path} drifted from TenkaCloudChallenge ${CATALOG_COMMIT}: ${actualSha256}`
     );
   }
   return contents;
 }
 
-describe('hello-multicloud AWS/GCP composite regression', () => {
-  it('AWS Function URL と GCP Cloud Run を同じ world へ配備して両 scoring probe を200にする', async () => {
-    const directory = await mkdtemp(join(tmpdir(), 'hello-multicloud-'));
-    const store = new SimulationStore(join(directory, 'simulation.sqlite'));
-    contexts.push({ directory, store });
-    const core = new SimulationCore(
-      store,
-      new ProviderRegistry([new AwsProvider(), new GcpProvider()])
-    );
-    const deploymentId = 'hello-multicloud-deployment';
-    const world = core.createWorld(
-      {
-        tenantId: 'tenant',
-        eventId: 'event',
-        teamId: 'team',
-        deploymentId,
-      },
-      'hello-multicloud-world'
-    );
-    const awsTemplate = await pinnedFixture(
-      '../../../providers/aws/tests/fixtures/hello-multicloud.yaml',
-      AWS_TEMPLATE_SHA256
-    );
-    const gcpTerraform = await pinnedFixture(
-      '../../../providers/gcp/test/fixtures/hello-multicloud/main.tf',
-      GCP_TERRAFORM_SHA256
-    );
-    const runtime = {
-      kind: 'composite' as const,
-      targets: [
-        {
-          id: 'aws-hello',
-          provider: 'aws',
-          engine: 'cloudformation',
-          entry: 'template.yaml',
-        },
-        {
-          id: 'gcp-hello',
-          provider: 'gcp',
-          engine: 'infra-manager',
-          entry: 'gcp/terraform',
-        },
-      ],
-    };
-    const deployment = core.createDeployment(
-      world.worldId,
-      {
-        deploymentId,
-        problemId: 'hello-multicloud',
-        runtime,
-        metadata: {
-          scoring: {
-            kind: 'composite-probe',
-            success: 'all',
-            pointsAllOk: 100,
-            targets: [
-              {
-                targetId: 'aws-hello',
-                probe: 'https',
-                outputKey: 'AwsHelloUrl',
-                expectStatus: [200],
-              },
-              {
-                targetId: 'gcp-hello',
-                probe: 'https',
-                outputKey: 'GcpHelloUrl',
-                expectStatus: [200],
-              },
-            ],
-          },
-        },
-        templateBody: JSON.stringify({
-          format: 'tenkacloud.simulator.artifacts.v1',
-          targets: [
-            {
-              id: 'aws-hello',
-              provider: 'aws',
-              engine: 'cloudformation',
-              entry: 'template.yaml',
-              artifacts: [{ path: 'template.yaml', content: awsTemplate }],
-            },
-            {
-              id: 'gcp-hello',
-              provider: 'gcp',
-              engine: 'infra-manager',
-              entry: 'gcp/terraform',
-              artifacts: [
-                {
-                  path: 'gcp/terraform/main.tf',
-                  content: gcpTerraform,
-                },
-              ],
-            },
-          ],
-        }),
-      },
-      'hello-multicloud-deployment-key'
-    );
+async function reviewedCatalogFixture(): Promise<ReviewedCatalogFixture> {
+  const [metadataSource, overlaySource, aws, gcp, azure, sakura] =
+    await Promise.all([
+      reviewedFixture(FIXTURES.metadata),
+      reviewedFixture(FIXTURES.overlay),
+      reviewedFixture(FIXTURES.aws),
+      reviewedFixture(FIXTURES.gcp),
+      reviewedFixture(FIXTURES.azure),
+      reviewedFixture(FIXTURES.sakura),
+    ]);
+  return {
+    metadata: JSON.parse(metadataSource) as CatalogMetadata,
+    simulationOverlay: JSON.parse(overlaySource) as unknown,
+    sourceByTarget: new Map([
+      ['aws-hello', aws],
+      ['gcp-hello', gcp],
+      ['azure-hello', azure],
+      ['sakura-hello', sakura],
+    ]),
+  };
+}
 
-    const awsUrl = Reflect.get(
-      deployment.outputs['aws-hello'] ?? {},
-      'AwsHelloUrl'
-    );
-    const gcpUrl = Reflect.get(
-      deployment.outputs['gcp-hello'] ?? {},
-      'GcpHelloUrl'
-    );
-    if (typeof awsUrl !== 'string' || typeof gcpUrl !== 'string') {
-      throw new Error('composite hello outputs are missing');
-    }
-    expect(awsUrl).toContain('.lambda-url.us-east-1.on.aws/');
-    expect(gcpUrl).toContain('.run.gcp.local');
-
-    const awsRequest = core.executeCommand(
-      world.worldId,
-      {
-        deploymentId,
-        targetId: 'aws-hello',
-        provider: 'aws',
-        engine: 'cloudformation',
-        service: 'http',
-        operation: 'Request',
-        resourceType: HTTP_ENDPOINT_RESOURCE,
-        input: {
-          Url: awsUrl,
-          Method: 'GET',
-          Path: '/',
-          Headers: {},
-          Body: '',
-        },
-      },
-      'aws-function-url-request'
-    );
-    const awsProbe = await core.executeCommandAsync(
-      world.worldId,
-      {
-        deploymentId,
-        targetId: 'aws-hello',
-        provider: 'aws',
-        engine: 'cloudformation',
-        service: 'http',
-        operation: 'Probe',
-        resourceType: HTTP_ENDPOINT_RESOURCE,
-        input: { Url: awsUrl },
-      },
-      'aws-function-url-probe'
-    );
-
-    const gcpService = store
-      .resources(world.worldId)
-      .find((resource) => resource.resourceType === CLOUD_RUN_SERVICE);
-    if (!gcpService) throw new Error('GCP Cloud Run service is missing');
-    const gcpRequest = core.executeCommand(
-      world.worldId,
-      {
-        deploymentId,
-        targetId: 'gcp-hello',
-        provider: 'gcp',
-        engine: 'infra-manager',
-        service: 'http',
-        operation: 'Request',
-        resourceType: HTTP_ENDPOINT_RESOURCE,
-        input: { Method: 'GET', Path: '/', Headers: {}, Body: '' },
-      },
-      'gcp-cloud-run-request'
-    );
-    const gcpProbe = core.executeCommand(
-      world.worldId,
-      {
-        deploymentId,
-        targetId: 'gcp-hello',
-        provider: 'gcp',
-        engine: 'infra-manager',
-        service: 'http',
-        operation: 'Probe',
-        resourceType: HTTP_ENDPOINT_RESOURCE,
-        input: { id: gcpService.resourceId },
-      },
-      'gcp-cloud-run-probe'
-    );
-
-    expect(awsRequest).toMatchObject({
-      StatusCode: 200,
-      Body: expect.stringContaining('hello-multicloud'),
-    });
-    expect(awsProbe).toMatchObject({ Ok: true, StatusCode: 200 });
-    expect(gcpRequest).toMatchObject({ StatusCode: 200 });
-    expect(gcpProbe).toMatchObject({ status: 200 });
-    const statuses = [
-      Reflect.get(awsProbe, 'StatusCode'),
-      Reflect.get(gcpProbe, 'status'),
-    ];
-    const points = statuses.every((status) => status === 200) ? 100 : 0;
-    expect(points).toBe(100);
+function expectProductionScoringContract(metadata: CatalogMetadata): void {
+  expect(metadata.id).toBe('hello-multicloud');
+  expect(metadata.runtime.targets.map((target) => target.id)).toEqual([
+    'aws-hello',
+    'gcp-hello',
+    'azure-hello',
+    'sakura-hello',
+  ]);
+  expect(metadata.scoring).toMatchObject({
+    kind: 'composite-probe',
+    success: 'all',
+    pointsAllOk: 100,
   });
+  expect(metadata.scoring.targets).toEqual([
+    {
+      targetId: 'aws-hello',
+      probe: 'https',
+      outputKey: 'AwsHelloUrl',
+      expectStatus: [200],
+    },
+    {
+      targetId: 'gcp-hello',
+      probe: 'https',
+      outputKey: 'GcpHelloUrl',
+      expectStatus: [200],
+    },
+    {
+      targetId: 'azure-hello',
+      probe: 'https',
+      outputKey: 'AzureHelloUrl',
+      path: '/healthz',
+      expectStatus: [200],
+    },
+    {
+      targetId: 'sakura-hello',
+      probe: 'https',
+      outputKey: 'BaseUrl',
+      path: '/healthz',
+      expectStatus: [200],
+    },
+  ]);
+}
+
+async function createTestCore(): Promise<{
+  readonly core: SimulationCore;
+  readonly deploymentId: string;
+  readonly worldId: string;
+}> {
+  const directory = await mkdtemp(join(tmpdir(), 'hello-multicloud-final-'));
+  const store = new SimulationStore(join(directory, 'simulation.sqlite'));
+  const core = new SimulationCore(
+    store,
+    new ProviderRegistry([
+      new AwsProvider(),
+      new GcpProvider(),
+      new AzureProvider(),
+      new SakuraProvider(),
+    ]),
+    { workloadEffects: runner }
+  );
+  const deploymentId = 'hello-multicloud-deployment';
+  const world = core.createWorld(
+    {
+      tenantId: 'tenant',
+      eventId: 'event',
+      teamId: 'team',
+      deploymentId,
+    },
+    'hello-multicloud-final-world'
+  );
+  contexts.push({ core, directory, store, worldId: world.worldId });
+  return { core, deploymentId, worldId: world.worldId };
+}
+
+const ARTIFACT_PATH_BY_TARGET = new Map([
+  ['aws-hello', 'template.yaml'],
+  ['gcp-hello', 'gcp/terraform/main.tf'],
+  ['azure-hello', 'azure/main.bicep'],
+  ['sakura-hello', 'sakura/application.json'],
+]);
+
+function artifactBundle(fixture: ReviewedCatalogFixture): string {
+  return JSON.stringify({
+    format: 'tenkacloud.simulator.artifacts.v1',
+    targets: [...fixture.metadata.runtime.targets]
+      .sort((left, right) => left.id.localeCompare(right.id))
+      .map((target) => {
+        const path = ARTIFACT_PATH_BY_TARGET.get(target.id);
+        const content = fixture.sourceByTarget.get(target.id);
+        if (!path || !content) {
+          throw new Error(`reviewed artifact is missing for ${target.id}`);
+        }
+        return { ...target, artifacts: [{ path, content }] };
+      }),
+  });
+}
+
+type ReadyDeployment = Awaited<
+  ReturnType<SimulationCore['materializeWorkloads']>
+>;
+
+async function deployFixture(
+  fixture: ReviewedCatalogFixture,
+  core: SimulationCore,
+  worldId: string,
+  deploymentId: string
+): Promise<ReadyDeployment> {
+  const deployment = core.createDeployment(
+    worldId,
+    {
+      deploymentId,
+      problemId: fixture.metadata.id,
+      runtime: fixture.metadata.runtime,
+      metadata: { scoring: fixture.metadata.scoring },
+      simulationOverlay: fixture.simulationOverlay,
+      templateBody: artifactBundle(fixture),
+    },
+    'hello-multicloud-deployment-key'
+  );
+  expect(deployment.status).toBe('deploying');
+  const ready = await core.materializeWorkloads(worldId, deploymentId);
+  expect(ready.status).toBe('ready');
+  expect(ready.targets.map((target) => target.id)).toEqual(
+    fixture.metadata.runtime.targets.map((target) => target.id)
+  );
+  return ready;
+}
+
+function scoringCommand(
+  target: RuntimeTarget,
+  scoring: ScoringTarget,
+  output: string,
+  deploymentId: string
+) {
+  const input = {
+    Method: 'GET',
+    Path: scoring.path ?? '/',
+    Headers: {},
+    Body: '',
+  };
+  return {
+    deploymentId,
+    targetId: target.id,
+    provider: target.provider,
+    engine: target.engine,
+    service: 'http',
+    operation:
+      target.provider === 'gcp' || target.provider === 'azure'
+        ? 'Request'
+        : 'Probe',
+    resourceType: HTTP_ENDPOINT_RESOURCE,
+    input:
+      target.provider === 'aws'
+        ? { Url: new URL(scoring.path ?? '/', output).toString() }
+        : input,
+  };
+}
+
+async function probeScoringTargets(
+  metadata: CatalogMetadata,
+  ready: ReadyDeployment,
+  core: SimulationCore,
+  worldId: string,
+  deploymentId: string
+): Promise<ReadonlyMap<string, number>> {
+  const statusByTarget = new Map<string, number>();
+  for (const scoring of metadata.scoring.targets) {
+    const target = metadata.runtime.targets.find(
+      (candidate) => candidate.id === scoring.targetId
+    );
+    const output = ready.outputs[scoring.targetId]?.[scoring.outputKey];
+    if (!target || typeof output !== 'string') {
+      throw new Error(`scoring binding is missing for ${scoring.targetId}`);
+    }
+    expect(output).toStartWith('https://');
+    const command = scoringCommand(target, scoring, output, deploymentId);
+    const response =
+      target.provider === 'aws' || target.provider === 'sakura'
+        ? await core.executeCommandAsync(worldId, command, `score-${target.id}`)
+        : core.executeCommand(worldId, command, `score-${target.id}`);
+    statusByTarget.set(target.id, statusCode(response));
+  }
+  return statusByTarget;
+}
+
+function scoredPoints(
+  metadata: CatalogMetadata,
+  statusByTarget: ReadonlyMap<string, number>
+): number {
+  return metadata.scoring.targets.every((target) =>
+    target.expectStatus.includes(statusByTarget.get(target.targetId) ?? 0)
+  )
+    ? metadata.scoring.pointsAllOk
+    : 0;
+}
+
+function statusCode(response: Readonly<Record<string, unknown>>): number {
+  const value = Reflect.get(response, 'StatusCode');
+  if (typeof value !== 'number') {
+    throw new Error('HTTP data-plane response has no StatusCode');
+  }
+  return value;
+}
+
+describe('final hello-multicloud catalog regression', () => {
+  it.serial(
+    'Challenge の4 targetを同じworldへ配備してproduction scoring pathをすべて実probeする',
+    async () => {
+      expect(await runner.available()).toBe(true);
+      const fixture = await reviewedCatalogFixture();
+      expectProductionScoringContract(fixture.metadata);
+      const { core, deploymentId, worldId } = await createTestCore();
+      const ready = await deployFixture(fixture, core, worldId, deploymentId);
+      const statusByTarget = await probeScoringTargets(
+        fixture.metadata,
+        ready,
+        core,
+        worldId,
+        deploymentId
+      );
+
+      expect(Object.fromEntries(statusByTarget)).toEqual({
+        'aws-hello': 200,
+        'gcp-hello': 200,
+        'azure-hello': 200,
+        'sakura-hello': 200,
+      });
+      expect(scoredPoints(fixture.metadata, statusByTarget)).toBe(100);
+    },
+    120_000
+  );
 });

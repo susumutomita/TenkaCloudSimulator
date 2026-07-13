@@ -70,7 +70,7 @@ resource "google_cloud_run_v2_service" "hello" {
     containers {
       # Google's stock hello container: answers 200 on GET /. The problem is a
       # smoke test, so the app itself is deliberately not ours to maintain.
-      image = "gcr.io/cloudrun/hello"
+      image = "gcr.io/cloudrun/hello@sha256:be5546cb78503c610f5774366ffdd247c8589e7f0c67ed7b1c17849454c53877"
       resources {
         limits = {
           cpu    = "1"
