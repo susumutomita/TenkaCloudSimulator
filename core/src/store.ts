@@ -689,6 +689,15 @@ function assertUnversionedSchemaSet(shapes: SchemaShapes): void {
     );
   }
   if (
+    hasExactlyKnownTables(shapes, CURRENT_TABLE_NAMES) &&
+    CURRENT_TABLE_NAMES.some((tableName) => shapes[tableName] !== 'current')
+  ) {
+    throw new CoreError(
+      'ValidationFailed',
+      'simulator state schema is partial or incompatible'
+    );
+  }
+  if (
     shapesPresent.length > 0 &&
     (shapes.deployments === 'legacy') !== (shapes.resources === 'legacy')
   ) {

@@ -168,6 +168,34 @@ function preserveBoundEndpoints(
   );
 }
 
+function assertParticipantResourceIdentitiesAvailable(
+  command: ProviderCommandInput,
+  world: ProviderWorldView,
+  resources: ProviderCommandResult['resources']
+): void {
+  const targetId = stringValue(command.targetId, 'targetId');
+  const participantResources = awsResources(world).filter(
+    (resource) =>
+      resource.deploymentId === command.deploymentId &&
+      resource.targetId === targetId &&
+      resource.properties['ParticipantCreated'] === true
+  );
+  for (const resource of resources) {
+    const properties = storedProperties(resource);
+    const collision = participantResources.some(
+      (candidate) =>
+        candidate.resourceType === resource.resourceType &&
+        storedProperties(candidate).refValue === properties.refValue
+    );
+    if (collision) {
+      throw new CoreError(
+        'Conflict',
+        'CloudFormation resource identity conflicts with a participant resource'
+      );
+    }
+  }
+}
+
 function updateStack(
   command: ProviderCommandInput,
   world: ProviderWorldView
@@ -192,6 +220,11 @@ function updateStack(
     ...(metadata === undefined ? {} : { metadata }),
   });
   const deployed = deployCloudFormation(plan, world);
+  assertParticipantResourceIdentitiesAvailable(
+    command,
+    world,
+    deployed.resources
+  );
   const resources = preserveBoundEndpoints(
     command,
     world,

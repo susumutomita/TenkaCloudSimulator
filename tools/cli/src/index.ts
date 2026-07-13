@@ -1,7 +1,11 @@
 export { runCli } from './cli';
-export type { ProviderOperationRequest } from './client';
+export type {
+  ProviderOperationRequest,
+  SimulatorClientTimeoutPolicy,
+} from './client';
 export {
   assertSimulatorDeleteResponse,
+  DEFAULT_SIMULATOR_CLIENT_TIMEOUT_POLICY,
   decodeSimulatorResponse,
   parseProviderOperationResponse,
   SimulatorClient,

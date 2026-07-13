@@ -1,9 +1,10 @@
 import { afterAll, describe, expect, it } from 'bun:test';
-import type {
-  ExecuteCommandInput,
-  ProviderCommandInput,
-  ProviderWorldView,
-  ResourceRecord,
+import {
+  CoreError,
+  type ExecuteCommandInput,
+  type ProviderCommandInput,
+  type ProviderWorldView,
+  type ResourceRecord,
 } from '@tenkacloud/simulator-core';
 import { AWS_CAPABILITIES } from '../src/model';
 import { AwsProvider } from '../src/provider';
@@ -20,10 +21,49 @@ const ECS_SERVICE_RESOURCE = 'AWS::ECS::Service';
 const APP_RUNNER_SERVICE_RESOURCE = 'AWS::AppRunner::Service';
 const RUNTIME_ENDPOINT_RESOURCE = 'Runtime::Endpoint';
 
+const MANAGED_RESOURCE_CASES = [
+  {
+    service: 'lambda',
+    resourceType: LAMBDA_RESOURCE,
+    name: 'identity-lambda',
+    slot: 'users',
+    nameField: 'FunctionName',
+    describeOperation: 'DescribeManagedFunction',
+  },
+  {
+    service: 'ecs',
+    resourceType: ECS_SERVICE_RESOURCE,
+    name: 'identity-ecs',
+    slot: 'orders',
+    nameField: 'ServiceName',
+    describeOperation: 'DescribeManagedService',
+  },
+  {
+    service: 'apprunner',
+    resourceType: APP_RUNNER_SERVICE_RESOURCE,
+    name: 'identity-apprunner',
+    slot: 'catalog',
+    nameField: 'ServiceName',
+    describeOperation: 'DescribeManagedService',
+  },
+] as const;
+
+type ManagedResourceCase = (typeof MANAGED_RESOURCE_CASES)[number];
+
 afterAll(cleanupContexts);
 
 function isRecord(value: unknown): value is Readonly<Record<string, unknown>> {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function captureCoreError(operation: () => unknown): CoreError {
+  try {
+    operation();
+  } catch (error) {
+    if (error instanceof CoreError) return error;
+    throw error;
+  }
+  throw new Error('CoreError が発生しませんでした');
 }
 
 function reviewedWorkload(
@@ -101,6 +141,83 @@ function createAppRunner(context: TestContext, name: string, slot: string) {
       Slot: slot,
     },
     APP_RUNNER_SERVICE_RESOURCE
+  );
+}
+
+function createManagedResource(
+  context: TestContext,
+  definition: ManagedResourceCase
+) {
+  switch (definition.service) {
+    case 'lambda':
+      return createLambda(context, definition.name, definition.slot);
+    case 'ecs':
+      return createEcs(context, definition.name, definition.slot);
+    case 'apprunner':
+      return createAppRunner(context, definition.name, definition.slot);
+  }
+}
+
+function describeManagedResource(
+  context: TestContext,
+  definition: ManagedResourceCase
+) {
+  return execute(
+    context,
+    definition.service,
+    definition.describeOperation,
+    { [definition.nameField]: definition.name },
+    definition.resourceType
+  );
+}
+
+function saveOrdinaryResource(
+  context: TestContext,
+  definition: ManagedResourceCase,
+  resourceId: string
+): void {
+  context.store.saveResource({
+    worldId: context.worldId,
+    deploymentId: context.deploymentId,
+    targetId: 'default',
+    provider: 'aws',
+    resourceType: definition.resourceType,
+    resourceId,
+    properties: {
+      logicalId: `Ordinary.${definition.name}`,
+      physicalId: definition.name,
+      refValue: definition.name,
+      dependsOn: [],
+      attributes: {},
+      templateProperties: {},
+      status: 'CREATE_COMPLETE',
+    },
+    status: 'ready',
+  });
+}
+
+function createOrdinaryLambda(context: TestContext, functionName: string) {
+  return execute(context, 'lambda', 'CreateFunction', {
+    FunctionName: functionName,
+    Runtime: 'nodejs22.x',
+    Role: 'arn:aws:iam::123456789012:role/tc-fixture-role',
+    Handler: 'index.handler',
+    Code: { ZipFile: Buffer.from('zip').toString('base64') },
+  });
+}
+
+function templateWithLambda(
+  templateBody: string,
+  logicalId: string,
+  functionName: string
+): string {
+  const resourcesMarker = 'Resources:\n';
+  if (!templateBody.includes(resourcesMarker)) {
+    throw new Error('CloudFormation template に Resources がありません');
+  }
+  return templateBody.replace(
+    resourcesMarker,
+    `${resourcesMarker}  ${logicalId}:\n    Type: AWS::Lambda::Function\n    Properties:\n      FunctionName: ${functionName}\n      Runtime: nodejs22.x\n      Handler: index.handler\n      Role: arn:aws:iam::123456789012:role/tc-fixture-role\n      Code:\n        ZipFile: "exports.handler = async () => ({ statusCode: 200 });"\n`
   );
 }
 
@@ -202,7 +319,7 @@ function providerWorld(context: TestContext): ProviderWorldView {
   };
 }
 
-describe('AWS managed placement projection', () => {
+describe('AWS managed placement の resource graph 投影', () => {
   it('managed create read bind projection capability identity を公開する', () => {
     expect(
       AWS_CAPABILITIES.filter((capability) =>
@@ -548,7 +665,141 @@ describe('AWS managed placement projection', () => {
     );
   });
 
-  it('should preserve participant resources and a consistent bound endpoint across stack updates', async () => {
+  it('通常 Lambda が先にあると同名の managed create を実 product operation で拒否する', async () => {
+    const context = await createContext('managed-placement-metadata.json');
+    reviewedWorkload(context);
+    const lambda = MANAGED_RESOURCE_CASES[0];
+    createOrdinaryLambda(context, lambda.name);
+
+    expect(() => createManagedResource(context, lambda)).toThrow(
+      'managed resource already exists'
+    );
+    expect(() => describeManagedResource(context, lambda)).toThrow(
+      'managed resource does not exist'
+    );
+  });
+
+  it('同一 scope の real SQLite graph にある通常 ECS App Runner を managed collision guard が検出する', async () => {
+    const context = await createContext('managed-placement-metadata.json');
+    reviewedWorkload(context);
+    for (const definition of MANAGED_RESOURCE_CASES.slice(1)) {
+      saveOrdinaryResource(
+        context,
+        definition,
+        `ordinary-before-${definition.service}`
+      );
+      expect(() => createManagedResource(context, definition)).toThrow(
+        'managed resource already exists'
+      );
+      expect(() => describeManagedResource(context, definition)).toThrow(
+        'managed resource does not exist'
+      );
+    }
+  });
+
+  it('先に managed Lambda があると同名の通常 CreateFunction を実 product operation で拒否する', async () => {
+    const context = await createContext('managed-placement-metadata.json');
+    reviewedWorkload(context);
+    const lambda = MANAGED_RESOURCE_CASES[0];
+    createManagedResource(context, lambda);
+
+    expect(() => createOrdinaryLambda(context, lambda.name)).toThrow(
+      'Lambda function already exists'
+    );
+  });
+
+  it('先に managed Lambda があると同名 Function を追加する stack update を原子的に拒否する', async () => {
+    const context = await createContext('managed-placement-metadata.json');
+    reviewedWorkload(context);
+    const lambda = MANAGED_RESOURCE_CASES[0];
+    const managedResourceId = resourceId(
+      createManagedResource(context, lambda)
+    );
+    const templateBody = templateWithLambda(
+      context.templateBody,
+      'CollisionFunction',
+      lambda.name
+    );
+    const eventsBefore = context.core.events(context.worldId);
+    const resourcesBefore = context.core.resources(context.worldId);
+    const deploymentBefore = context.core.deployment(
+      context.worldId,
+      context.deploymentId
+    );
+    const idempotencyKey = `cloudformation-UpdateStack-${context.sequence + 1}`;
+    const idempotencyScope = `command:${context.worldId}:aws`;
+    expect(
+      context.store.idempotentResponse(idempotencyScope, idempotencyKey)
+    ).toBeUndefined();
+
+    const error = captureCoreError(() =>
+      execute(context, 'cloudformation', 'UpdateStack', {
+        TemplateBody: templateBody,
+      })
+    );
+
+    expect(error.code).toBe('Conflict');
+    expect(error.message).toBe(
+      'CloudFormation resource identity conflicts with a participant resource'
+    );
+    expect(context.core.events(context.worldId)).toEqual(eventsBefore);
+    expect(context.core.resources(context.worldId)).toEqual(resourcesBefore);
+    expect(
+      context.core.deployment(context.worldId, context.deploymentId)
+    ).toEqual(deploymentBefore);
+    expect(
+      context.store.idempotentResponse(idempotencyScope, idempotencyKey)
+    ).toBeUndefined();
+    expect(
+      context.core
+        .resources(context.worldId)
+        .filter(
+          (resource) =>
+            resource.deploymentId === context.deploymentId &&
+            resource.targetId === 'default' &&
+            resource.resourceType === LAMBDA_RESOURCE &&
+            resource.properties['refValue'] === lambda.name &&
+            resource.status === 'ready'
+        )
+        .map((resource) => resource.resourceId)
+    ).toEqual([managedResourceId]);
+    expect(describeManagedResource(context, lambda)).toMatchObject({
+      ManagedResourceId: managedResourceId,
+      ResourceName: lambda.name,
+    });
+  });
+
+  it('同一 scope の real SQLite graph で ECS App Runner の eligible describe と同名 collision guard を分離する', async () => {
+    const context = await createContext('managed-placement-metadata.json');
+    reviewedWorkload(context);
+
+    for (const definition of MANAGED_RESOURCE_CASES.slice(1)) {
+      const managedResourceId = resourceId(
+        createManagedResource(context, definition)
+      );
+      saveOrdinaryResource(
+        context,
+        definition,
+        `000-ordinary-after-${definition.service}`
+      );
+      expect(describeManagedResource(context, definition)).toMatchObject({
+        ManagedResourceId: managedResourceId,
+        ResourceName: definition.name,
+      });
+      context.store.deleteResource(
+        context.worldId,
+        context.deploymentId,
+        'default',
+        'aws',
+        managedResourceId
+      );
+      expect(() => createManagedResource(context, definition)).toThrow(
+        'managed resource already exists'
+      );
+    }
+  });
+
+  it('stack update の前後で participant resource と bound endpoint の一貫性を保つ', async () => {
     const context = await createContext('managed-placement-metadata.json');
     reviewedWorkload(context);
     execute(context, 'lambda', 'CreateFunction', {

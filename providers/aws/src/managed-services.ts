@@ -71,18 +71,39 @@ function serviceName(value: unknown, label: string): string {
   return name;
 }
 
-function participantResource(
+function scopedReadyResources(
+  command: ProviderCommandInput,
+  world: ProviderWorldView,
+  resourceType: string
+) {
+  const targetId = stringValue(command.targetId, 'command targetId');
+  return awsResources(world, resourceType).filter(
+    (resource) =>
+      resource.deploymentId === command.deploymentId &&
+      resource.targetId === targetId
+  );
+}
+
+function hasResourceNameCollision(
+  command: ProviderCommandInput,
+  world: ProviderWorldView,
+  resourceType: string,
+  name: string
+): boolean {
+  return scopedReadyResources(command, world, resourceType).some(
+    (resource) => storedProperties(resource).refValue === name
+  );
+}
+
+function eligibleManagedResource(
   command: ProviderCommandInput,
   world: ProviderWorldView,
   resourceType: string,
   name: string
 ) {
-  const targetId = stringValue(command.targetId, 'command targetId');
-  return awsResources(world, resourceType).find((resource) => {
+  return scopedReadyResources(command, world, resourceType).find((resource) => {
     const properties = storedProperties(resource);
     return (
-      resource.deploymentId === command.deploymentId &&
-      resource.targetId === targetId &&
       properties['EligibleManagedPlacement'] === true &&
       properties.refValue === name
     );
@@ -119,7 +140,7 @@ function createManagedResource(
   const name = serviceName(command.input[nameField], nameField);
   const slot = stringValue(command.input['Slot'], 'Slot');
   const reviewed = reviewedWorkloadForSlot(command, world, slot);
-  if (participantResource(command, world, definition.resourceType, name)) {
+  if (hasResourceNameCollision(command, world, definition.resourceType, name)) {
     throw new CoreError('Conflict', 'managed resource already exists');
   }
   const resourceId = deterministicId('aws-managed-resource', {
@@ -188,7 +209,7 @@ function describeManagedResource(
     definition.operationLabel.replace('Create', 'Describe')
   );
   const name = serviceName(command.input[nameField], nameField);
-  const resource = participantResource(
+  const resource = eligibleManagedResource(
     command,
     world,
     definition.resourceType,

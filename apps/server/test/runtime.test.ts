@@ -568,7 +568,7 @@ describe('Simulator runtime entrypoint', () => {
     expect((await lstat(permissionState)).mode & 0o777).toBe(0o700);
   });
 
-  it('should reconcile a persisted delete intent before returning a runtime', async () => {
+  it('永続化済み delete intent を runtime 返却前に reconcile する', async () => {
     const configured = environment();
     const stateDirectory = configured.TENKACLOUD_SIMULATOR_STATE_DIR ?? '';
     await mkdir(stateDirectory, { recursive: true });

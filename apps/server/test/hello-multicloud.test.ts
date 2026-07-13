@@ -62,6 +62,9 @@ const WORKLOAD_IMAGE =
   'ghcr.io/susumutomita/tenkacloud-challenge-microservice-migration@sha256:96c7ca29de82b7d0c041e98f9cd9494de283102509134e5fb524d6e89da27cf2';
 const PROXY_IMAGE =
   'busybox@sha256:73aaf090f3d85aa34ee199857f03fa3a95c8ede2ffd4cc2cdb5b94e566b11662';
+// A test watchdog, not a protocol deadline: cleanup also performs Docker work
+// before and during the default 120 second quiet-observation window.
+const CLEANUP_TEARDOWN_TIMEOUT_MILLISECONDS = 600_000;
 const FIXTURES = {
   metadata: {
     path: './fixtures/hello-multicloud/metadata.json.fixture',
@@ -106,7 +109,7 @@ afterEach(async () => {
     context.store.close();
     await rm(context.directory, { recursive: true, force: true });
   }
-}, 60_000);
+}, CLEANUP_TEARDOWN_TIMEOUT_MILLISECONDS);
 
 async function reviewedFixture(fixture: {
   readonly path: string;

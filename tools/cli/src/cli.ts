@@ -7,7 +7,11 @@ import {
   type SimulatorDeploymentRequest,
   type SimulatorWorldRequest,
 } from '@tenkacloud/simulator-contracts';
-import { SimulatorClient } from './client';
+import {
+  DEFAULT_SIMULATOR_CLIENT_TIMEOUT_POLICY,
+  SimulatorClient,
+  type SimulatorClientTimeoutPolicy,
+} from './client';
 
 const USAGE = `Usage:
   tenkacloud-simulator capabilities --url <url> [--token <launch-token>]
@@ -196,7 +200,8 @@ async function executeSnapshot(
 export async function runCli(
   args: readonly string[],
   stdout: Output = process.stdout,
-  stderr: Output = process.stderr
+  stderr: Output = process.stderr,
+  timeoutPolicy: SimulatorClientTimeoutPolicy = DEFAULT_SIMULATOR_CLIENT_TIMEOUT_POLICY
 ): Promise<0 | 1 | 2> {
   if (args.length === 0 || args[0] === '--help') {
     stdout.write(USAGE);
@@ -207,7 +212,8 @@ export async function runCli(
     const values = options(args.slice(1));
     const client = new SimulatorClient(
       required(values, 'url'),
-      values['token']
+      values['token'],
+      timeoutPolicy
     );
     if (
       (await executeLifecycle(command, values, client, stdout)) ||

@@ -936,7 +936,7 @@ describe('SimulationCore の振る舞い', () => {
       ).toBe('IdempotencyConflict');
     });
 
-    it('should not overwrite an existing deployment identity with a new idempotency key', () => {
+    it('新しい idempotency key で既存 deployment identity を上書きしない', () => {
       const world = createWorld();
       const first = createReadyDeployment(world.worldId);
       const eventsBefore = core.events(world.worldId);
@@ -956,7 +956,7 @@ describe('SimulationCore の振る舞い', () => {
       expect(core.resources(world.worldId)).toEqual(resourcesBefore);
     });
 
-    it('should return the same-key deployment winner committed during provider evaluation', () => {
+    it('provider 評価中に commit された同一 key の deployment winner を返す', () => {
       const world = createWorld();
       const input = singleDeployment('interleaved-deployment');
       const provider = new DeployHookProvider('alpha', 'engine-a');
@@ -1408,7 +1408,7 @@ describe('SimulationCore の振る舞い', () => {
       ).toHaveLength(1);
     });
 
-    it('should reject duplicate materialization from another live store before running a second effect', async () => {
+    it('別の live store による重複 materialization を2回目の effect 実行前に拒否する', async () => {
       const effects = enableWorkloadEffects();
       const world = createWorld();
       const deployment = core.createDeployment(
@@ -1461,7 +1461,7 @@ describe('SimulationCore の振る舞い', () => {
       }
     });
 
-    it('should keep a cross-store delete behind a live materialization lease', async () => {
+    it('cross-store delete を live materialization lease の完了まで待機させる', async () => {
       const effects = enableWorkloadEffects();
       const world = createWorld();
       const deployment = core.createDeployment(
@@ -1507,7 +1507,7 @@ describe('SimulationCore の振る舞い', () => {
       }
     });
 
-    it('should reject a materialization result when workload declaration content changes during the effect', async () => {
+    it('effect 中に workload declaration が変化した materialization result を拒否する', async () => {
       const effects = enableWorkloadEffects();
       const world = createWorld();
       const deployment = core.createDeployment(
@@ -1568,7 +1568,7 @@ describe('SimulationCore の振る舞い', () => {
       }
     });
 
-    it('should clean up materialization when its active world disappears and preserve cleanup failure', async () => {
+    it('active world 消失時に materialization を cleanup し cleanup failure を保持する', async () => {
       const effects = enableWorkloadEffects();
       const workloads: readonly WorkloadDeclaration[] = [
         {
@@ -1687,7 +1687,7 @@ describe('SimulationCore の振る舞い', () => {
       expect(store.reservedEventCount(world.worldId)).toBe(0);
     });
 
-    it('should prevent a cross-store materialization after delete intent commits', async () => {
+    it('delete intent commit 後の cross-store materialization を拒否する', async () => {
       const effects = enableWorkloadEffects();
       const world = createWorld();
       const deployment = core.createDeployment(
@@ -1807,7 +1807,7 @@ describe('SimulationCore の振る舞い', () => {
       ).toBe(true);
     });
 
-    it('should preserve delete intent after a failed commit and finish on retry', async () => {
+    it('commit 失敗後も delete intent を保持して retry で完了する', async () => {
       const effects = enableWorkloadEffects();
       const world = createWorld();
       const deployment = core.createDeployment(
@@ -1874,7 +1874,7 @@ describe('SimulationCore の振る舞い', () => {
       }
     });
 
-    it('should enforce delete quota across processes and let an open survivor reclaim a crashed deletion', async () => {
+    it('process 間で delete quota を強制し open survivor が crashed deletion を回収する', async () => {
       const effects = enableWorkloadEffects();
       const world = createWorld();
       const deployment = core.createDeployment(
@@ -1990,7 +1990,7 @@ describe('SimulationCore の振る舞い', () => {
       }
     });
 
-    it('should keep a crashed delete intent ahead of materialization and reconcile it on the open survivor', async () => {
+    it('crashed delete intent を materialization より優先して open survivor で reconcile する', async () => {
       const effects = enableWorkloadEffects();
       const world = createWorld();
       const deployment = core.createDeployment(
@@ -2352,7 +2352,7 @@ describe('SimulationCore の振る舞い', () => {
   });
 
   describe('shared command mutation', () => {
-    it('should recover a saved mutation response after its provider becomes unavailable', () => {
+    it('provider が利用不能になった後も保存済み mutation response を回復する', () => {
       const world = createWorld();
       const deployment = createReadyDeployment(world.worldId);
       const input = commandInput(deployment.deploymentId);
@@ -2379,7 +2379,7 @@ describe('SimulationCore の振る舞い', () => {
       ).toThrow('provider does not exist');
     });
 
-    it('should reevaluate projection reads for a stable key and reject provider mutations', () => {
+    it('stable key の projection read を再評価して provider mutation を拒否する', () => {
       const world = createWorld();
       const deployment = createReadyDeployment(world.worldId);
       const provider = new ProjectionReadProvider('alpha', 'engine-a');
@@ -2414,7 +2414,7 @@ describe('SimulationCore の振る舞い', () => {
       expect(projectionCore.events(world.worldId)).toHaveLength(events);
     });
 
-    it('should reject a projection read when another store mutates its evaluated state before commit', () => {
+    it('別 store が評価済み state を commit 前に変更した projection read を拒否する', () => {
       const world = createWorld();
       const deployment = createReadyDeployment(world.worldId);
       const provider = new ProjectionReadProvider('alpha', 'engine-a');
@@ -2587,7 +2587,7 @@ describe('SimulationCore の振る舞い', () => {
       expect(fallback).toMatchObject({ value: 'fallback' });
     });
 
-    it('should return the same-key provider command winner committed while an async reducer is pending', async () => {
+    it('async reducer 待機中に commit された同一 key の provider command winner を返す', async () => {
       const world = createWorld();
       const deployment = createReadyDeployment(world.worldId);
       const gate = deferred();
@@ -2919,7 +2919,7 @@ describe('SimulationCore の振る舞い', () => {
       ).toBe('Conflict');
     });
 
-    it('should enforce resource quota against the final locked projection without double-counting updates', () => {
+    it('update を二重計上せず final locked projection に resource quota を強制する', () => {
       const world = createWorld();
       const swapRegistry = new ProviderRegistry([
         new SwapResourceProvider('swap', 'engine-swap'),
@@ -2993,7 +2993,7 @@ describe('SimulationCore の振る舞い', () => {
       expect(advanced.appliedTransitions).toEqual([]);
     });
 
-    it('should reject a clock result when another store changes the deployment target set during evaluation', () => {
+    it('別 store が評価中に deployment target 集合を変更した clock result を拒否する', () => {
       const world = createWorld({
         ...WORLD_INPUT,
         virtualTime: '2026-07-12T00:00:00.000Z',
@@ -3053,7 +3053,7 @@ describe('SimulationCore の振る舞い', () => {
       }
     });
 
-    it('should allow only one store to commit from the same old clock', () => {
+    it('同じ old clock から commit できる store を一つだけにする', () => {
       const world = createWorld({
         ...WORLD_INPUT,
         virtualTime: '2026-07-12T00:00:00.000Z',

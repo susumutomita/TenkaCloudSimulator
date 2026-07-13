@@ -145,7 +145,7 @@ describe('Simulator launch token', () => {
   });
 });
 
-describe('Simulator snapshot integrity proof', () => {
+describe('Simulator snapshot integrity proof の振る舞い', () => {
   it('proof を別 domain の canonical envelope に HMAC 署名して検証する', () => {
     const authority = new LaunchTokenAuthority(SECRET);
     const integrityProof = authority.signSnapshot(SNAPSHOT_ENVELOPE);

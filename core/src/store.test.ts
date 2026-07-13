@@ -131,6 +131,7 @@ function replayDeploymentTargetAlter(
 ): void {
   database.exec(`
     PRAGMA foreign_keys = OFF;
+    DROP TABLE event_reservations;
     ALTER TABLE deployments RENAME TO deployments_canonical;
     CREATE TABLE deployments (
       world_id TEXT NOT NULL,
@@ -151,6 +152,20 @@ function replayDeploymentTargetAlter(
     ALTER TABLE deployments
       ADD COLUMN targets TEXT NOT NULL DEFAULT '${defaultValue}';
     PRAGMA user_version = 0;
+  `);
+}
+
+function createCurrentEventReservationsTable(database: Database): void {
+  database.exec(`
+    CREATE TABLE event_reservations (
+      world_id TEXT NOT NULL,
+      reservation_id TEXT NOT NULL,
+      operation_kind TEXT NOT NULL CHECK (operation_kind IN ('materialization', 'deletion')),
+      owner_id TEXT NOT NULL,
+      event_count INTEGER NOT NULL CHECK (event_count > 0),
+      PRIMARY KEY (world_id, reservation_id),
+      FOREIGN KEY (world_id) REFERENCES worlds(world_id)
+    )
   `);
 }
 
@@ -182,6 +197,57 @@ function schemaSnapshot(database: Database): readonly SchemaSnapshotRow[] {
        ORDER BY type, name`
     )
     .all();
+}
+
+type PersistedSqliteRow = Readonly<Record<string, string | number | null>>;
+
+function tableRowsSnapshot(
+  database: Database,
+  tableName:
+    | 'worlds'
+    | 'events'
+    | 'deployments'
+    | 'idempotency'
+    | 'resources'
+    | 'event_reservations'
+): readonly PersistedSqliteRow[] {
+  return database
+    .query<PersistedSqliteRow, []>(`SELECT * FROM ${tableName} ORDER BY rowid`)
+    .all();
+}
+
+function databaseStateSnapshot(database: Database) {
+  return {
+    schema: schemaSnapshot(database),
+    rows: {
+      worlds: tableRowsSnapshot(database, 'worlds'),
+      events: tableRowsSnapshot(database, 'events'),
+      deployments: tableRowsSnapshot(database, 'deployments'),
+      idempotency: tableRowsSnapshot(database, 'idempotency'),
+      resources: tableRowsSnapshot(database, 'resources'),
+      eventReservations: tableRowsSnapshot(database, 'event_reservations'),
+    },
+    userVersion: database
+      .query<{ user_version: number }, []>('PRAGMA user_version')
+      .get()?.user_version,
+  };
+}
+
+function expectUnversionedHybridRejectedUnchanged(databasePath: string): void {
+  const beforeDatabase = new Database(databasePath, { readonly: true });
+  const before = databaseStateSnapshot(beforeDatabase);
+  beforeDatabase.close();
+
+  const error = captureCoreError(() => {
+    const accepted = new SimulationStore(databasePath);
+    accepted.close();
+  });
+
+  expect(error.code).toBe('ValidationFailed');
+  expect(error.message).toContain('partial or incompatible');
+  const rejected = new Database(databasePath, { readonly: true });
+  expect(databaseStateSnapshot(rejected)).toEqual(before);
+  rejected.close();
 }
 
 function idempotencySnapshot(
@@ -296,7 +362,7 @@ describe('SimulationStore の振る舞い', () => {
     expect(store.world('rolled-back-world')).toBeUndefined();
   });
 
-  it('should preserve nested savepoint rollback inside an immediate outer transaction', () => {
+  it('immediate outer transaction 内で nested savepoint rollback を保持する', () => {
     const world = worldRecord('nested-savepoint-world');
 
     store.transaction(() => {
@@ -314,7 +380,7 @@ describe('SimulationStore の振る舞い', () => {
     expect(store.events(world.worldId)).toEqual([]);
   });
 
-  it('should map bounded SQLite write contention to a retryable domain conflict', () => {
+  it('bounded SQLite write contention を retryable domain conflict に変換する', () => {
     const locker = new SimulationStore(
       path.join(directory, 'simulation.sqlite')
     );
@@ -342,6 +408,86 @@ describe('SimulationStore の振る舞い', () => {
       .get()?.user_version;
 
     expect(version).toBe(2);
+  });
+
+  it('exact current 6-table schema は unversioned でも rows を保持して version 2 へ移行する', () => {
+    const currentPath = path.join(directory, 'unversioned-current.sqlite');
+    const seeded = new SimulationStore(currentPath);
+    const world = worldRecord('unversioned-current-world');
+    seeded.insertWorld(world);
+    seeded.saveIdempotent(
+      'unversioned-current-scope',
+      'key',
+      { request: 'preserved' },
+      { response: 'preserved' }
+    );
+    seeded.close();
+    const unversioned = new Database(currentPath);
+    unversioned.exec('PRAGMA user_version = 0');
+    const before = databaseStateSnapshot(unversioned);
+    unversioned.close();
+
+    const migrated = new SimulationStore(currentPath);
+
+    const after = databaseStateSnapshot(migrated.database);
+    expect(after.schema).toEqual(before.schema);
+    expect(after.rows).toEqual(before.rows);
+    expect(after.userVersion).toBe(2);
+    expect(migrated.world(world.worldId)).toEqual(world);
+    migrated.close();
+  });
+
+  it('unversioned legacy または historical 5-table と current reservation table の hybrid を完全不変で拒否する', () => {
+    const legacyPath = path.join(directory, 'legacy-reservation-hybrid.sqlite');
+    const legacy = new Database(legacyPath, { create: true });
+    createLegacyTargetlessSchema(legacy);
+    createCurrentEventReservationsTable(legacy);
+    legacy.exec(`
+      INSERT INTO worlds VALUES (
+        'legacy-hybrid-world', 'tenant-a', 'event-a', 'team-a',
+        'deployment-a', 'seed-a', '2026-07-12T00:00:00.000Z', 'active', 1
+      );
+      INSERT INTO idempotency VALUES (
+        'legacy-hybrid-scope', 'key', 'request-hash', '{"preserved":true}'
+      );
+      INSERT INTO event_reservations VALUES (
+        'legacy-hybrid-world', 'preserved-reservation', 'materialization',
+        'preserved-owner', 2
+      )
+    `);
+    legacy.close();
+
+    expectUnversionedHybridRejectedUnchanged(legacyPath);
+
+    const historicalPath = path.join(
+      directory,
+      'historical-reservation-hybrid.sqlite'
+    );
+    const seeded = new SimulationStore(historicalPath);
+    const world = worldRecord('historical-hybrid-world');
+    seeded.insertWorld(world);
+    seeded.saveDeployment(
+      deploymentRecord(world.worldId, 'historical-hybrid-deployment')
+    );
+    seeded.saveIdempotent(
+      'historical-hybrid-scope',
+      'key',
+      { request: 'preserved' },
+      { response: 'preserved' }
+    );
+    seeded.close();
+    const historical = new Database(historicalPath);
+    replayDeploymentTargetAlter(historical, '[]');
+    createCurrentEventReservationsTable(historical);
+    historical.exec(`
+      INSERT INTO event_reservations VALUES (
+        'historical-hybrid-world', 'preserved-reservation', 'deletion',
+        'preserved-owner', 3
+      )
+    `);
+    historical.close();
+
+    expectUnversionedHybridRejectedUnchanged(historicalPath);
   });
 
   it('exact schema version 1 に event reservation table だけを追加して version 2 へ移行する', () => {
@@ -693,7 +839,7 @@ describe('SimulationStore の振る舞い', () => {
     expect(error.message).toContain('foreign key');
   });
 
-  it('should reserve, roll back, and release events idempotently', () => {
+  it('event の予約 rollback release を idempotent に処理する', () => {
     const world = worldRecord();
     store.insertWorld(world);
 
@@ -736,7 +882,7 @@ describe('SimulationStore の振る舞い', () => {
     expect(store.reservedEventCount(world.worldId)).toBe(0);
   });
 
-  it('should fail closed for an event reservation with an unknown owner identity', () => {
+  it('未知の owner identity を持つ event reservation を fail closed にする', () => {
     const world = worldRecord();
     store.insertWorld(world);
 
@@ -762,7 +908,7 @@ describe('SimulationStore の振る舞い', () => {
     reopened.close();
   });
 
-  it('should preserve an active same-process owner and release its reservations on close', () => {
+  it('同一 process の active owner を保持して close 時に reservation を解放する', () => {
     const world = worldRecord();
     store.insertWorld(world);
     const owner = new SimulationStore(
@@ -780,7 +926,7 @@ describe('SimulationStore の振る舞い', () => {
     observer.close();
   });
 
-  it('should preserve a delete intent on close and allow only a dead owner takeover', () => {
+  it('close 時も delete intent を保持して dead owner だけ takeover を許可する', () => {
     const world = worldRecord('persistent-delete-intent-world');
     store.insertWorld(world);
     store.reserveEvents(
@@ -819,7 +965,7 @@ describe('SimulationStore の振る舞い', () => {
     }
   });
 
-  it('should reclaim a reservation whose reused PID has no active store owner', () => {
+  it('再利用 PID に active store owner がない reservation を回収する', () => {
     const world = worldRecord();
     store.insertWorld(world);
     const reusedOwner = JSON.stringify({
@@ -847,7 +993,7 @@ describe('SimulationStore の振る舞い', () => {
     expect(store.reservedEventCount(world.worldId)).toBe(0);
   });
 
-  it('should preserve a live foreign reservation and let an open survivor reclaim it after its owner crashes', async () => {
+  it('live foreign reservation を保持して owner crash 後に open survivor が回収する', async () => {
     const world = worldRecord();
     store.insertWorld(world);
     const databasePath = path.join(directory, 'simulation.sqlite');
