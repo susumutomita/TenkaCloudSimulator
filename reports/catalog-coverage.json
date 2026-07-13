@@ -1,11 +1,11 @@
 {
   "protocolVersion": "2026-07-11",
-  "simulatorVersion": "tenkacloud-simulator-0.1.0+git.7e0245996bf601f661122169bf1129f603ce7567",
-  "catalogCommit": "397b913a5c937339d23f0fa281decf1404f9ccbc",
+  "simulatorVersion": "tenkacloud-simulator-0.1.0+git.463c7a1650925b1d5177d67540b2399c86783916",
+  "catalogCommit": "488ed4a2d103cbe596295c940620d68d8f420c99",
   "supported": true,
   "summary": {
-    "total": 163,
-    "covered": 163,
+    "total": 174,
+    "covered": 174,
     "missing": 0,
     "insufficient": 0,
     "invalid": 0
@@ -325,7 +325,7 @@
           "kind": "iac-resource",
           "location": {
             "file": "challenges/hello-multicloud/template.yaml",
-            "line": 88
+            "line": 101
           }
         }
       },
@@ -386,6 +386,29 @@
         "provider": "aws",
         "engine": "cloudformation",
         "service": "lambda",
+        "resourceType": "AWS::Lambda::Permission",
+        "operation": "lifecycle",
+        "requiredFidelity": ["control"],
+        "plane": "deploy",
+        "source": {
+          "kind": "iac-resource",
+          "location": {
+            "file": "challenges/hello-multicloud/template.yaml",
+            "line": 89
+          }
+        }
+      },
+      "status": "covered",
+      "implementedFidelity": ["control"],
+      "diagnostics": []
+    },
+    {
+      "requirement": {
+        "problemId": "hello-multicloud",
+        "targetId": "aws-hello",
+        "provider": "aws",
+        "engine": "cloudformation",
+        "service": "lambda",
         "resourceType": "AWS::Lambda::Url",
         "operation": "lifecycle",
         "requiredFidelity": ["control"],
@@ -400,6 +423,163 @@
       },
       "status": "covered",
       "implementedFidelity": ["control"],
+      "diagnostics": []
+    },
+    {
+      "requirement": {
+        "problemId": "hello-multicloud",
+        "targetId": "azure-hello",
+        "provider": "azure",
+        "engine": "bicep",
+        "service": "containerapps",
+        "resourceType": "Microsoft.App/containerApps",
+        "operation": "lifecycle",
+        "requiredFidelity": [
+          "contract",
+          "control",
+          "security",
+          "network",
+          "data-plane"
+        ],
+        "plane": "deploy",
+        "source": {
+          "kind": "iac-resource",
+          "location": {
+            "file": "challenges/hello-multicloud/azure/main.bicep",
+            "line": 17
+          }
+        }
+      },
+      "status": "covered",
+      "implementedFidelity": [
+        "contract",
+        "control",
+        "security",
+        "network",
+        "data-plane"
+      ],
+      "diagnostics": []
+    },
+    {
+      "requirement": {
+        "problemId": "hello-multicloud",
+        "targetId": "azure-hello",
+        "provider": "azure",
+        "engine": "bicep",
+        "service": "containerapps",
+        "resourceType": "Microsoft.App/managedEnvironments",
+        "operation": "lifecycle",
+        "requiredFidelity": ["contract", "control", "security"],
+        "plane": "deploy",
+        "source": {
+          "kind": "iac-resource",
+          "location": {
+            "file": "challenges/hello-multicloud/azure/main.bicep",
+            "line": 11
+          }
+        }
+      },
+      "status": "covered",
+      "implementedFidelity": ["contract", "control", "security"],
+      "diagnostics": []
+    },
+    {
+      "requirement": {
+        "problemId": "hello-multicloud",
+        "targetId": "azure-hello",
+        "provider": "azure",
+        "engine": "bicep",
+        "service": "http",
+        "resourceType": "HTTP::Endpoint",
+        "operation": "Probe",
+        "requiredFidelity": [
+          "contract",
+          "control",
+          "security",
+          "network",
+          "data-plane"
+        ],
+        "plane": "scoring",
+        "source": {
+          "kind": "iac-resource",
+          "location": {
+            "file": "challenges/hello-multicloud/azure/main.bicep",
+            "line": 1
+          }
+        }
+      },
+      "status": "covered",
+      "implementedFidelity": [
+        "contract",
+        "control",
+        "security",
+        "network",
+        "data-plane"
+      ],
+      "diagnostics": []
+    },
+    {
+      "requirement": {
+        "problemId": "hello-multicloud",
+        "targetId": "azure-hello",
+        "provider": "azure",
+        "engine": "bicep",
+        "service": "http",
+        "resourceType": "HTTP::Endpoint",
+        "operation": "Probe",
+        "requiredFidelity": ["data-plane"],
+        "plane": "scoring",
+        "source": {
+          "kind": "metadata-probe",
+          "location": {
+            "file": "challenges/hello-multicloud/metadata.json",
+            "line": 1
+          }
+        }
+      },
+      "status": "covered",
+      "implementedFidelity": [
+        "contract",
+        "control",
+        "security",
+        "network",
+        "data-plane"
+      ],
+      "diagnostics": []
+    },
+    {
+      "requirement": {
+        "problemId": "hello-multicloud",
+        "targetId": "azure-hello",
+        "provider": "azure",
+        "engine": "bicep",
+        "service": "http",
+        "resourceType": "HTTP::Endpoint",
+        "operation": "Request",
+        "requiredFidelity": [
+          "contract",
+          "control",
+          "security",
+          "network",
+          "data-plane"
+        ],
+        "plane": "workload",
+        "source": {
+          "kind": "iac-resource",
+          "location": {
+            "file": "challenges/hello-multicloud/azure/main.bicep",
+            "line": 1
+          }
+        }
+      },
+      "status": "covered",
+      "implementedFidelity": [
+        "contract",
+        "control",
+        "security",
+        "network",
+        "data-plane"
+      ],
       "diagnostics": []
     },
     {
@@ -481,6 +661,139 @@
         "network",
         "data-plane"
       ],
+      "diagnostics": []
+    },
+    {
+      "requirement": {
+        "problemId": "hello-multicloud",
+        "targetId": "sakura-hello",
+        "provider": "sakura",
+        "engine": "apprun",
+        "service": "apprun",
+        "resourceType": "sakura.apprun.Application",
+        "operation": "deploy",
+        "requiredFidelity": ["contract", "control", "security"],
+        "plane": "deploy",
+        "source": {
+          "kind": "iac-resource",
+          "location": {
+            "file": "challenges/hello-multicloud/sakura/application.json",
+            "line": 1
+          }
+        }
+      },
+      "status": "covered",
+      "implementedFidelity": ["contract", "control", "security"],
+      "diagnostics": []
+    },
+    {
+      "requirement": {
+        "problemId": "hello-multicloud",
+        "targetId": "sakura-hello",
+        "provider": "sakura",
+        "engine": "apprun",
+        "service": "http",
+        "resourceType": "HTTP::Endpoint",
+        "operation": "Probe",
+        "requiredFidelity": ["data-plane"],
+        "plane": "scoring",
+        "source": {
+          "kind": "metadata-probe",
+          "location": {
+            "file": "challenges/hello-multicloud/metadata.json",
+            "line": 1
+          }
+        }
+      },
+      "status": "covered",
+      "implementedFidelity": [
+        "contract",
+        "control",
+        "security",
+        "network",
+        "data-plane"
+      ],
+      "diagnostics": []
+    },
+    {
+      "requirement": {
+        "problemId": "hello-multicloud",
+        "targetId": "sakura-hello",
+        "provider": "sakura",
+        "engine": "apprun",
+        "service": "http",
+        "resourceType": "HTTP::Endpoint",
+        "operation": "Probe",
+        "requiredFidelity": ["data-plane"],
+        "plane": "scoring",
+        "source": {
+          "kind": "simulation-overlay",
+          "location": {
+            "file": "challenges/hello-multicloud/simulation.json",
+            "line": 6
+          }
+        }
+      },
+      "status": "covered",
+      "implementedFidelity": [
+        "contract",
+        "control",
+        "security",
+        "network",
+        "data-plane"
+      ],
+      "diagnostics": []
+    },
+    {
+      "requirement": {
+        "problemId": "hello-multicloud",
+        "targetId": "sakura-hello",
+        "provider": "sakura",
+        "engine": "apprun",
+        "service": "http",
+        "resourceType": "HTTP::Endpoint",
+        "operation": "Request",
+        "requiredFidelity": ["data-plane"],
+        "plane": "workload",
+        "source": {
+          "kind": "simulation-overlay",
+          "location": {
+            "file": "challenges/hello-multicloud/simulation.json",
+            "line": 6
+          }
+        }
+      },
+      "status": "covered",
+      "implementedFidelity": [
+        "contract",
+        "control",
+        "security",
+        "network",
+        "data-plane"
+      ],
+      "diagnostics": []
+    },
+    {
+      "requirement": {
+        "problemId": "hello-multicloud",
+        "targetId": "sakura-hello",
+        "provider": "sakura",
+        "engine": "apprun",
+        "service": "runtime",
+        "resourceType": "Runtime::Workload",
+        "operation": "Materialize",
+        "requiredFidelity": ["data-plane"],
+        "plane": "workload",
+        "source": {
+          "kind": "simulation-overlay",
+          "location": {
+            "file": "challenges/hello-multicloud/simulation.json",
+            "line": 24
+          }
+        }
+      },
+      "status": "covered",
+      "implementedFidelity": ["data-plane"],
       "diagnostics": []
     },
     {
@@ -3774,10 +4087,10 @@
     }
   ],
   "inventory": {
-    "catalogHash": "9ccfed69be742d4a6579653b2a5ad448946703d6d07459e954ec4681a029c478",
+    "catalogHash": "e5e8eb57425a02d38879cd3437d24753d6978446d180937c466fd5eb802aaadc",
     "capabilityManifest": {
-      "version": "tenkacloud-simulator-0.1.0+git.7e0245996bf601f661122169bf1129f603ce7567",
-      "hash": "072abe50d07831aa2dc22b53658a1f0543590f3629b087f8ee15425dad1910c2"
+      "version": "tenkacloud-simulator-0.1.0+git.463c7a1650925b1d5177d67540b2399c86783916",
+      "hash": "0d169c75706b163723984309288e2a3c656f429eeacd19eab183e5c7bc0829c5"
     },
     "problems": [
       {
@@ -3873,6 +4186,20 @@
             "provider": "gcp",
             "engine": "infra-manager",
             "entry": "gcp/terraform",
+            "delivery": "cloud"
+          },
+          {
+            "targetId": "azure-hello",
+            "provider": "azure",
+            "engine": "bicep",
+            "entry": "azure/main.bicep",
+            "delivery": "cloud"
+          },
+          {
+            "targetId": "sakura-hello",
+            "provider": "sakura",
+            "engine": "apprun",
+            "entry": "sakura/application.json",
             "delivery": "cloud"
           }
         ]
@@ -4106,8 +4433,8 @@
     "diagnostics": [],
     "authorizationInventory": {
       "summary": {
-        "requirements": 350,
-        "covered": 96,
+        "requirements": 351,
+        "covered": 97,
         "missing": 251,
         "insufficient": 3
       },
@@ -4564,7 +4891,7 @@
           }
         },
         {
-          "id": "ae06bb9c12ddcfa761b6ab1b41d961e26e4439bda32108b7f287b337d88ffa46",
+          "id": "2365f5079df5dbad572a3ca9cc2629c2acb587cf02dedc12d6de705c375c142b",
           "problemId": "hello-multicloud",
           "targetId": "aws-hello",
           "provider": "aws",
@@ -4578,7 +4905,7 @@
           "classification": "authorization-inventory",
           "source": {
             "path": "challenges/hello-multicloud/template.yaml",
-            "line": 112,
+            "line": 125,
             "jsonPointer": null
           },
           "coverage": {
@@ -4586,7 +4913,7 @@
           }
         },
         {
-          "id": "7234054cb67632554d8f610de21ac8b12f906875db68d807f274d1a86b914f4c",
+          "id": "ccb6c4ae202f3fae9d2e677b18afdd93063918e306dcb2ec95ac60efed32d082",
           "problemId": "hello-multicloud",
           "targetId": "aws-hello",
           "provider": "aws",
@@ -4600,7 +4927,7 @@
           "classification": "authorization-inventory",
           "source": {
             "path": "challenges/hello-multicloud/template.yaml",
-            "line": 113,
+            "line": 126,
             "jsonPointer": null
           },
           "coverage": {
@@ -4608,7 +4935,7 @@
           }
         },
         {
-          "id": "d891b4cb41dce927e962f9d58a5b5a6cad91dac2e36914c70c7d4d94fd8bfe22",
+          "id": "95510be118f54f84499840015bfb1f4b4a0b54548cf24c94321b175bbbf69870",
           "problemId": "hello-multicloud",
           "targetId": "aws-hello",
           "provider": "aws",
@@ -4622,7 +4949,7 @@
           "classification": "authorization-inventory",
           "source": {
             "path": "challenges/hello-multicloud/template.yaml",
-            "line": 117,
+            "line": 130,
             "jsonPointer": null
           },
           "coverage": {
@@ -4630,7 +4957,7 @@
           }
         },
         {
-          "id": "c2410f5d0460b4a7120bba58c5840db8278adea8fc85b929abf5c650c5c4e215",
+          "id": "4524329ef26e1b6c51d1d713412d97aa115f3619ebbc28dc9ae93718485e6d1b",
           "problemId": "hello-multicloud",
           "targetId": "aws-hello",
           "provider": "aws",
@@ -4644,7 +4971,7 @@
           "classification": "authorization-inventory",
           "source": {
             "path": "challenges/hello-multicloud/template.yaml",
-            "line": 114,
+            "line": 127,
             "jsonPointer": null
           },
           "coverage": {
@@ -4652,7 +4979,7 @@
           }
         },
         {
-          "id": "abf3898ed0771a3746f027709663e329a2b56f21d88a67d5104865d81e4c694c",
+          "id": "68fb20b2c6095b3d57a5c2d3b500e53ae45e2d1bb1f0a6294605fa9ef7edd693",
           "problemId": "hello-multicloud",
           "targetId": "aws-hello",
           "provider": "aws",
@@ -4666,7 +4993,7 @@
           "classification": "authorization-inventory",
           "source": {
             "path": "challenges/hello-multicloud/template.yaml",
-            "line": 118,
+            "line": 131,
             "jsonPointer": null
           },
           "coverage": {
@@ -4674,7 +5001,7 @@
           }
         },
         {
-          "id": "0a11804a4fcd1bb8b30518ef0d7a18447a62960e98abdefc0974c363f439da65",
+          "id": "f60155ada97de2503bafa9d1ad92357bcebaed4725ef4a597b9e9b2e3d7c8f28",
           "problemId": "hello-multicloud",
           "targetId": "aws-hello",
           "provider": "aws",
@@ -4688,7 +5015,7 @@
           "classification": "authorization-inventory",
           "source": {
             "path": "challenges/hello-multicloud/template.yaml",
-            "line": 115,
+            "line": 128,
             "jsonPointer": null
           },
           "coverage": {
@@ -4696,7 +5023,7 @@
           }
         },
         {
-          "id": "44e14f8c6a4b713b5ac3852dca2346c13052e281f17c51f180c60d7842738d25",
+          "id": "8513423a506f6221c7587a39f8724513c53e5a767834ec58ee8c0e24b1fd51b5",
           "problemId": "hello-multicloud",
           "targetId": "aws-hello",
           "provider": "aws",
@@ -4710,7 +5037,7 @@
           "classification": "authorization-inventory",
           "source": {
             "path": "challenges/hello-multicloud/template.yaml",
-            "line": 116,
+            "line": 129,
             "jsonPointer": null
           },
           "coverage": {
@@ -4718,7 +5045,7 @@
           }
         },
         {
-          "id": "50422e659fd90943a0e0a0b1d07bf113b543f464f1cea8c5470e385e8ab71a20",
+          "id": "a2b8209f7064e4376a4fa2590eafbe21b7696ed6d34bfa2398a00568cabeaaeb",
           "problemId": "hello-multicloud",
           "targetId": "aws-hello",
           "provider": "aws",
@@ -4732,7 +5059,7 @@
           "classification": "authorization-inventory",
           "source": {
             "path": "challenges/hello-multicloud/template.yaml",
-            "line": 123,
+            "line": 136,
             "jsonPointer": null
           },
           "coverage": {
@@ -4741,7 +5068,7 @@
           }
         },
         {
-          "id": "85da6fdb63fbf397dfcc976d228fe63296c7658347d0a8174b5de98d96b45d39",
+          "id": "097261736c7e4dc7ca0a4288862557d80b07e16746f788344ad62746a21a2ea3",
           "problemId": "hello-multicloud",
           "targetId": "aws-hello",
           "provider": "aws",
@@ -4755,11 +5082,34 @@
           "classification": "authorization-inventory",
           "source": {
             "path": "challenges/hello-multicloud/template.yaml",
-            "line": 124,
+            "line": 137,
             "jsonPointer": null
           },
           "coverage": {
             "status": "missing"
+          }
+        },
+        {
+          "id": "4fbe8182aa06331aedd257381ded13d6ff6b55c8a76279410919025ec903ac85",
+          "problemId": "hello-multicloud",
+          "targetId": "aws-hello",
+          "provider": "aws",
+          "engine": "cloudformation",
+          "service": "lambda",
+          "resourceType": "*",
+          "operation": "InvokeFunction",
+          "fidelity": ["L4"],
+          "plane": "deploy",
+          "origin": "iam-policy",
+          "classification": "authorization-inventory",
+          "source": {
+            "path": "challenges/hello-multicloud/template.yaml",
+            "line": 92,
+            "jsonPointer": null
+          },
+          "coverage": {
+            "status": "covered",
+            "availableFidelity": ["L0", "L1", "L4"]
           }
         },
         {
@@ -4807,7 +5157,7 @@
           }
         },
         {
-          "id": "0eb994cfba2c3892eac4d0184d0db7a1fcfa0f694923678ab5527b4431b02894",
+          "id": "53a895a3baf07ce5590d1955e380cf795a6084d0acdacd8c0539e862accb7771",
           "problemId": "hello-multicloud",
           "targetId": "aws-hello",
           "provider": "aws",
@@ -4821,7 +5171,7 @@
           "classification": "authorization-inventory",
           "source": {
             "path": "challenges/hello-multicloud/template.yaml",
-            "line": 98,
+            "line": 111,
             "jsonPointer": null
           },
           "coverage": {
@@ -11914,5 +12264,5 @@
       ]
     }
   },
-  "reportHash": "316e6210319adc3680026ea7f81527191f109974dbf2d1cc285b6153df07ab5c"
+  "reportHash": "68eda03eb7160873e5e22bb7a52b6ce77b3455f52d557df3aa3bffae3d8b3702"
 }

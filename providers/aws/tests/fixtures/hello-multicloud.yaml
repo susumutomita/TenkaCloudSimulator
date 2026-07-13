@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: >-
-  Hello Multicloud (aws-hello target). The smallest free AWS half of a Composite
+  Hello Multicloud (aws-hello target). The smallest free AWS target in a Composite
   problem: a Lambda Function URL that answers 200 with a static hello payload.
   The composite-probe scorer GETs the AwsHelloUrl output; nothing else runs.
   NOTE: this template deliberately lives at the problem-directory ROOT as
@@ -81,12 +81,17 @@ Resources:
       Principal: "*"
       FunctionUrlAuthType: NONE
 
-  HelloFunctionPublicInvoke:
+  # Lambda Function URLs with AuthType NONE require both the URL invocation
+  # permission above and the function invocation permission below. The
+  # InvokedViaFunctionUrl condition prevents this statement from authorizing
+  # direct InvokeFunction calls.
+  HelloFunctionUrlInvokePermission:
     Type: AWS::Lambda::Permission
     Properties:
       FunctionName: !GetAtt HelloFunction.Arn
       Action: lambda:InvokeFunction
       Principal: "*"
+      FunctionUrlAuthType: NONE
       InvokedViaFunctionUrl: true
 
   # Read-only role the platform's AWS access bridge (composite console / CLI

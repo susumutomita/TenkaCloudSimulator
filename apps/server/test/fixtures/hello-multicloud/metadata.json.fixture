@@ -1,0 +1,99 @@
+{
+  "$schema": "../../SCHEMA.json",
+  "id": "hello-multicloud",
+  "name": "Hello Multicloud (Sample)",
+  "category": "Challenge",
+  "status": "draft",
+  "visibility": "public",
+  "difficulty": 1,
+  "estimatedDuration": "10 分",
+  "shortDescription": "天下クラウド株式会社、マルチクラウド元年。1 回のデプロイで AWS、Google Cloud、Azure、さくらのクラウドの 4 target を起動し、各 endpoint の HTTP 200 を確認する。",
+  "instructions": "## はじめに\nComposite Runtime の入門問題。1 回のデプロイで `aws-hello`、`gcp-hello`、`azure-hello`、`sakura-hello` の 4 target が起動する。AWS と GCP は `/`、Azure と Sakura は `/healthz` が採点対象。\n\n## 最初の一手\n- デプロイ詳細で 4 target が COMPLETE になるのを待つ\n- `aws-hello` の `AwsHelloUrl` と `gcp-hello` の `GcpHelloUrl` はそのまま `curl` する\n- `azure-hello` の `AzureHelloUrl` と `sakura-hello` の `BaseUrl` には `/healthz` を付けて `curl` する\n\n## ゴール\n4 endpoint が HTTP 200 を返すこと。`composite-probe` は 4 target がすべて健康な場合だけ 100 点を加算する。",
+  "description": "Composite Runtime (TenkaCloud#2058) の 4 provider smoke test。AWS Lambda Function URL、GCP Cloud Run、Azure Container Apps、さくらのクラウド AppRun を 1 つの問題定義から展開する。AWS/GCP は root endpoint、Azure/Sakura は共通 workload の `/healthz` を採点する。GCP、Azure、Sakura の credential と platform 側 non-AWS runtime 設定、および GCP Infrastructure Manager 用 GCS staging が必要。live deploy 検証が完了するまで draft のまま運用する。",
+  "tags": ["sample", "multicloud", "composite", "smoke-test", "gcp", "azure", "sakura"],
+  "exposedPorts": [
+    { "port": 443, "name": "hello endpoints (AWS / GCP / Azure / Sakura)" }
+  ],
+  "learningGoals": [
+    "1 つの composite 問題が 4 provider へ展開される流れを体験する",
+    "target ごとの status、outputs、HTTP path、採点の対応を確認する"
+  ],
+  "runtime": {
+    "kind": "composite",
+    "targets": [
+      {
+        "id": "aws-hello",
+        "provider": "aws",
+        "engine": "cloudformation",
+        "entry": "template.yaml"
+      },
+      {
+        "id": "gcp-hello",
+        "provider": "gcp",
+        "engine": "infra-manager",
+        "entry": "gcp/terraform"
+      },
+      {
+        "id": "azure-hello",
+        "provider": "azure",
+        "engine": "bicep",
+        "entry": "azure/main.bicep"
+      },
+      {
+        "id": "sakura-hello",
+        "provider": "sakura",
+        "engine": "apprun",
+        "entry": "sakura/application.json"
+      }
+    ]
+  },
+  "simulationOverlay": {
+    "schemaVersion": "1",
+    "entry": "simulation.json"
+  },
+  "scoring": {
+    "kind": "composite-probe",
+    "success": "all",
+    "pointsAllOk": 100,
+    "targets": [
+      {
+        "targetId": "aws-hello",
+        "probe": "https",
+        "outputKey": "AwsHelloUrl",
+        "expectStatus": [200]
+      },
+      {
+        "targetId": "gcp-hello",
+        "probe": "https",
+        "outputKey": "GcpHelloUrl",
+        "expectStatus": [200]
+      },
+      {
+        "targetId": "azure-hello",
+        "probe": "https",
+        "outputKey": "AzureHelloUrl",
+        "path": "/healthz",
+        "expectStatus": [200]
+      },
+      {
+        "targetId": "sakura-hello",
+        "probe": "https",
+        "outputKey": "BaseUrl",
+        "path": "/healthz",
+        "expectStatus": [200]
+      }
+    ]
+  },
+  "i18n": {
+    "en": {
+      "name": "Hello Multicloud (Sample)",
+      "shortDescription": "Tenka Cloud Inc. enters its multicloud era. One deployment starts four targets on AWS, Google Cloud, Azure, and Sakura Cloud, then verifies HTTP 200 from each endpoint.",
+      "instructions": "## Getting started\nAn introductory Composite Runtime problem. One deployment starts four targets: `aws-hello`, `gcp-hello`, `azure-hello`, and `sakura-hello`. Scoring probes `/` on AWS and GCP, and `/healthz` on Azure and Sakura.\n\n## First move\n- Wait for all four targets to reach COMPLETE in the deployment detail\n- `curl` `AwsHelloUrl` from `aws-hello` and `GcpHelloUrl` from `gcp-hello` directly\n- Append `/healthz` when curling `AzureHelloUrl` from `azure-hello` and `BaseUrl` from `sakura-hello`\n\n## Goal\nAll four endpoints return HTTP 200. `composite-probe` awards 100 points only while every target is healthy.",
+      "description": "A four-provider smoke test for Composite Runtime (TenkaCloud#2058). One problem definition deploys an AWS Lambda Function URL, GCP Cloud Run, Azure Container Apps, and Sakura Cloud AppRun. Scoring probes the root endpoints on AWS/GCP and the shared workload's `/healthz` route on Azure/Sakura. It requires GCP, Azure, and Sakura credentials, platform-side non-AWS runtime configuration, and GCS staging for GCP Infrastructure Manager. Keep the problem in draft until live deployment verification is complete.",
+      "learningGoals": [
+        "Experience one composite problem fanning out to four providers",
+        "Verify the mapping between per-target status, outputs, HTTP paths, and scoring"
+      ]
+    }
+  }
+}

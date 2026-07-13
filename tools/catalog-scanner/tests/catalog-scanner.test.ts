@@ -23,6 +23,8 @@ import type {
 
 const temporaryDirectories: string[] = [];
 const CATALOG_COMMIT = 'a'.repeat(40);
+const FINAL_CATALOG_COMMIT = '488ed4a2d103cbe596295c940620d68d8f420c99';
+const FINAL_SIMULATOR_COMMIT = '463c7a1650925b1d5177d67540b2399c86783916';
 
 function reportIdentity(simulatorVersion: string) {
   return { catalogCommit: CATALOG_COMMIT, simulatorVersion };
@@ -1011,7 +1013,10 @@ describe('capability manifest を読むとき', () => {
 });
 
 describe('公開 coverage report を検証するとき', () => {
-  it('固定 catalog commit の committed report と canonical hash を検証する', async () => {
+  it('final catalog と clean Simulator source の committed report と canonical hash を検証する', async () => {
+    const manifest = await readCapabilityManifest(
+      new URL('../../../reports/capabilities.json', import.meta.url).pathname
+    );
     const value: unknown = JSON.parse(
       await readFile(
         new URL('../../../reports/catalog-coverage.json', import.meta.url),
@@ -1020,6 +1025,20 @@ describe('公開 coverage report を検証するとき', () => {
     );
 
     assertCapabilityCoverageReport(value);
+    const simulatorVersion = `tenkacloud-simulator-0.1.0+git.${FINAL_SIMULATOR_COMMIT}`;
+    expect(manifest.version).toBe(simulatorVersion);
+    expect(value).toMatchObject({
+      simulatorVersion,
+      catalogCommit: FINAL_CATALOG_COMMIT,
+      supported: true,
+      summary: {
+        total: 174,
+        covered: 174,
+        missing: 0,
+        insufficient: 0,
+        invalid: 0,
+      },
+    });
     expect(value.reportHash).toBe(coverageReportHash(value));
   });
 
