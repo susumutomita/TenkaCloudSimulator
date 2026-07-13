@@ -318,6 +318,9 @@ overlay の `Request` / `Probe` requirement を受理します。materialization
 保存済みの numeric loopback HTTP endpoint へ bounded な GET / HEAD だけを転送し、status、
 content type、body を実 workload の応答から返します。binding の欠落、不一致、未 ready、
 loopback 以外の endpoint、timeout、body 上限超過は fail closed です。
+runtime target の `entry` は catalog 内の AppRun descriptor path であり、OCI image identity
+ではありません。workload image は descriptor の単一 component に記録された digest 固定
+image とだけ照合します。
 
 - `covered`: 必要な fidelity dimension をすべて実装済み集合に含む。
 - `missing`: resource または operation がありません。

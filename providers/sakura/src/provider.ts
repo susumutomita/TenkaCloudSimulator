@@ -821,7 +821,6 @@ function matchingOverlayWorkload(
     typeof workload['image'] !== 'string' ||
     !/@sha256:[a-f0-9]{64}$/.test(workload['image']) ||
     workload['image'] !== image ||
-    workload['image'] !== input.target.entry ||
     workload['containerPort'] !== application.port ||
     (workload['healthPath'] ?? '/') !== (probe?.path ?? '/') ||
     (probe !== undefined && probe.port !== application.port)

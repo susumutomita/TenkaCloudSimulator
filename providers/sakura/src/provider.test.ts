@@ -577,7 +577,6 @@ describe('Sakura AppRun provider の振る舞い', () => {
 
     const workloadPlan = provider.compile({
       ...compileInput,
-      target: { ...compileInput.target, entry: APPLICATION_IMAGE },
       problemId: 'sakura-sample',
       templateBody: JSON.stringify(APPLICATION),
       simulationOverlay: {
@@ -602,7 +601,6 @@ describe('Sakura AppRun provider の振る舞い', () => {
     expect(() =>
       provider.compile({
         ...compileInput,
-        target: { ...compileInput.target, entry: APPLICATION_IMAGE },
         templateBody: JSON.stringify(APPLICATION),
         simulationOverlay: {
           schemaVersion: '1',
@@ -612,6 +610,25 @@ describe('Sakura AppRun provider の振る舞い', () => {
               targetId: 'default',
               resourceRef: 'WrongOutput',
               image: APPLICATION_IMAGE,
+              containerPort: 8080,
+              healthPath: '/healthz',
+            },
+          ],
+        },
+      })
+    ).toThrow('does not match the application descriptor');
+    expect(() =>
+      provider.compile({
+        ...compileInput,
+        templateBody: JSON.stringify(APPLICATION),
+        simulationOverlay: {
+          schemaVersion: '1',
+          workloads: [
+            {
+              id: 'sakura-hello',
+              targetId: 'default',
+              resourceRef: 'BaseUrl',
+              image: `ghcr.io/example/other@sha256:${'b'.repeat(64)}`,
               containerPort: 8080,
               healthPath: '/healthz',
             },

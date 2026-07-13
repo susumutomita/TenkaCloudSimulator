@@ -60,6 +60,12 @@ Docker 問題と simulated-cloud 問題を `make local` の同じ導線から操
   分離します。
 - 3 repository の protocol version、image digest、compatibility matrix を固定します。
 
+Capability manifest の source provenance は command module の位置から repository root
+を固定し、実 Git `HEAD` と worktree の clean state を出力前に照合します。caller の cwd
+を採用する案は別 repository の commit を誤って名乗れるため、環境変数で root を渡す案は
+release job の入力を新たな信頼境界にするため採用しません。Git 検査は shell を介さず、
+timeout と出力上限を持つ subprocess にします。
+
 ## 受け入れ証跡
 
 | 要件 | 証跡 |
