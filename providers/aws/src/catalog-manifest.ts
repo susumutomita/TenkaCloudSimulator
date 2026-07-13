@@ -2,16 +2,18 @@ import type { FidelityLevel } from '@tenkacloud/simulator-core';
 import {
   AWS_CAPABILITIES,
   AWS_PROVIDER,
+  CLOUDFORMATION_ENGINE,
   CLOUDFORMATION_RESOURCE_TYPES,
   STACK_RESOURCE,
 } from './model';
 
 export interface CatalogCapabilityEntry {
   readonly provider: string;
+  readonly engine: string;
   readonly service: string;
   readonly resourceType: string;
   readonly operation: string;
-  readonly fidelity: FidelityLevel;
+  readonly fidelity: readonly FidelityLevel[];
 }
 
 export interface AwsCatalogCapabilityManifest {
@@ -20,25 +22,25 @@ export interface AwsCatalogCapabilityManifest {
   readonly capabilities: readonly CatalogCapabilityEntry[];
 }
 
-export interface CatalogIdentityRequirement extends CatalogCapabilityEntry {
+export interface CatalogIdentityRequirement {
+  readonly provider: string;
+  readonly engine: string;
+  readonly service: string;
+  readonly resourceType: string;
+  readonly operation: string;
+  readonly fidelity: readonly FidelityLevel[];
   readonly problemId?: string;
 }
 
 export interface UnsupportedCatalogIdentity {
   readonly identity: string;
   readonly status: 'missing' | 'insufficient';
-  readonly requiredFidelity: FidelityLevel;
-  readonly availableFidelity?: FidelityLevel;
+  readonly requiredFidelity: readonly FidelityLevel[];
+  readonly availableFidelity?: readonly FidelityLevel[];
   readonly problemIds: readonly string[];
 }
 
-const FIDELITY_RANK: Readonly<Record<FidelityLevel, number>> = {
-  L0: 0,
-  L1: 1,
-  L2: 2,
-  L3: 3,
-  L4: 4,
-};
+const FIDELITIES = ['L0', 'L1', 'L2', 'L3', 'L4'] as const;
 
 const NETWORK_LIFECYCLE_RESOURCE_TYPES = new Set([
   'AWS::EC2::Instance',
@@ -57,14 +59,6 @@ const NETWORK_LIFECYCLE_RESOURCE_TYPES = new Set([
   'AWS::WAFv2::WebACL',
 ]);
 
-function maximumFidelity(levels: readonly FidelityLevel[]): FidelityLevel {
-  return (
-    [...levels].sort(
-      (left, right) => FIDELITY_RANK[right] - FIDELITY_RANK[left]
-    )[0] ?? 'L0'
-  );
-}
-
 function serviceForResourceType(resourceType: string): string {
   if (resourceType.startsWith('AWS::EC2::')) return 'ec2';
   if (resourceType.startsWith('AWS::ElasticLoadBalancingV2::')) {
@@ -80,25 +74,27 @@ function serviceForResourceType(resourceType: string): string {
   return 'cloudformation';
 }
 
-function lifecycleFidelity(resourceType: string): FidelityLevel {
+function lifecycleFidelity(resourceType: string): readonly FidelityLevel[] {
   if (
     resourceType === 'AWS::CloudFormation::CustomResource' ||
     resourceType === 'Custom::EmptyStackBuckets'
   ) {
-    return 'L4';
+    return ['L1', 'L4'];
   }
-  if (NETWORK_LIFECYCLE_RESOURCE_TYPES.has(resourceType)) return 'L3';
-  return resourceType.startsWith('AWS::IAM::') ? 'L2' : 'L1';
+  if (NETWORK_LIFECYCLE_RESOURCE_TYPES.has(resourceType)) return ['L1', 'L3'];
+  return resourceType.startsWith('AWS::IAM::') ? ['L1', 'L2'] : ['L1'];
 }
 
 export function catalogCapabilityIdentity(entry: {
   readonly provider: string;
+  readonly engine: string;
   readonly service: string;
   readonly resourceType: string;
   readonly operation: string;
 }): string {
   return [
     entry.provider,
+    entry.engine,
     entry.service,
     entry.resourceType,
     entry.operation,
@@ -109,6 +105,7 @@ const lifecycleCapabilities: readonly CatalogCapabilityEntry[] =
   CLOUDFORMATION_RESOURCE_TYPES.map(
     (resourceType): CatalogCapabilityEntry => ({
       provider: AWS_PROVIDER,
+      engine: CLOUDFORMATION_ENGINE,
       service: serviceForResourceType(resourceType),
       resourceType,
       operation: 'lifecycle',
@@ -121,10 +118,11 @@ const commandCapabilities: readonly CatalogCapabilityEntry[] =
     (capability) => capability.operation !== 'deploy'
   ).map((capability) => ({
     provider: capability.provider,
+    engine: capability.engine,
     service: capability.service,
     resourceType: capability.resourceType,
     operation: capability.operation,
-    fidelity: maximumFidelity(capability.fidelity),
+    fidelity: [...capability.fidelity],
   }));
 
 export const AWS_CATALOG_CAPABILITY_MANIFEST: AwsCatalogCapabilityManifest = {
@@ -134,10 +132,11 @@ export const AWS_CATALOG_CAPABILITY_MANIFEST: AwsCatalogCapabilityManifest = {
     [
       {
         provider: AWS_PROVIDER,
+        engine: CLOUDFORMATION_ENGINE,
         service: 'cloudformation',
         resourceType: STACK_RESOURCE,
         operation: 'deploy',
-        fidelity: 'L1',
+        fidelity: ['L1'],
       },
       ...lifecycleCapabilities,
       ...commandCapabilities,
@@ -162,8 +161,8 @@ export function unsupportedCatalogIdentities(
   const grouped = new Map<
     string,
     {
-      requiredFidelity: FidelityLevel;
-      availableFidelity?: FidelityLevel;
+      requiredFidelity: Set<FidelityLevel>;
+      availableFidelity?: readonly FidelityLevel[];
       problemIds: Set<string>;
     }
   >();
@@ -171,18 +170,16 @@ export function unsupportedCatalogIdentities(
     const identity = catalogCapabilityIdentity(requirement);
     const capability = capabilities.get(identity);
     if (
-      capability &&
-      FIDELITY_RANK[capability.fidelity] >= FIDELITY_RANK[requirement.fidelity]
+      requirement.fidelity.every((fidelity) =>
+        capability?.fidelity.includes(fidelity)
+      )
     ) {
       continue;
     }
     const current = grouped.get(identity);
     const requiredFidelity =
-      current &&
-      FIDELITY_RANK[current.requiredFidelity] >=
-        FIDELITY_RANK[requirement.fidelity]
-        ? current.requiredFidelity
-        : requirement.fidelity;
+      current?.requiredFidelity ?? new Set<FidelityLevel>();
+    for (const fidelity of requirement.fidelity) requiredFidelity.add(fidelity);
     const problemIds = current?.problemIds ?? new Set<string>();
     if (requirement.problemId) problemIds.add(requirement.problemId);
     grouped.set(identity, {
@@ -199,7 +196,9 @@ export function unsupportedCatalogIdentities(
       identity,
       status:
         value.availableFidelity === undefined ? 'missing' : 'insufficient',
-      requiredFidelity: value.requiredFidelity,
+      requiredFidelity: FIDELITIES.filter((fidelity) =>
+        value.requiredFidelity.has(fidelity)
+      ),
       ...(value.availableFidelity === undefined
         ? {}
         : { availableFidelity: value.availableFidelity }),

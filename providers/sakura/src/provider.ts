@@ -2,6 +2,7 @@ import {
   CoreError,
   deterministicId,
   HTTP_ENDPOINT_RESOURCE,
+  MAX_PROVIDER_HTTP_BODY_BYTES,
   type ProviderCapability,
   type ProviderCommandInput,
   type ProviderCommandResult,
@@ -63,7 +64,22 @@ const CAPABILITIES: readonly ProviderCapability[] = [
     operation: 'Request',
     fidelity: ['L0', 'L1', 'L2', 'L3', 'L4'],
   },
+  {
+    capabilityId: 'sakura.http.probe',
+    provider: PROVIDER,
+    engine: ENGINE,
+    service: 'http',
+    resourceType: HTTP_ENDPOINT,
+    operation: 'Probe',
+    fidelity: ['L0', 'L1', 'L2', 'L3', 'L4'],
+  },
 ];
+
+const WORKLOAD_PROVIDER = 'runtime';
+const WORKLOAD_RESOURCE = 'Runtime::Workload';
+const WORKLOAD_OUTPUT = 'BaseUrl';
+const LOOPBACK_HOSTS = new Set(['127.0.0.1', '::1']);
+const HTTP_TIMEOUT_MILLISECONDS = 8_000;
 
 function applicationResources(
   world: ProviderWorldView
@@ -92,13 +108,13 @@ function requestedId(command: ProviderCommandInput): string {
 }
 
 function assertCommandIdentity(command: ProviderCommandInput): void {
-  if (command.operation === 'Request') {
+  if (command.operation === 'Request' || command.operation === 'Probe') {
     if (command.service === 'http' && command.resourceType === HTTP_ENDPOINT) {
       return;
     }
     throw new CoreError(
       'UnsupportedCapability',
-      'AppRun Request command identity is not supported'
+      `AppRun ${command.operation} command identity is not supported`
     );
   }
   const versionOperation =
@@ -149,111 +165,202 @@ function response(
   };
 }
 
-function applicationEndpointBody(application: StoredApplication): string {
-  if (application.versions.length === 0 || application.traffics.length === 0) {
-    throw new CoreError(
-      'ValidationFailed',
-      'AppRun endpoint version projection is invalid'
-    );
+function recordValue(
+  value: unknown,
+  label: string
+): Readonly<Record<string, unknown>> {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    throw new CoreError('ValidationFailed', `${label} must be an object`);
   }
-  const versionNames = new Set<string>();
-  const versions: Array<{ readonly id: string; readonly name: string }> = [];
-  for (const version of application.versions) {
-    if (
-      version === null ||
-      typeof version !== 'object' ||
-      typeof version.id !== 'string' ||
-      !version.id ||
-      typeof version.name !== 'string' ||
-      !version.name ||
-      versionNames.has(version.name)
-    ) {
-      throw new CoreError(
-        'ValidationFailed',
-        'AppRun endpoint version projection is invalid'
-      );
-    }
-    versionNames.add(version.name);
-    versions.push({ id: version.id, name: version.name });
-  }
-  const trafficNames = new Set<string>();
-  const traffics: Array<{
-    readonly version_name: string;
-    readonly percent: number;
-  }> = [];
-  let total = 0;
-  for (const traffic of application.traffics) {
-    if (
-      traffic === null ||
-      typeof traffic !== 'object' ||
-      typeof traffic.version_name !== 'string' ||
-      !versionNames.has(traffic.version_name) ||
-      trafficNames.has(traffic.version_name) ||
-      typeof traffic.percent !== 'number' ||
-      !Number.isInteger(traffic.percent) ||
-      traffic.percent < 0 ||
-      traffic.percent > 100
-    ) {
-      throw new CoreError(
-        'ValidationFailed',
-        'AppRun endpoint traffic projection is invalid'
-      );
-    }
-    trafficNames.add(traffic.version_name);
-    total += traffic.percent;
-    traffics.push({
-      version_name: traffic.version_name,
-      percent: traffic.percent,
-    });
-  }
-  if (total !== 100) {
-    throw new CoreError(
-      'ValidationFailed',
-      'AppRun endpoint traffic projection is invalid'
-    );
-  }
-  return JSON.stringify({
-    application: application.name,
-    status: application.status,
-    versions,
-    traffics,
-  });
+  return value as Readonly<Record<string, unknown>>;
 }
 
-function requestApplicationEndpoint(
+function validatedLoopbackEndpoint(value: unknown): URL {
+  if (typeof value !== 'string') {
+    throw new CoreError('Conflict', 'AppRun workload endpoint is unavailable');
+  }
+  let endpoint: URL;
+  try {
+    endpoint = new URL(value);
+  } catch {
+    throw new CoreError('Conflict', 'AppRun workload endpoint is invalid');
+  }
+  if (
+    endpoint.protocol !== 'http:' ||
+    !LOOPBACK_HOSTS.has(endpoint.hostname.replace(/^\[|\]$/g, '')) ||
+    !endpoint.port ||
+    endpoint.username ||
+    endpoint.password ||
+    endpoint.pathname !== '/' ||
+    endpoint.search ||
+    endpoint.hash
+  ) {
+    throw new CoreError(
+      'Conflict',
+      'AppRun workload endpoint is not loopback HTTP'
+    );
+  }
+  return endpoint;
+}
+
+function workloadEndpoint(
   command: ProviderCommandInput,
-  world: ProviderWorldView
-): ProviderCommandResult {
-  const request = providerHttpRequest(command.input);
-  const resource = singleReadyDeploymentResource(
+  world: ProviderWorldView,
+  path: string
+): string {
+  const applicationResource = singleReadyDeploymentResource(
     world,
     command.deploymentId,
     PROVIDER,
     APPLICATION_RESOURCE,
     'AppRun application'
   );
-  if (resource.properties['status'] !== 'Healthy') {
+  if (applicationResource.properties['status'] !== 'Healthy') {
     throw new CoreError('Conflict', 'AppRun application endpoint is not ready');
   }
-  const application = storedApplication(resource.properties);
+  const application = storedApplication(applicationResource.properties);
   if (!application.public_url.trim()) {
     throw new CoreError(
       'ValidationFailed',
       'AppRun application endpoint projection is invalid'
     );
   }
+  const component = application.components[0];
+  if (!component || application.components.length !== 1) {
+    throw new CoreError(
+      'Conflict',
+      'AppRun application workload binding is ambiguous'
+    );
+  }
+  const expectedImage = component.deploy_source.container_registry.image;
+  const expectedHealthPath = component.probe?.http_get.path ?? '/';
+  const workloads = world.resources.filter(
+    (resource) =>
+      resource.deploymentId === command.deploymentId &&
+      resource.targetId === applicationResource.targetId &&
+      resource.provider === WORKLOAD_PROVIDER &&
+      resource.resourceType === WORKLOAD_RESOURCE &&
+      resource.status !== 'deleted'
+  );
+  if (workloads.length === 0) {
+    throw new CoreError(
+      'NotFound',
+      'AppRun materialized workload does not exist'
+    );
+  }
+  if (workloads.length !== 1) {
+    throw new CoreError(
+      'Conflict',
+      'AppRun materialized workload is ambiguous'
+    );
+  }
+  const workload = workloads[0];
+  if (workload?.status !== 'ready') {
+    throw new CoreError(
+      'Conflict',
+      'AppRun materialized workload is not ready'
+    );
+  }
+  const declaration = recordValue(
+    workload.properties['declaration'],
+    'AppRun workload declaration'
+  );
+  if (
+    declaration['targetId'] !== applicationResource.targetId ||
+    declaration['resourceRef'] !== WORKLOAD_OUTPUT ||
+    declaration['image'] !== expectedImage ||
+    declaration['containerPort'] !== application.port ||
+    (declaration['healthPath'] ?? '/') !== expectedHealthPath
+  ) {
+    throw new CoreError(
+      'Conflict',
+      'AppRun workload binding does not match application'
+    );
+  }
+  const materialization = recordValue(
+    workload.properties['materialization'],
+    'AppRun workload materialization'
+  );
+  const endpoint = validatedLoopbackEndpoint(materialization['endpoint']);
+  return new URL(path, `${endpoint.origin}/`).toString();
+}
+
+async function boundedResponseBody(response: Response): Promise<string> {
+  const reader = response.body?.getReader();
+  if (!reader) return '';
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  while (true) {
+    const next = await reader.read();
+    if (next.done) break;
+    total += next.value.byteLength;
+    if (total > MAX_PROVIDER_HTTP_BODY_BYTES) {
+      await reader.cancel();
+      throw new CoreError(
+        'QuotaExceeded',
+        'AppRun workload response body is too large'
+      );
+    }
+    chunks.push(next.value);
+  }
+  const body = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    body.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  try {
+    return new TextDecoder('utf-8', { fatal: true }).decode(body);
+  } catch {
+    throw new CoreError(
+      'ValidationFailed',
+      'AppRun workload response body must be UTF-8'
+    );
+  }
+}
+
+async function requestApplicationEndpoint(
+  command: ProviderCommandInput,
+  world: ProviderWorldView
+): Promise<ProviderCommandResult> {
+  const request = providerHttpRequest(command.input);
+  if (request.method !== 'GET' && request.method !== 'HEAD') {
+    throw new CoreError(
+      'UnsupportedCapability',
+      `AppRun HTTP method ${request.method} is not supported`
+    );
+  }
+  const endpoint = workloadEndpoint(command, world, request.path);
+  let response: Response;
+  try {
+    response = await fetch(endpoint, {
+      method: request.method,
+      headers: request.headers,
+      redirect: 'manual',
+      signal: AbortSignal.timeout(HTTP_TIMEOUT_MILLISECONDS),
+    });
+  } catch {
+    throw new CoreError('Conflict', 'AppRun workload endpoint is unreachable');
+  }
+  if (response.status >= 300 && response.status < 400) {
+    throw new CoreError(
+      'Conflict',
+      'AppRun workload endpoint redirect is forbidden'
+    );
+  }
+  const body = await boundedResponseBody(response);
   const endpointResponse = providerHttpResponse(request, {
-    statusCode: 200,
-    body: applicationEndpointBody(application),
-    contentType: 'application/json; charset=utf-8',
+    statusCode: response.status,
+    body,
+    contentType:
+      response.headers.get('content-type') ?? 'application/octet-stream',
   });
   return {
     events: [
       {
         type: 'SakuraApplicationRequestExecuted',
         payload: {
-          resourceId: resource.resourceId,
-          operation: 'Request',
+          operation: command.operation,
         },
       },
     ],
@@ -671,6 +778,62 @@ function packetFilterOperation(
   );
 }
 
+function matchingOverlayWorkload(
+  input: ProviderCompileInput,
+  application: ReturnType<typeof parseApplicationInput>
+): boolean {
+  if (input.simulationOverlay === undefined) return false;
+  const overlay = recordValue(input.simulationOverlay, 'simulation overlay');
+  const values = overlay['workloads'];
+  if (values === undefined) return false;
+  if (!Array.isArray(values)) {
+    throw new CoreError(
+      'ValidationFailed',
+      'simulation overlay workloads must be an array'
+    );
+  }
+  const candidates = values.filter(
+    (value) =>
+      value !== null &&
+      typeof value === 'object' &&
+      !Array.isArray(value) &&
+      Reflect.get(value, 'targetId') === input.targetId
+  );
+  if (candidates.length === 0) return false;
+  if (candidates.length !== 1 || application.components.length !== 1) {
+    throw new CoreError(
+      'ValidationFailed',
+      'AppRun simulation workload binding must be unambiguous'
+    );
+  }
+  const workload = recordValue(candidates[0], 'AppRun simulation workload');
+  const component = application.components[0];
+  if (!component) {
+    throw new CoreError(
+      'ValidationFailed',
+      'AppRun simulation workload has no matching component'
+    );
+  }
+  const image = component.deploy_source.container_registry.image;
+  const probe = component.probe?.http_get;
+  if (
+    workload['resourceRef'] !== WORKLOAD_OUTPUT ||
+    typeof workload['image'] !== 'string' ||
+    !/@sha256:[a-f0-9]{64}$/.test(workload['image']) ||
+    workload['image'] !== image ||
+    workload['image'] !== input.target.entry ||
+    workload['containerPort'] !== application.port ||
+    (workload['healthPath'] ?? '/') !== (probe?.path ?? '/') ||
+    (probe !== undefined && probe.port !== application.port)
+  ) {
+    throw new CoreError(
+      'ValidationFailed',
+      'AppRun simulation workload does not match the application descriptor'
+    );
+  }
+  return true;
+}
+
 export class SakuraProvider implements ProviderModule {
   readonly provider: string;
   readonly engines: readonly string[];
@@ -693,6 +856,7 @@ export class SakuraProvider implements ProviderModule {
       );
     }
     const application = parseApplicationInput(raw);
+    matchingOverlayWorkload(input, application);
     const stored = createStoredApplication(
       application,
       {
@@ -714,15 +878,6 @@ export class SakuraProvider implements ProviderModule {
           resourceType: APPLICATION_RESOURCE,
           operation: 'deploy',
           fidelity: ['L0', 'L1', 'L2'],
-          source: { path: input.target.entry },
-        },
-        {
-          provider: PROVIDER,
-          engine: ENGINE,
-          service: 'http',
-          resourceType: HTTP_ENDPOINT,
-          operation: 'Request',
-          fidelity: ['L0', 'L1', 'L2', 'L3', 'L4'],
           source: { path: input.target.entry },
         },
       ],
@@ -777,6 +932,7 @@ export class SakuraProvider implements ProviderModule {
       outputs: {
         ApplicationId: application.id,
         ApplicationUrl: application.public_url,
+        BaseUrl: application.public_url,
       },
     };
   }
@@ -788,7 +944,11 @@ export class SakuraProvider implements ProviderModule {
     assertCommandIdentity(command);
     switch (command.operation) {
       case 'Request':
-        return requestApplicationEndpoint(command, world);
+      case 'Probe':
+        throw new CoreError(
+          'UnsupportedCapability',
+          `AppRun ${command.operation} requires async execution`
+        );
       case 'postApplication':
         return createApplication(command, world);
       case 'listApplications':
@@ -817,5 +977,16 @@ export class SakuraProvider implements ProviderModule {
           `AppRun operation ${command.operation} is not supported`
         );
     }
+  }
+
+  async reduceAsync(
+    command: ProviderCommandInput,
+    world: ProviderWorldView
+  ): Promise<ProviderCommandResult> {
+    assertCommandIdentity(command);
+    if (command.operation === 'Request' || command.operation === 'Probe') {
+      return requestApplicationEndpoint(command, world);
+    }
+    return this.reduce(command, world);
   }
 }

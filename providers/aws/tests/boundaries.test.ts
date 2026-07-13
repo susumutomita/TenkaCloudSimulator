@@ -66,6 +66,7 @@ function resource(
   return {
     worldId: 'world',
     deploymentId: 'deployment',
+    targetId: 'default',
     provider: 'aws',
     resourceType,
     resourceId: `resource-${logicalId}`,
@@ -116,21 +117,35 @@ describe('AWS provider boundary', () => {
           capability.service === 'lambda' &&
           capability.operation === 'InvokeFunction'
       )?.fidelity
-    ).toBe('L4');
+    ).toEqual(['L0', 'L1', 'L4']);
     expect(
       AWS_CATALOG_CAPABILITY_MANIFEST.capabilities.find(
         (capability) =>
           capability.service === 'lambda' &&
           capability.operation === 'CreateFunction'
       )?.fidelity
-    ).toBe('L1');
+    ).toEqual(['L0', 'L1']);
+    expect(
+      AWS_CATALOG_CAPABILITY_MANIFEST.capabilities.find(
+        (capability) =>
+          capability.resourceType === 'AWS::Lambda::Function' &&
+          capability.operation === 'lifecycle'
+      )?.fidelity
+    ).toEqual(['L1']);
+    expect(
+      AWS_CATALOG_CAPABILITY_MANIFEST.capabilities.find(
+        (capability) =>
+          capability.resourceType === 'AWS::IAM::Role' &&
+          capability.operation === 'lifecycle'
+      )?.fidelity
+    ).toEqual(['L1', 'L2']);
     expect(
       AWS_CATALOG_CAPABILITY_MANIFEST.capabilities.find(
         (capability) =>
           capability.resourceType === 'AWS::EC2::Route' &&
           capability.operation === 'lifecycle'
       )?.fidelity
-    ).toBe('L3');
+    ).toEqual(['L1', 'L3']);
     expect(
       AWS_CATALOG_CAPABILITY_MANIFEST.capabilities.find(
         (capability) =>
@@ -138,14 +153,14 @@ describe('AWS provider boundary', () => {
             'AWS::ElasticLoadBalancingV2::ListenerRule' &&
           capability.operation === 'lifecycle'
       )?.fidelity
-    ).toBe('L3');
+    ).toEqual(['L1', 'L3']);
     expect(
       AWS_CATALOG_CAPABILITY_MANIFEST.capabilities.find(
         (capability) =>
           capability.resourceType === 'AWS::WAFv2::WebACL' &&
           capability.operation === 'lifecycle'
       )?.fidelity
-    ).toBe('L3');
+    ).toEqual(['L1', 'L3']);
     for (const resourceType of [
       'AWS::CloudFormation::CustomResource',
       'Custom::EmptyStackBuckets',
@@ -156,7 +171,7 @@ describe('AWS provider boundary', () => {
             capability.resourceType === resourceType &&
             capability.operation === 'lifecycle'
         )?.fidelity
-      ).toBe('L4');
+      ).toEqual(['L1', 'L4']);
     }
     expect(
       AWS_CATALOG_CAPABILITY_MANIFEST.capabilities.find(
@@ -164,14 +179,14 @@ describe('AWS provider boundary', () => {
           capability.service === 's3' &&
           capability.operation === 'GetBucketLocation'
       )?.fidelity
-    ).toBe('L4');
+    ).toEqual(['L0', 'L1', 'L4']);
     expect(
       AWS_CATALOG_CAPABILITY_MANIFEST.capabilities.find(
         (capability) =>
           capability.service === 'sts' &&
           capability.operation === 'GetCallerIdentity'
       )?.fidelity
-    ).toBe('L2');
+    ).toEqual(['L0', 'L1', 'L2']);
     expect(
       AWS_CATALOG_CAPABILITY_MANIFEST.capabilities.find(
         (capability) =>
@@ -179,7 +194,7 @@ describe('AWS provider boundary', () => {
           capability.resourceType === 'Runtime::Endpoint' &&
           capability.operation === 'ResolveEndpoint'
       )?.fidelity
-    ).toBe('L1');
+    ).toEqual(['L0', 'L1']);
     expect(
       new Set(
         AWS_CATALOG_CAPABILITY_MANIFEST.capabilities.map(
@@ -193,49 +208,91 @@ describe('AWS provider boundary', () => {
     const unsupported = unsupportedCatalogIdentities([
       {
         provider: 'aws',
+        engine: 'cloudformation',
         service: 'lambda',
         resourceType: '*',
         operation: 'CreateFunction',
-        fidelity: 'L4',
+        fidelity: ['L4'],
         problemId: 'z-problem',
       },
       {
         provider: 'aws',
+        engine: 'cloudformation',
         service: 'lambda',
         resourceType: '*',
         operation: 'CreateFunction',
-        fidelity: 'L4',
+        fidelity: ['L4'],
         problemId: 'a-problem',
       },
       {
         provider: 'aws',
+        engine: 'cloudformation',
         service: 'ecs',
         resourceType: '*',
         operation: 'RunTask',
-        fidelity: 'L1',
+        fidelity: ['L1'],
         problemId: 'migration',
       },
       {
         provider: 'aws',
+        engine: 'cloudformation',
         service: 'ssm',
         resourceType: '*',
         operation: 'GetParameter',
-        fidelity: 'L2',
+        fidelity: ['L2'],
       },
     ]);
     expect(unsupported).toEqual([
       {
-        identity: 'aws|ecs|*|RunTask',
+        identity: 'aws|cloudformation|ecs|*|RunTask',
         status: 'missing',
-        requiredFidelity: 'L1',
+        requiredFidelity: ['L1'],
         problemIds: ['migration'],
       },
       {
-        identity: 'aws|lambda|*|CreateFunction',
+        identity: 'aws|cloudformation|lambda|*|CreateFunction',
         status: 'insufficient',
-        requiredFidelity: 'L4',
-        availableFidelity: 'L1',
+        requiredFidelity: ['L4'],
+        availableFidelity: ['L0', 'L1'],
         problemIds: ['a-problem', 'z-problem'],
+      },
+    ]);
+  });
+
+  it('EC2 lifecycle は network の大小ではなく明示した control membership で coverage を満たす', () => {
+    const requirement = {
+      provider: 'aws',
+      engine: 'cloudformation',
+      service: 'ec2',
+      resourceType: 'AWS::EC2::Instance',
+      operation: 'lifecycle',
+      fidelity: ['L1'],
+      problemId: 'control-plane-instance',
+    } as const;
+
+    expect(unsupportedCatalogIdentities([requirement])).toEqual([]);
+    expect(
+      unsupportedCatalogIdentities([requirement], {
+        schemaVersion: '1',
+        version: 'network-only-fixture',
+        capabilities: [
+          {
+            provider: 'aws',
+            engine: 'cloudformation',
+            service: 'ec2',
+            resourceType: 'AWS::EC2::Instance',
+            operation: 'lifecycle',
+            fidelity: ['L3'],
+          },
+        ],
+      })
+    ).toEqual([
+      {
+        identity: 'aws|cloudformation|ec2|AWS::EC2::Instance|lifecycle',
+        status: 'insufficient',
+        requiredFidelity: ['L1'],
+        availableFidelity: ['L3'],
+        problemIds: ['control-plane-instance'],
       },
     ]);
   });

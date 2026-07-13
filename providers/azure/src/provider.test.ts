@@ -14,6 +14,7 @@ import {
 } from '@tenkacloud/simulator-core';
 import {
   AZURE_CONTAINER_APP,
+  AZURE_MANAGED_ENVIRONMENT,
   AZURE_ROLE_ASSIGNMENT,
   AzureProvider,
   HTTP_ENDPOINT,
@@ -144,19 +145,26 @@ function coreError(operation: () => unknown): CoreError {
 }
 
 describe('Azure Bicep provider の振る舞い', () => {
-  it('Container App と Role Assignment を dependency 付きで同じ world へ配備する', async () => {
+  it('Managed Environment、Container App、Role Assignment を dependency 付きで同じ world へ配備する', async () => {
     const testContext = await context();
     const resources = testContext.store.resources(testContext.worldId);
     const app = resources.find(
       (resource) => resource.resourceType === AZURE_CONTAINER_APP
     );
+    const environment = resources.find(
+      (resource) => resource.resourceType === AZURE_MANAGED_ENVIRONMENT
+    );
     const role = resources.find(
       (resource) => resource.resourceType === AZURE_ROLE_ASSIGNMENT
     );
-    if (!app || !role) throw new Error('Azure resources がありません');
+    if (!environment || !app || !role)
+      throw new Error('Azure resources がありません');
 
-    expect(resources).toHaveLength(2);
+    expect(resources).toHaveLength(3);
+    expect(environment.properties['status']).toBe('Ready');
     expect(app.resourceId).toBe(testContext.appId);
+    expect(app.properties['environmentId']).toBe(environment.resourceId);
+    expect(app.properties['dependencies']).toEqual([environment.resourceId]);
     expect(app.properties['status']).toBe('Running');
     expect(app.properties['external']).toBe(true);
     expect(app.properties['targetPort']).toBe(8080);
@@ -170,7 +178,7 @@ describe('Azure Bicep provider の振る舞い', () => {
       testContext.core
         .events(testContext.worldId)
         .filter((event) => event.type === 'AzureResourceCreated')
-    ).toHaveLength(2);
+    ).toHaveLength(3);
   });
 
   it('Container App を read、update、HTTP probe、delete して state を共有する', async () => {
@@ -182,7 +190,7 @@ describe('Azure Bicep provider の振る舞い', () => {
       }),
       'get-container-app'
     );
-    expect(Reflect.get(fetched, 'name')).toBe('hello-container-app');
+    expect(Reflect.get(fetched, 'name')).toMatch(/^tc-[a-f0-9]{13}-app$/);
 
     const updated = testContext.core.executeCommand(
       testContext.worldId,
@@ -430,7 +438,14 @@ describe('Azure Bicep provider の振る舞い', () => {
     };
     expect(provider.provider).toBe('azure');
     expect(provider.engines).toEqual(['bicep']);
-    expect(provider.capabilities).toHaveLength(10);
+    expect(provider.capabilities).toHaveLength(11);
+    expect(
+      provider.capabilities.some(
+        (capability) =>
+          capability.resourceType === AZURE_MANAGED_ENVIRONMENT &&
+          capability.operation === 'lifecycle'
+      )
+    ).toBe(true);
     const plan = provider.compile(input);
     expect(plan).toEqual(provider.compile(input));
     expect(

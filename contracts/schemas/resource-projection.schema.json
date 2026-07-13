@@ -8,6 +8,7 @@
       "required": [
         "worldId",
         "deploymentId",
+        "targetId",
         "provider",
         "resourceType",
         "resourceId",
@@ -19,6 +20,9 @@
           "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
         },
         "deploymentId": {
+          "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
+        },
+        "targetId": {
           "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
         },
         "provider": {

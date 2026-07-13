@@ -138,6 +138,40 @@ describe('Sakura Application parser の振る舞い', () => {
     expect(memoryError.message).toBe('component CPU or memory is unsupported');
   });
 
+  it('digest 固定 OCI image reference を保持し 512 文字を上限にする', () => {
+    const image =
+      'ghcr.io/susumutomita/tenkacloud-challenge-microservice-migration@sha256:96c7ca29de82b7d0c041e98f9cd9494de283102509134e5fb524d6e89da27cf2';
+    const parsed = parseApplicationInput({
+      ...VALID_APPLICATION,
+      components: [
+        componentWith({
+          deploy_source: { container_registry: { image } },
+        }),
+      ],
+    });
+    expect(parsed.components[0]?.deploy_source.container_registry.image).toBe(
+      image
+    );
+
+    const error = validationError(() =>
+      parseApplicationInput({
+        ...VALID_APPLICATION,
+        components: [
+          componentWith({
+            deploy_source: {
+              container_registry: {
+                image: `registry.example/${'a'.repeat(513)}`,
+              },
+            },
+          }),
+        ],
+      })
+    );
+    expect(error.message).toContain(
+      'must contain between 1 and 512 characters'
+    );
+  });
+
   it('optional field がない最小 application を値の追加なしで返す', () => {
     const parsed = parseApplicationInput(VALID_APPLICATION);
     const component = parsed.components[0];

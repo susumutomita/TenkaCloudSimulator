@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { CoreError } from '@tenkacloud/simulator-core';
 import {
   BICEP_CONTAINER_APP,
+  BICEP_MANAGED_ENVIRONMENT,
   BICEP_ROLE_ASSIGNMENT,
   bicepOutputs,
   bicepResources,
@@ -58,7 +59,7 @@ describe('targeted Bicep compiler の振る舞い', () => {
   it('resource 宣言の symbol、type、API version、body、source line を抽出する', async () => {
     const resources = bicepResources(await fixture());
 
-    expect(resources).toHaveLength(2);
+    expect(resources).toHaveLength(3);
     expect(
       resources.map(({ symbol, type, apiVersion }) => ({
         symbol,
@@ -66,6 +67,11 @@ describe('targeted Bicep compiler の振る舞い', () => {
         apiVersion,
       }))
     ).toEqual([
+      {
+        symbol: 'helloEnvironment',
+        type: BICEP_MANAGED_ENVIRONMENT,
+        apiVersion: '2024-03-01',
+      },
       {
         symbol: 'helloApp',
         type: BICEP_CONTAINER_APP,
@@ -77,9 +83,9 @@ describe('targeted Bicep compiler の振る舞い', () => {
         apiVersion: '2022-04-01',
       },
     ]);
-    expect(resources[0]?.body).toContain("image: 'mcr.microsoft.com");
-    expect(resources[0]?.line).toBe(1);
-    expect(resources[1]?.line).toBeGreaterThan(1);
+    expect(resources[1]?.body).toContain("image: 'mcr.microsoft.com");
+    expect(resources[0]?.line).toBeGreaterThan(1);
+    expect(resources[2]?.line).toBeGreaterThan(resources[1]?.line ?? 0);
   });
 
   it('output 宣言を型、式、source line とともに抽出する', async () => {
@@ -118,18 +124,25 @@ describe('targeted Bicep compiler の振る舞い', () => {
     const app = first.resources.find(
       (resource) => resource.type === BICEP_CONTAINER_APP
     );
+    const environment = first.resources.find(
+      (resource) => resource.type === BICEP_MANAGED_ENVIRONMENT
+    );
     const role = first.resources.find(
       (resource) => resource.type === BICEP_ROLE_ASSIGNMENT
     );
-    if (!app || !role) throw new Error('compiled Azure resources がありません');
+    if (!environment || !app || !role)
+      throw new Error('compiled Azure resources がありません');
     const fqdn = app.properties['fqdn'];
     if (typeof fqdn !== 'string')
       throw new Error('Container App FQDN がありません');
 
     expect(repeated).toEqual(first);
-    expect(app.resourceId).toContain(
-      '/providers/Microsoft.App/containerApps/hello-container-app'
-    );
+    expect(environment.name).toMatch(/^tc-[a-f0-9]{13}-env$/);
+    expect(app.name).toMatch(/^tc-[a-f0-9]{13}-app$/);
+    expect(app.name.slice(3, 16)).toBe(environment.name.slice(3, 16));
+    expect(app.dependencies).toEqual([environment.resourceId]);
+    expect(app.properties['environmentId']).toBe(environment.resourceId);
+    expect(environment.properties['status']).toBe('Ready');
     expect(role.resourceId).toBe(
       `${app.resourceId}/providers/Microsoft.Authorization/roleAssignments/participant-container-app-reader`
     );
@@ -140,6 +153,62 @@ describe('targeted Bicep compiler の振る舞い', () => {
       containerAppFqdn: fqdn,
       roleAssignmentId: role.resourceId,
     });
+  });
+
+  it('adapter parameter 3個とその uniqueString 名だけを組として受理する', async () => {
+    const source = await fixture();
+    const accepted = compileBicep(source, CONTEXT);
+    expect(accepted.resources).toHaveLength(3);
+
+    const invalidSources = [
+      source.replace('param tenkacloudTeam string\n', ''),
+      source.replace(
+        'param tenkacloudTeam string',
+        'param tenkacloudTeam object'
+      ),
+      source.replace(
+        'param tenkacloudTeam string',
+        "param tenkacloudTeam string = 'team'"
+      ),
+      source.replace('param tenkacloudTeam string', 'param unsupported string'),
+      source.replace('param tenkacloudTeam string', 'param 1bad string'),
+      source.replace(
+        'tenkacloudNamePrefix, tenkacloudProblemId, tenkacloudTeam',
+        'tenkacloudTeam, tenkacloudProblemId, tenkacloudNamePrefix'
+      ),
+      source.replace('uniqueString(', 'toLower('),
+      source.replace("-app'", "-other'"),
+    ];
+
+    invalidSources.forEach((invalid) => {
+      const error = coreError(() => compileBicep(invalid, CONTEXT));
+      expect(error.code).toBe('UnsupportedCapability');
+    });
+  });
+
+  it('Container App の environmentId を暗黙 dependency にし未知または複雑な式を拒否する', async () => {
+    const source = await fixture();
+    const missing = coreError(() =>
+      compileBicep(
+        source.replace(
+          'environmentId: helloEnvironment.id',
+          'environmentId: missing.id'
+        ),
+        CONTEXT
+      )
+    );
+    const expression = coreError(() =>
+      compileBicep(
+        source.replace(
+          'environmentId: helloEnvironment.id',
+          "environmentId: resourceId('Microsoft.App/managedEnvironments', 'env')"
+        ),
+        CONTEXT
+      )
+    );
+
+    expect(missing.message).toContain('unknown Managed Environment missing');
+    expect(expression.code).toBe('UnsupportedCapability');
   });
 
   it('quote 内の brace と line/block comment を block 終端と誤認しない', () => {
@@ -274,6 +343,12 @@ resource conditional 'Microsoft.App/containerApps@2024-03-01' = if (true) { name
         CONTEXT
       )
     );
+    const emptyName = coreError(() =>
+      compileBicep(
+        containerSource().replace("name: 'app'", "name: ''"),
+        CONTEXT
+      )
+    );
     const invalidPort = coreError(() =>
       compileBicep(
         containerSource().replace('targetPort: 8080', 'targetPort: 0'),
@@ -291,6 +366,7 @@ resource conditional 'Microsoft.App/containerApps@2024-03-01' = if (true) { name
 
     expect(missingName.message).toContain('requires string property name');
     expect(missingImage.message).toContain('requires string property image');
+    expect(emptyName.message).toContain('requires string property name');
     expect(invalidPort.message).toContain('targetPort must be an integer');
     expect(invalidReplicas.message).toBe(
       'minReplicas must not exceed maxReplicas'
@@ -301,6 +377,7 @@ resource conditional 'Microsoft.App/containerApps@2024-03-01' = if (true) { name
     const expressions = [
       ["name: 'app'", 'name: appName'],
       ["name: 'app'", `name: 'app-\${suffix}'`],
+      ["image: 'image:latest'", `image: '\${containerImage}'`],
       ['targetPort: 8080', 'targetPort: portValue'],
       ['targetPort: 8080', 'targetPort: 8080 + 1'],
       ['targetPort: 8080', 'external: publicIngress\n        targetPort: 8080'],
@@ -352,5 +429,35 @@ resource role 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
         CoreError
       );
     });
+  });
+
+  it('Container App ingress FQDN の HTTPS output だけを補間する', async () => {
+    const compiled = compileBicep(
+      containerSource(
+        `output AzureHelloUrl string = 'https://\${app.properties.configuration.ingress.fqdn}'`
+      ),
+      CONTEXT
+    );
+    const app = compiled.resources[0];
+    if (!app) throw new Error('compiled Container App がありません');
+
+    expect(compiled.outputs['AzureHelloUrl']).toBe(
+      `https://${app.properties['fqdn']}`
+    );
+
+    const invalidOutputs = [
+      `output url string = 'http://\${app.properties.configuration.ingress.fqdn}'`,
+      `output url string = 'prefix-\${app.properties.configuration.ingress.fqdn}'`,
+      `output url string = 'https://\${app.name}'`,
+      `output url string = 'https://\${unknown.properties.configuration.ingress.fqdn}'`,
+    ];
+    invalidOutputs.forEach((output) => {
+      expect(() => compileBicep(containerSource(output), CONTEXT)).toThrow(
+        CoreError
+      );
+    });
+    const roleOutput = `${await fixture()}
+output url string = 'https://\${participantRole.properties.configuration.ingress.fqdn}'`;
+    expect(() => compileBicep(roleOutput, CONTEXT)).toThrow(CoreError);
   });
 });

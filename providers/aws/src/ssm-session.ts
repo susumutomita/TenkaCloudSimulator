@@ -84,7 +84,8 @@ function sessionExpiry(virtualTime: string): string {
 function sessionStreamUrl(
   origin: string,
   command: ProviderCommandInput,
-  sessionId: string
+  sessionId: string,
+  targetId: string
 ): string {
   const url = new URL(
     `/v1/native/aws/ssm/data-channel/${encodeURIComponent(sessionId)}`,
@@ -93,6 +94,7 @@ function sessionStreamUrl(
   url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
   url.searchParams.set('worldId', command.worldId);
   url.searchParams.set('deploymentId', command.deploymentId);
+  url.searchParams.set('targetId', targetId);
   return url.toString();
 }
 
@@ -101,16 +103,15 @@ function sessionRecord(
   world: ProviderWorldView,
   sessionId: string
 ): ResourceRecord {
-  return (
-    resourcesForDeployment(
-      world,
-      command.deploymentId,
-      SSM_SESSION_RESOURCE
-    ).find((resource) => storedProperties(resource).refValue === sessionId) ??
-    (() => {
-      throw new CoreError('NotFound', 'SSM session does not exist');
-    })()
-  );
+  const resource = resourcesForDeployment(
+    world,
+    command.deploymentId,
+    SSM_SESSION_RESOURCE
+  ).find((candidate) => storedProperties(candidate).refValue === sessionId);
+  if (!resource) {
+    throw new CoreError('NotFound', 'SSM session does not exist');
+  }
+  return resource;
 }
 
 function sessionStatus(resource: ResourceRecord): SessionStatus {
@@ -208,6 +209,7 @@ function startSession(
   const sessionId = deterministicId('session', {
     worldId: command.worldId,
     deploymentId: command.deploymentId,
+    targetId: instance.targetId,
     target,
     requestId,
   });
@@ -239,7 +241,12 @@ function startSession(
     'AwsSsmSessionStarted',
     {
       SessionId: sessionId,
-      StreamUrl: sessionStreamUrl(origin, command, sessionId),
+      StreamUrl: sessionStreamUrl(
+        origin,
+        command,
+        sessionId,
+        instance.targetId
+      ),
       TokenValue: tokenValue,
     },
     [resource]
@@ -287,7 +294,12 @@ function resumeSession(
     'AwsSsmSessionResumed',
     {
       SessionId: sessionId,
-      StreamUrl: sessionStreamUrl(origin, command, sessionId),
+      StreamUrl: sessionStreamUrl(
+        origin,
+        command,
+        sessionId,
+        resource.targetId
+      ),
       TokenValue: tokenValue,
     },
     [updated]
@@ -366,6 +378,7 @@ export function expireSsmSessions(
     if (expiryTime > targetTime) continue;
     const transitionId = deterministicId('transition', {
       sessionId: resource.resourceId,
+      targetId: resource.targetId,
       expiresAt,
     });
     resources.push({
@@ -394,7 +407,7 @@ export function expireSsmSessions(
   return {
     events,
     resources,
-    deletedResourceIds: [],
+    deletedResourceRefs: [],
     appliedTransitionIds,
   };
 }

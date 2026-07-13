@@ -81,6 +81,7 @@ export interface ResourceDeclaration {
 export interface ResourceRecord extends ResourceDeclaration {
   readonly worldId: string;
   readonly deploymentId: string;
+  readonly targetId: string;
   readonly status: 'pending' | 'ready' | 'failed' | 'deleted';
 }
 
@@ -173,10 +174,16 @@ export interface ProviderClockInput {
   readonly virtualTime: string;
 }
 
+export interface ProviderClockResourceRef {
+  readonly deploymentId: string;
+  readonly targetId: string;
+  readonly resourceId: string;
+}
+
 export interface ProviderClockResult {
   readonly events: readonly ProviderEvent[];
   readonly resources: readonly ResourceRecord[];
-  readonly deletedResourceIds: readonly string[];
+  readonly deletedResourceRefs: readonly ProviderClockResourceRef[];
   readonly appliedTransitionIds: readonly string[];
 }
 
@@ -217,8 +224,15 @@ export interface DeploymentRecord {
   readonly deploymentId: string;
   readonly problemId: string;
   readonly status: 'deploying' | 'ready' | 'failed' | 'rejected' | 'deleted';
+  readonly targets: readonly DeploymentTargetIdentity[];
   readonly outputs: Readonly<Record<string, Readonly<Record<string, string>>>>;
   readonly diagnostics: readonly CapabilityDiagnostic[];
+}
+
+export interface DeploymentTargetIdentity {
+  readonly id: string;
+  readonly provider: string;
+  readonly engine: string;
 }
 
 export interface EventRecord {

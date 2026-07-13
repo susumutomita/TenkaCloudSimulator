@@ -16,8 +16,14 @@ import {
   SimulationCore,
   SimulationStore,
 } from '@tenkacloud/simulator-core';
-import { GcpProvider } from '@tenkacloud/simulator-provider-gcp';
-import { SakuraProvider } from '@tenkacloud/simulator-provider-sakura';
+import {
+  CLOUD_RUN_SERVICE,
+  GcpProvider,
+} from '@tenkacloud/simulator-provider-gcp';
+import {
+  APPLICATION_RESOURCE,
+  SakuraProvider,
+} from '@tenkacloud/simulator-provider-sakura';
 import {
   createAuthenticatedSimulatorApp,
   LaunchTokenAuthority,
@@ -33,7 +39,14 @@ import {
   consumeLaunchToken,
   simulatorLaunchToken,
 } from '../src/launch-token';
-import { loadConsoleData, parseConsoleRoute } from '../src/loader';
+import {
+  applyConsoleStreamBatch,
+  createConsoleOperationAction,
+  loadConsoleData,
+  loadConsoleStreamUpdate,
+  parseConsoleRoute,
+  submitConsoleOperation,
+} from '../src/loader';
 import {
   diagnostics,
   displayValue,
@@ -41,7 +54,11 @@ import {
   mergeEvents,
   propertyCategories,
 } from '../src/model';
-import { WorldConsoleView } from '../src/view';
+import {
+  ConsoleOperationResult,
+  runConsoleOperationAction,
+  WorldConsoleView,
+} from '../src/view';
 
 const GCP_TEMPLATE = readFileSync(
   new URL(
@@ -155,6 +172,16 @@ async function readyWorld(): Promise<{
 }
 
 async function sakuraResources(): Promise<SimulatorResourceProjection> {
+  const launch = await readySakuraWorld();
+  return launch.client.resources(launch.world.worldId);
+}
+
+async function readySakuraWorld(): Promise<{
+  readonly client: SimulatorConsoleClient;
+  readonly world: SimulatorWorldResponse;
+  readonly deployment: SimulatorDeploymentResponse;
+  readonly token: string;
+}> {
   const deploymentId = 'deployment-sakura-console';
   const launch = await createWorld(deploymentId);
   const response = await deploy(
@@ -166,7 +193,37 @@ async function sakuraResources(): Promise<SimulatorResourceProjection> {
     SAKURA_TEMPLATE
   );
   expect(response.status).toBe(201);
-  return launch.client.resources(launch.world.worldId);
+  const deployment: unknown = await response.json();
+  assertSimulatorDeploymentResponse(deployment);
+  return {
+    client: launch.client,
+    world: launch.world,
+    deployment,
+    token: launch.token,
+  };
+}
+
+function additionalSakuraApplication() {
+  return {
+    name: 'console-external-application',
+    timeout_seconds: 90,
+    port: 8080,
+    min_scale: 0,
+    max_scale: 3,
+    components: [
+      {
+        name: 'web',
+        max_cpu: '0.5',
+        max_memory: '1Gi',
+        deploy_source: {
+          container_registry: {
+            image:
+              'registry.example/console-external@sha256:6e9f5be0d355ec0401b614d760ecb0aa4ed6d9d9767261ee61d72601f622f3a7',
+          },
+        },
+      },
+    ],
+  };
 }
 
 beforeEach(() => {
@@ -256,6 +313,7 @@ describe('Console の API client と route', () => {
       <WorldConsoleView
         state={{ kind: 'error', worldId: 'world-a', message }}
         onRefresh={() => undefined}
+        onOperation={async () => undefined}
       />
     );
     expect(errorView).toContain('role="alert"');
@@ -285,6 +343,10 @@ describe('Console の API client と route', () => {
     expect(stream.nextCursor).toBe(data.cursor);
     const caughtUp = await client.stream(world.worldId, data.cursor);
     expect(caughtUp).toEqual({ events: [], nextCursor: data.cursor });
+    expect(
+      await applyConsoleStreamBatch(client, route, data, caughtUp)
+    ).toEqual(data);
+    expect(await loadConsoleStreamUpdate(client, route, data)).toBeUndefined();
 
     const resources = await client.resources(world.worldId);
     const fetchedDeployment = await client.deployment(
@@ -304,6 +366,9 @@ describe('Console の API client と route', () => {
     );
     const data = await loadConsoleData(launch.client, route);
     expect(data.deployment).toBeUndefined();
+    await expect(
+      submitConsoleOperation(launch.client, route, new FormData())
+    ).rejects.toThrow('selected deployment');
     expect(() =>
       parseConsoleRoute(new URL('http://console.local/world/nope'))
     ).toThrow('Expected /console/:worldId');
@@ -433,10 +498,142 @@ describe('Console の provider-neutral projection model', () => {
           },
         }}
         onRefresh={() => undefined}
+        onOperation={async () => undefined}
       />
     );
     expect(rendered).toContain('MissingProvider');
     expect(rendered).toContain('unavailable.json');
+  });
+
+  it('外部 API mutation の SSE を受けると resource と deployment projection を再取得する', async () => {
+    const { client, world, deployment, token } = await readySakuraWorld();
+    const route = {
+      worldId: world.worldId,
+      deploymentId: deployment.deploymentId,
+    };
+    const initial = await loadConsoleData(client, route);
+    const response = await fetch(
+      `${runtime.baseUrl}/v1/worlds/${encodeURIComponent(world.worldId)}/providers/sakura/operations/postApplication`,
+      {
+        method: 'POST',
+        headers: {
+          ...protocolHeaders(token),
+          'idempotency-key': 'external-cli-equivalent-create',
+        },
+        body: JSON.stringify({
+          deploymentId: deployment.deploymentId,
+          targetId: 'default',
+          engine: 'apprun',
+          service: 'apprun',
+          resourceType: APPLICATION_RESOURCE,
+          input: { application: additionalSakuraApplication() },
+        }),
+      }
+    );
+    expect(response.status).toBe(200);
+
+    const refreshed = await loadConsoleStreamUpdate(client, route, initial);
+    if (!refreshed) throw new Error('SSE projection refresh がありません');
+    expect(refreshed.events.map((event) => event.type)).toContain(
+      'SakuraApplicationCreated'
+    );
+    expect(refreshed.resources.resources).toHaveLength(2);
+    expect(refreshed.deployment?.outputs.ApplicationId).not.toBe(
+      initial.deployment?.outputs.ApplicationId
+    );
+    expect(refreshed.cursor).toBe(refreshed.events.at(-1)?.sequence);
+  });
+
+  it('Console operation action が同じ world を mutation し projection に反映する', async () => {
+    const { client, world, deployment } = await readyWorld();
+    const route = {
+      worldId: world.worldId,
+      deploymentId: deployment.deploymentId,
+    };
+    const initial = await loadConsoleData(client, route);
+    const service = initial.resources.resources.find(
+      (resource) => resource.resourceType === CLOUD_RUN_SERVICE
+    );
+    if (!service) throw new Error('Cloud Run service projection がありません');
+    let refreshes = 0;
+    const action = createConsoleOperationAction(client, route, () => {
+      refreshes += 1;
+    });
+    const form = new FormData();
+    form.set('provider', 'gcp');
+    form.set('targetId', 'default');
+    form.set('engine', 'infra-manager');
+    form.set('service', 'run');
+    form.set('resourceType', CLOUD_RUN_SERVICE);
+    form.set('operation', 'UpdateService');
+    form.set(
+      'input',
+      JSON.stringify({
+        id: service.resourceId,
+        patch: { minInstanceCount: 1, maxInstanceCount: 3 },
+      })
+    );
+    form.set('idempotencyKey', 'console-update-service');
+    expect(
+      await runConsoleOperationAction(action, { kind: 'idle' }, form)
+    ).toEqual({
+      kind: 'success',
+      message: 'Command accepted. Waiting for the shared projection.',
+    });
+    expect(refreshes).toBe(1);
+
+    const invalid = new FormData();
+    for (const [name, value] of form.entries()) invalid.set(name, value);
+    invalid.set('input', '[]');
+    invalid.delete('idempotencyKey');
+    expect(
+      await runConsoleOperationAction(action, { kind: 'idle' }, invalid)
+    ).toEqual({ kind: 'error', message: 'input must be a JSON object' });
+    invalid.set('input', '{');
+    expect(
+      await runConsoleOperationAction(action, { kind: 'idle' }, invalid)
+    ).toEqual({ kind: 'error', message: 'input must be a JSON object' });
+    invalid.set('input', '{}');
+    invalid.delete('provider');
+    expect(
+      await runConsoleOperationAction(action, { kind: 'idle' }, invalid)
+    ).toEqual({ kind: 'error', message: 'provider must not be empty' });
+    invalid.set('provider', 'gcp');
+    expect(
+      await runConsoleOperationAction(action, { kind: 'idle' }, invalid)
+    ).toEqual({
+      kind: 'error',
+      message: 'idempotencyKey must not be empty',
+    });
+    expect(refreshes).toBe(1);
+
+    const refreshed = await loadConsoleStreamUpdate(client, route, initial);
+    if (!refreshed) throw new Error('Console mutation event がありません');
+    const updated = refreshed.resources.resources.find(
+      (resource) => resource.resourceId === service.resourceId
+    );
+    expect(updated?.properties.minInstanceCount).toBe(1);
+    expect(updated?.properties.maxInstanceCount).toBe(3);
+    expect(refreshed.events.map((event) => event.type)).toContain(
+      'GcpServiceUpdated'
+    );
+    expect(
+      renderToStaticMarkup(
+        <ConsoleOperationResult
+          state={{ kind: 'success', message: 'Command accepted.' }}
+        />
+      )
+    ).toContain('role="status"');
+    expect(
+      renderToStaticMarkup(
+        <ConsoleOperationResult
+          state={{ kind: 'error', message: 'Command rejected.' }}
+        />
+      )
+    ).toContain('role="alert"');
+    expect(
+      renderToStaticMarkup(<ConsoleOperationResult state={{ kind: 'idle' }} />)
+    ).toBe('');
   });
 });
 
@@ -451,15 +648,20 @@ describe('Console view の状態表示', () => {
       <WorldConsoleView
         state={{ kind: 'ready', data }}
         onRefresh={() => undefined}
+        onOperation={async () => undefined}
       />
     );
     expect(html).toContain('Provider projections');
     expect(html).toContain('google_cloud_run_v2_service');
+    expect(html).toContain('<span>Target</span><code>default</code>');
     expect(html).toContain('Policy');
     expect(html).toContain('Reachability');
     expect(html).toContain('GcpHelloUrl');
     expect(html).toContain('DeploymentReady');
     expect(html).toContain('SSE replay');
+    expect(html).toContain('Provider operation');
+    expect(html).toContain('Execute command');
+    expect(html).toMatch(/console-[a-f0-9-]{36}/);
   });
 
   it('loading、error、空 projection の状態を accessible text で表示する', async () => {
@@ -467,6 +669,7 @@ describe('Console view の状態表示', () => {
       <WorldConsoleView
         state={{ kind: 'loading', worldId: 'world-loading' }}
         onRefresh={() => undefined}
+        onOperation={async () => undefined}
       />
     );
     const error = renderToStaticMarkup(
@@ -477,6 +680,7 @@ describe('Console view の状態表示', () => {
           message: 'World was deleted',
         }}
         onRefresh={() => undefined}
+        onOperation={async () => undefined}
       />
     );
     const launch = await createWorld('deployment-empty');
@@ -490,6 +694,7 @@ describe('Console view の状態表示', () => {
           data: { ...realData, events: [], cursor: 0 },
         }}
         onRefresh={() => undefined}
+        onOperation={async () => undefined}
       />
     );
     expect(loading).toContain('Reading the event-sourced world');

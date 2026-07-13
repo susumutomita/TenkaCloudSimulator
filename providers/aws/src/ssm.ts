@@ -440,7 +440,7 @@ function catalogTarget(
   world: ProviderWorldView,
   targetRef: string,
   targetResource: string
-): ResourceRecord {
+): { readonly resource: ResourceRecord; readonly targetId: string } {
   const stack = stackProperties(findStack(world, command.deploymentId));
   const output = stack.outputs[targetRef];
   if (output === undefined) {
@@ -466,7 +466,7 @@ function catalogTarget(
       'SSM command target resource does not exist'
     );
   }
-  return instance;
+  return { resource: instance, targetId: stack.targetId };
 }
 
 function scheduledAt(virtualTime: string, afterSeconds: number): string {
@@ -536,11 +536,13 @@ function scheduleCatalogCommand(
     revert['paramTemplate'],
     'revert.paramTemplate'
   );
-  const target = catalogTarget(command, world, targetRef, targetResource);
+  const catalog = catalogTarget(command, world, targetRef, targetResource);
+  const target = catalog.resource;
   const scheduledRevertAt = scheduledAt(world.world.virtualTime, afterSeconds);
   const commandId = deterministicId('command', {
     worldId: command.worldId,
     deploymentId: command.deploymentId,
+    targetId: catalog.targetId,
     targetRef,
     targetResource,
     documentName,
@@ -550,6 +552,7 @@ function scheduleCatalogCommand(
   });
   const transitionId = deterministicId('transition', {
     commandId,
+    targetId: catalog.targetId,
     scheduledRevertAt,
   });
   const transition = {
@@ -618,6 +621,7 @@ function scheduleCatalogCommand(
 
 interface DueTransition {
   readonly resource: ResourceRecord;
+  readonly targetId: string;
   readonly transition: Readonly<Record<string, unknown>>;
   readonly transitionId: string;
   readonly scheduledAt: string;
@@ -655,14 +659,33 @@ function dueTransitions(
         );
       }
       return scheduledTime <= targetTime
-        ? [{ resource, transition, transitionId, scheduledAt }]
+        ? [
+            {
+              resource,
+              targetId: resource.targetId,
+              transition,
+              transitionId,
+              scheduledAt,
+            },
+          ]
         : [];
     })
     .sort((left, right) =>
-      `${left.scheduledAt}\u0000${left.transitionId}`.localeCompare(
-        `${right.scheduledAt}\u0000${right.transitionId}`
+      `${left.scheduledAt}\u0000${left.targetId}\u0000${left.transitionId}`.localeCompare(
+        `${right.scheduledAt}\u0000${right.targetId}\u0000${right.transitionId}`
       )
     );
+}
+
+function transitionTargetKey(
+  command: ResourceRecord,
+  targetResource: string
+): string {
+  return JSON.stringify([
+    command.deploymentId,
+    command.targetId,
+    targetResource,
+  ]);
 }
 
 function transitionTarget(
@@ -671,13 +694,18 @@ function transitionTarget(
   world: ProviderWorldView,
   updatedTargets: ReadonlyMap<string, ResourceRecord>
 ): ResourceRecord {
-  const existing = updatedTargets.get(targetResource);
+  const key = transitionTargetKey(command, targetResource);
+  const existing = updatedTargets.get(key);
   if (existing) return existing;
   const target = resourcesForDeployment(
     world,
     command.deploymentId,
     INSTANCE_RESOURCE
-  ).find((resource) => storedProperties(resource).refValue === targetResource);
+  ).find(
+    (resource) =>
+      resource.targetId === command.targetId &&
+      storedProperties(resource).refValue === targetResource
+  );
   if (!target) {
     throw new CoreError(
       'NotFound',
@@ -727,7 +755,7 @@ export function advanceSsmClock(
     for (const line of documentLines(parameters, 'transition parameters')) {
       applyCatalogCommand(line, targetState);
     }
-    updatedTargets.set(targetResource, {
+    updatedTargets.set(transitionTargetKey(item.resource, targetResource), {
       ...target,
       properties: { ...target.properties, state: targetState },
     });
@@ -766,7 +794,7 @@ export function advanceSsmClock(
       ...commandResources,
       ...expiredSessions.resources,
     ],
-    deletedResourceIds: [],
+    deletedResourceRefs: [],
     appliedTransitionIds: [
       ...appliedTransitionIds,
       ...expiredSessions.appliedTransitionIds,

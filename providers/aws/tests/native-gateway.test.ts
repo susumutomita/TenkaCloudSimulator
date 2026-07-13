@@ -419,7 +419,10 @@ describe('AWS native gateway', () => {
       }),
       context.core
     );
-    expect(wrongTarget.status).toBe(404);
+    expect(wrongTarget.status).toBe(400);
+    expect(await wrongTarget.text()).toContain(
+      'command target does not belong to the deployment'
+    );
   });
 
   it('HTTP AttackProbe が登録済みendpointの防御状態を実Requestから観測してSQLiteへ反映する', async () => {

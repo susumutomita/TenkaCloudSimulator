@@ -4,6 +4,7 @@ import {
   assertSimulatorEvent,
   assertSimulatorEventPage,
   assertSimulatorResourceProjection,
+  SIMULATOR_PROTOCOL_VERSION,
   type SimulatorDeploymentResponse,
   type SimulatorErrorEnvelope,
   type SimulatorEvent,
@@ -13,6 +14,23 @@ import {
 import { simulatorLaunchToken } from './launch-token';
 
 const NEXT_CURSOR_HEADER = 'x-tenkacloud-next-cursor';
+const PROTOCOL_HEADER = 'x-tenkacloud-simulator-protocol';
+
+export interface ConsoleProviderOperation {
+  readonly deploymentId: string;
+  readonly targetId: string;
+  readonly provider: string;
+  readonly engine: string;
+  readonly service: string;
+  readonly resourceType: string;
+  readonly operation: string;
+  readonly input: Readonly<Record<string, unknown>>;
+  readonly idempotencyKey: string;
+}
+
+export type ConsoleProviderOperationResponse = Readonly<
+  Record<string, unknown>
+>;
 
 export class ConsoleClientError extends Error {
   public constructor(
@@ -66,6 +84,20 @@ function parseSseBlock(block: string): SimulatorEvent | undefined {
   }
   assertSimulatorEvent(body);
   return body;
+}
+
+function isRecord(value: unknown): value is Readonly<Record<string, unknown>> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function operationResponse(value: unknown): ConsoleProviderOperationResponse {
+  if (!isRecord(value)) {
+    throw new ConsoleClientError(
+      'Provider operation returned an invalid response',
+      502
+    );
+  }
+  return value;
 }
 
 export function parseEventStream(payload: string): readonly SimulatorEvent[] {
@@ -130,6 +162,38 @@ export class SimulatorConsoleClient {
     const body = await checkedJson(response);
     assertSimulatorDeploymentResponse(body);
     return body;
+  }
+
+  public async operation(
+    worldId: string,
+    command: ConsoleProviderOperation,
+    signal?: AbortSignal
+  ): Promise<ConsoleProviderOperationResponse> {
+    const response = await fetch(
+      apiUrl(
+        this.#baseUrl,
+        `/v1/worlds/${encodeURIComponent(worldId)}/providers/${encodeURIComponent(command.provider)}/operations/${encodeURIComponent(command.operation)}`
+      ),
+      {
+        method: 'POST',
+        headers: {
+          authorization: this.#authorization,
+          'content-type': 'application/json',
+          'idempotency-key': command.idempotencyKey,
+          [PROTOCOL_HEADER]: SIMULATOR_PROTOCOL_VERSION,
+        },
+        body: JSON.stringify({
+          deploymentId: command.deploymentId,
+          targetId: command.targetId,
+          engine: command.engine,
+          service: command.service,
+          resourceType: command.resourceType,
+          input: command.input,
+        }),
+        ...(signal ? { signal } : {}),
+      }
+    );
+    return operationResponse(await checkedJson(response));
   }
 
   public async events(

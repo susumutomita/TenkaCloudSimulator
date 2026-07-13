@@ -1,3 +1,4 @@
+import { Database } from 'bun:sqlite';
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -35,6 +36,7 @@ function deploymentRecord(
     deploymentId,
     problemId: `problem-${deploymentId}`,
     status,
+    targets: [{ id: 'default', provider: 'alpha', engine: 'engine-a' }],
     outputs: { default: { endpoint: `https://${deploymentId}.example` } },
     diagnostics,
   };
@@ -43,11 +45,13 @@ function deploymentRecord(
 function resourceRecord(
   worldId: string,
   resourceId: string,
-  provider = 'alpha'
+  provider = 'alpha',
+  targetId = 'default'
 ): ResourceRecord {
   return {
     worldId,
     deploymentId: 'deployment-a',
+    targetId,
     provider,
     resourceType: 'Object',
     resourceId,
@@ -243,16 +247,152 @@ describe('SimulationStore の振る舞い', () => {
     );
   });
 
-  it('resource を upsert、provider 順で取得し、論理削除する', () => {
+  it('既存 deployment table に target identity column を fail-closed migration する', () => {
+    const legacyPath = path.join(directory, 'legacy.sqlite');
+    const legacy = new Database(legacyPath, { create: true });
+    legacy.exec(`
+      CREATE TABLE deployments (
+        world_id TEXT NOT NULL,
+        deployment_id TEXT NOT NULL,
+        problem_id TEXT NOT NULL,
+        status TEXT NOT NULL,
+        outputs TEXT NOT NULL,
+        diagnostics TEXT NOT NULL,
+        PRIMARY KEY (world_id, deployment_id)
+      )
+    `);
+    legacy.close();
+
+    const migrated = new SimulationStore(legacyPath);
+    const columns = migrated.database
+      .query<{ name: string }, []>('PRAGMA table_info(deployments)')
+      .all();
+    expect(columns.map((column) => column.name)).toContain('targets');
+    migrated.close();
+  });
+
+  it('target identity のない既存 deployment row があれば schema 変更前に migration を拒否する', () => {
+    const legacyPath = path.join(directory, 'legacy-deployments.sqlite');
+    const legacy = new Database(legacyPath, { create: true });
+    legacy.exec(`
+      CREATE TABLE deployments (
+        world_id TEXT NOT NULL,
+        deployment_id TEXT NOT NULL,
+        problem_id TEXT NOT NULL,
+        status TEXT NOT NULL,
+        outputs TEXT NOT NULL,
+        diagnostics TEXT NOT NULL,
+        PRIMARY KEY (world_id, deployment_id)
+      );
+      INSERT INTO deployments VALUES (
+        'world-one', 'deployment-a', 'problem-a', 'ready', '{}', '[]'
+      )
+    `);
+    const schemaBefore = legacy
+      .query<{ name: string; sql: string }, []>(
+        `SELECT name, sql FROM sqlite_master
+         WHERE type = 'table' AND name NOT LIKE 'sqlite_%'
+         ORDER BY name`
+      )
+      .all();
+    legacy.close();
+
+    const error = captureCoreError(() => new SimulationStore(legacyPath));
+
+    expect(error.code).toBe('ValidationFailed');
+    expect(error.message).toContain('target identity');
+    const rejected = new Database(legacyPath, { readonly: true });
+    const schemaAfter = rejected
+      .query<{ name: string; sql: string }, []>(
+        `SELECT name, sql FROM sqlite_master
+         WHERE type = 'table' AND name NOT LIKE 'sqlite_%'
+         ORDER BY name`
+      )
+      .all();
+    rejected.close();
+    expect(schemaAfter).toEqual(schemaBefore);
+  });
+
+  it('保存済み deployment target identity の不正 JSON を拒否する', () => {
+    const world = worldRecord();
+    store.insertWorld(world);
+    const deployment = deploymentRecord(world.worldId, 'invalid-targets');
+    store.saveDeployment(deployment);
+    store.database
+      .query(
+        'UPDATE deployments SET targets = ? WHERE world_id = ? AND deployment_id = ?'
+      )
+      .run('[{}]', world.worldId, deployment.deploymentId);
+
+    const error = captureCoreError(() =>
+      store.deployment(world.worldId, deployment.deploymentId)
+    );
+    expect(error.code).toBe('ValidationFailed');
+  });
+
+  it('target identity のない既存 resource row があれば migration を拒否する', () => {
+    const legacyPath = path.join(directory, 'legacy-resources.sqlite');
+    const legacy = new Database(legacyPath, { create: true });
+    legacy.exec(`
+      CREATE TABLE resources (
+        world_id TEXT NOT NULL,
+        deployment_id TEXT NOT NULL,
+        provider TEXT NOT NULL,
+        resource_type TEXT NOT NULL,
+        resource_id TEXT NOT NULL,
+        properties TEXT NOT NULL,
+        status TEXT NOT NULL,
+        PRIMARY KEY (world_id, provider, resource_id)
+      );
+      INSERT INTO resources VALUES (
+        'world-one', 'deployment-a', 'alpha', 'Object', 'shared', '{}', 'ready'
+      )
+    `);
+    const schemaBefore = legacy
+      .query<{ name: string; sql: string }, []>(
+        `SELECT name, sql FROM sqlite_master
+         WHERE type = 'table' AND name NOT LIKE 'sqlite_%'
+         ORDER BY name`
+      )
+      .all();
+    legacy.close();
+
+    const error = captureCoreError(() => new SimulationStore(legacyPath));
+
+    expect(error.code).toBe('ValidationFailed');
+    expect(error.message).toContain('target identity');
+    const rejected = new Database(legacyPath, { readonly: true });
+    const schemaAfter = rejected
+      .query<{ name: string; sql: string }, []>(
+        `SELECT name, sql FROM sqlite_master
+         WHERE type = 'table' AND name NOT LIKE 'sqlite_%'
+         ORDER BY name`
+      )
+      .all();
+    rejected.close();
+    expect(schemaAfter).toEqual(schemaBefore);
+  });
+
+  it('resource を target 単位で upsert、取得し、論理削除する', () => {
     const world = worldRecord();
     store.insertWorld(world);
     const alpha = resourceRecord(world.worldId, 'z-resource', 'alpha');
     const beta = resourceRecord(world.worldId, 'a-resource', 'beta');
+    const sibling = resourceRecord(
+      world.worldId,
+      alpha.resourceId,
+      alpha.provider,
+      'secondary'
+    );
     store.saveResource(beta);
     store.saveResource(alpha);
+    store.saveResource(sibling);
+    expect(
+      captureCoreError(() => store.saveResource({ ...alpha, targetId: ' ' }))
+        .code
+    ).toBe('ValidationFailed');
     store.saveResource({
       ...alpha,
-      deploymentId: 'deployment-updated',
       resourceType: 'UpdatedObject',
       properties: { enabled: false },
     });
@@ -260,10 +400,10 @@ describe('SimulationStore の振る舞い', () => {
     expect(store.resources(world.worldId)).toEqual([
       {
         ...alpha,
-        deploymentId: 'deployment-updated',
         resourceType: 'UpdatedObject',
         properties: { enabled: false },
       },
+      sibling,
       beta,
     ]);
 
@@ -276,18 +416,26 @@ describe('SimulationStore の振る舞い', () => {
       ).toBe(status);
     }
 
-    store.deleteResource(world.worldId, alpha.provider, alpha.resourceId);
+    store.deleteResource(
+      world.worldId,
+      alpha.deploymentId,
+      alpha.targetId,
+      alpha.provider,
+      alpha.resourceId
+    );
     expect(store.resources(world.worldId)[0]?.status).toBe('deleted');
+    expect(store.resources(world.worldId)[1]).toEqual(sibling);
   });
 
   it('resource の保存 JSON が object でなければ ValidationFailed にする', () => {
     const world = worldRecord();
     store.insertWorld(world);
     store.database
-      .query('INSERT INTO resources VALUES (?, ?, ?, ?, ?, ?, ?)')
+      .query('INSERT INTO resources VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
       .run(
         world.worldId,
         'deployment-a',
+        'default',
         'alpha',
         'Object',
         'invalid-resource',

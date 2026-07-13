@@ -110,6 +110,7 @@ export function providerHttpRequest(
     typeof path !== 'string' ||
     !path.startsWith('/') ||
     path.startsWith('//') ||
+    path.includes('\\') ||
     path.length > MAX_PATH_LENGTH ||
     /[\s#]/.test(path) ||
     containsControlCharacter(path, false)

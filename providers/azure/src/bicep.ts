@@ -1,7 +1,14 @@
 import { CoreError, deterministicId } from '@tenkacloud/simulator-core';
 
 export const BICEP_CONTAINER_APP = 'Microsoft.App/containerApps';
+export const BICEP_MANAGED_ENVIRONMENT = 'Microsoft.App/managedEnvironments';
 export const BICEP_ROLE_ASSIGNMENT = 'Microsoft.Authorization/roleAssignments';
+
+const ADAPTER_PARAMETERS = [
+  'tenkacloudNamePrefix',
+  'tenkacloudProblemId',
+  'tenkacloudTeam',
+] as const;
 
 export interface BicepResource {
   readonly symbol: string;
@@ -363,6 +370,57 @@ function topLevelProjection(body: string): string {
   return result;
 }
 
+function validateAdapterParameters(source: string): boolean {
+  const projected = topLevelProjection(source);
+  const declarationCount = Array.from(
+    projected.matchAll(/(?:^|\n)\s*param\b/g)
+  ).length;
+  if (declarationCount === 0) return false;
+
+  const declarations = Array.from(
+    projected.matchAll(
+      /(?:^|\n)\s*param\s+([A-Za-z_][\w]*)\s+([A-Za-z_][\w]*)([^\n]*)/g
+    )
+  );
+  if (declarations.length !== declarationCount) {
+    throw new CoreError(
+      'UnsupportedCapability',
+      'Bicep parameter declaration syntax is not supported'
+    );
+  }
+
+  const names = new Set<string>();
+  for (const declaration of declarations) {
+    const name = declaration[1] ?? '';
+    const type = declaration[2] ?? '';
+    const remainder = (declaration[3] ?? '').trim();
+    if (
+      !ADAPTER_PARAMETERS.includes(
+        name as (typeof ADAPTER_PARAMETERS)[number]
+      ) ||
+      type !== 'string' ||
+      remainder.length > 0 ||
+      names.has(name)
+    ) {
+      throw new CoreError(
+        'UnsupportedCapability',
+        `Bicep parameter ${name || '<unknown>'} declaration is not supported`
+      );
+    }
+    names.add(name);
+  }
+  if (
+    names.size !== ADAPTER_PARAMETERS.length ||
+    ADAPTER_PARAMETERS.some((name) => !names.has(name))
+  ) {
+    throw new CoreError(
+      'UnsupportedCapability',
+      'Bicep TenkaCloud adapter parameters must be declared as one complete set'
+    );
+  }
+  return true;
+}
+
 function topLevelStringProperty(
   body: string,
   property: string
@@ -397,6 +455,19 @@ function referenceProperty(body: string, property: string): string | undefined {
   return expression;
 }
 
+function resourceIdReferenceProperty(
+  body: string,
+  property: string
+): string | undefined {
+  const expression = propertyExpression(body, property);
+  if (expression === undefined) return undefined;
+  const reference = /^([A-Za-z_][\w]*)\.id$/.exec(expression);
+  if (!reference?.[1]) {
+    return unsupportedPropertyExpression(property, expression);
+  }
+  return reference[1];
+}
+
 function topLevelReferenceProperty(
   body: string,
   property: string
@@ -426,19 +497,69 @@ function requiredString(
   return value;
 }
 
-function requiredTopLevelString(
-  body: string,
-  property: string,
-  symbol: string
+function adapterResourceName(
+  expression: string,
+  resource: BicepResource,
+  context: BicepCompileContext,
+  adapterParametersDeclared: boolean
 ): string {
-  const value = topLevelStringProperty(body, property);
-  if (!value?.trim()) {
+  const literal = /^(?:'([^']*)'|"([^"]*)")$/.exec(expression);
+  const value = literal?.[1] ?? literal?.[2];
+  if (value === undefined) {
+    return unsupportedPropertyExpression('name', expression);
+  }
+  if (!value.includes('${')) return value;
+
+  const parameterized =
+    /^([a-z0-9-]*)\$\{uniqueString\(\s*tenkacloudNamePrefix\s*,\s*tenkacloudProblemId\s*,\s*tenkacloudTeam\s*\)\}([a-z0-9-]*)$/.exec(
+      value
+    );
+  if (
+    !adapterParametersDeclared ||
+    !parameterized ||
+    (resource.type !== BICEP_MANAGED_ENVIRONMENT &&
+      resource.type !== BICEP_CONTAINER_APP)
+  ) {
+    return unsupportedPropertyExpression('name', expression);
+  }
+  const expectedSuffix =
+    resource.type === BICEP_CONTAINER_APP ? '-app' : '-env';
+  if (parameterized[1] !== 'tc-' || parameterized[2] !== expectedSuffix) {
+    return unsupportedPropertyExpression('name', expression);
+  }
+  const unique = deterministicId('azure-bicep-name', context).slice(-13);
+  const name = `${parameterized[1] ?? ''}${unique}${parameterized[2] ?? ''}`;
+  return name;
+}
+
+function requiredResourceName(
+  resource: BicepResource,
+  context: BicepCompileContext,
+  adapterParametersDeclared: boolean
+): string {
+  const expression = propertyExpression(
+    topLevelProjection(resource.body),
+    'name'
+  );
+  if (expression === undefined) {
     throw new CoreError(
       'ValidationFailed',
-      `Bicep resource ${symbol} requires string property ${property}`
+      `Bicep resource ${resource.symbol} requires string property name`
     );
   }
-  return value;
+  const name = adapterResourceName(
+    expression,
+    resource,
+    context,
+    adapterParametersDeclared
+  );
+  if (!name.trim()) {
+    throw new CoreError(
+      'ValidationFailed',
+      `Bicep resource ${resource.symbol} requires string property name`
+    );
+  }
+  return name;
 }
 
 function integerProperty(
@@ -490,7 +611,8 @@ function containerAppProperties(
   id: string,
   name: string,
   dependencies: readonly string[],
-  context: BicepCompileContext
+  context: BicepCompileContext,
+  environmentId?: string
 ): Readonly<Record<string, unknown>> {
   const targetPort = integerProperty(
     resource.body,
@@ -514,6 +636,7 @@ function containerAppProperties(
     apiVersion: resource.apiVersion,
     location: topLevelStringProperty(resource.body, 'location') ?? 'japaneast',
     dependencies,
+    ...(environmentId ? { environmentId } : {}),
     status: 'Running',
     external: booleanProperty(resource.body, 'external') ?? false,
     targetPort,
@@ -526,6 +649,24 @@ function containerAppProperties(
     })}.azurecontainerapps.local`,
     responseStatus: 200,
     responseBody: 'Hello from TenkaCloud Simulator',
+    sourceLine: resource.line,
+  };
+}
+
+function managedEnvironmentProperties(
+  resource: BicepResource,
+  id: string,
+  name: string,
+  dependencies: readonly string[]
+): Readonly<Record<string, unknown>> {
+  return {
+    id,
+    symbol: resource.symbol,
+    name,
+    apiVersion: resource.apiVersion,
+    location: topLevelStringProperty(resource.body, 'location') ?? 'japaneast',
+    dependencies,
+    status: 'Ready',
     sourceLine: resource.line,
   };
 }
@@ -555,6 +696,43 @@ function roleAssignmentProperties(
   };
 }
 
+function literalOutputValue(
+  output: BicepOutput,
+  resources: ReadonlyMap<string, CompiledBicepResource>
+): string | null {
+  const literal = /^(["'])(.*?)\1$/.exec(output.expression);
+  const expression = literal?.[2];
+  if (expression === undefined) return null;
+  const httpsFqdn =
+    /^https:\/\/\$\{([A-Za-z_][\w]*)\.properties\.configuration\.ingress\.fqdn\}$/.exec(
+      expression
+    );
+  if (!httpsFqdn) {
+    if (expression.includes('${')) {
+      throw new CoreError(
+        'UnsupportedCapability',
+        `Bicep output expression ${output.expression} is not supported`
+      );
+    }
+    return expression;
+  }
+  const resource = resources.get(httpsFqdn[1] ?? '');
+  if (!resource) {
+    throw new CoreError(
+      'ValidationFailed',
+      `Bicep output ${output.name} references an unknown resource`
+    );
+  }
+  const fqdn = resource.properties['fqdn'];
+  if (resource.type === BICEP_CONTAINER_APP && typeof fqdn === 'string') {
+    return `https://${fqdn}`;
+  }
+  throw new CoreError(
+    'UnsupportedCapability',
+    `Bicep output expression ${output.expression} is not supported`
+  );
+}
+
 function outputValue(
   output: BicepOutput,
   resources: ReadonlyMap<string, CompiledBicepResource>
@@ -565,16 +743,8 @@ function outputValue(
       `Bicep output type ${output.type} is not supported`
     );
   }
-  const literal = /^(["'])(.*?)\1$/.exec(output.expression);
-  if (literal?.[2] !== undefined) {
-    if (literal[2].includes('${')) {
-      throw new CoreError(
-        'UnsupportedCapability',
-        `Bicep output expression ${output.expression} is not supported`
-      );
-    }
-    return literal[2];
-  }
+  const literal = literalOutputValue(output, resources);
+  if (literal !== null) return literal;
   const reference = /^([A-Za-z_][\w]*)\.(.+)$/.exec(output.expression);
   const resource = reference ? resources.get(reference[1] ?? '') : undefined;
   if (!reference || !resource) {
@@ -604,6 +774,13 @@ interface NamedBicepResource {
 interface IdentifiedContainerApp extends NamedBicepResource {
   readonly kind: 'container-app';
   readonly resourceId: string;
+  readonly environmentSymbol?: string;
+  readonly environmentId?: string;
+}
+
+interface IdentifiedManagedEnvironment extends NamedBicepResource {
+  readonly kind: 'managed-environment';
+  readonly resourceId: string;
 }
 
 interface IdentifiedRoleAssignment extends NamedBicepResource {
@@ -613,12 +790,16 @@ interface IdentifiedRoleAssignment extends NamedBicepResource {
   readonly scopeId: string;
 }
 
-type IdentifiedResource = IdentifiedContainerApp | IdentifiedRoleAssignment;
+type IdentifiedResource =
+  | IdentifiedContainerApp
+  | IdentifiedManagedEnvironment
+  | IdentifiedRoleAssignment;
 
 function validateResourceTypes(resources: readonly BicepResource[]): void {
   for (const resource of resources) {
     if (
       resource.type !== BICEP_CONTAINER_APP &&
+      resource.type !== BICEP_MANAGED_ENVIRONMENT &&
       resource.type !== BICEP_ROLE_ASSIGNMENT
     ) {
       throw new CoreError(
@@ -649,17 +830,71 @@ function requiredScope(resource: BicepResource): string {
   return scope;
 }
 
+function identifyResource(
+  item: NamedBicepResource,
+  context: BicepCompileContext,
+  environmentIds: ReadonlyMap<string, string>,
+  containerIds: ReadonlyMap<string, string>
+): IdentifiedResource {
+  if (item.resource.type === BICEP_MANAGED_ENVIRONMENT) {
+    return {
+      ...item,
+      kind: 'managed-environment',
+      resourceId: baseResourceId(item.resource.type, item.name, context),
+    };
+  }
+  if (item.resource.type === BICEP_CONTAINER_APP) {
+    const environmentSymbol = resourceIdReferenceProperty(
+      item.resource.body,
+      'environmentId'
+    );
+    const environmentId = environmentSymbol
+      ? environmentIds.get(environmentSymbol)
+      : undefined;
+    if (environmentSymbol && !environmentId) {
+      throw new CoreError(
+        'ValidationFailed',
+        `Bicep Container App ${item.resource.symbol} references an unknown Managed Environment ${environmentSymbol}`
+      );
+    }
+    return {
+      ...item,
+      kind: 'container-app',
+      resourceId: baseResourceId(item.resource.type, item.name, context),
+      ...(environmentSymbol ? { environmentSymbol } : {}),
+      ...(environmentId ? { environmentId } : {}),
+    };
+  }
+  const scopeSymbol = requiredScope(item.resource);
+  const scopeId = containerIds.get(scopeSymbol);
+  if (!scopeId) {
+    throw new CoreError(
+      'ValidationFailed',
+      `Bicep role assignment ${item.resource.symbol} scopes an unknown Container App ${scopeSymbol}`
+    );
+  }
+  return {
+    ...item,
+    kind: 'role-assignment',
+    resourceId: `${scopeId}/providers/${BICEP_ROLE_ASSIGNMENT}/${item.name}`,
+    scopeSymbol,
+    scopeId,
+  };
+}
+
 function identifyResources(
   resources: readonly BicepResource[],
-  context: BicepCompileContext
+  context: BicepCompileContext,
+  adapterParametersDeclared: boolean
 ): readonly IdentifiedResource[] {
   const named = resources.map(
     (resource): NamedBicepResource => ({
       resource,
-      name: requiredTopLevelString(resource.body, 'name', resource.symbol),
+      name: requiredResourceName(resource, context, adapterParametersDeclared),
     })
   );
   const containerIds = new Map<string, string>();
+  const environmentIds = new Map<string, string>();
   for (const item of named) {
     if (item.resource.type === BICEP_CONTAINER_APP) {
       containerIds.set(
@@ -667,31 +902,16 @@ function identifyResources(
         baseResourceId(item.resource.type, item.name, context)
       );
     }
-  }
-  return named.map((item): IdentifiedResource => {
-    if (item.resource.type === BICEP_CONTAINER_APP) {
-      return {
-        ...item,
-        kind: 'container-app',
-        resourceId: baseResourceId(item.resource.type, item.name, context),
-      };
-    }
-    const scopeSymbol = requiredScope(item.resource);
-    const scopeId = containerIds.get(scopeSymbol);
-    if (!scopeId) {
-      throw new CoreError(
-        'ValidationFailed',
-        `Bicep role assignment ${item.resource.symbol} scopes an unknown Container App ${scopeSymbol}`
+    if (item.resource.type === BICEP_MANAGED_ENVIRONMENT) {
+      environmentIds.set(
+        item.resource.symbol,
+        baseResourceId(item.resource.type, item.name, context)
       );
     }
-    return {
-      ...item,
-      kind: 'role-assignment',
-      resourceId: `${scopeId}/providers/${BICEP_ROLE_ASSIGNMENT}/${item.name}`,
-      scopeSymbol,
-      scopeId,
-    };
-  });
+  }
+  return named.map((item) =>
+    identifyResource(item, context, environmentIds, containerIds)
+  );
 }
 
 function compileResource(
@@ -702,28 +922,45 @@ function compileResource(
   const dependencyNames = [
     ...dependencySymbols(item.resource.body),
     ...(item.kind === 'role-assignment' ? [item.scopeSymbol] : []),
+    ...(item.kind === 'container-app' && item.environmentSymbol
+      ? [item.environmentSymbol]
+      : []),
   ];
   const dependencies = resolveDependencies(
     dependencyNames,
     ids,
     item.resource.symbol
   );
-  const properties =
-    item.kind === 'container-app'
-      ? containerAppProperties(
-          item.resource,
-          item.resourceId,
-          item.name,
-          dependencies,
-          context
-        )
-      : roleAssignmentProperties(
-          item.resource,
-          item.resourceId,
-          item.name,
-          item.scopeId,
-          dependencies
-        );
+  let properties: Readonly<Record<string, unknown>>;
+  switch (item.kind) {
+    case 'container-app':
+      properties = containerAppProperties(
+        item.resource,
+        item.resourceId,
+        item.name,
+        dependencies,
+        context,
+        item.environmentId
+      );
+      break;
+    case 'managed-environment':
+      properties = managedEnvironmentProperties(
+        item.resource,
+        item.resourceId,
+        item.name,
+        dependencies
+      );
+      break;
+    case 'role-assignment':
+      properties = roleAssignmentProperties(
+        item.resource,
+        item.resourceId,
+        item.name,
+        item.scopeId,
+        dependencies
+      );
+      break;
+  }
   return {
     symbol: item.resource.symbol,
     type: item.resource.type,
@@ -752,9 +989,14 @@ export function compileBicep(
   context: BicepCompileContext
 ): BicepCompilation {
   validateTopLevelConstructs(source);
+  const adapterParametersDeclared = validateAdapterParameters(source);
   const resources = bicepResources(source);
   validateResourceTypes(resources);
-  const identified = identifyResources(resources, context);
+  const identified = identifyResources(
+    resources,
+    context,
+    adapterParametersDeclared
+  );
   const ids = new Map(
     identified.map((item) => [item.resource.symbol, item.resourceId])
   );

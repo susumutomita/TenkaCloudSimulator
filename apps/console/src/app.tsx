@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react';
 import type { SimulatorConsoleClient } from './client';
 import {
   type ConsoleRoute,
+  createConsoleOperationAction,
   loadConsoleData,
+  loadConsoleStreamUpdate,
   parseConsoleRoute,
 } from './loader';
-import { type ConsoleLoadState, mergeEvents } from './model';
+import type { ConsoleLoadState } from './model';
 import { WorldConsoleView } from './view';
 
 function errorMessage(error: unknown): string {
@@ -42,26 +44,27 @@ function useConsoleWorld(
     return () => controller.abort(generation);
   }, [client, generation, route]);
 
-  const eventCursor = state.kind === 'ready' ? state.data.cursor : undefined;
+  const currentData = state.kind === 'ready' ? state.data : undefined;
+  const eventCursor = currentData?.cursor;
   useEffect(() => {
-    if (eventCursor === undefined) return;
+    if (eventCursor === undefined || currentData === undefined) return;
     const controller = new AbortController();
     let reconnectTimer: ReturnType<typeof setTimeout> | undefined;
-    void client.stream(route.worldId, eventCursor, controller.signal).then(
-      (batch) => {
+    void loadConsoleStreamUpdate(
+      client,
+      route,
+      currentData,
+      controller.signal
+    ).then(
+      (refreshed) => {
         if (controller.signal.aborted) return;
-        setState((current) =>
-          current.kind === 'ready'
-            ? {
-                kind: 'ready',
-                data: {
-                  ...current.data,
-                  events: mergeEvents(current.data.events, batch.events),
-                  cursor: batch.nextCursor,
-                },
-              }
-            : current
-        );
+        if (refreshed) {
+          setState((current) =>
+            current.kind === 'ready' && current.data.cursor === eventCursor
+              ? { kind: 'ready', data: refreshed }
+              : current
+          );
+        }
         reconnectTimer = setTimeout(
           () => setStreamGeneration((current) => current + 1),
           1500
@@ -81,7 +84,7 @@ function useConsoleWorld(
       controller.abort(streamGeneration);
       if (reconnectTimer !== undefined) clearTimeout(reconnectTimer);
     };
-  }, [client, eventCursor, route.worldId, streamGeneration]);
+  }, [client, currentData, eventCursor, route, streamGeneration]);
 
   return [state, () => setGeneration((current) => current + 1)];
 }
@@ -94,7 +97,14 @@ function ConnectedConsole({
   readonly route: ConsoleRoute;
 }): React.JSX.Element {
   const [state, refresh] = useConsoleWorld(client, route);
-  return <WorldConsoleView state={state} onRefresh={refresh} />;
+  const operation = createConsoleOperationAction(client, route, refresh);
+  return (
+    <WorldConsoleView
+      state={state}
+      onRefresh={refresh}
+      onOperation={operation}
+    />
+  );
 }
 
 export type ConsoleBootstrap =
@@ -119,6 +129,7 @@ export function SimulatorConsoleApp({
           message: errorMessage(bootstrap.error),
         }}
         onRefresh={() => globalThis.location.reload()}
+        onOperation={async () => undefined}
       />
     );
   }
@@ -134,6 +145,7 @@ export function SimulatorConsoleApp({
           message: errorMessage(error),
         }}
         onRefresh={() => globalThis.location.reload()}
+        onOperation={async () => undefined}
       />
     );
   }

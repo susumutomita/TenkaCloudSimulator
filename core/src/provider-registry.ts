@@ -54,10 +54,10 @@ export class ProviderRegistry {
       ids.add(capability.capabilityId);
       const identity = [
         capability.provider,
+        capability.engine,
         capability.service,
         capability.resourceType,
         capability.operation,
-        ...capability.fidelity,
       ].join('\u0000');
       if (identities.has(identity)) {
         throw new CoreError(

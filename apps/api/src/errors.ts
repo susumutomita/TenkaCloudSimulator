@@ -45,8 +45,9 @@ export function coreDiagnostic(
 ): SimulatorDiagnostic {
   return {
     code: diagnostic.code,
-    message: `${diagnostic.provider}/${diagnostic.service}/${diagnostic.resourceType}/${diagnostic.operation}`,
+    message: `${diagnostic.provider}/${diagnostic.engine}/${diagnostic.service}/${diagnostic.resourceType}/${diagnostic.operation}`,
     provider: diagnostic.provider,
+    engine: diagnostic.engine,
     service: diagnostic.service,
     resourceType: diagnostic.resourceType,
     operation: diagnostic.operation,

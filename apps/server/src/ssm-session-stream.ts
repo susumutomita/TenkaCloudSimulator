@@ -63,6 +63,7 @@ interface RegisteredSession {
   readonly sessionId: string;
   readonly worldId: string;
   readonly deploymentId: string;
+  readonly targetId: string;
   readonly target: string;
   tokenValue: string;
   tokenConsumed: boolean;
@@ -86,6 +87,7 @@ interface StoredSession {
   readonly sessionId: string;
   readonly worldId: string;
   readonly deploymentId: string;
+  readonly targetId: string;
   readonly target: string;
   readonly tokenValue: string;
 }
@@ -319,7 +321,8 @@ export class SsmSessionStreamGateway {
         command.worldId,
         command.command.deploymentId,
         sessionId,
-        tokenValue
+        tokenValue,
+        command.command.targetId
       );
       this.#register(stored);
       return;
@@ -357,10 +360,17 @@ export class SsmSessionStreamGateway {
     }
     const worldId = url.searchParams.get('worldId') ?? '';
     const deploymentId = url.searchParams.get('deploymentId') ?? '';
+    const targetId = url.searchParams.get('targetId') ?? '';
     let session = this.#sessions.get(sessionId);
     try {
       session ??= this.#register(
-        this.#storedSession(worldId, deploymentId, sessionId)
+        this.#storedSession(
+          worldId,
+          deploymentId,
+          sessionId,
+          undefined,
+          targetId
+        )
       );
     } catch {
       return new Response('Session not found', { status: 404 });
@@ -368,6 +378,7 @@ export class SsmSessionStreamGateway {
     if (
       session.worldId !== worldId ||
       session.deploymentId !== deploymentId ||
+      session.targetId !== targetId ||
       session.tokenConsumed ||
       session.status === 'connected' ||
       session.status === 'connecting' ||
@@ -415,18 +426,22 @@ export class SsmSessionStreamGateway {
     worldId: string,
     deploymentId: string,
     sessionId: string,
-    expectedToken?: string
+    expectedToken?: string,
+    expectedTargetId?: string
   ): StoredSession {
     const world = this.#core.world(worldId);
-    const resource = this.#core.store
+    const resources = this.#core.store
       .resources(worldId)
-      .find(
+      .filter(
         (candidate) =>
           candidate.provider === AWS_PROVIDER &&
           candidate.resourceType === SSM_SESSION_RESOURCE &&
           candidate.deploymentId === deploymentId &&
-          candidate.resourceId === sessionId
+          candidate.resourceId === sessionId &&
+          (expectedTargetId === undefined ||
+            candidate.targetId === expectedTargetId)
       );
+    const resource = resources.length === 1 ? resources[0] : undefined;
     const properties = resource?.properties;
     const state =
       properties &&
@@ -453,6 +468,7 @@ export class SsmSessionStreamGateway {
       sessionId,
       worldId,
       deploymentId,
+      targetId: resource.targetId,
       target,
       tokenValue: storedToken,
     };
@@ -801,7 +817,7 @@ export class SsmSessionStreamGateway {
         session.worldId,
         {
           deploymentId: session.deploymentId,
-          targetId: 'default',
+          targetId: session.targetId,
           provider: AWS_PROVIDER,
           engine: CLOUDFORMATION_ENGINE,
           service: 'ssm',
@@ -842,7 +858,7 @@ export class SsmSessionStreamGateway {
         session.worldId,
         {
           deploymentId: session.deploymentId,
-          targetId: 'default',
+          targetId: session.targetId,
           provider: AWS_PROVIDER,
           engine: CLOUDFORMATION_ENGINE,
           service: 'ssm',

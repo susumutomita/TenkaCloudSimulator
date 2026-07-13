@@ -1,3 +1,8 @@
+import type {
+  CapabilityCoverageReport,
+  CapabilityCoverageSummary,
+} from '@tenkacloud/simulator-contracts';
+
 export const FIDELITIES = ['L0', 'L1', 'L2', 'L3', 'L4'] as const;
 
 export type Fidelity = (typeof FIDELITIES)[number];
@@ -35,7 +40,7 @@ export interface Requirement {
   service: string;
   resourceType: string;
   operation: string;
-  fidelity: Fidelity;
+  fidelity: readonly Fidelity[];
   plane: Plane;
   origin: Origin;
   classification: RequirementClassification;
@@ -45,6 +50,8 @@ export interface Requirement {
 export type DiagnosticCode =
   | 'ENTRY_OUTSIDE_PROBLEM'
   | 'ID_DIRECTORY_MISMATCH'
+  | 'INVALID_APPRUN'
+  | 'INVALID_BICEP'
   | 'INVALID_CLOUDFORMATION'
   | 'INVALID_METADATA'
   | 'INVALID_METADATA_JSON'
@@ -92,10 +99,11 @@ export interface CatalogInventory {
 
 export interface CapabilityEntry {
   provider: string;
+  engine: string;
   service: string;
   resourceType: string;
   operation: string;
-  fidelity: Fidelity;
+  fidelity: readonly Fidelity[];
 }
 
 export interface CapabilityManifest {
@@ -105,42 +113,43 @@ export interface CapabilityManifest {
 }
 
 export type RequirementCoverage =
-  | { status: 'covered'; availableFidelity: Fidelity }
+  | { status: 'covered'; availableFidelity: readonly Fidelity[] }
   | { status: 'missing' }
-  | { status: 'insufficient'; availableFidelity: Fidelity };
+  | { status: 'insufficient'; availableFidelity: readonly Fidelity[] };
 
 export interface CoveredRequirement extends Requirement {
   coverage: RequirementCoverage;
 }
 
-export interface CoverageSummary {
-  problems: number;
-  targets: number;
+export interface CoverageCounts {
   requirements: number;
   covered: number;
   missing: number;
   insufficient: number;
-  authorizationInventory: {
-    requirements: number;
-    covered: number;
-    missing: number;
-    insufficient: number;
-  };
-  invalid: number;
 }
 
-export interface CoverageReport {
-  schemaVersion: '1';
-  status: 'covered' | 'failed';
+export interface CoverageReportIdentity {
+  catalogCommit: string;
+  simulatorVersion: string;
+}
+
+export interface CoverageReportInventory {
   catalogHash: string;
   capabilityManifest: {
     version: string;
     hash: string;
   };
   problems: ProblemInventory[];
-  requirements: CoveredRequirement[];
   diagnostics: Diagnostic[];
-  summary: CoverageSummary;
+  authorizationInventory: {
+    summary: CoverageCounts;
+    requirements: CoveredRequirement[];
+  };
+}
+
+export interface CoverageReport extends CapabilityCoverageReport {
+  summary: CapabilityCoverageSummary;
+  inventory: CoverageReportInventory;
 }
 
 export interface CommandResult {

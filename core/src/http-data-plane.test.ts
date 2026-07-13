@@ -29,6 +29,7 @@ function resource(changes: Partial<ResourceRecord> = {}): ResourceRecord {
   return {
     worldId: 'world',
     deploymentId: 'deployment',
+    targetId: 'default',
     provider: 'test',
     resourceType: 'Test::Endpoint',
     resourceId: 'endpoint',
@@ -85,6 +86,7 @@ describe('provider-neutral HTTP data plane 境界', () => {
       1,
       'relative',
       '//authority',
+      '/\\authority',
       '/white space',
       '/fragment#part',
       '/null\u0000byte',

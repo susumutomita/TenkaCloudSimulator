@@ -23,6 +23,8 @@ import { HTTP_ENDPOINT, SakuraProvider } from './provider';
 
 const DEFAULT_TARGET_ID = 'default';
 const APPLICATION_ID_OUTPUT = 'ApplicationId';
+const APPLICATION_IMAGE =
+  'ghcr.io/example/catalog-app@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 
 const APPLICATION = {
   name: 'catalog-app',
@@ -38,8 +40,8 @@ const APPLICATION = {
       max_memory: '1Gi',
       deploy_source: {
         container_registry: {
-          image: 'registry.example/app:1',
-          server: 'registry.example',
+          image: APPLICATION_IMAGE,
+          server: 'ghcr.io',
           username: 'participant',
           password: 'registry-secret',
         },
@@ -130,7 +132,8 @@ function command(
     targetId: 'default',
     provider: 'sakura',
     engine: 'apprun',
-    service: operation === 'Request' ? 'http' : 'apprun',
+    service:
+      operation === 'Request' || operation === 'Probe' ? 'http' : 'apprun',
     operation,
     resourceType,
     input,
@@ -145,6 +148,46 @@ function coreError(operation: () => unknown): CoreError {
     throw error;
   }
   throw new Error('CoreError が発生しませんでした');
+}
+
+async function asyncCoreError(
+  operation: () => Promise<unknown>
+): Promise<CoreError> {
+  try {
+    await operation();
+  } catch (error) {
+    if (error instanceof CoreError) return error;
+    throw error;
+  }
+  throw new Error('CoreError が発生しませんでした');
+}
+
+function saveMaterializedWorkload(
+  testContext: TestContext,
+  endpoint: string,
+  declarationOverrides: Readonly<Record<string, unknown>> = {}
+): void {
+  testContext.store.saveResource({
+    worldId: testContext.worldId,
+    deploymentId: testContext.deploymentId,
+    targetId: DEFAULT_TARGET_ID,
+    provider: 'runtime',
+    resourceType: 'Runtime::Workload',
+    resourceId: 'workload-sakura-hello',
+    status: 'ready',
+    properties: {
+      declaration: {
+        id: 'sakura-hello',
+        targetId: DEFAULT_TARGET_ID,
+        resourceRef: 'BaseUrl',
+        image: APPLICATION_IMAGE,
+        containerPort: 8080,
+        healthPath: '/healthz',
+        ...declarationOverrides,
+      },
+      materialization: { endpoint },
+    },
+  });
 }
 
 function providerView(testContext: TestContext): ProviderWorldView {
@@ -299,71 +342,132 @@ describe('Sakura AppRun provider の振る舞い', () => {
     ).toThrow('application does not exist');
   });
 
-  it('AppRun endpoint は GET と HEAD を state から返し未対応 method を 405 にする', async () => {
+  it('AppRun Request と Probe は ready な materialized workload の実 HTTP 応答を転送する', async () => {
     const testContext = await context();
+    const seen: Array<{ readonly method: string; readonly path: string }> = [];
+    const server = Bun.serve({
+      hostname: '127.0.0.1',
+      port: 0,
+      fetch(request) {
+        const url = new URL(request.url);
+        seen.push({
+          method: request.method,
+          path: `${url.pathname}${url.search}`,
+        });
+        if (url.pathname !== '/healthz') {
+          return new Response('not found', { status: 404 });
+        }
+        return new Response(
+          JSON.stringify({
+            hello: 'sakura',
+            language: url.searchParams.get('language'),
+          }),
+          {
+            status: 202,
+            headers: { 'content-type': 'application/json; charset=utf-8' },
+          }
+        );
+      },
+    });
+    saveMaterializedWorkload(testContext, `http://127.0.0.1:${server.port}`);
     const input = {
       Method: 'GET',
-      Path: '/hello?language=ja',
+      Path: '/healthz?language=ja',
       Headers: { Accept: 'application/json' },
       Body: '',
     };
-    const get = testContext.core.executeCommand(
-      testContext.worldId,
-      command(testContext, 'Request', input, HTTP_ENDPOINT),
-      'sakura-http-get'
-    );
-    const head = testContext.core.executeCommand(
-      testContext.worldId,
-      command(
-        testContext,
-        'Request',
-        { ...input, Method: 'HEAD' },
-        HTTP_ENDPOINT
-      ),
-      'sakura-http-head'
-    );
-    const post = testContext.core.executeCommand(
-      testContext.worldId,
-      command(
-        testContext,
-        'Request',
-        { ...input, Method: 'POST' },
-        HTTP_ENDPOINT
-      ),
-      'sakura-http-post'
-    );
-    const body = Reflect.get(get, 'Body');
-    if (typeof body !== 'string') throw new Error('AppRun body がありません');
+    try {
+      const get = await testContext.core.executeCommandAsync(
+        testContext.worldId,
+        command(testContext, 'Request', input, HTTP_ENDPOINT),
+        'sakura-http-get'
+      );
+      const head = await testContext.core.executeCommandAsync(
+        testContext.worldId,
+        command(
+          testContext,
+          'Request',
+          { ...input, Method: 'HEAD' },
+          HTTP_ENDPOINT
+        ),
+        'sakura-http-head'
+      );
+      const probe = await testContext.core.executeCommandAsync(
+        testContext.worldId,
+        command(testContext, 'Probe', input, HTTP_ENDPOINT),
+        'sakura-http-probe'
+      );
+      const schemeLikePath = `/http://127.0.0.1:${server.port}/authority-escape`;
+      const schemeLike = await testContext.core.executeCommandAsync(
+        testContext.worldId,
+        command(
+          testContext,
+          'Request',
+          { ...input, Path: schemeLikePath },
+          HTTP_ENDPOINT
+        ),
+        'sakura-http-scheme-like-path'
+      );
+      const backslashEscape = await asyncCoreError(() =>
+        testContext.core.executeCommandAsync(
+          testContext.worldId,
+          command(
+            testContext,
+            'Request',
+            {
+              ...input,
+              Path: `/\\127.0.0.1:${server.port}/authority-escape`,
+            },
+            HTTP_ENDPOINT
+          ),
+          'sakura-http-backslash-authority'
+        )
+      );
+      const post = await asyncCoreError(() =>
+        testContext.core.executeCommandAsync(
+          testContext.worldId,
+          command(
+            testContext,
+            'Request',
+            { ...input, Method: 'POST' },
+            HTTP_ENDPOINT
+          ),
+          'sakura-http-post'
+        )
+      );
+      const body = Reflect.get(get, 'Body');
+      if (typeof body !== 'string') throw new Error('AppRun body がありません');
 
-    expect(get).toMatchObject({
-      StatusCode: 200,
-      Headers: { 'content-type': 'application/json; charset=utf-8' },
-    });
-    expect(JSON.parse(body)).toMatchObject({
-      application: 'catalog-app',
-      status: 'Healthy',
-      traffics: [{ percent: 100 }],
-    });
-    expect(head).toMatchObject({ StatusCode: 200, Body: '' });
-    expect(post).toMatchObject({
-      StatusCode: 405,
-      Headers: { allow: 'GET, HEAD' },
-    });
-    expect(
-      testContext.core
-        .events(testContext.worldId)
-        .filter((event) => event.type === 'SakuraApplicationRequestExecuted')
-    ).toHaveLength(3);
+      expect(get).toMatchObject({
+        StatusCode: 202,
+        Headers: { 'content-type': 'application/json; charset=utf-8' },
+      });
+      expect(JSON.parse(body)).toEqual({ hello: 'sakura', language: 'ja' });
+      expect(head).toMatchObject({ StatusCode: 202, Body: '' });
+      expect(probe).toMatchObject({ StatusCode: 202 });
+      expect(schemeLike).toMatchObject({ StatusCode: 404, Body: 'not found' });
+      expect(backslashEscape.code).toBe('ValidationFailed');
+      expect(post.code).toBe('UnsupportedCapability');
+      expect(seen).toEqual([
+        { method: 'GET', path: '/healthz?language=ja' },
+        { method: 'HEAD', path: '/healthz?language=ja' },
+        { method: 'GET', path: '/healthz?language=ja' },
+        { method: 'GET', path: schemeLikePath },
+      ]);
+      expect(
+        testContext.core
+          .events(testContext.worldId)
+          .filter((event) => event.type === 'SakuraApplicationRequestExecuted')
+      ).toHaveLength(4);
+    } finally {
+      await server.stop(true);
+    }
   });
 
   it('AppRun endpoint は request 境界と resource cardinality、ready projection を loud に扱う', async () => {
     const testContext = await context();
     const provider = new SakuraProvider();
     const view = providerView(testContext);
-    const application = view.resources.find(
-      (resource) => resource.resourceType === APPLICATION_RESOURCE
-    );
-    if (!application) throw new Error('AppRun application がありません');
     const request: ProviderCommandInput = {
       worldId: testContext.worldId,
       deploymentId: testContext.deploymentId,
@@ -372,122 +476,37 @@ describe('Sakura AppRun provider の振る舞い', () => {
       resourceType: HTTP_ENDPOINT,
       input: { Method: 'GET', Path: '/', Headers: {}, Body: '' },
     };
-    expect(
-      coreError(() =>
-        provider.reduce(
-          { ...request, input: { ...request.input, Body: 1 } },
-          view
-        )
-      ).code
-    ).toBe('ValidationFailed');
+    expect(coreError(() => provider.reduce(request, view)).code).toBe(
+      'UnsupportedCapability'
+    );
     expect(
       coreError(() => provider.reduce({ ...request, service: 'apprun' }, view))
         .code
     ).toBe('UnsupportedCapability');
+    expect(
+      (
+        await asyncCoreError(() =>
+          provider.reduceAsync(
+            { ...request, input: { ...request.input, Body: 1 } },
+            view
+          )
+        )
+      ).code
+    ).toBe('ValidationFailed');
+    expect(
+      (await asyncCoreError(() => provider.reduceAsync(request, view))).code
+    ).toBe('NotFound');
 
-    const withoutApplication = view.resources.filter(
-      (resource) => resource.resourceType !== APPLICATION_RESOURCE
-    );
-    const duplicate = {
-      ...application,
-      resourceId: `${application.resourceId}-duplicate`,
-    };
-    const version = storedApplication(application.properties).versions[0];
-    if (!version) throw new Error('AppRun version がありません');
-    const cases = [
-      { resources: withoutApplication, code: 'NotFound' },
-      { resources: [...view.resources, duplicate], code: 'Conflict' },
-      {
-        resources: view.resources.map((resource) =>
-          resource.resourceId === application.resourceId
-            ? { ...resource, status: 'pending' as const }
-            : resource
-        ),
-        code: 'Conflict',
-      },
-      {
-        resources: view.resources.map((resource) =>
-          resource.resourceId === application.resourceId
-            ? {
-                ...resource,
-                properties: { ...resource.properties, status: 'UnHealthy' },
-              }
-            : resource
-        ),
-        code: 'Conflict',
-      },
-      {
-        resources: view.resources.map((resource) =>
-          resource.resourceId === application.resourceId
-            ? {
-                ...resource,
-                properties: { ...resource.properties, public_url: '' },
-              }
-            : resource
-        ),
-        code: 'ValidationFailed',
-      },
-      {
-        resources: view.resources.map((resource) =>
-          resource.resourceId === application.resourceId
-            ? {
-                ...resource,
-                properties: { ...resource.properties, versions: [] },
-              }
-            : resource
-        ),
-        code: 'ValidationFailed',
-      },
-      {
-        resources: view.resources.map((resource) =>
-          resource.resourceId === application.resourceId
-            ? {
-                ...resource,
-                properties: {
-                  ...resource.properties,
-                  versions: [version, { ...version, id: 'duplicate' }],
-                },
-              }
-            : resource
-        ),
-        code: 'ValidationFailed',
-      },
-      {
-        resources: view.resources.map((resource) =>
-          resource.resourceId === application.resourceId
-            ? {
-                ...resource,
-                properties: {
-                  ...resource.properties,
-                  traffics: [{ version_name: 'unknown', percent: 100 }],
-                },
-              }
-            : resource
-        ),
-        code: 'ValidationFailed',
-      },
-      {
-        resources: view.resources.map((resource) =>
-          resource.resourceId === application.resourceId
-            ? {
-                ...resource,
-                properties: {
-                  ...resource.properties,
-                  traffics: [{ version_name: version.name, percent: 50 }],
-                },
-              }
-            : resource
-        ),
-        code: 'ValidationFailed',
-      },
-    ] as const;
-    for (const testCase of cases) {
-      expect(
-        coreError(() =>
-          provider.reduce(request, { ...view, resources: testCase.resources })
-        ).code
-      ).toBe(testCase.code);
-    }
+    saveMaterializedWorkload(testContext, 'http://127.0.0.1:65535', {
+      image: `ghcr.io/example/other@sha256:${'b'.repeat(64)}`,
+    });
+    expect(
+      (
+        await asyncCoreError(() =>
+          provider.reduceAsync(request, providerView(testContext))
+        )
+      ).code
+    ).toBe('Conflict');
   });
 
   it('invalid application と unsupported operation を loud に拒否する', async () => {
@@ -511,7 +530,7 @@ describe('Sakura AppRun provider の振る舞い', () => {
     const provider = new SakuraProvider();
     expect(provider.provider).toBe('sakura');
     expect(provider.engines).toEqual(['apprun']);
-    expect(provider.capabilities).toHaveLength(13);
+    expect(provider.capabilities).toHaveLength(14);
     expect(
       provider.capabilities.map((capability) => capability.operation)
     ).toContain('patchPacketFilter');
@@ -524,6 +543,11 @@ describe('Sakura AppRun provider の振る舞い', () => {
       resourceType: HTTP_ENDPOINT,
       fidelity: ['L0', 'L1', 'L2', 'L3', 'L4'],
     });
+    expect(
+      provider.capabilities.find(
+        (capability) => capability.operation === 'Probe'
+      )
+    ).toMatchObject({ service: 'http', resourceType: HTTP_ENDPOINT });
 
     const compileInput: ProviderCompileInput = {
       target: {
@@ -547,12 +571,54 @@ describe('Sakura AppRun provider の振る舞い', () => {
     });
     expect(
       validPlan.requirements.some(
-        (requirement) =>
-          requirement.operation === 'Request' &&
-          requirement.resourceType === HTTP_ENDPOINT &&
-          requirement.fidelity.includes('L4')
+        (requirement) => requirement.resourceType === HTTP_ENDPOINT
       )
-    ).toBe(true);
+    ).toBe(false);
+
+    const workloadPlan = provider.compile({
+      ...compileInput,
+      target: { ...compileInput.target, entry: APPLICATION_IMAGE },
+      problemId: 'sakura-sample',
+      templateBody: JSON.stringify(APPLICATION),
+      simulationOverlay: {
+        schemaVersion: '1',
+        workloads: [
+          {
+            id: 'sakura-hello',
+            targetId: 'default',
+            resourceRef: 'BaseUrl',
+            image: APPLICATION_IMAGE,
+            containerPort: 8080,
+            healthPath: '/healthz',
+          },
+        ],
+      },
+    });
+    expect(
+      workloadPlan.requirements
+        .filter((requirement) => requirement.resourceType === HTTP_ENDPOINT)
+        .map((requirement) => requirement.operation)
+    ).toEqual([]);
+    expect(() =>
+      provider.compile({
+        ...compileInput,
+        target: { ...compileInput.target, entry: APPLICATION_IMAGE },
+        templateBody: JSON.stringify(APPLICATION),
+        simulationOverlay: {
+          schemaVersion: '1',
+          workloads: [
+            {
+              id: 'sakura-hello',
+              targetId: 'default',
+              resourceRef: 'WrongOutput',
+              image: APPLICATION_IMAGE,
+              containerPort: 8080,
+              healthPath: '/healthz',
+            },
+          ],
+        },
+      })
+    ).toThrow('does not match the application descriptor');
 
     const testContext = await context();
     const emptyPlan: ProviderTargetPlan = {

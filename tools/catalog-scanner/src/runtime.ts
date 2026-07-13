@@ -56,10 +56,16 @@ function singleTarget(
   if (provider === 'aws' && engine === 'cloudformation') {
     return { targetId: 'default', provider, engine, entry, delivery: 'cloud' };
   }
+  if (provider === 'azure' && engine === 'bicep') {
+    return { targetId: 'default', provider, engine, entry, delivery: 'cloud' };
+  }
   if (
     provider === 'gcp' &&
     (engine === 'infra-manager' || engine === 'terraform')
   ) {
+    return { targetId: 'default', provider, engine, entry, delivery: 'cloud' };
+  }
+  if (provider === 'sakura' && engine === 'apprun') {
     return { targetId: 'default', provider, engine, entry, delivery: 'cloud' };
   }
   return undefined;

@@ -32,7 +32,10 @@ export function sourceLocation(
   };
 }
 
-export function contentDigest(path: string, contents: string): SourceDigest {
+export function contentDigest(
+  path: string,
+  contents: string | Uint8Array
+): SourceDigest {
   return {
     path,
     digest: createHash('sha256').update(contents).digest('hex'),

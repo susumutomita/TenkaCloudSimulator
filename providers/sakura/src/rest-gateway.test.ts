@@ -258,14 +258,14 @@ describe('Sakura AppRun native REST gateway の振る舞い', () => {
         APPLICATIONS_PATH,
         'POST',
         JSON.stringify({ ...APPLICATION, name: 'native-app' }),
-        (headers) => headers.set(SAKURA_APPRUN_TARGET_HEADER, 'sakura-target')
+        (headers) => headers.set(SAKURA_APPRUN_TARGET_HEADER, 'default')
       )
     );
 
     expect(create.worldId).toBe(testRuntime.worldId);
     expect(create.command).toMatchObject({
       deploymentId: testRuntime.deploymentId,
-      targetId: 'sakura-target',
+      targetId: 'default',
       provider: 'sakura',
       engine: 'apprun',
       service: 'apprun',
