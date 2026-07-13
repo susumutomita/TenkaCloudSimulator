@@ -90,6 +90,12 @@ scoped resource graph に保存します。通常の Lambda `CreateFunction` は
 eligibility に昇格しません。managed-create operation は AWS SDK wire protocol の再現ではなく、
 任意 code を実行しない Simulator 固有の bounded subset です。
 
+ready resource の name identity (`refValue`) は、同じ world / deployment / target /
+resource type で通常 resource と managed resource の間でも一意です。managed-create は
+eligibility の有無にかかわらず同名の ready resource があれば conflict にします。一方、
+managed-describe は provider が認定した `EligibleManagedPlacement: true` の resource だけを
+返し、同名の通常 resource を managed resource として投影しません。
+
 managed-create input は name と slot だけです。ECS だけは `DesiredCount: 1` と
 `LaunchType: "FARGATE"` も要求します。image、URL、platform、cluster、task definition は
 participant から受け取りません。provider は reviewed workload の exact declaration

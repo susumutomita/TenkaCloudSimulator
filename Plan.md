@@ -242,6 +242,33 @@ delete 待機、再送 cleanup を組み合わせ、failure と process restart 
 含めました。focused 136 tests、typecheck、lint、architecture harness、full 556 tests、100％ coverage、build
 を含む `make before-commit` が成功しました。
 
+### World deletion completion boundary - 2026-07-14
+
+#### 目的
+
+Docker cleanup の quiet window が通常 request deadline より長い場合も、実 CLI の `world-delete` が
+server の cleanup と tombstone 完了を待ち、成功 response を受け取れるようにします。
+
+#### 制約と設計判断
+
+- 選択肢 A は全 request timeout を延長する案、選択肢 B は quiet window を短縮する案、選択肢 C は
+  同期 DELETE だけを server completion-bound operation として扱う案です。A は短い read/write の
+  fail-fast 性を失い、B は late Docker resource fence を壊すため採用しません。通常 request の 10 秒
+  deadline と Docker timeout 以上の quiet window を維持できる C を採用します。
+- DELETE を非同期 API に変更する案は protocol と全 client に新しい polling state を追加するため、
+  既存の同期・idempotent completion contract を直す今回の最小修正には含めません。
+- library caller は通常 request の bounded timeout policy を指定できますが、同期 DELETE は server
+  completion を待ちます。早く中断する caller だけ明示的な `AbortSignal` を渡し、CLI は process signal
+  で中断します。総 cleanup 時間を quiet observation window だけから固定値として過小評価しません。
+
+#### 回帰と検証
+
+1. 実 HTTP、SQLite、workload effect を使い、cleanup が通常 request deadline を越える world を作ります。
+2. 同じ API に実 `world-delete` CLI を接続し、cleanup 後の 204 と deleted world を確認します。
+3. library caller の明示的な `AbortSignal` だけが待機を中断できることを実 HTTP で確認します。
+4. production image smoke test で既定 Docker timeout の quiet fence と endpoint 消失を確認します。
+5. staged architecture harness、`make before-commit`、review、security review、simplify を順に通します。
+
 ### Snapshot authenticity boundary - 2026-07-13
 
 #### 目的
