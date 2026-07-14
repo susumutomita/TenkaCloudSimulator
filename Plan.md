@@ -173,3 +173,152 @@ Docker 問題と simulated-cloud 問題を `make local` の同じ導線から操
   の実入力境界を満たす値に固定します。起動前 validation に失敗した場合は、auto-remove で
   原因を消さず container log を出力してから bounded cleanup し、EXIT trap が元の失敗を
   上書きしないようにします。
+
+### Authoritative managed placement projection - 2026-07-13
+
+#### 目的
+
+`microservice-migration-battle` の managed tier を participant workload の `/meta.platform`
+ではなく、Simulator の world / deployment / target scoped resource graph から検証できるように
+します。
+
+#### 制約
+
+- participant が入力した platform 名や URL を信頼しません。
+- 任意の participant code や image は実行しません。
+- AWS native wire protocol の未対応部分を成功扱いせず、generic provider-operation API 上の
+  L1 control-plane projection として境界を明示します。
+- 同じ slot 向けの未 binding 候補は複数許可しますが、1 endpoint は 1 active binding、
+  1 managed resource は 1 endpoint だけに binding できます。別 world、deployment、target、
+  未 ready、非 participant resource は fail closed にします。
+
+#### タスク
+
+- [x] Lambda / ECS / App Runner の participant-created resource を event log、snapshot、replay に
+  残すテストを先に追加します。
+- [x] reviewed workload URL を `Runtime::Endpoint` の `OutputKey` から内部導出する binding を
+  テスト先行で追加します。
+- [x] duplicate binding、resource reuse、scope mismatch、未 ready、unknown tier の拒否を固定します。
+- [x] redacted placement projection、capability、protocol、README を更新します。
+- [x] provider tests、typecheck、lint、repository gates を実行します。
+- [x] create response loss 時の namespace / deployment lookup と idempotent cleanup を追加します。
+- [x] snapshot restore response loss lookup と portable workload rematerialization を追加します。
+
+#### 検証手順
+
+`bun test providers/aws/tests/managed-placement.test.ts`、`bun run typecheck`、
+`make before-commit` を順に実行します。
+
+#### 進捗ログ
+
+- 2026-07-13: 既存の event-sourced resource graph、generic provider-operation API、
+  `Runtime::Workload` materialization を再利用する設計を選定しました。participant URL を binding
+  input に取らず、reviewed workload の loopback endpoint だけを内部で採用します。
+- 2026-07-13: cross-repository 監査で world create の commit-after-response-loss を検出し、
+  create-world idempotency record を使う `/v1/worlds/by-deployment/{deploymentId}` durable lookup と
+  deleted world の再 cleanup を追加スコープにしました。
+- 2026-07-13: snapshot clone と create recovery の identity を分離し、restore result lookup、旧 URL と
+  managed placement の sanitization、new-world workload rematerialization、部分成功 retry を追加しました。
+- 2026-07-13: workload effect の event quota を SQLite の `materialization` lease で先取りし、
+  `deletion` intent と `BEGIN IMMEDIATE` 内で相互排他にしました。dead materialization lease は回収し、
+  deletion intent は cleanup / tombstone commit failure と close 後も保持します。再送 DELETE と起動時
+  reconciliation が dead owner を引き継ぐため、cleanup 成功直後・tombstone 前の SIGKILL でも後続
+  materialization を拒否して orphan を回収できます。
+- 2026-07-13: Docker の遅延生成 fence は image を world effect 前に explicit pull / inspect し、両方の
+  `docker run` を `--pull=never` に固定しました。cleanup は container と deterministic network の連続不在を
+  Docker timeout 以上確認し、late proxy / late network の実 Docker regression test を追加しました。
+- 2026-07-13: lifecycle / store / runtime focused 132 tests と workload runner の実 Docker 15 tests、core / server /
+  runner typecheck、変更対象の Biome check、textlint、`git diff --check` が成功しました。
+- 2026-07-13: PR #7 の provider result identity、SSM token redaction、capability compatibility、exact
+  SQLite DDL hardening を取り込みました。reservation は schema version 2 の canonical table とし、exact
+  version 1 からだけ atomic migration します。
+
+#### 振り返り
+
+participant input から placement eligibility、tier、URL を決めず、provider-owned resource type と
+reviewed workload projection を結合することで trust boundary を明確にできました。外部 effect と
+SQLite transaction の間は完全な原子性を持てないため、durable quota reservation、single-flight、
+delete 待機、再送 cleanup を組み合わせ、failure と process restart を idempotent recovery path に
+含めました。focused 136 tests、typecheck、lint、architecture harness、full 556 tests、100％ coverage、build
+を含む `make before-commit` が成功しました。
+
+### World deletion completion boundary - 2026-07-14
+
+#### 目的
+
+Docker cleanup の quiet window が通常 request deadline より長い場合も、実 CLI の `world-delete` が
+server の cleanup と tombstone 完了を待ち、成功 response を受け取れるようにします。
+
+#### 制約と設計判断
+
+- 選択肢 A は全 request timeout を延長する案、選択肢 B は quiet window を短縮する案、選択肢 C は
+  同期 DELETE だけを server completion-bound operation として扱う案です。A は短い read/write の
+  fail-fast 性を失い、B は late Docker resource fence を壊すため採用しません。通常 request の 10 秒
+  deadline と Docker timeout 以上の quiet window を維持できる C を採用します。
+- DELETE を非同期 API に変更する案は protocol と全 client に新しい polling state を追加するため、
+  既存の同期・idempotent completion contract を直す今回の最小修正には含めません。
+- library caller は通常 request の bounded timeout policy を指定できますが、同期 DELETE は server
+  completion を待ちます。早く中断する caller だけ明示的な `AbortSignal` を渡し、CLI は process signal
+  で中断します。総 cleanup 時間を quiet observation window だけから固定値として過小評価しません。
+- Bun server の global `idleTimeout` はデフォルト 10 秒のままにします。最大 255 秒の固定値は Docker cleanup
+  全体の上限ではなく、0 による global 無効化は通常 route の fail-fast 性を失います。そのため query の
+  ない exact `DELETE /v1/worlds/{worldId}` の処理中だけ `server.timeout(request, 0)` を適用し、transport も
+  server completion boundary を所有します。response、例外、response 未生成のいずれでも `finally` で
+  デフォルト値へ復元してから socket を再利用可能にし、認証失敗後の keep-alive を無期限にしません。別
+  method、query、trailing slash、nested path は対象外です。
+
+#### 回帰と検証
+
+1. 実 HTTP、SQLite、workload effect を使い、cleanup が通常 request deadline を越える world を作ります。
+2. 同じ API に実 `world-delete` CLI を接続し、cleanup 後の 204 と deleted world を確認します。
+3. library caller の明示的な `AbortSignal` だけが待機を中断できることを実 HTTP で確認します。
+4. production fetch wrapper を実 Bun server の短い global idle timeout で起動し、それを超える exact
+   DELETE だけが完了し、通常 route と DELETE 類似 path は timeout を維持することを確認します。認証なし
+   exact DELETE の 401 後は、同じ keep-alive socket が global timeout 内に閉じることも raw HTTP で確認します。
+5. production image smoke test でデフォルト Docker timeout の quiet fence と endpoint 消失を確認します。
+6. staged architecture harness、`make before-commit`、review、security review、simplify を順に通します。
+
+### Snapshot authenticity boundary - 2026-07-13
+
+#### 目的
+
+公開 snapshot hash を再計算できる caller が provider resource、event、deployment、output を
+改変して restore できないように、認証済み snapshot export と restore の間へ server-held
+integrity proof を追加します。
+
+#### 制約と設計判断
+
+- proof は launch token authority の既存 secret を再利用しますが、launch token とは別の
+  versioned domain を HMAC 入力へ含めます。
+- 署名対象は proof 自身を除く API snapshot envelope 全体の canonical JSON とします。
+- proof の version、algorithm、base64url 形式、追加 field を schema と runtime の両方で厳密に
+  検証し、signature 比較には timing-safe comparison を使います。
+- generic API は signer と verifier の明示 injection を必須にし、未設定時に署名なしで動作する
+  fallback を持ちません。
+- authenticated POST は proof 検証に成功するまで core snapshot 変換、restore、SQLite write を
+  実行しません。
+
+#### データの流れ
+
+1. GET が core snapshot を API envelope へ変換します。
+2. server authority が proof を除く envelope を canonicalize して HMAC proof を付与します。
+3. POST が schema を検証し、authority verifier で proof を timing-safe に照合します。
+4. proof が正しい場合だけ API envelope を core snapshot へ変換し、transactional restore を開始します。
+
+#### テストと検証
+
+- [x] exact signed snapshot の restore、replay、response-loss lookup を維持します。
+- [x] provider resource、event、deployment、output の改変と public hash 再計算を拒否し、DB count が
+  変化しないことを確認します。
+- [x] 別 source、deployment、namespace の proof、malformed proof、追加 proof field を拒否します。
+- [x] response と log に authority secret が露出しないことを確認します。
+- [x] contracts、API、server の focused tests、typecheck、architecture harness を実行します。
+
+#### 進捗ログ
+
+- 2026-07-13: snapshot version 2、strict proof schema、launch authority HMAC、generic API injection、
+  restore 前 verification を実装しました。version 1 は authenticity を持たないため失効させました。
+- 2026-07-13: canonical base64url の padding-bit malleability と locale-dependent key sort を監査で検出し、
+  exact ASCII comparison と UTF-16 code-unit 順の versioned canonicalizer へ修正しました。
+- 2026-07-13: forged resource、event、deployment、output、cross-scope proof、unsigned / malformed proof、
+  response-loss replay を含む focused 44 tests、root typecheck、textlint、architecture harness が成功しました。

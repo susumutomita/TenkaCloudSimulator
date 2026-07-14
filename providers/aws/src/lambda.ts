@@ -347,6 +347,7 @@ function createFunction(
         Tags: tags,
       },
       status: 'CREATE_COMPLETE',
+      ParticipantCreated: true,
       state: { invocationCount: 0, codeSha256 },
     },
   });

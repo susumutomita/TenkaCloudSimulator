@@ -92,11 +92,12 @@ mode `0700` にしてから mount します。Simulator は既に private な di
 同じ directory を停止後に再利用できます。mode が `0700` でなければ起動時に狭め、変更できない
 directory は拒否します。
 
-## 5 operation lifecycle API
+## 6 operation lifecycle API
 
 ```text
 GET    /v1/capabilities
 POST   /v1/worlds
+GET    /v1/worlds/by-deployment/{deploymentId}
 POST   /v1/worlds/{worldId}/deployments
 GET    /v1/worlds/{worldId}/deployments/{deploymentId}
 DELETE /v1/worlds/{worldId}
@@ -105,16 +106,35 @@ DELETE /v1/worlds/{worldId}
 provider native API と共通 command API は、上記 lifecycle が所有する同じ world を
 操作します。初期 protocol identifier は `2026-07-11` です。version policy と error envelope は
 [protocol](./docs/architecture/protocol.md) を参照してください。
+world create の commit 後に response を受け取れなかった caller は、同じ launch token、
+`deploymentId`、create 時の `idempotency-key`（省略時は両 API 共通のデフォルト key）で lookup し、
+回復した `worldId` を idempotent delete に使えます。lookup は create-world の永続 idempotency
+record を使うため、同じ deployment の snapshot clone と混同しません。
+snapshot restore の response を失った場合は、source `worldId`、snapshot `hash`、restore 時と同じ
+`idempotency-key` で
+`GET /v1/worlds/{worldId}/snapshots/restores/{snapshotHash}` を呼び、新しい world を回復できます。
+source と restored world を別々に cleanup するまで、この pointer は deleted world にも残ります。
+
+AWS migration Battle の managed tier は、participant の `/meta.platform` ではなく resource graph の
+authoritative placement projection を使います。操作 identity、CLI / HTTP 例、reviewed workload
+binding の制約は [AWS provider](./providers/aws/README.md#managed-placement-projection) を参照して
+ください。
 
 ## セキュリティ境界
 
 - 実クラウド credential を受け付けません。
 - world を `tenantId / eventId / teamId / deploymentId` で隔離する。
 - workload container は非特権かつ egress deny をデフォルトにする。
+- workload image は world resource 作成前に明示 pull し、起動時は `--pull=never` に固定する。DELETE は
+  container と world network の双方が Docker timeout 以上連続して不在になるまで persistent intent を
+  保持するため、workload world の削除にはその quiet window 分の latency が加わる。
 - 未実装 operation を成功扱いにしません。
-- snapshot の import は schema と size limit の検証後に適用する。
-- workload を含む snapshot は、[TenkaCloud Issue 2605](https://github.com/susumutomita/TenkaCloud/issues/2605)
-  の async rematerialization が入るまで、新しい world の container を共有しないよう import を拒否する。
+- snapshot version `2` の import は schema、size limit、server-authenticated HMAC proof の検証後だけ
+  適用する。unsigned version `1` は失効済みで、launch authority secret の rotation は既存 proof を
+  無効にする。
+- workload を含む snapshot は resource、output、event payload の旧 endpoint と managed override を
+  除去し、新しい world 専用 container を async rematerialize してから返す。runner failure は同じ
+  restore key で再試行する。
 
 ## ライセンス
 

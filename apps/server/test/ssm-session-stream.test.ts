@@ -471,7 +471,10 @@ describe('SSM Session Manager streaming endpoint', () => {
     );
     expect(sourceState['tokenValue']).toBe(sourceToken);
 
-    const restored = core.restoreSnapshot(snapshot, 'restore-session-world');
+    const restored = await core.restoreSnapshot(
+      snapshot,
+      'restore-session-world'
+    );
     const restoredStream = new SsmSessionStreamGateway({
       core,
       idleTimeoutMilliseconds: 5_000,

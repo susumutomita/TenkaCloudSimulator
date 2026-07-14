@@ -25,6 +25,11 @@ import { reduceHttpProbe } from './http-probe';
 import { reduceIam } from './iam';
 import { reduceLambda, reduceLambdaAsync } from './lambda';
 import { reduceLogs } from './logs';
+import {
+  reduceAppRunner,
+  reduceEcs,
+  reduceManagedLambda,
+} from './managed-services';
 import { AWS_CAPABILITIES, AWS_PROVIDER, CLOUDFORMATION_ENGINE } from './model';
 import { reduceRds } from './rds';
 import { reduceRuntime } from './runtime';
@@ -66,6 +71,13 @@ export class AwsProvider implements ProviderModule {
     return deployCloudFormation(plan, world);
   }
 
+  commandMode(command: ProviderCommandInput) {
+    return command.service === 'runtime' &&
+      command.operation === 'DescribeEndpointPlacement'
+      ? ('projection-read' as const)
+      : ('mutation' as const);
+  }
+
   reduce(
     command: ProviderCommandInput,
     world: ProviderWorldView
@@ -80,7 +92,13 @@ export class AwsProvider implements ProviderModule {
       case 's3':
         return reduceS3(command, world);
       case 'lambda':
-        return reduceLambda(command, world);
+        return command.operation.includes('Managed')
+          ? reduceManagedLambda(command, world)
+          : reduceLambda(command, world);
+      case 'ecs':
+        return reduceEcs(command, world);
+      case 'apprunner':
+        return reduceAppRunner(command, world);
       case 'elasticloadbalancing':
         return reduceElb(command, world);
       case 'ec2':
@@ -110,6 +128,9 @@ export class AwsProvider implements ProviderModule {
     world: ProviderWorldView
   ): Promise<ProviderCommandResult> {
     if (command.service === 'lambda') {
+      if (command.operation.includes('Managed')) {
+        return reduceManagedLambda(command, world);
+      }
       return reduceLambdaAsync(command, world, this.#trustedWorkerOrigins);
     }
     if (

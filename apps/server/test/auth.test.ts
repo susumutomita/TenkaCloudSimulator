@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'bun:test';
 import { createHmac } from 'node:crypto';
 import {
+  SIMULATOR_PROTOCOL_VERSION,
+  SIMULATOR_SNAPSHOT_VERSION,
+  type SimulatorSnapshotEnvelope,
+} from '@tenkacloud/simulator-contracts';
+import {
   bearerLaunchToken,
   LaunchTokenAuthority,
   LaunchTokenError,
@@ -13,6 +18,36 @@ const NAMESPACE = {
   eventId: 'event-auth',
   teamId: 'team-auth',
   deploymentId: 'deployment-auth',
+};
+
+const SNAPSHOT_PROJECTED_WORLD = {
+  worldId: 'world-auth',
+  tenantId: NAMESPACE.tenantId,
+  eventId: NAMESPACE.eventId,
+  teamId: NAMESPACE.teamId,
+  deploymentId: NAMESPACE.deploymentId,
+};
+
+const SNAPSHOT_ENVELOPE: SimulatorSnapshotEnvelope = {
+  snapshotVersion: SIMULATOR_SNAPSHOT_VERSION,
+  protocolVersion: SIMULATOR_PROTOCOL_VERSION,
+  worldId: 'world-auth',
+  namespace: {
+    tenantId: NAMESPACE.tenantId,
+    eventId: NAMESPACE.eventId,
+    teamId: NAMESPACE.teamId,
+  },
+  seed: 'seed-auth',
+  clock: '2027-01-15T08:00:00.000Z',
+  lastSequence: 1,
+  resourceGraph: {
+    world: SNAPSHOT_PROJECTED_WORLD,
+    events: [],
+    deployments: [],
+    resources: [],
+  },
+  providerProjections: {},
+  hash: 'a'.repeat(64),
 };
 
 function signedToken(payloadValue: unknown): string {
@@ -107,5 +142,140 @@ describe('Simulator launch token', () => {
     expect(() =>
       authority.issue({ ...NAMESPACE, tenantId: '' }, 60, NOW)
     ).toThrow(LaunchTokenError);
+  });
+});
+
+describe('Simulator snapshot integrity proof の振る舞い', () => {
+  it('proof を別 domain の canonical envelope に HMAC 署名して検証する', () => {
+    const authority = new LaunchTokenAuthority(SECRET);
+    const integrityProof = authority.signSnapshot(SNAPSHOT_ENVELOPE);
+    expect(integrityProof).toEqual({
+      version: '1',
+      algorithm: 'HMAC-SHA256',
+      value: expect.stringMatching(/^[A-Za-z0-9_-]{43}$/),
+    });
+    expect(
+      authority.verifySnapshot({ ...SNAPSHOT_ENVELOPE, integrityProof })
+    ).toBe(true);
+    const alphabet =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+    const lastCharacter = integrityProof.value.at(-1);
+    const lastIndex = lastCharacter ? alphabet.indexOf(lastCharacter) : -1;
+    if (lastIndex < 0) throw new Error('proof suffix is invalid');
+    const nonCanonicalValue = `${integrityProof.value.slice(0, -1)}${alphabet[lastIndex ^ 1]}`;
+    expect(
+      Buffer.from(nonCanonicalValue, 'base64url').equals(
+        Buffer.from(integrityProof.value, 'base64url')
+      )
+    ).toBe(true);
+    expect(
+      authority.verifySnapshot({
+        ...SNAPSHOT_ENVELOPE,
+        integrityProof: { ...integrityProof, value: nonCanonicalValue },
+      })
+    ).toBe(false);
+
+    const reordered: SimulatorSnapshotEnvelope = {
+      hash: SNAPSHOT_ENVELOPE.hash,
+      providerProjections: SNAPSHOT_ENVELOPE.providerProjections,
+      resourceGraph: SNAPSHOT_ENVELOPE.resourceGraph,
+      lastSequence: SNAPSHOT_ENVELOPE.lastSequence,
+      clock: SNAPSHOT_ENVELOPE.clock,
+      seed: SNAPSHOT_ENVELOPE.seed,
+      namespace: SNAPSHOT_ENVELOPE.namespace,
+      worldId: SNAPSHOT_ENVELOPE.worldId,
+      protocolVersion: SNAPSHOT_ENVELOPE.protocolVersion,
+      snapshotVersion: SNAPSHOT_ENVELOPE.snapshotVersion,
+    };
+    expect(authority.signSnapshot(reordered)).toEqual(integrityProof);
+    const unicodeProjectionLeft = {
+      é: 'precomposed',
+      é: 'decomposed',
+    };
+    const unicodeProjectionRight = {
+      é: 'decomposed',
+      é: 'precomposed',
+    };
+    const unicodeLeft: SimulatorSnapshotEnvelope = {
+      ...SNAPSHOT_ENVELOPE,
+      providerProjections: { unicode: unicodeProjectionLeft },
+    };
+    const unicodeRight: SimulatorSnapshotEnvelope = {
+      ...SNAPSHOT_ENVELOPE,
+      providerProjections: { unicode: unicodeProjectionRight },
+    };
+    const unicodeProof = authority.signSnapshot(unicodeLeft);
+    expect(authority.signSnapshot(unicodeRight)).toEqual(unicodeProof);
+    expect(
+      authority.verifySnapshot({
+        ...unicodeRight,
+        integrityProof: unicodeProof,
+      })
+    ).toBe(true);
+
+    const tokenSignature = authority
+      .issue(NAMESPACE, 60, NOW)
+      .split('.')
+      .at(-1);
+    expect(
+      authority.verifySnapshot({
+        ...SNAPSHOT_ENVELOPE,
+        integrityProof: { ...integrityProof, value: tokenSignature },
+      })
+    ).toBe(false);
+  });
+
+  it('別 source、deployment、namespace、authority の proof を拒否する', () => {
+    const authority = new LaunchTokenAuthority(SECRET);
+    const integrityProof = authority.signSnapshot(SNAPSHOT_ENVELOPE);
+    const signed = { ...SNAPSHOT_ENVELOPE, integrityProof };
+    expect(
+      authority.verifySnapshot({ ...signed, worldId: 'world-other' })
+    ).toBe(false);
+    expect(
+      authority.verifySnapshot({
+        ...signed,
+        namespace: { ...signed.namespace, teamId: 'team-other' },
+      })
+    ).toBe(false);
+    expect(
+      authority.verifySnapshot({
+        ...signed,
+        resourceGraph: {
+          ...signed.resourceGraph,
+          world: {
+            ...SNAPSHOT_PROJECTED_WORLD,
+            deploymentId: 'deployment-other',
+          },
+        },
+      })
+    ).toBe(false);
+    expect(
+      new LaunchTokenAuthority(
+        'other-secret-0123456789abcdef01234'
+      ).verifySnapshot(signed)
+    ).toBe(false);
+  });
+
+  it('unsigned、malformed、追加 field を strict に拒否して secret を露出しない', () => {
+    const authority = new LaunchTokenAuthority(SECRET);
+    const integrityProof = authority.signSnapshot(SNAPSHOT_ENVELOPE);
+    expect(authority.verifySnapshot(SNAPSHOT_ENVELOPE)).toBe(false);
+    expect(
+      authority.verifySnapshot({
+        ...SNAPSHOT_ENVELOPE,
+        integrityProof: {
+          ...integrityProof,
+          value: `${integrityProof.value}=`,
+        },
+      })
+    ).toBe(false);
+    expect(
+      authority.verifySnapshot({
+        ...SNAPSHOT_ENVELOPE,
+        integrityProof: { ...integrityProof, source: 'caller' },
+      })
+    ).toBe(false);
+    expect(JSON.stringify(integrityProof)).not.toContain(SECRET);
   });
 });

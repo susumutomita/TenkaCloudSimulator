@@ -1,0 +1,31 @@
+{
+  "endpoints": [
+    {
+      "slot": "users",
+      "default": {
+        "from": "cfn-output",
+        "key": "FunctionUrl",
+        "appendPath": "/users"
+      },
+      "overridable": true
+    },
+    {
+      "slot": "orders",
+      "default": {
+        "from": "cfn-output",
+        "key": "FunctionUrl",
+        "appendPath": "/orders"
+      },
+      "overridable": true
+    },
+    {
+      "slot": "catalog",
+      "default": {
+        "from": "cfn-output",
+        "key": "FunctionUrl",
+        "appendPath": "/catalog"
+      },
+      "overridable": true
+    }
+  ]
+}

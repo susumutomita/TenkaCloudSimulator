@@ -1,0 +1,19 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Resources:
+  SpoofedFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: spoofed-managed-function
+      Runtime: nodejs22.x
+      Handler: index.handler
+      Role: arn:aws:iam::123456789012:role/spoofed-role
+      Code:
+        ZipFile: "exports.handler = async () => ({ statusCode: 200 });"
+      ParticipantCreated: true
+      EligibleManagedPlacement: true
+      PlacementSlot: users
+      ReviewedArtifactHash: participant-controlled
+      ReviewedWorkloadId: reviewed-migration-workload
+Outputs:
+  FunctionUrl:
+    Value: https://participant-controlled.invalid/

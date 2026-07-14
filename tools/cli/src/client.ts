@@ -18,7 +18,28 @@ import {
   type SimulatorWorldResponse,
 } from '@tenkacloud/simulator-contracts';
 
-const REQUEST_TIMEOUT_MILLISECONDS = 10_000;
+export interface SimulatorClientTimeoutPolicy {
+  readonly requestMilliseconds: number;
+}
+
+const MAX_SIMULATOR_CLIENT_TIMEOUT_MILLISECONDS = 600_000;
+
+export const DEFAULT_SIMULATOR_CLIENT_TIMEOUT_POLICY: SimulatorClientTimeoutPolicy =
+  Object.freeze({
+    requestMilliseconds: 10_000,
+  });
+
+function assertTimeoutPolicy(policy: SimulatorClientTimeoutPolicy): void {
+  if (
+    !Number.isSafeInteger(policy.requestMilliseconds) ||
+    policy.requestMilliseconds < 1 ||
+    policy.requestMilliseconds > MAX_SIMULATOR_CLIENT_TIMEOUT_MILLISECONDS
+  ) {
+    throw new TypeError(
+      'client request timeout must be a bounded positive integer'
+    );
+  }
+}
 
 export class SimulatorClientError extends Error {
   constructor(
@@ -95,13 +116,20 @@ export function parseProviderOperationResponse(
 export class SimulatorClient {
   readonly #baseUrl: string;
   readonly #launchToken: string | undefined;
+  readonly #requestTimeoutMilliseconds: number;
 
-  constructor(baseUrl: string, launchToken?: string) {
+  constructor(
+    baseUrl: string,
+    launchToken?: string,
+    timeoutPolicy = DEFAULT_SIMULATOR_CLIENT_TIMEOUT_POLICY
+  ) {
     this.#baseUrl = normalizedBaseUrl(baseUrl);
     if (launchToken && !launchToken.startsWith('tc_sim_v1.')) {
       throw new TypeError('CLI token must be a simulator launch token');
     }
+    assertTimeoutPolicy(timeoutPolicy);
     this.#launchToken = launchToken;
+    this.#requestTimeoutMilliseconds = timeoutPolicy.requestMilliseconds;
   }
 
   #headers(idempotencyKey?: string): Headers {
@@ -113,7 +141,11 @@ export class SimulatorClient {
     return headers;
   }
 
-  #request(path: string, init: RequestInit = {}): Promise<Response> {
+  #fetch(
+    path: string,
+    init: RequestInit,
+    signal: AbortSignal | null
+  ): Promise<Response> {
     const headers = new Headers(init.headers);
     if (this.#launchToken) {
       headers.set('authorization', `Bearer ${this.#launchToken}`);
@@ -121,8 +153,16 @@ export class SimulatorClient {
     return fetch(`${this.#baseUrl}${path}`, {
       ...init,
       headers,
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MILLISECONDS),
+      signal,
     });
+  }
+
+  #request(path: string, init: RequestInit = {}): Promise<Response> {
+    return this.#fetch(
+      path,
+      init,
+      AbortSignal.timeout(this.#requestTimeoutMilliseconds)
+    );
   }
 
   async capabilities(): Promise<SimulatorCapabilities> {
@@ -178,10 +218,11 @@ export class SimulatorClient {
     return value;
   }
 
-  async deleteWorld(worldId: string): Promise<void> {
-    const response = await this.#request(
+  async deleteWorld(worldId: string, signal?: AbortSignal): Promise<void> {
+    const response = await this.#fetch(
       `/v1/worlds/${encodeURIComponent(worldId)}`,
-      { method: 'DELETE', headers: this.#headers() }
+      { method: 'DELETE', headers: this.#headers() },
+      signal ?? null
     );
     await assertSimulatorDeleteResponse(response);
   }

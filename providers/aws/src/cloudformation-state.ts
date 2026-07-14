@@ -3,15 +3,18 @@ import {
   type ProviderCommandInput,
   type ProviderCommandResult,
   type ProviderWorldView,
+  type ResourceRecord,
 } from '@tenkacloud/simulator-core';
 import { compileCloudFormation } from './cloudformation';
 import { deployCloudFormation } from './deploy';
 import {
   AWS_PROVIDER,
   CLOUDFORMATION_ENGINE,
+  OBJECT_RESOURCE,
   RUNTIME_ENDPOINT_RESOURCE,
   STACK_RESOURCE,
 } from './model';
+import { preserveBoundRuntimeEndpoint } from './runtime';
 import {
   awsResources,
   findStack,
@@ -68,17 +71,21 @@ function stackResourceDocuments(
   world: ProviderWorldView,
   deploymentId: string
 ) {
+  const stack = findStack(world, deploymentId);
+  const state = stackProperties(stack);
+  const logicalIds = new Set(state.resourceLogicalIds);
   return resourcesForDeployment(world, deploymentId)
     .filter(
       (resource) =>
-        resource.resourceType !== STACK_RESOURCE &&
-        resource.resourceType !== RUNTIME_ENDPOINT_RESOURCE
+        resource.targetId === state.targetId &&
+        resource.properties['ParticipantCreated'] !== true &&
+        logicalIds.has(storedProperties(resource).logicalId)
     )
     .map((resource) => {
       const stored = storedProperties(resource);
       return {
         StackName: `${deploymentId}`,
-        StackId: findStack(world, deploymentId).resourceId,
+        StackId: stack.resourceId,
         LogicalResourceId: stored.logicalId,
         PhysicalResourceId: stored.physicalId,
         ResourceType: resource.resourceType,
@@ -88,6 +95,105 @@ function stackResourceDocuments(
     .sort((left, right) =>
       left.LogicalResourceId.localeCompare(right.LogicalResourceId)
     );
+}
+
+function stackOwnsResource(
+  resource: ResourceRecord,
+  stack: ReturnType<typeof findStack>,
+  state: ReturnType<typeof stackProperties>
+): boolean {
+  if (
+    resource.targetId !== state.targetId ||
+    resource.properties['ParticipantCreated'] === true
+  ) {
+    return false;
+  }
+  if (resource.resourceId === stack.resourceId) return true;
+  const properties = storedProperties(resource);
+  const logicalIds = new Set(state.resourceLogicalIds);
+  if (logicalIds.has(properties.logicalId)) return true;
+  if (
+    resource.resourceType === OBJECT_RESOURCE &&
+    properties.dependsOn.length === 1 &&
+    logicalIds.has(properties.dependsOn[0] ?? '') &&
+    properties.logicalId === `${properties.dependsOn[0]}.Object`
+  ) {
+    return true;
+  }
+  return (
+    resource.resourceType === RUNTIME_ENDPOINT_RESOURCE &&
+    properties['ProblemId'] === state.problemId &&
+    properties['TargetId'] === state.targetId &&
+    properties.dependsOn.length === 1 &&
+    properties.dependsOn[0] === state.logicalId &&
+    properties.physicalId.startsWith(`${stack.resourceId}:`)
+  );
+}
+
+function preserveBoundEndpoints(
+  command: ProviderCommandInput,
+  world: ProviderWorldView,
+  existing: ReturnType<typeof findStack>,
+  state: ReturnType<typeof stackProperties>,
+  resources: ProviderCommandResult['resources']
+) {
+  const replacements = new Map(
+    resources.map((resource) => [resource.resourceId, resource])
+  );
+  for (const endpoint of resourcesForDeployment(
+    world,
+    command.deploymentId,
+    RUNTIME_ENDPOINT_RESOURCE
+  )) {
+    if (
+      !stackOwnsResource(endpoint, existing, state) ||
+      endpoint.properties['ManagedPlacement'] === undefined
+    ) {
+      continue;
+    }
+    const replacement = replacements.get(endpoint.resourceId);
+    if (!replacement) {
+      throw new CoreError(
+        'Conflict',
+        'bound runtime endpoint cannot be removed from the stack'
+      );
+    }
+    replacements.set(
+      endpoint.resourceId,
+      preserveBoundRuntimeEndpoint(command, world, endpoint, replacement)
+    );
+  }
+  return resources.map(
+    (resource) => replacements.get(resource.resourceId) ?? resource
+  );
+}
+
+function assertParticipantResourceIdentitiesAvailable(
+  command: ProviderCommandInput,
+  world: ProviderWorldView,
+  resources: ProviderCommandResult['resources']
+): void {
+  const targetId = stringValue(command.targetId, 'targetId');
+  const participantResources = awsResources(world).filter(
+    (resource) =>
+      resource.deploymentId === command.deploymentId &&
+      resource.targetId === targetId &&
+      resource.properties['ParticipantCreated'] === true
+  );
+  for (const resource of resources) {
+    const properties = storedProperties(resource);
+    const collision = participantResources.some(
+      (candidate) =>
+        candidate.resourceType === resource.resourceType &&
+        storedProperties(candidate).refValue === properties.refValue
+    );
+    if (collision) {
+      throw new CoreError(
+        'Conflict',
+        'CloudFormation resource identity conflicts with a participant resource'
+      );
+    }
+  }
 }
 
 function updateStack(
@@ -114,11 +220,25 @@ function updateStack(
     ...(metadata === undefined ? {} : { metadata }),
   });
   const deployed = deployCloudFormation(plan, world);
-  const nextIds = new Set(
-    deployed.resources.map((resource) => resource.resourceId)
+  assertParticipantResourceIdentitiesAvailable(
+    command,
+    world,
+    deployed.resources
   );
+  const resources = preserveBoundEndpoints(
+    command,
+    world,
+    existing,
+    existingState,
+    deployed.resources
+  );
+  const nextIds = new Set(resources.map((resource) => resource.resourceId));
   const deletedResourceIds = resourcesForDeployment(world, command.deploymentId)
-    .filter((resource) => !nextIds.has(resource.resourceId))
+    .filter(
+      (resource) =>
+        stackOwnsResource(resource, existing, existingState) &&
+        !nextIds.has(resource.resourceId)
+    )
     .map((resource) => resource.resourceId)
     .sort();
   const stack = deployed.resources.find(
@@ -138,7 +258,7 @@ function updateStack(
       },
       ...deployed.events,
     ],
-    resources: deployed.resources,
+    resources,
     deletedResourceIds,
     outputs: deployed.outputs,
     response: { StackId: stack.resourceId },

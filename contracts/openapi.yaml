@@ -53,6 +53,30 @@ paths:
           $ref: '#/components/responses/Error'
         default:
           $ref: '#/components/responses/Error'
+  /v1/worlds/by-deployment/{deploymentId}:
+    parameters:
+      - $ref: '#/components/parameters/DeploymentId'
+    get:
+      operationId: getWorldByDeployment
+      summary: Recover a world after an ambiguous create response
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      security:
+        - LaunchToken: []
+      responses:
+        '200':
+          description: The world committed for the create-world idempotency identity
+          headers:
+            x-tenkacloud-simulator-protocol:
+              $ref: '#/components/headers/ProtocolVersion'
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/create-world-response.schema.json'
+        '404':
+          $ref: '#/components/responses/Error'
+        default:
+          $ref: '#/components/responses/Error'
   /v1/worlds/{worldId}/deployments:
     parameters:
       - $ref: '#/components/parameters/WorldId'
@@ -347,7 +371,10 @@ paths:
       - $ref: '#/components/parameters/WorldId'
     get:
       operationId: exportSnapshot
-      summary: Export a versioned world snapshot
+      summary: Export a server-authenticated versioned world snapshot
+      description: Returns snapshot version 2 with an HMAC integrity proof over the canonical envelope. Unsigned version 1 snapshots are intentionally incompatible.
+      security:
+        - LaunchToken: []
       responses:
         '200':
           description: Versioned snapshot
@@ -362,7 +389,10 @@ paths:
           $ref: '#/components/responses/Error'
     post:
       operationId: restoreSnapshot
-      summary: Validate a snapshot and restore it as a new world
+      summary: Verify a signed snapshot and restore it as a new world
+      description: Rejects unsigned, malformed, or modified snapshots before core conversion or persistence.
+      security:
+        - LaunchToken: []
       parameters:
         - $ref: '#/components/parameters/ProtocolVersion'
         - $ref: '#/components/parameters/IdempotencyKey'
@@ -382,6 +412,31 @@ paths:
             application/json:
               schema:
                 $ref: './schemas/create-world-response.schema.json'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/worlds/{worldId}/snapshots/restores/{snapshotHash}:
+    parameters:
+      - $ref: '#/components/parameters/WorldId'
+      - $ref: '#/components/parameters/SnapshotHash'
+    get:
+      operationId: getSnapshotRestore
+      summary: Recover the new world committed by a snapshot restore
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      security:
+        - LaunchToken: []
+      responses:
+        '200':
+          description: The restored world committed for the restore identity
+          headers:
+            x-tenkacloud-simulator-protocol:
+              $ref: '#/components/headers/ProtocolVersion'
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/create-world-response.schema.json'
+        '404':
+          $ref: '#/components/responses/Error'
         default:
           $ref: '#/components/responses/Error'
 components:
@@ -404,8 +459,10 @@ components:
       in: header
       required: false
       description: >-
-        Retry identity within a namespace. Existing TenkaCloud clients may use
-        the caller-assigned deploymentId as the lifecycle identity.
+        Retry identity within an operation scope. Recovery lookups must send
+        the same explicit key as the originating create or restore mutation;
+        omission uses the same deterministic deploymentId and operation
+        default on both endpoints.
       schema:
         type: string
         minLength: 1
@@ -424,6 +481,13 @@ components:
       schema:
         type: string
         minLength: 1
+    SnapshotHash:
+      name: snapshotHash
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^[a-f0-9]{64}$'
     Provider:
       name: provider
       in: path

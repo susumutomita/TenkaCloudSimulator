@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
+import { createHmac, timingSafeEqual } from 'node:crypto';
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -10,11 +11,20 @@ import {
   assertSimulatorResourceProjection,
   assertSimulatorSnapshot,
   assertSimulatorWorldResponse,
+  canonicalSimulatorSnapshotIntegrityPayload,
+  SIMULATOR_SNAPSHOT_INTEGRITY_ALGORITHM,
+  SIMULATOR_SNAPSHOT_INTEGRITY_VERSION,
+  type SimulatorSnapshot,
+  type SimulatorSnapshotEnvelope,
+  type SimulatorSnapshotIntegrityProof,
 } from '@tenkacloud/simulator-contracts';
 import {
+  type MaterializedWorkload,
   ProviderRegistry,
   SimulationCore,
   SimulationStore,
+  type WorkloadDeclaration,
+  type WorkloadEffectPort,
 } from '@tenkacloud/simulator-core';
 import {
   CLOUD_RUN_SERVICE,
@@ -23,10 +33,12 @@ import {
 import { runCli } from '../src/cli';
 import {
   assertSimulatorDeleteResponse,
+  DEFAULT_SIMULATOR_CLIENT_TIMEOUT_POLICY,
   decodeSimulatorResponse,
   parseProviderOperationResponse,
   SimulatorClient,
   SimulatorClientError,
+  type SimulatorClientTimeoutPolicy,
 } from '../src/client';
 
 class BufferOutput {
@@ -45,17 +57,93 @@ interface Invocation {
 
 interface TestRuntime {
   readonly baseUrl: string;
+  readonly core: SimulationCore;
   readonly directory: string;
   readonly server: Bun.Server<undefined>;
   readonly store: SimulationStore;
+  readonly workloadEffects?: QuietWindowWorkloadEffects;
 }
 
 let runtime: TestRuntime;
 
-async function invoke(args: readonly string[]): Promise<Invocation> {
+const SNAPSHOT_INTEGRITY_SECRET = 'cli-test-snapshot-secret-0123456789abcdef';
+const WORKLOAD_IMAGE = `ghcr.io/tenkacloud/cli-timeout@sha256:${'a'.repeat(64)}`;
+
+class QuietWindowWorkloadEffects implements WorkloadEffectPort {
+  readonly #servers = new Map<string, Bun.Server<undefined>[]>();
+
+  constructor(readonly cleanupQuietMilliseconds: number) {}
+
+  async materialize(
+    worldId: string,
+    declarations: readonly WorkloadDeclaration[]
+  ): Promise<readonly MaterializedWorkload[]> {
+    const servers = this.#servers.get(worldId) ?? [];
+    const materialized = declarations.map((declaration) => {
+      const server = Bun.serve({
+        hostname: '127.0.0.1',
+        port: 0,
+        fetch: () => new Response('healthy'),
+      });
+      servers.push(server);
+      return {
+        worldId,
+        workloadId: declaration.id,
+        targetId: declaration.targetId,
+        resourceRef: declaration.resourceRef,
+        image: declaration.image,
+        healthPath: declaration.healthPath ?? '/',
+        endpoint: server.url.origin,
+      };
+    });
+    this.#servers.set(worldId, servers);
+    return materialized;
+  }
+
+  async cleanup(worldId: string): Promise<void> {
+    for (const server of this.#servers.get(worldId) ?? []) server.stop(true);
+    this.#servers.delete(worldId);
+    await Bun.sleep(this.cleanupQuietMilliseconds);
+  }
+
+  close(): void {
+    for (const servers of this.#servers.values()) {
+      for (const server of servers) server.stop(true);
+    }
+    this.#servers.clear();
+  }
+}
+
+function snapshotProofValue(envelope: SimulatorSnapshotEnvelope): string {
+  return createHmac('sha256', SNAPSHOT_INTEGRITY_SECRET)
+    .update(canonicalSimulatorSnapshotIntegrityPayload(envelope))
+    .digest('base64url');
+}
+
+function signSnapshot(
+  envelope: SimulatorSnapshotEnvelope
+): SimulatorSnapshotIntegrityProof {
+  return {
+    version: SIMULATOR_SNAPSHOT_INTEGRITY_VERSION,
+    algorithm: SIMULATOR_SNAPSHOT_INTEGRITY_ALGORITHM,
+    value: snapshotProofValue(envelope),
+  };
+}
+
+function verifySnapshot(snapshot: SimulatorSnapshot): boolean {
+  const { integrityProof, ...envelope } = snapshot;
+  const expected = Buffer.from(snapshotProofValue(envelope), 'ascii');
+  const provided = Buffer.from(integrityProof.value, 'ascii');
+  return timingSafeEqual(expected, provided);
+}
+
+async function invoke(
+  args: readonly string[],
+  timeoutPolicy?: SimulatorClientTimeoutPolicy
+): Promise<Invocation> {
   const stdout = new BufferOutput();
   const stderr = new BufferOutput();
-  const code = await runCli(args, stdout, stderr);
+  const code = await runCli(args, stdout, stderr, timeoutPolicy);
   return { code, stdout: stdout.value, stderr: stderr.value };
 }
 
@@ -63,26 +151,97 @@ function parseJson(value: string): unknown {
   return JSON.parse(value);
 }
 
-beforeEach(async () => {
+async function openRuntime(
+  workloadEffects?: QuietWindowWorkloadEffects
+): Promise<TestRuntime> {
   const directory = await mkdtemp(join(tmpdir(), 'simulator-cli-'));
   const store = new SimulationStore(join(directory, 'simulation.sqlite'));
   const registry = new ProviderRegistry([new GcpProvider()]);
-  const core = new SimulationCore(store, registry);
+  const core = new SimulationCore(store, registry, {
+    ...(workloadEffects === undefined ? {} : { workloadEffects }),
+  });
   const app = createSimulatorApp({
     core,
     registry,
     consoleBaseUrl: 'http://127.0.0.1:9444/console',
+    resolveWorldNamespace: () => ({
+      tenantId: 'tenant-cli',
+      eventId: 'event-cli',
+      teamId: 'team-cli',
+    }),
+    signSnapshot,
+    verifySnapshot,
   });
   const server = Bun.serve({
     hostname: '127.0.0.1',
     port: 0,
     fetch: app.fetch,
   });
-  runtime = { baseUrl: server.url.origin, directory, server, store };
+  return {
+    baseUrl: server.url.origin,
+    core,
+    directory,
+    server,
+    store,
+    ...(workloadEffects === undefined ? {} : { workloadEffects }),
+  };
+}
+
+async function replaceRuntime(
+  workloadEffects: QuietWindowWorkloadEffects
+): Promise<void> {
+  await runtime.server.stop(true);
+  runtime.workloadEffects?.close();
+  runtime.store.close();
+  await rm(runtime.directory, { recursive: true, force: true });
+  runtime = await openRuntime(workloadEffects);
+}
+
+async function createWorkloadWorld(deploymentId: string): Promise<string> {
+  const client = new SimulatorClient(runtime.baseUrl);
+  const world = await client.createWorld({
+    tenantId: 'tenant-cli',
+    eventId: 'event-cli',
+    teamId: 'team-cli',
+    deploymentId,
+  });
+  const templateBody = await readFile(
+    new URL('./fixtures/main.tf', import.meta.url),
+    'utf8'
+  );
+  const deployment = await client.createDeployment(world.worldId, {
+    problemId: deploymentId,
+    runtime: {
+      provider: 'gcp',
+      engine: 'infra-manager',
+      entry: 'main.tf',
+    },
+    templateBody,
+    simulationOverlay: {
+      schemaVersion: '1',
+      workloads: [
+        {
+          id: 'api',
+          targetId: 'default',
+          resourceRef: 'google_cloud_run_v2_service.hello',
+          image: WORKLOAD_IMAGE,
+          containerPort: 8080,
+          healthPath: '/',
+        },
+      ],
+    },
+  });
+  expect(deployment.status).toBe('running');
+  return world.worldId;
+}
+
+beforeEach(async () => {
+  runtime = await openRuntime();
 });
 
 afterEach(async () => {
   await runtime.server.stop(true);
+  runtime.workloadEffects?.close();
   runtime.store.close();
   await rm(runtime.directory, { recursive: true, force: true });
 });
@@ -257,6 +416,39 @@ describe('Simulator CLI', () => {
     expect(parseJson(deleted.stdout)).toEqual({ deleted: true });
   });
 
+  it('world-delete は通常 request deadline を越える cleanup の完了を実 HTTP で待つ', async () => {
+    const workloadEffects = new QuietWindowWorkloadEffects(75);
+    await replaceRuntime(workloadEffects);
+    const worldId = await createWorkloadWorld('cli-delete-timeout');
+
+    const deleted = await invoke(
+      ['world-delete', '--url', runtime.baseUrl, '--world', worldId],
+      { requestMilliseconds: 25 }
+    );
+
+    expect(deleted).toMatchObject({
+      code: 0,
+      stderr: '',
+    });
+    expect(parseJson(deleted.stdout)).toEqual({ deleted: true });
+    expect(runtime.core.world(worldId).status).toBe('deleted');
+  });
+
+  it('deleteWorld は caller の明示 AbortSignal で server completion 待機を中断する', async () => {
+    const workloadEffects = new QuietWindowWorkloadEffects(75);
+    await replaceRuntime(workloadEffects);
+    const worldId = await createWorkloadWorld('client-delete-cancellation');
+    const client = new SimulatorClient(runtime.baseUrl, undefined, {
+      requestMilliseconds: 25,
+    });
+
+    await expect(
+      client.deleteWorld(worldId, AbortSignal.timeout(25))
+    ).rejects.toMatchObject({ name: 'TimeoutError' });
+    await Bun.sleep(200);
+    expect(runtime.core.world(worldId).status).toBe('deleted');
+  });
+
   it('入力、cursor、contract、API error を終了コードと診断へ変換する', async () => {
     expect((await invoke([])).stdout).toContain('Usage:');
     expect((await invoke(['--help'])).code).toBe(0);
@@ -362,6 +554,9 @@ describe('Simulator CLI', () => {
   });
 
   it('client の URL と response 境界を schema で検証する', async () => {
+    expect(DEFAULT_SIMULATOR_CLIENT_TIMEOUT_POLICY).toEqual({
+      requestMilliseconds: 10_000,
+    });
     expect(() => new SimulatorClient('http://example.com')).toThrow('HTTPS');
     expect(
       () => new SimulatorClient('https://example.com', 'real-oauth-token')
@@ -369,6 +564,34 @@ describe('Simulator CLI', () => {
     expect(() => new SimulatorClient('https://example.com')).not.toThrow();
     expect(() => new SimulatorClient('http://localhost:8787')).not.toThrow();
     expect(() => new SimulatorClient('http://[::1]:8787')).not.toThrow();
+    expect(
+      () =>
+        new SimulatorClient('https://example.com', undefined, {
+          requestMilliseconds: 0,
+        })
+    ).toThrow('client request timeout');
+    expect(
+      () =>
+        new SimulatorClient('https://example.com', undefined, {
+          requestMilliseconds: 600_001,
+        })
+    ).toThrow('bounded');
+    expect(
+      () =>
+        new SimulatorClient('https://example.com', undefined, {
+          requestMilliseconds: 600_000,
+        })
+    ).not.toThrow();
+    const mutableTimeoutPolicy = { requestMilliseconds: 250 };
+    const stablePolicyClient = new SimulatorClient(
+      runtime.baseUrl,
+      undefined,
+      mutableTimeoutPolicy
+    );
+    mutableTimeoutPolicy.requestMilliseconds = 0;
+    expect(
+      (await stablePolicyClient.capabilities()).providers['gcp']
+    ).toBeDefined();
     expect(await decodeSimulatorResponse(new Response(null))).toBeUndefined();
     await expect(
       decodeSimulatorResponse(new Response('{invalid'))

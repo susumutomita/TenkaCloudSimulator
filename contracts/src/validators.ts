@@ -39,6 +39,7 @@ import type {
   SimulatorResourceProjection,
   SimulatorSimulationOverlay,
   SimulatorSnapshot,
+  SimulatorSnapshotEnvelope,
   SimulatorWorldRequest,
   SimulatorWorldResponse,
 } from './types.js';
@@ -100,6 +101,19 @@ const resourceProjectionValidator = ajv.compile<SimulatorResourceProjection>(
   resourceProjectionSchema
 );
 const snapshotValidator = ajv.compile<SimulatorSnapshot>(snapshotSchema);
+const { integrityProof: _integrityProofSchema, ...snapshotEnvelopeProperties } =
+  snapshotSchema.properties;
+const snapshotEnvelopeValidator = ajv.compile<SimulatorSnapshotEnvelope>({
+  ...snapshotSchema,
+  $id: snapshotSchema.$id.replace(
+    'snapshot.schema.json',
+    'snapshot-envelope.schema.json'
+  ),
+  required: snapshotSchema.required.filter(
+    (property) => property !== 'integrityProof'
+  ),
+  properties: snapshotEnvelopeProperties,
+});
 const capabilityRequirementValidator = ajv.compile<CapabilityRequirement>(
   capabilityRequirementSchema
 );
@@ -314,6 +328,18 @@ export function isSimulatorSnapshot(
   value: unknown
 ): value is SimulatorSnapshot {
   return snapshotValidator(value);
+}
+
+export function isSimulatorSnapshotEnvelope(
+  value: unknown
+): value is SimulatorSnapshotEnvelope {
+  return snapshotEnvelopeValidator(value);
+}
+
+export function assertSimulatorSnapshotEnvelope(
+  value: unknown
+): asserts value is SimulatorSnapshotEnvelope {
+  assertContract('SimulatorSnapshotEnvelope', snapshotEnvelopeValidator, value);
 }
 
 export function assertSimulatorSnapshot(

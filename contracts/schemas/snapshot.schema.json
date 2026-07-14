@@ -13,10 +13,11 @@
     "lastSequence",
     "resourceGraph",
     "providerProjections",
-    "hash"
+    "hash",
+    "integrityProof"
   ],
   "properties": {
-    "snapshotVersion": { "const": "1" },
+    "snapshotVersion": { "const": "2" },
     "protocolVersion": { "const": "2026-07-11" },
     "worldId": {
       "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/nonEmptyString"
@@ -46,6 +47,20 @@
     },
     "hash": {
       "$ref": "https://schemas.tenkacloud.dev/simulator/v1/common.schema.json#/$defs/sha256"
+    },
+    "integrityProof": {
+      "description": "Server-authenticated proof over the canonical version 2 snapshot envelope excluding this property. Unsigned version 1 snapshots are intentionally rejected.",
+      "type": "object",
+      "required": ["version", "algorithm", "value"],
+      "properties": {
+        "version": { "const": "1" },
+        "algorithm": { "const": "HMAC-SHA256" },
+        "value": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{43}$"
+        }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false

@@ -1,4 +1,13 @@
 import { createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
+import {
+  assertSimulatorSnapshotEnvelope,
+  canonicalSimulatorSnapshotIntegrityPayload,
+  isSimulatorSnapshot,
+  SIMULATOR_SNAPSHOT_INTEGRITY_ALGORITHM,
+  SIMULATOR_SNAPSHOT_INTEGRITY_VERSION,
+  type SimulatorSnapshotEnvelope,
+  type SimulatorSnapshotIntegrityProof,
+} from '@tenkacloud/simulator-contracts';
 
 const TOKEN_PREFIX = 'tc_sim_v1';
 const MAX_TOKEN_LENGTH = 4096;
@@ -110,6 +119,33 @@ export class LaunchTokenAuthority {
         .update(`${TOKEN_PREFIX}.${payload}`)
         .digest()
     );
+  }
+
+  #snapshotSignature(envelope: SimulatorSnapshotEnvelope): string {
+    return base64Url(
+      createHmac('sha256', this.#secret)
+        .update(canonicalSimulatorSnapshotIntegrityPayload(envelope))
+        .digest()
+    );
+  }
+
+  signSnapshot(
+    envelope: SimulatorSnapshotEnvelope
+  ): SimulatorSnapshotIntegrityProof {
+    assertSimulatorSnapshotEnvelope(envelope);
+    return {
+      version: SIMULATOR_SNAPSHOT_INTEGRITY_VERSION,
+      algorithm: SIMULATOR_SNAPSHOT_INTEGRITY_ALGORITHM,
+      value: this.#snapshotSignature(envelope),
+    };
+  }
+
+  verifySnapshot(value: unknown): boolean {
+    if (!isSimulatorSnapshot(value)) return false;
+    const { integrityProof, ...envelope } = value;
+    const expected = Buffer.from(this.#snapshotSignature(envelope), 'ascii');
+    const provided = Buffer.from(integrityProof.value, 'ascii');
+    return timingSafeEqual(expected, provided);
   }
 
   issue(

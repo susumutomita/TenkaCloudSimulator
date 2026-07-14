@@ -10,6 +10,7 @@ import {
   symlink,
   writeFile,
 } from 'node:fs/promises';
+import { createConnection } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
@@ -19,11 +20,21 @@ import {
   SIMULATOR_PROTOCOL_VERSION,
 } from '@tenkacloud/simulator-contracts';
 import {
+  deterministicId,
+  ProviderRegistry,
+  SimulationCore,
+  SimulationStore,
+} from '@tenkacloud/simulator-core';
+import {
   AWS_NATIVE_DEPLOYMENT_HEADER,
   AWS_NATIVE_TARGET_HEADER,
   AWS_NATIVE_WORLD_HEADER,
 } from '@tenkacloud/simulator-provider-aws';
 import { LaunchTokenAuthority } from '../src/auth';
+import {
+  isCompletionBoundWorldDelete,
+  productionServerFetch,
+} from '../src/production-server';
 import {
   createSimulatorRuntime,
   needsPrivateDirectoryModeCorrection,
@@ -33,6 +44,7 @@ import {
 } from '../src/runtime';
 
 const WORKLOAD_IMAGE = `busybox@sha256:${'a'.repeat(64)}`;
+const TEST_PRODUCTION_SERVER_IDLE_TIMEOUT_SECONDS = 1;
 
 function workloadEnvironment(): Readonly<Partial<SimulatorRuntimeEnvironment>> {
   return {
@@ -172,6 +184,97 @@ function serveEntrypoint(runtime: SimulatorRuntime) {
   return server;
 }
 
+function serveDelayedProductionEntrypoint(
+  runtime: SimulatorRuntime
+): Bun.Server<unknown> {
+  const delayedFetch: SimulatorRuntime['fetch'] = async (request, server) => {
+    await Bun.sleep(5_500);
+    const response = await runtime.fetch(request, server);
+    if (response === undefined) {
+      throw new Error('delayed production fetch must return an HTTP response');
+    }
+    return response;
+  };
+  const productionFetch = productionServerFetch(
+    delayedFetch,
+    TEST_PRODUCTION_SERVER_IDLE_TIMEOUT_SECONDS
+  );
+  const server = Bun.serve({
+    hostname: '127.0.0.1',
+    port: 0,
+    idleTimeout: TEST_PRODUCTION_SERVER_IDLE_TIMEOUT_SECONDS,
+    fetch: (request, requestServer) => {
+      requestServer.timeout(
+        request,
+        TEST_PRODUCTION_SERVER_IDLE_TIMEOUT_SECONDS
+      );
+      return productionFetch(request, requestServer);
+    },
+    websocket: runtime.websocket,
+  });
+  servers.push(server);
+  return server;
+}
+
+function serveProductionEntrypoint(
+  runtime: SimulatorRuntime
+): Bun.Server<unknown> {
+  const server = Bun.serve({
+    hostname: '127.0.0.1',
+    port: 0,
+    idleTimeout: TEST_PRODUCTION_SERVER_IDLE_TIMEOUT_SECONDS,
+    fetch: productionServerFetch(
+      runtime.fetch,
+      TEST_PRODUCTION_SERVER_IDLE_TIMEOUT_SECONDS
+    ),
+    websocket: runtime.websocket,
+  });
+  servers.push(server);
+  return server;
+}
+
+async function rawUnauthenticatedDeleteUntilClose(
+  server: Bun.Server<unknown>
+): Promise<string> {
+  const port = server.port;
+  if (port === undefined) {
+    throw new Error('production test server has no bound port');
+  }
+  return new Promise((resolve, reject) => {
+    const socket = createConnection({
+      host: '127.0.0.1',
+      port,
+    });
+    let response = '';
+    let socketError: Error | undefined;
+    const watchdog = setTimeout(() => {
+      socket.destroy();
+      reject(new Error('unauthenticated keep-alive socket remained open'));
+    }, 8_000);
+
+    socket.setEncoding('utf8');
+    socket.on('connect', () => {
+      socket.write(
+        `DELETE /v1/worlds/world_missing HTTP/1.1\r\nHost: 127.0.0.1:${port}\r\nConnection: keep-alive\r\nx-tenkacloud-simulator-protocol: ${SIMULATOR_PROTOCOL_VERSION}\r\n\r\n`
+      );
+    });
+    socket.on('data', (chunk) => {
+      response += chunk;
+    });
+    socket.on('error', (error) => {
+      socketError = error;
+    });
+    socket.on('close', () => {
+      clearTimeout(watchdog);
+      if (response.length === 0 && socketError !== undefined) {
+        reject(socketError);
+        return;
+      }
+      resolve(response);
+    });
+  });
+}
+
 function authenticatedHeaders(token: string, json = true): Headers {
   const headers = new Headers({ authorization: `Bearer ${token}` });
   if (json) {
@@ -245,6 +348,72 @@ afterEach(async () => {
 });
 
 describe('Simulator runtime entrypoint', () => {
+  it('query のない exact world DELETE だけを completion-bound request と判定する', () => {
+    const requests = [
+      ['DELETE', '/v1/worlds/world-1', true],
+      ['POST', '/v1/worlds/world-1', false],
+      ['DELETE', '/v1/worlds/world-1?retry=1', false],
+      ['DELETE', '/v1/worlds/world-1/', false],
+      ['DELETE', '/v1/worlds/world-1/deployments', false],
+      ['DELETE', '/v1/worlds/by-deployment/deployment-1', false],
+    ] as const;
+
+    for (const [method, requestPath, expected] of requests) {
+      expect(
+        isCompletionBoundWorldDelete(
+          new Request(`http://127.0.0.1${requestPath}`, { method })
+        )
+      ).toBe(expected);
+    }
+  });
+
+  it('production server は idle timeout を越える実 world DELETE の完了まで接続を維持する', async () => {
+    const runtime = await openRuntime();
+    const token = new LaunchTokenAuthority(SECRET_BYTES).issue(NAMESPACE);
+    const created = await runtime.app.fetch(
+      new Request('http://127.0.0.1/v1/worlds', {
+        method: 'POST',
+        headers: authenticatedHeaders(token),
+        body: JSON.stringify(NAMESPACE),
+      })
+    );
+    const world: unknown = await created.json();
+    assertSimulatorWorldResponse(world);
+    const server = serveDelayedProductionEntrypoint(runtime);
+
+    const deleted = await fetch(
+      `${server.url.origin}/v1/worlds/${world.worldId}`,
+      { method: 'DELETE', headers: authenticatedHeaders(token) }
+    );
+
+    expect(deleted.status).toBe(204);
+    expect(runtime.store.world(world.worldId)?.status).toBe('deleted');
+  }, 10_000);
+
+  it('production server は通常 route の idle timeout を解除しない', async () => {
+    const runtime = await openRuntime();
+    const server = serveDelayedProductionEntrypoint(runtime);
+
+    const result = await fetch(`${server.url.origin}/v1/capabilities`).catch(
+      (error: unknown) => error
+    );
+
+    expect(result).toBeInstanceOf(Error);
+    expect(result).toMatchObject({ code: 'ECONNRESET' });
+  }, 10_000);
+
+  it('認証失敗した exact DELETE の keep-alive を production timeout へ復元する', async () => {
+    const runtime = await openRuntime();
+    const server = serveProductionEntrypoint(runtime);
+
+    const response = await rawUnauthenticatedDeleteUntilClose(server);
+
+    expect(response).toContain('HTTP/1.1 401 Unauthorized');
+    expect(response.toLowerCase()).toContain(
+      `x-tenkacloud-simulator-protocol: ${SIMULATOR_PROTOCOL_VERSION}`
+    );
+  }, 10_000);
+
   it('mode 0700 の state directory では bind mount 非互換の chmod を省略する', () => {
     expect(needsPrivateDirectoryModeCorrection(0o40_700)).toBe(false);
     expect(needsPrivateDirectoryModeCorrection(0o40_755)).toBe(true);
@@ -560,6 +729,44 @@ describe('Simulator runtime entrypoint', () => {
     );
     runtimes.push(runtime);
     expect((await lstat(permissionState)).mode & 0o777).toBe(0o700);
+  });
+
+  it('永続化済み delete intent を runtime 返却前に reconcile する', async () => {
+    const configured = environment();
+    const stateDirectory = configured.TENKACLOUD_SIMULATOR_STATE_DIR ?? '';
+    await mkdir(stateDirectory, { recursive: true });
+    const seededStore = new SimulationStore(
+      join(stateDirectory, 'simulator.sqlite')
+    );
+    const seededCore = new SimulationCore(seededStore, new ProviderRegistry());
+    const world = seededCore.createWorld(
+      {
+        tenantId: 'startup-reconcile-tenant',
+        eventId: 'startup-reconcile-event',
+        teamId: 'startup-reconcile-team',
+        deploymentId: 'startup-reconcile-deployment',
+      },
+      'startup-reconcile-world'
+    );
+    seededStore.reserveEvents(
+      world.worldId,
+      deterministicId('command', {
+        worldId: world.worldId,
+        operation: 'delete',
+      }),
+      1,
+      'deletion'
+    );
+    await expect(createSimulatorRuntime(configured)).rejects.toMatchObject({
+      code: 'Conflict',
+    });
+    expect(seededStore.pendingDeletionWorldIds()).toEqual([world.worldId]);
+    seededStore.close();
+
+    const runtime = await createSimulatorRuntime(configured);
+    runtimes.push(runtime);
+    expect(runtime.store.world(world.worldId)?.status).toBe('deleted');
+    expect(runtime.store.pendingDeletionWorldIds()).toEqual([]);
   });
 
   it('workload policy は全項目の厳密設定時だけ runner capability を広告する', async () => {
