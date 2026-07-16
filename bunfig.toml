@@ -19,6 +19,14 @@ trustedDependencies = []
 # 監査時の進捗をログに残し、後追いしやすくする
 saveTextLockfile = true
 
+# 公開から 7 日 (168h) 未満のバージョンを解決しない。.npmrc の
+# min-release-age=168h (npm 系 fallback 用) および CI の Safe Chain
+# minimum package age ゲートと同じ隔離期間を、Bun 自身の解決にも適用する。
+# これが無いと bun install はローカルで最新版を lockfile に固定し、
+# CI の install_ci (Safe Chain) で初めて 403 になる。判断の正本:
+# docs/adr/0014-bun-minimum-release-age.md
+minimumReleaseAge = 604800
+
 [test]
 # console の view テスト (Cloudscape + @testing-library/react) が使う DOM 環境。
 # react-dom は load 時に DOM の有無で event system の経路を固定する CommonJS
