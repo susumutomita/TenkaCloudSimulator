@@ -1,10 +1,33 @@
+import Alert from '@cloudscape-design/components/alert';
+import AppLayout from '@cloudscape-design/components/app-layout';
+import Box from '@cloudscape-design/components/box';
+import Button from '@cloudscape-design/components/button';
+import Cards, { type CardsProps } from '@cloudscape-design/components/cards';
+import ColumnLayout from '@cloudscape-design/components/column-layout';
+import Container from '@cloudscape-design/components/container';
+import ContentLayout from '@cloudscape-design/components/content-layout';
+import ExpandableSection from '@cloudscape-design/components/expandable-section';
+import Form from '@cloudscape-design/components/form';
+import FormField from '@cloudscape-design/components/form-field';
+import Grid from '@cloudscape-design/components/grid';
+import Header from '@cloudscape-design/components/header';
+import Input from '@cloudscape-design/components/input';
+import KeyValuePairs from '@cloudscape-design/components/key-value-pairs';
+import SpaceBetween from '@cloudscape-design/components/space-between';
+import Spinner from '@cloudscape-design/components/spinner';
+import StatusIndicator, {
+  type StatusIndicatorProps,
+} from '@cloudscape-design/components/status-indicator';
+import Table, { type TableProps } from '@cloudscape-design/components/table';
+import Textarea from '@cloudscape-design/components/textarea';
+import TopNavigation from '@cloudscape-design/components/top-navigation';
 import type {
   JsonValue,
   SimulatorDiagnostic,
   SimulatorEvent,
   SimulatorResourceRecord,
 } from '@tenkacloud/simulator-contracts';
-import { useActionState, useRef } from 'react';
+import { useActionState, useRef, useState } from 'react';
 import {
   type ConsoleLoadState,
   diagnostics,
@@ -48,6 +71,35 @@ export async function runConsoleOperationAction(
   }
 }
 
+const STATUS_INDICATOR_TYPES: Readonly<
+  Record<string, StatusIndicatorProps.Type>
+> = {
+  accepted: 'pending',
+  deleted: 'stopped',
+  deleting: 'in-progress',
+  deploying: 'in-progress',
+  failed: 'error',
+  pending: 'pending',
+  ready: 'success',
+  running: 'success',
+};
+
+export function statusIndicatorType(status: string): StatusIndicatorProps.Type {
+  return STATUS_INDICATOR_TYPES[status] ?? 'pending';
+}
+
+function ConsoleStatus({
+  status,
+}: {
+  readonly status: string;
+}): React.JSX.Element {
+  return (
+    <StatusIndicator type={statusIndicatorType(status)}>
+      {status}
+    </StatusIndicator>
+  );
+}
+
 export function ConsoleOperationResult({
   state,
 }: {
@@ -55,36 +107,11 @@ export function ConsoleOperationResult({
 }): React.JSX.Element | null {
   if (state.kind === 'idle') return null;
   return (
-    <p
-      className={`operation-result operation-result-${state.kind}`}
-      role={state.kind === 'error' ? 'alert' : 'status'}
-    >
-      {state.message}
-    </p>
-  );
-}
-
-function BrandMark(): React.JSX.Element {
-  return (
-    <span className="brand-mark" aria-hidden="true">
-      T
-    </span>
-  );
-}
-
-function ShellHeader(): React.JSX.Element {
-  return (
-    <header className="shell-header">
-      <a className="brand" href="/" aria-label="TenkaCloud home">
-        <BrandMark />
-        <span>TenkaCloud</span>
-        <span className="brand-product">Simulator</span>
-      </a>
-      <div className="protocol-badge">
-        <span className="live-dot" aria-hidden="true" />
-        Protocol 2026-07-11
-      </div>
-    </header>
+    <div role={state.kind === 'error' ? 'alert' : 'status'}>
+      <Alert type={state.kind === 'error' ? 'error' : 'success'}>
+        {state.message}
+      </Alert>
+    </div>
   );
 }
 
@@ -94,12 +121,20 @@ function LoadingState({
   readonly worldId: string;
 }): React.JSX.Element {
   return (
-    <main className="state-page" aria-busy="true" aria-live="polite">
-      <div className="loader" aria-hidden="true" />
-      <p className="eyebrow">World {worldId}</p>
-      <h1>Reading the event-sourced world</h1>
-      <p>Loading resources, deployment output, and the replay cursor.</p>
-    </main>
+    <div aria-busy="true" aria-live="polite">
+      <Container>
+        <Box padding="xxl" textAlign="center">
+          <SpaceBetween alignItems="center" size="s">
+            <Spinner size="large" />
+            <Box variant="strong">World {worldId}</Box>
+            <Box variant="h1">Reading the event-sourced world</Box>
+            <Box color="text-body-secondary">
+              Loading resources, deployment output, and the replay cursor.
+            </Box>
+          </SpaceBetween>
+        </Box>
+      </Container>
+    </div>
   );
 }
 
@@ -113,94 +148,101 @@ function ErrorState({
   readonly onRefresh: () => void;
 }): React.JSX.Element {
   return (
-    <main className="state-page" role="alert">
-      <span className="state-icon" aria-hidden="true">
-        !
-      </span>
-      <p className="eyebrow">World {worldId}</p>
-      <h1>World unavailable</h1>
-      <p>{message}</p>
-      <button className="primary-button" type="button" onClick={onRefresh}>
-        Try again
-      </button>
-    </main>
-  );
-}
-
-function Metric({
-  label,
-  value,
-}: {
-  readonly label: string;
-  readonly value: string | number;
-}): React.JSX.Element {
-  return (
-    <div className="metric">
-      <span>{label}</span>
-      <strong>{value}</strong>
+    <div role="alert">
+      <Alert
+        action={<Button onClick={onRefresh}>Try again</Button>}
+        header="World unavailable"
+        type="error"
+      >
+        <SpaceBetween size="xxs">
+          <Box variant="strong">World {worldId}</Box>
+          <Box>{message}</Box>
+        </SpaceBetween>
+      </Alert>
     </div>
   );
 }
 
-function StatusBadge({
-  status,
-}: {
-  readonly status: string;
-}): React.JSX.Element {
-  return <span className={`status status-${status}`}>{status}</span>;
-}
-
-function JsonEntry({
-  name,
+function PropertyValue({
   value,
 }: {
-  readonly name: string;
   readonly value: JsonValue;
 }): React.JSX.Element {
   const rendered = displayValue(value);
-  return (
-    <div className="property-row">
-      <dt>{name}</dt>
-      <dd className={rendered.includes('\n') ? 'code-value' : undefined}>
-        {rendered}
-      </dd>
-    </div>
-  );
+  const variant = rendered.includes('\n') ? 'pre' : 'span';
+  return <Box variant={variant}>{rendered}</Box>;
 }
 
-function ResourceCard({
+function ResourceCategories({
   resource,
 }: {
   readonly resource: SimulatorResourceRecord;
 }): React.JSX.Element {
   return (
-    <article className="resource-card">
-      <div className="resource-heading">
-        <div>
-          <p className="resource-type">{resource.resourceType}</p>
-          <h4>{resource.resourceId}</h4>
-        </div>
-        <StatusBadge status={resource.status} />
-      </div>
-      <div className="resource-meta">
-        <span>Target</span>
-        <code>{resource.targetId}</code>
-        <span>Deployment</span>
-        <code>{resource.deploymentId}</code>
-      </div>
+    <SpaceBetween size="xs">
       {propertyCategories(resource).map((category) => (
-        <details key={category.label} open={category.label !== 'Properties'}>
-          <summary>{category.label}</summary>
-          <dl className="properties">
-            {category.entries.map(([name, value]) => (
-              <JsonEntry key={name} name={name} value={value} />
-            ))}
-          </dl>
-        </details>
+        <ExpandableSection
+          defaultExpanded={category.label !== 'Properties'}
+          headerText={category.label}
+          key={category.label}
+        >
+          <KeyValuePairs
+            columns={2}
+            items={category.entries.map(([name, value]) => ({
+              label: name,
+              value: <PropertyValue value={value} />,
+            }))}
+          />
+        </ExpandableSection>
       ))}
-    </article>
+    </SpaceBetween>
   );
 }
+
+function resourceKey(resource: SimulatorResourceRecord): string {
+  return `${resource.deploymentId}:${resource.targetId}:${resource.provider}:${resource.resourceType}:${resource.resourceId}`;
+}
+
+const RESOURCE_CARD_DEFINITION: CardsProps.CardDefinition<SimulatorResourceRecord> =
+  {
+    header: (resource) => (
+      <SpaceBetween direction="horizontal" size="xs">
+        <Box variant="h4">{resource.resourceId}</Box>
+        <ConsoleStatus status={resource.status} />
+      </SpaceBetween>
+    ),
+    sections: [
+      {
+        id: 'type',
+        header: 'Type',
+        content: (resource) => (
+          <Box variant="code">{resource.resourceType}</Box>
+        ),
+      },
+      {
+        id: 'placement',
+        content: (resource) => (
+          <KeyValuePairs
+            columns={2}
+            items={[
+              {
+                label: 'Target',
+                value: <Box variant="code">{resource.targetId}</Box>,
+              },
+              {
+                label: 'Deployment',
+                value: <Box variant="code">{resource.deploymentId}</Box>,
+              },
+            ]}
+          />
+        ),
+      },
+      {
+        id: 'categories',
+        content: (resource) => <ResourceCategories resource={resource} />,
+      },
+    ],
+  };
 
 function ResourceGraph({
   resources,
@@ -209,76 +251,152 @@ function ResourceGraph({
 }): React.JSX.Element {
   const groups = groupResources({ resources });
   if (groups.length === 0) {
-    return <p className="empty-state">No resources have been projected yet.</p>;
+    return (
+      <Container>
+        <Cards
+          cardDefinition={RESOURCE_CARD_DEFINITION}
+          empty={
+            <Box color="text-body-secondary">
+              No resources have been projected yet.
+            </Box>
+          }
+          items={[]}
+          trackBy={resourceKey}
+        />
+      </Container>
+    );
   }
   return (
-    <div className="provider-grid">
+    <SpaceBetween size="m">
       {groups.map((group) => (
-        <section className="provider-lane" key={group.provider}>
-          <header>
-            <span className="provider-glyph" aria-hidden="true">
-              {group.provider.slice(0, 2).toUpperCase()}
-            </span>
-            <div>
-              <h3>{group.provider}</h3>
-              <p>{group.resources.length} projected resources</p>
-            </div>
-          </header>
-          <div className="resource-list">
-            {group.resources.map((resource) => (
-              <ResourceCard
-                key={`${resource.deploymentId}:${resource.targetId}:${resource.provider}:${resource.resourceType}:${resource.resourceId}`}
-                resource={resource}
-              />
-            ))}
-          </div>
-        </section>
+        <Container
+          header={
+            <Header
+              counter={`(${group.resources.length})`}
+              description={`${group.resources.length} projected resources`}
+              variant="h3"
+            >
+              {group.provider}
+            </Header>
+          }
+          key={group.provider}
+        >
+          <Cards
+            cardDefinition={RESOURCE_CARD_DEFINITION}
+            cardsPerRow={[{ cards: 1 }]}
+            items={[...group.resources]}
+            trackBy={resourceKey}
+          />
+        </Container>
       ))}
-    </div>
+    </SpaceBetween>
   );
 }
 
-function EventItem({
-  event,
-}: {
-  readonly event: SimulatorEvent;
-}): React.JSX.Element {
-  return (
-    <li className="event-item">
-      <span className="event-sequence">{event.sequence}</span>
-      <div>
-        <div className="event-heading">
-          <strong>{event.type}</strong>
-          <time dateTime={event.virtualTimestamp}>
-            {event.virtualTimestamp}
-          </time>
-        </div>
-        <p className="event-command">
-          {event.command.operation} · <code>{event.command.id}</code>
-        </p>
-        <details>
-          <summary>Event payload</summary>
-          <pre>{JSON.stringify(event.payload, null, 2)}</pre>
-        </details>
-      </div>
-    </li>
-  );
-}
+const EVENT_COLUMN_DEFINITIONS: readonly TableProps.ColumnDefinition<SimulatorEvent>[] =
+  [
+    {
+      id: 'sequence',
+      header: 'Sequence',
+      cell: (event) => event.sequence,
+    },
+    {
+      id: 'type',
+      header: 'Type',
+      cell: (event) => <Box variant="strong">{event.type}</Box>,
+    },
+    {
+      id: 'timestamp',
+      header: 'Virtual timestamp',
+      cell: (event) => (
+        <time dateTime={event.virtualTimestamp}>{event.virtualTimestamp}</time>
+      ),
+    },
+    {
+      id: 'command',
+      header: 'Command',
+      cell: (event) => (
+        <Box variant="code">
+          {event.command.operation} · {event.command.id}
+        </Box>
+      ),
+    },
+    {
+      id: 'payload',
+      header: 'Payload',
+      cell: (event) => (
+        <ExpandableSection headerText="Event payload">
+          <Box variant="pre">{JSON.stringify(event.payload, null, 2)}</Box>
+        </ExpandableSection>
+      ),
+    },
+  ];
 
 function EventTimeline({
   events,
 }: {
   readonly events: readonly SimulatorEvent[];
 }): React.JSX.Element {
-  if (events.length === 0) {
-    return <p className="empty-state">No events exist after this cursor.</p>;
-  }
   return (
-    <ol className="timeline">
-      {events.toReversed().map((event) => (
-        <EventItem key={event.sequence} event={event} />
-      ))}
-    </ol>
+    <Table
+      columnDefinitions={EVENT_COLUMN_DEFINITIONS}
+      empty={
+        <Box color="text-body-secondary">
+          No events exist after this cursor.
+        </Box>
+      }
+      items={events.toReversed()}
+      trackBy={(event) => String(event.sequence)}
+      variant="embedded"
+    />
+  );
+}
+
+function diagnosticSource(diagnostic: SimulatorDiagnostic): string {
+  const line = diagnostic.source?.line ? `:${diagnostic.source.line}` : '';
+  return diagnostic.source ? `${diagnostic.source.file}${line}` : '—';
+}
+
+const DIAGNOSTIC_COLUMN_DEFINITIONS: readonly TableProps.ColumnDefinition<SimulatorDiagnostic>[] =
+  [
+    {
+      id: 'code',
+      header: 'Code',
+      cell: (diagnostic) => (
+        <StatusIndicator type="error">{diagnostic.code}</StatusIndicator>
+      ),
+    },
+    {
+      id: 'message',
+      header: 'Message',
+      cell: (diagnostic) => diagnostic.message,
+    },
+    {
+      id: 'source',
+      header: 'Source',
+      cell: (diagnostic) => (
+        <Box variant="code">{diagnosticSource(diagnostic)}</Box>
+      ),
+    },
+  ];
+
+function diagnosticKey(diagnostic: SimulatorDiagnostic): string {
+  return `${diagnostic.code}:${diagnostic.provider}:${diagnostic.service}:${diagnostic.resourceType}:${diagnostic.operation}:${diagnostic.source?.file}:${diagnostic.source?.line}`;
+}
+
+function Diagnostics({
+  entries,
+}: {
+  readonly entries: readonly SimulatorDiagnostic[];
+}): React.JSX.Element {
+  return (
+    <Table
+      columnDefinitions={DIAGNOSTIC_COLUMN_DEFINITIONS}
+      empty={<Box color="text-body-secondary">No deployment diagnostics.</Box>}
+      items={[...entries]}
+      trackBy={diagnosticKey}
+      variant="embedded"
+    />
   );
 }
 
@@ -289,81 +407,127 @@ function OutputList({
 }): React.JSX.Element {
   const entries = Object.entries(outputs);
   if (entries.length === 0) {
-    return <p className="empty-state compact">No deployment outputs.</p>;
+    return <Box color="text-body-secondary">No deployment outputs.</Box>;
   }
   return (
-    <dl className="output-list">
-      {entries.map(([key, value]) => (
-        <div key={key}>
-          <dt>{key}</dt>
-          <dd>{value}</dd>
-        </div>
-      ))}
-    </dl>
+    <KeyValuePairs
+      items={entries.map(([label, value]) => ({
+        label,
+        value: <Box variant="code">{value}</Box>,
+      }))}
+    />
   );
 }
 
-function DiagnosticItem({
-  diagnostic,
-}: {
-  readonly diagnostic: SimulatorDiagnostic;
-}): React.JSX.Element {
-  return (
-    <li>
-      <strong>{diagnostic.code}</strong>
-      <p>{diagnostic.message}</p>
-      {diagnostic.source ? (
-        <code>
-          {diagnostic.source.file}
-          {diagnostic.source.line ? `:${diagnostic.source.line}` : ''}
-        </code>
-      ) : null}
-    </li>
-  );
+interface OperationFormValues {
+  readonly provider: string;
+  readonly targetId: string;
+  readonly engine: string;
+  readonly service: string;
+  readonly resourceType: string;
+  readonly operation: string;
+  readonly input: string;
+  readonly idempotencyKey: string;
 }
 
-function Diagnostics({
-  entries,
-}: {
-  readonly entries: readonly SimulatorDiagnostic[];
-}): React.JSX.Element {
-  if (entries.length === 0) {
-    return <p className="empty-state compact">No deployment diagnostics.</p>;
-  }
-  return (
-    <ul className="diagnostic-list">
-      {entries.map((diagnostic) => (
-        <DiagnosticItem
-          key={`${diagnostic.code}:${diagnostic.provider}:${diagnostic.service}:${diagnostic.resourceType}:${diagnostic.operation}:${diagnostic.source?.file}:${diagnostic.source?.line}`}
-          diagnostic={diagnostic}
-        />
-      ))}
-    </ul>
-  );
-}
-
-function OperationField({
-  label,
-  name,
-  defaultValue,
-  placeholder,
-}: {
+interface OperationFieldDefinition {
   readonly label: string;
-  readonly name: string;
-  readonly defaultValue?: string;
+  readonly name: Exclude<keyof OperationFormValues, 'input' | 'idempotencyKey'>;
   readonly placeholder?: string;
+}
+
+const OPERATION_FIELD_DEFINITIONS: readonly OperationFieldDefinition[] = [
+  { label: 'Provider', name: 'provider', placeholder: 'gcp' },
+  { label: 'Target ID', name: 'targetId' },
+  { label: 'Engine', name: 'engine', placeholder: 'infra-manager' },
+  { label: 'Service', name: 'service', placeholder: 'run' },
+  {
+    label: 'Resource type',
+    name: 'resourceType',
+    placeholder: 'google_cloud_run_v2_service',
+  },
+  { label: 'Operation', name: 'operation', placeholder: 'UpdateService' },
+];
+
+function ProviderOperationForm({
+  deploymentId,
+  onOperation,
+}: {
+  readonly deploymentId: string;
+  readonly onOperation: (formData: FormData) => Promise<void>;
 }): React.JSX.Element {
+  const idempotencyKey = useRef(`console-${crypto.randomUUID()}`).current;
+  const [fields, setFields] = useState<OperationFormValues>({
+    provider: '',
+    targetId: 'default',
+    engine: '',
+    service: '',
+    resourceType: '',
+    operation: '',
+    input: '{}',
+    idempotencyKey,
+  });
+  const [actionState, formAction, pending] = useActionState(
+    runConsoleOperationAction.bind(null, onOperation),
+    INITIAL_OPERATION_STATE
+  );
+  const setField = (name: keyof OperationFormValues, value: string): void =>
+    setFields((current) => ({ ...current, [name]: value }));
   return (
-    <label className="operation-field">
-      <span>{label}</span>
-      <input
-        name={name}
-        required
-        defaultValue={defaultValue}
-        placeholder={placeholder}
-        autoComplete="off"
-      />
-    </label>
+    <form action={formAction}>
+      <Form
+        actions={
+          <Button disabled={pending} variant="primary">
+            {pending ? 'Executing…' : 'Execute command'}
+          </Button>
+        }
+      >
+        <SpaceBetween size="m">
+          <Box>
+            Deployment{' '}
+            <Box display="inline" variant="code">
+              {deploymentId}
+            </Box>
+            . The command appends to this world and refreshes from its event
+            stream.
+          </Box>
+          <ColumnLayout columns={2}>
+            {OPERATION_FIELD_DEFINITIONS.map((field) => (
+              <FormField key={field.name} label={field.label}>
+                <Input
+                  autoComplete={false}
+                  name={field.name}
+                  onChange={({ detail }) => setField(field.name, detail.value)}
+                  value={fields[field.name]}
+                  {...(field.placeholder
+                    ? { placeholder: field.placeholder }
+                    : {})}
+                />
+              </FormField>
+            ))}
+          </ColumnLayout>
+          <FormField label="Input JSON object" stretch>
+            <Textarea
+              name="input"
+              onChange={({ detail }) => setField('input', detail.value)}
+              rows={7}
+              value={fields.input}
+            />
+          </FormField>
+          <FormField label="Idempotency key" stretch>
+            <Input
+              autoComplete={false}
+              name="idempotencyKey"
+              onChange={({ detail }) =>
+                setField('idempotencyKey', detail.value)
+              }
+              value={fields.idempotencyKey}
+            />
+          </FormField>
+          <ConsoleOperationResult state={actionState} />
+        </SpaceBetween>
+      </Form>
+    </form>
   );
 }
 
@@ -374,80 +538,25 @@ function ProviderOperationPanel({
   readonly deploymentId?: string;
   readonly onOperation: (formData: FormData) => Promise<void>;
 }): React.JSX.Element {
-  const idempotencyKey = useRef(`console-${crypto.randomUUID()}`).current;
-  const [actionState, formAction, pending] = useActionState(
-    runConsoleOperationAction.bind(null, onOperation),
-    INITIAL_OPERATION_STATE
-  );
   return (
-    <section
-      className="panel operation-panel"
-      aria-labelledby="operation-title"
+    <Container
+      header={
+        <Header description="Shared command API" variant="h2">
+          Provider operation
+        </Header>
+      }
     >
-      <div className="section-heading">
-        <div>
-          <p className="eyebrow">Shared command API</p>
-          <h2 id="operation-title">Provider operation</h2>
-        </div>
-      </div>
       {deploymentId ? (
-        <form action={formAction} className="operation-form">
-          <p>
-            Deployment <code>{deploymentId}</code>. The command appends to this
-            world and refreshes from its event stream.
-          </p>
-          <div className="operation-fields">
-            <OperationField
-              label="Provider"
-              name="provider"
-              placeholder="gcp"
-            />
-            <OperationField
-              label="Target ID"
-              name="targetId"
-              defaultValue="default"
-            />
-            <OperationField
-              label="Engine"
-              name="engine"
-              placeholder="infra-manager"
-            />
-            <OperationField label="Service" name="service" placeholder="run" />
-            <OperationField
-              label="Resource type"
-              name="resourceType"
-              placeholder="google_cloud_run_v2_service"
-            />
-            <OperationField
-              label="Operation"
-              name="operation"
-              placeholder="UpdateService"
-            />
-          </div>
-          <label className="operation-field">
-            <span>Input JSON object</span>
-            <textarea name="input" required defaultValue="{}" rows={7} />
-          </label>
-          <label className="operation-field">
-            <span>Idempotency key</span>
-            <input
-              name="idempotencyKey"
-              required
-              defaultValue={idempotencyKey}
-              autoComplete="off"
-            />
-          </label>
-          <ConsoleOperationResult state={actionState} />
-          <button className="primary-button" type="submit" disabled={pending}>
-            {pending ? 'Executing…' : 'Execute command'}
-          </button>
-        </form>
+        <ProviderOperationForm
+          deploymentId={deploymentId}
+          onOperation={onOperation}
+        />
       ) : (
-        <p className="empty-state compact">
+        <Box color="text-body-secondary">
           Select a deployment in the Console URL before executing a command.
-        </p>
+        </Box>
       )}
-    </section>
+    </Container>
   );
 }
 
@@ -464,93 +573,105 @@ function ReadyConsole({
   const providers = groupResources(data.resources);
   const deploymentDiagnostics = diagnostics(data.deployment);
   return (
-    <main className="console-main">
-      <section className="hero" aria-labelledby="world-title">
-        <div>
-          <p className="eyebrow">Deterministic world</p>
-          <h1 id="world-title">{data.worldId}</h1>
-          <p className="hero-copy">
-            One source of truth for every provider, command, and projected
-            resource.
-          </p>
-        </div>
-        <button className="secondary-button" type="button" onClick={onRefresh}>
-          Refresh projection
-        </button>
-      </section>
-
-      <section className="metrics" aria-label="World summary">
-        <Metric label="Providers" value={providers.length} />
-        <Metric label="Resources" value={data.resources.resources.length} />
-        <Metric label="Events" value={data.events.length} />
-        <Metric
-          label="Deployment"
-          value={data.deployment?.status ?? 'not selected'}
-        />
-      </section>
-
-      <div className="content-grid">
-        <section
-          className="panel resources-panel"
-          aria-labelledby="resources-title"
+    <ContentLayout
+      header={
+        <Header
+          actions={<Button onClick={onRefresh}>Refresh projection</Button>}
+          description="One source of truth for every provider, command, and projected resource."
+          variant="h1"
         >
-          <div className="section-heading">
-            <div>
-              <p className="eyebrow">Resource graph</p>
-              <h2 id="resources-title">Provider projections</h2>
-            </div>
-            <span className="cursor-badge">cursor {data.cursor}</span>
-          </div>
-          <ResourceGraph resources={data.resources.resources} />
-        </section>
-
-        <aside className="side-column">
-          <ProviderOperationPanel
-            {...(data.deployment
-              ? { deploymentId: data.deployment.deploymentId }
-              : {})}
-            onOperation={onOperation}
+          {data.worldId}
+        </Header>
+      }
+    >
+      <SpaceBetween size="l">
+        <Container>
+          <KeyValuePairs
+            columns={4}
+            items={[
+              { label: 'Providers', value: providers.length },
+              {
+                label: 'Resources',
+                value: data.resources.resources.length,
+              },
+              { label: 'Events', value: data.events.length },
+              {
+                label: 'Deployment',
+                value: data.deployment?.status ?? 'not selected',
+              },
+            ]}
           />
-          <section className="panel" aria-labelledby="outputs-title">
-            <div className="section-heading">
-              <div>
-                <p className="eyebrow">Deployment</p>
-                <h2 id="outputs-title">Outputs</h2>
-              </div>
-              {data.deployment ? (
-                <StatusBadge status={data.deployment.status} />
-              ) : null}
-            </div>
-            <OutputList outputs={data.deployment?.outputs ?? {}} />
-          </section>
-          <section className="panel" aria-labelledby="diagnostics-title">
-            <div className="section-heading">
-              <div>
-                <p className="eyebrow">Preflight & runtime</p>
-                <h2 id="diagnostics-title">Diagnostics</h2>
-              </div>
-              <span className="count-badge">
-                {deploymentDiagnostics.length}
-              </span>
-            </div>
-            <Diagnostics entries={deploymentDiagnostics} />
-          </section>
-        </aside>
-      </div>
-
-      <section className="panel events-panel" aria-labelledby="events-title">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">Replayable audit trail</p>
-            <h2 id="events-title">Event timeline</h2>
-          </div>
-          <span className="stream-badge">
-            <span className="live-dot" aria-hidden="true" /> SSE replay
-          </span>
-        </div>
-        <EventTimeline events={data.events} />
-      </section>
-    </main>
+        </Container>
+        <Grid
+          gridDefinition={[
+            { colspan: { default: 12, m: 8 } },
+            { colspan: { default: 12, m: 4 } },
+          ]}
+        >
+          <SpaceBetween size="m">
+            <Header
+              counter={`cursor ${data.cursor}`}
+              description="Resource graph"
+              variant="h2"
+            >
+              Provider projections
+            </Header>
+            <ResourceGraph resources={data.resources.resources} />
+          </SpaceBetween>
+          <SpaceBetween size="l">
+            <ProviderOperationPanel
+              {...(data.deployment
+                ? { deploymentId: data.deployment.deploymentId }
+                : {})}
+              onOperation={onOperation}
+            />
+            <Container
+              header={
+                <Header
+                  actions={
+                    data.deployment ? (
+                      <ConsoleStatus status={data.deployment.status} />
+                    ) : null
+                  }
+                  description="Deployment"
+                  variant="h2"
+                >
+                  Outputs
+                </Header>
+              }
+            >
+              <OutputList outputs={data.deployment?.outputs ?? {}} />
+            </Container>
+            <Container
+              header={
+                <Header
+                  counter={`(${deploymentDiagnostics.length})`}
+                  description="Preflight & runtime"
+                  variant="h2"
+                >
+                  Diagnostics
+                </Header>
+              }
+            >
+              <Diagnostics entries={deploymentDiagnostics} />
+            </Container>
+          </SpaceBetween>
+        </Grid>
+        <Container
+          header={
+            <Header
+              actions={<Box variant="strong">SSE replay</Box>}
+              description="Replayable audit trail"
+              variant="h2"
+            >
+              Event timeline
+            </Header>
+          }
+        >
+          <EventTimeline events={data.events} />
+        </Container>
+      </SpaceBetween>
+    </ContentLayout>
   );
 }
 
@@ -560,29 +681,42 @@ export function WorldConsoleView({
   onOperation,
 }: WorldConsoleViewProps): React.JSX.Element {
   return (
-    <div className="app-shell">
-      <ShellHeader />
-      {state.kind === 'loading' ? (
-        <LoadingState worldId={state.worldId} />
-      ) : null}
-      {state.kind === 'error' ? (
-        <ErrorState
-          worldId={state.worldId}
-          message={state.message}
-          onRefresh={onRefresh}
+    <div className="console-shell">
+      <header className="console-header" id="console-header">
+        <TopNavigation
+          identity={{
+            href: '/',
+            title: 'TenkaCloud Simulator',
+          }}
+          utilities={[{ type: 'button', text: 'Protocol 2026-07-11' }]}
         />
-      ) : null}
-      {state.kind === 'ready' ? (
-        <ReadyConsole
-          state={state}
-          onRefresh={onRefresh}
-          onOperation={onOperation}
-        />
-      ) : null}
-      <footer className="shell-footer">
-        <span>TenkaCloud Simulator</span>
-        <span>Event-sourced · provider-neutral · deterministic</span>
-      </footer>
+      </header>
+      <AppLayout
+        headerSelector="#console-header"
+        content={
+          <>
+            {state.kind === 'loading' ? (
+              <LoadingState worldId={state.worldId} />
+            ) : null}
+            {state.kind === 'error' ? (
+              <ErrorState
+                message={state.message}
+                onRefresh={onRefresh}
+                worldId={state.worldId}
+              />
+            ) : null}
+            {state.kind === 'ready' ? (
+              <ReadyConsole
+                onOperation={onOperation}
+                onRefresh={onRefresh}
+                state={state}
+              />
+            ) : null}
+          </>
+        }
+        navigationHide
+        toolsHide
+      />
     </div>
   );
 }

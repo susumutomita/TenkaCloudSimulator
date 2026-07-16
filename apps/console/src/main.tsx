@@ -1,9 +1,13 @@
+import '@cloudscape-design/global-styles/index.css';
+import { applyMode, Mode } from '@cloudscape-design/global-styles';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { type ConsoleBootstrap, SimulatorConsoleApp } from './app';
 import { SimulatorConsoleClient } from './client';
 import { consumeLaunchToken } from './launch-token';
 import './styles.css';
+
+applyMode(Mode.Dark);
 
 const root = document.getElementById('root');
 if (!root) throw new Error('Console root element was not found');

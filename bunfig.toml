@@ -20,6 +20,12 @@ trustedDependencies = []
 saveTextLockfile = true
 
 [test]
+# console の view テスト (Cloudscape + @testing-library/react) が使う DOM 環境。
+# react-dom は load 時に DOM の有無で event system の経路を固定する CommonJS
+# のため、preload で全 module より先に happy-dom を登録する必要がある。
+# setup はネットワーク・ストリーム実装を Bun native へ戻すので、実 HTTP と
+# 実 SQLite を使う他 workspace の behavior テストの経路は変わらない。
+preload = ["./apps/console/test/dom-setup.ts"]
 # カバレッジ 100% は Definition of Done (docs/architecture/quality-bar.md / ADR-0003)。
 # `bun test --coverage` 実行時に下回ったら失敗させる。閾値は 0-1 の割合で 1 = 100%。
 coverageThreshold = 1

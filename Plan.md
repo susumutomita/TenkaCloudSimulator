@@ -322,3 +322,67 @@ integrity proof を追加します。
   exact ASCII comparison と UTF-16 code-unit 順の versioned canonicalizer へ修正しました。
 - 2026-07-13: forged resource、event、deployment、output、cross-scope proof、unsigned / malformed proof、
   response-loss replay を含む focused 44 tests、root typecheck、textlint、architecture harness が成功しました。
+
+### [console Cloudscape 統一] - [2026-07-16]
+
+#### 目的
+
+Issue 9 の承認済み設計 `docs/design/2026-07-15-console-cloudscape.md` (選択肢 B) に従い、
+`apps/console` の表示層を Cloudscape Design System へ全面移行します。behavior
+(`model.ts` / `client.ts` / `loader.ts` / `launch-token.ts`) は維持したまま、view 層と
+view 層テストだけを刷新します。
+
+#### 制約
+
+- behavior テストは実 HTTP (`Bun.serve`) と実 SQLite のまま変更しません。view の
+  `renderToStaticMarkup` assertion だけを client-side rendering へ移送します。
+- `aria-busy` (loading)、role=alert (error)、launch token 秘匿 (`tc_sim_v1` 非表示)、
+  `useActionState` の pending 表示、`crypto.randomUUID()` の idempotency 既定値、
+  MissingProvider 診断、未知 status の pending フォールバックを維持します。
+- カバレッジ 100% と日本語 BDD スタイルを維持します。
+
+#### タスク
+
+- [x] spike: DOM 環境と `@testing-library/react` で Cloudscape 代表 component を Red-Green で描画します。
+- [x] shell: `AppLayout` + `TopNavigation` + `ContentLayout` へ骨格を移し、3 状態テストを client 版へ移送します。
+- [x] ready 本体: metrics、resource graph、operation form、outputs、diagnostics、event timeline を移行します。
+- [x] `styles.css` を console 固有の最小レイアウトへ削減します。
+- [x] gate: typecheck、test、coverage 100%、architecture-harness、biome、production build を緑にします。
+
+#### 検証手順
+
+`cd apps/console && bun run typecheck && bun test test && bun test --coverage test`、
+`bun scripts/architecture-harness.ts --fail-on=error`、`bun biome check apps/console`、
+`cd apps/console && bun run build` を順に実行します。
+
+#### 進捗ログ
+
+- 2026-07-16: 設計ドキュメントの未確定 2 点を判断しました。DOM 環境は Bun test での既知の
+  実績とネットワーク実装を差し替えない構成を取りやすい happy-dom
+  (`@happy-dom/global-registrator`) を採用します。表示密度は resource を `Cards`
+  (入れ子の property category を per-item で展開表示するため)、event と diagnostics を
+  `Table` (列が均質で密度が高いため) で出すことにしました。
+- 2026-07-16: spike で Bun が CommonJS 依存を module graph の link 時に先行実行する挙動を確認しました。
+  `@testing-library/dom` の `screen` は import 時の document を束縛して壊れるため、view テストは
+  `render()` が返す query だけを使います。
+- 2026-07-16: react-dom が load 時に DOM の有無 (canUseDOM) で event system の経路を固定するため、
+  テストファイル内 import では Cloudscape Input の onChange が発火しない問題を特定しました。DOM 登録は
+  bunfig.toml の `[test].preload` (root と apps/console の両方) へ移し、setup がネットワーク・
+  ストリーム・WebSocket 実装を Bun native へ戻すことで、他 workspace の実 HTTP / 実 SQLite テストの
+  経路を変えずに全体を緑にしました。
+- 2026-07-16: view.tsx を Cloudscape へ全面移行し、view テスト 10 件を client render で追加、
+  console.test.tsx の view assertion を削除して behavior テスト 9 件を維持しました。styles.css は
+  857 行から 17 行 (sticky header と body margin のみ) へ削減し、apps/console のカバレッジ 100% を
+  維持しました。apps/server の workload-runner import が console のカバレッジ集計へ漏れていた
+  既存問題は、bunfig.toml の coveragePathIgnorePatterns へ `../../tools/**` を追加して解消しました。
+
+#### 振り返り
+
+- 問題: happy-dom の登録をテストファイルの import で行うと、CommonJS 依存の link 時実行より遅れて
+  React の event system が DOM なし経路へ固定され、controlled input の onChange が発火しない状態でも
+  form 送信テストが DOM 値経由で成功してしまいました。
+- 根本原因: Bun の CommonJS 先行実行と react-dom の load 時 canUseDOM 判定という 2 つの初期化順序の
+  制約を、テスト成功という表面のシグナルだけでは検出できなかったためです。
+- 予防策: DOM 環境は必ず preload で登録し、controlled input のテストでは DOM の値ではなく state に
+  接続された経路 (onChange 由来の再描画とカバレッジ) を確認します。カバレッジ 100% ゲートが
+  この問題を実際に検出したので、ゲートを維持します。
