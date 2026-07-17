@@ -1,4 +1,8 @@
 [test]
+# React (react-dom) は load 時に DOM の有無で event system の経路を固定する
+# CommonJS のため、view テストの DOM 環境 (happy-dom) はテストファイルの
+# import ではなく preload で全 module より先に登録する。
+preload = ["./test/dom-setup.ts"]
 coverageThreshold = 1
 coverageSkipTestFiles = true
-coveragePathIgnorePatterns = ["../../contracts/**", "../../core/**", "../../providers/**", "../api/**", "../server/**"]
+coveragePathIgnorePatterns = ["../../contracts/**", "../../core/**", "../../providers/**", "../../tools/**", "../api/**", "../server/**"]

@@ -19,7 +19,21 @@ trustedDependencies = []
 # 監査時の進捗をログに残し、後追いしやすくする
 saveTextLockfile = true
 
+# 公開から 7 日 (168h) 未満のバージョンを解決しない。.npmrc の
+# min-release-age=168h (npm 系 fallback 用) および CI の Safe Chain
+# minimum package age ゲートと同じ隔離期間を、Bun 自身の解決にも適用する。
+# これが無いと bun install はローカルで最新版を lockfile に固定し、
+# CI の install_ci (Safe Chain) で初めて 403 になる。判断の正本:
+# docs/adr/0014-bun-minimum-release-age.md
+minimumReleaseAge = 604800
+
 [test]
+# console の view テスト (Cloudscape + @testing-library/react) が使う DOM 環境。
+# react-dom は load 時に DOM の有無で event system の経路を固定する CommonJS
+# のため、preload で全 module より先に happy-dom を登録する必要がある。
+# setup はネットワーク・ストリーム実装を Bun native へ戻すので、実 HTTP と
+# 実 SQLite を使う他 workspace の behavior テストの経路は変わらない。
+preload = ["./apps/console/test/dom-setup.ts"]
 # カバレッジ 100% は Definition of Done (docs/architecture/quality-bar.md / ADR-0003)。
 # `bun test --coverage` 実行時に下回ったら失敗させる。閾値は 0-1 の割合で 1 = 100%。
 coverageThreshold = 1

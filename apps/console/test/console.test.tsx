@@ -28,7 +28,6 @@ import {
   createAuthenticatedSimulatorApp,
   LaunchTokenAuthority,
 } from '@tenkacloud/simulator-server';
-import { renderToStaticMarkup } from 'react-dom/server';
 import {
   ConsoleClientError,
   parseEventStream,
@@ -54,11 +53,7 @@ import {
   mergeEvents,
   propertyCategories,
 } from '../src/model';
-import {
-  ConsoleOperationResult,
-  runConsoleOperationAction,
-  WorldConsoleView,
-} from '../src/view';
+import { runConsoleOperationAction } from '../src/view';
 
 const GCP_TEMPLATE = readFileSync(
   new URL(
@@ -307,18 +302,6 @@ describe('Console の API client と route', () => {
     expect(cleaned).toBe('/console/world-a');
     expect(duplicate.hash).toBe('');
     expect(tokenError).toBeInstanceOf(ConsoleLaunchTokenError);
-    const message =
-      tokenError instanceof Error ? tokenError.message : 'Launch denied';
-    const errorView = renderToStaticMarkup(
-      <WorldConsoleView
-        state={{ kind: 'error', worldId: 'world-a', message }}
-        onRefresh={() => undefined}
-        onOperation={async () => undefined}
-      />
-    );
-    expect(errorView).toContain('role="alert"');
-    expect(errorView).toContain('simulator launch token');
-    expect(errorView).not.toContain('tc_sim_v1');
   });
 
   it('実 HTTP と SQLite の world を route から読み、SSE cursor で replay する', async () => {
@@ -480,29 +463,6 @@ describe('Console の provider-neutral projection model', () => {
         ],
       })
     ).toEqual([diagnostic]);
-    const rejectedEvents = await rejectedLaunch.client.events(
-      rejectedLaunch.world.worldId
-    );
-    const rendered = renderToStaticMarkup(
-      <WorldConsoleView
-        state={{
-          kind: 'ready',
-          data: {
-            worldId: rejectedLaunch.world.worldId,
-            deployment: rejected,
-            resources: await rejectedLaunch.client.resources(
-              rejectedLaunch.world.worldId
-            ),
-            events: rejectedEvents.events,
-            cursor: rejectedEvents.nextCursor,
-          },
-        }}
-        onRefresh={() => undefined}
-        onOperation={async () => undefined}
-      />
-    );
-    expect(rendered).toContain('MissingProvider');
-    expect(rendered).toContain('unavailable.json');
   });
 
   it('外部 API mutation の SSE を受けると resource と deployment projection を再取得する', async () => {
@@ -617,93 +577,5 @@ describe('Console の provider-neutral projection model', () => {
     expect(refreshed.events.map((event) => event.type)).toContain(
       'GcpServiceUpdated'
     );
-    expect(
-      renderToStaticMarkup(
-        <ConsoleOperationResult
-          state={{ kind: 'success', message: 'Command accepted.' }}
-        />
-      )
-    ).toContain('role="status"');
-    expect(
-      renderToStaticMarkup(
-        <ConsoleOperationResult
-          state={{ kind: 'error', message: 'Command rejected.' }}
-        />
-      )
-    ).toContain('role="alert"');
-    expect(
-      renderToStaticMarkup(<ConsoleOperationResult state={{ kind: 'idle' }} />)
-    ).toBe('');
-  });
-});
-
-describe('Console view の状態表示', () => {
-  it('実 world の resource、policy、reachability、output、event を表示する', async () => {
-    const { client, world, deployment } = await readyWorld();
-    const data = await loadConsoleData(client, {
-      worldId: world.worldId,
-      deploymentId: deployment.deploymentId,
-    });
-    const html = renderToStaticMarkup(
-      <WorldConsoleView
-        state={{ kind: 'ready', data }}
-        onRefresh={() => undefined}
-        onOperation={async () => undefined}
-      />
-    );
-    expect(html).toContain('Provider projections');
-    expect(html).toContain('google_cloud_run_v2_service');
-    expect(html).toContain('<span>Target</span><code>default</code>');
-    expect(html).toContain('Policy');
-    expect(html).toContain('Reachability');
-    expect(html).toContain('GcpHelloUrl');
-    expect(html).toContain('DeploymentReady');
-    expect(html).toContain('SSE replay');
-    expect(html).toContain('Provider operation');
-    expect(html).toContain('Execute command');
-    expect(html).toMatch(/console-[a-f0-9-]{36}/);
-  });
-
-  it('loading、error、空 projection の状態を accessible text で表示する', async () => {
-    const loading = renderToStaticMarkup(
-      <WorldConsoleView
-        state={{ kind: 'loading', worldId: 'world-loading' }}
-        onRefresh={() => undefined}
-        onOperation={async () => undefined}
-      />
-    );
-    const error = renderToStaticMarkup(
-      <WorldConsoleView
-        state={{
-          kind: 'error',
-          worldId: 'world-error',
-          message: 'World was deleted',
-        }}
-        onRefresh={() => undefined}
-        onOperation={async () => undefined}
-      />
-    );
-    const launch = await createWorld('deployment-empty');
-    const realData = await loadConsoleData(launch.client, {
-      worldId: launch.world.worldId,
-    });
-    const empty = renderToStaticMarkup(
-      <WorldConsoleView
-        state={{
-          kind: 'ready',
-          data: { ...realData, events: [], cursor: 0 },
-        }}
-        onRefresh={() => undefined}
-        onOperation={async () => undefined}
-      />
-    );
-    expect(loading).toContain('Reading the event-sourced world');
-    expect(loading).toContain('aria-busy="true"');
-    expect(error).toContain('role="alert"');
-    expect(error).toContain('World was deleted');
-    expect(empty).toContain('No resources have been projected yet.');
-    expect(empty).toContain('No events exist after this cursor.');
-    expect(empty).toContain('No deployment outputs.');
-    expect(empty).toContain('No deployment diagnostics.');
   });
 });
