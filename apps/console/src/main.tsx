@@ -7,7 +7,11 @@ import { SimulatorConsoleClient } from './client';
 import { consumeLaunchToken } from './launch-token';
 import './styles.css';
 
-applyMode(Mode.Dark);
+// OS のカラースキーム設定に追従する。判定できない環境では旧 bespoke テーマと
+// 視覚的連続性のある dark を既定にする。
+const prefersLight =
+  window.matchMedia?.('(prefers-color-scheme: light)').matches ?? false;
+applyMode(prefersLight ? Mode.Light : Mode.Dark);
 
 const root = document.getElementById('root');
 if (!root) throw new Error('Console root element was not found');

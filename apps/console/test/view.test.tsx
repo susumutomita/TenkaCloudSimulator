@@ -181,7 +181,7 @@ afterEach(async () => {
   rmSync(runtime.directory, { recursive: true, force: true });
 });
 
-describe('Cloudscape client rendering spike', () => {
+describe('Cloudscape コンポーネントを DOM 環境で描画できること', () => {
   it('代表 component の Alert と StatusIndicator と Container を DOM 環境で描画する', () => {
     const view = render(
       <Container header={<Header variant="h2">spike container</Header>}>
@@ -368,7 +368,7 @@ describe('Console ready 表示', () => {
   });
 });
 
-describe('Console operation form', () => {
+describe('Console 操作フォームがコマンド送信状態を表示すること', () => {
   it('送信中は Executing… と disabled を表示し、成功で role=status を出す', async () => {
     const { client, data, deployment } = await readyWorldData();
     const service = data.resources.resources.find(

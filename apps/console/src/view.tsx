@@ -21,11 +21,12 @@ import StatusIndicator, {
 import Table, { type TableProps } from '@cloudscape-design/components/table';
 import Textarea from '@cloudscape-design/components/textarea';
 import TopNavigation from '@cloudscape-design/components/top-navigation';
-import type {
-  JsonValue,
-  SimulatorDiagnostic,
-  SimulatorEvent,
-  SimulatorResourceRecord,
+import {
+  type JsonValue,
+  SIMULATOR_PROTOCOL_VERSION,
+  type SimulatorDiagnostic,
+  type SimulatorEvent,
+  type SimulatorResourceRecord,
 } from '@tenkacloud/simulator-contracts';
 import { useActionState, useRef, useState } from 'react';
 import {
@@ -688,7 +689,11 @@ export function WorldConsoleView({
             href: '/',
             title: 'TenkaCloud Simulator',
           }}
-          utilities={[{ type: 'button', text: 'Protocol 2026-07-11' }]}
+          search={
+            <Box color="text-status-inactive" textAlign="right">
+              Protocol {SIMULATOR_PROTOCOL_VERSION}
+            </Box>
+          }
         />
       </header>
       <AppLayout
