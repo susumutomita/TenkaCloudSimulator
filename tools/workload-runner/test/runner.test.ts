@@ -825,18 +825,23 @@ describe('Docker workload runner', () => {
   it.serial(
     '起動後に data plane が停止した workload の health probe を typed failure にする',
     async () => {
+      // data plane の停止はテスト側から docker exec で指示する。コンテナ内の
+      // 固定 `sleep 2; killall` だと、CI runner の起動レイテンシが 2 秒を超えた
+      // とき start() の health 待ちがレース負けする (Issue 12)。
       const started = await runner.start(
         workload({
           workloadId: 'stopped-data-plane',
           command: [
             'sh',
             '-c',
-            'printf "ready\\n" > /tmp/healthz; httpd -p 8080 -h /tmp; sleep 2; killall httpd; exec sleep 10',
+            'printf "ready\\n" > /tmp/healthz; httpd -p 8080 -h /tmp; exec sleep 60',
           ],
         })
       );
       containers.push(started.containerId);
-      await Bun.sleep(2200);
+      const killed = docker(['exec', started.containerId, 'killall', 'httpd']);
+      expect(killed.exitCode).toBe(0);
+      await Bun.sleep(250);
       await expect(
         runner.probe(WORLD_ID, 'stopped-data-plane')
       ).rejects.toMatchObject({ code: 'WorkloadFailed' });
