@@ -386,3 +386,51 @@ view 層テストだけを刷新します。
 - 予防策: DOM 環境は必ず preload で登録し、controlled input のテストでは DOM の値ではなく state に
   接続された経路 (onChange 由来の再描画とカバレッジ) を確認します。カバレッジ 100% ゲートが
   この問題を実際に検出したので、ゲートを維持します。
+
+### クリーンコード CI (jscpd ラチェットと knip 報告) - 2026-07-18
+
+#### 目的
+
+AI エージェントが大量にコードを書く前提で、既存実装を調べずに持ち込まれる再実装 (コピー&ペースト) と、
+リファクタ後に取り残される未使用コードを機械検出します。Biome の認知的複雑度ゲートが
+守れない 2 つの空白 (ファイル横断の重複、未使用 export / file) を埋めます。
+
+#### 制約と設計判断
+
+- 検査は「新しく増えた分を正確に指せるか」で止める側と知らせる側に分けます。jscpd は
+  baseline ラチェット方式で増分だけを検出できるため `make before-commit` と CI で止めます。
+  knip は現時点の全量しか出せないため CI job summary へ知らせるだけにします。判断の正本は
+  [ADR-0015](./docs/adr/0015-duplication-ratchet-and-dead-code-report.md) です。
+- 検出ロジックは No Mock で検証します。テストは一時 directory に実 file を置き、実 jscpd
+  binary を実行して report と baseline の実 I/O を通します。
+- baseline を増やす更新は PR body で理由を説明します (audit-baseline と同じ運用)。
+
+#### タスク
+
+- [x] ADR-0015 を作成する。
+- [x] `scripts/check-duplication.ts` と日本語 BDD テストを追加する。
+- [x] `.jscpd.json` と `scripts/duplication-baseline.json` を追加する。
+- [x] `knip.json` を追加し、report を精査して誤検知を除く。
+- [x] Makefile (`dup_check` / `dup_baseline` / `dup_report` / `dead_code`) と
+  before-commit、CI を接続する。
+- [x] AGENTS.md のコマンド一覧と lint:text の対象 list を更新する。
+
+#### 検証手順
+
+- `make before-commit` が緑 (dup_check 含む)。
+- `bun scripts/check-duplication.ts` が baseline 一致で exit 0。
+- `bun run dead-code` が exit 0 で現状の未使用候補を報告する。
+
+#### 進捗ログ
+
+- 2026-07-18: 参考記事の 4 本柱 (ESLint サイズ規律 / SonarJS / jscpd / knip) を棚卸しし、
+  本 repo は Biome の複雑度 error 化が導入済みのため、空白である jscpd と knip を導入対象に
+  決めました。
+
+#### 振り返り
+
+- 問題: 重複と未使用コードは 1 file しか見ない linter では検出できず、レビューの記憶にも
+  依存できない状態でした。
+- 根本原因: ファイル横断の検査を CI に持っていなかったためです。
+- 予防策: 増分を正確に指せる検査 (jscpd ラチェット) は CI で止め、全量しか出せない検査
+  (knip) は知らせるだけに分けて、形骸化させずに運用します。

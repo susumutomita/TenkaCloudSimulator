@@ -1,0 +1,19 @@
+{
+  "format": ["typescript", "tsx"],
+  "pattern": "{contracts,core,conformance,providers,apps,tools,scripts}/**/*.{ts,tsx}",
+  "ignore": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/coverage/**",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/test/**",
+    "**/fixtures/**"
+  ],
+  "minTokens": 50,
+  "minLines": 5,
+  "reporters": ["consoleFull"],
+  "output": ".jscpd-report",
+  "absolute": false,
+  "gitignore": true
+}
