@@ -81,8 +81,28 @@ harness_test:
 pre_release_check:
 	bun run check:pre-release
 
+# jscpd ベースライン・ラチェット。重複ゼロは強制しない (責務分離の意図的類似は
+# baseline に焼き込み済み)。baseline を超える新規コピペだけ fail させる (ADR-0015)。
+.PHONY: dup_check
+dup_check:
+	bun scripts/check-duplication.ts
+
+.PHONY: dup_baseline
+dup_baseline:
+	bun scripts/check-duplication.ts --update
+
+.PHONY: dup_report
+dup_report:
+	bunx jscpd
+
+# knip デッドコード検出。全量報告しかできないため gate にせず報告のみ (ADR-0015)。
+# rules は knip.json で warn 化済みなので検出があっても exit 0。
+.PHONY: dead_code
+dead_code:
+	bun run dead-code
+
 .PHONY: before-commit
-before-commit: harness harness_test pre_release_check lint_text lint typecheck test test_coverage build
+before-commit: harness harness_test pre_release_check dup_check lint_text lint typecheck test test_coverage build
 
 .PHONY: dev
 dev:

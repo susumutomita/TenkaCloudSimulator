@@ -1,0 +1,58 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "ignore": ["**/dist/**", "**/coverage/**", "**/fixtures/**"],
+  "ignoreExportsUsedInFile": true,
+  "rules": {
+    "exports": "warn",
+    "types": "warn",
+    "files": "warn",
+    "duplicates": "warn",
+    "dependencies": "off",
+    "devDependencies": "off",
+    "optionalPeerDependencies": "off",
+    "unlisted": "off",
+    "binaries": "off",
+    "unresolved": "off",
+    "enumMembers": "off",
+    "nsExports": "off",
+    "nsTypes": "off"
+  },
+  "workspaces": {
+    ".": {
+      "entry": ["scripts/**/*.ts"],
+      "project": ["scripts/**/*.ts"]
+    },
+    "contracts": {
+      "entry": ["src/index.ts", "src/**/*.test.ts"],
+      "project": ["src/**"]
+    },
+    "core": {
+      "entry": ["src/**/*.test.ts"],
+      "project": ["src/**"]
+    },
+    "conformance": {
+      "entry": ["src/index.ts", "src/**/*.test.ts"],
+      "project": ["src/**"]
+    },
+    "providers/*": {
+      "entry": ["src/index.ts", "src/**/*.test.ts"],
+      "project": ["src/**"]
+    },
+    "apps/api": {
+      "entry": ["src/app.ts", "src/**/*.test.ts"],
+      "project": ["src/**"]
+    },
+    "apps/console": {
+      "entry": ["src/app.tsx", "src/**/*.test.{ts,tsx}", "test/**/*.ts"],
+      "project": ["src/**", "test/**"]
+    },
+    "apps/server": {
+      "entry": ["src/bin.ts", "src/**/*.test.ts"],
+      "project": ["src/**"]
+    },
+    "tools/*": {
+      "entry": ["src/{index,bin,cli}.ts", "src/**/*.test.ts"],
+      "project": ["src/**"]
+    }
+  }
+}

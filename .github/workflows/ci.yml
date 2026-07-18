@@ -56,6 +56,19 @@ jobs:
           make harness
           make before-commit
 
+      # knip デッドコード検出は報告のみ (ADR-0015)。knip は「この PR で増えた分」ではなく
+      # 「現時点の全量」しか出せないため、gate にすると既存負債で新規 PR が落ちて
+      # 無視 comment が量産される。job summary へ知らせ、判断は人間が行う。
+      # `|| true` は knip 自体の障害で CI を止めないための設計 (advisory)。
+      - name: Dead-code scan (knip, report-only)
+        run: |
+          {
+            echo '## Dead-code scan (knip, report-only)'
+            echo '```'
+            bun run --silent dead-code 2>/dev/null || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Build and smoke-test the production image
         shell: bash
         env:
