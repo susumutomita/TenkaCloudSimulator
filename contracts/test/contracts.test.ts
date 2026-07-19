@@ -623,11 +623,34 @@ describe('runtime と lifecycle 契約', () => {
 
     expect(isSimulatorSimulationOverlay(overlay)).toBe(true);
     expect(isSimulatorSimulationOverlay(workloadOverlay)).toBe(true);
+    for (const invalidImage of [
+      `GHCR.IO/tenkacloud/api@sha256:${HASH}`,
+      `ghcr.io//api@sha256:${HASH}`,
+      `ghcr.io/api/@sha256:${HASH}`,
+    ]) {
+      expect(
+        isSimulatorSimulationOverlay({
+          ...workloadOverlay,
+          workloads: [{ ...workloadOverlay.workloads[0], image: invalidImage }],
+        })
+      ).toBe(false);
+    }
     expect(
       isSimulatorSimulationOverlay({
         ...workloadOverlay,
         workloads: [
           { ...workloadOverlay.workloads[0], image: 'ghcr.io/latest' },
+        ],
+      })
+    ).toBe(false);
+    expect(
+      isSimulatorSimulationOverlay({
+        ...workloadOverlay,
+        workloads: [
+          {
+            ...workloadOverlay.workloads[0],
+            image: `${'a'.repeat(441)}@sha256:${HASH}`,
+          },
         ],
       })
     ).toBe(false);

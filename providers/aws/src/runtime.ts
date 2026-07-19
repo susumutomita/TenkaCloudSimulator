@@ -1,3 +1,4 @@
+import { isLowercaseDigestPinnedImage } from '@tenkacloud/simulator-contracts/image-reference';
 import {
   CoreError,
   contentHash,
@@ -377,7 +378,7 @@ function reviewedWorkloadDeclaration(value: unknown): WorkloadDeclaration {
     !/^(default|[a-z][a-z0-9-]{0,31})$/.test(reviewed.targetId) ||
     reviewed.resourceRef.length > 256 ||
     reviewed.resourceRef.includes('\u0000') ||
-    !/^[a-z0-9][a-z0-9./_-]*@sha256:[a-f0-9]{64}$/.test(reviewed.image)
+    !isLowercaseDigestPinnedImage(reviewed.image)
   ) {
     throw new CoreError(
       'ValidationFailed',

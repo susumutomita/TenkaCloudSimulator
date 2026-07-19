@@ -55,6 +55,18 @@ function containerSource(outputs = ''): string {
 ${outputs}`;
 }
 
+function longWhitespaceAndNewlines(): string {
+  return `${' '.repeat(64)}\n`.repeat(2_048);
+}
+
+function resourceDeclarations(count: number): string {
+  return Array.from(
+    { length: count },
+    (_, index) =>
+      `resource item${index} 'Microsoft.App/containerApps@2024-03-01' = {}`
+  ).join('\n');
+}
+
 describe('targeted Bicep compiler の振る舞い', () => {
   it('resource 宣言の symbol、type、API version、body、source line を抽出する', async () => {
     const resources = bicepResources(await fixture());
@@ -349,6 +361,9 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
       CONTEXT
     );
     expect(compiled.resources[0]?.name).toBe('app');
+    expect(
+      bicepResources(containerSource().replace("name: 'app'", "name: 'app-😀'"))
+    ).toHaveLength(1);
   });
 
   it('resource block 不在、未閉鎖、API version 不在、symbol 重複を拒否する', () => {
@@ -365,7 +380,7 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
         'must include an API version',
       ],
       [
-        `${containerSource()}\n${containerSource().replace('app ', 'app ')}`,
+        `${containerSource()}\n${containerSource()}`,
         'Conflict',
         'symbol app is duplicated',
       ],
@@ -376,6 +391,138 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
       expect(error.code).toBe(code);
       expect(error.message).toContain(message);
     }
+  });
+
+  it('大量の空白と改行で分断された resource 宣言を拒否する', () => {
+    const error = coreError(() =>
+      bicepResources(`resource${longWhitespaceAndNewlines()}app 'Microsoft.App/containerApps@2024-03-01' = {
+  name: 'app'
+}`)
+    );
+
+    expect(error.code).toBe('UnsupportedCapability');
+    expect(error.message).toContain('resource declaration syntax');
+  });
+
+  it('大量の空白と改行で分断された output 宣言を拒否する', () => {
+    const error = coreError(() =>
+      bicepOutputs(
+        `output${longWhitespaceAndNewlines()}greeting string = 'hello'`
+      )
+    );
+
+    expect(error.code).toBe('UnsupportedCapability');
+    expect(error.message).toContain('output declaration syntax');
+  });
+
+  it('大量の空白と改行で分断された param 宣言を拒否する', async () => {
+    const source = (await fixture()).replace(
+      'param tenkacloudTeam string',
+      `param${longWhitespaceAndNewlines()}tenkacloudTeam string`
+    );
+    const error = coreError(() => compileBicep(source, CONTEXT));
+
+    expect(error.code).toBe('UnsupportedCapability');
+    expect(error.message).toContain('parameter declaration syntax');
+  });
+
+  it('大量の空白と改行の後にある module 宣言を拒否する', () => {
+    const error = coreError(() =>
+      compileBicep(
+        `${containerSource()}\n${longWhitespaceAndNewlines()}module child './child.bicep' = { name: 'child' }`,
+        CONTEXT
+      )
+    );
+
+    expect(error.code).toBe('UnsupportedCapability');
+    expect(error.message).toContain('module declarations');
+  });
+
+  it('改行で property と colon を分断した入力を default 値へ縮退させず拒否する', () => {
+    const error = coreError(() =>
+      compileBicep(
+        containerSource().replace(
+          "name: 'app'",
+          `name${longWhitespaceAndNewlines()}: 'app'`
+        ),
+        CONTEXT
+      )
+    );
+
+    expect(error.code).toBe('UnsupportedCapability');
+    expect(error.message).toContain('property name expression');
+  });
+
+  it('改行で dependsOn と colon を分断した入力と未閉鎖配列を拒否する', () => {
+    const split = coreError(() =>
+      compileBicep(
+        containerSource().replace(
+          "name: 'app'",
+          `name: 'app'\n  dependsOn${longWhitespaceAndNewlines()}: [missing]`
+        ),
+        CONTEXT
+      )
+    );
+    const unclosed = coreError(() =>
+      compileBicep(
+        containerSource().replace(
+          "name: 'app'",
+          "name: 'app'\n  dependsOn: [missing"
+        ),
+        CONTEXT
+      )
+    );
+    const notArray = coreError(() =>
+      compileBicep(
+        containerSource().replace(
+          "name: 'app'",
+          "name: 'app'\n  dependsOn: missing"
+        ),
+        CONTEXT
+      )
+    );
+
+    expect(split.code).toBe('UnsupportedCapability');
+    expect(split.message).toContain('dependsOn');
+    expect(unclosed.code).toBe('ValidationFailed');
+    expect(unclosed.message).toContain('dependency array is not closed');
+    expect(notArray.code).toBe('UnsupportedCapability');
+    expect(notArray.message).toContain('dependsOn');
+  });
+
+  it('5 MiB、100000 行、64 KiB/行、256 resource の parser 境界を超える入力を拒否する', () => {
+    const oversized = coreError(() =>
+      bicepResources(`${'あ'.repeat(20_000)}\n`.repeat(88))
+    );
+    const excessiveLines = coreError(() =>
+      bicepResources('\n'.repeat(100_000))
+    );
+    const excessiveLineBytes = coreError(() =>
+      bicepResources(' '.repeat(1024 * 1024 - 1))
+    );
+    const excessiveResources = coreError(() =>
+      bicepResources(resourceDeclarations(257))
+    );
+
+    expect(oversized.message).toContain('exceeds 5242880 bytes');
+    expect(excessiveLines.message).toContain('exceeds 100000 lines');
+    expect(excessiveLineBytes.message).toContain('exceeds 65536 line bytes');
+    expect(excessiveResources.message).toContain('exceeds 256 resources');
+  });
+
+  it('nested resource 宣言を黙って無視せず拒否する', () => {
+    const nested = containerSource().replace(
+      "name: 'app'",
+      `name: 'app'
+  resource child 'Microsoft.App/containerApps@2024-03-01' = {
+    name: 'child'
+  }`
+    );
+
+    const error = coreError(() => compileBicep(nested, CONTEXT));
+
+    expect(error.code).toBe('UnsupportedCapability');
+    expect(error.message).toContain('nested resource declarations');
   });
 
   it('module、condition、loop など対象外の top-level 構文を黙って無視しない', () => {

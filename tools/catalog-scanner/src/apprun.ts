@@ -1,3 +1,7 @@
+import {
+  isLowercaseDigestPinnedImage,
+  sha256DigestPinnedImageName,
+} from '@tenkacloud/simulator-contracts/image-reference';
 import { errorMessage } from './errors.ts';
 import type { Diagnostic, NormalizedTarget, Requirement } from './model.ts';
 import { createRequirement } from './requirements.ts';
@@ -10,17 +14,28 @@ export interface AppRunParseResult {
 const CPU_VALUES = new Set(['0.5', '1', '2']);
 const MEMORY_VALUES = new Set(['1Gi', '2Gi', '4Gi']);
 const RESERVED_PORTS = new Set([8008, 8012, 8013, 8022, 9090, 9091]);
+const SUPPORTED_IMAGE_PREFIXES = [
+  'ghcr.io/',
+  'docker.io/',
+  'index.docker.io/',
+  'registry.sakura.ad.jp/',
+] as const;
+
+function supportedImagePrefix(value: string): string | undefined {
+  return SUPPORTED_IMAGE_PREFIXES.find((prefix) => value.startsWith(prefix));
+}
 
 export function isPinnedAppRunImage(value: string): boolean {
-  return /^(?:ghcr\.io|docker\.io|index\.docker\.io|registry\.sakura\.ad\.jp)\/[A-Za-z0-9._/-]+@sha256:[a-f0-9]{64}$/.test(
-    value
+  const imageName = sha256DigestPinnedImageName(value);
+  return (
+    imageName !== undefined &&
+    supportedImagePrefix(imageName) !== undefined &&
+    isLowercaseDigestPinnedImage(value)
   );
 }
 
 export function isAppRunImageReference(value: string): boolean {
-  return /^(?:ghcr\.io|docker\.io|index\.docker\.io|registry\.sakura\.ad\.jp)\//.test(
-    value
-  );
+  return supportedImagePrefix(value) !== undefined;
 }
 
 function objectValue(

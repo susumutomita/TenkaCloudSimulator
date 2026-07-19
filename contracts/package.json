@@ -8,6 +8,7 @@
   "types": "src/index.ts",
   "exports": {
     ".": "./src/index.ts",
+    "./image-reference": "./src/image-reference.ts",
     "./schemas": "./src/schemas.ts",
     "./schemas/*.schema.json": "./schemas/*.schema.json",
     "./openapi.yaml": "./openapi.yaml"
@@ -24,7 +25,7 @@
     "test:coverage": "bun test --coverage test"
   },
   "dependencies": {
-    "ajv": "^8.17.1",
+    "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1"
   },
   "devDependencies": {

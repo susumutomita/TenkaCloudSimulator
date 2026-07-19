@@ -768,7 +768,7 @@ describe('AWS native gateway', () => {
       nativeRequest({
         context,
         service: 'ssm',
-        accessKeyId: 'AKIAIOSFODNN7EXAMPLE',
+        accessKeyId: 'AKIA',
         target: 'AmazonSSM.GetParameter',
         body: '{}',
         contentType: 'application/x-amz-json-1.1',
@@ -776,7 +776,7 @@ describe('AWS native gateway', () => {
       nativeRequest({
         context,
         service: 'ssm',
-        accessKeyId: 'ASIAIOSFODNN7EXAMPLE',
+        accessKeyId: 'ASIA',
         target: 'AmazonSSM.GetParameter',
         body: '{}',
         contentType: 'application/x-amz-json-1.1',
@@ -856,7 +856,7 @@ describe('AWS native gateway', () => {
       () =>
         new AwsNativeGateway({
           simulatorOrigin: ORIGIN,
-          simulatorAccessKeyId: 'AKIAIOSFODNN7EXAMPLE',
+          simulatorAccessKeyId: 'AKIA',
         })
     ).toThrow('simulator-owned');
     expect(() => gateway(0)).toThrow('maxBodyBytes');
@@ -973,7 +973,7 @@ describe('AWS native gateway', () => {
     const context = await createContext();
     expect(() =>
       execute(context, 'sts', 'GetCallerIdentity', {
-        AccessKeyId: 'AKIAIOSFODNN7EXAMPLE',
+        AccessKeyId: 'AKIA',
       })
     ).toThrow('simulator-owned access key');
     const provider = new AwsProvider();

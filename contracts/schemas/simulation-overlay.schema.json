@@ -85,7 +85,8 @@
         },
         "image": {
           "type": "string",
-          "pattern": "^(?:[a-z0-9][a-z0-9._/-]*/)?[a-z0-9][a-z0-9._/-]*@sha256:[a-f0-9]{64}$"
+          "maxLength": 512,
+          "pattern": "^[a-z0-9][a-z0-9._-]*(?:/[a-z0-9][a-z0-9._-]*)*@sha256:[a-f0-9]{64}$"
         },
         "command": {
           "type": "array",
