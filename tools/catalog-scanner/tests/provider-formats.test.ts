@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from 'bun:test';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
-import { parseAppRun } from '../src/apprun.ts';
+import { isPinnedAppRunImage, parseAppRun } from '../src/apprun.ts';
 import { parseBicep } from '../src/bicep.ts';
 import { compareInventory } from '../src/manifest.ts';
 import type { CapabilityManifest, NormalizedTarget } from '../src/model.ts';
@@ -220,6 +220,21 @@ describe('Azure Bicep と Sakura AppRun catalog を走査するとき', () => {
         diagnostic.message.includes('digest-pinned image')
       )
     ).toBe(true);
+  });
+
+  it('direct AppRun image は lowercase OCI segment の受理集合を runtime と一致させる', () => {
+    const digest = 'a'.repeat(64);
+
+    expect(isPinnedAppRunImage(`ghcr.io/example/hello@sha256:${digest}`)).toBe(
+      true
+    );
+    for (const image of [
+      `ghcr.io//hello@sha256:${digest}`,
+      `ghcr.io/Team/hello@sha256:${digest}`,
+      `ghcr.io/example/@sha256:${digest}`,
+    ]) {
+      expect(isPinnedAppRunImage(image)).toBe(false);
+    }
   });
 
   it('provider compile contract fixture を完全 identity の requirement にする', async () => {

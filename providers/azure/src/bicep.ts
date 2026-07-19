@@ -10,6 +10,11 @@ const ADAPTER_PARAMETERS = [
   'tenkacloudTeam',
 ] as const;
 
+const BICEP_MAX_SOURCE_BYTES = 5 * 1024 * 1024;
+const BICEP_MAX_SOURCE_LINES = 100_000;
+const BICEP_MAX_LINE_BYTES = 64 * 1024;
+const BICEP_MAX_RESOURCES = 256;
+
 export interface BicepResource {
   readonly symbol: string;
   readonly type: string;
@@ -44,10 +49,6 @@ export interface CompiledBicepResource {
 export interface BicepCompilation {
   readonly resources: readonly CompiledBicepResource[];
   readonly outputs: Readonly<Record<string, string>>;
-}
-
-function lineAt(source: string, offset: number): number {
-  return source.slice(0, offset).split('\n').length;
 }
 
 type ScanMode =
@@ -132,18 +133,40 @@ function isComment(mode: ScanMode): boolean {
   return mode === 'line-comment' || mode === 'block-comment';
 }
 
+interface SourceScan {
+  readonly character: string;
+  readonly step: ScanStep;
+  readonly comment: boolean;
+}
+
+function scanSourceCharacter(
+  source: string,
+  index: number,
+  mode: ScanMode
+): SourceScan {
+  const character = source[index] ?? '';
+  const step = scanStep(
+    mode,
+    character,
+    source[index + 1] ?? '',
+    source[index - 1] ?? ''
+  );
+  return {
+    character,
+    step,
+    comment: isComment(mode) || isComment(step.mode),
+  };
+}
+
 function commentProjection(source: string): string {
   let mode: ScanMode = 'code';
   let result = '';
   for (let index = 0; index < source.length; index++) {
-    const character = source[index] ?? '';
-    const step = scanStep(
-      mode,
-      character,
-      source[index + 1] ?? '',
-      source[index - 1] ?? ''
+    const { character, step, comment } = scanSourceCharacter(
+      source,
+      index,
+      mode
     );
-    const comment = isComment(mode) || isComment(step.mode);
     result += comment && character !== '\n' ? ' ' : character;
     mode = step.mode;
     if (step.consumeNext) {
@@ -158,13 +181,7 @@ function blockEnd(source: string, start: number): number {
   let depth = 0;
   let mode: ScanMode = 'code';
   for (let index = start; index < source.length; index++) {
-    const character = source[index] ?? '';
-    const step = scanStep(
-      mode,
-      character,
-      source[index + 1] ?? '',
-      source[index - 1] ?? ''
-    );
+    const { character, step } = scanSourceCharacter(source, index, mode);
     mode = step.mode;
     if (step.consumeNext) index++;
     if (!step.structural) continue;
@@ -194,17 +211,188 @@ function typeAndVersion(value: string): {
   };
 }
 
-export function bicepResources(source: string): readonly BicepResource[] {
+interface ProjectedSourceLine {
+  readonly topLevel: string;
+  readonly commentless: string;
+  readonly offset: number;
+  readonly number: number;
+}
+
+interface TopLevelDeclarations {
+  readonly resources: readonly ProjectedSourceLine[];
+  readonly outputs: readonly ProjectedSourceLine[];
+  readonly parameters: readonly ProjectedSourceLine[];
+  readonly modules: readonly ProjectedSourceLine[];
+}
+
+interface IdentifierToken {
+  readonly value: string;
+  readonly end: number;
+}
+
+interface ResourceDeclaration {
+  readonly symbol: string;
+  readonly typeAndVersion: string;
+  readonly blockStart: number;
+}
+
+interface OutputDeclaration {
+  readonly name: string;
+  readonly type: string;
+  readonly expression: string;
+}
+
+interface ParameterDeclaration {
+  readonly name: string;
+  readonly type: string;
+  readonly remainder: string;
+}
+
+function isHorizontalWhitespace(character: string): boolean {
+  return (
+    character === ' ' ||
+    character === '\t' ||
+    character === '\r' ||
+    character === '\f' ||
+    character === '\v'
+  );
+}
+
+function skipHorizontalWhitespace(value: string, start: number): number {
+  let index = start;
+  while (index < value.length && isHorizontalWhitespace(value[index] ?? '')) {
+    index++;
+  }
+  return index;
+}
+
+function isAsciiLetter(character: string): boolean {
+  return (
+    (character >= 'A' && character <= 'Z') ||
+    (character >= 'a' && character <= 'z')
+  );
+}
+
+function isIdentifierStart(character: string): boolean {
+  return character === '_' || isAsciiLetter(character);
+}
+
+function isIdentifierPart(character: string): boolean {
+  return isIdentifierStart(character) || (character >= '0' && character <= '9');
+}
+
+function identifierAt(value: string, start: number): IdentifierToken | null {
+  if (!isIdentifierStart(value[start] ?? '')) return null;
+  let end = start + 1;
+  while (end < value.length && isIdentifierPart(value[end] ?? '')) end++;
+  return { value: value.slice(start, end), end };
+}
+
+function requiredIdentifierAfter(
+  value: string,
+  start: number
+): IdentifierToken | null {
+  const tokenStart = skipHorizontalWhitespace(value, start);
+  if (tokenStart === start) return null;
+  return identifierAt(value, tokenStart);
+}
+
+function quotedResourceTypeAt(
+  value: string,
+  start: number
+): IdentifierToken | null {
+  const quote = value[start] ?? '';
+  if (quote !== "'" && quote !== '"') return null;
+  const typeStart = start + 1;
+  let end = typeStart;
+  while (end < value.length && value[end] !== quote) {
+    const character = value[end] ?? '';
+    if (character === "'" || character === '"') return null;
+    end++;
+  }
+  if (end === typeStart || end >= value.length) return null;
+  return { value: value.slice(typeStart, end), end: end + 1 };
+}
+
+function parseResourceDeclaration(
+  line: ProjectedSourceLine
+): ResourceDeclaration | null {
+  const text = line.commentless;
+  const keyword = identifierAt(text, skipHorizontalWhitespace(text, 0));
+  if (keyword?.value !== 'resource') return null;
+  const symbol = requiredIdentifierAfter(text, keyword.end);
+  if (!symbol) return null;
+  let index = skipHorizontalWhitespace(text, symbol.end);
+  if (index === symbol.end) return null;
+  const resourceType = quotedResourceTypeAt(text, index);
+  if (!resourceType) return null;
+  index = skipHorizontalWhitespace(text, resourceType.end);
+  if (text[index] !== '=') return null;
+  index = skipHorizontalWhitespace(text, index + 1);
+  if (text[index] !== '{') return null;
+  return {
+    symbol: symbol.value,
+    typeAndVersion: resourceType.value,
+    blockStart: line.offset + index,
+  };
+}
+
+function parseOutputDeclaration(
+  line: ProjectedSourceLine
+): OutputDeclaration | null {
+  const text = line.topLevel;
+  const keyword = identifierAt(text, skipHorizontalWhitespace(text, 0));
+  if (keyword?.value !== 'output') return null;
+  const name = requiredIdentifierAfter(text, keyword.end);
+  if (!name) return null;
+  const type = requiredIdentifierAfter(text, name.end);
+  if (!type) return null;
+  let index = skipHorizontalWhitespace(text, type.end);
+  if (text[index] !== '=') return null;
+  index = skipHorizontalWhitespace(text, index + 1);
+  const expression = text.slice(index).trim();
+  if (!expression) return null;
+  return { name: name.value, type: type.value, expression };
+}
+
+function parseParameterDeclaration(
+  line: ProjectedSourceLine
+): ParameterDeclaration | null {
+  const text = line.topLevel;
+  const keyword = identifierAt(text, skipHorizontalWhitespace(text, 0));
+  if (keyword?.value !== 'param') return null;
+  const name = requiredIdentifierAfter(text, keyword.end);
+  if (!name) return null;
+  const type = requiredIdentifierAfter(text, name.end);
+  if (!type) return null;
+  return {
+    name: name.value,
+    type: type.value,
+    remainder: text.slice(type.end).trim(),
+  };
+}
+
+function parseBicepResources(
+  source: string,
+  declarations: TopLevelDeclarations
+): readonly BicepResource[] {
+  if (declarations.resources.length === 0) {
+    throw new CoreError(
+      'ValidationFailed',
+      'Bicep entry has no resource declarations'
+    );
+  }
   const resources: BicepResource[] = [];
   const symbols = new Set<string>();
-  const searchable = commentProjection(source);
-  const declarationCount = Array.from(
-    topLevelProjection(source).matchAll(/(?:^|\n)\s*resource\b/g)
-  ).length;
-  const pattern =
-    /(?:^|\n)\s*resource\s+([A-Za-z_][\w]*)\s+(["'])([^"'\n]+)\2\s*=\s*\{/g;
-  for (const match of searchable.matchAll(pattern)) {
-    const symbol = match[1] ?? '';
+  for (const line of declarations.resources) {
+    const declaration = parseResourceDeclaration(line);
+    if (!declaration) {
+      throw new CoreError(
+        'UnsupportedCapability',
+        'Bicep resource declaration syntax is not supported'
+      );
+    }
+    const { symbol, blockStart } = declaration;
     if (symbols.has(symbol)) {
       throw new CoreError(
         'Conflict',
@@ -212,65 +400,57 @@ export function bicepResources(source: string): readonly BicepResource[] {
       );
     }
     symbols.add(symbol);
-    const start = (match.index ?? 0) + match[0].lastIndexOf('{');
-    const end = blockEnd(source, start);
+    const end = blockEnd(source, blockStart);
     if (end === -1) {
       throw new CoreError(
         'ValidationFailed',
         `Bicep resource ${symbol} block is not closed`
       );
     }
-    const parsedType = typeAndVersion(match[3] ?? '');
-    const resourceOffset = source.indexOf('resource', match.index ?? 0);
     resources.push({
       symbol,
-      ...parsedType,
-      body: source.slice(start + 1, end),
-      line: lineAt(source, resourceOffset),
+      ...typeAndVersion(declaration.typeAndVersion),
+      body: source.slice(blockStart + 1, end),
+      line: line.number,
     });
-  }
-  if (resources.length === 0) {
-    if (declarationCount > 0) {
-      throw new CoreError(
-        'UnsupportedCapability',
-        'Bicep resource declaration syntax is not supported'
-      );
-    }
-    throw new CoreError(
-      'ValidationFailed',
-      'Bicep entry has no resource declarations'
-    );
-  }
-  if (resources.length !== declarationCount) {
-    throw new CoreError(
-      'UnsupportedCapability',
-      'Bicep resource declaration syntax is not supported'
-    );
   }
   return resources;
 }
 
-export function bicepOutputs(source: string): readonly BicepOutput[] {
+export function bicepResources(source: string): readonly BicepResource[] {
+  return parseBicepResources(source, topLevelDeclarations(source));
+}
+
+function parseBicepOutputs(
+  declarations: TopLevelDeclarations
+): readonly BicepOutput[] {
   const outputs: BicepOutput[] = [];
   const names = new Set<string>();
-  const searchable = commentProjection(source);
-  const pattern =
-    /(?:^|\n)\s*output\s+([A-Za-z_][\w]*)\s+([A-Za-z_][\w]*)\s*=\s*([^\n]+)/g;
-  for (const match of searchable.matchAll(pattern)) {
-    const name = match[1] ?? '';
+  for (const line of declarations.outputs) {
+    const declaration = parseOutputDeclaration(line);
+    if (!declaration) {
+      throw new CoreError(
+        'UnsupportedCapability',
+        'Bicep output declaration syntax is not supported'
+      );
+    }
+    const { name } = declaration;
     if (names.has(name)) {
       throw new CoreError('Conflict', `Bicep output ${name} is duplicated`);
     }
     names.add(name);
-    const outputOffset = source.indexOf('output', match.index ?? 0);
     outputs.push({
       name,
-      type: match[2] ?? '',
-      expression: (match[3] ?? '').trim(),
-      line: lineAt(source, outputOffset),
+      type: declaration.type,
+      expression: declaration.expression,
+      line: line.number,
     });
   }
   return outputs;
+}
+
+export function bicepOutputs(source: string): readonly BicepOutput[] {
+  return parseBicepOutputs(topLevelDeclarations(source));
 }
 
 function propertyExpression(
@@ -278,12 +458,44 @@ function propertyExpression(
   property: string
 ): string | undefined {
   const searchable = commentProjection(body);
-  const match = new RegExp(
-    `(?:^|\\n)\\s*${property}\\s*:\\s*([^\\n]+)`,
-    'm'
-  ).exec(searchable);
-  if (!match?.[1]) return undefined;
-  return match[1].trim().replace(/,\s*$/, '').trim();
+  const location = lineProperty(searchable, property);
+  if (!location) return undefined;
+  let expression = searchable
+    .slice(location.valueStart, location.lineEnd)
+    .trim();
+  if (expression.endsWith(',')) expression = expression.slice(0, -1).trim();
+  return expression;
+}
+
+interface LineProperty {
+  readonly valueStart: number;
+  readonly lineEnd: number;
+}
+
+function malformedProperty(property: string, line: string): never {
+  return unsupportedPropertyExpression(property, line.trim() || '<empty>');
+}
+
+function lineProperty(source: string, property: string): LineProperty | null {
+  let lineStart = 0;
+  while (lineStart <= source.length) {
+    const newline = source.indexOf('\n', lineStart);
+    const lineEnd = newline === -1 ? source.length : newline;
+    const line = source.slice(lineStart, lineEnd);
+    const tokenStart = skipHorizontalWhitespace(line, 0);
+    const token = identifierAt(line, tokenStart);
+    if (token?.value === property) {
+      const separator = skipHorizontalWhitespace(line, token.end);
+      if (line[separator] !== ':') malformedProperty(property, line);
+      return {
+        valueStart: lineStart + skipHorizontalWhitespace(line, separator + 1),
+        lineEnd,
+      };
+    }
+    if (newline === -1) break;
+    lineStart = newline + 1;
+  }
+  return null;
 }
 
 function unsupportedPropertyExpression(
@@ -331,14 +543,7 @@ function topLevelProjection(body: string): string {
   let mode: ScanMode = 'code';
   let result = '';
   for (let index = 0; index < body.length; index++) {
-    const character = body[index] ?? '';
-    const step = scanStep(
-      mode,
-      character,
-      body[index + 1] ?? '',
-      body[index - 1] ?? ''
-    );
-    const comment = isComment(mode) || isComment(step.mode);
+    const { character, step, comment } = scanSourceCharacter(body, index, mode);
     const brace = structuralBrace(step, character);
     depth = nextDepth(depth, brace, character);
     result += projectedCharacter(character, comment, brace, depth);
@@ -351,30 +556,149 @@ function topLevelProjection(body: string): string {
   return result;
 }
 
-function validateAdapterParameters(source: string): boolean {
-  const projected = topLevelProjection(source);
-  const declarationCount = Array.from(
-    projected.matchAll(/(?:^|\n)\s*param\b/g)
-  ).length;
-  if (declarationCount === 0) return false;
-
-  const declarations = Array.from(
-    projected.matchAll(
-      /(?:^|\n)\s*param\s+([A-Za-z_][\w]*)\s+([A-Za-z_][\w]*)([^\n]*)/g
-    )
-  );
-  if (declarations.length !== declarationCount) {
-    throw new CoreError(
-      'UnsupportedCapability',
-      'Bicep parameter declaration syntax is not supported'
-    );
+function utf8Width(source: string, index: number): number {
+  const code = source.charCodeAt(index);
+  if (code <= 0x7f) return 1;
+  if (code <= 0x7ff) return 2;
+  if (code >= 0xd800 && code <= 0xdbff) {
+    const next = source.charCodeAt(index + 1);
+    if (next >= 0xdc00 && next <= 0xdfff) return 4;
   }
+  if (code >= 0xdc00 && code <= 0xdfff) {
+    const previous = source.charCodeAt(index - 1);
+    if (previous >= 0xd800 && previous <= 0xdbff) return 0;
+  }
+  return 3;
+}
+
+function sourceLimitExceeded(kind: string, limit: number): never {
+  throw new CoreError(
+    'ValidationFailed',
+    `Bicep source exceeds ${limit} ${kind}`
+  );
+}
+
+function validateBicepSourceBounds(source: string): void {
+  let bytes = 0;
+  let lines = 1;
+  let lineBytes = 0;
+  for (let index = 0; index < source.length; index++) {
+    const width = utf8Width(source, index);
+    bytes += width;
+    if (source[index] === '\n') {
+      lines++;
+      lineBytes = 0;
+    } else {
+      lineBytes += width;
+    }
+    if (bytes > BICEP_MAX_SOURCE_BYTES) {
+      sourceLimitExceeded('bytes', BICEP_MAX_SOURCE_BYTES);
+    }
+    if (lines > BICEP_MAX_SOURCE_LINES) {
+      sourceLimitExceeded('lines', BICEP_MAX_SOURCE_LINES);
+    }
+    if (lineBytes > BICEP_MAX_LINE_BYTES) {
+      sourceLimitExceeded('line bytes', BICEP_MAX_LINE_BYTES);
+    }
+  }
+}
+
+function* projectedSourceLines(
+  source: string
+): Generator<ProjectedSourceLine, void, undefined> {
+  validateBicepSourceBounds(source);
+  let depth = 0;
+  let mode: ScanMode = 'code';
+  let topLevel = '';
+  let commentless = '';
+  let offset = 0;
+  let number = 1;
+  for (let index = 0; index < source.length; index++) {
+    const { character, step, comment } = scanSourceCharacter(
+      source,
+      index,
+      mode
+    );
+    const brace = structuralBrace(step, character);
+    depth = nextDepth(depth, brace, character);
+    mode = step.mode;
+    if (character === '\n') {
+      yield { topLevel, commentless, offset, number };
+      topLevel = '';
+      commentless = '';
+      offset = index + 1;
+      number++;
+      continue;
+    }
+    topLevel += projectedCharacter(character, comment, brace, depth);
+    commentless += comment ? ' ' : character;
+    if (step.consumeNext) {
+      topLevel += ' ';
+      commentless += ' ';
+      index++;
+    }
+  }
+  yield { topLevel, commentless, offset, number };
+}
+
+function topLevelDeclarations(source: string): TopLevelDeclarations {
+  const resources: ProjectedSourceLine[] = [];
+  const outputs: ProjectedSourceLine[] = [];
+  const parameters: ProjectedSourceLine[] = [];
+  const modules: ProjectedSourceLine[] = [];
+  for (const line of projectedSourceLines(source)) {
+    const start = skipHorizontalWhitespace(line.topLevel, 0);
+    const keyword = identifierAt(line.topLevel, start)?.value;
+    const commentlessStart = skipHorizontalWhitespace(line.commentless, 0);
+    const commentlessKeyword = identifierAt(
+      line.commentless,
+      commentlessStart
+    )?.value;
+    if (commentlessKeyword === 'resource' && keyword !== 'resource') {
+      throw new CoreError(
+        'UnsupportedCapability',
+        'Bicep nested resource declarations are not supported'
+      );
+    }
+    switch (keyword) {
+      case 'resource':
+        resources.push(line);
+        if (resources.length > BICEP_MAX_RESOURCES) {
+          throw new CoreError(
+            'ValidationFailed',
+            `Bicep source exceeds ${BICEP_MAX_RESOURCES} resources`
+          );
+        }
+        break;
+      case 'output':
+        outputs.push(line);
+        break;
+      case 'param':
+        parameters.push(line);
+        break;
+      case 'module':
+        modules.push(line);
+        break;
+    }
+  }
+  return { resources, outputs, parameters, modules };
+}
+
+function validateAdapterParameters(
+  declarations: TopLevelDeclarations
+): boolean {
+  if (declarations.parameters.length === 0) return false;
 
   const names = new Set<string>();
-  for (const declaration of declarations) {
-    const name = declaration[1] ?? '';
-    const type = declaration[2] ?? '';
-    const remainder = (declaration[3] ?? '').trim();
+  for (const line of declarations.parameters) {
+    const declaration = parseParameterDeclaration(line);
+    if (!declaration) {
+      throw new CoreError(
+        'UnsupportedCapability',
+        'Bicep parameter declaration syntax is not supported'
+      );
+    }
+    const { name, type, remainder } = declaration;
     if (
       !ADAPTER_PARAMETERS.includes(
         name as (typeof ADAPTER_PARAMETERS)[number]
@@ -457,11 +781,42 @@ function topLevelReferenceProperty(
 }
 
 function dependencySymbols(body: string): readonly string[] {
-  const match = /(?:^|\n)\s*dependsOn\s*:\s*\[([\s\S]*?)\]/m.exec(
-    commentProjection(body)
+  const searchable = commentProjection(body);
+  const location = lineProperty(searchable, 'dependsOn');
+  if (!location) return [];
+  if (searchable[location.valueStart] !== '[') {
+    return malformedProperty(
+      'dependsOn',
+      searchable.slice(location.valueStart, location.lineEnd)
+    );
+  }
+  const symbols: string[] = [];
+  let index = location.valueStart + 1;
+  while (index < searchable.length) {
+    const character = searchable[index] ?? '';
+    if (character === ']') return symbols;
+    if (
+      character === ' ' ||
+      character === '\t' ||
+      character === '\r' ||
+      character === '\n' ||
+      character === ','
+    ) {
+      index++;
+      continue;
+    }
+    const token = identifierAt(searchable, index);
+    if (token) {
+      symbols.push(token.value);
+      index = token.end;
+      continue;
+    }
+    break;
+  }
+  throw new CoreError(
+    'ValidationFailed',
+    'Bicep dependency array is not closed'
   );
-  if (!match?.[1]) return [];
-  return match[1].match(/[A-Za-z_][\w]*/g) ?? [];
 }
 
 function requiredString(
@@ -792,8 +1147,8 @@ function validateResourceTypes(resources: readonly BicepResource[]): void {
   }
 }
 
-function validateTopLevelConstructs(source: string): void {
-  if (/(?:^|\n)\s*module\b/.test(topLevelProjection(source))) {
+function validateTopLevelConstructs(declarations: TopLevelDeclarations): void {
+  if (declarations.modules.length > 0) {
     throw new CoreError(
       'UnsupportedCapability',
       'Bicep module declarations are not supported'
@@ -968,11 +1323,11 @@ function compileResource(
 }
 
 function compileOutputs(
-  source: string,
+  declarations: TopLevelDeclarations,
   resources: ReadonlyMap<string, CompiledBicepResource>
 ): Readonly<Record<string, string>> {
   const outputs: Record<string, string> = {};
-  for (const output of bicepOutputs(source)) {
+  for (const output of parseBicepOutputs(declarations)) {
     outputs[output.name] = outputValue(output, resources);
   }
   return outputs;
@@ -982,9 +1337,10 @@ export function compileBicep(
   source: string,
   context: BicepCompileContext
 ): BicepCompilation {
-  validateTopLevelConstructs(source);
-  const adapterParametersDeclared = validateAdapterParameters(source);
-  const resources = bicepResources(source);
+  const declarations = topLevelDeclarations(source);
+  validateTopLevelConstructs(declarations);
+  const adapterParametersDeclared = validateAdapterParameters(declarations);
+  const resources = parseBicepResources(source, declarations);
   validateResourceTypes(resources);
   const identified = identifyResources(
     resources,
@@ -1000,5 +1356,8 @@ export function compileBicep(
   const bySymbol = new Map(
     compiled.map((resource) => [resource.symbol, resource])
   );
-  return { resources: compiled, outputs: compileOutputs(source, bySymbol) };
+  return {
+    resources: compiled,
+    outputs: compileOutputs(declarations, bySymbol),
+  };
 }

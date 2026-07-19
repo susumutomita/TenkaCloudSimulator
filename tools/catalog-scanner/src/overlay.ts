@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { lstat, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { isLowercaseDigestPinnedImage } from '@tenkacloud/simulator-contracts/image-reference';
 import type {
   Diagnostic,
   Fidelity,
@@ -361,7 +362,7 @@ function validWorkload(value: Record<string, unknown>): boolean {
     Boolean(stringValue(value, 'targetId')) &&
     Boolean(stringValue(value, 'resourceRef')) &&
     typeof value['image'] === 'string' &&
-    /@sha256:[a-f0-9]{64}$/.test(value['image']) &&
+    isLowercaseDigestPinnedImage(value['image']) &&
     Number.isInteger(value['containerPort']) &&
     Number(value['containerPort']) >= 1024 &&
     Number(value['containerPort']) <= 65_535 &&

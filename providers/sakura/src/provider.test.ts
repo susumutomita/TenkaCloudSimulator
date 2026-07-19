@@ -715,6 +715,43 @@ describe('Sakura AppRun provider の振る舞い', () => {
         },
       })
     ).toThrow('does not match the application descriptor');
+    const uppercaseImage = APPLICATION_IMAGE.replace('ghcr.io', 'GHCR.IO');
+    const applicationComponent = APPLICATION.components[0];
+    if (!applicationComponent) throw new Error('component is missing');
+    const uppercaseApplication = {
+      ...APPLICATION,
+      components: [
+        {
+          ...applicationComponent,
+          deploy_source: {
+            container_registry: {
+              ...applicationComponent.deploy_source.container_registry,
+              image: uppercaseImage,
+            },
+          },
+        },
+      ],
+    };
+    expect(() =>
+      provider.compile({
+        ...compileInput,
+        problemId: 'sakura-uppercase-image',
+        templateBody: JSON.stringify(uppercaseApplication),
+        simulationOverlay: {
+          schemaVersion: '1',
+          workloads: [
+            {
+              id: 'sakura-hello',
+              targetId: 'default',
+              resourceRef: 'BaseUrl',
+              image: uppercaseImage,
+              containerPort: 8080,
+              healthPath: '/healthz',
+            },
+          ],
+        },
+      })
+    ).toThrow('does not match the application descriptor');
     expect(() =>
       provider.compile({
         ...compileInput,

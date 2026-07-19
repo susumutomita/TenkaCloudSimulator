@@ -1,3 +1,4 @@
+import { isLowercaseDigestPinnedImage } from '@tenkacloud/simulator-contracts/image-reference';
 import {
   CoreError,
   deterministicId,
@@ -78,8 +79,6 @@ const CAPABILITIES: readonly ProviderCapability[] = [
 const WORKLOAD_PROVIDER = 'runtime';
 const WORKLOAD_RESOURCE = 'Runtime::Workload';
 const WORKLOAD_OUTPUT = 'BaseUrl';
-const DIRECT_IMAGE_ENTRY =
-  /^(?:[a-z0-9][a-z0-9._/-]*\/)?[a-z0-9][a-z0-9._/-]*@sha256:[a-f0-9]{64}$/;
 const LOOPBACK_HOSTS = new Set(['127.0.0.1', '::1']);
 const HTTP_TIMEOUT_MILLISECONDS = 8_000;
 
@@ -818,13 +817,15 @@ function matchingOverlayWorkload(
   }
   const image = component.deploy_source.container_registry.image;
   const probe = component.probe?.http_get;
+  const directImageEntry = input.target.entry.includes('@sha256:');
   if (
     workload['resourceRef'] !== WORKLOAD_OUTPUT ||
     typeof workload['image'] !== 'string' ||
-    !/@sha256:[a-f0-9]{64}$/.test(workload['image']) ||
+    !isLowercaseDigestPinnedImage(workload['image']) ||
     workload['image'] !== image ||
-    (DIRECT_IMAGE_ENTRY.test(input.target.entry) &&
-      workload['image'] !== input.target.entry) ||
+    (directImageEntry &&
+      (!isLowercaseDigestPinnedImage(input.target.entry) ||
+        workload['image'] !== input.target.entry)) ||
     workload['containerPort'] !== application.port ||
     (workload['healthPath'] ?? '/') !== (probe?.path ?? '/') ||
     (probe !== undefined && probe.port !== application.port)

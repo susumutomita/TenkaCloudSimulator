@@ -1,5 +1,6 @@
 import { chmod, lstat, mkdir, realpath } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
+import { isLowercaseDigestPinnedImage } from '@tenkacloud/simulator-contracts/image-reference';
 import {
   ProviderRegistry,
   SimulationCore,
@@ -28,8 +29,6 @@ import {
 
 const LOOPBACK_HOSTS = new Set(['127.0.0.1', 'localhost', '::1']);
 const CONTAINER_HOST = '0.0.0.0';
-const PINNED_WORKLOAD_IMAGE =
-  /^(?:[a-z0-9][a-z0-9._/-]*\/)?[a-z0-9][a-z0-9._/-]*@sha256:[a-f0-9]{64}$/;
 const CONTROL_CONTAINER = /^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$/;
 const MAX_WORKLOAD_IMAGES = 64;
 
@@ -123,7 +122,7 @@ export function workloadPolicy(
     !isStringArray(parsedImages) ||
     parsedImages.length < 1 ||
     parsedImages.length > MAX_WORKLOAD_IMAGES ||
-    parsedImages.some((image) => !PINNED_WORKLOAD_IMAGE.test(image)) ||
+    parsedImages.some((image) => !isLowercaseDigestPinnedImage(image)) ||
     new Set(parsedImages).size !== parsedImages.length
   ) {
     throw new TypeError(

@@ -1,5 +1,129 @@
 # Issue 2574 実装計画
 
+## GitHub security alert 0 件化 - 2026-07-18
+
+### 目的
+
+GitHub の default branch に残る Dependabot 12 件、CodeQL 11 件、Secret scanning 1 件を、
+誤検知の一括 dismiss ではなく、依存更新、入力境界の線形化、credential fixture の除去で
+解消します。同時に、lockfile 不整合で CI が失敗している Dependabot PR
+`https://github.com/susumutomita/TenkaCloudSimulator/pull/14` と
+`https://github.com/susumutomita/TenkaCloudSimulator/pull/15` の変更を包含し、最終的に Open PR、
+Open Issue、GitHub security alert をすべて 0 件にします。
+
+### 制約と設計判断
+
+- 選択肢 A は CodeQL が示した正規表現だけを別の正規表現へ置換する案、選択肢 B は Bicep を
+  行単位、OCI image digest を固定長の文字列走査で検証する案です。A は正規表現の重なりを
+  再導入しやすく、長大な外部入力に対する計算量の根拠が残らないため、線形時間をコード構造で
+  説明できる B を採用します。
+- 選択肢 A は各 package に image 検証を複製する案、選択肢 B は versioned contract package に
+  副作用のない共通 validator を置く案です。API、server、provider、scanner、runner の判定差を
+  防ぎ、schema と runtime の境界を一致させるため B を採用します。JSON Schema の `pattern` も
+  path segment を重なりなく表す形にし、AJV の `allErrors` 実行でも polynomial backtracking を
+  起こさない同じ受理集合にします。
+- Hono と yaml に限らず `bun audit` が報告する production / tooling dependency を修正版へ
+  更新し、root `bun.lock` も同じ変更として生成します。minimum-age や frozen-lockfile を
+  無効化せず、GitHub の既存 alert とローカルの実 dependency tree の両方を 0 件にします。
+  複数 major が共存する `diff` と `js-yaml` は、古い consumer の互換範囲にある修正版を root
+  dev dependency で resolution anchor にし、新しい consumer の major は別解決のまま保ちます。
+- Azure Bicep は schema と一致する最大 5 MiB に加えて 1 行 64 KiB、行数、宣言数の入力境界を parser 自身でも
+  fail-closed に強制し、全行 object 配列を作らず、宣言と property / dependency を単一方向の
+  行走査で解析します。これにより改行だけの入力で memory が増幅せず、property 不在時も開始位置を
+  戻って再探索しません。
+- AWS credential 拒否テストは secret scanner が credential と判定する 20 文字の `ASIA...` 値を
+  保持せず、prefix 拒否という実際の境界だけを最短入力で検証します。履歴上の alert は修正 merge
+  後に、credential ではない AWS documentation example の test fixture だった根拠をコメントして
+  `used_in_tests` で解決します。
+
+### データの流れと責務
+
+1. `contracts` が SHA-256 digest pin と OCI repository の線形 validator を提供します。
+2. server、provider、catalog scanner、workload runner は同じ validator を外部入力境界で使います。
+3. Azure Bicep parser は入力上限と comment / nesting projection を維持したまま、全行を保持せず
+   top-level 宣言、property、dependency を一方向に走査します。
+4. package manifests と `bun.lock` が Hono、yaml、AJV を含む修正版 dependency graph を固定し、
+   `bun audit` が production / tooling を含めて 0 件であることを検証します。
+5. GitHub Actions と CodeQL が merge commit を解析し、Dependabot、Code scanning、Secret scanning の
+   open alert が 0 件であることを GitHub API で再確認します。
+
+### エッジケース
+
+- digest が 63/65 文字、大文字 hexadecimal、digest 前の image 名が空、不正文字、512 文字超の場合を
+  受理しません。末尾 slash と slash が連続する path も schema / runtime の双方で拒否します。
+- 改行や空白を大量に含む Bicep、5 MiB・1 行 64 KiB・行数・宣言数の上限を超える Bicep、comment 内の ghost
+  宣言、nested resource、未対応 condition / loop、未閉鎖 block / dependency 配列を成功扱いしません。
+- test fixture の credential 文字列を短くしても、`AKIA` / `ASIA` prefix の fail-closed 拒否を維持します。
+- GitHub alert は branch 上のテスト成功だけでは解決済みとせず、default branch 反映後の API 状態を
+  完了証跡にします。
+
+### タスク
+
+- [x] 共通 image validator のテストを Red にし、runtime consumer を移行します。
+- [x] Bicep の長大入力 regression test を Red にし、top-level parser を行単位走査へ変更します。
+- [x] CodeQL の test-code 指摘 2 件と AWS secret fixture を修正します。
+- [x] Hono / yaml と `bun.lock` を同期更新します。
+- [x] Bicep の property / dependency ReDoS と全行 materialize の memory 増幅を修正します。
+- [x] OCI image の JSON Schema pattern に残る ReDoS と runtime との受理差を修正します。
+- [x] `bun audit` 17 件を dependency graph から除去し、0 件を検証します。
+- [x] architecture harness、before-commit、review、security-review、simplify を通します。
+- [ ] PR を merge し、Open PR、Open Issue、Security alert の 0 件を GitHub API で確認します。
+
+### 検証手順
+
+```bash
+bun test contracts/test/contracts.test.ts providers/azure/src/bicep.test.ts
+bun test tools/workload-runner/test/runner.test.ts providers/sakura/src/provider.test.ts
+bun audit
+bun scripts/architecture-harness.ts --staged --fail-on=error
+make before-commit
+```
+
+### 進捗ログ
+
+- 2026-07-18: GitHub API で Open PR 2、Open Issue 0、Dependabot 12、CodeQL 11、
+  Secret scanning 1 を確認しました。Dependabot PR は manifest のみを変更し、root lockfile を
+  更新していないため frozen install で失敗していました。
+- 2026-07-18: OCI image validator を固定長 512 文字以内の線形走査へ集約し、server、AWS、
+  Sakura、catalog scanner、workload runner を同じ判定へ移行しました。Hono は transitive
+  dependency も 4.12.25 へ固定し、yaml 2.8.3 とともに旧版が lockfile に残らないことを確認しました。
+- 2026-07-18: Bicep の resource、output、param、module 判定を top-level 行分類と手動 token
+  parser へ移行しました。約 131 KB の改行分断入力を誤受理する Red 3 件を再現後、Azure 全体
+  37 tests、`bicep.ts` の line / function coverage 100％で Green を確認しました。
+- 2026-07-18: security review で property / dependency の全体 regex に polynomial ReDoS、全行
+  object materialize に 1 MiB 改行入力で約 300 MB の memory 増幅を再現しました。code review では
+  更新後 dependency tree に `bun audit` 17 件（high 6、moderate 9、low 2）が残ることを確認し、
+  GitHub の既存 alert だけでなく実 tree も 0 件にする追加 gate としました。
+- 2026-07-18: code review で nested child resource が top-level 分類から消えて黙って無視される
+  回帰を再現しました。comment 内は除外しつつ、depth が 0 でない resource 宣言は明示的に拒否します。
+- 2026-07-18: code review で simulation overlay の旧 schema pattern が AJV `allErrors` 経路に
+  polynomial ReDoS を残し、末尾 slash の受理も runtime validator と一致しないことを再現しました。
+- 2026-07-20: Bicep の property / dependency を同一行 token と閉鎖済み配列の線形走査へ変更し、
+  全行 object 配列を iterator 化しました。5 MiB、100,000 行、256 resource の上限と nested
+  resource 拒否を追加し、Red 4 件から Bicep 25 tests Green を確認しました。
+- 2026-07-20: OCI schema を slash と segment class が重ならない pattern へ変更し、共有 helper、
+  catalog scanner、Sakura workload binding の lowercase / 空 segment 受理集合を統一しました。
+  関連 39 tests が Green です。
+- 2026-07-20: AJV と transitive tooling dependency を修正版へ更新し、manifests から lockfile を
+  再生成しました。`bun audit` の 17 件を `No vulnerabilities found` にし、frozen install も
+  成功しました。
+- 2026-07-20: 初回 `make before-commit` は Azure の duplication が baseline を 5 行超えて
+  fail しました。scan 状態生成を `scanSourceCharacter` へ抽出して新規 clone を除去し、Azure は
+  baseline 452 行から 427 行、catalog scanner は 170 行から 145 行へ減少しました。
+- 2026-07-20: UTF-8 surrogate pair と malformed `dependsOn` の境界テストを追加し、Azure Bicep
+  25 tests と `bicep.ts` の line / function coverage 100％を確認しました。
+- 2026-07-20: 最終 security review で 1 MiB の単一長行が約 383 MB へ増幅する経路を再現しました。
+  parser の文字列連結前に 1 行 64 KiB の byte 上限を強制し、1 MiB 未満の長行を早期拒否します。
+- 2026-07-20: 最終 code review で direct AppRun entry だけが連続 slash、大文字 segment、末尾 slash を
+  scanner で受理する runtime との不一致を再現しました。scanner も共通 lowercase OCI validator へ統一します。
+- 2026-07-20: 最終 code review と security review はともに PASS でした。`make dead_code` は指摘なし、
+  duplication は Azure と catalog scanner の双方で baseline 未満です。並行 reviewer と固定 world ID が
+  衝突した Docker E2E は、他 process 終了後の単独再実行で 1 pass、0 fail を確認しました。
+- 2026-07-20: PR `https://github.com/susumutomita/TenkaCloudSimulator/pull/16` を Ready にし、
+  squash auto-merge を有効化しました。通常 CI、CodeRabbit、GitGuardian、CodeQL の language jobs は
+  成功しましたが、GitHub Advanced Security の SARIF 処理が timeout 後も pending のため、
+  ruleset の必須 `CodeQL` check が未完了です。保護ルールを緩和せず、同じ修正内容を再解析します。
+
 ### Issue 4 final four-cloud evidence - 2026-07-13
 
 #### 目的

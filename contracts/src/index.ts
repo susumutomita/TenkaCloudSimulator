@@ -1,3 +1,4 @@
+export * from './image-reference.js';
 export * from './schemas.js';
 export * from './snapshot-integrity.js';
 export * from './types.js';

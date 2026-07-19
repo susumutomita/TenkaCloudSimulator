@@ -255,6 +255,16 @@ describe('simulation overlay workload boundary', () => {
           { ...valid, id: 'other', targetId: 'missing' },
           { ...valid, id: 'extra', extra: true },
           { ...valid, id: 'bad-image', image: 'registry.example/api:latest' },
+          {
+            ...valid,
+            id: 'uppercase-image',
+            image: `REGISTRY.EXAMPLE/api@sha256:${'a'.repeat(64)}`,
+          },
+          {
+            ...valid,
+            id: 'empty-segment-image',
+            image: `registry.example//api@sha256:${'a'.repeat(64)}`,
+          },
           null,
         ],
       })
@@ -264,7 +274,7 @@ describe('simulation overlay workload boundary', () => {
     expect(
       result.requirements.filter((item) => item.operation === 'Materialize')
     ).toHaveLength(1);
-    expect(result.diagnostics).toHaveLength(5);
+    expect(result.diagnostics).toHaveLength(7);
     expect(result.diagnostics.every((item) => item.targetId !== 'secret')).toBe(
       true
     );

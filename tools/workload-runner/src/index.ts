@@ -1,7 +1,6 @@
 import { createHash } from 'node:crypto';
+import { isLowercaseDigestPinnedImage } from '@tenkacloud/simulator-contracts/image-reference';
 
-const PINNED_IMAGE =
-  /^(?:[a-z0-9][a-z0-9._/-]*\/)?[a-z0-9][a-z0-9._/-]*@sha256:[a-f0-9]{64}$/;
 const SAFE_ENVIRONMENT_KEY = /^[A-Z][A-Z0-9_]{0,63}$/;
 const SENSITIVE_ENVIRONMENT_KEY =
   /(?:ACCESS_KEY|CREDENTIAL|PASSWORD|PRIVATE_KEY|SECRET|TOKEN)/;
@@ -447,7 +446,7 @@ export class DockerWorkloadRunner {
   ) {
     if (
       policy.allowedImages.size < 1 ||
-      !PINNED_IMAGE.test(policy.proxyImage) ||
+      !isLowercaseDigestPinnedImage(policy.proxyImage) ||
       !policy.allowedImages.has(policy.proxyImage) ||
       !Number.isSafeInteger(policy.maxMemoryBytes) ||
       policy.maxMemoryBytes < 1 ||
@@ -850,7 +849,7 @@ export class DockerWorkloadRunner {
     readonly pids: number;
   } {
     validateWorkloadIdentity(spec);
-    if (!PINNED_IMAGE.test(spec.image)) {
+    if (!isLowercaseDigestPinnedImage(spec.image)) {
       throw new WorkloadRunnerError(
         'InvalidWorkload',
         'workload image must be pinned by sha256 digest'

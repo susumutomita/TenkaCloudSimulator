@@ -377,7 +377,7 @@ describe('Azure ARM native gateway の振る舞い', () => {
         `/subscriptions/sub/resourceGroups/group/providers/Microsoft.App/containerApps/${'a'.repeat(40)}?api-version=${AZURE_ARM_CONTAINER_API_VERSION}`
       ),
       armRequest(
-        `${ROLE_PATH.replace('assignment-1', '%2F')}?api-version=${AZURE_ARM_ROLE_API_VERSION}`
+        `${CONTAINER_PATH}/providers/Microsoft.Authorization/roleAssignments/%2F?api-version=${AZURE_ARM_ROLE_API_VERSION}`
       ),
       armRequest(
         `/subscriptions/${'a'.repeat(4100)}/resourceGroups/group/providers/Microsoft.App/containerApps/app?api-version=${AZURE_ARM_CONTAINER_API_VERSION}`
