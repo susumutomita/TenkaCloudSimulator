@@ -119,6 +119,10 @@ make before-commit
 - 2026-07-20: 最終 code review と security review はともに PASS でした。`make dead_code` は指摘なし、
   duplication は Azure と catalog scanner の双方で baseline 未満です。並行 reviewer と固定 world ID が
   衝突した Docker E2E は、他 process 終了後の単独再実行で 1 pass、0 fail を確認しました。
+- 2026-07-20: PR `https://github.com/susumutomita/TenkaCloudSimulator/pull/16` を Ready にし、
+  squash auto-merge を有効化しました。通常 CI、CodeRabbit、GitGuardian、CodeQL の language jobs は
+  成功しましたが、GitHub Advanced Security の SARIF 処理が timeout 後も pending のため、
+  ruleset の必須 `CodeQL` check が未完了です。保護ルールを緩和せず、同じ修正内容を再解析します。
 
 ### Issue 4 final four-cloud evidence - 2026-07-13
 
