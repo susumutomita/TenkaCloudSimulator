@@ -57,9 +57,11 @@ const NETWORK_LIFECYCLE_RESOURCE_TYPES = new Set([
   'AWS::ElasticLoadBalancingV2::LoadBalancer',
   'AWS::ElasticLoadBalancingV2::TargetGroup',
   'AWS::WAFv2::WebACL',
+  'AWS::WAFv2::WebACLAssociation',
 ]);
 
 function serviceForResourceType(resourceType: string): string {
+  if (resourceType.startsWith('AWS::ApiGateway::')) return 'apigateway';
   if (resourceType.startsWith('AWS::EC2::')) return 'ec2';
   if (resourceType.startsWith('AWS::ElasticLoadBalancingV2::')) {
     return 'elasticloadbalancing';

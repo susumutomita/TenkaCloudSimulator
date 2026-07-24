@@ -11,6 +11,7 @@ import {
 import { deployCloudFormation } from '../src/deploy';
 import { CLOUDFORMATION_RESOURCE_TYPES, STACK_RESOURCE } from '../src/model';
 import { AwsProvider } from '../src/provider';
+import { objectValue } from '../src/value';
 import {
   cleanupContexts,
   createContext,
@@ -36,7 +37,7 @@ function compile(body: string) {
 }
 
 describe('CloudFormation compiler', () => {
-  it('package fixture の26 resource typeを依存順かつ決定的に宣言する', async () => {
+  it('package fixture の32 resource typeを依存順かつ決定的に宣言する', async () => {
     const body = await fixtureBody();
     const first = compile(body);
     const second = compile(body);
@@ -56,6 +57,24 @@ describe('CloudFormation compiler', () => {
     );
     expect(logicalIds.indexOf('GatewayAttachment')).toBeLessThan(
       logicalIds.indexOf('Route')
+    );
+    expect(logicalIds.indexOf('RestApi')).toBeLessThan(
+      logicalIds.indexOf('ProxyResource')
+    );
+    expect(logicalIds.indexOf('ProxyResource')).toBeLessThan(
+      logicalIds.indexOf('ProxyMethod')
+    );
+    expect(logicalIds.indexOf('ProxyMethod')).toBeLessThan(
+      logicalIds.indexOf('ApiDeployment')
+    );
+    expect(logicalIds.indexOf('ApiDeployment')).toBeLessThan(
+      logicalIds.indexOf('ApiStage')
+    );
+    expect(logicalIds.indexOf('ApiStage')).toBeLessThan(
+      logicalIds.indexOf('ApiWebAclAssociation')
+    );
+    expect(logicalIds.indexOf('WebAcl')).toBeLessThan(
+      logicalIds.indexOf('ApiWebAclAssociation')
     );
   });
 
@@ -78,6 +97,50 @@ describe('CloudFormation compiler', () => {
     }
     expect(String(Reflect.get(outputs, 'FunctionUrl'))).toContain(
       '.lambda-url.us-east-1.on.aws/'
+    );
+    const restApi = plan.resources.find(
+      (resource) => resource.properties['logicalId'] === 'RestApi'
+    );
+    expect(restApi?.properties['refValue']).toStartWith('restapi-');
+    expect(restApi?.properties['attributes']).toMatchObject({
+      RootResourceId: `${restApi?.properties['refValue']}-root`,
+    });
+    const proxyResource = plan.resources.find(
+      (resource) => resource.properties['logicalId'] === 'ProxyResource'
+    );
+    expect(
+      Reflect.get(
+        proxyResource?.properties['templateProperties'] ?? {},
+        'ParentId'
+      )
+    ).toBe(
+      Reflect.get(restApi?.properties['attributes'] ?? {}, 'RootResourceId')
+    );
+    const apiStage = plan.resources.find(
+      (resource) => resource.properties['logicalId'] === 'ApiStage'
+    );
+    expect(apiStage?.properties['refValue']).toBe('prod');
+    expect(apiStage?.properties['attributes']).toMatchObject({
+      Arn: `arn:aws:apigateway:us-east-1::/restapis/${restApi?.properties['refValue']}/stages/prod`,
+    });
+    expect(String(Reflect.get(outputs, 'ApiInvokeUrl'))).toBe(
+      `https://${restApi?.properties['refValue']}.execute-api.us-east-1.amazonaws.com/prod`
+    );
+    const webAcl = plan.resources.find(
+      (resource) => resource.properties['logicalId'] === 'WebAcl'
+    );
+    const webAclAttributes = objectValue(
+      webAcl?.properties['attributes'] ?? {},
+      'WebAcl attributes'
+    );
+    const association = plan.resources.find(
+      (resource) => resource.properties['logicalId'] === 'ApiWebAclAssociation'
+    );
+    // AWS documents Ref on AWS::WAFv2::WebACLAssociation as the composite
+    // "name|id|scope" (same as AWS::WAFv2::WebACL itself) -- see
+    // https://github.com/awsdocs/aws-cloudformation-user-guide/blob/main/doc_source/aws-resource-wafv2-webaclassociation.md
+    expect(association?.properties['refValue']).toBe(
+      `${webAcl?.properties['refValue']}|${webAclAttributes['Id']}|REGIONAL`
     );
     const instance = plan.resources.find(
       (resource) => resource.properties['logicalId'] === 'Instance'

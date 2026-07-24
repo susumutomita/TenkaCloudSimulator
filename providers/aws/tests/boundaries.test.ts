@@ -25,8 +25,10 @@ import {
 import { reduceRuntime } from '../src/runtime';
 import {
   customResourceObjects,
+  initializeResource,
   stackProperties,
   storedProperties,
+  webAclAssociationEffects,
 } from '../src/state';
 import {
   booleanValue,
@@ -173,6 +175,28 @@ describe('AWS provider boundary', () => {
         )?.fidelity
       ).toEqual(['L1', 'L4']);
     }
+    for (const resourceType of [
+      'AWS::ApiGateway::Deployment',
+      'AWS::ApiGateway::Method',
+      'AWS::ApiGateway::Resource',
+      'AWS::ApiGateway::RestApi',
+      'AWS::ApiGateway::Stage',
+    ]) {
+      expect(
+        AWS_CATALOG_CAPABILITY_MANIFEST.capabilities.find(
+          (capability) =>
+            capability.resourceType === resourceType &&
+            capability.operation === 'lifecycle'
+        )
+      ).toMatchObject({ service: 'apigateway', fidelity: ['L1'] });
+    }
+    expect(
+      AWS_CATALOG_CAPABILITY_MANIFEST.capabilities.find(
+        (capability) =>
+          capability.resourceType === 'AWS::WAFv2::WebACLAssociation' &&
+          capability.operation === 'lifecycle'
+      )
+    ).toMatchObject({ service: 'wafv2', fidelity: ['L1', 'L3'] });
     expect(
       AWS_CATALOG_CAPABILITY_MANIFEST.capabilities.find(
         (capability) =>
@@ -362,6 +386,51 @@ Outputs:
     expect(templateProperties['MetadataValue']).toBe(
       ['$', '{literal}-$', '{SHELL_VALUE}'].join('')
     );
+  });
+
+  it('WebACLAssociationのRefはWebACLArnからname|id|scopeを合成し不正な形式ならsyntheticへfallbackする', () => {
+    const plan = compile(`Resources:
+  WebAcl:
+    Type: AWS::WAFv2::WebACL
+    Properties:
+      Name: fixture-acl
+      Scope: REGIONAL
+      DefaultAction: { Allow: {} }
+      VisibilityConfig:
+        CloudWatchMetricsEnabled: true
+        MetricName: fixture
+        SampledRequestsEnabled: true
+  Assoc:
+    Type: AWS::WAFv2::WebACLAssociation
+    Properties:
+      ResourceArn: arn:aws:apigateway:us-east-1::/restapis/abc/stages/prod
+      WebACLArn: !GetAtt WebAcl.Arn
+  Malformed:
+    Type: AWS::WAFv2::WebACLAssociation
+    Properties:
+      ResourceArn: arn:aws:apigateway:us-east-1::/restapis/abc/stages/dev
+      WebACLArn: not-a-valid-wafv2-arn
+`);
+    const webAcl = plan.resources.find(
+      (candidate) => candidate.properties['logicalId'] === 'WebAcl'
+    );
+    const webAclAttributes = objectValue(
+      webAcl?.properties['attributes'] ?? {},
+      'WebAcl attributes'
+    );
+    const association = plan.resources.find(
+      (candidate) => candidate.properties['logicalId'] === 'Assoc'
+    );
+    // AWS documents Ref on AWS::WAFv2::WebACLAssociation as the composite
+    // "name|id|scope" (same as AWS::WAFv2::WebACL itself):
+    // https://github.com/awsdocs/aws-cloudformation-user-guide/blob/main/doc_source/aws-resource-wafv2-webaclassociation.md
+    expect(association?.properties['refValue']).toBe(
+      `${webAcl?.properties['refValue']}|${webAclAttributes['Id']}|REGIONAL`
+    );
+    const malformed = plan.resources.find(
+      (candidate) => candidate.properties['logicalId'] === 'Malformed'
+    );
+    expect(malformed?.properties['refValue']).toMatch(/^webaclassoc-/);
   });
 
   it('conditionとintrinsicの不正shapeをすべてloudに拒否する', () => {
@@ -583,6 +652,139 @@ Outputs:
         world([webAcl, target])
       )
     ).not.toThrow();
+  });
+
+  it('webAclAssociationEffectsはCFN宣言のWebACLAssociationをAssociateWebACLと同じstateへ集約する', () => {
+    const webAcl = {
+      ...resource('AWS::WAFv2::WebACL', 'WebAcl', { Name: 'acl' }),
+      properties: {
+        ...resource('AWS::WAFv2::WebACL', 'WebAcl', { Name: 'acl' }).properties,
+        attributes: { Arn: 'arn:acl' },
+        state: { associatedResources: [] },
+      },
+    };
+    const stage = {
+      ...resource('AWS::ApiGateway::Stage', 'ApiStage', { StageName: 'prod' }),
+      properties: {
+        ...resource('AWS::ApiGateway::Stage', 'ApiStage', {
+          StageName: 'prod',
+        }).properties,
+        attributes: { Arn: 'arn:stage-prod' },
+      },
+    };
+    const secondStage = {
+      ...resource('AWS::ApiGateway::Stage', 'DevStage', { StageName: 'dev' }),
+      properties: {
+        ...resource('AWS::ApiGateway::Stage', 'DevStage', {
+          StageName: 'dev',
+        }).properties,
+        attributes: { Arn: 'arn:stage-dev' },
+      },
+    };
+    const association = resource(
+      'AWS::WAFv2::WebACLAssociation',
+      'ApiWebAclAssociation',
+      { ResourceArn: 'arn:stage-prod', WebACLArn: 'arn:acl' }
+    );
+    const secondAssociation = resource(
+      'AWS::WAFv2::WebACLAssociation',
+      'DevWebAclAssociation',
+      { ResourceArn: 'arn:stage-dev', WebACLArn: 'arn:acl' }
+    );
+
+    const withoutAssociation = [webAcl, stage];
+    expect(webAclAssociationEffects(withoutAssociation)).toBe(
+      withoutAssociation
+    );
+
+    const effected = webAclAssociationEffects([
+      webAcl,
+      stage,
+      secondStage,
+      association,
+      secondAssociation,
+    ]);
+    const effectedWebAcl = effected.find(
+      (candidate) => candidate.properties['logicalId'] === 'WebAcl'
+    );
+    const effectedStage = effected.find(
+      (candidate) => candidate.properties['logicalId'] === 'ApiStage'
+    );
+    const effectedDevStage = effected.find(
+      (candidate) => candidate.properties['logicalId'] === 'DevStage'
+    );
+    expect(
+      objectValue(effectedWebAcl?.properties['state'], 'state')[
+        'associatedResources'
+      ]
+    ).toEqual(['arn:stage-dev', 'arn:stage-prod']);
+    expect(
+      objectValue(effectedStage?.properties['state'], 'state')['webAclArn']
+    ).toBe('arn:acl');
+    expect(
+      objectValue(effectedDevStage?.properties['state'], 'state')['webAclArn']
+    ).toBe('arn:acl');
+
+    expect(() =>
+      webAclAssociationEffects([
+        webAcl,
+        resource('AWS::WAFv2::WebACLAssociation', 'MissingTarget', {
+          ResourceArn: 'arn:missing-stage',
+          WebACLArn: 'arn:acl',
+        }),
+      ])
+    ).toThrow(
+      'ResourceArn arn:missing-stage does not resolve to a resource declared in this stack'
+    );
+    expect(() =>
+      webAclAssociationEffects([
+        stage,
+        resource('AWS::WAFv2::WebACLAssociation', 'MissingAcl', {
+          ResourceArn: 'arn:stage-prod',
+          WebACLArn: 'arn:missing-acl',
+        }),
+      ])
+    ).toThrow(
+      'WebACLArn arn:missing-acl does not resolve to an AWS::WAFv2::WebACL declared in this stack'
+    );
+  });
+
+  it('webAclAssociationEffectsは手動seedなしでも実initializeResourceのassociatedResources初期値を前提にできる', () => {
+    const virtualTime = '2026-07-12T00:00:00.000Z';
+    // state を手で埋めず、deploy.ts と同じ initializeResource() を通す。
+    // AWS::WAFv2::WebACL の initialState() は associatedResources: [] を必ず
+    // 返すため (state.ts の initialState 参照)、webAclAssociationEffects の
+    // stringArray 読み出しがここで unset を踏むことはない。
+    const initializedWebAcl = initializeResource(
+      resource('AWS::WAFv2::WebACL', 'WebAcl', { Name: 'acl' }),
+      virtualTime
+    );
+    const initializedStage = initializeResource(
+      resource('AWS::ApiGateway::Stage', 'ApiStage', { StageName: 'prod' }),
+      virtualTime
+    );
+    expect(
+      objectValue(initializedWebAcl.properties['state'], 'state')[
+        'associatedResources'
+      ]
+    ).toEqual([]);
+    const association = resource('AWS::WAFv2::WebACLAssociation', 'Assoc', {
+      ResourceArn: 'ApiStage',
+      WebACLArn: 'WebAcl',
+    });
+    const effected = webAclAssociationEffects([
+      initializedWebAcl,
+      initializedStage,
+      association,
+    ]);
+    const effectedWebAcl = effected.find(
+      (candidate) => candidate.properties['logicalId'] === 'WebAcl'
+    );
+    expect(
+      objectValue(effectedWebAcl?.properties['state'], 'state')[
+        'associatedResources'
+      ]
+    ).toEqual(['ApiStage']);
   });
 
   it('custom resource不足とLambda payload handler不足を明示する', () => {

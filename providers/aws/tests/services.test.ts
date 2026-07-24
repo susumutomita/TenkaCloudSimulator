@@ -1270,6 +1270,38 @@ describe('AWS participant and operator reducers', () => {
     ).toThrow('DB instance does not exist');
   });
 
+  it('CFN宣言のWebACLAssociationがAssociateWebACLなしでGetWebACLForResourceへ反映される', async () => {
+    const context = await createContext();
+    const webAcl = resourceByLogicalId(context, 'WebAcl');
+    const webAclArn = String(
+      objectField(webAcl.properties, 'attributes')['Arn']
+    );
+    const apiStage = resourceByLogicalId(context, 'ApiStage');
+    const stageArn = String(
+      objectField(apiStage.properties, 'attributes')['Arn']
+    );
+    expect(
+      objectField(webAcl.properties, 'state')['associatedResources']
+    ).toContain(stageArn);
+    expect(objectField(apiStage.properties, 'state')['webAclArn']).toBe(
+      webAclArn
+    );
+    expect(
+      objectField(
+        execute(context, 'wafv2', 'GetWebACLForResource', {
+          ResourceArn: stageArn,
+        }),
+        'WebACL'
+      )['ARN']
+    ).toBe(webAclArn);
+    execute(context, 'wafv2', 'DisassociateWebACL', { ResourceArn: stageArn });
+    expect(
+      execute(context, 'wafv2', 'GetWebACLForResource', {
+        ResourceArn: stageArn,
+      })
+    ).toEqual({});
+  });
+
   it('CloudWatch Logs group stream eventsを永続化しfilterする', async () => {
     const context = await createContext();
     expect(

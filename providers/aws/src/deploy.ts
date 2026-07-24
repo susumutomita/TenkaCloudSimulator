@@ -14,6 +14,7 @@ import {
   customResourceObjects,
   initializeResource,
   stackProperties,
+  webAclAssociationEffects,
 } from './state';
 
 export function deployCloudFormation(
@@ -34,12 +35,13 @@ export function deployCloudFormation(
   const initialized = plan.resources.map((resource) =>
     initializeResource(resource, world.world.virtualTime)
   );
-  const objects = customResourceObjects(initialized, world.world.virtualTime);
+  const associated = webAclAssociationEffects(initialized);
+  const objects = customResourceObjects(associated, world.world.virtualTime);
   const state = stackProperties(
-    initialized.find((resource) => resource.resourceType === STACK_RESOURCE) ??
+    associated.find((resource) => resource.resourceType === STACK_RESOURCE) ??
       stack
   );
-  const endpointCount = initialized.filter(
+  const endpointCount = associated.filter(
     (resource) => resource.resourceType === RUNTIME_ENDPOINT_RESOURCE
   ).length;
   return {
@@ -49,13 +51,13 @@ export function deployCloudFormation(
         payload: {
           stackId: stack.resourceId,
           targetId: plan.targetId,
-          resourceCount: initialized.length - 1 - endpointCount,
+          resourceCount: associated.length - 1 - endpointCount,
           customObjectCount: objects.length,
           endpointCount,
         },
       },
     ],
-    resources: [...initialized, ...objects],
+    resources: [...associated, ...objects],
     outputs: state.outputs,
   };
 }

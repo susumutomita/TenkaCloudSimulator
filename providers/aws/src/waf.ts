@@ -7,6 +7,7 @@ import {
 import {
   awsResources,
   findBy,
+  matchesAssociableArn,
   result,
   stateObject,
   storedProperties,
@@ -37,15 +38,9 @@ function findWebAcl(world: ProviderWorldView, arn: string) {
 }
 
 function findAssociableResource(world: ProviderWorldView, arn: string) {
-  const resource = awsResources(world).find((candidate) => {
-    const properties = storedProperties(candidate);
-    return (
-      properties.refValue === arn ||
-      properties.physicalId === arn ||
-      properties.attributes['Arn'] === arn ||
-      properties.attributes['LoadBalancerArn'] === arn
-    );
-  });
+  const resource = awsResources(world).find((candidate) =>
+    matchesAssociableArn(storedProperties(candidate), arn)
+  );
   if (!resource)
     throw new CoreError('NotFound', 'WAF target resource does not exist');
   return resource;
