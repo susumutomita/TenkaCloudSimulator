@@ -264,6 +264,46 @@ Resources:
         CloudWatchMetricsEnabled: true
         MetricName: fixture
         SampledRequestsEnabled: true
+  RestApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Sub "${NamePrefix}-api"
+      EndpointConfiguration:
+        Types: [REGIONAL]
+  ProxyResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref RestApi
+      ParentId: !GetAtt RestApi.RootResourceId
+      PathPart: "{proxy+}"
+  ProxyMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref RestApi
+      ResourceId: !Ref ProxyResource
+      HttpMethod: ANY
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GateFunction.Arn}/invocations"
+  ApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn: ProxyMethod
+    Properties:
+      RestApiId: !Ref RestApi
+  ApiStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      RestApiId: !Ref RestApi
+      DeploymentId: !Ref ApiDeployment
+      StageName: prod
+  ApiWebAclAssociation:
+    Type: AWS::WAFv2::WebACLAssociation
+    Condition: CAllEnabled
+    Properties:
+      ResourceArn: !Sub "arn:aws:apigateway:${AWS::Region}::/restapis/${RestApi}/stages/${ApiStage}"
+      WebACLArn: !GetAtt WebAcl.Arn
 Outputs:
   InstanceId:
     Value: !Ref Instance
@@ -287,3 +327,5 @@ Outputs:
       - "${Prefix}-${Resource}-${AWS::Region}"
       - Prefix: mapped
         Resource: !Ref Bucket
+  ApiInvokeUrl:
+    Value: !Sub "https://${RestApi}.execute-api.${AWS::Region}.amazonaws.com/${ApiStage}"

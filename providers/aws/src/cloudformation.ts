@@ -745,6 +745,18 @@ function physicalRef(
       return `arn:aws:elasticloadbalancing:${REGION}:${ACCOUNT_ID}:listener-rule/app/simulator/${suffix}`;
     case 'AWS::ElasticLoadBalancingV2::TargetGroup':
       return `arn:aws:elasticloadbalancing:${REGION}:${ACCOUNT_ID}:targetgroup/simulator/${suffix}`;
+    case 'AWS::ApiGateway::RestApi':
+      return `restapi-${suffix}`;
+    case 'AWS::ApiGateway::Resource':
+      return `resource-${suffix}`;
+    case 'AWS::ApiGateway::Method':
+      return `method-${suffix}`;
+    case 'AWS::ApiGateway::Deployment':
+      return `deployment-${suffix}`;
+    case 'AWS::ApiGateway::Stage':
+      return propertyText(properties, 'StageName') ?? `stage-${suffix}`;
+    case 'AWS::WAFv2::WebACLAssociation':
+      return `webaclassoc-${suffix}`;
     default:
       return resourceId;
   }
@@ -813,6 +825,12 @@ function resourceAttributes(
       return {
         Arn: `arn:aws:wafv2:${REGION}:${ACCOUNT_ID}:regional/webacl/${ref}/${suffix}`,
         Id: suffix,
+      };
+    case 'AWS::ApiGateway::RestApi':
+      return { RootResourceId: `${ref}-root` };
+    case 'AWS::ApiGateway::Stage':
+      return {
+        Arn: `arn:aws:apigateway:${REGION}::/restapis/${properties['RestApiId']}/stages/${ref}`,
       };
     case 'AWS::Logs::LogGroup':
       return { Arn: `arn:aws:logs:${REGION}:${ACCOUNT_ID}:log-group:${ref}` };

@@ -18,6 +18,11 @@ export const ECS_SERVICE_RESOURCE = 'AWS::ECS::Service';
 export const APP_RUNNER_SERVICE_RESOURCE = 'AWS::AppRunner::Service';
 
 export const CLOUDFORMATION_RESOURCE_TYPES = [
+  'AWS::ApiGateway::Deployment',
+  'AWS::ApiGateway::Method',
+  'AWS::ApiGateway::Resource',
+  'AWS::ApiGateway::RestApi',
+  'AWS::ApiGateway::Stage',
   'AWS::CloudFormation::CustomResource',
   'AWS::EC2::Instance',
   'AWS::EC2::InternetGateway',
@@ -43,6 +48,7 @@ export const CLOUDFORMATION_RESOURCE_TYPES = [
   'AWS::S3::Bucket',
   'AWS::SSM::Parameter',
   'AWS::WAFv2::WebACL',
+  'AWS::WAFv2::WebACLAssociation',
   'Custom::EmptyStackBuckets',
 ] as const;
 

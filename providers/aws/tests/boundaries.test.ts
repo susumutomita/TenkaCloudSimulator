@@ -27,6 +27,7 @@ import {
   customResourceObjects,
   stackProperties,
   storedProperties,
+  webAclAssociationEffects,
 } from '../src/state';
 import {
   booleanValue,
@@ -173,6 +174,28 @@ describe('AWS provider boundary', () => {
         )?.fidelity
       ).toEqual(['L1', 'L4']);
     }
+    for (const resourceType of [
+      'AWS::ApiGateway::Deployment',
+      'AWS::ApiGateway::Method',
+      'AWS::ApiGateway::Resource',
+      'AWS::ApiGateway::RestApi',
+      'AWS::ApiGateway::Stage',
+    ]) {
+      expect(
+        AWS_CATALOG_CAPABILITY_MANIFEST.capabilities.find(
+          (capability) =>
+            capability.resourceType === resourceType &&
+            capability.operation === 'lifecycle'
+        )
+      ).toMatchObject({ service: 'apigateway', fidelity: ['L1'] });
+    }
+    expect(
+      AWS_CATALOG_CAPABILITY_MANIFEST.capabilities.find(
+        (capability) =>
+          capability.resourceType === 'AWS::WAFv2::WebACLAssociation' &&
+          capability.operation === 'lifecycle'
+      )
+    ).toMatchObject({ service: 'wafv2', fidelity: ['L1', 'L3'] });
     expect(
       AWS_CATALOG_CAPABILITY_MANIFEST.capabilities.find(
         (capability) =>
@@ -583,6 +606,97 @@ Outputs:
         world([webAcl, target])
       )
     ).not.toThrow();
+  });
+
+  it('webAclAssociationEffectsはCFN宣言のWebACLAssociationをAssociateWebACLと同じstateへ集約する', () => {
+    const webAcl = {
+      ...resource('AWS::WAFv2::WebACL', 'WebAcl', { Name: 'acl' }),
+      properties: {
+        ...resource('AWS::WAFv2::WebACL', 'WebAcl', { Name: 'acl' }).properties,
+        attributes: { Arn: 'arn:acl' },
+        state: { associatedResources: [] },
+      },
+    };
+    const stage = {
+      ...resource('AWS::ApiGateway::Stage', 'ApiStage', { StageName: 'prod' }),
+      properties: {
+        ...resource('AWS::ApiGateway::Stage', 'ApiStage', {
+          StageName: 'prod',
+        }).properties,
+        attributes: { Arn: 'arn:stage-prod' },
+      },
+    };
+    const secondStage = {
+      ...resource('AWS::ApiGateway::Stage', 'DevStage', { StageName: 'dev' }),
+      properties: {
+        ...resource('AWS::ApiGateway::Stage', 'DevStage', {
+          StageName: 'dev',
+        }).properties,
+        attributes: { Arn: 'arn:stage-dev' },
+      },
+    };
+    const association = resource(
+      'AWS::WAFv2::WebACLAssociation',
+      'ApiWebAclAssociation',
+      { ResourceArn: 'arn:stage-prod', WebACLArn: 'arn:acl' }
+    );
+    const secondAssociation = resource(
+      'AWS::WAFv2::WebACLAssociation',
+      'DevWebAclAssociation',
+      { ResourceArn: 'arn:stage-dev', WebACLArn: 'arn:acl' }
+    );
+
+    const withoutAssociation = [webAcl, stage];
+    expect(webAclAssociationEffects(withoutAssociation)).toBe(
+      withoutAssociation
+    );
+
+    const effected = webAclAssociationEffects([
+      webAcl,
+      stage,
+      secondStage,
+      association,
+      secondAssociation,
+    ]);
+    const effectedWebAcl = effected.find(
+      (candidate) => candidate.properties['logicalId'] === 'WebAcl'
+    );
+    const effectedStage = effected.find(
+      (candidate) => candidate.properties['logicalId'] === 'ApiStage'
+    );
+    const effectedDevStage = effected.find(
+      (candidate) => candidate.properties['logicalId'] === 'DevStage'
+    );
+    expect(
+      objectValue(effectedWebAcl?.properties['state'], 'state')[
+        'associatedResources'
+      ]
+    ).toEqual(['arn:stage-dev', 'arn:stage-prod']);
+    expect(
+      objectValue(effectedStage?.properties['state'], 'state')['webAclArn']
+    ).toBe('arn:acl');
+    expect(
+      objectValue(effectedDevStage?.properties['state'], 'state')['webAclArn']
+    ).toBe('arn:acl');
+
+    expect(() =>
+      webAclAssociationEffects([
+        webAcl,
+        resource('AWS::WAFv2::WebACLAssociation', 'MissingTarget', {
+          ResourceArn: 'arn:missing-stage',
+          WebACLArn: 'arn:acl',
+        }),
+      ])
+    ).toThrow('is not declared in this stack');
+    expect(() =>
+      webAclAssociationEffects([
+        stage,
+        resource('AWS::WAFv2::WebACLAssociation', 'MissingAcl', {
+          ResourceArn: 'arn:stage-prod',
+          WebACLArn: 'arn:missing-acl',
+        }),
+      ])
+    ).toThrow('is not declared in this stack');
   });
 
   it('custom resource不足とLambda payload handler不足を明示する', () => {

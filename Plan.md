@@ -558,3 +558,65 @@ AI エージェントが大量にコードを書く前提で、既存実装を�
 - 根本原因: ファイル横断の検査を CI に持っていなかったためです。
 - 予防策: 増分を正確に指せる検査 (jscpd ラチェット) は CI で止め、全量しか出せない検査
   (knip) は知らせるだけに分けて、形骸化させずに運用します。
+
+### API Gateway と WAFv2 WebACLAssociation の capability coverage - 2026-07-24
+
+#### 目的
+
+TenkaCloudChallenge の新しい Challenge `wp2shell-friday-night-patch`
+(API Gateway + Lambda + WAFv2 の incident-response 問題) が、catalog の
+`catalog-coverage` gate (`bun run simulator:compatibility`) を `missing=7` で
+落とす。`AWS::ApiGateway::RestApi` / `Resource` / `Method` / `Deployment` /
+`Stage` と `AWS::WAFv2::WebACLAssociation` の `lifecycle` capability を、
+要求された fidelity (`L1` / `L3`) で実装し、`supported=true missing=0` にする。
+
+#### 制約と設計判断
+
+設計は
+[`docs/design/2026-07-24-apigateway-wafv2-association.md`](./docs/design/2026-07-24-apigateway-wafv2-association.md)
+に記録。manifest だけの機械的拡張 (stub) と HTTP data-plane の完全 proxy
+(overreach) を却下し、要求された fidelity ちょうどの control/network plane
+実装を選んだ。WAFv2 association は deploy 時に既存の `AssociateWebACL`
+reducer と同じ状態遷移を再現する (`state.ts` に `webAclAssociationEffects()`
+を追加、ARN 照合は `waf.ts` と共通化)。
+
+#### タスク
+
+- [x] 設計ドキュメントを作成する。
+- [x] `providers/aws/src/model.ts` に 6 resourceType を登録する。
+- [x] `providers/aws/src/catalog-manifest.ts` の service 判定と fidelity 判定を拡張する。
+- [x] `providers/aws/src/cloudformation.ts` に Ref / GetAtt 解決を実装する。
+- [x] `providers/aws/src/state.ts` に `webAclAssociationEffects()` を追加し
+      `waf.ts` の ARN 照合と重複させない。
+- [x] `providers/aws/src/deploy.ts` から新しい post-process を呼ぶ。
+- [x] fixture (`catalog-stack.yaml`) と各 test を更新し、26 -> 32 resource type の
+      coverage を維持する。
+- [x] `providers/aws/scripts/verify-catalog.ts` で実際の
+      `wp2shell-friday-night-patch` template を compile して確認する。
+
+#### 検証手順
+
+- `bun test` (`providers/aws`) が全件緑。
+- `TenkaCloudChallenge` 側 `bun run simulator:compatibility --simulator
+  <this checkout>` が `supported=true missing=0` を返す。
+- `make before-commit` / `bun scripts/architecture-harness.ts --staged
+  --fail-on=error` が緑。
+
+#### 進捗ログ
+
+- 2026-07-24: 7 requirement の内訳 (apigateway 5 type + wafv2 association 1 type、
+  すべて `operation=lifecycle` / `classification=binding`) を
+  `tools/catalog-scanner` の実装から確認し、fidelity は catalog-scanner の
+  `resourceFidelity()` (apigateway は network marker 対象外で `L1` のみ、wafv2 は
+  対象で `L1`+`L3`) と対称にした。
+
+#### 振り返り
+
+- 問題: `simulator:compatibility` は manifest の宣言だけを比較する mechanical gate
+  であり、resourceType を登録するだけで green にできてしまう。
+- 根本原因: capability manifest と実装 (`compileCloudFormation` / reducer) が
+  別ファイルに分かれているため、片方だけ更新しても検出されない。
+- 予防策: `cloudformation.test.ts` の「登録した resourceType は必ず fixture で
+  synthesize される」という既存の全件一致テストが、この乖離を機械的に止める
+  ガードレールになっている。新しい resourceType を足すたびにこのテストを更新する
+  運用を維持する。

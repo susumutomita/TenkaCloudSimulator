@@ -240,6 +240,95 @@ export function initializeResource(
   });
 }
 
+const WEB_ACL_RESOURCE = 'AWS::WAFv2::WebACL';
+const WEB_ACL_ASSOCIATION_RESOURCE = 'AWS::WAFv2::WebACLAssociation';
+
+export function matchesAssociableArn(
+  properties: StoredResourceProperties,
+  arn: string
+): boolean {
+  return (
+    properties.refValue === arn ||
+    properties.physicalId === arn ||
+    properties.attributes['Arn'] === arn ||
+    properties.attributes['LoadBalancerArn'] === arn
+  );
+}
+
+function webAclAssociationArn(
+  stored: StoredResourceProperties,
+  key: 'ResourceArn' | 'WebACLArn'
+): string {
+  return stringValue(
+    stored.templateProperties[key],
+    `AWS::WAFv2::WebACLAssociation ${key}`
+  );
+}
+
+/**
+ * A CFN-declared `AWS::WAFv2::WebACLAssociation` performs the same
+ * association AWS itself would run via `wafv2:AssociateWebACL` when
+ * CloudFormation creates it. Reproduce that state transition here so the
+ * association is visible through `GetWebACLForResource` / `ListWebACLs`
+ * without requiring a separate imperative API call (see `waf.ts`).
+ */
+export function webAclAssociationEffects(
+  resources: readonly ResourceDeclaration[]
+): readonly ResourceDeclaration[] {
+  const associations = resources.filter(
+    (resource) => resource.resourceType === WEB_ACL_ASSOCIATION_RESOURCE
+  );
+  if (associations.length === 0) return resources;
+  const stateOverrides = new Map<string, Readonly<Record<string, unknown>>>();
+  const currentState = (
+    resource: ResourceDeclaration
+  ): Readonly<Record<string, unknown>> =>
+    stateOverrides.get(resource.resourceId) ??
+    stateObject(storedProperties(resource));
+  for (const association of associations) {
+    const stored = storedProperties(association);
+    const resourceArn = webAclAssociationArn(stored, 'ResourceArn');
+    const webAclArn = webAclAssociationArn(stored, 'WebACLArn');
+    const target = resources.find(
+      (candidate) =>
+        candidate.resourceId !== association.resourceId &&
+        matchesAssociableArn(storedProperties(candidate), resourceArn)
+    );
+    const webAcl = resources.find(
+      (candidate) =>
+        candidate.resourceType === WEB_ACL_RESOURCE &&
+        matchesAssociableArn(storedProperties(candidate), webAclArn)
+    );
+    if (!target || !webAcl) {
+      throw new CoreError(
+        'ValidationFailed',
+        'AWS::WAFv2::WebACLAssociation references a resource that is not declared in this stack'
+      );
+    }
+    stateOverrides.set(target.resourceId, {
+      ...currentState(target),
+      webAclArn,
+    });
+    const associated = new Set(
+      stringArray(
+        currentState(webAcl)['associatedResources'],
+        'associatedResources'
+      )
+    );
+    associated.add(resourceArn);
+    stateOverrides.set(webAcl.resourceId, {
+      ...currentState(webAcl),
+      associatedResources: [...associated].sort(),
+    });
+  }
+  return resources.map((resource) => {
+    const state = stateOverrides.get(resource.resourceId);
+    return state === undefined
+      ? resource
+      : { ...resource, properties: { ...resource.properties, state } };
+  });
+}
+
 export function customResourceObjects(
   resources: readonly ResourceDeclaration[],
   virtualTime: string
