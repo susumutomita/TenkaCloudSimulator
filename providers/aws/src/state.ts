@@ -299,10 +299,16 @@ export function webAclAssociationEffects(
         candidate.resourceType === WEB_ACL_RESOURCE &&
         matchesAssociableArn(storedProperties(candidate), webAclArn)
     );
-    if (!target || !webAcl) {
+    if (!target) {
       throw new CoreError(
         'ValidationFailed',
-        'AWS::WAFv2::WebACLAssociation references a resource that is not declared in this stack'
+        `AWS::WAFv2::WebACLAssociation ResourceArn ${resourceArn} does not resolve to a resource declared in this stack`
+      );
+    }
+    if (!webAcl) {
+      throw new CoreError(
+        'ValidationFailed',
+        `AWS::WAFv2::WebACLAssociation WebACLArn ${webAclArn} does not resolve to an AWS::WAFv2::WebACL declared in this stack`
       );
     }
     stateOverrides.set(target.resourceId, {

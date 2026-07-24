@@ -596,11 +596,18 @@ reducer と同じ状態遷移を再現する (`state.ts` に `webAclAssociationE
 
 #### 検証手順
 
-- `bun test` (`providers/aws`) が全件緑。
-- `TenkaCloudChallenge` 側 `bun run simulator:compatibility --simulator
-  <this checkout>` が `supported=true missing=0` を返す。
-- `make before-commit` / `bun scripts/architecture-harness.ts --staged
-  --fail-on=error` が緑。
+AGENTS.md の品質ゲートをこの順序で通す。
+
+1. `bun scripts/architecture-harness.ts --staged --fail-on=error` が緑。
+2. `make before-commit` (architecture-harness + harness_test + dup_check +
+   lint_text + lint + typecheck + test + test_coverage + build) が緑。
+   `bun test` (`providers/aws`) は全件緑かつ変更ファイルのカバレッジ 100% を維持する。
+3. `/review` (コードレビュー) を通す。
+4. `/security-review` (セキュリティレビュー) を通す。
+5. `/simplify` (重複・品質・効率の最終確認) を通す。
+
+加えて `TenkaCloudChallenge` 側 `bun run simulator:compatibility --simulator
+<this checkout>` が `supported=true missing=0` を返すことを確認する。
 
 #### 進捗ログ
 

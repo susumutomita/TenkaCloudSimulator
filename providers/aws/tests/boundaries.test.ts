@@ -25,6 +25,7 @@ import {
 import { reduceRuntime } from '../src/runtime';
 import {
   customResourceObjects,
+  initializeResource,
   stackProperties,
   storedProperties,
   webAclAssociationEffects,
@@ -387,6 +388,51 @@ Outputs:
     );
   });
 
+  it('WebACLAssociationのRefはWebACLArnからname|id|scopeを合成し不正な形式ならsyntheticへfallbackする', () => {
+    const plan = compile(`Resources:
+  WebAcl:
+    Type: AWS::WAFv2::WebACL
+    Properties:
+      Name: fixture-acl
+      Scope: REGIONAL
+      DefaultAction: { Allow: {} }
+      VisibilityConfig:
+        CloudWatchMetricsEnabled: true
+        MetricName: fixture
+        SampledRequestsEnabled: true
+  Assoc:
+    Type: AWS::WAFv2::WebACLAssociation
+    Properties:
+      ResourceArn: arn:aws:apigateway:us-east-1::/restapis/abc/stages/prod
+      WebACLArn: !GetAtt WebAcl.Arn
+  Malformed:
+    Type: AWS::WAFv2::WebACLAssociation
+    Properties:
+      ResourceArn: arn:aws:apigateway:us-east-1::/restapis/abc/stages/dev
+      WebACLArn: not-a-valid-wafv2-arn
+`);
+    const webAcl = plan.resources.find(
+      (candidate) => candidate.properties['logicalId'] === 'WebAcl'
+    );
+    const webAclAttributes = objectValue(
+      webAcl?.properties['attributes'] ?? {},
+      'WebAcl attributes'
+    );
+    const association = plan.resources.find(
+      (candidate) => candidate.properties['logicalId'] === 'Assoc'
+    );
+    // AWS documents Ref on AWS::WAFv2::WebACLAssociation as the composite
+    // "name|id|scope" (same as AWS::WAFv2::WebACL itself):
+    // https://github.com/awsdocs/aws-cloudformation-user-guide/blob/main/doc_source/aws-resource-wafv2-webaclassociation.md
+    expect(association?.properties['refValue']).toBe(
+      `${webAcl?.properties['refValue']}|${webAclAttributes['Id']}|REGIONAL`
+    );
+    const malformed = plan.resources.find(
+      (candidate) => candidate.properties['logicalId'] === 'Malformed'
+    );
+    expect(malformed?.properties['refValue']).toMatch(/^webaclassoc-/);
+  });
+
   it('conditionとintrinsicの不正shapeをすべてloudに拒否する', () => {
     const invalid = [
       `Conditions:\n  Bad: { Fn::Equals: [a] }\nResources:\n  A: { Type: AWS::S3::Bucket }`,
@@ -687,7 +733,9 @@ Outputs:
           WebACLArn: 'arn:acl',
         }),
       ])
-    ).toThrow('is not declared in this stack');
+    ).toThrow(
+      'ResourceArn arn:missing-stage does not resolve to a resource declared in this stack'
+    );
     expect(() =>
       webAclAssociationEffects([
         stage,
@@ -696,7 +744,47 @@ Outputs:
           WebACLArn: 'arn:missing-acl',
         }),
       ])
-    ).toThrow('is not declared in this stack');
+    ).toThrow(
+      'WebACLArn arn:missing-acl does not resolve to an AWS::WAFv2::WebACL declared in this stack'
+    );
+  });
+
+  it('webAclAssociationEffectsは手動seedなしでも実initializeResourceのassociatedResources初期値を前提にできる', () => {
+    const virtualTime = '2026-07-12T00:00:00.000Z';
+    // state を手で埋めず、deploy.ts と同じ initializeResource() を通す。
+    // AWS::WAFv2::WebACL の initialState() は associatedResources: [] を必ず
+    // 返すため (state.ts の initialState 参照)、webAclAssociationEffects の
+    // stringArray 読み出しがここで unset を踏むことはない。
+    const initializedWebAcl = initializeResource(
+      resource('AWS::WAFv2::WebACL', 'WebAcl', { Name: 'acl' }),
+      virtualTime
+    );
+    const initializedStage = initializeResource(
+      resource('AWS::ApiGateway::Stage', 'ApiStage', { StageName: 'prod' }),
+      virtualTime
+    );
+    expect(
+      objectValue(initializedWebAcl.properties['state'], 'state')[
+        'associatedResources'
+      ]
+    ).toEqual([]);
+    const association = resource('AWS::WAFv2::WebACLAssociation', 'Assoc', {
+      ResourceArn: 'ApiStage',
+      WebACLArn: 'WebAcl',
+    });
+    const effected = webAclAssociationEffects([
+      initializedWebAcl,
+      initializedStage,
+      association,
+    ]);
+    const effectedWebAcl = effected.find(
+      (candidate) => candidate.properties['logicalId'] === 'WebAcl'
+    );
+    expect(
+      objectValue(effectedWebAcl?.properties['state'], 'state')[
+        'associatedResources'
+      ]
+    ).toEqual(['ApiStage']);
   });
 
   it('custom resource不足とLambda payload handler不足を明示する', () => {

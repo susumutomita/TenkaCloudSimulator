@@ -11,6 +11,7 @@ import {
 import { deployCloudFormation } from '../src/deploy';
 import { CLOUDFORMATION_RESOURCE_TYPES, STACK_RESOURCE } from '../src/model';
 import { AwsProvider } from '../src/provider';
+import { objectValue } from '../src/value';
 import {
   cleanupContexts,
   createContext,
@@ -124,6 +125,22 @@ describe('CloudFormation compiler', () => {
     });
     expect(String(Reflect.get(outputs, 'ApiInvokeUrl'))).toBe(
       `https://${restApi?.properties['refValue']}.execute-api.us-east-1.amazonaws.com/prod`
+    );
+    const webAcl = plan.resources.find(
+      (resource) => resource.properties['logicalId'] === 'WebAcl'
+    );
+    const webAclAttributes = objectValue(
+      webAcl?.properties['attributes'] ?? {},
+      'WebAcl attributes'
+    );
+    const association = plan.resources.find(
+      (resource) => resource.properties['logicalId'] === 'ApiWebAclAssociation'
+    );
+    // AWS documents Ref on AWS::WAFv2::WebACLAssociation as the composite
+    // "name|id|scope" (same as AWS::WAFv2::WebACL itself) -- see
+    // https://github.com/awsdocs/aws-cloudformation-user-guide/blob/main/doc_source/aws-resource-wafv2-webaclassociation.md
+    expect(association?.properties['refValue']).toBe(
+      `${webAcl?.properties['refValue']}|${webAclAttributes['Id']}|REGIONAL`
     );
     const instance = plan.resources.find(
       (resource) => resource.properties['logicalId'] === 'Instance'

@@ -80,6 +80,19 @@ path/method match から Lambda invoke まで実際に転送する。ELBv2 (`L3`
   (実 AWS の `AWS::WAFv2::WebACLAssociation` も CFN 作成時に同じ API を裏で
   呼ぶ)。ARN 照合ロジックは `waf.ts` の `findAssociableResource` と
   重複させず、`state.ts` の `matchesAssociableArn()` へ共通化する。
+- **Ref (`AWS::WAFv2::WebACLAssociation`)**: AWS の CloudFormation User Guide は
+  `AWS::WAFv2::WebACL` と `AWS::WAFv2::WebACLAssociation` の両方の Ref を
+  `name|id|scope` の合成値と文書化している
+  ([出典](https://github.com/awsdocs/aws-cloudformation-user-guide/blob/main/doc_source/aws-resource-wafv2-webaclassociation.md)、
+  raw source を直接取得して確認済み)。association 自体は `WebACLArn` しか
+  持たないため、`cloudformation.ts` の `webAclArnComponents()` がこの
+  `WebACLArn` (`arn:{partition}:wafv2:{region}:{account}:{scope}/webacl/{name}/{id}`)
+  を解析して合成する。解析できない場合 (テンプレートが不正な ARN を渡した場合)
+  だけ、従来の `webaclassoc-${suffix}` 合成 ID へ fallback する。
+  `/home/user/TenkaCloudChallenge` の catalog 全体を grep しても、この Ref を
+  実際に参照する箇所は存在しない (association 自体への `Ref` / `Fn::GetAtt` は
+  wp2shell-friday-night-patch を含めどの problem にもない) が、解析コストが
+  低く AWS の文書と一致するため実装した。
 
 C は `docs/architecture/protocol.md` が定義する fidelity dimension をそのまま
 使い、新しい invariant を追加しないため ADR は起票しない。

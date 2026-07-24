@@ -694,6 +694,34 @@ function propertyText(
   return typeof value === 'string' && value ? value : undefined;
 }
 
+const WEB_ACL_ARN_PATTERN =
+  /^arn:[^:]+:wafv2:[^:]*:[^:]*:(regional|global)\/webacl\/([^/]+)\/([^/]+)$/;
+
+/**
+ * AWS documents `Ref` on both `AWS::WAFv2::WebACL` and
+ * `AWS::WAFv2::WebACLAssociation` as the composite `name|id|scope` (see
+ * https://github.com/awsdocs/aws-cloudformation-user-guide/blob/main/doc_source/aws-resource-wafv2-webaclassociation.md).
+ * The association only carries the target WebACL's ARN, so derive the
+ * triple by parsing it (`arn:{partition}:wafv2:{region}:{account}:{scope}/webacl/{name}/{id}`)
+ * instead of reaching back into the resource graph.
+ */
+function webAclArnComponents(
+  arn: string
+):
+  | { readonly name: string; readonly id: string; readonly scope: string }
+  | undefined {
+  const match = WEB_ACL_ARN_PATTERN.exec(arn);
+  const scopeSegment = match?.[1];
+  const name = match?.[2];
+  const id = match?.[3];
+  if (!scopeSegment || !name || !id) return undefined;
+  return {
+    name,
+    id,
+    scope: scopeSegment === 'global' ? 'CLOUDFRONT' : 'REGIONAL',
+  };
+}
+
 function physicalRef(
   type: string,
   resourceId: string,
@@ -755,8 +783,13 @@ function physicalRef(
       return `deployment-${suffix}`;
     case 'AWS::ApiGateway::Stage':
       return propertyText(properties, 'StageName') ?? `stage-${suffix}`;
-    case 'AWS::WAFv2::WebACLAssociation':
-      return `webaclassoc-${suffix}`;
+    case 'AWS::WAFv2::WebACLAssociation': {
+      const webAclArn = propertyText(properties, 'WebACLArn');
+      const components = webAclArn ? webAclArnComponents(webAclArn) : undefined;
+      return components
+        ? `${components.name}|${components.id}|${components.scope}`
+        : `webaclassoc-${suffix}`;
+    }
     default:
       return resourceId;
   }
