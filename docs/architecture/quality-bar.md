@@ -26,4 +26,4 @@
 - 特定 Skill、review、固定 role の subagent を実行したこと。
 - lint、coverage、CI だけが緑で、受け入れ条件または runtime behavior を確認していないこと。
 
-複雑な設計判断は必要に応じて文書化する。文書作成をすべての変更へ課す ceremony にはしない。
+public contract、provider boundary、data migration、security boundary、後方互換性を変更する場合は、判断と移行方法を ADR または `docs/design/` に記録する。その他の変更では設計文書を必須にしない。
