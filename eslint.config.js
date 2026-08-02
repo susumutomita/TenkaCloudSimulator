@@ -1,6 +1,7 @@
 import sonarjs from "eslint-plugin-sonarjs";
 import tseslint from "typescript-eslint";
 
+// Keep typed rules in a named block so their migration scope is explicit.
 const typedRules = {
   "@typescript-eslint/no-floating-promises": "warn",
   "@typescript-eslint/no-misused-promises": "warn",
