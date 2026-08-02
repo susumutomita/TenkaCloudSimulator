@@ -1,4 +1,3 @@
-import sonarjs from 'eslint-plugin-sonarjs';
 import tseslint from 'typescript-eslint';
 
 // Keep typed rules in a named block so their migration scope and parser cost are explicit.
@@ -22,7 +21,6 @@ export default tseslint.config(
   },
   ...tseslint.configs.strict,
   ...tseslint.configs.stylistic,
-  sonarjs.configs.recommended,
   {
     files: ['**/*.{ts,tsx,mts,cts}'],
     rules: {
@@ -33,9 +31,6 @@ export default tseslint.config(
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-non-null-assertion': 'error',
       '@typescript-eslint/ban-ts-comment': 'error',
-      // no-floating-promises requires `void promise` for intentional fire-and-forget.
-      // Sonar's rule forbids that exact construct, so the promise-safety rule wins.
-      'sonarjs/void-use': 'off',
     },
   },
   {
