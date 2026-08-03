@@ -69,7 +69,7 @@ export function createHostedSimulatorApp(
     app.use('*', async (c, next) => {
       const response = await nativeGateway(c.req.raw);
       if (response) return response;
-      await next();
+      return next();
     });
   }
   app.route('/', simulator);
