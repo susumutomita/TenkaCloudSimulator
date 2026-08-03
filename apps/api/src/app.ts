@@ -82,7 +82,7 @@ export function createSimulatorApp(options: SimulatorAppOptions): Hono {
     ) {
       return protocolMismatchResponse(c);
     }
-    await next();
+    return next();
   });
   app.use(
     '*',
