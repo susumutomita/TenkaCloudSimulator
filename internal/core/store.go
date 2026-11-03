@@ -352,3 +352,7 @@ func (s *Store) ForeignKeyCheck() error {
 	}
 	return rows.Err()
 }
+
+// Database is shared only with trusted in-process providers. Each provider owns
+// its tables and validation; this does not grant a remote SQL API.
+func (s *Store) Database() *sql.DB { return s.db }

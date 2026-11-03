@@ -1,30 +1,7 @@
-# Review handoff and preservation
+# 引継ぎ
 
-The working repository is `/workspace/TenkaCloudSimulator`, branch `codex/go-single-binary-console`, based on upstream main commit `256dc8384a724e2a8a684986a97bb05f7944ad67`. The branch is preserved remotely in [PR #26](https://github.com/susumutomita/TenkaCloudSimulator/pull/26), following explicit push/PR/merge authorization. No deployment or real-cloud provisioning is included. The original macOS work was not accessed or moved.
+現行作業はmain 639af7aからの未公開ローカル変更。以前のクラウド環境の最終未保存差分は確認不能で、失われた可能性がある。旧レビューZIPはネットワーク制約で実物検証できず、最新GitHub sourceを基準に復旧した。過去の報告を新実装の検証結果として扱わない。
 
-The handoff package is a **private review snapshot, not a cleared public release**. Its top-level manifest identifies the exact source commit, binary digest, included verification, and remaining limitations. It contains source, a Linux amd64 static executable, notices, and text evidence. The final requested handoff includes the synthetic-resource browser screenshots as deliverables. They can also be regenerated in a cloud workspace with make audit.
+hello-worldは実カタログ/実ホストのimport、CFN deployment、SSM read、flag採点、重複加点防止、チーム別token/DB/process、teardownをdevelopment integrationで検証。TenkaCloudの通常起動に常設されたproduction adapterではない。実STS/federationや他問題を対応済みとしない。[再現手順](../../test/platform/README.md)。
 
-The existing workspace should not be treated as an indefinite storage guarantee. The persistent Library copy is confirmed only when a successful save result and link are returned. A separate full Git bundle, retained in `/workspace/deliverables`, preserves commits/history locally; the pushed GitHub branch/PR also preserves the committed source.
-
-Restore the private source snapshot into a cloud workspace, or import the verified local Git bundle into a fresh cloud checkout. Do not use macOS disk as a build or runtime workspace for this request. The Linux binary can run from an empty cloud directory with no Node, Docker, external SQLite, Java, or Python installed:
-
-```sh
-chmod +x tenkacloud-simulator-linux-amd64
-./tenkacloud-simulator-linux-amd64 --listen 127.0.0.1:4566 --state ./practice.db
-```
-
-Console: `/_simulator/console/`; local interactive API reference: `/_simulator/docs/`; S3 endpoint: the root URL or `/_simulator/providers/aws/`. Default numeric loopback binding is intentional. Use only dummy simulator credentials. The process is not a multi-tenant authentication boundary.
-
-Verification evidence:
-
-- `reports/quality-gates.txt`: vet, module/asset integrity, race tests, static binary build.
-- `reports/e2e.txt`: standalone startup/stop, real boto3 and Chromium interactions, shared API/UI state, persistent restart and isolation, offline Scalar request client.
-- `reports/audit/README.md` and `reports/audit-run.txt`: seven captured/visually inspected states, contrast fixes, keyboard validation/focus, mobile reflow, scoped automated accessibility results.
-- `reports/formal-model-check.txt`: the unchanged valid model has 125 reachable states with no reported invariant violation.
-- `reports/formal-mutation-check.txt`: the intentionally broken temporary deletion guard is detected; no such defect is left in the runtime or normal model.
-- `reports/vulnerability-review.md`: official-source snapshot scan and x/sys update; canonical-service access remains blocked. Linux/Windows/Darwin source configurations report no vulnerabilities against the identified snapshot. This does not mean a canonical online scan passed.
-- `reports/cross-build.txt`: final five-target compilation; foreign binaries were not runtime-tested.
-
-Distribution status: the formerly unresolved optional color-picker dependency is excluded from the rebuilt Scalar JS/CSS input graph. Only CSS color swatches are omitted. Original notices for the included package/style entries are retained and checked; `third_party/color-picker-removal.json` records the removal. The earlier historical evidence is not a list of shipped dependencies. This removes that particular missing-notice blocker without inventing attribution. GitHub CI has run the canonical online Go vulnerability check successfully for the initial PR revision; all required checks must pass again on the final PR head. This change does not publish a binary release or deployment.
-
-Scope remains a basic S3 and limited identity-policy increment. Full IAM, other cloud providers, deep links, advanced S3 administration, infrastructure execution, full AWS console fidelity, full accessibility compliance, full cloud API conformance, and a proof of the Go implementation are not claimed.
+変更後はmake before-commit/e2e/audit/formal/cross-checkとdependency/security検査を実行。失敗・未実行は明記する。今回のpush/PR/mergeは本人承認済み。既存branch/PRを確認し、重大問題なし・レビュー・exact HEAD必須CI成功後のみmergeする。実AWSやTailscaleの設定・公開は行わない。問題catalogや元の作業を削除/上書きしない。

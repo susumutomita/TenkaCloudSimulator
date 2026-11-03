@@ -11,3 +11,13 @@ The model abstracts object bytes, time, limits, policy patterns/ARN/action match
 No `Poteto` toolchain or configuration was found in the cloud checkout or its available repository instructions. That name is not assumed to mean TLC, Apalache, or a proof assistant.
 
 The reported NoOrphans counterexample is **intentional negative control** in ObjectStoreMutant, generated only inside a temporary directory. It is not an unresolved bug in ObjectStore or the Go implementation. The normal model retains `ObjectsFor(b) = {}`; Store.DeleteBucket checks child count inside its transaction and SQLite also has a restrictive FK. The fresh run and concrete lifecycle/concurrent-write tests both confirm nonempty deletion is rejected without changing stored bytes.
+
+## Stack ownership and drift
+
+StackOwnership.tla models two owners and two names. Create reserves a name;
+manual deletion removes the resource but preserves its claim; stack cleanup
+releases only its own claims/resources. OwnershipExclusive prohibits two owners
+from claiming the same name, including drift. The normal finite model must pass;
+a mutant that allows reclaiming an absent resource must fail this invariant.
+This corresponds to aws_cfn_ownership and transactional create/delete in the Go
+AWS provider. It does not prove SQL crash behavior, authentication or IAM semantics.

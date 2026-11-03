@@ -33,3 +33,12 @@ internal/server/apidocs/scalar.css -text -diff linguist-vendored
 
 tools/scalar/bundle-inputs.json linguist-generated
 tools/scalar/bundle-digests.json linguist-generated
+# Preserve original mixed-line-ending third-party notice bytes in this bundle.
+third_party/CONSOLE-NOTICES.txt -text -whitespace
+internal/legal/assets/CONSOLE-NOTICES.txt -text -whitespace
+
+# Generated Cloudscape inputs/assets are reviewed through source and provenance.
+internal/server/web/app.js -text -diff linguist-vendored
+internal/server/web/app.css -text -diff linguist-vendored
+tools/console/bundle-inputs.json linguist-generated
+tools/console/bundle-digests.json linguist-generated

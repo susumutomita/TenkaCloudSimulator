@@ -12,4 +12,4 @@ paths:
 - `allowed-tools` は本体が実際に使う最小セットのみ宣言する。引数を取るなら `argument-hint`、ユーザー専用なら `disable-model-invocation: true` を付ける。
 - 不可視 Unicode・base64 ブロック・HTML コメント・リモート取得のシェルパイプ実行を置かない (harness の `INVARIANT_SKILL_*` で error になる)。
 - 検出対象パターンを説明するときはリテラルで書かず言い換える（このディレクトリ群は検出器のスコープ内であり、例示のつもりの 1 行が自己検出で error になる）。
-- 変更後は `bun scripts/architecture-harness.ts --fail-on=warning` と `/skill-audit` の Quick Workflow を通す。
+- 変更後は `make before-commit` と変更した文書の参照先検査 を通す。

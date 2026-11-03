@@ -18,3 +18,17 @@ with tempfile.TemporaryDirectory(prefix='tcsim-tlc-') as directory:
   if success:assert result.returncode==0 and 'No error has been found' in text,text
   else:assert result.returncode!=0 and 'Invariant NoOrphans is violated' in text,text
   print(name+': '+('invariants hold' if success else 'missing deletion guard detected'))
+# Drift must not release ownership: otherwise a later owner's stack can be
+# deleted by the original stack's cleanup. The mutant reclaims absent resources.
+with tempfile.TemporaryDirectory(prefix='tcsim-ownership-') as directory:
+ root=Path(directory)
+ model=Path('formal/StackOwnership.tla').read_text()
+ cfg=Path('formal/StackOwnership.cfg').read_text()
+ for name,source,success in [('StackOwnership',model,True),('StackOwnershipMutant',model.replace('MODULE StackOwnership ', 'MODULE StackOwnershipMutant ').replace('/\\ Unclaimed(p)', '/\\ p \\notin present'),False)]:
+  (root/(name+'.tla')).write_text(source);(root/(name+'.cfg')).write_text(cfg)
+  result=subprocess.run(['java','-cp',str(jar),'tlc2.TLC','-workers','1','-metadir',str(root/(name+'-states')),'-config',str(root/(name+'.cfg')),str(root/(name+'.tla'))],capture_output=True,text=True,timeout=60)
+  text=result.stdout+result.stderr
+  Path('reports/'+name+'.txt').write_text(text)
+  if success:assert result.returncode==0 and 'No error has been found' in text,text
+  else:assert result.returncode!=0 and 'Invariant OwnershipExclusive is violated' in text,text
+  print(name+': '+('invariants hold' if success else 'drift ownership mutation detected'))

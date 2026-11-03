@@ -22,6 +22,12 @@ jobs:
           node tools/scalar/build.mjs
           python3 tools/scalar/notices.py
           git diff --exit-code -- internal/server/apidocs third_party/scalar.json third_party/scalar-bundled-packages.json third_party/SCALAR-BUNDLED-NOTICES.txt internal/legal/assets/SCALAR-BUNDLED-NOTICES.txt tools/scalar/bundle-inputs.json tools/scalar/bundle-digests.json third_party/color-picker-removal.json
+      - name: Rebuild official Cloudscape console and original notices
+        run: |
+          npm ci --prefix tools/console --ignore-scripts --no-audit --no-fund
+          node tools/console/build.mjs
+          git diff --exit-code -- internal/server/web internal/legal/assets/CONSOLE-NOTICES.txt third_party/CONSOLE-NOTICES.txt third_party/console-packages.json tools/console/bundle-inputs.json tools/console/bundle-digests.json
+          npm audit --prefix tools/console --audit-level=high
       - name: Run Go quality gates and compile all supported targets
         run: make before-commit cross-check
       - name: Generate coverage views and enforce both 90% floors
@@ -52,6 +58,25 @@ jobs:
           /tmp/simulator-tests/bin/playwright install --with-deps chromium
       - name: Verify real binary, SDK, console, and offline API reference
         run: make e2e PYTHON=/tmp/simulator-tests/bin/python
+      - name: Run the actual platform hello-world lifecycle and participant browser
+        run: |
+          git init /tmp/simulator-platform
+          git -C /tmp/simulator-platform remote add origin https://github.com/susumutomita/TenkaCloud.git
+          git -C /tmp/simulator-platform fetch --depth=1 origin f99b3d9a00076a2a5e97f1d4d9b0b20a7e02245c
+          git -C /tmp/simulator-platform checkout --detach FETCH_HEAD
+          git init /tmp/simulator-challenges
+          git -C /tmp/simulator-challenges remote add origin https://github.com/susumutomita/TenkaCloudChallenge.git
+          git -C /tmp/simulator-challenges fetch --depth=1 origin a749b142416770abee3f173673702c55df3856aa
+          git -C /tmp/simulator-challenges checkout --detach FETCH_HEAD
+          npm ci --prefix tools/platform --ignore-scripts --no-audit --no-fund
+          npm audit --prefix tools/platform --audit-level=high
+          node tools/platform/setup.mjs /tmp/simulator-platform
+          python3 scripts/catalog-matrix.py /tmp/simulator-challenges
+          git diff --exit-code -- docs/catalog.md
+          export TENKACLOUD_ROOT=/tmp/simulator-platform CHALLENGE_ROOT=/tmp/simulator-challenges
+          export BUN="$PWD/tools/platform/node_modules/@oven/bun-linux-x64/bin/bun"
+          "$BUN" test/platform/hello-world.ts
+          /tmp/simulator-tests/bin/python test/platform/browser.py
       - name: Inspect console flow, keyboard behavior, and accessible contrast
         run: |
           /tmp/simulator-tests/bin/python scripts/get-audit-tools.py /tmp/simulator-audit

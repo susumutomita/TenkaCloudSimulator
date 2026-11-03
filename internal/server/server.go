@@ -23,7 +23,17 @@ func New(path string) (http.Handler, func() error, error) {
 		return nil, nil, err
 	}
 	identities := core.NewIdentities(store)
-	gateway := &aws.Gateway{Store: store, Identities: identities}
+	parameters, err := aws.NewParameterStore(store.Database())
+	if err != nil {
+		_ = store.Close()
+		return nil, nil, err
+	}
+	stacks, err := aws.NewStackStore(store.Database())
+	if err != nil {
+		_ = store.Close()
+		return nil, nil, err
+	}
+	gateway := &aws.Gateway{Store: store, Identities: identities, Parameters: parameters, Stacks: stacks}
 	registry := provider.New("aws")
 	if err := registry.Register("aws", gateway); err != nil {
 		_ = store.Close()
@@ -50,12 +60,12 @@ func New(path string) (http.Handler, func() error, error) {
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(map[string]any{"protocolVersion": "2026-11-03", "simulatorVersion": "0.1.0", "providers": registry.Names(), "persistence": func() string {
+		_ = json.NewEncoder(w).Encode(map[string]any{"protocolVersion": "2026-11-03", "principal": r.Header.Get("X-Simulator-Principal"), "identitySelection": r.Header.Get("X-Simulator-Access-Role") != "participant", "simulatorVersion": "0.1.0", "providers": registry.Names(), "persistence": func() string {
 			if path == "" || path == ":memory:" {
 				return "memory"
 			}
 			return "file"
-		}(), "provider": "aws", "service": "s3", "operations": []string{"ListBuckets", "CreateBucket", "HeadBucket", "GetBucketLocation", "DeleteBucket", "ListObjectsV2", "PutObject", "GetObject", "HeadObject", "DeleteObject"}, "regions": aws.Regions, "limits": map[string]int{"objectBytes": core.MaxObjectBytes, "storedBytes": core.MaxStoredBytes, "buckets": core.MaxBuckets, "objects": core.MaxObjects}, "state": "SQLite; ephemeral by default, persist with --state; one database per environment", "authentication": "unsigned or simulator TCSIM credentials; signatures not evaluated; identity policy subset enforced via x-simulator-principal", "unsupported": []string{"resource policies, ACLs, conditions, boundaries, SCPs, sessions", "versioning", "multipart uploads", "presigned URLs", "virtual-host addressing", "other cloud services", "legacy TenkaCloud world/deploy/grading protocol"}})
+		}(), "provider": "aws", "service": "s3", "services": map[string]any{"s3": map[string]any{"operations": []string{"ListBuckets", "CreateBucket", "HeadBucket", "GetBucketLocation", "DeleteBucket", "ListObjectsV2", "PutObject", "GetObject", "HeadObject", "DeleteObject"}}, "ssm": map[string]any{"operations": []string{"PutParameter", "GetParameter", "GetParameters", "GetParametersByPath", "DescribeParameters", "DeleteParameter"}, "types": []string{"String", "StringList"}, "tier": "Standard", "parameterLimit": 1000}, "cloudformation": map[string]any{"operations": []string{"CreateStack", "DescribeStacks", "DeleteStack"}, "resourceTypes": []string{"AWS::SSM::Parameter", "AWS::IAM::Role"}, "stackLimit": 100, "resourceLimitPerStack": 100}}, "operations": []string{"ListBuckets", "CreateBucket", "HeadBucket", "GetBucketLocation", "DeleteBucket", "ListObjectsV2", "PutObject", "GetObject", "HeadObject", "DeleteObject"}, "regions": aws.Regions, "limits": map[string]int{"objectBytes": core.MaxObjectBytes, "storedBytes": core.MaxStoredBytes, "buckets": core.MaxBuckets, "objects": core.MaxObjects}, "state": "SQLite; ephemeral by default, persist with --state; one database per environment", "authentication": "CLI requires opaque local access tokens by default; participant tokens bind an exercise identity. SDK wire uses dummy TCSIM credentials, without signature verification. server.New is an unauthenticated composition API; hosts must wrap NewAccess. One process/database/token authority per team.", "unsupported": []string{"resource policies, ACLs, conditions, boundaries, SCPs, sessions", "versioning", "multipart uploads", "presigned URLs", "virtual-host addressing", "services outside the declared S3/SSM/CloudFormation subset", "STS, AWS federation, managed-policy permissions, trust-policy evaluation", "legacy TenkaCloud world/deploy/grading protocol; grading stays in the host"}})
 	})
 	mux.Handle("/_simulator/v1/iam/", identityAPI(identities))
 	mux.Handle("/", registry)
@@ -64,7 +74,7 @@ func New(path string) (http.Handler, func() error, error) {
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.Header().Set("Referrer-Policy", "no-referrer")
 		w.Header().Set("Cache-Control", "no-store")
-		w.Header().Set("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'; sandbox allow-scripts allow-same-origin allow-downloads allow-forms")
+		w.Header().Set("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; font-src 'self' data:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'; sandbox allow-scripts allow-same-origin allow-downloads allow-forms")
 		if strings.HasPrefix(r.URL.Path, "/_simulator/docs/") {
 			w.Header().Set("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src blob:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'")
 		}

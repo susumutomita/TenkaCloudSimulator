@@ -21,7 +21,7 @@ func TestLifecycleServesRealRequestsAndStops(t *testing.T) {
 	output := readyOutput{make(chan string, 1)}
 	done := make(chan error, 1)
 	go func() {
-		done <- run(ctx, []string{"--listen", "127.0.0.1:0", "--state", t.TempDir() + "/state.db"}, output)
+		done <- run(ctx, []string{"--unsafe-no-auth", "--listen", "127.0.0.1:0", "--state", t.TempDir() + "/state.db"}, output)
 	}()
 	var message string
 	select {
@@ -32,7 +32,7 @@ func TestLifecycleServesRealRequestsAndStops(t *testing.T) {
 	case <-time.After(45 * time.Second):
 		t.Fatal("server did not become ready")
 	}
-	_, endpoint, ok := strings.Cut(message, "S3 endpoint ")
+	_, endpoint, ok := strings.Cut(message, "AWS simulation endpoint ")
 	if !ok {
 		t.Fatal(message)
 	}

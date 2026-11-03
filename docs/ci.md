@@ -54,3 +54,17 @@ GitHub documents [workflow artifacts](https://docs.github.com/en/actions/tutoria
 as a way to retain test/coverage output, and [job summaries](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-commands#adding-a-job-summary)
 as the native way to display Markdown in a workflow run. Those mechanisms expose
 and preserve the same required local coverage evidence without calling Code Quality.
+
+## Cloudscape / local catalog increment
+
+The console has its own locked, development-only npm build in tools/console.
+CI rebuilds the actual official component graph and original notices, compares
+embedded assets/digests/inventories, and audits both console and Scalar dependencies.
+Python remains only for active SDK/browser, coverage, build, formal and license
+verification; it is not part of the runtime. SSM/CloudFormation/auth transaction
+and isolation tests belong to the full-module race/coverage gates. StackOwnership
+adds drift-reservation invariants and a required negative control to TLC.
+
+The real-platform catalog runner and participant browser run in CI: see test/platform/README.md. CI fetches immutable reviewed TenkaCloud/Challenge commits and installs only tools/platform/package-lock.json development dependencies; setup refuses to overwrite existing module directories. No catalog scripts or real AWS are run. A failed acquisition or lifecycle fails CI.
+Remote checks remain authoritative only for their exact tested commit. Historical
+reports below predate this increment and do not certify the changed working tree.

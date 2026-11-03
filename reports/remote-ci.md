@@ -1,3 +1,5 @@
+> Historical evidence from the pre-catalog/Cloudscape increment. It does not certify the current working tree. Re-run the documented gates for the current revision.
+
 # Remote CI status
 
 [Run 41631944882](https://github.com/susumutomita/TenkaCloudSimulator/actions/runs/41631944882), head 6b4270632ab226f868354f0efe8f460e39d4fd48, passed asset rebuild/provenance, full-module race tests and both coverage floors, five-target compilation, canonical online govulncheck, real SDK/browser/standalone tests, seven-state accessibility audit, and bounded TLC plus deliberate mutation detection.

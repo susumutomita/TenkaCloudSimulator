@@ -4,6 +4,46 @@
     "violations": [],
     "incomplete": [
       {
+        "id": "aria-valid-attr-value",
+        "impact": "critical",
+        "tags": [
+          "cat.aria",
+          "wcag2a",
+          "wcag412",
+          "EN-301-549",
+          "EN-9.4.1.2",
+          "RGAAv4",
+          "RGAA-7.1.1"
+        ],
+        "description": "Ensure all ARIA attributes have valid values",
+        "help": "ARIA attributes must conform to valid values",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/aria-valid-attr-value?application=axeAPI",
+        "nodes": [
+          {
+            "any": [],
+            "all": [
+              {
+                "id": "aria-valid-attr-value",
+                "data": {
+                  "messageKey": "controlsWithinPopup",
+                  "needsReview": "aria-controls=\"tools-_r_1n_\""
+                },
+                "relatedNodes": [],
+                "impact": "critical",
+                "message": "Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"tools-_r_1n_\""
+              }
+            ],
+            "none": [],
+            "impact": "critical",
+            "html": "<button aria-expanded=\"false\" aria-controls=\"tools-_r_1n_\" aria-haspopup=\"true\" aria-label=\"Toggle help panel\" aria-disabled=\"false\" class=\"awsui_trigger_hyvsj_...\" type=\"button\" data-awsui-motion-tr...=\"hover\" data-awsui-motion-ta...=\"\">",
+            "target": [
+              ".awsui_tools-toggle_1fj9k_q6akd_14"
+            ],
+            "failureSummary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"tools-_r_1n_\""
+          }
+        ]
+      },
+      {
         "id": "color-contrast",
         "impact": "serious",
         "tags": [
@@ -27,164 +67,121 @@
               {
                 "id": "color-contrast",
                 "data": {
-                  "messageKey": "nonBmp"
+                  "fgColor": null,
+                  "bgColor": null,
+                  "contrastRatio": 0,
+                  "fontSize": "18.0pt (24px)",
+                  "fontWeight": "bold",
+                  "messageKey": "elmPartiallyObscured",
+                  "expectedContrastRatio": "3:1",
+                  "shadowColor": null
                 },
-                "relatedNodes": [],
-                "impact": "serious",
-                "message": "Element content contains only non-text characters"
-              }
-            ],
-            "all": [],
-            "none": [],
-            "impact": "serious",
-            "html": "<span aria-hidden=\"true\">\u25b1</span>",
-            "target": [
-              ".active > span[aria-hidden=\"true\"]"
-            ],
-            "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
-          },
-          {
-            "any": [
-              {
-                "id": "color-contrast",
-                "data": {
-                  "messageKey": "nonBmp"
-                },
-                "relatedNodes": [],
-                "impact": "serious",
-                "message": "Element content contains only non-text characters"
-              }
-            ],
-            "all": [],
-            "none": [],
-            "impact": "serious",
-            "html": "<span class=\"service-emblem\" aria-hidden=\"true\">\u25b1</span>",
-            "target": [
-              ".service-emblem"
-            ],
-            "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
-          },
-          {
-            "any": [
-              {
-                "id": "color-contrast",
-                "data": {
-                  "messageKey": "nonBmp"
-                },
-                "relatedNodes": [],
-                "impact": "serious",
-                "message": "Element content contains only non-text characters"
-              }
-            ],
-            "all": [],
-            "none": [],
-            "impact": "serious",
-            "html": "<button id=\"refresh\" class=\"icon-button\" aria-label=\"Refresh resources\">\n                \u21bb</button>",
-            "target": [
-              "#refresh"
-            ],
-            "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
-          },
-          {
-            "any": [
-              {
-                "id": "color-contrast",
-                "data": {
-                  "messageKey": "nonBmp"
-                },
-                "relatedNodes": [],
-                "impact": "serious",
-                "message": "Element content contains only non-text characters"
-              }
-            ],
-            "all": [],
-            "none": [],
-            "impact": "serious",
-            "html": "<span aria-hidden=\"true\">\u2315</span>",
-            "target": [
-              ".search > span[aria-hidden=\"true\"]"
-            ],
-            "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
-          },
-          {
-            "any": [
-              {
-                "id": "color-contrast",
-                "data": {
-                  "messageKey": "nonBmp"
-                },
-                "relatedNodes": [],
-                "impact": "serious",
-                "message": "Element content contains only non-text characters"
-              }
-            ],
-            "all": [],
-            "none": [],
-            "impact": "serious",
-            "html": "<div aria-hidden=\"true\" class=\"empty-symbol\">\u25b1</div>",
-            "target": [
-              ".empty-symbol"
-            ],
-            "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
-          }
-        ]
-      },
-      {
-        "id": "th-has-data-cells",
-        "impact": "serious",
-        "tags": [
-          "cat.tables",
-          "wcag2a",
-          "wcag131",
-          "section508",
-          "section508.22.g",
-          "TTv5",
-          "TT14.b",
-          "EN-301-549",
-          "EN-9.1.3.1",
-          "RGAAv4",
-          "RGAA-5.7.1"
-        ],
-        "description": "Ensure that <th> elements and elements with role=columnheader/rowheader have data cells they describe",
-        "help": "Table headers in a data table must refer to data cells",
-        "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/th-has-data-cells?application=axeAPI",
-        "nodes": [
-          {
-            "any": [],
-            "all": [
-              {
-                "id": "th-has-data-cells",
-                "data": null,
                 "relatedNodes": [
                   {
-                    "html": "<th>Storage class</th>",
+                    "html": "<div id=\"container-header-_r_...\" class=\"awsui_refresh_14iqq_...\" style=\"top: calc(var(--awsu...\">",
                     "target": [
-                      "th:nth-child(5)"
+                      "#container-header-_r_2a_"
                     ]
                   }
                 ],
                 "impact": "serious",
-                "message": "Table data cells are missing or empty"
+                "message": "Element's background color could not be determined because it's partially obscured by another element"
               }
             ],
+            "all": [],
             "none": [],
             "impact": "serious",
-            "html": "<table>\n              <thead id=\"table-head\"><tr><th></th><th>Bucket name</th><th>Region</th><th>Created</th><th>Storage class</th></tr></thead>\n              <tbody id=\"rows\"></tbody>\n            </table>",
+            "html": "<span data-analytics-funnel-key=\"substep-name\" class=\"awsui_heading-text_2qdw9_1tbn2_262 awsui_heading-text_105ke_268sp_5 awsui_heading-text-variant-h1_2qdw9_1tbn2_265\" id=\"heading_r_2c_\">General purpose buckets</span>",
             "target": [
-              "table"
+              "#heading_r_2c_"
             ],
-            "failureSummary": "Fix all of the following:\n  Table data cells are missing or empty"
+            "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          },
+          {
+            "any": [
+              {
+                "id": "color-contrast",
+                "data": {
+                  "fgColor": null,
+                  "bgColor": null,
+                  "contrastRatio": 0,
+                  "fontSize": "18.0pt (24px)",
+                  "fontWeight": "normal",
+                  "messageKey": "elmPartiallyObscured",
+                  "expectedContrastRatio": "3:1",
+                  "shadowColor": null
+                },
+                "relatedNodes": [
+                  {
+                    "html": "<div id=\"container-header-_r_...\" class=\"awsui_refresh_14iqq_...\" style=\"top: calc(var(--awsu...\">",
+                    "target": [
+                      "#container-header-_r_2a_"
+                    ]
+                  }
+                ],
+                "impact": "serious",
+                "message": "Element's background color could not be determined because it's partially obscured by another element"
+              }
+            ],
+            "all": [],
+            "none": [],
+            "impact": "serious",
+            "html": "<span class=\"awsui_counter_2qdw9_1tbn2_293\"> (0)</span>",
+            "target": [
+              ".awsui_counter_2qdw9_1tbn2_293"
+            ],
+            "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
           }
         ]
       }
     ],
-    "passes": 22
+    "passes": 30
   },
   {
     "step": "02-create-form",
     "violations": [],
     "incomplete": [
       {
+        "id": "aria-valid-attr-value",
+        "impact": "critical",
+        "tags": [
+          "cat.aria",
+          "wcag2a",
+          "wcag412",
+          "EN-301-549",
+          "EN-9.4.1.2",
+          "RGAAv4",
+          "RGAA-7.1.1"
+        ],
+        "description": "Ensure all ARIA attributes have valid values",
+        "help": "ARIA attributes must conform to valid values",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/aria-valid-attr-value?application=axeAPI",
+        "nodes": [
+          {
+            "any": [],
+            "all": [
+              {
+                "id": "aria-valid-attr-value",
+                "data": {
+                  "messageKey": "controlsWithinPopup",
+                  "needsReview": "aria-controls=\"tools-_r_1n_\""
+                },
+                "relatedNodes": [],
+                "impact": "critical",
+                "message": "Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"tools-_r_1n_\""
+              }
+            ],
+            "none": [],
+            "impact": "critical",
+            "html": "<button aria-expanded=\"false\" aria-controls=\"tools-_r_1n_\" aria-haspopup=\"true\" aria-label=\"Toggle help panel\" aria-disabled=\"false\" class=\"awsui_trigger_hyvsj_...\" type=\"button\" data-awsui-motion-tr...=\"hover\" data-awsui-motion-ta...=\"\">",
+            "target": [
+              ".awsui_tools-toggle_1fj9k_q6akd_14"
+            ],
+            "failureSummary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"tools-_r_1n_\""
+          }
+        ]
+      },
+      {
         "id": "color-contrast",
         "impact": "serious",
         "tags": [
@@ -211,32 +208,131 @@
                   "fgColor": null,
                   "bgColor": null,
                   "contrastRatio": 0,
-                  "fontSize": "18.8pt (25px)",
-                  "fontWeight": "normal",
-                  "messageKey": "shortTextContent",
+                  "fontSize": "18.0pt (24px)",
+                  "fontWeight": "bold",
+                  "messageKey": "elmPartiallyObscured",
                   "expectedContrastRatio": "3:1",
                   "shadowColor": null
                 },
                 "relatedNodes": [
                   {
-                    "html": "<button type=\"button\" id=\"close-modal\" class=\"icon-button\" aria-label=\"Close dialog\">\n            \u00d7\n          </button>",
+                    "html": "<div class=\"awsui_background_5gtk3_9ykox_23 awsui_has-default-background_5gtk3_9ykox_68\"></div>",
                     "target": [
-                      "#close-modal"
+                      ".awsui_background_5gtk3_9ykox_23"
                     ]
                   }
                 ],
                 "impact": "serious",
-                "message": "Element content is too short to determine if it is actual text content"
+                "message": "Element's background color could not be determined because it's partially obscured by another element"
               }
             ],
             "all": [],
             "none": [],
             "impact": "serious",
-            "html": "<button type=\"button\" id=\"close-modal\" class=\"icon-button\" aria-label=\"Close dialog\">\n            \u00d7\n          </button>",
+            "html": "<span class=\"awsui_heading-text_2qdw9_1tbn2_262 awsui_heading-text_105ke_268sp_5 awsui_heading-text-variant-h1_2qdw9_1tbn2_265\" id=\"heading_r_3q_\">Create bucket</span>",
             "target": [
-              "#close-modal"
+              "#heading_r_3q_"
             ],
-            "failureSummary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+            "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          }
+        ]
+      }
+    ],
+    "passes": 27
+  },
+  {
+    "step": "03-bucket-detail",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "aria-valid-attr-value",
+        "impact": "critical",
+        "tags": [
+          "cat.aria",
+          "wcag2a",
+          "wcag412",
+          "EN-301-549",
+          "EN-9.4.1.2",
+          "RGAAv4",
+          "RGAA-7.1.1"
+        ],
+        "description": "Ensure all ARIA attributes have valid values",
+        "help": "ARIA attributes must conform to valid values",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/aria-valid-attr-value?application=axeAPI",
+        "nodes": [
+          {
+            "any": [],
+            "all": [
+              {
+                "id": "aria-valid-attr-value",
+                "data": {
+                  "messageKey": "controlsWithinPopup",
+                  "needsReview": "aria-controls=\"tools-_r_1n_\""
+                },
+                "relatedNodes": [],
+                "impact": "critical",
+                "message": "Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"tools-_r_1n_\""
+              }
+            ],
+            "none": [],
+            "impact": "critical",
+            "html": "<button aria-expanded=\"false\" aria-controls=\"tools-_r_1n_\" aria-haspopup=\"true\" aria-label=\"Toggle help panel\" aria-disabled=\"false\" class=\"awsui_trigger_hyvsj_...\" type=\"button\" data-awsui-motion-tr...=\"hover\" data-awsui-motion-ta...=\"\">",
+            "target": [
+              ".awsui_tools-toggle_1fj9k_q6akd_14"
+            ],
+            "failureSummary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"tools-_r_1n_\""
+          }
+        ]
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "tags": [
+          "cat.color",
+          "wcag2aa",
+          "wcag143",
+          "TTv5",
+          "TT13.c",
+          "EN-301-549",
+          "EN-9.1.4.3",
+          "ACT",
+          "RGAAv4",
+          "RGAA-3.2.1"
+        ],
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=axeAPI",
+        "nodes": [
+          {
+            "any": [
+              {
+                "id": "color-contrast",
+                "data": {
+                  "fontSize": "12.0pt (16px)",
+                  "fontWeight": "bold",
+                  "messageKey": "pseudoContent",
+                  "expectedContrastRatio": "4.5:1"
+                },
+                "relatedNodes": [
+                  {
+                    "html": "<div class=\"awsui_tabs-tab-header-container_14rmt_ib7qg_97 awsui_refresh_14rmt_ib7qg_110 awsui_tabs-tab-active_14rmt_ib7qg_255 awsui_tabs-tab-focusable_14rmt_ib7qg_268\">",
+                    "target": [
+                      ".awsui_tabs-tab-active_14rmt_ib7qg_255.awsui_tabs-tab-focusable_14rmt_ib7qg_268.awsui_tabs-tab-header-container_14rmt_ib7qg_97"
+                    ]
+                  }
+                ],
+                "impact": "serious",
+                "message": "Element's background color could not be determined due to a pseudo element"
+              }
+            ],
+            "all": [],
+            "none": [],
+            "impact": "serious",
+            "html": "<span>Objects</span>",
+            "target": [
+              "#awsui-tabs-_r_60_-objects > .awsui_tabs-tab-label_14rmt_ib7qg_86.awsui_tab-label_1acwa_dp0cl_7 > span"
+            ],
+            "failureSummary": "Fix any of the following:\n  Element's background color could not be determined due to a pseudo element"
           },
           {
             "any": [
@@ -246,7 +342,318 @@
                   "fgColor": null,
                   "bgColor": null,
                   "contrastRatio": 0,
-                  "fontSize": "8.3pt (11px)",
+                  "fontSize": "18.0pt (24px)",
+                  "fontWeight": "bold",
+                  "messageKey": "elmPartiallyObscured",
+                  "expectedContrastRatio": "3:1",
+                  "shadowColor": null
+                },
+                "relatedNodes": [
+                  {
+                    "html": "<div id=\"container-header-_r_...\" class=\"awsui_refresh_14iqq_...\" style=\"top: calc(var(--awsu...\">",
+                    "target": [
+                      "#container-header-_r_4u_"
+                    ]
+                  }
+                ],
+                "impact": "serious",
+                "message": "Element's background color could not be determined because it's partially obscured by another element"
+              }
+            ],
+            "all": [],
+            "none": [],
+            "impact": "serious",
+            "html": "<span data-analytics-funnel-key=\"substep-name\" class=\"awsui_heading-text_2qdw9_1tbn2_262 awsui_heading-text_105ke_268sp_5 awsui_heading-text-variant-h1_2qdw9_1tbn2_265\" id=\"heading_r_50_\">Objects</span>",
+            "target": [
+              "#heading_r_50_"
+            ],
+            "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          },
+          {
+            "any": [
+              {
+                "id": "color-contrast",
+                "data": {
+                  "fgColor": null,
+                  "bgColor": null,
+                  "contrastRatio": 0,
+                  "fontSize": "18.0pt (24px)",
+                  "fontWeight": "normal",
+                  "messageKey": "elmPartiallyObscured",
+                  "expectedContrastRatio": "3:1",
+                  "shadowColor": null
+                },
+                "relatedNodes": [
+                  {
+                    "html": "<div id=\"container-header-_r_...\" class=\"awsui_refresh_14iqq_...\" style=\"top: calc(var(--awsu...\">",
+                    "target": [
+                      "#container-header-_r_4u_"
+                    ]
+                  }
+                ],
+                "impact": "serious",
+                "message": "Element's background color could not be determined because it's partially obscured by another element"
+              }
+            ],
+            "all": [],
+            "none": [],
+            "impact": "serious",
+            "html": "<span class=\"awsui_counter_2qdw9_1tbn2_293\"> (0)</span>",
+            "target": [
+              ".awsui_counter_2qdw9_1tbn2_293"
+            ],
+            "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          }
+        ]
+      }
+    ],
+    "passes": 31
+  },
+  {
+    "step": "04-upload-form",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "aria-valid-attr-value",
+        "impact": "critical",
+        "tags": [
+          "cat.aria",
+          "wcag2a",
+          "wcag412",
+          "EN-301-549",
+          "EN-9.4.1.2",
+          "RGAAv4",
+          "RGAA-7.1.1"
+        ],
+        "description": "Ensure all ARIA attributes have valid values",
+        "help": "ARIA attributes must conform to valid values",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/aria-valid-attr-value?application=axeAPI",
+        "nodes": [
+          {
+            "any": [],
+            "all": [
+              {
+                "id": "aria-valid-attr-value",
+                "data": {
+                  "messageKey": "controlsWithinPopup",
+                  "needsReview": "aria-controls=\"tools-_r_1n_\""
+                },
+                "relatedNodes": [],
+                "impact": "critical",
+                "message": "Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"tools-_r_1n_\""
+              }
+            ],
+            "none": [],
+            "impact": "critical",
+            "html": "<button aria-expanded=\"false\" aria-controls=\"tools-_r_1n_\" aria-haspopup=\"true\" aria-label=\"Toggle help panel\" aria-disabled=\"false\" class=\"awsui_trigger_hyvsj_...\" type=\"button\" data-awsui-motion-tr...=\"hover\" data-awsui-motion-ta...=\"\">",
+            "target": [
+              ".awsui_tools-toggle_1fj9k_q6akd_14"
+            ],
+            "failureSummary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"tools-_r_1n_\""
+          }
+        ]
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "tags": [
+          "cat.color",
+          "wcag2aa",
+          "wcag143",
+          "TTv5",
+          "TT13.c",
+          "EN-301-549",
+          "EN-9.1.4.3",
+          "ACT",
+          "RGAAv4",
+          "RGAA-3.2.1"
+        ],
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=axeAPI",
+        "nodes": [
+          {
+            "any": [
+              {
+                "id": "color-contrast",
+                "data": {
+                  "fgColor": null,
+                  "bgColor": null,
+                  "contrastRatio": 0,
+                  "fontSize": "18.0pt (24px)",
+                  "fontWeight": "bold",
+                  "messageKey": "elmPartiallyObscured",
+                  "expectedContrastRatio": "3:1",
+                  "shadowColor": null
+                },
+                "relatedNodes": [
+                  {
+                    "html": "<div class=\"awsui_background_5gtk3_9ykox_23 awsui_has-default-background_5gtk3_9ykox_68\"></div>",
+                    "target": [
+                      ".awsui_background_5gtk3_9ykox_23"
+                    ]
+                  }
+                ],
+                "impact": "serious",
+                "message": "Element's background color could not be determined because it's partially obscured by another element"
+              }
+            ],
+            "all": [],
+            "none": [],
+            "impact": "serious",
+            "html": "<span class=\"awsui_heading-text_2qdw9_1tbn2_262 awsui_heading-text_105ke_268sp_5 awsui_heading-text-variant-h1_2qdw9_1tbn2_265\" id=\"heading_r_6e_\">Upload</span>",
+            "target": [
+              "#heading_r_6e_"
+            ],
+            "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          }
+        ]
+      }
+    ],
+    "passes": 27
+  },
+  {
+    "step": "05-delete-error",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "aria-valid-attr-value",
+        "impact": "critical",
+        "tags": [
+          "cat.aria",
+          "wcag2a",
+          "wcag412",
+          "EN-301-549",
+          "EN-9.4.1.2",
+          "RGAAv4",
+          "RGAA-7.1.1"
+        ],
+        "description": "Ensure all ARIA attributes have valid values",
+        "help": "ARIA attributes must conform to valid values",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/aria-valid-attr-value?application=axeAPI",
+        "nodes": [
+          {
+            "any": [],
+            "all": [
+              {
+                "id": "aria-valid-attr-value",
+                "data": {
+                  "messageKey": "controlsWithinPopup",
+                  "needsReview": "aria-controls=\"tools-_r_1n_\""
+                },
+                "relatedNodes": [],
+                "impact": "critical",
+                "message": "Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"tools-_r_1n_\""
+              }
+            ],
+            "none": [],
+            "impact": "critical",
+            "html": "<button aria-expanded=\"false\" aria-controls=\"tools-_r_1n_\" aria-haspopup=\"true\" aria-label=\"Toggle help panel\" aria-disabled=\"false\" class=\"awsui_trigger_hyvsj_...\" type=\"button\" data-awsui-motion-tr...=\"hover\" data-awsui-motion-ta...=\"\">",
+            "target": [
+              ".awsui_tools-toggle_1fj9k_q6akd_14"
+            ],
+            "failureSummary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"tools-_r_1n_\""
+          }
+        ]
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "tags": [
+          "cat.color",
+          "wcag2aa",
+          "wcag143",
+          "TTv5",
+          "TT13.c",
+          "EN-301-549",
+          "EN-9.1.4.3",
+          "ACT",
+          "RGAAv4",
+          "RGAA-3.2.1"
+        ],
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=axeAPI",
+        "nodes": [
+          {
+            "any": [
+              {
+                "id": "color-contrast",
+                "data": {
+                  "fgColor": null,
+                  "bgColor": null,
+                  "contrastRatio": 0,
+                  "fontSize": "18.0pt (24px)",
+                  "fontWeight": "bold",
+                  "messageKey": "elmPartiallyObscured",
+                  "expectedContrastRatio": "3:1",
+                  "shadowColor": null
+                },
+                "relatedNodes": [
+                  {
+                    "html": "<div id=\"container-header-_r_...\" class=\"awsui_refresh_14iqq_...\" style=\"top: calc(var(--awsu...\">",
+                    "target": [
+                      "#container-header-_r_7s_"
+                    ]
+                  }
+                ],
+                "impact": "serious",
+                "message": "Element's background color could not be determined because it's partially obscured by another element"
+              }
+            ],
+            "all": [],
+            "none": [],
+            "impact": "serious",
+            "html": "<span data-analytics-funnel-key=\"substep-name\" class=\"awsui_heading-text_2qdw9_1tbn2_262 awsui_heading-text_105ke_268sp_5 awsui_heading-text-variant-h1_2qdw9_1tbn2_265\" id=\"heading_r_7u_\">General purpose buckets</span>",
+            "target": [
+              "#heading_r_7u_"
+            ],
+            "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          },
+          {
+            "any": [
+              {
+                "id": "color-contrast",
+                "data": {
+                  "fgColor": null,
+                  "bgColor": null,
+                  "contrastRatio": 0,
+                  "fontSize": "18.0pt (24px)",
+                  "fontWeight": "normal",
+                  "messageKey": "elmPartiallyObscured",
+                  "expectedContrastRatio": "3:1",
+                  "shadowColor": null
+                },
+                "relatedNodes": [
+                  {
+                    "html": "<div id=\"container-header-_r_...\" class=\"awsui_refresh_14iqq_...\" style=\"top: calc(var(--awsu...\">",
+                    "target": [
+                      "#container-header-_r_7s_"
+                    ]
+                  }
+                ],
+                "impact": "serious",
+                "message": "Element's background color could not be determined because it's partially obscured by another element"
+              }
+            ],
+            "all": [],
+            "none": [],
+            "impact": "serious",
+            "html": "<span class=\"awsui_counter_2qdw9_1tbn2_293\"> (1)</span>",
+            "target": [
+              ".awsui_counter_2qdw9_1tbn2_293"
+            ],
+            "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          },
+          {
+            "any": [
+              {
+                "id": "color-contrast",
+                "data": {
+                  "fgColor": null,
+                  "bgColor": null,
+                  "contrastRatio": 0,
+                  "fontSize": "10.5pt (14px)",
                   "fontWeight": "normal",
                   "messageKey": "elmPartiallyObscuring",
                   "expectedContrastRatio": "4.5:1",
@@ -260,323 +667,16 @@
             "all": [],
             "none": [],
             "impact": "serious",
-            "html": "<div class=\"inline-note\">Basic object storage only. Public access controls, versioning, encryption, and lifecycle rules are not modeled in this build.</div>",
+            "html": "<div class=\"awsui_content_mx3cw_x82zy_232\">Delete \u201c<span class=\"resource-identifier\">audit-practice</span>\u201d? This action cannot be undone. Buckets must be empty.</div>",
             "target": [
-              "#modal-body > .inline-note"
+              "#alert-_r_98_ > .awsui_content_mx3cw_x82zy_232"
             ],
             "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
           }
         ]
       }
     ],
-    "passes": 16
-  },
-  {
-    "step": "03-bucket-detail",
-    "violations": [],
-    "incomplete": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "tags": [
-          "cat.color",
-          "wcag2aa",
-          "wcag143",
-          "TTv5",
-          "TT13.c",
-          "EN-301-549",
-          "EN-9.1.4.3",
-          "ACT",
-          "RGAAv4",
-          "RGAA-3.2.1"
-        ],
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=axeAPI",
-        "nodes": [
-          {
-            "any": [
-              {
-                "id": "color-contrast",
-                "data": {
-                  "messageKey": "nonBmp"
-                },
-                "relatedNodes": [],
-                "impact": "serious",
-                "message": "Element content contains only non-text characters"
-              }
-            ],
-            "all": [],
-            "none": [],
-            "impact": "serious",
-            "html": "<span aria-hidden=\"true\">\u25b1</span>",
-            "target": [
-              ".active > span[aria-hidden=\"true\"]"
-            ],
-            "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
-          },
-          {
-            "any": [
-              {
-                "id": "color-contrast",
-                "data": {
-                  "messageKey": "nonBmp"
-                },
-                "relatedNodes": [],
-                "impact": "serious",
-                "message": "Element content contains only non-text characters"
-              }
-            ],
-            "all": [],
-            "none": [],
-            "impact": "serious",
-            "html": "<span class=\"service-emblem\" aria-hidden=\"true\">\u25b1</span>",
-            "target": [
-              ".service-emblem"
-            ],
-            "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
-          },
-          {
-            "any": [
-              {
-                "id": "color-contrast",
-                "data": {
-                  "messageKey": "nonBmp"
-                },
-                "relatedNodes": [],
-                "impact": "serious",
-                "message": "Element content contains only non-text characters"
-              }
-            ],
-            "all": [],
-            "none": [],
-            "impact": "serious",
-            "html": "<button id=\"refresh\" class=\"icon-button\" aria-label=\"Refresh resources\">\n                \u21bb</button>",
-            "target": [
-              "#refresh"
-            ],
-            "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
-          },
-          {
-            "any": [
-              {
-                "id": "color-contrast",
-                "data": {
-                  "messageKey": "nonBmp"
-                },
-                "relatedNodes": [],
-                "impact": "serious",
-                "message": "Element content contains only non-text characters"
-              }
-            ],
-            "all": [],
-            "none": [],
-            "impact": "serious",
-            "html": "<span aria-hidden=\"true\">\u2315</span>",
-            "target": [
-              ".search > span[aria-hidden=\"true\"]"
-            ],
-            "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
-          },
-          {
-            "any": [
-              {
-                "id": "color-contrast",
-                "data": {
-                  "messageKey": "nonBmp"
-                },
-                "relatedNodes": [],
-                "impact": "serious",
-                "message": "Element content contains only non-text characters"
-              }
-            ],
-            "all": [],
-            "none": [],
-            "impact": "serious",
-            "html": "<div aria-hidden=\"true\" class=\"empty-symbol\">\u25b1</div>",
-            "target": [
-              ".empty-symbol"
-            ],
-            "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
-          }
-        ]
-      },
-      {
-        "id": "th-has-data-cells",
-        "impact": "serious",
-        "tags": [
-          "cat.tables",
-          "wcag2a",
-          "wcag131",
-          "section508",
-          "section508.22.g",
-          "TTv5",
-          "TT14.b",
-          "EN-301-549",
-          "EN-9.1.3.1",
-          "RGAAv4",
-          "RGAA-5.7.1"
-        ],
-        "description": "Ensure that <th> elements and elements with role=columnheader/rowheader have data cells they describe",
-        "help": "Table headers in a data table must refer to data cells",
-        "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/th-has-data-cells?application=axeAPI",
-        "nodes": [
-          {
-            "any": [],
-            "all": [
-              {
-                "id": "th-has-data-cells",
-                "data": null,
-                "relatedNodes": [
-                  {
-                    "html": "<th>ETag</th>",
-                    "target": [
-                      "th:nth-child(5)"
-                    ]
-                  }
-                ],
-                "impact": "serious",
-                "message": "Table data cells are missing or empty"
-              }
-            ],
-            "none": [],
-            "impact": "serious",
-            "html": "<table>\n              <thead id=\"table-head\"><tr><th></th><th>Object key</th><th>Size</th><th>Last modified</th><th>ETag</th></tr></thead>\n              <tbody id=\"rows\"></tbody>\n            </table>",
-            "target": [
-              "table"
-            ],
-            "failureSummary": "Fix all of the following:\n  Table data cells are missing or empty"
-          }
-        ]
-      }
-    ],
-    "passes": 25
-  },
-  {
-    "step": "04-upload-form",
-    "violations": [],
-    "incomplete": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "tags": [
-          "cat.color",
-          "wcag2aa",
-          "wcag143",
-          "TTv5",
-          "TT13.c",
-          "EN-301-549",
-          "EN-9.1.4.3",
-          "ACT",
-          "RGAAv4",
-          "RGAA-3.2.1"
-        ],
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=axeAPI",
-        "nodes": [
-          {
-            "any": [
-              {
-                "id": "color-contrast",
-                "data": {
-                  "fgColor": null,
-                  "bgColor": null,
-                  "contrastRatio": 0,
-                  "fontSize": "18.8pt (25px)",
-                  "fontWeight": "normal",
-                  "messageKey": "shortTextContent",
-                  "expectedContrastRatio": "3:1",
-                  "shadowColor": null
-                },
-                "relatedNodes": [
-                  {
-                    "html": "<button type=\"button\" id=\"close-modal\" class=\"icon-button\" aria-label=\"Close dialog\">\n            \u00d7\n          </button>",
-                    "target": [
-                      "#close-modal"
-                    ]
-                  }
-                ],
-                "impact": "serious",
-                "message": "Element content is too short to determine if it is actual text content"
-              }
-            ],
-            "all": [],
-            "none": [],
-            "impact": "serious",
-            "html": "<button type=\"button\" id=\"close-modal\" class=\"icon-button\" aria-label=\"Close dialog\">\n            \u00d7\n          </button>",
-            "target": [
-              "#close-modal"
-            ],
-            "failureSummary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
-          }
-        ]
-      }
-    ],
-    "passes": 15
-  },
-  {
-    "step": "05-delete-error",
-    "violations": [],
-    "incomplete": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "tags": [
-          "cat.color",
-          "wcag2aa",
-          "wcag143",
-          "TTv5",
-          "TT13.c",
-          "EN-301-549",
-          "EN-9.1.4.3",
-          "ACT",
-          "RGAAv4",
-          "RGAA-3.2.1"
-        ],
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=axeAPI",
-        "nodes": [
-          {
-            "any": [
-              {
-                "id": "color-contrast",
-                "data": {
-                  "fgColor": null,
-                  "bgColor": null,
-                  "contrastRatio": 0,
-                  "fontSize": "18.8pt (25px)",
-                  "fontWeight": "normal",
-                  "messageKey": "shortTextContent",
-                  "expectedContrastRatio": "3:1",
-                  "shadowColor": null
-                },
-                "relatedNodes": [
-                  {
-                    "html": "<button type=\"button\" id=\"close-modal\" class=\"icon-button\" aria-label=\"Close dialog\">\n            \u00d7\n          </button>",
-                    "target": [
-                      "#close-modal"
-                    ]
-                  }
-                ],
-                "impact": "serious",
-                "message": "Element content is too short to determine if it is actual text content"
-              }
-            ],
-            "all": [],
-            "none": [],
-            "impact": "serious",
-            "html": "<button type=\"button\" id=\"close-modal\" class=\"icon-button\" aria-label=\"Close dialog\">\n            \u00d7\n          </button>",
-            "target": [
-              "#close-modal"
-            ],
-            "failureSummary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
-          }
-        ]
-      }
-    ],
-    "passes": 19
+    "passes": 30
   },
   {
     "step": "06-mobile",
@@ -606,73 +706,120 @@
               {
                 "id": "color-contrast",
                 "data": {
-                  "messageKey": "nonBmp"
+                  "fgColor": null,
+                  "bgColor": null,
+                  "contrastRatio": 0,
+                  "fontSize": "18.0pt (24px)",
+                  "fontWeight": "bold",
+                  "messageKey": "elmPartiallyObscured",
+                  "expectedContrastRatio": "3:1",
+                  "shadowColor": null
                 },
-                "relatedNodes": [],
+                "relatedNodes": [
+                  {
+                    "html": "<div id=\"container-header-_r_...\" class=\"awsui_refresh_14iqq_...\" style=\"top: calc(var(--awsu...\">",
+                    "target": [
+                      "#container-header-_r_7s_"
+                    ]
+                  }
+                ],
                 "impact": "serious",
-                "message": "Element content contains only non-text characters"
+                "message": "Element's background color could not be determined because it's partially obscured by another element"
               }
             ],
             "all": [],
             "none": [],
             "impact": "serious",
-            "html": "<button id=\"refresh\" class=\"icon-button\" aria-label=\"Refresh resources\">\n                \u21bb</button>",
+            "html": "<span data-analytics-funnel-key=\"substep-name\" class=\"awsui_heading-text_2qdw9_1tbn2_262 awsui_heading-text_105ke_268sp_5 awsui_heading-text-variant-h1_2qdw9_1tbn2_265\" id=\"heading_r_7u_\">General purpose buckets</span>",
             "target": [
-              "#refresh"
+              "#heading_r_7u_"
             ],
-            "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
+            "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
           },
           {
             "any": [
               {
                 "id": "color-contrast",
                 "data": {
-                  "messageKey": "nonBmp"
+                  "fgColor": null,
+                  "bgColor": null,
+                  "contrastRatio": 0,
+                  "fontSize": "18.0pt (24px)",
+                  "fontWeight": "normal",
+                  "messageKey": "elmPartiallyObscured",
+                  "expectedContrastRatio": "3:1",
+                  "shadowColor": null
                 },
-                "relatedNodes": [],
+                "relatedNodes": [
+                  {
+                    "html": "<div id=\"container-header-_r_...\" class=\"awsui_refresh_14iqq_...\" style=\"top: calc(var(--awsu...\">",
+                    "target": [
+                      "#container-header-_r_7s_"
+                    ]
+                  }
+                ],
                 "impact": "serious",
-                "message": "Element content contains only non-text characters"
+                "message": "Element's background color could not be determined because it's partially obscured by another element"
               }
             ],
             "all": [],
             "none": [],
             "impact": "serious",
-            "html": "<span aria-hidden=\"true\">\u2315</span>",
+            "html": "<span class=\"awsui_counter_2qdw9_1tbn2_293\"> (1)</span>",
             "target": [
-              ".search > span[aria-hidden=\"true\"]"
+              ".awsui_counter_2qdw9_1tbn2_293"
             ],
-            "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
-          },
-          {
-            "any": [
-              {
-                "id": "color-contrast",
-                "data": {
-                  "messageKey": "nonBmp"
-                },
-                "relatedNodes": [],
-                "impact": "serious",
-                "message": "Element content contains only non-text characters"
-              }
-            ],
-            "all": [],
-            "none": [],
-            "impact": "serious",
-            "html": "<span class=\"resource-glyph\">\u25b1</span>",
-            "target": [
-              ".resource-glyph"
-            ],
-            "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
+            "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
           }
         ]
       }
     ],
-    "passes": 27
+    "passes": 31
   },
   {
     "step": "07-reflow",
     "violations": [],
     "incomplete": [
+      {
+        "id": "aria-valid-attr-value",
+        "impact": "critical",
+        "tags": [
+          "cat.aria",
+          "wcag2a",
+          "wcag412",
+          "EN-301-549",
+          "EN-9.4.1.2",
+          "RGAAv4",
+          "RGAA-7.1.1"
+        ],
+        "description": "Ensure all ARIA attributes have valid values",
+        "help": "ARIA attributes must conform to valid values",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/aria-valid-attr-value?application=axeAPI",
+        "nodes": [
+          {
+            "any": [],
+            "all": [
+              {
+                "id": "aria-valid-attr-value",
+                "data": {
+                  "messageKey": "controlsWithinPopup",
+                  "needsReview": "aria-controls=\"tools-_r_1n_\""
+                },
+                "relatedNodes": [],
+                "impact": "critical",
+                "message": "Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"tools-_r_1n_\""
+              }
+            ],
+            "none": [],
+            "impact": "critical",
+            "html": "<button aria-expanded=\"false\" aria-controls=\"tools-_r_1n_\" aria-haspopup=\"true\" aria-label=\"Toggle help panel\" aria-disabled=\"false\" class=\"awsui_trigger_hyvsj_...\" type=\"button\" data-awsui-motion-tr...=\"hover\" data-awsui-motion-ta...=\"\">",
+            "target": [
+              ".awsui_tools-toggle_1fj9k_q6akd_14"
+            ],
+            "failureSummary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"tools-_r_1n_\""
+          }
+        ]
+      },
       {
         "id": "color-contrast",
         "impact": "serious",
@@ -697,67 +844,74 @@
               {
                 "id": "color-contrast",
                 "data": {
-                  "messageKey": "nonBmp"
+                  "fgColor": null,
+                  "bgColor": null,
+                  "contrastRatio": 0,
+                  "fontSize": "18.0pt (24px)",
+                  "fontWeight": "bold",
+                  "messageKey": "elmPartiallyObscured",
+                  "expectedContrastRatio": "3:1",
+                  "shadowColor": null
                 },
-                "relatedNodes": [],
+                "relatedNodes": [
+                  {
+                    "html": "<div id=\"container-header-_r_...\" class=\"awsui_refresh_14iqq_...\" style=\"top: calc(var(--awsu...\">",
+                    "target": [
+                      "#container-header-_r_7s_"
+                    ]
+                  }
+                ],
                 "impact": "serious",
-                "message": "Element content contains only non-text characters"
+                "message": "Element's background color could not be determined because it's partially obscured by another element"
               }
             ],
             "all": [],
             "none": [],
             "impact": "serious",
-            "html": "<button id=\"refresh\" class=\"icon-button\" aria-label=\"Refresh resources\">\n                \u21bb</button>",
+            "html": "<span data-analytics-funnel-key=\"substep-name\" class=\"awsui_heading-text_2qdw9_1tbn2_262 awsui_heading-text_105ke_268sp_5 awsui_heading-text-variant-h1_2qdw9_1tbn2_265\" id=\"heading_r_7u_\">General purpose buckets</span>",
             "target": [
-              "#refresh"
+              "#heading_r_7u_"
             ],
-            "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
+            "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
           },
           {
             "any": [
               {
                 "id": "color-contrast",
                 "data": {
-                  "messageKey": "nonBmp"
+                  "fgColor": null,
+                  "bgColor": null,
+                  "contrastRatio": 0,
+                  "fontSize": "18.0pt (24px)",
+                  "fontWeight": "normal",
+                  "messageKey": "elmPartiallyObscured",
+                  "expectedContrastRatio": "3:1",
+                  "shadowColor": null
                 },
-                "relatedNodes": [],
+                "relatedNodes": [
+                  {
+                    "html": "<div id=\"container-header-_r_...\" class=\"awsui_refresh_14iqq_...\" style=\"top: calc(var(--awsu...\">",
+                    "target": [
+                      "#container-header-_r_7s_"
+                    ]
+                  }
+                ],
                 "impact": "serious",
-                "message": "Element content contains only non-text characters"
+                "message": "Element's background color could not be determined because it's partially obscured by another element"
               }
             ],
             "all": [],
             "none": [],
             "impact": "serious",
-            "html": "<span aria-hidden=\"true\">\u2315</span>",
+            "html": "<span class=\"awsui_counter_2qdw9_1tbn2_293\"> (1)</span>",
             "target": [
-              ".search > span[aria-hidden=\"true\"]"
+              ".awsui_counter_2qdw9_1tbn2_293"
             ],
-            "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
-          },
-          {
-            "any": [
-              {
-                "id": "color-contrast",
-                "data": {
-                  "messageKey": "nonBmp"
-                },
-                "relatedNodes": [],
-                "impact": "serious",
-                "message": "Element content contains only non-text characters"
-              }
-            ],
-            "all": [],
-            "none": [],
-            "impact": "serious",
-            "html": "<span class=\"resource-glyph\">\u25b1</span>",
-            "target": [
-              ".resource-glyph"
-            ],
-            "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters"
+            "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
           }
         ]
       }
     ],
-    "passes": 26
+    "passes": 30
   }
 ]

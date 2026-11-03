@@ -36,6 +36,8 @@ var Regions = []string{"us-east-1", "us-west-2", "ap-northeast-1", "eu-west-1"}
 type Gateway struct {
 	Store      *core.Store
 	Identities *core.Identities
+	Parameters *ParameterStore
+	Stacks     *StackStore
 }
 type failure struct {
 	XMLName   xml.Name `xml:"Error"`
@@ -94,7 +96,7 @@ func validText(s string) bool {
 	}
 	return true
 }
-func (g *Gateway) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (g *Gateway) serveS3(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("x-amz-request-id", fmt.Sprintf("TCSIM%016x", sequence.Add(1)))
 	if a := r.Header.Get("Authorization"); a != "" {
 		_, credential, ok := strings.Cut(a, "Credential=")
