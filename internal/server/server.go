@@ -83,7 +83,7 @@ func New(path string) (http.Handler, func() error, error) {
 			http.NotFound(w, r)
 			return
 		}
-		if !strings.HasPrefix(r.URL.Path, "/_simulator/") {
+		if !strings.HasPrefix(r.URL.Path, "/_simulator/") || strings.HasPrefix(r.URL.Path, provider.Prefix) {
 			registry.ServeHTTP(w, r)
 			return
 		}
