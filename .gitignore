@@ -137,3 +137,12 @@ dist
 
 # jscpd duplication reports (make dup_check / dup_report)
 .jscpd-report
+
+# Go standalone artifacts and private simulator state
+/dist/
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+__pycache__/
+reports/coverage.out

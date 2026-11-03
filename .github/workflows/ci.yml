@@ -1,146 +1,28 @@
 name: ci
-
-# Supply Chain Security:
-# - All actions pinned to full SHA for immutable references
-# - Safe Chain runs before dependency installation
-# - Lifecycle scripts disabled during install
-# - Minimal permissions following principle of least privilege
-
-permissions:
-  contents: read
-  packages: read
-  actions: read
-
 on:
   push:
   pull_request:
   workflow_dispatch:
-
+permissions:
+  contents: read
 jobs:
-  ci:
+  standalone:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out the code
-        # actions/checkout v4.3.1
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16
         with:
-          submodules: true
-
-      - name: Setup Bun
-        # oven-sh/setup-bun v2.0.2
-        uses: oven-sh/setup-bun@735343b667d3e6f658f44d0eca948eb6282f2b76
-        with:
-          bun-version: "1.3.11"
-
-      # Supply Chain Security: Setup safe-chain before dependency installation
-      # safe-chain 自体のサプライチェイン経由侵入を防ぐため、
-      # (1) --ignore-scripts を必ず付ける (Bun は npm_config_ignore_scripts を読まない)
-      # (2) version を明示固定する (latest を引かない)
-      # version を上げるときは ADR / 別 PR でレビューする。
-      - name: Setup safe-chain
+          go-version: '1.26.10'
+          cache: true
+      - run: make before-commit cross-check
+      - name: Install development-only browser and SDK tools
         run: |
-          bun add -g --ignore-scripts @aikidosec/safe-chain@1.5.3
-          safe-chain setup-ci
-
-      # Supply Chain Security: Disable lifecycle scripts during install.
-      # minimum-package-age は迂回しない。公開直後の transitive dependency は
-      # review 済みの互換版を root override と lockfile で固定する。
-      - name: Install packages via packages.json
-        env:
-          npm_config_ignore_scripts: "true"
-          CI: "true"
-        run: make install_ci
-
-      - name: Run quality gates
+          python3 -m venv /tmp/simulator-tests
+          /tmp/simulator-tests/bin/pip install -r scripts/requirements-test.txt
+          /tmp/simulator-tests/bin/playwright install --with-deps chromium
+      - name: Verify real binary, SDK, console, and offline API reference
+        run: make e2e PYTHON=/tmp/simulator-tests/bin/python
+      - name: Finite state model check and deletion-guard mutation
         run: |
-          make harness
-          make before-commit
-
-      # knip デッドコード検出は報告のみ (ADR-0015)。knip は「この PR で増えた分」ではなく
-      # 「現時点の全量」しか出せないため、gate にすると既存負債で新規 PR が落ちて
-      # 無視 comment が量産される。job summary へ知らせ、判断は人間が行う。
-      # `|| true` は knip 自体の障害で CI を止めないための設計 (advisory)。
-      - name: Dead-code scan (knip, report-only)
-        run: |
-          {
-            echo '## Dead-code scan (knip, report-only)'
-            echo '```'
-            bun run --silent dead-code 2>/dev/null || true
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Build and smoke-test the production image
-        shell: bash
-        env:
-          WORKLOAD_IMAGE: busybox@sha256:73aaf090f3d85aa34ee199857f03fa3a95c8ede2ffd4cc2cdb5b94e566b11662
-        run: |
-          docker build --tag tenkacloud-simulator:test .
-          docker pull "${WORKLOAD_IMAGE}"
-          secret="$(openssl rand -hex 32)"
-          container_name="tenkacloud-simulator-ci-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
-          state_dir="${RUNNER_TEMP}/tenkacloud-simulator-state-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
-          sudo install -d -m 700 -o 1000 -g 1000 "${state_dir}"
-          container=""
-          cleanup() {
-            exit_code="$?"
-            if test -n "${container}"; then
-              if test "${exit_code}" -ne 0; then
-                docker logs "${container}" || true
-              fi
-              docker container rm --force --volumes "${container}" >/dev/null 2>&1 || true
-            fi
-            exit "${exit_code}"
-          }
-          trap cleanup EXIT
-          socket_group="$(docker run --rm \
-            --mount type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock,readonly \
-            --entrypoint /usr/bin/stat \
-            tenkacloud-simulator:test \
-            -c %g /var/run/docker.sock)"
-          start_container() {
-            docker run --detach \
-              --name "${container_name}" \
-              --read-only \
-              --cap-drop=ALL \
-              --security-opt=no-new-privileges:true \
-              --tmpfs /tmp:rw,noexec,nosuid,nodev,size=16777216 \
-              --publish 127.0.0.1:17777:7777 \
-              --mount type=bind,src="${state_dir}",dst=/var/lib/tenkacloud-simulator \
-              --mount type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock,readonly \
-              --group-add "${socket_group}" \
-              --env TENKACLOUD_SIMULATOR_LAUNCH_SECRET="${secret}" \
-              --env TENKACLOUD_SIMULATOR_AWS_ACCESS_KEY_ID=TCSIMABCDEFGHIJKLMNO \
-              --env TENKACLOUD_SIMULATOR_AZURE_CREDENTIAL=tcsim_azure_ci_credential \
-              --env TENKACLOUD_SIMULATOR_GCP_CREDENTIAL=tcsim_google_ci_credential \
-              --env TENKACLOUD_SIMULATOR_SAKURA_CREDENTIAL=tcsim_sakura_ci_credential_a:tcsim_sakura_ci_credential_b \
-              --env TENKACLOUD_SIMULATOR_PUBLIC_ORIGIN=http://127.0.0.1:17777 \
-              --env "TENKACLOUD_SIMULATOR_WORKLOAD_ALLOWED_IMAGES=[\"${WORKLOAD_IMAGE}\"]" \
-              --env TENKACLOUD_SIMULATOR_WORKLOAD_CONTROL_CONTAINER="${container_name}" \
-              --env TENKACLOUD_SIMULATOR_WORKLOAD_MAX_MEMORY_BYTES=536870912 \
-              --env TENKACLOUD_SIMULATOR_WORKLOAD_MAX_MILLI_CPU=1000 \
-              --env TENKACLOUD_SIMULATOR_WORKLOAD_MAX_PIDS=128 \
-              --env TENKACLOUD_SIMULATOR_WORKLOAD_PROXY_IMAGE="${WORKLOAD_IMAGE}" \
-              tenkacloud-simulator:test
-          }
-          wait_until_ready() {
-            for _ in $(seq 1 30); do
-              if curl --fail --silent http://127.0.0.1:17777/v1/capabilities >/dev/null; then
-                return 0
-              fi
-              sleep 1
-            done
-            return 1
-          }
-          container="$(start_container)"
-          wait_until_ready
-          curl --fail --silent http://127.0.0.1:17777/v1/capabilities >/dev/null
-          docker container rm --force "${container}" >/dev/null
-          container=""
-          container="$(start_container)"
-          wait_until_ready
-          curl --fail --silent http://127.0.0.1:17777/v1/capabilities >/dev/null
-          test "$(docker exec "${container}" id -u)" = "1000"
-          SIMULATOR_URL=http://127.0.0.1:17777 \
-            SIMULATOR_LAUNCH_SECRET="${secret}" \
-            SIMULATOR_WORKLOAD_IMAGE="${WORKLOAD_IMAGE}" \
-            bun scripts/verify-container-workload.ts
+          curl --fail --location https://github.com/tlaplus/tlaplus/releases/download/v1.7.4/tla2tools.jar --output /tmp/tla2tools.jar
+          TLA_JAR=/tmp/tla2tools.jar make formal

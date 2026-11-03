@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      name="description"
+      content="TenkaCloud Simulator: an independent, in-memory cloud sandbox."
+    />
+    <title>Object storage · TenkaCloud Simulator</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/_simulator/console/style.css" />
+    <script src="/_simulator/console/app.js" defer></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a
+        class="brand"
+        href="/_simulator/console/"
+        aria-label="TenkaCloud Simulator home"
+        ><span class="brandmark" aria-hidden="true">T</span>TenkaCloud
+        <span>Simulator</span></a
+      >
+      <div class="toptools">
+        <span class="runtime"><i></i> Local simulation</span
+        ><label class="region"
+          >Region
+          <select id="region">
+            <option value="us-east-1">N. Virginia · us-east-1</option>
+            <option value="ap-northeast-1">Tokyo · ap-northeast-1</option>
+            <option value="us-west-2">Oregon · us-west-2</option>
+            <option value="eu-west-1">Ireland · eu-west-1</option>
+          </select></label
+        ><button id="identity-button" class="topbutton">simulator-admin</button
+        ><button id="scope-button" class="topbutton">API & scope</button>
+      </div>
+    </header>
+    <div class="shell">
+      <aside class="sidebar">
+        <div class="workspace-label">WORKSPACE</div>
+        <a href="/_simulator/console/" class="workspace-name"
+          ><span class="workspace-icon">S</span
+          ><span>Personal sandbox<small>In-memory environment</small></span></a
+        >
+        <div class="nav-caption">SERVICES</div>
+        <a
+          class="nav-item active"
+          href="/_simulator/console/"
+          aria-current="page"
+          ><span aria-hidden="true">▱</span> Object storage
+          <span class="nav-count">S3</span></a
+        ><button id="identity-policies" class="nav-item identity-nav">
+          Identity policies</button
+        ><a class="nav-item" href="/_simulator/docs/">API reference ↗</a>
+        <div class="nav-caption">AVAILABLE IN THIS BUILD</div>
+        <p class="nav-note">
+          Buckets and objects.<br />One shared state for the<br />console, SDK,
+          and CLI.
+        </p>
+        <div class="sidebar-bottom">
+          <span class="status-dot"></span> No cloud connection<small
+            >Independent simulator<br />Not affiliated with AWS.</small
+          >
+        </div>
+      </aside>
+      <main id="main">
+        <div class="notice">
+          <span class="notice-icon" aria-hidden="true">i</span>
+          <div>
+            <strong>A safe place to practice.</strong> Resources stay in this
+            process. Everything resets when it stops. No real cloud resources
+            are created.
+          </div>
+          <span class="notice-tag">SIMULATOR</span>
+        </div>
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <button id="home">Services</button><span>/</span
+          ><button id="buckets-crumb">Object storage</button
+          ><span id="bucket-crumb"></span>
+        </nav>
+        <div id="feedback" role="status" aria-live="polite" hidden></div>
+        <div class="page-heading">
+          <div>
+            <div class="eyebrow">OBJECT STORAGE</div>
+            <h1 id="title">Buckets</h1>
+            <p id="subtitle">
+              Organize your objects. Build with the same state through the
+              console or API.
+            </p>
+          </div>
+          <span class="service-emblem" aria-hidden="true">▱</span>
+        </div>
+        <section class="summary" aria-label="Environment overview">
+          <div>
+            <span id="metric-label">Buckets in this region</span
+            ><strong id="metric-count">—</strong>
+          </div>
+          <div>
+            <span>Region</span
+            ><strong id="metric-region" class="metric-small">us-east-1</strong>
+          </div>
+          <div>
+            <span>Storage engine</span
+            ><strong class="metric-small"
+              >SQLite <span class="mini-label">ISOLATED</span></strong
+            >
+          </div>
+        </section>
+        <div id="tabs" class="tabs" hidden>
+          <button id="objects-tab" class="selected">Objects</button
+          ><button id="properties-tab">Properties</button>
+        </div>
+        <section id="resource-panel" class="panel">
+          <div class="panel-heading">
+            <div>
+              <h2 id="table-title">
+                General purpose buckets
+                <span id="count" class="muted">(0)</span>
+              </h2>
+              <p id="table-description">
+                Buckets store your files as objects, each identified by a unique
+                key.
+              </p>
+            </div>
+            <div class="actions">
+              <button
+                id="refresh"
+                class="icon-button"
+                aria-label="Refresh resources"
+              >
+                ↻</button
+              ><button id="delete" class="secondary" disabled>Delete</button
+              ><button id="primary" class="primary">Create bucket</button>
+            </div>
+          </div>
+          <div class="table-tools">
+            <label class="search"
+              ><span aria-hidden="true">⌕</span
+              ><input
+                id="search"
+                type="search"
+                aria-label="Filter resources"
+                placeholder="Find buckets by name" /></label
+            ><span id="selection" class="muted"
+              >Select a bucket to see available actions</span
+            >
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead id="table-head"></thead>
+              <tbody id="rows"></tbody>
+            </table>
+          </div>
+          <div id="empty" class="empty" hidden>
+            <div aria-hidden="true" class="empty-symbol">▱</div>
+            <h3 id="empty-title">No buckets yet</h3>
+            <p id="empty-copy">
+              Create a bucket to start working with object storage.
+            </p>
+            <button id="empty-action" class="secondary">Create bucket</button>
+          </div>
+          <div id="loading" class="loading" role="status" hidden>
+            Loading resources…
+          </div>
+          <div class="table-footer">
+            <span id="result-count">0 resources</span
+            ><span
+              >State shared with the S3 API <span class="status-dot"></span
+            ></span>
+          </div>
+        </section>
+        <section id="properties" class="panel properties" hidden>
+          <h2>Bucket properties</h2>
+          <dl id="property-values"></dl>
+          <div class="inline-note">
+            This build models basic object storage. Encryption, access policies,
+            versioning, and public access evaluation are outside its scope.
+          </div>
+        </section>
+        <div class="developer-hint">
+          <span class="code-symbol" aria-hidden="true">&lt;/&gt;</span>
+          <div>
+            <strong>Your tools. The same sandbox.</strong>
+            <p>
+              Point your S3 client at <code id="endpoint"></code> using dummy
+              TCSIM credentials.
+            </p>
+          </div>
+          <button id="api-help" class="text-button">
+            View API guide <span aria-hidden="true">↗</span>
+          </button>
+        </div>
+        <footer>
+          TenkaCloud Simulator <span>0.1.0 · S3 basics</span
+          ><span>Built for practice. Ready for CI.</span>
+        </footer>
+      </main>
+    </div>
+    <dialog id="modal" aria-labelledby="modal-title">
+      <form id="modal-form">
+        <div class="modal-header">
+          <div>
+            <div class="eyebrow">OBJECT STORAGE</div>
+            <h2 id="modal-title"></h2>
+          </div>
+          <button
+            type="button"
+            id="close-modal"
+            class="icon-button"
+            aria-label="Close dialog"
+          >
+            ×
+          </button>
+        </div>
+        <div id="modal-body" class="modal-body"></div>
+        <p id="modal-error" class="form-error" role="alert" hidden></p>
+        <div class="modal-footer">
+          <button id="cancel" type="button" class="secondary">Cancel</button
+          ><button id="submit" class="primary" type="submit">
+            Create bucket
+          </button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="scope" aria-labelledby="scope-title">
+      <div class="modal-header">
+        <div>
+          <div class="eyebrow">DEVELOPER GUIDE</div>
+          <h2 id="scope-title">One binary. One shared state.</h2>
+        </div>
+        <button
+          id="close-scope"
+          class="icon-button"
+          aria-label="Close API guide"
+        >
+          ×
+        </button>
+      </div>
+      <div class="modal-body">
+        <p><a href="/_simulator/docs/">Open interactive API reference ↗</a></p>
+        <p>
+          Use the endpoint below with the AWS CLI or an S3 SDK. Use path-style
+          addressing and simulator-only credentials. No AWS account is needed.
+        </p>
+        <pre id="cli-example"></pre>
+        <h3>Supported operations</h3>
+        <p>
+          ListBuckets, CreateBucket, HeadBucket, GetBucketLocation,
+          DeleteBucket, ListObjectsV2, PutObject, GetObject, HeadObject,
+          DeleteObject.
+        </p>
+        <h3>Deliberate boundaries</h3>
+        <p>
+          8 MiB per object · 64 MiB total · 1,000 buckets · 10,000 objects. The
+          default SQLite database is in memory and resets on exit. Identity
+          policy Allow/Deny rules are enforced for the selected principal.
+          Conditions, resource policies, ACLs, boundaries, and SCPs are
+          unsupported and rejected. No signature verification, multipart
+          uploads, or versioning. Add --state to persist SQLite state. Use a
+          trusted local environment.
+        </p>
+        <p>
+          The console uses the same S3 HTTP API as your tools. Other cloud
+          services are not implemented.
+        </p>
+        <a href="/_simulator/v1/capabilities" target="_blank" rel="noopener"
+          >Open machine-readable capabilities ↗</a
+        >
+      </div>
+    </dialog>
+  </body>
+</html>
