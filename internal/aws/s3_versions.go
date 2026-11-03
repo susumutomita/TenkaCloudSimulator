@@ -1,6 +1,7 @@
 package aws
 
 import (
+	"context"
 	"crypto/md5"
 	"crypto/rand"
 	"database/sql"
@@ -28,7 +29,7 @@ func NewS3Store(db *sql.DB) (*S3Store, error) {
  CREATE INDEX IF NOT EXISTS aws_s3_version_keys ON aws_s3_versions(bucket,key,seq DESC);`)
 	return &S3Store{db}, err
 }
-func s3BucketExists(tx *sql.Tx, bucket string) error {
+func s3BucketExists(tx s3Query, bucket string) error {
 	var n int
 	err := tx.QueryRow("SELECT 1 FROM buckets WHERE name=?", bucket).Scan(&n)
 	if err == sql.ErrNoRows {
@@ -36,7 +37,7 @@ func s3BucketExists(tx *sql.Tx, bucket string) error {
 	}
 	return err
 }
-func s3State(tx *sql.Tx, bucket string) (string, error) {
+func s3State(tx s3Query, bucket string) (string, error) {
 	if err := s3BucketExists(tx, bucket); err != nil {
 		return "", err
 	}
@@ -49,7 +50,7 @@ func s3State(tx *sql.Tx, bucket string) (string, error) {
 }
 
 // Import the original unversioned object lazily, preserving existing state files.
-func s3Import(tx *sql.Tx, bucket, key string) error {
+func s3Import(tx s3Query, bucket, key string) error {
 	_, err := tx.Exec(`INSERT INTO aws_s3_versions(bucket,key,version,marker,content_type,etag,modified,data)
  SELECT bucket,key,'null',0,content_type,etag,modified,data FROM objects o WHERE bucket=? AND key=? AND NOT EXISTS(SELECT 1 FROM aws_s3_versions v WHERE v.bucket=o.bucket AND v.key=o.key)`, bucket, key)
 	return err
@@ -68,10 +69,10 @@ func s3Scan(row interface{ Scan(...any) error }, key string) (S3Version, error) 
 
 const s3VersionColumns = "seq,version,marker,content_type,etag,modified,data"
 
-func s3Latest(tx *sql.Tx, bucket, key string) (S3Version, error) {
+func s3Latest(tx s3Query, bucket, key string) (S3Version, error) {
 	return s3Scan(tx.QueryRow("SELECT "+s3VersionColumns+" FROM aws_s3_versions WHERE bucket=? AND key=? ORDER BY seq DESC LIMIT 1", bucket, key), key)
 }
-func s3Refresh(tx *sql.Tx, bucket, key string) error {
+func s3Refresh(tx s3Query, bucket, key string) error {
 	v, err := s3Latest(tx, bucket, key)
 	if err == sql.ErrNoRows || (err == nil && v.Marker) {
 		_, err = tx.Exec("DELETE FROM objects WHERE bucket=? AND key=?", bucket, key)
@@ -86,7 +87,7 @@ func s3Refresh(tx *sql.Tx, bucket, key string) error {
 
 // Logical quota counts every retained version/marker and untouched legacy object,
 // excluding the duplicate current-object view. Replacement frees its null version.
-func s3Quota(tx *sql.Tx, bytes, count int) error {
+func s3Quota(tx s3Query, bytes, count int) error {
 	var stored, versions int
 	err := tx.QueryRow(`SELECT
  (SELECT coalesce(sum(length(data)),0) FROM aws_s3_versions)+(SELECT coalesce(sum(length(data)),0) FROM objects o WHERE NOT EXISTS(SELECT 1 FROM aws_s3_versions v WHERE v.bucket=o.bucket AND v.key=o.key)),
@@ -105,13 +106,16 @@ func s3NewID() (string, error) {
 	return hex.EncodeToString(b[:]), err
 }
 func (s *S3Store) Put(bucket, key, contentType string, data []byte, match, none string) (S3Version, error) {
+	return s.PutContext(context.Background(), bucket, key, contentType, data, match, none)
+}
+func (s *S3Store) PutContext(ctx context.Context, bucket, key, contentType string, data []byte, match, none string) (S3Version, error) {
 	if len(contentType) > 1024 {
 		return S3Version{}, core.Fail("InvalidArgument", "Content-Type exceeds the 1024-byte simulator limit.")
 	}
 	if len(data) > core.MaxObjectBytes {
 		return S3Version{}, core.Fail("EntityTooLarge", "Object exceeds the 8 MiB simulator limit.")
 	}
-	tx, err := s.db.Begin()
+	tx, err := beginS3Request(ctx, s.db)
 	if err != nil {
 		return S3Version{}, err
 	}
@@ -171,7 +175,10 @@ func (s *S3Store) Put(bucket, key, contentType string, data []byte, match, none 
 	return v, nil
 }
 func (s *S3Store) Get(bucket, key, id string) (S3Version, error) {
-	tx, err := s.db.Begin()
+	return s.GetContext(context.Background(), bucket, key, id)
+}
+func (s *S3Store) GetContext(ctx context.Context, bucket, key, id string) (S3Version, error) {
+	tx, err := beginS3Request(ctx, s.db)
 	if err != nil {
 		return S3Version{}, err
 	}
@@ -208,7 +215,10 @@ func (s *S3Store) Get(bucket, key, id string) (S3Version, error) {
 	return v, nil
 }
 func (s *S3Store) Delete(bucket, key, id string) (S3Version, error) {
-	tx, err := s.db.Begin()
+	return s.DeleteContext(context.Background(), bucket, key, id)
+}
+func (s *S3Store) DeleteContext(ctx context.Context, bucket, key, id string) (S3Version, error) {
+	tx, err := beginS3Request(ctx, s.db)
 	if err != nil {
 		return S3Version{}, err
 	}
@@ -275,7 +285,7 @@ func (s *S3Store) DeleteBucket(bucket string) error {
 	}
 	return tx.Commit()
 }
-func s3DeleteBucket(tx *sql.Tx, bucket string) error {
+func s3DeleteBucket(tx s3Query, bucket string) error {
 	if err := s3BucketExists(tx, bucket); err != nil {
 		return err
 	}
@@ -345,7 +355,7 @@ func (s *S3Store) Create(bucket, region string) error {
 	}
 	return tx.Commit()
 }
-func s3CreateBucket(tx *sql.Tx, bucket, region string) error {
+func s3CreateBucket(tx s3Query, bucket, region string) error {
 	var existing string
 	err := tx.QueryRow("SELECT region FROM buckets WHERE name=?", bucket).Scan(&existing)
 	if err == nil {

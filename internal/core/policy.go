@@ -2,6 +2,7 @@ package core
 
 import (
 	"bytes"
+	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -171,8 +172,11 @@ func (i *Identities) Delete(name string) error {
 	return err
 }
 func (i *Identities) Policy(name string) (Policy, bool, error) {
+	return i.PolicyContext(context.Background(), name)
+}
+func (i *Identities) PolicyContext(ctx context.Context, name string) (Policy, bool, error) {
 	var data []byte
-	err := i.store.db.QueryRow("SELECT document FROM identity_policies WHERE name=?", name).Scan(&data)
+	err := i.store.db.QueryRowContext(ctx, "SELECT document FROM identity_policies WHERE name=?", name).Scan(&data)
 	if err == sql.ErrNoRows {
 		return Policy{}, false, nil
 	}
@@ -199,10 +203,13 @@ func (i *Identities) Names() ([]string, error) {
 	return names, rows.Err()
 }
 func (i *Identities) Decision(name, action, resource string) (string, error) {
+	return i.DecisionContext(context.Background(), name, action, resource)
+}
+func (i *Identities) DecisionContext(ctx context.Context, name, action, resource string) (string, error) {
 	if name == Administrator {
 		return "allowed", nil
 	}
-	p, ok, err := i.Policy(name)
+	p, ok, err := i.PolicyContext(ctx, name)
 	if err != nil {
 		return "implicitDeny", err
 	}

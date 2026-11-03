@@ -57,6 +57,8 @@ DependsOnのlogical ID文字列/配列とRef/GetAtt/Subを統合した順序で�
 
 API呼出しはsocketを開かず、保存済みexecution roleと関数regionに固定したhost closureからnative SSM/S3 handlerへ渡す。IAM・quota・SQLite transaction・version IDは通常SDKと共通。Invokeした参加者のidentityは実行roleに置き換えない。参加者の直接SSMを拒否しても、関数は自身のroleで許可されたSSMを読める。roleの明示Denyは次回の実操作を拒否する。
 
+role policy・SSM読取・S3 object処理のDB接続待ちとqueryにもinvocation contextを伝える。接続待ち中にcancelされた操作は接続の解放を待たず終了し、後からPutObject/DeleteObjectを開始しない。回帰テストは唯一の接続を保持し、5操作それぞれの待機を確認してからcancelし、解放前の終了と保存済みobjectの維持を検証する。
+
 任意service/operation、endpoint/credential/identity/header指定、別regionを拒否する。ネットワーク権限やtokenはguestに渡さない。互換ClientErrorはError.Code/MessageとHTTPStatusCodeを持つ。resource policy、STS、managed/trust policy、HTTP/API Gateway、paginator/session、upstream SDK全機能は未対応。
 
 汎用runtimeはAWSを知らず、trusted providerが明示したcontext-bound capabilityと固定FSだけを受ける。JSON message64KiB、128calls、request+response合計1MiB、未読response1件まで。read/host callbackはinvocation contextで終了し、Closeはactive/queued invocationをcancelする。native SQLite操作の完了とtimeoutが競合した場合、応答だけで副作用の有無を断定せずnative APIで状態を確認する。RPC本文をruntime logに混ぜない。これらはlocal simulatorの範囲で、実AWS全体の互換性を意味しない。
