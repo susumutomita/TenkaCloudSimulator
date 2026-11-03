@@ -133,6 +133,30 @@ class Conformance(unittest.TestCase):
    send.click();expect(page.get_by_text('ui-practice',exact=False).last).to_be_visible(timeout=10000)
    page.screenshot(path=str(REPORTS/'api-reference.png'),full_page=False,animations='disabled')
    self.assertEqual(page.evaluate('window.__policyViolations'),[]);self.assertEqual(errors,[]);self.assertEqual(outside,[],'Runtime attempted external network requests');browser.close()
+ def test_console_literal_keys(self):
+  with running() as endpoint,sync_playwright() as p:
+   c=sdk(endpoint);c.create_bucket(Bucket='literal-keys')
+   objects={'victim':b'keep-victim','folder/../victim':b'literal-dot','folder/./victim':b'literal-single','a//b':b'adjacent-slashes','../victim':b'parent-prefix','percent%2F../victim':b'literal-percent','.':b'dot-only','..':b'double-dot-only'}
+   for key,body in objects.items():c.put_object(Bucket='literal-keys',Key=key,Body=body)
+   browser=p.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE') or shutil.which('chromium'),args=['--no-sandbox'])
+   page=browser.new_page();page.goto(endpoint+'/_simulator/console/');page.get_by_role('button',name='literal-keys',exact=True).click()
+   for key,body in objects.items():
+    page.get_by_role('button',name=key,exact=True).click()
+    if key in ('.','..'):
+     page.locator('#submit').click();expect(page.locator('#modal-error')).to_contain_text('Use an SDK');page.locator('#cancel').click()
+    else:
+     with page.expect_download() as download:page.locator('#submit').click()
+     self.assertEqual(Path(download.value.path()).read_bytes(),body,key)
+   page.locator('#primary').click();page.get_by_label('Choose a file').set_input_files({'name':'update.txt','mimeType':'text/plain','buffer':b'exact-update'});page.get_by_label('Object key',exact=True).fill('folder/../victim');page.locator('#submit').click();expect(page.locator('#modal')).not_to_be_visible()
+   self.assertEqual(c.get_object(Bucket='literal-keys',Key='folder/../victim')['Body'].read(),b'exact-update')
+   self.assertEqual(c.get_object(Bucket='literal-keys',Key='victim')['Body'].read(),b'keep-victim')
+   for key in ('.','..'):
+    page.locator('#primary').click();page.get_by_label('Choose a file').set_input_files({'name':'blocked.txt','mimeType':'text/plain','buffer':b'blocked'});page.get_by_label('Object key',exact=True).fill(key);page.locator('#submit').click();expect(page.locator('#modal-error')).to_contain_text('Use an SDK');page.locator('#cancel').click();self.assertEqual(c.get_object(Bucket='literal-keys',Key=key)['Body'].read(),objects[key])
+   page.get_by_label('Select folder/../victim',exact=True).check();page.locator('#delete').click();page.get_by_label('Type folder/../victim to confirm',exact=True).fill('folder/../victim');page.locator('#submit').click();expect(page.get_by_role('button',name='folder/../victim',exact=True)).to_have_count(0)
+   self.assertEqual(c.get_object(Bucket='literal-keys',Key='victim')['Body'].read(),b'keep-victim')
+   for key in ('.','..'):
+    page.get_by_label('Select '+key,exact=True).check();page.locator('#delete').click();page.get_by_label('Type '+key+' to confirm',exact=True).fill(key);page.locator('#submit').click();expect(page.locator('#modal-error')).to_contain_text('Use an SDK');page.locator('#cancel').click();self.assertEqual(c.get_object(Bucket='literal-keys',Key=key)['Body'].read(),objects[key])
+   browser.close()
  def test_refuses_non_loopback_by_default(self):
   result=subprocess.run([str(BINARY),'--listen','0.0.0.0:0'],capture_output=True,text=True);self.assertNotEqual(result.returncode,0);self.assertIn('--allow-remote',result.stderr)
 if __name__=='__main__':unittest.main(verbosity=2)

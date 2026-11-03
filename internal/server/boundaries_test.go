@@ -111,3 +111,13 @@ func TestClosedStateControlErrors(t *testing.T) {
 		t.Fatal("accepted directory as DB file")
 	}
 }
+
+func TestCreateBucketRejectsObjectOnlyOptionsBeforeWriting(t *testing.T) {
+	s := instance(t)
+	for _, header := range []string{"x-amz-acl", "x-amz-server-side-encryption", "x-amz-tagging", "x-amz-storage-class", "x-amz-copy-source"} {
+		t.Run(header, func(t *testing.T) {
+			status(t, s, "PUT", "/unsupported-bucket", "", 501, map[string]string{header: "unsupported"})
+			status(t, s, "HEAD", "/unsupported-bucket", "", 404, nil)
+		})
+	}
+}

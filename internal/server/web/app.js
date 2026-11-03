@@ -30,8 +30,15 @@ const text = (tag, value, cls) => {
   if (cls) e.className = cls;
   return e;
 };
-const keyPath = (bucket, key) =>
-  `/${bucket}/${key.split("/").map(encodeURIComponent).join("/")}`;
+const keyPath = (bucket, key) => {
+  // Encode the whole key so embedded slash/dot segments survive URL parsing.
+  // Browsers normalize even percent-encoded standalone dot-only segments.
+  if (key === "." || key === "..")
+    throw new Error(
+      "Use an SDK for keys consisting only of one or two dots. Browser URLs cannot preserve these keys safely.",
+    );
+  return `/${bucket}/${encodeURIComponent(key)}`;
+};
 const elements = (xml, name) => [...xml.getElementsByTagName(name)];
 const value = (node, name) =>
   node.getElementsByTagName(name)[0]?.textContent || "";

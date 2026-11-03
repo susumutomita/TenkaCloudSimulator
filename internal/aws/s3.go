@@ -153,6 +153,14 @@ func (g *Gateway) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
+	// These access/storage/copy options are not modeled for any operation.
+	// Reject before dispatch so CreateBucket cannot report false success.
+	for _, header := range []string{"x-amz-acl", "x-amz-server-side-encryption", "x-amz-tagging", "x-amz-storage-class", "x-amz-copy-source"} {
+		if r.Header.Get(header) != "" {
+			fail(w, r, "NotImplemented", "Unsupported option: "+header)
+			return
+		}
+	}
 	path := strings.TrimPrefix(r.URL.Path, "/")
 	name, key, object := strings.Cut(path, "/")
 	if name == "" {
@@ -419,16 +427,6 @@ func (g *Gateway) list(w http.ResponseWriter, r *http.Request, name string) {
 func (g *Gateway) object(w http.ResponseWriter, r *http.Request, name, key string) {
 	switch r.Method {
 	case "PUT":
-		if r.Header.Get("x-amz-copy-source") != "" {
-			fail(w, r, "NotImplemented", "CopyObject is not supported.")
-			return
-		}
-		for _, h := range []string{"x-amz-acl", "x-amz-server-side-encryption", "x-amz-tagging", "x-amz-storage-class"} {
-			if r.Header.Get(h) != "" {
-				fail(w, r, "NotImplemented", "Unsupported object option: "+h)
-				return
-			}
-		}
 		data, err := io.ReadAll(http.MaxBytesReader(w, r.Body, core.MaxObjectBytes))
 		if err != nil {
 			fail(w, r, "EntityTooLarge", "Object exceeds the 8 MiB simulator limit.")

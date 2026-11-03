@@ -45,6 +45,8 @@ Unsigned requests work. SDK-generated signatures using dummy `TCSIM…` access k
 | GetObject / HeadObject | Exact bytes, content type, size, ETag, single byte range, ETag conditions |
 | DeleteObject | Idempotent deletion of keys in an existing bucket |
 
+The console preserves literal slash and dot segments in object keys. Keys consisting only of `.` or `..` can be used through the SDK; browser console operations reject these two keys before sending a request.
+
 Limits: 8 MiB per object, 64 MiB total object bytes, 1,000 buckets, 10,000 objects. These bound payload state, not whole-process resident memory or peak concurrent upload buffers. Regions: `us-east-1`, `us-west-2`, `ap-northeast-1`, `eu-west-1`.
 
 ## IAM simulation
