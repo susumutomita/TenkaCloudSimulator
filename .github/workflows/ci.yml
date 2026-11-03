@@ -8,9 +8,6 @@ permissions:
 jobs:
   ci:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      code-quality: write
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
@@ -25,11 +22,27 @@ jobs:
           node tools/scalar/build.mjs
           python3 tools/scalar/notices.py
           git diff --exit-code -- internal/server/apidocs third_party/scalar.json third_party/scalar-bundled-packages.json third_party/SCALAR-BUNDLED-NOTICES.txt internal/legal/assets/SCALAR-BUNDLED-NOTICES.txt tools/scalar/bundle-inputs.json tools/scalar/bundle-digests.json third_party/color-picker-removal.json
-      - run: make before-commit cross-check
-      - name: Convert full Go coverage to Cobertura
+      - name: Run Go quality gates and compile all supported targets
+        run: make before-commit cross-check
+      - name: Generate coverage views and enforce both 90% floors
         run: |
           go run github.com/boumenot/gocover-cobertura@v1.4.0 < reports/coverage.out > reports/coverage.xml
+          go tool cover -html=reports/coverage.out -o reports/coverage.html
           python3 scripts/check-coverage.py reports/coverage.out reports/coverage.xml
+      - name: Retain coverage evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: go-coverage-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            reports/coverage.out
+            reports/coverage.xml
+            reports/coverage.html
+            reports/coverage-summary.md
+          if-no-files-found: error
+          retention-days: 14
+      - name: Audit the locked API-reference build dependencies
+        run: npm audit --prefix tools/scalar --audit-level=high
       - name: Check Go vulnerabilities against the canonical service
         run: go run golang.org/x/vuln/cmd/govulncheck@v1.1.4 ./...
       - name: Install development-only browser and SDK tools
@@ -47,9 +60,3 @@ jobs:
         run: |
           curl --fail --location https://github.com/tlaplus/tlaplus/releases/download/v1.7.4/tla2tools.jar --output /tmp/tla2tools.jar
           TLA_JAR=/tmp/tla2tools.jar make formal
-      - name: Upload coverage for the repository threshold rule
-        uses: actions/upload-code-coverage@2b21a77928be8d5168c2b9581a67f2adbebacc52
-        with:
-          file: reports/coverage.xml
-          language: Go
-          label: code-coverage/go-tests

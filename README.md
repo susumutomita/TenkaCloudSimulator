@@ -78,7 +78,7 @@ The browser/SDK tests start and stop the actual binary from an empty directory w
 
 TLC checks a finite TLA+ model (two buckets, two keys, abstract Allow/Deny states) and verifies that removing the nonempty-delete guard produces a counterexample. This is bounded model checking of the specified state machine, **not a proof of the Go implementation or all IAM rules**. See [formal/README.md](formal/README.md).
 
-CI runs these same gates on Linux. Foreign-platform binaries are compile-checked, not runtime-tested. Evidence and screenshots are in [reports/](reports/).
+[CI](docs/ci.md) runs these same gates on Linux, enforces both 90% coverage floors, and publishes a workflow summary plus downloadable Go/XML/HTML coverage evidence. Foreign-platform binaries are compile-checked, not runtime-tested. Evidence and screenshots are in [reports/](reports/).
 
 ## Architecture and compatibility
 

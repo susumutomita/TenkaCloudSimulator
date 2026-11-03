@@ -13,6 +13,7 @@ dev: build
 test:
 	mkdir -p reports
 	$(GO) test -race -coverpkg=./... -coverprofile=reports/coverage.out ./...
+	$(PYTHON) scripts/test-coverage-gate.py
 	$(PYTHON) scripts/check-coverage.py reports/coverage.out
 
 vet:
