@@ -1,0 +1,86 @@
+- banner:
+  - link "TenkaCloud Simulator home":
+    - /url: /_simulator/console/
+    - text: TenkaCloud Simulator
+  - text: Local simulation Region
+  - combobox "Region":
+    - option "N. Virginia · us-east-1" [selected]
+    - option "Tokyo · ap-northeast-1"
+    - option "Oregon · us-west-2"
+    - option "Ireland · eu-west-1"
+  - button "simulator-admin"
+  - button "API & scope"
+- complementary:
+  - text: WORKSPACE
+  - link "S Personal sandbox In-memory environment":
+    - /url: /_simulator/console/
+  - text: SERVICES
+  - link "Object storage S3":
+    - /url: /_simulator/console/
+  - button "Identity policies"
+  - link "API reference ↗":
+    - /url: /_simulator/docs/
+  - text: AVAILABLE IN THIS BUILD
+  - paragraph: Buckets and objects. One shared state for the console, SDK, and CLI.
+  - text: No cloud connection Independent simulator Not affiliated with AWS.
+- main:
+  - strong: A safe place to practice.
+  - text: Resources stay in this process. Everything resets when it stops. No real cloud resources are created. SIMULATOR
+  - navigation "Breadcrumb":
+    - button "Services"
+    - text: /
+    - button "Object storage"
+    - text: / audit-practice
+  - status: Bucket “audit-practice” created.
+  - text: OBJECT STORAGE
+  - heading "audit-practice" [level=1]
+  - paragraph: Upload, inspect, and download objects. Changes are immediately available through the S3 API.
+  - region "Environment overview":
+    - text: Objects in this bucket
+    - strong: "0"
+    - text: Region
+    - strong: us-east-1
+    - text: Storage engine
+    - strong: SQLite ISOLATED
+  - button "Objects"
+  - button "Properties"
+  - heading "Objects (0)" [level=2]
+  - paragraph: Objects are identified by their full key, including any folder prefixes.
+  - button "Refresh resources": ↻
+  - button "Delete" [disabled]
+  - button "Upload object"
+  - searchbox "Filter resources"
+  - text: Select an object to see available actions
+  - table:
+    - rowgroup:
+      - row "Object key Size Last modified ETag":
+        - columnheader
+        - columnheader "Object key"
+        - columnheader "Size"
+        - columnheader "Last modified"
+        - columnheader "ETag"
+    - rowgroup
+  - heading "This bucket is empty" [level=3]
+  - paragraph: Upload your first object, or add one through the S3 API.
+  - button "Upload object"
+  - text: 0 of 0 objects State shared with the S3 API
+  - strong: Your tools. The same sandbox.
+  - paragraph:
+    - text: Point your S3 client at
+    - code: http://127.0.0.1:55529
+    - text: using dummy TCSIM credentials.
+  - button "View API guide"
+  - text: TenkaCloud Simulator 0.1.0 · S3 basics Built for practice. Ready for CI.
+- dialog "Upload object":
+  - text: OBJECT STORAGE
+  - heading "Upload object" [level=2]
+  - button "Close dialog": ×
+  - text: Choose a file
+  - button "Choose a file"
+  - text: Maximum 8 MiB per object. Uploads stay in memory. Object key
+  - textbox "Object key":
+    - /placeholder: documents/example.txt
+    - text: hello.txt
+  - text: Use slashes to organize keys into prefixes. An existing object with the same key will be replaced.
+  - button "Cancel"
+  - button "Upload object"

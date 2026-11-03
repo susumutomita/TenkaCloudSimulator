@@ -1,109 +1,44 @@
-.PHONY: install
-# --ignore-scripts: Mini Shai-Hulud 2nd (Flatt Security, 2026-05-12) を含む
-# lifecycle script 系サプライチェイン攻撃を一段目で封じるフラグ。
-# Bun は npm_config_ignore_scripts 環境変数も .npmrc の ignore-scripts も読まないため
-# (公式 docs では bunfig.toml のみが設定経路)、Bun を叩く側で毎回明示する必要がある。
-# Bun はデフォルトで「top 500 npm パッケージ」の lifecycle script を暗黙信頼する
-# 仕様もあるため、ここで全停止させる方が事故が少ない。Husky の prepare も巻き添えで
-# 止まるので、フックを使う場合は make setup-hooks で明示的に再有効化する。
-install:
-	bun install --ignore-scripts
+GO ?= go
+PYTHON ?= python3
+BINARY := dist/tenkacloud-simulator
 
-.PHONY: install_ci
-install_ci:
-	bun install --frozen-lockfile --ignore-scripts
-
-.PHONY: setup-hooks
-# install 時に --ignore-scripts で止めた husky の prepare をここで明示的に走らせる。
-# `bun run prepare` は package.json の "prepare": "husky" を叩くため、Husky 一発で済む。
-setup-hooks:
-	bun run prepare
-
-.PHONY: build
+.PHONY: build dev test vet format-check before-commit e2e formal verify-assets cross-check
 build:
-	bun run build
+	mkdir -p dist
+	CGO_ENABLED=0 $(GO) build -trimpath -ldflags='-s -w' -o $(BINARY) ./cmd/simulator
 
-.PHONY: clean
-clean:
-	bun run clean
+dev: build
+	./$(BINARY)
 
-.PHONY: test
 test:
-	bun run test
+	mkdir -p reports
+	$(GO) test -race -coverpkg=./internal/... -coverprofile=reports/coverage.out ./...
+	$(PYTHON) scripts/test-check-coverage.py
+	$(PYTHON) scripts/check-coverage.py reports/coverage.out
 
-.PHONY: test_coverage
-test_coverage:
-	bun run test:coverage
+vet:
+	$(GO) vet ./...
 
-.PHONY: test_watch
-test_watch:
-	bun run --filter '*' test --watch
+format-check:
+	@test -z "$$($(GO) fmt ./...)" || { echo 'Go formatting changed; review and rerun'; exit 1; }
 
-.PHONY: lint
-lint:
-	bun run lint
+verify-assets:
+	$(PYTHON) scripts/check-assets.py
 
-.PHONY: lint_fix
-lint_fix:
-	bun run lint:fix
+before-commit: format-check vet verify-assets
+	$(GO) mod verify
+	mkdir -p reports
+	$(MAKE) test build
 
-.PHONY: lint_text
-lint_text:
-	bun run lint:text
+e2e: build
+	$(PYTHON) test/e2e/check.py
 
-.PHONY: typecheck
-typecheck:
-	bun run typecheck
+formal:
+	$(PYTHON) scripts/check-formal.py
 
-.PHONY: format
-format:
-	bun run format
+cross-check:
+	$(PYTHON) scripts/check-cross-build.py
 
-.PHONY: format_check
-format_check:
-	bun run format:check
-
-.PHONY: architecture_harness
-architecture_harness:
-	bun scripts/architecture-harness.ts --staged --fail-on=error
-
-.PHONY: harness
-harness:
-	bun scripts/architecture-harness.ts --fail-on=error
-
-.PHONY: harness_test
-# harness 自体の invariant 検出ロジックを検証する。workspace 構成に依存しないため
-# 既定ゲートに含める (workspace 側のテストは利用プロジェクトで before-commit に足す)。
-harness_test:
-	bun test scripts/
-
-.PHONY: pre_release_check
-pre_release_check:
-	bun run check:pre-release
-
-# jscpd ベースライン・ラチェット。重複ゼロは強制しない (責務分離の意図的類似は
-# baseline に焼き込み済み)。baseline を超える新規コピペだけ fail させる (ADR-0015)。
-.PHONY: dup_check
-dup_check:
-	bun scripts/check-duplication.ts
-
-.PHONY: dup_baseline
-dup_baseline:
-	bun scripts/check-duplication.ts --update
-
-.PHONY: dup_report
-dup_report:
-	bunx jscpd
-
-# knip デッドコード検出。全量報告しかできないため gate にせず報告のみ (ADR-0015)。
-# rules は knip.json で warn 化済みなので検出があっても exit 0。
-.PHONY: dead_code
-dead_code:
-	bun run dead-code
-
-.PHONY: before-commit
-before-commit: harness harness_test pre_release_check dup_check lint_text lint typecheck test test_coverage build
-
-.PHONY: dev
-dev:
-	bun run dev
+.PHONY: audit
+audit: build
+	$(PYTHON) test/e2e/audit.py

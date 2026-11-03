@@ -1,141 +1,97 @@
 # TenkaCloud Simulator
 
-TenkaCloud Simulator は、TenkaCloud の問題カタログで使う AWS、Azure、
-GCP、さくらのクラウド API と観測可能な状態遷移を、実クラウドへ接続せずに
-再現するローカル実行環境です。
+An independent cloud API simulator built as one Go executable. The console, SDK clients, and interactive API reference operate on the same SQLite state. No Docker, Node, cloud account, external database, or real infrastructure is needed at runtime.
 
-汎用クラウドの完全な複製は目指しません。問題の IaC、CLI、SDK、採点処理が
-実際に使う resource、operation、fidelity を catalog scanner で抽出し、実装済み
-capability と一致した問題だけを起動します。不足した capability は resource を
-作る前に診断付きで拒否します。
+The first working increment implements **AWS S3 basics and a limited identity-policy evaluator**. AWS is the first provider of a multi-cloud product, not the product boundary. Google Cloud and Azure are not implemented yet.
 
-## 状態
-
-Issue 2574 の実装中です。設計と公開契約の正本は次の文書です。
-
-- [設計](./docs/design/2026-07-12-tenkacloud-simulator.md)
-- [protocol](./docs/architecture/protocol.md)
-- [Definition of Done](./docs/architecture/quality-bar.md)
-- [ADR-0007](./docs/adr/0007-event-sourced-provider-plugin-architecture.md)
-
-## アーキテクチャ
-
-```text
-CloudFormation / Bicep / Infrastructure Manager / AppRun
-AWS CLI / az / gcloud / usacloud / SDK / Console
-                         |
-                  provider gateways
-                         |
-                 command dispatcher
-                         |
-          team-scoped simulation world
-     graph / policy / network / clock / events
-                         |
-             optional workload containers
-```
-
-Console と CLI は専用の状態を持たず、同じ versioned API を呼びます。provider
-module は共通 plugin contract を実装し、core は provider 名による分岐を持ちません。
-
-## リポジトリ構成
-
-```text
-contracts/                     OpenAPI、capability、snapshot schema
-core/                          world、graph、events、policy、network
-providers/{aws,azure,gcp,sakura}/
-apps/api/                      lifecycle API と provider gateway
-apps/console/                  共通 Web Console
-tools/catalog-scanner/         IaC と metadata の静的解析
-tools/cli/                     API を操作する CLI
-conformance/                   provider 契約と差分検査
-```
-
-## 開発
-
-```bash
-make install
-make dev
-make test
-make typecheck
+```sh
 make build
-make before-commit
+./dist/tenkacloud-simulator
 ```
 
-Bun、Hono、Vite、React、Biome を使用します。依存 package の lifecycle script は
-デフォルトで無効です。
+Requires Go 1.26 to build (CI pins the current maintained patch 1.26.10). Open <http://127.0.0.1:4566/_simulator/console/> for the console or <http://127.0.0.1:4566/_simulator/docs/> for the embedded Scalar API reference. The API reference supports actual requests to this simulator and makes no runtime CDN or hosted proxy requests.
 
-## OCI image
-
-production image は API と Console を同じ origin で提供します。mutable tag は検証用にだけ
-使い、TenkaCloud からは publish 後の manifest digest を指定します。
-
-```bash
-docker build --tag tenkacloud-simulator:local .
-install -d -m 700 "$PWD/.simulator-state"
-docker run --read-only --tmpfs /tmp:rw,noexec,nosuid,size=16m \
-  --publish 127.0.0.1:7777:7777 \
-  --env TENKACLOUD_SIMULATOR_LAUNCH_SECRET="$TENKACLOUD_SIMULATOR_LAUNCH_SECRET" \
-  --env TENKACLOUD_SIMULATOR_AWS_ACCESS_KEY_ID="$TENKACLOUD_SIMULATOR_AWS_ACCESS_KEY_ID" \
-  --env TENKACLOUD_SIMULATOR_AZURE_CREDENTIAL="$TENKACLOUD_SIMULATOR_AZURE_CREDENTIAL" \
-  --env TENKACLOUD_SIMULATOR_GCP_CREDENTIAL="$TENKACLOUD_SIMULATOR_GCP_CREDENTIAL" \
-  --env TENKACLOUD_SIMULATOR_SAKURA_CREDENTIAL="$TENKACLOUD_SIMULATOR_SAKURA_CREDENTIAL" \
-  --env TENKACLOUD_SIMULATOR_PUBLIC_ORIGIN=http://127.0.0.1:7777 \
-  --volume "$PWD/.simulator-state:/var/lib/tenkacloud-simulator" \
-  tenkacloud-simulator:local
+```sh
+# Persistent state; omission means a fresh in-memory SQLite database.
+./dist/tenkacloud-simulator --state ./practice.db
+# Each CI job should use its own process and database.
+./dist/tenkacloud-simulator --listen 127.0.0.1:4567 --state ./job.db
 ```
 
-image は non-root で起動し、container mode だけが内部 `0.0.0.0` bind を使います。host publish
-address は必ず loopback にします。`.devcontainer/` は同じ Bun version を持ち、port 7777 を
-Codespaces の private forwarded port として宣言します。state directory は launcher が host 側で
-mode `0700` にしてから mount します。Simulator は既に private な directory に redundant な
-`chmod` を行わないため、Linux native volume に加えて macOS Colima/virtiofs の bind mount でも
-同じ directory を停止後に再利用できます。mode が `0700` でなければ起動時に狭め、変更できない
-directory は拒否します。
+SIGINT/SIGTERM gracefully shuts down the HTTP server and closes SQLite. Binding outside a numeric loopback address requires explicit `--allow-remote`; expose it only within a trusted isolated environment. Principals are exercise context, not authentication. This is not a tenant isolation boundary.
 
-## 6 operation lifecycle API
+## Basic API and SDK use
 
-```text
-GET    /v1/capabilities
-POST   /v1/worlds
-GET    /v1/worlds/by-deployment/{deploymentId}
-POST   /v1/worlds/{worldId}/deployments
-GET    /v1/worlds/{worldId}/deployments/{deploymentId}
-DELETE /v1/worlds/{worldId}
+S3 uses its native REST/XML wire format with path-style bucket addressing. Both the root endpoint and `/_simulator/providers/aws/` address the same provider. There is no REST wrapper masquerading as AWS SDK compatibility.
+
+```sh
+export AWS_ACCESS_KEY_ID=TCSIMEXAMPLE
+export AWS_SECRET_ACCESS_KEY=simulator-only
+export AWS_DEFAULT_REGION=us-east-1
+aws --endpoint-url http://127.0.0.1:4566 s3api create-bucket --bucket practice-bucket
+aws --endpoint-url http://127.0.0.1:4566 s3api list-buckets
+curl -X PUT --data-binary 'hello' http://127.0.0.1:4566/practice-bucket/hello.txt
+curl http://127.0.0.1:4566/practice-bucket/hello.txt
 ```
 
-provider native API と共通 command API は、上記 lifecycle が所有する同じ world を
-操作します。初期 protocol identifier は `2026-07-11` です。version policy と error envelope は
-[protocol](./docs/architecture/protocol.md) を参照してください。
-world create の commit 後に response を受け取れなかった caller は、同じ launch token、
-`deploymentId`、create 時の `idempotency-key`（省略時は両 API 共通のデフォルト key）で lookup し、
-回復した `worldId` を idempotent delete に使えます。lookup は create-world の永続 idempotency
-record を使うため、同じ deployment の snapshot clone と混同しません。
-snapshot restore の response を失った場合は、source `worldId`、snapshot `hash`、restore 時と同じ
-`idempotency-key` で
-`GET /v1/worlds/{worldId}/snapshots/restores/{snapshotHash}` を呼び、新しい world を回復できます。
-source と restored world を別々に cleanup するまで、この pointer は deleted world にも残ります。
+Unsigned requests work. SDK-generated signatures using dummy `TCSIM…` access keys are accepted without signature verification. Real AWS-style access keys, session tokens, and presigned requests are rejected. Never supply real credentials. For boto3 use `Config(s3={'addressing_style':'path'}, request_checksum_calculation='when_required', response_checksum_validation='when_required')` with an explicit endpoint and dummy credentials. Buffered PutObject is supported; aws-chunked streaming and managed multipart transfers are not.
 
-AWS migration Battle の managed tier は、participant の `/meta.platform` ではなく resource graph の
-authoritative placement projection を使います。操作 identity、CLI / HTTP 例、reviewed workload
-binding の制約は [AWS provider](./providers/aws/README.md#managed-placement-projection) を参照して
-ください。
+| Supported operation | Behavior |
+| --- | --- |
+| ListBuckets / CreateBucket / HeadBucket / GetBucketLocation | Global bucket names in the single simulated account; four declared regions |
+| DeleteBucket | Fails with `BucketNotEmpty` while child objects exist |
+| ListObjectsV2 | Lexical order, prefix, delimiter, max-keys, start-after, opaque continuation, URL encoding |
+| PutObject | Atomic replacement, ETag, If-Match / If-None-Match, selected checksum validation |
+| GetObject / HeadObject | Exact bytes, content type, size, ETag, single byte range, ETag conditions |
+| DeleteObject | Idempotent deletion of keys in an existing bucket |
 
-## セキュリティ境界
+The console preserves literal slash and dot segments in object keys. Keys consisting only of `.` or `..` can be used through the SDK; browser console operations reject these two keys before sending a request.
 
-- 実クラウド credential を受け付けません。
-- world を `tenantId / eventId / teamId / deploymentId` で隔離する。
-- workload container は非特権かつ egress deny をデフォルトにする。
-- workload image は world resource 作成前に明示 pull し、起動時は `--pull=never` に固定する。DELETE は
-  container と world network の双方が Docker timeout 以上連続して不在になるまで persistent intent を
-  保持するため、workload world の削除にはその quiet window 分の latency が加わる。
-- 未実装 operation を成功扱いにしません。
-- snapshot version `2` の import は schema、size limit、server-authenticated HMAC proof の検証後だけ
-  適用する。unsigned version `1` は失効済みで、launch authority secret の rotation は既存 proof を
-  無効にする。
-- workload を含む snapshot は resource、output、event payload の旧 endpoint と managed override を
-  除去し、新しい world 専用 container を async rematerialize してから返す。runner failure は同じ
-  restore key で再試行する。
+Limits: 8 MiB per object, 64 MiB total object bytes, 1,000 buckets, 10,000 objects. These bound payload state, not whole-process resident memory or peak concurrent upload buffers. Regions: `us-east-1`, `us-west-2`, `ap-northeast-1`, `eu-west-1`.
 
-## ライセンス
+## IAM simulation
 
-[MIT](./LICENSE)
+The default `simulator-admin` is an unrestricted local setup identity. Send `x-simulator-principal: reader` to evaluate the stored identity policy for `reader`. Unknown principals implicitly deny. The console's identity button uses this same header.
+
+```sh
+curl -X PUT http://127.0.0.1:4566/_simulator/v1/iam/principals/reader/policy \
+  -H 'Content-Type: application/json' --data '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["s3:ListAllMyBuckets","s3:ListBucket","s3:GetObject"],"Resource":"*"},{"Effect":"Deny","Action":"s3:GetObject","Resource":"arn:aws:s3:::practice-bucket/private/*"}]}'
+curl -H 'x-simulator-principal: reader' http://127.0.0.1:4566/practice-bucket/hello.txt
+```
+
+Supported: identity policy `Version`, `Statement`, `Sid`, `Effect`, `Action`, `Resource`; scalar or array forms; `*`/`?` patterns; case-insensitive action and case-sensitive resource matching; explicit Deny overrides Allow; no matching Allow means implicit Deny. Unsupported policy fields, including Condition, Principal, NotAction, and NotResource, are rejected rather than ignored. Policy management is a **simulator JSON control API**, not the AWS IAM Query protocol.
+
+Not implemented: resource policies, ACLs, conditions, roles/sessions, boundaries, SCPs, cross-account policy evaluation, or AWS account authentication. This limited model must not be described as full IAM compatibility.
+
+## Verification
+
+```sh
+make before-commit              # format, vet, asset identity, module integrity, race tests, 90% runtime statement coverage, static build
+python3 -m venv /tmp/tcsim-tests
+/tmp/tcsim-tests/bin/pip install -r scripts/requirements-test.txt
+/tmp/tcsim-tests/bin/playwright install chromium
+make e2e PYTHON=/tmp/tcsim-tests/bin/python
+make cross-check                # compile Linux amd64/arm64, Darwin amd64/arm64, Windows amd64
+curl -fL https://github.com/tlaplus/tlaplus/releases/download/v1.7.4/tla2tools.jar -o /tmp/tla2tools.jar
+TLA_JAR=/tmp/tla2tools.jar make formal
+```
+
+The browser/SDK tests start and stop the actual binary from an empty directory with no executables on PATH, create resources through the console and boto3, check state in both directions, exercise IAM/deletion errors, restart a persistent database, check process isolation, and execute Scalar's request client. All browser requests outside the simulator origin are blocked and fail the test if attempted. Java, Python, the SDK, and Chromium are development-only tools.
+
+TLC checks a finite TLA+ model (two buckets, two keys, abstract Allow/Deny states) and verifies that removing the nonempty-delete guard produces a counterexample. This is bounded model checking of the specified state machine, **not a proof of the Go implementation or all IAM rules**. See [formal/README.md](formal/README.md).
+
+CI runs these same gates on Linux. Foreign-platform binaries are compile-checked, not runtime-tested. Evidence and screenshots are in [reports/](reports/).
+
+## Architecture and compatibility
+
+[The design note](docs/design/0001-go-standalone.md) describes provider registration, SQLite constraints, and the transition from the old TypeScript runtime. This is a deliberate replacement: the old worlds/deployments/snapshots/CloudFormation/multi-provider APIs are not retained. Existing TenkaCloud/Challenge integrations need a separate adapter and capability compatibility checks. Simulator contains no problem IDs or graders.
+
+Not implemented in this increment: EC2, VPC, compute execution, SSH, Terraform/CloudFormation, cross-cloud resource links, versioning, multipart upload, lifecycle, bucket policies, arbitrary metadata, fault injection, or real data-plane networking. The stored object bytes are real local simulated data; no cloud resources or infrastructure are created.
+
+## Licensing and attribution
+
+Repository license remains MIT. The console uses original HTML/CSS and no copied cloud logos, screenshots, fonts, icons, or console assets. AWS service names identify simulated APIs; this project is independent and not affiliated with AWS. Scalar 1.76.4 is MIT, rebuilt from integrity-locked npm modules with the optional color picker excluded; its bundle hash and dependency inventory are pinned under [third_party/](third_party/). Runtime Go dependency notices and bundled frontend notices are embedded at `/_simulator/licenses/`.
+
+The earlier missing-notice concern is resolved by **excluding** `@replit/codemirror-css-color-picker` from the shipped API reference. The local rebuild omits CSS color swatches only; it preserves request editing/execution. It retains original notices for all 194 included package/style entries. See [rebuild instructions and exclusion evidence](tools/scalar/README.md) and [removal record](third_party/color-picker-removal.json). No copyright wording was invented. This removes that specific distribution blocker; it is not a legal certification or a claim that an online canonical vulnerability scan passed. No release, deployment, push, or PR is performed by this change.
+
+Additional console verification: `python3 scripts/get-audit-tools.py /tmp/tcsim-audit`, then `AXE_SCRIPT=/tmp/tcsim-audit/axe.min.js make audit PYTHON=/tmp/tcsim-tests/bin/python`. This development-only tool retains its original licenses outside the application. The seven-state [console audit](reports/audit/README.md) records keyboard focus, validation, responsive reflow, screenshots, contrast fixes, and remaining UX limits. See the [vulnerability-data review](reports/vulnerability-review.md) for the official-source snapshot fallback, dependency update, and the remaining canonical-service limitation.
