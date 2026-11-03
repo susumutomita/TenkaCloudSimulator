@@ -12,8 +12,8 @@ Every push, pull request and manual run checks out the exact tested head and run
 3. Unfiltered Cobertura conversion and Go HTML coverage view. Both full-module
    statement coverage and source-line coverage must be at least 90%.
 4. Locked npm dependency audit (high/critical fail) and canonical Go govulncheck.
-5. Eight real binary + SDK + offline console/Scalar E2E cases, fourteen-state accessibility audit,
-   finite TLC model checking and detection of the deliberate deletion-guard mutant.
+5. Ten real binary + SDK + offline console/Scalar E2E cases, 23-state accessibility audit,
+   three finite TLC models and three required mutation counterexamples.
 
 Coverage generation and threshold checks are ordinary required steps. An absent,
 empty, malformed or below-floor report exits nonzero. Regression tests exercise
