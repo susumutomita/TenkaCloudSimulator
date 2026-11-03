@@ -1,0 +1,845 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "TenkaCloud Simulator API",
+    "version": "0.1.0",
+    "description": "Independent local cloud simulator. AWS S3 is the first provider. No real infrastructure is created. This document describes only implemented operations. S3 wire APIs retain their XML formats; simulator IAM control is explicitly a separate JSON API. Use unsigned requests or dummy TCSIM SDK credentials. Default principal simulator-admin has full sandbox access. For IAM exercises send x-simulator-principal. SQLite is ephemeral by default; --state persists it. See /_simulator/v1/capabilities for limits and deviations.",
+    "license": {
+      "name": "MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "This simulator only"
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "operationId": "ListBuckets",
+        "summary": "List all buckets",
+        "description": "IAM action s3:ListAllMyBuckets on *. XML response; console and SDK see the same SQLite state.",
+        "tags": [
+          "S3 basic object storage"
+        ],
+        "parameters": [
+          {
+            "name": "x-simulator-principal",
+            "in": "header",
+            "required": false,
+            "description": "Simulator identity, not authentication. Defaults to simulator-admin. Unknown names implicitly deny.",
+            "schema": {
+              "type": "string",
+              "default": "simulator-admin"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "S3 XML response",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "<?xml version=\"1.0\"?><ListAllMyBucketsResult xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"><Buckets/></ListAllMyBucketsResult>"
+              }
+            }
+          },
+          "default": {
+            "description": "S3 XML Error: invalid input, missing resource, AccessDenied, BucketNotEmpty, precondition failure, or unsupported feature.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "<Error><Code>BucketNotEmpty</Code><Message>Delete all objects before deleting this bucket.</Message></Error>"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{bucket}": {
+      "parameters": [
+        {
+          "name": "bucket",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 63,
+            "default": "practice-bucket"
+          },
+          "description": "DNS-compatible general purpose bucket name."
+        }
+      ],
+      "put": {
+        "operationId": "CreateBucket",
+        "summary": "Create a bucket",
+        "description": "Requires s3:CreateBucket on the bucket ARN. Empty body creates in us-east-1. Other supported regions require LocationConstraint.",
+        "tags": [
+          "S3 basic object storage"
+        ],
+        "parameters": [
+          {
+            "name": "x-simulator-principal",
+            "in": "header",
+            "required": false,
+            "description": "Simulator identity, not authentication. Defaults to simulator-admin. Unknown names implicitly deny.",
+            "schema": {
+              "type": "string",
+              "default": "simulator-admin"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bucket created; Location header contains its path."
+          },
+          "409": {
+            "description": "S3 XML Error: invalid input, missing resource, AccessDenied, BucketNotEmpty, precondition failure, or unsupported feature.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "<Error><Code>BucketNotEmpty</Code><Message>Delete all objects before deleting this bucket.</Message></Error>"
+              }
+            }
+          },
+          "default": {
+            "description": "S3 XML Error: invalid input, missing resource, AccessDenied, BucketNotEmpty, precondition failure, or unsupported feature.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "<Error><Code>BucketNotEmpty</Code><Message>Delete all objects before deleting this bucket.</Message></Error>"
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/xml": {
+              "schema": {
+                "type": "string"
+              },
+              "example": "<CreateBucketConfiguration xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"><LocationConstraint>ap-northeast-1</LocationConstraint></CreateBucketConfiguration>"
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "ListObjectsV2OrGetBucketLocation",
+        "summary": "List objects or get bucket location",
+        "description": "ListObjectsV2: keep list-type=2; supports prefix, delimiter, max-keys and continuation. GetBucketLocation: omit list-type and send an empty location query. S3 uses one path for these two wire operations; this reference does not invent a REST adapter.",
+        "tags": [
+          "S3 basic object storage"
+        ],
+        "parameters": [
+          {
+            "name": "x-simulator-principal",
+            "in": "header",
+            "required": false,
+            "description": "Simulator identity, not authentication. Defaults to simulator-admin. Unknown names implicitly deny.",
+            "schema": {
+              "type": "string",
+              "default": "simulator-admin"
+            }
+          },
+          {
+            "name": "list-type",
+            "in": "query",
+            "description": "Use 2 for ListObjectsV2. Omit for GetBucketLocation.",
+            "schema": {
+              "type": "string",
+              "default": "2"
+            }
+          },
+          {
+            "name": "prefix",
+            "in": "query",
+            "description": "Only list matching keys.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "delimiter",
+            "in": "query",
+            "description": "Usually / to group prefixes.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "max-keys",
+            "in": "query",
+            "description": "0\u20131000 entries per page.",
+            "schema": {
+              "type": "integer",
+              "default": 1000
+            }
+          },
+          {
+            "name": "continuation-token",
+            "in": "query",
+            "description": "Opaque token returned by the previous page.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "start-after",
+            "in": "query",
+            "description": "Lexical starting key.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "encoding-type",
+            "in": "query",
+            "description": "Optional url encoding.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "location",
+            "in": "query",
+            "description": "Empty query selects GetBucketLocation. Omit for listing.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "S3 XML response",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "<?xml version=\"1.0\"?><ListAllMyBucketsResult xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"><Buckets/></ListAllMyBucketsResult>"
+              }
+            }
+          },
+          "default": {
+            "description": "S3 XML Error: invalid input, missing resource, AccessDenied, BucketNotEmpty, precondition failure, or unsupported feature.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "<Error><Code>BucketNotEmpty</Code><Message>Delete all objects before deleting this bucket.</Message></Error>"
+              }
+            }
+          }
+        }
+      },
+      "head": {
+        "operationId": "HeadBucket",
+        "summary": "Check whether a bucket exists",
+        "description": "Requires s3:ListBucket. x-amz-bucket-region returns its region.",
+        "tags": [
+          "S3 basic object storage"
+        ],
+        "parameters": [
+          {
+            "name": "x-simulator-principal",
+            "in": "header",
+            "required": false,
+            "description": "Simulator identity, not authentication. Defaults to simulator-admin. Unknown names implicitly deny.",
+            "schema": {
+              "type": "string",
+              "default": "simulator-admin"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bucket exists."
+          },
+          "default": {
+            "description": "S3 XML Error: invalid input, missing resource, AccessDenied, BucketNotEmpty, precondition failure, or unsupported feature.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "<Error><Code>BucketNotEmpty</Code><Message>Delete all objects before deleting this bucket.</Message></Error>"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "DeleteBucket",
+        "summary": "Delete an empty bucket",
+        "description": "Atomic relational constraint: fails with BucketNotEmpty while any object belongs to this bucket.",
+        "tags": [
+          "S3 basic object storage"
+        ],
+        "parameters": [
+          {
+            "name": "x-simulator-principal",
+            "in": "header",
+            "required": false,
+            "description": "Simulator identity, not authentication. Defaults to simulator-admin. Unknown names implicitly deny.",
+            "schema": {
+              "type": "string",
+              "default": "simulator-admin"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Bucket deleted."
+          },
+          "409": {
+            "description": "S3 XML Error: invalid input, missing resource, AccessDenied, BucketNotEmpty, precondition failure, or unsupported feature.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "<Error><Code>BucketNotEmpty</Code><Message>Delete all objects before deleting this bucket.</Message></Error>"
+              }
+            }
+          },
+          "default": {
+            "description": "S3 XML Error: invalid input, missing resource, AccessDenied, BucketNotEmpty, precondition failure, or unsupported feature.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "<Error><Code>BucketNotEmpty</Code><Message>Delete all objects before deleting this bucket.</Message></Error>"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{bucket}/{key}": {
+      "parameters": [
+        {
+          "name": "bucket",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 63,
+            "default": "practice-bucket"
+          },
+          "description": "DNS-compatible general purpose bucket name."
+        },
+        {
+          "name": "key",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "default": "hello.txt"
+          },
+          "description": "Full object key (up to 1024 UTF-8 bytes). Slashes represent prefixes."
+        }
+      ],
+      "put": {
+        "operationId": "PutObject",
+        "summary": "Upload or replace an object",
+        "description": "Requires s3:PutObject on arn:aws:s3:::bucket/key. Maximum 8 MiB; atomic replacement. No multipart, ACLs, encryption configuration or custom metadata.",
+        "tags": [
+          "S3 basic object storage"
+        ],
+        "parameters": [
+          {
+            "name": "x-simulator-principal",
+            "in": "header",
+            "required": false,
+            "description": "Simulator identity, not authentication. Defaults to simulator-admin. Unknown names implicitly deny.",
+            "schema": {
+              "type": "string",
+              "default": "simulator-admin"
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Use * to reject overwrite."
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Require the current quoted ETag."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Stored; ETag returned in headers."
+          },
+          "412": {
+            "description": "S3 XML Error: invalid input, missing resource, AccessDenied, BucketNotEmpty, precondition failure, or unsupported feature.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "<Error><Code>BucketNotEmpty</Code><Message>Delete all objects before deleting this bucket.</Message></Error>"
+              }
+            }
+          },
+          "default": {
+            "description": "S3 XML Error: invalid input, missing resource, AccessDenied, BucketNotEmpty, precondition failure, or unsupported feature.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "<Error><Code>BucketNotEmpty</Code><Message>Delete all objects before deleting this bucket.</Message></Error>"
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "text/plain": {
+              "schema": {
+                "type": "string"
+              },
+              "example": "Hello from the API reference."
+            },
+            "application/octet-stream": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "GetObject",
+        "summary": "Download an object",
+        "description": "Requires s3:GetObject. Supports a single standard HTTP byte range and ETag conditions.",
+        "tags": [
+          "S3 basic object storage"
+        ],
+        "parameters": [
+          {
+            "name": "x-simulator-principal",
+            "in": "header",
+            "required": false,
+            "description": "Simulator identity, not authentication. Defaults to simulator-admin. Unknown names implicitly deny.",
+            "schema": {
+              "type": "string",
+              "default": "simulator-admin"
+            }
+          },
+          {
+            "name": "Range",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            },
+            "example": "bytes=0-4"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Object bytes.",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "206": {
+            "description": "Requested byte range."
+          },
+          "304": {
+            "description": "Unmodified ETag."
+          },
+          "default": {
+            "description": "S3 XML Error: invalid input, missing resource, AccessDenied, BucketNotEmpty, precondition failure, or unsupported feature.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "<Error><Code>BucketNotEmpty</Code><Message>Delete all objects before deleting this bucket.</Message></Error>"
+              }
+            }
+          }
+        }
+      },
+      "head": {
+        "operationId": "HeadObject",
+        "summary": "Inspect object headers",
+        "description": "Requires s3:GetObject. Returns ETag, Last-Modified, Content-Type and Content-Length.",
+        "tags": [
+          "S3 basic object storage"
+        ],
+        "parameters": [
+          {
+            "name": "x-simulator-principal",
+            "in": "header",
+            "required": false,
+            "description": "Simulator identity, not authentication. Defaults to simulator-admin. Unknown names implicitly deny.",
+            "schema": {
+              "type": "string",
+              "default": "simulator-admin"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Object metadata."
+          },
+          "default": {
+            "description": "S3 XML Error: invalid input, missing resource, AccessDenied, BucketNotEmpty, precondition failure, or unsupported feature.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "<Error><Code>BucketNotEmpty</Code><Message>Delete all objects before deleting this bucket.</Message></Error>"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "DeleteObject",
+        "summary": "Delete an object",
+        "description": "Requires s3:DeleteObject. Deleting an absent key is idempotent when its bucket exists.",
+        "tags": [
+          "S3 basic object storage"
+        ],
+        "parameters": [
+          {
+            "name": "x-simulator-principal",
+            "in": "header",
+            "required": false,
+            "description": "Simulator identity, not authentication. Defaults to simulator-admin. Unknown names implicitly deny.",
+            "schema": {
+              "type": "string",
+              "default": "simulator-admin"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted (or key already absent)."
+          },
+          "default": {
+            "description": "S3 XML Error: invalid input, missing resource, AccessDenied, BucketNotEmpty, precondition failure, or unsupported feature.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "<Error><Code>BucketNotEmpty</Code><Message>Delete all objects before deleting this bucket.</Message></Error>"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/_simulator/v1/capabilities": {
+      "get": {
+        "operationId": "Capabilities",
+        "summary": "Inspect exact support and limits",
+        "tags": [
+          "Simulator control"
+        ],
+        "responses": {
+          "200": {
+            "description": "Current capability manifest.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/_simulator/v1/iam/principals": {
+      "get": {
+        "operationId": "ListPrincipals",
+        "summary": "List simulator identities",
+        "tags": [
+          "Simulator IAM state"
+        ],
+        "description": "Simulator-admin only. These are local identity-policy attachments, not AWS IAM Query protocol.",
+        "parameters": [
+          {
+            "name": "x-simulator-principal",
+            "in": "header",
+            "required": false,
+            "description": "Simulator identity, not authentication. Defaults to simulator-admin. Unknown names implicitly deny.",
+            "schema": {
+              "type": "string",
+              "default": "simulator-admin"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Principal names.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "principals": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/_simulator/v1/iam/principals/{principal}/policy": {
+      "parameters": [
+        {
+          "name": "principal",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+            "default": "reader"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "GetIdentityPolicy",
+        "summary": "Read an identity policy",
+        "tags": [
+          "Simulator IAM state"
+        ],
+        "parameters": [
+          {
+            "name": "x-simulator-principal",
+            "in": "header",
+            "required": false,
+            "description": "Simulator identity, not authentication. Defaults to simulator-admin. Unknown names implicitly deny.",
+            "schema": {
+              "type": "string",
+              "default": "simulator-admin"
+            }
+          }
+        ],
+        "description": "Simulator-admin only. Identity policy subset: Action/Resource string or array; Statement object or array; wildcard * and ?; explicit Deny wins; absent Allow implicitly denies. Rejects Condition, Principal, NotAction, NotResource, boundaries, sessions and SCPs. Principal selection is not authentication.",
+        "responses": {
+          "200": {
+            "description": "Policy state updated or returned.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityPolicy"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unsupported policy or invalid input."
+          },
+          "403": {
+            "description": "Only simulator-admin may manage policies."
+          }
+        }
+      },
+      "put": {
+        "operationId": "PutIdentityPolicy",
+        "summary": "Create or replace an identity policy",
+        "tags": [
+          "Simulator IAM state"
+        ],
+        "parameters": [
+          {
+            "name": "x-simulator-principal",
+            "in": "header",
+            "required": false,
+            "description": "Simulator identity, not authentication. Defaults to simulator-admin. Unknown names implicitly deny.",
+            "schema": {
+              "type": "string",
+              "default": "simulator-admin"
+            }
+          }
+        ],
+        "description": "Simulator-admin only. Identity policy subset: Action/Resource string or array; Statement object or array; wildcard * and ?; explicit Deny wins; absent Allow implicitly denies. Rejects Condition, Principal, NotAction, NotResource, boundaries, sessions and SCPs. Principal selection is not authentication.",
+        "responses": {
+          "200": {
+            "description": "Policy state updated or returned.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityPolicy"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unsupported policy or invalid input."
+          },
+          "403": {
+            "description": "Only simulator-admin may manage policies."
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IdentityPolicy"
+              },
+              "example": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Action": [
+                      "s3:ListAllMyBuckets",
+                      "s3:ListBucket",
+                      "s3:GetObject"
+                    ],
+                    "Resource": [
+                      "*"
+                    ]
+                  },
+                  {
+                    "Effect": "Deny",
+                    "Action": [
+                      "s3:GetObject"
+                    ],
+                    "Resource": [
+                      "arn:aws:s3:::practice-bucket/private/*"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "DeleteIdentityPolicy",
+        "summary": "Delete an identity policy attachment",
+        "tags": [
+          "Simulator IAM state"
+        ],
+        "parameters": [
+          {
+            "name": "x-simulator-principal",
+            "in": "header",
+            "required": false,
+            "description": "Simulator identity, not authentication. Defaults to simulator-admin. Unknown names implicitly deny.",
+            "schema": {
+              "type": "string",
+              "default": "simulator-admin"
+            }
+          }
+        ],
+        "description": "Simulator-admin only. Identity policy subset: Action/Resource string or array; Statement object or array; wildcard * and ?; explicit Deny wins; absent Allow implicitly denies. Rejects Condition, Principal, NotAction, NotResource, boundaries, sessions and SCPs. Principal selection is not authentication.",
+        "responses": {
+          "204": {
+            "description": "Attachment removed."
+          },
+          "400": {
+            "description": "Unsupported policy or invalid input."
+          },
+          "403": {
+            "description": "Only simulator-admin may manage policies."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "IdentityPolicy": {
+        "type": "object",
+        "required": [
+          "Version",
+          "Statement"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "Version": {
+            "type": "string",
+            "enum": [
+              "2012-10-17"
+            ]
+          },
+          "Statement": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 100,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "Effect",
+                "Action",
+                "Resource"
+              ],
+              "properties": {
+                "Sid": {
+                  "type": "string"
+                },
+                "Effect": {
+                  "type": "string",
+                  "enum": [
+                    "Allow",
+                    "Deny"
+                  ]
+                },
+                "Action": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "Resource": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

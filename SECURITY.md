@@ -1,43 +1,9 @@
-# Security Policy
+# Security policy
 
-## サポート対象
+Report vulnerabilities privately through [GitHub private vulnerability reporting](https://github.com/susumutomita/TenkaCloudSimulator/security/advisories/new) or oyster880@gmail.com. Include the version, provider, operation, sanitized request sequence, impact, and reproduction steps. Do not send real credentials or participant secrets.
 
-TenkaCloud Simulator は最新の `main` branch と、TenkaCloud が pin する release image を
-サポートします。protocol compatibility は
-[Simulator Protocol](./docs/architecture/protocol.md) を正本とします。
+This increment is an independent local simulator, not a multi-tenant hosted security boundary. It creates no real cloud infrastructure and runs no user code. Default numeric loopback binding requires explicit --allow-remote to expose a network listener. Use a trusted isolated environment; simulator principal selection and administrator policy APIs are intentionally not connection authentication.
 
-## 脆弱性の報告
+Core invariants: no outbound cloud calls; no real credentials; same-origin console/API reference; bounded object payloads; exact bytes shared between API/UI; transactionally enforced parent relationships and conditional writes; explicit IAM Deny precedence for the declared policy subset; unsupported operations/policy fields fail; database errors do not become successful empty results. Uploaded objects download as attachments and are not rendered as console HTML.
 
-security issue は public Issue に書かず、次の private 経路で報告してください。
-
-- [GitHub Private vulnerability reporting](https://github.com/susumutomita/TenkaCloudSimulator/security/advisories/new)
-- `oyster880@gmail.com`
-
-48 時間以内に受領確認を返します。報告には影響する protocol version、provider、resource、
-operation、再現手順を含めてください。実 credential や participant secret は添付しないで
-ください。
-
-## Security boundary
-
-Simulator は untrusted IaC、metadata、snapshot、provider request、workload image を処理します。
-主な security invariant は次のとおりです。
-
-- 実 cloud credential を受け付けません。
-- world を tenant、event、team、deployment で隔離する。
-- workload は non-privileged、resource bounded、egress deny をデフォルトにする。
-- image は digest と allowlist を検証する。
-- archive、template、snapshot の path traversal と symlink escape を拒否する。
-- event、log、diagnostic に secret と credential を保存しません。
-- unsupported operation を成功扱いにしません。
-
-設計は [Simulator 設計](./docs/design/2026-07-12-tenkacloud-simulator.md)、supply chain
-invariant は [ADR-0001](./docs/adr/0001-supply-chain-hardening.md) と
-[harness](./docs/architecture/harness.md) を参照してください。
-
-## 報告に含める情報
-
-- 影響する release、protocol identifier、provider、operation。
-- namespace isolation または privilege boundary への影響。
-- network request と event sequence を含む最小再現手順。
-- secret を除いた log と diagnostic。
-- 回避策または修正案があればその内容。
+See [runtime design and limitations](docs/design/0001-go-standalone.md) and [supported operations](README.md). The legacy workload/container/world security claims do not apply to the replacement runtime because those features are absent. Never use this limited IAM model as a production authorization engine.

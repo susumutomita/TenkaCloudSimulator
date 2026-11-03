@@ -1,0 +1,22 @@
+{
+  "package": "@scalar/api-reference",
+  "version": "1.76.4",
+  "integrity": "sha512-bHSVv494yuNTcBzmfZR3eYhckOTiu3L6IJmvM2kdKzBVmWqm+JhEHbYc7ydsv7FBSs3vTW9sCz00La2dFgWxVg==",
+  "source": "https://registry.npmjs.org/@scalar/api-reference/-/api-reference-1.76.4.tgz",
+  "bundleSha256": "09949908a1eaed291abd64c8f490c2a7c5d218a458a77d394f065b644301cb5f",
+  "build": "Local esbuild rebuild of the pinned published ESM modules",
+  "assets": {
+    "scalar.js": "09949908a1eaed291abd64c8f490c2a7c5d218a458a77d394f065b644301cb5f",
+    "scalar.css": "16d120ead42947e6a7daa1c1ea171b1e7059201637a311ae876d3a4d835446d2",
+    "scalar.js.LEGAL.txt": "4e003b408d282f3bddaaa7bdc2514ea32f6fe0530836619efd64d4ad294d5d3a",
+    "scalar.css.LEGAL.txt": "435113eba407bf2d8f5567f89334ca92842111afa502d571f90e331c027692d3"
+  },
+  "buildLock": "tools/scalar/package-lock.json",
+  "inputGraph": "tools/scalar/bundle-inputs.json",
+  "excludedPackages": [
+    "@replit/codemirror-css-color-picker"
+  ],
+  "modifications": [
+    "CSS color swatch editing omitted using an original empty CodeMirror extension adapter; API documentation/request client retained."
+  ]
+}

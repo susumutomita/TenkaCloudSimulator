@@ -25,3 +25,11 @@ Makefile    text eol=lf
 *.pdf       binary
 *.woff      binary
 *.woff2     binary
+
+# Preserve the verified upstream bundle byte for byte; review via pinned provenance.
+internal/server/apidocs/scalar.js -text -diff linguist-vendored
+
+internal/server/apidocs/scalar.css -text -diff linguist-vendored
+
+tools/scalar/bundle-inputs.json linguist-generated
+tools/scalar/bundle-digests.json linguist-generated

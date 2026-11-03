@@ -1,0 +1,21 @@
+go vet ./...
+python3 scripts/check-assets.py
+Vendored Scalar identity, notices, and local OpenAPI configuration verified.
+go mod verify
+all modules verified
+mkdir -p reports
+make test build
+make[1]: Entering directory '/workspace/TenkaCloudSimulator'
+mkdir -p reports
+go test -race -coverpkg=./... -coverprofile=reports/coverage.out ./...
+ok  	github.com/susumutomita/TenkaCloudSimulator/cmd/simulator	11.775s	coverage: 21.9% of statements in ./...
+	github.com/susumutomita/TenkaCloudSimulator/internal/aws		coverage: 0.0% of statements
+ok  	github.com/susumutomita/TenkaCloudSimulator/internal/core	12.614s	coverage: 35.5% of statements in ./...
+	github.com/susumutomita/TenkaCloudSimulator/internal/legal		coverage: 0.0% of statements
+ok  	github.com/susumutomita/TenkaCloudSimulator/internal/provider	1.024s	coverage: 3.0% of statements in ./...
+ok  	github.com/susumutomita/TenkaCloudSimulator/internal/server	12.826s	coverage: 82.2% of statements in ./...
+python3 scripts/check-coverage.py reports/coverage.out
+Full-module Go statement coverage: 94.6% (minimum 90.0%)
+mkdir -p dist
+CGO_ENABLED=0 go build -trimpath -ldflags='-s -w' -o dist/tenkacloud-simulator ./cmd/simulator
+make[1]: Leaving directory '/workspace/TenkaCloudSimulator'

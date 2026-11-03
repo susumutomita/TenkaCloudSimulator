@@ -137,3 +137,20 @@ dist
 
 # jscpd duplication reports (make dup_check / dup_report)
 .jscpd-report
+
+# Go standalone artifacts and private simulator state
+/dist/
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+__pycache__/
+reports/coverage.out
+
+# Optional frontend rebuild dependencies, including cloud-only symlink installs
+**/node_modules
+
+reports/coverage.xml
+
+reports/coverage.html
+reports/coverage-summary.md
