@@ -13,6 +13,8 @@ dev: build
 test:
 	mkdir -p reports
 	$(GO) test -race -coverpkg=./internal/... -coverprofile=reports/coverage.out ./...
+	$(PYTHON) scripts/test-check-coverage.py
+	$(PYTHON) scripts/check-coverage.py reports/coverage.out
 
 vet:
 	$(GO) vet ./...

@@ -64,7 +64,7 @@ Not implemented: resource policies, ACLs, conditions, roles/sessions, boundaries
 ## Verification
 
 ```sh
-make before-commit              # format, vet, asset identity, module integrity, race tests, static build
+make before-commit              # format, vet, asset identity, module integrity, race tests, 90% runtime statement coverage, static build
 python3 -m venv /tmp/tcsim-tests
 /tmp/tcsim-tests/bin/pip install -r scripts/requirements-test.txt
 /tmp/tcsim-tests/bin/playwright install chromium

@@ -1,6 +1,6 @@
 # Go standalone runtime: initial S3 increment
 
-Status: implemented locally on `codex/go-single-binary-console`; replaces the TypeScript runtime intentionally. No remote branch, PR, deployment, or release has been created.
+Status: implemented in PR #26 and recovered for required-check verification on an independent branch. Replaces the TypeScript runtime intentionally. No deployment or release is part of this work.
 
 ## Outcome and boundaries
 
