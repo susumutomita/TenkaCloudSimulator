@@ -33,6 +33,7 @@ before-commit: format-check vet verify-assets
 	$(MAKE) test build
 
 e2e: build
+	$(PYTHON) test/e2e/reflow_test.py
 	$(PYTHON) test/e2e/check.py
 
 formal:

@@ -27,6 +27,7 @@ import boto3
 from botocore.config import Config
 from botocore.exceptions import ClientError
 from playwright.sync_api import sync_playwright, expect
+from reflow import assert_reflow
 
 BINARY=Path(os.environ.get('SIMULATOR_BINARY','dist/tenkacloud-simulator')).resolve()
 REPORTS=Path(os.environ.get('SIMULATOR_REPORTS','reports')).resolve()
@@ -116,13 +117,13 @@ class Conformance(unittest.TestCase):
    page.get_by_role('tab',name='Objects',exact=True).click();page.get_by_role('checkbox',name='Show versions',exact=True).check()
    expect(page.get_by_role('cell',name=updated,exact=True)).to_be_visible();expect(page.get_by_role('cell',name='Delete marker',exact=True)).to_be_visible();expect(page.get_by_role('row').nth(1)).to_contain_text('Delete marker')
    page.screenshot(path=str(REPORTS/'s3-versions-desktop.png'),full_page=True)
-   self.assertTrue(page.evaluate('document.documentElement.scrollWidth <= innerWidth'))
+   assert_reflow(page)
    null_row=page.get_by_role('row').filter(has=page.get_by_role('cell',name='null',exact=True));null_row.get_by_role('link',name='incident-log.json',exact=True).click()
    with page.expect_download() as download:page.get_by_role('button',name='Download object',exact=True).click()
    self.assertEqual(Path(download.value.path()).read_bytes(),b'original evidence')
    delete_row=page.get_by_role('row').filter(has=page.get_by_role('cell',name='Delete marker',exact=True));delete_row.get_by_role('link',name='incident-log.json',exact=True).click();page.get_by_label('Type incident-log.json to confirm',exact=True).fill('incident-log.json');page.get_by_role('button',name='Delete permanently',exact=True).click();expect(page.get_by_role('cell',name='Delete marker',exact=True)).to_have_count(0)
    self.assertEqual(c.get_object(Bucket='version-evidence',Key='incident-log.json')['Body'].read(),b'updated evidence')
-   page.set_viewport_size({'width':390,'height':844});page.screenshot(path=str(REPORTS/'s3-versions-mobile.png'),full_page=True);self.assertTrue(page.evaluate('document.documentElement.scrollWidth <= innerWidth'))
+   page.set_viewport_size({'width':390,'height':844});page.screenshot(path=str(REPORTS/'s3-versions-mobile.png'),full_page=True);assert_reflow(page)
    self.assertEqual(other_client.list_buckets()['Buckets'],[])
    with self.assertRaises(ClientError) as error:other_client.get_object(Bucket='version-evidence',Key='incident-log.json',VersionId=updated)
    self.assertEqual(error.exception.response['Error']['Code'],'NoSuchBucket')
@@ -179,7 +180,7 @@ class Conformance(unittest.TestCase):
    page.screenshot(path=str(REPORTS/'s3-tags-desktop.png'),full_page=True)
    c.put_bucket_tagging(Bucket='browser-evidence',Tagging={'TagSet':[{'Key':'Team','Value':'independent'}]})
    page.get_by_role('tab',name='Objects',exact=True).click();page.get_by_role('tab',name='Properties',exact=True).click();expect(page.get_by_role('table',name='Bucket tags',exact=True)).to_contain_text('independent');expect(page.get_by_role('table',name='Bucket tags',exact=True)).not_to_contain_text('TenkaCloud:NamePrefix')
-   page.set_viewport_size({'width':390,'height':844});page.screenshot(path=str(REPORTS/'s3-tags-mobile.png'),full_page=True);self.assertTrue(page.evaluate('document.documentElement.scrollWidth <= innerWidth'))
+   page.set_viewport_size({'width':390,'height':844});page.screenshot(path=str(REPORTS/'s3-tags-mobile.png'),full_page=True);assert_reflow(page)
    self.assertEqual(other_s3.get_bucket_tagging(Bucket='browser-evidence')['TagSet'],[{'Key':'TenkaCloud:NamePrefix','Value':'browser-evidence'}])
    c.put_object(Bucket='browser-evidence',Key='incident.json',Body=b'evidence');c.delete_object(Bucket='browser-evidence',Key='incident.json')
    with self.assertRaises(ClientError) as error:f.delete_stack(StackName='evidence-stack')
@@ -217,7 +218,7 @@ class Conformance(unittest.TestCase):
    page.get_by_role('link',name='Identity policies',exact=True).click();page.get_by_label('Principal name',exact=True).fill('reader');submit(page);page.get_by_role('button',name='Choose identity',exact=True).click();page.get_by_label('Principal name',exact=True).fill('reader');submit(page);expect(page.get_by_role('button',name='Choose identity',exact=True)).to_have_text('reader')
    page.get_by_role('button',name='Create bucket',exact=True).first.click();page.get_by_label('Bucket name',exact=True).fill('denied-bucket');submit(page);expect(page.locator('[id^=form-error-]')).to_contain_text('implicitDeny');page.get_by_role('button',name='Cancel',exact=True).click();self.assertNotIn('denied-bucket',[b['Name'] for b in c.list_buckets()['Buckets']])
    page.get_by_role('searchbox',name='Find resources',exact=True).fill('no-matches');expect(page.get_by_role('heading',name='No matching resources')).to_be_visible();page.get_by_role('searchbox',name='Find resources',exact=True).fill('')
-   page.set_viewport_size({'width':390,'height':844});expect(page.get_by_role('button',name='Create bucket',exact=True).first).to_be_visible();page.screenshot(path=str(REPORTS/'console-mobile.png'),full_page=True);self.assertEqual(page.evaluate('document.documentElement.scrollWidth <= innerWidth'),True)
+   page.set_viewport_size({'width':390,'height':844});expect(page.get_by_role('button',name='Create bucket',exact=True).first).to_be_visible();page.screenshot(path=str(REPORTS/'console-mobile.png'),full_page=True);assert_reflow(page)
    self.assertEqual(page.evaluate('window.__policyViolations'),[]);page.set_viewport_size({'width':1440,'height':1000});page.goto(endpoint+'/_simulator/docs/');expect(page.get_by_role('heading',name='TenkaCloud Simulator API',exact=True)).to_be_visible(timeout=15000)
    expect(page.get_by_role('button',name='Ask AI',exact=True)).to_have_count(0)
    # Scalar executes the real S3 ListBuckets operation. The response contains console-created state.
@@ -299,7 +300,7 @@ class Conformance(unittest.TestCase):
    expect(page.get_by_role('button',name='Choose identity',exact=True)).to_have_count(0)
    page.get_by_role('button',name='Services',exact=True).click();page.get_by_role('menuitem',name='Systems Manager',exact=True).click();page.get_by_role('link',name=outputs['ParameterName'],exact=True).click();expect(page.get_by_label('Value',exact=True)).to_have_value('TC{'+seed+'}');expect(page.get_by_role('tab',name='Overview',exact=True)).to_be_visible()
    page.get_by_role('button',name='Edit parameter',exact=True).click();expect(page.get_by_role('button',name='Type String',exact=True)).to_be_disabled();page.get_by_label('Value',exact=True).fill('unauthorized change');page.get_by_role('button',name='Save changes',exact=True).click();expect(page.locator('[id^=form-error-]')).to_contain_text('403');self.assertEqual(client('ssm',token).get_parameter(Name=outputs['ParameterName'])['Parameter']['Value'],'TC{'+seed+'}')
-   page.get_by_role('button',name='Cancel',exact=True).click();page.set_viewport_size({'width':390,'height':844});self.assertTrue(page.evaluate('document.documentElement.scrollWidth <= innerWidth'));self.assertEqual(errors,[]);self.assertEqual(outside,[])
+   page.get_by_role('button',name='Cancel',exact=True).click();page.set_viewport_size({'width':390,'height':844});assert_reflow(page);self.assertEqual(errors,[]);self.assertEqual(outside,[])
    browser.close();cfn.delete_stack(StackName='tc-hello-world-browser')
  def test_region_change_clears_bucket_and_writes_only_new_region(self):
   with running() as endpoint,sync_playwright() as p:
@@ -357,7 +358,7 @@ class Conformance(unittest.TestCase):
    code=io.BytesIO()
    with zipfile.ZipFile(code,'w',compression=zipfile.ZIP_DEFLATED) as z:z.writestr('lambda_function.py',"import sqlite3\ndef lambda_handler(event, context):\n    db=sqlite3.connect(':memory:')\n    return {'answer':db.execute('select ? * 6',(event['value'],)).fetchone()[0]}\n")
    previous=c.get_function_configuration(FunctionName='ui-lambda')['RevisionId'];page.get_by_role('tab',name='Code',exact=True).click();page.get_by_label('Function ZIP',exact=True).set_input_files({'name':'function.zip','mimeType':'application/zip','buffer':code.getvalue()});page.get_by_role('button',name='Deploy',exact=True).click();expect(page.get_by_text('Function code deployed.',exact=True)).to_be_visible();configuration=c.get_function_configuration(FunctionName='ui-lambda');self.assertNotEqual(previous,configuration['RevisionId']);self.assertEqual(configuration['CodeSha256'],base64.b64encode(hashlib.sha256(code.getvalue()).digest()).decode())
-   page.get_by_role('tab',name='Test',exact=True).click();page.get_by_role('button',name='Test',exact=True).click();expect(page.get_by_label('Response',exact=True)).to_have_value('{\n  "answer": 42\n}');self.assertEqual(json.loads(c.invoke(FunctionName=configuration['FunctionArn'],Payload=b'{"value":7}')['Payload'].read()),{'answer':42});page.screenshot(path=str(REPORTS/'lambda-test-desktop.png'),full_page=True);page.set_viewport_size({'width':390,'height':844});self.assertTrue(page.evaluate('document.documentElement.scrollWidth <= innerWidth'));page.screenshot(path=str(REPORTS/'lambda-test-mobile.png'),full_page=True);page.set_viewport_size({'width':1440,'height':1000})
+   page.get_by_role('tab',name='Test',exact=True).click();page.get_by_role('button',name='Test',exact=True).click();expect(page.get_by_label('Response',exact=True)).to_have_value('{\n  "answer": 42\n}');self.assertEqual(json.loads(c.invoke(FunctionName=configuration['FunctionArn'],Payload=b'{"value":7}')['Payload'].read()),{'answer':42});page.screenshot(path=str(REPORTS/'lambda-test-desktop.png'),full_page=True);page.set_viewport_size({'width':390,'height':844});assert_reflow(page);page.screenshot(path=str(REPORTS/'lambda-test-mobile.png'),full_page=True);page.set_viewport_size({'width':1440,'height':1000})
    invoke_policy={'Version':'2012-10-17','Statement':[{'Effect':'Allow','Action':'lambda:InvokeFunction','Resource':configuration['FunctionArn']}]};control(endpoint,operator,'/_simulator/v1/iam/principals/invoker/policy',invoke_policy);participant=control(endpoint,operator,'/_simulator/v1/access',{'Principal':'invoker'})['AccessToken'];limited=client(endpoint,participant)
    with self.assertRaises(ClientError):limited.get_function_configuration(FunctionName='ui-lambda')
    participant_context=browser.new_context(viewport={'width':1440,'height':1000});participant_page=participant_context.new_page();participant_page.goto(endpoint+'/_simulator/console/');participant_page.get_by_label('Access token',exact=True).fill(participant);participant_page.get_by_role('button',name='Open sandbox',exact=True).click();participant_page.get_by_role('button',name='Services',exact=True).click();participant_page.get_by_role('menuitem',name='Lambda',exact=True).click();expect(participant_page.get_by_text('Functions unavailable',exact=True)).to_be_visible();participant_page.get_by_label('Function name or ARN',exact=True).fill(configuration['FunctionArn']);participant_page.get_by_role('button',name='Test',exact=True).click();expect(participant_page.get_by_label('Response',exact=True)).to_have_value('{\n  "answer": 42\n}')
