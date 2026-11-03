@@ -1,6 +1,6 @@
 # 既存クラウド問題の段階的な対応
 
-基準はmain `37c0460`、Challenge `a749b142416770abee3f173673702c55df3856aa`。
+基準はmain `e9e67dc`（PR #29の実Python Lambda foundationまでmerge済み）、Challenge `a749b142416770abee3f173673702c55df3856aa`。
 hello-world以外を対応済みとは表示しない。問題コード、テンプレート、採点をSimulator専用の固定応答へ置き換えない。
 
 ## 次の対象と順番
@@ -13,6 +13,8 @@ hello-world以外を対応済みとは表示しない。問題コード、テン
 4. 未変更の実テンプレートで初期化し、証拠読取、WAF Count→Block、SSM修復、credential rotation、正常/攻撃HTTP、実Lambda採点、実TenkaCloud multi-flag ledger、削除まで2チームで検証する。ここまで成功して初めて問題の選択を有効にする。
 
 Lambda/WAF/API GatewayはAWS layerに属し、問題ID・flag計算をcore/runtimeへ入れない。API/SDK/UIは同じHTTP/stateを使用する。今後のEC2 Battleは実LinuxワークロードとSSM Session Managerが必要であり、systemctl文字列への固定応答で代用しない。hello-multicloudはAWS Lambdaだけでは完了せず、GCP/Azure/Sakura各targetの実ワークロードとcomposite-probe採点まで必要。
+
+現在の追加範囲: step 2のnative S3 version history/public-access-blockとCloudscape操作を実装する。S3 CloudFormationはまだ未対応で、step 2全体やwp2shellの完了ではない。問題の選択を有効にする条件はstep 4の実採点完走のまま。
 
 ## 実行境界の受け入れ条件
 

@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"hash/crc32"
 	"io"
+	"log/slog"
 	"net"
 	"net/http"
 	"net/url"
@@ -35,6 +36,7 @@ var Regions = []string{"us-east-1", "us-west-2", "ap-northeast-1", "eu-west-1"}
 
 type Gateway struct {
 	Store      *core.Store
+	S3         *S3Store
 	Identities *core.Identities
 	Parameters *ParameterStore
 	Stacks     *StackStore
@@ -59,7 +61,7 @@ func fail(w http.ResponseWriter, r *http.Request, code, message string) {
 	switch code {
 	case "InternalError":
 		status = 500
-	case "NoSuchBucket", "NoSuchKey":
+	case "NoSuchBucket", "NoSuchKey", "NoSuchVersion", "NoSuchPublicAccessBlockConfiguration":
 		status = 404
 	case "BucketNotEmpty", "BucketAlreadyExists", "BucketAlreadyOwnedByYou":
 		status = 409
@@ -81,6 +83,11 @@ func fail(w http.ResponseWriter, r *http.Request, code, message string) {
 	writeXML(w, status, failure{Code: code, Message: message, Resource: r.URL.Path, RequestID: w.Header().Get("x-amz-request-id")})
 }
 func fromError(w http.ResponseWriter, r *http.Request, err error) {
+	if core.Code(err) == "InternalError" {
+		slog.Error("S3 state operation failed", "error", err)
+		fail(w, r, "InternalError", "Simulator S3 state operation failed.")
+		return
+	}
 	fail(w, r, core.Code(err), err.Error())
 }
 func ValidBucket(name string) bool {
@@ -111,9 +118,13 @@ func (g *Gateway) serveS3(w http.ResponseWriter, r *http.Request) {
 		fail(w, r, "NotImplemented", "Session tokens and presigned requests are not supported.")
 		return
 	}
-	for k := range r.URL.Query() {
+	for k, values := range r.URL.Query() {
+		if len(values) != 1 {
+			fail(w, r, "InvalidArgument", "Duplicate query parameters are unsupported.")
+			return
+		}
 		switch k {
-		case "list-type", "prefix", "delimiter", "max-keys", "continuation-token", "start-after", "encoding-type", "location", "x-id":
+		case "list-type", "prefix", "delimiter", "max-keys", "continuation-token", "start-after", "encoding-type", "location", "x-id", "versioning", "publicAccessBlock", "versions", "versionId", "key-marker", "version-id-marker":
 		default:
 			fail(w, r, "NotImplemented", "Unsupported S3 query: "+k)
 			return
@@ -121,6 +132,10 @@ func (g *Gateway) serveS3(w http.ResponseWriter, r *http.Request) {
 	}
 	if r.Header.Get("Content-Encoding") == "aws-chunked" || strings.HasPrefix(r.Header.Get("X-Amz-Content-Sha256"), "STREAMING-") {
 		fail(w, r, "NotImplemented", "Streaming signatures are not supported. Use a buffered body and optional checksums.")
+		return
+	}
+	if r.Method == "DELETE" && (r.Header.Get("If-Match") != "" || r.Header.Get("If-None-Match") != "") {
+		fail(w, r, "NotImplemented", "Conditional DELETE is unsupported.")
 		return
 	}
 	principal := r.Header.Get("x-simulator-principal")
@@ -172,18 +187,56 @@ func (g *Gateway) serveS3(w http.ResponseWriter, r *http.Request) {
 		fail(w, r, "InvalidBucketName", "Use a DNS-compatible bucket name of 3–63 characters.")
 		return
 	}
+	if g.S3 == nil && (object || r.Method == "PUT" || r.Method == "DELETE") {
+		fail(w, r, "InternalError", "S3 version state is unavailable.")
+		return
+	}
 	if object && key != "" {
 		if len(key) > 1024 || !validText(key) {
 			fail(w, r, "InvalidArgument", "Object keys must be valid printable UTF-8, at most 1024 bytes.")
 			return
 		}
 		for k := range r.URL.Query() {
-			if k != "x-id" {
+			if k != "x-id" && k != "versionId" {
 				fail(w, r, "NotImplemented", "Unsupported object query: "+k)
 				return
 			}
 		}
+		if r.URL.Query().Has("versionId") && (r.URL.Query().Get("versionId") == "" || len(r.URL.Query().Get("versionId")) > 128 || !validText(r.URL.Query().Get("versionId")) || r.Method == "PUT") {
+			fail(w, r, "InvalidArgument", "versionId must be printable UTF-8, 1–128 bytes, with GET, HEAD or DELETE.")
+			return
+		}
 		g.object(w, r, name, key)
+		return
+	}
+	for _, kind := range []string{"versioning", "publicAccessBlock", "versions"} {
+		if r.URL.Query().Has(kind) {
+			allowed := map[string]bool{kind: true, "x-id": true}
+			if kind == "versions" {
+				for _, k := range []string{"prefix", "delimiter", "max-keys", "encoding-type", "key-marker", "version-id-marker"} {
+					allowed[k] = true
+				}
+			}
+			for k := range r.URL.Query() {
+				if !allowed[k] {
+					fail(w, r, "InvalidArgument", "Incompatible bucket query: "+k)
+					return
+				}
+			}
+			if r.URL.Query().Get(kind) != "" {
+				fail(w, r, "InvalidArgument", "Bucket subresource must not have a value.")
+				return
+			}
+			if kind == "versions" {
+				g.listVersions(w, r, name)
+			} else {
+				g.bucketConfiguration(w, r, name, kind)
+			}
+			return
+		}
+	}
+	if r.URL.Query().Has("versionId") || r.URL.Query().Has("key-marker") || r.URL.Query().Has("version-id-marker") {
+		fail(w, r, "InvalidArgument", "Version cursors require ListObjectVersions.")
 		return
 	}
 	if r.Method != "GET" {
@@ -272,7 +325,7 @@ func (g *Gateway) bucket(w http.ResponseWriter, r *http.Request, name string) {
 			fail(w, r, "InvalidLocationConstraint", "This simulator supports us-east-1, us-west-2, ap-northeast-1 and eu-west-1.")
 			return
 		}
-		if err := g.Store.Create(name, region); err != nil {
+		if err := g.S3.Create(name, region); err != nil {
 			fromError(w, r, err)
 			return
 		}
@@ -288,7 +341,7 @@ func (g *Gateway) bucket(w http.ResponseWriter, r *http.Request, name string) {
 		w.Header().Set("x-amz-bucket-region", b.Region)
 		w.WriteHeader(200)
 	case "DELETE":
-		if err := g.Store.DeleteBucket(name); err != nil {
+		if err := g.S3.DeleteBucket(name); err != nil {
 			fromError(w, r, err)
 			return
 		}
@@ -435,17 +488,33 @@ func (g *Gateway) object(w http.ResponseWriter, r *http.Request, name, key strin
 		if ct == "" {
 			ct = "application/octet-stream"
 		}
-		obj, err := g.Store.Put(name, key, ct, data, r.Header.Get("If-Match"), r.Header.Get("If-None-Match"))
+		obj, err := g.S3.Put(name, key, ct, data, r.Header.Get("If-Match"), r.Header.Get("If-None-Match"))
 		if err != nil {
 			fromError(w, r, err)
 			return
 		}
 		w.Header().Set("ETag", obj.ETag)
+		if obj.ID != "" {
+			w.Header().Set("x-amz-version-id", obj.ID)
+		}
 		w.WriteHeader(200)
 	case "GET", "HEAD":
-		obj, err := g.Store.Get(name, key)
+		obj, err := g.S3.Get(name, key, r.URL.Query().Get("versionId"))
 		if err != nil {
 			fromError(w, r, err)
+			return
+		}
+		if obj.ID != "" {
+			w.Header().Set("x-amz-version-id", obj.ID)
+		}
+		if obj.Marker {
+			w.Header().Set("x-amz-delete-marker", "true")
+			if r.URL.Query().Has("versionId") {
+				w.Header().Set("Last-Modified", obj.Modified.Format(http.TimeFormat))
+				fail(w, r, "MethodNotAllowed", "The specified version is a delete marker.")
+			} else {
+				fail(w, r, "NoSuchKey", "The current version is a delete marker.")
+			}
 			return
 		}
 		w.Header().Set("ETag", obj.ETag)
@@ -468,9 +537,16 @@ func (g *Gateway) object(w http.ResponseWriter, r *http.Request, name, key strin
 		w.Header().Set("Content-Disposition", "attachment")
 		http.ServeContent(w, r, key, obj.Modified, bytes.NewReader(obj.Data))
 	case "DELETE":
-		if err := g.Store.Delete(name, key); err != nil {
+		obj, err := g.S3.Delete(name, key, r.URL.Query().Get("versionId"))
+		if err != nil {
 			fromError(w, r, err)
 			return
+		}
+		if obj.ID != "" {
+			w.Header().Set("x-amz-version-id", obj.ID)
+		}
+		if obj.Marker {
+			w.Header().Set("x-amz-delete-marker", "true")
 		}
 		w.WriteHeader(204)
 	default:
@@ -492,10 +568,31 @@ func permission(r *http.Request) (string, string) {
 		case "PUT":
 			return "s3:PutObject", resource
 		case "DELETE":
+			if r.URL.Query().Has("versionId") {
+				return "s3:DeleteObjectVersion", resource
+			}
 			return "s3:DeleteObject", resource
 		default:
+			if r.URL.Query().Has("versionId") {
+				return "s3:GetObjectVersion", resource
+			}
 			return "s3:GetObject", resource
 		}
+	}
+	if r.URL.Query().Has("versions") {
+		return "s3:ListBucketVersions", resource
+	}
+	if r.URL.Query().Has("versioning") {
+		if r.Method == "PUT" {
+			return "s3:PutBucketVersioning", resource
+		}
+		return "s3:GetBucketVersioning", resource
+	}
+	if r.URL.Query().Has("publicAccessBlock") {
+		if r.Method == "GET" {
+			return "s3:GetBucketPublicAccessBlock", resource
+		}
+		return "s3:PutBucketPublicAccessBlock", resource
 	}
 	if r.URL.Query().Has("location") {
 		return "s3:GetBucketLocation", resource

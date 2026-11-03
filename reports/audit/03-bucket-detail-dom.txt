@@ -39,8 +39,8 @@
   - heading "audit-practice" [level=1]
   - tablist:
     - tab "Objects" [selected]
-    - tab "Properties" [disabled]
-    - tab "Permissions" [disabled]
+    - tab "Properties"
+    - tab "Permissions"
     - tab "Metrics" [disabled]
     - tab "Management" [disabled]
   - tabpanel "Objects"
@@ -49,6 +49,8 @@
   - button "Delete" [disabled]
   - button "Upload"
   - paragraph: Objects are identified by their complete key. The console and SDK share the same state.
+  - checkbox "Show versions"
+  - text: Show versions
   - searchbox "Find resources"
   - list:
     - listitem:

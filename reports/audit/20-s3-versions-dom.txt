@@ -1,0 +1,106 @@
+- banner:
+  - link "TenkaCloud Simulator":
+    - /url: /_simulator/console/
+  - button "Services"
+  - button "us-east-1"
+  - button "Choose identity": simulator-admin
+  - link "API reference":
+    - /url: /_simulator/docs/
+- main:
+  - navigation "Service navigation":
+    - button "Toggle service navigation"
+  - navigation "Breadcrumbs":
+    - list:
+      - listitem:
+        - link "Services":
+          - /url: "#/s3"
+      - listitem:
+        - link "Amazon S3":
+          - /url: "#/s3"
+      - listitem:
+        - link "audit-practice" [disabled]
+  - group: Local simulation Your resources reset when the process stops. This is an independent simulator, not the AWS console.
+  - heading "audit-practice" [level=1]
+  - tablist:
+    - tab "Objects" [selected]
+    - tab "Properties"
+    - tab "Permissions"
+    - tab "Metrics" [disabled]
+    - tab "Management" [disabled]
+  - tabpanel "Objects"
+  - heading "Objects (3)" [level=1]
+  - button "Refresh resources"
+  - button "Delete" [disabled]
+  - button "Upload"
+  - paragraph: Objects are identified by their complete key. The console and SDK share the same state.
+  - checkbox "Show versions" [checked]
+  - text: Show versions
+  - searchbox "Find resources"
+  - list:
+    - listitem:
+      - button "Previous page" [disabled]
+    - listitem:
+      - button "Page 1": "1"
+    - listitem:
+      - button "Next page" [disabled]
+  - region "Objects":
+    - table "Objects":
+      - rowgroup:
+        - row "Resource selection Name Version ID Type Latest version Size Last modified ETag":
+          - columnheader "Resource selection"
+          - columnheader "Name":
+            - button "Name"
+          - columnheader "Version ID"
+          - columnheader "Type"
+          - columnheader "Latest version"
+          - columnheader "Size":
+            - button "Size"
+          - columnheader "Last modified"
+          - columnheader "ETag"
+      - rowgroup:
+        - row "Select hello.txt hello.txt d5bb14708e0df2849d6c52facbea5672 Delete marker Yes 0 B 11/3/2026, 6:29:19 PM":
+          - cell "Select hello.txt":
+            - radio "Select hello.txt"
+          - cell "hello.txt":
+            - link "hello.txt":
+              - /url: "#"
+          - cell "d5bb14708e0df2849d6c52facbea5672"
+          - cell "Delete marker"
+          - cell "Yes"
+          - cell "0 B"
+          - cell "11/3/2026, 6:29:19 PM"
+          - cell
+        - row "Select hello.txt hello.txt f1e991c96d6c8ef35193d0dae97b8acd Object No 7 B 11/3/2026, 6:29:19 PM \"0f81d52e06caaa4860887488d18271c7\"":
+          - cell "Select hello.txt":
+            - radio "Select hello.txt"
+          - cell "hello.txt":
+            - link "hello.txt":
+              - /url: "#"
+          - cell "f1e991c96d6c8ef35193d0dae97b8acd"
+          - cell "Object"
+          - cell "No"
+          - cell "7 B"
+          - cell "11/3/2026, 6:29:19 PM"
+          - cell "\"0f81d52e06caaa4860887488d18271c7\""
+        - row "Select hello.txt hello.txt null Object No 11 B 11/3/2026, 6:29:05 PM \"4e410ef9be29753f83ef2b07aa303a2f\"":
+          - cell "Select hello.txt":
+            - radio "Select hello.txt"
+          - cell "hello.txt":
+            - link "hello.txt":
+              - /url: "#"
+          - cell "null"
+          - cell "Object"
+          - cell "No"
+          - cell "11 B"
+          - cell "11/3/2026, 6:29:05 PM"
+          - cell "\"4e410ef9be29753f83ef2b07aa303a2f\""
+  - text: simulator-admin · us-east-1 · Temporary environment · No external cloud connection
+  - complementary "Help panel":
+    - button "Close help panel"
+    - heading "Simulator scope" [level=2]
+    - paragraph: Independent local simulator. Not affiliated with AWS. No real cloud resources are created.
+    - paragraph: S3 basic operations, Standard SSM text parameters, Python 3.12 Lambda functions and limited CloudFormation stacks using SSM parameters and inline IAM identity policies.
+    - paragraph: Cloud IAM sessions, managed policies, EC2, KMS and other cloud providers are not implemented.
+    - button "Manage identity policy"
+    - link "Console licenses":
+      - /url: /_simulator/licenses/CONSOLE-NOTICES.txt

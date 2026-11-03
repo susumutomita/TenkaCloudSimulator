@@ -19,3 +19,5 @@ CloudFormationのRef/GetAtt/Subはresource dependency graphを先にtopological 
 CloudFormationのIAM判定は要求開始時のpolicy snapshotを使い、Createは生成対象ID（冪等retryは既存ID）、named Describe/Deleteは実際のStack ARNを評価する。DeleteのID解決と認可は同じwrite transaction内。全stackのDescribeにはglobal許可に加え各ARNの明示Denyも評価し、拒否時に部分Outputsを返さない。
 
 IAMはglobal namespaceなので、自動Role名はStack固有IDとlogical IDから接尾辞を生成し64文字に収める。同名Stackの別リージョン作成を衝突させない。明示RoleNameはその名前を保持し、CAPABILITY_NAMED_IAMを必須とする。既存の保存済みphysical IDは読み出した値を使い、再計算・改名しない。[AWS IAM Role仕様](https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-resource-iam-role.html)、[CloudFormation action/resource対応](https://docs.aws.amazon.com/service-authorization/latest/reference/list_cloudformation.html)を参照。
+
+S3 version history/public-access-blockはAWS layerのaws_s3_versions/aws_s3_configに保存する。current-object viewは既存coreのobjectsと共有し、history/current/null置換・marker除去を単一transactionで更新する。GET時の旧状態importもtransaction内。config XMLの読込/検証は共有DB transactionより前で行い、遅い本文送信で他操作の接続を塞がない。bucket削除はcurrentだけでなく全history/markersを確認。provider-neutral coreへS3 versioningの分岐を持ち込まない。[保存・IAM・quota詳細](../s3.md)。

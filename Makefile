@@ -12,7 +12,9 @@ dev: build
 
 test:
 	mkdir -p reports
-	$(GO) test -race -coverpkg=./... -coverprofile=reports/coverage.out ./...
+	# Packages each compile fixed WASM runtimes. Avoid cross-package CPU contention;
+	# goroutine/race and deadline assertions inside each test remain unchanged.
+	$(GO) test -p 1 -race -coverpkg=./... -coverprofile=reports/coverage.out ./...
 	$(PYTHON) scripts/test-coverage-gate.py
 	$(PYTHON) scripts/check-coverage.py reports/coverage.out
 

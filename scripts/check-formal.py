@@ -32,3 +32,18 @@ with tempfile.TemporaryDirectory(prefix='tcsim-ownership-') as directory:
   if success:assert result.returncode==0 and 'No error has been found' in text,text
   else:assert result.returncode!=0 and 'Invariant OwnershipExclusive is violated' in text,text
   print(name+': '+('invariants hold' if success else 'drift ownership mutation detected'))
+# Versioned deletion must guard retained history, not merely the current view.
+# The bounded model abstracts payload/version IDs and enabled versioning only;
+# native tests cover suspension, quotas, SQL rollback and concurrent writers.
+with tempfile.TemporaryDirectory(prefix='tcsim-s3-versions-') as directory:
+ root=Path(directory)
+ model=Path('formal/S3Versions.tla').read_text()
+ cfg=Path('formal/S3Versions.cfg').read_text()
+ for name,source,success in [('S3Versions',model,True),('S3VersionsMutant',model.replace('MODULE S3Versions ', 'MODULE S3VersionsMutant ').replace('bucket /\\ EmptyHistory', 'bucket /\\ current = {}'),False)]:
+  (root/(name+'.tla')).write_text(source);(root/(name+'.cfg')).write_text(cfg)
+  result=subprocess.run(['java','-cp',str(jar),'tlc2.TLC','-workers','1','-metadir',str(root/(name+'-states')),'-config',str(root/(name+'.cfg')),str(root/(name+'.tla'))],capture_output=True,text=True,timeout=60)
+  text=result.stdout+result.stderr
+  Path('reports/'+name+'.txt').write_text(text)
+  if success:assert result.returncode==0 and 'No error has been found' in text,text
+  else:assert result.returncode!=0 and 'Invariant NoHistoryOrphans is violated' in text,text
+  print(name+': '+('invariants hold' if success else 'current-only deletion mutation detected'))

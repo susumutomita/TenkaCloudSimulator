@@ -1,0 +1,61 @@
+- banner:
+  - link "TenkaCloud Simulator":
+    - /url: /_simulator/console/
+  - button "Services"
+  - button "us-east-1"
+  - button "Choose identity": simulator-admin
+  - link "API reference":
+    - /url: /_simulator/docs/
+- main:
+  - navigation "Service navigation":
+    - button "Toggle service navigation"
+  - navigation "Breadcrumbs":
+    - list:
+      - listitem:
+        - link "Services":
+          - /url: "#/s3"
+      - listitem:
+        - link "Amazon S3":
+          - /url: "#/s3"
+      - listitem:
+        - link "audit-practice" [disabled]
+  - group: Local simulation Your resources reset when the process stops. This is an independent simulator, not the AWS console.
+  - heading "audit-practice" [level=1]
+  - tablist:
+    - tab "Objects"
+    - tab "Properties"
+    - tab "Permissions" [selected]
+    - tab "Metrics" [disabled]
+    - tab "Management" [disabled]
+  - tabpanel "Permissions"
+  - heading "Block public access (bucket settings)" [level=2]
+  - button "Cancel"
+  - button "Save changes"
+  - checkbox "Block all public access" [checked]
+  - text: Block all public access
+  - checkbox "Block public access to buckets and objects granted through new access control lists (ACLs)" [checked]
+  - text: Block public access to buckets and objects granted through new access control lists (ACLs)
+  - checkbox "Block public access to buckets and objects granted through any access control lists (ACLs)" [checked]
+  - text: Block public access to buckets and objects granted through any access control lists (ACLs)
+  - checkbox "Block public access to buckets and objects granted through new public bucket or access point policies" [checked]
+  - text: Block public access to buckets and objects granted through new public bucket or access point policies
+  - checkbox "Block public and cross-account access to buckets and objects through any public bucket or access point policies" [checked]
+  - text: Block public and cross-account access to buckets and objects through any public bucket or access point policies
+  - group: These are bucket-level settings. Public ACLs, resource policies, access points and cross-account grants are unavailable in this simulator, so turning a setting off does not grant public access.
+  - text: simulator-admin · us-east-1 · Temporary environment · No external cloud connection
+  - complementary "Help panel":
+    - button "Close help panel"
+    - heading "Simulator scope" [level=2]
+    - paragraph: Independent local simulator. Not affiliated with AWS. No real cloud resources are created.
+    - paragraph: S3 basic operations, Standard SSM text parameters, Python 3.12 Lambda functions and limited CloudFormation stacks using SSM parameters and inline IAM identity policies.
+    - paragraph: Cloud IAM sessions, managed policies, EC2, KMS and other cloud providers are not implemented.
+    - button "Manage identity policy"
+    - link "Console licenses":
+      - /url: /_simulator/licenses/CONSOLE-NOTICES.txt
+- dialog "Edit Block public access (bucket settings)":
+  - heading "Edit Block public access (bucket settings)" [level=2]
+  - button "Close confirmation"
+  - text: Type confirm to save changes
+  - textbox "Type confirm to save changes"
+  - button "Cancel"
+  - button "Confirm"

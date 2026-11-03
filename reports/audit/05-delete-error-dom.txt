@@ -55,23 +55,23 @@
         - columnheader "AWS Region"
         - columnheader "Creation date"
     - rowgroup:
-      - row "Select audit-practice audit-practice us-east-1 11/3/2026, 5:28:14 PM":
+      - row "Select audit-practice audit-practice us-east-1 11/3/2026, 6:29:04 PM":
         - cell "Select audit-practice":
           - radio "Select audit-practice" [checked]
         - cell "audit-practice":
           - link "audit-practice":
             - /url: "#"
         - cell "us-east-1"
-        - cell "11/3/2026, 5:28:14 PM"
+        - cell "11/3/2026, 6:29:04 PM"
   - text: simulator-admin · us-east-1 · Temporary environment · No external cloud connection
   - complementary "Help panel":
     - button "Toggle help panel"
 - dialog "Delete bucket":
   - heading "Delete bucket" [level=2]
   - button "Close dialog"
-  - group: Delete “audit-practice”? This action cannot be undone. Buckets must be empty.
+  - group: Delete “audit-practice”? Buckets must contain no objects, versions or delete markers.
   - text: Type audit-practice to confirm
   - textbox "Type audit-practice to confirm": audit-practice
-  - group: "BucketNotEmpty: Delete all objects before deleting this bucket."
+  - group: "BucketNotEmpty: Delete all objects, versions and delete markers first."
   - button "Cancel"
   - button "Delete permanently"
