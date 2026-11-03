@@ -40,7 +40,7 @@ func TestCloudFormationAtomicLifecycleAndOwnership(t *testing.T) {
 	delete(create, "Parameters.member.1.ParameterValue")
 	delete(create, "ClientRequestToken")
 	cfnCall(t, s, "CreateStack", create, 400, nil)
-	reader := map[string]string{"X-Simulator-Principal": "owned-R"}
+	reader := map[string]string{"X-Simulator-Principal": strings.TrimPrefix(stackOutput(t, []byte(original), "Role"), "arn:aws:iam::000000000000:role/")}
 	ssmCall(t, s, "GetParameter", map[string]any{"Name": "/owned/hello"}, 200, reader)
 	cfnCall(t, s, "DescribeStacks", nil, 403, reader)
 	// A manually deleted resource remains reserved until its owner is deleted.
@@ -181,4 +181,24 @@ func TestStackIAMUsesActualResourceARN(t *testing.T) {
 		t.Fatal("list leaked denied outputs")
 	}
 	cfnCall(t, s, "DescribeStacks", nil, 403, map[string]string{"X-Simulator-Principal": "unknown"})
+}
+
+func stackOutput(t *testing.T, body []byte, key string) string {
+	t.Helper()
+	var response struct {
+		Outputs []struct {
+			Key   string `xml:"OutputKey"`
+			Value string `xml:"OutputValue"`
+		} `xml:"DescribeStacksResult>Stacks>member>Outputs>member"`
+	}
+	if err := xml.Unmarshal(body, &response); err != nil {
+		t.Fatal(err)
+	}
+	for _, output := range response.Outputs {
+		if output.Key == key {
+			return output.Value
+		}
+	}
+	t.Fatalf("Missing output %s", key)
+	return ""
 }

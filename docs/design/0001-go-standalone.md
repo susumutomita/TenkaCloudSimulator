@@ -15,3 +15,5 @@ Protocol/API subsetと制限は[README](../../README.md)。AWS以外は未実装
 CloudFormationのRef/GetAtt/Subはresource dependency graphを先にtopological sortし、forward referenceとcycleを識別する。リソースの論理名の辞書順に依存させない。DeleteStackはimmediate transactionを取得してからstack documentとownershipを読み、同じtransactionで削除する。遅延した旧stack IDの削除が、再利用された物理名の別stackを壊さない。
 
 CloudFormationのIAM判定は要求開始時のpolicy snapshotを使い、Createは生成対象ID（冪等retryは既存ID）、named Describe/Deleteは実際のStack ARNを評価する。DeleteのID解決と認可は同じwrite transaction内。全stackのDescribeにはglobal許可に加え各ARNの明示Denyも評価し、拒否時に部分Outputsを返さない。
+
+IAMはglobal namespaceなので、自動Role名はStack固有IDとlogical IDから接尾辞を生成し64文字に収める。同名Stackの別リージョン作成を衝突させない。明示RoleNameはその名前を保持し、CAPABILITY_NAMED_IAMを必須とする。既存の保存済みphysical IDは読み出した値を使い、再計算・改名しない。[AWS IAM Role仕様](https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-resource-iam-role.html)、[CloudFormation action/resource対応](https://docs.aws.amazon.com/service-authorization/latest/reference/list_cloudformation.html)を参照。

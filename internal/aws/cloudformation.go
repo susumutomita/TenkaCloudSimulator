@@ -411,11 +411,16 @@ func compileStack(region, name, body string, parameters map[string]string, capab
 			}
 			physical = stringValue(properties["RoleName"])
 			if physical == "" {
-				physical = name + "-" + key
-				if len(physical) > 64 {
-					sum := sha256.Sum256([]byte(physical))
-					physical = physical[:47] + "-" + hex.EncodeToString(sum[:8])
+				base := name + "-" + key
+				if len(base) > 47 {
+					base = base[:47]
 				}
+				// IAM is global. Include this unique stack ID (and logical ID),
+				// not just a region-scoped stack name, in generated role names.
+				sum := sha256.Sum256([]byte(id + "\x00" + key))
+				physical = base + "-" + hex.EncodeToString(sum[:8])
+			} else if capabilities != "CAPABILITY_NAMED_IAM" {
+				return fail("Explicit RoleName requires CAPABILITY_NAMED_IAM.")
 			}
 			if !regexp.MustCompile(`^[a-zA-Z0-9_-]{1,64}$`).MatchString(physical) || physical == core.Administrator {
 				return fail("Role name must be 1–64 non-reserved local identity characters.")

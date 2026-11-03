@@ -292,7 +292,7 @@ Outputs:
   Result: {Value: !GetAtt A.Value}
 `
 	record, err = compileStack("us-east-1", "forward", cross, nil, "CAPABILITY_IAM")
-	if err != nil || record.Outputs["Result"] != "arn:aws:iam::000000000000:role/forward-Z" {
+	if err != nil || record.Outputs["Result"] != "arn:aws:iam::000000000000:role/"+record.Resources[0].PhysicalID {
 		t.Fatal(record, err)
 	}
 	for _, value := range []string{"!Ref A", "!GetAtt A.Value", "!Sub '${A.Value}'"} {
@@ -322,5 +322,93 @@ func TestStackDeletionValidatesResourceClaims(t *testing.T) {
 	}
 	if got, err := p.Get("us-east-1", "/owner"); err != nil || got.Value != "sentinel" {
 		t.Fatal("ownership mismatch deleted bytes", err)
+	}
+}
+
+func TestGeneratedRolesRemainUniqueAcrossRegionalStacks(t *testing.T) {
+	c, err := core.New(":memory:")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer c.Close()
+	_, err = NewParameterStore(c.Database())
+	if err != nil {
+		t.Fatal(err)
+	}
+	s, err := NewStackStore(c.Database())
+	if err != nil {
+		t.Fatal(err)
+	}
+	template := `Resources:
+  Parameter:
+    Type: AWS::SSM::Parameter
+    Properties: {Name: /regional/hello, Type: String, Value: regional sentinel}
+  Viewer:
+    Type: AWS::IAM::Role
+    Properties:
+      Policies:
+        - PolicyName: read
+          PolicyDocument: {Version: '2012-10-17', Statement: [{Effect: Allow, Action: 'ssm:GetParameter', Resource: '*'}]}
+Outputs:
+  Role: {Value: !GetAtt Viewer.Arn}
+`
+	a, err := compileStack("us-east-1", "same-name", template, nil, "CAPABILITY_IAM")
+	if err != nil {
+		t.Fatal(err)
+	}
+	b, err := compileStack("ap-northeast-1", "same-name", template, nil, "CAPABILITY_IAM")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if a.Outputs["Role"] == b.Outputs["Role"] {
+		t.Fatal("regional stacks generated the same global role")
+	}
+	if err = s.Create(a); err != nil {
+		t.Fatal(err)
+	}
+	if err = s.Create(b); err != nil {
+		t.Fatal("independent regional stack collided", err)
+	}
+	if err = s.Delete(a.Region, a.ID); err != nil {
+		t.Fatal(err)
+	}
+	role := strings.TrimPrefix(b.Outputs["Role"], "arn:aws:iam::000000000000:role/")
+	if decision, err := core.NewIdentities(c).Decision(role, "ssm:GetParameter", "*"); err != nil || decision != "allowed" {
+		t.Fatal("deletion damaged other region role", decision, err)
+	}
+	parameters, _ := NewParameterStore(c.Database())
+	if got, err := parameters.Get(b.Region, "/regional/hello"); err != nil || got.Value != "regional sentinel" {
+		t.Fatal("deletion damaged other region parameter", got, err)
+	}
+	if _, err = s.Records(b.Region, b.ID); err != nil {
+		t.Fatal(err)
+	}
+	// Explicit names still intentionally occupy IAM's global namespace.
+	named := strings.Replace(template, "    Properties:\n      Policies:", "    Properties:\n      RoleName: SharedExplicitRole\n      Policies:", 1)
+	if _, err = compileStack("us-east-1", "named-a", named, nil, "CAPABILITY_IAM"); err == nil {
+		t.Fatal("named IAM acknowledgement not required")
+	}
+	first, err := compileStack("us-east-1", "named-a", named, nil, "CAPABILITY_NAMED_IAM")
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := compileStack("eu-west-1", "named-b", named, nil, "CAPABILITY_NAMED_IAM")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = s.Create(first); err != nil {
+		t.Fatal(err)
+	}
+	if err = s.Create(second); err == nil {
+		t.Fatal("explicit global role collision accepted")
+	}
+	if records, err := s.Records(second.Region, ""); err != nil || len(records) != 0 {
+		t.Fatal("failed named stack persisted", records, err)
+	}
+	if err = s.Delete(first.Region, first.ID); err != nil {
+		t.Fatal(err)
+	}
+	if err = s.Delete(b.Region, b.ID); err != nil {
+		t.Fatal(err)
 	}
 }
