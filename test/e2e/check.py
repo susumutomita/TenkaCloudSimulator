@@ -2,6 +2,8 @@
 Dev dependencies: scripts/requirements-test.txt. No AWS account or credentials.
 """
 import contextlib
+import base64
+import io
 import hashlib
 import json
 import os
@@ -16,6 +18,7 @@ import tempfile
 import time
 import unittest
 import urllib.request
+import zipfile
 
 os.environ['AWS_CONFIG_FILE']='/dev/null'
 os.environ['AWS_SHARED_CREDENTIALS_FILE']='/dev/null'
@@ -228,6 +231,37 @@ class Conformance(unittest.TestCase):
       self.assertEqual([b['Name'] for b in c.list_buckets()['Buckets']],['navigation-bucket']);self.assertEqual([o['Key'] for o in c.list_objects_v2(Bucket='navigation-bucket')['Contents']],['sentinel']);self.assertEqual(c.get_object(Bucket='navigation-bucket',Key='sentinel')['Body'].read(),b'unchanged');self.assertEqual(ssm.get_parameter(Name='/navigation/existing')['Parameter']['Value'],'unchanged')
       with self.assertRaises(ClientError):ssm.get_parameter(Name='/navigation/must-not-create')
    self.assertEqual(errors,[]);browser.close()
+ def test_lambda_sdk_console_and_isolated_python_without_host_runtime(self):
+  with running(authenticated=True) as (endpoint,operator),running(authenticated=True) as (other_endpoint,other_operator),sync_playwright() as p:
+   def client(url,token):
+    c=boto3.client('lambda',endpoint_url=url,region_name='us-east-1',aws_access_key_id='TCSIMLOCAL',aws_secret_access_key='dummy',config=Config(retries={'max_attempts':0}));c.meta.events.register('before-sign.lambda',lambda request,**kwargs:request.headers.add_header('X-Simulator-Token',token));return c
+   def control(url,token,path,data):
+    request=urllib.request.Request(url+path,data=json.dumps(data).encode(),headers={'Content-Type':'application/json','X-Simulator-Token':token},method='POST' if path.endswith('/access') else 'PUT')
+    with urllib.request.urlopen(request) as response:return json.load(response)
+   policy={'Version':'2012-10-17','Statement':[{'Effect':'Allow','Action':'ssm:GetParameter','Resource':'*'}]}
+   for url,token in ((endpoint,operator),(other_endpoint,other_operator)):control(url,token,'/_simulator/v1/iam/principals/executor/policy',policy)
+   c=client(endpoint,operator);other=client(other_endpoint,other_operator)
+   executable=os.environ.get('CHROMIUM_EXECUTABLE') or shutil.which('chromium');browser=p.chromium.launch(**({'executable_path':executable} if executable else {}),args=['--no-sandbox']);context=browser.new_context(viewport={'width':1440,'height':1000});page=context.new_page();errors=[];outside=[];page.on('pageerror',lambda e:errors.append(str(e)))
+   def route(r):
+    if r.request.url.startswith(endpoint+'/'):r.continue_()
+    else:outside.append(r.request.url);r.abort()
+   context.route('**/*',route)
+   page.goto(endpoint+'/_simulator/console/');page.get_by_label('Access token',exact=True).fill(operator);page.get_by_role('button',name='Open sandbox',exact=True).click();page.get_by_role('button',name='Services',exact=True).click();page.get_by_role('menuitem',name='Lambda',exact=True).click();expect(page.get_by_role('heading',name='No functions yet',exact=True)).to_be_visible()
+   page.get_by_role('button',name='Create function',exact=True).first.click();page.get_by_label('Function name',exact=True).fill('ui-lambda');page.get_by_label('Execution role ARN',exact=True).fill('arn:aws:iam::000000000000:role/executor');page.get_by_role('button',name='Create function',exact=True).last.click();expect(page.get_by_role('heading',name='ui-lambda',exact=True)).to_be_visible();page.get_by_label('Event JSON',exact=True).fill('{"value":7}');page.get_by_role('button',name='Test',exact=True).click();expect(page.get_by_text('Execution succeeded',exact=True)).to_be_visible(timeout=20000)
+   response=json.loads(page.get_by_label('Response',exact=True).input_value());self.assertEqual(json.loads(response['body'])['event'],{'value':7});self.assertEqual(json.loads(c.invoke(FunctionName='ui-lambda',Payload=b'{"value":7}')['Payload'].read()),response)
+   code=io.BytesIO()
+   with zipfile.ZipFile(code,'w',compression=zipfile.ZIP_DEFLATED) as z:z.writestr('lambda_function.py',"import sqlite3\ndef lambda_handler(event, context):\n    db=sqlite3.connect(':memory:')\n    return {'answer':db.execute('select ? * 6',(event['value'],)).fetchone()[0]}\n")
+   previous=c.get_function_configuration(FunctionName='ui-lambda')['RevisionId'];page.get_by_role('tab',name='Code',exact=True).click();page.get_by_label('Function ZIP',exact=True).set_input_files({'name':'function.zip','mimeType':'application/zip','buffer':code.getvalue()});page.get_by_role('button',name='Deploy',exact=True).click();expect(page.get_by_text('Function code deployed.',exact=True)).to_be_visible();configuration=c.get_function_configuration(FunctionName='ui-lambda');self.assertNotEqual(previous,configuration['RevisionId']);self.assertEqual(configuration['CodeSha256'],base64.b64encode(hashlib.sha256(code.getvalue()).digest()).decode())
+   page.get_by_role('tab',name='Test',exact=True).click();page.get_by_role('button',name='Test',exact=True).click();expect(page.get_by_label('Response',exact=True)).to_have_value('{\n  "answer": 42\n}');self.assertEqual(json.loads(c.invoke(FunctionName=configuration['FunctionArn'],Payload=b'{"value":7}')['Payload'].read()),{'answer':42});page.screenshot(path=str(REPORTS/'lambda-test-desktop.png'),full_page=True);page.set_viewport_size({'width':390,'height':844});self.assertTrue(page.evaluate('document.documentElement.scrollWidth <= innerWidth'));page.screenshot(path=str(REPORTS/'lambda-test-mobile.png'),full_page=True);page.set_viewport_size({'width':1440,'height':1000})
+   invoke_policy={'Version':'2012-10-17','Statement':[{'Effect':'Allow','Action':'lambda:InvokeFunction','Resource':configuration['FunctionArn']}]};control(endpoint,operator,'/_simulator/v1/iam/principals/invoker/policy',invoke_policy);participant=control(endpoint,operator,'/_simulator/v1/access',{'Principal':'invoker'})['AccessToken'];limited=client(endpoint,participant)
+   with self.assertRaises(ClientError):limited.get_function_configuration(FunctionName='ui-lambda')
+   participant_context=browser.new_context(viewport={'width':1440,'height':1000});participant_page=participant_context.new_page();participant_page.goto(endpoint+'/_simulator/console/');participant_page.get_by_label('Access token',exact=True).fill(participant);participant_page.get_by_role('button',name='Open sandbox',exact=True).click();participant_page.get_by_role('button',name='Services',exact=True).click();participant_page.get_by_role('menuitem',name='Lambda',exact=True).click();expect(participant_page.get_by_text('Functions unavailable',exact=True)).to_be_visible();participant_page.get_by_label('Function name or ARN',exact=True).fill(configuration['FunctionArn']);participant_page.get_by_role('button',name='Test',exact=True).click();expect(participant_page.get_by_label('Response',exact=True)).to_have_value('{\n  "answer": 42\n}')
+   other_code=io.BytesIO()
+   with zipfile.ZipFile(other_code,'w') as z:z.writestr('index.py',"def handler(event, context): return {'team':'other'}\n")
+   other.create_function(FunctionName='ui-lambda',Runtime='python3.12',Role='arn:aws:iam::000000000000:role/executor',Handler='index.handler',Timeout=5,Code={'ZipFile':other_code.getvalue()});self.assertEqual(json.loads(other.invoke(FunctionName='ui-lambda',Payload=b'{}')['Payload'].read()),{'team':'other'});self.assertEqual(json.loads(c.invoke(FunctionName='ui-lambda',Payload=b'{"value":7}')['Payload'].read()),{'answer':42})
+   with self.assertRaises(ClientError) as denied:client(other_endpoint,participant).invoke(FunctionName='ui-lambda',Payload=b'{}')
+   self.assertEqual(denied.exception.response['ResponseMetadata']['HTTPStatusCode'],401)
+   page.get_by_role('button',name='Functions',exact=True).click();page.get_by_role('radio',name='Select ui-lambda',exact=True).check();page.get_by_role('button',name='Delete',exact=True).click();page.get_by_label('Type ui-lambda to confirm',exact=True).fill('ui-lambda');page.get_by_role('dialog').get_by_role('button',name='Delete',exact=True).click();expect(page.get_by_role('heading',name='No functions yet',exact=True)).to_be_visible();self.assertEqual(c.list_functions()['Functions'],[]);self.assertEqual(len(other.list_functions()['Functions']),1);other.delete_function(FunctionName='ui-lambda');self.assertEqual(errors,[]);self.assertEqual(outside,[]);browser.close()
  def test_refuses_non_loopback_by_default(self):
   result=subprocess.run([str(BINARY),'--listen','0.0.0.0:0'],capture_output=True,text=True);self.assertNotEqual(result.returncode,0);self.assertIn('--allow-remote',result.stderr)
 if __name__=='__main__':unittest.main(verbosity=2)

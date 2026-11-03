@@ -18,6 +18,7 @@ Go 1.26が必要（CIは1.26.10）。コンソールは <http://127.0.0.1:4566/_
 | S3 | ListBuckets/CreateBucket/HeadBucket/GetBucketLocation/DeleteBucket/ListObjectsV2/PutObject/GetObject/HeadObject/DeleteObject | path-style、4リージョン、versioning/multipart/ACLなし |
 | Systems Manager Parameter Store | PutParameter/GetParameter/GetParameters/GetParametersByPath/DescribeParameters/DeleteParameter | StandardのString/StringList/textのみ。SecureString/KMS/labelsなし |
 | CloudFormation | CreateStack/DescribeStacks/DeleteStack | SSM Parameterと1 inline identity policy付きIAM Roleのみ。Ref/Sub/GetAttの限定評価。その他は明示エラー |
+| Lambda | CreateFunction/ListFunctions/GetFunctionConfiguration/UpdateFunctionCode/Invoke/DeleteFunction | 埋込CPython 3.12.16/WASIでPythonコードを実行。128 MiB/1–30秒、同期のみ。CFN・関数内SDK/network・Function URLは未対応 |
 
 リージョン: us-east-1、us-west-2、ap-northeast-1、eu-west-1。1プロセスの上限: 8 MiB/object、64 MiB object合計、1000 buckets、10000 objects、1000 parameters/identities、100 stacks、100 resources/stack。SSM値4096 UTF-8 bytes、TemplateBody51200 bytes。プロセスメモリ全体の上限ではない。
 
@@ -59,8 +60,8 @@ npm ci --prefix tools/console --ignore-scripts
 node tools/console/build.mjs
 ```
 
-statementとsource-line coverageの両方90%必須。PythonはSDK/browser/coverage/license等の開発支援に限定し、実行時に不要。詳細は[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)、[画面の再現範囲](docs/console.md)、[形式検証](formal/README.md)、[引継ぎ](docs/handoff/README.md)。
+statementとsource-line coverageの両方90%必須。ホストPythonはSDK/browser/coverage/license等の開発支援だけに使用する。Lambda用CPythonはGoに埋め込み、実行時の外部Pythonは不要。[Lambdaの範囲・制限](docs/lambda.md)、[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)、[画面の再現範囲](docs/console.md)、[形式検証](formal/README.md)、[引継ぎ](docs/handoff/README.md)。
 
 ## ライセンス
 
-本体の[MIT LICENSE](LICENSE)と依存ライブラリの原文rights noticesを保持。実行バイナリの`/_simulator/licenses/`にGo/Scalar/Cloudscapeの原文LICENSE/NOTICEを同梱。再生成手順と出所は[tools/console/README.md](tools/console/README.md)、[tools/scalar/README.md](tools/scalar/README.md)。AWSの商標や公式サービスとの提携を意味しない。
+本体の[MIT LICENSE](LICENSE)と依存ライブラリの原文rights noticesを保持。実行バイナリの`/_simulator/licenses/`にGo/Scalar/Cloudscape/CPython-WASIの原文LICENSE/NOTICEを同梱。再生成手順と出所は[tools/console/README.md](tools/console/README.md)、[tools/scalar/README.md](tools/scalar/README.md)、[tools/python/README.md](tools/python/README.md)。AWSの商標や公式サービスとの提携を意味しない。

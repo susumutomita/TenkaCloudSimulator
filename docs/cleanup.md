@@ -16,5 +16,7 @@
 - tools/scalar/notices.py: bundled packagesの原文rights evidenceの再生成。
 - build-vulndb-snapshot.py: canonical vuln.go.devがこの環境で403のため、公式Go vuln DB mirrorの原文OSVを使う検査補助として使用。canonical CIの代替成功と偽らない。
 - catalog-matrix.py: 実カタログmetadataと参照templateから対応表を再生成。問題コードは実行しない。
+- tools/python/package.py / check.py: 新しい埋込CPython/WASIの固定artifact・stdlib・原文rightsを構築/検証。ホストPythonは実行時に不要。
+- internal/workload/python/bootstrap.py: go:embedでWASI内へ渡す有効な関数呼出glue。旧Pythonクラウドruntimeではなく、既存Python Lambdaコードの実行に必要。
 
 現行mainには旧Pythonクラウドruntime自体は既に存在しなかった。hello-worldに必要なCFN/SSM知識はGoへ復旧し、残るPythonを言語だけで消して機能・検査を失わせない。検索、埋込assetチェック、build、SDK/browserテストで参照漏れを確認する。

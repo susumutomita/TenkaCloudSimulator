@@ -13,7 +13,9 @@ assert not any(item['name']=='@replit/codemirror-css-color-picker' for item in i
 assert all(item.get('noticeEvidence') for item in inventory)
 spec=json.loads(Path('internal/server/apidocs/openapi.json').read_text())
 assert spec['openapi']=='3.1.0' and spec['servers']==[{'url':'/','description':'This simulator only'}]
-assert len([v for p in spec['paths'].values() for k,v in p.items() if k in ['get','put','head','delete']])==14
+assert len([v for p in spec['paths'].values() for k,v in p.items() if k in ['get','put','head','delete']])==18
+lambda_operations={v['operationId'] for path,p in spec['paths'].items() if path.startswith('/2015-03-31/functions') for k,v in p.items() if k in ['get','post','put','delete']}
+assert lambda_operations=={'CreateFunction','ListFunctions','GetFunctionConfiguration','UpdateFunctionCode','Invoke','DeleteFunction'}
 init=Path('internal/server/apidocs/init.js').read_text()
 for option in ['withDefaultFonts: false','telemetry: false','agent: { disabled: true }','proxyUrl: ""','url.origin !== location.origin']:
  assert option in init,option
@@ -36,3 +38,6 @@ assert all(p.get('evidence') for p in packages)
 assert Path('third_party/CONSOLE-NOTICES.txt').read_bytes()==Path('internal/legal/assets/CONSOLE-NOTICES.txt').read_bytes()
 assert spec['paths']['/']['post']['operationId']=='awsRegionalOperation'
 print('Cloudscape bundle, original notices and regional API description verified.')
+
+import runpy
+runpy.run_path('tools/python/check.py',run_name='__main__')
