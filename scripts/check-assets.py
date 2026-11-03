@@ -24,3 +24,15 @@ for path in ['third_party/SCALAR-LICENSE','third_party/SCALAR-BUNDLED-NOTICES.tx
 for path in ['SCALAR-LICENSE','SCALAR-BUNDLED-NOTICES.txt','GO-NOTICES.txt']:
  assert Path('third_party',path).read_bytes()==Path('internal/legal/assets',path).read_bytes()
 print('Vendored Scalar identity, notices, and local OpenAPI configuration verified.')
+
+console=json.loads(Path('tools/console/bundle-digests.json').read_text())
+for name,digest in console.items():
+ assert hashlib.sha256(Path('internal/server/web',name).read_bytes()).hexdigest()==digest,name
+inputs=json.loads(Path('tools/console/bundle-inputs.json').read_text())['inputs']
+for component in ['app-layout','table','tabs','global-styles']:
+ assert any('@cloudscape-design/' in name and component in name for name in inputs),component
+packages=json.loads(Path('third_party/console-packages.json').read_text())
+assert all(p.get('evidence') for p in packages)
+assert Path('third_party/CONSOLE-NOTICES.txt').read_bytes()==Path('internal/legal/assets/CONSOLE-NOTICES.txt').read_bytes()
+assert spec['paths']['/']['post']['operationId']=='awsRegionalOperation'
+print('Cloudscape bundle, original notices and regional API description verified.')

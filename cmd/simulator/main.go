@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"flag"
 	"fmt"
 	"io"
@@ -9,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -29,6 +32,8 @@ func run(ctx context.Context, args []string, output io.Writer) error {
 	listen := flags.String("listen", "127.0.0.1:4566", "HTTP listen address (console: /_simulator/console/)")
 	statePath := flags.String("state", ":memory:", "SQLite state path; default is ephemeral memory")
 	remote := flags.Bool("allow-remote", false, "Allow binding beyond loopback; use only in an isolated trusted network")
+	tokenFile := flags.String("token-file", "simulator-token", "Private local operator access-token file (created with mode 0600)")
+	unsafe := flags.Bool("unsafe-no-auth", false, "Development-only: disable access tokens on numeric loopback")
 	if err := flags.Parse(args); err != nil {
 		return err
 	}
@@ -41,7 +46,10 @@ func run(ctx context.Context, args []string, output io.Writer) error {
 	}
 	ip := net.ParseIP(host)
 	if !*remote && (ip == nil || !ip.IsLoopback()) {
-		return fmt.Errorf("non-loopback binding requires --allow-remote; the simulator has no authentication")
+		return fmt.Errorf("non-loopback binding requires --allow-remote; use a trusted authenticated host proxy")
+	}
+	if *unsafe && *remote {
+		return fmt.Errorf("--unsafe-no-auth cannot be combined with --allow-remote")
 	}
 	l, err := net.Listen("tcp", *listen)
 	if err != nil {
@@ -53,10 +61,23 @@ func run(ctx context.Context, args []string, output io.Writer) error {
 		return err
 	}
 	defer closeState()
+	if !*unsafe {
+		token, err := operatorToken(*tokenFile)
+		if err != nil {
+			_ = l.Close()
+			return err
+		}
+		handler, err = server.NewAccess(handler, token, *remote)
+		if err != nil {
+			_ = l.Close()
+			return err
+		}
+		fmt.Fprintf(output, "Operator token file: %s (never share with participants)\n", *tokenFile)
+	}
 	srv := &http.Server{Handler: handler, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 30 * time.Second, WriteTimeout: 30 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 32 << 10}
 	done := make(chan error, 1)
 	go func() { done <- srv.Serve(l) }()
-	fmt.Fprintf(output, "TenkaCloud Simulator · independent local simulation\nConsole http://%s/_simulator/console/\nS3 endpoint http://%s\n", l.Addr(), l.Addr())
+	fmt.Fprintf(output, "TenkaCloud Simulator · independent local simulation\nConsole http://%s/_simulator/console/\nAWS simulation endpoint http://%s\n", l.Addr(), l.Addr())
 	select {
 	case err := <-done:
 		if err != http.ErrServerClosed {
@@ -68,4 +89,40 @@ func run(ctx context.Context, args []string, output io.Writer) error {
 		defer cancel()
 		return srv.Shutdown(shutdown)
 	}
+}
+
+func operatorToken(path string) (string, error) {
+	info, err := os.Lstat(path)
+	if os.IsNotExist(err) {
+		data := make([]byte, 32)
+		if _, err = rand.Read(data); err != nil {
+			return "", err
+		}
+		token := hex.EncodeToString(data)
+		file, e := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
+		if e != nil {
+			return "", e
+		}
+		_, e = file.WriteString(token + "\n")
+		closeErr := file.Close()
+		if e != nil {
+			return "", e
+		}
+		return token, closeErr
+	}
+	if err != nil {
+		return "", err
+	}
+	if !info.Mode().IsRegular() || info.Size() > 512 || info.Mode().Perm()&0077 != 0 {
+		return "", fmt.Errorf("token file must be a regular private file (0600) of at most 512 bytes")
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return "", err
+	}
+	token := strings.TrimSpace(string(data))
+	if len(token) < 32 || len(token) > 256 {
+		return "", fmt.Errorf("invalid operator token file length")
+	}
+	return token, nil
 }

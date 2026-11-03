@@ -12,7 +12,7 @@ PR 作業中に scope 外の発見をしたら、その場で実装せずに本�
 
 - 永続バックログ: `.claude/state/follow-ups.jsonl`
   - JSON Lines 形式（1 行 = 1 エントリ）
-  - フィールド: `id` (ULID), `created_at` (ISO8601), `branch`, `title`, `description`, `severity` (low/medium/high), `status` (open/resolved), `resolved_pr` (URL or null), `resolved_at` (ISO8601 or null)
+  - フィールド: `id` (UUID), `created_at` (ISO8601), `branch`, `title`, `description`, `severity` (low/medium/high), `status` (open/resolved), `resolved_pr` (URL or null), `resolved_at` (ISO8601 or null)
 - 初回利用時は `.claude/state/` ディレクトリと空のファイルを作る (`mkdir -p .claude/state && touch .claude/state/follow-ups.jsonl`)
 
 ## サブコマンド
@@ -32,7 +32,7 @@ jq -c 'select(.status == "open")' .claude/state/follow-ups.jsonl | \
 
 ユーザー入力から `title` (必須) と `description` (任意・複数行可) を受け取り、ストレージに追記する。
 
-- `id` は ULID で発行 (`bunx ulid` または `python -c "import ulid; print(ulid.new())"` または `date +%s%N` の代替)
+- `id` は開発用Python標準ライブラリのUUIDで発行（外部パッケージ不要）
 - `branch` は `git rev-parse --abbrev-ref HEAD` で取得
 - `severity` はユーザー指定がなければ `medium`
 - 追記したら、現在の PR 本文に貼る markdown スニペットも出力:
@@ -44,7 +44,7 @@ jq -c 'select(.status == "open")' .claude/state/follow-ups.jsonl | \
 例:
 ```bash
 mkdir -p .claude/state
-ID=$(bunx ulid 2>/dev/null || date +%s%N)
+ID=$(python3 -c "import uuid; print(uuid.uuid4())")
 BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
 NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 jq -nc \

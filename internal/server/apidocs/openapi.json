@@ -59,6 +59,93 @@
             }
           }
         }
+      },
+      "post": {
+        "summary": "SSM JSON or CloudFormation Query operation",
+        "description": "Native regional root endpoint. SSM: X-Amz-Target AmazonSSM.PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter. CloudFormation: CreateStack, DescribeStacks, DeleteStack; only SSM parameters and one inline IAM identity policy per role. Unsupported options fail. Real credentials and session tokens are rejected.",
+        "operationId": "awsRegionalOperation",
+        "parameters": [
+          {
+            "name": "X-Amz-Target",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            },
+            "description": "AmazonSSM.<operation> for SSM only"
+          },
+          {
+            "name": "X-Simulator-Region",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "us-east-1",
+                "us-west-2",
+                "ap-northeast-1",
+                "eu-west-1"
+              ]
+            },
+            "example": "us-east-1"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-amz-json-1.1": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "Name": "/practice/hello"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Action": {
+                    "type": "string",
+                    "enum": [
+                      "CreateStack",
+                      "DescribeStacks",
+                      "DeleteStack"
+                    ]
+                  },
+                  "Version": {
+                    "type": "string",
+                    "enum": [
+                      "2010-05-15"
+                    ]
+                  },
+                  "StackName": {
+                    "type": "string"
+                  },
+                  "TemplateBody": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "Action": "DescribeStacks",
+                "Version": "2010-05-15"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Native JSON 1.1 SSM or XML Query response"
+          },
+          "400": {
+            "description": "Validation/unsupported field/state conflict"
+          },
+          "403": {
+            "description": "Exercise IAM denied"
+          },
+          "501": {
+            "description": "Unsupported operation"
+          }
+        }
       }
     },
     "/{bucket}": {

@@ -118,7 +118,7 @@ AskUserQuestion ツールを使って以下を必ず確認する。質問は一�
 - テストを通す実装（Green）。最小限で止めず、設計どおりの完成形にする。
 - リファクタリング（Refactor）。
 - `docs/architecture/quality-bar.md` の Definition of Done を満たす。MVP・仮実装・型エスケープで止めない。
-- Biome・型・harness（`bun scripts/architecture-harness.ts --staged --fail-on=error`）を通す。
+- Go fmt/vet・race・coverage・asset gate（`make before-commit`）を通す。
 
 ### QA エージェント
 
