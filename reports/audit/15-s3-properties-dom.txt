@@ -32,13 +32,24 @@
   - button "Edit"
   - term: Bucket Versioning
   - definition: Disabled
+  - heading "Tags (0)" [level=2]
+  - button "Edit tags"
+  - table "Bucket tags":
+    - rowgroup:
+      - row "Key Value":
+        - columnheader "Key"
+        - columnheader "Value"
+    - rowgroup:
+      - row "No tags":
+        - cell "No tags"
+  - text: User-defined bucket tags only. Tag-based permissions, billing and AWS-generated tags are unavailable.
   - group: Version changes take effect immediately in this simulator. MFA Delete, lifecycle expiration, replication and Object Lock are unavailable.
   - text: simulator-admin · us-east-1 · Temporary environment · No external cloud connection
   - complementary "Help panel":
     - button "Close help panel"
     - heading "Simulator scope" [level=2]
     - paragraph: Independent local simulator. Not affiliated with AWS. No real cloud resources are created.
-    - paragraph: S3 basic operations, Standard SSM text parameters, Python 3.12 Lambda functions and limited CloudFormation stacks using SSM parameters and inline IAM identity policies.
+    - paragraph: S3 basic operations, Standard SSM text parameters, Python 3.12 Lambda functions and limited CloudFormation stacks using S3 buckets, SSM parameters and inline IAM identity policies.
     - paragraph: Cloud IAM sessions, managed policies, EC2, KMS and other cloud providers are not implemented.
     - button "Manage identity policy"
     - link "Console licenses":

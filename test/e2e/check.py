@@ -145,6 +145,53 @@ class Conformance(unittest.TestCase):
    for v in c.list_object_versions(Bucket='version-evidence').get('Versions',[]):c.delete_object(Bucket='version-evidence',Key=v['Key'],VersionId=v['VersionId'])
    c.delete_bucket(Bucket='version-evidence');self.assertEqual(c.list_buckets()['Buckets'],[])
    self.assertEqual(errors,[]);self.assertEqual(outside,[]);browser.close()
+ def test_cloudformation_s3_tags_console_and_atomic_cleanup(self):
+  template=Path('internal/aws/testdata/s3-evidence.yaml').read_text()
+  with running(authenticated=True) as (endpoint,token),running(authenticated=True) as (other,other_token),sync_playwright() as p:
+   def client(service,url,access):
+    c=boto3.client(service,endpoint_url=url,region_name='ap-northeast-1',aws_access_key_id='TCSIMEXAMPLE',aws_secret_access_key='simulator-only',config=Config(s3={'addressing_style':'path'},retries={'max_attempts':0},request_checksum_calculation='when_required',response_checksum_validation='when_required'))
+    c.meta.events.register('before-sign.'+service,lambda request,**kwargs:request.headers.add_header('X-Simulator-Token',access));return c
+   c=client('s3',endpoint,token);f=client('cloudformation',endpoint,token);ssm_client=client('ssm',endpoint,token)
+   fields={'StackName':'evidence-stack','TemplateBody':template,'Parameters':[{'ParameterKey':'Prefix','ParameterValue':'browser-evidence'}]}
+   f.create_stack(**fields);other_cfn=client('cloudformation',other,other_token);other_cfn.create_stack(**fields)
+   other_s3=client('s3',other,other_token)
+   self.assertEqual(c.get_bucket_versioning(Bucket='browser-evidence')['Status'],'Enabled')
+   self.assertEqual(c.get_bucket_tagging(Bucket='browser-evidence')['TagSet'],[{'Key':'TenkaCloud:NamePrefix','Value':'browser-evidence'}])
+   executable=os.environ.get('CHROMIUM_EXECUTABLE') or shutil.which('chromium')
+   browser=p.chromium.launch(**({'executable_path':executable} if executable else {}),args=['--no-sandbox']);context=browser.new_context(viewport={'width':1440,'height':1000});page=context.new_page();errors=[];outside=[]
+   page.on('pageerror',lambda e:errors.append(str(e)))
+   def route(r):
+    if r.request.url.startswith(endpoint+'/'):r.continue_()
+    else:outside.append(r.request.url);r.abort()
+   context.route('**/*',route)
+   page.goto(endpoint+'/_simulator/console/');page.get_by_label('Access token',exact=True).fill(token);page.get_by_role('button',name='Open sandbox',exact=True).click()
+   page.get_by_role('button',name='us-east-1',exact=True).click();page.get_by_role('menuitem',name='ap-northeast-1',exact=True).click();page.get_by_role('link',name='browser-evidence',exact=True).click();page.get_by_role('tab',name='Properties',exact=True).click()
+   expect(page.get_by_role('table',name='Bucket tags',exact=True)).to_contain_text('TenkaCloud:NamePrefix')
+   page.get_by_role('button',name='Edit tags',exact=True).click();page.get_by_role('button',name='Add tag',exact=True).click();page.get_by_placeholder('Enter key',exact=True).last.fill('Environment');page.get_by_placeholder('Enter value',exact=True).last.fill('practice');held=[]
+   def hold_tag_save(r):
+    if r.request.method=='PUT':held.append(r)
+    else:r.continue_()
+   page.route(re.compile(re.escape(endpoint)+r'/browser-evidence\?tagging$'),hold_tag_save)
+   with page.expect_request(lambda r:r.url==endpoint+'/browser-evidence?tagging' and r.method=='PUT'):page.get_by_role('button',name='Save tags',exact=True).click()
+   expect(page.get_by_role('button',name='Edit',exact=True)).to_be_disabled();expect(page.get_by_text('Tags saved.',exact=True)).to_have_count(0)
+   self.assertEqual(c.get_bucket_tagging(Bucket='browser-evidence')['TagSet'],[{'Key':'TenkaCloud:NamePrefix','Value':'browser-evidence'}]);self.assertEqual(len(held),1);held[0].continue_();expect(page.get_by_text('Tags saved.',exact=True)).to_be_visible()
+   self.assertEqual({t['Key']:t['Value'] for t in c.get_bucket_tagging(Bucket='browser-evidence')['TagSet']},{'TenkaCloud:NamePrefix':'browser-evidence','Environment':'practice'})
+   page.screenshot(path=str(REPORTS/'s3-tags-desktop.png'),full_page=True)
+   c.put_bucket_tagging(Bucket='browser-evidence',Tagging={'TagSet':[{'Key':'Team','Value':'independent'}]})
+   page.get_by_role('tab',name='Objects',exact=True).click();page.get_by_role('tab',name='Properties',exact=True).click();expect(page.get_by_role('table',name='Bucket tags',exact=True)).to_contain_text('independent');expect(page.get_by_role('table',name='Bucket tags',exact=True)).not_to_contain_text('TenkaCloud:NamePrefix')
+   page.set_viewport_size({'width':390,'height':844});page.screenshot(path=str(REPORTS/'s3-tags-mobile.png'),full_page=True);self.assertTrue(page.evaluate('document.documentElement.scrollWidth <= innerWidth'))
+   self.assertEqual(other_s3.get_bucket_tagging(Bucket='browser-evidence')['TagSet'],[{'Key':'TenkaCloud:NamePrefix','Value':'browser-evidence'}])
+   c.put_object(Bucket='browser-evidence',Key='incident.json',Body=b'evidence');c.delete_object(Bucket='browser-evidence',Key='incident.json')
+   with self.assertRaises(ClientError) as error:f.delete_stack(StackName='evidence-stack')
+   self.assertEqual(error.exception.response['Error']['Code'],'ValidationError')
+   self.assertEqual(ssm_client.get_parameter(Name='/cfn-evidence/config')['Parameter']['Value'],'preserve-me')
+   self.assertEqual(f.describe_stacks(StackName='evidence-stack')['Stacks'][0]['Outputs'][0]['OutputValue'] is not None,True)
+   versions=c.list_object_versions(Bucket='browser-evidence')
+   for v in versions.get('Versions',[])+versions.get('DeleteMarkers',[]):c.delete_object(Bucket='browser-evidence',Key=v['Key'],VersionId=v['VersionId'])
+   f.delete_stack(StackName='evidence-stack');other_cfn.delete_stack(StackName='evidence-stack')
+   with self.assertRaises(ClientError) as error:c.get_bucket_tagging(Bucket='browser-evidence')
+   self.assertEqual(error.exception.response['Error']['Code'],'NoSuchBucket')
+   self.assertEqual(errors,[]);self.assertEqual(outside,[]);browser.close()
  def test_console_and_api_share_state_offline(self):
   with running() as endpoint,sync_playwright() as p:
    executable=os.environ.get('CHROMIUM_EXECUTABLE') or shutil.which('chromium')

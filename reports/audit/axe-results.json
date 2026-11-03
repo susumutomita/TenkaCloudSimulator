@@ -1643,7 +1643,7 @@
         ]
       }
     ],
-    "passes": 28
+    "passes": 30
   },
   {
     "step": "16-s3-versioning-edit",
@@ -1702,7 +1702,7 @@
         ]
       }
     ],
-    "passes": 28
+    "passes": 30
   },
   {
     "step": "17-s3-permissions",
@@ -1953,7 +1953,7 @@
                   {
                     "html": "<div id=\"container-header-_r_...\" class=\"awsui_refresh_14iqq_...\" style=\"top: calc(var(--awsu...\">",
                     "target": [
-                      "#container-header-_r_n7_"
+                      "#container-header-_r_nk_"
                     ]
                   }
                 ],
@@ -1964,9 +1964,9 @@
             "all": [],
             "none": [],
             "impact": "serious",
-            "html": "<span data-analytics-funnel-key=\"substep-name\" class=\"awsui_heading-text_2qdw9_1tbn2_262 awsui_heading-text_105ke_268sp_5 awsui_heading-text-variant-h1_2qdw9_1tbn2_265\" id=\"heading_r_n9_\">Objects</span>",
+            "html": "<span data-analytics-funnel-key=\"substep-name\" class=\"awsui_heading-text_2qdw9_1tbn2_262 awsui_heading-text_105ke_268sp_5 awsui_heading-text-variant-h1_2qdw9_1tbn2_265\" id=\"heading_r_nm_\">Objects</span>",
             "target": [
-              "#heading_r_n9_"
+              "#heading_r_nm_"
             ],
             "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
           },
@@ -1988,7 +1988,7 @@
                   {
                     "html": "<div id=\"container-header-_r_...\" class=\"awsui_refresh_14iqq_...\" style=\"top: calc(var(--awsu...\">",
                     "target": [
-                      "#container-header-_r_n7_"
+                      "#container-header-_r_nk_"
                     ]
                   }
                 ],
@@ -2012,6 +2012,99 @@
   },
   {
     "step": "21-s3-versions-mobile",
+    "violations": [],
+    "incomplete": [],
+    "passes": 18
+  },
+  {
+    "step": "22-s3-tag-editor",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "tags": [
+          "cat.color",
+          "wcag2aa",
+          "wcag143",
+          "TTv5",
+          "TT13.c",
+          "EN-301-549",
+          "EN-9.1.4.3",
+          "ACT",
+          "RGAAv4",
+          "RGAA-3.2.1"
+        ],
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=axeAPI",
+        "nodes": [
+          {
+            "any": [
+              {
+                "id": "color-contrast",
+                "data": {
+                  "fontSize": "12.0pt (16px)",
+                  "fontWeight": "bold",
+                  "messageKey": "pseudoContent",
+                  "expectedContrastRatio": "4.5:1"
+                },
+                "relatedNodes": [
+                  {
+                    "html": "<div class=\"awsui_tabs-tab-header-container_14rmt_ib7qg_97 awsui_refresh_14rmt_ib7qg_110 awsui_tabs-tab-active_14rmt_ib7qg_255 awsui_tabs-tab-focusable_14rmt_ib7qg_268\">",
+                    "target": [
+                      ".awsui_tabs-tab-active_14rmt_ib7qg_255.awsui_tabs-tab-header-container_14rmt_ib7qg_97.awsui_tabs-tab-focusable_14rmt_ib7qg_268"
+                    ]
+                  }
+                ],
+                "impact": "serious",
+                "message": "Element's background color could not be determined due to a pseudo element"
+              }
+            ],
+            "all": [],
+            "none": [],
+            "impact": "serious",
+            "html": "<span>Properties</span>",
+            "target": [
+              "#awsui-tabs-_r_k0_-properties > .awsui_tabs-tab-label_14rmt_ib7qg_86.awsui_tab-label_1acwa_dp0cl_7 > span"
+            ],
+            "failureSummary": "Fix any of the following:\n  Element's background color could not be determined due to a pseudo element"
+          },
+          {
+            "any": [
+              {
+                "id": "color-contrast",
+                "data": {
+                  "fgColor": null,
+                  "bgColor": null,
+                  "contrastRatio": 0,
+                  "fontSize": "10.5pt (14px)",
+                  "fontWeight": "normal",
+                  "messageKey": "bgOverlap",
+                  "expectedContrastRatio": "4.5:1",
+                  "shadowColor": null
+                },
+                "relatedNodes": [],
+                "impact": "serious",
+                "message": "Element's background color could not be determined because it is overlapped by another element"
+              }
+            ],
+            "all": [],
+            "none": [],
+            "impact": "serious",
+            "html": "<div class=\"awsui_option-content_15o6u_1k2cf_208 awsui_option-content_2dmmi_qu62t_6 awsui_selectable-item-content_15o6u_1k2cf_31\">Use value demo</div>",
+            "target": [
+              ".awsui_option-content_15o6u_1k2cf_208"
+            ],
+            "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          }
+        ]
+      }
+    ],
+    "passes": 32
+  },
+  {
+    "step": "23-s3-tags-mobile",
     "violations": [],
     "incomplete": [],
     "passes": 18

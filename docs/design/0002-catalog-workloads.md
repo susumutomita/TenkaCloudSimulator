@@ -14,7 +14,7 @@ hello-world以外を対応済みとは表示しない。問題コード、テン
 
 Lambda/WAF/API GatewayはAWS layerに属し、問題ID・flag計算をcore/runtimeへ入れない。API/SDK/UIは同じHTTP/stateを使用する。今後のEC2 Battleは実LinuxワークロードとSSM Session Managerが必要であり、systemctl文字列への固定応答で代用しない。hello-multicloudはAWS Lambdaだけでは完了せず、GCP/Azure/Sakura各targetの実ワークロードとcomposite-probe採点まで必要。
 
-現在の追加範囲: step 2のnative S3 version history/public-access-blockとCloudscape操作を実装する。S3 CloudFormationはまだ未対応で、step 2全体やwp2shellの完了ではない。問題の選択を有効にする条件はstep 4の実採点完走のまま。
+現在の追加範囲: step 2のnative S3 version history/public-access-blockとCloudscape操作を実装する。S3 CloudFormationのBucketName/Versioning/PublicAccessBlock/resource TagsとRef/Arnを追加する。Step 3/4とwp2shellの完了ではない。問題の選択を有効にする条件はstep 4の実採点完走のまま。
 
 ## 実行境界の受け入れ条件
 

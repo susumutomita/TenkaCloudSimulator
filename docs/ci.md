@@ -12,8 +12,8 @@ Every push, pull request and manual run checks out the exact tested head and run
 3. Unfiltered Cobertura conversion and Go HTML coverage view. Both full-module
    statement coverage and source-line coverage must be at least 90%.
 4. Locked npm dependency audit (high/critical fail) and canonical Go govulncheck.
-5. Eight real binary + SDK + offline console/Scalar E2E cases, fourteen-state accessibility audit,
-   finite TLC model checking and detection of the deliberate deletion-guard mutant.
+5. Ten real binary + SDK + offline console/Scalar E2E cases, 23-state accessibility audit,
+   three finite TLC models and three required mutation counterexamples.
 
 Coverage generation and threshold checks are ordinary required steps. An absent,
 empty, malformed or below-floor report exits nonzero. Regression tests exercise
@@ -77,6 +77,6 @@ The real-platform catalog runner and participant browser run in CI: see test/pla
 Remote checks remain authoritative only for their exact tested commit. Historical
 reports below predate this increment and do not certify the changed working tree.
 
-S3 versioning increment adds the enabled-history S3Versions model and a mandatory mutant that incorrectly guards bucket deletion using only current objects. TLC must reject that mutant with NoHistoryOrphans. This finite abstraction does not prove the implementation or model suspended versions/quota; native race/SQLite/SDK/browser tests cover those contracts. The browser audit now captures 21 states, including version settings, public-access confirmation, version table and mobile reflow. Existing 90% statement and unfiltered source-line floors remain unchanged.
+S3 versioning increment adds the enabled-history S3Versions model and a mandatory mutant that incorrectly guards bucket deletion using only current objects. TLC must reject that mutant with NoHistoryOrphans. This finite abstraction does not prove the implementation or model suspended versions/quota; native race/SQLite/SDK/browser tests cover those contracts. The browser audit now captures 23 states, including version settings, public-access confirmation, version table, bucket tag editor and mobile reflow. Existing 90% statement and unfiltered source-line floors remain unchanged.
 
-The full-module Go race command runs packages with `-p 1`: several test binaries independently JIT-compile the fixed embedded CPython/SQLite WASM. Cross-package CPU competition caused non-performance containment tests to hit their existing execution deadlines on the cloud worker. Packages run sequentially; goroutine concurrency, race instrumentation, function deadlines, all assertions and both 90% floors remain unchanged. No failed test is skipped or retried by CI.
+The full-module Go race command runs packages with `-p 1`: several test binaries independently JIT-compile the fixed embedded CPython/SQLite WASM. Cross-package CPU competition caused non-performance containment tests to hit their existing execution deadlines on the cloud worker. Packages run sequentially; goroutine concurrency, race instrumentation, cancellation/deadline negative assertions and both 90% floors remain enforced. The positive four-invocation state-isolation test uses a supported15-second budget for two queued waves of fresh interpreter startup under race instrumentation; every payload must still be1. It is not a startup performance benchmark. No failed test is skipped or retried by CI.

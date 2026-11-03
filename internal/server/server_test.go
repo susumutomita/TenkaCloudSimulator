@@ -186,7 +186,7 @@ func TestEveryAdvertisedOperationHasWireCoverage(t *testing.T) {
 	if err := json.Unmarshal(status(t, s, "GET", "/_simulator/v1/capabilities", "", 200, nil), &manifest); err != nil {
 		t.Fatal(err)
 	}
-	expected := "ListBuckets,CreateBucket,HeadBucket,GetBucketLocation,DeleteBucket,ListObjectsV2,PutObject,GetObject,HeadObject,DeleteObject,GetBucketVersioning,PutBucketVersioning,ListObjectVersions,GetPublicAccessBlock,PutPublicAccessBlock,DeletePublicAccessBlock"
+	expected := "ListBuckets,CreateBucket,HeadBucket,GetBucketLocation,DeleteBucket,ListObjectsV2,PutObject,GetObject,HeadObject,DeleteObject,GetBucketVersioning,PutBucketVersioning,ListObjectVersions,GetPublicAccessBlock,PutPublicAccessBlock,DeletePublicAccessBlock,GetBucketTagging,PutBucketTagging,DeleteBucketTagging"
 	if strings.Join(manifest.Operations, ",") != expected {
 		t.Fatal("Update lifecycle conformance when capabilities change")
 	}

@@ -1,0 +1,61 @@
+- banner:
+  - link "TenkaCloud Simulator":
+    - /url: /_simulator/console/
+  - button "Services"
+  - button "us-east-1"
+  - button "Choose identity": simulator-admin
+  - link "API reference":
+    - /url: /_simulator/docs/
+- main:
+  - navigation "Service navigation":
+    - button "Toggle service navigation"
+  - navigation "Breadcrumbs":
+    - list:
+      - listitem:
+        - link "Services":
+          - /url: "#/s3"
+      - listitem:
+        - link "Amazon S3":
+          - /url: "#/s3"
+      - listitem:
+        - link "audit-practice" [disabled]
+  - group: Local simulation Your resources reset when the process stops. This is an independent simulator, not the AWS console.
+  - heading "audit-practice" [level=1]
+  - tablist:
+    - tab "Objects"
+    - tab "Properties" [selected]
+    - tab "Permissions"
+    - tab "Metrics" [disabled]
+    - tab "Management" [disabled]
+  - tabpanel "Properties"
+  - heading "Bucket Versioning" [level=2]
+  - button "Edit"
+  - term: Bucket Versioning
+  - definition: Enabled
+  - heading "Tags (0)" [level=2]
+  - button "Cancel"
+  - button "Save tags"
+  - group "Key Audit":
+    - text: Key
+    - combobox "Key": Audit
+    - button "Clear"
+    - text: Value - optional
+    - combobox "Value - optional" [expanded]:
+      - text: demo
+      - listbox "Use value demo":
+        - option "Use value demo" [selected]
+    - button "Clear"
+    - button "Remove tag Audit": Remove
+  - button "Add tag"
+  - text: 49 of 50 tags available User-defined bucket tags only. Tag-based permissions, billing and AWS-generated tags are unavailable.
+  - group: Version changes take effect immediately in this simulator. MFA Delete, lifecycle expiration, replication and Object Lock are unavailable.
+  - text: simulator-admin · us-east-1 · Temporary environment · No external cloud connection
+  - complementary "Help panel":
+    - button "Close help panel"
+    - heading "Simulator scope" [level=2]
+    - paragraph: Independent local simulator. Not affiliated with AWS. No real cloud resources are created.
+    - paragraph: S3 basic operations, Standard SSM text parameters, Python 3.12 Lambda functions and limited CloudFormation stacks using S3 buckets, SSM parameters and inline IAM identity policies.
+    - paragraph: Cloud IAM sessions, managed policies, EC2, KMS and other cloud providers are not implemented.
+    - button "Manage identity policy"
+    - link "Console licenses":
+      - /url: /_simulator/licenses/CONSOLE-NOTICES.txt

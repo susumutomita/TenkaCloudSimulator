@@ -62,7 +62,7 @@
       },
       "post": {
         "summary": "SSM JSON or CloudFormation Query operation",
-        "description": "Native regional root endpoint. SSM: X-Amz-Target AmazonSSM.PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter. CloudFormation: CreateStack, DescribeStacks, DeleteStack; only SSM parameters and one inline IAM identity policy per role. Unsupported options fail. Real credentials and session tokens are rejected.",
+        "description": "Native regional root endpoint. SSM: X-Amz-Target AmazonSSM.PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter. CloudFormation: CreateStack, DescribeStacks, DeleteStack; only S3 buckets, SSM parameters and one inline IAM identity policy per role. Unsupported options fail. Real credentials and session tokens are rejected. Create/DeleteStack also require the caller to allow the underlying S3/SSM/IAM actions; CAPABILITY_IAM grants no permissions. No service RoleArn or general CloudFormation lifecycle is supported.",
         "operationId": "awsRegionalOperation",
         "parameters": [
           {
@@ -166,7 +166,7 @@
       "put": {
         "operationId": "CreateBucket",
         "summary": "Create a bucket",
-        "description": "Requires s3:CreateBucket on the bucket ARN. Empty body creates in us-east-1. Other supported regions require LocationConstraint. Bucket subresources: use ?versioning for Get/PutBucketVersioning; ?publicAccessBlock for Get/Put/DeletePublicAccessBlock; ?versions for GET ListObjectVersions. Do not combine subresources or send list-type with them. Versioning Status is Enabled/Suspended; MFA Delete is unsupported. Public access block stores the four bucket-level booleans; public ACLs/policies remain unsupported.",
+        "description": "Requires s3:CreateBucket on the bucket ARN. Empty body creates in us-east-1. Other supported regions require LocationConstraint. Bucket subresources: use ?versioning for Get/PutBucketVersioning; ?publicAccessBlock for Get/Put/DeletePublicAccessBlock; ?versions for GET ListObjectVersions. Do not combine subresources or send list-type with them. Versioning Status is Enabled/Suspended; MFA Delete is unsupported. Public access block stores the four bucket-level booleans; public ACLs/policies remain unsupported. Bucket tags use ?tagging. GET requires s3:GetBucketTagging; PUT/DELETE require s3:PutBucketTagging. User-defined metadata only, no ABAC/billing/system tags. An empty replacement removes the set; an absent set returns NoSuchTagSet.",
         "tags": [
           "S3 basic object storage"
         ],
@@ -198,6 +198,15 @@
               "type": "string"
             },
             "description": "Optional S3 subresource selector (empty value), or version-list cursor. Remove incompatible ListObjectsV2 parameters."
+          },
+          {
+            "name": "tagging",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional empty selector for native Get/Put/DeleteBucketTagging. Do not combine bucket subresources. PUT requires a supported checksum, a complete replacement set of at most50 user tags and a body up to64KiB."
           }
         ],
         "responses": {
@@ -243,6 +252,9 @@
                 },
                 "publicAccessBlock": {
                   "value": "<PublicAccessBlockConfiguration><BlockPublicAcls>true</BlockPublicAcls><IgnorePublicAcls>true</IgnorePublicAcls><BlockPublicPolicy>true</BlockPublicPolicy><RestrictPublicBuckets>true</RestrictPublicBuckets></PublicAccessBlockConfiguration>"
+                },
+                "bucketTags": {
+                  "value": "<Tagging><TagSet><Tag><Key>Environment</Key><Value>practice</Value></Tag></TagSet></Tagging>"
                 }
               }
             }
@@ -252,7 +264,7 @@
       "get": {
         "operationId": "ListObjectsV2OrGetBucketLocation",
         "summary": "List objects or get bucket location",
-        "description": "ListObjectsV2: keep list-type=2; supports prefix, delimiter, max-keys and continuation. GetBucketLocation: omit list-type and send an empty location query. S3 uses one path for these two wire operations; this reference does not invent a REST adapter. Bucket subresources: use ?versioning for Get/PutBucketVersioning; ?publicAccessBlock for Get/Put/DeletePublicAccessBlock; ?versions for GET ListObjectVersions. Do not combine subresources or send list-type with them. Versioning Status is Enabled/Suspended; MFA Delete is unsupported. Public access block stores the four bucket-level booleans; public ACLs/policies remain unsupported.",
+        "description": "ListObjectsV2: keep list-type=2; supports prefix, delimiter, max-keys and continuation. GetBucketLocation: omit list-type and send an empty location query. S3 uses one path for these two wire operations; this reference does not invent a REST adapter. Bucket subresources: use ?versioning for Get/PutBucketVersioning; ?publicAccessBlock for Get/Put/DeletePublicAccessBlock; ?versions for GET ListObjectVersions. Do not combine subresources or send list-type with them. Versioning Status is Enabled/Suspended; MFA Delete is unsupported. Public access block stores the four bucket-level booleans; public ACLs/policies remain unsupported. Bucket tags use ?tagging. GET requires s3:GetBucketTagging; PUT/DELETE require s3:PutBucketTagging. User-defined metadata only, no ABAC/billing/system tags. An empty replacement removes the set; an absent set returns NoSuchTagSet.",
         "tags": [
           "S3 basic object storage"
         ],
@@ -378,6 +390,15 @@
               "type": "string"
             },
             "description": "Optional S3 subresource selector (empty value), or version-list cursor. Remove incompatible ListObjectsV2 parameters."
+          },
+          {
+            "name": "tagging",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional empty selector for native Get/Put/DeleteBucketTagging. Do not combine bucket subresources. PUT requires a supported checksum, a complete replacement set of at most50 user tags and a body up to64KiB."
           }
         ],
         "responses": {
@@ -444,7 +465,7 @@
       "delete": {
         "operationId": "DeleteBucket",
         "summary": "Delete an empty bucket",
-        "description": "Atomic relational constraint: fails with BucketNotEmpty while any object belongs to this bucket. Bucket subresources: use ?versioning for Get/PutBucketVersioning; ?publicAccessBlock for Get/Put/DeletePublicAccessBlock; ?versions for GET ListObjectVersions. Do not combine subresources or send list-type with them. Versioning Status is Enabled/Suspended; MFA Delete is unsupported. Public access block stores the four bucket-level booleans; public ACLs/policies remain unsupported.",
+        "description": "Atomic relational constraint: fails with BucketNotEmpty while any object belongs to this bucket. Bucket subresources: use ?versioning for Get/PutBucketVersioning; ?publicAccessBlock for Get/Put/DeletePublicAccessBlock; ?versions for GET ListObjectVersions. Do not combine subresources or send list-type with them. Versioning Status is Enabled/Suspended; MFA Delete is unsupported. Public access block stores the four bucket-level booleans; public ACLs/policies remain unsupported. Bucket tags use ?tagging. GET requires s3:GetBucketTagging; PUT/DELETE require s3:PutBucketTagging. User-defined metadata only, no ABAC/billing/system tags. An empty replacement removes the set; an absent set returns NoSuchTagSet.",
         "tags": [
           "S3 basic object storage"
         ],
@@ -467,6 +488,15 @@
               "type": "string"
             },
             "description": "Optional S3 subresource selector (empty value), or version-list cursor. Remove incompatible ListObjectsV2 parameters."
+          },
+          {
+            "name": "tagging",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional empty selector for native Get/Put/DeleteBucketTagging. Do not combine bucket subresources. PUT requires a supported checksum, a complete replacement set of at most50 user tags and a body up to64KiB."
           }
         ],
         "responses": {

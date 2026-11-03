@@ -285,7 +285,7 @@ func compileStack(region, name, body string, parameters map[string]string, capab
 	for _, value := range resources {
 		r := object(value)
 		kind := stringValue(r["Type"])
-		if kind != "AWS::SSM::Parameter" && kind != "AWS::IAM::Role" {
+		if kind != "AWS::SSM::Parameter" && kind != "AWS::IAM::Role" && kind != "AWS::S3::Bucket" {
 			return fail("Unsupported resource type: " + kind)
 		}
 		for k := range r {
@@ -357,6 +357,9 @@ func compileStack(region, name, body string, parameters map[string]string, capab
 			return fail(e.Error())
 		}
 		properties := object(resolved)
+		if resolved != nil && properties == nil {
+			return fail("Resource Properties must be an object.")
+		}
 		physical := ""
 		if kind == "AWS::SSM::Parameter" {
 			for k := range properties {
@@ -386,6 +389,12 @@ func compileStack(region, name, body string, parameters map[string]string, capab
 				return fail("Parameter description exceeds 1024 bytes.")
 			}
 			attrs[key+".Value"] = value
+		} else if kind == "AWS::S3::Bucket" {
+			physical, e = compileS3Bucket(name, id, key, properties)
+			if e != nil {
+				return StackRecord{}, e
+			}
+			attrs[key+".Arn"] = "arn:aws:s3:::" + physical
 		} else {
 			if capabilities != "CAPABILITY_IAM" && capabilities != "CAPABILITY_NAMED_IAM" {
 				return fail("Acknowledge CAPABILITY_IAM for identity-policy resources.")
@@ -482,6 +491,9 @@ func (s *StackStore) Create(record StackRecord) error {
 	}
 	for _, r := range record.Resources {
 		table, limit := "aws_ssm_parameters", 1000
+		if r.Type == "AWS::S3::Bucket" {
+			table, limit = "buckets", core.MaxBuckets
+		}
 		if r.Type == "AWS::IAM::Role" {
 			table, limit = "identity_policies", 1000
 		}
@@ -491,15 +503,14 @@ func (s *StackStore) Create(record StackRecord) error {
 		if count >= limit {
 			return ssmFailure{"LimitExceededException", "Simulator resource limit reached."}
 		}
-		namespace := record.Region
-		if r.Type == "AWS::IAM::Role" {
-			namespace = ""
-		}
+		namespace := stackResourceNamespace(record.Region, r.Type)
 		if _, err = tx.Exec("INSERT INTO aws_cfn_ownership VALUES(?,?,?,?)", namespace, r.Type, r.PhysicalID, record.ID); err != nil {
 			return ssmFailure{"AlreadyExistsException", "Resource belongs to an existing stack, including drifted resources."}
 		}
 		if r.Type == "AWS::SSM::Parameter" {
 			_, err = tx.Exec("INSERT INTO aws_ssm_parameters VALUES(?,?,?,?,?,?,?)", record.Region, r.PhysicalID, stringValue(r.Properties["Type"]), stringValue(r.Properties["Value"]), stringValue(r.Properties["Description"]), 1, float64(time.Now().UnixMilli())/1000)
+		} else if r.Type == "AWS::S3::Bucket" {
+			err = createStackBucket(tx, record.Region, r)
 		} else {
 			_, err = tx.Exec("INSERT INTO identity_policies VALUES(?,?)", r.PhysicalID, stringValue(r.Properties["SimulatorPolicy"]))
 		}
@@ -570,10 +581,7 @@ func (s *StackStore) deleteChecked(region, name string, authorize func(StackReco
 		}
 	}
 	for _, r := range records[0].Resources {
-		namespace := region
-		if r.Type == "AWS::IAM::Role" {
-			namespace = ""
-		}
+		namespace := stackResourceNamespace(region, r.Type)
 		var owned int
 		if err = tx.QueryRow("SELECT count(*) FROM aws_cfn_ownership WHERE namespace=? AND kind=? AND physical_id=? AND stack_id=?", namespace, r.Type, r.PhysicalID, records[0].ID).Scan(&owned); err != nil {
 			return err
@@ -583,6 +591,13 @@ func (s *StackStore) deleteChecked(region, name string, authorize func(StackReco
 		}
 		if r.Type == "AWS::SSM::Parameter" {
 			_, err = tx.Exec("DELETE FROM aws_ssm_parameters WHERE region=? AND name=?", region, r.PhysicalID)
+		} else if r.Type == "AWS::S3::Bucket" {
+			err = s3DeleteBucket(tx, r.PhysicalID)
+			if core.Code(err) == "NoSuchBucket" {
+				err = nil
+			} else if core.Code(err) == "BucketNotEmpty" {
+				return ssmFailure{"ValidationError", "S3 bucket retains objects, versions or delete markers; empty it explicitly before DeleteStack."}
+			}
 		} else {
 			_, err = tx.Exec("DELETE FROM identity_policies WHERE name=?", r.PhysicalID)
 		}
@@ -743,15 +758,16 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	authorize := func(resource string) error {
+	authorizeAction := func(action, resource string) error {
 		if principal == core.Administrator {
 			return nil
 		}
-		if core.Evaluate(policy, "cloudformation:"+action, resource) != "allowed" {
-			return ssmFailure{"AccessDenied", "Identity policy does not allow this stack resource."}
+		if core.Evaluate(policy, action, resource) != "allowed" {
+			return ssmFailure{"AccessDenied", "Identity policy does not allow " + action + " on " + resource + "."}
 		}
 		return nil
 	}
+	authorize := func(resource string) error { return authorizeAction("cloudformation:"+action, resource) }
 
 	name := form.Get("StackName")
 	switch action {
@@ -800,7 +816,10 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 			if err = authorize(record.ID); err == nil {
-				err = g.Stacks.Create(record)
+				err = stackResourcePermissions(record, false, authorizeAction)
+				if err == nil {
+					err = g.Stacks.Create(record)
+				}
 			}
 		}
 		if err != nil {
@@ -849,7 +868,12 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 			fail("Specify a stack name or ID.")
 			return
 		}
-		if err = g.Stacks.deleteChecked(region, name, func(record StackRecord) error { return authorize(record.ID) }); err != nil {
+		if err = g.Stacks.deleteChecked(region, name, func(record StackRecord) error {
+			if e := authorize(record.ID); e != nil {
+				return e
+			}
+			return stackResourcePermissions(record, true, authorizeAction)
+		}); err != nil {
 			cfnError(w, err)
 			return
 		}
