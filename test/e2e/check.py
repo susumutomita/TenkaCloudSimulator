@@ -203,6 +203,31 @@ class Conformance(unittest.TestCase):
    self.assertEqual(c.get_object(Bucket='tokyo-region-bucket',Key='new-region.txt')['Body'].read(),b'tokyo only');self.assertEqual(c.get_object(Bucket='east-region-bucket',Key='sentinel')['Body'].read(),b'east unchanged')
    with self.assertRaises(ClientError):c.get_object(Bucket='east-region-bucket',Key='new-region.txt')
    browser.close()
+ def test_service_navigation_dismisses_resource_forms(self):
+  with running() as endpoint,sync_playwright() as p:
+   c=sdk(endpoint);c.create_bucket(Bucket='navigation-bucket');c.put_object(Bucket='navigation-bucket',Key='sentinel',Body=b'unchanged')
+   ssm=boto3.client('ssm',endpoint_url=endpoint,region_name='us-east-1',aws_access_key_id='TCSIMLOCAL',aws_secret_access_key='dummy',config=Config(retries={'max_attempts':0}));ssm.put_parameter(Name='/navigation/existing',Type='String',Value='unchanged')
+   executable=os.environ.get('CHROMIUM_EXECUTABLE') or shutil.which('chromium');browser=p.chromium.launch(**({'executable_path':executable} if executable else {}),args=['--no-sandbox']);page=browser.new_page(viewport={'width':1440,'height':1000});errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
+   for route in ('menu','hash'):
+    for kind in ('create-bucket','upload','create-parameter','edit-parameter'):
+     with self.subTest(route=route,form=kind):
+      source='s3' if kind in ('create-bucket','upload') else 'ssm';destination='ssm' if source=='s3' else 's3'
+      page.goto('about:blank');page.goto(endpoint+'/_simulator/console/#/'+source)
+      if kind=='create-bucket':page.get_by_role('button',name='Create bucket',exact=True).first.click();page.get_by_label('Bucket name',exact=True).fill('must-not-be-created')
+      elif kind=='upload':
+       page.get_by_role('link',name='navigation-bucket',exact=True).click();page.get_by_role('button',name='Upload',exact=True).first.click();page.get_by_label('Choose a file').set_input_files({'name':'must-not-upload.txt','mimeType':'text/plain','buffer':b'wrong destination'})
+      else:
+       if kind=='edit-parameter':page.get_by_role('link',name='/navigation/existing',exact=True).click();page.get_by_role('button',name='Edit parameter',exact=True).click()
+       else:page.get_by_role('button',name='Create parameter',exact=True).first.click();page.get_by_label('Name',exact=True).fill('/navigation/must-not-create')
+       page.get_by_label('Value',exact=True).fill('must not save')
+      if route=='menu':page.get_by_role('button',name='Services',exact=True).click();page.get_by_role('menuitem',name='Systems Manager' if destination=='ssm' else 'S3',exact=True).click()
+      else:page.evaluate('(hash)=>{location.hash=hash}', '/parameters' if destination=='ssm' else '/s3')
+      expect(page.get_by_role('heading',name='Parameters' if destination=='ssm' else 'General purpose buckets',exact=False)).to_be_visible();expect(page.get_by_label('Bucket name',exact=True)).to_have_count(0);expect(page.get_by_label('Object key',exact=True)).to_have_count(0);expect(page.get_by_label('Value',exact=True)).to_have_count(0)
+      if destination=='ssm':
+       page.get_by_role('button',name='Create parameter',exact=True).first.click();expect(page.get_by_label('Name',exact=True)).to_have_value('');expect(page.get_by_label('Value',exact=True)).to_have_value('');name='/navigation/'+route+'-'+kind;page.get_by_label('Name',exact=True).fill(name);page.get_by_label('Value',exact=True).fill('correct destination');submit(page);expect(page.get_by_role('link',name=name,exact=True)).to_be_visible();self.assertEqual(ssm.get_parameter(Name=name)['Parameter']['Value'],'correct destination')
+      self.assertEqual([b['Name'] for b in c.list_buckets()['Buckets']],['navigation-bucket']);self.assertEqual([o['Key'] for o in c.list_objects_v2(Bucket='navigation-bucket')['Contents']],['sentinel']);self.assertEqual(c.get_object(Bucket='navigation-bucket',Key='sentinel')['Body'].read(),b'unchanged');self.assertEqual(ssm.get_parameter(Name='/navigation/existing')['Parameter']['Value'],'unchanged')
+      with self.assertRaises(ClientError):ssm.get_parameter(Name='/navigation/must-not-create')
+   self.assertEqual(errors,[]);browser.close()
  def test_refuses_non_loopback_by_default(self):
   result=subprocess.run([str(BINARY),'--listen','0.0.0.0:0'],capture_output=True,text=True);self.assertNotEqual(result.returncode,0);self.assertIn('--allow-remote',result.stderr)
 if __name__=='__main__':unittest.main(verbosity=2)

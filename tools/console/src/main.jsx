@@ -75,8 +75,9 @@ function Console(){
   }
   useEffect(()=>{fetch('/_simulator/v1/capabilities').then(async r=>{if(r.status===401){location.assign('/_simulator/login');return null}return r.json()}).then(c=>{if(!c)return;setPrincipal(c.principal||'simulator-admin');setIdentitySelection(c.identitySelection===true);setPersistent(c.persistence==='file');setReady(true)}).catch(e=>{setError(e.message);setBusy(false)})},[]);
   useEffect(()=>{if(ready){setDetail(null);setMessage('');load()}},[ready,service,bucket,region,principal]);
-  useEffect(()=>{const change=()=>{setService(routeService());setBucket(null);setDetail(null);setFilter('');setSelected([]);};addEventListener('hashchange',change);return()=>removeEventListener('hashchange',change);},[]);
-  function navigate(next){if(saving)return;generation.current++;setService(next);setBucket(null);setDetail(null);setFilter('');setSelected([]);location.hash=next==='ssm'?'/parameters':next==='cfn'?'/stacks':'/s3';}
+  function dismissResourceForm(){setModal(null);setModalError('');setForm({});file.current=null;}
+  useEffect(()=>{const change=()=>{setService(routeService());setBucket(null);setDetail(null);setFilter('');setSelected([]);dismissResourceForm();};addEventListener('hashchange',change);return()=>removeEventListener('hashchange',change);},[]);
+  function navigate(next){if(saving)return;generation.current++;setService(next);setBucket(null);setDetail(null);setFilter('');setSelected([]);dismissResourceForm();location.hash=next==='ssm'?'/parameters':next==='cfn'?'/stacks':'/s3';}
   function changeRegion(next){if(saving||next===region)return;generation.current++;setRegion(next);setBucket(null);setDetail(null);setSelected([]);setFilter('');setModal(null);setModalError('');setError('');setMessage('');}
   async function inspect(item){
     if(service==='s3'&&!bucket){setBucket(item.name);setFilter('');return}
