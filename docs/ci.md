@@ -14,7 +14,6 @@ Every push, pull request and manual run checks out the exact tested head and run
 4. Locked npm dependency audit (high/critical fail) and canonical Go govulncheck.
 5. Eleven real binary + SDK + offline console/Scalar E2E cases, 23-state accessibility audit,
    three finite TLC models and three required mutation counterexamples.
-   three finite TLC models and three required mutation counterexamples.
 
 Coverage generation and threshold checks are ordinary required steps. An absent,
 empty, malformed or below-floor report exits nonzero. Regression tests exercise
