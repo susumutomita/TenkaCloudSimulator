@@ -62,7 +62,7 @@ Primary protocol references consulted on 2026-11-03:
 - https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html
 - boto3 1.42.0 / botocore 1.41.6 service model in pinned development dependencies; `reports/sdk-model.json` records the local model version and digest.
 
-No cloud-owned source code, console assets, logos, screenshots, or docs prose was copied into the UI/specification. No Kumo fork is used. Scalar and actual Go dependency licenses are retained and embedded. One missing upstream notice from Scalar's MIT-declared Replit color-picker dependency remains a distribution review item, described in README.
+No cloud-owned source code, console assets, logos, screenshots, or docs prose was copied into the UI/specification. No Kumo fork is used. Scalar and actual Go dependency licenses are retained and embedded. The formerly unresolved Replit color-picker dependency is excluded from the locally rebuilt bundle; only CSS color swatches are omitted. Original notices for all actual bundle inputs are retained. The original upstream standalone JS is no longer shipped.
 
 TLC 1.7.4 checked the finite resource/IAM abstraction and detected a deliberate nonempty-delete mutant. Go tests separately exercise HTTP, state constraints, policy parsing/evaluation, concurrent writers and persistence. This is not a refinement proof of Go/SQLite, exhaustive cloud conformance, or proof of full IAM semantics.
 

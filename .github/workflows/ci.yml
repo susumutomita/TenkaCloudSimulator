@@ -14,6 +14,12 @@ jobs:
         with:
           go-version: '1.26.10'
           cache: true
+      - name: Rebuild the API reference without the excluded color picker
+        run: |
+          npm ci --prefix tools/scalar --ignore-scripts --no-audit --no-fund
+          node tools/scalar/build.mjs
+          python3 tools/scalar/notices.py
+          git diff --exit-code -- internal/server/apidocs third_party/scalar.json third_party/scalar-bundled-packages.json third_party/SCALAR-BUNDLED-NOTICES.txt internal/legal/assets/SCALAR-BUNDLED-NOTICES.txt tools/scalar/bundle-inputs.json tools/scalar/bundle-digests.json third_party/color-picker-removal.json
       - run: make before-commit cross-check
       - name: Check Go vulnerabilities against the canonical service
         run: go run golang.org/x/vuln/cmd/govulncheck@v1.1.4 ./...

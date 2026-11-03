@@ -110,7 +110,28 @@ class Conformance(unittest.TestCase):
    # Use the request client Send button, not a parallel fetch injected by the test.
    send=page.get_by_role('button',name=re.compile('^Send.*get request'))
    expect(send).to_be_visible();send.click();expect(page.get_by_text('ui-practice',exact=False).last).to_be_visible(timeout=10000)
-   page.screenshot(path=str(REPORTS/'api-reference.png'),full_page=False)
+   page.get_by_role('button',name='Close Client',exact=True).click()
+   c.create_bucket(Bucket='practice-bucket')
+   page.get_by_role('link',name=re.compile('^Upload or replace an object')).click()
+   page.get_by_role('button',name='Test Request (put /{bucket}/{key})',exact=True).click()
+   put_send=page.get_by_role('button',name=re.compile('^Send.*put request'))
+   expect(put_send).to_be_visible();put_send.click()
+   # The prefilled OpenAPI text example goes through the actual Scalar editor/client.
+   deadline=time.monotonic()+8
+   while True:
+    try:
+     body=c.get_object(Bucket='practice-bucket',Key='hello.txt')['Body'].read();break
+    except ClientError:
+     if time.monotonic()>deadline:raise
+     time.sleep(.1)
+   self.assertEqual(body,b'Hello from the API reference.')
+   page.screenshot(path=str(REPORTS/'api-reference-put.png'),full_page=False,animations='disabled')
+   page.get_by_role('button',name='Close Client',exact=True).click()
+   page.get_by_role('link',name=re.compile('^List all buckets')).click()
+   page.get_by_role('button',name='Test Request (get /)',exact=True).click()
+   send=page.get_by_role('button',name=re.compile('^Send.*get request'))
+   send.click();expect(page.get_by_text('ui-practice',exact=False).last).to_be_visible(timeout=10000)
+   page.screenshot(path=str(REPORTS/'api-reference.png'),full_page=False,animations='disabled')
    self.assertEqual(page.evaluate('window.__policyViolations'),[]);self.assertEqual(errors,[]);self.assertEqual(outside,[],'Runtime attempted external network requests');browser.close()
  def test_refuses_non_loopback_by_default(self):
   result=subprocess.run([str(BINARY),'--listen','0.0.0.0:0'],capture_output=True,text=True);self.assertNotEqual(result.returncode,0);self.assertIn('--allow-remote',result.stderr)

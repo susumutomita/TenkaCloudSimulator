@@ -1,0 +1,13 @@
+{
+  "removedPackage": "@replit/codemirror-css-color-picker",
+  "previousVersion": "6.3.0",
+  "reason": "Original notice absent; remove optional CSS color editing instead of inventing attribution.",
+  "implementation": "tools/scalar/no-color-picker.js is original code returning an empty extension array.",
+  "verification": {
+    "forbiddenInputCount": 0,
+    "inputGraphSha256": "aa7d66dfd73c6230ea6c02f8e45a2bd12f2d9e9fdbfe3fdff97ad0c00b9bf4c4",
+    "bundleSha256": "09949908a1eaed291abd64c8f490c2a7c5d218a458a77d394f065b644301cb5f"
+  },
+  "impact": "No CSS color swatches. Text/XML/JSON editing, API reference, and S3 requests remain functional.",
+  "historicalEvidence": "color-picker-evidence.json describes the excluded old dependency only; it is not a runtime inventory."
+}
