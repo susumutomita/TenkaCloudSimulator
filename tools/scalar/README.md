@@ -14,3 +14,8 @@ Node 22+ and npm are needed only to regenerate these assets. Normal `make build`
 Original upstream copyright/license notices for the included packages are collected from local package files or immutable upstream commits into `third_party/SCALAR-BUNDLED-NOTICES.txt` and embedded in the executable. The generated JS/CSS legal-comment sidecars are retained too. The notice collector fails on an unknown/missing upstream notice rather than manufacturing one. Scalar workspace packages use the original Scalar MIT license; precompiled Tailwind CSS has its original MIT notice separately included.
 
 Verification includes source-graph exclusion, pinned output digests, offline docs rendering, Scalar GET and PUT execution, exact SDK readback of bytes uploaded through the Scalar request client, console/browser checks, and the standard Go single-binary gates. The earlier color-picker metadata file is retained only as historical evidence of why that optional feature was removed; it is not a runtime dependency inventory.
+
+The small local `go.mod` is a traversal boundary, not a second runtime service.
+It prevents root `go test ./...` / `go fmt ./...` / vulnerability scans from
+compiling or rewriting third-party Go examples inside optional node_modules.
+The production binary still has one root Go module and one process.
