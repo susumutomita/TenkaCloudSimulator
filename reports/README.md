@@ -16,3 +16,5 @@ These are scoped checks, not exhaustive AWS conformance or a proof of the whole 
 - govulncheck.txt: vulnerability database access was blocked (Forbidden at vuln.go.dev); no clean vulnerability-scan result is claimed.
 
 Attribution status: one MIT-declared Scalar dependency is missing its original upstream notice; review remains open before distribution. These are local validation results. The GitHub workflow was authored but not run on GitHub because no push/PR was authorized.
+
+Follow-up verification: see [the seven-state console audit](audit/README.md), [vulnerability source/reachability review](vulnerability-review.md), and [exact missing-notice evidence](../third_party/color-picker-evidence.json). The source repository for the Replit dependency exists; missing-file 404s must not be described as an unavailable repository. The TLA+ failure is an intentional temporary mutant, while the normal model and concrete deletion tests pass.

@@ -13,6 +13,6 @@ assert 'jitless: true' in Path('internal/server/apidocs/boot.js').read_text()
 assert 'https://' not in Path('internal/server/apidocs/index.html').read_text()
 for path in ['third_party/SCALAR-LICENSE','third_party/SCALAR-BUNDLED-NOTICES.txt','third_party/GO-NOTICES.txt']:
  assert Path(path).stat().st_size>500,path
-for path in ['SCALAR-LICENSE','SCALAR-BUNDLED-NOTICES.txt','GO-NOTICES.txt']:
+for path in ['SCALAR-LICENSE','SCALAR-BUNDLED-NOTICES.txt','GO-NOTICES.txt','COLOR-PICKER-NOTICE.txt']:
  assert Path('third_party',path).read_bytes()==Path('internal/legal/assets',path).read_bytes()
 print('Vendored Scalar identity, notices, and local OpenAPI configuration verified.')

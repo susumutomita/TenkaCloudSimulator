@@ -243,11 +243,13 @@ function openBucket(bucket) {
 function modal(title, submit, build, onSubmit) {
   $("modal-title").textContent = title;
   $("submit").textContent = submit;
+  $("submit").className = "primary";
   $("submit").hidden = false;
   $("modal-error").hidden = true;
   $("modal-body").replaceChildren();
   build($("modal-body"));
   $("modal").showModal();
+  $("modal-body").querySelector("input, textarea, select")?.focus();
   $("modal-form").onsubmit = async (event) => {
     event.preventDefault();
     $("submit").disabled = true;
@@ -287,7 +289,7 @@ function createBucket() {
         minLength: 3,
         maxLength: 63,
         placeholder: "my-practice-bucket",
-        pattern: "[a-z0-9][a-z0-9.\\x2d]{1,61}[a-z0-9]",
+        pattern: /[a-z0-9][a-z0-9.\x2d]{1,61}[a-z0-9]/.source,
       });
       body.append(
         text(
@@ -413,6 +415,7 @@ function removeSelected() {
       await load();
     },
   );
+  $("submit").classList.add("danger");
 }
 function inspectObject(obj) {
   modal(
@@ -482,8 +485,13 @@ $("properties-tab").onclick = async () => {
   }
 };
 $("endpoint").textContent = location.origin;
-$("cli-example").textContent =
-  `export AWS_ACCESS_KEY_ID=TCSIMEXAMPLE\nexport AWS_SECRET_ACCESS_KEY=simulator-only\nexport AWS_DEFAULT_REGION=us-east-1\n\naws --endpoint-url ${location.origin} s3api list-buckets\naws --endpoint-url ${location.origin} s3api create-bucket \\\n  --bucket my-practice-bucket`;
+$("cli-example").textContent = `export AWS_ACCESS_KEY_ID=TCSIMEXAMPLE
+export AWS_SECRET_ACCESS_KEY=simulator-only
+export AWS_DEFAULT_REGION=us-east-1
+
+aws --endpoint-url ${location.origin} s3api list-buckets
+aws --endpoint-url ${location.origin} s3api create-bucket \\
+  --bucket my-practice-bucket`;
 $("scope-button").onclick = $("api-help").onclick = () =>
   $("scope").showModal();
 $("close-scope").onclick = () => $("scope").close();
@@ -496,7 +504,7 @@ $("identity-button").onclick = () => {
       input = labelInput(body, "Principal name", "identity-name", {
         value: state.principal,
         required: true,
-        pattern: "[a-zA-Z0-9_\\x2d]{1,64}",
+        pattern: /[a-zA-Z0-9_\x2d]{1,64}/.source,
         maxLength: 64,
       });
       body.append(
@@ -522,7 +530,7 @@ $("identity-policies").onclick = () => {
     (body) => {
       name = labelInput(body, "Principal name", "policy-principal", {
         required: true,
-        pattern: "[a-zA-Z0-9_\\x2d]{1,64}",
+        pattern: /[a-zA-Z0-9_\x2d]{1,64}/.source,
         maxLength: 64,
         placeholder: "reader",
       });
@@ -609,3 +617,8 @@ async function initialize() {
   }
 }
 initialize();
+
+$("scope-policies").onclick = () => {
+  $("scope").close();
+  $("identity-policies").click();
+};

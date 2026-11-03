@@ -36,3 +36,7 @@ formal:
 
 cross-check:
 	$(PYTHON) scripts/check-cross-build.py
+
+.PHONY: audit
+audit: build
+	$(PYTHON) test/e2e/audit.py

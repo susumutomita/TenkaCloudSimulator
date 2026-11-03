@@ -71,7 +71,7 @@ a:hover {
   font-size: 14px;
   font-weight: 450;
   letter-spacing: 0;
-  color: #718278;
+  color: #526b59;
   border-left: 1px solid #d7dfda;
   padding-left: 12px;
   margin-left: 5px;
@@ -112,7 +112,7 @@ a:hover {
   display: flex;
   gap: 10px;
   align-items: center;
-  color: #708079;
+  color: #526b59;
 }
 .region select {
   border: 0;
@@ -145,7 +145,7 @@ a:hover {
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 1.4px;
-  color: #87968e;
+  color: #526b59;
   margin: 0 14px 15px;
 }
 .workspace-name {
@@ -159,7 +159,7 @@ a:hover {
 }
 .workspace-name small {
   display: block;
-  color: #829087;
+  color: #526b59;
   font-size: 10px;
   margin-top: 5px;
   font-weight: 400;
@@ -217,7 +217,7 @@ a:hover {
   font-size: 10px;
   line-height: 1.8;
   margin-top: 10px;
-  color: #8b988f;
+  color: #526b59;
 }
 main {
   padding: 27px 42px 0;
@@ -262,14 +262,14 @@ main {
   display: flex;
   gap: 12px;
   align-items: center;
-  color: #85988d;
+  color: #526b59;
   font-size: 11px;
   margin: 25px 0 28px;
 }
 .breadcrumbs button {
   padding: 0;
   background: none;
-  color: #607c6b;
+  color: #526b59;
   font-size: 11px;
 }
 .breadcrumbs #bucket-crumb {
@@ -286,7 +286,7 @@ main {
   font-size: 9px;
   letter-spacing: 1.8px;
   font-weight: 750;
-  color: #77927f;
+  color: #526b59;
   margin-bottom: 10px;
 }
 h1 {
@@ -348,7 +348,7 @@ h1 {
 .mini-label {
   font-size: 8px;
   letter-spacing: 1px;
-  color: #6c8c72;
+  color: #526b59;
   background: #eff5ef;
   border: 1px solid #e4ece2;
   border-radius: 3px;
@@ -568,7 +568,7 @@ input[type="radio"] {
   margin: 0;
 }
 .empty p {
-  color: #809185;
+  color: #526b59;
   font-size: 11px;
   margin: 10px 0 19px;
 }
@@ -627,7 +627,7 @@ footer {
   color: #7b8f7e;
 }
 footer span:first-child {
-  color: #9aa79b;
+  color: #526b59;
 }
 footer span:last-child {
   margin-left: auto;
@@ -641,7 +641,7 @@ footer span:last-child {
 .tabs button {
   padding: 0 0 13px;
   background: none;
-  color: #78907b;
+  color: #526b59;
   font-size: 12px;
 }
 .tabs .selected {
@@ -669,7 +669,7 @@ footer span:last-child {
   background: #f0f5ef;
   padding: 14px;
   border-radius: 5px;
-  color: #6e826e;
+  color: #526b59;
   font-size: 11px;
   line-height: 1.7;
 }
@@ -1022,4 +1022,56 @@ footer {
 }
 .muted {
   color: #637b69;
+}
+
+.notice-tag {
+  color: #3d5c47;
+}
+.eyebrow,
+.workspace-label,
+.nav-caption {
+  font-size: 11px;
+}
+.mini-label {
+  color: #42634b;
+  font-size: 10px;
+}
+.sidebar-bottom small,
+.workspace-name small,
+.table-footer,
+footer {
+  font-size: 11px;
+}
+.danger {
+  background: #963c30;
+  border-color: #963c30;
+}
+.danger:hover {
+  background: #782e25;
+}
+#delete:not(:disabled) {
+  color: #963c30;
+}
+@media (max-width: 720px) {
+  .toptools {
+    gap: 8px;
+  }
+  .topbutton {
+    padding: 9px 10px;
+    white-space: nowrap;
+  }
+  .region {
+    gap: 6px;
+  }
+  .region select {
+    max-width: 120px;
+  }
+  #identity-button {
+    max-width: 85px;
+    white-space: nowrap;
+  }
+}
+
+.type-tag {
+  color: #4e6a53;
 }
