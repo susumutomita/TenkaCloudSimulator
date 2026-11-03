@@ -137,7 +137,7 @@ func (g *Gateway) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	for _, header := range []string{"x-amz-expected-bucket-owner", "x-amz-request-payer", "x-amz-optional-object-attributes"} {
+	for _, header := range []string{"x-amz-expected-bucket-owner", "x-amz-request-payer", "x-amz-optional-object-attributes", "x-amz-copy-source", "x-amz-acl", "x-amz-server-side-encryption", "x-amz-tagging", "x-amz-storage-class"} {
 		if r.Header.Get(header) != "" {
 			fail(w, r, "NotImplemented", "Unsupported option: "+header)
 			return
@@ -146,7 +146,7 @@ func (g *Gateway) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	for name := range r.Header {
 		if strings.HasPrefix(strings.ToLower(name), "x-amz-") {
 			switch strings.ToLower(name) {
-			case "x-amz-date", "x-amz-content-sha256", "x-amz-user-agent", "x-amz-checksum-sha1", "x-amz-checksum-sha256", "x-amz-checksum-crc32", "x-amz-checksum-crc32c", "x-amz-sdk-checksum-algorithm", "x-amz-copy-source", "x-amz-acl", "x-amz-server-side-encryption", "x-amz-tagging", "x-amz-storage-class":
+			case "x-amz-date", "x-amz-content-sha256", "x-amz-user-agent", "x-amz-checksum-sha1", "x-amz-checksum-sha256", "x-amz-checksum-crc32", "x-amz-checksum-crc32c", "x-amz-sdk-checksum-algorithm":
 			default:
 				fail(w, r, "NotImplemented", "Unsupported header: "+name)
 				return
@@ -419,26 +419,10 @@ func (g *Gateway) list(w http.ResponseWriter, r *http.Request, name string) {
 func (g *Gateway) object(w http.ResponseWriter, r *http.Request, name, key string) {
 	switch r.Method {
 	case "PUT":
-		if r.Header.Get("x-amz-copy-source") != "" {
-			fail(w, r, "NotImplemented", "CopyObject is not supported.")
-			return
-		}
-		for _, h := range []string{"x-amz-acl", "x-amz-server-side-encryption", "x-amz-tagging", "x-amz-storage-class"} {
-			if r.Header.Get(h) != "" {
-				fail(w, r, "NotImplemented", "Unsupported object option: "+h)
-				return
-			}
-		}
 		data, err := io.ReadAll(http.MaxBytesReader(w, r.Body, core.MaxObjectBytes))
 		if err != nil {
 			fail(w, r, "EntityTooLarge", "Object exceeds the 8 MiB simulator limit.")
 			return
-		}
-		for h := range r.Header {
-			if strings.HasPrefix(strings.ToLower(h), "x-amz-meta-") {
-				fail(w, r, "NotImplemented", "Custom metadata is not supported.")
-				return
-			}
 		}
 		if err := checksums(r, data); err != nil {
 			fail(w, r, "BadDigest", err.Error())

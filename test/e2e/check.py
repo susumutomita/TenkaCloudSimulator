@@ -133,6 +133,33 @@ class Conformance(unittest.TestCase):
    send.click();expect(page.get_by_text('ui-practice',exact=False).last).to_be_visible(timeout=10000)
    page.screenshot(path=str(REPORTS/'api-reference.png'),full_page=False,animations='disabled')
    self.assertEqual(page.evaluate('window.__policyViolations'),[]);self.assertEqual(errors,[]);self.assertEqual(outside,[],'Runtime attempted external network requests');browser.close()
+ def test_console_literal_dot_keys_do_not_mutate_neighbors(self):
+  with running() as endpoint,sync_playwright() as p:
+   c=sdk(endpoint);c.create_bucket(Bucket='dot-practice');c.create_bucket(Bucket='other-bucket')
+   c.put_object(Bucket='dot-practice',Key='victim',Body=b'local sentinel')
+   c.put_object(Bucket='other-bucket',Key='victim',Body=b'other sentinel')
+   executable=os.environ.get('CHROMIUM_EXECUTABLE') or shutil.which('chromium')
+   browser=p.chromium.launch(**({'executable_path':executable} if executable else {}),args=['--no-sandbox'])
+   page=browser.new_page();page.goto(endpoint+'/_simulator/console/')
+   page.get_by_role('button',name='dot-practice',exact=True).click()
+   for key in ['a/../victim','a/./victim','../other-bucket/victim','a//victim']:
+    c.put_object(Bucket='dot-practice',Key=key,Body=b'original literal bytes');page.locator('#refresh').click()
+    page.get_by_role('button',name=key,exact=True).click()
+    with page.expect_download() as download:page.locator('#submit').click()
+    self.assertEqual(Path(download.value.path()).read_bytes(),b'original literal bytes')
+    page.locator('#primary').click();page.get_by_label('Choose a file').set_input_files({'name':'replacement.txt','mimeType':'text/plain','buffer':b'replaced literal bytes'});page.get_by_label('Object key',exact=True).fill(key);page.locator('#submit').click();expect(page.locator('#modal')).not_to_be_visible()
+    self.assertEqual(c.get_object(Bucket='dot-practice',Key=key)['Body'].read(),b'replaced literal bytes')
+    page.get_by_label('Select '+key,exact=True).check();page.locator('#delete').click();page.get_by_label('Type '+key+' to confirm',exact=True).fill(key);page.locator('#submit').click();expect(page.locator('#modal')).not_to_be_visible()
+    with self.assertRaises(ClientError):c.get_object(Bucket='dot-practice',Key=key)
+    self.assertEqual(c.get_object(Bucket='dot-practice',Key='victim')['Body'].read(),b'local sentinel')
+    self.assertEqual(c.get_object(Bucket='other-bucket',Key='victim')['Body'].read(),b'other sentinel')
+   for key in ['.','..']:
+    c.put_object(Bucket='dot-practice',Key=key,Body=b'bare dot sentinel');page.locator('#refresh').click()
+    page.get_by_role('button',name=key,exact=True).click();page.locator('#submit').click();expect(page.locator('#modal-error')).to_contain_text('Use an S3 SDK');page.locator('#cancel').click()
+    page.get_by_label('Select '+key,exact=True).check();page.locator('#delete').click();page.get_by_label('Type '+key+' to confirm',exact=True).fill(key);page.locator('#submit').click();expect(page.locator('#modal-error')).to_contain_text('Use an S3 SDK');page.locator('#cancel').click()
+    page.locator('#primary').click();page.get_by_label('Choose a file').set_input_files({'name':'dot.txt','mimeType':'text/plain','buffer':b'bad replacement'});page.get_by_label('Object key',exact=True).fill(key);page.locator('#submit').click();expect(page.locator('#modal-error')).to_contain_text('Use an S3 SDK');page.locator('#cancel').click()
+    self.assertEqual(c.get_object(Bucket='dot-practice',Key=key)['Body'].read(),b'bare dot sentinel')
+   browser.close()
  def test_refuses_non_loopback_by_default(self):
   result=subprocess.run([str(BINARY),'--listen','0.0.0.0:0'],capture_output=True,text=True);self.assertNotEqual(result.returncode,0);self.assertIn('--allow-remote',result.stderr)
 if __name__=='__main__':unittest.main(verbosity=2)

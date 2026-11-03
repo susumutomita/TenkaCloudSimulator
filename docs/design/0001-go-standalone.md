@@ -50,6 +50,8 @@ OpenAPI represents the actual S3 paths and methods. GET /{bucket} combines ListO
 
 Supported data integrity inputs: Content-MD5 and SHA1/SHA256/CRC32/CRC32C headers. Unsupported options fail rather than pretending to configure encryption, ACLs, metadata, multipart uploads, or versioning. Content-Disposition forces downloaded object data to attachments; uploaded HTML is not rendered as part of the console.
 
+Browser URL parsing cannot safely address a bare `.` or `..` object key. The console explicitly refuses those two keys; use a non-normalizing S3 SDK. Internal dot segments such as `a/../victim` are supported using whole-key URL encoding, with browser/SDK upload, download and deletion regression checks.
+
 Known differences: all duplicate bucket creates currently return 409 (including us-east-1, where AWS historically has a 200 special case); names reject control characters in keys; only four regions and general-purpose buckets; single-account identity policy subset only; no bucket pagination, owner model, user metadata, object version IDs, service billing or real network/compute behavior. The simulator limits payload storage to 64 MiB; whole-process resident memory includes SQLite/Wasm and transient HTTP buffers.
 
 ## Sources and validation scope

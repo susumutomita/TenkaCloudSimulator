@@ -30,8 +30,14 @@ const text = (tag, value, cls) => {
   if (cls) e.className = cls;
   return e;
 };
-const keyPath = (bucket, key) =>
-  `/${bucket}/${key.split("/").map(encodeURIComponent).join("/")}`;
+const keyPath = (bucket, key) => {
+  // WHATWG URL parsing removes literal and percent-encoded dot segments.
+  // Encode the entire key, including slashes, so internal segments stay literal.
+  // A bare dot segment cannot be expressed safely by a browser S3 path.
+  if (key === "." || key === "..")
+    throw new Error("A standalone dot key cannot be addressed safely in this browser. Use an S3 SDK for this key.");
+  return `/${bucket}/${encodeURIComponent(key)}`;
+};
 const elements = (xml, name) => [...xml.getElementsByTagName(name)];
 const value = (node, name) =>
   node.getElementsByTagName(name)[0]?.textContent || "";

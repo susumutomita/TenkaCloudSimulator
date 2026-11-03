@@ -97,6 +97,10 @@ func TestS3UnsupportedInputAndConditionalFailures(t *testing.T) {
 	} {
 		status(t, s, tc.method, tc.path, tc.body, tc.code, tc.headers)
 	}
+	for _, header := range []string{"x-amz-acl", "x-amz-server-side-encryption", "x-amz-tagging", "x-amz-storage-class", "x-amz-copy-source"} {
+		status(t, s, "PUT", "/must-not-exist", "", 501, map[string]string{header: "unsupported"})
+		status(t, s, "HEAD", "/must-not-exist", "", 404, nil)
+	}
 	status(t, s, "PUT", "/boundary-bucket", "", 409, nil)
 	status(t, s, "GET", "/boundary-bucket?location", "", 200, nil)
 	status(t, s, "GET", "/", "", 501, map[string]string{"X-Amz-Content-Sha256": "STREAMING-UNSIGNED-PAYLOAD-TRAILER"})
