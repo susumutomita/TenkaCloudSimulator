@@ -240,3 +240,32 @@ func TestStackUnderlyingActionsNeedTheirOwnPermissions(t *testing.T) {
 	cfnCall(t, s, "DeleteStack", url.Values{"StackName": {"underlying"}}, 200, actor)
 	ssmCall(t, s, "GetParameter", map[string]any{"Name": "/owned/hello"}, 400, nil)
 }
+
+func TestInlineFunctionStackRequiresPassRoleAndFunctionPermissions(t *testing.T) {
+	s := instance(t)
+	lambdaRole(t, s)
+	template := `{"Resources":{"Function":{"Type":"AWS::Lambda::Function","Properties":{"FunctionName":"cfn-authorized","Runtime":"python3.12","Handler":"index.handler","Role":"arn:aws:iam::000000000000:role/executor","Code":{"ZipFile":"def handler(event, context): return 42"}}}}}`
+	fields := url.Values{"StackName": {"lambda-policy"}, "TemplateBody": {template}}
+	for _, policy := range []string{
+		`{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["cloudformation:*","lambda:*"],"Resource":"*"}]}`,
+		`{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["cloudformation:*","iam:PassRole"],"Resource":"*"}]}`,
+		`{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":"*","Resource":"*"},{"Effect":"Deny","Action":"iam:PassRole","Resource":"arn:aws:iam::000000000000:role/executor"}]}`,
+	} {
+		status(t, s, "PUT", "/_simulator/v1/iam/principals/deployer/policy", policy, 200, nil)
+		cfnCall(t, s, "CreateStack", fields, 403, map[string]string{"X-Simulator-Principal": "deployer"})
+		lambdaCall(t, s, "GET", functionRoot+"/cfn-authorized/configuration", nil, 404, nil)
+	}
+	policy := `{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["cloudformation:*","lambda:CreateFunction"],"Resource":"*"},{"Effect":"Allow","Action":"iam:PassRole","Resource":"arn:aws:iam::000000000000:role/executor"}]}`
+	status(t, s, "PUT", "/_simulator/v1/iam/principals/deployer/policy", policy, 200, nil)
+	caller := map[string]string{"X-Simulator-Principal": "deployer"}
+	cfnCall(t, s, "CreateStack", fields, 200, caller)
+	config := lambdaCall(t, s, "GET", functionRoot+"/cfn-authorized/configuration", nil, 200, nil)
+	if config["Handler"] != "index.handler" {
+		t.Fatal(config)
+	}
+	cfnCall(t, s, "DeleteStack", url.Values{"StackName": {"lambda-policy"}}, 403, caller)
+	lambdaCall(t, s, "GET", functionRoot+"/cfn-authorized/configuration", nil, 200, nil)
+	status(t, s, "PUT", "/_simulator/v1/iam/principals/deployer/policy", `{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":"cloudformation:DeleteStack","Resource":"*"},{"Effect":"Allow","Action":"lambda:DeleteFunction","Resource":"arn:aws:lambda:us-east-1:000000000000:function:cfn-authorized"}]}`, 200, nil)
+	cfnCall(t, s, "DeleteStack", url.Values{"StackName": {"lambda-policy"}}, 200, caller)
+	lambdaCall(t, s, "GET", functionRoot+"/cfn-authorized/configuration", nil, 404, nil)
+}

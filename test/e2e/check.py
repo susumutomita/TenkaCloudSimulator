@@ -192,6 +192,35 @@ class Conformance(unittest.TestCase):
    with self.assertRaises(ClientError) as error:c.get_bucket_tagging(Bucket='browser-evidence')
    self.assertEqual(error.exception.response['Error']['Code'],'NoSuchBucket')
    self.assertEqual(errors,[]);self.assertEqual(outside,[]);browser.close()
+ def test_cloudformation_inline_lambda_native_execution_and_isolation(self):
+  template=Path('internal/aws/testdata/lambda-inline.yaml').read_text()
+  def client(service,url,token):
+   c=boto3.client(service,endpoint_url=url,region_name='ap-northeast-1',aws_access_key_id='TCSIMEXAMPLE',aws_secret_access_key='dummy',config=Config(retries={'max_attempts':0}))
+   c.meta.events.register('before-sign.'+service,lambda request,**kwargs:request.headers.add_header('X-Simulator-Token',token));return c
+  with tempfile.TemporaryDirectory() as d:
+   state=Path(d)/'team.db'
+   with running(state,authenticated=True) as (endpoint,token),running(authenticated=True) as (other,other_token):
+    f=client('cloudformation',endpoint,token);c=client('lambda',endpoint,token);of=client('cloudformation',other,other_token);oc=client('lambda',other,other_token)
+    for cf,value in ((f,'team-one'),(of,'team-two')):cf.create_stack(StackName='inline-practice',TemplateBody=template,Parameters=[{'ParameterKey':'Value','ParameterValue':value}],Capabilities=['CAPABILITY_IAM'])
+    self.assertEqual(c.get_function_configuration(FunctionName='cfn-inline-app')['Runtime'],'python3.12')
+    for lc,value in ((c,'team-one'),(oc,'team-two')):
+     result=lc.invoke(FunctionName='cfn-inline-app',Payload=b'{"value":7}');self.assertNotIn('FunctionError',result);self.assertEqual(json.loads(result['Payload'].read()),{'answer':42,'value':value,'event':{'value':7}})
+    with sync_playwright() as p:
+     executable=os.environ.get('CHROMIUM_EXECUTABLE') or shutil.which('chromium');browser=p.chromium.launch(**({'executable_path':executable} if executable else {}),args=['--no-sandbox']);context=browser.new_context(viewport={'width':1440,'height':1000});page=context.new_page();outside=[];errors=[]
+     page.on('pageerror',lambda e:errors.append(str(e)))
+     def route(r):
+      if r.request.url.startswith(endpoint+'/'):r.continue_()
+      else:outside.append(r.request.url);r.abort()
+     context.route('**/*',route)
+     page.goto(endpoint+'/_simulator/console/');page.get_by_label('Access token',exact=True).fill(token);page.get_by_role('button',name='Open sandbox',exact=True).click();page.get_by_role('button',name='us-east-1',exact=True).click();page.get_by_role('menuitem',name='ap-northeast-1',exact=True).click();page.get_by_role('button',name='Services',exact=True).click();page.get_by_role('menuitem',name='Lambda',exact=True).click();page.get_by_role('link',name='cfn-inline-app',exact=True).click();page.get_by_label('Event JSON',exact=True).fill('{"value":7}');page.get_by_role('button',name='Test',exact=True).click();expect(page.get_by_text('Execution succeeded',exact=True)).to_be_visible(timeout=20000)
+     self.assertEqual(json.loads(page.get_by_label('Response',exact=True).input_value()),{'answer':42,'value':'team-one','event':{'value':7}});page.screenshot(path=str(REPORTS/'lambda-cfn-desktop.png'),full_page=True);page.set_viewport_size({'width':390,'height':844});page.screenshot(path=str(REPORTS/'lambda-cfn-mobile.png'),full_page=True);self.assertTrue(page.evaluate('document.documentElement.scrollWidth <= innerWidth'));self.assertEqual(errors,[]);self.assertEqual(outside,[]);browser.close()
+    with self.assertRaises(ClientError) as error:client('lambda',other,token).get_function_configuration(FunctionName='cfn-inline-app')
+    self.assertEqual(error.exception.response['ResponseMetadata']['HTTPStatusCode'],401)
+    of.delete_stack(StackName='inline-practice');self.assertEqual(oc.list_functions()['Functions'],[]);self.assertEqual(len(c.list_functions()['Functions']),1)
+   with running(state,authenticated=True) as (endpoint,token):
+    f=client('cloudformation',endpoint,token);c=client('lambda',endpoint,token)
+    result=c.invoke(FunctionName='cfn-inline-app',Payload=b'null');self.assertNotIn('FunctionError',result);self.assertEqual(json.loads(result['Payload'].read()),{'answer':42,'value':'team-one','event':None})
+    f.delete_stack(StackName='inline-practice');self.assertEqual(c.list_functions()['Functions'],[])
  def test_console_and_api_share_state_offline(self):
   with running() as endpoint,sync_playwright() as p:
    executable=os.environ.get('CHROMIUM_EXECUTABLE') or shutil.which('chromium')

@@ -23,3 +23,5 @@ CPythonを利用する場合も、実行時の外部Python/Docker/Nodeを要求�
 将来のSDK/HTTP bridgeは呼出元が送るprincipalやURLを信用せず、保存したexecution roleと同一環境の宣言済みtargetに限定する。外部AWSや任意loopback/metadata endpointへのproxyにしない。各段階はrace/coverage90/SDK/browser/security/既存形式検査を維持し、原文licenseと固定source/build provenanceを同梱する。
 
 一次資料: [CPython WASI build](https://github.com/python/cpython/blob/3.12/Tools/wasm/README.md)、[wazero](https://wazero.io/docs/)、[Lambda CreateFunction](https://docs.aws.amazon.com/lambda/latest/api/API_CreateFunction.html)、[Lambda Invoke](https://docs.aws.amazon.com/lambda/latest/api/API_Invoke.html)。これらは対応完了の証拠ではなく実装契約の参照元。
+
+追加段階: Lambda inline CFNと明示DependsOnの作成/逆順削除をnative保存処理に接続する。これだけでstep3/4やWP採点が完成するわけではない。managed BasicExecutionRoleはmetadataのみ。次は保存execution roleに固定した制限付きSDK bridgeで、ネットワークや任意endpointは与えない。

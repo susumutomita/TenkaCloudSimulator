@@ -3,7 +3,7 @@
   "info": {
     "title": "TenkaCloud Simulator API",
     "version": "0.1.0",
-    "description": "Independent local cloud simulator. AWS S3 is the first provider. No real infrastructure is created. This document describes only implemented operations. S3 wire APIs retain their XML formats; simulator IAM control is explicitly a separate JSON API. Use unsigned requests or dummy TCSIM SDK credentials. Default principal simulator-admin has full sandbox access. For IAM exercises send x-simulator-principal. SQLite is ephemeral by default; --state persists it. See /_simulator/v1/capabilities for limits and deviations. Lambda supports a bounded Python 3.12 ZIP subset through the native REST paths below. Host Python is not required. Lambda CloudFormation, function-internal SDK/network and Function URLs remain unsupported.",
+    "description": "Independent local cloud simulator. AWS S3 is the first provider. No real infrastructure is created. This document describes only implemented operations. S3 wire APIs retain their XML formats; simulator IAM control is explicitly a separate JSON API. Use unsigned requests or dummy TCSIM SDK credentials. Default principal simulator-admin has full sandbox access. For IAM exercises send x-simulator-principal. SQLite is ephemeral by default; --state persists it. See /_simulator/v1/capabilities for limits and deviations. Lambda supports a bounded Python 3.12 ZIP subset through the native REST paths below. Host Python is not required. Function-internal SDK/network and Function URLs remain unsupported. CloudFormation supports inline Python AWS::Lambda::Function with index.handler, existing local role, Ref/Arn and explicit DependsOn. Caller requires Lambda Create/DeleteFunction and iam:PassRole; tagged creation also requires lambda:TagResource. No SDK/network bridge or managed-policy grants.",
     "license": {
       "name": "MIT"
     }
@@ -62,7 +62,7 @@
       },
       "post": {
         "summary": "SSM JSON or CloudFormation Query operation",
-        "description": "Native regional root endpoint. SSM: X-Amz-Target AmazonSSM.PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter. CloudFormation: CreateStack, DescribeStacks, DeleteStack; only S3 buckets, SSM parameters and one inline IAM identity policy per role. Unsupported options fail. Real credentials and session tokens are rejected. Create/DeleteStack also require the caller to allow the underlying S3/SSM/IAM actions; CAPABILITY_IAM grants no permissions. No service RoleArn or general CloudFormation lifecycle is supported.",
+        "description": "Native regional root endpoint. SSM: X-Amz-Target AmazonSSM.PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter. CloudFormation: CreateStack, DescribeStacks, DeleteStack; only S3 buckets, SSM parameters, inline Python Lambda functions and one inline IAM identity policy per role. Unsupported options fail. Real credentials and session tokens are rejected. Create/DeleteStack also require the caller to allow the underlying S3/SSM/IAM/Lambda actions; CAPABILITY_IAM grants no permissions. No service RoleArn or general CloudFormation lifecycle is supported.",
         "operationId": "awsRegionalOperation",
         "parameters": [
           {

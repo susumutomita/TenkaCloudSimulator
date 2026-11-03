@@ -136,6 +136,15 @@ func (s *LambdaStore) save(f *LambdaFunction, create bool, revision string) erro
 		return err
 	}
 	defer tx.Rollback()
+	if err = saveLambdaFunction(tx, f, create, revision); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+// Shared by the native API and transactional CloudFormation creation.
+func saveLambdaFunction(tx *sql.Tx, f *LambdaFunction, create bool, revision string) error {
+	var err error
 	var count, total int
 	if err = tx.QueryRow("SELECT count(*),coalesce(sum(code_bytes),0) FROM aws_lambda_functions").Scan(&count, &total); err != nil {
 		return err
@@ -187,7 +196,7 @@ func (s *LambdaStore) save(f *LambdaFunction, create bool, revision string) erro
 	if err != nil {
 		return err
 	}
-	return tx.Commit()
+	return nil
 }
 
 var lambdaName = regexp.MustCompile(`^[a-zA-Z0-9_-]{1,64}$`)

@@ -1,0 +1,49 @@
+Parameters:
+  Value:
+    Type: String
+    Default: safe-dummy
+Resources:
+  AFunction:
+    Type: AWS::Lambda::Function
+    DependsOn: ZRole
+    Properties:
+      FunctionName: cfn-inline-app
+      Runtime: python3.12
+      Handler: index.handler
+      Role: !GetAtt ZRole.Arn
+      Description: Local inline Python with real SQLite execution
+      Timeout: 15
+      MemorySize: 128
+      Environment:
+        Variables:
+          DEMO_VALUE: !Ref Value
+      Tags:
+        - Key: Purpose
+          Value: local-practice
+      Code:
+        ZipFile: |
+          import os, sqlite3
+          def handler(event, context):
+              db = sqlite3.connect(':memory:')
+              result = db.execute('select 6 * 7').fetchone()[0]
+              return {'answer': result, 'value': os.environ['DEMO_VALUE'], 'event': event}
+  ZRole:
+    Type: AWS::IAM::Role
+    Properties:
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: ReadConfig
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: ssm:GetParameter
+                Resource: arn:aws:ssm:ap-northeast-1:000000000000:parameter/cfn-inline/*
+Outputs:
+  Name:
+    Value: !Ref AFunction
+  Arn:
+    Value: !GetAtt AFunction.Arn
+  Role:
+    Value: !GetAtt ZRole.Arn

@@ -232,7 +232,29 @@ func resourceOrder(resources map[string]any) ([]string, error) {
 				}
 			}
 		}
-		walk(object(resources[key])["Properties"])
+		raw := object(resources[key])
+		if explicit, exists := raw["DependsOn"]; exists {
+			var names []any
+			switch v := explicit.(type) {
+			case string:
+				names = []any{v}
+			case []any:
+				names = v
+			default:
+				return fmt.Errorf("DependsOn must be a logical ID or array of logical IDs")
+			}
+			if len(names) == 0 {
+				return fmt.Errorf("DependsOn must not be empty")
+			}
+			for _, value := range names {
+				name, valid := value.(string)
+				if _, found := resources[name]; !valid || !found {
+					return fmt.Errorf("unknown DependsOn logical ID")
+				}
+				dependencies[name] = true
+			}
+		}
+		walk(raw["Properties"])
 		names := []string{}
 		for dependency := range dependencies {
 			names = append(names, dependency)
@@ -285,11 +307,11 @@ func compileStack(region, name, body string, parameters map[string]string, capab
 	for _, value := range resources {
 		r := object(value)
 		kind := stringValue(r["Type"])
-		if kind != "AWS::SSM::Parameter" && kind != "AWS::IAM::Role" && kind != "AWS::S3::Bucket" {
+		if kind != "AWS::SSM::Parameter" && kind != "AWS::IAM::Role" && kind != "AWS::S3::Bucket" && kind != "AWS::Lambda::Function" {
 			return fail("Unsupported resource type: " + kind)
 		}
 		for k := range r {
-			if k != "Type" && k != "Properties" {
+			if k != "Type" && k != "Properties" && k != "DependsOn" {
 				return fail("Unsupported resource attribute: " + k)
 			}
 		}
@@ -389,6 +411,13 @@ func compileStack(region, name, body string, parameters map[string]string, capab
 				return fail("Parameter description exceeds 1024 bytes.")
 			}
 			attrs[key+".Value"] = value
+		} else if kind == "AWS::Lambda::Function" {
+			f, e := compileStackFunction(region, name, id, key, properties)
+			if e != nil {
+				return StackRecord{}, e
+			}
+			physical = f.Name
+			attrs[key+".Arn"] = lambdaARN(region, physical)
 		} else if kind == "AWS::S3::Bucket" {
 			physical, e = compileS3Bucket(name, id, key, properties)
 			if e != nil {
@@ -413,7 +442,7 @@ func compileStack(region, name, body string, parameters map[string]string, capab
 					return fail("ManagedPolicyArns must be an array.")
 				}
 				for _, arn := range list {
-					if stringValue(arn) != "arn:aws:iam::aws:policy/SignInLocalDevelopmentAccess" {
+					if stringValue(arn) != "arn:aws:iam::aws:policy/SignInLocalDevelopmentAccess" && stringValue(arn) != "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole" {
 						return fail("Managed policy permissions are unsupported.")
 					}
 				}
@@ -494,6 +523,9 @@ func (s *StackStore) Create(record StackRecord) error {
 		if r.Type == "AWS::S3::Bucket" {
 			table, limit = "buckets", core.MaxBuckets
 		}
+		if r.Type == "AWS::Lambda::Function" {
+			table, limit = "aws_lambda_functions", 100
+		}
 		if r.Type == "AWS::IAM::Role" {
 			table, limit = "identity_policies", 1000
 		}
@@ -509,10 +541,20 @@ func (s *StackStore) Create(record StackRecord) error {
 		}
 		if r.Type == "AWS::SSM::Parameter" {
 			_, err = tx.Exec("INSERT INTO aws_ssm_parameters VALUES(?,?,?,?,?,?,?)", record.Region, r.PhysicalID, stringValue(r.Properties["Type"]), stringValue(r.Properties["Value"]), stringValue(r.Properties["Description"]), 1, float64(time.Now().UnixMilli())/1000)
+		} else if r.Type == "AWS::Lambda::Function" {
+			var f LambdaFunction
+			f, err = compileStackFunction(record.Region, record.Name, record.ID, r.LogicalID, r.Properties)
+			if err == nil {
+				// Persisted physical IDs remain authoritative across code upgrades.
+				f.Name = r.PhysicalID
+				err = saveLambdaFunction(tx, &f, true, "")
+			}
 		} else if r.Type == "AWS::S3::Bucket" {
 			err = createStackBucket(tx, record.Region, r)
-		} else {
+		} else if r.Type == "AWS::IAM::Role" {
 			_, err = tx.Exec("INSERT INTO identity_policies VALUES(?,?)", r.PhysicalID, stringValue(r.Properties["SimulatorPolicy"]))
+		} else {
+			return ssmFailure{"ValidationError", "Unsupported stored stack resource type."}
 		}
 		if err != nil {
 			return ssmFailure{"AlreadyExistsException", "A resource already exists or its creation was rejected."}
@@ -580,7 +622,8 @@ func (s *StackStore) deleteChecked(region, name string, authorize func(StackReco
 			return err
 		}
 	}
-	for _, r := range records[0].Resources {
+	for i := len(records[0].Resources) - 1; i >= 0; i-- {
+		r := records[0].Resources[i]
 		namespace := stackResourceNamespace(region, r.Type)
 		var owned int
 		if err = tx.QueryRow("SELECT count(*) FROM aws_cfn_ownership WHERE namespace=? AND kind=? AND physical_id=? AND stack_id=?", namespace, r.Type, r.PhysicalID, records[0].ID).Scan(&owned); err != nil {
@@ -591,6 +634,8 @@ func (s *StackStore) deleteChecked(region, name string, authorize func(StackReco
 		}
 		if r.Type == "AWS::SSM::Parameter" {
 			_, err = tx.Exec("DELETE FROM aws_ssm_parameters WHERE region=? AND name=?", region, r.PhysicalID)
+		} else if r.Type == "AWS::Lambda::Function" {
+			_, err = tx.Exec("DELETE FROM aws_lambda_functions WHERE region=? AND name=?", region, r.PhysicalID)
 		} else if r.Type == "AWS::S3::Bucket" {
 			err = s3DeleteBucket(tx, r.PhysicalID)
 			if core.Code(err) == "NoSuchBucket" {
@@ -598,8 +643,10 @@ func (s *StackStore) deleteChecked(region, name string, authorize func(StackReco
 			} else if core.Code(err) == "BucketNotEmpty" {
 				return ssmFailure{"ValidationError", "S3 bucket retains objects, versions or delete markers; empty it explicitly before DeleteStack."}
 			}
-		} else {
+		} else if r.Type == "AWS::IAM::Role" {
 			_, err = tx.Exec("DELETE FROM identity_policies WHERE name=?", r.PhysicalID)
+		} else {
+			return ssmFailure{"ValidationError", "Unsupported stored stack resource type."}
 		}
 		if err != nil {
 			return err
