@@ -166,7 +166,7 @@
       "put": {
         "operationId": "CreateBucket",
         "summary": "Create a bucket",
-        "description": "Requires s3:CreateBucket on the bucket ARN. Empty body creates in us-east-1. Other supported regions require LocationConstraint.",
+        "description": "Requires s3:CreateBucket on the bucket ARN. Empty body creates in us-east-1. Other supported regions require LocationConstraint. Bucket subresources: use ?versioning for Get/PutBucketVersioning; ?publicAccessBlock for Get/Put/DeletePublicAccessBlock; ?versions for GET ListObjectVersions. Do not combine subresources or send list-type with them. Versioning Status is Enabled/Suspended; MFA Delete is unsupported. Public access block stores the four bucket-level booleans; public ACLs/policies remain unsupported.",
         "tags": [
           "S3 basic object storage"
         ],
@@ -180,6 +180,24 @@
               "type": "string",
               "default": "simulator-admin"
             }
+          },
+          {
+            "name": "versioning",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional S3 subresource selector (empty value), or version-list cursor. Remove incompatible ListObjectsV2 parameters."
+          },
+          {
+            "name": "publicAccessBlock",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional S3 subresource selector (empty value), or version-list cursor. Remove incompatible ListObjectsV2 parameters."
           }
         ],
         "responses": {
@@ -216,7 +234,17 @@
               "schema": {
                 "type": "string"
               },
-              "example": "<CreateBucketConfiguration xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"><LocationConstraint>ap-northeast-1</LocationConstraint></CreateBucketConfiguration>"
+              "examples": {
+                "createBucket": {
+                  "value": "<CreateBucketConfiguration><LocationConstraint>ap-northeast-1</LocationConstraint></CreateBucketConfiguration>"
+                },
+                "enableVersioning": {
+                  "value": "<VersioningConfiguration><Status>Enabled</Status></VersioningConfiguration>"
+                },
+                "publicAccessBlock": {
+                  "value": "<PublicAccessBlockConfiguration><BlockPublicAcls>true</BlockPublicAcls><IgnorePublicAcls>true</IgnorePublicAcls><BlockPublicPolicy>true</BlockPublicPolicy><RestrictPublicBuckets>true</RestrictPublicBuckets></PublicAccessBlockConfiguration>"
+                }
+              }
             }
           }
         }
@@ -224,7 +252,7 @@
       "get": {
         "operationId": "ListObjectsV2OrGetBucketLocation",
         "summary": "List objects or get bucket location",
-        "description": "ListObjectsV2: keep list-type=2; supports prefix, delimiter, max-keys and continuation. GetBucketLocation: omit list-type and send an empty location query. S3 uses one path for these two wire operations; this reference does not invent a REST adapter.",
+        "description": "ListObjectsV2: keep list-type=2; supports prefix, delimiter, max-keys and continuation. GetBucketLocation: omit list-type and send an empty location query. S3 uses one path for these two wire operations; this reference does not invent a REST adapter. Bucket subresources: use ?versioning for Get/PutBucketVersioning; ?publicAccessBlock for Get/Put/DeletePublicAccessBlock; ?versions for GET ListObjectVersions. Do not combine subresources or send list-type with them. Versioning Status is Enabled/Suspended; MFA Delete is unsupported. Public access block stores the four bucket-level booleans; public ACLs/policies remain unsupported.",
         "tags": [
           "S3 basic object storage"
         ],
@@ -246,7 +274,8 @@
             "schema": {
               "type": "string",
               "default": "2"
-            }
+            },
+            "required": false
           },
           {
             "name": "prefix",
@@ -267,7 +296,7 @@
           {
             "name": "max-keys",
             "in": "query",
-            "description": "0–1000 entries per page.",
+            "description": "0\u20131000 entries per page.",
             "schema": {
               "type": "integer",
               "default": 1000
@@ -304,6 +333,51 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "versioning",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional S3 subresource selector (empty value), or version-list cursor. Remove incompatible ListObjectsV2 parameters."
+          },
+          {
+            "name": "publicAccessBlock",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional S3 subresource selector (empty value), or version-list cursor. Remove incompatible ListObjectsV2 parameters."
+          },
+          {
+            "name": "versions",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional S3 subresource selector (empty value), or version-list cursor. Remove incompatible ListObjectsV2 parameters."
+          },
+          {
+            "name": "key-marker",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional S3 subresource selector (empty value), or version-list cursor. Remove incompatible ListObjectsV2 parameters."
+          },
+          {
+            "name": "version-id-marker",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional S3 subresource selector (empty value), or version-list cursor. Remove incompatible ListObjectsV2 parameters."
           }
         ],
         "responses": {
@@ -334,7 +408,7 @@
       "head": {
         "operationId": "HeadBucket",
         "summary": "Check whether a bucket exists",
-        "description": "Requires s3:ListBucket. x-amz-bucket-region returns its region.",
+        "description": "Requires s3:ListBucket. x-amz-bucket-region returns its region. Bucket subresources: use ?versioning for Get/PutBucketVersioning; ?publicAccessBlock for Get/Put/DeletePublicAccessBlock; ?versions for GET ListObjectVersions. Do not combine subresources or send list-type with them. Versioning Status is Enabled/Suspended; MFA Delete is unsupported. Public access block stores the four bucket-level booleans; public ACLs/policies remain unsupported.",
         "tags": [
           "S3 basic object storage"
         ],
@@ -370,7 +444,7 @@
       "delete": {
         "operationId": "DeleteBucket",
         "summary": "Delete an empty bucket",
-        "description": "Atomic relational constraint: fails with BucketNotEmpty while any object belongs to this bucket.",
+        "description": "Atomic relational constraint: fails with BucketNotEmpty while any object belongs to this bucket. Bucket subresources: use ?versioning for Get/PutBucketVersioning; ?publicAccessBlock for Get/Put/DeletePublicAccessBlock; ?versions for GET ListObjectVersions. Do not combine subresources or send list-type with them. Versioning Status is Enabled/Suspended; MFA Delete is unsupported. Public access block stores the four bucket-level booleans; public ACLs/policies remain unsupported.",
         "tags": [
           "S3 basic object storage"
         ],
@@ -384,6 +458,15 @@
               "type": "string",
               "default": "simulator-admin"
             }
+          },
+          {
+            "name": "publicAccessBlock",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional S3 subresource selector (empty value), or version-list cursor. Remove incompatible ListObjectsV2 parameters."
           }
         ],
         "responses": {
@@ -545,6 +628,14 @@
               "type": "string"
             },
             "example": "bytes=0-4"
+          },
+          {
+            "name": "versionId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional opaque version ID, including null. Get/Head require s3:GetObjectVersion, Delete requires s3:DeleteObjectVersion. A current delete marker returns 404; explicitly retrieving one returns 405. Deleting a marker restores the latest remaining version."
           }
         ],
         "responses": {
@@ -595,6 +686,14 @@
               "type": "string",
               "default": "simulator-admin"
             }
+          },
+          {
+            "name": "versionId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional opaque version ID, including null. Get/Head require s3:GetObjectVersion, Delete requires s3:DeleteObjectVersion. A current delete marker returns 404; explicitly retrieving one returns 405. Deleting a marker restores the latest remaining version."
           }
         ],
         "responses": {
@@ -631,6 +730,14 @@
               "type": "string",
               "default": "simulator-admin"
             }
+          },
+          {
+            "name": "versionId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional opaque version ID, including null. Get/Head require s3:GetObjectVersion, Delete requires s3:DeleteObjectVersion. A current delete marker returns 404; explicitly retrieving one returns 405. Deleting a marker restores the latest remaining version."
           }
         ],
         "responses": {

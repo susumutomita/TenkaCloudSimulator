@@ -1,0 +1,41 @@
+TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)
+Warning: Please run the Java VM which executes TLC with a throughput optimized garbage collector by passing the "-XX:+UseParallelGC" property.
+(Use the -nowarning option to disable this warning.)
+Running breadth-first search Model-Checking with fp 100 and seed 907542222413557489 with 1 worker on 4 cores with 4096MB heap and 64MB offheap memory [pid: 114659] (Linux 6.18.57 amd64, Debian 21.0.12.1 x86_64, MSBDiskFPSet, DiskStateQueue).
+Parsing file /tmp/tcsim-s3-versions-de_c1zwc/S3VersionsMutant.tla
+Parsing file /tmp/Naturals.tla
+Parsing file /tmp/Sequences.tla
+Parsing file /tmp/FiniteSets.tla
+Semantic processing of module Naturals
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module S3VersionsMutant
+Starting... (2026-11-03 18:29:32)
+Computing initial states...
+Finished computing initial states: 1 distinct state generated at 2026-11-03 18:29:32.
+Error: Invariant NoHistoryOrphans is violated.
+Error: The behavior up to this point is:
+State 1: <Initial predicate>
+/\ history = (evidence :> <<>> @@ other :> <<>>)
+/\ bucket = FALSE
+/\ current = {}
+
+State 2: <Create line 11, col 11 to line 13, col 43 of module S3VersionsMutant>
+/\ history = (evidence :> <<>> @@ other :> <<>>)
+/\ bucket = TRUE
+/\ current = {}
+
+State 3: <MarkDeleted line 18, col 19 to line 21, col 37 of module S3VersionsMutant>
+/\ history = (evidence :> <<"marker">> @@ other :> <<>>)
+/\ bucket = TRUE
+/\ current = {}
+
+State 4: <RemoveBucket line 29, col 17 to line 31, col 49 of module S3VersionsMutant>
+/\ history = (evidence :> <<"marker">> @@ other :> <<>>)
+/\ bucket = FALSE
+/\ current = {}
+
+13 states generated, 11 distinct states found, 6 states left on queue.
+The depth of the complete state graph search is 4.
+The average outdegree of the complete state graph is 3 (minimum is 1, the maximum 4 and the 95th percentile is 4).
+Finished in 00s at (2026-11-03 18:29:32)
