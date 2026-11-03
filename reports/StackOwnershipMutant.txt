@@ -1,8 +1,8 @@
 TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)
 Warning: Please run the Java VM which executes TLC with a throughput optimized garbage collector by passing the "-XX:+UseParallelGC" property.
 (Use the -nowarning option to disable this warning.)
-Running breadth-first search Model-Checking with fp 49 and seed 3321542225797232548 with 1 worker on 4 cores with 4096MB heap and 64MB offheap memory [pid: 125453] (Linux 6.18.57 amd64, Debian 21.0.12.1 x86_64, MSBDiskFPSet, DiskStateQueue).
-Parsing file /tmp/tcsim-ownership-g7liejd0/StackOwnershipMutant.tla
+Running breadth-first search Model-Checking with fp 87 and seed 7693358995021930897 with 1 worker on 4 cores with 4096MB heap and 64MB offheap memory [pid: 135006] (Linux 6.18.57 amd64, Debian 21.0.12.1 x86_64, MSBDiskFPSet, DiskStateQueue).
+Parsing file /tmp/tcsim-ownership-tfh25nl3/StackOwnershipMutant.tla
 Parsing file /tmp/Naturals.tla
 Parsing file /tmp/FiniteSets.tla
 Parsing file /tmp/Sequences.tla
@@ -10,9 +10,9 @@ Semantic processing of module Naturals
 Semantic processing of module Sequences
 Semantic processing of module FiniteSets
 Semantic processing of module StackOwnershipMutant
-Starting... (2026-11-03 19:50:04)
+Starting... (2026-11-03 21:55:48)
 Computing initial states...
-Finished computing initial states: 1 distinct state generated at 2026-11-03 19:50:05.
+Finished computing initial states: 1 distinct state generated at 2026-11-03 21:55:48.
 Error: Invariant OwnershipExclusive is violated.
 Error: The behavior up to this point is:
 State 1: <Initial predicate>
@@ -34,4 +34,4 @@ State 4: <Create line 9, col 16 to line 11, col 45 of module StackOwnershipMutan
 30 states generated, 18 distinct states found, 9 states left on queue.
 The depth of the complete state graph search is 4.
 The average outdegree of the complete state graph is 2 (minimum is 1, the maximum 4 and the 95th percentile is 4).
-Finished in 00s at (2026-11-03 19:50:05)
+Finished in 00s at (2026-11-03 21:55:48)
