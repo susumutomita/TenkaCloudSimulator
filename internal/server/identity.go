@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"io"
+	"log/slog"
 	"net/http"
 	"regexp"
 	"sort"
@@ -69,7 +70,12 @@ func identityAPI(identities *core.Identities) http.Handler {
 				return
 			}
 			if err = identities.Set(name, p); err != nil {
-				fail(400, err.Error())
+				if core.Code(err) == "ServiceUnavailable" {
+					fail(503, err.Error())
+				} else {
+					slog.Error("simulator identity write failed", "error", err)
+					fail(500, "Could not save identity policy.")
+				}
 				return
 			}
 			_ = json.NewEncoder(w).Encode(p)

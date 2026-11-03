@@ -6,10 +6,15 @@ on:
 permissions:
   contents: read
 jobs:
-  standalone:
+  ci:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      code-quality: write
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16
         with:
           go-version: '1.26.10'
@@ -21,6 +26,16 @@ jobs:
           python3 tools/scalar/notices.py
           git diff --exit-code -- internal/server/apidocs third_party/scalar.json third_party/scalar-bundled-packages.json third_party/SCALAR-BUNDLED-NOTICES.txt internal/legal/assets/SCALAR-BUNDLED-NOTICES.txt tools/scalar/bundle-inputs.json tools/scalar/bundle-digests.json third_party/color-picker-removal.json
       - run: make before-commit cross-check
+      - name: Convert full Go coverage to Cobertura
+        run: |
+          go run github.com/boumenot/gocover-cobertura@v1.4.0 < reports/coverage.out > reports/coverage.xml
+          python3 scripts/check-coverage.py reports/coverage.out reports/coverage.xml
+      - name: Upload coverage for the repository threshold rule
+        uses: actions/upload-code-coverage@2b21a77928be8d5168c2b9581a67f2adbebacc52
+        with:
+          file: reports/coverage.xml
+          language: Go
+          label: code-coverage/go-tests
       - name: Check Go vulnerabilities against the canonical service
         run: go run golang.org/x/vuln/cmd/govulncheck@v1.1.4 ./...
       - name: Install development-only browser and SDK tools

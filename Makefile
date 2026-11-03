@@ -12,7 +12,8 @@ dev: build
 
 test:
 	mkdir -p reports
-	$(GO) test -race -coverpkg=./internal/... -coverprofile=reports/coverage.out ./...
+	$(GO) test -race -coverpkg=./... -coverprofile=reports/coverage.out ./...
+	$(PYTHON) scripts/check-coverage.py reports/coverage.out
 
 vet:
 	$(GO) vet ./...

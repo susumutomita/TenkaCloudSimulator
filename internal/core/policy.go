@@ -151,8 +151,10 @@ func (i *Identities) Set(name string, p Policy) error {
 	}
 	if n >= 1000 {
 		var exists int
-		if err = tx.QueryRow("SELECT 1 FROM identity_policies WHERE name=?", name).Scan(&exists); err != nil {
-			return fmt.Errorf("simulator principal limit reached")
+		if err = tx.QueryRow("SELECT 1 FROM identity_policies WHERE name=?", name).Scan(&exists); err == sql.ErrNoRows {
+			return Fail("ServiceUnavailable", "Simulator principal limit reached.")
+		} else if err != nil {
+			return err
 		}
 	}
 	data, err := json.Marshal(p)

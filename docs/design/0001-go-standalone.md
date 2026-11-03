@@ -1,6 +1,6 @@
 # Go standalone runtime: initial S3 increment
 
-Status: implemented locally on `codex/go-single-binary-console`; replaces the TypeScript runtime intentionally. No remote branch, PR, deployment, or release has been created.
+Status: implemented on `codex/go-single-binary-console`; replaces the TypeScript runtime intentionally. Review: https://github.com/susumutomita/TenkaCloudSimulator/pull/26. No deployment or release is part of this change.
 
 ## Outcome and boundaries
 
