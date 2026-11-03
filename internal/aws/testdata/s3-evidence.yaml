@@ -1,0 +1,22 @@
+Parameters:
+  Prefix: {Type: String, Default: cfn-evidence}
+Resources:
+  AConfig:
+    Type: AWS::SSM::Parameter
+    Properties: {Name: /cfn-evidence/config, Type: String, Value: preserve-me}
+  EvidenceBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref Prefix
+      VersioningConfiguration: {Status: Enabled}
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: TenkaCloud:NamePrefix
+          Value: !Ref Prefix
+Outputs:
+  Bucket: {Value: !Ref EvidenceBucket}
+  ARN: {Value: !GetAtt EvidenceBucket.Arn}

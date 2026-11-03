@@ -24,6 +24,7 @@ type S3Version struct {
 func NewS3Store(db *sql.DB) (*S3Store, error) {
 	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS aws_s3_config(bucket TEXT PRIMARY KEY REFERENCES buckets(name) ON DELETE CASCADE,status TEXT NOT NULL CHECK(status IN ('','Enabled','Suspended')),public_access TEXT);
  CREATE TABLE IF NOT EXISTS aws_s3_versions(seq INTEGER PRIMARY KEY AUTOINCREMENT,bucket TEXT NOT NULL REFERENCES buckets(name) ON DELETE RESTRICT,key TEXT NOT NULL,version TEXT NOT NULL,marker INTEGER NOT NULL CHECK(marker IN (0,1)),content_type TEXT NOT NULL,etag TEXT NOT NULL,modified TEXT NOT NULL,data BLOB NOT NULL,UNIQUE(bucket,key,version));
+ CREATE TABLE IF NOT EXISTS aws_s3_tags(bucket TEXT PRIMARY KEY REFERENCES buckets(name) ON DELETE CASCADE,document TEXT NOT NULL);
  CREATE INDEX IF NOT EXISTS aws_s3_version_keys ON aws_s3_versions(bucket,key,seq DESC);`)
 	return &S3Store{db}, err
 }
@@ -269,20 +270,26 @@ func (s *S3Store) DeleteBucket(bucket string) error {
 		return err
 	}
 	defer tx.Rollback()
-	if err = s3BucketExists(tx, bucket); err != nil {
+	if err = s3DeleteBucket(tx, bucket); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+func s3DeleteBucket(tx *sql.Tx, bucket string) error {
+	if err := s3BucketExists(tx, bucket); err != nil {
 		return err
 	}
 	var count int
-	if err = tx.QueryRow("SELECT (SELECT count(*) FROM objects WHERE bucket=?)+(SELECT count(*) FROM aws_s3_versions WHERE bucket=?)", bucket, bucket).Scan(&count); err != nil {
+	if err := tx.QueryRow("SELECT (SELECT count(*) FROM objects WHERE bucket=?)+(SELECT count(*) FROM aws_s3_versions WHERE bucket=?)", bucket, bucket).Scan(&count); err != nil {
 		return err
 	}
 	if count != 0 {
 		return core.Fail("BucketNotEmpty", "Delete all objects, versions and delete markers first.")
 	}
-	if _, err = tx.Exec("DELETE FROM buckets WHERE name=?", bucket); err != nil {
+	if _, err := tx.Exec("DELETE FROM buckets WHERE name=?", bucket); err != nil {
 		return err
 	}
-	return tx.Commit()
+	return nil
 }
 
 func (s *S3Store) Versions(bucket string) ([]S3Version, error) {
@@ -333,8 +340,14 @@ func (s *S3Store) Create(bucket, region string) error {
 		return err
 	}
 	defer tx.Rollback()
+	if err = s3CreateBucket(tx, bucket, region); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+func s3CreateBucket(tx *sql.Tx, bucket, region string) error {
 	var existing string
-	err = tx.QueryRow("SELECT region FROM buckets WHERE name=?", bucket).Scan(&existing)
+	err := tx.QueryRow("SELECT region FROM buckets WHERE name=?", bucket).Scan(&existing)
 	if err == nil {
 		if existing == region {
 			return core.Fail("BucketAlreadyOwnedByYou", "The bucket already exists in this simulator.")
@@ -357,5 +370,5 @@ func (s *S3Store) Create(bucket, region string) error {
 	if _, err = tx.Exec(`INSERT INTO aws_s3_config VALUES(?,'','{"BlockPublicAcls":true,"IgnorePublicAcls":true,"BlockPublicPolicy":true,"RestrictPublicBuckets":true}')`, bucket); err != nil {
 		return err
 	}
-	return tx.Commit()
+	return nil
 }

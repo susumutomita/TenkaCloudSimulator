@@ -160,11 +160,11 @@ func TestStackIAMUsesActualResourceARN(t *testing.T) {
 	}
 	cfnCall(t, s, "DescribeStacks", nil, 403, identity)
 	cfnCall(t, s, "DescribeStacks", url.Values{"StackName": {"allowed"}}, 403, identity)
-	policy(statement("Allow", "cloudformation:*", "*"), statement("Deny", "cloudformation:DeleteStack", protected))
+	policy(statement("Allow", "cloudformation:*", "*"), statement("Deny", "cloudformation:DeleteStack", protected), statement("Allow", "ssm:DeleteParameter", "arn:aws:ssm:us-east-1:000000000000:parameter/allowed/hello"), map[string]any{"Effect": "Allow", "Action": []string{"iam:DeleteRolePolicy", "iam:DeleteRole"}, "Resource": "arn:aws:iam::000000000000:role/allowed-R-*"})
 	cfnCall(t, s, "DeleteStack", url.Values{"StackName": {allowed}}, 200, identity)
-	policy(statement("Allow", "cloudformation:DeleteStack", protected))
+	policy(statement("Allow", "cloudformation:DeleteStack", protected), statement("Allow", "ssm:DeleteParameter", "arn:aws:ssm:us-east-1:000000000000:parameter/protected/hello"), map[string]any{"Effect": "Allow", "Action": []string{"iam:DeleteRolePolicy", "iam:DeleteRole"}, "Resource": "arn:aws:iam::000000000000:role/protected-R-*"})
 	cfnCall(t, s, "DeleteStack", url.Values{"StackName": {"protected"}}, 200, identity)
-	policy(statement("Allow", "cloudformation:CreateStack", "arn:aws:cloudformation:us-east-1:000000000000:stack/permitted/*"))
+	policy(statement("Allow", "cloudformation:CreateStack", "arn:aws:cloudformation:us-east-1:000000000000:stack/permitted/*"), statement("Allow", "ssm:PutParameter", "arn:aws:ssm:us-east-1:000000000000:parameter/permitted/hello"), map[string]any{"Effect": "Allow", "Action": []string{"iam:CreateRole", "iam:PutRolePolicy"}, "Resource": "arn:aws:iam::000000000000:role/permitted-R-*"})
 	permitted := create("permitted", identity)
 	cfnCall(t, s, "CreateStack", url.Values{"StackName": {"forbidden"}, "TemplateBody": {template("forbidden")}, "Capabilities.member.1": {"CAPABILITY_IAM"}}, 403, identity)
 	ssmCall(t, s, "GetParameter", map[string]any{"Name": "/forbidden/hello"}, 400, nil)
@@ -201,4 +201,42 @@ func stackOutput(t *testing.T, body []byte, key string) string {
 	}
 	t.Fatalf("Missing output %s", key)
 	return ""
+}
+
+func TestStackUnderlyingActionsNeedTheirOwnPermissions(t *testing.T) {
+	s := instance(t)
+	actor := map[string]string{"X-Simulator-Principal": "underlying-caller"}
+	set := func(statements ...map[string]any) {
+		t.Helper()
+		body, _ := json.Marshal(map[string]any{"Version": "2012-10-17", "Statement": statements})
+		status(t, s, "PUT", "/_simulator/v1/iam/principals/underlying-caller/policy", string(body), 200, nil)
+	}
+	allow := func(actions []string, resource string) map[string]any {
+		return map[string]any{"Effect": "Allow", "Action": actions, "Resource": resource}
+	}
+	stack := allow([]string{"cloudformation:CreateStack", "cloudformation:DeleteStack"}, "arn:aws:cloudformation:us-east-1:000000000000:stack/underlying/*")
+	fields := func() url.Values {
+		return url.Values{"StackName": {"underlying"}, "TemplateBody": {simpleTemplate}, "Capabilities.member.1": {"CAPABILITY_IAM"}}
+	}
+	// CAPABILITY_IAM is acknowledgment, never permission to install a role policy.
+	set(stack)
+	cfnCall(t, s, "CreateStack", fields(), 403, actor)
+	ssmCall(t, s, "GetParameter", map[string]any{"Name": "/owned/hello"}, 400, nil)
+	cfnCall(t, s, "DescribeStacks", url.Values{"StackName": {"underlying"}}, 400, nil)
+	parameter := allow([]string{"ssm:PutParameter"}, "arn:aws:ssm:us-east-1:000000000000:parameter/owned/hello")
+	set(stack, parameter)
+	cfnCall(t, s, "CreateStack", fields(), 403, actor)
+	ssmCall(t, s, "GetParameter", map[string]any{"Name": "/owned/hello"}, 400, nil)
+	role := allow([]string{"iam:CreateRole", "iam:PutRolePolicy"}, "arn:aws:iam::000000000000:role/underlying-R-*")
+	deny := map[string]any{"Effect": "Deny", "Action": "ssm:PutParameter", "Resource": "arn:aws:ssm:us-east-1:000000000000:parameter/owned/hello"}
+	set(stack, parameter, role, deny)
+	cfnCall(t, s, "CreateStack", fields(), 403, actor)
+	set(stack, parameter, role)
+	cfnCall(t, s, "CreateStack", fields(), 200, actor)
+	set(stack)
+	cfnCall(t, s, "DeleteStack", url.Values{"StackName": {"underlying"}}, 403, actor)
+	ssmCall(t, s, "GetParameter", map[string]any{"Name": "/owned/hello"}, 200, nil)
+	set(stack, allow([]string{"ssm:DeleteParameter"}, "arn:aws:ssm:us-east-1:000000000000:parameter/owned/hello"), allow([]string{"iam:DeleteRolePolicy", "iam:DeleteRole"}, "arn:aws:iam::000000000000:role/underlying-R-*"))
+	cfnCall(t, s, "DeleteStack", url.Values{"StackName": {"underlying"}}, 200, actor)
+	ssmCall(t, s, "GetParameter", map[string]any{"Name": "/owned/hello"}, 400, nil)
 }

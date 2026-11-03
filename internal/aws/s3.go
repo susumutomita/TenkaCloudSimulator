@@ -61,7 +61,7 @@ func fail(w http.ResponseWriter, r *http.Request, code, message string) {
 	switch code {
 	case "InternalError":
 		status = 500
-	case "NoSuchBucket", "NoSuchKey", "NoSuchVersion", "NoSuchPublicAccessBlockConfiguration":
+	case "NoSuchBucket", "NoSuchKey", "NoSuchVersion", "NoSuchPublicAccessBlockConfiguration", "NoSuchTagSet":
 		status = 404
 	case "BucketNotEmpty", "BucketAlreadyExists", "BucketAlreadyOwnedByYou":
 		status = 409
@@ -124,7 +124,7 @@ func (g *Gateway) serveS3(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		switch k {
-		case "list-type", "prefix", "delimiter", "max-keys", "continuation-token", "start-after", "encoding-type", "location", "x-id", "versioning", "publicAccessBlock", "versions", "versionId", "key-marker", "version-id-marker":
+		case "list-type", "prefix", "delimiter", "max-keys", "continuation-token", "start-after", "encoding-type", "location", "x-id", "versioning", "publicAccessBlock", "versions", "versionId", "key-marker", "version-id-marker", "tagging":
 		default:
 			fail(w, r, "NotImplemented", "Unsupported S3 query: "+k)
 			return
@@ -209,7 +209,7 @@ func (g *Gateway) serveS3(w http.ResponseWriter, r *http.Request) {
 		g.object(w, r, name, key)
 		return
 	}
-	for _, kind := range []string{"versioning", "publicAccessBlock", "versions"} {
+	for _, kind := range []string{"versioning", "publicAccessBlock", "versions", "tagging"} {
 		if r.URL.Query().Has(kind) {
 			allowed := map[string]bool{kind: true, "x-id": true}
 			if kind == "versions" {
@@ -227,7 +227,9 @@ func (g *Gateway) serveS3(w http.ResponseWriter, r *http.Request) {
 				fail(w, r, "InvalidArgument", "Bucket subresource must not have a value.")
 				return
 			}
-			if kind == "versions" {
+			if kind == "tagging" {
+				g.bucketTags(w, r, name)
+			} else if kind == "versions" {
 				g.listVersions(w, r, name)
 			} else {
 				g.bucketConfiguration(w, r, name, kind)
@@ -578,6 +580,12 @@ func permission(r *http.Request) (string, string) {
 			}
 			return "s3:GetObject", resource
 		}
+	}
+	if r.URL.Query().Has("tagging") {
+		if r.Method == "GET" {
+			return "s3:GetBucketTagging", resource
+		}
+		return "s3:PutBucketTagging", resource
 	}
 	if r.URL.Query().Has("versions") {
 		return "s3:ListBucketVersions", resource

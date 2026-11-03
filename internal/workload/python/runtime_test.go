@@ -152,7 +152,10 @@ def handler(event, context):
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
-				result, e := invoke("counter=0\ndef handler(event, context):\n    global counter\n    counter+=1\n    return counter\n", 5*time.Second)
+				// Four fresh interpreters need two waves through the two slots.
+				// This is a positive isolation test, not a startup benchmark;
+				// tight cancellation/deadline behavior is tested separately.
+				result, e := invoke("counter=0\ndef handler(event, context):\n    global counter\n    counter+=1\n    return counter\n", 15*time.Second)
 				if e != nil || result.FunctionError || string(result.Payload) != "1" {
 					t.Errorf("isolation: %+v %v", result, e)
 				}
