@@ -256,3 +256,71 @@ func TestProviderStorageFailuresDoNotReportSuccess(t *testing.T) {
 		t.Fatal("error text")
 	}
 }
+
+func TestResourceReferencesUseDependencyOrder(t *testing.T) {
+	template := `Resources:
+  A:
+    Type: AWS::SSM::Parameter
+    Properties: {Name: /dependency/a, Type: String, Value: !Sub '${Z.Value}/${M}'}
+  M:
+    Type: AWS::SSM::Parameter
+    Properties: {Name: /dependency/m, Type: String, Value: {Fn::GetAtt: [Z, Value]}}
+  Z:
+    Type: AWS::SSM::Parameter
+    Properties: {Name: /dependency/z, Type: String, Value: source}
+Outputs:
+  Result: {Value: !GetAtt A.Value}
+`
+	record, err := compileStack("us-east-1", "forward", template, nil, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if record.Outputs["Result"] != "source//dependency/m" || record.Resources[0].LogicalID != "Z" {
+		t.Fatal(record)
+	}
+	cross := `Resources:
+  A:
+    Type: AWS::SSM::Parameter
+    Properties: {Name: /dependency/arn, Type: String, Value: !GetAtt Z.Arn}
+  Z:
+    Type: AWS::IAM::Role
+    Properties:
+      Policies:
+        - PolicyName: read
+          PolicyDocument: {Version: '2012-10-17', Statement: [{Effect: Allow, Action: 'ssm:GetParameter', Resource: '*'}]}
+Outputs:
+  Result: {Value: !GetAtt A.Value}
+`
+	record, err = compileStack("us-east-1", "forward", cross, nil, "CAPABILITY_IAM")
+	if err != nil || record.Outputs["Result"] != "arn:aws:iam::000000000000:role/forward-Z" {
+		t.Fatal(record, err)
+	}
+	for _, value := range []string{"!Ref A", "!GetAtt A.Value", "!Sub '${A.Value}'"} {
+		body := strings.Replace(template, "{Fn::GetAtt: [Z, Value]}", value, 1)
+		if _, err = compileStack("us-east-1", "cycle", body, nil, ""); err == nil || !strings.Contains(err.Error(), "cyclic") {
+			t.Fatal("cycle not rejected", err)
+		}
+	}
+}
+func TestStackDeletionValidatesResourceClaims(t *testing.T) {
+	c, err := core.New(":memory:")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer c.Close()
+	p, _ := NewParameterStore(c.Database())
+	s, _ := NewStackStore(c.Database())
+	record := StackRecord{Name: "owner", ID: "owner-id", Region: "us-east-1", Resources: []StackResource{{Type: "AWS::SSM::Parameter", PhysicalID: "/owner", Properties: map[string]any{"Type": "String", "Value": "sentinel"}}}}
+	if err = s.Create(record); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = c.Database().Exec("DELETE FROM aws_cfn_ownership"); err != nil {
+		t.Fatal(err)
+	}
+	if err = s.Delete("us-east-1", record.ID); err == nil {
+		t.Fatal("missing ownership accepted")
+	}
+	if got, err := p.Get("us-east-1", "/owner"); err != nil || got.Value != "sentinel" {
+		t.Fatal("ownership mismatch deleted bytes", err)
+	}
+}

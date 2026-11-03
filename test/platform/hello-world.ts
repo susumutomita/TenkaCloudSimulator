@@ -81,7 +81,7 @@ try {
   const supported = engine.catalog().filter((problem: any)=>problem.problemId==='hello-world');
   assert.equal(supported.length, 1);
   engine.catalog = () => supported;
-  engine.participantAwsAccess = async () => {throw new Error('Native AWS access is unavailable in local simulation')};
+  engine.hasAws = false; // Local consoles are available, native AWS federation/credentials are not.
   const hostKey = 'disposable-local-host-bootstrap-key';
   const service = new HostingService(store, engine, hostKey);
   service.accountConnection = {region:'ap-northeast-1',operatorAccountId:'000000000000',externalId:'local-host-external-id-2026',verify:async(account: string)=>assert(runtimes.has(account))};
@@ -106,10 +106,13 @@ try {
   const jobs=store.jobs(event.eventId);
   assert(jobs.every((job:any)=>job.status==='COMPLETE'), JSON.stringify(jobs.map((job:any)=>({status:job.status,error:job.error}))));
   await admin('PATCH',`/events/${event.eventId}/schedule`,{startNow:true,endsAt:new Date(Date.now()+600000).toISOString()});
+  assert.equal((await (await fetch(participantHttp.origin+'/runtime-config.json')).json()).hasAws,false);
   const flags: string[]=[];
   const access: string[]=[];
   for (const [index,team] of event.teams.entries()) {
     const job = jobs.find((item:any)=>item.teamId===team.teamId);
+    const native=await fetch(`${participantHttp.origin}/api/portal/me/cli-credentials?jobId=${job.jobId}`,{headers:{authorization:`Bearer ${team.teamLoginKey}`}});
+    assert.equal(native.status,503);assert.equal((await native.json()).kind,'aws_not_configured');
     const outputs = JSON.parse(job.unit).outputs;
     const runtime=runtimes.get(accounts[index])!;
     const response=await fetch(`${runtime.endpoint}/_simulator/v1/access`,{method:'POST',headers:{'x-simulator-token':runtime.token,'content-type':'application/json'},body:JSON.stringify({Principal:outputs.ParticipantViewerRoleArn.split('/').at(-1)})});

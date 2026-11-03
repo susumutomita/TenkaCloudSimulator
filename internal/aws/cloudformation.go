@@ -177,6 +177,84 @@ func resolve(v any, refs map[string]string, attributes map[string]string) (any, 
 	}
 	return nil, fmt.Errorf("unsupported template value")
 }
+
+// resourceOrder rejects cycles and resolves forward Ref/GetAtt/Sub dependencies
+// before evaluating properties. Logical-ID spelling must not change behavior.
+func resourceOrder(resources map[string]any) ([]string, error) {
+	keys := []string{}
+	for key := range resources {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	state := map[string]int{}
+	ordered := []string{}
+	var visit func(string) error
+	visit = func(key string) error {
+		if state[key] == 2 {
+			return nil
+		}
+		if state[key] == 1 {
+			return fmt.Errorf("cyclic resource dependency: %s", key)
+		}
+		state[key] = 1
+		dependencies := map[string]bool{}
+		add := func(reference string) {
+			name, _, _ := strings.Cut(reference, ".")
+			if _, found := resources[name]; found {
+				dependencies[name] = true
+			}
+		}
+		var walk func(any)
+		walk = func(value any) {
+			switch v := value.(type) {
+			case []any:
+				for _, item := range v {
+					walk(item)
+				}
+			case map[string]any:
+				for field, item := range v {
+					switch field {
+					case "Ref":
+						add(stringValue(item))
+					case "Fn::GetAtt":
+						if array, ok := item.([]any); ok && len(array) == 2 {
+							add(stringValue(array[0]))
+						} else {
+							add(stringValue(item))
+						}
+					case "Fn::Sub":
+						for _, match := range subExpression.FindAllStringSubmatch(stringValue(item), -1) {
+							add(match[1])
+						}
+					default:
+						walk(item)
+					}
+				}
+			}
+		}
+		walk(object(resources[key])["Properties"])
+		names := []string{}
+		for dependency := range dependencies {
+			names = append(names, dependency)
+		}
+		sort.Strings(names)
+		for _, dependency := range names {
+			if err := visit(dependency); err != nil {
+				return err
+			}
+		}
+		state[key] = 2
+		ordered = append(ordered, key)
+		return nil
+	}
+	for _, key := range keys {
+		if err := visit(key); err != nil {
+			return nil, err
+		}
+	}
+	return ordered, nil
+}
+
 func compileStack(region, name, body string, parameters map[string]string, capabilities string) (StackRecord, error) {
 	fail := func(message string) (StackRecord, error) {
 		return StackRecord{}, ssmFailure{"ValidationError", message}
@@ -266,103 +344,98 @@ func compileStack(region, name, body string, parameters map[string]string, capab
 		refs[key] = v
 		record.Parameters[key] = v
 	}
-	keys := []string{}
-	for key := range resources {
-		keys = append(keys, key)
+	keys, err := resourceOrder(resources)
+	if err != nil {
+		return fail(err.Error())
 	}
-	sort.Strings(keys)
-	// Resolve parameter values before roles so identity policies can reference them.
-	for _, kind := range []string{"AWS::SSM::Parameter", "AWS::IAM::Role"} {
-		for _, key := range keys {
-			raw := object(resources[key])
-			if stringValue(raw["Type"]) != kind {
-				continue
+	for _, key := range keys {
+		raw := object(resources[key])
+		kind := stringValue(raw["Type"])
+
+		resolved, e := resolve(raw["Properties"], refs, attrs)
+		if e != nil {
+			return fail(e.Error())
+		}
+		properties := object(resolved)
+		physical := ""
+		if kind == "AWS::SSM::Parameter" {
+			for k := range properties {
+				switch k {
+				case "Name", "Value", "Type", "Description", "Tier":
+				default:
+					return fail("Unsupported parameter property: " + k)
+				}
 			}
-			resolved, e := resolve(raw["Properties"], refs, attrs)
+			physical = stringValue(properties["Name"])
+			parameterType := stringValue(properties["Type"])
+			value := stringValue(properties["Value"])
+			if !validParameterName(physical) || parameterType != "String" && parameterType != "StringList" || len(value) == 0 || len(value) > 4096 {
+				return fail("Invalid or unsupported SSM parameter properties.")
+			}
+			if tier := stringValue(properties["Tier"]); tier != "" && tier != "Standard" {
+				return fail("Only Standard parameters are supported.")
+			}
+			if parameterType == "StringList" {
+				for _, item := range strings.Split(value, ",") {
+					if strings.TrimSpace(item) == "" {
+						return fail("StringList elements cannot be empty.")
+					}
+				}
+			}
+			if len(stringValue(properties["Description"])) > 1024 {
+				return fail("Parameter description exceeds 1024 bytes.")
+			}
+			attrs[key+".Value"] = value
+		} else {
+			if capabilities != "CAPABILITY_IAM" && capabilities != "CAPABILITY_NAMED_IAM" {
+				return fail("Acknowledge CAPABILITY_IAM for identity-policy resources.")
+			}
+			for k := range properties {
+				switch k {
+				case "RoleName", "AssumeRolePolicyDocument", "Policies", "Tags", "MaxSessionDuration", "ManagedPolicyArns":
+				default:
+					return fail("Unsupported role property: " + k)
+				}
+			}
+			// Sign-in/trust metadata is retained for catalog fidelity, never evaluated as authorization.
+			if managed, exists := properties["ManagedPolicyArns"]; exists {
+				list, ok := managed.([]any)
+				if !ok {
+					return fail("ManagedPolicyArns must be an array.")
+				}
+				for _, arn := range list {
+					if stringValue(arn) != "arn:aws:iam::aws:policy/SignInLocalDevelopmentAccess" {
+						return fail("Managed policy permissions are unsupported.")
+					}
+				}
+			}
+			physical = stringValue(properties["RoleName"])
+			if physical == "" {
+				physical = name + "-" + key
+				if len(physical) > 64 {
+					sum := sha256.Sum256([]byte(physical))
+					physical = physical[:47] + "-" + hex.EncodeToString(sum[:8])
+				}
+			}
+			if !regexp.MustCompile(`^[a-zA-Z0-9_-]{1,64}$`).MatchString(physical) || physical == core.Administrator {
+				return fail("Role name must be 1–64 non-reserved local identity characters.")
+			}
+			policies, ok := properties["Policies"].([]any)
+			if !ok || len(policies) != 1 {
+				return fail("Exactly one inline identity policy is supported per role.")
+			}
+			encoded, e := json.Marshal(object(policies[0])["PolicyDocument"])
 			if e != nil {
+				return fail("Invalid identity policy.")
+			}
+			if _, e = core.ParsePolicy(encoded); e != nil {
 				return fail(e.Error())
 			}
-			properties := object(resolved)
-			physical := ""
-			if kind == "AWS::SSM::Parameter" {
-				for k := range properties {
-					switch k {
-					case "Name", "Value", "Type", "Description", "Tier":
-					default:
-						return fail("Unsupported parameter property: " + k)
-					}
-				}
-				physical = stringValue(properties["Name"])
-				parameterType := stringValue(properties["Type"])
-				value := stringValue(properties["Value"])
-				if !validParameterName(physical) || parameterType != "String" && parameterType != "StringList" || len(value) == 0 || len(value) > 4096 {
-					return fail("Invalid or unsupported SSM parameter properties.")
-				}
-				if tier := stringValue(properties["Tier"]); tier != "" && tier != "Standard" {
-					return fail("Only Standard parameters are supported.")
-				}
-				if parameterType == "StringList" {
-					for _, item := range strings.Split(value, ",") {
-						if strings.TrimSpace(item) == "" {
-							return fail("StringList elements cannot be empty.")
-						}
-					}
-				}
-				if len(stringValue(properties["Description"])) > 1024 {
-					return fail("Parameter description exceeds 1024 bytes.")
-				}
-				attrs[key+".Value"] = value
-			} else {
-				if capabilities != "CAPABILITY_IAM" && capabilities != "CAPABILITY_NAMED_IAM" {
-					return fail("Acknowledge CAPABILITY_IAM for identity-policy resources.")
-				}
-				for k := range properties {
-					switch k {
-					case "RoleName", "AssumeRolePolicyDocument", "Policies", "Tags", "MaxSessionDuration", "ManagedPolicyArns":
-					default:
-						return fail("Unsupported role property: " + k)
-					}
-				}
-				// Sign-in/trust metadata is retained for catalog fidelity, never evaluated as authorization.
-				if managed, exists := properties["ManagedPolicyArns"]; exists {
-					list, ok := managed.([]any)
-					if !ok {
-						return fail("ManagedPolicyArns must be an array.")
-					}
-					for _, arn := range list {
-						if stringValue(arn) != "arn:aws:iam::aws:policy/SignInLocalDevelopmentAccess" {
-							return fail("Managed policy permissions are unsupported.")
-						}
-					}
-				}
-				physical = stringValue(properties["RoleName"])
-				if physical == "" {
-					physical = name + "-" + key
-					if len(physical) > 64 {
-						sum := sha256.Sum256([]byte(physical))
-						physical = physical[:47] + "-" + hex.EncodeToString(sum[:8])
-					}
-				}
-				if !regexp.MustCompile(`^[a-zA-Z0-9_-]{1,64}$`).MatchString(physical) || physical == core.Administrator {
-					return fail("Role name must be 1–64 non-reserved local identity characters.")
-				}
-				policies, ok := properties["Policies"].([]any)
-				if !ok || len(policies) != 1 {
-					return fail("Exactly one inline identity policy is supported per role.")
-				}
-				encoded, e := json.Marshal(object(policies[0])["PolicyDocument"])
-				if e != nil {
-					return fail("Invalid identity policy.")
-				}
-				if _, e = core.ParsePolicy(encoded); e != nil {
-					return fail(e.Error())
-				}
-				properties["SimulatorPolicy"] = string(encoded)
-				attrs[key+".Arn"] = "arn:aws:iam::000000000000:role/" + physical
-			}
-			refs[key] = physical
-			record.Resources = append(record.Resources, StackResource{key, kind, physical, properties})
+			properties["SimulatorPolicy"] = string(encoded)
+			attrs[key+".Arn"] = "arn:aws:iam::000000000000:role/" + physical
 		}
+		refs[key] = physical
+		record.Resources = append(record.Resources, StackResource{key, kind, physical, properties})
 	}
 	for key, raw := range object(template["Outputs"]) {
 		for field := range object(raw) {
@@ -431,8 +504,16 @@ func (s *StackStore) Create(record StackRecord) error {
 	}
 	return tx.Commit()
 }
+
+type stackQuery interface {
+	Query(string, ...any) (*sql.Rows, error)
+}
+
 func (s *StackStore) Records(region, name string) ([]StackRecord, error) {
-	rows, err := s.db.Query("SELECT document FROM aws_cfn_stacks WHERE region=? AND (?='' OR name=? OR id=?) ORDER BY name", region, name, name, name)
+	return stackRecords(s.db, region, name)
+}
+func stackRecords(query stackQuery, region, name string) ([]StackRecord, error) {
+	rows, err := query.Query("SELECT document FROM aws_cfn_stacks WHERE region=? AND (?='' OR name=? OR id=?) ORDER BY name", region, name, name, name)
 	if err != nil {
 		return nil, err
 	}
@@ -458,19 +539,33 @@ func (s *StackStore) Records(region, name string) ([]StackRecord, error) {
 	return records, nil
 }
 func (s *StackStore) Delete(region, name string) error {
-	records, err := s.Records(region, name)
+	// Acquire the immediate write transaction before reading the stack. A stale
+	// delete must never remove a replacement stack that reclaimed physical names.
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	records, err := stackRecords(tx, region, name)
 	if err != nil {
 		return err
 	}
 	if len(records) != 1 {
 		return ssmFailure{"ValidationError", "Specify exactly one stack."}
 	}
-	tx, err := s.db.Begin()
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
+
 	for _, r := range records[0].Resources {
+		namespace := region
+		if r.Type == "AWS::IAM::Role" {
+			namespace = ""
+		}
+		var owned int
+		if err = tx.QueryRow("SELECT count(*) FROM aws_cfn_ownership WHERE namespace=? AND kind=? AND physical_id=? AND stack_id=?", namespace, r.Type, r.PhysicalID, records[0].ID).Scan(&owned); err != nil {
+			return err
+		}
+		if owned != 1 {
+			return ssmFailure{"ValidationError", "Stack resource ownership changed; deletion refused."}
+		}
 		if r.Type == "AWS::SSM::Parameter" {
 			_, err = tx.Exec("DELETE FROM aws_ssm_parameters WHERE region=? AND name=?", region, r.PhysicalID)
 		} else {
@@ -608,6 +703,11 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
+	}
+	// Exercise IAM permission is not permission to read host-private answers.
+	if action == "DescribeStacks" && r.Header.Get("X-Simulator-Access-Role") == "participant" {
+		cfnError(w, ssmFailure{"AccessDenied", "Stack outputs are reserved for the host."})
+		return
 	}
 	principal := r.Header.Get("X-Simulator-Principal")
 	if principal == "" {

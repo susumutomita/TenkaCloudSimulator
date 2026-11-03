@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"net/http/httptest"
 	"net/url"
 	"strings"
@@ -85,4 +86,37 @@ func TestCloudFormationWireValidation(t *testing.T) {
 	for _, body := range []string{"%invalid", "Action=DescribeStacks&Version=wrong", strings.Repeat("a", (1<<20)+1)} {
 		status(t, s, "POST", "/", body, 400, h)
 	}
+}
+
+func TestParticipantCannotReadPrivateOutputsWithWildcardIAM(t *testing.T) {
+	h, closeState, err := New(":memory:")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer closeState()
+	operator := strings.Repeat("o", 64)
+	access, err := NewAccess(h, operator, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := httptest.NewServer(access)
+	defer s.Close()
+	admin := map[string]string{"X-Simulator-Token": operator}
+	status(t, s, "PUT", "/_simulator/v1/iam/principals/broad/policy", `{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":"*","Resource":"*"}]}`, 200, admin)
+	cfnCall(t, s, "CreateStack", url.Values{"StackName": {"private"}, "TemplateBody": {simpleTemplate}, "Capabilities.member.1": {"CAPABILITY_IAM"}}, 200, admin)
+	data := status(t, s, "POST", "/_simulator/v1/access", `{"Principal":"broad"}`, 200, admin)
+	var issued struct{ AccessToken string }
+	if json.Unmarshal(data, &issued) != nil {
+		t.Fatal("invalid issuance")
+	}
+	participant := map[string]string{"X-Simulator-Token": issued.AccessToken, "X-Simulator-Access-Role": "operator"}
+	for _, fields := range []url.Values{nil, {"StackName": {"private"}}} {
+		body := cfnCall(t, s, "DescribeStacks", fields, 403, participant)
+		if strings.Contains(string(body), "safe-dummy") {
+			t.Fatal("private output leaked")
+		}
+	}
+	cfnCall(t, s, "DescribeStacks", url.Values{"StackName": {"private"}}, 200, admin)
+	// Wildcard exercise permission remains usable for the intended data plane.
+	ssmCall(t, s, "GetParameter", map[string]any{"Name": "/owned/hello"}, 200, participant)
 }
