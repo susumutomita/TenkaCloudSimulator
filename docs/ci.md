@@ -12,7 +12,7 @@ Every push, pull request and manual run checks out the exact tested head and run
 3. Unfiltered Cobertura conversion and Go HTML coverage view. Both full-module
    statement coverage and source-line coverage must be at least 90%.
 4. Locked npm dependency audit (high/critical fail) and canonical Go govulncheck.
-5. Ten real binary + SDK + offline console/Scalar E2E cases, 23-state accessibility audit,
+5. Eleven real binary + SDK + offline console/Scalar E2E cases, 23-state accessibility audit,
    three finite TLC models and three required mutation counterexamples.
 
 Coverage generation and threshold checks are ordinary required steps. An absent,
@@ -83,4 +83,4 @@ The full-module Go race command runs packages with `-p 1`: several test binaries
 
 ## Responsive layout synchronization
 
-The main f790403 run41706632955 passed Go/coverage/security but caught an SSM mobile width assertion immediately after viewport change/Cancel. Cloudscape processes resize asynchronously; E2E now waits up to3s for the exact document.scrollWidth<=innerWidth geometry to stay stable100ms. A real Chromium regression first observes temporary overflow, then waits for a delayed responsive update, and requires permanent1000px overflow at390px to fail. No width tolerance, ignored failure or coverage change is introduced. All six viewport geometry assertions use this gate; persistent overflow reports geometry only, without text/input/token data.
+The main f790403 run41706632955 passed Go/coverage/security but caught an SSM mobile width assertion immediately after viewport change/Cancel. Cloudscape processes resize asynchronously; E2E now waits up to3s for the exact document.scrollWidth<=innerWidth geometry to stay stable100ms. A real Chromium regression first observes temporary overflow, then waits for a delayed responsive update, and requires permanent1000px overflow at390px to fail. No width tolerance, ignored failure or coverage change is introduced. All viewport geometry assertions use this gate; persistent overflow reports geometry only, without text/input/token data.

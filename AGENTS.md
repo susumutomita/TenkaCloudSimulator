@@ -1,6 +1,6 @@
 # TenkaCloudSimulator working contract
 
-This repository owns an independent Go single-binary multi-cloud simulator. AWS is the first provider, with S3 basics/version history/bucket settings, Standard SSM parameters, bounded Python Lambda execution and a deliberately limited CloudFormation subset. Static console, local Scalar API reference, SQLite and the fixed CPython/WASI interpreter are embedded; runtime must not require host Python, Node, Docker, an external DB, or real cloud access.
+This repository owns an independent Go single-binary multi-cloud simulator. AWS is the first provider, with S3 basics/version history/bucket settings, Standard SSM parameters, bounded Python Lambda execution/inline CloudFormation provisioning and a deliberately limited CloudFormation subset. Static console, local Scalar API reference, SQLite and the fixed CPython/WASI interpreter are embedded; runtime must not require host Python, Node, Docker, an external DB, or real cloud access.
 
 - `internal/core/` owns provider-neutral relational object storage and the currently supported identity-policy matching primitive. Do not introduce cloud-specific protocol dispatch or problem IDs here.
 - `internal/provider/` registers separate cloud protocol handlers. Preserve the ability to run several providers at once. New providers keep their own authorization semantics, resource model, namespace, and UI rather than inheriting AWS behavior.

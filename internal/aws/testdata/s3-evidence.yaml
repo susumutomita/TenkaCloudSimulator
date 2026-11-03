@@ -1,7 +1,7 @@
 Parameters:
   Prefix: {Type: String, Default: cfn-evidence}
 Resources:
-  AConfig:
+  ZConfig:
     Type: AWS::SSM::Parameter
     Properties: {Name: /cfn-evidence/config, Type: String, Value: preserve-me}
   EvidenceBucket:

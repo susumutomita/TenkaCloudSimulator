@@ -2,7 +2,7 @@
 
 LambdaのPython 3.12関数を、埋込CPython 3.12.16/WASIで実際に実行する。S3/SSMと同じGoバイナリ・SQLite・local access tokenを使い、外部Python、Docker、Node、クラウド接続は実行時に不要。
 
-この段階では既存wp2shell問題の完走を意味しない。LambdaのCloudFormation、API Gateway/WAF、関数内SDK/HTTP接続は未対応。問題の選択は引き続きhello-worldのみ。[対応順](design/0002-catalog-workloads.md)。
+この段階では既存wp2shell問題の完走を意味しない。Lambdaの限定CloudFormationに対応するが、API Gateway/WAF、関数内SDK/HTTP接続は未対応。問題の選択は引き続きhello-worldのみ。[対応順](design/0002-catalog-workloads.md)。
 
 ## 対応API
 
@@ -40,3 +40,13 @@ Lambda→Functions→Create function（Author from scratch、Python 3.12、既�
 実バイナリを空cwd/PATHで起動するE2Eは、ブラウザ作成/実行/ZIP更新/削除、SDKのcode hash/readback、参加者Invoke/metadata拒否、別processの同名関数とtoken分離を検証する。Go race testsはSQL/hashの実Python実行、host capability拒否、deadline/heap/output bounds、concurrent cold isolation、SQLite失敗rollback/破損fail-closedを検証する。
 
 一次資料: [CreateFunction](https://docs.aws.amazon.com/lambda/latest/api/API_CreateFunction.html)、[Invoke](https://docs.aws.amazon.com/lambda/latest/api/API_Invoke.html)、[ListFunctions](https://docs.aws.amazon.com/lambda/latest/api/API_ListFunctions.html)、[environment variables](https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html)。対応部分と未対応部分を区別し、AWS全体との互換性を主張しない。
+
+## CloudFormationからの作成
+
+AWS::Lambda::FunctionのPython3.12/Code.ZipFile inline sourceに対応する。handlerはindex.function、memory128MiB、timeout1–30秒。FunctionName/Description/Role/Environment.Variables/TagsとRef/Arnを扱い、実ZIPをnative Lambdaと同じSQLiteへ保存する。S3 package/image/layers/architecture選択/versions/alias、UpdateStackは未対応。保存済みphysical IDを改名しない。
+
+CFN呼出者はStack操作に加えlambda:CreateFunction、実行roleのiam:PassRole、tag付きならlambda:TagResourceを必要とする。削除はlambda:DeleteFunctionを必要とする。execution roleは既存local identityまたは同stackで先行作成されたroleで、managed AWSLambdaBasicExecutionRole ARNはmetadataのみ。CloudWatchへの実通信や権限追加はない。関数内SDK bridgeもまだ提供しない。
+
+DependsOnのlogical ID文字列/配列とRef/GetAtt/Subを統合した順序で作成し、依存元から逆順に削除する。未知ID/型/cycleは変更前に拒否。function/code/role/stack/ownershipは単一transactionで保存・削除し、失敗時は全体rollback。Lambdaのclaim namespaceはlambda:<region>とし、未対応の古いreaderがrole fallbackで誤削除できないようにする。SQLiteを古い実行ファイルと共有・downgradeする運用はサポートしない。
+
+[公式Lambda CFN](https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-resource-lambda-function.html)、[DependsOnと削除順](https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-attribute-dependson.html)を参照した限定実装。既存問題の実採点完了を意味しない。

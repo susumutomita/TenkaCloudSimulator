@@ -127,6 +127,10 @@ func createStackBucket(tx *sql.Tx, region string, r StackResource) error {
 	return s3WriteTags(tx, r.PhysicalID, tags)
 }
 func stackResourceNamespace(region, kind string) string {
+	if kind == "AWS::Lambda::Function" {
+		return "lambda:" + region
+	} // Older readers must fail ownership validation, never interpret a function as an IAM role.
+
 	if kind == "AWS::IAM::Role" || kind == "AWS::S3::Bucket" {
 		return ""
 	}
@@ -163,6 +167,19 @@ func stackResourcePermissions(record StackRecord, deleting bool, authorize func(
 			}
 			if tags, ok := r.Properties["Tags"].([]any); !deleting && ok && len(tags) > 0 {
 				actions = append(actions, "iam:TagRole")
+			}
+		case "AWS::Lambda::Function":
+			resource = lambdaARN(record.Region, r.PhysicalID)
+			if deleting {
+				actions = []string{"lambda:DeleteFunction"}
+			} else {
+				actions = []string{"lambda:CreateFunction"}
+				if tags, ok := r.Properties["Tags"].([]any); ok && len(tags) > 0 {
+					actions = append(actions, "lambda:TagResource")
+				}
+				if err := authorize("iam:PassRole", stringValue(r.Properties["Role"])); err != nil {
+					return err
+				}
 			}
 		case "AWS::S3::Bucket":
 			resource = "arn:aws:s3:::" + r.PhysicalID
