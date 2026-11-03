@@ -44,6 +44,8 @@ type Runtime struct {
 }
 
 type Invocation struct {
+	Exchange    Exchange
+	Modules     fs.FS
 	Code        []byte
 	Handler     string
 	Event       json.RawMessage
@@ -197,17 +199,30 @@ func (r *Runtime) Run(ctx context.Context, in Invocation) (Result, error) {
 	if err = ctx.Err(); err != nil {
 		return Result{}, err
 	}
-	envelope, _ := json.Marshal(map[string]any{"handler": in.Handler, "event": in.Event, "context": in.Context})
+	envelope, _ := json.Marshal(map[string]any{"handler": in.Handler, "event": in.Event, "context": in.Context, "capabilities": in.Exchange != nil})
 	bootstrap, _ := assets.ReadFile("bootstrap.py")
 	var output, stderr cappedOutput
-	config := wazero.NewModuleConfig().WithName("").WithArgs("python", "-I", "-B", "-c", string(bootstrap)).WithStdin(bytes.NewReader(envelope)).WithStdout(&output).WithStderr(&stderr).WithRandSource(rand.Reader).WithSysWalltime().WithSysNanotime().WithNanosleep(func(ns int64) {
+	envelope = append(envelope, '\n')
+	var input io.Reader = bytes.NewReader(envelope)
+	var stdout io.Writer = &output
+	fsConfig := wazero.NewFSConfig().WithFSMount(r.stdlib, "/python/lib/python3.12").WithFSMount(code, "/var/task")
+	var exchange *exchangeOutput
+	if in.Exchange != nil {
+		stream := &exchangeInput{context: ctx, initial: bytes.NewReader(envelope), replies: make(chan []byte, 1)}
+		exchange = &exchangeOutput{context: ctx, call: in.Exchange, input: stream, output: &output}
+		input, stdout = stream, exchange
+		if in.Modules != nil {
+			fsConfig = fsConfig.WithFSMount(in.Modules, "/simulator/modules")
+		}
+	}
+	config := wazero.NewModuleConfig().WithName("").WithArgs("python", "-I", "-B", "-c", string(bootstrap)).WithStdin(input).WithStdout(stdout).WithStderr(&stderr).WithRandSource(rand.Reader).WithSysWalltime().WithSysNanotime().WithNanosleep(func(ns int64) {
 		timer := time.NewTimer(time.Duration(ns))
 		defer timer.Stop()
 		select {
 		case <-ctx.Done():
 		case <-timer.C:
 		}
-	}).WithFSConfig(wazero.NewFSConfig().WithFSMount(r.stdlib, "/python/lib/python3.12").WithFSMount(code, "/var/task"))
+	}).WithFSConfig(fsConfig)
 	for key, value := range in.Environment {
 		if key == "" || strings.ContainsAny(key, "=\x00") || strings.ContainsRune(value, '\x00') {
 			return Result{}, errors.New("Invalid function environment")
@@ -217,6 +232,11 @@ func (r *Runtime) Run(ctx context.Context, in Invocation) (Result, error) {
 	_, err = r.runtime.InstantiateModule(ctx, r.module, config)
 	if ctx.Err() != nil {
 		return Result{Logs: output.String()[:min(output.Len(), 64<<10)]}, ctx.Err()
+	}
+	if exchange != nil {
+		if e := exchange.finish(); e != nil {
+			return Result{}, errors.New("Local capability exchange exceeded its protocol limits")
+		}
 	}
 	if output.exceeded || stderr.exceeded {
 		return Result{}, errors.New("Function output exceeded 256 KiB")

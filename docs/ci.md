@@ -12,7 +12,7 @@ Every push, pull request and manual run checks out the exact tested head and run
 3. Unfiltered Cobertura conversion and Go HTML coverage view. Both full-module
    statement coverage and source-line coverage must be at least 90%.
 4. Locked npm dependency audit (high/critical fail) and canonical Go govulncheck.
-5. Eleven real binary + SDK + offline console/Scalar E2E cases, 23-state accessibility audit,
+5. Twelve real binary + SDK + offline console/Scalar E2E cases, 23-state accessibility audit,
    three finite TLC models and three required mutation counterexamples.
 
 Coverage generation and threshold checks are ordinary required steps. An absent,
@@ -84,3 +84,7 @@ The full-module Go race command runs packages with `-p 1`: several test binaries
 ## Responsive layout synchronization
 
 The main f790403 run41706632955 passed Go/coverage/security but caught an SSM mobile width assertion immediately after viewport change/Cancel. Cloudscape processes resize asynchronously; E2E now waits up to3s for the exact document.scrollWidth<=innerWidth geometry to stay stable100ms. A real Chromium regression first observes temporary overflow, then waits for a delayed responsive update, and requires permanent1000px overflow at390px to fail. No width tolerance, ignored failure or coverage change is introduced. All viewport geometry assertions use this gate; persistent overflow reports geometry only, without text/input/token data.
+
+The local SDK bridge tests exercise actual CPython, native SSM/S3 shared state, execution-role rather than caller authority, private-resource denial, two authenticated team processes, explicitDeny, frame/message/aggregate limits, unconsumed replies, canceled stdin/callback and four independent concurrent capability channels.
+
+A required pinned-catalog subset rehearsal runs the unchanged original wp2shell handler (SHA2568d559b2b8ad72f7a281d3ef5cd3ba804d76cb01d6f2d45049baf56ee4c8a4f03) through real Python/SQLite and native role-bound SSM. The test-only projection excludes unsupported resources and supplies a dummy unavailable HTTP URL. It observes the original SQL/routing defects, then native SSM configuration changes produce400/401. This is explicitly not a full-template deployment, seven-check grading or permission to select the problem.

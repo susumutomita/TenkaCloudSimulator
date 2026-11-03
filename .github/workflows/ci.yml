@@ -77,6 +77,7 @@ jobs:
           export BUN="$PWD/tools/platform/node_modules/@oven/bun-linux-x64/bin/bun"
           "$BUN" test/platform/hello-world.ts
           /tmp/simulator-tests/bin/python test/platform/browser.py
+          /tmp/simulator-tests/bin/python test/platform/wp-sdk-subset.py
       - name: Inspect console flow, keyboard behavior, and accessible contrast
         run: |
           /tmp/simulator-tests/bin/python scripts/get-audit-tools.py /tmp/simulator-audit
