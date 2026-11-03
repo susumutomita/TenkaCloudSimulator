@@ -2,7 +2,6 @@ package server
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -111,5 +110,4 @@ func TestSSMPaginationAndValidation(t *testing.T) {
 	status(t, s, "POST", "/?unsupported=1", "{}", 400, map[string]string{"X-Amz-Target": "AmazonSSM.DescribeParameters"})
 	status(t, s, "POST", "/_simulator/providers/aws/", "{}", 200, map[string]string{"X-Amz-Target": "AmazonSSM.DescribeParameters"})
 	status(t, s, "POST", "/", strings.Repeat("x", (48<<10)+1), 400, map[string]string{"X-Amz-Target": "AmazonSSM.DescribeParameters"})
-	_ = fmt.Sprint(token)
 }
