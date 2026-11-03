@@ -1,0 +1,47 @@
+- banner:
+  - link "TenkaCloud Simulator":
+    - /url: /_simulator/console/
+  - button "Services"
+  - button "us-east-1"
+  - button "Choose identity": simulator-admin
+  - link "API reference":
+    - /url: /_simulator/docs/
+- main:
+  - navigation "Service navigation":
+    - button "Toggle service navigation"
+  - navigation "Breadcrumbs":
+    - list:
+      - listitem:
+        - link "Services":
+          - /url: "#/s3"
+      - listitem:
+        - link "Lambda" [disabled]
+  - group: Local simulation Independent local simulator. Python 3.12 functions only. Network access, layers and other runtimes are unavailable.
+  - heading "Create function" [level=1]
+  - text: Function options
+  - radiogroup "Function options":
+    - radio "Author from scratch" [checked]
+    - text: Author from scratch Start with a small Python function that returns its event.
+    - radio "Use a blueprint" [disabled]
+    - text: Use a blueprint
+    - radio "Container image" [disabled]
+    - text: Container image
+  - heading "Basic information" [level=2]
+  - text: Function name
+  - textbox "Function name"
+  - text: Runtime
+  - button "Runtime Python 3.12" [disabled]: Python 3.12
+  - text: Execution role ARN Use an existing local IAM identity created by your host. Creating an AWS IAM role from this form is not implemented.
+  - textbox "Execution role ARN":
+    - /placeholder: arn:aws:iam::000000000000:role/executor
+  - button "Cancel"
+  - button "Create function"
+  - complementary "Help panel":
+    - button "Close help panel"
+    - heading "Simulator scope" [level=2]
+    - paragraph: Independent local simulator. Not affiliated with AWS. No real cloud resources are created.
+    - paragraph: S3 basic operations, Standard SSM text parameters, Python 3.12 Lambda functions and limited CloudFormation stacks using SSM parameters and inline IAM identity policies.
+    - paragraph: Cloud IAM sessions, managed policies, EC2, KMS and other cloud providers are not implemented.
+    - button "Manage identity policy"
+    - link "Console licenses":
+      - /url: /_simulator/licenses/CONSOLE-NOTICES.txt

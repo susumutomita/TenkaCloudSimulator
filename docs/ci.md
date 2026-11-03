@@ -12,7 +12,7 @@ Every push, pull request and manual run checks out the exact tested head and run
 3. Unfiltered Cobertura conversion and Go HTML coverage view. Both full-module
    statement coverage and source-line coverage must be at least 90%.
 4. Locked npm dependency audit (high/critical fail) and canonical Go govulncheck.
-5. Real binary + SDK + offline console/Scalar E2E, seven-state accessibility audit,
+5. Eight real binary + SDK + offline console/Scalar E2E cases, fourteen-state accessibility audit,
    finite TLC model checking and detection of the deliberate deletion-guard mutant.
 
 Coverage generation and threshold checks are ordinary required steps. An absent,
@@ -21,6 +21,14 @@ both floors independently, repeated statement blocks and missing/invalid reports
 No source files or packages are removed from the coverage reports: `cmd/simulator`
 and all internal packages are included. Foreign builds are compile checks, not
 foreign-platform runtime tests. TLC is bounded checking, not an implementation proof.
+
+The embedded CPython/WASI/stdlib and original rights inventory are verified offline
+by tools/python/check.py. Race/SDK/browser tests execute actual Python with SQL,
+check guest containment and cancellation, exercise atomic Lambda persistence and
+compare independent team processes. The fixed JIT compiler may clean up asynchronously;
+a deterministic compiler barrier checks that shutdown/client cancellation return
+without waiting and that no runtime is published after Close. This is not a claim
+that the finite object/stack models prove the Python interpreter or full AWS behavior.
 
 The coverage step writes a table and PASS/FAIL result to `GITHUB_STEP_SUMMARY`.
 A pinned `actions/upload-artifact` stores the raw Go profile, unfiltered XML, HTML

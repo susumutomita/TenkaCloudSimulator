@@ -3,7 +3,7 @@
   "info": {
     "title": "TenkaCloud Simulator API",
     "version": "0.1.0",
-    "description": "Independent local cloud simulator. AWS S3 is the first provider. No real infrastructure is created. This document describes only implemented operations. S3 wire APIs retain their XML formats; simulator IAM control is explicitly a separate JSON API. Use unsigned requests or dummy TCSIM SDK credentials. Default principal simulator-admin has full sandbox access. For IAM exercises send x-simulator-principal. SQLite is ephemeral by default; --state persists it. See /_simulator/v1/capabilities for limits and deviations.",
+    "description": "Independent local cloud simulator. AWS S3 is the first provider. No real infrastructure is created. This document describes only implemented operations. S3 wire APIs retain their XML formats; simulator IAM control is explicitly a separate JSON API. Use unsigned requests or dummy TCSIM SDK credentials. Default principal simulator-admin has full sandbox access. For IAM exercises send x-simulator-principal. SQLite is ephemeral by default; --state persists it. See /_simulator/v1/capabilities for limits and deviations. Lambda supports a bounded Python 3.12 ZIP subset through the native REST paths below. Host Python is not required. Lambda CloudFormation, function-internal SDK/network and Function URLs remain unsupported.",
     "license": {
       "name": "MIT"
     }
@@ -267,7 +267,7 @@
           {
             "name": "max-keys",
             "in": "query",
-            "description": "0\u20131000 entries per page.",
+            "description": "0–1000 entries per page.",
             "schema": {
               "type": "integer",
               "default": 1000
@@ -866,6 +866,631 @@
           },
           "403": {
             "description": "Only simulator-admin may manage policies."
+          }
+        }
+      }
+    },
+    "/2015-03-31/functions": {
+      "get": {
+        "operationId": "ListFunctions",
+        "summary": "List functions",
+        "tags": [
+          "Lambda Python functions"
+        ],
+        "description": "IAM lambda:ListFunctions on *. At most 50 entries per page.",
+        "parameters": [
+          {
+            "name": "X-Simulator-Service",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "lambda"
+              ],
+              "default": "lambda"
+            },
+            "description": "Unsigned REST service selection; SDK dummy signature scope also routes Lambda."
+          },
+          {
+            "name": "X-Simulator-Region",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "us-east-1",
+                "us-west-2",
+                "ap-northeast-1",
+                "eu-west-1"
+              ],
+              "default": "us-east-1"
+            }
+          },
+          {
+            "name": "X-Simulator-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Host-issued local access token. Browser sessions use their same-origin cookie."
+          },
+          {
+            "name": "MaxItems",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            }
+          },
+          {
+            "name": "Marker",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Native Lambda JSON response; same SQLite state as the console and SDK.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or unsupported request fields"
+          },
+          "403": {
+            "description": "Local authentication/IAM denied"
+          },
+          "404": {
+            "description": "Function not found"
+          },
+          "501": {
+            "description": "Operation or option not implemented"
+          }
+        }
+      },
+      "post": {
+        "operationId": "CreateFunction",
+        "summary": "Create a Python ZIP function",
+        "tags": [
+          "Lambda Python functions"
+        ],
+        "description": "IAM lambda:CreateFunction on its ARN plus iam:PassRole on the existing execution role. No real role assumption or cloud access.",
+        "parameters": [
+          {
+            "name": "X-Simulator-Service",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "lambda"
+              ],
+              "default": "lambda"
+            },
+            "description": "Unsigned REST service selection; SDK dummy signature scope also routes Lambda."
+          },
+          {
+            "name": "X-Simulator-Region",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "us-east-1",
+                "us-west-2",
+                "ap-northeast-1",
+                "eu-west-1"
+              ],
+              "default": "us-east-1"
+            }
+          },
+          {
+            "name": "X-Simulator-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Host-issued local access token. Browser sessions use their same-origin cookie."
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Native Lambda JSON response; same SQLite state as the console and SDK.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or unsupported request fields"
+          },
+          "403": {
+            "description": "Local authentication/IAM denied"
+          },
+          "404": {
+            "description": "Function not found"
+          },
+          "501": {
+            "description": "Operation or option not implemented"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "FunctionName",
+                  "Runtime",
+                  "Role",
+                  "Handler",
+                  "Code"
+                ],
+                "properties": {
+                  "FunctionName": {
+                    "type": "string",
+                    "pattern": "^[a-zA-Z0-9_-]{1,64}$"
+                  },
+                  "Runtime": {
+                    "type": "string",
+                    "enum": [
+                      "python3.12"
+                    ]
+                  },
+                  "Role": {
+                    "type": "string",
+                    "description": "Existing local identity ARN in synthetic account 000000000000"
+                  },
+                  "Handler": {
+                    "type": "string",
+                    "example": "index.handler"
+                  },
+                  "Code": {
+                    "type": "object",
+                    "required": [
+                      "ZipFile"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "ZipFile": {
+                        "type": "string",
+                        "contentEncoding": "base64",
+                        "description": "ZIP containing regular .py files; 256 KiB compressed/1 MiB expanded/64 entries maximum."
+                      }
+                    }
+                  },
+                  "Description": {
+                    "type": "string",
+                    "maxLength": 256
+                  },
+                  "Timeout": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 30,
+                    "default": 3
+                  },
+                  "MemorySize": {
+                    "type": "integer",
+                    "enum": [
+                      128
+                    ],
+                    "default": 128
+                  },
+                  "PackageType": {
+                    "type": "string",
+                    "enum": [
+                      "Zip"
+                    ]
+                  },
+                  "Environment": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "Variables": {
+                        "type": "object",
+                        "additionalProperties": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "Tags": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/2015-03-31/functions/{FunctionName}/configuration": {
+      "get": {
+        "operationId": "GetFunctionConfiguration",
+        "summary": "Read function configuration",
+        "tags": [
+          "Lambda Python functions"
+        ],
+        "description": "IAM lambda:GetFunctionConfiguration on the actual function ARN. Includes its environment; no source-download URL.",
+        "parameters": [
+          {
+            "name": "X-Simulator-Service",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "lambda"
+              ],
+              "default": "lambda"
+            },
+            "description": "Unsigned REST service selection; SDK dummy signature scope also routes Lambda."
+          },
+          {
+            "name": "X-Simulator-Region",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "us-east-1",
+                "us-west-2",
+                "ap-northeast-1",
+                "eu-west-1"
+              ],
+              "default": "us-east-1"
+            }
+          },
+          {
+            "name": "X-Simulator-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Host-issued local access token. Browser sessions use their same-origin cookie."
+          },
+          {
+            "name": "FunctionName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Local function name or same-region synthetic-account ARN, without version/alias."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Native Lambda JSON response; same SQLite state as the console and SDK.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or unsupported request fields"
+          },
+          "403": {
+            "description": "Local authentication/IAM denied"
+          },
+          "404": {
+            "description": "Function not found"
+          },
+          "501": {
+            "description": "Operation or option not implemented"
+          }
+        }
+      }
+    },
+    "/2015-03-31/functions/{FunctionName}/code": {
+      "put": {
+        "operationId": "UpdateFunctionCode",
+        "summary": "Deploy function ZIP",
+        "tags": [
+          "Lambda Python functions"
+        ],
+        "description": "IAM lambda:UpdateFunctionCode. Stale RevisionId is HTTP412; role/environment are preserved atomically.",
+        "parameters": [
+          {
+            "name": "X-Simulator-Service",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "lambda"
+              ],
+              "default": "lambda"
+            },
+            "description": "Unsigned REST service selection; SDK dummy signature scope also routes Lambda."
+          },
+          {
+            "name": "X-Simulator-Region",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "us-east-1",
+                "us-west-2",
+                "ap-northeast-1",
+                "eu-west-1"
+              ],
+              "default": "us-east-1"
+            }
+          },
+          {
+            "name": "X-Simulator-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Host-issued local access token. Browser sessions use their same-origin cookie."
+          },
+          {
+            "name": "FunctionName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Local function name or same-region synthetic-account ARN, without version/alias."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Native Lambda JSON response; same SQLite state as the console and SDK.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or unsupported request fields"
+          },
+          "403": {
+            "description": "Local authentication/IAM denied"
+          },
+          "404": {
+            "description": "Function not found"
+          },
+          "501": {
+            "description": "Operation or option not implemented"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "ZipFile"
+                ],
+                "properties": {
+                  "ZipFile": {
+                    "type": "string",
+                    "contentEncoding": "base64",
+                    "description": "ZIP containing regular .py files; 256 KiB compressed/1 MiB expanded/64 entries maximum."
+                  },
+                  "RevisionId": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/2015-03-31/functions/{FunctionName}/invocations": {
+      "post": {
+        "operationId": "Invoke",
+        "summary": "Invoke a real Python function",
+        "tags": [
+          "Lambda Python functions"
+        ],
+        "description": "IAM lambda:InvokeFunction on the actual ARN. Event JSON max256 KiB; HTTP200 with X-Amz-Function-Error: Unhandled on function exception. DryRun is HTTP204. Network, SDK, layers, async, aliases, log tail and client context unsupported.",
+        "parameters": [
+          {
+            "name": "X-Simulator-Service",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "lambda"
+              ],
+              "default": "lambda"
+            },
+            "description": "Unsigned REST service selection; SDK dummy signature scope also routes Lambda."
+          },
+          {
+            "name": "X-Simulator-Region",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "us-east-1",
+                "us-west-2",
+                "ap-northeast-1",
+                "eu-west-1"
+              ],
+              "default": "us-east-1"
+            }
+          },
+          {
+            "name": "X-Simulator-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Host-issued local access token. Browser sessions use their same-origin cookie."
+          },
+          {
+            "name": "FunctionName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Local function name or same-region synthetic-account ARN, without version/alias."
+          },
+          {
+            "name": "X-Amz-Invocation-Type",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "RequestResponse",
+                "DryRun"
+              ],
+              "default": "RequestResponse"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Native Lambda JSON response; same SQLite state as the console and SDK.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or unsupported request fields"
+          },
+          "403": {
+            "description": "Local authentication/IAM denied"
+          },
+          "404": {
+            "description": "Function not found"
+          },
+          "501": {
+            "description": "Operation or option not implemented"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          }
+        }
+      }
+    },
+    "/2015-03-31/functions/{FunctionName}": {
+      "delete": {
+        "operationId": "DeleteFunction",
+        "summary": "Delete function",
+        "tags": [
+          "Lambda Python functions"
+        ],
+        "description": "IAM lambda:DeleteFunction on the actual function ARN. Other regions and team processes retain their own functions.",
+        "parameters": [
+          {
+            "name": "X-Simulator-Service",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "lambda"
+              ],
+              "default": "lambda"
+            },
+            "description": "Unsigned REST service selection; SDK dummy signature scope also routes Lambda."
+          },
+          {
+            "name": "X-Simulator-Region",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "us-east-1",
+                "us-west-2",
+                "ap-northeast-1",
+                "eu-west-1"
+              ],
+              "default": "us-east-1"
+            }
+          },
+          {
+            "name": "X-Simulator-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Host-issued local access token. Browser sessions use their same-origin cookie."
+          },
+          {
+            "name": "FunctionName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Local function name or same-region synthetic-account ARN, without version/alias."
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Native Lambda JSON response; same SQLite state as the console and SDK.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or unsupported request fields"
+          },
+          "403": {
+            "description": "Local authentication/IAM denied"
+          },
+          "404": {
+            "description": "Function not found"
+          },
+          "501": {
+            "description": "Operation or option not implemented"
           }
         }
       }

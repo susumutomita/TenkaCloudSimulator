@@ -33,7 +33,12 @@ func New(path string) (http.Handler, func() error, error) {
 		_ = store.Close()
 		return nil, nil, err
 	}
-	gateway := &aws.Gateway{Store: store, Identities: identities, Parameters: parameters, Stacks: stacks}
+	lambdas, err := aws.NewLambdaStore(store.Database())
+	if err != nil {
+		_ = store.Close()
+		return nil, nil, err
+	}
+	gateway := &aws.Gateway{Store: store, Identities: identities, Parameters: parameters, Stacks: stacks, Lambdas: lambdas}
 	registry := provider.New("aws")
 	if err := registry.Register("aws", gateway); err != nil {
 		_ = store.Close()
@@ -65,7 +70,7 @@ func New(path string) (http.Handler, func() error, error) {
 				return "memory"
 			}
 			return "file"
-		}(), "provider": "aws", "service": "s3", "services": map[string]any{"s3": map[string]any{"operations": []string{"ListBuckets", "CreateBucket", "HeadBucket", "GetBucketLocation", "DeleteBucket", "ListObjectsV2", "PutObject", "GetObject", "HeadObject", "DeleteObject"}}, "ssm": map[string]any{"operations": []string{"PutParameter", "GetParameter", "GetParameters", "GetParametersByPath", "DescribeParameters", "DeleteParameter"}, "types": []string{"String", "StringList"}, "tier": "Standard", "parameterLimit": 1000}, "cloudformation": map[string]any{"operations": []string{"CreateStack", "DescribeStacks", "DeleteStack"}, "resourceTypes": []string{"AWS::SSM::Parameter", "AWS::IAM::Role"}, "stackLimit": 100, "resourceLimitPerStack": 100}}, "operations": []string{"ListBuckets", "CreateBucket", "HeadBucket", "GetBucketLocation", "DeleteBucket", "ListObjectsV2", "PutObject", "GetObject", "HeadObject", "DeleteObject"}, "regions": aws.Regions, "limits": map[string]int{"objectBytes": core.MaxObjectBytes, "storedBytes": core.MaxStoredBytes, "buckets": core.MaxBuckets, "objects": core.MaxObjects}, "state": "SQLite; ephemeral by default, persist with --state; one database per environment", "authentication": "CLI requires opaque local access tokens by default; participant tokens bind an exercise identity. SDK wire uses dummy TCSIM credentials, without signature verification. server.New is an unauthenticated composition API; hosts must wrap NewAccess. One process/database/token authority per team.", "unsupported": []string{"resource policies, ACLs, conditions, boundaries, SCPs, sessions", "versioning", "multipart uploads", "presigned URLs", "virtual-host addressing", "services outside the declared S3/SSM/CloudFormation subset", "STS, AWS federation, managed-policy permissions, trust-policy evaluation", "legacy TenkaCloud world/deploy/grading protocol; grading stays in the host"}})
+		}(), "provider": "aws", "service": "s3", "services": map[string]any{"s3": map[string]any{"operations": []string{"ListBuckets", "CreateBucket", "HeadBucket", "GetBucketLocation", "DeleteBucket", "ListObjectsV2", "PutObject", "GetObject", "HeadObject", "DeleteObject"}}, "ssm": map[string]any{"operations": []string{"PutParameter", "GetParameter", "GetParameters", "GetParametersByPath", "DescribeParameters", "DeleteParameter"}, "types": []string{"String", "StringList"}, "tier": "Standard", "parameterLimit": 1000}, "lambda": map[string]any{"operations": []string{"CreateFunction", "ListFunctions", "GetFunctionConfiguration", "UpdateFunctionCode", "Invoke", "DeleteFunction"}, "runtime": "python3.12", "interpreter": "CPython 3.12.16/WASI", "memoryMiB": 128, "maxTimeoutSeconds": 30, "functionLimit": 100, "codeBytes": 256 << 10, "expandedCodeBytes": 1 << 20, "eventBytes": 256 << 10, "concurrentSandboxes": 2}, "cloudformation": map[string]any{"operations": []string{"CreateStack", "DescribeStacks", "DeleteStack"}, "resourceTypes": []string{"AWS::SSM::Parameter", "AWS::IAM::Role"}, "stackLimit": 100, "resourceLimitPerStack": 100}}, "operations": []string{"ListBuckets", "CreateBucket", "HeadBucket", "GetBucketLocation", "DeleteBucket", "ListObjectsV2", "PutObject", "GetObject", "HeadObject", "DeleteObject"}, "regions": aws.Regions, "limits": map[string]int{"objectBytes": core.MaxObjectBytes, "storedBytes": core.MaxStoredBytes, "buckets": core.MaxBuckets, "objects": core.MaxObjects}, "state": "SQLite; ephemeral by default, persist with --state; one database per environment", "authentication": "CLI requires opaque local access tokens by default; participant tokens bind an exercise identity. SDK wire uses dummy TCSIM credentials, without signature verification. server.New is an unauthenticated composition API; hosts must wrap NewAccess. One process/database/token authority per team.", "unsupported": []string{"resource policies, ACLs, conditions, boundaries, SCPs, sessions", "versioning", "multipart uploads", "presigned URLs", "virtual-host addressing", "services outside the declared S3/SSM/Lambda/CloudFormation subset", "STS, AWS federation, managed-policy permissions, trust-policy evaluation", "legacy TenkaCloud world/deploy/grading protocol; grading stays in the host"}})
 	})
 	mux.Handle("/_simulator/v1/iam/", identityAPI(identities))
 	mux.Handle("/", registry)
@@ -99,5 +104,12 @@ func New(path string) (http.Handler, func() error, error) {
 		}
 		mux.ServeHTTP(w, r)
 	})
-	return handler, store.Close, nil
+	return handler, func() error {
+		runtimeErr := lambdas.Close()
+		storeErr := store.Close()
+		if runtimeErr != nil {
+			return runtimeErr
+		}
+		return storeErr
+	}, nil
 }

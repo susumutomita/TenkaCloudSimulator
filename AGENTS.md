@@ -1,12 +1,13 @@
 # TenkaCloudSimulator working contract
 
-This repository owns an independent Go single-binary multi-cloud simulator. AWS is the first provider, with S3 basics, Standard SSM parameters and a deliberately limited CloudFormation subset. Static console, local Scalar API reference, and SQLite are embedded; runtime must not require Node, Docker, an external DB, or real cloud access.
+This repository owns an independent Go single-binary multi-cloud simulator. AWS is the first provider, with S3 basics, Standard SSM parameters, bounded Python Lambda execution and a deliberately limited CloudFormation subset. Static console, local Scalar API reference, SQLite and the fixed CPython/WASI interpreter are embedded; runtime must not require host Python, Node, Docker, an external DB, or real cloud access.
 
 - `internal/core/` owns provider-neutral relational object storage and the currently supported identity-policy matching primitive. Do not introduce cloud-specific protocol dispatch or problem IDs here.
 - `internal/provider/` registers separate cloud protocol handlers. Preserve the ability to run several providers at once. New providers keep their own authorization semantics, resource model, namespace, and UI rather than inheriting AWS behavior.
-- `internal/aws/` owns S3 REST/XML, SSM JSON 1.1, CloudFormation Query/XML and its provider-specific tables, and maps requests to documented IAM actions/ARNs. Simulator IAM management is explicitly a separate JSON control API.
+- `internal/aws/` owns S3 REST/XML, SSM JSON 1.1, Lambda REST/JSON, CloudFormation Query/XML and its provider-specific tables, and maps requests to documented IAM actions/ARNs. Simulator IAM management is explicitly a separate JSON control API.
 - `internal/server/` composes providers, local token access control and official Cloudscape/Scalar embedded assets. The console and API reference must use the same actual HTTP APIs and SQLite state as SDK clients.
 - TenkaCloudChallenge owns problems, scenarios, grading, and required capabilities; TenkaCloud owns platform compatibility and integration. Do not add problem-specific logic here.
+- internal/workload/ owns provider-neutral bounded language execution. Never grant guest code host filesystem/environment/process/network access or add problem IDs/scoring. AWS owns function state, ARN/IAM and any future restricted SDK bridge. Preserve pinned runtime rights/provenance and all containment negative tests.
 
 Read README and docs/design/0001-go-standalone.md before changing public contracts. Search for related capabilities, handlers, and tests. Preserve Git history and unrelated/uncommitted work. Never read/write `.env`, credentials, or secret directories. Do not perform release, deployment, cloud provisioning, push, or PR without the relevant authorization.
 

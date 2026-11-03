@@ -42,3 +42,9 @@ internal/server/web/app.js -text -diff linguist-vendored
 internal/server/web/app.css -text -diff linguist-vendored
 tools/console/bundle-inputs.json linguist-generated
 tools/console/bundle-digests.json linguist-generated
+
+# Original CPython/WASI rights bytes and fixed embedded runtime artifacts.
+third_party/PYTHON-NOTICES.txt -text -whitespace linguist-generated
+internal/legal/assets/PYTHON-NOTICES.txt -text -whitespace linguist-generated
+internal/workload/python/assets/* binary linguist-vendored
+third_party/python.json linguist-generated

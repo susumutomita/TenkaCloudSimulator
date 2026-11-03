@@ -38,6 +38,7 @@ type Gateway struct {
 	Identities *core.Identities
 	Parameters *ParameterStore
 	Stacks     *StackStore
+	Lambdas    *LambdaStore
 }
 type failure struct {
 	XMLName   xml.Name `xml:"Error"`
@@ -102,7 +103,7 @@ func (g *Gateway) serveS3(w http.ResponseWriter, r *http.Request) {
 		_, credential, ok := strings.Cut(a, "Credential=")
 		key, _, _ := strings.Cut(credential, "/")
 		if !ok || !strings.HasPrefix(key, "TCSIM") {
-			fail(w, r, "AccessDenied", "Use simulator-only TCSIM credentials. Signature validation and IAM are not simulated.")
+			fail(w, r, "AccessDenied", "Use simulator-only TCSIM credentials. AWS signature verification and sessions are unsupported.")
 			return
 		}
 	}
