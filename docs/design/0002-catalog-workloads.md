@@ -1,6 +1,6 @@
 # 既存クラウド問題の段階的な対応
 
-基準はmain `e9e67dc`（PR #29の実Python Lambda foundationまでmerge済み）、Challenge `a749b142416770abee3f173673702c55df3856aa`。
+基準はmain `f790403`（PR #31のS3 CloudFormation/タグまでmerge済み）、Challenge `a749b142416770abee3f173673702c55df3856aa`。
 hello-world以外を対応済みとは表示しない。問題コード、テンプレート、採点をSimulator専用の固定応答へ置き換えない。
 
 ## 次の対象と順番
