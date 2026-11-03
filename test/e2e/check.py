@@ -193,6 +193,16 @@ class Conformance(unittest.TestCase):
    page.get_by_role('button',name='Edit parameter',exact=True).click();expect(page.get_by_role('button',name='Type String',exact=True)).to_be_disabled();page.get_by_label('Value',exact=True).fill('unauthorized change');page.get_by_role('button',name='Save changes',exact=True).click();expect(page.locator('[id^=form-error-]')).to_contain_text('403');self.assertEqual(client('ssm',token).get_parameter(Name=outputs['ParameterName'])['Parameter']['Value'],'TC{'+seed+'}')
    page.get_by_role('button',name='Cancel',exact=True).click();page.set_viewport_size({'width':390,'height':844});self.assertTrue(page.evaluate('document.documentElement.scrollWidth <= innerWidth'));self.assertEqual(errors,[]);self.assertEqual(outside,[])
    browser.close();cfn.delete_stack(StackName='tc-hello-world-browser')
+ def test_region_change_clears_bucket_and_writes_only_new_region(self):
+  with running() as endpoint,sync_playwright() as p:
+   c=sdk(endpoint);c.create_bucket(Bucket='east-region-bucket');c.create_bucket(Bucket='tokyo-region-bucket',CreateBucketConfiguration={'LocationConstraint':'ap-northeast-1'});c.put_object(Bucket='east-region-bucket',Key='sentinel',Body=b'east unchanged')
+   executable=os.environ.get('CHROMIUM_EXECUTABLE') or shutil.which('chromium')
+   browser=p.chromium.launch(**({'executable_path':executable} if executable else {}),args=['--no-sandbox']);page=browser.new_page(viewport={'width':1440,'height':1000});page.goto(endpoint+'/_simulator/console/');page.get_by_role('link',name='east-region-bucket',exact=True).click();expect(page.get_by_role('link',name='sentinel',exact=True)).to_be_visible()
+   page.get_by_role('button',name='us-east-1',exact=True).click();page.get_by_role('menuitem',name='ap-northeast-1',exact=True).click();expect(page.get_by_role('heading',name='General purpose buckets',exact=False)).to_be_visible();expect(page.get_by_role('link',name='east-region-bucket',exact=True)).to_have_count(0);page.get_by_role('link',name='tokyo-region-bucket',exact=True).click()
+   page.get_by_role('button',name='Upload',exact=True).first.click();page.get_by_label('Choose a file').set_input_files({'name':'new-region.txt','mimeType':'text/plain','buffer':b'tokyo only'});submit(page);expect(page.get_by_role('link',name='new-region.txt',exact=True)).to_be_visible()
+   self.assertEqual(c.get_object(Bucket='tokyo-region-bucket',Key='new-region.txt')['Body'].read(),b'tokyo only');self.assertEqual(c.get_object(Bucket='east-region-bucket',Key='sentinel')['Body'].read(),b'east unchanged')
+   with self.assertRaises(ClientError):c.get_object(Bucket='east-region-bucket',Key='new-region.txt')
+   browser.close()
  def test_refuses_non_loopback_by_default(self):
   result=subprocess.run([str(BINARY),'--listen','0.0.0.0:0'],capture_output=True,text=True);self.assertNotEqual(result.returncode,0);self.assertIn('--allow-remote',result.stderr)
 if __name__=='__main__':unittest.main(verbosity=2)

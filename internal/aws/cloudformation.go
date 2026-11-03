@@ -539,6 +539,9 @@ func stackRecords(query stackQuery, region, name string) ([]StackRecord, error) 
 	return records, nil
 }
 func (s *StackStore) Delete(region, name string) error {
+	return s.deleteChecked(region, name, nil)
+}
+func (s *StackStore) deleteChecked(region, name string, authorize func(StackRecord) error) error {
 	// Acquire the immediate write transaction before reading the stack. A stale
 	// delete must never remove a replacement stack that reclaimed physical names.
 	tx, err := s.db.Begin()
@@ -554,6 +557,13 @@ func (s *StackStore) Delete(region, name string) error {
 		return ssmFailure{"ValidationError", "Specify exactly one stack."}
 	}
 
+	// Resolve and authorize the exact ID while holding the same write lock;
+	// authorizing a name before this transaction would permit replacement races.
+	if authorize != nil {
+		if err = authorize(records[0]); err != nil {
+			return err
+		}
+	}
 	for _, r := range records[0].Resources {
 		namespace := region
 		if r.Type == "AWS::IAM::Role" {
@@ -713,15 +723,31 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 	if principal == "" {
 		principal = core.Administrator
 	}
-	decision, err := g.Identities.Decision(principal, "cloudformation:"+action, "*")
-	if err != nil {
-		cfnError(w, err)
-		return
+	// Snapshot the caller's exercise policy once, like other provider requests.
+	// Authorization against resource IDs is deferred until the target is known.
+	var policy core.Policy
+	if principal != core.Administrator {
+		var found bool
+		policy, found, err = g.Identities.Policy(principal)
+		if err != nil {
+			cfnError(w, err)
+			return
+		}
+		if !found {
+			cfnError(w, ssmFailure{"AccessDenied", "Unknown exercise identity."})
+			return
+		}
 	}
-	if decision != "allowed" {
-		cfnError(w, ssmFailure{"AccessDenied", "Identity policy does not allow this stack operation."})
-		return
+	authorize := func(resource string) error {
+		if principal == core.Administrator {
+			return nil
+		}
+		if core.Evaluate(policy, "cloudformation:"+action, resource) != "allowed" {
+			return ssmFailure{"AccessDenied", "Identity policy does not allow this stack resource."}
+		}
+		return nil
 	}
+
 	name := form.Get("StackName")
 	switch action {
 	case "CreateStack":
@@ -760,11 +786,17 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 						fail("ClientRequestToken was reused with a different request.")
 						return
 					}
+					if err = authorize(existing[0].ID); err != nil {
+						cfnError(w, err)
+						return
+					}
 					cfnResponse(w, action, "<StackId>"+xmlText(existing[0].ID)+"</StackId>")
 					return
 				}
 			}
-			err = g.Stacks.Create(record)
+			if err = authorize(record.ID); err == nil {
+				err = g.Stacks.Create(record)
+			}
 		}
 		if err != nil {
 			cfnError(w, err)
@@ -772,6 +804,12 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 		}
 		cfnResponse(w, action, "<StackId>"+xmlText(record.ID)+"</StackId>")
 	case "DescribeStacks":
+		if name == "" {
+			if err = authorize("*"); err != nil {
+				cfnError(w, err)
+				return
+			}
+		}
 		records, err := g.Stacks.Records(region, name)
 		if err != nil {
 			cfnError(w, err)
@@ -780,6 +818,10 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 		var out strings.Builder
 		out.WriteString("<Stacks>")
 		for _, record := range records {
+			if err = authorize(record.ID); err != nil {
+				cfnError(w, err)
+				return
+			}
 			out.WriteString("<member><StackId>" + xmlText(record.ID) + "</StackId><StackName>" + xmlText(record.Name) + "</StackName><CreationTime>" + record.Created + "</CreationTime><StackStatus>CREATE_COMPLETE</StackStatus><Outputs>")
 			keys := []string{}
 			for k := range record.Outputs {
@@ -802,7 +844,7 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 			fail("Specify a stack name or ID.")
 			return
 		}
-		if err = g.Stacks.Delete(region, name); err != nil {
+		if err = g.Stacks.deleteChecked(region, name, func(record StackRecord) error { return authorize(record.ID) }); err != nil {
 			cfnError(w, err)
 			return
 		}

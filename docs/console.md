@@ -23,3 +23,5 @@
 スクリーンショットはreports/console-objects-desktop.png、reports/console-mobile.png、reports/audit/へ保存。ダミー値のみ使用。実ホストintegrationは秘密flagをログや画面に出さず採点結果のみ記録する。
 
 現状のURLはサービス単位のhash routingまで。リージョン・operatorの選択identity・選択resource詳細はページ状態で、reload時の復元やresource詳細のブラウザBack履歴は実AWS同等ではない。これらと未実装tab/設定の追加は引き続き対応が必要であり、今回のhello-world完走と区別する。
+
+リージョン変更は選択bucket/detail/modalを破棄して、そのリージョンのbucket一覧へ戻す。保存中のcontext変更をUIでガードし、古いregionのbucketへ誤って書き込まないことをSDK readback付きの実ブラウザ回帰で検証する。

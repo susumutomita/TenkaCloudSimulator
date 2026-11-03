@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"encoding/xml"
 	"net/http/httptest"
 	"net/url"
 	"strings"
@@ -119,4 +120,65 @@ func TestParticipantCannotReadPrivateOutputsWithWildcardIAM(t *testing.T) {
 	cfnCall(t, s, "DescribeStacks", url.Values{"StackName": {"private"}}, 200, admin)
 	// Wildcard exercise permission remains usable for the intended data plane.
 	ssmCall(t, s, "GetParameter", map[string]any{"Name": "/owned/hello"}, 200, participant)
+}
+
+func TestStackIAMUsesActualResourceARN(t *testing.T) {
+	s := instance(t)
+	template := func(name string) string { return strings.ReplaceAll(simpleTemplate, "/owned/hello", "/"+name+"/hello") }
+	create := func(name string, headers map[string]string) string {
+		t.Helper()
+		body := cfnCall(t, s, "CreateStack", url.Values{"StackName": {name}, "TemplateBody": {template(name)}, "Capabilities.member.1": {"CAPABILITY_IAM"}, "ClientRequestToken": {"retry"}}, 200, headers)
+		var response struct {
+			Result struct {
+				ID string `xml:"StackId"`
+			} `xml:"CreateStackResult"`
+		}
+		if err := xml.Unmarshal(body, &response); err != nil || response.Result.ID == "" {
+			t.Fatal(string(body), err)
+		}
+		return response.Result.ID
+	}
+	protected := create("protected", nil)
+	allowed := create("allowed", nil)
+	identity := map[string]string{"X-Simulator-Principal": "stack-operator"}
+	policy := func(statements ...map[string]any) {
+		t.Helper()
+		data, _ := json.Marshal(map[string]any{"Version": "2012-10-17", "Statement": statements})
+		status(t, s, "PUT", "/_simulator/v1/iam/principals/stack-operator/policy", string(data), 200, nil)
+	}
+	statement := func(effect, action, resource string) map[string]any {
+		return map[string]any{"Effect": effect, "Action": action, "Resource": resource}
+	}
+	policy(statement("Allow", "cloudformation:*", "*"), statement("Deny", "cloudformation:DeleteStack", protected))
+	for _, name := range []string{"protected", protected} {
+		cfnCall(t, s, "DeleteStack", url.Values{"StackName": {name}}, 403, identity)
+	}
+	ssmCall(t, s, "GetParameter", map[string]any{"Name": "/protected/hello"}, 200, nil)
+	policy(statement("Allow", "cloudformation:DescribeStacks", protected))
+	for _, name := range []string{"protected", protected} {
+		cfnCall(t, s, "DescribeStacks", url.Values{"StackName": {name}}, 200, identity)
+	}
+	cfnCall(t, s, "DescribeStacks", nil, 403, identity)
+	cfnCall(t, s, "DescribeStacks", url.Values{"StackName": {"allowed"}}, 403, identity)
+	policy(statement("Allow", "cloudformation:*", "*"), statement("Deny", "cloudformation:DeleteStack", protected))
+	cfnCall(t, s, "DeleteStack", url.Values{"StackName": {allowed}}, 200, identity)
+	policy(statement("Allow", "cloudformation:DeleteStack", protected))
+	cfnCall(t, s, "DeleteStack", url.Values{"StackName": {"protected"}}, 200, identity)
+	policy(statement("Allow", "cloudformation:CreateStack", "arn:aws:cloudformation:us-east-1:000000000000:stack/permitted/*"))
+	permitted := create("permitted", identity)
+	cfnCall(t, s, "CreateStack", url.Values{"StackName": {"forbidden"}, "TemplateBody": {template("forbidden")}, "Capabilities.member.1": {"CAPABILITY_IAM"}}, 403, identity)
+	ssmCall(t, s, "GetParameter", map[string]any{"Name": "/forbidden/hello"}, 400, nil)
+	// Idempotent create authorizes the persisted target, not a new random ID.
+	policy(statement("Allow", "cloudformation:CreateStack", permitted))
+	if got := create("permitted", identity); got != permitted {
+		t.Fatal("retry changed ID")
+	}
+	policy(statement("Allow", "cloudformation:CreateStack", "*"), statement("Deny", "cloudformation:CreateStack", permitted))
+	cfnCall(t, s, "CreateStack", url.Values{"StackName": {"permitted"}, "TemplateBody": {template("permitted")}, "Capabilities.member.1": {"CAPABILITY_IAM"}, "ClientRequestToken": {"retry"}}, 403, identity)
+	policy(statement("Allow", "cloudformation:DescribeStacks", "*"), statement("Deny", "cloudformation:DescribeStacks", permitted))
+	body := cfnCall(t, s, "DescribeStacks", nil, 403, identity)
+	if strings.Contains(string(body), "safe-dummy") {
+		t.Fatal("list leaked denied outputs")
+	}
+	cfnCall(t, s, "DescribeStacks", nil, 403, map[string]string{"X-Simulator-Principal": "unknown"})
 }
