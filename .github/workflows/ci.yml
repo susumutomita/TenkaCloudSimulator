@@ -30,12 +30,6 @@ jobs:
         run: |
           go run github.com/boumenot/gocover-cobertura@v1.4.0 < reports/coverage.out > reports/coverage.xml
           python3 scripts/check-coverage.py reports/coverage.out reports/coverage.xml
-      - name: Upload coverage for the repository threshold rule
-        uses: actions/upload-code-coverage@2b21a77928be8d5168c2b9581a67f2adbebacc52
-        with:
-          file: reports/coverage.xml
-          language: Go
-          label: code-coverage/go-tests
       - name: Check Go vulnerabilities against the canonical service
         run: go run golang.org/x/vuln/cmd/govulncheck@v1.1.4 ./...
       - name: Install development-only browser and SDK tools
@@ -53,3 +47,9 @@ jobs:
         run: |
           curl --fail --location https://github.com/tlaplus/tlaplus/releases/download/v1.7.4/tla2tools.jar --output /tmp/tla2tools.jar
           TLA_JAR=/tmp/tla2tools.jar make formal
+      - name: Upload coverage for the repository threshold rule
+        uses: actions/upload-code-coverage@2b21a77928be8d5168c2b9581a67f2adbebacc52
+        with:
+          file: reports/coverage.xml
+          language: Go
+          label: code-coverage/go-tests

@@ -28,7 +28,8 @@ func TestLifecycleServesRealRequestsAndStops(t *testing.T) {
 	case message = <-output.ready:
 	case err := <-done:
 		t.Fatalf("server failed before readiness: %v", err)
-	case <-time.After(10 * time.Second):
+	// Cold SQLite/Wasm compilation under -race can exceed 10s on shared CI CPUs.
+	case <-time.After(45 * time.Second):
 		t.Fatal("server did not become ready")
 	}
 	_, endpoint, ok := strings.Cut(message, "S3 endpoint ")
