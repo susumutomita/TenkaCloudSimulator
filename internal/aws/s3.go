@@ -39,6 +39,8 @@ type Gateway struct {
 	S3         *S3Store
 	Identities *core.Identities
 	Parameters *ParameterStore
+	SNS        *SNSStore
+	QueueFanout SNSQueueFanout
 	Stacks     *StackStore
 	Lambdas    *LambdaStore
 	Roles      *IAMRoleStore
