@@ -12,6 +12,9 @@ from cloudwatch_logs import client
 
 
 def run():
+    console_source=(Path(__file__).resolve().parents[2]/"tools/console/src/main.jsx").read_text()
+    assert console_source.count("service==='logs'?<CloudWatchLogsView")==1, "Exactly one actual Logs content branch is required"
+    assert console_source.count("service==='kms'?<KMSView")==1, "Exactly one actual KMS content branch is required"
     for name in ("cloudwatch-logs-events-desktop.png", "cloudwatch-logs-events-mobile.png", "cloudwatch-logs-events-mobile-scrolled.png", "cloudwatch-logs-a11y.json"):
         (REPORTS/name).unlink(missing_ok=True)
     # The canonical pinned audit asset is supplied by the host, never downloaded
@@ -46,6 +49,17 @@ def run():
             page.goto(endpoint + "/_simulator/console/")
             page.get_by_label("Access token", exact=True).fill(token)
             page.get_by_role("button", name="Open sandbox", exact=True).click()
+            page.get_by_role("button", name="Services", exact=True).click()
+            page.get_by_role("menuitem", name="CloudWatch Logs", exact=True).click()
+            expect(page.get_by_role("heading", name=re.compile(r"^Log groups"))).to_be_visible()
+            # Exercise the other merged native service, not merely its import/menu.
+            page.get_by_role("button", name="Services", exact=True).click()
+            with page.expect_response(lambda response:response.request.headers.get("x-amz-target")=="TrentService.ListKeys") as keys_response:
+                page.get_by_role("menuitem", name="Key Management Service", exact=True).click()
+            assert keys_response.value.status==200
+            assert keys_response.value.json()["Keys"]==[]
+            expect(page.get_by_role("heading", name=re.compile(r"^Customer managed keys"))).to_be_visible()
+            expect(page.get_by_role("table", name="Customer managed keys", exact=True)).to_be_visible()
             page.get_by_role("button", name="Services", exact=True).click()
             page.get_by_role("menuitem", name="CloudWatch Logs", exact=True).click()
             expect(page.get_by_role("heading", name=re.compile(r"^Log groups"))).to_be_visible()
