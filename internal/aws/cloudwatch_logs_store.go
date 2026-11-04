@@ -88,6 +88,9 @@ func validLogsRegion(region string) error {
 }
 
 func NewCloudWatchLogsStore(db *sql.DB) (*CloudWatchLogsStore, error) {
+	if db == nil {
+		return nil, errors.New("CloudWatch Logs database is required")
+	}
 	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS aws_logs_settings(id INTEGER PRIMARY KEY CHECK(id=1),secret BLOB NOT NULL CHECK(length(secret)=32));
 CREATE TABLE IF NOT EXISTS aws_logs_groups(region TEXT NOT NULL,name TEXT NOT NULL,generation TEXT NOT NULL,created INTEGER NOT NULL,PRIMARY KEY(region,name));
 CREATE TABLE IF NOT EXISTS aws_logs_streams(region TEXT NOT NULL,group_name TEXT NOT NULL,name TEXT NOT NULL,generation TEXT NOT NULL,created INTEGER NOT NULL,PRIMARY KEY(region,group_name,name),FOREIGN KEY(region,group_name) REFERENCES aws_logs_groups(region,name) ON DELETE CASCADE);
@@ -112,6 +115,24 @@ CREATE INDEX IF NOT EXISTS aws_logs_event_order ON aws_logs_events(region,group_
 	return &CloudWatchLogsStore{db: db, now: time.Now, key: key}, nil
 }
 func logsGeneration() string { return rand.Text() }
+
+// A nil Exec error does not prove a write happened: a host-owned SQLite
+// BEFORE INSERT RAISE(IGNORE) can suppress it. Reject that outcome so callers
+// roll back the entire operation instead of acknowledging missing/partial data.
+func logsExactlyOne(result sql.Result, err error) error {
+	if err != nil {
+		return err
+	}
+	count, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if count != 1 {
+		return errors.New("CloudWatch Logs write did not affect exactly one row")
+	}
+	return nil
+}
+
 func (s *CloudWatchLogsStore) CreateGroup(ctx context.Context, region, name string) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -146,8 +167,7 @@ func (s *CloudWatchLogsStore) CreateGroupTx(ctx context.Context, tx *sql.Tx, reg
 	if n >= 100 {
 		return logsFailure{"LimitExceededException", "Simulator limit: 100 log groups per database."}
 	}
-	_, err := tx.ExecContext(ctx, "INSERT INTO aws_logs_groups VALUES(?,?,?,?)", region, name, logsGeneration(), s.now().UnixMilli())
-	return err
+	return logsExactlyOne(tx.ExecContext(ctx, "INSERT INTO aws_logs_groups VALUES(?,?,?,?)", region, name, logsGeneration(), s.now().UnixMilli()))
 }
 func (s *CloudWatchLogsStore) DeleteGroup(ctx context.Context, region, name string) error {
 	tx, err := s.db.BeginTx(ctx, nil)
@@ -211,7 +231,7 @@ func (s *CloudWatchLogsStore) CreateStream(ctx context.Context, region, group, n
 	if n >= 1000 {
 		return logsFailure{"LimitExceededException", "Simulator limit: 1000 log streams per database."}
 	}
-	if _, err = tx.ExecContext(ctx, "INSERT INTO aws_logs_streams VALUES(?,?,?,?,?)", region, group, name, logsGeneration(), s.now().UnixMilli()); err != nil {
+	if err = logsExactlyOne(tx.ExecContext(ctx, "INSERT INTO aws_logs_streams VALUES(?,?,?,?,?)", region, group, name, logsGeneration(), s.now().UnixMilli())); err != nil {
 		return err
 	}
 	return tx.Commit()
@@ -282,7 +302,7 @@ func (s *CloudWatchLogsStore) PutEvents(ctx context.Context, region, group, stre
 		return nil, logsFailure{"LimitExceededException", "Simulator event storage limit: 100000 events or 64 MiB per database."}
 	}
 	for _, e := range valid {
-		if _, err = tx.ExecContext(ctx, "INSERT INTO aws_logs_events(region,group_name,stream_name,timestamp,ingested,message) VALUES(?,?,?,?,?,?)", region, group, stream, e.Timestamp, now, e.Message); err != nil {
+		if err = logsExactlyOne(tx.ExecContext(ctx, "INSERT INTO aws_logs_events(region,group_name,stream_name,timestamp,ingested,message) VALUES(?,?,?,?,?,?)", region, group, stream, e.Timestamp, now, e.Message)); err != nil {
 			return nil, err
 		}
 	}

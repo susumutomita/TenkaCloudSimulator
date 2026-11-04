@@ -22,6 +22,11 @@ type accessSession struct {
 	expires   time.Time
 }
 
+type browserSession struct {
+	accessSession
+	parent [32]byte
+}
+
 // Access binds opaque local credentials to exercise identities. A separate
 // Access instance and database must be assigned to each team by the host.
 type Access struct {
@@ -31,6 +36,7 @@ type Access struct {
 	remote   bool
 	mu       sync.Mutex
 	sessions map[[32]byte]accessSession
+	browsers map[[32]byte]browserSession
 	now      func() time.Time
 }
 
@@ -39,24 +45,61 @@ func NewAccess(next http.Handler, operatorToken string, allowRemote bool) (*Acce
 		return nil, fmt.Errorf("operator token must contain 32–256 URL-safe characters")
 	}
 	sum := sha256.Sum256([]byte(operatorToken))
-	return &Access{next: next, operator: sum, cookie: "tcsim_" + hex.EncodeToString(sum[:6]), remote: allowRemote, sessions: map[[32]byte]accessSession{}, now: time.Now}, nil
+	return &Access{next: next, operator: sum, cookie: "tcsim_" + hex.EncodeToString(sum[:6]), remote: allowRemote, sessions: map[[32]byte]accessSession{}, browsers: map[[32]byte]browserSession{}, now: time.Now}, nil
 }
-func (a *Access) identity(token string) (string, bool) {
+func (a *Access) credential(token string) (accessSession, bool) {
 	sum := sha256.Sum256([]byte(token))
 	if subtle.ConstantTimeCompare(sum[:], a.operator[:]) == 1 {
-		return "simulator-admin", true
+		return accessSession{principal: "simulator-admin"}, true
 	}
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	session, ok := a.sessions[sum]
 	if !ok || !a.now().Before(session.expires) {
 		delete(a.sessions, sum)
+		return accessSession{}, false
+	}
+	return session, true
+}
+func (a *Access) identity(token string) (string, bool) {
+	session, ok := a.credential(token)
+	return session.principal, ok
+}
+func (a *Access) browserIdentity(token string) (string, bool) {
+	sum := sha256.Sum256([]byte(token))
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	session, ok := a.browsers[sum]
+	if !ok {
+		return "", false
+	}
+	now := a.now()
+	valid := now.Before(session.expires)
+	if session.parent != a.operator {
+		parent, exists := a.sessions[session.parent]
+		valid = valid && exists && now.Before(parent.expires) && parent.principal == session.principal
+	}
+	if !valid {
+		delete(a.browsers, sum)
 		return "", false
 	}
 	return session.principal, true
 }
+func (a *Access) browserCookie(r *http.Request, token string, expires time.Time) *http.Cookie {
+	return &http.Cookie{Name: a.cookie, Value: token, Path: "/", HttpOnly: true, SameSite: http.SameSiteStrictMode, Secure: r.TLS != nil, Expires: expires}
+}
+
+// revokeBrowser requires a.mu to be held.
+func (a *Access) revokeBrowser(r *http.Request) {
+	if cookie, err := r.Cookie(a.cookie); err == nil {
+		delete(a.browsers, sha256.Sum256([]byte(cookie.Value)))
+	}
+}
 func (a *Access) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "no-store")
+	if r.URL.Path == "/_simulator/login" || r.URL.Path == "/_simulator/v1/capabilities" {
+		w.Header().Set("X-Simulator-Authentication", "required")
+	}
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.Header().Set("Content-Security-Policy", "default-src 'self'; frame-ancestors 'none'; form-action 'self'")
 	host := r.Host
@@ -70,13 +113,32 @@ func (a *Access) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	if origin := r.Header.Get("Origin"); origin != "" {
 		u, e := url.Parse(origin)
-		if e != nil || u.Host != r.Host || (u.Scheme != "http" && u.Scheme != "https") {
+		scheme := "http"
+		if r.TLS != nil {
+			scheme = "https"
+		}
+		if e != nil || u.Host != r.Host || u.Scheme != scheme || u.User != nil || u.Path != "" || u.RawQuery != "" || u.ForceQuery || u.Fragment != "" {
 			http.Error(w, "Cross-origin request rejected", 403)
 			return
 		}
 	}
 	if r.Header.Get("Sec-Fetch-Site") == "cross-site" {
 		http.Error(w, "Cross-site request rejected", 403)
+		return
+	}
+	if r.URL.Path == "/_simulator/logout" {
+		if r.Method != "POST" {
+			w.Header().Set("Allow", "POST")
+			w.WriteHeader(405)
+			return
+		}
+		a.mu.Lock()
+		a.revokeBrowser(r)
+		a.mu.Unlock()
+		cookie := a.browserCookie(r, "", time.Unix(1, 0))
+		cookie.MaxAge = -1
+		http.SetCookie(w, cookie)
+		w.WriteHeader(http.StatusNoContent)
 		return
 	}
 	if r.URL.Path == "/_simulator/login" {
@@ -98,11 +160,52 @@ func (a *Access) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		token := r.PostForm.Get("token")
-		if _, ok := a.identity(token); !ok {
+		parent, ok := a.credential(token)
+		if !ok {
 			http.Error(w, "Invalid or expired access token", 401)
 			return
 		}
-		http.SetCookie(w, &http.Cookie{Name: a.cookie, Value: token, Path: "/", HttpOnly: true, SameSite: http.SameSiteStrictMode, Secure: r.TLS != nil})
+		random := make([]byte, 32)
+		if _, err := rand.Read(random); err != nil {
+			http.Error(w, "Browser sign-in failed", 500)
+			return
+		}
+		browserToken := hex.EncodeToString(random)
+		now := a.now()
+		expires := now.Add(15 * time.Minute)
+		if !parent.expires.IsZero() && parent.expires.Before(expires) {
+			expires = parent.expires
+		}
+		a.mu.Lock()
+		parentHash := sha256.Sum256([]byte(token))
+		if parentHash != a.operator {
+			current, exists := a.sessions[parentHash]
+			if !exists || !now.Before(current.expires) || current.principal != parent.principal {
+				a.mu.Unlock()
+				http.Error(w, "Invalid or expired access token", 401)
+				return
+			}
+		}
+		for key, session := range a.browsers {
+			if !now.Before(session.expires) {
+				delete(a.browsers, key)
+			}
+		}
+		// Replacing this browser's session must not consume another quota slot.
+		oldToken := ""
+		if old, err := r.Cookie(a.cookie); err == nil {
+			oldToken = old.Value
+		}
+		_, replacing := a.browsers[sha256.Sum256([]byte(oldToken))]
+		if len(a.browsers) >= 1000 && !replacing {
+			a.mu.Unlock()
+			http.Error(w, "Browser-session limit reached", 429)
+			return
+		}
+		a.revokeBrowser(r)
+		a.browsers[sha256.Sum256([]byte(browserToken))] = browserSession{accessSession{parent.principal, expires}, parentHash}
+		a.mu.Unlock()
+		http.SetCookie(w, a.browserCookie(r, browserToken, expires))
 		http.Redirect(w, r, "/_simulator/console/", 303)
 		return
 	}
@@ -112,12 +215,15 @@ func (a *Access) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	token := r.Header.Get("X-Simulator-Token")
-	if token == "" {
+	var principal string
+	var ok bool
+	if token != "" {
+		principal, ok = a.identity(token)
+	} else {
 		if cookie, e := r.Cookie(a.cookie); e == nil {
-			token = cookie.Value
+			principal, ok = a.browserIdentity(cookie.Value)
 		}
 	}
-	principal, ok := a.identity(token)
 	if !ok {
 		if r.Method == "GET" && (strings.HasPrefix(r.URL.Path, "/_simulator/console/") || strings.HasPrefix(r.URL.Path, "/_simulator/docs/")) {
 			http.Redirect(w, r, "/_simulator/login", 303)

@@ -56,8 +56,10 @@ jobs:
           python3 -m venv /tmp/simulator-tests
           /tmp/simulator-tests/bin/pip install -r scripts/requirements-test.txt
           /tmp/simulator-tests/bin/playwright install --with-deps chromium
+      - name: Prepare pinned axe-core for mandatory browser accessibility checks
+        run: /tmp/simulator-tests/bin/python scripts/get-audit-tools.py /tmp/simulator-audit
       - name: Verify real binary, SDK, console, and offline API reference
-        run: make e2e PYTHON=/tmp/simulator-tests/bin/python
+        run: AXE_SCRIPT=/tmp/simulator-audit/axe.min.js make e2e PYTHON=/tmp/simulator-tests/bin/python
       - name: Run the actual platform hello-world lifecycle and participant browser
         run: |
           git init /tmp/simulator-platform
@@ -80,7 +82,6 @@ jobs:
           /tmp/simulator-tests/bin/python test/platform/wp-sdk-subset.py
       - name: Inspect console flow, keyboard behavior, and accessible contrast
         run: |
-          /tmp/simulator-tests/bin/python scripts/get-audit-tools.py /tmp/simulator-audit
           AXE_SCRIPT=/tmp/simulator-audit/axe.min.js make audit PYTHON=/tmp/simulator-tests/bin/python
       - name: Finite state model check and deletion-guard mutation
         run: |

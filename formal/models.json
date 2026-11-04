@@ -1,0 +1,762 @@
+{
+  "version": 1,
+  "tool": {
+    "version": "1.7.4",
+    "checksum_file": "formal/tla2tools.sha256",
+    "release_url": "https://github.com/tlaplus/tlaplus/releases/download/v1.7.4/tla2tools.jar"
+  },
+  "models": [
+    {
+      "id": "ObjectStore",
+      "model": "formal/ObjectStore.tla",
+      "config": "formal/ObjectStore.cfg",
+      "bounds": "Two bucket names, two keys, Boolean allow and deny.",
+      "properties": [
+        "TypeOK",
+        "NoOrphans",
+        "NoUnauthorizedMutation",
+        "DenyWins"
+      ],
+      "limits": "Abstract authorization and atomic transitions only; not IAM parsing/ARN matching, SQL, HTTP, quotas, crashes or a Go refinement proof.",
+      "source_scope": [
+        "internal/core/store.go",
+        "internal/core/policy.go",
+        "internal/aws/s3.go"
+      ],
+      "mutants": [
+        {
+          "id": "MissingDeletionGuard",
+          "edits": [
+            {
+              "old": "ObjectsFor(b) = {}",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoOrphans"
+        }
+      ]
+    },
+    {
+      "id": "StackOwnership",
+      "model": "formal/StackOwnership.tla",
+      "config": "formal/StackOwnership.cfg",
+      "bounds": "Two owners and two physical names with retained drift claims.",
+      "properties": [
+        "TypeOK",
+        "OwnershipExclusive"
+      ],
+      "limits": "Exclusive reservation and cleanup abstraction only; not authentication, SQL crash recovery, custom callbacks or full CFN behavior.",
+      "source_scope": [
+        "internal/aws/cloudformation.go",
+        "internal/aws/s3_cloudformation.go",
+        "internal/aws/apigateway_cloudformation.go"
+      ],
+      "mutants": [
+        {
+          "id": "ReclaimDriftedResource",
+          "edits": [
+            {
+              "old": "/\\ Unclaimed(p)",
+              "new": "/\\ p \\notin present",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OwnershipExclusive"
+        }
+      ]
+    },
+    {
+      "id": "S3Versions",
+      "model": "formal/S3Versions.tla",
+      "config": "formal/S3Versions.cfg",
+      "bounds": "One bucket, two keys, bounded enabled history and delete markers.",
+      "properties": [
+        "TypeOK",
+        "NoHistoryOrphans",
+        "CurrentMatchesLatest"
+      ],
+      "limits": "Enabled version history only; suspension, byte/version IDs, quotas, SQL and HTTP are independently tested.",
+      "source_scope": [
+        "internal/aws/s3_versions.go",
+        "internal/aws/s3_list_versions.go",
+        "internal/aws/s3_configuration.go",
+        "internal/aws/s3_cloudformation.go"
+      ],
+      "mutants": [
+        {
+          "id": "CurrentOnlyDeletion",
+          "edits": [
+            {
+              "old": "bucket /\\ EmptyHistory",
+              "new": "bucket /\\ current = {}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoHistoryOrphans"
+        }
+      ]
+    },
+    {
+      "id": "NativeIAMOwnership",
+      "model": "formal/NativeIAMOwnership.tla",
+      "config": "formal/NativeIAMOwnership.cfg",
+      "bounds": "Two case-folded names; native active/retired claims and legacy identities.",
+      "properties": [
+        "TypeOK",
+        "OwnershipExclusive"
+      ],
+      "limits": "Atomic name ownership abstraction only; not service trust parsing, complete IAM semantics, SQL isolation or HTTP authorization.",
+      "source_scope": [
+        "internal/aws/iam_roles.go",
+        "internal/aws/iam_legacy.go",
+        "internal/aws/iam_query.go",
+        "internal/core/policy.go",
+        "internal/server/identity.go"
+      ],
+      "mutants": [
+        {
+          "id": "LegacyAdoptsNativeRole",
+          "edits": [
+            {
+              "old": "LegacyPut(n) == /\\ n \\notin claimed",
+              "new": "LegacyPut(n) == /\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OwnershipExclusive"
+        }
+      ]
+    },
+    {
+      "id": "RESTDeploymentSnapshot",
+      "model": "formal/RESTDeploymentSnapshot.tla",
+      "config": "formal/RESTDeploymentSnapshot.cfg",
+      "bounds": "One API, two deployment IDs, two handler configurations and one stage.",
+      "properties": [
+        "TypeOK",
+        "SnapshotsFrozen",
+        "NoStageOrphans"
+      ],
+      "limits": "Frozen deployment references only; not path matcher correctness, Lambda permissions, HTTP execution, WASI, SQL recovery or WAF.",
+      "source_scope": [
+        "internal/aws/apigateway_store.go",
+        "internal/aws/apigateway_resources.go",
+        "internal/aws/apigateway_deployments.go",
+        "internal/aws/apigateway_routing.go"
+      ],
+      "mutants": [
+        {
+          "id": "MutableSnapshot",
+          "edits": [
+            {
+              "old": "/\\ UNCHANGED <<exists, snapshots, baseline, stage>>",
+              "new": "/\\ snapshots' = [d \\in Deployments |-> IF snapshots[d] = None THEN None ELSE v] /\\ UNCHANGED <<exists, baseline, stage>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SnapshotsFrozen"
+        }
+      ]
+    },
+    {
+      "id": "SSMParameterState",
+      "model": "formal/SSMParameterState.tla",
+      "config": "formal/SSMParameterState.cfg",
+      "bounds": "Two regions x two names, two abstract validated values, latest-row versions1..2. Successful overwrites beyond2 are an exploration cutoff, not an API/runtime limit. One ghost pre-event snapshot; no stored version history.",
+      "properties": [
+        "TypeOK",
+        "DeniedPreservesState",
+        "OverwriteRefusal",
+        "PutVersion",
+        "DeleteEffect",
+        "OtherKeysUnchanged",
+        "ReadIsolation"
+      ],
+      "limits": "Atomic accepted operations and abstract allow/explicit-deny only; no IAM parser/ARN matching, HTTP syntax, type/description/time fields, pagination/path queries, SQLite crash/interleaving proof, version history/selectors/labels, AWS recreation delay, live AWS differential run or Go refinement proof.",
+      "source_scope": [
+        "internal/aws/parameters.go",
+        "internal/aws/ssm.go",
+        "internal/server/ssm_model_contract_test.go"
+      ],
+      "mutants": [
+        {
+          "id": "IgnoreExplicitDeny",
+          "edits": [
+            {
+              "old": "Permitted(allow,deny) == allow /\\ ~deny",
+              "new": "Permitted(allow,deny) == allow",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DeniedPreservesState"
+        },
+        {
+          "id": "IgnoreOverwriteGuard",
+          "edits": [
+            {
+              "old": "accepted == Permitted(allow,deny) /\\ (old = None \\/ overwrite)",
+              "new": "accepted == Permitted(allow,deny)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OverwriteRefusal"
+        },
+        {
+          "id": "DoNotAdvanceVersion",
+          "edits": [
+            {
+              "old": "nextVersion == IF old = None THEN 1 ELSE old.version + 1",
+              "new": "nextVersion == IF old = None THEN 1 ELSE old.version",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PutVersion"
+        },
+        {
+          "id": "ReadWrongRegion",
+          "edits": [
+            {
+              "old": "served == <<r,n>>",
+              "new": "served == <<IF r = RegionA THEN RegionB ELSE RegionA,n>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadIsolation"
+        },
+        {
+          "id": "ReadWrongName",
+          "edits": [
+            {
+              "old": "served == <<r,n>>",
+              "new": "served == <<r,IF n = NameA THEN NameB ELSE NameA>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadIsolation"
+        }
+      ]
+    },
+    {
+      "id": "StartupTokenVisibility",
+      "model": "formal/StartupTokenVisibility.tla",
+      "config": "formal/StartupTokenVisibility.cfg",
+      "bounds": "One configured token file, two abstract token values, three initial file states, four Boolean context inputs (auth, explicit show, real stdout TTY, CI environment-variable presence) and at most two recorded emissions.",
+      "properties": [
+        "TypeOK",
+        "FileIdentityFrozen",
+        "CreatedFilePrivate",
+        "HistoryVisibility",
+        "InvalidFileNeverEmits"
+      ],
+      "limits": "Finite safety only; abstract validated file state and terminal context, not OS permissions/syscalls/randomness/crash-write atomicity, build freshness, process shutdown, liveness or Go refinement. One fixed file path; manual deletion/path changes/rotation are outside the model. Darwin/Windows helpers are not claimed executed by Linux PTY tests.",
+      "source_scope": [
+        "Makefile",
+        "scripts/start.sh",
+        "cmd/simulator/main.go",
+        "cmd/simulator/terminal.go",
+        "cmd/simulator/terminal_linux.go",
+        "cmd/simulator/terminal_darwin.go",
+        "cmd/simulator/terminal_windows.go",
+        "cmd/simulator/terminal_other.go",
+        "cmd/simulator/terminal_test.go",
+        "cmd/simulator/terminal_linux_test.go",
+        "test/start/check_start.py"
+      ],
+      "mutants": [
+        {
+          "id": "OmittedCIGuard",
+          "edits": [
+            {
+              "old": "PrintAllowed == context.show /\\ context.tty /\\ ~context.ci /\\ context.auth",
+              "new": "PrintAllowed == context.show /\\ context.tty /\\ context.auth",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "HistoryVisibility"
+        },
+        {
+          "id": "OmittedTTYGuard",
+          "edits": [
+            {
+              "old": "PrintAllowed == context.show /\\ context.tty /\\ ~context.ci /\\ context.auth",
+              "new": "PrintAllowed == context.show /\\ ~context.ci /\\ context.auth",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "HistoryVisibility"
+        },
+        {
+          "id": "OverwriteExistingToken",
+          "edits": [
+            {
+              "old": "Chosen(t) == IF fileState = \"absent\" THEN t ELSE fileToken",
+              "new": "Chosen(t) == t",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FileIdentityFrozen"
+        }
+      ]
+    },
+    {
+      "id": "SQSLifecycle",
+      "model": "formal/SQSLifecycle.tla",
+      "config": "formal/SQSLifecycle.cfg",
+      "bounds": "Two distinct database/region/queue scopes; one queue creation and one message per scope; at most two receives per message; clock 0..2, delay/visibility 0..1, retention two abstract ticks, two attribute configurations. Cached HTTP queue lookup can interleave with queue deletion. Deleted message/queue row metadata is normalized to zero. Receipt candidates include current, previous, unissued and peer handles; baseline equality admits only the current handle.",
+      "properties": [
+        "TypeOK",
+        "NoOrphans",
+        "AuthorizedMutations",
+        "ScopedMutation",
+        "FailedMutationAtomic",
+        "IdempotentCreateUnchanged",
+        "ReceiveOnlyEligible",
+        "FreshReceipt",
+        "ReceiptMutationCurrent",
+        "ChangeOnlyInflight"
+      ],
+      "limits": "Atomic transition abstraction after the native parent/expiry/rollback repair. Scopes abstract separately configured database/region/queue targets, not selected IAM principals. Receipt freshness assumes collision-free opaque IDs. No SQL/Go refinement, cryptographic proof, restart/file durability, wall-clock or long-poll liveness, batch/multiple-message atomicity, FIFO/exactly-once/distributed replica behavior, Unicode/size/checksum correctness or full URL validation. Queue name reuse beyond one lifetime is outside the bound; native regression tests separately cover actual storage failures and persistence.",
+      "source_scope": [
+        "internal/aws/sqs_store.go",
+        "internal/aws/sqs.go",
+        "internal/aws/s3.go",
+        "internal/aws/ssm.go",
+        "internal/server/server.go"
+      ],
+      "mutants": [
+        {
+          "id": "SendWithoutParentCheck",
+          "edits": [
+            {
+              "old": "CommitSend(s,delay) ==\n /\\ allowed /\\ pending[s]\n /\\ queues[s]",
+              "new": "CommitSend(s,delay) ==\n /\\ allowed /\\ pending[s]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoOrphans"
+        },
+        {
+          "id": "DeleteWithoutCascade",
+          "edits": [
+            {
+              "old": "DeleteQueue(s) ==\n /\\ allowed /\\ queues[s]\n /\\ queues' = [queues EXCEPT ![s] = FALSE]\n /\\ messages' = [messages EXCEPT ![s] = FALSE]",
+              "new": "DeleteQueue(s) ==\n /\\ allowed /\\ queues[s]\n /\\ queues' = [queues EXCEPT ![s] = FALSE]\n /\\ messages' = messages",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoOrphans"
+        },
+        {
+          "id": "CrossScopeQueueDelete",
+          "edits": [
+            {
+              "old": "DeleteQueue(s) ==\n /\\ allowed /\\ queues[s]\n /\\ queues' = [queues EXCEPT ![s] = FALSE]\n /\\ messages' = [messages EXCEPT ![s] = FALSE]",
+              "new": "DeleteQueue(s) ==\n /\\ allowed /\\ queues[s]\n /\\ queues' = [x \\in Scopes |-> FALSE]\n /\\ messages' = [x \\in Scopes |-> FALSE]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopedMutation"
+        },
+        {
+          "id": "ReceiveBeforeDelay",
+          "edits": [
+            {
+              "old": "\n /\\ visibleAt[s] <= now\n",
+              "new": "\n /\\ TRUE\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReceiveOnlyEligible"
+        },
+        {
+          "id": "ReceiveAfterRetention",
+          "edits": [
+            {
+              "old": "\n /\\ expiresAt[s] > now\n",
+              "new": "\n /\\ TRUE\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReceiveOnlyEligible"
+        },
+        {
+          "id": "ReceiptNotRotated",
+          "edits": [
+            {
+              "old": " /\\ deliveries' = [deliveries EXCEPT ![s] = @ + 1]",
+              "new": " /\\ deliveries' = deliveries",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FreshReceipt"
+        },
+        {
+          "id": "AcceptStaleReceipt",
+          "edits": [
+            {
+              "old": " /\\ h = Current(s) /\\ h # NoHandle",
+              "new": " /\\ h # NoHandle",
+              "count": 2
+            }
+          ],
+          "expect_invariant": "ReceiptMutationCurrent"
+        },
+        {
+          "id": "UnauthorizedSend",
+          "edits": [
+            {
+              "old": "CommitSend(s,delay) ==\n /\\ allowed /\\ pending[s]",
+              "new": "CommitSend(s,delay) ==\n /\\ pending[s]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AuthorizedMutations"
+        },
+        {
+          "id": "ChangeWithoutInflight",
+          "edits": [
+            {
+              "old": "\n /\\ visibleAt[s] > now\n",
+              "new": "\n /\\ TRUE\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ChangeOnlyInflight"
+        },
+        {
+          "id": "FailedWriteChangesState",
+          "edits": [
+            {
+              "old": "StorageFailure(s) ==\n /\\ allowed /\\ (queues[s] \\/ pending[s])\n /\\ UNCHANGED <<queues,attributes,queueEpoch,messages,messageEpoch,\n                 visibleAt,expiresAt,deliveries,pending,now,allowed>>\n /\\ Record(s,\"Error\",\"InternalError\",NoHandle,NoHandle,NoHandle,TRUE,TRUE)\n",
+              "new": "StorageFailure(s) ==\n /\\ allowed /\\ (queues[s] \\/ pending[s])\n /\\ attributes' = [attributes EXCEPT ![s] = 1 - @]\n /\\ UNCHANGED <<queues,queueEpoch,messages,messageEpoch,\n                 visibleAt,expiresAt,deliveries,pending,now,allowed>>\n /\\ Record(s,\"Error\",\"InternalError\",NoHandle,NoHandle,NoHandle,TRUE,TRUE)\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FailedMutationAtomic"
+        },
+        {
+          "id": "IdempotentCreateChangesState",
+          "edits": [
+            {
+              "old": "CreateExisting(s,a) ==\n /\\ allowed /\\ queues[s] /\\ attributes[s] = a\n /\\ UNCHANGED <<queues,attributes,queueEpoch,messages,messageEpoch,\n                 visibleAt,expiresAt,deliveries,pending,now,allowed>>\n /\\ Record(s,\"CreateExisting\",\"Success\",NoHandle,NoHandle,NoHandle,TRUE,TRUE)\n",
+              "new": "CreateExisting(s,a) ==\n /\\ allowed /\\ queues[s] /\\ attributes[s] = a\n /\\ attributes' = [attributes EXCEPT ![s] = 1 - @]\n /\\ UNCHANGED <<queues,queueEpoch,messages,messageEpoch,\n                 visibleAt,expiresAt,deliveries,pending,now,allowed>>\n /\\ Record(s,\"CreateExisting\",\"Success\",NoHandle,NoHandle,NoHandle,TRUE,TRUE)\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "IdempotentCreateUnchanged"
+        }
+      ]
+    },
+    {
+      "id": "SQSStorageBudget",
+      "model": "formal/SQSStorageBudget.tla",
+      "config": "formal/SQSStorageBudget.cfg",
+      "bounds": "Two trusted queue scopes; three possible pre-existing row IDs plus one additional fresh ID; each row weight1\u20132 abstract payload units. MaxRows2/MaxBytes3. Initial unique-ID row sets include legacy states with3rows and up to6units, beyond either cap. Initial enumeration uses the exact729 unique-ID assignments, not a powerset filter. No time transition: expiry is a pre-existing Boolean classification.",
+      "properties": [
+        "TypeOK",
+        "FailedSendPreservesRows",
+        "ForeignRowsPreserved",
+        "LiveRowsPreserved",
+        "BudgetAccountsPhysical",
+        "PhysicalRowCap",
+        "PayloadByteCap",
+        "ReadRemovesOwnExpired",
+        "DeleteScopeExact",
+        "MaintenanceNotBudgetBlocked"
+      ],
+      "limits": "Finite physical-payload budget abstraction, not Go/SQLite refinement, SQL transaction/crash proof, Unicode/UTF8/string-byte counting, JSON attribute serialization, actual64MiB/10000row arithmetic, file size/SQLite overhead, clock/retention, receipt/IAM authorization or random-ID collision resistance. Row weights abstract persisted body+serialized-attribute bytes; all foreign rows, including expired ones, consume budget. Scopes/parent queues are assumed already valid and trusted; SQSLifecycle/native tests separately handle authority, parent lifetime and receipts. Maintenance enabledness assumes these preconditions, not unauthorized access or liveness/fairness. Charged counters describe successful admission accounting, not a claim that an actual storage-error path computed counters. FailedSendPreservesRows still applies to every rejected/storage-error send. Legacy overcap rows are retained: only new accepted sends must fit both caps, own expired cleanup is explicit/scoped and rollback preserves every row on send failure.",
+      "source_scope": [
+        "internal/aws/sqs_store.go"
+      ],
+      "mutants": [
+        {
+          "id": "OmitPhysicalRowCap",
+          "edits": [
+            {
+              "old": "Fits(rs,s) == Cardinality(Chargeable(rs,s))<=MaxRows\n              /\\ Bytes(Chargeable(rs,s))<=MaxBytes",
+              "new": "Fits(rs,s) == Bytes(Chargeable(rs,s))<=MaxBytes",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PhysicalRowCap"
+        },
+        {
+          "id": "OmitPayloadByteCap",
+          "edits": [
+            {
+              "old": "Fits(rs,s) == Cardinality(Chargeable(rs,s))<=MaxRows\n              /\\ Bytes(Chargeable(rs,s))<=MaxBytes",
+              "new": "Fits(rs,s) == Cardinality(Chargeable(rs,s))<=MaxRows",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PayloadByteCap"
+        },
+        {
+          "id": "IgnoreExpiredForeignCharge",
+          "edits": [
+            {
+              "old": "Chargeable(rs,s) == rs",
+              "new": "Chargeable(rs,s) == {r \\in rs : r.scope=s \\/ ~r.expired}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BudgetAccountsPhysical"
+        },
+        {
+          "id": "PurgeExpiredForeignRows",
+          "edits": [
+            {
+              "old": "PurgeOwn(rs,s) == {r \\in rs : r.scope#s \\/ ~r.expired}",
+              "new": "PurgeOwn(rs,s) == {r \\in rs : ~r.expired}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ForeignRowsPreserved"
+        },
+        {
+          "id": "CommitPurgeOnFailedSend",
+          "edits": [
+            {
+              "old": "THEN /\\ outcome'=\"StorageError\" /\\ rows'=rows",
+              "new": "THEN /\\ outcome'=\"StorageError\" /\\ rows'=post",
+              "count": 1
+            },
+            {
+              "old": "ELSE /\\ outcome'=\"QuotaRejected\" /\\ rows'=rows",
+              "new": "ELSE /\\ outcome'=\"QuotaRejected\" /\\ rows'=post",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FailedSendPreservesRows"
+        },
+        {
+          "id": "DiscardOwnedLiveRows",
+          "edits": [
+            {
+              "old": "PurgeOwn(rs,s) == {r \\in rs : r.scope#s \\/ ~r.expired}",
+              "new": "PurgeOwn(rs,s) == {r \\in rs : r.scope#s}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "LiveRowsPreserved"
+        },
+        {
+          "id": "BlockLegacyMaintenance",
+          "edits": [
+            {
+              "old": "Read(s) ==\n",
+              "new": "Read(s) ==\n /\\ Cardinality(rows)<=MaxRows /\\ Bytes(rows)<=MaxBytes\n",
+              "count": 1
+            },
+            {
+              "old": "Delete(s) ==\n",
+              "new": "Delete(s) ==\n /\\ Cardinality(rows)<=MaxRows /\\ Bytes(rows)<=MaxBytes\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MaintenanceNotBudgetBlocked"
+        }
+      ]
+    },
+    {
+      "id": "BrowserSessions",
+      "model": "formal/BrowserSessions.tla",
+      "config": "formal/BrowserSessions.cfg",
+      "bounds": "2 browser clients, 3 fresh opaque browser tokens, 1 operator and 1 participant SDK credential; integer clock0..3, browserTTL2,parentTTL1; login only while expiry fits boundedclock",
+      "properties": [
+        "TypeOK",
+        "RevokedCookiesDenied",
+        "AcceptedOnlyLiveParent",
+        "SDKAuthorityPreserved",
+        "UnrelatedSessionsPreserved",
+        "NoRawSDKCookie",
+        "NoBrowserSDKAuthority",
+        "ParentLifetimeBound"
+      ],
+      "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them.",
+      "source_scope": [
+        "internal/server/access.go",
+        "tools/console/src/main.jsx",
+        "internal/server/access_browser_test.go",
+        "test/e2e/console_logout.py"
+      ],
+      "mutants": [
+        {
+          "id": "LogoutKeepsSession",
+          "edits": [
+            {
+              "old": "RemoveBrowser(t) == active \\ {t}",
+              "new": "RemoveBrowser(t) == active",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RevokedCookiesDenied"
+        },
+        {
+          "id": "IgnoreParentValidity",
+          "edits": [
+            {
+              "old": "/\\ ParentValid(binding[t])",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AcceptedOnlyLiveParent"
+        },
+        {
+          "id": "RawOperatorCookie",
+          "edits": [
+            {
+              "old": "RawCookieAllowed(t) == FALSE",
+              "new": "RawCookieAllowed(t) == (t = OperatorToken)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoRawSDKCookie"
+        },
+        {
+          "id": "LogoutClearsOthers",
+          "edits": [
+            {
+              "old": "RemoveBrowser(t) == active \\ {t}",
+              "new": "RemoveBrowser(t) == {}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "UnrelatedSessionsPreserved"
+        },
+        {
+          "id": "LogoutRevokesSDK",
+          "edits": [
+            {
+              "old": "SDKAfterLogout == sdkAuthority",
+              "new": "SDKAfterLogout == {}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SDKAuthorityPreserved"
+        }
+      ]
+    },
+    {
+      "id": "CloudWatchLogsLifecycle",
+      "model": "formal/CloudWatchLogsLifecycle.tla",
+      "config": "formal/CloudWatchLogsLifecycle.cfg",
+      "bounds": "{\"abstractEventRecordsPerIncarnation\": 1, \"groupsPerTeam\": 1, \"incarnationsPerTeam\": 2, \"streamsPerGroup\": 1, \"teams\": 2} (abstract finite bounds, not API quota values)",
+      "properties": [
+        "TypeOK",
+        "NoOrphans",
+        "OnlyAcceptedWrites",
+        "TokenAuthority"
+      ],
+      "limits": "Finite safety only; no liveness or implementation refinement. Models transaction atomicity and database identity as abstract steps, not SQLite faults, HMAC cryptography or OS process isolation. Byte/time limits, sorting, page convergence, expiry and real IAM documents require native/SDK tests. Captured read receipts preserve the authorization context when later resource generations change. Shared source scope covers only the added Logs field/dispatch/construction seam; not all other service dispatch or server lifecycle/authentication.",
+      "source_scope": [
+        "internal/aws/cloudwatch_logs_store.go",
+        "internal/aws/cloudwatch_logs_query.go",
+        "internal/aws/cloudwatch_logs_http.go",
+        "internal/aws/cloudwatch_logs_dispatch.go",
+        "internal/aws/s3.go",
+        "internal/aws/ssm.go",
+        "internal/server/server.go"
+      ],
+      "mutants": [
+        {
+          "id": "OmitTokenTeam",
+          "edits": [
+            {
+              "old": "/\\ token.team = t /\\ token.gen = generation[t]",
+              "new": "/\\ token.gen = generation[t]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TokenAuthority"
+        },
+        {
+          "id": "OmitTokenGeneration",
+          "edits": [
+            {
+              "old": "/\\ token.team = t /\\ token.gen = generation[t]",
+              "new": "/\\ token.team = t",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TokenAuthority"
+        },
+        {
+          "id": "AcceptInvalidBatch",
+          "edits": [
+            {
+              "old": "/\\ allowed /\\ valid",
+              "new": "/\\ allowed",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OnlyAcceptedWrites"
+        },
+        {
+          "id": "OmitPutAuthority",
+          "edits": [
+            {
+              "old": "/\\ allowed /\\ valid",
+              "new": "/\\ valid",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OnlyAcceptedWrites"
+        },
+        {
+          "id": "OmitDeleteEventCascade",
+          "edits": [
+            {
+              "old": "/\\ events' = {e \\in events : e.team # t}",
+              "new": "/\\ UNCHANGED events",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoOrphans"
+        }
+      ]
+    },
+    {
+      "id": "CloudWatchLogsViewEpoch",
+      "model": "formal/CloudWatchLogsViewEpoch.tla",
+      "config": "formal/CloudWatchLogsViewEpoch.cfg",
+      "bounds": "{\"componentLifetimes\": 1, \"queryContexts\": 2, \"requestVersions\": 2} (abstract finite bounds, not API quota values)",
+      "properties": [
+        "TypeOK",
+        "FreshResults",
+        "NoUnmountedResults"
+      ],
+      "limits": "Finite async-display acceptance model, not React/AbortController/DOM execution or implementation refinement. Context abstracts a group/stream/page query; parent region/principal changes unmount the component. IAM, team authentication, page tokens, SQL state and mutation atomicity are separate backend obligations. Form input, busy indicators and navigation layout are not modeled; actual stale-reply and browser tests remain required. Shared main.jsx scope covers the added Logs identity/region/navigation remount only, not all other service views or browser authentication.",
+      "source_scope": [
+        "tools/console/src/cloudwatch-logs.jsx",
+        "tools/console/src/main.jsx"
+      ],
+      "mutants": [
+        {
+          "id": "OmitResponseEpoch",
+          "edits": [
+            {
+              "old": "Reply(r) == /\\ alive /\\ r.version = epoch",
+              "new": "Reply(r) == /\\ alive",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FreshResults"
+        },
+        {
+          "id": "AcceptUnmountedReply",
+          "edits": [
+            {
+              "old": "Reply(r) == /\\ alive /\\ r.version = epoch",
+              "new": "Reply(r) == /\\ r.version = epoch",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoUnmountedResults"
+        }
+      ]
+    }
+  ]
+}
