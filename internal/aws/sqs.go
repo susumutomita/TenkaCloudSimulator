@@ -71,10 +71,6 @@ type sqsRequest struct {
 	MessageSystemAttributeNames []string
 }
 
-func isSQS(r *http.Request) bool {
-	return strings.HasPrefix(r.Header.Get("X-Amz-Target"), "AmazonSQS.")
-}
-
 // queueNameFromURL accepts the QueueUrl this simulator issues
 // (https://sqs.<region>.amazonaws.com/000000000000/<name> shape, on any host)
 // or a bare queue name.
@@ -288,7 +284,7 @@ func (g *Gateway) serveSQS(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		limit := 1000
-		if input.MaxResults != 0 {
+		if _, supplied := raw["MaxResults"]; supplied {
 			if input.MaxResults < 1 || input.MaxResults > 1000 {
 				invalid("MaxResults must be 1–1000.")
 				return
@@ -403,7 +399,7 @@ func (g *Gateway) serveSQS(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		maxN := 1
-		if input.MaxNumberOfMessages != 0 {
+		if _, supplied := raw["MaxNumberOfMessages"]; supplied {
 			if input.MaxNumberOfMessages < 1 || input.MaxNumberOfMessages > 10 {
 				invalid("MaxNumberOfMessages must be 1–10.")
 				return

@@ -160,3 +160,21 @@ wire uses the target/content-type headers above; the legacy Query protocol's
 Version parameter is not an extra supported JSON request field. Regional
 production endpoint examples in the linked AWS reference are documentation only;
 all native tests target the local simulator and use dummy credentials.
+
+
+Additional acceptance checkpoint (source-only; not executed yet): explicit JSON
+`MaxResults: 0` and `MaxNumberOfMessages: 0` now fail instead of selecting omitted
+parameter defaults. Their documented minima are 1; omission retains 1000 and 1,
+respectively ([ListQueues](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_ListQueues.html),
+[ReceiveMessage](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_ReceiveMessage.html)).
+New regression cases cover these distinctions, GetQueueUrl, persisted nondefault
+queue settings, per-message delay override, exact attribute selection, native
+composition bounds, capacity/idempotency and real SQLite-to-HTTP rollback errors.
+The unused isSQS helper was removed after a whole-repository reference search
+found only its declaration; actual dispatch already selects the AmazonSQS target.
+These new tests and changes require fresh execution. A previous whole-suite
+attempt failed the unchanged bounded-output VM deadline; one isolated retry
+passed. Its failed profile was inspected only for diagnostic uncovered blocks,
+never combined with another profile or accepted as whole coverage evidence.
+The finite model files remain unchanged; their previous bounded results do not
+prove JSON validation, HTTP errors or the new acceptance tests.

@@ -11,7 +11,7 @@
     },
     {
       "path": "docs/sqs.md",
-      "sha256": "eda4df7283ef5a844b61d5ba85f45358d1723e8002b46889167ad15a4126277d",
+      "sha256": "24b6e440742e18f2f62ed616136eafa6a92d890c9c2262ac1c6448949690b062",
       "disposition": "documentation",
       "reason": "Document the bounded native SQS subset, local 256 KiB versus current operation-reference 1 MiB, repair provenance, actual focused tests and explicit compatibility/model/coverage limits. No service or formal-proof completion is asserted by prose.",
       "models": []
@@ -86,7 +86,7 @@
     },
     {
       "path": "internal/aws/sqs.go",
-      "sha256": "13dd5ebd33738eed732ee2487528615878dddbffe750c9953a745d75232405d3",
+      "sha256": "2b259f69e7dece05407b4d2cb78d69377cd7f0f8fbad9bd3a00b1967c390cb3a",
       "disposition": "modeled",
       "reason": "Authorize the selected SQS action/regional queue ARN before native operations, retain bounded request validation and pass the same regional queue/receipt target to the repaired store. Body Unicode is additionally tested as a separate protocol contract.",
       "models": [
@@ -102,6 +102,13 @@
           "limits": "The model assumes an immutable Boolean authorization result and fresh handles; it does not prove IAM matching, QueueUrl parsing, JSON, body/attribute validation, MD5, long polling or HTTP error equivalence."
         }
       ]
+    },
+    {
+      "path": "internal/aws/sqs_acceptance_boundaries_test.go",
+      "sha256": "dae170523ce42cdcb0aed7d62c84abb52c1edbc1ee0a30730287b370dce0e62e",
+      "disposition": "test-support",
+      "reason": "Add acceptance regressions for explicit-zero versus omitted bounds, nondefault delay/attribute roundtrips, native composition and quota guards, and actual SQLite transaction faults surfaced as HTTP 500 with preserved state. Source-only checkpoint: execution pending, no coverage claim.",
+      "models": []
     },
     {
       "path": "internal/aws/sqs_atomic_boundaries_test.go",
@@ -177,6 +184,13 @@
           "limits": "Initial valid graph and separate host/database authority assumptions; constructor/orphan retention is native-tested. No server/token/IAM implementation proof or full capability-catalog acceptance."
         }
       ]
+    },
+    {
+      "path": "internal/server/sqs_acceptance_test.go",
+      "sha256": "37472ccdf9d97bb77259c89c061fe39388f4ac3c73481681e1566d6b35af6ca0",
+      "disposition": "test-support",
+      "reason": "Add acceptance regressions for explicit-zero versus omitted bounds, nondefault delay/attribute roundtrips, native composition and quota guards, and actual SQLite transaction faults surfaced as HTTP 500 with preserved state. Source-only checkpoint: execution pending, no coverage claim.",
+      "models": []
     },
     {
       "path": "internal/server/sqs_boundaries_test.go",
