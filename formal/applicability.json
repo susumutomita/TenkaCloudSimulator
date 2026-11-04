@@ -478,6 +478,24 @@
       ]
     },
     {
+      "path": "internal/server/web/app.js",
+      "sha256": "38225657648156b5b8b900dcd60ebaffe1338e9d92b734a579bb19976a51f3de",
+      "disposition": "modeled",
+      "reason": "Binds this source/artifact to the named finite state or disclosure/reveal properties. Actual local TLC evidence at c97bdde and concrete runtime/browser evidence at0888924 are recorded separately; declaration alone is not a new-head execution result or a general protocol/SQL/crypto/refinement proof.",
+      "models": [
+        {
+          "id": "SecretsRevealEpoch",
+          "properties": [
+            "NoUnmountedDisplay",
+            "FreshEmissionHistory",
+            "ReturnedARNMatches",
+            "VisibleContextMatches"
+          ],
+          "limits": "Finite explicit-retrieve/display model, not React, DOM, AbortController, memory zeroization or implementation refinement. Only the successful response path is modeled; native store/IAM must authorize before returning any secret. A returned ARN can differ and must be rejected. Retrieve, Hide and navigation invalidate epochs; unmount also clears visible state. Parent must remount on region/principal changes. Emission history captures the context at each acceptance so later Hide/navigation cannot relabel an earlier stale acceptance. Draft entry, mutation atomicity and form layout are outside this model. Parent main.jsx scope binds only Secrets routing/remount key (region/principal/navigation); the generated app.js binding is the canonical compiled artifact of those source inputs, independently checked by bundle/asset hashes. It does not model unrelated existing console services or prove JavaScript compilation."
+        }
+      ]
+    },
+    {
       "path": "scripts/formal_model_gate.py",
       "sha256": "b15b3589215f663dca86675dfd35c30a5d4e6123065fbe36ca7e3f33a02b2a68",
       "disposition": "formal-infrastructure",
@@ -517,6 +535,20 @@
       "sha256": "b768a1c41308c0a524b0ad83a789d65888654949bcd6371e53f715ce222b4c3b",
       "disposition": "test-support",
       "reason": "Test support for the served shared-root Secrets examples and shared native API inventory. Exact independent61operation/34path literals pinned to main5c97 replace obsolete43count; actualHTTP/SDKstate and no inventedSecretsURL assertions retained. No production/native/model change or Go refinement proof.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "4cd749b5d7a6e119f1a893432d93a1cfc2701bcbf71bca2fd78878029eaf6d00",
+      "disposition": "presentation",
+      "reason": "Canonical build input/digest metadata from exact package-lock and a verified existing physical dependency copy. Actual generated UI state logic is separately bound at app.js; metadata alone grants no runtime authority.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "dc7715942b3958775a490eeb41fffedd67a5ff742541e6a3132cfdad011e1e59",
+      "disposition": "presentation",
+      "reason": "Canonical build input/digest metadata from exact package-lock and a verified existing physical dependency copy. Actual generated UI state logic is separately bound at app.js; metadata alone grants no runtime authority.",
       "models": []
     },
     {
