@@ -43,7 +43,7 @@ S3のCloudFormationはBucketName/Versioning/PublicAccessBlock/ユーザーTags�
 
 SQSはnative JSON 1.0 APIのみ対応します。保持中・期限切れ未回収を含む物理message rowはプロセス全体10000件、UTF-8 bodyとserialized attribute JSONの合計64 MiBまでです。これはSQLiteファイル全体・プロセスメモリ・AWS課金サイズの上限ではありません。Azure/GCP/Sakura等の他クラウドは現在のGo実装では未対応です。Issueや計画は実装完了を意味しません。[開発状況](docs/development-status.md)を参照してください。Cloudscapeを使用していますが、本物のAWSコンソールとの全画面・全挙動の一致や実AWSとの差分検証完了は主張していません。
 
-Secrets Managerのローカル候補はnative/SDK/browser・全24 E2E・実起動を検証済みです。`0888924`の同一全体profileでstatement94.78%、無除外source90.12%を確認しました。SecretStringはSQLite内の平文で、実AWSのKMS暗号化やAWSコンソールの全機能は再現しません。最終docs更新HEADの形式・画面監査・CIは別途確認し、公開・release・merge済みとは扱いません。
+Secrets Managerのローカル候補はnative/SDK/browser・全24 E2E・実起動を検証済みです。`0888924`の同一全体profileでstatement94.78%、無除外source90.12%を確認しました。SecretStringはSQLite内の平文で、実AWSのKMS暗号化やAWSコンソールの全機能は再現しません。13モデル/50欠陥検出の実TLC・50画面監査もローカルで確認済みです。変更後は固定HEADを再検証し、公開後CI・review・release・mergeとは区別します。
 
 ## IAMロールからLambdaを作る
 
@@ -93,7 +93,7 @@ TLA_JAR=/path/to/tla2tools.jar make formal
 
 CIはstatementと未フィルターsource-line coverageを両方90%以上に強制します。`make before-commit`単独のcoverage判定はstatementのみで、source-line判定はCIのCobertura生成後ステージと上記の2コマンドで行います。SDK/browser、license、依存security、埋込asset、形式検査も行います。cross compileは他OSでの実行成功を意味しません。開発用Python/Node/Javaはruntime依存ではありません。UI・Scalarの再生成は権利表記とlockを保持する[各build手順](tools/console/README.md)・[Scalar手順](tools/scalar/README.md)・[Python runtimeの権利・再生成手順](tools/python/README.md)に従います。
 
-形式検査にはObjectStore、StackOwnership、S3Versions、NativeIAMOwnership、RESTDeploymentSnapshot、SSMParameterState、StartupTokenVisibility、BrowserSessions、SQSLifecycle、SQSStorageBudgetにSecretsVersionLifecycle、SecretsRevealEpoch、SecretsDisclosureChannelsを加える候補では13有限モデルと50の意図した欠陥検出を登録します（この統合HEADのTLC実行は未実施）。TLCと意図したmutantの反例で限定した安全条件を検査しますが、Go実装のrefinement、暗号、全AWS仕様・実AWSとの一致を証明するものではありません。変更はregistryとsource対応を更新し、固定HEADのCI結果で判断します。[形式検査](formal/README.md)、[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)。
+形式registryは既存10モデルとSecretsVersionLifecycle・SecretsRevealEpoch・SecretsDisclosureChannelsを含む13有限モデル、50の必須欠陥検出を登録しています。ローカル固定HEADで全63実行を確認し、50検出を1件ずつ削除する否定テストも通過しました。各変更は新しい固定HEADで再検証し、公開後のGitHub CIとは区別して記録します。TLCと意図したmutantの反例で限定した安全条件を検査しますが、Go実装のrefinement、暗号、全AWS仕様・実AWSとの一致を証明するものではありません。変更はregistryとsource対応を更新し、固定HEADのCI結果で判断します。[形式検査](formal/README.md)、[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)。
 
 ## ライセンス
 
