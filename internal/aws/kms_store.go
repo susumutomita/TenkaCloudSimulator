@@ -20,7 +20,9 @@ type kmsStored struct {
 }
 
 func NewKMSStore(db *sql.DB) (*KMSStore, error) {
-	if db == nil { return nil, errors.New("KMS requires a SQLite database") }
+	if db == nil {
+		return nil, errors.New("KMS requires a SQLite database")
+	}
 	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS aws_kms_keys (
  region TEXT NOT NULL,key_id TEXT NOT NULL,description TEXT NOT NULL,created REAL NOT NULL,
  state TEXT NOT NULL CHECK(state IN ('Enabled','Disabled')),
@@ -247,8 +249,16 @@ func (s *KMSStore) Decrypt(ctx context.Context, region, requestedID string, cont
 
 // Expected-single-row mutations must be persisted before acknowledging key,
 // state, or ciphertext success. SQLite IGNORE is not an acknowledged write.
-func kmsRequireOne(result sql.Result,err error)error{
- if err!=nil{return err}
- n,err:=result.RowsAffected();if err!=nil{return err}
- if n!=1{return kmsInternal()};return nil
+func kmsRequireOne(result sql.Result, err error) error {
+	if err != nil {
+		return err
+	}
+	n, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if n != 1 {
+		return kmsInternal()
+	}
+	return nil
 }
