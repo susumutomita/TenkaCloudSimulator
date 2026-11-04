@@ -1,166 +1,501 @@
 {
   "version": 1,
-  "base_sha": "cb529272ce14be9cab645e284b1733da37b21cda",
+  "base_sha": "b61d0299a2139661f01ef29ae5826e4c070cc7bf",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "b6beb58c7999f991cddf8910c45f5eb50193ebd78318cfe37770e0a5f0ad896f",
+      "sha256": "3ef4d9fef86d3236556ebec704deb5b98676a83daa8442c516639f2d171a58ce",
       "disposition": "documentation",
-      "reason": "Describe the merged native-only SQS scope, preserved browser logout security, ten bounded models and36 required mutants; no runtime/Go refinement proof or full catalog/multicloud claim.",
+      "reason": "Truthfully documents recovered local scope, actual limited native results, primary API references and pending combined validation. No new runtime claim.",
       "models": []
     },
     {
-      "path": "SECURITY.md",
-      "sha256": "b0c9b8f83fa38d42f1b5994d5c19e434fcdaa0f55c603ca73e57d14d8f47d3dc",
+      "path": "docs/formal-validation.md",
+      "sha256": "31d106c87deaebd43e80edfa2d6dc4facabc6d233bbffce38508fbc01d0be66c",
       "disposition": "documentation",
-      "reason": "Corrects stale descriptive logout text to match the existing parent-bound ephemeral browser credential/revocation code. SDK/other-session preservation, trusted-host/proxy boundaries and limitations remain; no new security-policy exception or runtime grant.",
+      "reason": "Truthfully documents recovered local scope, actual limited native results, primary API references and pending combined validation. No new runtime claim.",
       "models": []
     },
     {
-      "path": "docs/console-sessions.md",
-      "sha256": "12378cda75394ad91e483cb2bbbeed585f0453d92e085ecbc108e20a95b677e0",
+      "path": "docs/secrets-manager.md",
+      "sha256": "102805bf400b03294e66c384a0dd8eeafc4b56bc0413eb94118607a6f7f4d09d",
       "disposition": "documentation",
-      "reason": "Documents current eight-model/eighteen-control combined inventory and explicit bounded session limits; source restack/policy checks do not imply fresh runtime/browser/TLC/hosted CI execution.",
+      "reason": "Truthfully documents recovered local scope, actual limited native results, primary API references and pending combined validation. No new runtime claim.",
       "models": []
-    },
-    {
-      "path": "docs/sqs.md",
-      "sha256": "7c812f381803172147e4aefe33d555e4aad0c64ab12eeeb13d088d870d18e526",
-      "disposition": "documentation",
-      "reason": "Describe the merged native-only SQS scope, preserved browser logout security, ten bounded models and36 required mutants; no runtime/Go refinement proof or full catalog/multicloud claim.",
-      "models": []
-    },
-    {
-      "path": "formal/BrowserSessions.cfg",
-      "sha256": "6c9a3ec3c355763cb5d212c2da845085be53e302df956a87c94bb479e2e5640f",
-      "disposition": "modeled",
-      "reason": "The changed source is a caller/test correspondence seam for selected browser revocation and independent SDK/session preservation; actual UI/HTTP behavior is validated separately, not executed by TLC.",
-      "models": [
-        {
-          "id": "BrowserSessions",
-          "properties": [
-            "RevokedCookiesDenied",
-            "AcceptedOnlyLiveParent",
-            "SDKAuthorityPreserved",
-            "UnrelatedSessionsPreserved",
-            "NoRawSDKCookie",
-            "NoBrowserSDKAuthority",
-            "ParentLifetimeBound"
-          ],
-          "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them."
-        }
-      ]
-    },
-    {
-      "path": "formal/BrowserSessions.tla",
-      "sha256": "cde5633b5b190063d8c65205680c1a10f399430469b1562562a467133098b40a",
-      "disposition": "modeled",
-      "reason": "The changed source is a caller/test correspondence seam for selected browser revocation and independent SDK/session preservation; actual UI/HTTP behavior is validated separately, not executed by TLC.",
-      "models": [
-        {
-          "id": "BrowserSessions",
-          "properties": [
-            "RevokedCookiesDenied",
-            "AcceptedOnlyLiveParent",
-            "SDKAuthorityPreserved",
-            "UnrelatedSessionsPreserved",
-            "NoRawSDKCookie",
-            "NoBrowserSDKAuthority",
-            "ParentLifetimeBound"
-          ],
-          "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them."
-        }
-      ]
     },
     {
       "path": "formal/README.md",
-      "sha256": "59bcde31c59d93f105a72611ea3d7f7bebe2189cee35be03c595a6504707a9a5",
+      "sha256": "de0686d5078eada80e31690ff5b1ac47d83027021477d82d637dcd6ad682f0ab",
       "disposition": "documentation",
-      "reason": "Describe the merged native-only SQS scope, preserved browser logout security, ten bounded models and36 required mutants; no runtime/Go refinement proof or full catalog/multicloud claim.",
+      "reason": "Truthfully documents recovered local scope, actual limited native results, primary API references and pending combined validation. No new runtime claim.",
       "models": []
+    },
+    {
+      "path": "formal/SecretsDisclosureChannels.cfg",
+      "sha256": "04e27e9b31fef776f86a14c83692076d1104340328ca34267d3526023efe7e76",
+      "disposition": "modeled",
+      "reason": "Correspondence to the named finite Secrets or pre-existing state abstraction only. Source registration is not new-head TLC/native/browser execution; no general protocol, transaction failure or refinement claim.",
+      "models": [
+        {
+          "id": "SecretsDisclosureChannels",
+          "properties": [
+            "RawRequiresAuthorizedGet",
+            "MetadataLogErrorRedacted",
+            "DeniedNoRaw",
+            "RawEmissionRequiresGet"
+          ],
+          "limits": "Finite classification of plaintext acquisition/output call sites, not Go fmt/JSON/slog, SQL, encryption, memory secrecy or implementation refinement. The private plaintext() accessor itself has no authorization: its only production writer call site must follow successful native Get authorization. Actual private-holder formatting/JSON/slog sentinel tests and native denied-Get/error/metadata tests verify the Go mechanisms independently."
+        }
+      ]
+    },
+    {
+      "path": "formal/SecretsDisclosureChannels.tla",
+      "sha256": "c8edc5aabc1553e4dbb8a884da24fb76cb8eb37509817a48b1997ab64d94e731",
+      "disposition": "modeled",
+      "reason": "Correspondence to the named finite Secrets or pre-existing state abstraction only. Source registration is not new-head TLC/native/browser execution; no general protocol, transaction failure or refinement claim.",
+      "models": [
+        {
+          "id": "SecretsDisclosureChannels",
+          "properties": [
+            "RawRequiresAuthorizedGet",
+            "MetadataLogErrorRedacted",
+            "DeniedNoRaw",
+            "RawEmissionRequiresGet"
+          ],
+          "limits": "Finite classification of plaintext acquisition/output call sites, not Go fmt/JSON/slog, SQL, encryption, memory secrecy or implementation refinement. The private plaintext() accessor itself has no authorization: its only production writer call site must follow successful native Get authorization. Actual private-holder formatting/JSON/slog sentinel tests and native denied-Get/error/metadata tests verify the Go mechanisms independently."
+        }
+      ]
+    },
+    {
+      "path": "formal/SecretsRevealEpoch.cfg",
+      "sha256": "85f6ff6ef3a25e5eaf284b5cb844af18623ed4527ff14f917707090a275c2898",
+      "disposition": "modeled",
+      "reason": "Correspondence to the named finite Secrets or pre-existing state abstraction only. Source registration is not new-head TLC/native/browser execution; no general protocol, transaction failure or refinement claim.",
+      "models": [
+        {
+          "id": "SecretsRevealEpoch",
+          "properties": [
+            "NoUnmountedDisplay",
+            "FreshEmissionHistory",
+            "ReturnedARNMatches",
+            "VisibleContextMatches"
+          ],
+          "limits": "Finite explicit-retrieve/display model, not React, DOM, AbortController, memory zeroization or implementation refinement. Only the successful response path is modeled; native store/IAM must authorize before returning any secret. A returned ARN can differ and must be rejected. Retrieve, Hide and navigation invalidate epochs; unmount also clears visible state. Parent must remount on region/principal changes. Emission history captures the context at each acceptance so later Hide/navigation cannot relabel an earlier stale acceptance. Draft entry, mutation atomicity and form layout are outside this model. Parent main.jsx scope binds only Secrets routing/remount key (region/principal/navigation); the generated app.js binding is the canonical compiled artifact of those source inputs, independently checked by bundle/asset hashes. It does not model unrelated existing console services or prove JavaScript compilation."
+        }
+      ]
+    },
+    {
+      "path": "formal/SecretsRevealEpoch.tla",
+      "sha256": "3cde329f4cb1e7feff528ec3bee76e834214c5c6da48ff78a829b5366f8c2f4b",
+      "disposition": "modeled",
+      "reason": "Correspondence to the named finite Secrets or pre-existing state abstraction only. Source registration is not new-head TLC/native/browser execution; no general protocol, transaction failure or refinement claim.",
+      "models": [
+        {
+          "id": "SecretsRevealEpoch",
+          "properties": [
+            "NoUnmountedDisplay",
+            "FreshEmissionHistory",
+            "ReturnedARNMatches",
+            "VisibleContextMatches"
+          ],
+          "limits": "Finite explicit-retrieve/display model, not React, DOM, AbortController, memory zeroization or implementation refinement. Only the successful response path is modeled; native store/IAM must authorize before returning any secret. A returned ARN can differ and must be rejected. Retrieve, Hide and navigation invalidate epochs; unmount also clears visible state. Parent must remount on region/principal changes. Emission history captures the context at each acceptance so later Hide/navigation cannot relabel an earlier stale acceptance. Draft entry, mutation atomicity and form layout are outside this model. Parent main.jsx scope binds only Secrets routing/remount key (region/principal/navigation); the generated app.js binding is the canonical compiled artifact of those source inputs, independently checked by bundle/asset hashes. It does not model unrelated existing console services or prove JavaScript compilation."
+        }
+      ]
+    },
+    {
+      "path": "formal/SecretsVersionLifecycle.cfg",
+      "sha256": "2a743a944b8bf9c376f74e84a3f45e00be1d0fc27f0ad179b1c9eb649292ae0b",
+      "disposition": "modeled",
+      "reason": "Correspondence to the named finite Secrets or pre-existing state abstraction only. Source registration is not new-head TLC/native/browser execution; no general protocol, transaction failure or refinement claim.",
+      "models": [
+        {
+          "id": "SecretsVersionLifecycle",
+          "properties": [
+            "ImmutableVersions",
+            "NoOrphans",
+            "UniqueLabels",
+            "SeparateCurrentPrevious",
+            "ActiveHasCurrent",
+            "AuthorizedVersions",
+            "AuthorizedDisclosure"
+          ],
+          "limits": "Finite lifecycle/authority abstraction, not SQL transaction, cryptography, OS authentication, formatter redaction or Go implementation refinement. A team models one secret name and two never-reused ARN incarnations; process/token isolation and cursor bindings require actual native SDK tests. History contains abstract dummy values solely to detect an attempted immutable-version overwrite; runtime force deletion does not retain secret values. IAM is represented by a pure Boolean decision for the resolved resource; policy loading/error ordering and actual IAM rules require concrete Go tests. Shared Gateway/dispatch/server paths bind only Secrets composition into the native SQLite/immutable-policy authority path, not unrelated S3/SSM behavior or a proof of HTTP routing. Cursor signatures, quotas and restart persistence require concrete tests."
+        }
+      ]
+    },
+    {
+      "path": "formal/SecretsVersionLifecycle.tla",
+      "sha256": "de4b9666671e3e3a8c9b69434b494c46f034eff5a243e312ea40e3b5aa412642",
+      "disposition": "modeled",
+      "reason": "Correspondence to the named finite Secrets or pre-existing state abstraction only. Source registration is not new-head TLC/native/browser execution; no general protocol, transaction failure or refinement claim.",
+      "models": [
+        {
+          "id": "SecretsVersionLifecycle",
+          "properties": [
+            "ImmutableVersions",
+            "NoOrphans",
+            "UniqueLabels",
+            "SeparateCurrentPrevious",
+            "ActiveHasCurrent",
+            "AuthorizedVersions",
+            "AuthorizedDisclosure"
+          ],
+          "limits": "Finite lifecycle/authority abstraction, not SQL transaction, cryptography, OS authentication, formatter redaction or Go implementation refinement. A team models one secret name and two never-reused ARN incarnations; process/token isolation and cursor bindings require actual native SDK tests. History contains abstract dummy values solely to detect an attempted immutable-version overwrite; runtime force deletion does not retain secret values. IAM is represented by a pure Boolean decision for the resolved resource; policy loading/error ordering and actual IAM rules require concrete Go tests. Shared Gateway/dispatch/server paths bind only Secrets composition into the native SQLite/immutable-policy authority path, not unrelated S3/SSM behavior or a proof of HTTP routing. Cursor signatures, quotas and restart persistence require concrete tests."
+        }
+      ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "38b7a5a2812e49cf318cc6588b4d4f2898a553bce0f0eded7295d5683bbf8d37",
+      "sha256": "f718fc4e0d217bd365f249c92e6c74c3ba2d3e583dca50429eec35f59b759956",
       "disposition": "formal-infrastructure",
-      "reason": "Additive union of Startup, SSM and Browser inventories/required IDs/critical invariants and all feature-specific negative controls; exact guard function bodies, strict module metadata recognizer/fixtures and mandatory canonical axe/E2E preparation are preserved. Eight normal/eighteen sensitivity cases require fresh immutable-HEAD TLC; no new runtime proof is inferred.",
+      "reason": "Adds three required Secrets models and invariant guards plus rejection tests without removing or weakening main ten models, thirty-six mutants or existing immutable-head/module policies.",
       "models": []
     },
     {
-      "path": "internal/server/access.go",
-      "sha256": "039384e1f22a36807ff8b1942cb0211eed58f7f044c45e7ce40428562a02fd7b",
+      "path": "internal/aws/s3.go",
+      "sha256": "9103d2b18215894abf25cbf46a265164c9c68f81b0fe04cfbeebc91f49996380",
       "disposition": "modeled",
-      "reason": "Introduces independent browser credential state with bounded lifetime, live-parent use checks and selective logout without mutating raw SDK authority. BrowserSessions checks the bounded design transitions; native concurrency/HTTP tests remain independent.",
+      "reason": "Correspondence to the named finite Secrets or pre-existing state abstraction only. Source registration is not new-head TLC/native/browser execution; no general protocol, transaction failure or refinement claim.",
       "models": [
         {
-          "id": "BrowserSessions",
+          "id": "ObjectStore",
           "properties": [
-            "RevokedCookiesDenied",
-            "AcceptedOnlyLiveParent",
-            "SDKAuthorityPreserved",
-            "UnrelatedSessionsPreserved",
-            "NoRawSDKCookie",
-            "NoBrowserSDKAuthority",
-            "ParentLifetimeBound"
+            "NoOrphans",
+            "NoUnauthorizedMutation",
+            "DenyWins"
           ],
-          "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them."
+          "limits": "Abstract authorization and atomic transitions only; not IAM parsing/ARN matching, SQL, HTTP, quotas, crashes or a Go refinement proof."
+        },
+        {
+          "id": "SQSLifecycle",
+          "properties": [
+            "NoOrphans",
+            "AuthorizedMutations",
+            "ScopedMutation",
+            "FailedMutationAtomic",
+            "IdempotentCreateUnchanged",
+            "ReceiveOnlyEligible",
+            "FreshReceipt",
+            "ReceiptMutationCurrent",
+            "ChangeOnlyInflight"
+          ],
+          "limits": "Atomic transition abstraction after the native parent/expiry/rollback repair. Scopes abstract separately configured database/region/queue targets, not selected IAM principals. Receipt freshness assumes collision-free opaque IDs. No SQL/Go refinement, cryptographic proof, restart/file durability, wall-clock or long-poll liveness, batch/multiple-message atomicity, FIFO/exactly-once/distributed replica behavior, Unicode/size/checksum correctness or full URL validation. Queue name reuse beyond one lifetime is outside the bound; native regression tests separately cover actual storage failures and persistence."
+        },
+        {
+          "id": "SecretsVersionLifecycle",
+          "properties": [
+            "ImmutableVersions",
+            "NoOrphans",
+            "UniqueLabels",
+            "SeparateCurrentPrevious",
+            "ActiveHasCurrent",
+            "AuthorizedVersions",
+            "AuthorizedDisclosure"
+          ],
+          "limits": "Finite lifecycle/authority abstraction, not SQL transaction, cryptography, OS authentication, formatter redaction or Go implementation refinement. A team models one secret name and two never-reused ARN incarnations; process/token isolation and cursor bindings require actual native SDK tests. History contains abstract dummy values solely to detect an attempted immutable-version overwrite; runtime force deletion does not retain secret values. IAM is represented by a pure Boolean decision for the resolved resource; policy loading/error ordering and actual IAM rules require concrete Go tests. Shared Gateway/dispatch/server paths bind only Secrets composition into the native SQLite/immutable-policy authority path, not unrelated S3/SSM behavior or a proof of HTTP routing. Cursor signatures, quotas and restart persistence require concrete tests."
         }
       ]
     },
     {
-      "path": "internal/server/access_browser_test.go",
-      "sha256": "a1d06a5c4a5a185627cd3ae97952891b733509d72032b9ed3095a58250f53af0",
+      "path": "internal/aws/secret_boundaries_test.go",
+      "sha256": "048d1e09e144a639b204a8d22723ab861ed325028abf241130d421ac8fa19fce",
+      "disposition": "test-support",
+      "reason": "Meaningful native/SDK/UI regression assertions or mandatory test registration. Source presence is not a passing runtime result.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/secret_gateway.go",
+      "sha256": "668a49a85b2bc06c1b1cd6f8d22472a75ab016e233603ac6bde12a1e40cbbc4e",
       "disposition": "modeled",
-      "reason": "The changed source is a caller/test correspondence seam for selected browser revocation and independent SDK/session preservation; actual UI/HTTP behavior is validated separately, not executed by TLC.",
+      "reason": "Correspondence to the named finite Secrets or pre-existing state abstraction only. Source registration is not new-head TLC/native/browser execution; no general protocol, transaction failure or refinement claim.",
       "models": [
         {
-          "id": "BrowserSessions",
+          "id": "SecretsVersionLifecycle",
           "properties": [
-            "RevokedCookiesDenied",
-            "AcceptedOnlyLiveParent",
-            "SDKAuthorityPreserved",
-            "UnrelatedSessionsPreserved",
-            "NoRawSDKCookie",
-            "NoBrowserSDKAuthority",
-            "ParentLifetimeBound"
+            "ImmutableVersions",
+            "NoOrphans",
+            "UniqueLabels",
+            "SeparateCurrentPrevious",
+            "ActiveHasCurrent",
+            "AuthorizedVersions",
+            "AuthorizedDisclosure"
           ],
-          "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them."
+          "limits": "Finite lifecycle/authority abstraction, not SQL transaction, cryptography, OS authentication, formatter redaction or Go implementation refinement. A team models one secret name and two never-reused ARN incarnations; process/token isolation and cursor bindings require actual native SDK tests. History contains abstract dummy values solely to detect an attempted immutable-version overwrite; runtime force deletion does not retain secret values. IAM is represented by a pure Boolean decision for the resolved resource; policy loading/error ordering and actual IAM rules require concrete Go tests. Shared Gateway/dispatch/server paths bind only Secrets composition into the native SQLite/immutable-policy authority path, not unrelated S3/SSM behavior or a proof of HTTP routing. Cursor signatures, quotas and restart persistence require concrete tests."
         }
       ]
     },
     {
-      "path": "internal/server/web/app.js",
-      "sha256": "3e3ba30db04307b2e064c4cfca07749dee4ef2cd65e3935256d9bbadd00fe497",
+      "path": "internal/aws/secret_http.go",
+      "sha256": "5d81fb88522a81aac475153ccf80d742a7e6d486c2b062b73a33935825cb9897",
+      "disposition": "modeled",
+      "reason": "Correspondence to the named finite Secrets or pre-existing state abstraction only. Source registration is not new-head TLC/native/browser execution; no general protocol, transaction failure or refinement claim.",
+      "models": [
+        {
+          "id": "SecretsDisclosureChannels",
+          "properties": [
+            "RawRequiresAuthorizedGet",
+            "MetadataLogErrorRedacted",
+            "DeniedNoRaw",
+            "RawEmissionRequiresGet"
+          ],
+          "limits": "Finite classification of plaintext acquisition/output call sites, not Go fmt/JSON/slog, SQL, encryption, memory secrecy or implementation refinement. The private plaintext() accessor itself has no authorization: its only production writer call site must follow successful native Get authorization. Actual private-holder formatting/JSON/slog sentinel tests and native denied-Get/error/metadata tests verify the Go mechanisms independently."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/secret_http_test.go",
+      "sha256": "c0d39b1504bb852dac64e22984d6e07deef3fb0891633246dedcff892f235f16",
+      "disposition": "test-support",
+      "reason": "Meaningful native/SDK/UI regression assertions or mandatory test registration. Source presence is not a passing runtime result.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/secret_material.go",
+      "sha256": "d47afc112fa7168015168a6ec7ef3964cf48f48ad89692d65f78c4b2769b9147",
+      "disposition": "modeled",
+      "reason": "Correspondence to the named finite Secrets or pre-existing state abstraction only. Source registration is not new-head TLC/native/browser execution; no general protocol, transaction failure or refinement claim.",
+      "models": [
+        {
+          "id": "SecretsDisclosureChannels",
+          "properties": [
+            "RawRequiresAuthorizedGet",
+            "MetadataLogErrorRedacted",
+            "DeniedNoRaw",
+            "RawEmissionRequiresGet"
+          ],
+          "limits": "Finite classification of plaintext acquisition/output call sites, not Go fmt/JSON/slog, SQL, encryption, memory secrecy or implementation refinement. The private plaintext() accessor itself has no authorization: its only production writer call site must follow successful native Get authorization. Actual private-holder formatting/JSON/slog sentinel tests and native denied-Get/error/metadata tests verify the Go mechanisms independently."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/secret_material_test.go",
+      "sha256": "0f96796bea7649a94276829bbd66390812fe5deb0d49f79625ac735154bb3052",
+      "disposition": "test-support",
+      "reason": "Meaningful native/SDK/UI regression assertions or mandatory test registration. Source presence is not a passing runtime result.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/secret_query.go",
+      "sha256": "fd4ffb0bdef52b7a914f0fc543cca8be1dc1d2763e650b50f813c11ac8e03de1",
+      "disposition": "modeled",
+      "reason": "Correspondence to the named finite Secrets or pre-existing state abstraction only. Source registration is not new-head TLC/native/browser execution; no general protocol, transaction failure or refinement claim.",
+      "models": [
+        {
+          "id": "SecretsVersionLifecycle",
+          "properties": [
+            "ImmutableVersions",
+            "NoOrphans",
+            "UniqueLabels",
+            "SeparateCurrentPrevious",
+            "ActiveHasCurrent",
+            "AuthorizedVersions",
+            "AuthorizedDisclosure"
+          ],
+          "limits": "Finite lifecycle/authority abstraction, not SQL transaction, cryptography, OS authentication, formatter redaction or Go implementation refinement. A team models one secret name and two never-reused ARN incarnations; process/token isolation and cursor bindings require actual native SDK tests. History contains abstract dummy values solely to detect an attempted immutable-version overwrite; runtime force deletion does not retain secret values. IAM is represented by a pure Boolean decision for the resolved resource; policy loading/error ordering and actual IAM rules require concrete Go tests. Shared Gateway/dispatch/server paths bind only Secrets composition into the native SQLite/immutable-policy authority path, not unrelated S3/SSM behavior or a proof of HTTP routing. Cursor signatures, quotas and restart persistence require concrete tests."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/secret_query_test.go",
+      "sha256": "3517e5a11becb058f3f9ae4abf22ae4afd6477dd35b9f8ea08efa30f030420c1",
+      "disposition": "test-support",
+      "reason": "Meaningful native/SDK/UI regression assertions or mandatory test registration. Source presence is not a passing runtime result.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/secret_store.go",
+      "sha256": "096b9dd5cf5e825662c039f653179cd2102476a5cdfb80730422f3952736e25b",
+      "disposition": "modeled",
+      "reason": "Correspondence to the named finite Secrets or pre-existing state abstraction only. Source registration is not new-head TLC/native/browser execution; no general protocol, transaction failure or refinement claim.",
+      "models": [
+        {
+          "id": "SecretsVersionLifecycle",
+          "properties": [
+            "ImmutableVersions",
+            "NoOrphans",
+            "UniqueLabels",
+            "SeparateCurrentPrevious",
+            "ActiveHasCurrent",
+            "AuthorizedVersions",
+            "AuthorizedDisclosure"
+          ],
+          "limits": "Finite lifecycle/authority abstraction, not SQL transaction, cryptography, OS authentication, formatter redaction or Go implementation refinement. A team models one secret name and two never-reused ARN incarnations; process/token isolation and cursor bindings require actual native SDK tests. History contains abstract dummy values solely to detect an attempted immutable-version overwrite; runtime force deletion does not retain secret values. IAM is represented by a pure Boolean decision for the resolved resource; policy loading/error ordering and actual IAM rules require concrete Go tests. Shared Gateway/dispatch/server paths bind only Secrets composition into the native SQLite/immutable-policy authority path, not unrelated S3/SSM behavior or a proof of HTTP routing. Cursor signatures, quotas and restart persistence require concrete tests."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/secret_store_test.go",
+      "sha256": "745730071a481c5197816e875bf736282048c6c724a9370b4d9c619b1b9d6f41",
+      "disposition": "test-support",
+      "reason": "Meaningful native/SDK/UI regression assertions or mandatory test registration. Source presence is not a passing runtime result.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/secret_values.go",
+      "sha256": "a605b613fcf9a1547af12fb77d429db31f2be938c83df98355c3a0833cb72d01",
+      "disposition": "modeled",
+      "reason": "Correspondence to the named finite Secrets or pre-existing state abstraction only. Source registration is not new-head TLC/native/browser execution; no general protocol, transaction failure or refinement claim.",
+      "models": [
+        {
+          "id": "SecretsVersionLifecycle",
+          "properties": [
+            "ImmutableVersions",
+            "NoOrphans",
+            "UniqueLabels",
+            "SeparateCurrentPrevious",
+            "ActiveHasCurrent",
+            "AuthorizedVersions",
+            "AuthorizedDisclosure"
+          ],
+          "limits": "Finite lifecycle/authority abstraction, not SQL transaction, cryptography, OS authentication, formatter redaction or Go implementation refinement. A team models one secret name and two never-reused ARN incarnations; process/token isolation and cursor bindings require actual native SDK tests. History contains abstract dummy values solely to detect an attempted immutable-version overwrite; runtime force deletion does not retain secret values. IAM is represented by a pure Boolean decision for the resolved resource; policy loading/error ordering and actual IAM rules require concrete Go tests. Shared Gateway/dispatch/server paths bind only Secrets composition into the native SQLite/immutable-policy authority path, not unrelated S3/SSM behavior or a proof of HTTP routing. Cursor signatures, quotas and restart persistence require concrete tests."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/secret_values_test.go",
+      "sha256": "f89bf04c92c0f9010cfc0e782a915fa4c41ca642d942196cbd0f17625a013f77",
+      "disposition": "test-support",
+      "reason": "Meaningful native/SDK/UI regression assertions or mandatory test registration. Source presence is not a passing runtime result.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ssm.go",
+      "sha256": "5abeb7cade339058259472cb158d88472fc11b6f9d904f2a6df33f2cae9df9ab",
+      "disposition": "modeled",
+      "reason": "Correspondence to the named finite Secrets or pre-existing state abstraction only. Source registration is not new-head TLC/native/browser execution; no general protocol, transaction failure or refinement claim.",
+      "models": [
+        {
+          "id": "SSMParameterState",
+          "properties": [
+            "DeniedPreservesState",
+            "OverwriteRefusal",
+            "PutVersion",
+            "DeleteEffect",
+            "OtherKeysUnchanged",
+            "ReadIsolation"
+          ],
+          "limits": "Atomic accepted operations and abstract allow/explicit-deny only; no IAM parser/ARN matching, HTTP syntax, type/description/time fields, pagination/path queries, SQLite crash/interleaving proof, version history/selectors/labels, AWS recreation delay, live AWS differential run or Go refinement proof."
+        },
+        {
+          "id": "SQSLifecycle",
+          "properties": [
+            "NoOrphans",
+            "AuthorizedMutations",
+            "ScopedMutation",
+            "FailedMutationAtomic",
+            "IdempotentCreateUnchanged",
+            "ReceiveOnlyEligible",
+            "FreshReceipt",
+            "ReceiptMutationCurrent",
+            "ChangeOnlyInflight"
+          ],
+          "limits": "Atomic transition abstraction after the native parent/expiry/rollback repair. Scopes abstract separately configured database/region/queue targets, not selected IAM principals. Receipt freshness assumes collision-free opaque IDs. No SQL/Go refinement, cryptographic proof, restart/file durability, wall-clock or long-poll liveness, batch/multiple-message atomicity, FIFO/exactly-once/distributed replica behavior, Unicode/size/checksum correctness or full URL validation. Queue name reuse beyond one lifetime is outside the bound; native regression tests separately cover actual storage failures and persistence."
+        },
+        {
+          "id": "SecretsVersionLifecycle",
+          "properties": [
+            "ImmutableVersions",
+            "NoOrphans",
+            "UniqueLabels",
+            "SeparateCurrentPrevious",
+            "ActiveHasCurrent",
+            "AuthorizedVersions",
+            "AuthorizedDisclosure"
+          ],
+          "limits": "Finite lifecycle/authority abstraction, not SQL transaction, cryptography, OS authentication, formatter redaction or Go implementation refinement. A team models one secret name and two never-reused ARN incarnations; process/token isolation and cursor bindings require actual native SDK tests. History contains abstract dummy values solely to detect an attempted immutable-version overwrite; runtime force deletion does not retain secret values. IAM is represented by a pure Boolean decision for the resolved resource; policy loading/error ordering and actual IAM rules require concrete Go tests. Shared Gateway/dispatch/server paths bind only Secrets composition into the native SQLite/immutable-policy authority path, not unrelated S3/SSM behavior or a proof of HTTP routing. Cursor signatures, quotas and restart persistence require concrete tests."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/apidocs/openapi.json",
+      "sha256": "f0dab6496b0d701a42949bf51102b5bf8d30fc8035d23d4cab7f9a118f191ed0",
       "disposition": "presentation",
-      "reason": "Canonical embedded UI/bundle metadata for the reviewed account-menu caller; source account state correspondence is explicitly bound separately. Bundle provenance and actual browser checks remain required.",
+      "reason": "Additive static seven-action root OpenAPI schemas/examples and explicit plaintext/unsupported guidance; native HTTP protocol and existing operation IDs/authentication entries preserved. Not an executed Scalar or SDK claim.",
       "models": []
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "c5b6acf6fb851b65c61087bf7aca582bc6e88f1b6d33a0603c0379f47434a1f1",
+      "disposition": "modeled",
+      "reason": "Correspondence to the named finite Secrets or pre-existing state abstraction only. Source registration is not new-head TLC/native/browser execution; no general protocol, transaction failure or refinement claim.",
+      "models": [
+        {
+          "id": "SQSLifecycle",
+          "properties": [
+            "NoOrphans",
+            "AuthorizedMutations",
+            "ScopedMutation",
+            "FailedMutationAtomic",
+            "IdempotentCreateUnchanged",
+            "ReceiveOnlyEligible",
+            "FreshReceipt",
+            "ReceiptMutationCurrent",
+            "ChangeOnlyInflight"
+          ],
+          "limits": "Atomic transition abstraction after the native parent/expiry/rollback repair. Scopes abstract separately configured database/region/queue targets, not selected IAM principals. Receipt freshness assumes collision-free opaque IDs. No SQL/Go refinement, cryptographic proof, restart/file durability, wall-clock or long-poll liveness, batch/multiple-message atomicity, FIFO/exactly-once/distributed replica behavior, Unicode/size/checksum correctness or full URL validation. Queue name reuse beyond one lifetime is outside the bound; native regression tests separately cover actual storage failures and persistence."
+        },
+        {
+          "id": "SecretsVersionLifecycle",
+          "properties": [
+            "ImmutableVersions",
+            "NoOrphans",
+            "UniqueLabels",
+            "SeparateCurrentPrevious",
+            "ActiveHasCurrent",
+            "AuthorizedVersions",
+            "AuthorizedDisclosure"
+          ],
+          "limits": "Finite lifecycle/authority abstraction, not SQL transaction, cryptography, OS authentication, formatter redaction or Go implementation refinement. A team models one secret name and two never-reused ARN incarnations; process/token isolation and cursor bindings require actual native SDK tests. History contains abstract dummy values solely to detect an attempted immutable-version overwrite; runtime force deletion does not retain secret values. IAM is represented by a pure Boolean decision for the resolved resource; policy loading/error ordering and actual IAM rules require concrete Go tests. Shared Gateway/dispatch/server paths bind only Secrets composition into the native SQLite/immutable-policy authority path, not unrelated S3/SSM behavior or a proof of HTTP routing. Cursor signatures, quotas and restart persistence require concrete tests."
+        }
+      ]
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "c6e8e2b841cc2adee4201aa57a2c3a324edaa987453f5382ef906f0f5e31b692",
+      "sha256": "59832869558c2456732d8b6177b397d5445229f0f2a480289a7efaea2bd29ea2",
       "disposition": "formal-infrastructure",
-      "reason": "Additive union of Startup, SSM and Browser inventories/required IDs/critical invariants and all feature-specific negative controls; exact guard function bodies, strict module metadata recognizer/fixtures and mandatory canonical axe/E2E preparation are preserved. Eight normal/eighteen sensitivity cases require fresh immutable-HEAD TLC; no new runtime proof is inferred.",
+      "reason": "Adds three required Secrets models and invariant guards plus rejection tests without removing or weakening main ten models, thirty-six mutants or existing immutable-head/module policies.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "ae93870dbe1697067b0cfa3f756709f949d320b39bd660979686c869186958ee",
+      "sha256": "c00400c5bb60e95d78e972982ec80155db9b3a4d967bc84bcc3fc0bc69ad5a9d",
       "disposition": "formal-infrastructure",
-      "reason": "Additive union of Startup, SSM and Browser inventories/required IDs/critical invariants and all feature-specific negative controls; exact guard function bodies, strict module metadata recognizer/fixtures and mandatory canonical axe/E2E preparation are preserved. Eight normal/eighteen sensitivity cases require fresh immutable-HEAD TLC; no new runtime proof is inferred.",
+      "reason": "Adds three required Secrets models and invariant guards plus rejection tests without removing or weakening main ten models, thirty-six mutants or existing immutable-head/module policies.",
       "models": []
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "c4d9ef1f80a66ad9986e623a6c62eca060b2ad0be49528ee3bbdce14228e0f9e",
+      "sha256": "f7bbb7c9cd4d65927edce179257d22d0715ad300f4b0e0f390af790bbfd2932c",
       "disposition": "test-support",
-      "reason": "Retains main real Scalar Send/response-reader+parameter detector hook and all earlier native/browser methods, adds mandatory detector-negative controls and keeps real logout helper check=True. Tests are caller/correspondence seams, not executed by TLC; actual final-head native/browser/CI remains required.",
+      "reason": "Meaningful native/SDK/UI regression assertions or mandatory test registration. Source presence is not a passing runtime result.",
       "models": []
     },
     {
-      "path": "test/e2e/console_logout.py",
-      "sha256": "7c5b4595f85f17a5ad4eb9b034a4d9700d27b8942e02cedfaa389adbdcfb04a1",
+      "path": "test/e2e/secrets_manager.py",
+      "sha256": "ddb1b3946c2d21e192f0a46c3c45e4bd3be7055932e6c6c4cb32ecd221ef83d9",
+      "disposition": "test-support",
+      "reason": "Meaningful native/SDK/UI regression assertions or mandatory test registration. Source presence is not a passing runtime result.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/secrets_manager_console.py",
+      "sha256": "61e441e3d3cc44e90f396f364f6e4e1b555cc161b8a36e2b07bfaba36ec0a1fb",
+      "disposition": "test-support",
+      "reason": "Meaningful native/SDK/UI regression assertions or mandatory test registration. Source presence is not a passing runtime result.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/secrets_manager_docs.py",
+      "sha256": "32e71b539bf0ab7aae2bd950425339eb8d5a3ea1a15482f9e9bf9558aac9fcbf",
+      "disposition": "test-support",
+      "reason": "Meaningful native/SDK/UI regression assertions or mandatory test registration. Source presence is not a passing runtime result.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/main.jsx",
+      "sha256": "f4510d0a18b6d96bf103dd6d2b7c0cf2c444bb3f9416b6deacbaa2acd8583400",
       "disposition": "modeled",
-      "reason": "The changed source is a caller/test correspondence seam for selected browser revocation and independent SDK/session preservation; actual UI/HTTP behavior is validated separately, not executed by TLC.",
+      "reason": "Correspondence to the named finite Secrets or pre-existing state abstraction only. Source registration is not new-head TLC/native/browser execution; no general protocol, transaction failure or refinement claim.",
       "models": [
         {
           "id": "BrowserSessions",
@@ -174,37 +509,34 @@
             "ParentLifetimeBound"
           ],
           "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them."
+        },
+        {
+          "id": "SecretsRevealEpoch",
+          "properties": [
+            "NoUnmountedDisplay",
+            "FreshEmissionHistory",
+            "ReturnedARNMatches",
+            "VisibleContextMatches"
+          ],
+          "limits": "Finite explicit-retrieve/display model, not React, DOM, AbortController, memory zeroization or implementation refinement. Only the successful response path is modeled; native store/IAM must authorize before returning any secret. A returned ARN can differ and must be rejected. Retrieve, Hide and navigation invalidate epochs; unmount also clears visible state. Parent must remount on region/principal changes. Emission history captures the context at each acceptance so later Hide/navigation cannot relabel an earlier stale acceptance. Draft entry, mutation atomicity and form layout are outside this model. Parent main.jsx scope binds only Secrets routing/remount key (region/principal/navigation); the generated app.js binding is the canonical compiled artifact of those source inputs, independently checked by bundle/asset hashes. It does not model unrelated existing console services or prove JavaScript compilation."
         }
       ]
     },
     {
-      "path": "tools/console/bundle-digests.json",
-      "sha256": "97868208b7a19d8b0b9fd242f61c1dadaa0376e6934408dd863c907b620db496",
-      "disposition": "presentation",
-      "reason": "Canonical embedded UI/bundle metadata for the reviewed account-menu caller; source account state correspondence is explicitly bound separately. Bundle provenance and actual browser checks remain required.",
-      "models": []
-    },
-    {
-      "path": "tools/console/bundle-inputs.json",
-      "sha256": "1abfb7427675e3eff370edd2201d258609310757777129fb2b020d11b4e3ca54",
-      "disposition": "presentation",
-      "reason": "Canonical embedded UI/bundle metadata for the reviewed account-menu caller; source account state correspondence is explicitly bound separately. Bundle provenance and actual browser checks remain required.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/main.jsx",
-      "sha256": "632a8cae47145ae8d65746c2bf3b7ece9edf7ea846ee0a012b7f865f75b3d1c9",
+      "path": "tools/console/src/secrets-manager.jsx",
+      "sha256": "a90bb2ea1bf0d89d191bbed66b7b188e2cbdcb0e85fc9aeeeb56009663e3ebcd",
       "disposition": "modeled",
-      "reason": "The changed source is a caller/test correspondence seam for selected browser revocation and independent SDK/session preservation; actual UI/HTTP behavior is validated separately, not executed by TLC.",
+      "reason": "Correspondence to the named finite Secrets or pre-existing state abstraction only. Source registration is not new-head TLC/native/browser execution; no general protocol, transaction failure or refinement claim.",
       "models": [
         {
-          "id": "BrowserSessions",
+          "id": "SecretsRevealEpoch",
           "properties": [
-            "RevokedCookiesDenied",
-            "SDKAuthorityPreserved",
-            "UnrelatedSessionsPreserved"
+            "NoUnmountedDisplay",
+            "FreshEmissionHistory",
+            "ReturnedARNMatches",
+            "VisibleContextMatches"
           ],
-          "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them."
+          "limits": "Finite explicit-retrieve/display model, not React, DOM, AbortController, memory zeroization or implementation refinement. Only the successful response path is modeled; native store/IAM must authorize before returning any secret. A returned ARN can differ and must be rejected. Retrieve, Hide and navigation invalidate epochs; unmount also clears visible state. Parent must remount on region/principal changes. Emission history captures the context at each acceptance so later Hide/navigation cannot relabel an earlier stale acceptance. Draft entry, mutation atomicity and form layout are outside this model. Parent main.jsx scope binds only Secrets routing/remount key (region/principal/navigation); the generated app.js binding is the canonical compiled artifact of those source inputs, independently checked by bundle/asset hashes. It does not model unrelated existing console services or prove JavaScript compilation."
         }
       ]
     }
