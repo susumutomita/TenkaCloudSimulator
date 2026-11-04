@@ -69,3 +69,33 @@ func TestSecretMetadataUsesValueFreeNativeWireShapes(t *testing.T) {
 		}
 	}
 }
+
+func TestSecretMaterialUnicodeEscapesAreNotSilentlyReplaced(t *testing.T) {
+	fixtures := []struct {
+		name  string
+		wire  string
+		valid bool
+		value string
+	}{
+		{"literal UTF8", `{"SecretString":"DUMMY-秘密"}`, true, "DUMMY-秘密"},
+		{"paired surrogate", `{"SecretString":"DUMMY-\ud83d\ude80"}`, true, "DUMMY-🚀"},
+		{"escaped literal", `{"SecretString":"DUMMY-\\ud800"}`, true, `DUMMY-\ud800`},
+		{"escaped quote", `{"SecretString":"DUMMY-\"quoted\""}`, true, `DUMMY-"quoted"`},
+		{"unpaired high", `{"SecretString":"DUMMY-\ud800"}`, false, ""},
+		{"unpaired low", `{"SecretString":"DUMMY-\udc00"}`, false, ""},
+		{"high then ordinary", `{"SecretString":"DUMMY-\ud800\u0041"}`, false, ""},
+	}
+	for _, fixture := range fixtures {
+		t.Run(fixture.name, func(t *testing.T) {
+			if secretUnicodeScalars([]byte(fixture.wire)) != fixture.valid {
+				t.Fatal("Unicode scalar validation disagreed with the request contract")
+			}
+			if fixture.valid {
+				var input struct{ SecretString string }
+				if err := json.Unmarshal([]byte(fixture.wire), &input); err != nil || input.SecretString != fixture.value {
+					t.Fatal("valid decoded secret value bytes changed")
+				}
+			}
+		})
+	}
+}
