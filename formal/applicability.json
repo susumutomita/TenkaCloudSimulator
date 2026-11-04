@@ -1,89 +1,209 @@
 {
   "version": 1,
-  "base_sha": "6ffbd1881dad3589469fdf1809654b7483bd6ac4",
+  "base_sha": "55a111953eb3eb0dfd90aaa473ac3fe39cb10b66",
   "changes": [
     {
-      "path": ".github/workflows/formal.yml",
-      "sha256": "3e8a66f278d22a6c9fbf2761c784a97b7923d933d9307964139e26c4d83ea7b6",
-      "disposition": "formal-infrastructure",
-      "reason": "Run the exact-HEAD formal gate in an unprivileged Actions job; define runner-dependent bytecode cache only in supported step env contexts.",
-      "models": []
-    },
-    {
-      "path": ".gitignore",
-      "sha256": "a49de3a7afae4ca42ecfdb1f064a98cad1c0bbce18bddc63a01ad6e9c3097286",
-      "disposition": "build-metadata",
-      "reason": "Ignore only generated reports/formal evidence so the validator does not mistake its own output for uncommitted source. No model, source or validation input is excluded.",
-      "models": []
-    },
-    {
-      "path": "docs/ci.md",
-      "sha256": "35bf55f6279fcc7106ff832e0f886a63a575d0c582715eb818b06a3d7e588a3e",
+      "path": "README.md",
+      "sha256": "e9a77274a1c13c517935c9b811e90d89e5880a8534ecb712fd172796c054ab60",
       "disposition": "documentation",
-      "reason": "Explains finite bounds, declared correspondence, exact-input checks and separately configured merge protection; no application transition or mathematical implementation proof is introduced by this prose.",
+      "reason": "Document the bounded native SQS subset, local 256 KiB versus current operation-reference 1 MiB, repair provenance, actual focused tests and explicit compatibility/model/coverage limits. No service or formal-proof completion is asserted by prose.",
       "models": []
     },
     {
-      "path": "docs/formal-validation.md",
-      "sha256": "3aca4a0d7a833f84e96155d756371f85f85fa807c0869ebac022dea994ab3703",
+      "path": "docs/sqs.md",
+      "sha256": "63eba3e37ee8f8baf12bafd4bf870890ea5f31a3b7fbeb65809b182db237b1b1",
       "disposition": "documentation",
-      "reason": "Explains finite bounds, declared correspondence, exact-input checks and separately configured merge protection; no application transition or mathematical implementation proof is introduced by this prose.",
+      "reason": "Document the bounded native SQS subset, local 256 KiB versus current operation-reference 1 MiB, repair provenance, actual focused tests and explicit compatibility/model/coverage limits. No service or formal-proof completion is asserted by prose.",
       "models": []
     },
     {
-      "path": "formal/README.md",
-      "sha256": "65776efb4f747c0f8cb07d22c90ad451b52fecec0cdbb80160be0e4b306b743f",
-      "disposition": "documentation",
-      "reason": "Explains finite bounds, declared correspondence, exact-input checks and separately configured merge protection; no application transition or mathematical implementation proof is introduced by this prose.",
-      "models": []
+      "path": "formal/SQSLifecycle.cfg",
+      "sha256": "1b15948015f67dbacacdb06856b510027f7e562fe0fc37dd352bb86d85fec9d1",
+      "disposition": "modeled",
+      "reason": "Introduce the finite SQS queue/visibility/receipt safety contract and explicit error/rollback outcomes with eleven exact invariant sensitivity controls. Native repair and tests precede the applicability binding; actual TLC execution remains required.",
+      "models": [
+        {
+          "id": "SQSLifecycle",
+          "properties": [
+            "NoOrphans",
+            "ScopedMutation",
+            "FailedMutationAtomic",
+            "IdempotentCreateUnchanged",
+            "ReceiveOnlyEligible",
+            "FreshReceipt",
+            "ReceiptMutationCurrent",
+            "ChangeOnlyInflight",
+            "AuthorizedMutations"
+          ],
+          "limits": "Two scopes, one queue/message lifetime, two receives and coarse finite clock; no Go/SQL refinement, crypto, persistence, batch/long-poll liveness or full AWS proof."
+        }
+      ]
+    },
+    {
+      "path": "formal/SQSLifecycle.tla",
+      "sha256": "8c46cc38f07e422d4adaae73b4effb7a71a01f4ef9b855e4448c36a6662cbcc3",
+      "disposition": "modeled",
+      "reason": "Introduce the finite SQS queue/visibility/receipt safety contract and explicit error/rollback outcomes with eleven exact invariant sensitivity controls. Native repair and tests precede the applicability binding; actual TLC execution remains required.",
+      "models": [
+        {
+          "id": "SQSLifecycle",
+          "properties": [
+            "NoOrphans",
+            "ScopedMutation",
+            "FailedMutationAtomic",
+            "IdempotentCreateUnchanged",
+            "ReceiveOnlyEligible",
+            "FreshReceipt",
+            "ReceiptMutationCurrent",
+            "ChangeOnlyInflight",
+            "AuthorizedMutations"
+          ],
+          "limits": "Two scopes, one queue/message lifetime, two receives and coarse finite clock; no Go/SQL refinement, crypto, persistence, batch/long-poll liveness or full AWS proof."
+        }
+      ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "ed8bd53c5b16d33443c4bf89c7c13eef41ae2632b740083f08e69cc2ee8b8e96",
+      "sha256": "b94d3a7b5c87a2fcca28055962c15934d3340257ee405f74c837380b83ce3eaa",
       "disposition": "formal-infrastructure",
-      "reason": "Changes validation orchestration or its executable inventory, not simulator resource transitions. Strict real-Git/input and failure-classification negative tests exercise the mechanism; the unchanged five finite specifications still require actual TLC baseline and sensitivity runs. Human acceptance and policy self-edit protection remain separate.",
+      "reason": "Register SQSLifecycle and add its required invariant/ID set while preserving every original five model/property requirements and strict missing/stale/exit guards. The self-test requires the exact original-five-plus-SQS set and iterates all mutation anchors; future combined service registries need an explicitly merged set, not a lowered check.",
       "models": []
     },
     {
-      "path": "scripts/check-formal-applicability.py",
-      "sha256": "47045d256c9b3c9ac7b4e1342368b6ce6aa17f74d689f62b6ae7d5b7592dfb84",
-      "disposition": "formal-infrastructure",
-      "reason": "Changes validation orchestration or its executable inventory, not simulator resource transitions. Strict real-Git/input and failure-classification negative tests exercise the mechanism; the unchanged five finite specifications still require actual TLC baseline and sensitivity runs. Human acceptance and policy self-edit protection remain separate.",
+      "path": "internal/aws/s3.go",
+      "sha256": "b9a0ff9ba8ded51578427533868f29dbcf8deaf5a4f155318b3f3bd51f65c284",
+      "disposition": "modeled",
+      "reason": "Add a distinct SQSStore field to the existing Gateway composition; no S3 operation or storage path is replaced. The SQS-specific field routes to its own scoped provider tables.",
+      "models": [
+        {
+          "id": "SQSLifecycle",
+          "properties": [
+            "ScopedMutation"
+          ],
+          "limits": "Composition correspondence for the added SQS field only; no new claim about S3 semantics, authentication or Go refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/sqs.go",
+      "sha256": "13dd5ebd33738eed732ee2487528615878dddbffe750c9953a745d75232405d3",
+      "disposition": "modeled",
+      "reason": "Authorize the selected SQS action/regional queue ARN before native operations, retain bounded request validation and pass the same regional queue/receipt target to the repaired store. Body Unicode is additionally tested as a separate protocol contract.",
+      "models": [
+        {
+          "id": "SQSLifecycle",
+          "properties": [
+            "AuthorizedMutations",
+            "ScopedMutation",
+            "ReceiveOnlyEligible",
+            "ReceiptMutationCurrent",
+            "ChangeOnlyInflight"
+          ],
+          "limits": "The model assumes an immutable Boolean authorization result and fresh handles; it does not prove IAM matching, QueueUrl parsing, JSON, body/attribute validation, MD5, long polling or HTTP error equivalence."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/sqs_atomic_boundaries_test.go",
+      "sha256": "b5f4e45edf70fd570acc88a10a60bc1a6105afd0666fc64c8c7da0294a2db214",
+      "disposition": "test-support",
+      "reason": "Verify native SQS positive/negative lifecycle, expiry/receipt scope, reopen and real SQLite rollback/storage failures without real AWS or a guest VM. Tests do not exempt implementation from finite applicability or the unchanged full source/statement coverage floors.",
       "models": []
     },
     {
-      "path": "scripts/check-formal.py",
-      "sha256": "de54b5df0d2c3306b9a97542d87777c9dc0298ae9fc255b13b8a66d19e660253",
-      "disposition": "formal-infrastructure",
-      "reason": "Changes validation orchestration or its executable inventory, not simulator resource transitions. Strict real-Git/input and failure-classification negative tests exercise the mechanism; the unchanged five finite specifications still require actual TLC baseline and sensitivity runs. Human acceptance and policy self-edit protection remain separate.",
+      "path": "internal/aws/sqs_store.go",
+      "sha256": "116cb29f5cf7b639c2898e1f2e88992470204053a93fdc6f3f4e63097a219453",
+      "disposition": "modeled",
+      "reason": "Actual queue-parent admission, expiry and message/receipt mutation now share native SQLite transactions; failed cleanup or multi-row writes roll back. Native trigger/reopen/redelivery/orphan-preservation tests passed at 0a28266 before this binding.",
+      "models": [
+        {
+          "id": "SQSLifecycle",
+          "properties": [
+            "NoOrphans",
+            "ScopedMutation",
+            "FailedMutationAtomic",
+            "IdempotentCreateUnchanged",
+            "ReceiveOnlyEligible",
+            "FreshReceipt",
+            "ReceiptMutationCurrent",
+            "ChangeOnlyInflight"
+          ],
+          "limits": "Atomic finite specification only, not SQL/Go refinement, randomness, real clocks, queue name reuse, distributed delivery or multi-message batch proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/sqs_store_test.go",
+      "sha256": "d33abe42423a1aff6887672f086b9c1a7380bfca3d7ebaed9373c368ad175d91",
+      "disposition": "test-support",
+      "reason": "Verify native SQS positive/negative lifecycle, expiry/receipt scope, reopen and real SQLite rollback/storage failures without real AWS or a guest VM. Tests do not exempt implementation from finite applicability or the unchanged full source/statement coverage floors.",
       "models": []
     },
     {
-      "path": "scripts/formal_applicability.py",
-      "sha256": "a1e8baf590a398039395827e206a20c98871f198b5c558eb97744ae1679028cd",
-      "disposition": "formal-infrastructure",
-      "reason": "Changes validation orchestration or its executable inventory, not simulator resource transitions. Strict real-Git/input and failure-classification negative tests exercise the mechanism; the unchanged five finite specifications still require actual TLC baseline and sensitivity runs. Human acceptance and policy self-edit protection remain separate.",
+      "path": "internal/aws/ssm.go",
+      "sha256": "7239098145eef0f233a66f68f14e0035a7b61fe7d9ad6fcbbce22b3739a63389",
+      "disposition": "modeled",
+      "reason": "Add AmazonSQS target dispatch to the SQS handler before existing service dispatch; existing SSM/S3/Lambda/CFN paths remain intact. The handler performs SQS action/ARN authorization and regional targeting.",
+      "models": [
+        {
+          "id": "SQSLifecycle",
+          "properties": [
+            "AuthorizedMutations",
+            "ScopedMutation"
+          ],
+          "limits": "Abstract caller authorization/scoped target assumptions only; no proof of header parsing, dummy signatures, HTTP routing or existing other-service behavior."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/apidocs/openapi.json",
+      "sha256": "04765c73090c334d0e16ef6a74593d01369051f7ad30eab4fc5ee544f1d4e874",
+      "disposition": "presentation",
+      "reason": "Add descriptive SQS provider metadata to the local reference; this does not replace native operations or introduce a different API/backend. Scalar/SDK share the existing SQS HTTP handler; documentation metadata is not a proof of API fidelity.",
+      "models": []
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "596211eb8be7e6a1b237f387935f5dec77e41f1865d388a2a817e35065d39ca2",
+      "disposition": "modeled",
+      "reason": "Initialize the native SQS store on the same provider DB, propagate constructor failure and expose an additive bounded capability entry. Existing #303 resource/operation capability entries are preserved by public 95300b9.",
+      "models": [
+        {
+          "id": "SQSLifecycle",
+          "properties": [
+            "NoOrphans",
+            "ScopedMutation"
+          ],
+          "limits": "Initial valid graph and separate host/database authority assumptions; constructor/orphan retention is native-tested. No server/token/IAM implementation proof or full capability-catalog acceptance."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/sqs_boundaries_test.go",
+      "sha256": "4e9b59c794070da7f279bce6fafee907552e6373fa461e0739ffc36da3857013",
+      "disposition": "test-support",
+      "reason": "Verify native SQS positive/negative lifecycle, expiry/receipt scope, reopen and real SQLite rollback/storage failures without real AWS or a guest VM. Tests do not exempt implementation from finite applicability or the unchanged full source/statement coverage floors.",
+      "models": []
+    },
+    {
+      "path": "internal/server/sqs_test.go",
+      "sha256": "26e6f4fc9876d0e2e2d279e083f20eca00fadcda8d9e795ca6e23c177dee5cdb",
+      "disposition": "test-support",
+      "reason": "Verify native SQS positive/negative lifecycle, expiry/receipt scope, reopen and real SQLite rollback/storage failures without real AWS or a guest VM. Tests do not exempt implementation from finite applicability or the unchanged full source/statement coverage floors.",
       "models": []
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "d08008ba7c3445eb3f2abff7cc4275d5829ff017d342ea48e421a70d2fb77248",
+      "sha256": "52f5e014fbb9e345359745425692d2e43483401dee436d7eab9d1667449202e3",
       "disposition": "formal-infrastructure",
-      "reason": "Changes validation orchestration or its executable inventory, not simulator resource transitions. Strict real-Git/input and failure-classification negative tests exercise the mechanism; the unchanged five finite specifications still require actual TLC baseline and sensitivity runs. Human acceptance and policy self-edit protection remain separate.",
-      "models": []
-    },
-    {
-      "path": "scripts/test-formal-applicability.py",
-      "sha256": "68a801b2146e3ecb7763f6dc7e00212f1ccda35beb6203f84d136d782801c044",
-      "disposition": "formal-infrastructure",
-      "reason": "Changes validation orchestration or its executable inventory, not simulator resource transitions. Strict real-Git/input and failure-classification negative tests exercise the mechanism; the unchanged five finite specifications still require actual TLC baseline and sensitivity runs. Human acceptance and policy self-edit protection remain separate.",
+      "reason": "Register SQSLifecycle and add its required invariant/ID set while preserving every original five model/property requirements and strict missing/stale/exit guards. The self-test requires the exact original-five-plus-SQS set and iterates all mutation anchors; future combined service registries need an explicitly merged set, not a lowered check.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "2e02b5c95eb2d9a5dd9bc801a884590b7d4c2e29741c3481a90f217653b2dd1b",
+      "sha256": "0848a740ead74beef05fef805a2858afd456700e3bbcb31ed932fd9a82e535be",
       "disposition": "formal-infrastructure",
-      "reason": "Changes validation orchestration or its executable inventory, not simulator resource transitions. Strict real-Git/input and failure-classification negative tests exercise the mechanism; the unchanged five finite specifications still require actual TLC baseline and sensitivity runs. Human acceptance and policy self-edit protection remain separate.",
+      "reason": "Register SQSLifecycle and add its required invariant/ID set while preserving every original five model/property requirements and strict missing/stale/exit guards. The self-test requires the exact original-five-plus-SQS set and iterates all mutation anchors; future combined service registries need an explicitly merged set, not a lowered check.",
       "models": []
     }
   ]

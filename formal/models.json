@@ -158,6 +158,155 @@
           "expect_invariant": "SnapshotsFrozen"
         }
       ]
+    },
+    {
+      "id": "SQSLifecycle",
+      "model": "formal/SQSLifecycle.tla",
+      "config": "formal/SQSLifecycle.cfg",
+      "bounds": "Two distinct database/region/queue scopes; one queue creation and one message per scope; at most two receives per message; clock 0..2, delay/visibility 0..1, retention two abstract ticks, two attribute configurations. Cached HTTP queue lookup can interleave with queue deletion.",
+      "properties": [
+        "TypeOK",
+        "NoOrphans",
+        "AuthorizedMutations",
+        "ScopedMutation",
+        "FailedMutationAtomic",
+        "IdempotentCreateUnchanged",
+        "ReceiveOnlyEligible",
+        "FreshReceipt",
+        "ReceiptMutationCurrent",
+        "ChangeOnlyInflight"
+      ],
+      "limits": "Atomic transition abstraction after the native parent/expiry/rollback repair. Scopes abstract separately configured database/region/queue targets, not selected IAM principals. Receipt freshness assumes collision-free opaque IDs. No SQL/Go refinement, cryptographic proof, restart/file durability, wall-clock or long-poll liveness, batch/multiple-message atomicity, FIFO/exactly-once/distributed replica behavior, Unicode/size/checksum correctness or full URL validation. Queue name reuse beyond one lifetime is outside the bound; native regression tests separately cover actual storage failures and persistence.",
+      "source_scope": [
+        "internal/aws/sqs_store.go",
+        "internal/aws/sqs.go",
+        "internal/aws/s3.go",
+        "internal/aws/ssm.go",
+        "internal/server/server.go"
+      ],
+      "mutants": [
+        {
+          "id": "SendWithoutParentCheck",
+          "edits": [
+            {
+              "old": "CommitSend(s,delay) ==\n /\\ allowed /\\ pending[s]\n /\\ queues[s]",
+              "new": "CommitSend(s,delay) ==\n /\\ allowed /\\ pending[s]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoOrphans"
+        },
+        {
+          "id": "DeleteWithoutCascade",
+          "edits": [
+            {
+              "old": "DeleteQueue(s) ==\n /\\ allowed /\\ queues[s]\n /\\ queues' = [queues EXCEPT ![s] = FALSE]\n /\\ messages' = [messages EXCEPT ![s] = FALSE]",
+              "new": "DeleteQueue(s) ==\n /\\ allowed /\\ queues[s]\n /\\ queues' = [queues EXCEPT ![s] = FALSE]\n /\\ messages' = messages",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoOrphans"
+        },
+        {
+          "id": "CrossScopeQueueDelete",
+          "edits": [
+            {
+              "old": "DeleteQueue(s) ==\n /\\ allowed /\\ queues[s]\n /\\ queues' = [queues EXCEPT ![s] = FALSE]\n /\\ messages' = [messages EXCEPT ![s] = FALSE]",
+              "new": "DeleteQueue(s) ==\n /\\ allowed /\\ queues[s]\n /\\ queues' = [x \\in Scopes |-> FALSE]\n /\\ messages' = [x \\in Scopes |-> FALSE]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopedMutation"
+        },
+        {
+          "id": "ReceiveBeforeDelay",
+          "edits": [
+            {
+              "old": "\n /\\ visibleAt[s] <= now\n",
+              "new": "\n /\\ TRUE\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReceiveOnlyEligible"
+        },
+        {
+          "id": "ReceiveAfterRetention",
+          "edits": [
+            {
+              "old": "\n /\\ expiresAt[s] > now\n",
+              "new": "\n /\\ TRUE\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReceiveOnlyEligible"
+        },
+        {
+          "id": "ReceiptNotRotated",
+          "edits": [
+            {
+              "old": " /\\ deliveries' = [deliveries EXCEPT ![s] = @ + 1]",
+              "new": " /\\ deliveries' = deliveries",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FreshReceipt"
+        },
+        {
+          "id": "AcceptStaleReceipt",
+          "edits": [
+            {
+              "old": " /\\ h = Current(s) /\\ h # NoHandle",
+              "new": " /\\ h # NoHandle",
+              "count": 2
+            }
+          ],
+          "expect_invariant": "ReceiptMutationCurrent"
+        },
+        {
+          "id": "UnauthorizedSend",
+          "edits": [
+            {
+              "old": "CommitSend(s,delay) ==\n /\\ allowed /\\ pending[s]",
+              "new": "CommitSend(s,delay) ==\n /\\ pending[s]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AuthorizedMutations"
+        },
+        {
+          "id": "ChangeWithoutInflight",
+          "edits": [
+            {
+              "old": "\n /\\ visibleAt[s] > now\n",
+              "new": "\n /\\ TRUE\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ChangeOnlyInflight"
+        },
+        {
+          "id": "FailedWriteChangesState",
+          "edits": [
+            {
+              "old": "StorageFailure(s) ==\n /\\ allowed /\\ (queues[s] \\/ pending[s])\n /\\ UNCHANGED <<queues,attributes,queueEpoch,messages,messageEpoch,\n                 visibleAt,expiresAt,deliveries,pending,now,allowed>>\n /\\ Record(s,\"Error\",\"InternalError\",NoHandle,NoHandle,NoHandle,TRUE,TRUE)\n",
+              "new": "StorageFailure(s) ==\n /\\ allowed /\\ (queues[s] \\/ pending[s])\n /\\ attributes' = [attributes EXCEPT ![s] = 1 - @]\n /\\ UNCHANGED <<queues,queueEpoch,messages,messageEpoch,\n                 visibleAt,expiresAt,deliveries,pending,now,allowed>>\n /\\ Record(s,\"Error\",\"InternalError\",NoHandle,NoHandle,NoHandle,TRUE,TRUE)\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FailedMutationAtomic"
+        },
+        {
+          "id": "IdempotentCreateChangesState",
+          "edits": [
+            {
+              "old": "CreateExisting(s,a) ==\n /\\ allowed /\\ queues[s] /\\ attributes[s] = a\n /\\ UNCHANGED <<queues,attributes,queueEpoch,messages,messageEpoch,\n                 visibleAt,expiresAt,deliveries,pending,now,allowed>>\n /\\ Record(s,\"CreateExisting\",\"Success\",NoHandle,NoHandle,NoHandle,TRUE,TRUE)\n",
+              "new": "CreateExisting(s,a) ==\n /\\ allowed /\\ queues[s] /\\ attributes[s] = a\n /\\ attributes' = [attributes EXCEPT ![s] = 1 - @]\n /\\ UNCHANGED <<queues,queueEpoch,messages,messageEpoch,\n                 visibleAt,expiresAt,deliveries,pending,now,allowed>>\n /\\ Record(s,\"CreateExisting\",\"Success\",NoHandle,NoHandle,NoHandle,TRUE,TRUE)\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "IdempotentCreateUnchanged"
+        }
+      ]
     }
   ]
 }

@@ -78,7 +78,60 @@ an old handle may return success without deleting the message. The simulator
 does not reproduce distributed replicas, probabilistic delivery, exact-once
 processing or every AWS receipt/error timing detail.
 
-Focused native regression/rollback tests have been prepared but have not run
-for this checkpoint. Full unfiltered source coverage remains a separate blocker:
+At immutable native repair checkpoint `0a28266`, focused `^TestSQS` tests
+passed in internal/aws and internal/server: normal 1.047s/1.144s and race
+13.968s/11.339s with GOMAXPROCS=1 and -p 1. These include actual rollback,
+cached-parent deletion, expiry/redelivery, regional receipt rejection and
+non-destructive orphan startup failure. No guest VM was executed. These focused
+checks do not establish whole-module coverage or real standalone SDK acceptance
+for the repaired source. Full unfiltered source coverage remains a separate blocker:
 the original hosted run reported 86.92% against the unchanged 90% floor. Adding
 formal files or exempting runtime paths cannot resolve that test deficit.
+
+
+## Formal applicability and bounded contract
+
+`SQSLifecycle` models two distinct queue scopes (database/region/name tuples),
+one queue creation and one message per scope, at most two deliveries, clock
+0..2, delay/visibility 0..1 and retention two abstract ticks. A cached queue
+lookup may interleave with deletion before the send transaction. Queue creation
+is idempotent for equal attributes; mismatches and storage errors preserve state.
+The model checks parent lifetime, abstract caller authorization, scoped mutation,
+failed-operation atomicity, receive eligibility, fresh/current receipt use and
+in-flight visibility changes. Eleven targeted mutants remove those guards or
+introduce partial/cross-scope writes. **TLC has not yet run for this proposal.**
+
+The actual native repair precedes these bindings: sqsQueueTx rechecks the parent
+inside Send/Receive/Counts/receipt transactions; purgeExpiredTx errors propagate;
+Receive commits fresh receipt updates atomically; ChangeVisibility verifies both
+retention and the current in-flight deadline. SQL trigger tests exercise failed
+purge, insert, multi-row receive and cascade deletion rollback. NoOrphans assumes
+valid initial state; the constructor enforces that precondition by refusing
+orphans without deleting them. Startup/reopen persistence is separately tested.
+
+The model does not prove Go/SQLite refinement, random-ID collision resistance,
+real time, long-poll liveness/cancellation, multiple-message batch atomicity,
+queue-name reuse beyond one lifetime, message-body/attribute checksums, size or
+Unicode correctness, full QueueUrl parsing, IAM policy matching or distributed
+SQS delivery semantics. It assumes fresh opaque receipt handles. It does not
+prove FIFO or exactly-once processing. Those limits also apply to the formal
+record; existing unrelated models are retained, not presented as SQS proofs.
+
+The current URL parser accepts the final queue-name segment (including a bare
+name); it does not validate the entire supplied host/account/region URL. No
+outbound connection is made from QueueUrl, and the native request region and
+IAM queue ARN still select the local target. This convenience is a local
+compatibility limit, not complete AWS QueueUrl validation. Some returned system
+attributes are simplified; in particular ApproximateFirstReceiveTimestamp uses
+the stored send timestamp and must not be claimed as an accurate first-delivery
+clock. Full attribute-name selection, attribute/body aggregate sizing and
+number-attribute semantic validation also remain outside this repair.
+
+Primary references (inspected without real AWS requests):
+
+- [SQS JSON protocol and independent regional endpoints](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-making-api-requests-json.html)
+- [SendMessage: current 1 MiB bound and permitted Unicode](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_SendMessage.html)
+- [ReceiveMessage: per-call visibility and receipt handles](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_ReceiveMessage.html)
+- [DeleteMessage: most-recent receipt and distributed-delivery limits](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_DeleteMessage.html)
+- [ChangeMessageVisibility: in-flight clock semantics](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_ChangeMessageVisibility.html)
+- [Regional endpoints](https://docs.aws.amazon.com/general/latest/gr/sqs-service.html)
