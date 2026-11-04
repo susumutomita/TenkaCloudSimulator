@@ -478,6 +478,24 @@
       ]
     },
     {
+      "path": "internal/server/web/app.js",
+      "sha256": "0062728de3eafc718cd6df70b63ffc41313bffb2173b0691418d81564bf4460e",
+      "disposition": "modeled",
+      "reason": "Binds this source/artifact to the named finite state or disclosure/reveal properties. Actual local TLC evidence at c97bdde and concrete runtime/browser evidence at0888924 are recorded separately; declaration alone is not a new-head execution result or a general protocol/SQL/crypto/refinement proof.",
+      "models": [
+        {
+          "id": "SecretsRevealEpoch",
+          "properties": [
+            "NoUnmountedDisplay",
+            "FreshEmissionHistory",
+            "ReturnedARNMatches",
+            "VisibleContextMatches"
+          ],
+          "limits": "Finite explicit-retrieve/display model, not React, DOM, AbortController, memory zeroization or implementation refinement. Only the successful response path is modeled; native store/IAM must authorize before returning any secret. A returned ARN can differ and must be rejected. Retrieve, Hide and navigation invalidate epochs; unmount also clears visible state. Parent must remount on region/principal changes. Emission history captures the context at each acceptance so later Hide/navigation cannot relabel an earlier stale acceptance. Draft entry, mutation atomicity and form layout are outside this model. Parent main.jsx scope binds only Secrets routing/remount key (region/principal/navigation); the generated app.js binding is the canonical compiled artifact of those source inputs, independently checked by bundle/asset hashes. It does not model unrelated existing console services or prove JavaScript compilation."
+        }
+      ]
+    },
+    {
       "path": "scripts/formal_model_gate.py",
       "sha256": "91ddfaa29f53915e05acb8228edf34eafbc63d3552b669658686e393d3ff9277",
       "disposition": "formal-infrastructure",
@@ -517,6 +535,20 @@
       "sha256": "32e71b539bf0ab7aae2bd950425339eb8d5a3ea1a15482f9e9bf9558aac9fcbf",
       "disposition": "test-support",
       "reason": "Actual native SDK, browser or served-reference regression helper/mandatory registration; full24 Conformance cases, including all three Secrets helpers, executed at0888924. Test-support classification does not itself prove implementation refinement or hosted CI.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "d2d8fe0ab7b5388588b17efd8c076dd44a861df7638467a789f2801309f43d12",
+      "disposition": "presentation",
+      "reason": "Canonical build input/digest metadata from exact package-lock and a verified existing physical dependency copy. Actual generated UI state logic is separately bound at app.js; metadata alone grants no runtime authority.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "8e4b1fa61016a534be2dab2d02165b482c1e60a998639c70e40f9680dc4b05a5",
+      "disposition": "presentation",
+      "reason": "Canonical build input/digest metadata from exact package-lock and a verified existing physical dependency copy. Actual generated UI state logic is separately bound at app.js; metadata alone grants no runtime authority.",
       "models": []
     },
     {
