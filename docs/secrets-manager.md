@@ -1,6 +1,6 @@
 # Secrets Manager: local training subset
 
-> Main refresh candidate: current main0a4 (KMS merged) plus Secrets7a is source-prepared only. Every validation receipt below describes the original isolated62ba/runtime source; this new21-model/108-control,27-case integrated candidate has not yet run Go, SDK, UI, formal, coverage or hosted CI.
+> Main refresh candidate: current main26d (KMS and S3 regression merged) plus Secretsd904 is source-prepared only. Every validation receipt below describes the original isolated62ba/runtime source; this new21-model/108-control,28-case integrated candidate has not yet run Go, SDK, UI, formal, coverage or hosted CI.
 
 Seven native Secrets Manager operations, the Cloudscape console, SDK clients and
 the embedded API reference use the same SQLite state. This is an independent,

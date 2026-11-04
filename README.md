@@ -98,7 +98,7 @@ AXE_SCRIPT=/tmp/tcsim-audit/axe.min.js make e2e PYTHON=/tmp/tcsim-tests/bin/pyth
 TLA_JAR=/path/to/tla2tools.jar make formal
 ```
 
-KMSを含むmain0a4の証拠と、Secrets旧HEADの証拠は別入力です。この新しいSecrets統合候補の実行検証は未実施です。
+KMSとS3回帰を含むmain26dの証拠と、Secrets旧HEADの証拠は別入力です。この新しいSecrets統合候補の実行検証は未実施です。
 
 CIはstatementと未フィルターsource-line coverageを両方90%以上に強制します。`make before-commit`単独のcoverage判定はstatementのみで、source-line判定はCIのCobertura生成後ステージと上記の2コマンドで行います。SDK/browser、license、依存security、埋込asset、形式検査も行います。cross compileは他OSでの実行成功を意味しません。開発用Python/Node/Javaはruntime依存ではありません。UI・Scalarの再生成は権利表記とlockを保持する[各build手順](tools/console/README.md)・[Scalar手順](tools/scalar/README.md)・[Python runtimeの権利・再生成手順](tools/python/README.md)に従います。
 
