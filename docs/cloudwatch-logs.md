@@ -214,8 +214,10 @@ verify sanitized read failures, retained damaged data and repair, corrupt cursor
 key refusal without rotation, global stream quota maintenance and transport/
 missing-stream rejection. Host-owned SQL corruption is not an HTTP exploit.
 
-Final immutable applicability/formal receipts must bind the resulting local
-integration HEAD. Hosted CI and current canonical vulnerability clearance remain
+Immutable code inputcf231ef passed all12 finite-model baselines,43 required
+counterexamples and34 exact changed-blob applicability declarations. Documentation
+followups retain the same runtime/model inputs and require their own immutable
+HEAD receipts. Hosted CI and current canonical vulnerability clearance remain
 pending; this candidate is not public main and all public merges remain on HOLD.
 Historical c005842 focused/SDK/browser/finite-model results cannot be
 used as a new-head pass. Metrics, alarms, CFN Logs resources, Lambda delivery and
