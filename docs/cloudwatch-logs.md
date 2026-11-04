@@ -166,7 +166,7 @@ itself does not overflow. Message columns retain a readable minimum width.
 
 ## Integration and validation boundary
 
-This slice normally incorporates main `0a4ed897f492011bcef0a5d8765f45c200809db9`
+This slice normally incorporates main `26d51142703b2b32946e06363d0d1d299eaf87c9`
 into the existing public PR407 ancestry. It retains the separate Azure/GCP
 providers, authenticated actor mapping, raw provider paths, startup/logout and
 all existing AWS services. The registry preserves all eighteen main models and
@@ -181,12 +181,12 @@ JSON1.1 target/service headers. Capabilities expose exactly seven native Logs
 operations. Retention policies, metrics/alarms, CloudFormation Logs resources,
 Lambda automatic delivery and additional Challenge workloads remain unsupported.
 
-All twenty-four main mandatory Conformance method bodies remain unchanged; the
+All twenty-five main mandatory Conformance method bodies remain unchanged; the
 Logs SDK and console wrappers add two mandatory cases. The original Logs SDK,
 console, native tests and both finite model inputs remain present. Historical
 PR407 validation applies to its recorded source only. Current-main integration
 requires canonical asset generation, whole-module race/vet/build and both
-unchanged ninety-percent coverage floors from one fresh profile, full twenty-six
+unchanged ninety-percent coverage floors from one fresh profile, full twenty-seven
 case E2E/start, exact-head twenty-model/one-hundred-and-one-control validation, cross
 builds and accessibility review. None of those new-head runtime results is
 inferred from the source merge. At the initial source checkpoint, generated
