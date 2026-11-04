@@ -34,13 +34,35 @@ class FormalGateTests(unittest.TestCase):
 
     def test_complete_registry_and_exact_mutations(self):
         registry = load_registry(self.root)
-        self.assertEqual({model['id'] for model in registry['models']}, {'RESTDeploymentSnapshot', 'S3Versions', 'SSMParameterState', 'SQSLifecycle', 'SQSStorageBudget', 'StackOwnership', 'ObjectStore', 'StartupTokenVisibility', 'BrowserSessions', 'NativeIAMOwnership'})
+        self.assertEqual({model['id'] for model in registry['models']}, {'KMSKeyState', 'RESTDeploymentSnapshot', 'S3Versions', 'SSMParameterState', 'SQSLifecycle', 'SQSStorageBudget', 'StackOwnership', 'ObjectStore', 'StartupTokenVisibility', 'BrowserSessions', 'NativeIAMOwnership'})
         for model in registry['models']:
             source = (self.root / model['model']).read_text()
             for mutant in model['mutants']:
                 name, mutated = apply_mutant(source, model['id'], mutant)
                 self.assertNotEqual(mutated, source)
                 self.assertIn('MODULE ' + name, mutated)
+
+    def test_kms_required_model_and_invariants_cannot_disappear(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        registry = json.loads(original)
+        registry['models'] = [m for m in registry['models'] if m['id'] != 'KMSKeyState']
+        path.write_text(json.dumps(registry))
+        model = self.root / 'formal/KMSKeyState.tla'
+        config = self.root / 'formal/KMSKeyState.cfg'
+        model_bytes, config_bytes = model.read_bytes(), config.read_bytes()
+        model.unlink(); config.unlink()
+        with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+            load_registry(self.root)
+        model.write_bytes(model_bytes); config.write_bytes(config_bytes)
+        registry = json.loads(original)
+        kms = next(m for m in registry['models'] if m['id'] == 'KMSKeyState')
+        kms['properties'].remove('EnabledCrypto')
+        kms['mutants'] = [m for m in kms['mutants'] if m['expect_invariant'] != 'EnabledCrypto']
+        config.write_text(config_bytes.decode().replace('INVARIANT EnabledCrypto\n',''))
+        path.write_text(json.dumps(registry))
+        with self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+            load_registry(self.root)
 
     def test_startup_required_model_and_properties_cannot_disappear(self):
         path = self.root / 'formal/models.json'

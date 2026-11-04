@@ -13,11 +13,11 @@ After root configures the shared AWS Gateway with this module, send
 four supported local regions (default `us-east-1`). SDKs use dummy `TCSIM...`
 SigV4 credentials with service `kms`; real credentials and session tokens are
 rejected. The host's local access token must still be required. `server.New` alone is
-an unauthenticated composition API; hosts must wrap it in `NewAccess`. In this
-refreshed private candidate, shared server/navigation/assets are preserved from
-main and do not initialize/advertise KMS. Native fixtures explicitly configure
-Gateway.KMS; actual CLI/SDK/console availability is a root integration gate, not
-implied by source presence. An unconfigured store returns501.
+an unauthenticated composition API; hosts must wrap it in `NewAccess`. The refreshed private source now initializes KMS in regular server.New and
+advertises exactly these eight operations. Native fixtures also configure
+Gateway.KMS directly. The new composition, actual CLI/SDK and rebuilt console
+remain separate execution gates; source presence is not successful integration.
+An explicitly unconfigured store still returns501.
 
 ## Keys and identity permissions
 
@@ -97,9 +97,9 @@ CloudTrail/CloudWatch, rotation, scheduled deletion, grants, multi-region keys,
 external key material, AWS portable blobs, AWS eventual consistency, or CFN
 resource are supplied by this increment. A prepared isolated Cloudscape component targets these same native APIs for the
 regional key list, creation, metadata, read-only default policy, enable/disable
-and explicitly identified local encryption test. Its shared navigation/assets
-remain an outside-tree proposal; it is not registered or browser-verified at the
-refreshed HEAD.
+and explicitly identified local encryption test. Shared navigation/component wiring is now registered in source. Canonical
+asset rebuild and actual browser verification remain pending; the old embedded
+bundle is not evidence that the new source view is usable.
 No existing Challenge problem is enabled merely by these operations.
 
 ## Wire examples
@@ -194,27 +194,32 @@ or SDK runtime is required. S3 SSE-KMS, SSM SecureString, Secrets Manager encryp
 Lambda guest KMS and CloudFormation KMS resources are separate unimplemented
 integrations. Enabling this native module does not enable any existing problem.
 
-The KMSKeyState fragment bounds two keys/teams, two request regions, two context
+The KMSKeyState model bounds two keys/teams, two request regions, two context
 values, two blob slots and two encryptions per key. Eight controls target permission,
 team, region, enabled encrypt/decrypt, context/key binding and the abstract counter
 ceiling. It describes only atomic successful state events: rejected response frames,
 SQL RowsAffected/commit failures, payload/header/JSON parsing, ciphertext bytes,
 cryptography and probability, pagination, host authentication and read-only metadata
-outputs are not proved. Model/registry applicability must be integrated and checked
-at the final exact HEAD; the fragment alone is not an executable merge-gate result.
+outputs are not proved. The canonical model registry and four required properties are integrated in
+source; the final exact HEAD must pass the immutable applicability and TLC gates.
+A registry declaration alone is not an executed proof.
 
 This source refresh normally merges main b61d029 into a separate candidate while
-preserving the original5862047 checkout. All five shared conflict files retain
-main bytes. Existing Gateway/dispatch changes and the original UI wiring are
-proposals for root review; no generated assets are rebuilt. New native tests use
+preserving the original5862047 checkout. The initial merge preserved all five shared conflict files from main. A later
+authorized source phase adds regular server initialization/capabilities, minimal
+KMS navigation and eight header-target body templates while preserving the
+existing IAM alias and all43 OpenAPI operation IDs. Generated assets are not
+rebuilt yet; existing SQS/API/logout state and routes are preserved. New native tests use
 independent literal operation/action/resource names, full persisted-key fingerprints,
 actual SQLite pure RAISE(IGNORE) failures and rejected transport frames. Expected
 single-row writes now require one affected row before any key/state/ciphertext
 success; a missing database refuses construction. These fault tests concern
 nonstandard SQL fault fixtures, not an ordinary API exploit or protection against
-an arbitrary host/database administrator. Native/model tests and whole integration
-have not yet been executed at this source refresh; old-candidate results are not
-fresh evidence.
+an arbitrary host/database administrator. At native checkpoint f018bc6, all16 TestKMS functions passed normally (1.223s),
+under race (10.312s), and package vet passed (1CPU/-p1/offline/timeout60s).
+The owned native sources have not changed after that proof; later regular-server,
+OpenAPI/console source and model registration changes remain unexecuted.
+Old-candidate results are not fresh whole-integration evidence.
 
 | Actual operation group | Finite model correspondence | Native obligations outside the model |
 |---|---|---|
@@ -224,7 +229,33 @@ fresh evidence.
 | Decrypt | Decrypt + BoundContextAndKey, EnabledCrypto, AuthorizedEvents | Actual tag verification, case-sensitive context JSON, no plaintext on denial/error, counter/material read invariance |
 | DescribeKey/ListKeys/GetKeyPolicy | No separate read-output transition | Independent native permission/resource checks, pagination, schema/redaction, disabled-state metadata/default policy |
 
-The candidate registry fragment now includes kms_types.go for the abstract key,
-region and context binding helpers, with explicit parser/crypto/read-output limits.
-It is an unregistered proposal until root integrates the model list, protected
-baseline requirements, applicability and immutable-head validation together.
+The canonical registry includes kms_types.go for abstract key/region/context
+binding helpers and shared initialization/dispatch declarations. Its explicit
+limits exclude parser/crypto/read-output/host-authentication proofs. The prior
+standalone fragment is preserved outside the source tree, leaving one canonical
+registry. Eleven baselines and44 named controls are registered; existing ten
+models and36 controls remain intact. Current-head execution is still pending.
+
+
+## Source composition and bounded API reference
+
+Regular server.New uses the same provider SQLite connection for KMS and closes
+it with the existing team lifecycle. Existing Access remains mandatory in the CLI;
+no new login path, principal bypass, AWS account configuration or public endpoint
+is added. Capabilities explicitly list eight operations and unsupported scope.
+The console imports the isolated Cloudscape view with region/principal/navigation
+remount keys and the existing authenticated request helper; logout/account/API
+reference controls retain their prior source. The view is not an AWS-authenticated
+console capture or a promise of exact current layout.
+
+The existing root POST OpenAPI operation now contains eight named KMS JSON1.1 body
+examples with exact per-target request/response schema mapping. The IAM Query
+provider alias and all43 existing operation IDs remain unchanged: eight target
+headers are not misrepresented as eight distinct path/method operations. Select
+X-Amz-Target manually to match the body; choosing a body example has not been
+verified to synchronize headers automatically. Create a key first, use its actual
+returned identifier, then copy actual local Encrypt output for Decrypt. The
+valid-base64 documentation placeholder is deliberately not decryptable.
+Parsed schema/source checks, served examples, SDK sends, browser operations,
+canonical bundle/NOTICE rebuild, complete coverage/security/CI and all11/44
+formal runs are distinct pending gates for this new source composition.

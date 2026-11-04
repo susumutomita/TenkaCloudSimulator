@@ -3,7 +3,7 @@
   "info": {
     "title": "TenkaCloud Simulator API",
     "version": "0.1.0",
-    "description": "Sign in through the local console first. The browser sends its same-origin session cookie; Test Request uses that session. For curl or SDKs add the host-issued `X-Simulator-Token` header. Dummy TCSIM signature credentials identify the AWS wire format; they are not host authentication. `x-simulator-principal` selects an exercise identity only. Participant sessions are already bound to an identity and cannot select simulator-admin. Never enter real AWS credentials here. \n\n**Examples are static documentation, not saved state.** Use Test Request → Send to query your environment. S3 responses remain native XML/bytes; expand typed schemas below to understand fields.\n\nIndependent local cloud simulator. AWS is the first provider, with documented S3, Systems Manager Parameter Store, SQS, Lambda, CloudFormation and IAM role subsets. No real infrastructure is created. This document describes only implemented operations. S3 wire APIs retain their XML formats; Native IAM roles use Query/XML; legacy identity control remains a separate JSON API. Native role ownership blocks legacy PUT/DELETE with HTTP409. Use unsigned requests or dummy TCSIM SDK credentials. Default principal simulator-admin has full sandbox access. IAM Query routing uses X-Simulator-Service: iam (or the dummy SDK signature scope), root POST and Version2010-05-08. Nine bounded role/inline-policy operations are implemented; no STS, managed policies, Conditions or non-root paths. Native Lambda roles must trust lambda.amazonaws.com. Legacy CFN/local identity roles retain their prior metadata-only trust semantics. For IAM exercises send x-simulator-principal. SQLite is ephemeral by default; --state persists it. See /_simulator/v1/capabilities for limits and deviations. Lambda supports a bounded Python 3.12 ZIP subset through the native REST paths below. Host Python is not required. A limited saved-role local SSM/S3 function SDK is supported; arbitrary network/HTTP and Function URLs remain unsupported. CloudFormation supports inline Python AWS::Lambda::Function with index.handler, existing local role, Ref/Arn and explicit DependsOn. Caller requires Lambda Create/DeleteFunction and iam:PassRole; tagged creation also requires lambda:TagResource. Only the declared saved-role SSM/S3 capability bridge is available, with no arbitrary network or managed-policy grants. Function SDK limits: S3 object body32KiB, native response48KiB before capability encoding, message64KiB,128calls and1MiB request/response aggregate. Oversized native SSM or S3 responses return EntityTooLarge without a partial successful result. API Gateway REST APIs support an explicit REGIONAL/NONE/Lambda AWS_PROXY subset. Deployments freeze resources and integrations; stages refer to a deployment. No public endpoint or real AWS is created. Local invocation requires the host access token/session and a bounded Lambda apigateway.amazonaws.com resource permission with a matching local execute-api SourceArn. Responses are non-executing downloads, with protected cookie/navigation/CORS/CSP headers removed. Active browser app hosting, WAF, custom domains, authorizers, binary media, API keys, caching, stage editing and full WP grading remain unsupported. CloudFormation also provisions the bounded RestApi/Resource/Method/Deployment/Stage and Lambda::Permission subset in the same native SQLite transaction. Deployment DependsOn methods is explicit; API children are same-stack, snapshots immutable, and native drift blocks destructive cleanup. No WAF or custom resources are supported.",
+    "description": "Sign in through the local console first. The browser sends its same-origin session cookie; Test Request uses that session. For curl or SDKs add the host-issued `X-Simulator-Token` header. Dummy TCSIM signature credentials identify the AWS wire format; they are not host authentication. `x-simulator-principal` selects an exercise identity only. Participant sessions are already bound to an identity and cannot select simulator-admin. Never enter real AWS credentials here. \n\n**Examples are static documentation, not saved state.** Use Test Request \u2192 Send to query your environment. S3 responses remain native XML/bytes; expand typed schemas below to understand fields.\n\nIndependent local cloud simulator. AWS is the first provider, with documented S3, Systems Manager Parameter Store, SQS, Lambda, CloudFormation and IAM role subsets. No real infrastructure is created. This document describes only implemented operations. S3 wire APIs retain their XML formats; Native IAM roles use Query/XML; legacy identity control remains a separate JSON API. Native role ownership blocks legacy PUT/DELETE with HTTP409. Use unsigned requests or dummy TCSIM SDK credentials. Default principal simulator-admin has full sandbox access. IAM Query routing uses X-Simulator-Service: iam (or the dummy SDK signature scope), root POST and Version2010-05-08. Nine bounded role/inline-policy operations are implemented; no STS, managed policies, Conditions or non-root paths. Native Lambda roles must trust lambda.amazonaws.com. Legacy CFN/local identity roles retain their prior metadata-only trust semantics. For IAM exercises send x-simulator-principal. SQLite is ephemeral by default; --state persists it. See /_simulator/v1/capabilities for limits and deviations. Lambda supports a bounded Python 3.12 ZIP subset through the native REST paths below. Host Python is not required. A limited saved-role local SSM/S3 function SDK is supported; arbitrary network/HTTP and Function URLs remain unsupported. CloudFormation supports inline Python AWS::Lambda::Function with index.handler, existing local role, Ref/Arn and explicit DependsOn. Caller requires Lambda Create/DeleteFunction and iam:PassRole; tagged creation also requires lambda:TagResource. Only the declared saved-role SSM/S3 capability bridge is available, with no arbitrary network or managed-policy grants. Function SDK limits: S3 object body32KiB, native response48KiB before capability encoding, message64KiB,128calls and1MiB request/response aggregate. Oversized native SSM or S3 responses return EntityTooLarge without a partial successful result. API Gateway REST APIs support an explicit REGIONAL/NONE/Lambda AWS_PROXY subset. Deployments freeze resources and integrations; stages refer to a deployment. No public endpoint or real AWS is created. Local invocation requires the host access token/session and a bounded Lambda apigateway.amazonaws.com resource permission with a matching local execute-api SourceArn. Responses are non-executing downloads, with protected cookie/navigation/CORS/CSP headers removed. Active browser app hosting, WAF, custom domains, authorizers, binary media, API keys, caching, stage editing and full WP grading remain unsupported. CloudFormation also provisions the bounded RestApi/Resource/Method/Deployment/Stage and Lambda::Permission subset in the same native SQLite transaction. Deployment DependsOn methods is explicit; API children are same-stack, snapshots immutable, and native drift blocks destructive cleanup. No WAF or custom resources are supported.",
     "license": {
       "name": "MIT"
     }
@@ -19,7 +19,7 @@
       "get": {
         "operationId": "ListBuckets",
         "summary": "List all buckets",
-        "description": "**Static examples below are sample documentation, not your current state.** Click **Test Request**, then **Send** to execute this operation. The client shows the live HTTP status, headers and body. Lists the buckets currently saved in this environment, across the supported regions. `Buckets/Bucket/Name` is a bucket name; `BucketRegion` is its saved region; `CreationDate` is UTC. An actually executed response with `<Buckets></Buckets>` is empty. The example below intentionally contains two sample buckets. Requires `s3:ListAllMyBuckets` on `*`.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.\n\nAfter a live S3 metadata request, use the **Live S3 result · Read fields** button or **Alt+Shift+R** for a bounded field explanation. The API client keeps the original XML. The explanation is not available for arbitrary object bodies.",
+        "description": "**Static examples below are sample documentation, not your current state.** Click **Test Request**, then **Send** to execute this operation. The client shows the live HTTP status, headers and body. Lists the buckets currently saved in this environment, across the supported regions. `Buckets/Bucket/Name` is a bucket name; `BucketRegion` is its saved region; `CreationDate` is UTC. An actually executed response with `<Buckets></Buckets>` is empty. The example below intentionally contains two sample buckets. Requires `s3:ListAllMyBuckets` on `*`.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.\n\nAfter a live S3 metadata request, use the **Live S3 result \u00b7 Read fields** button or **Alt+Shift+R** for a bounded field explanation. The API client keeps the original XML. The explanation is not available for arbitrary object bodies.",
         "tags": [
           "S3 basic object storage"
         ],
@@ -39,7 +39,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Static example — two sample buckets, not a live inventory. Expand the response schema for each field; execute Send for your actual list.",
+            "description": "Static example \u2014 two sample buckets, not a live inventory. Expand the response schema for each field; execute Send for your actual list.",
             "content": {
               "application/xml": {
                 "schema": {
@@ -77,8 +77,8 @@
         }
       },
       "post": {
-        "summary": "SSM/SQS JSON, CloudFormation Query, or IAM Query operation",
-        "description": "**Static request templates:** choose the correct Content-Type and routing headers before Test Request → Send. SSM/SQS send JSON with X-Amz-Target (JSON 1.1 for SSM, JSON 1.0 for SQS); CloudFormation/IAM send URL-encoded Query fields. The 200 response is JSON for SSM/SQS and XML for Query protocols. A successful DeleteStack has no result payload beyond Query response metadata.\n\nNative regional root endpoint. SQS: X-Amz-Target AmazonSQS.CreateQueue, ListQueues, GetQueueUrl, DeleteQueue, SendMessage, ReceiveMessage, DeleteMessage, ChangeMessageVisibility, GetQueueAttributes (JSON 1.0, Standard queues only; local body limit 256 KiB, aggregate physical storage 10000 messages/64 MiB across queues/regions including expired foreign rows until scoped cleanup; bytes count body UTF-8 plus stored attribute JSON. Over-budget SendMessage returns local SimulatorQuotaExceeded without mutation; existing over-cap data remains readable/deletable; FIFO, Query protocol, batch operations and dead-letter redrive are unsupported). SSM: X-Amz-Target AmazonSSM.PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter. CloudFormation: CreateStack, DescribeStacks, DeleteStack; S3 buckets, SSM parameters, inline Python Lambda functions, one inline IAM identity policy per role, five Regional REST API Gateway resource types, and bounded Lambda::Permission. Unsupported options fail. Real credentials and session tokens are rejected. Create/DeleteStack also require the caller to allow the underlying S3/SSM/IAM/Lambda actions; CAPABILITY_IAM grants no permissions. API resources use NONE/POST AWS_PROXY local Lambda, same-stack API children, explicit deployment DependsOn methods and reverse guarded cleanup. Lambda permission uses only apigateway.amazonaws.com and local execute-api SourceArn. No service RoleArn or general CloudFormation lifecycle is supported. IAM is global: send X-Simulator-Service: iam, Version2010-05-08 and one of CreateRole/GetRole/ListRoles/DeleteRole/PutRolePolicy/GetRolePolicy/DeleteRolePolicy/ListRolePolicies/UpdateAssumeRolePolicy. Policy documents are JSON strings; successful IAM XML returns them RFC3986 URL-encoded. Native role names use the local alphanumeric/underscore/hyphen subset,1–64; inline policy names1–128 AWS characters. Trust and aggregate policies32KiB, at most10 inline policies/100 statements,1000 active+retired name claims. Deleted role names cannot be adopted by legacy identity writes. No managed grants or session issuance.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.",
+        "summary": "SSM/SQS/KMS JSON, CloudFormation Query, or IAM Query operation",
+        "description": "**Static request templates:** choose the correct Content-Type and routing headers before Test Request \u2192 Send. SSM/SQS send JSON with X-Amz-Target (JSON 1.1 for SSM, JSON 1.0 for SQS); CloudFormation/IAM send URL-encoded Query fields. The 200 response is JSON for SSM/SQS and XML for Query protocols. A successful DeleteStack has no result payload beyond Query response metadata.\n\nNative regional root endpoint. SQS: X-Amz-Target AmazonSQS.CreateQueue, ListQueues, GetQueueUrl, DeleteQueue, SendMessage, ReceiveMessage, DeleteMessage, ChangeMessageVisibility, GetQueueAttributes (JSON 1.0, Standard queues only; local body limit 256 KiB, aggregate physical storage 10000 messages/64 MiB across queues/regions including expired foreign rows until scoped cleanup; bytes count body UTF-8 plus stored attribute JSON. Over-budget SendMessage returns local SimulatorQuotaExceeded without mutation; existing over-cap data remains readable/deletable; FIFO, Query protocol, batch operations and dead-letter redrive are unsupported). SSM: X-Amz-Target AmazonSSM.PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter. CloudFormation: CreateStack, DescribeStacks, DeleteStack; S3 buckets, SSM parameters, inline Python Lambda functions, one inline IAM identity policy per role, five Regional REST API Gateway resource types, and bounded Lambda::Permission. Unsupported options fail. Real credentials and session tokens are rejected. Create/DeleteStack also require the caller to allow the underlying S3/SSM/IAM/Lambda actions; CAPABILITY_IAM grants no permissions. API resources use NONE/POST AWS_PROXY local Lambda, same-stack API children, explicit deployment DependsOn methods and reverse guarded cleanup. Lambda permission uses only apigateway.amazonaws.com and local execute-api SourceArn. No service RoleArn or general CloudFormation lifecycle is supported. IAM is global: send X-Simulator-Service: iam, Version2010-05-08 and one of CreateRole/GetRole/ListRoles/DeleteRole/PutRolePolicy/GetRolePolicy/DeleteRolePolicy/ListRolePolicies/UpdateAssumeRolePolicy. Policy documents are JSON strings; successful IAM XML returns them RFC3986 URL-encoded. Native role names use the local alphanumeric/underscore/hyphen subset,1\u201364; inline policy names1\u2013128 AWS characters. Trust and aggregate policies32KiB, at most10 inline policies/100 statements,1000 active+retired name claims. Deleted role names cannot be adopted by legacy identity writes. No managed grants or session issuance.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.\n\nUse X-Amz-Target TrentService.<operation> matching the selected body example; example choice does not change routing headers automatically. CreateKey first, copy returned KeyId into later requests, and copy an actual local Encrypt CiphertextBlob into Decrypt (the valid-base64 documentation placeholder is deliberately not decryptable). All calls require host X-Simulator-Token or signed-in local session. Dummy TCSIM SigV4 scope is not authentication.\n\nCreateKey/ListKeys require their exact kms action on *. DescribeKey/EnableKey/DisableKey/GetKeyPolicy/Encrypt/Decrypt require the actual key ARN. Decrypt without KeyId resolves the local blob key. Explicit Deny wins. Programmatic default policy only enables local identity-policy delegation; no grant for all participants.\n\nEnabled/Disabled only; disabled blocks Encrypt/Decrypt, metadata/default policy remain readable. Local request64KiB,1000keys,plaintext1\u20134096bytes,context100entries/8192canonicalbytes,counter2^32 ceiling. Ciphertext/material are simulator-local; SQLite stores raw material, not an at-rest security boundary. Unsupported aliases/tags/grants/custom policies/asymmetric/data keys/rotation/deletion/multi-region/CFN/other-service encryption fail; no problem availability is implied. Actual AWS eventual consistency and ciphertext portability are not reproduced.\n\nKMS JSON1.1 targets TrentService.CreateKey/DescribeKey/ListKeys/EnableKey/DisableKey/GetKeyPolicy/Encrypt/Decrypt are also accepted here. This root JSON1.1 section includes all eight bounded KMS body templates and limitations.",
         "operationId": "awsRegionalOperation",
         "parameters": [
           {
@@ -87,7 +87,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "AmazonSSM.<operation> for SSM only"
+            "description": "AmazonSSM.<operation>, AmazonSQS.<operation> or TrentService.<operation>; use matching Content-Type and body."
           },
           {
             "name": "X-Simulator-Region",
@@ -111,10 +111,11 @@
               "enum": [
                 "ssm",
                 "cloudformation",
-                "iam"
+                "iam",
+                "kms"
               ]
             },
-            "description": "iam selects IAM Query; omit or use cloudformation for CloudFormation, and omit or use ssm for SSM JSON. Do not select iam for CreateStack/DescribeStacks/DeleteStack."
+            "description": "iam selects IAM Query; omit or use cloudformation for CloudFormation, and omit or use ssm for SSM JSON. Do not select iam for CreateStack/DescribeStacks/DeleteStack. kms selects the bounded KMS JSON1.1 handler."
           },
           {
             "$ref": "#/components/parameters/SimulatorToken"
@@ -125,10 +126,102 @@
           "content": {
             "application/x-amz-json-1.1": {
               "schema": {
-                "type": "object"
+                "anyOf": [
+                  {
+                    "type": "object"
+                  },
+                  {
+                    "$ref": "#/components/schemas/KMSCreateKeyInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/KMSKeyInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/KMSListKeysInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/KMSGetKeyPolicyInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/KMSEncryptInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/KMSDecryptInput"
+                  }
+                ],
+                "description": "SSM or KMS JSON1.1 as selected by X-Amz-Target; generic SSM remains documented independently. Exact KMS per-target schemas are in x-simulator-kms-operation-schemas; body alone cannot discriminate routing."
               },
-              "example": {
-                "Name": "/practice/hello"
+              "examples": {
+                "SSMGetParameter": {
+                  "summary": "Existing SSM body template; set X-Amz-Target AmazonSSM.GetParameter",
+                  "value": {
+                    "Name": "/practice/hello"
+                  }
+                },
+                "KMSCreateKey": {
+                  "summary": "X-Amz-Target: TrentService.CreateKey",
+                  "description": "Replace dummy KeyId with current CreateKey output; Decrypt additionally needs actual Encrypt output.",
+                  "value": {
+                    "Description": "Local dummy key"
+                  }
+                },
+                "KMSDescribeKey": {
+                  "summary": "X-Amz-Target: TrentService.DescribeKey",
+                  "description": "Replace dummy KeyId with current CreateKey output; Decrypt additionally needs actual Encrypt output.",
+                  "value": {
+                    "KeyId": "11111111-1111-4111-8111-111111111111"
+                  }
+                },
+                "KMSListKeys": {
+                  "summary": "X-Amz-Target: TrentService.ListKeys",
+                  "description": "Replace dummy KeyId with current CreateKey output; Decrypt additionally needs actual Encrypt output.",
+                  "value": {
+                    "Limit": 1
+                  }
+                },
+                "KMSEnableKey": {
+                  "summary": "X-Amz-Target: TrentService.EnableKey",
+                  "description": "Replace dummy KeyId with current CreateKey output; Decrypt additionally needs actual Encrypt output.",
+                  "value": {
+                    "KeyId": "11111111-1111-4111-8111-111111111111"
+                  }
+                },
+                "KMSDisableKey": {
+                  "summary": "X-Amz-Target: TrentService.DisableKey",
+                  "description": "Replace dummy KeyId with current CreateKey output; Decrypt additionally needs actual Encrypt output.",
+                  "value": {
+                    "KeyId": "11111111-1111-4111-8111-111111111111"
+                  }
+                },
+                "KMSGetKeyPolicy": {
+                  "summary": "X-Amz-Target: TrentService.GetKeyPolicy",
+                  "description": "Replace dummy KeyId with current CreateKey output; Decrypt additionally needs actual Encrypt output.",
+                  "value": {
+                    "KeyId": "11111111-1111-4111-8111-111111111111",
+                    "PolicyName": "default"
+                  }
+                },
+                "KMSEncrypt": {
+                  "summary": "X-Amz-Target: TrentService.Encrypt",
+                  "description": "Replace dummy KeyId with current CreateKey output; Decrypt additionally needs actual Encrypt output.",
+                  "value": {
+                    "KeyId": "11111111-1111-4111-8111-111111111111",
+                    "Plaintext": "bG9jYWwgZHVtbXk=",
+                    "EncryptionContext": {
+                      "purpose": "demo"
+                    }
+                  }
+                },
+                "KMSDecrypt": {
+                  "summary": "X-Amz-Target: TrentService.Decrypt",
+                  "description": "Replace dummy KeyId with current CreateKey output; Decrypt additionally needs actual Encrypt output.",
+                  "value": {
+                    "CiphertextBlob": "VEhJU19JU19BX0RPQ1VNRU5UQVRJT05fUExBQ0VIT0xERVI=",
+                    "EncryptionContext": {
+                      "purpose": "demo"
+                    }
+                  }
+                }
               }
             },
             "application/x-www-form-urlencoded": {
@@ -304,7 +397,7 @@
                   }
                 },
                 "CreateRESTStack": {
-                  "summary": "Local REST→Lambda→SSM stack (no real AWS)",
+                  "summary": "Local REST\u2192Lambda\u2192SSM stack (no real AWS)",
                   "value": {
                     "Action": "CreateStack",
                     "Version": "2010-05-15",
@@ -319,7 +412,7 @@
         },
         "responses": {
           "200": {
-            "description": "Native JSON 1.1 SSM or XML Query response"
+            "description": "Native JSON 1.1 SSM or XML Query response KMS returns target-specific JSON metadata/list/policy/crypto; EnableKey/DisableKey return an EMPTY body. Use returned local key/ciphertext values in subsequent requests."
           },
           "400": {
             "description": "Validation/unsupported field/state conflict IAM ValidationError/MalformedPolicyDocument reject unknown trust or permissions semantics."
@@ -341,6 +434,83 @@
           },
           "401": {
             "$ref": "#/components/responses/HostAccessRequired"
+          }
+        },
+        "tags": [
+          "KMS local symmetric keys"
+        ],
+        "x-simulator-kms-operation-schemas": {
+          "CreateKey": {
+            "target": "TrentService.CreateKey",
+            "request": {
+              "$ref": "#/components/schemas/KMSCreateKeyInput"
+            },
+            "response": {
+              "$ref": "#/components/schemas/KMSKeyResponse"
+            }
+          },
+          "DescribeKey": {
+            "target": "TrentService.DescribeKey",
+            "request": {
+              "$ref": "#/components/schemas/KMSKeyInput"
+            },
+            "response": {
+              "$ref": "#/components/schemas/KMSKeyResponse"
+            }
+          },
+          "ListKeys": {
+            "target": "TrentService.ListKeys",
+            "request": {
+              "$ref": "#/components/schemas/KMSListKeysInput"
+            },
+            "response": {
+              "$ref": "#/components/schemas/KMSKeyPage"
+            }
+          },
+          "EnableKey": {
+            "target": "TrentService.EnableKey",
+            "request": {
+              "$ref": "#/components/schemas/KMSKeyInput"
+            },
+            "response": {
+              "description": "empty HTTP200 body"
+            }
+          },
+          "DisableKey": {
+            "target": "TrentService.DisableKey",
+            "request": {
+              "$ref": "#/components/schemas/KMSKeyInput"
+            },
+            "response": {
+              "description": "empty HTTP200 body"
+            }
+          },
+          "GetKeyPolicy": {
+            "target": "TrentService.GetKeyPolicy",
+            "request": {
+              "$ref": "#/components/schemas/KMSGetKeyPolicyInput"
+            },
+            "response": {
+              "$ref": "#/components/schemas/KMSPolicyResponse"
+            }
+          },
+          "Encrypt": {
+            "target": "TrentService.Encrypt",
+            "request": {
+              "$ref": "#/components/schemas/KMSEncryptInput"
+            },
+            "response": {
+              "$ref": "#/components/schemas/KMSEncryptResponse"
+            }
+          },
+          "Decrypt": {
+            "target": "TrentService.Decrypt",
+            "request": {
+              "$ref": "#/components/schemas/KMSDecryptInput"
+            },
+            "response": {
+              "$ref": "#/components/schemas/KMSDecryptResponse"
+            }
           }
         }
       }
@@ -484,19 +654,19 @@
               "examples": {
                 "createBucket": {
                   "value": "<CreateBucketConfiguration><LocationConstraint>ap-northeast-1</LocationConstraint></CreateBucketConfiguration>",
-                  "summary": "STATIC request template — choose the matching query selector before Send"
+                  "summary": "STATIC request template \u2014 choose the matching query selector before Send"
                 },
                 "enableVersioning": {
                   "value": "<VersioningConfiguration><Status>Enabled</Status></VersioningConfiguration>",
-                  "summary": "STATIC request template — choose the matching query selector before Send"
+                  "summary": "STATIC request template \u2014 choose the matching query selector before Send"
                 },
                 "publicAccessBlock": {
                   "value": "<PublicAccessBlockConfiguration><BlockPublicAcls>true</BlockPublicAcls><IgnorePublicAcls>true</IgnorePublicAcls><BlockPublicPolicy>true</BlockPublicPolicy><RestrictPublicBuckets>true</RestrictPublicBuckets></PublicAccessBlockConfiguration>",
-                  "summary": "STATIC request template — choose the matching query selector before Send"
+                  "summary": "STATIC request template \u2014 choose the matching query selector before Send"
                 },
                 "bucketTags": {
                   "value": "<Tagging><TagSet><Tag><Key>Environment</Key><Value>practice</Value></Tag></TagSet></Tagging>",
-                  "summary": "STATIC request template — choose the matching query selector before Send",
+                  "summary": "STATIC request template \u2014 choose the matching query selector before Send",
                   "description": "For this exact minified XML template use ?tagging and Content-MD5: tIgFdZ9IMEXsF8MypLdCYQ==. Recompute if any body byte changes. This is a static request template, not an executed update."
                 }
               }
@@ -508,7 +678,7 @@
       "get": {
         "operationId": "ListObjectsV2OrGetBucketLocation",
         "summary": "List objects, versions or bucket settings",
-        "description": "**Static examples below are sample documentation, not your current state.** Click **Test Request**, then **Send** to execute this operation. The client shows the live HTTP status, headers and body. Choose **one** query mode. Do not combine selectors.\n\n| Goal | Query | XML root / what it means |\n| --- | --- | --- |\n| Current objects | `?list-type=2` (default) | `ListBucketResult`: `Contents/Key` is an object key, `Size` is bytes, `KeyCount` is this page's entries. |\n| Retained versions | `?versions` | `ListVersionsResult`: `Version` contains saved bodies; `DeleteMarker` hides a key without erasing old versions. |\n| Bucket region | `?location` | `LocationConstraint`: empty text means `us-east-1`. |\n| Versioning setting | `?versioning` | `VersioningConfiguration`: missing `Status` means never enabled. |\n| Public-access settings | `?publicAccessBlock` | `PublicAccessBlockConfiguration`: four saved booleans. |\n| User tags | `?tagging` | `Tagging/TagSet/Tag`: `Key` and `Value` pairs. |\n\nFor any setting/history mode, **remove `list-type=2`** and unrelated query fields in the request editor before Send. A 404 setting/tag error means that configuration is absent, not necessarily that the bucket is absent. Requires the corresponding S3 read action; this simulator rejects unsupported selectors, combined selectors and nonempty selector values. `ListBucketResult` is not a bucket list.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.\n\nAfter a live S3 metadata request, use the **Live S3 result · Read fields** button or **Alt+Shift+R** for a bounded field explanation. The API client keeps the original XML. The explanation is not available for arbitrary object bodies.",
+        "description": "**Static examples below are sample documentation, not your current state.** Click **Test Request**, then **Send** to execute this operation. The client shows the live HTTP status, headers and body. Choose **one** query mode. Do not combine selectors.\n\n| Goal | Query | XML root / what it means |\n| --- | --- | --- |\n| Current objects | `?list-type=2` (default) | `ListBucketResult`: `Contents/Key` is an object key, `Size` is bytes, `KeyCount` is this page's entries. |\n| Retained versions | `?versions` | `ListVersionsResult`: `Version` contains saved bodies; `DeleteMarker` hides a key without erasing old versions. |\n| Bucket region | `?location` | `LocationConstraint`: empty text means `us-east-1`. |\n| Versioning setting | `?versioning` | `VersioningConfiguration`: missing `Status` means never enabled. |\n| Public-access settings | `?publicAccessBlock` | `PublicAccessBlockConfiguration`: four saved booleans. |\n| User tags | `?tagging` | `Tagging/TagSet/Tag`: `Key` and `Value` pairs. |\n\nFor any setting/history mode, **remove `list-type=2`** and unrelated query fields in the request editor before Send. A 404 setting/tag error means that configuration is absent, not necessarily that the bucket is absent. Requires the corresponding S3 read action; this simulator rejects unsupported selectors, combined selectors and nonempty selector values. `ListBucketResult` is not a bucket list.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.\n\nAfter a live S3 metadata request, use the **Live S3 result \u00b7 Read fields** button or **Alt+Shift+R** for a bounded field explanation. The API client keeps the original XML. The explanation is not available for arbitrary object bodies.",
         "tags": [
           "S3 basic object storage"
         ],
@@ -551,7 +721,7 @@
           {
             "name": "max-keys",
             "in": "query",
-            "description": "Object/version list page size, 0–1000. REMOVE for location/versioning/publicAccessBlock/tagging reads.",
+            "description": "Object/version list page size, 0\u20131000. REMOVE for location/versioning/publicAccessBlock/tagging reads.",
             "schema": {
               "type": "integer",
               "default": 1000
@@ -649,7 +819,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Static examples — select the example matching your query. Actual state is read only after Test Request → Send.",
+            "description": "Static examples \u2014 select the example matching your query. Actual state is read only after Test Request \u2192 Send.",
             "content": {
               "application/xml": {
                 "schema": {
@@ -676,27 +846,27 @@
                 },
                 "examples": {
                   "currentObjects": {
-                    "summary": "STATIC: ?list-type=2 — one object, not buckets",
+                    "summary": "STATIC: ?list-type=2 \u2014 one object, not buckets",
                     "value": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<ListBucketResult xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">\n  <Name>practice-bucket</Name>\n  <Prefix></Prefix>\n  <MaxKeys>1000</MaxKeys>\n  <KeyCount>1</KeyCount>\n  <IsTruncated>false</IsTruncated>\n  <Contents>\n    <Key>hello.txt</Key>\n    <LastModified>2026-11-04T09:02:00Z</LastModified>\n    <ETag>&quot;dummy-entity-tag&quot;</ETag>\n    <Size>31</Size>\n    <StorageClass>STANDARD</StorageClass>\n  </Contents>\n</ListBucketResult>\n"
                   },
                   "versions": {
-                    "summary": "STATIC: ?versions — retained version",
+                    "summary": "STATIC: ?versions \u2014 retained version",
                     "value": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<ListVersionsResult xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">\n  <Name>practice-bucket</Name>\n  <Prefix></Prefix>\n  <KeyMarker></KeyMarker>\n  <VersionIdMarker></VersionIdMarker>\n  <MaxKeys>1000</MaxKeys>\n  <IsTruncated>false</IsTruncated>\n  <Version>\n    <Key>hello.txt</Key>\n    <VersionId>EXAMPLE-VERSION</VersionId>\n    <IsLatest>true</IsLatest>\n    <LastModified>2026-11-04T09:02:00Z</LastModified>\n    <ETag>&quot;dummy-entity-tag&quot;</ETag>\n    <Size>31</Size>\n    <StorageClass>STANDARD</StorageClass>\n  </Version>\n</ListVersionsResult>\n"
                   },
                   "location": {
-                    "summary": "STATIC: ?location — saved region",
+                    "summary": "STATIC: ?location \u2014 saved region",
                     "value": "<LocationConstraint xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">us-west-2</LocationConstraint>\n"
                   },
                   "versioning": {
-                    "summary": "STATIC: ?versioning — enabled",
+                    "summary": "STATIC: ?versioning \u2014 enabled",
                     "value": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<VersioningConfiguration xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">\n  <Status>Enabled</Status>\n</VersioningConfiguration>\n"
                   },
                   "publicAccessBlock": {
-                    "summary": "STATIC: ?publicAccessBlock — saved settings",
+                    "summary": "STATIC: ?publicAccessBlock \u2014 saved settings",
                     "value": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<PublicAccessBlockConfiguration xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">\n  <BlockPublicAcls>true</BlockPublicAcls>\n  <IgnorePublicAcls>true</IgnorePublicAcls>\n  <BlockPublicPolicy>true</BlockPublicPolicy>\n  <RestrictPublicBuckets>true</RestrictPublicBuckets>\n</PublicAccessBlockConfiguration>\n"
                   },
                   "tags": {
-                    "summary": "STATIC: ?tagging — one user tag",
+                    "summary": "STATIC: ?tagging \u2014 one user tag",
                     "value": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Tagging xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">\n  <TagSet>\n    <Tag>\n      <Key>Environment</Key>\n      <Value>practice</Value>\n    </Tag>\n  </TagSet>\n</Tagging>\n"
                   }
                 }
@@ -755,7 +925,7 @@
       "head": {
         "operationId": "HeadBucket",
         "summary": "Check whether a bucket exists",
-        "description": "**Static documentation, not a live existence check.** Use Test Request → Send; HEAD never returns an XML body. A live 200 means the bucket exists and the selected identity can list it. Read x-amz-bucket-region in Response Headers. Requires s3:ListBucket. Use GET ?location for readable region XML; bucket configuration selectors do not apply to HEAD.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.",
+        "description": "**Static documentation, not a live existence check.** Use Test Request \u2192 Send; HEAD never returns an XML body. A live 200 means the bucket exists and the selected identity can list it. Read x-amz-bucket-region in Response Headers. Requires s3:ListBucket. Use GET ?location for readable region XML; bucket configuration selectors do not apply to HEAD.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.",
         "tags": [
           "S3 basic object storage"
         ],
@@ -2775,7 +2945,7 @@
         ],
         "responses": {
           "201": {
-            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2979,7 +3149,7 @@
         ],
         "responses": {
           "200": {
-            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3145,7 +3315,7 @@
         ],
         "responses": {
           "200": {
-            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3300,7 +3470,7 @@
         ],
         "responses": {
           "200": {
-            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3576,7 +3746,7 @@
         ],
         "responses": {
           "201": {
-            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3754,7 +3924,7 @@
         ],
         "responses": {
           "200": {
-            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4055,7 +4225,7 @@
         ],
         "responses": {
           "201": {
-            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4248,7 +4418,7 @@
         ],
         "responses": {
           "200": {
-            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4409,7 +4579,7 @@
         ],
         "responses": {
           "201": {
-            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4582,7 +4752,7 @@
         ],
         "responses": {
           "201": {
-            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4745,7 +4915,7 @@
         ],
         "responses": {
           "200": {
-            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4882,7 +5052,7 @@
         ],
         "responses": {
           "201": {
-            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5059,7 +5229,7 @@
         ],
         "responses": {
           "200": {
-            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5328,7 +5498,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The saved Lambda application body, returned as a non-executing download. It may be text or JSON depending on your code; this is not a fixed simulator success object. App status codes can also be 2xx–5xx.",
+            "description": "The saved Lambda application body, returned as a non-executing download. It may be text or JSON depending on your code; this is not a fixed simulator success object. App status codes can also be 2xx\u20135xx.",
             "content": {
               "application/octet-stream": {
                 "schema": {
@@ -5411,7 +5581,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The saved Lambda application body, returned as a non-executing download. It may be text or JSON depending on your code; this is not a fixed simulator success object. App status codes can also be 2xx–5xx.",
+            "description": "The saved Lambda application body, returned as a non-executing download. It may be text or JSON depending on your code; this is not a fixed simulator success object. App status codes can also be 2xx\u20135xx.",
             "content": {
               "application/octet-stream": {
                 "schema": {
@@ -5507,7 +5677,7 @@
         ],
         "responses": {
           "201": {
-            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5696,7 +5866,7 @@
         ],
         "responses": {
           "200": {
-            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6278,7 +6448,7 @@
         "properties": {
           "Key": {
             "type": "string",
-            "description": "Unique tag key; 1–128 Unicode characters. aws: prefixes are reserved."
+            "description": "Unique tag key; 1\u2013128 Unicode characters. aws: prefixes are reserved."
           },
           "Value": {
             "type": "string",
@@ -6905,6 +7075,381 @@
           }
         },
         "required": []
+      },
+      "KMSCreateKeyInput": {
+        "type": "object",
+        "properties": {
+          "Description": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "KeySpec": {
+            "type": "string",
+            "enum": [
+              "SYMMETRIC_DEFAULT"
+            ]
+          },
+          "KeyUsage": {
+            "type": "string",
+            "enum": [
+              "ENCRYPT_DECRYPT"
+            ]
+          },
+          "Origin": {
+            "type": "string",
+            "enum": [
+              "AWS_KMS"
+            ]
+          },
+          "MultiRegion": {
+            "type": "boolean",
+            "const": false
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "KMSKeyInput": {
+        "type": "object",
+        "properties": {
+          "KeyId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048,
+            "description": "Local UUID key ID or full same-region/account ARN. Replace example IDs with CreateKey output. Aliases and cross-account keys are unsupported."
+          }
+        },
+        "required": [
+          "KeyId"
+        ],
+        "additionalProperties": false
+      },
+      "KMSListKeysInput": {
+        "type": "object",
+        "properties": {
+          "Limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000,
+            "default": 100
+          },
+          "Marker": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024,
+            "description": "Copy prior NextMarker; region-bound local live pagination, not a snapshot."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "KMSGetKeyPolicyInput": {
+        "type": "object",
+        "properties": {
+          "KeyId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048,
+            "description": "Local UUID key ID or full same-region/account ARN. Replace example IDs with CreateKey output. Aliases and cross-account keys are unsupported."
+          },
+          "PolicyName": {
+            "type": "string",
+            "enum": [
+              "default"
+            ],
+            "default": "default"
+          }
+        },
+        "required": [
+          "KeyId"
+        ],
+        "additionalProperties": false
+      },
+      "KMSEncryptInput": {
+        "type": "object",
+        "properties": {
+          "KeyId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048,
+            "description": "Local UUID key ID or full same-region/account ARN. Replace example IDs with CreateKey output. Aliases and cross-account keys are unsupported."
+          },
+          "Plaintext": {
+            "type": "string",
+            "format": "byte",
+            "contentEncoding": "base64",
+            "minLength": 4,
+            "maxLength": 5464,
+            "description": "Base64 of1\u20134096 arbitrary plaintext bytes; use dummy data."
+          },
+          "EncryptionContext": {
+            "type": "object",
+            "maxProperties": 100,
+            "propertyNames": {
+              "minLength": 1
+            },
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Exact case-sensitive string map. Local canonical UTF-8 JSON budget8192bytes; absent and empty equivalent. Never put secrets in context."
+          },
+          "EncryptionAlgorithm": {
+            "type": "string",
+            "enum": [
+              "SYMMETRIC_DEFAULT"
+            ]
+          }
+        },
+        "required": [
+          "KeyId",
+          "Plaintext"
+        ],
+        "additionalProperties": false
+      },
+      "KMSDecryptInput": {
+        "type": "object",
+        "properties": {
+          "CiphertextBlob": {
+            "type": "string",
+            "format": "byte",
+            "contentEncoding": "base64",
+            "minLength": 4,
+            "maxLength": 8192,
+            "description": "Copy actual base64 CiphertextBlob from local Encrypt; not AWS-portable. Documentation placeholder is intentionally not decryptable."
+          },
+          "KeyId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048,
+            "description": "Local UUID key ID or full same-region/account ARN. Replace example IDs with CreateKey output. Aliases and cross-account keys are unsupported."
+          },
+          "EncryptionContext": {
+            "type": "object",
+            "maxProperties": 100,
+            "propertyNames": {
+              "minLength": 1
+            },
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Exact case-sensitive string map. Local canonical UTF-8 JSON budget8192bytes; absent and empty equivalent. Never put secrets in context."
+          },
+          "EncryptionAlgorithm": {
+            "type": "string",
+            "enum": [
+              "SYMMETRIC_DEFAULT"
+            ]
+          }
+        },
+        "required": [
+          "CiphertextBlob"
+        ],
+        "additionalProperties": false
+      },
+      "KMSKeyMetadata": {
+        "type": "object",
+        "properties": {
+          "AWSAccountId": {
+            "type": "string",
+            "const": "000000000000"
+          },
+          "KeyId": {
+            "type": "string"
+          },
+          "Arn": {
+            "type": "string"
+          },
+          "CreationDate": {
+            "type": "number"
+          },
+          "Enabled": {
+            "type": "boolean"
+          },
+          "Description": {
+            "type": "string"
+          },
+          "KeyUsage": {
+            "type": "string",
+            "const": "ENCRYPT_DECRYPT"
+          },
+          "KeyState": {
+            "type": "string",
+            "enum": [
+              "Enabled",
+              "Disabled"
+            ]
+          },
+          "Origin": {
+            "type": "string",
+            "const": "AWS_KMS"
+          },
+          "KeyManager": {
+            "type": "string",
+            "const": "CUSTOMER"
+          },
+          "KeySpec": {
+            "type": "string",
+            "const": "SYMMETRIC_DEFAULT"
+          },
+          "EncryptionAlgorithms": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "SYMMETRIC_DEFAULT"
+              ]
+            }
+          },
+          "MultiRegion": {
+            "type": "boolean",
+            "const": false
+          }
+        },
+        "required": [
+          "AWSAccountId",
+          "KeyId",
+          "Arn",
+          "CreationDate",
+          "Enabled",
+          "Description",
+          "KeyUsage",
+          "KeyState",
+          "Origin",
+          "KeyManager",
+          "KeySpec",
+          "EncryptionAlgorithms",
+          "MultiRegion"
+        ],
+        "additionalProperties": false
+      },
+      "KMSKeyResponse": {
+        "type": "object",
+        "properties": {
+          "KeyMetadata": {
+            "$ref": "#/components/schemas/KMSKeyMetadata"
+          }
+        },
+        "required": [
+          "KeyMetadata"
+        ],
+        "additionalProperties": false
+      },
+      "KMSKeyPage": {
+        "type": "object",
+        "properties": {
+          "Keys": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "KeyId": {
+                  "type": "string"
+                },
+                "KeyArn": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "KeyId",
+                "KeyArn"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "Truncated": {
+            "type": "boolean"
+          },
+          "NextMarker": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Keys",
+          "Truncated"
+        ],
+        "additionalProperties": false
+      },
+      "KMSPolicyResponse": {
+        "type": "object",
+        "properties": {
+          "Policy": {
+            "type": "string",
+            "description": "Immutable default account delegation policy JSON string; not a grant for every participant."
+          },
+          "PolicyName": {
+            "type": "string",
+            "const": "default"
+          }
+        },
+        "required": [
+          "Policy",
+          "PolicyName"
+        ],
+        "additionalProperties": false
+      },
+      "KMSEncryptResponse": {
+        "type": "object",
+        "properties": {
+          "CiphertextBlob": {
+            "type": "string",
+            "format": "byte"
+          },
+          "KeyId": {
+            "type": "string"
+          },
+          "EncryptionAlgorithm": {
+            "type": "string",
+            "enum": [
+              "SYMMETRIC_DEFAULT"
+            ]
+          }
+        },
+        "required": [
+          "CiphertextBlob",
+          "KeyId",
+          "EncryptionAlgorithm"
+        ],
+        "additionalProperties": false
+      },
+      "KMSDecryptResponse": {
+        "type": "object",
+        "properties": {
+          "Plaintext": {
+            "type": "string",
+            "format": "byte"
+          },
+          "KeyId": {
+            "type": "string"
+          },
+          "EncryptionAlgorithm": {
+            "type": "string",
+            "enum": [
+              "SYMMETRIC_DEFAULT"
+            ]
+          }
+        },
+        "required": [
+          "Plaintext",
+          "KeyId",
+          "EncryptionAlgorithm"
+        ],
+        "additionalProperties": false
+      },
+      "KMSNativeError": {
+        "type": "object",
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "__type",
+          "message"
+        ],
+        "additionalProperties": false
       }
     },
     "responses": {
@@ -6955,6 +7500,10 @@
     {
       "name": "API Gateway REST APIs",
       "description": "Actual native REST management plus authenticated local in-process Lambda proxy invocation. Original AWS JSON wire list field item maps to SDK items. See docs/apigateway.md for limits and non-executing download behavior."
+    },
+    {
+      "name": "KMS local symmetric keys",
+      "description": "Independent bounded symmetric encryption simulator. Raw key material in SQLite; local ciphertext is incompatible with AWS KMS. No aliases/grants/deletion/rotation or HSM guarantee."
     }
   ]
 }

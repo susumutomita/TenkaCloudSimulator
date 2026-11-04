@@ -1,210 +1,302 @@
 {
   "version": 1,
-  "base_sha": "cb529272ce14be9cab645e284b1733da37b21cda",
+  "base_sha": "b61d0299a2139661f01ef29ae5826e4c070cc7bf",
   "changes": [
     {
-      "path": "README.md",
-      "sha256": "b6beb58c7999f991cddf8910c45f5eb50193ebd78318cfe37770e0a5f0ad896f",
+      "path": "docs/kms.md",
+      "sha256": "653d2098a96e46bbe812f3a39653875a72f76764b053589b0650794595990870",
       "disposition": "documentation",
-      "reason": "Describe the merged native-only SQS scope, preserved browser logout security, ten bounded models and36 required mutants; no runtime/Go refinement proof or full catalog/multicloud claim.",
+      "reason": "Document exact bounded KMS contracts/official URLs/legacy provenance and distinguish native f018 evidence from new unexecuted server/UI/model integration; no runtime behavior or proof by prose.",
       "models": []
     },
     {
-      "path": "SECURITY.md",
-      "sha256": "b0c9b8f83fa38d42f1b5994d5c19e434fcdaa0f55c603ca73e57d14d8f47d3dc",
-      "disposition": "documentation",
-      "reason": "Corrects stale descriptive logout text to match the existing parent-bound ephemeral browser credential/revocation code. SDK/other-session preservation, trusted-host/proxy boundaries and limitations remain; no new security-policy exception or runtime grant.",
-      "models": []
-    },
-    {
-      "path": "docs/console-sessions.md",
-      "sha256": "12378cda75394ad91e483cb2bbbeed585f0453d92e085ecbc108e20a95b677e0",
-      "disposition": "documentation",
-      "reason": "Documents current eight-model/eighteen-control combined inventory and explicit bounded session limits; source restack/policy checks do not imply fresh runtime/browser/TLC/hosted CI execution.",
-      "models": []
-    },
-    {
-      "path": "docs/sqs.md",
-      "sha256": "7c812f381803172147e4aefe33d555e4aad0c64ab12eeeb13d088d870d18e526",
-      "disposition": "documentation",
-      "reason": "Describe the merged native-only SQS scope, preserved browser logout security, ten bounded models and36 required mutants; no runtime/Go refinement proof or full catalog/multicloud claim.",
-      "models": []
-    },
-    {
-      "path": "formal/BrowserSessions.cfg",
-      "sha256": "6c9a3ec3c355763cb5d212c2da845085be53e302df956a87c94bb479e2e5640f",
+      "path": "formal/KMSKeyState.cfg",
+      "sha256": "44b027d39cbebe6030053b599ff398a66bbe423b504d57fa2e46007cd1fce8fa",
       "disposition": "modeled",
-      "reason": "The changed source is a caller/test correspondence seam for selected browser revocation and independent SDK/session preservation; actual UI/HTTP behavior is validated separately, not executed by TLC.",
+      "reason": "Add bounded native KMS key-state and immutable permission/context/region bridge; abstract successful authorized events only. Native SQL affected-row/failed-commit, JSON MIME/parser, actual AES, and metadata/list response cases are separate real tests; no model proof claimed for those.",
       "models": [
         {
-          "id": "BrowserSessions",
+          "id": "KMSKeyState",
           "properties": [
-            "RevokedCookiesDenied",
-            "AcceptedOnlyLiveParent",
-            "SDKAuthorityPreserved",
-            "UnrelatedSessionsPreserved",
-            "NoRawSDKCookie",
-            "NoBrowserSDKAuthority",
-            "ParentLifetimeBound"
+            "AuthorizedEvents",
+            "EnabledCrypto",
+            "BoundContextAndKey"
           ],
-          "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them."
+          "limits": "Atomic bounded successful Create/SetEnabled/Encrypt/Decrypt events only; key/region/context labels are abstract values. No AES proof, nonce probability, JSON/IAM parsing, SQLite RowsAffected/commit/crash refinement, rejected/error response frames, read-only Describe/List/GetPolicy outputs, host authentication, time, growing key population or arbitrary key policies. Last event captures pre-operation conditions so later Disable does not invalidate an earlier legitimate output. Shared Gateway/dispatch/server paths are wiring declarations only; this model does not establish host-token authentication, constructor rollback or UI/SDK integration. This binding is declared source applicability, not Go refinement or full host/UI/schema proof."
         }
       ]
     },
     {
-      "path": "formal/BrowserSessions.tla",
-      "sha256": "cde5633b5b190063d8c65205680c1a10f399430469b1562562a467133098b40a",
+      "path": "formal/KMSKeyState.tla",
+      "sha256": "26dae0bb9da92a19190b613c4d870d23356b2571374639ff0116229b8ee6edaf",
       "disposition": "modeled",
-      "reason": "The changed source is a caller/test correspondence seam for selected browser revocation and independent SDK/session preservation; actual UI/HTTP behavior is validated separately, not executed by TLC.",
+      "reason": "Add bounded native KMS key-state and immutable permission/context/region bridge; abstract successful authorized events only. Native SQL affected-row/failed-commit, JSON MIME/parser, actual AES, and metadata/list response cases are separate real tests; no model proof claimed for those.",
       "models": [
         {
-          "id": "BrowserSessions",
+          "id": "KMSKeyState",
           "properties": [
-            "RevokedCookiesDenied",
-            "AcceptedOnlyLiveParent",
-            "SDKAuthorityPreserved",
-            "UnrelatedSessionsPreserved",
-            "NoRawSDKCookie",
-            "NoBrowserSDKAuthority",
-            "ParentLifetimeBound"
+            "AuthorizedEvents",
+            "EnabledCrypto",
+            "BoundContextAndKey"
           ],
-          "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them."
+          "limits": "Atomic bounded successful Create/SetEnabled/Encrypt/Decrypt events only; key/region/context labels are abstract values. No AES proof, nonce probability, JSON/IAM parsing, SQLite RowsAffected/commit/crash refinement, rejected/error response frames, read-only Describe/List/GetPolicy outputs, host authentication, time, growing key population or arbitrary key policies. Last event captures pre-operation conditions so later Disable does not invalidate an earlier legitimate output. Shared Gateway/dispatch/server paths are wiring declarations only; this model does not establish host-token authentication, constructor rollback or UI/SDK integration. This binding is declared source applicability, not Go refinement or full host/UI/schema proof."
         }
       ]
     },
     {
       "path": "formal/README.md",
-      "sha256": "59bcde31c59d93f105a72611ea3d7f7bebe2189cee35be03c595a6504707a9a5",
+      "sha256": "5fd67486016147621e51a5faf04c302cb21ae75783d2981c6511b8135e2d080a",
       "disposition": "documentation",
-      "reason": "Describe the merged native-only SQS scope, preserved browser logout security, ten bounded models and36 required mutants; no runtime/Go refinement proof or full catalog/multicloud claim.",
+      "reason": "Document exact bounded KMS contracts/official URLs/legacy provenance and distinguish native f018 evidence from new unexecuted server/UI/model integration; no runtime behavior or proof by prose.",
       "models": []
     },
     {
       "path": "formal/models.json",
-      "sha256": "38b7a5a2812e49cf318cc6588b4d4f2898a553bce0f0eded7295d5683bbf8d37",
+      "sha256": "e9b2dd9544612aa7e0f870cc3bb5121031d41a4dff5e5d518215c616d1d3e110",
       "disposition": "formal-infrastructure",
-      "reason": "Additive union of Startup, SSM and Browser inventories/required IDs/critical invariants and all feature-specific negative controls; exact guard function bodies, strict module metadata recognizer/fixtures and mandatory canonical axe/E2E preparation are preserved. Eight normal/eighteen sensitivity cases require fresh immutable-HEAD TLC; no new runtime proof is inferred.",
+      "reason": "Register KMSKeyState and protect its four required invariants with removal-negative fixtures, preserving all previous ten entries/properties/thirty-six controls. Actual immutable-head finite model runs remain required.",
       "models": []
     },
     {
-      "path": "internal/server/access.go",
-      "sha256": "039384e1f22a36807ff8b1942cb0211eed58f7f044c45e7ce40428562a02fd7b",
+      "path": "internal/aws/kms_ack_boundary_test.go",
+      "sha256": "ee74374beae7c73ff2d95dc6ca5222c09daaf127cddd6471655eebb10dc01bad",
+      "disposition": "test-support",
+      "reason": "Add/retain real KMS native/SQLite/SDK/browser assertions with literal operation resources, positive crypto, failed-write frames and state persistence; these tests are validation support, not a formal implementation proof.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/kms_crypto.go",
+      "sha256": "2026f074a7cd0b20684f4ab01219cef89a1668933fc51452105bf49df694e32a",
       "disposition": "modeled",
-      "reason": "Introduces independent browser credential state with bounded lifetime, live-parent use checks and selective logout without mutating raw SDK authority. BrowserSessions checks the bounded design transitions; native concurrency/HTTP tests remain independent.",
+      "reason": "Add bounded native KMS key-state and immutable permission/context/region bridge; abstract successful authorized events only. Native SQL affected-row/failed-commit, JSON MIME/parser, actual AES, and metadata/list response cases are separate real tests; no model proof claimed for those.",
       "models": [
         {
-          "id": "BrowserSessions",
+          "id": "KMSKeyState",
           "properties": [
-            "RevokedCookiesDenied",
-            "AcceptedOnlyLiveParent",
-            "SDKAuthorityPreserved",
-            "UnrelatedSessionsPreserved",
-            "NoRawSDKCookie",
-            "NoBrowserSDKAuthority",
-            "ParentLifetimeBound"
+            "AuthorizedEvents",
+            "EnabledCrypto",
+            "BoundContextAndKey"
           ],
-          "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them."
+          "limits": "Atomic bounded successful Create/SetEnabled/Encrypt/Decrypt events only; key/region/context labels are abstract values. No AES proof, nonce probability, JSON/IAM parsing, SQLite RowsAffected/commit/crash refinement, rejected/error response frames, read-only Describe/List/GetPolicy outputs, host authentication, time, growing key population or arbitrary key policies. Last event captures pre-operation conditions so later Disable does not invalidate an earlier legitimate output. Shared Gateway/dispatch/server paths are wiring declarations only; this model does not establish host-token authentication, constructor rollback or UI/SDK integration. This binding is declared source applicability, not Go refinement or full host/UI/schema proof."
         }
       ]
     },
     {
-      "path": "internal/server/access_browser_test.go",
-      "sha256": "a1d06a5c4a5a185627cd3ae97952891b733509d72032b9ed3095a58250f53af0",
+      "path": "internal/aws/kms_dispatch.go",
+      "sha256": "5cdedf5cec3687361c32d0f68b92a2cead937444d1822aa2f101afb7ef0b5ee9",
       "disposition": "modeled",
-      "reason": "The changed source is a caller/test correspondence seam for selected browser revocation and independent SDK/session preservation; actual UI/HTTP behavior is validated separately, not executed by TLC.",
+      "reason": "Add bounded native KMS key-state and immutable permission/context/region bridge; abstract successful authorized events only. Native SQL affected-row/failed-commit, JSON MIME/parser, actual AES, and metadata/list response cases are separate real tests; no model proof claimed for those.",
       "models": [
         {
-          "id": "BrowserSessions",
+          "id": "KMSKeyState",
           "properties": [
-            "RevokedCookiesDenied",
-            "AcceptedOnlyLiveParent",
-            "SDKAuthorityPreserved",
-            "UnrelatedSessionsPreserved",
-            "NoRawSDKCookie",
-            "NoBrowserSDKAuthority",
-            "ParentLifetimeBound"
+            "AuthorizedEvents",
+            "EnabledCrypto",
+            "BoundContextAndKey"
           ],
-          "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them."
+          "limits": "Atomic bounded successful Create/SetEnabled/Encrypt/Decrypt events only; key/region/context labels are abstract values. No AES proof, nonce probability, JSON/IAM parsing, SQLite RowsAffected/commit/crash refinement, rejected/error response frames, read-only Describe/List/GetPolicy outputs, host authentication, time, growing key population or arbitrary key policies. Last event captures pre-operation conditions so later Disable does not invalidate an earlier legitimate output. Shared Gateway/dispatch/server paths are wiring declarations only; this model does not establish host-token authentication, constructor rollback or UI/SDK integration. This binding is declared source applicability, not Go refinement or full host/UI/schema proof."
         }
       ]
     },
     {
-      "path": "internal/server/web/app.js",
-      "sha256": "3e3ba30db04307b2e064c4cfca07749dee4ef2cd65e3935256d9bbadd00fe497",
+      "path": "internal/aws/kms_fault_test.go",
+      "sha256": "9368d7b6e7846e6897ca4301ee15c6d5cd3dba6a0e86a46da565dffc41dc6488",
+      "disposition": "test-support",
+      "reason": "Add/retain real KMS native/SQLite/SDK/browser assertions with literal operation resources, positive crypto, failed-write frames and state persistence; these tests are validation support, not a formal implementation proof.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/kms_http.go",
+      "sha256": "f51d6e6d5d7da55a8a2125d095fd40a61e599d43d29e5d671532a14e11ef4aec",
+      "disposition": "modeled",
+      "reason": "Add bounded native KMS key-state and immutable permission/context/region bridge; abstract successful authorized events only. Native SQL affected-row/failed-commit, JSON MIME/parser, actual AES, and metadata/list response cases are separate real tests; no model proof claimed for those.",
+      "models": [
+        {
+          "id": "KMSKeyState",
+          "properties": [
+            "AuthorizedEvents",
+            "EnabledCrypto",
+            "BoundContextAndKey"
+          ],
+          "limits": "Atomic bounded successful Create/SetEnabled/Encrypt/Decrypt events only; key/region/context labels are abstract values. No AES proof, nonce probability, JSON/IAM parsing, SQLite RowsAffected/commit/crash refinement, rejected/error response frames, read-only Describe/List/GetPolicy outputs, host authentication, time, growing key population or arbitrary key policies. Last event captures pre-operation conditions so later Disable does not invalidate an earlier legitimate output. Shared Gateway/dispatch/server paths are wiring declarations only; this model does not establish host-token authentication, constructor rollback or UI/SDK integration. This binding is declared source applicability, not Go refinement or full host/UI/schema proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/kms_http_test.go",
+      "sha256": "6a56418db8b0a65b142870a985ec2a6144277ea02182f019902a13e76c2d4c1a",
+      "disposition": "test-support",
+      "reason": "Add/retain real KMS native/SQLite/SDK/browser assertions with literal operation resources, positive crypto, failed-write frames and state persistence; these tests are validation support, not a formal implementation proof.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/kms_permission_boundary_test.go",
+      "sha256": "854fd3e8f08e806b127ec53262d9d37190bdd765ff9e6712b8015676d3dcb361",
+      "disposition": "test-support",
+      "reason": "Add/retain real KMS native/SQLite/SDK/browser assertions with literal operation resources, positive crypto, failed-write frames and state persistence; these tests are validation support, not a formal implementation proof.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/kms_store.go",
+      "sha256": "9b1339304fd6e3aabf5dd8b33d09d699f219784b5b828bd7fdf77de9977fa1b8",
+      "disposition": "modeled",
+      "reason": "Add bounded native KMS key-state and immutable permission/context/region bridge; abstract successful authorized events only. Native SQL affected-row/failed-commit, JSON MIME/parser, actual AES, and metadata/list response cases are separate real tests; no model proof claimed for those.",
+      "models": [
+        {
+          "id": "KMSKeyState",
+          "properties": [
+            "AuthorizedEvents",
+            "EnabledCrypto",
+            "BoundContextAndKey"
+          ],
+          "limits": "Atomic bounded successful Create/SetEnabled/Encrypt/Decrypt events only; key/region/context labels are abstract values. No AES proof, nonce probability, JSON/IAM parsing, SQLite RowsAffected/commit/crash refinement, rejected/error response frames, read-only Describe/List/GetPolicy outputs, host authentication, time, growing key population or arbitrary key policies. Last event captures pre-operation conditions so later Disable does not invalidate an earlier legitimate output. Shared Gateway/dispatch/server paths are wiring declarations only; this model does not establish host-token authentication, constructor rollback or UI/SDK integration. This binding is declared source applicability, not Go refinement or full host/UI/schema proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/kms_store_test.go",
+      "sha256": "023ee5513b83331665174f9d9d9c4622516b01e23eec5a6ea235b447e666badd",
+      "disposition": "test-support",
+      "reason": "Add/retain real KMS native/SQLite/SDK/browser assertions with literal operation resources, positive crypto, failed-write frames and state persistence; these tests are validation support, not a formal implementation proof.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/kms_types.go",
+      "sha256": "7853b7463b96c8122ef0d274dd84bc8dce64923336a9c00f490d21ca8811f172",
+      "disposition": "modeled",
+      "reason": "Add bounded native KMS key-state and immutable permission/context/region bridge; abstract successful authorized events only. Native SQL affected-row/failed-commit, JSON MIME/parser, actual AES, and metadata/list response cases are separate real tests; no model proof claimed for those.",
+      "models": [
+        {
+          "id": "KMSKeyState",
+          "properties": [
+            "AuthorizedEvents",
+            "EnabledCrypto",
+            "BoundContextAndKey"
+          ],
+          "limits": "Atomic bounded successful Create/SetEnabled/Encrypt/Decrypt events only; key/region/context labels are abstract values. No AES proof, nonce probability, JSON/IAM parsing, SQLite RowsAffected/commit/crash refinement, rejected/error response frames, read-only Describe/List/GetPolicy outputs, host authentication, time, growing key population or arbitrary key policies. Last event captures pre-operation conditions so later Disable does not invalidate an earlier legitimate output. Shared Gateway/dispatch/server paths are wiring declarations only; this model does not establish host-token authentication, constructor rollback or UI/SDK integration. This binding is declared source applicability, not Go refinement or full host/UI/schema proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/s3.go",
+      "sha256": "3d545074fab864eee93d5aa68d3142014f6625a5a51ca2d137e54c158b7e434e",
+      "disposition": "modeled",
+      "reason": "Add bounded native KMS key-state and immutable permission/context/region bridge; abstract successful authorized events only. Native SQL affected-row/failed-commit, JSON MIME/parser, actual AES, and metadata/list response cases are separate real tests; no model proof claimed for those.",
+      "models": [
+        {
+          "id": "KMSKeyState",
+          "properties": [
+            "AuthorizedEvents",
+            "EnabledCrypto",
+            "BoundContextAndKey"
+          ],
+          "limits": "Atomic bounded successful Create/SetEnabled/Encrypt/Decrypt events only; key/region/context labels are abstract values. No AES proof, nonce probability, JSON/IAM parsing, SQLite RowsAffected/commit/crash refinement, rejected/error response frames, read-only Describe/List/GetPolicy outputs, host authentication, time, growing key population or arbitrary key policies. Last event captures pre-operation conditions so later Disable does not invalidate an earlier legitimate output. Shared Gateway/dispatch/server paths are wiring declarations only; this model does not establish host-token authentication, constructor rollback or UI/SDK integration. This binding is declared source applicability, not Go refinement or full host/UI/schema proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ssm.go",
+      "sha256": "c617d506f07815e83b23db158b65ce8f8649bdc5986553a603d4acffe883e57e",
+      "disposition": "modeled",
+      "reason": "Add bounded native KMS key-state and immutable permission/context/region bridge; abstract successful authorized events only. Native SQL affected-row/failed-commit, JSON MIME/parser, actual AES, and metadata/list response cases are separate real tests; no model proof claimed for those.",
+      "models": [
+        {
+          "id": "KMSKeyState",
+          "properties": [
+            "AuthorizedEvents",
+            "EnabledCrypto",
+            "BoundContextAndKey"
+          ],
+          "limits": "Atomic bounded successful Create/SetEnabled/Encrypt/Decrypt events only; key/region/context labels are abstract values. No AES proof, nonce probability, JSON/IAM parsing, SQLite RowsAffected/commit/crash refinement, rejected/error response frames, read-only Describe/List/GetPolicy outputs, host authentication, time, growing key population or arbitrary key policies. Last event captures pre-operation conditions so later Disable does not invalidate an earlier legitimate output. Shared Gateway/dispatch/server paths are wiring declarations only; this model does not establish host-token authentication, constructor rollback or UI/SDK integration. This binding is declared source applicability, not Go refinement or full host/UI/schema proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/apidocs/openapi.json",
+      "sha256": "22297a764cb9925037a51d9d6fa5720ee5178eb292568418ac867e4db70e6194",
       "disposition": "presentation",
-      "reason": "Canonical embedded UI/bundle metadata for the reviewed account-menu caller; source account state correspondence is explicitly bound separately. Bundle provenance and actual browser checks remain required.",
+      "reason": "Expose existing same-origin KMS API requests/typed documentation and minimal Cloudscape component presentation. Backend remains authoritative; generated assets, served examples, async UI/reflow and real browser operation are separate pending tests, not established by a presentation disposition.",
       "models": []
+    },
+    {
+      "path": "internal/server/kms_integration_test.go",
+      "sha256": "5906bb0c3150a487b875998cf58d29897058ef5b8647ba0430c9ab8ea5932b1f",
+      "disposition": "test-support",
+      "reason": "Add/retain real KMS native/SQLite/SDK/browser assertions with literal operation resources, positive crypto, failed-write frames and state persistence; these tests are validation support, not a formal implementation proof.",
+      "models": []
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "1181c2ee0619dacec5bc7c792bef5d195e7d1ef9ec5eb3bf5435b3fdf0b876f0",
+      "disposition": "modeled",
+      "reason": "Regular constructor wires KMS to the same team SQLite/Gateway and advertises only eight operations plus explicit unsupported limits. KMS finite authority/state model covers successful abstract service events, not constructor/Access composition correctness, token authentication or other-service semantics; existing host/runtime tests and fresh actual SDK are separate obligations.",
+      "models": [
+        {
+          "id": "KMSKeyState",
+          "properties": [
+            "AuthorizedEvents",
+            "EnabledCrypto",
+            "BoundContextAndKey"
+          ],
+          "limits": "Atomic bounded successful Create/SetEnabled/Encrypt/Decrypt events only; key/region/context labels are abstract values. No AES proof, nonce probability, JSON/IAM parsing, SQLite RowsAffected/commit/crash refinement, rejected/error response frames, read-only Describe/List/GetPolicy outputs, host authentication, time, growing key population or arbitrary key policies. Last event captures pre-operation conditions so later Disable does not invalidate an earlier legitimate output. Shared Gateway/dispatch/server paths are wiring declarations only; this model does not establish host-token authentication, constructor rollback or UI/SDK integration. This binding is declared source applicability, not Go refinement or full host/UI/schema proof."
+        }
+      ]
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "c6e8e2b841cc2adee4201aa57a2c3a324edaa987453f5382ef906f0f5e31b692",
+      "sha256": "4f17722e45f87c695560ac53b284ed1caa8d25d98428d3e46c191e86e95f8bd5",
       "disposition": "formal-infrastructure",
-      "reason": "Additive union of Startup, SSM and Browser inventories/required IDs/critical invariants and all feature-specific negative controls; exact guard function bodies, strict module metadata recognizer/fixtures and mandatory canonical axe/E2E preparation are preserved. Eight normal/eighteen sensitivity cases require fresh immutable-HEAD TLC; no new runtime proof is inferred.",
+      "reason": "Register KMSKeyState and protect its four required invariants with removal-negative fixtures, preserving all previous ten entries/properties/thirty-six controls. Actual immutable-head finite model runs remain required.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "ae93870dbe1697067b0cfa3f756709f949d320b39bd660979686c869186958ee",
+      "sha256": "9ef72ff73cbf9cb581f35945ac30681760092bfee372ce2633302bdb7f1eddf9",
       "disposition": "formal-infrastructure",
-      "reason": "Additive union of Startup, SSM and Browser inventories/required IDs/critical invariants and all feature-specific negative controls; exact guard function bodies, strict module metadata recognizer/fixtures and mandatory canonical axe/E2E preparation are preserved. Eight normal/eighteen sensitivity cases require fresh immutable-HEAD TLC; no new runtime proof is inferred.",
+      "reason": "Register KMSKeyState and protect its four required invariants with removal-negative fixtures, preserving all previous ten entries/properties/thirty-six controls. Actual immutable-head finite model runs remain required.",
       "models": []
     },
     {
-      "path": "test/e2e/check.py",
-      "sha256": "c4d9ef1f80a66ad9986e623a6c62eca060b2ad0be49528ee3bbdce14228e0f9e",
+      "path": "test/e2e/kms.py",
+      "sha256": "b276a1886eb8e07181340badcfed90febaee86235ad6aa9dd8e0b830f491b052",
       "disposition": "test-support",
-      "reason": "Retains main real Scalar Send/response-reader+parameter detector hook and all earlier native/browser methods, adds mandatory detector-negative controls and keeps real logout helper check=True. Tests are caller/correspondence seams, not executed by TLC; actual final-head native/browser/CI remains required.",
+      "reason": "Add/retain real KMS native/SQLite/SDK/browser assertions with literal operation resources, positive crypto, failed-write frames and state persistence; these tests are validation support, not a formal implementation proof.",
       "models": []
     },
     {
-      "path": "test/e2e/console_logout.py",
-      "sha256": "7c5b4595f85f17a5ad4eb9b034a4d9700d27b8942e02cedfaa389adbdcfb04a1",
-      "disposition": "modeled",
-      "reason": "The changed source is a caller/test correspondence seam for selected browser revocation and independent SDK/session preservation; actual UI/HTTP behavior is validated separately, not executed by TLC.",
-      "models": [
-        {
-          "id": "BrowserSessions",
-          "properties": [
-            "RevokedCookiesDenied",
-            "AcceptedOnlyLiveParent",
-            "SDKAuthorityPreserved",
-            "UnrelatedSessionsPreserved",
-            "NoRawSDKCookie",
-            "NoBrowserSDKAuthority",
-            "ParentLifetimeBound"
-          ],
-          "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/bundle-digests.json",
-      "sha256": "97868208b7a19d8b0b9fd242f61c1dadaa0376e6934408dd863c907b620db496",
-      "disposition": "presentation",
-      "reason": "Canonical embedded UI/bundle metadata for the reviewed account-menu caller; source account state correspondence is explicitly bound separately. Bundle provenance and actual browser checks remain required.",
+      "path": "test/e2e/kms_console.py",
+      "sha256": "59b7a8e588dffe8a9938b68fd6471f4fde38c86760c9151ff1df9cca81d010ee",
+      "disposition": "test-support",
+      "reason": "Add/retain real KMS native/SQLite/SDK/browser assertions with literal operation resources, positive crypto, failed-write frames and state persistence; these tests are validation support, not a formal implementation proof.",
       "models": []
     },
     {
-      "path": "tools/console/bundle-inputs.json",
-      "sha256": "1abfb7427675e3eff370edd2201d258609310757777129fb2b020d11b4e3ca54",
+      "path": "third_party/kumo-kms.json",
+      "sha256": "390e17eadda7556773b5d43c84ad7fda83846404d19984f91841eac848197f8b",
+      "disposition": "documentation",
+      "reason": "Document exact bounded KMS contracts/official URLs/legacy provenance and distinguish native f018 evidence from new unexecuted server/UI/model integration; no runtime behavior or proof by prose.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/kms.jsx",
+      "sha256": "a88a1c821136795e3478838128beacef69cf039d59cbfe7ee40aef83e13791e5",
       "disposition": "presentation",
-      "reason": "Canonical embedded UI/bundle metadata for the reviewed account-menu caller; source account state correspondence is explicitly bound separately. Bundle provenance and actual browser checks remain required.",
+      "reason": "Expose existing same-origin KMS API requests/typed documentation and minimal Cloudscape component presentation. Backend remains authoritative; generated assets, served examples, async UI/reflow and real browser operation are separate pending tests, not established by a presentation disposition.",
       "models": []
     },
     {
       "path": "tools/console/src/main.jsx",
-      "sha256": "632a8cae47145ae8d65746c2bf3b7ece9edf7ea846ee0a012b7f865f75b3d1c9",
+      "sha256": "79acc0500565fabd8245949a71ad6ebb0bb34afd29014b43d924e3d4b2a4bbc5",
       "disposition": "modeled",
-      "reason": "The changed source is a caller/test correspondence seam for selected browser revocation and independent SDK/session preservation; actual UI/HTTP behavior is validated separately, not executed by TLC.",
+      "reason": "Minimal KMS service navigation/import/component mount preserves existing account signout/login/request authority. Existing browser-session finite revocation properties remain applicable; KMS UI async/rendering and console fidelity are separate unexecuted browser tests.",
       "models": [
         {
           "id": "BrowserSessions",
           "properties": [
             "RevokedCookiesDenied",
-            "SDKAuthorityPreserved",
-            "UnrelatedSessionsPreserved"
+            "NoBrowserSDKAuthority"
           ],
-          "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them."
+          "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them. This binding is declared source applicability, not Go refinement or full host/UI/schema proof."
         }
       ]
     }

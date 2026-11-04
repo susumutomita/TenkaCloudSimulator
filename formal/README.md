@@ -109,11 +109,27 @@ sets use an equivalent seed-assignment product, avoiding enumeration of every
 subset of the larger record universe. Accounting invariants apply to accepted
 admissions; failures independently preserve the complete prior physical state.
 
-The combined inventory includes ten baselines and thirty-six mandatory mutants after the BrowserSessions union.
+The combined inventory includes eleven baselines and forty-four mandatory mutants after the bounded KMS union.
 All original, SSM and Startup required properties remain protected. Model/source
 integration must pass the immutable-head gate separately for each new head. These finite abstractions do not
 prove Go/SQLite refinement, actual byte/JSON/Unicode arithmetic, filesystem size,
 concurrency scheduling, persistence/crashes, distributed delivery or liveness.
 See [SQS limits and concrete test boundaries](../docs/sqs.md).
 
-The combined registry requires 10 finite baselines and 36 named mutation controls, including BrowserSessions, SQSLifecycle and SQSStorageBudget. This source integration is not a new-head TLC or Go execution result.
+The combined registry requires 11 finite baselines and 44 named mutation controls, including BrowserSessions, SQSLifecycle and SQSStorageBudget. This source integration is not a new-head TLC or Go execution result.
+
+
+## Bounded KMS key-state registration
+
+KMSKeyState adds two fixed team/key namespaces sharing one home region, two request
+regions, two contexts/blob slots and an abstract two-encryption counter ceiling.
+Eight named controls exercise missing permission/team/region/state/context/key
+binding guards and the counter ceiling. Create/SetEnabled/Encrypt/Decrypt are
+atomic successful-event transitions; rejection frames, actual AES/nonce behavior,
+policy/JSON parsing, metadata/list outputs, SQL write acknowledgment/rollback,
+constructor wiring and host authentication remain native/integration obligations.
+The existing ten model entries and their36 controls are preserved; the new model
+and all four invariants are required by the loader and removal-negative fixtures.
+The registry is canonical; the old standalone KMS fragment is preserved outside
+production history as a handoff artifact and removed from the current tree.
+This source registration is not a new-head TLC, SDK, browser or whole-CI success.
