@@ -12,7 +12,7 @@ Every push, pull request and manual run checks out the exact tested head and run
 3. Unfiltered Cobertura conversion and Go HTML coverage view. Both full-module
    statement coverage and source-line coverage must be at least 90%.
 4. Locked npm dependency audit (high/critical fail) and canonical Go govulncheck.
-5. Twelve real binary + SDK + offline console/Scalar E2E cases, 23-state accessibility audit,
+5. Thirteen real binary + SDK + offline console/Scalar E2E cases, 28-state accessibility audit,
    three finite TLC models and three required mutation counterexamples.
 
 Coverage generation and threshold checks are ordinary required steps. An absent,
@@ -88,3 +88,5 @@ The main f790403 run41706632955 passed Go/coverage/security but caught an SSM mo
 The local SDK bridge tests exercise actual CPython, native SSM/S3 shared state, execution-role rather than caller authority, private-resource denial, two authenticated team processes, explicitDeny, frame/message/aggregate limits, unconsumed replies, canceled stdin/callback and four independent concurrent capability channels.
 
 A required pinned-catalog subset rehearsal runs the unchanged original wp2shell handler (SHA2568d559b2b8ad72f7a281d3ef5cd3ba804d76cb01d6f2d45049baf56ee4c8a4f03) through real Python/SQLite and native role-bound SSM. The test-only projection excludes unsupported resources and supplies a dummy unavailable HTTP URL. It observes the original SQL/routing defects, then native SSM configuration changes produce400/401. This is explicitly not a full-template deployment, seven-check grading or permission to select the problem.
+
+IAM console increment adds a twelfth actual-binary/SDK/browser E2E case; together with the SDK bridge the combined suite has thirteen cases and28scoped axe/keyboard/reflow states now include local role creation/read/edit, existing-role selection and ZIP deployment. Conditional identity creation races must yield exactly one success without overwriting prior permissions; a delayed detail read must not replace a new role form. Native IAM/trust/STS remain unsupported.

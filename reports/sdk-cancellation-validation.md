@@ -32,3 +32,7 @@ Only hello-world is selectable. API Gateway, WAF, original custom resources and 
 ## API documentation and response-bound follow-up
 
 The48KiB native-response buffer now has its own accurate EntityTooLarge message, separately from32KiB S3 object bodies. Capabilities and the embedded API description expose the distinct32/48/64KiB limits,128calls and1MiB aggregate. A native SSM regression uses valid stored values whose JSON escaping exceeds the transport buffer and requires an error without a partial successful result. Final full local gates pass with statements3263/3425=95.27% and source4239/4650=91.16%; all12 binary/SDK/browser E2E cases and the responsive detector pass. Logs: sdk-final-api-doc-gates.log and sdk-final-api-doc-e2e.log. Exact latest-head CI and reviews remain required.
+
+## Integration with the merged IAM console
+
+PR35 merged as65fe9e8 with successful main CI41755720364 and CodeQL41755720198. Its IAM controls and the SDK branch are combined by a normal merge, preserving both documentation sections and regenerating all six raw TLC reports. Local combined all-package race/quality/build gates, all13 actual-binary/SDK/browser E2E cases, strict responsive controls,28scoped accessibility states and all three models/three mutants pass. Exact combined-head CI/reviews are still required; earlier per-branch checks do not certify this merged tree.

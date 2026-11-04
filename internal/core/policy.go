@@ -138,6 +138,15 @@ type Identities struct{ store *Store }
 
 func NewIdentities(store *Store) *Identities { return &Identities{store: store} }
 func (i *Identities) Set(name string, p Policy) error {
+	return i.save(name, p, false)
+}
+
+// Create never replaces an existing identity, including a concurrent creator.
+func (i *Identities) Create(name string, p Policy) error {
+	return i.save(name, p, true)
+}
+
+func (i *Identities) save(name string, p Policy, createOnly bool) error {
 	if name == Administrator {
 		return fmt.Errorf("the simulator administrator is reserved")
 	}
@@ -162,8 +171,22 @@ func (i *Identities) Set(name string, p Policy) error {
 	if err != nil {
 		return err
 	}
-	if _, err = tx.Exec("INSERT INTO identity_policies(name,document) VALUES(?,?) ON CONFLICT(name) DO UPDATE SET document=excluded.document", name, string(data)); err != nil {
+	query := "INSERT INTO identity_policies(name,document) VALUES(?,?) ON CONFLICT(name) DO UPDATE SET document=excluded.document"
+	if createOnly {
+		query = "INSERT INTO identity_policies(name,document) VALUES(?,?) ON CONFLICT(name) DO NOTHING"
+	}
+	result, err := tx.Exec(query, name, string(data))
+	if err != nil {
 		return err
+	}
+	if createOnly {
+		n, err := result.RowsAffected()
+		if err != nil {
+			return err
+		}
+		if n == 0 {
+			return Fail("PreconditionFailed", "An identity with this name already exists.")
+		}
 	}
 	return tx.Commit()
 }

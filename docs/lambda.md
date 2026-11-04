@@ -35,7 +35,7 @@ CPythonは変更していない。WASIの絶対時刻poll非対応に合わせ�
 
 ## Cloudscape画面と検証
 
-Lambda→Functions→Create function（Author from scratch、Python 3.12、既存local role）→Test。Code tabからZIPをDeployし、同じnative API/SDKで読戻す。Configurationは実設定を表示する。Invokeのみ許可された参加者には、一覧/configurationを許可せず、hostから渡された名前のTestを用意する。inline code editor、monitoring、role自動作成等は未再現。実AWSログイン済み画面とのpixel一致は未検証。
+Lambda→Functions→Create function（Author from scratch、Python 3.12、既存local role）→Test。Services→IAM→Roles→Create roleでローカルroleを作り、LambdaのPermissions→Existing roleから選べる。初期policyは明示Denyでservice権限なし。Code tabからZIPをDeployし、同じnative API/SDKで読戻す。Configurationは実設定を表示する。Invokeのみ許可された参加者には、一覧/configurationを許可せず、hostから渡された名前のTestを用意する。inline code editor、monitoring、role自動作成等は未再現。実AWSログイン済み画面とのpixel一致は未検証。
 
 実バイナリを空cwd/PATHで起動するE2Eは、ブラウザ作成/実行/ZIP更新/削除、SDKのcode hash/readback、参加者Invoke/metadata拒否、別processの同名関数とtoken分離を検証する。Go race testsはSQL/hashの実Python実行、host capability拒否、deadline/heap/output bounds、concurrent cold isolation、SQLite失敗rollback/破損fail-closedを検証する。
 

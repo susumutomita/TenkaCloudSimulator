@@ -26,6 +26,12 @@ S3の設定・version ID/IAM・履歴quota・削除境界は[対応詳細](docs/
 
 IAMはidentity policyのVersion/Statement/Sid/Effect/Action/Resource、配列、`*`/`?`、明示Deny優先を評価する。Condition/Principal/NotAction/NotResource/resource policies/boundaries/SCPは未対応。CFNのRoleはローカルidentityを作り、trust metadataは認可に使用しない。カタログのSignInLocalDevelopmentAccess/AWSLambdaBasicExecutionRole ARNは記録のみで権限を付与しない。STS・AWSサインイン・CloudShellは未実装。
 
+## IAMからLambdaを作成
+
+管理者でServices→IAM→Roles→Create roleを開き、Role nameと限定identity policyを保存する。初期policyは明示Denyでservice権限を与えない。role詳細のCreate a Lambda functionからCreate functionへ進み、Permissions→Existing roleで作成済みroleを選ぶ。Python関数を作成後、Code→Function ZIP→Deploy→Testで実コードを実行する。既存のExecution role ARN手入力も使える。
+
+IAM画面は既存のローカルidentity policyを実行roleとして管理する限定UI。IAM Query API、別のuser/role namespace、trust policy/STS、AWS managed policies、CloudWatch権限の自動付与は未対応。AWSのIAM role作成と同等ではない。参加者tokenはIAM管理不可で、Lambda作成には既存のlambda:CreateFunctionとiam:PassRoleの判定を保つ。
+
 ## API/SDK
 
 ```sh

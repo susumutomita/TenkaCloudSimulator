@@ -33,3 +33,11 @@ LambdaはFunctions一覧→Author from scratchで作成→CodeのZIP Deploy→Te
 S3はbucket→Objects→Show versionsでversion ID、最新判定、delete markerを表示し、指定版をdownload/永久削除する。Properties→Bucket Versioning→Edit→Enable/Suspend、Permissions→Block public access (bucket settings)→Edit→Save changes→confirm入力もnative APIと同じ状態へ接続した。一次資料は[version一覧](https://docs.aws.amazon.com/AmazonS3/latest/userguide/list-obj-version-enabled-bucket.html)・[bucket公開ブロック設定](https://docs.aws.amazon.com/AmazonS3/latest/userguide/configuring-block-public-access-bucket.html)。bucket-level設定のみであり、未実装のACL/resource policiesを公開可能にする機能はない。実ブラウザでSDK更新→履歴読取→旧版download→marker除去→current復元、PC/390px・外部通信0を検証する。object全Properties page・実AWSの余白/全設定との一致は未検証。
 
 S3のProperties→Tagsは公式Cloudscape TagEditorのAdd tag/Key/Value/Remove/Save tagsを用い、native checksum付きPUT/GETと同じprovider-ownedタグを扱う。CFN resource Tagsも同じ値を作る。2チームのSDK/Console更新、空でない履歴のDeleteStack拒否と明示cleanupを実バイナリで検証する。AWS-generated tags/ABAC/課金は未対応。ログイン済AWS画面とのpixel一致・全page layout同等性は未検証。
+
+## IAM / Lambdaのロール導線と比較の限界
+
+IAM→Roles→Create role→Role details→Lambda→Create function→Permissions→Existing roleを実装した。role ARNとpermissions JSONは既存のlocal identity API/SQLiteを使用し、create時のIf-None-Match:*で同名identityを上書きしない。編集だけが既存policyを置き換える。simulator-adminは選択肢から除く。operatorだけが管理でき、participantはIAMの一覧/作成を拒否する。
+
+[公式Lambda execution-role手順](https://docs.aws.amazon.com/lambda/latest/dg/lambda-intro-execution-role.html)と[公式IAM role作成](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create.html)を参照した。公式はLambda service principalへのtrust、managed policies、自動role作成等を持つが、ここでは未対応。AWS風の項目名/Cloudscape componentの使用を、AWS画面の完全再現やtrust評価と扱わない。認証済みの現行AWS画面を直接確認していないため、pixel一致/最新の全配置は未検証。公開文書は操作の参考資料であり、実AWS画面を監査した証拠ではない。
+
+実ブラウザでは空のIAMからrole作成、Lambdaのrole選択、関数作成、ZIP Deploy、実Pythonが42を返すまで確認する。PC/390px、別teamのrole非共有、participant管理拒否も検証。残る差分はdocs/console-fidelity.mdに記録する。
