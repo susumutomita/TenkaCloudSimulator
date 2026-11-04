@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "base_sha": "6ffbd1881dad3589469fdf1809654b7483bd6ac4",
+  "changes": [
+    {
+      "path": ".github/workflows/formal.yml",
+      "sha256": "3e8a66f278d22a6c9fbf2761c784a97b7923d933d9307964139e26c4d83ea7b6",
+      "disposition": "formal-infrastructure",
+      "reason": "Run the exact-HEAD formal gate in an unprivileged Actions job; define runner-dependent bytecode cache only in supported step env contexts.",
+      "models": []
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "a49de3a7afae4ca42ecfdb1f064a98cad1c0bbce18bddc63a01ad6e9c3097286",
+      "disposition": "build-metadata",
+      "reason": "Ignore only generated reports/formal evidence so the validator does not mistake its own output for uncommitted source. No model, source or validation input is excluded.",
+      "models": []
+    },
+    {
+      "path": "docs/ci.md",
+      "sha256": "35bf55f6279fcc7106ff832e0f886a63a575d0c582715eb818b06a3d7e588a3e",
+      "disposition": "documentation",
+      "reason": "Explains finite bounds, declared correspondence, exact-input checks and separately configured merge protection; no application transition or mathematical implementation proof is introduced by this prose.",
+      "models": []
+    },
+    {
+      "path": "docs/formal-validation.md",
+      "sha256": "3aca4a0d7a833f84e96155d756371f85f85fa807c0869ebac022dea994ab3703",
+      "disposition": "documentation",
+      "reason": "Explains finite bounds, declared correspondence, exact-input checks and separately configured merge protection; no application transition or mathematical implementation proof is introduced by this prose.",
+      "models": []
+    },
+    {
+      "path": "formal/README.md",
+      "sha256": "65776efb4f747c0f8cb07d22c90ad451b52fecec0cdbb80160be0e4b306b743f",
+      "disposition": "documentation",
+      "reason": "Explains finite bounds, declared correspondence, exact-input checks and separately configured merge protection; no application transition or mathematical implementation proof is introduced by this prose.",
+      "models": []
+    },
+    {
+      "path": "formal/models.json",
+      "sha256": "ed8bd53c5b16d33443c4bf89c7c13eef41ae2632b740083f08e69cc2ee8b8e96",
+      "disposition": "formal-infrastructure",
+      "reason": "Changes validation orchestration or its executable inventory, not simulator resource transitions. Strict real-Git/input and failure-classification negative tests exercise the mechanism; the unchanged five finite specifications still require actual TLC baseline and sensitivity runs. Human acceptance and policy self-edit protection remain separate.",
+      "models": []
+    },
+    {
+      "path": "scripts/check-formal-applicability.py",
+      "sha256": "47045d256c9b3c9ac7b4e1342368b6ce6aa17f74d689f62b6ae7d5b7592dfb84",
+      "disposition": "formal-infrastructure",
+      "reason": "Changes validation orchestration or its executable inventory, not simulator resource transitions. Strict real-Git/input and failure-classification negative tests exercise the mechanism; the unchanged five finite specifications still require actual TLC baseline and sensitivity runs. Human acceptance and policy self-edit protection remain separate.",
+      "models": []
+    },
+    {
+      "path": "scripts/check-formal.py",
+      "sha256": "de54b5df0d2c3306b9a97542d87777c9dc0298ae9fc255b13b8a66d19e660253",
+      "disposition": "formal-infrastructure",
+      "reason": "Changes validation orchestration or its executable inventory, not simulator resource transitions. Strict real-Git/input and failure-classification negative tests exercise the mechanism; the unchanged five finite specifications still require actual TLC baseline and sensitivity runs. Human acceptance and policy self-edit protection remain separate.",
+      "models": []
+    },
+    {
+      "path": "scripts/formal_applicability.py",
+      "sha256": "a1e8baf590a398039395827e206a20c98871f198b5c558eb97744ae1679028cd",
+      "disposition": "formal-infrastructure",
+      "reason": "Changes validation orchestration or its executable inventory, not simulator resource transitions. Strict real-Git/input and failure-classification negative tests exercise the mechanism; the unchanged five finite specifications still require actual TLC baseline and sensitivity runs. Human acceptance and policy self-edit protection remain separate.",
+      "models": []
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "d08008ba7c3445eb3f2abff7cc4275d5829ff017d342ea48e421a70d2fb77248",
+      "disposition": "formal-infrastructure",
+      "reason": "Changes validation orchestration or its executable inventory, not simulator resource transitions. Strict real-Git/input and failure-classification negative tests exercise the mechanism; the unchanged five finite specifications still require actual TLC baseline and sensitivity runs. Human acceptance and policy self-edit protection remain separate.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-applicability.py",
+      "sha256": "68a801b2146e3ecb7763f6dc7e00212f1ccda35beb6203f84d136d782801c044",
+      "disposition": "formal-infrastructure",
+      "reason": "Changes validation orchestration or its executable inventory, not simulator resource transitions. Strict real-Git/input and failure-classification negative tests exercise the mechanism; the unchanged five finite specifications still require actual TLC baseline and sensitivity runs. Human acceptance and policy self-edit protection remain separate.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "2e02b5c95eb2d9a5dd9bc801a884590b7d4c2e29741c3481a90f217653b2dd1b",
+      "disposition": "formal-infrastructure",
+      "reason": "Changes validation orchestration or its executable inventory, not simulator resource transitions. Strict real-Git/input and failure-classification negative tests exercise the mechanism; the unchanged five finite specifications still require actual TLC baseline and sensitivity runs. Human acceptance and policy self-edit protection remain separate.",
+      "models": []
+    }
+  ]
+}
