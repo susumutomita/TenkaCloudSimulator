@@ -140,7 +140,7 @@
     },
     {
       "path": "internal/aws/kms_dispatch_boundary_test.go",
-      "sha256": "54818bf0f4345e1a3935c3d188cc4c0d8e2f1ddbda3b3ae7b59ddf8cf0518de6",
+      "sha256": "fb58a6888da0c8b0229c4e10a20201d9e1a2edc9d6bf4aa248bb676edfd0a017",
       "disposition": "modeled",
       "reason": "ONLY the new configured KMS selection/policy-snapshot/refusal branch is declared under the normalized protocol model. Raw headers/SigV4, real identity SQL errors, parsing and unchanged S3/SSM/other AWS branches are not modeled. Tests-first native bridge still expected to fail old dispatch until executable reproduction and correction.",
       "models": [
@@ -294,7 +294,7 @@
     },
     {
       "path": "internal/server/kms_integration_test.go",
-      "sha256": "5906bb0c3150a487b875998cf58d29897058ef5b8647ba0430c9ab8ea5932b1f",
+      "sha256": "fd377b0fee0e2136ffd4584e766880ee51fd61f5c3915e3a93bc900a89636204",
       "disposition": "test-support",
       "reason": "Real native/SQLite/SDK/browser boundary assertions with independent literals and positive outcomes; new dispatch counterexamples remain expected-fail until reproduced and fixed, no full IAM/token proof.",
       "models": []
