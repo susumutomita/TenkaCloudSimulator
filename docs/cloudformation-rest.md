@@ -70,6 +70,10 @@ iam:PassRole, SSM Put/Delete and IAM role/inline-policy actions. CAPABILITY_IAM
 acknowledges role creation; it does not grant permissions. Native role trust
 validation is unchanged. Existing CFN roles retain their documented legacy
 metadata-only trust behavior; arbitrary managed-policy permissions are not added.
+CFN-created IAM roles remain legacy aggregate identities: native IAM GetRole/
+ListRoles and the native role picker do not return them. Migrating that IAM
+visibility is still pending. API Gateway, Lambda and SSM resources do share their
+actual native SQLite state and existing console views.
 
 No UpdateStack/change sets, authorizers, API Gateway v2, WAF, custom resources,
 guest HTTP networking, active browser application hosting or full problem grading
