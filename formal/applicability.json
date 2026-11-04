@@ -1,33 +1,33 @@
 {
   "version": 1,
-  "base_sha": "b61d0299a2139661f01ef29ae5826e4c070cc7bf",
+  "base_sha": "5c97dc5916fa39fd43d80ae79532d5892fcb30ea",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "05bceeaf6c3da3bf11a9174db6e4c5d1b8ab7c04961159456e125c93d55ad25f",
+      "sha256": "c7285855d94824cb05950336ec42c510694e16e64c9e4a7ec22b635452b6eb7c",
       "disposition": "documentation",
-      "reason": "Documents the current bounded service, primary references and executed local Go/coverage/SDK/browser/cross/formal results at named checkpoints. Documentation-only changes require fresh immutable-head evidence; hosted CI is separate and unverified. No runtime change.",
+      "reason": "Document current main plus bounded Secrets candidate and limits; historical62ba local evidence is not validation of this new union. All integrated-head execution pending.",
       "models": []
     },
     {
       "path": "docs/formal-validation.md",
-      "sha256": "820cdc0f0c00f3e4db4ff45d0574dd484df48a889acd3c1adb7eacadeb0a9a74",
+      "sha256": "8a90df36d4f799ad0e9bcd5555eafc487ed95fe6e4428f18111ae28022b3edb2",
       "disposition": "documentation",
-      "reason": "Documents the current bounded service, primary references and executed local Go/coverage/SDK/browser/cross/formal results at named checkpoints. Documentation-only changes require fresh immutable-head evidence; hosted CI is separate and unverified. No runtime change.",
+      "reason": "Document current main plus bounded Secrets candidate and limits; historical62ba local evidence is not validation of this new union. All integrated-head execution pending.",
       "models": []
     },
     {
       "path": "docs/secrets-manager.md",
-      "sha256": "efccd535ec3c6793c005f0aa82cca200f7ead6167324dc0a0b36df75d055286c",
+      "sha256": "7f9f2924dd43e02f67a0b6ff5a396b2ca5a315467ec8bb3cd3adecd90a3e2d19",
       "disposition": "documentation",
-      "reason": "Documents the current bounded service, primary references and executed local Go/coverage/SDK/browser/cross/formal results at named checkpoints. Documentation-only changes require fresh immutable-head evidence; hosted CI is separate and unverified. No runtime change.",
+      "reason": "Document current main plus bounded Secrets candidate and limits; historical62ba local evidence is not validation of this new union. All integrated-head execution pending.",
       "models": []
     },
     {
       "path": "formal/README.md",
-      "sha256": "531cdeff9936385e0926163564c023489ddaaa9288aa7db8c1b3e56071023fd4",
+      "sha256": "935099a21179f648d0682c8c16e5fd5f0ec9daa4d7e84f88959a7aa8e7cba23a",
       "disposition": "documentation",
-      "reason": "Documents the current bounded service, primary references and executed local Go/coverage/SDK/browser/cross/formal results at named checkpoints. Documentation-only changes require fresh immutable-head evidence; hosted CI is separate and unverified. No runtime change.",
+      "reason": "Document current main plus bounded Secrets candidate and limits; historical62ba local evidence is not validation of this new union. All integrated-head execution pending.",
       "models": []
     },
     {
@@ -146,7 +146,7 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "f718fc4e0d217bd365f249c92e6c74c3ba2d3e583dca50429eec35f59b759956",
+      "sha256": "71ab6f98e192ad9af702ba99145f5a407d46f4ce43175f03bd97fb7ec3e4423a",
       "disposition": "formal-infrastructure",
       "reason": "Adds three required Secrets models and invariant guards plus rejection tests without removing or weakening main ten models, thirty-six mutants or existing immutable-head/module policies.",
       "models": []
@@ -429,7 +429,7 @@
     },
     {
       "path": "internal/server/apidocs/openapi.json",
-      "sha256": "f0dab6496b0d701a42949bf51102b5bf8d30fc8035d23d4cab7f9a118f191ed0",
+      "sha256": "3b69ea7afd4828ddda07293e39efd7249fa8bdc2c1d8fbaba05fe71bf50fedc3",
       "disposition": "presentation",
       "reason": "Additive seven-action native-root schemas/static examples and explicit plaintext/unsupported guidance, preserving existing paths/operation IDs/authentication. Served examples actually executed through native HTTP and checked against SDK state; examples themselves are not live state or authenticated AWS-console evidence.",
       "models": []
@@ -443,7 +443,7 @@
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "c5b6acf6fb851b65c61087bf7aca582bc6e88f1b6d33a0603c0379f47434a1f1",
+      "sha256": "8c0689e0c8a9351e4e33213af9bf8a574c55f30b34c0405d2e88588069da6deb",
       "disposition": "modeled",
       "reason": "Binds this source/artifact to the named finite state or disclosure/reveal properties. Actual local TLC evidence at c97bdde and concrete runtime/browser evidence at0888924 are recorded separately; declaration alone is not a new-head execution result or a general protocol/SQL/crypto/refinement proof.",
       "models": [
@@ -478,40 +478,22 @@
       ]
     },
     {
-      "path": "internal/server/web/app.js",
-      "sha256": "364e96e4465c6d2094fceb63fe639ba342a557264b1cba90b43c390acbe04572",
-      "disposition": "modeled",
-      "reason": "Binds this source/artifact to the named finite state or disclosure/reveal properties. Actual local TLC evidence at c97bdde and concrete runtime/browser evidence at0888924 are recorded separately; declaration alone is not a new-head execution result or a general protocol/SQL/crypto/refinement proof.",
-      "models": [
-        {
-          "id": "SecretsRevealEpoch",
-          "properties": [
-            "NoUnmountedDisplay",
-            "FreshEmissionHistory",
-            "ReturnedARNMatches",
-            "VisibleContextMatches"
-          ],
-          "limits": "Finite explicit-retrieve/display model, not React, DOM, AbortController, memory zeroization or implementation refinement. Only the successful response path is modeled; native store/IAM must authorize before returning any secret. A returned ARN can differ and must be rejected. Retrieve, Hide and navigation invalidate epochs; unmount also clears visible state. Parent must remount on region/principal changes. Emission history captures the context at each acceptance so later Hide/navigation cannot relabel an earlier stale acceptance. Draft entry, mutation atomicity and form layout are outside this model. Parent main.jsx scope binds only Secrets routing/remount key (region/principal/navigation); the generated app.js binding is the canonical compiled artifact of those source inputs, independently checked by bundle/asset hashes. It does not model unrelated existing console services or prove JavaScript compilation."
-        }
-      ]
-    },
-    {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "1614e1f321b15f0026d948307700c9f4a660144042b93e8a2b392b69b58b9bc4",
+      "sha256": "91ddfaa29f53915e05acb8228edf34eafbc63d3552b669658686e393d3ff9277",
       "disposition": "formal-infrastructure",
       "reason": "Preserves main ten models/thirty-six controls and adds three Secrets models/fourteen controls. Narrow required-ID guard freezes all50 reviewed sensitivity controls; each individual removal is a negative fixture. No unrelated provider/CFG feature or policy exemption imported; no bound/invariant/timeout reduction.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "ec0d6c4a1158ff6ca583173cd3f7cf74aaa64a5d75afc042943cd28583c8cf10",
+      "sha256": "31be2b65d725513b9776b54f74abf784837a119e97c647e082b9391211392d09",
       "disposition": "formal-infrastructure",
       "reason": "Preserves main ten models/thirty-six controls and adds three Secrets models/fourteen controls. Narrow required-ID guard freezes all50 reviewed sensitivity controls; each individual removal is a negative fixture. No unrelated provider/CFG feature or policy exemption imported; no bound/invariant/timeout reduction.",
       "models": []
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "f7bbb7c9cd4d65927edce179257d22d0715ad300f4b0e0f390af790bbfd2932c",
+      "sha256": "3f7dbcc3e4795e12c1651cec1418c46e86c4f9631881577c2632bacf03e7b5d6",
       "disposition": "test-support",
       "reason": "Actual native SDK, browser or served-reference regression helper/mandatory registration; full24 Conformance cases, including all three Secrets helpers, executed at0888924. Test-support classification does not itself prove implementation refinement or hosted CI.",
       "models": []
@@ -538,22 +520,8 @@
       "models": []
     },
     {
-      "path": "tools/console/bundle-digests.json",
-      "sha256": "6ecc338dcd9ec2ddb309dc68dcd07fd3ce1eaec2a03d4aa802e26d7b97c74c96",
-      "disposition": "presentation",
-      "reason": "Canonical build input/digest metadata from exact package-lock and a verified existing physical dependency copy. Actual generated UI state logic is separately bound at app.js; metadata alone grants no runtime authority.",
-      "models": []
-    },
-    {
-      "path": "tools/console/bundle-inputs.json",
-      "sha256": "5c1be7ac9118d999968c47b703661d5998bd161c21b2b1b6c26a6d2c733165fc",
-      "disposition": "presentation",
-      "reason": "Canonical build input/digest metadata from exact package-lock and a verified existing physical dependency copy. Actual generated UI state logic is separately bound at app.js; metadata alone grants no runtime authority.",
-      "models": []
-    },
-    {
       "path": "tools/console/src/main.jsx",
-      "sha256": "f4510d0a18b6d96bf103dd6d2b7c0cf2c444bb3f9416b6deacbaa2acd8583400",
+      "sha256": "019b5a317b3d65f44aaf8c7174f08e898df6ad1d0ded5cf42ef55c2dc9cc6b85",
       "disposition": "modeled",
       "reason": "Binds this source/artifact to the named finite state or disclosure/reveal properties. Actual local TLC evidence at c97bdde and concrete runtime/browser evidence at0888924 are recorded separately; declaration alone is not a new-head execution result or a general protocol/SQL/crypto/refinement proof.",
       "models": [

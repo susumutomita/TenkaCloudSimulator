@@ -18,6 +18,11 @@ import (
 var assets embed.FS
 
 func New(path string) (http.Handler, func() error, error) {
+	return NewWithCloudStorage(path, DefaultCloudStorageConfig())
+}
+
+// NewWithCloudStorage composes bounded providers; hosts must wrap NewAccess.
+func NewWithCloudStorage(path string, cloudConfig CloudStorageConfig) (http.Handler, func() error, error) {
 	store, err := core.New(path)
 	if err != nil {
 		return nil, nil, err
@@ -74,6 +79,11 @@ func New(path string) (http.Handler, func() error, error) {
 		_ = store.Close()
 		return nil, nil, err
 	}
+	if err := registerCloudStorage(store.Database(), registry, cloudConfig); err != nil {
+		_ = lambdas.Close()
+		_ = store.Close()
+		return nil, nil, err
+	}
 	mux := http.NewServeMux()
 	mux.Handle("/_simulator/licenses/", http.StripPrefix("/_simulator/licenses/", legal.Handler()))
 	mux.Handle(provider.Prefix, registry)
@@ -95,7 +105,7 @@ func New(path string) (http.Handler, func() error, error) {
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(map[string]any{"protocolVersion": "2026-11-03", "principal": r.Header.Get("X-Simulator-Principal"), "identitySelection": r.Header.Get("X-Simulator-Access-Role") != "participant", "simulatorVersion": "0.1.0", "providers": registry.Names(), "persistence": func() string {
+		_ = json.NewEncoder(w).Encode(map[string]any{"protocolVersion": "2026-11-03", "principal": r.Header.Get("X-Simulator-Principal"), "identitySelection": r.Header.Get("X-Simulator-Access-Role") != "participant", "simulatorVersion": "0.1.0", "providers": registry.Names(), "cloudStorage": cloudStorageCapabilities(cloudConfig), "persistence": func() string {
 			if path == "" || path == ":memory:" {
 				return "memory"
 			}

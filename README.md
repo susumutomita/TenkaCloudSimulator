@@ -1,6 +1,6 @@
 # TenkaCloud Simulator
 
-非公式のAWS学習用クラウドシミュレーター。Go単一バイナリにCloudscapeコンソール、Scalar API reference、SQLite、Python Lambda用の固定CPython/WASIを埋め込みます。実行時にGo・Node・ホストPython・Docker・外部DB・実AWSは不要です。実AWSの資格情報は入力しないでください。
+非公式のクラウド学習用シミュレーター。AWSを中心に開発し、Google Cloud Storage・Azure Blob Storageの限定的なローカル接続候補を追加しています（[範囲と検証状況](docs/multicloud-storage.md)）。Go単一バイナリにCloudscapeコンソール、Scalar API reference、SQLite、Python Lambda用の固定CPython/WASIを埋め込みます。実行時にGo・Node・ホストPython・Docker・外部DB・実AWSは不要です。実AWSの資格情報は入力しないでください。
 
 ## 起動する
 
@@ -41,7 +41,13 @@ make build
 
 S3のCloudFormationはBucketName/Versioning/PublicAccessBlock/ユーザーTagsとRef/Arnに対応し、空でない履歴は削除しません。呼出者にはStack ARNと各リソース操作の両方の権限が必要で、CAPABILITY_IAMは権限を付与しません。
 
-SQSはnative JSON 1.0 APIのみ対応します。保持中・期限切れ未回収を含む物理message rowはプロセス全体10000件、UTF-8 bodyとserialized attribute JSONの合計64 MiBまでです。これはSQLiteファイル全体・プロセスメモリ・AWS課金サイズの上限ではありません。Azure/GCP/Sakura等の他クラウドは現在のGo実装では未対応です。Issueや計画は実装完了を意味しません。[開発状況](docs/development-status.md)を参照してください。Cloudscapeを使用していますが、本物のAWSコンソールとの全画面・全挙動の一致や実AWSとの差分検証完了は主張していません。
+SQSはnative JSON 1.0 APIのみ対応します。保持中・期限切れ未回収を含む物理message rowはプロセス全体10000件、UTF-8 bodyとserialized attribute JSONの合計64 MiBまでです。これはSQLiteファイル全体・プロセスメモリ・AWS課金サイズの上限ではありません。この開発候補には下記の限定GCP Storage・Azure Blob実装がありますが、両クラウドの他サービスとSakuraは未対応です。Issueや計画は実装完了を意味しません。[開発状況](docs/development-status.md)を参照してください。Cloudscapeを使用していますが、本物のAWSコンソールとの全画面・全挙動の一致や実AWSとの差分検証完了は主張していません。
+
+## Google Cloud Storage・Azure Blob Storageのローカル接続候補
+
+ServicesからGoogle Cloud · Cloud Storage／Azure · Blob Storageを開きます。固定のsynthetic project/accountで、作成→upload→実ファイルdownload→削除を操作できます。2 CLI・別DB/tokenとPC/390pxの実操作は検証済みですが、公式SDK・全体CI・実クラウド画面との一致は未検証です。[対応・制限](docs/multicloud-storage.md)。
+
+既定所有者はsimulator-adminです。参加者に使わせる新規環境は、ホストが`--cloud-storage-owner=learner`を指定し、learnerへ固定したparticipant tokenを発行します。この所有者設定はGoogle IAMやAzure RBACではなく、AWSの権限も付与しません。同じDBの所有者変更は拒否します。CLIフラグは実CLIの再起動・所有者変更拒否・AWS権限非付与までGo/raceで検証しています。
 
 Secrets Managerのローカル候補はnative/SDK/browser・全24 E2E・実起動を検証済みです。`0888924`の同一全体profileでstatement94.78%、無除外source90.12%を確認しました。SecretStringはSQLite内の平文で、実AWSのKMS暗号化やAWSコンソールの全機能は再現しません。13モデル/50欠陥検出の実TLC・50画面監査もローカルで確認済みです。変更後は固定HEADを再検証し、公開後CI・review・release・mergeとは区別します。
 
@@ -91,9 +97,13 @@ AXE_SCRIPT=/tmp/tcsim-audit/axe.min.js make e2e PYTHON=/tmp/tcsim-tests/bin/pyth
 TLA_JAR=/path/to/tla2tools.jar make formal
 ```
 
+旧main5c97の開発候補の同一全体profileではstatement94.95%・未フィルターsource-line90.46%を確認しました。正式SDK・hosted CI・最終固定HEADの結果は別途必要です。
+
 CIはstatementと未フィルターsource-line coverageを両方90%以上に強制します。`make before-commit`単独のcoverage判定はstatementのみで、source-line判定はCIのCobertura生成後ステージと上記の2コマンドで行います。SDK/browser、license、依存security、埋込asset、形式検査も行います。cross compileは他OSでの実行成功を意味しません。開発用Python/Node/Javaはruntime依存ではありません。UI・Scalarの再生成は権利表記とlockを保持する[各build手順](tools/console/README.md)・[Scalar手順](tools/scalar/README.md)・[Python runtimeの権利・再生成手順](tools/python/README.md)に従います。
 
-形式registryは既存10モデルとSecretsVersionLifecycle・SecretsRevealEpoch・SecretsDisclosureChannelsを含む13有限モデル、50の必須欠陥検出を登録しています。ローカル固定HEADで全63実行を確認し、50検出を1件ずつ削除する否定テストも通過しました。各変更は新しい固定HEADで再検証し、公開後のGitHub CIとは区別して記録します。TLCと意図したmutantの反例で限定した安全条件を検査しますが、Go実装のrefinement、暗号、全AWS仕様・実AWSとの一致を証明するものではありません。変更はregistryとsource対応を更新し、固定HEADのCI結果で判断します。[形式検査](formal/README.md)、[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)。
+形式検査にはObjectStore、StackOwnership、S3Versions、NativeIAMOwnership、RESTDeploymentSnapshot、SSMParameterState、StartupTokenVisibility、BrowserSessions、SQSLifecycle、SQSStorageBudget、ProviderActor、GCPStorageState、AzureBlobState、ProjectAuthority、BlobRange、ProviderPath、SecretsVersionLifecycle、SecretsRevealEpoch、SecretsDisclosureChannelsの19有限モデルと96の意図した欠陥検出をregistryへ登録しています。追加モデルの有限検査結果と、統合後の固定HEAD検査は区別して記録します。TLCと意図したmutantの反例で限定した安全条件を検査しますが、Go実装のrefinement、暗号、全AWS仕様・実AWSとの一致を証明するものではありません。変更はregistryとsource対応を更新し、固定HEADのCI結果で判断します。[形式検査](formal/README.md)、[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)。
+
+Secrets Manager追加の旧62ba検証は履歴として保持し、このmain統合候補の検証は未実施です。
 
 ## ライセンス
 

@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"regexp"
 	"strings"
 	"syscall"
 	"time"
@@ -35,12 +36,19 @@ func run(ctx context.Context, args []string, output io.Writer) error {
 	tokenFile := flags.String("token-file", "simulator-token", "Private local operator access-token file (created with mode 0600)")
 	unsafe := flags.Bool("unsafe-no-auth", false, "Development-only: disable access tokens on numeric loopback")
 	showToken := flags.Bool("show-token", false, "Display the operator token only on an interactive terminal with CI unset")
+	cloudOwner := flags.String("cloud-storage-owner", "simulator-admin", "Trusted exercise owner of the local GCP project and Azure account (not an AWS IAM grant)")
 	if err := flags.Parse(args); err != nil {
 		return err
 	}
 	if flags.NArg() != 0 {
 		return fmt.Errorf("unexpected positional arguments")
 	}
+	if !regexp.MustCompile(`^[a-zA-Z0-9_-]{1,64}$`).MatchString(*cloudOwner) {
+		return fmt.Errorf("--cloud-storage-owner must contain 1–64 ASCII letters, digits, underscores or hyphens")
+	}
+	cloudConfig := server.DefaultCloudStorageConfig()
+	cloudConfig.GCPOwner = *cloudOwner
+	cloudConfig.AzureOwner = *cloudOwner
 	host, _, err := net.SplitHostPort(*listen)
 	if err != nil {
 		return err
@@ -59,7 +67,7 @@ func run(ctx context.Context, args []string, output io.Writer) error {
 	if err != nil {
 		return err
 	}
-	handler, closeState, err := server.New(*statePath)
+	handler, closeState, err := server.NewWithCloudStorage(*statePath, cloudConfig)
 	if err != nil {
 		_ = l.Close()
 		return err

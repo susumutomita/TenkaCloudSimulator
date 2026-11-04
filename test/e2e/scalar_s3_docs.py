@@ -39,7 +39,8 @@ def run_scalar_s3_docs():
         validate_parameter_lists(spec)
         assert spec == json.loads(Path('internal/server/apidocs/openapi.json').read_text()), 'Must exercise the actual embedded candidate spec'
         operations = [op['operationId'] for item in spec['paths'].values() for op in item.values() if isinstance(op, dict) and 'operationId' in op]
-        assert len(operations) == 43 and len(set(operations)) == 43
+        assert len(operations) == 61 and len(set(operations)) == 61
+        assert {'GCPListBuckets', 'GCPUploadObject', 'AzureListContainers', 'AzureGetBlob'} <= set(operations)
         assert spec['paths']['/']['get']['responses']['200']['content']['application/xml']['schema']['$ref'].endswith('/S3BucketList')
         examples = spec['paths']['/{bucket}']['get']['responses']['200']['content']['application/xml']['examples']
         mode_paths = {'currentObjects': '/practice-bucket?list-type=2', 'versions': '/practice-bucket?versions',
