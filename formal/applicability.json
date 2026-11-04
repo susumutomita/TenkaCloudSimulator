@@ -18,14 +18,14 @@
     },
     {
       "path": "docs/secrets-manager.md",
-      "sha256": "b1df7433d805772bc86f55c092748070589a6f1405eb0a0c74ac9c64ad68ac32",
+      "sha256": "979088cfd2532383d2d43ea257b802106a94cbb02a6b25810dfdf596c6fdab45",
       "disposition": "documentation",
       "reason": "Truthfully documents recovered local scope, actual limited native results, primary API references and pending combined validation. No new runtime claim.",
       "models": []
     },
     {
       "path": "formal/README.md",
-      "sha256": "aec249f36aab07fc3843767e94946700a49e6bfc59a7c8f3027cb56df6fcc508",
+      "sha256": "6d8529bbca6f0a3e80e7e1408b530d5df7ce451b29ccc9c5b00ba8b592824f2b",
       "disposition": "documentation",
       "reason": "Truthfully documents recovered local scope, actual limited native results, primary API references and pending combined validation. No new runtime claim.",
       "models": []
@@ -464,6 +464,24 @@
       ]
     },
     {
+      "path": "internal/server/web/app.js",
+      "sha256": "364e96e4465c6d2094fceb63fe639ba342a557264b1cba90b43c390acbe04572",
+      "disposition": "modeled",
+      "reason": "Canonical generated UI carries the declared browser-session and Secrets reveal-epoch flows. Model correspondence only; no browser/React/fetch execution or full asset refinement proof.",
+      "models": [
+        {
+          "id": "SecretsRevealEpoch",
+          "properties": [
+            "NoUnmountedDisplay",
+            "FreshEmissionHistory",
+            "ReturnedARNMatches",
+            "VisibleContextMatches"
+          ],
+          "limits": "Finite explicit-retrieve/display model, not React, DOM, AbortController, memory zeroization or implementation refinement. Only the successful response path is modeled; native store/IAM must authorize before returning any secret. A returned ARN can differ and must be rejected. Retrieve, Hide and navigation invalidate epochs; unmount also clears visible state. Parent must remount on region/principal changes. Emission history captures the context at each acceptance so later Hide/navigation cannot relabel an earlier stale acceptance. Draft entry, mutation atomicity and form layout are outside this model. Parent main.jsx scope binds only Secrets routing/remount key (region/principal/navigation); the generated app.js binding is the canonical compiled artifact of those source inputs, independently checked by bundle/asset hashes. It does not model unrelated existing console services or prove JavaScript compilation."
+        }
+      ]
+    },
+    {
       "path": "scripts/formal_model_gate.py",
       "sha256": "59832869558c2456732d8b6177b397d5445229f0f2a480289a7efaea2bd29ea2",
       "disposition": "formal-infrastructure",
@@ -503,6 +521,20 @@
       "sha256": "32e71b539bf0ab7aae2bd950425339eb8d5a3ea1a15482f9e9bf9558aac9fcbf",
       "disposition": "test-support",
       "reason": "Meaningful native/SDK/UI regression assertions or mandatory test registration. Source presence is not a passing runtime result.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "6ecc338dcd9ec2ddb309dc68dcd07fd3ce1eaec2a03d4aa802e26d7b97c74c96",
+      "disposition": "presentation",
+      "reason": "Canonical build input/digest metadata from exact package-lock and a verified existing physical dependency copy. Actual generated UI state logic is separately bound at app.js; metadata alone grants no runtime authority.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "5c1be7ac9118d999968c47b703661d5998bd161c21b2b1b6c26a6d2c733165fc",
+      "disposition": "presentation",
+      "reason": "Canonical build input/digest metadata from exact package-lock and a verified existing physical dependency copy. Actual generated UI state logic is separately bound at app.js; metadata alone grants no runtime authority.",
       "models": []
     },
     {
