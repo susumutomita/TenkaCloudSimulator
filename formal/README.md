@@ -52,8 +52,8 @@ regions by two names, two validated abstract values and latest-row versions
 explicit-Deny preservation, no-overwrite refusal, successful version advance,
 exact-key deletion/frame conditions and region/name read isolation. Five
 specified mutations must fail the appropriate named property. Existing five
-models and their controls remain mandatory; the combined inventory is six
-positive models and ten negative controls (sixteen TLC cases).
+models and their controls remain mandatory. SSM adds one baseline and five
+negative controls; the complete combined inventory is stated below.
 
 See [the SSM contract and source/test correspondence](../docs/formal-ssm.md).
 The native HTTP integration test uses distinct values and runtime versions

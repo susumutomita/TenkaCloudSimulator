@@ -106,7 +106,7 @@ randomness, file-write/crash atomicity, build freshness, process shutdown or
 implementation refinement. Real file/PTY/build/HTTP tests are independent checks.
 
 
-### Formal registry candidate and source correspondence
+### Formal registry and source correspondence
 
 The original model/config and three mutation anchors are registered without
 changing the Startup implementation. Registry-safe mutation IDs are
