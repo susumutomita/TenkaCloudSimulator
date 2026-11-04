@@ -38,7 +38,7 @@
   - textbox "Role name": audit-native-role
   - text: "Local subset: 1–64 letters, digits, hyphens or underscores; root path only. Description"
   - textbox "Description"
-  - text: Maximum 1000 UTF-8 bytes.
+  - text: Maximum 1000 characters in the IAM description character range.
   - heading "Trust policy" [level=2]
   - text: Reviewed trust policy
   - textbox "Reviewed trust policy": "{ \"Version\": \"2012-10-17\", \"Statement\": [ { \"Effect\": \"Allow\", \"Action\": \"sts:AssumeRole\", \"Principal\": { \"Service\": \"lambda.amazonaws.com\" } } ] }"

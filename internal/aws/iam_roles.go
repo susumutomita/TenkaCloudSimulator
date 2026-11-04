@@ -16,6 +16,7 @@ import (
 	"regexp"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/susumutomita/TenkaCloudSimulator/internal/core"
 )
@@ -217,7 +218,17 @@ func iamExecutionRole(ctx context.Context, query interface {
 	return nil
 }
 func (s *IAMRoleStore) Create(ctx context.Context, name, trust, description string, duration int) (IAMRole, error) {
-	if !iamRoleName.MatchString(name) || strings.EqualFold(name, core.Administrator) || len(description) > 1000 || duration < 3600 || duration > 43200 {
+	// Match CreateRole's documented description character range before XML output.
+	if !utf8.ValidString(description) || utf8.RuneCountInString(description) > 1000 {
+		return IAMRole{}, ssmFailure{"ValidationError", "Description must use at most1000 permitted IAM characters."}
+	}
+	for _, r := range description {
+		if r != '\t' && r != '\n' && r != '\r' && !(r >= 0x20 && r <= 0x7e) && !(r >= 0xa1 && r <= 0xff) {
+			return IAMRole{}, ssmFailure{"ValidationError", "Description contains characters outside the documented IAM range."}
+		}
+	}
+
+	if !iamRoleName.MatchString(name) || strings.EqualFold(name, core.Administrator) || duration < 3600 || duration > 43200 {
 		return IAMRole{}, ssmFailure{"ValidationError", "Use the root-path local role-name subset and duration3600–43200."}
 	}
 	if _, err := iamTrust(trust); err != nil {

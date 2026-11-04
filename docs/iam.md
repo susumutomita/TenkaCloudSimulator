@@ -22,7 +22,7 @@ Create a Lambda function→Create function→Existing roleで空の権限のロ�
 | inline permissions | identity policy subset、最大10policy/100aggregate statements/32KiB。未知のCondition等は拒否。明示Deny優先 |
 | pagination | ListRoles/ListRolePoliciesのMaxItems1–1000、返却Markerで継続 |
 | limits | Query本文128KiB。active+retired role名1000まで。削除ロールのnative再作成は新RoleIdを発行 |
-| メタデータ | description1000 UTF-8 bytes、MaxSessionDuration3600–43200（STSなし、実session期間ではない） |
+| メタデータ | description1000文字、AWSのAPI仕様の許可文字範囲（tab/改行/CR、U+0020–007E、U+00A1–00FF）、MaxSessionDuration3600–43200（STSなし、実session期間ではない） |
 | errors | malformed input/trust400、認可403、NoSuchEntity404、EntityAlreadyExists/DeleteConflict/LimitExceeded409、本文超過413、未対応操作/field501。DB障害500は内部詳細を隠す |
 
 各操作は`iam:<Action>`とrole ARN（ListRolesは`*`）へ現在のidentity policyを評価する。ローカルparticipant tokenの固定identityも同じ判定を受け、headerでadminへ変更できない。operator-onlyの旧identity管理とは認可境界が異なる。
@@ -40,3 +40,5 @@ DeleteRoleはinline policyが残るとDeleteConflict。先にDeleteRolePolicyす
 ## 上流再利用と権利
 
 Role wire fieldsはKumoのMIT実装の選択部分を適合した。固定commit/source SHAと改変範囲は[provenance](../third_party/kumo-iam.json)、原文copyright/permissionは[Kumo license](../third_party/KUMO-LICENSE.txt)。SQLite、認可、trust判定、ownership、consoleはこの実装で追加した。Kumo serverやLocalStack/Pythonを実行時依存にせず、上流の対応サービス数をこのSimulatorの対応数とは扱わない。
+
+Descriptionの文字制約は[CreateRole API](https://docs.aws.amazon.com/IAM/latest/APIReference/API_CreateRole.html)に合わせ、XMLで置換されるNUL等を保存前に拒否する。

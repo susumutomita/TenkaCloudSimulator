@@ -3,6 +3,7 @@ package aws
 import (
 	"context"
 	"encoding/json"
+	"encoding/xml"
 	"errors"
 	"strings"
 	"sync"
@@ -260,5 +261,35 @@ func TestNativeIAMRejectsUnknownTrustAndRollsBackAggregateLimit(t *testing.T) {
 	}
 	if owned, err := roles.Owns(ctx, "rolled-back"); err != nil || owned {
 		t.Fatal("failed role creation retained ownership", owned, err)
+	}
+}
+
+func TestNativeIAMDescriptionRoundTripsWithoutSilentXMLReplacement(t *testing.T) {
+	ctx := context.Background()
+	db, _ := s3TestState(t)
+	roles, err := NewIAMRoleStore(db.Database())
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, description := range []string{"bad\x00value", "bad\x0bvalue", string([]byte{0xff}), "bad\ufffevalue", "bad\uffffvalue", "日本語", strings.Repeat("é", 1001)} {
+		if _, err = roles.Create(ctx, "invalid-description", lambdaServiceTrust, description, 3600); iamCode(err) != "ValidationError" {
+			t.Fatal("unrepresentable description stored", err)
+		}
+	}
+	if _, err = roles.Get(ctx, "invalid-description"); iamCode(err) != "NoSuchEntity" {
+		t.Fatal("invalid metadata left a role", err)
+	}
+	description := "Local\trole\ncafé"
+	role, err := roles.Create(ctx, "description-roundtrip", lambdaServiceTrust, description, 3600)
+	if err != nil {
+		t.Fatal(err)
+	}
+	data, err := xml.Marshal(iamWireRole(role))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var read IAMRole
+	if err = xml.Unmarshal(data, &read); err != nil || read.Description != description {
+		t.Fatal("description changed across XML", read.Description, err)
 	}
 }

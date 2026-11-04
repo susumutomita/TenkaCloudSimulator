@@ -1,0 +1,29 @@
+# Native IAM role increment — validation record
+
+This adds nine bounded native IAM Query operations, persisted roles and inline policies, Lambda service trust, Cloudscape role creation/permissions/trust flows, and an executable Scalar reference. It does not add STS, managed-policy grants, users, advanced trust Conditions, non-root paths, or full AWS console parity. Existing legacy identity/CloudFormation roles retain their documented behavior. Only hello-world is selectable; full WP and the remaining catalog workloads are not enabled.
+
+## Behavior and security boundaries
+
+- Real boto3 creates/gets/lists/deletes roles and inline policies. Empty roles grant no service access. Policies use the same core identity state and native S3/SSM handlers as other clients.
+- Actual fixed CPython/WASI Lambda returns42 from deployed code. Its saved native role denies S3 before a grant, reads the stored dummy object after PutRolePolicy, and denies again after deletion. Wrong Lambda trust and retired-role fallback are rejected.
+- Two actual processes/databases/token authorities keep same-named roles independent. Cross-team tokens fail401; participant native IAM calls require their individual IAM actions. Local token selection is not STS or multi-tenancy.
+- Native/legacy simultaneous creation yields one owner. Legacy writes cannot adopt active or retired native names; CFN ownership, including drift, also prevents adoption. Ownership and mutation share one SQLite transaction.
+- Cancellation, inline-count/aggregate-byte/identity/retired-claim limits, damaged persisted state, SQL failure rollback and description XML roundtrip have concrete Go tests. Invalid XML/control/UTF-8 descriptions are rejected under the documented AWS character range before storage.
+
+## UI and API reference
+
+The actual official Cloudscape Wizard selects the Lambda service use case, adds no fictitious managed permissions, and creates an empty role. Permissions and Trust relationships call native Query. Empty roles appear in the Lambda picker; legacy identities remain usable through their separate view and manual ARN. Native role lists have real pagination/filtering. Pending policy reads must not overwrite a new unsaved inline-policy draft.
+
+The embedded Scalar IAM section uses the existing AWS provider alias with its required service header prefilled. Each Action has its own schema and required fields. A flat schema was insufficient: the real Scalar client omitted optional RoleName/trust fields and got400. The operation variants correct this; actual Send actions now create a role, list it, and return to a working S3 ListBuckets request. Native SDK readback verifies the created trust. Both root and provider-alias examples are executed through actual HTTP for all nine operations. Existing S3 reference order and operations are preserved.
+
+The authenticated AWS console was not available. Public primary AWS guides were consulted; passing local Cloudscape tests is not a pixel-equivalence claim. docs/console-fidelity.md records remaining differences. Images contain only dummy local resources. Original Kumo MIT role wire fields, pinned source SHA, exact copyright/permission and adaptations are recorded in third_party/kumo-iam.json and embedded KUMO-LICENSE.txt.
+
+## Integration and evidence
+
+SDK PR34 merged as4b3846df343d4ecea18bcde9375c0b1fdbfd2083 after all eight exact-59851e3 checks, same-head code/security review, bot+1 and resolved threads. Main CI41761403333 and CodeQL41761403139 succeeded. This candidate normally merges that main, preserving both native IAM and the saved-role SDK/context/frame/version-selector fixes; generated assets and models are regenerated rather than selecting stale reports as proof.
+
+Final local Go quality/race/assets/modules/build gates: statements3743/3946=94.86%, unfiltered source4867/5386=90.36%, both minimum90%. Earlier failures at88.05/89.88 were retained and addressed with meaningful cancellation/quota/ownership/fault tests; no floor, package filter or failure-ignore was changed. Four finite models and four intentional mutation counterexamples pass. The native ownership model abstracts two case-folded names; it is not a refinement proof.
+
+Logs reside in the cloud build directory /workspace/simulator-python-build. The final immutable runs and exact committed-head hosted checks must pass before merge is considered complete. Cross-compilation is not foreign-platform execution. Library screenshot saving failed before transfer because its connection could not be established; no Library ID was created. Local images remain preserved.
+
+Final frozen/rebuilt integration: all14 actual-binary/SDK/browser E2E cases PASS154.943s, including the delayed-read draft guard and actual Scalar CreateRole/ListRoles/S3 GET. The earlier draft-guard failure used a binary built six seconds before the new guarded UI; rebuilding the embedded assets and binary in order makes the new regression pass. No assertion was relaxed. Final38scoped axe states pass; all5target cross-compiles pass; actual pinned host/browser integration scores100/95 with duplicate awards0, cross-team401, private-output403, no external requests/page errors/mobile overflow, and DELETED cleanup. npm audit reports0vulnerabilities. Four models/four mutation controls pass. Logs: native-iam-immutable-gates.log, native-iam-immutable-coverage.log, native-iam-final-built-e2e.log, native-iam-final-cross.log, native-iam-final-host.log, native-iam-final-host-browser.log, native-iam-final-axe.log and native-iam-merged-final-formal.log. Final hosted checks/reviews must still certify the committed HEAD.

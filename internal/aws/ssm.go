@@ -175,7 +175,7 @@ func (g *Gateway) serveSSM(w http.ResponseWriter, r *http.Request) {
 		principal = core.Administrator
 	}
 	authorize := func(resource string) bool {
-		decision, err := g.Identities.Decision(principal, "ssm:"+op, resource)
+		decision, err := g.Identities.DecisionContext(r.Context(), principal, "ssm:"+op, resource)
 		if err != nil {
 			ssmError(w, err)
 			return false
@@ -203,7 +203,7 @@ func (g *Gateway) serveSSM(w http.ResponseWriter, r *http.Request) {
 	switch op {
 	case "PutParameter":
 		if input.Type == "" && input.Overwrite {
-			existing, err := g.Parameters.Get(region, input.Name)
+			existing, err := g.Parameters.GetContext(r.Context(), region, input.Name)
 			if err != nil {
 				ssmError(w, err)
 				return
@@ -241,7 +241,7 @@ func (g *Gateway) serveSSM(w http.ResponseWriter, r *http.Request) {
 		}
 		ssmJSON(w, 200, map[string]any{"Version": version, "Tier": "Standard"})
 	case "GetParameter":
-		p, err := g.Parameters.Get(region, input.Name)
+		p, err := g.Parameters.GetContext(r.Context(), region, input.Name)
 		if err != nil {
 			ssmError(w, err)
 			return
@@ -264,7 +264,7 @@ func (g *Gateway) serveSSM(w http.ResponseWriter, r *http.Request) {
 		values := []Parameter{}
 		missing := []string{}
 		for _, n := range input.Names {
-			p, err := g.Parameters.Get(region, n)
+			p, err := g.Parameters.GetContext(r.Context(), region, n)
 			if err != nil {
 				var e ssmFailure
 				if errors.As(err, &e) && e.code == "ParameterNotFound" {

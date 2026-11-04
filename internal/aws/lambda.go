@@ -621,7 +621,7 @@ func (g *Gateway) serveLambda(w http.ResponseWriter, r *http.Request) {
 			lambdaError(w, e)
 			return
 		}
-		result, e := runner.Run(r.Context(), pythonruntime.Invocation{Code: f.Code, Handler: f.Handler, Event: event, Environment: f.Environment, Context: map[string]string{"function_name": f.Name, "function_version": "$LATEST", "invoked_function_arn": lambdaARN(region, name)}, Timeout: time.Duration(f.Timeout) * time.Second})
+		result, e := runner.Run(r.Context(), pythonruntime.Invocation{Exchange: g.lambdaExchange(f, region), Modules: lambdaSDKFiles(), Code: f.Code, Handler: f.Handler, Event: event, Environment: f.Environment, Context: map[string]string{"function_name": f.Name, "function_version": "$LATEST", "invoked_function_arn": lambdaARN(region, name)}, Timeout: time.Duration(f.Timeout) * time.Second})
 		if e != nil {
 			result.FunctionError = true
 			result.Payload, _ = json.Marshal(map[string]string{"errorType": "Runtime.SandboxError", "errorMessage": "Function execution stopped: time, memory, output, cancellation or sandbox limit."})

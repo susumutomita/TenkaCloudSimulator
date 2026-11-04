@@ -145,7 +145,7 @@ func (g *Gateway) serveS3(w http.ResponseWriter, r *http.Request) {
 	}
 	if g.Identities != nil {
 		action, resource := permission(r)
-		decision, err := g.Identities.Decision(principal, action, resource)
+		decision, err := g.Identities.DecisionContext(r.Context(), principal, action, resource)
 		if err != nil {
 			fail(w, r, "InternalError", "Identity state could not be read.")
 			return
@@ -283,7 +283,7 @@ func (g *Gateway) bucket(w http.ResponseWriter, r *http.Request, name string) {
 			fail(w, r, "NotImplemented", "Only GetBucketLocation is supported.")
 			return
 		}
-		b, err := g.Store.Bucket(name)
+		b, err := g.Store.BucketContext(r.Context(), name)
 		if err != nil {
 			fromError(w, r, err)
 			return
@@ -336,7 +336,7 @@ func (g *Gateway) bucket(w http.ResponseWriter, r *http.Request, name string) {
 		w.Header().Set("x-amz-bucket-region", region)
 		w.WriteHeader(200)
 	case "HEAD":
-		b, err := g.Store.Bucket(name)
+		b, err := g.Store.BucketContext(r.Context(), name)
 		if err != nil {
 			fromError(w, r, err)
 			return
@@ -372,7 +372,7 @@ func (g *Gateway) list(w http.ResponseWriter, r *http.Request, name string) {
 		fail(w, r, "NotImplemented", "Use ListObjectsV2 (list-type=2).")
 		return
 	}
-	b, err := g.Store.Bucket(name)
+	b, err := g.Store.BucketContext(r.Context(), name)
 	if err != nil {
 		fromError(w, r, err)
 		return
@@ -491,7 +491,7 @@ func (g *Gateway) object(w http.ResponseWriter, r *http.Request, name, key strin
 		if ct == "" {
 			ct = "application/octet-stream"
 		}
-		obj, err := g.S3.Put(name, key, ct, data, r.Header.Get("If-Match"), r.Header.Get("If-None-Match"))
+		obj, err := g.S3.PutContext(r.Context(), name, key, ct, data, r.Header.Get("If-Match"), r.Header.Get("If-None-Match"))
 		if err != nil {
 			fromError(w, r, err)
 			return
@@ -502,7 +502,7 @@ func (g *Gateway) object(w http.ResponseWriter, r *http.Request, name, key strin
 		}
 		w.WriteHeader(200)
 	case "GET", "HEAD":
-		obj, err := g.S3.Get(name, key, r.URL.Query().Get("versionId"))
+		obj, err := g.S3.GetContext(r.Context(), name, key, r.URL.Query().Get("versionId"))
 		if err != nil {
 			fromError(w, r, err)
 			return
@@ -540,7 +540,7 @@ func (g *Gateway) object(w http.ResponseWriter, r *http.Request, name, key strin
 		w.Header().Set("Content-Disposition", "attachment")
 		http.ServeContent(w, r, key, obj.Modified, bytes.NewReader(obj.Data))
 	case "DELETE":
-		obj, err := g.S3.Delete(name, key, r.URL.Query().Get("versionId"))
+		obj, err := g.S3.DeleteContext(r.Context(), name, key, r.URL.Query().Get("versionId"))
 		if err != nil {
 			fromError(w, r, err)
 			return

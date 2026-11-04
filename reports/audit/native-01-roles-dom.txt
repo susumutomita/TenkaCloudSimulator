@@ -22,6 +22,13 @@
   - button "Refresh roles"
   - button "Create role"
   - searchbox "Find roles"
+  - list:
+    - listitem:
+      - button "Previous page" [disabled]
+    - listitem:
+      - button "Page 1": "1"
+    - listitem:
+      - button "Next page" [disabled]
   - table "IAM roles":
     - rowgroup:
       - row "Role name Trusted entities Creation time":

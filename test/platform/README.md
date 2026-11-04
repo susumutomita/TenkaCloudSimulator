@@ -8,7 +8,7 @@ Reviewed versions for this run:
 
 - TenkaCloud: f99b3d9a00076a2a5e97f1d4d9b0b20a7e02245c
 - TenkaCloudChallenge: a749b142416770abee3f173673702c55df3856aa
-- Simulator base: 639af7a9e7384dcc0d6fdf42d05024f03ab75349 plus local working tree
+- Simulator: this checkout (`git rev-parse HEAD`, plus any explicitly recorded local changes); CI builds and tests its exact target HEAD
 
 With the platform's locked development dependencies available and Bun 1.4.4:
 

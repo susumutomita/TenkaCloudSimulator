@@ -2,6 +2,7 @@
 package core
 
 import (
+	"context"
 	"crypto/md5"
 	"database/sql"
 	"encoding/hex"
@@ -190,14 +191,17 @@ func (s *Store) Buckets() ([]Bucket, error) {
 	return result, storageError(rows.Err())
 }
 func (s *Store) Bucket(name string) (Bucket, error) {
-	tx, err := s.db.Begin()
+	return s.BucketContext(context.Background(), name)
+}
+func (s *Store) BucketContext(ctx context.Context, name string) (Bucket, error) {
+	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return Bucket{}, storageError(err)
 	}
 	defer tx.Rollback()
 	b := Bucket{Name: name, Objects: []Object{}}
 	var created string
-	err = tx.QueryRow("SELECT region,created FROM buckets WHERE name=?", name).Scan(&b.Region, &created)
+	err = tx.QueryRowContext(ctx, "SELECT region,created FROM buckets WHERE name=?", name).Scan(&b.Region, &created)
 	if err == sql.ErrNoRows {
 		return b, Fail("NoSuchBucket", "The specified bucket does not exist.")
 	}
@@ -208,7 +212,7 @@ func (s *Store) Bucket(name string) (Bucket, error) {
 	if err != nil {
 		return b, storageError(err)
 	}
-	rows, err := tx.Query("SELECT key,length(data),etag,modified,content_type FROM objects WHERE bucket=? ORDER BY key", name)
+	rows, err := tx.QueryContext(ctx, "SELECT key,length(data),etag,modified,content_type FROM objects WHERE bucket=? ORDER BY key", name)
 	if err != nil {
 		return b, storageError(err)
 	}

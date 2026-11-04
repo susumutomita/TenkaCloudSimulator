@@ -36,13 +36,12 @@
   - heading "Trusted entity type" [level=2]
   - radiogroup:
     - radio "AWS service" [checked]
-    - text: AWS service Allow the Lambda service to use this role in the local simulator.
+    - text: AWS service Allow a supported AWS service to use this role in the local simulator.
     - radio "Custom trust policy"
     - text: Custom trust policy Use the supported service-principal trust subset.
-  - term: Service or use case
-  - definition: Lambda
-  - term: Trusted service
-  - definition: lambda.amazonaws.com
+  - text: Service or use case
+  - button "Service or use case Choose a service or use case": Choose a service or use case
+  - text: Lambda is the supported service use case.
   - button "Cancel"
   - button "Next"
   - complementary "Help panel":
