@@ -11,7 +11,7 @@
     },
     {
       "path": "docs/sqs.md",
-      "sha256": "24b6e440742e18f2f62ed616136eafa6a92d890c9c2262ac1c6448949690b062",
+      "sha256": "02227797c7ab9dcab8403fa433dbaa90e21e0b4b33bfc6018216b66825acd2d9",
       "disposition": "documentation",
       "reason": "Document the bounded native SQS subset, local 256 KiB versus current operation-reference 1 MiB, repair provenance, actual focused tests and explicit compatibility/model/coverage limits. No service or formal-proof completion is asserted by prose.",
       "models": []
@@ -86,9 +86,9 @@
     },
     {
       "path": "internal/aws/sqs.go",
-      "sha256": "2b259f69e7dece05407b4d2cb78d69377cd7f0f8fbad9bd3a00b1967c390cb3a",
+      "sha256": "3870d8b7ed98d6b936b9e0696da1d64b53545cdf3e75aafefd7fe99f68232dbd",
       "disposition": "modeled",
-      "reason": "Authorize the selected SQS action/regional queue ARN before native operations, retain bounded request validation and pass the same regional queue/receipt target to the repaired store. Body Unicode is additionally tested as a separate protocol contract.",
+      "reason": "Authorize the selected SQS action/regional queue ARN before native operations, retain bounded request validation and pass the same regional queue/receipt target to the repaired store. Body Unicode is additionally tested as a separate protocol contract. Additional admission fixes distinguish explicit-zero limits from omission, reject nested unsupported members and All-order bypass, and refuse malformed MessageBody Unicode before silent decoder replacement. These parser/encoding behaviors require native wire tests; the lifecycle model does not prove them.",
       "models": [
         {
           "id": "SQSLifecycle",
@@ -187,7 +187,7 @@
     },
     {
       "path": "internal/server/sqs_acceptance_test.go",
-      "sha256": "37472ccdf9d97bb77259c89c061fe39388f4ac3c73481681e1566d6b35af6ca0",
+      "sha256": "c5f8da0298772dc4ec59f2b80156bd020efc0b1173b493be628421e25e6905a2",
       "disposition": "test-support",
       "reason": "Add acceptance regressions for explicit-zero versus omitted bounds, nondefault delay/attribute roundtrips, native composition and quota guards, and actual SQLite transaction faults surfaced as HTTP 500 with preserved state. Source-only checkpoint: execution pending, no coverage claim.",
       "models": []

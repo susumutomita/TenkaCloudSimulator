@@ -172,8 +172,14 @@ func (g *Gateway) serveSQS(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	if body, supplied := raw["MessageBody"]; supplied && !validSQSJSONString(body) {
+		invalid("MessageBody must encode Unicode without invalid UTF-8 or unpaired surrogates.")
+		return
+	}
 	var input sqsRequest
-	if json.Unmarshal(data, &input) != nil {
+	decoder := json.NewDecoder(strings.NewReader(string(data)))
+	decoder.DisallowUnknownFields()
+	if decoder.Decode(&input) != nil {
 		invalid("Invalid request field type.")
 		return
 	}
@@ -532,17 +538,19 @@ func (g *Gateway) serveSQS(w http.ResponseWriter, r *http.Request) {
 			sqsError(w, sqsFailure{"InvalidAttributeName", "AttributeNames is required; use All for every supported attribute."})
 			return
 		}
+		// Validate every name before applying All, so order cannot hide an unsupported field.
+		for _, name := range input.AttributeNames {
+			if _, supported := all[name]; name != "All" && !supported {
+				sqsError(w, sqsFailure{"InvalidAttributeName", "Unsupported queue attribute: " + name})
+				return
+			}
+		}
 		for _, name := range input.AttributeNames {
 			if name == "All" {
 				out = all
 				break
 			}
-			v, ok := all[name]
-			if !ok {
-				sqsError(w, sqsFailure{"InvalidAttributeName", "Unsupported queue attribute: " + name})
-				return
-			}
-			out[name] = v
+			out[name] = all[name]
 		}
 		sqsJSON(w, 200, map[string]any{"Attributes": out})
 	}
@@ -561,4 +569,44 @@ func validateSQSBody(body string) error {
 		return sqsFailure{"InvalidMessageContents", "The message contains a character SQS does not permit."}
 	}
 	return nil
+}
+
+// JSON's Go decoder replaces malformed UTF-8 and isolated UTF-16 surrogates.
+// Reject those body encodings before decode rather than store a changed payload.
+// Syntax is already checked by json.Unmarshal into raw request fields.
+func validSQSJSONString(raw []byte) bool {
+	if !utf8.Valid(raw) {
+		return false
+	}
+	for i := 0; i < len(raw); i++ {
+		if raw[i] != '\\' {
+			continue
+		}
+		if i+1 >= len(raw) {
+			return false
+		}
+		if raw[i+1] != 'u' {
+			i++
+			continue
+		}
+		if i+6 > len(raw) {
+			return false
+		}
+		value, err := strconv.ParseUint(string(raw[i+2:i+6]), 16, 16)
+		if err != nil || (value >= 0xDC00 && value <= 0xDFFF) {
+			return false
+		}
+		if value >= 0xD800 && value <= 0xDBFF {
+			if i+12 > len(raw) || string(raw[i+6:i+8]) != "\\u" {
+				return false
+			}
+			low, err := strconv.ParseUint(string(raw[i+8:i+12]), 16, 16)
+			if err != nil || low < 0xDC00 || low > 0xDFFF {
+				return false
+			}
+			i += 6
+		}
+		i += 5
+	}
+	return true
 }

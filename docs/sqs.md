@@ -178,3 +178,21 @@ passed. Its failed profile was inspected only for diagnostic uncovered blocks,
 never combined with another profile or accepted as whole coverage evidence.
 The finite model files remain unchanged; their previous bounded results do not
 prove JSON validation, HTTP errors or the new acceptance tests.
+
+The additional checkpoint also rejects unknown nested message-attribute members
+(including unsupported StringListValues/BinaryListValues) instead of silently
+dropping them during typed decoding. This enforces the documented local subset;
+it does not add list-attribute support. Rejection/no-enqueue and supported custom
+data-type suffix regressions accompany the decoder change. The 8bd checkpoint's
+whole run was deliberately terminated after source review found this gap; its
+partial profile is diagnostic only. New-head execution remains pending.
+
+GetQueueAttributes now validates every requested name before applying All,
+preventing unsupported names from being accepted depending on list order. A raw
+MessageBody encoding guard refuses malformed UTF-8 and unpaired UTF-16 surrogate
+escapes before Go's JSON decoder can silently replace them. This is an explicit
+local no-silent-rewrite rule; malformed-input behavior has not been compared by
+requests to real AWS. Valid surrogate pairs, escaped literal backslash-u text,
+mixed literal/escaped UTF-8 and deliberate U+FFFD remain valid and have wire
+roundtrip regression cases. The finite lifecycle model does not model this parser
+or prove Unicode validation. All these latest source changes remain unexecuted.
