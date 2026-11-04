@@ -41,6 +41,8 @@ Lambda→Functions→Create function（Author from scratch、Python 3.12、既�
 
 一次資料: [CreateFunction](https://docs.aws.amazon.com/lambda/latest/api/API_CreateFunction.html)、[Invoke](https://docs.aws.amazon.com/lambda/latest/api/API_Invoke.html)、[ListFunctions](https://docs.aws.amazon.com/lambda/latest/api/API_ListFunctions.html)、[environment variables](https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html)。対応部分と未対応部分を区別し、AWS全体との互換性を主張しない。
 
+関数が改行なしでstdoutへログを書いても、SDK通信frameは独立した行へ分離する。`VersionId`を明示した場合は空文字もnative S3へそのまま検証させる。空のversion selectorは通常のGET/DELETEへ置き換えずエラーとなり、現行objectを変更しない。
+
 ## CloudFormationからの作成
 
 AWS::Lambda::FunctionのPython3.12/Code.ZipFile inline sourceに対応する。handlerはindex.function、memory128MiB、timeout1–30秒。FunctionName/Description/Role/Environment.Variables/TagsとRef/Arnを扱い、実ZIPをnative Lambdaと同じSQLiteへ保存する。S3 package/image/layers/architecture選択/versions/alias、UpdateStackは未対応。保存済みphysical IDを改名しない。

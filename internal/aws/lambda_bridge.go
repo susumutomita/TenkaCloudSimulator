@@ -107,7 +107,7 @@ func (g *Gateway) lambdaExchange(f LambdaFunction, region string) pythonruntime.
 				}
 			}
 			object := url.URL{Scheme: "http", Host: "simulator.invalid", Path: "/" + input.Bucket + "/" + input.Key}
-			if input.VersionId != "" {
+			if _, supplied := parameters["VersionId"]; supplied {
 				object.RawQuery = url.Values{"versionId": {input.VersionId}}.Encode()
 			}
 			path = object.RequestURI()

@@ -9,7 +9,7 @@ request = json.loads(sys.stdin.readline())
 if request.get("capabilities"):
     capability = types.ModuleType("_simulator_bridge")
     def call(message):
-        print("\x1eTCSIM_CALL " + json.dumps(message, allow_nan=False, separators=(",", ":")), flush=True)
+        print("\n\x1eTCSIM_CALL " + json.dumps(message, allow_nan=False, separators=(",", ":")), flush=True)
         line = sys.stdin.readline()
         if not line:
             raise RuntimeError("Local capability channel closed")
@@ -25,4 +25,4 @@ try:
     response = json.dumps({"payload": value, "error": False}, allow_nan=False)
 except BaseException as error:
     response = json.dumps({"payload": {"errorType": type(error).__name__, "errorMessage": str(error), "stackTrace": []}, "error": True})
-print("\x1eTCSIM_RESULT " + response, flush=True)
+print("\n\x1eTCSIM_RESULT " + response, flush=True)

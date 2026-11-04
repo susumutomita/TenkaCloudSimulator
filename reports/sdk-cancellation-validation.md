@@ -36,3 +36,9 @@ The48KiB native-response buffer now has its own accurate EntityTooLarge message,
 ## Integration with the merged IAM console
 
 PR35 merged as65fe9e8 with successful main CI41755720364 and CodeQL41755720198. Its IAM controls and the SDK branch are combined by a normal merge, preserving both documentation sections and regenerating all six raw TLC reports. Local combined all-package race/quality/build gates, all13 actual-binary/SDK/browser E2E cases, strict responsive controls,28scoped accessibility states and all three models/three mutants pass. Exact combined-head CI/reviews are still required; earlier per-branch checks do not certify this merged tree.
+
+## PR review regressions
+
+Review found two reproducible protocol defects: unterminated function stdout made a capability frame invisible until timeout, and an explicit empty S3 VersionId was dropped before native validation. The added tests failed on the previous implementation (actual WASI timeout; empty-version GET falsely succeeded). Bootstrap now separates capability/result frames from preceding stdout with a newline. The bridge preserves field presence, including an empty selector, for native rejection. Regression coverage checks two SDK calls after unterminated prints and preservation of both versioned and unversioned objects after rejected GET/DELETE. No capability limits, IAM actions, or quality floors were relaxed.
+
+After both review fixes: full all-package race/vet/fmt/assets/module/build gates PASS; statements3282/3446=95.24% and unfiltered source4266/4681=91.13% (both minimum90%). All13 real-binary/SDK/browser E2E cases and strict responsive-detector controls PASS (128.802s). Evidence: sdk-review-before.log, sdk-review-after.log, sdk-review-final-gates.log, sdk-review-source-coverage.log and sdk-review-final-e2e.log. Exact committed-head hosted CI and fresh reviews are still required before merge.

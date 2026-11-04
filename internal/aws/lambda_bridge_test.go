@@ -119,6 +119,24 @@ func TestLambdaCapabilityUsesSavedRoleAndNativeState(t *testing.T) {
 	if _, err = s.Get("versions-test", "new.bin", ""); core.Code(err) != "NoSuchKey" {
 		t.Fatal("rejected write left data", err)
 	}
+	for _, versioned := range []bool{false, true} {
+		if versioned {
+			s3Enable(t, s, "Enabled")
+		}
+		if _, err = s.Put("versions-test", "empty-version.txt", "text/plain", []byte("must remain"), "", ""); err != nil {
+			t.Fatal(err)
+		}
+		for _, op := range []string{"GetObject", "DeleteObject"} {
+			rejected := call("s3", op, map[string]any{"Bucket": "versions-test", "Key": "empty-version.txt", "VersionId": ""})
+			if rejected["error"] == nil {
+				t.Fatal("empty explicit selector accepted", op, rejected)
+			}
+			stored, err := s.Get("versions-test", "empty-version.txt", "")
+			if err != nil || string(stored.Data) != "must remain" {
+				t.Fatal("invalid selector mutated current object", err)
+			}
+		}
+	}
 	s3Enable(t, s, "Enabled")
 	putVersion := call("s3", "PutObject", map[string]any{"Bucket": "versions-test", "Key": "version.txt", "Body": base64.StdEncoding.EncodeToString([]byte("retained"))})
 	version := putVersion["result"].(map[string]any)["VersionId"]

@@ -139,7 +139,7 @@ func TestRealPythonExplicitCapabilityAndTrustedModule(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer runtime.Close(context.Background())
-	source := "import safeclient\ndef handler(event,context):\n    return safeclient.read(event)\n"
+	source := "import safeclient\ndef handler(event,context):\n    print('starting SDK: ', end='')\n    safeclient.read(event)\n    print('next SDK: ', end='')\n    answer = safeclient.read(event)\n    print('finished', end='')\n    return answer\n"
 	modules := fstest.MapFS{"safeclient.py": &fstest.MapFile{Data: []byte("from _simulator_bridge import call\ndef read(event): return call({'request':event})\n")}}
 	in := Invocation{Code: sourceZIP(t, source), Handler: "index.handler", Event: json.RawMessage(`{"name":"demo"}`), Timeout: 15 * time.Second, Modules: modules, Exchange: func(ctx context.Context, message json.RawMessage) (json.RawMessage, error) {
 		if !bytes.Contains(message, []byte(`"name":"demo"`)) {
@@ -148,7 +148,7 @@ func TestRealPythonExplicitCapabilityAndTrustedModule(t *testing.T) {
 		return json.RawMessage(`{"answer":42}`), nil
 	}}
 	result, err := runtime.Run(context.Background(), in)
-	if err != nil || result.FunctionError || !bytes.Contains(result.Payload, []byte(`"answer": 42`)) || strings.Contains(result.Logs, "TCSIM_CALL") {
+	if err != nil || result.FunctionError || !bytes.Contains(result.Payload, []byte(`"answer": 42`)) || strings.Contains(result.Logs, "TCSIM_CALL") || !strings.Contains(result.Logs, "starting SDK: ") || !strings.Contains(result.Logs, "next SDK: ") || !strings.Contains(result.Logs, "finished") {
 		t.Fatal(string(result.Payload), err)
 	}
 	in.Exchange = nil
