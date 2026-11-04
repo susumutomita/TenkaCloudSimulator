@@ -16,8 +16,8 @@ tests, latest1.294 seconds), including immutable values, unique labels, physical
 ARN protection, late-failure rollback and pure-policy handling. The real embedded
 CLI and boto3 exercise all seven operations, two authenticated persistent team
 databases, cross-team endpoint401, participant IAM, restart and physical cleanup.
-The actual embedded console/browser checks pass as described below; model
-execution, applicability registration and complete quality gates remain unfinished. These checks are not a completed AWS service or Challenge claim.
+The actual embedded console/browser checks pass as described below; applicability registration and complete quality gates remain unfinished; both
+bounded models and all nine intended mutants pass the focused TLC check. These checks are not a completed AWS service or Challenge claim.
 
 ## Scope and explicit storage boundary
 
@@ -200,8 +200,8 @@ navigation. These are finite abstractions, not encryption/SQL/React refinement
 proofs. Root must register applicable models under307 and run both global90%
 floors, full required CI/E2E/security/license gates before merge. gofmt,
 compilation, selected native tests and the real local SDK increment have run;
-the embedded console/browser increment has also run. Full Go/coverage, TLC,
-AWS, publish, release and deployment have not run.
+the embedded console/browser increment has also run. Focused TLC has run as documented below. Full Go/coverage, AWS, publish,
+release and deployment have not run.
 
 Public console reference: the official flow is Store a new secret → Other type
 of secret → key/value or Plaintext → name/description → rotation off → review →
@@ -227,8 +227,17 @@ describes CLI label moves, so it is not claimed as the actual AWS console flow.
 unmount, response ARN binding and historical acceptance context with two
 resources and two request/navigation epochs. `SecretsVersionLifecycle` also
 checks that every active resource has exactly one current label. The source
-and nine intended mutant definitions are prepared, but TLC and applicability
-registration have not run. `test/e2e/secrets_manager_console.py` passed the actual
+and nine intended mutants have run with the pinned TLC JAR, one worker and a
+512MiB Java heap. Lifecycle normal checks463,761 distinct states (4,261,018
+generated), and reveal normal checks60 distinct states (164 generated). All nine
+mutants produce their intended invariant violation: conflicting-version
+overwrite, missing delete cascade, duplicate previous label, missing Create
+permission, missing Read team/generation binding, missing reply epoch/ARN guard
+and retained visible value after unmount. An initial mutant had a shadowed
+variable semantic error; that run was rejected, corrected and rerun. Parse
+errors/timeouts are never counted as counterexamples. Registry/applicability
+integration and its exact-HEAD receipt remain pending. These checks establish
+only the documented finite model properties. `test/e2e/secrets_manager_console.py` passed the actual
 browser/SDK wizard, metadata-only reads, genuine delayed Get rejection after
 Hide and list navigation, explicit reveal/edit, version rollback and keyboard
 deletion with native SDK state assertions. A separately authenticated participant
