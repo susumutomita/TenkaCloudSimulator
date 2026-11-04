@@ -94,7 +94,7 @@ def run():
             control(a,'/_simulator/v1/iam/principals/ddb-reader/policy',{'Version':'2012-10-17','Statement':[
                 {'Effect':'Allow','Action':['dynamodb:GetItem','dynamodb:DescribeTable'],'Resource':arn},
                 {'Effect':'Deny','Action':['dynamodb:PutItem','dynamodb:DeleteItem','dynamodb:DeleteTable'],'Resource':arn}]},'PUT')
-            participant=control(a,'/_simulator/v1/access',{'principal':'ddb-reader'})['token']
+            participant=control(a,'/_simulator/v1/access',{'principal':'ddb-reader'})['AccessToken']
             reader=client(a,token=participant)
             assert reader.get_item(TableName=name,Key=key)['Item']['payload']=={'S':'team-a'}
             spoof=client(a,token=participant)
