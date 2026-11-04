@@ -12,6 +12,13 @@ vars == <<queues, attributes, queueEpoch, messages, messageEpoch, visibleAt,
           authorized, supplied, priorHandle, issued, eligible, inflight, outcome>>
 Current(s) == IF ~messages[s] \/ deliveries[s] = 0 THEN NoHandle
               ELSE <<s, queueEpoch[s], messageEpoch[s], deliveries[s]>>
+\* Every baseline receipt mutation requires Current(s). The additional candidates
+\* retain prior, never-issued and peer handles for guard-removal controls without
+\* enumerating disabled tuples that can never pass the baseline equality guard.
+CandidateHandles(s) == {Current(s), <<s,queueEpoch[s],messageEpoch[s],0>>,
+                       <<s,queueEpoch[s],messageEpoch[s],
+                         IF deliveries[s] > 0 THEN deliveries[s]-1 ELSE 0>>}
+                       \cup {Current(t): t \in Scopes}
 ScopeView(g,s) == <<g[1][s],g[2][s],g[3][s],g[4][s],
                     g[5][s],g[6][s],g[7][s],g[8][s]>>
 WriteKinds == {"Create", "CreateExisting", "DeleteQueue", "Send", "Receive",
@@ -75,8 +82,11 @@ DeleteQueue(s) ==
  /\ allowed /\ queues[s]
  /\ queues' = [queues EXCEPT ![s] = FALSE]
  /\ messages' = [messages EXCEPT ![s] = FALSE]
- /\ UNCHANGED <<attributes,queueEpoch,messageEpoch,visibleAt,
-                 expiresAt,deliveries,pending,now,allowed>>
+ /\ attributes' = [attributes EXCEPT ![s] = 0]
+ /\ visibleAt' = [visibleAt EXCEPT ![s] = 0]
+ /\ expiresAt' = [expiresAt EXCEPT ![s] = 0]
+ /\ deliveries' = [deliveries EXCEPT ![s] = 0]
+ /\ UNCHANGED <<queueEpoch,messageEpoch,pending,now,allowed>>
  /\ Record(s,"DeleteQueue","Success",NoHandle,NoHandle,NoHandle,TRUE,TRUE)
 Receive(s,timeout) ==
  /\ allowed /\ queues[s] /\ messages[s] /\ deliveries[s] < 2
@@ -93,8 +103,10 @@ DeleteMessage(s,h) ==
  /\ allowed /\ queues[s] /\ messages[s] /\ expiresAt[s] > now
  /\ h = Current(s) /\ h # NoHandle
  /\ messages' = [messages EXCEPT ![s] = FALSE]
- /\ UNCHANGED <<queues,attributes,queueEpoch,messageEpoch,visibleAt,
-                 expiresAt,deliveries,pending,now,allowed>>
+ /\ visibleAt' = [visibleAt EXCEPT ![s] = 0]
+ /\ expiresAt' = [expiresAt EXCEPT ![s] = 0]
+ /\ deliveries' = [deliveries EXCEPT ![s] = 0]
+ /\ UNCHANGED <<queues,attributes,queueEpoch,messageEpoch,pending,now,allowed>>
  /\ Record(s,"DeleteMessage","Success",h,Current(s),NoHandle,TRUE,TRUE)
 ChangeVisibility(s,h,timeout) ==
  /\ allowed /\ queues[s] /\ messages[s] /\ expiresAt[s] > now
@@ -108,8 +120,10 @@ ChangeVisibility(s,h,timeout) ==
 Expire(s) ==
  /\ allowed /\ queues[s] /\ messages[s] /\ expiresAt[s] <= now
  /\ messages' = [messages EXCEPT ![s] = FALSE]
- /\ UNCHANGED <<queues,attributes,queueEpoch,messageEpoch,visibleAt,
-                 expiresAt,deliveries,pending,now,allowed>>
+ /\ visibleAt' = [visibleAt EXCEPT ![s] = 0]
+ /\ expiresAt' = [expiresAt EXCEPT ![s] = 0]
+ /\ deliveries' = [deliveries EXCEPT ![s] = 0]
+ /\ UNCHANGED <<queues,attributes,queueEpoch,messageEpoch,pending,now,allowed>>
  /\ Record(s,"Expire","Success",NoHandle,NoHandle,NoHandle,TRUE,TRUE)
 StorageFailure(s) ==
  /\ allowed /\ (queues[s] \/ pending[s])
@@ -143,7 +157,7 @@ Next == Tick \/ ChangeAuthority \/ (\E s \in Scopes:
  \/ (\E a \in 0..1: Create(s,a) \/ CreateExisting(s,a) \/ CreateMismatch(s,a))
  \/ (\E delay \in 0..1: CommitSend(s,delay))
  \/ (\E timeout \in 0..1: Receive(s,timeout))
- \/ (\E h \in HandleSet: DeleteMessage(s,h)
+ \/ (\E h \in CandidateHandles(s): DeleteMessage(s,h)
         \/ (\E timeout \in 0..1: ChangeVisibility(s,h,timeout))))
 TypeOK ==
  /\ queues \in [Scopes -> BOOLEAN] /\ attributes \in [Scopes -> 0..1]

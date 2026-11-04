@@ -99,7 +99,14 @@ is idempotent for equal attributes; mismatches and storage errors preserve state
 The model checks parent lifetime, abstract caller authorization, scoped mutation,
 failed-operation atomicity, receive eligibility, fresh/current receipt use and
 in-flight visibility changes. Eleven targeted mutants remove those guards or
-introduce partial/cross-scope writes. **TLC has not yet run for this proposal.**
+introduce partial/cross-scope writes. The first immutable full-gate attempt passed
+the original five models and controls but the new baseline hit the unchanged
+60-second timeout; that attempt is a failure, not a counterexample or proof.
+The model now normalizes deleted-row metadata (matching actual SQL DELETE) and
+enumerates current/previous/unissued/peer receipt candidates instead of disabled
+receipt tuples; the baseline receipt equality still admits exactly the same
+current-handle transitions. All properties and eleven controls remain. A new
+strict run is pending, with an explicit local 512 MiB Java heap cap.
 
 The actual native repair precedes these bindings: sqsQueueTx rechecks the parent
 inside Send/Receive/Counts/receipt transactions; purgeExpiredTx errors propagate;

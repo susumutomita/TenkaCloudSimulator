@@ -11,7 +11,7 @@
     },
     {
       "path": "docs/sqs.md",
-      "sha256": "63eba3e37ee8f8baf12bafd4bf870890ea5f31a3b7fbeb65809b182db237b1b1",
+      "sha256": "cadd8742bc32dbfbbcd73cc938f69f0da8bd7e187a879f394bd4b62f029fe8e6",
       "disposition": "documentation",
       "reason": "Document the bounded native SQS subset, local 256 KiB versus current operation-reference 1 MiB, repair provenance, actual focused tests and explicit compatibility/model/coverage limits. No service or formal-proof completion is asserted by prose.",
       "models": []
@@ -41,7 +41,7 @@
     },
     {
       "path": "formal/SQSLifecycle.tla",
-      "sha256": "8c46cc38f07e422d4adaae73b4effb7a71a01f4ef9b855e4448c36a6662cbcc3",
+      "sha256": "159e4a17e09bf3c3387d1c938d43bb26940dcda6c5a417299c59d61e7b39efb7",
       "disposition": "modeled",
       "reason": "Introduce the finite SQS queue/visibility/receipt safety contract and explicit error/rollback outcomes with eleven exact invariant sensitivity controls. Native repair and tests precede the applicability binding; actual TLC execution remains required.",
       "models": [
@@ -64,7 +64,7 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "b94d3a7b5c87a2fcca28055962c15934d3340257ee405f74c837380b83ce3eaa",
+      "sha256": "74c47e6ca5c54dba015ed2a43c5f96366bdea4f6978a7195e7ac560f376d4eb8",
       "disposition": "formal-infrastructure",
       "reason": "Register SQSLifecycle and add its required invariant/ID set while preserving every original five model/property requirements and strict missing/stale/exit guards. The self-test requires the exact original-five-plus-SQS set and iterates all mutation anchors; future combined service registries need an explicitly merged set, not a lowered check.",
       "models": []

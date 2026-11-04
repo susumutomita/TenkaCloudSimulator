@@ -163,7 +163,7 @@
       "id": "SQSLifecycle",
       "model": "formal/SQSLifecycle.tla",
       "config": "formal/SQSLifecycle.cfg",
-      "bounds": "Two distinct database/region/queue scopes; one queue creation and one message per scope; at most two receives per message; clock 0..2, delay/visibility 0..1, retention two abstract ticks, two attribute configurations. Cached HTTP queue lookup can interleave with queue deletion.",
+      "bounds": "Two distinct database/region/queue scopes; one queue creation and one message per scope; at most two receives per message; clock 0..2, delay/visibility 0..1, retention two abstract ticks, two attribute configurations. Cached HTTP queue lookup can interleave with queue deletion. Deleted message/queue row metadata is normalized to zero. Receipt candidates include current, previous, unissued and peer handles; baseline equality admits only the current handle.",
       "properties": [
         "TypeOK",
         "NoOrphans",
