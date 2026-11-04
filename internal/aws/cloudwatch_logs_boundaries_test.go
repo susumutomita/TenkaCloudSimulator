@@ -34,7 +34,7 @@ func TestLogsRejectedTransportAndNativeContractsPreserveExistingGraph(t *testing
 			t.Fatal(test.op, test.body, w.Code, w.Body.String())
 		}
 	}
-	for _, variant := range []string{"method", "path", "query", "content-type", "region", "session"} {
+	for _, variant := range []string{"method", "path", "query", "content-type", "content-type-suffix", "region", "session"} {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(`{"logGroupName":"group"}`))
 		r.Header.Set("Content-Type", "application/x-amz-json-1.1")
 		r.Header.Set("X-Amz-Target", "Logs_20140328.CreateLogGroup")
@@ -48,6 +48,8 @@ func TestLogsRejectedTransportAndNativeContractsPreserveExistingGraph(t *testing
 			r.URL.RawQuery = "x=1"
 		case "content-type":
 			r.Header.Set("Content-Type", "text/plain")
+		case "content-type-suffix":
+			r.Header.Set("Content-Type", "application/x-amz-json-1.1invalid")
 		case "region":
 			region = "unsupported"
 		case "session":

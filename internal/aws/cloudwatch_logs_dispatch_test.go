@@ -77,6 +77,9 @@ func TestLogsGatewayDispatchPreservesServiceRegionAndIAMAuthority(t *testing.T) 
 	}
 	g.Identities = core.NewIdentities(db)
 	logsMust(t, db.Close())
+	fresh := httptest.NewRequest("POST", "/", strings.NewReader(`{"logGroupName":"regional"}`))
+	fresh.Header = r.Header.Clone()
+	r = fresh
 	w = httptest.NewRecorder()
 	g.ServeHTTP(w, r)
 	if w.Code != 500 || strings.Contains(w.Body.String(), "closed") {

@@ -12,6 +12,8 @@ from cloudwatch_logs import client
 
 
 def run():
+    for name in ("cloudwatch-logs-events-desktop.png", "cloudwatch-logs-events-mobile.png", "cloudwatch-logs-a11y.json"):
+        (REPORTS/name).unlink(missing_ok=True)
     # The canonical pinned audit asset is supplied by the host, never downloaded
     # by the running simulator or substituted with an empty checker.
     axe_path=Path(os.environ["AXE_SCRIPT"])
@@ -51,13 +53,13 @@ def run():
             page.get_by_role("button", name="Create log group", exact=True).click()
             page.get_by_label("Log group name", exact=True).fill("/aws/console-example")
             audit("create-log-group")
-            page.get_by_role("button", name="Create", exact=True).click()
+            page.get_by_label("Log group name", exact=True).press("Enter")
             expect(page.get_by_role("link", name="/aws/console-example", exact=True)).to_be_visible()
             assert logs.describe_log_groups()["logGroups"][0]["logGroupName"] == "/aws/console-example"
             page.get_by_role("link", name="/aws/console-example", exact=True).click()
             page.get_by_role("button", name="Create log stream", exact=True).click()
             page.get_by_label("Log stream name", exact=True).fill("application")
-            page.get_by_role("button", name="Create", exact=True).click()
+            page.get_by_label("Log stream name", exact=True).press("Enter")
             expect(page.get_by_role("link", name="application", exact=True)).to_be_visible()
             audit("log-streams")
             assert logs.describe_log_streams(logGroupName="/aws/console-example")["logStreams"][0]["logStreamName"] == "application"
@@ -85,6 +87,7 @@ def run():
                 pending[0].continue_()
             page.unroute(endpoint+"/",hold_event_read)
             expect(page.get_by_role("heading", name=re.compile(r"^Log groups"))).to_be_visible()
+            expect(page.get_by_role("button", name="Refresh CloudWatch Logs", exact=True)).to_be_enabled()
             expect(page.get_by_text("<script>dummy markup remains text</script>", exact=True)).to_have_count(0)
             page.get_by_role("link", name="/aws/console-example", exact=True).click()
             page.get_by_role("link", name="application", exact=True).click()

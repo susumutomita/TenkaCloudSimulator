@@ -95,10 +95,12 @@ Each page is bounded by 10000 events and 1 MiB including local 26-byte overhead.
 Forward/backward cursors point beyond the selected page; a forward cursor
 requires startFromHead=true. An exhausted direction returns the same token,
 including empty pages. A forward token can observe later events beyond its
-ordering boundary; a subsequently ingested event before that boundary requires
+ordering boundary. Reversing after an empty boundary page includes the first/last
+boundary event. A subsequently ingested event before that boundary requires
 a fresh query. This is an ordering cursor, not a snapshot or live-tail stream.
 
-Tokens expire 24 hours after the first page. They bind the query's region,
+Tokens expire 24 hours after issuance. A page that advances issues new tokens;
+an exhausted direction preserves the input token and its existing expiry. They bind the query's region,
 resource names, time filters, stream generation and direction using a
 database-specific persisted HMAC key. Changing the page limit is permitted;
 changing query filters is not. Tokens survive restart but cannot be reused in

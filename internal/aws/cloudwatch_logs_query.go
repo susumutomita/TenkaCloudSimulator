@@ -49,6 +49,7 @@ func (s *CloudWatchLogsStore) Groups(ctx context.Context, region, prefix, token 
 	if len(result) > limit {
 		result = result[:limit]
 		c.Name = result[len(result)-1].Name
+		c.Expires = s.now().Add(24 * time.Hour).UnixMilli()
 		next = s.encodeCursor(c)
 	}
 	return result, next, nil
@@ -168,6 +169,7 @@ func (s *CloudWatchLogsStore) Streams(ctx context.Context, region, group string,
 		last := result[len(result)-1]
 		c.Name = last.Name
 		c.Timestamp = key(last)
+		c.Expires = s.now().Add(24 * time.Hour).UnixMilli()
 		next = s.encodeCursor(c)
 	}
 	if err = tx.Commit(); err != nil {
@@ -267,10 +269,19 @@ func (s *CloudWatchLogsStore) Events(ctx context.Context, region, group, stream 
 		first, last := page.Events[0], page.Events[len(page.Events)-1]
 		b.Timestamp, b.ID = first.Timestamp, first.id
 		f.Timestamp, f.ID = last.Timestamp, last.id
+		f.Expires = s.now().Add(24 * time.Hour).UnixMilli()
+		b.Expires = f.Expires
 	}
-	if len(page.Events) == 0 && q.Token == "" && !q.StartFromHead {
-		f.Timestamp = -1
-		f.ID = 0
+	if len(page.Events) == 0 {
+		// Preserve the exhausted direction exactly. Its opposite must include
+		// the boundary event when the caller reverses, rather than skip it.
+		if c.Direction == "b" {
+			f.Timestamp, f.ID = -1, 0
+			f.Expires = s.now().Add(24 * time.Hour).UnixMilli()
+		} else {
+			b.Timestamp, b.ID = math.MaxInt64, math.MaxInt64
+			b.Expires = s.now().Add(24 * time.Hour).UnixMilli()
+		}
 	}
 	page.Forward, page.Backward = s.encodeCursor(f), s.encodeCursor(b)
 	if err = tx.Commit(); err != nil {

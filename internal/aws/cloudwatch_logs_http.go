@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"mime"
 	"net/http"
 	"slices"
 	"strings"
@@ -106,7 +107,8 @@ func logsUniqueJSON(dec *json.Decoder, depth int) error {
 // server middleware. Every request, including continuation requests, reauthorizes.
 func (s *CloudWatchLogsStore) ServeHTTP(w http.ResponseWriter, r *http.Request, region string, authorize func(action, resource string) error) {
 	fail := func(err error) { logsWriteError(w, err) }
-	if r.Method != "POST" || r.URL.Path != "/" || r.URL.RawQuery != "" || !strings.HasPrefix(r.Header.Get("Content-Type"), "application/x-amz-json-1.1") {
+	mediaType, _, mediaErr := mime.ParseMediaType(r.Header.Get("Content-Type"))
+	if r.Method != "POST" || r.URL.Path != "/" || r.URL.RawQuery != "" || mediaErr != nil || mediaType != "application/x-amz-json-1.1" {
 		fail(logsInvalid("Use JSON 1.1 root POST without query parameters."))
 		return
 	}

@@ -230,6 +230,75 @@ func TestLogsTokensCannotCrossTeamQueryExpiryOrRecreatedResources(t *testing.T) 
 	}
 }
 
+func TestLogsAdvancingPagesIssueNewExpiryWhileExhaustionPreservesToken(t *testing.T) {
+	ctx := context.Background()
+	_, s := newLogsTest(t)
+	seedLogs(t, s, "group", "stream")
+	now := s.now().UnixMilli()
+	_, err := s.PutEvents(ctx, "us-east-1", "group", "stream", []LogsInputEvent{{now, "first"}, {now + 1, "second"}, {now + 2, "third"}})
+	logsMust(t, err)
+	q := LogsEventsQuery{StartFromHead: true, Limit: 1}
+	first, err := s.Events(ctx, "us-east-1", "group", "stream", q)
+	logsMust(t, err)
+	s.now = func() time.Time { return time.UnixMilli(now).Add(23 * time.Hour) }
+	q.Token = first.Forward
+	second, err := s.Events(ctx, "us-east-1", "group", "stream", q)
+	logsMust(t, err)
+	if len(second.Events) != 1 || second.Events[0].Message != "second" {
+		t.Fatal(second)
+	}
+	s.now = func() time.Time { return time.UnixMilli(now).Add(25 * time.Hour) }
+	if _, err = s.Events(ctx, "us-east-1", "group", "stream", q); logsCode(err) != "InvalidParameterException" {
+		t.Fatal("old token did not expire", err)
+	}
+	q.Token = second.Forward
+	third, err := s.Events(ctx, "us-east-1", "group", "stream", q)
+	logsMust(t, err)
+	if len(third.Events) != 1 || third.Events[0].Message != "third" {
+		t.Fatal("progress inherited stale expiry", third)
+	}
+	s.now = func() time.Time { return time.UnixMilli(now).Add(26 * time.Hour) }
+	q.Token = third.Forward
+	end, err := s.Events(ctx, "us-east-1", "group", "stream", q)
+	logsMust(t, err)
+	if len(end.Events) != 0 || end.Forward != q.Token {
+		t.Fatal("empty boundary refreshed token forever", end)
+	}
+}
+
+func TestLogsReversingAtEmptyPageDoesNotSkipBoundaryEvents(t *testing.T) {
+	ctx := context.Background()
+	_, s := newLogsTest(t)
+	seedLogs(t, s, "group", "stream")
+	now := s.now().UnixMilli()
+	_, err := s.PutEvents(ctx, "us-east-1", "group", "stream", []LogsInputEvent{{now, "first"}, {now + 1, "middle"}, {now + 2, "last"}})
+	logsMust(t, err)
+	first, err := s.Events(ctx, "us-east-1", "group", "stream", LogsEventsQuery{StartFromHead: true, Limit: 1})
+	logsMust(t, err)
+	before, err := s.Events(ctx, "us-east-1", "group", "stream", LogsEventsQuery{Limit: 1, Token: first.Backward})
+	logsMust(t, err)
+	if len(before.Events) != 0 || before.Backward != first.Backward {
+		t.Fatal("backward boundary failed to converge", before)
+	}
+	again, err := s.Events(ctx, "us-east-1", "group", "stream", LogsEventsQuery{StartFromHead: true, Limit: 1, Token: before.Forward})
+	logsMust(t, err)
+	if len(again.Events) != 1 || again.Events[0].Message != "first" {
+		t.Fatal("rewinding skipped first event", again)
+	}
+	last, err := s.Events(ctx, "us-east-1", "group", "stream", LogsEventsQuery{Limit: 1})
+	logsMust(t, err)
+	after, err := s.Events(ctx, "us-east-1", "group", "stream", LogsEventsQuery{StartFromHead: true, Limit: 1, Token: last.Forward})
+	logsMust(t, err)
+	if len(after.Events) != 0 || after.Forward != last.Forward {
+		t.Fatal("forward boundary failed to converge", after)
+	}
+	again, err = s.Events(ctx, "us-east-1", "group", "stream", LogsEventsQuery{Limit: 1, Token: after.Backward})
+	logsMust(t, err)
+	if len(again.Events) != 1 || again.Events[0].Message != "last" {
+		t.Fatal("reversing skipped last event", again)
+	}
+}
+
 func TestLogsIngestPartialTimeRejectionValidationAndAtomicFailures(t *testing.T) {
 	ctx := context.Background()
 	db, s := newLogsTest(t)
