@@ -1900,8 +1900,8 @@
           "id": "RestartLosesStatistics",
           "edits": [
             {
-              "old": "Restart == /\\ initialized'=FALSE /\\ lastOp'=\"Restart\"\n /\\ beforeTables'=tables /\\ beforeRows'=rows /\\ beforeStats'=stats\n /\\ UNCHANGED <<startupValid,tables,rows,stats,lastScope,lastToken,lastKind,lastAllow,\n lastDeny,lastAccepted,lastReady,lastKey,lastBytes>>\n",
-              "new": "Restart == /\\ initialized'=FALSE /\\ lastOp'=\"Restart\"\n /\\ beforeTables'=tables /\\ beforeRows'=rows /\\ beforeStats'=stats\n /\\ stats'=[s \\in Scopes |-> 0]\n /\\ UNCHANGED <<startupValid,tables,rows,lastScope,lastToken,lastKind,lastAllow,\n lastDeny,lastAccepted,lastReady,lastKey,lastBytes>>\n",
+              "old": "Restart == /\\ initialized'=FALSE /\\ lastOp'=\"Restart\"\n /\\ UNCHANGED <<startupValid,tables,rows,stats,lastScope,lastToken,lastKind,lastAllow,\n lastDeny,lastAccepted,lastReady,lastKey,lastBytes>>\n /\\ Prior(lastScope,lastToken) /\\ Observe(lastScope)\n",
+              "new": "Restart == /\\ initialized'=FALSE /\\ lastOp'=\"Restart\"\n /\\ stats'=[s \\in Scopes |-> 0]\n /\\ UNCHANGED <<startupValid,tables,rows,lastScope,lastToken,lastKind,lastAllow,\n lastDeny,lastAccepted,lastReady,lastKey,lastBytes>>\n /\\ Prior(lastScope,lastToken) /\\ Observe(lastScope)\n",
               "count": 1
             }
           ],
