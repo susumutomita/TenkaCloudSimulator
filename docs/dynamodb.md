@@ -38,3 +38,11 @@ ConditionExpression は `attribute_not_exists(<パーティションキー>)` �
 - ProvisionedThroughput の実スロットリング（数値は保存・表示のみ）、オートスケーリング、容量消費量の計算
 - 項目の順序保証、強整合性/結果整合性の区別（ConsistentRead は受付のみで常に保存済み状態を読む）
 - CloudFormation の `AWS::DynamoDB::Table`、Lambda 実行ロールSDKブリッジからの DynamoDB アクセス、Cloudscape コンソール画面
+
+## 数値の範囲と互換性（2026-11-04）
+
+数値は符号付き10進数（小数点、e/E指数を含む）として整数・文字列演算で正規化し、二進浮動小数点へ変換しない。有効数字は先頭・末尾のゼロを除き38桁まで。ゼロ、および絶対値 1E-130 以上 9.9999999999999999999999999999999999999E+125 以下を受け付ける。指数部はゼロを除いて9桁までという実装上の制限がある。
+
+旧実装の `big.Rat` が受け付けた分数、16進数、範囲外・精度超過の数値は新規操作で ValidationException となる。既存の有効な10進数の canonical key は保持し、保存した AttributeValue の原文を変更しない。DB migration、既存データの削除・自動修復は行わない。旧実装で保存された範囲外の数値は未対応の既存データとして扱う。
+
+参照（2026-11-04確認）: [AWS DynamoDB constraints](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Constraints.html)。全てのAWS数値パーサーの字句互換を実証したものではない。

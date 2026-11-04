@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"math/big"
 	"net/http"
 	"regexp"
 	"sort"
@@ -52,12 +51,8 @@ var dynamoTableName = regexp.MustCompile(`^[a-zA-Z0-9_.-]{3,255}$`)
 // canonicalDynamoNumber normalizes a DynamoDB number string so that
 // numerically equal keys ("1", "1.0", "1e2"/"100") identify the same item.
 func canonicalDynamoNumber(s string) (string, bool) {
-	rat, ok := new(big.Rat).SetString(s)
-	if !ok {
-		return "", false
-	}
-	f := new(big.Float).SetPrec(512).SetRat(rat)
-	return f.Text('f', -1), true
+	canonical, _, ok := parseDynamoDecimal(s)
+	return canonical, ok
 }
 
 // dynamoKeyComponent encodes one key attribute value with its type tag.
