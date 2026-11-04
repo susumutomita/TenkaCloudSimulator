@@ -78,7 +78,7 @@
       },
       "post": {
         "summary": "SSM/SQS/KMS JSON, CloudFormation Query, or IAM Query operation",
-        "description": "**Static request templates:** choose the correct Content-Type and routing headers before Test Request \u2192 Send. SSM/SQS send JSON with X-Amz-Target (JSON 1.1 for SSM, JSON 1.0 for SQS); CloudFormation/IAM send URL-encoded Query fields. The 200 response is JSON for SSM/SQS and XML for Query protocols. A successful DeleteStack has no result payload beyond Query response metadata.\n\nNative regional root endpoint. SQS: X-Amz-Target AmazonSQS.CreateQueue, ListQueues, GetQueueUrl, DeleteQueue, SendMessage, ReceiveMessage, DeleteMessage, ChangeMessageVisibility, GetQueueAttributes (JSON 1.0, Standard queues only; local body limit 256 KiB, aggregate physical storage 10000 messages/64 MiB across queues/regions including expired foreign rows until scoped cleanup; bytes count body UTF-8 plus stored attribute JSON. Over-budget SendMessage returns local SimulatorQuotaExceeded without mutation; existing over-cap data remains readable/deletable; FIFO, Query protocol, batch operations and dead-letter redrive are unsupported). SSM: X-Amz-Target AmazonSSM.PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter. CloudFormation: CreateStack, DescribeStacks, DeleteStack; S3 buckets, SSM parameters, inline Python Lambda functions, one inline IAM identity policy per role, five Regional REST API Gateway resource types, and bounded Lambda::Permission. Unsupported options fail. Real credentials and session tokens are rejected. Create/DeleteStack also require the caller to allow the underlying S3/SSM/IAM/Lambda actions; CAPABILITY_IAM grants no permissions. API resources use NONE/POST AWS_PROXY local Lambda, same-stack API children, explicit deployment DependsOn methods and reverse guarded cleanup. Lambda permission uses only apigateway.amazonaws.com and local execute-api SourceArn. No service RoleArn or general CloudFormation lifecycle is supported. IAM is global: send X-Simulator-Service: iam, Version2010-05-08 and one of CreateRole/GetRole/ListRoles/DeleteRole/PutRolePolicy/GetRolePolicy/DeleteRolePolicy/ListRolePolicies/UpdateAssumeRolePolicy. Policy documents are JSON strings; successful IAM XML returns them RFC3986 URL-encoded. Native role names use the local alphanumeric/underscore/hyphen subset,1\u201364; inline policy names1\u2013128 AWS characters. Trust and aggregate policies32KiB, at most10 inline policies/100 statements,1000 active+retired name claims. Deleted role names cannot be adopted by legacy identity writes. No managed grants or session issuance.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.\n\nCloudWatch Logs subset: choose JSON1.1, service=logs and the exact Logs_20140328 target matching one of seven Logs examples. Lowercase payload fields differ from SSM. Create/delete succeed with an empty200 body; describe/get/put use native JSON (events, nextForwardToken/nextBackwardToken, optional rejectedLogEventsInfo). Sequence tokens are ignored. For valid events the span is at most24hours; UTF8 message bytes+26/event total at most1048576, count at most10000. Static timestamp0 is intentionally a template; replace it with current epoch milliseconds before Send. A template is not live state. STANDARD only; no tags/retention/KMS/metrics/alarms/CFN/automatic Lambda delivery.",
+        "description": "**Static request templates:** choose the correct Content-Type and routing headers before Test Request \u2192 Send. SSM/SQS send JSON with X-Amz-Target (JSON 1.1 for SSM, JSON 1.0 for SQS); CloudFormation/IAM send URL-encoded Query fields. The 200 response is JSON for SSM/SQS and XML for Query protocols. A successful DeleteStack has no result payload beyond Query response metadata.\n\nNative regional root endpoint. SQS: X-Amz-Target AmazonSQS.CreateQueue, ListQueues, GetQueueUrl, DeleteQueue, SendMessage, ReceiveMessage, DeleteMessage, ChangeMessageVisibility, GetQueueAttributes (JSON 1.0, Standard queues only; local body limit 256 KiB, aggregate physical storage 10000 messages/64 MiB across queues/regions including expired foreign rows until scoped cleanup; bytes count body UTF-8 plus stored attribute JSON. Over-budget SendMessage returns local SimulatorQuotaExceeded without mutation; existing over-cap data remains readable/deletable; FIFO, Query protocol, batch operations and dead-letter redrive are unsupported). SSM: X-Amz-Target AmazonSSM.PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter. CloudFormation: CreateStack, DescribeStacks, DeleteStack; S3 buckets, SSM parameters, inline Python Lambda functions, one inline IAM identity policy per role, five Regional REST API Gateway resource types, and bounded Lambda::Permission. Unsupported options fail. Real credentials and session tokens are rejected. Create/DeleteStack also require the caller to allow the underlying S3/SSM/IAM/Lambda actions; CAPABILITY_IAM grants no permissions. API resources use NONE/POST AWS_PROXY local Lambda, same-stack API children, explicit deployment DependsOn methods and reverse guarded cleanup. Lambda permission uses only apigateway.amazonaws.com and local execute-api SourceArn. No service RoleArn or general CloudFormation lifecycle is supported. IAM is global: send X-Simulator-Service: iam, Version2010-05-08 and one of CreateRole/GetRole/ListRoles/DeleteRole/PutRolePolicy/GetRolePolicy/DeleteRolePolicy/ListRolePolicies/UpdateAssumeRolePolicy. Policy documents are JSON strings; successful IAM XML returns them RFC3986 URL-encoded. Native role names use the local alphanumeric/underscore/hyphen subset,1\u201364; inline policy names1\u2013128 AWS characters. Trust and aggregate policies32KiB, at most10 inline policies/100 statements,1000 active+retired name claims. Deleted role names cannot be adopted by legacy identity writes. No managed grants or session issuance.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.\n\nUse X-Amz-Target TrentService.<operation> matching the selected body example; example choice does not change routing headers automatically. CreateKey first, copy returned KeyId into later requests, and copy an actual local Encrypt CiphertextBlob into Decrypt (the valid-base64 documentation placeholder is deliberately not decryptable). All calls require host X-Simulator-Token or signed-in local session. Dummy TCSIM SigV4 scope is not authentication.\n\nCreateKey/ListKeys require their exact kms action on *. DescribeKey/EnableKey/DisableKey/GetKeyPolicy/Encrypt/Decrypt require the actual key ARN. Decrypt without KeyId resolves the local blob key. Explicit Deny wins. Programmatic default policy only enables local identity-policy delegation; no grant for all participants.\n\nEnabled/Disabled only; disabled blocks Encrypt/Decrypt, metadata/default policy remain readable. Local request64KiB,1000keys,plaintext1\u20134096bytes,context100entries/8192canonicalbytes,counter2^32 ceiling. Ciphertext/material are simulator-local; SQLite stores raw material, not an at-rest security boundary. Unsupported aliases/tags/grants/custom policies/asymmetric/data keys/rotation/deletion/multi-region/CFN/other-service encryption fail; no problem availability is implied. Actual AWS eventual consistency and ciphertext portability are not reproduced.\n\nKMS JSON1.1 targets TrentService.CreateKey/DescribeKey/ListKeys/EnableKey/DisableKey/GetKeyPolicy/Encrypt/Decrypt are also accepted here. This root JSON1.1 section includes all eight bounded KMS body templates and limitations. CloudWatch Logs JSON1.1 uses Logs_20140328.<operation> and service=logs; only the seven declared operations are implemented. Choose the matching headers separately from the body example.",
         "operationId": "awsRegionalOperation",
         "parameters": [
           {
@@ -111,7 +111,7 @@
                 "Logs_20140328.GetLogEvents"
               ]
             },
-            "description": "AmazonSSM.<operation>, AmazonSQS.<operation> or TrentService.<operation>; use matching Content-Type and body. JSON protocols only: AmazonSSM.<operation>, AmazonSQS.<operation>, or Logs_20140328.<operation>. For Logs choose application/x-amz-json-1.1 and X-Simulator-Service=logs; match the selected request example. Query IAM/CloudFormation do not use this header."
+            "description": "AmazonSSM.<operation>, AmazonSQS.<operation> or TrentService.<operation>; use matching Content-Type and body. Also supports the declared Logs_20140328.<operation> JSON1.1 requests with X-Simulator-Service=logs; body selection alone does not select headers."
           },
           {
             "name": "X-Simulator-Region",
@@ -141,7 +141,7 @@
                 "sqs"
               ]
             },
-            "description": "iam selects IAM Query; omit or use cloudformation for CloudFormation, and omit or use ssm for SSM JSON. Do not select iam for CreateStack/DescribeStacks/DeleteStack. kms selects the bounded KMS JSON1.1 handler. iam selects IAM Query; omit or use cloudformation for CloudFormation, and omit or use ssm for SSM JSON. Do not select iam for CreateStack/DescribeStacks/DeleteStack. Select logs for the bounded CloudWatch Logs JSON1.1 operations. Metrics/alarms, Logs Insights and Lambda automatic delivery are not implemented. sqs is the existing JSON1.0 queue subset."
+            "description": "iam selects IAM Query; omit or use cloudformation for CloudFormation, and omit or use ssm for SSM JSON. Do not select iam for CreateStack/DescribeStacks/DeleteStack. kms selects the bounded KMS JSON1.1 handler. Also supports the declared Logs_20140328.<operation> JSON1.1 requests with X-Simulator-Service=logs; body selection alone does not select headers."
           },
           {
             "$ref": "#/components/parameters/SimulatorToken"
@@ -173,15 +173,100 @@
                   },
                   {
                     "$ref": "#/components/schemas/KMSDecryptInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LogsCreateLogGroupRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LogsDescribeLogGroupsRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LogsDeleteLogGroupRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LogsCreateLogStreamRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LogsDescribeLogStreamsRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LogsPutLogEventsRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LogsGetLogEventsRequest"
                   }
                 ],
-                "description": "Operation-specific JSON object: SSM uppercase field names; CloudWatch Logs lowercase field names. Exact payload fields and constraints are in the Logs request schemas; the routing header chooses the contract. Unknown/unsupported Logs fields are rejected, not ignored."
+                "description": "SSM or KMS JSON1.1 as selected by X-Amz-Target; generic SSM remains documented independently. Exact KMS per-target schemas are in x-simulator-kms-operation-schemas; body alone cannot discriminate routing."
               },
               "examples": {
                 "SSMGetParameter": {
-                  "summary": "SSM GetParameter: AmazonSSM.GetParameter; service=ssm",
+                  "summary": "Existing SSM body template; set X-Amz-Target AmazonSSM.GetParameter",
                   "value": {
                     "Name": "/practice/hello"
+                  }
+                },
+                "KMSCreateKey": {
+                  "summary": "X-Amz-Target: TrentService.CreateKey",
+                  "description": "Replace dummy KeyId with current CreateKey output; Decrypt additionally needs actual Encrypt output.",
+                  "value": {
+                    "Description": "Local dummy key"
+                  }
+                },
+                "KMSDescribeKey": {
+                  "summary": "X-Amz-Target: TrentService.DescribeKey",
+                  "description": "Replace dummy KeyId with current CreateKey output; Decrypt additionally needs actual Encrypt output.",
+                  "value": {
+                    "KeyId": "11111111-1111-4111-8111-111111111111"
+                  }
+                },
+                "KMSListKeys": {
+                  "summary": "X-Amz-Target: TrentService.ListKeys",
+                  "description": "Replace dummy KeyId with current CreateKey output; Decrypt additionally needs actual Encrypt output.",
+                  "value": {
+                    "Limit": 1
+                  }
+                },
+                "KMSEnableKey": {
+                  "summary": "X-Amz-Target: TrentService.EnableKey",
+                  "description": "Replace dummy KeyId with current CreateKey output; Decrypt additionally needs actual Encrypt output.",
+                  "value": {
+                    "KeyId": "11111111-1111-4111-8111-111111111111"
+                  }
+                },
+                "KMSDisableKey": {
+                  "summary": "X-Amz-Target: TrentService.DisableKey",
+                  "description": "Replace dummy KeyId with current CreateKey output; Decrypt additionally needs actual Encrypt output.",
+                  "value": {
+                    "KeyId": "11111111-1111-4111-8111-111111111111"
+                  }
+                },
+                "KMSGetKeyPolicy": {
+                  "summary": "X-Amz-Target: TrentService.GetKeyPolicy",
+                  "description": "Replace dummy KeyId with current CreateKey output; Decrypt additionally needs actual Encrypt output.",
+                  "value": {
+                    "KeyId": "11111111-1111-4111-8111-111111111111",
+                    "PolicyName": "default"
+                  }
+                },
+                "KMSEncrypt": {
+                  "summary": "X-Amz-Target: TrentService.Encrypt",
+                  "description": "Replace dummy KeyId with current CreateKey output; Decrypt additionally needs actual Encrypt output.",
+                  "value": {
+                    "KeyId": "11111111-1111-4111-8111-111111111111",
+                    "Plaintext": "bG9jYWwgZHVtbXk=",
+                    "EncryptionContext": {
+                      "purpose": "demo"
+                    }
+                  }
+                },
+                "KMSDecrypt": {
+                  "summary": "X-Amz-Target: TrentService.Decrypt",
+                  "description": "Replace dummy KeyId with current CreateKey output; Decrypt additionally needs actual Encrypt output.",
+                  "value": {
+                    "CiphertextBlob": "VEhJU19JU19BX0RPQ1VNRU5UQVRJT05fUExBQ0VIT0xERVI=",
+                    "EncryptionContext": {
+                      "purpose": "demo"
+                    }
                   }
                 },
                 "LogsCreateLogGroup": {
@@ -459,13 +544,13 @@
         },
         "responses": {
           "200": {
-            "description": "Native JSON1.1 SSM/Logs or JSON1.0 SQS or XML Query response. Logs CreateLogGroup/CreateLogStream/DeleteLogGroup return an empty200 body; reads return events/groups/streams and opaque page tokens; PutLogEvents can report partial time rejections."
+            "description": "Native JSON 1.1 SSM or XML Query response KMS returns target-specific JSON metadata/list/policy/crypto; EnableKey/DisableKey return an EMPTY body. Use returned local key/ciphertext values in subsequent requests."
           },
           "400": {
-            "description": "Validation/unsupported field/state conflict IAM ValidationError/MalformedPolicyDocument reject unknown trust or permissions semantics. Logs InvalidParameterException, ResourceNotFoundException or ResourceAlreadyExistsException; no partial representation of unsupported fields."
+            "description": "Validation/unsupported field/state conflict IAM ValidationError/MalformedPolicyDocument reject unknown trust or permissions semantics."
           },
           "403": {
-            "description": "Exercise IAM denied Logs AccessDeniedException is distinct from policy/DB infrastructure errors."
+            "description": "Exercise IAM denied"
           },
           "501": {
             "description": "Unsupported operation"
