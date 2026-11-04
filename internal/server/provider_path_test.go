@@ -1,9 +1,13 @@
 package server
 
 import (
+	"encoding/xml"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
+	"slices"
+	"sort"
 	"strconv"
 	"strings"
 	"testing"
@@ -14,29 +18,95 @@ func TestProviderPrefixPreservesLiteralKeys(t *testing.T) {
 	// A redirect is a failure even if following it would reach a successful route.
 	s.Client().CheckRedirect = func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }
 	status(t, s, "PUT", "/prefix-bucket", "", 200, nil)
-	status(t, s, "PUT", "/prefix-bucket/victim", "sentinel", 200, nil)
-	for i, key := range []string{"a/../victim", "a/./victim", "a//victim", "./victim", "a///victim", "a/%252F/victim", "a/%2525/victim", "a/%2F/victim", "a/雪/é"} {
-		root := "/prefix-bucket/" + key
-		prefixed := "/_simulator/providers/aws" + root
-		before := fmt.Sprintf("literal-%d", i)
-		status(t, s, "PUT", root, before, 200, nil)
-		if got := status(t, s, "GET", prefixed, "", 200, nil); string(got) != before {
-			t.Fatalf("prefixed GET changed key %q: %q", key, got)
+	keys := []string{"b", "a/b", "a/../b", "a/./b", "a//b", "a///b", "a/%2F/b", "a/%2f/b", "a/%25/b", "a/%/b", "a/%252F/b", "a/雪/é", "./b"}
+	prefixes := []string{"", "/_simulator/providers/aws"}
+	expected := map[string]string{}
+	pathFor := func(prefix, key string) string {
+		segments := strings.Split(key, "/")
+		for i := range segments {
+			segments[i] = url.PathEscape(segments[i])
 		}
-		head, _ := call(t, s, "HEAD", prefixed, "", nil)
-		if head.StatusCode != 200 || head.Header.Get("Content-Length") != strconv.Itoa(len(before)) {
-			t.Fatalf("HEAD changed key %q: %d %v", key, head.StatusCode, head.Header)
+		// Keep literal dot segments and slashes; encode percent and UTF-8 once.
+		return prefix + "/prefix-bucket/" + strings.Join(segments, "/")
+	}
+	assertSnapshot := func() {
+		t.Helper()
+		wantKeys := make([]string, 0, len(expected))
+		for key := range expected {
+			wantKeys = append(wantKeys, key)
 		}
-		status(t, s, "PUT", prefixed, "replacement", 200, nil)
-		if got := status(t, s, "GET", root, "", 200, nil); string(got) != "replacement" {
-			t.Fatalf("prefixed PUT changed key %q: %q", key, got)
-		}
-		status(t, s, "DELETE", prefixed, "", 204, nil)
-		status(t, s, "GET", root, "", 404, nil)
-		if got := status(t, s, "GET", "/prefix-bucket/victim", "", 200, nil); string(got) != "sentinel" {
-			t.Fatal("neighbor object changed", string(got))
+		sort.Strings(wantKeys)
+		for _, prefix := range prefixes {
+			var listing struct {
+				IsTruncated bool
+				Contents    []struct{ Key string }
+			}
+			if err := xml.Unmarshal(status(t, s, "GET", prefix+"/prefix-bucket?list-type=2", "", 200, nil), &listing); err != nil {
+				t.Fatal(err)
+			}
+			listed := make([]string, 0, len(listing.Contents))
+			for _, item := range listing.Contents {
+				listed = append(listed, item.Key)
+			}
+			sort.Strings(listed)
+			if listing.IsTruncated || !slices.Equal(listed, wantKeys) {
+				t.Fatalf("exact object-key set changed at %q: got %q want %q", prefix, listed, wantKeys)
+			}
+			for key, body := range expected {
+				if got := status(t, s, "GET", pathFor(prefix, key), "", 200, nil); string(got) != body {
+					t.Fatalf("object %q changed at %q: got %q want %q", key, prefix, got, body)
+				}
+			}
 		}
 	}
+	// All potentially colliding keys coexist with distinct values. Agreement
+	// between two equally wrong endpoints cannot satisfy the exact list set.
+	for i, key := range keys {
+		expected[key] = fmt.Sprintf("seed-%d:%s", i, key)
+		status(t, s, "PUT", pathFor(prefixes[i%2], key), expected[key], 200, nil)
+		assertSnapshot()
+	}
+	for i, key := range keys {
+		for writer, prefix := range prefixes {
+			path := pathFor(prefix, key)
+			if got := status(t, s, "GET", path, "", 200, nil); string(got) != expected[key] {
+				t.Fatal("GET changed key", key)
+			}
+			assertSnapshot()
+			head, _ := call(t, s, "HEAD", path, "", nil)
+			if head.StatusCode != 200 || head.Header.Get("Content-Length") != strconv.Itoa(len(expected[key])) {
+				t.Fatalf("HEAD changed key %q: %d %v", key, head.StatusCode, head.Header)
+			}
+			assertSnapshot()
+			expected[key] = fmt.Sprintf("updated-%d-%d:%s", writer, i, key)
+			status(t, s, "PUT", path, expected[key], 200, nil)
+			assertSnapshot()
+			status(t, s, "DELETE", path, "", 204, nil)
+			delete(expected, key)
+			assertSnapshot()
+			for _, reader := range prefixes {
+				status(t, s, "GET", pathFor(reader, key), "", 404, nil)
+				assertSnapshot()
+			}
+			expected[key] = fmt.Sprintf("restored-%d-%d:%s", writer, i, key)
+			status(t, s, "PUT", path, expected[key], 200, nil)
+			assertSnapshot()
+		}
+	}
+	// Encoded slash is a URI spelling of the three-slash key, whereas the
+	// percent-containing neighbors above must survive an additional decode.
+	for _, prefix := range prefixes {
+		if got := status(t, s, "GET", prefix+"/prefix-bucket/a/%2F/b", "", 200, nil); string(got) != expected["a///b"] {
+			t.Fatal("encoded slash did not address the exact decoded key")
+		}
+		assertSnapshot()
+	}
+	for i, key := range keys {
+		status(t, s, "DELETE", pathFor(prefixes[i%2], key), "", 204, nil)
+		delete(expected, key)
+		assertSnapshot()
+	}
+	status(t, s, "DELETE", "/prefix-bucket", "", 204, nil)
 	status(t, s, "GET", "/_simulator/providers/missing/a/../victim", "", 404, nil)
 }
 
