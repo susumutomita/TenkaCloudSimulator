@@ -78,7 +78,7 @@ the separate narrow recognizer and is not bound to token-state invariants.
 
 ## Browser session revocation
 
-BrowserSessions is required alongside SSMParameterState and the original five models. Its two clients, three fresh browser
+BrowserSessions is required alongside StartupTokenVisibility, SSMParameterState and the original five models. Its two clients, three fresh browser
 credentials, one operator and one participant parent, clock0..3 and TTL2/1 bound
 login→cookie use→logout/replay→parent expiry/invalidation. Five named mutants
 retain a revoked session, ignore parent validity, accept raw operator cookies,

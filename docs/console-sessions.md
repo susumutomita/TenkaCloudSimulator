@@ -69,7 +69,7 @@ Origin parsing, cookie flags, HTTP error handling, Go concurrency, token entropy
 PC/mobile layout or cross-team isolation. Those are independent existing tests.
 Clock/TTL/token counts are exploration bounds, not the actual15-minute TTL limit.
 
-The combined seven baselines and fifteen specified sensitivity controls require
+The combined eight baselines and eighteen specified sensitivity controls require
 fresh immutable-HEAD TLC execution. Source-only integration and Python policy/
 applicability checks are separate from native Go, actual browser, hosted CI and
 review evidence; no fresh runtime execution is implied by restacking.
