@@ -2,6 +2,8 @@
 import copy
 import json
 import shutil
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -17,6 +19,7 @@ class ApplicabilityTests(unittest.TestCase):
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name)
         shutil.copytree(ROOT / 'formal', self.root / 'formal')
+        shutil.copyfile(ROOT / '.gitignore', self.root / '.gitignore')
         record = self.root / RECORD
         if record.exists():
             record.unlink()
@@ -226,6 +229,13 @@ class ApplicabilityTests(unittest.TestCase):
         self.commit('scope erasure is not an exception')
         with self.assertRaises(GateError):
             validate_record(self.root, self.base)
+
+    def test_cli_generated_evidence_does_not_dirty_the_source_tree(self):
+        self.prepare()
+        result = subprocess.run([sys.executable, str(ROOT / 'scripts/check-formal-applicability.py'), 'check', '--base', self.base], cwd=self.root, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue((self.root / 'reports/formal/applicability.json').is_file())
+        validate_record(self.root, self.base)
 
 
 if __name__ == '__main__':

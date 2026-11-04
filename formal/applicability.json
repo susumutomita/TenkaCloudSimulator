@@ -10,6 +10,13 @@
       "models": []
     },
     {
+      "path": ".gitignore",
+      "sha256": "a49de3a7afae4ca42ecfdb1f064a98cad1c0bbce18bddc63a01ad6e9c3097286",
+      "disposition": "build-metadata",
+      "reason": "Ignore only generated reports/formal evidence so the validator does not mistake its own output for uncommitted source. No model, source or validation input is excluded.",
+      "models": []
+    },
+    {
       "path": "docs/ci.md",
       "sha256": "35bf55f6279fcc7106ff832e0f886a63a575d0c582715eb818b06a3d7e588a3e",
       "disposition": "documentation",
@@ -67,7 +74,7 @@
     },
     {
       "path": "scripts/test-formal-applicability.py",
-      "sha256": "b0ea549b8578f6f6b808f219f7f5b722317e9a7b10c02fa4a1ca013b37f9df3a",
+      "sha256": "68a801b2146e3ecb7763f6dc7e00212f1ccda35beb6203f84d136d782801c044",
       "disposition": "formal-infrastructure",
       "reason": "Changes validation orchestration or its executable inventory, not simulator resource transitions. Strict real-Git/input and failure-classification negative tests exercise the mechanism; the unchanged five finite specifications still require actual TLC baseline and sensitivity runs. Human acceptance and policy self-edit protection remain separate.",
       "models": []
