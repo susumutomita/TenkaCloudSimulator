@@ -43,3 +43,5 @@ IAM→Roles→Create role→Role details→Lambda→Create function→Permission
 実ブラウザでは空のIAMからrole作成、Lambdaのrole選択、関数作成、ZIP Deploy、実Pythonが42を返すまで確認する。PC/390px、別teamのrole非共有、participant管理拒否も検証。残る差分はdocs/console-fidelity.mdに記録する。
 
 IAMはnative Query APIを使うCloudscape Wizard、Permissions/Trust relationshipsの実状態操作に対応する。従来のidentity方式はLocal identitiesへ残す。[導線・制限](iam.md)。
+
+API GatewayはAPIs→Regional REST作成→resource/method→Lambda proxy→Deploy API/new stage→stage実行をnative APIと共有する。作成時はAPI/method限定Lambda resource permissionを追加し、実行ロールによるサービスアクセスとは分離する。応答は安全な非実行downloadで、AWSのbrowser app hostingとは異なる。resource tree、既存stage編集等の差と実確認範囲は[API Gateway](apigateway.md)と[再現差分](console-fidelity.md)を参照。

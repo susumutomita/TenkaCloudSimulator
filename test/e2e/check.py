@@ -261,6 +261,10 @@ def handler(event,context):
     f=client('cloudformation',endpoint,token);c=client('lambda',endpoint,token)
     result=c.invoke(FunctionName='cfn-inline-app',Payload=b'null');self.assertNotIn('FunctionError',result);self.assertEqual(json.loads(result['Payload'].read()),{'answer':42,'value':'team-one','event':None})
     f.delete_stack(StackName='inline-practice');self.assertEqual(c.list_functions()['Functions'],[])
+ def test_apigateway_rest_sdk_permissions_and_two_teams(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('apigateway.py'))],check=True)
+ def test_apigateway_console_and_actual_scalar_requests(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('apigateway_console.py'))],check=True)
  def test_native_iam_query_and_console_to_lambda(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('native_iam.py'))],check=True)
  def test_iam_role_console_to_lambda_deploy_without_host_setup(self):

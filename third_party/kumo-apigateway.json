@@ -1,0 +1,24 @@
+{
+  "upstream": "https://github.com/sivchari/kumo",
+  "commit": "ce37a8fb406ecb96b5619204f645c26302b651a5",
+  "license": "MIT",
+  "copyright": "Copyright (c) 2025 sivchari",
+  "sourceFiles": {
+    "internal/service/execapi/path.go": "0c800b9e8b0c6fe525a4c07b76e9f7241d31abd9bad681cbae79ff980f8f3f7b",
+    "internal/service/execapi/event.go": "cc26fe2f9a046487ab1a954150b4fade86fbcdc910eaf3c56322f90ec06f2f79",
+    "internal/service/apigateway/types.go": "29d2228a8ed50349df185ec5e1ea862eb09ef6002693ee2575d5eff58297c352"
+  },
+  "licenseSha256": "02f8d83277fea29291727639f45ddafcbcbf7cbc2d92ea1297eb84f0b8ee9fe2",
+  "status": "Local bounded REST adapter under validation; no catalog problem is enabled by this alone",
+  "modifications": [
+    "Strict bounded greedy-path matching",
+    "REST v1 event shape only; actual path distinct from resource template",
+    "No UUID dependency; trusted provider request id",
+    "Simulator header/cookie/session credential redaction; application Bearer data retained",
+    "Reject malformed query/binary bodies/encoded event overflow; no arbitrary HTTP dispatch copied",
+    "SQLite regional resource tree, immutable deployment snapshots and stage references",
+    "Native management and in-process saved-role invocation with SourceArn service permission",
+    "Non-executing downloaded responses; no upstream HTTP dispatcher or guest network client",
+    "Drop all Cookie headers, including unrelated local app sessions shared across ports; host authentication remains outside the guest"
+  ]
+}

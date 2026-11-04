@@ -302,7 +302,7 @@ func (g *Gateway) serveLambda(w http.ResponseWriter, r *http.Request) {
 	if path != prefix {
 		parts = strings.Split(strings.TrimPrefix(path, prefix+"/"), "/")
 	}
-	if len(parts) > 2 {
+	if len(parts) > 3 || len(parts) == 3 && parts[1] != "policy" {
 		invalid("Unsupported function resource path.")
 		return
 	}
@@ -332,6 +332,11 @@ func (g *Gateway) serveLambda(w http.ResponseWriter, r *http.Request) {
 		case "Qualifier":
 			if values[0] != "$LATEST" || len(parts) != 2 || !(parts[1] == "configuration" && r.Method == "GET" || parts[1] == "invocations" && r.Method == "POST") {
 				lambdaError(w, ssmFailure{"NotImplementedException", "Versions and aliases are unsupported."})
+				return
+			}
+		case "RevisionId":
+			if len(parts) != 3 || parts[1] != "policy" || r.Method != "DELETE" {
+				invalid("Resource policy revision is only valid on RemovePermission.")
 				return
 			}
 		case "MaxItems", "Marker":
@@ -368,6 +373,10 @@ func (g *Gateway) serveLambda(w http.ResponseWriter, r *http.Request) {
 			return false
 		}
 		return true
+	}
+	if len(parts) >= 2 && parts[1] == "policy" {
+		g.serveLambdaPolicy(w, r, region, name, parts, authorize)
+		return
 	}
 	if name == "" && r.Method == "GET" {
 		if r.URL.Query().Has("Qualifier") {

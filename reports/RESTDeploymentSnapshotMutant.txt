@@ -1,0 +1,56 @@
+TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)
+Warning: Please run the Java VM which executes TLC with a throughput optimized garbage collector by passing the "-XX:+UseParallelGC" property.
+(Use the -nowarning option to disable this warning.)
+Running breadth-first search Model-Checking with fp 12 and seed -5717969490823634223 with 1 worker on 4 cores with 4096MB heap and 64MB offheap memory [pid: 192306] (Linux 6.18.57 amd64, Debian 21.0.12.1 x86_64, MSBDiskFPSet, DiskStateQueue).
+Parsing file /tmp/tcsim-rest-snapshots-rvpuxumc/RESTDeploymentSnapshotMutant.tla
+Parsing file /tmp/FiniteSets.tla
+Parsing file /tmp/Naturals.tla
+Parsing file /tmp/Sequences.tla
+Semantic processing of module Naturals
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module RESTDeploymentSnapshotMutant
+Starting... (2026-11-04 04:19:19)
+Computing initial states...
+Finished computing initial states: 1 distinct state generated at 2026-11-04 04:19:19.
+Error: Invariant SnapshotsFrozen is violated.
+Error: The behavior up to this point is:
+State 1: <Initial predicate>
+/\ draft = none
+/\ exists = FALSE
+/\ snapshots = (first :> none @@ second :> none)
+/\ baseline = (first :> none @@ second :> none)
+/\ stage = none
+
+State 2: <CreateAPI line 9, col 14 to line 10, col 63 of module RESTDeploymentSnapshotMutant>
+/\ draft = none
+/\ exists = TRUE
+/\ snapshots = (first :> none @@ second :> none)
+/\ baseline = (first :> none @@ second :> none)
+/\ stage = none
+
+State 3: <EditDraft line 11, col 17 to line 12, col 136 of module RESTDeploymentSnapshotMutant>
+/\ draft = handlerA
+/\ exists = TRUE
+/\ snapshots = (first :> none @@ second :> none)
+/\ baseline = (first :> none @@ second :> none)
+/\ stage = none
+
+State 4: <Deploy line 13, col 14 to line 16, col 50 of module RESTDeploymentSnapshotMutant>
+/\ draft = handlerA
+/\ exists = TRUE
+/\ snapshots = (first :> handlerA @@ second :> none)
+/\ baseline = (first :> handlerA @@ second :> none)
+/\ stage = none
+
+State 5: <EditDraft line 11, col 17 to line 12, col 136 of module RESTDeploymentSnapshotMutant>
+/\ draft = handlerB
+/\ exists = TRUE
+/\ snapshots = (first :> handlerB @@ second :> none)
+/\ baseline = (first :> handlerA @@ second :> none)
+/\ stage = none
+
+28 states generated, 9 distinct states found, 3 states left on queue.
+The depth of the complete state graph search is 5.
+The average outdegree of the complete state graph is 2 (minimum is 1, the maximum 2 and the 95th percentile is 2).
+Finished in 00s at (2026-11-04 04:19:19)
