@@ -36,7 +36,7 @@ with running(authenticated=True) as (team_a,operator),running(authenticated=True
    for width in (1440,390):
     page.set_viewport_size({'width':width,'height':1000});assert_reflow(page);page.screenshot(path=str(REPORTS/('logout-login-'+str(width)+'.png')),full_page=True,animations='disabled')
    page.set_viewport_size({'width':1440,'height':1000})
-  page.get_by_role('button',name='Open sandbox',exact=True).click();expect(page.get_by_role('button',name='Account menu',exact=True)).to_be_visible();expect(page.get_by_role('link',name='logout-team-b-only' if endpoint==team_b else 'logout-team-a-only',exact=True)).to_be_visible()
+  page.get_by_role('button',name='Open sandbox',exact=True).click();page.wait_for_url(endpoint+'/_simulator/console/');expect(page.get_by_role('button',name='Account menu',exact=True)).to_be_visible();expect(page.get_by_role('link',name='logout-team-b-only' if endpoint==team_b else 'logout-team-a-only',exact=True)).to_be_visible()
  def cookie(page,endpoint):
   values=[item for item in page.context.cookies(endpoint) if item['name'].startswith('tcsim_')]
   assert len(values)==1,'Expected a single local authority cookie';return values[0]
@@ -76,7 +76,7 @@ with running(authenticated=True) as (team_a,operator),running(authenticated=True
  assert protected(team_a).status==401 and protected(team_a,original).status==401
  assert protected(team_a,second_cookie).status==200 and protected(team_b,cookie(other,team_b)).status==200
  assert [item['Name'] for item in s3.list_buckets()['Buckets']]==['logout-team-a-only'];assert participant_s3.list_buckets()['Buckets'][0]['Name']=='logout-team-a-only';assert other_s3.list_buckets()['Buckets'][0]['Name']=='logout-team-b-only'
- page.goto(team_a+'/_simulator/console/');expect(page.get_by_role('heading',name='Open your local sandbox',exact=True)).to_be_visible();page.get_by_label('Access token',exact=True).fill(operator);page.get_by_role('button',name='Open sandbox',exact=True).click();expect(page.get_by_role('button',name='Account menu',exact=True)).to_be_visible();assert cookie(page,team_a)['value']!=original['value']
+ page.goto(team_a+'/_simulator/console/');expect(page.get_by_role('heading',name='Open your local sandbox',exact=True)).to_be_visible();page.get_by_label('Access token',exact=True).fill(operator);page.get_by_role('button',name='Open sandbox',exact=True).click();page.wait_for_url(team_a+'/_simulator/console/');expect(page.get_by_role('button',name='Account menu',exact=True)).to_be_visible();assert cookie(page,team_a)['value']!=original['value']
  signout(limited);expect(limited.get_by_role('heading',name='Open your local sandbox',exact=True)).to_be_visible();assert protected(team_a,participant_cookie).status==401;assert participant_s3.list_buckets()['Buckets'][0]['Name']=='logout-team-a-only'
  unguarded=make_page(unsafe);unguarded.goto(unsafe+'/_simulator/console/');expect(unguarded.get_by_role('button',name='Account menu',exact=True)).to_be_visible();unguarded.get_by_role('button',name='Account menu',exact=True).click();expect(unguarded.get_by_role('menuitem',name='Sign out (authentication disabled)',exact=True)).to_have_attribute('aria-disabled','true')
  s3.delete_bucket(Bucket='logout-team-a-only');other_s3.delete_bucket(Bucket='logout-team-b-only');assert not errors,'Browser page errors';assert not outside,'Unexpected external request';wire.dispose();browser.close()

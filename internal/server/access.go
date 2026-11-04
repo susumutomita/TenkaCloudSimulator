@@ -88,6 +88,8 @@ func (a *Access) browserIdentity(token string) (string, bool) {
 func (a *Access) browserCookie(r *http.Request, token string, expires time.Time) *http.Cookie {
 	return &http.Cookie{Name: a.cookie, Value: token, Path: "/", HttpOnly: true, SameSite: http.SameSiteStrictMode, Secure: r.TLS != nil, Expires: expires}
 }
+
+// revokeBrowser requires a.mu to be held.
 func (a *Access) revokeBrowser(r *http.Request) {
 	if cookie, err := r.Cookie(a.cookie); err == nil {
 		delete(a.browsers, sha256.Sum256([]byte(cookie.Value)))
