@@ -10,7 +10,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from formal_model_gate import GateError, apply_mutant, load_registry, run_suite, validate_result, invariants, exact_head_inputs
+from formal_model_gate import GateError, apply_mutant, load_registry, run_suite, validate_result, invariants, exact_head_inputs, REQUIRED_MUTANTS
 
 ROOT = Path(__file__).resolve().parents[1]
 
