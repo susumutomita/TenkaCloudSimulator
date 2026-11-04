@@ -1,7 +1,54 @@
 # Development roster
 
+Current integration snapshot: 2026-11-04. Integration owner: `root`.
+This section is the single current assignment roster. The previous snapshot is
+retained below as history. Follow the [parallel rules](contributing/parallel-development.md)
+and [shared contracts](design/0005-parallel-service-contracts.md). Backlog issue
+creation, source implementation, executable verification and public merge are separate states.
+
+## Public baseline and current integration
+
+The last independently checked public baseline is
+`b61d0299a2139661f01ef29ae5826e4c070cc7bf`: PR313 (SSM model), PR308
+(make start), PR311 (API reference), PR315 (SQS), and PR312 (logout/README)
+were individually verified and merged. All six main checks succeeded, including
+[CI41855423133](https://github.com/susumutomita/TenkaCloudSimulator/actions/runs/41855423133)
+and [Formal41855423028](https://github.com/susumutomita/TenkaCloudSimulator/actions/runs/41855423028).
+This is a recorded baseline, not a claim that no other remote work exists.
+
+The multi-cloud storage integration is tracked in [Draft PR406](https://github.com/susumutomita/TenkaCloudSimulator/pull/406). It is published for review and exact-HEAD hosted CI, and remains unmerged. New merges are on hold under the latest owner instruction; no blanket merge is attempted. Kumo
+is an architectural reference, not the base engine for these independently written
+providers. Existing third-party notices are preserved. Composio is not used.
+
+## Current ownership and verified boundaries
+
+| Owner / editing boundary | Actual state | Remaining dependency / acceptance |
+|---|---|---|
+| `root`: server composition, dispatch, OpenAPI, navigation, generated assets, README and final gates | Integrated authenticated GCP/Azure routes; two-server native normal/race/vet and binary build pass. Existing locked console dependencies reproduced unchanged main assets before the new build | Fresh whole Go/race/build and both floors94.95%/90.46% now pass; full22-case E2E/start also pass; immutable16-baseline/82-counterexample and83-blob applicability checks also pass on code input73de6a7. Current hosted CI/review is authoritative in Draft PR406; merge remains held |
+| `cfn_callback`: common Actor context/access hook and its model | Full Go race/build/quality gate and one-profile94.83% statement/90.28% unfiltered source pass. Interrupted E2E is retained as not passed; full21-case rerun and immutable11/42 formal checks passed at private2b193 | Actor13-file input is preserved at2b193; separate CloudWatch Logs main-b61 source integration is in progress with focused native/SDK proof. Final shared-file composition stays with root |
+| `waf_service`: GCP Storage leaf, project-owner factory, generation download and ProjectAuthority model |27 native tests normal/race/vet passed;90.76% package source coverage, finite leaf baseline+8 controls and owner-authority baseline+6 controls passed | Root native/browser/immutable gates now pass; versioned official SDK execution remains unverified. No Google IAM/OAuth or official SDK success claim |
+| `cfn_adapters`: Azure Blob leaf/factory/range and independent model review |31 native tests normal/race/vet passed;91.60% package source coverage; original finite baseline+11 and BlobRange baseline+8 controls passed; typedXML288 serializer byte-goldens preserved | Official Azure SDK and final root gates; owner-only policy is not Azure RBAC. HTTP Range has a finite normalized-selection model; concrete header/SQL/SDK behavior is native-tested |
+| `waf_console`: GCP view and two-provider actual browser acceptance |2 CLI/2 DB,1440/390px actual lifecycle/download/state isolation, reader403, logout/relogin and Scalar Send pass;18 axe states0, strict reflow, no external requests/page errors. CPU released | The helper is mandatory and full22-case regression passes. Authenticated real cloud visual parity remains unverified |
+| `team_host`: Azure view, escaped-path seam and formal/source reviews | Azure view included in actual browser proof; root source and narrow CFG parser reviews completed | Portable same-lock rebuild is byte-identical and narrow source/applicability review is recorded; hosted CI and future scopes remain; no shared-file rewrites or runtime jobs without reservation |
+| `grader_http`: official SDK acceptance source | Real official-import two-CLI acceptance source prepared; syntax/preflight checked. Missing SDK packages produce explicit failure before network/process startup | Approved/verified development dependency availability and actual official SDK execution; never count native HTTP as SDK proof |
+
+The environment has seven slots including root; that is a capacity, not a claim
+that every slot or every service is executing. Heavy Go/WASI/browser/TLC jobs are
+explicitly serialized to protect existing deadline assertions. A completed author
+may perform independent source review while another owns the runtime lane.
+
+[Storage boundaries](multicloud-storage.md), [browser acceptance](acceptance/crossprovider-console.md)
+and [official SDK acceptance](acceptance/crossprovider-official-storage.md) record
+verified and unverified behavior. Models are finite abstractions, not Go refinement
+or complete real-cloud compatibility proofs. Two in-process HTTP servers and two
+actual CLI processes are distinct evidence and are recorded separately.
+
+---
+
+# Historical roster: 2026-11-04 09:04 UTC
+
 **Snapshot: 2026-11-04 09:04 UTC. Update owner: the integration owner (`root`).**
-This is the single active-assignment roster. Update it at claims, handoffs and
+This historical snapshot is retained for decision provenance, not current assignment or completion status. Update it at claims, handoffs and
 integration milestones; linked PRs and exact-HEAD checks remain authoritative.
 Follow the [parallel rules](contributing/parallel-development.md) and
 [shared contracts](design/0005-parallel-service-contracts.md). The
@@ -18,7 +65,7 @@ succeeded on that exact commit. Six active internal workers plus root fit this
 environment's seven slots. External agents do not consume these slots. Heavy
 Go/WASI/TLC checks use an explicit reservation to preserve deadline-test validity.
 
-## Active internal assignments
+## Historical internal assignments
 
 | Owner / editing boundary | Issue / PR | Observed state | Dependency / acceptance |
 |---|---|---|---|

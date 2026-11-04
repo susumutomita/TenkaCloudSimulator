@@ -34,7 +34,7 @@ class FormalGateTests(unittest.TestCase):
 
     def test_complete_registry_and_exact_mutations(self):
         registry = load_registry(self.root)
-        self.assertEqual({model['id'] for model in registry['models']}, {'RESTDeploymentSnapshot', 'S3Versions', 'SSMParameterState', 'SQSLifecycle', 'SQSStorageBudget', 'StackOwnership', 'ObjectStore', 'StartupTokenVisibility', 'BrowserSessions', 'NativeIAMOwnership'})
+        self.assertEqual({model['id'] for model in registry['models']}, {'AzureBlobState', 'BlobRange', 'BrowserSessions', 'GCPStorageState', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'StackOwnership', 'StartupTokenVisibility'})
         for model in registry['models']:
             source = (self.root / model['model']).read_text()
             for mutant in model['mutants']:
@@ -287,6 +287,188 @@ class FormalGateTests(unittest.TestCase):
                     with self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
                         load_registry(self.root)
             path.write_text(original); config.write_bytes(saved_config)
+
+    def test_actor_model_properties_and_all_six_controls_are_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        registry = json.loads(original)
+        actor = next(m for m in registry['models'] if m['id'] == 'ProviderActor')
+        model = self.root / actor['model']
+        config = self.root / actor['config']
+        model_bytes, config_bytes = model.read_bytes(), config.read_bytes()
+        removed = json.loads(original)
+        removed['models'] = [m for m in removed['models'] if m['id'] != 'ProviderActor']
+        path.write_text(json.dumps(removed))
+        model.unlink(); config.unlink()
+        with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+            load_registry(self.root)
+        model.write_bytes(model_bytes); config.write_bytes(config_bytes)
+        for name in actor['properties']:
+            changed = json.loads(original)
+            target = next(m for m in changed['models'] if m['id'] == 'ProviderActor')
+            target['properties'].remove(name)
+            config.write_text(config_bytes.decode().replace(' ' + name, '', 1))
+            path.write_text(json.dumps(changed))
+            with self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                load_registry(self.root)
+        config.write_bytes(config_bytes)
+        for name in [m['id'] for m in actor['mutants']]:
+            changed = json.loads(original)
+            target = next(m for m in changed['models'] if m['id'] == 'ProviderActor')
+            target['mutants'] = [m for m in target['mutants'] if m['id'] != name]
+            path.write_text(json.dumps(changed))
+            with self.assertRaisesRegex(GateError, 'required mutation control was removed'):
+                load_registry(self.root)
+        path.write_text(original)
+
+    def test_gcp_azure_models_properties_and_controls_are_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        for name in ('GCPStorageState', 'AzureBlobState'):
+            entry = next(m for m in json.loads(original)['models'] if m['id'] == name)
+            model = self.root / entry['model']
+            config = self.root / entry['config']
+            saved_model, saved_config = model.read_bytes(), config.read_bytes()
+            with self.subTest(model=name, omission='model-and-artifacts'):
+                registry = json.loads(original)
+                registry['models'] = [m for m in registry['models'] if m['id'] != name]
+                path.write_text(json.dumps(registry))
+                model.unlink(); config.unlink()
+                with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+                    load_registry(self.root)
+            model.write_bytes(saved_model); config.write_bytes(saved_config)
+            for prop in entry['properties']:
+                with self.subTest(model=name, property=prop):
+                    registry = json.loads(original)
+                    changed = next(m for m in registry['models'] if m['id'] == name)
+                    changed['properties'].remove(prop)
+                    changed['mutants'] = [m for m in changed['mutants'] if m['expect_invariant'] != prop]
+                    config.write_text(saved_config.decode().replace('INVARIANT ' + prop + '\n', ''))
+                    path.write_text(json.dumps(registry))
+                    with self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                        load_registry(self.root)
+            config.write_bytes(saved_config)
+            for mutant in entry['mutants']:
+                with self.subTest(model=name, control=mutant['id']):
+                    registry = json.loads(original)
+                    changed = next(m for m in registry['models'] if m['id'] == name)
+                    changed['mutants'] = [m for m in changed['mutants'] if m['id'] != mutant['id']]
+                    path.write_text(json.dumps(registry))
+                    with self.assertRaisesRegex(GateError, 'required mutation control was removed'):
+                        load_registry(self.root)
+            path.write_text(original)
+
+    def test_azure_owner_binding_is_exact_and_never_generic_substitution(self):
+        config = (self.root / 'formal/AzureBlobState.cfg').read_text()
+        self.assertEqual(set(invariants(config, 'AzureBlobState')),
+                         set(next(m for m in load_registry(self.root)['models']
+                                  if m['id'] == 'AzureBlobState')['properties']))
+        for model in (None, 'ObjectStore', 'GCPStorageState', 'ProviderActor'):
+            with self.subTest(model=model), self.assertRaisesRegex(GateError, 'unsupported constant declaration'):
+                invariants(config, model)
+        for old, new in (('Owners <- AccountOwners', 'Owners <- OtherOwners'),
+                         ('Owners <- AccountOwners', 'Other <- AccountOwners'),
+                         ('Owners <- AccountOwners', 'Owners <- TypeOK'),
+                         ('Owners <- AccountOwners', 'Owners <- AccountOwners VIEW Prune'),
+                         ('CONSTANT Owners <- AccountOwners', 'CONSTANT Owners <- AccountOwners\nCONSTANT Owners <- AccountOwners'),
+                         ('CONSTANT Owners <- AccountOwners', 'CONSTANT Owners <- AccountOwners\nCONSTANT Other <- AccountOwners')):
+            with self.subTest(replacement=new), self.assertRaises(GateError):
+                invariants(config.replace(old, new), 'AzureBlobState')
+        for extra in ('VIEW Prune', 'CONSTRAINT Prune', 'ACTION_CONSTRAINT Prune',
+                      'INVARIANT TypeOK VIEW Prune'):
+            with self.subTest(directive=extra), self.assertRaises(GateError):
+                invariants(config + '\n' + extra, 'AzureBlobState')
+        with self.assertRaisesRegex(GateError, 'Azure finite owner binding is required'):
+            invariants(config.replace('CONSTANT Owners <- AccountOwners\n', ''), 'AzureBlobState')
+
+    def test_project_authority_model_properties_and_controls_are_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        for name in ('ProjectAuthority',):
+            entry = next(m for m in json.loads(original)['models'] if m['id'] == name)
+            model = self.root / entry['model']
+            config = self.root / entry['config']
+            saved_model, saved_config = model.read_bytes(), config.read_bytes()
+            with self.subTest(model=name, omission='model-and-artifacts'):
+                registry = json.loads(original)
+                registry['models'] = [m for m in registry['models'] if m['id'] != name]
+                path.write_text(json.dumps(registry))
+                model.unlink(); config.unlink()
+                with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+                    load_registry(self.root)
+            model.write_bytes(saved_model); config.write_bytes(saved_config)
+            for prop in entry['properties']:
+                with self.subTest(model=name, property=prop):
+                    registry = json.loads(original)
+                    changed = next(m for m in registry['models'] if m['id'] == name)
+                    changed['properties'].remove(prop)
+                    changed['mutants'] = [m for m in changed['mutants'] if m['expect_invariant'] != prop]
+                    config.write_text(saved_config.decode().replace('INVARIANT ' + prop + '\n', ''))
+                    path.write_text(json.dumps(registry))
+                    with self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                        load_registry(self.root)
+            config.write_bytes(saved_config)
+            for mutant in entry['mutants']:
+                with self.subTest(model=name, control=mutant['id']):
+                    registry = json.loads(original)
+                    changed = next(m for m in registry['models'] if m['id'] == name)
+                    changed['mutants'] = [m for m in changed['mutants'] if m['id'] != mutant['id']]
+                    path.write_text(json.dumps(registry))
+                    with self.assertRaisesRegex(GateError, 'required mutation control was removed'):
+                        load_registry(self.root)
+            path.write_text(original)
+
+    def test_blob_range_provider_path_models_properties_and_controls_are_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        for name in ('BlobRange', 'ProviderPath'):
+            entry = next(m for m in json.loads(original)['models'] if m['id'] == name)
+            model = self.root / entry['model']
+            config = self.root / entry['config']
+            saved_model, saved_config = model.read_bytes(), config.read_bytes()
+            with self.subTest(model=name, omission='model-and-artifacts'):
+                registry = json.loads(original)
+                registry['models'] = [m for m in registry['models'] if m['id'] != name]
+                path.write_text(json.dumps(registry))
+                model.unlink(); config.unlink()
+                with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+                    load_registry(self.root)
+            model.write_bytes(saved_model); config.write_bytes(saved_config)
+            for prop in entry['properties']:
+                with self.subTest(model=name, property=prop):
+                    registry = json.loads(original)
+                    changed = next(m for m in registry['models'] if m['id'] == name)
+                    changed['properties'].remove(prop)
+                    changed['mutants'] = [m for m in changed['mutants'] if m['expect_invariant'] != prop]
+                    config.write_text(saved_config.decode().replace('INVARIANT ' + prop + '\n', ''))
+                    path.write_text(json.dumps(registry))
+                    with self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                        load_registry(self.root)
+            config.write_bytes(saved_config)
+            for mutant in entry['mutants']:
+                with self.subTest(model=name, control=mutant['id']):
+                    registry = json.loads(original)
+                    changed = next(m for m in registry['models'] if m['id'] == name)
+                    changed['mutants'] = [m for m in changed['mutants'] if m['id'] != mutant['id']]
+                    path.write_text(json.dumps(registry))
+                    with self.assertRaisesRegex(GateError, 'required mutation control was removed'):
+                        load_registry(self.root)
+            path.write_text(original)
+
+    def test_each_established_mutation_control_cannot_be_removed(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        baseline = json.loads(original)
+        for model in baseline['models']:
+            for mutant in model['mutants']:
+                with self.subTest(model=model['id'], mutant=mutant['id']):
+                    changed = json.loads(original)
+                    entry = next(m for m in changed['models'] if m['id'] == model['id'])
+                    entry['mutants'] = [m for m in entry['mutants'] if m['id'] != mutant['id']]
+                    path.write_text(json.dumps(changed))
+                    with self.assertRaisesRegex(GateError, 'required mutation control was removed|model needs a sensitivity control'):
+                        load_registry(self.root)
+        path.write_text(original)
 
 if __name__ == '__main__':
     unittest.main()

@@ -82,8 +82,15 @@ class ParameterLists(unittest.TestCase):
         validate_parameter_lists(repaired)
         ids = [op['operationId'] for path in repaired['paths'].values() for op in path.values()
                if isinstance(op, dict) and 'operationId' in op]
-        self.assertEqual(len(ids), 43)
-        self.assertEqual(len(set(ids)), 43)
+        added = {'GCPDownloadObject', 'GCPListBuckets', 'GCPCreateBucket', 'GCPGetBucket', 'GCPDeleteBucket',
+                 'GCPListObjects', 'GCPGetObject', 'GCPDeleteObject', 'GCPUploadObject',
+                 'AzureListContainers', 'AzureCreateContainer', 'AzureGetContainerProperties',
+                 'AzureListBlobs', 'AzureDeleteContainer', 'AzurePutBlob', 'AzureGetBlob',
+                 'AzureGetBlobProperties', 'AzureDeleteBlob'}
+        self.assertEqual(len(ids), 61)
+        self.assertEqual(len(set(ids)), 61)
+        self.assertEqual({name for name in ids if name.startswith(('GCP', 'Azure'))}, added)
+        self.assertEqual(len(set(ids) - added), 43)
         for item in repaired['paths'].values():
             for operation in item.values():
                 if isinstance(operation, dict) and {'$ref': '#/components/parameters/SimulatorToken'} in operation.get('parameters', []):
