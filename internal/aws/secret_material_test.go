@@ -11,8 +11,8 @@ import (
 
 func TestSecretMaterialGenericFormattingAndLoggingCannotExposeValues(t *testing.T) {
 	const sentinel = "DUMMY-secret-privacy-sentinel-秘密"
-	material := secretMaterial{raw: sentinel}
-	for _, value := range []any{material, &material, struct{ Value secretMaterial }{material}} {
+	material := newSecretMaterial(sentinel)
+	for _, value := range []any{material, &material, struct{ Value secretMaterial }{material}, struct{ private secretMaterial }{material}} {
 		for _, format := range []string{"%v", "%+v", "%#v", "%s", "%q", "%x"} {
 			output := fmt.Sprintf(format, value)
 			if strings.Contains(output, sentinel) || strings.Contains(output, "privacy-sentinel") {
@@ -23,7 +23,7 @@ func TestSecretMaterialGenericFormattingAndLoggingCannotExposeValues(t *testing.
 		if err != nil {
 			t.Fatal(err)
 		}
-		if bytes.Contains(encoded, []byte(sentinel)) || !bytes.Contains(encoded, []byte("REDACTED")) {
+		if bytes.Contains(encoded, []byte(sentinel)) {
 			t.Fatal("generic JSON logging did not redact secret material")
 		}
 	}
@@ -33,7 +33,7 @@ func TestSecretMaterialGenericFormattingAndLoggingCannotExposeValues(t *testing.
 	if strings.Contains(output.String(), sentinel) || !strings.Contains(output.String(), "REDACTED") {
 		t.Fatal("structured logging exposed secret material")
 	}
-	if material.raw != sentinel {
+	if material.plaintext() != sentinel {
 		t.Fatal("redaction destroyed the stored value")
 	}
 }

@@ -7,7 +7,19 @@ import "log/slog"
 // The eventual authorized GetSecretValue writer must explicitly select raw only
 // after same-transaction ARN resolution and authorization. This is not encryption.
 type secretMaterial struct {
-	raw string
+	// fmt does not call methods on unexported fields inside another struct.
+	// Keep only an indirection here, so that fallback formatting exposes an
+	// address rather than recursively printing the underlying string bytes.
+	raw *string
+}
+
+func newSecretMaterial(value string) secretMaterial { return secretMaterial{raw: &value} }
+
+// plaintext is an explicit escape hatch for validated request comparison and
+// an authorized Get response. It must never be passed to a logger or metadata.
+func (s secretMaterial) plaintext() string {
+	if s.raw == nil { return "" }
+	return *s.raw
 }
 
 func (secretMaterial) String() string {

@@ -74,7 +74,7 @@ func secretAuthorize(authorize SecretAuthorizer, action, arn string) error {
 }
 
 func (s *SecretStore) Create(ctx context.Context, region, name, description, token string, material secretMaterial, authorize SecretAuthorizer) (SecretMutationResult, error) {
-	if !secretRegion(region) || !secretNamePattern.MatchString(name) || !secretToken(token) || !utf8.ValidString(description) || utf8.RuneCountInString(description)>2048 || !utf8.ValidString(material.raw) || len(material.raw)<1 || len(material.raw)>65536 {
+	if !secretRegion(region) || !secretNamePattern.MatchString(name) || !secretToken(token) || !utf8.ValidString(description) || utf8.RuneCountInString(description)>2048 || !utf8.ValidString(material.plaintext()) || len(material.plaintext())<1 || len(material.plaintext())>65536 {
 		return SecretMutationResult{}, secretInvalid()
 	}
 	tx, err := s.db.BeginTx(ctx, nil)
@@ -88,7 +88,7 @@ func (s *SecretStore) Create(ctx context.Context, region, name, description, tok
 		err = tx.QueryRowContext(ctx, "SELECT value FROM aws_secret_versions WHERE region=? AND arn=? AND version_id=?", region, existing, token).Scan(&prior)
 		if errors.Is(err, sql.ErrNoRows) { return SecretMutationResult{}, secretFailure{"ResourceExistsException", "Use PutSecretValue to create another version."} }
 		if err != nil { return SecretMutationResult{}, err }
-		if subtle.ConstantTimeCompare(prior, []byte(material.raw)) != 1 { return SecretMutationResult{}, secretFailure{"ResourceExistsException", "A version ID cannot replace an existing value."} }
+		if subtle.ConstantTimeCompare(prior, []byte(material.plaintext())) != 1 { return SecretMutationResult{}, secretFailure{"ResourceExistsException", "A version ID cannot replace an existing value."} }
 		if err = tx.Commit(); err != nil { return SecretMutationResult{}, err }
 		return SecretMutationResult{ARN: existing, Name: name, VersionId: token}, nil
 	}
@@ -106,11 +106,11 @@ func (s *SecretStore) Create(ctx context.Context, region, name, description, tok
 	if count >= 100 { return SecretMutationResult{}, secretFailure{"LimitExceededException", "Simulator secret limit reached."} }
 	if err = tx.QueryRowContext(ctx, "SELECT count(*) FROM aws_secret_arns").Scan(&count); err != nil { return SecretMutationResult{}, err }
 	if count >= 10000 { return SecretMutationResult{}, secretFailure{"LimitExceededException", "Simulator lifetime ARN reservation limit reached."} }
-	if err = secretValueQuota(ctx, tx, len(material.raw)); err != nil { return SecretMutationResult{}, err }
+	if err = secretValueQuota(ctx, tx, len(material.plaintext())); err != nil { return SecretMutationResult{}, err }
 	now := s.now().UnixMilli()
 	if _, err = tx.ExecContext(ctx, "INSERT INTO aws_secret_arns VALUES(?,?,?,?)", arn, region, name, now); err != nil { return SecretMutationResult{}, err }
 	if _, err = tx.ExecContext(ctx, "INSERT INTO aws_secrets VALUES(?,?,?,?,?,?)", region, arn, name, description, now, now); err != nil { return SecretMutationResult{}, err }
-	if _, err = tx.ExecContext(ctx, "INSERT INTO aws_secret_versions VALUES(?,?,?,?,?)", region, arn, token, []byte(material.raw), now); err != nil { return SecretMutationResult{}, err }
+	if _, err = tx.ExecContext(ctx, "INSERT INTO aws_secret_versions VALUES(?,?,?,?,?)", region, arn, token, []byte(material.plaintext()), now); err != nil { return SecretMutationResult{}, err }
 	if _, err = tx.ExecContext(ctx, "INSERT INTO aws_secret_stages VALUES(?,?,?,?)", region, arn, "AWSCURRENT", token); err != nil { return SecretMutationResult{}, err }
 	if err = tx.Commit(); err != nil { return SecretMutationResult{}, err }
 	return SecretMutationResult{ARN: arn, Name: name, VersionId: token}, nil
