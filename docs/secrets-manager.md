@@ -8,11 +8,12 @@ this increment. Root owns the shared roster, Gateway, server, navigation,
 OpenAPI, generated assets and public actions. No service is registered by this P0.
 
 Source checkpoint: private redacted material, value-free metadata DTOs, immutable
-SQL schema and transactional Create are prepared. Focused material/metadata/store
-tests pass (4 tests, 1.183 seconds), including reflective formatting, same-token
-retry, overwrite denial and late-failure rollback. This does not establish any
-HTTP/API/SDK support. Other native operations, protocol, UI and model execution
-remain unfinished.
+SQL schema, seven bounded store operations and a private JSON protocol adapter
+are prepared. Selected material/store/private-HTTP tests pass (14 tests, 1.389
+seconds), including same-token retry, immutable values, unique labels, physical
+ARN protection, late-failure rollback and pure-policy transaction handling. This
+does not establish CLI-registered API or SDK support. Shared composition, real
+SDK tests, UI, model execution and complete quality gates remain unfinished.
 
 ## Scope and explicit storage boundary
 
@@ -114,6 +115,12 @@ entering the store. Inside the transaction, the callback uses `core.Evaluate`
 and writes the IAM decision header only; it must never call DecisionContext or
 perform another database lookup on the single connection. Policy/DB failures
 must remain sanitized 500 errors, not be collapsed into AccessDenied.
+
+For a name that does not exist, resolution currently returns generic
+ResourceNotFound without constructing a prospective ARN or reading a value.
+Existence/error ordering can therefore differ from AWS authorization behavior;
+this is a bounded compatibility difference, not a claim of full IAM error
+equivalence. Full ARN lookup never falls back to the name.
 
 Resolve full ARNs exactly, including region/account/suffix. Resolve names only in
 the selected region. Authorize before reading any value. Values are separate
