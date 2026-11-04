@@ -5,8 +5,9 @@ GCP/Azure storage integration. Owner `cfn_callback` is preparing a normal merge
 in an isolated worktree, preserving main native/auth/raw-path/menu behavior and
 adding only the SQS console/reference slice. This is source preparation:
 17 models/86 controls and24 mandatory E2E cases are the required union, not new
-execution results. Canonical generated UI rebuild and every fresh merge gate
-remain pending. Prior worktrees and private service candidates are preserved.
+execution results. Canonical generated UI rebuild, original22-package notices,
+asset checks and10 parameter-detector tests pass. Fresh native/browser,
+coverage/E2E/formal and hosted merge gates remain pending. Prior worktrees and private service candidates are preserved.
 
 ---
 

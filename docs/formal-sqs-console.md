@@ -3,9 +3,9 @@
 > Current integration source: normal merge of public SQS HEAD725960e with
 > main5c97dc5. The main22 mandatory cases remain unchanged and the two owned
 > SQS console/reference cases remain mandatory (24 total). The registry union
-> contains17 baselines/86 controls. Canonical UI rebuild, current-head native
-> and browser execution, both90% coverage floors, E2E/formal/applicability and
-> hosted CI are pending. Prior results below belong to the named older heads.
+> contains17 baselines/86 controls. Canonical UI rebuild and asset checks pass;
+> current-head native/browser execution, both90% coverage floors,
+> E2E/formal/applicability and hosted CI remain pending. Prior results below belong to the named older heads.
 
 
 `SQSConsoleEpoch` has a bounded SANY/TLC result at immutable341dec2. It adds one finite
