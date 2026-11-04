@@ -46,6 +46,10 @@ func (g *Gateway) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		g.serveCFN(w, r)
 		return
 	}
+	if strings.HasPrefix(r.Header.Get("X-Amz-Target"), "AmazonSQS.") {
+		g.serveSQS(w, r)
+		return
+	}
 	if strings.HasPrefix(r.Header.Get("X-Amz-Target"), "AmazonSSM.") {
 		g.serveSSM(w, r)
 		return

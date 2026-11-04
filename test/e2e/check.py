@@ -261,8 +261,18 @@ def handler(event,context):
     f=client('cloudformation',endpoint,token);c=client('lambda',endpoint,token)
     result=c.invoke(FunctionName='cfn-inline-app',Payload=b'null');self.assertNotIn('FunctionError',result);self.assertEqual(json.loads(result['Payload'].read()),{'answer':42,'value':'team-one','event':None})
     f.delete_stack(StackName='inline-practice');self.assertEqual(c.list_functions()['Functions'],[])
+ def test_console_account_sign_out_revokes_browser_session_only(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('console_logout.py'))],check=True)
+
+ def test_openapi_parameter_detector_controls(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('test_openapi_parameters.py'))],check=True)
+ def test_scalar_s3_docs_live_response_reader(self):
+  from scalar_s3_docs import run_scalar_s3_docs
+  run_scalar_s3_docs()
  def test_cloudformation_rest_native_sdk_lifecycle(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('cloudformation_rest.py'))],check=True)
+ def test_sqs_native_sdk_two_teams_restart_retention_and_cleanup(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('sqs.py'))],check=True)
  def test_apigateway_rest_sdk_permissions_and_two_teams(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('apigateway.py'))],check=True)
  def test_apigateway_console_and_actual_scalar_requests(self):
@@ -322,23 +332,37 @@ def handler(event,context):
    with page.expect_download() as download:submit(page)
    self.assertEqual(Path(download.value.path()).read_bytes(),b'hello from UI')
    page.get_by_role('link',name='General purpose buckets',exact=True).click();page.get_by_role('radio',name='Select ui-practice',exact=True).check();page.get_by_role('button',name='Delete',exact=True).click();page.get_by_label('Type ui-practice to confirm').fill('ui-practice');submit(page);expect(page.get_by_role('dialog')).to_contain_text('BucketNotEmpty');page.get_by_role('button',name='Cancel',exact=True).click()
-   page.get_by_role('link',name='Identity policies',exact=True).click();page.get_by_label('Principal name',exact=True).fill('reader');submit(page);page.get_by_role('button',name='Choose identity',exact=True).click();page.get_by_label('Principal name',exact=True).fill('reader');submit(page);expect(page.get_by_role('button',name='Choose identity',exact=True)).to_have_text('reader')
-   page.get_by_role('button',name='Create bucket',exact=True).first.click();page.get_by_label('Bucket name',exact=True).fill('denied-bucket');submit(page);expect(page.locator('[id^=form-error-]')).to_contain_text('implicitDeny');page.get_by_role('button',name='Cancel',exact=True).click();self.assertNotIn('denied-bucket',[b['Name'] for b in c.list_buckets()['Buckets']])
+   page.get_by_role('link',name='Identity policies',exact=True).click();page.get_by_label('Principal name',exact=True).fill('reader');submit(page)
+   page.get_by_role('button',name='Account menu',exact=True).click();page.get_by_role('menuitem',name='Choose identity',exact=True).click();page.get_by_label('Principal name',exact=True).fill('reader');submit(page);expect(page.get_by_role('button',name='Account menu',exact=True)).to_contain_text('reader')
+   buckets_before=sorted(b['Name'] for b in c.list_buckets()['Buckets'])
+   page.get_by_role('button',name='Create bucket',exact=True).first.click();page.get_by_label('Bucket name',exact=True).fill('denied-bucket')
+   with page.expect_response(lambda response:response.request.method=='PUT' and response.url==endpoint+'/denied-bucket') as denied_create:submit(page)
+   self.assertEqual(denied_create.value.status,403);self.assertEqual(denied_create.value.request.headers.get('x-simulator-principal'),'reader');expect(page.locator('[id^=form-error-]')).to_contain_text('implicitDeny');page.get_by_role('button',name='Cancel',exact=True).click()
+   self.assertNotIn('denied-bucket',[b['Name'] for b in c.list_buckets()['Buckets']]);self.assertEqual(sorted(b['Name'] for b in c.list_buckets()['Buckets']),buckets_before);self.assertEqual(c.get_object(Bucket='ui-practice',Key='docs/hello.txt')['Body'].read(),b'hello from UI');self.assertEqual(c.get_object(Bucket='ui-practice',Key='from-sdk.txt')['Body'].read(),b'shared')
    page.get_by_role('searchbox',name='Find resources',exact=True).fill('no-matches');expect(page.get_by_role('heading',name='No matching resources')).to_be_visible();page.get_by_role('searchbox',name='Find resources',exact=True).fill('')
    page.set_viewport_size({'width':390,'height':844});expect(page.get_by_role('button',name='Create bucket',exact=True).first).to_be_visible();page.screenshot(path=str(REPORTS/'console-mobile.png'),full_page=True);assert_reflow(page)
    self.assertEqual(page.evaluate('window.__policyViolations'),[]);page.set_viewport_size({'width':1440,'height':1000});page.goto(endpoint+'/_simulator/docs/');expect(page.get_by_role('heading',name='TenkaCloud Simulator API',exact=True)).to_be_visible(timeout=15000)
    expect(page.get_by_role('button',name='Ask AI',exact=True)).to_have_count(0)
-   # Scalar executes the real S3 ListBuckets operation. The response contains console-created state.
-   page.get_by_role('button',name='Test Request (get /)',exact=True).click();page.wait_for_timeout(400)
+   # The expanded API introduction can fill the initial viewport. Select the
+   # documented operation before expecting Scalar's lazily rendered control.
+   page.get_by_role('link',name=re.compile('^List all buckets')).click()
+   page.get_by_role('button',name='Test Request (get /)',exact=True).click()
    # Use the request client Send button, not a parallel fetch injected by the test.
    send=page.get_by_role('button',name=re.compile('^Send.*get request'))
-   expect(send).to_be_visible();send.click();expect(page.get_by_text('ui-practice',exact=False).last).to_be_visible(timeout=10000)
+   expect(send).to_be_visible()
+   with page.expect_response(lambda response:response.request.method=='GET' and response.url.rstrip('/')==endpoint) as listed:
+    send.click()
+   self.assertEqual(listed.value.status,200);self.assertIn('ListAllMyBucketsResult',listed.value.text());self.assertIn('ui-practice',listed.value.text())
+   expect(page.get_by_text('ui-practice',exact=False).last).to_be_visible(timeout=10000)
    page.get_by_role('button',name='Close Client',exact=True).click()
    c.create_bucket(Bucket='practice-bucket')
    page.get_by_role('link',name=re.compile('^Upload or replace an object')).click()
    page.get_by_role('button',name='Test Request (put /{bucket}/{key})',exact=True).click()
    put_send=page.get_by_role('button',name=re.compile('^Send.*put request'))
-   expect(put_send).to_be_visible();put_send.click()
+   expect(put_send).to_be_visible()
+   with page.expect_response(lambda response:response.request.method=='PUT' and response.url==endpoint+'/practice-bucket/hello.txt') as uploaded:
+    put_send.click()
+   self.assertEqual(uploaded.value.status,200)
    # The prefilled OpenAPI text example goes through the actual Scalar editor/client.
    deadline=time.monotonic()+8
    while True:
@@ -353,7 +377,10 @@ def handler(event,context):
    page.get_by_role('link',name=re.compile('^List all buckets')).click()
    page.get_by_role('button',name='Test Request (get /)',exact=True).click()
    send=page.get_by_role('button',name=re.compile('^Send.*get request'))
-   send.click();expect(page.get_by_text('ui-practice',exact=False).last).to_be_visible(timeout=10000)
+   with page.expect_response(lambda response:response.request.method=='GET' and response.url.rstrip('/')==endpoint) as listed:
+    send.click()
+   self.assertEqual(listed.value.status,200);self.assertIn('ui-practice',listed.value.text());self.assertIn('practice-bucket',listed.value.text())
+   expect(page.get_by_text('ui-practice',exact=False).last).to_be_visible(timeout=10000)
    page.screenshot(path=str(REPORTS/'api-reference.png'),full_page=False,animations='disabled')
    self.assertEqual(page.evaluate('window.__policyViolations'),[]);self.assertEqual(errors,[]);self.assertEqual(outside,[],'Runtime attempted external network requests');browser.close()
  def test_console_literal_dot_keys_do_not_mutate_neighbors(self):
@@ -404,7 +431,7 @@ def handler(event,context):
     else:outside.append(r.request.url);r.abort()
    page.route('**/*',route)
    page.goto(endpoint+'/_simulator/console/');expect(page.get_by_role('heading',name='Open your local sandbox',exact=True)).to_be_visible();page.get_by_label('Access token',exact=True).fill(token);page.get_by_role('button',name='Open sandbox',exact=True).click()
-   expect(page.get_by_role('button',name='Choose identity',exact=True)).to_have_count(0)
+   page.get_by_role('button',name='Account menu',exact=True).click();expect(page.get_by_role('menuitem',name='Sign out',exact=True)).to_be_visible();expect(page.get_by_role('menuitem',name='Choose identity',exact=True)).to_have_count(0);page.keyboard.press('Escape')
    page.get_by_role('button',name='Services',exact=True).click();page.get_by_role('menuitem',name='Systems Manager',exact=True).click();page.get_by_role('link',name=outputs['ParameterName'],exact=True).click();expect(page.get_by_label('Value',exact=True)).to_have_value('TC{'+seed+'}');expect(page.get_by_role('tab',name='Overview',exact=True)).to_be_visible()
    page.get_by_role('button',name='Edit parameter',exact=True).click();expect(page.get_by_role('button',name='Type String',exact=True)).to_be_disabled();page.get_by_label('Value',exact=True).fill('unauthorized change');page.get_by_role('button',name='Save changes',exact=True).click();expect(page.locator('[id^=form-error-]')).to_contain_text('403');self.assertEqual(client('ssm',token).get_parameter(Name=outputs['ParameterName'])['Parameter']['Value'],'TC{'+seed+'}')
    page.get_by_role('button',name='Cancel',exact=True).click();page.set_viewport_size({'width':390,'height':844});assert_reflow(page);self.assertEqual(errors,[]);self.assertEqual(outside,[])
