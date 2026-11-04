@@ -4,9 +4,9 @@
   "changes": [
     {
       "path": ".github/workflows/formal.yml",
-      "sha256": "99a05cd2c4b70693ae628777d9157a21bda0419966bb4d4dce9c8729ff546b71",
+      "sha256": "3e8a66f278d22a6c9fbf2761c784a97b7923d933d9307964139e26c4d83ea7b6",
       "disposition": "formal-infrastructure",
-      "reason": "Changes validation orchestration or its executable inventory, not simulator resource transitions. Strict real-Git/input and failure-classification negative tests exercise the mechanism; the unchanged five finite specifications still require actual TLC baseline and sensitivity runs. Human acceptance and policy self-edit protection remain separate.",
+      "reason": "Run the exact-HEAD formal gate in an unprivileged Actions job; define runner-dependent bytecode cache only in supported step env contexts.",
       "models": []
     },
     {
