@@ -34,7 +34,7 @@ class FormalGateTests(unittest.TestCase):
 
     def test_complete_registry_and_exact_mutations(self):
         registry = load_registry(self.root)
-        self.assertEqual({model['id'] for model in registry['models']}, {'ObjectStore', 'StackOwnership', 'S3Versions', 'NativeIAMOwnership', 'RESTDeploymentSnapshot', 'SSMParameterState', 'StartupTokenVisibility', 'SQSLifecycle', 'SQSStorageBudget', 'BrowserSessions', 'ProviderActor', 'GCPStorageState', 'AzureBlobState', 'ProjectAuthority', 'BlobRange', 'ProviderPath', 'KMSKeyState', 'KMSProtocolAdmission'})
+        self.assertEqual({model['id'] for model in registry['models']}, {'ObjectStore', 'StackOwnership', 'S3Versions', 'NativeIAMOwnership', 'RESTDeploymentSnapshot', 'SSMParameterState', 'StartupTokenVisibility', 'SQSLifecycle', 'SQSStorageBudget', 'BrowserSessions', 'ProviderActor', 'GCPStorageState', 'AzureBlobState', 'ProjectAuthority', 'BlobRange', 'ProviderPath', 'KMSKeyState', 'KMSProtocolAdmission', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch'})
         for model in registry['models']:
             source = (self.root / model['model']).read_text()
             for mutant in model['mutants']:
@@ -502,12 +502,44 @@ class FormalGateTests(unittest.TestCase):
                         load_registry(self.root)
         path.write_text(original)
 
+    def test_logs_required_models_properties_and_all_seven_controls(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        for model_id in ('CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch'):
+            registry = json.loads(original)
+            model = next(m for m in registry['models'] if m['id'] == model_id)
+            tla, cfg = self.root / model['model'], self.root / model['config']
+            tla_bytes, cfg_bytes = tla.read_bytes(), cfg.read_bytes()
+            registry['models'] = [m for m in registry['models'] if m['id'] != model_id]
+            path.write_text(json.dumps(registry))
+            tla.unlink(); cfg.unlink()
+            with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+                load_registry(self.root)
+            tla.write_bytes(tla_bytes); cfg.write_bytes(cfg_bytes)
+            for prop in model['properties']:
+                registry = json.loads(original)
+                target = next(m for m in registry['models'] if m['id'] == model_id)
+                target['properties'].remove(prop)
+                cfg.write_text('\n'.join(line for line in cfg_bytes.decode().splitlines() if line != 'INVARIANT ' + prop) + '\n')
+                path.write_text(json.dumps(registry))
+                with self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                    load_registry(self.root)
+            cfg.write_bytes(cfg_bytes)
+            for control in [m['id'] for m in model['mutants']]:
+                registry = json.loads(original)
+                target = next(m for m in registry['models'] if m['id'] == model_id)
+                target['mutants'] = [m for m in target['mutants'] if m['id'] != control]
+                path.write_text(json.dumps(registry))
+                with self.assertRaisesRegex(GateError, 'required mutation control was removed'):
+                    load_registry(self.root)
+            path.write_text(original)
+
     def test_each_required_mutation_control_cannot_disappear(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
         registry = json.loads(original)
         self.assertEqual(set(REQUIRED_MUTANTS), BASE_MODELS)
-        self.assertEqual(sum(map(len, REQUIRED_MUTANTS.values())), 94)
+        self.assertEqual(sum(map(len, REQUIRED_MUTANTS.values())), 101)
         self.assertEqual({m['id']: {c['id'] for c in m['mutants']} for m in registry['models']}, REQUIRED_MUTANTS)
         for model in registry['models']:
             for mutant in model['mutants']:
