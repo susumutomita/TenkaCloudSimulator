@@ -1,0 +1,184 @@
+{
+  "Description": "Local simulator CFN REST/Lambda example; no real AWS use required.",
+  "Parameters": {
+    "Value": {
+      "Type": "String",
+      "Default": "safe-dummy"
+    }
+  },
+  "Resources": {
+    "Config": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": "/cfn-rest/public",
+        "Type": "String",
+        "Value": {
+          "Ref": "Value"
+        }
+      }
+    },
+    "Role": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": "sts:AssumeRole",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "ReadConfig",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": "ssm:GetParameter",
+                  "Resource": {
+                    "Fn::Sub": "arn:aws:ssm:${AWS::Region}:000000000000:parameter/cfn-rest/public"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "Function": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "FunctionName": "cfn-rest-app",
+        "Runtime": "python3.12",
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": "Role.Arn"
+        },
+        "Timeout": 20,
+        "MemorySize": 128,
+        "Environment": {
+          "Variables": {
+            "PARAMETER": {
+              "Ref": "Config"
+            }
+          }
+        },
+        "Code": {
+          "ZipFile": "import json, os, boto3\nfrom botocore.exceptions import ClientError\nssm = boto3.client('ssm')\ndef handler(event, context):\n    name = (event.get('queryStringParameters') or {}).get('name', os.environ['PARAMETER'])\n    try:\n        value = ssm.get_parameter(Name=name)['Parameter']['Value']\n        return {'statusCode': 200, 'body': json.dumps({'value': value, 'path': event['path']})}\n    except ClientError as error:\n        return {'statusCode': 403, 'body': json.dumps({'code': error.response['Error']['Code']})}\n"
+        }
+      }
+    },
+    "Api": {
+      "Type": "AWS::ApiGateway::RestApi",
+      "Properties": {
+        "Name": "cfn-rest-example",
+        "EndpointConfiguration": {
+          "Types": [
+            "REGIONAL"
+          ]
+        }
+      }
+    },
+    "Resource": {
+      "Type": "AWS::ApiGateway::Resource",
+      "Properties": {
+        "RestApiId": {
+          "Ref": "Api"
+        },
+        "ParentId": {
+          "Fn::GetAtt": "Api.RootResourceId"
+        },
+        "PathPart": "config"
+      }
+    },
+    "Method": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "RestApiId": {
+          "Ref": "Api"
+        },
+        "ResourceId": {
+          "Ref": "Resource"
+        },
+        "HttpMethod": "GET",
+        "AuthorizationType": "NONE",
+        "Integration": {
+          "Type": "AWS_PROXY",
+          "IntegrationHttpMethod": "POST",
+          "Uri": {
+            "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${Function.Arn}/invocations"
+          }
+        }
+      }
+    },
+    "Deployment": {
+      "Type": "AWS::ApiGateway::Deployment",
+      "DependsOn": [
+        "Method"
+      ],
+      "Properties": {
+        "RestApiId": {
+          "Ref": "Api"
+        }
+      }
+    },
+    "Stage": {
+      "Type": "AWS::ApiGateway::Stage",
+      "Properties": {
+        "RestApiId": {
+          "Ref": "Api"
+        },
+        "DeploymentId": {
+          "Ref": "Deployment"
+        },
+        "StageName": "prod"
+      }
+    },
+    "Permission": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "Function"
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Sub": "arn:aws:execute-api:${AWS::Region}:000000000000:${Api}/prod/GET/config"
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "ApiId": {
+      "Value": {
+        "Ref": "Api"
+      }
+    },
+    "Stage": {
+      "Value": {
+        "Ref": "Stage"
+      }
+    },
+    "Function": {
+      "Value": {
+        "Ref": "Function"
+      }
+    },
+    "Role": {
+      "Value": {
+        "Ref": "Role"
+      }
+    },
+    "LocalPath": {
+      "Value": {
+        "Fn::Sub": "/_simulator/providers/aws/_execute-api/${AWS::Region}/${Api}/prod/config"
+      }
+    }
+  }
+}

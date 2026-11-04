@@ -2,7 +2,7 @@
 
 LambdaのPython 3.12関数を、埋込CPython 3.12.16/WASIで実際に実行する。S3/SSMと同じGoバイナリ・SQLite・local access tokenを使い、外部Python、Docker、Node、クラウド接続は実行時に不要。
 
-この段階では既存wp2shell問題の完走を意味しない。Lambdaの限定CloudFormationに対応するが、API Gateway/WAF、関数内HTTP接続は未対応。関数内SDKは下記SSM/S3の限定subset。問題の選択は引き続きhello-worldのみ。[対応順](design/0002-catalog-workloads.md)。
+この段階では既存wp2shell問題の完走を意味しない。Lambdaの限定CloudFormationに対応するが、API GatewayのRegional REST→Lambda proxyと対応CFNリソースを利用できる。WAF、関数内HTTP接続はこのmainの対応範囲外。関数内SDKは下記SSM/S3の限定subset。問題の選択は引き続きhello-worldのみ。[対応順](design/0002-catalog-workloads.md)。
 
 ## 対応API
 

@@ -12,8 +12,12 @@ Every push, pull request and manual run checks out the exact tested head and run
 3. Unfiltered Cobertura conversion and Go HTML coverage view. Both full-module
    statement coverage and source-line coverage must be at least 90%.
 4. Locked npm dependency audit (high/critical fail) and canonical Go govulncheck.
-5. Fourteen real binary + SDK + offline console/Scalar E2E cases, 38-state accessibility audit,
-   four finite TLC models and four required mutation counterexamples.
+5. Required real-binary/SDK/console/Scalar regression, including the new two-provider
+   PC/mobile acceptance, plus the existing accessibility audit. The current source
+   registers22 Conformance cases and16 finite TLC baselines/82 named sensitivity
+   counterexamples; only completed exact-head runs count as verified. Official
+   Google/Azure SDK execution is separately pending development dependency availability;
+   native HTTP and browser proof must not be labelled official SDK compatibility.
 
 Coverage generation and threshold checks are ordinary required steps. An absent,
 empty, malformed or below-floor report exits nonzero. Regression tests exercise
@@ -92,3 +96,18 @@ Native IAM reference examples execute all nine Query operations. Native/legacy s
 The local SDK bridge tests exercise actual CPython, native SSM/S3 shared state, execution-role rather than caller authority, private-resource denial, two authenticated team processes, explicitDeny, frame/message/aggregate limits, unconsumed replies, canceled stdin/callback and four independent concurrent capability channels.
 
 A required pinned-catalog subset rehearsal runs the unchanged original wp2shell handler (SHA2568d559b2b8ad72f7a281d3ef5cd3ba804d76cb01d6f2d45049baf56ee4c8a4f03) through real Python/SQLite and native role-bound SSM. The test-only projection excludes unsupported resources and supplies a dummy unavailable HTTP URL. It observes the original SQL/routing defects, then native SSM configuration changes produce400/401. This is explicitly not a full-template deployment, seven-check grading or permission to select the problem.
+
+## Formal validation merge check
+
+The standalone `Formal validation` job is proposed as a stable required check;
+its inventory/applicability contract is documented in
+[formal-validation.md](formal-validation.md). The checker always runs all
+registered models and requires the intended invariant counterexamples. Exact
+base/blob-bound dispositions prevent absent/stale applicability metadata from
+silently passing; unknown implementation paths fail. This validates declared
+bounded correspondence, not Go refinement or authenticated human review.
+A later read-only inspection observed a main ruleset requiring `ci`, without a
+separate required `Formal validation` context. Adding that requirement remains on
+hold under the latest owner instruction; Composio and alternate settings routes
+are not used. No repository settings were changed. A green workflow is distinct
+from verified merge enforcement.

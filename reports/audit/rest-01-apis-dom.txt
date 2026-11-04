@@ -1,0 +1,44 @@
+- banner:
+  - link "TenkaCloud Simulator":
+    - /url: /_simulator/console/
+  - button "Services"
+  - button "us-east-1"
+  - button "Choose identity": simulator-admin
+  - link "API reference":
+    - /url: /_simulator/docs/
+- main:
+  - navigation "Service navigation":
+    - button "Toggle service navigation"
+  - navigation "Breadcrumbs":
+    - list:
+      - listitem:
+        - link "Services":
+          - /url: "#/s3"
+      - listitem:
+        - link "API Gateway" [disabled]
+  - group: Independent local simulator. Regional REST APIs with Lambda proxy integrations. Responses download as data; browser application hosting and unsupported AWS settings are unavailable.
+  - heading "APIs (0)" [level=1]
+  - button "Refresh APIs"
+  - button "Create API"
+  - searchbox "Find APIs"
+  - table "REST APIs":
+    - rowgroup:
+      - row "Name API ID API type API endpoint type":
+        - columnheader "Name"
+        - columnheader "API ID"
+        - columnheader "API type"
+        - columnheader "API endpoint type"
+    - rowgroup:
+      - row "No REST APIs Build REST API":
+        - cell "No REST APIs Build REST API":
+          - heading "No REST APIs" [level=2]
+          - button "Build REST API"
+  - complementary "Help panel":
+    - button "Close help panel"
+    - heading "Simulator scope" [level=2]
+    - paragraph: Independent local simulator. Not affiliated with AWS. No real cloud resources are created.
+    - paragraph: S3 basic operations, Standard SSM text parameters, Python 3.12 Lambda functions and limited CloudFormation stacks using S3 buckets, SSM parameters, inline Python functions and IAM identity policies.
+    - paragraph: Cloud IAM sessions, managed policies, EC2, KMS and other cloud providers are not implemented.
+    - button "Manage identity policy"
+    - link "Console licenses":
+      - /url: /_simulator/licenses/CONSOLE-NOTICES.txt

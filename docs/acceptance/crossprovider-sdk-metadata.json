@@ -1,0 +1,77 @@
+{
+  "observedDateUTC": "2026-11-04",
+  "status": "SOURCE ONLY / SDK acceptance NOT RUN",
+  "python": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+  "packages": {
+    "google-cloud-storage": null,
+    "google-auth": null,
+    "azure-storage-blob": null,
+    "azure-core": null,
+    "requests": null,
+    "playwright": "1.62.0",
+    "boto3": null
+  },
+  "executablePaths": {
+    "python": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+    "python3": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+    "node": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+    "bun": null,
+    "go": "/usr/bin/go"
+  },
+  "buildTools": {
+    "console": {
+      "packageJSON": {
+        "private": true,
+        "description": "Development-only Cloudscape console build; no Node runtime requirement",
+        "dependencies": {
+          "@cloudscape-design/components": "3.0.1408",
+          "@cloudscape-design/global-styles": "1.0.71",
+          "react": "19.3.1",
+          "react-dom": "19.3.1"
+        },
+        "devDependencies": {
+          "esbuild": "0.28.2"
+        }
+      },
+      "nodeModulesPresent": false,
+      "lockfilePresent": true
+    },
+    "scalar": {
+      "packageJSON": {
+        "dependencies": {
+          "@scalar/api-reference": "1.76.4",
+          "esbuild": "0.25.12"
+        }
+      },
+      "nodeModulesPresent": false,
+      "lockfilePresent": true
+    },
+    "platform": {
+      "packageJSON": {
+        "name": "simulator-platform-integration-tools",
+        "private": true,
+        "type": "module",
+        "dependencies": {
+          "@oven/bun-linux-x64": "1.4.4",
+          "@aws-sdk/client-cloudformation": "3.1161.0",
+          "@aws-sdk/client-sts": "3.1161.0",
+          "@aws-sdk/client-ssm": "3.1161.0",
+          "@aws-sdk/client-dynamodb": "3.1161.0",
+          "@aws-sdk/lib-dynamodb": "3.1161.0",
+          "@node-saml/node-saml": "5.1.0",
+          "ws": "8.22.1",
+          "http-status-codes": "2.3.0",
+          "js-yaml": "5.5.0",
+          "yaml": "2.9.1",
+          "zod": "4.6.7",
+          "ajv": "8.20.0",
+          "ajv-formats": "3.0.1"
+        }
+      },
+      "nodeModulesPresent": false,
+      "lockfilePresent": true
+    }
+  },
+  "noInstall": true,
+  "noNetworkBootstrap": true
+}
