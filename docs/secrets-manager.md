@@ -1,19 +1,24 @@
 # Secrets Manager: P0 contract and bounded increment
 
-Status: design/source preparation only. Issue [266](https://github.com/susumutomita/TenkaCloudSimulator/issues/266)
+Status: local native increment under validation. Issue [266](https://github.com/susumutomita/TenkaCloudSimulator/issues/266)
 is owned by `cfn_callback`, branch `feat/secrets-manager-native-20261104`, worktree
 `/workspace/secrets-manager-native`, public base `6ffbd1881dad3589469fdf1809654b7483bd6ac4`.
 Root checked the open Issue and absence of an existing service PR before assigning
 this increment. Root owns the shared roster, Gateway, server, navigation,
-OpenAPI, generated assets and public actions. No service is registered by this P0.
+OpenAPI, generated assets and public actions. After P0, root approved the minimal
+CLI composition in this branch. Public main55a was normally merged without
+rewriting the original source checkpoints. This increment is not published or
+merged; capabilities, Scalar navigation and service console are not advertised.
 
 Source checkpoint: private redacted material, value-free metadata DTOs, immutable
 SQL schema, seven bounded store operations and a private JSON protocol adapter
-are prepared. Selected material/store/private-HTTP tests pass (14 tests, 1.389
-seconds), including same-token retry, immutable values, unique labels, physical
-ARN protection, late-failure rollback and pure-policy transaction handling. This
-does not establish CLI-registered API or SDK support. Shared composition, real
-SDK tests, UI, model execution and complete quality gates remain unfinished.
+are implemented locally. Selected material/store/private-HTTP tests pass (14
+tests, latest1.294 seconds), including immutable values, unique labels, physical
+ARN protection, late-failure rollback and pure-policy handling. The real embedded
+CLI and boto3 exercise all seven operations, two authenticated persistent team
+databases, cross-team endpoint401, participant IAM, restart and physical cleanup.
+UI, model execution, applicability registration and complete quality gates remain
+unfinished. These checks are not a completed AWS service or Challenge claim.
 
 ## Scope and explicit storage boundary
 
@@ -74,6 +79,12 @@ payload bounds and Unicode scalar validity rather than silently replacing an
 unpaired surrogate inside a value. JSON transport can be capped at 512 KiB to
 allow a fully escaped valid value. ClientRequestToken/VersionId is 32–64
 characters; SDKs auto-generate the token, raw HTTP clients must supply one.
+
+The installed development boto3 model predates the current optional SortBy field.
+The actual SDK test therefore specifies SortOrder and uses the documented default
+CreatedDate sort key. Name sorting is covered by native store/private-protocol
+tests; the pinned current AWS Go SDK reference includes SortBy. No dependency
+install, test skip or relaxed backend behavior was used to conceal that tool gap.
 
 Create retries with an existing token and identical value must be no-ops;
 different data for a known version fails. Creating an already named secret with a
@@ -188,9 +199,9 @@ owners, stale-ARN adoption and orphaned versions/stages. A separate view/reveal
 epoch model is needed if async response acceptance can retain a secret after
 navigation. These are finite abstractions, not encryption/SQL/React refinement
 proofs. Root must register applicable models under307 and run both global90%
-floors, full required CI/E2E/security/license gates before merge. Only gofmt,
-compilation and the selected pure material/store tests have run; full Go,
-SDK, TLC, browser, AWS, publish, release and deployment have not run.
+floors, full required CI/E2E/security/license gates before merge. gofmt,
+compilation, selected native tests and the real local SDK increment have run;
+full Go/coverage, TLC, browser, AWS, publish, release and deployment have not run.
 
 Public console reference: the official flow is Store a new secret → Other type
 of secret → key/value or Plaintext → name/description → rotation off → review →
