@@ -77,8 +77,8 @@
         }
       },
       "post": {
-        "summary": "SSM/SQS JSON, CloudFormation Query, or IAM Query operation",
-        "description": "**Static request templates:** choose the correct Content-Type and routing headers before Test Request → Send. SSM/SQS send JSON with X-Amz-Target (JSON 1.1 for SSM, JSON 1.0 for SQS); CloudFormation/IAM send URL-encoded Query fields. The 200 response is JSON for SSM/SQS and XML for Query protocols. A successful DeleteStack has no result payload beyond Query response metadata.\n\nNative regional root endpoint. SQS: X-Amz-Target AmazonSQS.CreateQueue, ListQueues, GetQueueUrl, DeleteQueue, SendMessage, ReceiveMessage, DeleteMessage, ChangeMessageVisibility, GetQueueAttributes (JSON 1.0, Standard queues only; local body limit 256 KiB, aggregate physical storage 10000 messages/64 MiB across queues/regions including expired foreign rows until scoped cleanup; bytes count body UTF-8 plus stored attribute JSON. Over-budget SendMessage returns local SimulatorQuotaExceeded without mutation; existing over-cap data remains readable/deletable; FIFO, Query protocol, batch operations and dead-letter redrive are unsupported). SSM: X-Amz-Target AmazonSSM.PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter. CloudFormation: CreateStack, DescribeStacks, DeleteStack; S3 buckets, SSM parameters, inline Python Lambda functions, one inline IAM identity policy per role, five Regional REST API Gateway resource types, and bounded Lambda::Permission. Unsupported options fail. Real credentials and session tokens are rejected. Create/DeleteStack also require the caller to allow the underlying S3/SSM/IAM/Lambda actions; CAPABILITY_IAM grants no permissions. API resources use NONE/POST AWS_PROXY local Lambda, same-stack API children, explicit deployment DependsOn methods and reverse guarded cleanup. Lambda permission uses only apigateway.amazonaws.com and local execute-api SourceArn. No service RoleArn or general CloudFormation lifecycle is supported. IAM is global: send X-Simulator-Service: iam, Version2010-05-08 and one of CreateRole/GetRole/ListRoles/DeleteRole/PutRolePolicy/GetRolePolicy/DeleteRolePolicy/ListRolePolicies/UpdateAssumeRolePolicy. Policy documents are JSON strings; successful IAM XML returns them RFC3986 URL-encoded. Native role names use the local alphanumeric/underscore/hyphen subset,1–64; inline policy names1–128 AWS characters. Trust and aggregate policies32KiB, at most10 inline policies/100 statements,1000 active+retired name claims. Deleted role names cannot be adopted by legacy identity writes. No managed grants or session issuance.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission. Secrets Manager adds seven bounded JSON1.1 operations; values are dummy plaintext in private SQLite, with no KMS encryption, rotation or recovery window. See service-specific examples and limits.",
+        "summary": "SSM/SQS/KMS JSON, CloudFormation Query, or IAM Query operation",
+        "description": "**Static request templates:** choose the correct Content-Type and routing headers before Test Request → Send. SSM/SQS send JSON with X-Amz-Target (JSON 1.1 for SSM, JSON 1.0 for SQS); CloudFormation/IAM send URL-encoded Query fields. The 200 response is JSON for SSM/SQS and XML for Query protocols. A successful DeleteStack has no result payload beyond Query response metadata.\n\nNative regional root endpoint. SQS: X-Amz-Target AmazonSQS.CreateQueue, ListQueues, GetQueueUrl, DeleteQueue, SendMessage, ReceiveMessage, DeleteMessage, ChangeMessageVisibility, GetQueueAttributes (JSON 1.0, Standard queues only; local body limit 256 KiB, aggregate physical storage 10000 messages/64 MiB across queues/regions including expired foreign rows until scoped cleanup; bytes count body UTF-8 plus stored attribute JSON. Over-budget SendMessage returns local SimulatorQuotaExceeded without mutation; existing over-cap data remains readable/deletable; FIFO, Query protocol, batch operations and dead-letter redrive are unsupported). SSM: X-Amz-Target AmazonSSM.PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter. CloudFormation: CreateStack, DescribeStacks, DeleteStack; S3 buckets, SSM parameters, inline Python Lambda functions, one inline IAM identity policy per role, five Regional REST API Gateway resource types, and bounded Lambda::Permission. Unsupported options fail. Real credentials and session tokens are rejected. Create/DeleteStack also require the caller to allow the underlying S3/SSM/IAM/Lambda actions; CAPABILITY_IAM grants no permissions. API resources use NONE/POST AWS_PROXY local Lambda, same-stack API children, explicit deployment DependsOn methods and reverse guarded cleanup. Lambda permission uses only apigateway.amazonaws.com and local execute-api SourceArn. No service RoleArn or general CloudFormation lifecycle is supported. IAM is global: send X-Simulator-Service: iam, Version2010-05-08 and one of CreateRole/GetRole/ListRoles/DeleteRole/PutRolePolicy/GetRolePolicy/DeleteRolePolicy/ListRolePolicies/UpdateAssumeRolePolicy. Policy documents are JSON strings; successful IAM XML returns them RFC3986 URL-encoded. Native role names use the local alphanumeric/underscore/hyphen subset,1–64; inline policy names1–128 AWS characters. Trust and aggregate policies32KiB, at most10 inline policies/100 statements,1000 active+retired name claims. Deleted role names cannot be adopted by legacy identity writes. No managed grants or session issuance.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.\n\nUse X-Amz-Target TrentService.<operation> matching the selected body example; example choice does not change routing headers automatically. CreateKey first, copy returned KeyId into later requests, and copy an actual local Encrypt CiphertextBlob into Decrypt (the valid-base64 documentation placeholder is deliberately not decryptable). All calls require host X-Simulator-Token or signed-in local session. Dummy TCSIM SigV4 scope is not authentication.\n\nCreateKey/ListKeys require their exact kms action on *. DescribeKey/EnableKey/DisableKey/GetKeyPolicy/Encrypt/Decrypt require the actual key ARN. Decrypt without KeyId resolves the local blob key. Explicit Deny wins. Programmatic default policy only enables local identity-policy delegation; no grant for all participants.\n\nEnabled/Disabled only; disabled blocks Encrypt/Decrypt, metadata/default policy remain readable. Local request64KiB,1000keys,plaintext1–4096bytes,context100entries/8192canonicalbytes,counter2^32 ceiling. Ciphertext/material are simulator-local; SQLite stores raw material, not an at-rest security boundary. Unsupported aliases/tags/grants/custom policies/asymmetric/data keys/rotation/deletion/multi-region/CFN/other-service encryption fail; no problem availability is implied. Actual AWS eventual consistency and ciphertext portability are not reproduced.\n\nKMS JSON1.1 targets TrentService.CreateKey/DescribeKey/ListKeys/EnableKey/DisableKey/GetKeyPolicy/Encrypt/Decrypt are also accepted here. This root JSON1.1 section includes all eight bounded KMS body templates and limitations. Secrets Manager adds seven bounded JSON1.1 operations over this same root; practice values are plaintext, not KMS-encrypted. No recovery window or rotation.",
         "operationId": "awsRegionalOperation",
         "parameters": [
           {
@@ -87,7 +87,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "AmazonSSM.<operation> for SSM only Secrets Manager uses secretsmanager.<operation> (2017-10-17), with operation-specific fields."
+            "description": "AmazonSSM.<operation>, AmazonSQS.<operation> or TrentService.<operation>; use matching Content-Type and body. Secrets Manager uses secretsmanager.<operation> (2017-10-17); operation-specific fields apply."
           },
           {
             "name": "X-Simulator-Region",
@@ -112,10 +112,11 @@
                 "ssm",
                 "cloudformation",
                 "iam",
+                "kms",
                 "secretsmanager"
               ]
             },
-            "description": "iam selects IAM Query; omit or use cloudformation for CloudFormation, and omit or use ssm for SSM JSON. Do not select iam for CreateStack/DescribeStacks/DeleteStack. Secrets Manager uses secretsmanager; its JSON target must be secretsmanager.<operation>."
+            "description": "iam selects IAM Query; omit or use cloudformation for CloudFormation, and omit or use ssm for SSM JSON. Do not select iam for CreateStack/DescribeStacks/DeleteStack. kms selects the bounded KMS JSON1.1 handler. Secrets Manager selects secretsmanager; target secretsmanager.<operation>."
           },
           {
             "$ref": "#/components/parameters/SimulatorToken"
@@ -126,13 +127,100 @@
           "content": {
             "application/x-amz-json-1.1": {
               "schema": {
-                "type": "object"
+                "anyOf": [
+                  {
+                    "type": "object"
+                  },
+                  {
+                    "$ref": "#/components/schemas/KMSCreateKeyInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/KMSKeyInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/KMSListKeysInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/KMSGetKeyPolicyInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/KMSEncryptInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/KMSDecryptInput"
+                  }
+                ],
+                "description": "SSM or KMS JSON1.1 as selected by X-Amz-Target; generic SSM remains documented independently. Exact KMS per-target schemas are in x-simulator-kms-operation-schemas; body alone cannot discriminate routing."
               },
               "examples": {
                 "SSMGetParameter": {
-                  "summary": "SSM GetParameter",
+                  "summary": "Existing SSM body template; set X-Amz-Target AmazonSSM.GetParameter",
                   "value": {
                     "Name": "/practice/hello"
+                  }
+                },
+                "KMSCreateKey": {
+                  "summary": "X-Amz-Target: TrentService.CreateKey",
+                  "description": "Replace dummy KeyId with current CreateKey output; Decrypt additionally needs actual Encrypt output.",
+                  "value": {
+                    "Description": "Local dummy key"
+                  }
+                },
+                "KMSDescribeKey": {
+                  "summary": "X-Amz-Target: TrentService.DescribeKey",
+                  "description": "Replace dummy KeyId with current CreateKey output; Decrypt additionally needs actual Encrypt output.",
+                  "value": {
+                    "KeyId": "11111111-1111-4111-8111-111111111111"
+                  }
+                },
+                "KMSListKeys": {
+                  "summary": "X-Amz-Target: TrentService.ListKeys",
+                  "description": "Replace dummy KeyId with current CreateKey output; Decrypt additionally needs actual Encrypt output.",
+                  "value": {
+                    "Limit": 1
+                  }
+                },
+                "KMSEnableKey": {
+                  "summary": "X-Amz-Target: TrentService.EnableKey",
+                  "description": "Replace dummy KeyId with current CreateKey output; Decrypt additionally needs actual Encrypt output.",
+                  "value": {
+                    "KeyId": "11111111-1111-4111-8111-111111111111"
+                  }
+                },
+                "KMSDisableKey": {
+                  "summary": "X-Amz-Target: TrentService.DisableKey",
+                  "description": "Replace dummy KeyId with current CreateKey output; Decrypt additionally needs actual Encrypt output.",
+                  "value": {
+                    "KeyId": "11111111-1111-4111-8111-111111111111"
+                  }
+                },
+                "KMSGetKeyPolicy": {
+                  "summary": "X-Amz-Target: TrentService.GetKeyPolicy",
+                  "description": "Replace dummy KeyId with current CreateKey output; Decrypt additionally needs actual Encrypt output.",
+                  "value": {
+                    "KeyId": "11111111-1111-4111-8111-111111111111",
+                    "PolicyName": "default"
+                  }
+                },
+                "KMSEncrypt": {
+                  "summary": "X-Amz-Target: TrentService.Encrypt",
+                  "description": "Replace dummy KeyId with current CreateKey output; Decrypt additionally needs actual Encrypt output.",
+                  "value": {
+                    "KeyId": "11111111-1111-4111-8111-111111111111",
+                    "Plaintext": "bG9jYWwgZHVtbXk=",
+                    "EncryptionContext": {
+                      "purpose": "demo"
+                    }
+                  }
+                },
+                "KMSDecrypt": {
+                  "summary": "X-Amz-Target: TrentService.Decrypt",
+                  "description": "Replace dummy KeyId with current CreateKey output; Decrypt additionally needs actual Encrypt output.",
+                  "value": {
+                    "CiphertextBlob": "VEhJU19JU19BX0RPQ1VNRU5UQVRJT05fUExBQ0VIT0xERVI=",
+                    "EncryptionContext": {
+                      "purpose": "demo"
+                    }
                   }
                 },
                 "CreateSecret": {
@@ -388,7 +476,7 @@
         },
         "responses": {
           "200": {
-            "description": "Native JSON 1.1 SSM or XML Query response"
+            "description": "Native JSON 1.1 SSM or XML Query response KMS returns target-specific JSON metadata/list/policy/crypto; EnableKey/DisableKey return an EMPTY body. Use returned local key/ciphertext values in subsequent requests."
           },
           "400": {
             "description": "Validation/unsupported field/state conflict IAM ValidationError/MalformedPolicyDocument reject unknown trust or permissions semantics."
@@ -410,6 +498,83 @@
           },
           "401": {
             "$ref": "#/components/responses/HostAccessRequired"
+          }
+        },
+        "tags": [
+          "KMS local symmetric keys"
+        ],
+        "x-simulator-kms-operation-schemas": {
+          "CreateKey": {
+            "target": "TrentService.CreateKey",
+            "request": {
+              "$ref": "#/components/schemas/KMSCreateKeyInput"
+            },
+            "response": {
+              "$ref": "#/components/schemas/KMSKeyResponse"
+            }
+          },
+          "DescribeKey": {
+            "target": "TrentService.DescribeKey",
+            "request": {
+              "$ref": "#/components/schemas/KMSKeyInput"
+            },
+            "response": {
+              "$ref": "#/components/schemas/KMSKeyResponse"
+            }
+          },
+          "ListKeys": {
+            "target": "TrentService.ListKeys",
+            "request": {
+              "$ref": "#/components/schemas/KMSListKeysInput"
+            },
+            "response": {
+              "$ref": "#/components/schemas/KMSKeyPage"
+            }
+          },
+          "EnableKey": {
+            "target": "TrentService.EnableKey",
+            "request": {
+              "$ref": "#/components/schemas/KMSKeyInput"
+            },
+            "response": {
+              "description": "empty HTTP200 body"
+            }
+          },
+          "DisableKey": {
+            "target": "TrentService.DisableKey",
+            "request": {
+              "$ref": "#/components/schemas/KMSKeyInput"
+            },
+            "response": {
+              "description": "empty HTTP200 body"
+            }
+          },
+          "GetKeyPolicy": {
+            "target": "TrentService.GetKeyPolicy",
+            "request": {
+              "$ref": "#/components/schemas/KMSGetKeyPolicyInput"
+            },
+            "response": {
+              "$ref": "#/components/schemas/KMSPolicyResponse"
+            }
+          },
+          "Encrypt": {
+            "target": "TrentService.Encrypt",
+            "request": {
+              "$ref": "#/components/schemas/KMSEncryptInput"
+            },
+            "response": {
+              "$ref": "#/components/schemas/KMSEncryptResponse"
+            }
+          },
+          "Decrypt": {
+            "target": "TrentService.Decrypt",
+            "request": {
+              "$ref": "#/components/schemas/KMSDecryptInput"
+            },
+            "response": {
+              "$ref": "#/components/schemas/KMSDecryptResponse"
+            }
           }
         }
       }
@@ -10671,6 +10836,381 @@
           }
         },
         "required": []
+      },
+      "KMSCreateKeyInput": {
+        "type": "object",
+        "properties": {
+          "Description": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "KeySpec": {
+            "type": "string",
+            "enum": [
+              "SYMMETRIC_DEFAULT"
+            ]
+          },
+          "KeyUsage": {
+            "type": "string",
+            "enum": [
+              "ENCRYPT_DECRYPT"
+            ]
+          },
+          "Origin": {
+            "type": "string",
+            "enum": [
+              "AWS_KMS"
+            ]
+          },
+          "MultiRegion": {
+            "type": "boolean",
+            "const": false
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "KMSKeyInput": {
+        "type": "object",
+        "properties": {
+          "KeyId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048,
+            "description": "Local UUID key ID or full same-region/account ARN. Replace example IDs with CreateKey output. Aliases and cross-account keys are unsupported."
+          }
+        },
+        "required": [
+          "KeyId"
+        ],
+        "additionalProperties": false
+      },
+      "KMSListKeysInput": {
+        "type": "object",
+        "properties": {
+          "Limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000,
+            "default": 100
+          },
+          "Marker": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024,
+            "description": "Copy prior NextMarker; region-bound local live pagination, not a snapshot."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "KMSGetKeyPolicyInput": {
+        "type": "object",
+        "properties": {
+          "KeyId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048,
+            "description": "Local UUID key ID or full same-region/account ARN. Replace example IDs with CreateKey output. Aliases and cross-account keys are unsupported."
+          },
+          "PolicyName": {
+            "type": "string",
+            "enum": [
+              "default"
+            ],
+            "default": "default"
+          }
+        },
+        "required": [
+          "KeyId"
+        ],
+        "additionalProperties": false
+      },
+      "KMSEncryptInput": {
+        "type": "object",
+        "properties": {
+          "KeyId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048,
+            "description": "Local UUID key ID or full same-region/account ARN. Replace example IDs with CreateKey output. Aliases and cross-account keys are unsupported."
+          },
+          "Plaintext": {
+            "type": "string",
+            "format": "byte",
+            "contentEncoding": "base64",
+            "minLength": 4,
+            "maxLength": 5464,
+            "description": "Base64 of1–4096 arbitrary plaintext bytes; use dummy data."
+          },
+          "EncryptionContext": {
+            "type": "object",
+            "maxProperties": 100,
+            "propertyNames": {
+              "minLength": 1
+            },
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Exact case-sensitive string map. Local canonical UTF-8 JSON budget8192bytes; absent and empty equivalent. Never put secrets in context."
+          },
+          "EncryptionAlgorithm": {
+            "type": "string",
+            "enum": [
+              "SYMMETRIC_DEFAULT"
+            ]
+          }
+        },
+        "required": [
+          "KeyId",
+          "Plaintext"
+        ],
+        "additionalProperties": false
+      },
+      "KMSDecryptInput": {
+        "type": "object",
+        "properties": {
+          "CiphertextBlob": {
+            "type": "string",
+            "format": "byte",
+            "contentEncoding": "base64",
+            "minLength": 4,
+            "maxLength": 8192,
+            "description": "Copy actual base64 CiphertextBlob from local Encrypt; not AWS-portable. Documentation placeholder is intentionally not decryptable."
+          },
+          "KeyId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048,
+            "description": "Local UUID key ID or full same-region/account ARN. Replace example IDs with CreateKey output. Aliases and cross-account keys are unsupported."
+          },
+          "EncryptionContext": {
+            "type": "object",
+            "maxProperties": 100,
+            "propertyNames": {
+              "minLength": 1
+            },
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Exact case-sensitive string map. Local canonical UTF-8 JSON budget8192bytes; absent and empty equivalent. Never put secrets in context."
+          },
+          "EncryptionAlgorithm": {
+            "type": "string",
+            "enum": [
+              "SYMMETRIC_DEFAULT"
+            ]
+          }
+        },
+        "required": [
+          "CiphertextBlob"
+        ],
+        "additionalProperties": false
+      },
+      "KMSKeyMetadata": {
+        "type": "object",
+        "properties": {
+          "AWSAccountId": {
+            "type": "string",
+            "const": "000000000000"
+          },
+          "KeyId": {
+            "type": "string"
+          },
+          "Arn": {
+            "type": "string"
+          },
+          "CreationDate": {
+            "type": "number"
+          },
+          "Enabled": {
+            "type": "boolean"
+          },
+          "Description": {
+            "type": "string"
+          },
+          "KeyUsage": {
+            "type": "string",
+            "const": "ENCRYPT_DECRYPT"
+          },
+          "KeyState": {
+            "type": "string",
+            "enum": [
+              "Enabled",
+              "Disabled"
+            ]
+          },
+          "Origin": {
+            "type": "string",
+            "const": "AWS_KMS"
+          },
+          "KeyManager": {
+            "type": "string",
+            "const": "CUSTOMER"
+          },
+          "KeySpec": {
+            "type": "string",
+            "const": "SYMMETRIC_DEFAULT"
+          },
+          "EncryptionAlgorithms": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "SYMMETRIC_DEFAULT"
+              ]
+            }
+          },
+          "MultiRegion": {
+            "type": "boolean",
+            "const": false
+          }
+        },
+        "required": [
+          "AWSAccountId",
+          "KeyId",
+          "Arn",
+          "CreationDate",
+          "Enabled",
+          "Description",
+          "KeyUsage",
+          "KeyState",
+          "Origin",
+          "KeyManager",
+          "KeySpec",
+          "EncryptionAlgorithms",
+          "MultiRegion"
+        ],
+        "additionalProperties": false
+      },
+      "KMSKeyResponse": {
+        "type": "object",
+        "properties": {
+          "KeyMetadata": {
+            "$ref": "#/components/schemas/KMSKeyMetadata"
+          }
+        },
+        "required": [
+          "KeyMetadata"
+        ],
+        "additionalProperties": false
+      },
+      "KMSKeyPage": {
+        "type": "object",
+        "properties": {
+          "Keys": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "KeyId": {
+                  "type": "string"
+                },
+                "KeyArn": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "KeyId",
+                "KeyArn"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "Truncated": {
+            "type": "boolean"
+          },
+          "NextMarker": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Keys",
+          "Truncated"
+        ],
+        "additionalProperties": false
+      },
+      "KMSPolicyResponse": {
+        "type": "object",
+        "properties": {
+          "Policy": {
+            "type": "string",
+            "description": "Immutable default account delegation policy JSON string; not a grant for every participant."
+          },
+          "PolicyName": {
+            "type": "string",
+            "const": "default"
+          }
+        },
+        "required": [
+          "Policy",
+          "PolicyName"
+        ],
+        "additionalProperties": false
+      },
+      "KMSEncryptResponse": {
+        "type": "object",
+        "properties": {
+          "CiphertextBlob": {
+            "type": "string",
+            "format": "byte"
+          },
+          "KeyId": {
+            "type": "string"
+          },
+          "EncryptionAlgorithm": {
+            "type": "string",
+            "enum": [
+              "SYMMETRIC_DEFAULT"
+            ]
+          }
+        },
+        "required": [
+          "CiphertextBlob",
+          "KeyId",
+          "EncryptionAlgorithm"
+        ],
+        "additionalProperties": false
+      },
+      "KMSDecryptResponse": {
+        "type": "object",
+        "properties": {
+          "Plaintext": {
+            "type": "string",
+            "format": "byte"
+          },
+          "KeyId": {
+            "type": "string"
+          },
+          "EncryptionAlgorithm": {
+            "type": "string",
+            "enum": [
+              "SYMMETRIC_DEFAULT"
+            ]
+          }
+        },
+        "required": [
+          "Plaintext",
+          "KeyId",
+          "EncryptionAlgorithm"
+        ],
+        "additionalProperties": false
+      },
+      "KMSNativeError": {
+        "type": "object",
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "__type",
+          "message"
+        ],
+        "additionalProperties": false
       }
     },
     "responses": {
@@ -10729,6 +11269,10 @@
     {
       "name": "Azure Blob Storage",
       "description": "Independent bounded local storage provider. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. "
+    },
+    {
+      "name": "KMS local symmetric keys",
+      "description": "Independent bounded symmetric encryption simulator. Raw key material in SQLite; local ciphertext is incompatible with AWS KMS. No aliases/grants/deletion/rotation or HSM guarantee."
     }
   ]
 }

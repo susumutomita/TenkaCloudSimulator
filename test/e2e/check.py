@@ -273,6 +273,10 @@ def handler(event,context):
  def test_scalar_s3_docs_live_response_reader(self):
   from scalar_s3_docs import run_scalar_s3_docs
   run_scalar_s3_docs()
+ def test_kms_native_sdk_served_examples_two_teams_and_restart(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('kms.py'))],check=True)
+ def test_kms_console_actual_native_state_identity_and_logout(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('kms_console.py'))],check=True)
  def test_cloudformation_rest_native_sdk_lifecycle(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('cloudformation_rest.py'))],check=True)
  def test_secrets_manager_native_two_teams_restart_and_redaction(self):
