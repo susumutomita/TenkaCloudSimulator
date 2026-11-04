@@ -18,14 +18,14 @@
     },
     {
       "path": "docs/secrets-manager.md",
-      "sha256": "41a2d3558d97c5736f6eed6d8903e78573d35e174f44c7736e583812d00ddfdb",
+      "sha256": "b81b3cd61240be5da2f487928c321fb64f5fc88383c00ca2628a94da2107a573",
       "disposition": "documentation",
       "reason": "Truthfully documents recovered local scope, actual limited native results, primary API references and pending combined validation. No new runtime claim.",
       "models": []
     },
     {
       "path": "formal/README.md",
-      "sha256": "3c9b9e9aba8d955f348174ce644e5e2d376cad2348052c9fcfbdbf3887df6d3c",
+      "sha256": "f2cdb9ba3b4e7c70890d219ab6e08cd3d7a0ce86d2a07d43f596a73b4d4b574b",
       "disposition": "documentation",
       "reason": "Truthfully documents recovered local scope, actual limited native results, primary API references and pending combined validation. No new runtime claim.",
       "models": []
@@ -250,6 +250,13 @@
       ]
     },
     {
+      "path": "internal/aws/secret_http_contract_matrix_test.go",
+      "sha256": "f9a6d9cbd98e69aa8c4a0b1eb88ae1ba79883d87076e78e6e2e92799a1a108c5",
+      "disposition": "test-support",
+      "reason": "Real native HTTP strict JSON/Unicode/field/size/protocol/version and ARN selectors, pure exact-ARN authorization, sanitized errors and unchanged durable-frame refusals/retry; no runtime/threshold changes.",
+      "models": []
+    },
+    {
       "path": "internal/aws/secret_http_test.go",
       "sha256": "c0d39b1504bb852dac64e22984d6e07deef3fb0891633246dedcff892f235f16",
       "disposition": "test-support",
@@ -307,6 +314,13 @@
       "sha256": "3517e5a11becb058f3f9ae4abf22ae4afd6477dd35b9f8ea08efa30f030420c1",
       "disposition": "test-support",
       "reason": "Meaningful native/SDK/UI regression assertions or mandatory test registration. Source presence is not a passing runtime result.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/secret_storage_contracts_test.go",
+      "sha256": "d5f8ee675a11bc382562726dbcafdd3b50dbbe75de7255e6d020f70678c56bff",
+      "disposition": "test-support",
+      "reason": "Actual SQLite ABORT/deferred-FK commit rollback, full private-frame/repaired retry, persistent identity/schema/query/cursor corruption, native capacity relief and immutable retired reservations; no production/model/threshold changes.",
       "models": []
     },
     {
