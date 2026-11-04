@@ -12,8 +12,8 @@ Valid(t) == t \notin {"fraction","precision","range"}
 Key(t) == ExpectedKey(t)
 ExpectedSize(k) == CASE k="small" -> 2 [] k \in {"binary","escaped"} -> 3
  [] k \in {"utf8","nested"} -> 4 [] OTHER -> 5
-Size(k) == ExpectedSize(k)
 WireSize(k) == IF k \in {"binary","escaped"} THEN 8 ELSE ExpectedSize(k)
+Size(k) == ExpectedSize(k)
 Empty == [k \in Keys |-> 0]
 Count(values) == Cardinality({k \in Keys : values[k] # 0})
 TableCount(value) == Cardinality({s \in Scopes : value[s]})
