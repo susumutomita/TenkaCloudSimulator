@@ -6,7 +6,9 @@ source baseline: `6ffbd1881dad3589469fdf1809654b7483bd6ac4`.
 
 This registry integration originally stacked on formal PR #310's exact
 `ebf5b5d29c3616c57afcd6a6542829d8a741218c` head. After that PR merged, main
-`55a111953eb3eb0dfd90aaa473ac3fe39cb10b66` was incorporated by a **normal merge**,
+`55a111953eb3eb0dfd90aaa473ac3fe39cb10b66` and subsequently
+`2d8a41a0cb576bd42561a7162d35129f44979c08` (formal module-metadata PR #314)
+were incorporated by **normal merges**,
 retaining the original SSM commits. The applicability record now uses that
 reviewed main base. Regenerate the record for any later base change; a valid
 local record does not imply that the SSM candidate itself has merged.
