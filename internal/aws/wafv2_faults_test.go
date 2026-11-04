@@ -373,3 +373,42 @@ func TestWAFRequiresAPIStateBeforeSchemaInitialization(t *testing.T) {
 		t.Fatal("failed constructor left partial state", n, e)
 	}
 }
+
+func TestWAFTrustedPreallocatedIDIsValidatedAndNotNativeInput(t *testing.T) {
+	store, _ := wafFixture(t)
+	ctx := context.Background()
+	tx, e := store.db.BeginTx(ctx, nil)
+	if e != nil {
+		t.Fatal(e)
+	}
+	defer tx.Rollback()
+	for _, id := range []string{"", "not-a-uuid", "01234567-89AB-4def-8123-0123456789ab", "01234567-89ab-4def-8123-0123456789ab/extra"} {
+		if _, e = CreateWebACLWithIDTx(ctx, tx, wafTestRegion, wafTestACL(), id); iamCode(e) != "WAFInvalidParameterException" {
+			t.Fatal(id, e)
+		}
+	}
+	const id = "01234567-89ab-4def-8123-0123456789ab"
+	summary, e := CreateWebACLWithIDTx(ctx, tx, wafTestRegion, wafTestACL(), id)
+	if e != nil || summary.ID != id || summary.ARN != wafARN(wafTestRegion, "incident", id) {
+		t.Fatal(summary, e)
+	}
+	acl := wafTestACL()
+	acl.Name = "distinct-name"
+	if _, e = CreateWebACLWithIDTx(ctx, tx, wafTestRegion, acl, id); iamCode(e) != "WAFDuplicateItemException" {
+		t.Fatal("same preallocated ID reused", e)
+	}
+	if _, lock, e := GetWebACLTx(ctx, tx, wafTestRegion, id, "incident"); e != nil || lock != summary.LockToken {
+		t.Fatal(lock, e)
+	}
+	if e = tx.Rollback(); e != nil {
+		t.Fatal(e)
+	}
+	if _, _, e = store.Get(ctx, wafTestRegion, id, "incident"); iamCode(e) != "WAFNonexistentItemException" {
+		t.Fatal("rolled-back trusted ID remained", e)
+	}
+	native := wafTestACL()
+	w := wafCall(store, "CreateWebACL", wafJSON(t, map[string]any{"Name": native.Name, "Id": id, "Scope": "REGIONAL", "DefaultAction": native.DefaultAction, "Rules": native.Rules, "VisibilityConfig": native.VisibilityConfig}), wafAllow)
+	if w.Code != 400 {
+		t.Fatal("native caller supplied ID accepted", w.Code, w.Body.String())
+	}
+}

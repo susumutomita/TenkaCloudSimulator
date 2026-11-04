@@ -74,25 +74,35 @@ func wafSummary(a WAFWebACL, token string) WAFSummary {
 
 // CreateWebACLTx is transaction-aware so CloudFormation shares the same state/validation.
 func CreateWebACLTx(ctx context.Context, tx *sql.Tx, region string, acl WAFWebACL) (WAFSummary, error) {
+	id, e := wafNewID()
+	if e != nil {
+		return WAFSummary{}, e
+	}
+	return CreateWebACLWithIDTx(ctx, tx, region, acl, id)
+}
+
+// CreateWebACLWithIDTx is a trusted provisioning seam for IDs resolved before
+// a host-owned transaction. Native CreateWebACL never accepts a caller's Id.
+func CreateWebACLWithIDTx(ctx context.Context, tx *sql.Tx, region string, acl WAFWebACL, id string) (WAFSummary, error) {
+	if !wafUUID.MatchString(id) {
+		return WAFSummary{}, wafInvalid("Provisioning requires a valid preallocated Web ACL UUID.")
+	}
+
 	if e := wafValidate(region, &acl); e != nil {
 		return WAFSummary{}, e
 	}
 	var n int
-	if e := tx.QueryRowContext(ctx, "SELECT count(*) FROM aws_wafv2_acls WHERE region=? AND name=?", region, acl.Name).Scan(&n); e != nil {
+	if e := tx.QueryRowContext(ctx, "SELECT count(*) FROM aws_wafv2_acls WHERE region=? AND (name=? OR id=?)", region, acl.Name, id).Scan(&n); e != nil {
 		return WAFSummary{}, e
 	}
 	if n != 0 {
-		return WAFSummary{}, ssmFailure{"WAFDuplicateItemException", "A Web ACL with this name already exists."}
+		return WAFSummary{}, ssmFailure{"WAFDuplicateItemException", "A Web ACL with this name or Id already exists."}
 	}
 	if e := tx.QueryRowContext(ctx, "SELECT count(*) FROM aws_wafv2_acls").Scan(&n); e != nil {
 		return WAFSummary{}, e
 	}
 	if n >= 100 {
 		return WAFSummary{}, ssmFailure{"WAFLimitsExceededException", "At most 100 Web ACLs are supported per process."}
-	}
-	id, e := wafNewID()
-	if e != nil {
-		return WAFSummary{}, e
 	}
 	token, e := wafNewID()
 	if e != nil {
