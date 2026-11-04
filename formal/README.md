@@ -78,4 +78,24 @@ the separate narrow recognizer and is not bound to token-state invariants.
 
 
 
-The current combined registry has 7 baselines and 13 required mutation controls. SSM and feature inventory/property removal are rejected. Source integration does not constitute a new-head TLC or runtime execution result.
+
+## SQS lifecycle and physical storage budget
+
+SQSLifecycle bounds two valid queue scopes, one queue/message lifetime per scope,
+two deliveries and a coarse clock; its eleven mutations cover parent lifetime,
+IAM/scope, delay/retention eligibility, atomic failure and receipt rotation.
+SQSStorageBudget separately checks two trusted queue scopes, up to three legacy
+rows plus one fresh ID, abstract payload weights 1–2, caps of two rows/three
+units and preserved legacy over-cap state. Its seven mutations exercise row/byte
+admission, expired foreign charging, scoped purge, failure rollback, live-row
+preservation and available legacy maintenance. The 729 unique-ID initial row
+sets use an equivalent seed-assignment product, avoiding enumeration of every
+subset of the larger record universe. Accounting invariants apply to accepted
+admissions; failures independently preserve the complete prior physical state.
+
+The combined inventory is nine baselines and thirty-one mandatory mutants.
+All original, SSM and Startup required properties remain protected. Model/source
+integration must pass the immutable-head gate separately for each new head. These finite abstractions do not
+prove Go/SQLite refinement, actual byte/JSON/Unicode arithmetic, filesystem size,
+concurrency scheduling, persistence/crashes, distributed delivery or liveness.
+See [SQS limits and concrete test boundaries](../docs/sqs.md).

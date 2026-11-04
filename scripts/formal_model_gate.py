@@ -9,7 +9,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-BASE_MODELS = {'ObjectStore', 'StackOwnership', 'S3Versions', 'NativeIAMOwnership', 'RESTDeploymentSnapshot', 'SSMParameterState', 'StartupTokenVisibility'}
+BASE_MODELS = {'S3Versions', 'StartupTokenVisibility', 'ObjectStore', 'SSMParameterState', 'RESTDeploymentSnapshot', 'StackOwnership', 'NativeIAMOwnership', 'SQSLifecycle', 'SQSStorageBudget'}
 BASE_INVARIANTS = {
     'ObjectStore': {'TypeOK', 'NoOrphans', 'NoUnauthorizedMutation', 'DenyWins'},
     'StackOwnership': {'TypeOK', 'OwnershipExclusive'},
@@ -18,6 +18,8 @@ BASE_INVARIANTS = {
     'RESTDeploymentSnapshot': {'TypeOK', 'SnapshotsFrozen', 'NoStageOrphans'},
     'StartupTokenVisibility': {'TypeOK', 'FileIdentityFrozen', 'CreatedFilePrivate', 'HistoryVisibility', 'InvalidFileNeverEmits'},
     'SSMParameterState': {'TypeOK', 'DeleteEffect', 'OtherKeysUnchanged', 'OverwriteRefusal', 'ReadIsolation', 'DeniedPreservesState', 'PutVersion'},
+    'SQSLifecycle': {'AuthorizedMutations', 'NoOrphans', 'ChangeOnlyInflight', 'TypeOK', 'IdempotentCreateUnchanged', 'FreshReceipt', 'ReceiveOnlyEligible', 'ReceiptMutationCurrent', 'ScopedMutation', 'FailedMutationAtomic'},
+    'SQSStorageBudget': {'MaintenanceNotBudgetBlocked', 'TypeOK', 'FailedSendPreservesRows', 'ReadRemovesOwnExpired', 'BudgetAccountsPhysical', 'DeleteScopeExact', 'ForeignRowsPreserved', 'LiveRowsPreserved', 'PayloadByteCap', 'PhysicalRowCap'},
 }
 IDENTIFIER = re.compile(r'^[A-Za-z][A-Za-z0-9_]*$')
 

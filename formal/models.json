@@ -298,6 +298,266 @@
           "expect_invariant": "FileIdentityFrozen"
         }
       ]
+    },
+    {
+      "id": "SQSLifecycle",
+      "model": "formal/SQSLifecycle.tla",
+      "config": "formal/SQSLifecycle.cfg",
+      "bounds": "Two distinct database/region/queue scopes; one queue creation and one message per scope; at most two receives per message; clock 0..2, delay/visibility 0..1, retention two abstract ticks, two attribute configurations. Cached HTTP queue lookup can interleave with queue deletion. Deleted message/queue row metadata is normalized to zero. Receipt candidates include current, previous, unissued and peer handles; baseline equality admits only the current handle.",
+      "properties": [
+        "TypeOK",
+        "NoOrphans",
+        "AuthorizedMutations",
+        "ScopedMutation",
+        "FailedMutationAtomic",
+        "IdempotentCreateUnchanged",
+        "ReceiveOnlyEligible",
+        "FreshReceipt",
+        "ReceiptMutationCurrent",
+        "ChangeOnlyInflight"
+      ],
+      "limits": "Atomic transition abstraction after the native parent/expiry/rollback repair. Scopes abstract separately configured database/region/queue targets, not selected IAM principals. Receipt freshness assumes collision-free opaque IDs. No SQL/Go refinement, cryptographic proof, restart/file durability, wall-clock or long-poll liveness, batch/multiple-message atomicity, FIFO/exactly-once/distributed replica behavior, Unicode/size/checksum correctness or full URL validation. Queue name reuse beyond one lifetime is outside the bound; native regression tests separately cover actual storage failures and persistence.",
+      "source_scope": [
+        "internal/aws/sqs_store.go",
+        "internal/aws/sqs.go",
+        "internal/aws/s3.go",
+        "internal/aws/ssm.go",
+        "internal/server/server.go"
+      ],
+      "mutants": [
+        {
+          "id": "SendWithoutParentCheck",
+          "edits": [
+            {
+              "old": "CommitSend(s,delay) ==\n /\\ allowed /\\ pending[s]\n /\\ queues[s]",
+              "new": "CommitSend(s,delay) ==\n /\\ allowed /\\ pending[s]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoOrphans"
+        },
+        {
+          "id": "DeleteWithoutCascade",
+          "edits": [
+            {
+              "old": "DeleteQueue(s) ==\n /\\ allowed /\\ queues[s]\n /\\ queues' = [queues EXCEPT ![s] = FALSE]\n /\\ messages' = [messages EXCEPT ![s] = FALSE]",
+              "new": "DeleteQueue(s) ==\n /\\ allowed /\\ queues[s]\n /\\ queues' = [queues EXCEPT ![s] = FALSE]\n /\\ messages' = messages",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoOrphans"
+        },
+        {
+          "id": "CrossScopeQueueDelete",
+          "edits": [
+            {
+              "old": "DeleteQueue(s) ==\n /\\ allowed /\\ queues[s]\n /\\ queues' = [queues EXCEPT ![s] = FALSE]\n /\\ messages' = [messages EXCEPT ![s] = FALSE]",
+              "new": "DeleteQueue(s) ==\n /\\ allowed /\\ queues[s]\n /\\ queues' = [x \\in Scopes |-> FALSE]\n /\\ messages' = [x \\in Scopes |-> FALSE]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopedMutation"
+        },
+        {
+          "id": "ReceiveBeforeDelay",
+          "edits": [
+            {
+              "old": "\n /\\ visibleAt[s] <= now\n",
+              "new": "\n /\\ TRUE\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReceiveOnlyEligible"
+        },
+        {
+          "id": "ReceiveAfterRetention",
+          "edits": [
+            {
+              "old": "\n /\\ expiresAt[s] > now\n",
+              "new": "\n /\\ TRUE\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReceiveOnlyEligible"
+        },
+        {
+          "id": "ReceiptNotRotated",
+          "edits": [
+            {
+              "old": " /\\ deliveries' = [deliveries EXCEPT ![s] = @ + 1]",
+              "new": " /\\ deliveries' = deliveries",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FreshReceipt"
+        },
+        {
+          "id": "AcceptStaleReceipt",
+          "edits": [
+            {
+              "old": " /\\ h = Current(s) /\\ h # NoHandle",
+              "new": " /\\ h # NoHandle",
+              "count": 2
+            }
+          ],
+          "expect_invariant": "ReceiptMutationCurrent"
+        },
+        {
+          "id": "UnauthorizedSend",
+          "edits": [
+            {
+              "old": "CommitSend(s,delay) ==\n /\\ allowed /\\ pending[s]",
+              "new": "CommitSend(s,delay) ==\n /\\ pending[s]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AuthorizedMutations"
+        },
+        {
+          "id": "ChangeWithoutInflight",
+          "edits": [
+            {
+              "old": "\n /\\ visibleAt[s] > now\n",
+              "new": "\n /\\ TRUE\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ChangeOnlyInflight"
+        },
+        {
+          "id": "FailedWriteChangesState",
+          "edits": [
+            {
+              "old": "StorageFailure(s) ==\n /\\ allowed /\\ (queues[s] \\/ pending[s])\n /\\ UNCHANGED <<queues,attributes,queueEpoch,messages,messageEpoch,\n                 visibleAt,expiresAt,deliveries,pending,now,allowed>>\n /\\ Record(s,\"Error\",\"InternalError\",NoHandle,NoHandle,NoHandle,TRUE,TRUE)\n",
+              "new": "StorageFailure(s) ==\n /\\ allowed /\\ (queues[s] \\/ pending[s])\n /\\ attributes' = [attributes EXCEPT ![s] = 1 - @]\n /\\ UNCHANGED <<queues,queueEpoch,messages,messageEpoch,\n                 visibleAt,expiresAt,deliveries,pending,now,allowed>>\n /\\ Record(s,\"Error\",\"InternalError\",NoHandle,NoHandle,NoHandle,TRUE,TRUE)\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FailedMutationAtomic"
+        },
+        {
+          "id": "IdempotentCreateChangesState",
+          "edits": [
+            {
+              "old": "CreateExisting(s,a) ==\n /\\ allowed /\\ queues[s] /\\ attributes[s] = a\n /\\ UNCHANGED <<queues,attributes,queueEpoch,messages,messageEpoch,\n                 visibleAt,expiresAt,deliveries,pending,now,allowed>>\n /\\ Record(s,\"CreateExisting\",\"Success\",NoHandle,NoHandle,NoHandle,TRUE,TRUE)\n",
+              "new": "CreateExisting(s,a) ==\n /\\ allowed /\\ queues[s] /\\ attributes[s] = a\n /\\ attributes' = [attributes EXCEPT ![s] = 1 - @]\n /\\ UNCHANGED <<queues,queueEpoch,messages,messageEpoch,\n                 visibleAt,expiresAt,deliveries,pending,now,allowed>>\n /\\ Record(s,\"CreateExisting\",\"Success\",NoHandle,NoHandle,NoHandle,TRUE,TRUE)\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "IdempotentCreateUnchanged"
+        }
+      ]
+    },
+    {
+      "id": "SQSStorageBudget",
+      "model": "formal/SQSStorageBudget.tla",
+      "config": "formal/SQSStorageBudget.cfg",
+      "bounds": "Two trusted queue scopes; three possible pre-existing row IDs plus one additional fresh ID; each row weight1\u20132 abstract payload units. MaxRows2/MaxBytes3. Initial unique-ID row sets include legacy states with3rows and up to6units, beyond either cap. Initial enumeration uses the exact729 unique-ID assignments, not a powerset filter. No time transition: expiry is a pre-existing Boolean classification.",
+      "properties": [
+        "TypeOK",
+        "FailedSendPreservesRows",
+        "ForeignRowsPreserved",
+        "LiveRowsPreserved",
+        "BudgetAccountsPhysical",
+        "PhysicalRowCap",
+        "PayloadByteCap",
+        "ReadRemovesOwnExpired",
+        "DeleteScopeExact",
+        "MaintenanceNotBudgetBlocked"
+      ],
+      "limits": "Finite physical-payload budget abstraction, not Go/SQLite refinement, SQL transaction/crash proof, Unicode/UTF8/string-byte counting, JSON attribute serialization, actual64MiB/10000row arithmetic, file size/SQLite overhead, clock/retention, receipt/IAM authorization or random-ID collision resistance. Row weights abstract persisted body+serialized-attribute bytes; all foreign rows, including expired ones, consume budget. Scopes/parent queues are assumed already valid and trusted; SQSLifecycle/native tests separately handle authority, parent lifetime and receipts. Maintenance enabledness assumes these preconditions, not unauthorized access or liveness/fairness. Charged counters describe successful admission accounting, not a claim that an actual storage-error path computed counters. FailedSendPreservesRows still applies to every rejected/storage-error send. Legacy overcap rows are retained: only new accepted sends must fit both caps, own expired cleanup is explicit/scoped and rollback preserves every row on send failure.",
+      "source_scope": [
+        "internal/aws/sqs_store.go"
+      ],
+      "mutants": [
+        {
+          "id": "OmitPhysicalRowCap",
+          "edits": [
+            {
+              "old": "Fits(rs,s) == Cardinality(Chargeable(rs,s))<=MaxRows\n              /\\ Bytes(Chargeable(rs,s))<=MaxBytes",
+              "new": "Fits(rs,s) == Bytes(Chargeable(rs,s))<=MaxBytes",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PhysicalRowCap"
+        },
+        {
+          "id": "OmitPayloadByteCap",
+          "edits": [
+            {
+              "old": "Fits(rs,s) == Cardinality(Chargeable(rs,s))<=MaxRows\n              /\\ Bytes(Chargeable(rs,s))<=MaxBytes",
+              "new": "Fits(rs,s) == Cardinality(Chargeable(rs,s))<=MaxRows",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PayloadByteCap"
+        },
+        {
+          "id": "IgnoreExpiredForeignCharge",
+          "edits": [
+            {
+              "old": "Chargeable(rs,s) == rs",
+              "new": "Chargeable(rs,s) == {r \\in rs : r.scope=s \\/ ~r.expired}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BudgetAccountsPhysical"
+        },
+        {
+          "id": "PurgeExpiredForeignRows",
+          "edits": [
+            {
+              "old": "PurgeOwn(rs,s) == {r \\in rs : r.scope#s \\/ ~r.expired}",
+              "new": "PurgeOwn(rs,s) == {r \\in rs : ~r.expired}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ForeignRowsPreserved"
+        },
+        {
+          "id": "CommitPurgeOnFailedSend",
+          "edits": [
+            {
+              "old": "THEN /\\ outcome'=\"StorageError\" /\\ rows'=rows",
+              "new": "THEN /\\ outcome'=\"StorageError\" /\\ rows'=post",
+              "count": 1
+            },
+            {
+              "old": "ELSE /\\ outcome'=\"QuotaRejected\" /\\ rows'=rows",
+              "new": "ELSE /\\ outcome'=\"QuotaRejected\" /\\ rows'=post",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FailedSendPreservesRows"
+        },
+        {
+          "id": "DiscardOwnedLiveRows",
+          "edits": [
+            {
+              "old": "PurgeOwn(rs,s) == {r \\in rs : r.scope#s \\/ ~r.expired}",
+              "new": "PurgeOwn(rs,s) == {r \\in rs : r.scope#s}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "LiveRowsPreserved"
+        },
+        {
+          "id": "BlockLegacyMaintenance",
+          "edits": [
+            {
+              "old": "Read(s) ==\n",
+              "new": "Read(s) ==\n /\\ Cardinality(rows)<=MaxRows /\\ Bytes(rows)<=MaxBytes\n",
+              "count": 1
+            },
+            {
+              "old": "Delete(s) ==\n",
+              "new": "Delete(s) ==\n /\\ Cardinality(rows)<=MaxRows /\\ Bytes(rows)<=MaxBytes\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MaintenanceNotBudgetBlocked"
+        }
+      ]
     }
   ]
 }
