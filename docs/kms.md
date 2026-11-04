@@ -189,9 +189,12 @@ independent GCP/Azure scopes, actual raw provider paths, read-only non-AWS scope
 menu,61 OpenAPI operation IDs and22 mandatory Conformance cases. Only the two
 KMS models/twelve controls and two KMS SDK/browser children are added, giving
 18 models/94 controls and24 cases. The SDK child also executes the eight served
-root POST examples. Current merged Go, canonical assets, full coverage, SDK,
-browser, TLC/applicability and hosted checks have NOT run. Generated assets
-remain main's prior bundle until an authorized canonical rebuild. Earlier
+root POST examples. The canonical Cloudscape assets were rebuilt using the pinned Node24.19 runtime
+and an exactly byte/mode/link-verified existing dependency tree;22 original
+rights inventories and Scalar/response-reader bytes are unchanged. Asset checks
+and the10 parameter-detector tests passed. Current merged Go, full coverage, SDK,
+browser, TLC and hosted checks have NOT run. Exact source/applicability input
+validation is a declaration check, not model execution. Earlier
 acceptance tables below refer to their named old inputs, not this refresh.
 No Google/Azure official SDK execution or authenticated cloud-console visual
 comparison is implied. No full AWS parity, HSM or at-rest raw-key secrecy claim.
