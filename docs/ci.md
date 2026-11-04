@@ -13,7 +13,7 @@ Every push, pull request and manual run checks out the exact tested head and run
    statement coverage and source-line coverage must be at least 90%.
 4. Locked npm dependency audit (high/critical fail) and canonical Go govulncheck.
 5. Sixteen real binary + SDK + offline console/Scalar E2E cases, 50-state accessibility audit,
-   five finite TLC models and five required mutation counterexamples.
+   six finite TLC models and ten required mutation counterexamples.
 
 Coverage generation and threshold checks are ordinary required steps. An absent,
 empty, malformed or below-floor report exits nonzero. Regression tests exercise
@@ -92,3 +92,5 @@ Native IAM reference examples execute all nine Query operations. Native/legacy s
 The local SDK bridge tests exercise actual CPython, native SSM/S3 shared state, execution-role rather than caller authority, private-resource denial, two authenticated team processes, explicitDeny, frame/message/aggregate limits, unconsumed replies, canceled stdin/callback and four independent concurrent capability channels.
 
 A required pinned-catalog subset rehearsal runs the unchanged original wp2shell handler (SHA2568d559b2b8ad72f7a281d3ef5cd3ba804d76cb01d6f2d45049baf56ee4c8a4f03) through real Python/SQLite and native role-bound SSM. The test-only projection excludes unsupported resources and supplies a dummy unavailable HTTP URL. It observes the original SQL/routing defects, then native SSM configuration changes produce400/401. This is explicitly not a full-template deployment, seven-check grading or permission to select the problem.
+
+The WAF increment adds an ordered three-rule model with Count continuation, first Allow/Block termination, default action and association deletion guards. Its five targeted mutations are required by `make formal`; see [the model limits](../formal/WAFRequestEvaluation.md). This does not verify SQLi matching or refine the Go implementation.

@@ -1,7 +1,7 @@
 """Finite TLA+ model check and a deletion-guard mutation to test the invariant.
 Requires Java and a separately downloaded TLC 1.7.4 jar; no runtime dependency.
 """
-import hashlib,os,subprocess,tempfile
+import hashlib,os,subprocess,sys,tempfile
 from pathlib import Path
 jar=Path(os.environ['TLA_JAR']).resolve()
 expected=Path('formal/tla2tools.sha256').read_text().split()[0]
@@ -83,3 +83,7 @@ with tempfile.TemporaryDirectory(prefix='tcsim-rest-snapshots-') as directory:
   if success:assert result.returncode==0 and 'No error has been found' in text,text
   else:assert result.returncode!=0 and 'Invariant SnapshotsFrozen is violated' in text,text
   print(name+': '+('invariants hold' if success else 'mutable deployment snapshot mutation detected'))
+
+# Ordered WAF safety and association guards share the required formal gate.
+# Its own finite baseline and five intentional mutants must all be checked.
+subprocess.run([sys.executable, str(Path(__file__).with_name("check-waf-formal.py"))], check=True)

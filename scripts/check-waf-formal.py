@@ -1,6 +1,6 @@
 """Independent bounded WAF model and five sensitivity mutations.
 
-No claim of implementation refinement. Does not alter the shared formal gate.
+No claim of implementation refinement. Invoked by the shared formal gate.
 All TLC working files and logs live below --output (never the system temp dir).
 """
 import argparse
