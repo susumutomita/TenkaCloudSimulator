@@ -24,6 +24,8 @@ class FormalGateTests(unittest.TestCase):
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name)
         shutil.copytree(ROOT / 'formal', self.root / 'formal')
+        for path in ('go.mod', 'go.sum'):
+            shutil.copyfile(ROOT / path, self.root / path)
         registry = json.loads((ROOT / 'formal/models.json').read_text())
         for path in {p for m in registry['models'] for p in m['source_scope']}:
             target = self.root / path
