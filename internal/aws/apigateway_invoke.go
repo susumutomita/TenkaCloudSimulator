@@ -21,6 +21,20 @@ func (g *Gateway) invokeREST(ctx context.Context, region string, route RESTRoute
 	if g.Lambdas == nil || route.Method.MethodIntegration == nil || !json.Valid(event) || len(event) > apirouting.MaxProxyEventBytes {
 		return fail()
 	}
+	if g.WAF != nil {
+		var proxy apirouting.ProxyEventV1
+		if json.Unmarshal(event, &proxy) != nil || proxy.IsBase64Encoded || proxy.Path != path || proxy.HTTPMethod != method || proxy.RequestContext.APIID != route.API.ID || proxy.RequestContext.Stage != route.Stage.StageName {
+			return fail()
+		}
+		stageARN := "arn:aws:apigateway:" + region + "::/restapis/" + route.API.ID + "/stages/" + route.Stage.StageName
+		decision, e := g.WAF.Evaluate(ctx, region, stageARN, path, []byte(proxy.Body))
+		if e != nil {
+			return fail()
+		}
+		if decision.Action == "BLOCK" {
+			return apirouting.ProxyResponse{StatusCode: 403, Headers: map[string]string{"Content-Type": "application/json"}, Body: `{"message":"Forbidden"}`}, nil
+		}
+	}
 	integration := route.Method.MethodIntegration
 	prefix := "arn:aws:apigateway:" + region + ":lambda:path/2015-03-31/functions/" + "arn:aws:lambda:" + region + ":000000000000:function:"
 	if integration.Type != "AWS_PROXY" || integration.HTTPMethod != "POST" || !strings.HasPrefix(integration.URI, prefix) || !strings.HasSuffix(integration.URI, "/invocations") {
