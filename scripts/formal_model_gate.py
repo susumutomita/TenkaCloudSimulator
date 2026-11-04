@@ -8,13 +8,16 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-BASE_MODELS = {'ObjectStore', 'StackOwnership', 'S3Versions', 'NativeIAMOwnership', 'RESTDeploymentSnapshot'}
+BASE_MODELS = {'ObjectStore', 'StackOwnership', 'S3Versions', 'NativeIAMOwnership', 'RESTDeploymentSnapshot', 'BrowserSessions'}
 BASE_INVARIANTS = {
     'ObjectStore': {'TypeOK', 'NoOrphans', 'NoUnauthorizedMutation', 'DenyWins'},
     'StackOwnership': {'TypeOK', 'OwnershipExclusive'},
     'S3Versions': {'TypeOK', 'NoHistoryOrphans', 'CurrentMatchesLatest'},
     'NativeIAMOwnership': {'TypeOK', 'OwnershipExclusive'},
     'RESTDeploymentSnapshot': {'TypeOK', 'SnapshotsFrozen', 'NoStageOrphans'},
+    'BrowserSessions': {'TypeOK', 'RevokedCookiesDenied', 'AcceptedOnlyLiveParent',
+                        'SDKAuthorityPreserved', 'UnrelatedSessionsPreserved',
+                        'NoRawSDKCookie', 'NoBrowserSDKAuthority', 'ParentLifetimeBound'},
 }
 IDENTIFIER = re.compile(r'^[A-Za-z][A-Za-z0-9_]*$')
 

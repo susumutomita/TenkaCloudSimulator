@@ -34,11 +34,27 @@ RESTDeploymentSnapshot.tla bounds one API, two deployment IDs, two handler confi
 
 ## Required gate and applicability
 
-The executable inventory is now `formal/models.json`; all five existing models
-and their exact sensitivity mutations remain mandatory. See
+The executable inventory is now `formal/models.json`; all five prior models
+and BrowserSessions plus their exact sensitivity mutations remain mandatory. See
 [formal validation](../docs/formal-validation.md) for exact changed-blob records,
 negative controls, evidence and the distinction between a workflow check,
 human scope review and separately configured repository merge protection.
 New runtime/state transitions are not covered by the existing five models merely
 because this suite passes. No new service, callback or Python/HTTP state-machine
 proof is implied by this inventory.
+
+## Browser session revocation
+
+BrowserSessions is the sixth required model. Its two clients, three fresh browser
+credentials, one operator and one participant parent, clock0..3 and TTL2/1 bound
+login→cookie use→logout/replay→parent expiry/invalidation. Five named mutants
+retain a revoked session, ignore parent validity, accept raw operator cookies,
+clear other sessions or remove SDK authority; each must violate its declared
+invariant. Existing five models and protected invariants remain unchanged.
+
+The registry is the only executable inventory; there is no checked-in companion
+registration fragment. access.go is the runtime seam; main.jsx is the account
+menu's caller, and access_browser_test.go/console_logout.py hold separate native
+and actual browser assertions. Listing those paths binds source review, not Go
+refinement or a UI/TLS/cryptography proof. See
+[session contract](../docs/console-sessions.md) for the independent checks.

@@ -1,90 +1,205 @@
 {
   "version": 1,
-  "base_sha": "6ffbd1881dad3589469fdf1809654b7483bd6ac4",
+  "base_sha": "55a111953eb3eb0dfd90aaa473ac3fe39cb10b66",
   "changes": [
     {
-      "path": ".github/workflows/formal.yml",
-      "sha256": "3e8a66f278d22a6c9fbf2761c784a97b7923d933d9307964139e26c4d83ea7b6",
+      "path": ".github/workflows/ci.yml",
+      "sha256": "678936ddb1e20c9e031a9ad665e58ee175cfd4395d12d34043d2f754190e28c5",
       "disposition": "formal-infrastructure",
-      "reason": "Run the exact-HEAD formal gate in an unprivileged Actions job; define runner-dependent bytecode cache only in supported step env contexts.",
+      "reason": "Registers and protects the sixth model while retaining existing obligations, or preserves mandatory axe/E2E preparation. Registration/checker negative controls and exact-input TLC remain separate required results; no implementation refinement claim.",
       "models": []
     },
     {
-      "path": ".gitignore",
-      "sha256": "a49de3a7afae4ca42ecfdb1f064a98cad1c0bbce18bddc63a01ad6e9c3097286",
-      "disposition": "build-metadata",
-      "reason": "Ignore only generated reports/formal evidence so the validator does not mistake its own output for uncommitted source. No model, source or validation input is excluded.",
-      "models": []
-    },
-    {
-      "path": "docs/ci.md",
-      "sha256": "35bf55f6279fcc7106ff832e0f886a63a575d0c582715eb818b06a3d7e588a3e",
+      "path": "README.md",
+      "sha256": "0a2b7050b3b62a338adb0f4d72bc6fb7cb357ca58b6c72b4d29f37282f71c820",
       "disposition": "documentation",
-      "reason": "Explains finite bounds, declared correspondence, exact-input checks and separately configured merge protection; no application transition or mathematical implementation proof is introduced by this prose.",
+      "reason": "Explains local browser-session contract, bounded model correspondence and independent verification or developer axe preparation; no runtime behavior is established by prose.",
       "models": []
     },
     {
-      "path": "docs/formal-validation.md",
-      "sha256": "3aca4a0d7a833f84e96155d756371f85f85fa807c0869ebac022dea994ab3703",
+      "path": "docs/console-sessions.md",
+      "sha256": "0bba1cfb71de152cecca2331e314a31057ae12c66d1337d68d2084181a09be5c",
       "disposition": "documentation",
-      "reason": "Explains finite bounds, declared correspondence, exact-input checks and separately configured merge protection; no application transition or mathematical implementation proof is introduced by this prose.",
+      "reason": "Explains local browser-session contract, bounded model correspondence and independent verification or developer axe preparation; no runtime behavior is established by prose.",
       "models": []
+    },
+    {
+      "path": "formal/BrowserSessions.cfg",
+      "sha256": "6c9a3ec3c355763cb5d212c2da845085be53e302df956a87c94bb479e2e5640f",
+      "disposition": "modeled",
+      "reason": "The changed source is a caller/test correspondence seam for selected browser revocation and independent SDK/session preservation; actual UI/HTTP behavior is validated separately, not executed by TLC.",
+      "models": [
+        {
+          "id": "BrowserSessions",
+          "properties": [
+            "RevokedCookiesDenied",
+            "AcceptedOnlyLiveParent",
+            "SDKAuthorityPreserved",
+            "UnrelatedSessionsPreserved",
+            "NoRawSDKCookie",
+            "NoBrowserSDKAuthority",
+            "ParentLifetimeBound"
+          ],
+          "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them."
+        }
+      ]
+    },
+    {
+      "path": "formal/BrowserSessions.tla",
+      "sha256": "cde5633b5b190063d8c65205680c1a10f399430469b1562562a467133098b40a",
+      "disposition": "modeled",
+      "reason": "The changed source is a caller/test correspondence seam for selected browser revocation and independent SDK/session preservation; actual UI/HTTP behavior is validated separately, not executed by TLC.",
+      "models": [
+        {
+          "id": "BrowserSessions",
+          "properties": [
+            "RevokedCookiesDenied",
+            "AcceptedOnlyLiveParent",
+            "SDKAuthorityPreserved",
+            "UnrelatedSessionsPreserved",
+            "NoRawSDKCookie",
+            "NoBrowserSDKAuthority",
+            "ParentLifetimeBound"
+          ],
+          "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them."
+        }
+      ]
     },
     {
       "path": "formal/README.md",
-      "sha256": "65776efb4f747c0f8cb07d22c90ad451b52fecec0cdbb80160be0e4b306b743f",
+      "sha256": "4a0341f2944cad33329a0e62dd0448e9fce37f8fa506f930be06c8ac2fe6c12a",
       "disposition": "documentation",
-      "reason": "Explains finite bounds, declared correspondence, exact-input checks and separately configured merge protection; no application transition or mathematical implementation proof is introduced by this prose.",
+      "reason": "Explains local browser-session contract, bounded model correspondence and independent verification or developer axe preparation; no runtime behavior is established by prose.",
       "models": []
     },
     {
       "path": "formal/models.json",
-      "sha256": "ed8bd53c5b16d33443c4bf89c7c13eef41ae2632b740083f08e69cc2ee8b8e96",
+      "sha256": "dfc2dac61f176b38000f27d0a01bd0e359181f40564ec6f5262f760a39317cde",
       "disposition": "formal-infrastructure",
-      "reason": "Changes validation orchestration or its executable inventory, not simulator resource transitions. Strict real-Git/input and failure-classification negative tests exercise the mechanism; the unchanged five finite specifications still require actual TLC baseline and sensitivity runs. Human acceptance and policy self-edit protection remain separate.",
+      "reason": "Registers and protects the sixth model while retaining existing obligations, or preserves mandatory axe/E2E preparation. Registration/checker negative controls and exact-input TLC remain separate required results; no implementation refinement claim.",
       "models": []
     },
     {
-      "path": "scripts/check-formal-applicability.py",
-      "sha256": "47045d256c9b3c9ac7b4e1342368b6ce6aa17f74d689f62b6ae7d5b7592dfb84",
-      "disposition": "formal-infrastructure",
-      "reason": "Changes validation orchestration or its executable inventory, not simulator resource transitions. Strict real-Git/input and failure-classification negative tests exercise the mechanism; the unchanged five finite specifications still require actual TLC baseline and sensitivity runs. Human acceptance and policy self-edit protection remain separate.",
-      "models": []
+      "path": "internal/server/access.go",
+      "sha256": "039384e1f22a36807ff8b1942cb0211eed58f7f044c45e7ce40428562a02fd7b",
+      "disposition": "modeled",
+      "reason": "Introduces independent browser credential state with bounded lifetime, live-parent use checks and selective logout without mutating raw SDK authority. BrowserSessions checks the bounded design transitions; native concurrency/HTTP tests remain independent.",
+      "models": [
+        {
+          "id": "BrowserSessions",
+          "properties": [
+            "RevokedCookiesDenied",
+            "AcceptedOnlyLiveParent",
+            "SDKAuthorityPreserved",
+            "UnrelatedSessionsPreserved",
+            "NoRawSDKCookie",
+            "NoBrowserSDKAuthority",
+            "ParentLifetimeBound"
+          ],
+          "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them."
+        }
+      ]
     },
     {
-      "path": "scripts/check-formal.py",
-      "sha256": "de54b5df0d2c3306b9a97542d87777c9dc0298ae9fc255b13b8a66d19e660253",
-      "disposition": "formal-infrastructure",
-      "reason": "Changes validation orchestration or its executable inventory, not simulator resource transitions. Strict real-Git/input and failure-classification negative tests exercise the mechanism; the unchanged five finite specifications still require actual TLC baseline and sensitivity runs. Human acceptance and policy self-edit protection remain separate.",
-      "models": []
+      "path": "internal/server/access_browser_test.go",
+      "sha256": "a1d06a5c4a5a185627cd3ae97952891b733509d72032b9ed3095a58250f53af0",
+      "disposition": "modeled",
+      "reason": "The changed source is a caller/test correspondence seam for selected browser revocation and independent SDK/session preservation; actual UI/HTTP behavior is validated separately, not executed by TLC.",
+      "models": [
+        {
+          "id": "BrowserSessions",
+          "properties": [
+            "RevokedCookiesDenied",
+            "AcceptedOnlyLiveParent",
+            "SDKAuthorityPreserved",
+            "UnrelatedSessionsPreserved",
+            "NoRawSDKCookie",
+            "NoBrowserSDKAuthority",
+            "ParentLifetimeBound"
+          ],
+          "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them."
+        }
+      ]
     },
     {
-      "path": "scripts/formal_applicability.py",
-      "sha256": "a1e8baf590a398039395827e206a20c98871f198b5c558eb97744ae1679028cd",
-      "disposition": "formal-infrastructure",
-      "reason": "Changes validation orchestration or its executable inventory, not simulator resource transitions. Strict real-Git/input and failure-classification negative tests exercise the mechanism; the unchanged five finite specifications still require actual TLC baseline and sensitivity runs. Human acceptance and policy self-edit protection remain separate.",
+      "path": "internal/server/web/app.js",
+      "sha256": "3e3ba30db04307b2e064c4cfca07749dee4ef2cd65e3935256d9bbadd00fe497",
+      "disposition": "presentation",
+      "reason": "Canonical embedded UI/bundle metadata for the reviewed account-menu caller; source account state correspondence is explicitly bound separately. Bundle provenance and actual browser checks remain required.",
       "models": []
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "d08008ba7c3445eb3f2abff7cc4275d5829ff017d342ea48e421a70d2fb77248",
+      "sha256": "c8cef63d5cf25ef99ebb15e4a21c6fa8c2c4430c0fff451f20547fb6435d940c",
       "disposition": "formal-infrastructure",
-      "reason": "Changes validation orchestration or its executable inventory, not simulator resource transitions. Strict real-Git/input and failure-classification negative tests exercise the mechanism; the unchanged five finite specifications still require actual TLC baseline and sensitivity runs. Human acceptance and policy self-edit protection remain separate.",
-      "models": []
-    },
-    {
-      "path": "scripts/test-formal-applicability.py",
-      "sha256": "68a801b2146e3ecb7763f6dc7e00212f1ccda35beb6203f84d136d782801c044",
-      "disposition": "formal-infrastructure",
-      "reason": "Changes validation orchestration or its executable inventory, not simulator resource transitions. Strict real-Git/input and failure-classification negative tests exercise the mechanism; the unchanged five finite specifications still require actual TLC baseline and sensitivity runs. Human acceptance and policy self-edit protection remain separate.",
+      "reason": "Registers and protects the sixth model while retaining existing obligations, or preserves mandatory axe/E2E preparation. Registration/checker negative controls and exact-input TLC remain separate required results; no implementation refinement claim.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "2e02b5c95eb2d9a5dd9bc801a884590b7d4c2e29741c3481a90f217653b2dd1b",
+      "sha256": "9c5292d61a4dff41a44a7d5b5d3a7732a8aeac32563c74d4782bac131c8b4037",
       "disposition": "formal-infrastructure",
-      "reason": "Changes validation orchestration or its executable inventory, not simulator resource transitions. Strict real-Git/input and failure-classification negative tests exercise the mechanism; the unchanged five finite specifications still require actual TLC baseline and sensitivity runs. Human acceptance and policy self-edit protection remain separate.",
+      "reason": "Registers and protects the sixth model while retaining existing obligations, or preserves mandatory axe/E2E preparation. Registration/checker negative controls and exact-input TLC remain separate required results; no implementation refinement claim.",
       "models": []
+    },
+    {
+      "path": "test/e2e/check.py",
+      "sha256": "4d44ecee1bd920909e6b3df7992fc89f0c05c3b18c6690e51b647ecad059d510",
+      "disposition": "test-support",
+      "reason": "Keeps actual console logout conformance mandatory and preserves existing identity selection compatibility; these assertions do not substitute for backend/model checks.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/console_logout.py",
+      "sha256": "7c5b4595f85f17a5ad4eb9b034a4d9700d27b8942e02cedfaa389adbdcfb04a1",
+      "disposition": "modeled",
+      "reason": "The changed source is a caller/test correspondence seam for selected browser revocation and independent SDK/session preservation; actual UI/HTTP behavior is validated separately, not executed by TLC.",
+      "models": [
+        {
+          "id": "BrowserSessions",
+          "properties": [
+            "RevokedCookiesDenied",
+            "AcceptedOnlyLiveParent",
+            "SDKAuthorityPreserved",
+            "UnrelatedSessionsPreserved",
+            "NoRawSDKCookie",
+            "NoBrowserSDKAuthority",
+            "ParentLifetimeBound"
+          ],
+          "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "97868208b7a19d8b0b9fd242f61c1dadaa0376e6934408dd863c907b620db496",
+      "disposition": "presentation",
+      "reason": "Canonical embedded UI/bundle metadata for the reviewed account-menu caller; source account state correspondence is explicitly bound separately. Bundle provenance and actual browser checks remain required.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "1abfb7427675e3eff370edd2201d258609310757777129fb2b020d11b4e3ca54",
+      "disposition": "presentation",
+      "reason": "Canonical embedded UI/bundle metadata for the reviewed account-menu caller; source account state correspondence is explicitly bound separately. Bundle provenance and actual browser checks remain required.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/main.jsx",
+      "sha256": "632a8cae47145ae8d65746c2bf3b7ece9edf7ea846ee0a012b7f865f75b3d1c9",
+      "disposition": "modeled",
+      "reason": "The changed source is a caller/test correspondence seam for selected browser revocation and independent SDK/session preservation; actual UI/HTTP behavior is validated separately, not executed by TLC.",
+      "models": [
+        {
+          "id": "BrowserSessions",
+          "properties": [
+            "RevokedCookiesDenied",
+            "SDKAuthorityPreserved",
+            "UnrelatedSessionsPreserved"
+          ],
+          "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them."
+        }
+      ]
     }
   ]
 }

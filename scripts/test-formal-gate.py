@@ -32,7 +32,7 @@ class FormalGateTests(unittest.TestCase):
 
     def test_complete_registry_and_exact_mutations(self):
         registry = load_registry(self.root)
-        self.assertEqual(len(registry['models']), 5)
+        self.assertEqual(len(registry['models']), 6)
         for model in registry['models']:
             source = (self.root / model['model']).read_text()
             for mutant in model['mutants']:
@@ -166,6 +166,19 @@ class FormalGateTests(unittest.TestCase):
             with self.assertRaises(GateError):
                 run_suite(self.root, jar, self.root / 'reports/formal', merge_gate=True)
         self.assertFalse(json.loads((self.root / 'reports/formal/evidence.json').read_text())['success'])
+
+
+
+    def test_browser_session_model_and_revocation_obligation_are_required(self):
+        path = self.root / 'formal/models.json'
+        registry = json.loads(path.read_text())
+        browser = next(m for m in registry['models'] if m['id'] == 'BrowserSessions')
+        browser['properties'].remove('RevokedCookiesDenied')
+        config = self.root / browser['config']
+        config.write_text(config.read_text().replace('INVARIANT RevokedCookiesDenied\n', ''))
+        path.write_text(json.dumps(registry))
+        with self.assertRaises(GateError):
+            load_registry(self.root)
 
 
 if __name__ == '__main__':

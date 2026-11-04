@@ -52,3 +52,28 @@ AXE_SCRIPT=/tmp/simulator-audit/axe.min.js make e2e PYTHON=/tmp/tcsim-tests/bin/
 ```
 
 Missing `AXE_SCRIPT` or an unreadable tool fails the helper; there is no optional accessibility skip. CI obtains the existing pinned axe tool before E2E and continues to run the separate `make audit` checks afterward.
+
+## Registered finite-model integration
+
+The existing PR312 branch was normally merged with public main
+`55a111953eb3eb0dfd90aaa473ac3fe39cb10b66`; no rebase/force or duplicate PR is
+needed. The native access backend, account-menu UI, mandatory console_logout E2E
+registration, axe-before-E2E preparation and generated bundle remain byte-identical
+to reviewed dd2bccd. `formal/models.json` now contains BrowserSessions with its
+eight CFG invariants and five exact expected-invariant mutants. The checker adds
+that ID and those invariants to its minimum protected set, retaining all prior
+protection. A negative unit control removes RevokedCookiesDenied from both CFG
+and registry and must still fail.
+
+Correspondence is intentionally limited: login/session digest state, parent
+validity at use and selected revocation map to access.go; main.jsx and the named
+native/browser helpers are caller/test seams. TLC does not execute them or prove
+Origin parsing, cookie flags, HTTP error handling, Go concurrency, token entropy,
+PC/mobile layout or cross-team isolation. Those are independent existing tests.
+Clock/TTL/token counts are exploration bounds, not the actual15-minute TTL limit.
+
+This registration's source-only handoff has not rerun the six baselines/ten
+sensitivity cases or Python/immutable-record checks. Previous7348-state/5mutant
+evidence is preserved but does not replace a fresh exactHEAD registered gate.
+Root leases the validation window and reviews the record based on public55a.
+SSM313 and metadata314 are not imported and are not required for this registration.
