@@ -116,14 +116,17 @@ prove Go/SQLite refinement, actual byte/JSON/Unicode arithmetic, filesystem size
 concurrency scheduling, persistence/crashes, distributed delivery or liveness.
 See [SQS limits and concrete test boundaries](../docs/sqs.md).
 
-Recorded mainb61 required10 finite baselines and36 named mutation controls, including BrowserSessions, SQSLifecycle and SQSStorageBudget. This source integration is not a new-head TLC or Go execution result.
+Recorded mainb61 required10 finite baselines and36 named mutation controls, including BrowserSessions, SQSLifecycle and SQSStorageBudget. That baseline history is not a new-head TLC or Go execution result.
 
-## SQS console source registration
+## SQS console epoch and receipt custody
 
-The source candidate registers `SQSConsoleEpoch` in addition to all unchanged
-mainb61 entries: eleven finite baselines and forty literal-required controls.
-The new four controls target response epochs, paired unmount defenses, receipt
-custody on context switches and raw receipt rendering. Forty prepared negative
-fixtures individually remove each old/new control. The new model and mandatory
-browser helper have not run at this source checkpoint. See the
-[exact source/native correspondence and limitations](../docs/formal-sqs-console.md).
+`SQSConsoleEpoch` adds one baseline/four specific controls to unchanged mainb61:
+eleven baselines and forty literal-required controls in total. SANY and all51
+cases passed at immutable341dec2. The new model explored86distinct states;
+each new control violated its intended named invariant. Policy fixtures remove
+every individual old/new control and critical new property. Final documentation
+HEAD requires its own immutable receipt; an older HEAD is not current CI.
+
+The model covers bounded view epochs/accepted replies/private receipt custody,
+not native receipt validity, authentication, React/DOM/thread execution or an
+implementation refinement. See [source/native correspondence and limits](../docs/formal-sqs-console.md).

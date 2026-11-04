@@ -84,42 +84,29 @@ additive hunks; preserve existing providers, IAM and SQLite state. SNS-to-SQS
 composition must agree atomicity/retry behavior without nested transactions.
 Inspect the service backlog and roster before claiming another service.
 
-## Local SQS console source assignment (2026-11-04)
+## Local SQS console assignment — current bounded candidate
 
-`cfn_callback` owns `feat/sqs-console-native-20261104` at recorded main `b61d029`,
-worktree `/workspace/sqs-console-native-b61`. Issue48 and merged PR315 supply the
-existing nine native APIs; the console was explicitly outside that native slice.
-Targeted public open/closed PR and branch searches and72 allowlisted private
-worktree console directories found no console-specific candidate. These are
-targeted observations, not an exhaustive alias inventory. No public Issue action
-is authorized for this assignment. External native/SNS/DynamoDB ownership is
-unchanged.
+| Owner | Base/branch | Verified local scope | Remaining gates |
+| --- | --- | --- | --- |
+| cfn_callback | mainb61 / feat/sqs-console-native-20261104 | Existing9nativeAPIs unchanged; Cloudscape queue/create/details/send/poll/visibility/delete; served9templates share actualSQLite. Canonical22packagebuild/assets/rights, nativeSDK335, focusedUI/SDK25, servedHTTP13/SDK10 passed. | Full23E2E/start/audit, finaldocHEAD immutable51/applicability, currenthostedCI/security; no public merge |
 
-Owned source: new `tools/console/src/sqs.jsx`, new `docs/sqs-console.md`, new
-`test/e2e/sqs_console.py`, and minimal own-tree navigation/remount hunks in
-`main.jsx`. No server/native/core edits. Queues, supported Standard creation,
-details, explicit send/poll, current-receipt visibility/delete and queue deletion
-use actual native HTTP only. Receipt handles stay transient and are never
-rendered, logged or persisted by the console. Heavy execution is unrun/reserved
-by root; no API/UI success, formal result or global gate is claimed from source.
+Native/server/core remain byte-identical to recorded mainb61; external native
+SQS/SNS/DynamoDB ownership is not overwritten. Issue48 and merged PR315 supplied
+the native slice and explicitly excluded UI. Targeted public/private duplicate
+checks found no separate console candidate; they are not an exhaustive alias
+inventory. No public Issue/comment/push/PR operation occurred in this assignment.
 
-SQS followup SOURCE now also owns `formal/SQSConsoleEpoch.tla/.cfg`, the additive
-registry/policy minimum and negative fixtures, `docs/formal-sqs-console.md`, exact
-applicability and one mandatory Conformance method. All main10/36 are preserved;
-new11/40 registration and actual UI/helper remain unrun. Participant, region,
-late native reply, wrong-token and restart coverage are prepared in the helper,
-not claimed successful. The original five-file source bundle remains preserved.
+FullGo/race/vet/assets/module/build passed at e039c50 from one fresh profile:
+statements94.80%, unfilteredsource90.21%, unchanged floors/no profile union.
+The last immutable model input341dec2 passed11baselines/40specific controls;
+policy19/applicability21 units and20exact blobs passed. The UI's first run found
+only a heading-selector ambiguity; two assertions now require h1, with no timeout
+or production changes. Its corrected run passed all9UIoperations, role403 and
+peer/token/region/restart isolation, current receipts and fourPC/mobileaxe states.
+See [scope/limits](sqs-console.md) and [formal correspondence](formal-sqs-console.md).
 
-SQS canonical-node phase: same-lock physical16047files/3symlinks verified,
-22package canonical build/rights/assets and offlineCGO0 binary passed. Native
-nine-API SDK335calls/sends/responses passed on that binary (no browser). Its
-spec lacked full JSON1.0 templates. New owned root-POST typed examples and
-mandatory `sqs_docs.py` are SOURCE now, awaiting a new embedded build; do not
-relabel the old binary's native proof as served-reference execution. No native/
-server/core changes, new dependency, actual cloud or publication.
-
-SQS new-reference checkpoint: cached canonical rebuild/assets and new offline
-embedded binary passed. Actual served9JSON1.0 templates passed with explicit
-live substitutions, HTTP13/13 and SDK10/10/10, sameSQLite bytes, refused old/
-fixture receipts and cleanup.43IDs/25paths/JSON1.1/Query preserved. All processes
-closed; no UI/browser/model/globalGo/currentCI success or publication claimed.
+AWS public text guides were read; two official screenshot GETs returned403 and
+were not retried by another route. No authenticatedAWS pixels, actualSQS,
+cloud credentials, deployment or billing changes are part of this work. All
+public merges remainHOLD. Runtime leases are root-coordinated; local evidence
+and assignments do not imply all-service or full-AWS completion.

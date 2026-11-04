@@ -1,6 +1,6 @@
-# SQS console epoch and receipt-custody model (source candidate)
+# SQS console epoch and receipt-custody model
 
-`SQSConsoleEpoch` is newly registered source, not a TLC result. It adds one finite
+`SQSConsoleEpoch` has a bounded SANY/TLC result at immutable341dec2. It adds one finite
 baseline/four exact expected-invariant controls to recorded mainb61's unchanged
 ten baselines/thirty-six controls: eleven/forty total. All forty IDs are literal
 minimum requirements in `scripts/formal_model_gate.py`; the prepared policy unit
@@ -23,10 +23,10 @@ claim. Receipt identities abstract response custody, not actual random receipt
 freshness, message visibility or the cryptographic/account identity of callers.
 Native `SQSLifecycle` and `SQSStorageBudget` retain their own separate scopes.
 
-| Property | Source correspondence | Prepared concrete check |
+| Property | Source correspondence | Concrete check and limit |
 | --- | --- | --- |
 | OnlyCurrentReplies | `valid(epoch)` before accepting list/detail/poll results; queue/cancel invalidation; only SQS keyed remount in main.jsx | Hold an actual native poll response, change region, deliver/abort it and reject old body/receipt in new context |
-| NoUnmountedAcceptance | alive flag plus revision advance and abort in effect cleanup | Region/navigation remount during a real pending reply; model history captures whether acceptance happened while mounted |
+| NoUnmountedAcceptance | alive flag plus revision advance and abort in effect cleanup | Actual region remount during a real pending reply; service/principal late-reply variants are not separately exercised. Model history captures mounted state at acceptance |
 | ReceiptCustodyBound | clearMessages; private Map filled only after valid native poll; release/delete/context switch clears or removes receipts | Native visibility0→redelivery/newreceipt→stale receipt refusal; UI selected message only; region switch clears received rows |
 | RawReceiptsPrivate | only MessageId/body/selected metadata enter row state; receipt stays in ref and is sent only to native delete/visibility | Actual browser response receipts absent from DOM, URL, storage, console output and reports; no raw receipt values in test output |
 
@@ -49,12 +49,19 @@ the added SQS navigation/remount seam; it is not a proof of the full console or
 its existing BrowserSessions authentication implementation. Actual token
 binding/403/401 and scoped persistence are separate native acceptance tests.
 
-The helper `test/e2e/sqs_console.py` is mandatory in Conformance source and is
-prepared for two real authenticated CLI processes/databases, current native
-state, cross-token401, participant-denied send with no mutation, same-name
-regional state, delayed native reply, restart/relogin and cleanup. Native/server/
-core files remain byte-identical to mainb61. Browser/model/policy execution remains **unrun**. A subsequent canonical
-Node/build and unchanged-native SDK checkpoint is recorded separately in the
-console document; it does not prove the new view/model or newly added served
-examples. No previous head's proof is used as new success. The official AWS screenshots returned403; public text
-references do not establish authenticated AWS screen equivalence.
+The mandatory `test/e2e/sqs_console.py` passed actual embedded browser/native
+checks: two authenticated CLI processes/DBs, cross-token401, participant403
+without mutation, same-name regional data, a held actual response rejected in a
+new region, current receipts/visibility/deletion, restart/relogin and cleanup.
+Details/Messages at1440/390pixels passed four pinned-axe states. Native/server/
+core code remains unchanged from mainb61; receipt values are not emitted.
+
+At341dec2, SANY semantic processing and all11baselines/40exact expected
+counterexamples passed with one Java worker/512MiB/default60seconds and the
+original bounds. The new baseline explored86distinct states (252generated,
+depth9). Policy19/applicability21 units passed, including every one of40controls
+removed individually. These are finite checks, not the implementation proofs
+excluded above. Test-only heading disambiguation afterward did not change
+runtime/model/assets; final documentation-HEAD immutable receipts remain required.
+The complete23-case E2E/start/audit and current hostedCI/security remain pending.
+Official screenshot GET403 prevents image/authenticated-screen equivalence claims.

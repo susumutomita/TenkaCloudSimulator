@@ -29,7 +29,7 @@ make build
 | サービス | 実装済みの操作・状態 | 主な未対応 |
 | --- | --- | --- |
 | [S3](docs/s3.md) | bucket作成・一覧・存在確認・region取得・削除、object PUT/GET/HEAD/DELETE・ListObjectsV2、bucket versioning・ListObjectVersions、public access block・tags | multipart、ACL、一般bucket policy、暗号化設定。path-styleのみ |
-| [SQS](docs/sqs.md) | Standard queue JSON 1.0 API 9操作：CreateQueue、GetQueueUrl、ListQueues、GetQueueAttributes、DeleteQueue、SendMessage、ReceiveMessage、DeleteMessage、ChangeMessageVisibility | UI、CloudFormation、function SDK bridge、Challenge連携、FIFO、batch、DLQ、SNS連携 |
+| [SQS](docs/sqs.md) | Standard queue JSON 1.0 API 9操作＋[基本コンソール](docs/sqs-console.md)：一覧・3属性で作成・詳細・送受信・可視性変更・メッセージ／キュー削除 | 設定編集、CloudFormation、function SDK bridge、Challenge連携、FIFO、batch、DLQ、SNS連携、暗号化 |
 | [Systems Manager Parameter Store](docs/console.md) | PutParameter、GetParameter、GetParameters、GetParametersByPath、DescribeParameters、DeleteParameter。最新値・version・overwrite判定 | SecureString/KMS、履歴・labels。StandardのString/StringList/textのみ |
 | [IAM](docs/iam.md) | Create/Get/List/DeleteRole、Put/Get/Delete/ListRolePolicy、UpdateAssumeRolePolicy。Lambda service trust、inline policy評価 | STS、managed policyの権限付与、一般Condition・permissions boundary・SCP |
 | [Lambda](docs/lambda.md) | CreateFunction、ListFunctions、GetFunctionConfiguration、UpdateFunctionCode、Invoke、DeleteFunction、AddPermission/GetPolicy/RemovePermission。固定CPython 3.12.16/WASIによるPython ZIP実行、限定S3/SSM SDK bridge | 他言語、非同期実行、Function URL、任意network。128 MiB・timeout 1–30秒 |
@@ -40,7 +40,7 @@ make build
 
 S3のCloudFormationはBucketName/Versioning/PublicAccessBlock/ユーザーTagsとRef/Arnに対応し、空でない履歴は削除しません。呼出者にはStack ARNと各リソース操作の両方の権限が必要で、CAPABILITY_IAMは権限を付与しません。
 
-SQSはnative JSON 1.0 APIのみ対応します。保持中・期限切れ未回収を含む物理message rowはプロセス全体10000件、UTF-8 bodyとserialized attribute JSONの合計64 MiBまでです。これはSQLiteファイル全体・プロセスメモリ・AWS課金サイズの上限ではありません。Azure/GCP/Sakura等の他クラウドは現在のGo実装では未対応です。Issueや計画は実装完了を意味しません。[開発状況](docs/development-status.md)を参照してください。Cloudscapeを使用していますが、本物のAWSコンソールとの全画面・全挙動の一致や実AWSとの差分検証完了は主張していません。
+SQSは9つのnative JSON 1.0 APIと、その同じSQLiteを使う基本コンソールに対応します。保持中・期限切れ未回収を含む物理message rowはプロセス全体10000件、UTF-8 bodyとserialized attribute JSONの合計64 MiBまでです。これはSQLiteファイル全体・プロセスメモリ・AWS課金サイズの上限ではありません。Azure/GCP/Sakura等の他クラウドは現在のGo実装では未対応です。Issueや計画は実装完了を意味しません。[開発状況](docs/development-status.md)を参照してください。Cloudscapeを使用していますが、本物のAWSコンソールとの全画面・全挙動の一致や実AWSとの差分検証完了は主張していません。
 
 ## IAMロールからLambdaを作る
 
@@ -90,10 +90,10 @@ TLA_JAR=/path/to/tla2tools.jar make formal
 
 CIはstatementと未フィルターsource-line coverageを両方90%以上に強制します。`make before-commit`単独のcoverage判定はstatementのみで、source-line判定はCIのCobertura生成後ステージと上記の2コマンドで行います。SDK/browser、license、依存security、埋込asset、形式検査も行います。cross compileは他OSでの実行成功を意味しません。開発用Python/Node/Javaはruntime依存ではありません。UI・Scalarの再生成は権利表記とlockを保持する[各build手順](tools/console/README.md)・[Scalar手順](tools/scalar/README.md)・[Python runtimeの権利・再生成手順](tools/python/README.md)に従います。
 
-形式検査にはObjectStore、StackOwnership、S3Versions、NativeIAMOwnership、RESTDeploymentSnapshot、SSMParameterState、StartupTokenVisibility、BrowserSessions、SQSLifecycle、SQSStorageBudgetの既存10有限モデル・36欠陥検出を維持し、このSQSコンソールSOURCE候補はSQSConsoleEpochを加えた11モデル・40欠陥検出を登録しています（新規実行は未検証）。TLCと意図したmutantの反例で限定した安全条件を検査しますが、Go実装のrefinement、暗号、全AWS仕様・実AWSとの一致を証明するものではありません。変更はregistryとsource対応を更新し、固定HEADのCI結果で判断します。[形式検査](formal/README.md)、[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)。
+形式検査にはObjectStore、StackOwnership、S3Versions、NativeIAMOwnership、RESTDeploymentSnapshot、SSMParameterState、StartupTokenVisibility、BrowserSessions、SQSLifecycle、SQSStorageBudgetの既存10有限モデル・36欠陥検出を維持し、SQSConsoleEpochを加えた11モデル・40欠陥検出があります。341dec2の固定HEADで全51ケースが成功し、最終ドキュメントHEADは別の実行証拠で確認します。TLCと意図したmutantの反例で限定した安全条件を検査しますが、Go実装のrefinement、暗号、全AWS仕様・実AWSとの一致を証明するものではありません。変更はregistryとsource対応を更新し、固定HEADのCI結果で判断します。[形式検査](formal/README.md)、[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)。
 
 ## ライセンス
 
 本体は[MIT](LICENSE)。`/_simulator/licenses/`にGo・Cloudscape・Scalar・CPython/WASI等の原文LICENSE/NOTICEを同梱しています。再配布時も保持してください。AWS公式サービスではなく、AWSロゴは使用しません。[設計・引継ぎ資料](docs/handoff/README.md)。
 
-SQSの基本コンソールは[独立したSOURCE候補](docs/sqs-console.md)として準備中です。既存9 native API以外は追加せず、canonical bundle・実ブラウザー・形式検査・全体gateの成功前に利用可能とは扱いません。
+SQSの[基本コンソール](docs/sqs-console.md)は実ブラウザー／SDKで、配信API例9操作はHTTP／SDKで、同じSQLiteの実データを検証済みです。Go全体の単一プロファイルはstatement94.80%・source90.21%。全23件E2E・最終HEAD形式検査・現在の公開CIは別gateで、未完了を成功扱いしません。
