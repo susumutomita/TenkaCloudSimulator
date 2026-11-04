@@ -423,7 +423,7 @@ func (g *Gateway) serveDynamoDB(w http.ResponseWriter, r *http.Request) {
 			invalid("Item size has exceeded the maximum allowed size")
 			return
 		}
-		if err := g.DynamoDB.PutItem(region, input.TableName, pk, sk, string(encoded), condition); err != nil {
+		if err := g.DynamoDB.PutItem(t, pk, sk, string(encoded), condition); err != nil {
 			dynamoError(w, err)
 			return
 		}
@@ -450,7 +450,7 @@ func (g *Gateway) serveDynamoDB(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if op == "GetItem" {
-			item, found, err := g.DynamoDB.GetItem(region, input.TableName, pk, sk)
+			item, found, err := g.DynamoDB.GetItem(t, pk, sk)
 			if err != nil {
 				dynamoError(w, err)
 				return
@@ -467,7 +467,7 @@ func (g *Gateway) serveDynamoDB(w http.ResponseWriter, r *http.Request) {
 			dynamoError(w, err)
 			return
 		}
-		if err := g.DynamoDB.DeleteItem(region, input.TableName, pk, sk, condition); err != nil {
+		if err := g.DynamoDB.DeleteItem(t, pk, sk, condition); err != nil {
 			dynamoError(w, err)
 			return
 		}
@@ -582,7 +582,9 @@ func (g *Gateway) dynamoDescription(region string, t DynamoDBTable, deleting boo
 	if t.BillingMode == "PROVISIONED" {
 		desc["ProvisionedThroughput"] = map[string]any{"ReadCapacityUnits": t.ReadUnits, "WriteCapacityUnits": t.WriteUnits, "NumberOfDecreasesToday": 0}
 	}
-	count, size, err := g.DynamoDB.TableStats(region, t.Name)
+	var count, size int64
+ var err error
+ if !deleting { count, size, err = g.DynamoDB.TableStats(t) }
 	if err != nil {
 		return nil, err
 	}

@@ -45,7 +45,13 @@ func NewDynamoDBStore(db *sql.DB) (*DynamoDBStore, error) {
 		return nil, err
 	}
 	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS aws_dynamodb_items(region TEXT NOT NULL,table_name TEXT NOT NULL,pk TEXT NOT NULL,sk TEXT NOT NULL,item TEXT NOT NULL,PRIMARY KEY(region,table_name,pk,sk));`)
-	return &DynamoDBStore{db}, err
+	if err != nil { return nil, err }
+ // Refuse legacy orphan data without migrating, deleting or adopting any row.
+ var orphan int
+ err = db.QueryRow(`SELECT 1 FROM aws_dynamodb_items i LEFT JOIN aws_dynamodb_tables t ON t.region=i.region AND t.name=i.table_name WHERE t.name IS NULL LIMIT 1`).Scan(&orphan)
+ if err == nil { return nil, fmt.Errorf("DynamoDB state contains orphaned items; refusing startup without modifying existing data") }
+ if err != sql.ErrNoRows { return nil, err }
+ return &DynamoDBStore{db}, nil
 }
 
 func (t *DynamoDBTable) PartitionKey() string {
@@ -122,26 +128,7 @@ func (s *DynamoDBStore) CreateTable(t DynamoDBTable) (DynamoDBTable, error) {
 }
 
 func (s *DynamoDBStore) GetTable(region, name string) (DynamoDBTable, error) {
-	var t DynamoDBTable
-	var schema string
-	err := s.db.QueryRow("SELECT name,table_id,schema,billing,read_units,write_units,created FROM aws_dynamodb_tables WHERE region=? AND name=?", region, name).
-		Scan(&t.Name, &t.TableID, &schema, &t.BillingMode, &t.ReadUnits, &t.WriteUnits, &t.Created)
-	if err == sql.ErrNoRows {
-		return DynamoDBTable{}, dynamoFailure{"ResourceNotFoundException", "Cannot do operations on a non-existent table"}
-	}
-	if err != nil {
-		return DynamoDBTable{}, err
-	}
-	t.Region = region
-	var decoded struct {
-		KeySchema   []DynamoDBKeyElement `json:"keySchema"`
-		Definitions map[string]string    `json:"definitions"`
-	}
-	if err := json.Unmarshal([]byte(schema), &decoded); err != nil {
-		return DynamoDBTable{}, err
-	}
-	t.KeySchema, t.Definitions = decoded.KeySchema, decoded.Definitions
-	return t, nil
+ return readDynamoTable(s.db, region, name)
 }
 
 func (s *DynamoDBStore) ListTables(region, startAfter string, limit int) ([]string, string, error) {
@@ -172,26 +159,28 @@ func (s *DynamoDBStore) ListTables(region, startAfter string, limit int) ([]stri
 }
 
 func (s *DynamoDBStore) DeleteTable(region, name string) (DynamoDBTable, error) {
-	t, err := s.GetTable(region, name)
-	if err != nil {
-		return DynamoDBTable{}, err
-	}
-	tx, err := s.db.Begin()
-	if err != nil {
-		return DynamoDBTable{}, err
-	}
-	defer tx.Rollback()
-	if _, err = tx.Exec("DELETE FROM aws_dynamodb_items WHERE region=? AND table_name=?", region, name); err != nil {
-		return DynamoDBTable{}, err
-	}
-	if _, err = tx.Exec("DELETE FROM aws_dynamodb_tables WHERE region=? AND name=?", region, name); err != nil {
-		return DynamoDBTable{}, err
-	}
-	return t, tx.Commit()
+ table, err := s.GetTable(region, name)
+ if err != nil { return DynamoDBTable{}, err }
+ return s.deleteTableSnapshot(table)
 }
 
-func (s *DynamoDBStore) TableStats(region, name string) (int64, int64, error) {
-	rows, err := s.db.Query("SELECT item FROM aws_dynamodb_items WHERE region=? AND table_name=?", region, name)
+func (s *DynamoDBStore) deleteTableSnapshot(table DynamoDBTable) (DynamoDBTable, error) {
+ tx, err := s.db.Begin()
+ if err != nil { return DynamoDBTable{}, err }
+ defer tx.Rollback()
+ if err = checkDynamoGeneration(tx, table); err != nil { return DynamoDBTable{}, err }
+ if _, err = tx.Exec("DELETE FROM aws_dynamodb_items WHERE region=? AND table_name=?", table.Region, table.Name); err != nil { return DynamoDBTable{}, err }
+ if _, err = tx.Exec("DELETE FROM aws_dynamodb_tables WHERE region=? AND name=? AND table_id=?", table.Region, table.Name, table.TableID); err != nil { return DynamoDBTable{}, err }
+ if err = tx.Commit(); err != nil { return DynamoDBTable{}, err }
+ return table, nil
+}
+
+func (s *DynamoDBStore) TableStats(table DynamoDBTable) (int64, int64, error) {
+ tx, err := s.db.Begin()
+ if err != nil { return 0, 0, err }
+ defer tx.Rollback()
+ if err = checkDynamoGeneration(tx, table); err != nil { return 0, 0, err }
+ rows, err := tx.Query("SELECT item FROM aws_dynamodb_items WHERE region=? AND table_name=?", table.Region, table.Name)
 	if err != nil {
 		return 0, 0, err
 	}
@@ -216,17 +205,28 @@ func (s *DynamoDBStore) TableStats(region, name string) (int64, int64, error) {
 	if err := rows.Err(); err != nil {
 		return 0, 0, err
 	}
-	return count, size, nil
+ if err = rows.Close(); err != nil { return 0, 0, err }
+ if err = tx.Commit(); err != nil { return 0, 0, err }
+ return count, size, nil
 }
 
 // PutItem stores itemJSON under (pk, sk). condition is "", "exists" or
 // "not_exists" and is evaluated against the same key inside the transaction.
-func (s *DynamoDBStore) PutItem(region, table, pk, sk, itemJSON, condition string) error {
+func (s *DynamoDBStore) PutItem(snapshot DynamoDBTable, pk, sk, itemJSON, condition string) error {
+ region, table := snapshot.Region, snapshot.Name
+ if err := validDynamoConditionMode(condition); err != nil { return err }
 	tx, err := s.db.Begin()
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback()
+ if err = checkDynamoGeneration(tx, snapshot); err != nil { return err }
+ var item map[string]any
+ if err = json.Unmarshal([]byte(itemJSON), &item); err != nil { return fmt.Errorf("invalid DynamoDB item document") }
+ actualPK, actualSK, err := snapshot.KeyFor(item)
+ if err != nil { return err }
+ if actualPK != pk || actualSK != sk { return dynamoFailure{"ValidationException", "Stored key does not match item attributes"} }
+
 	var n int
 	if err := tx.QueryRow("SELECT count(*) FROM aws_dynamodb_items WHERE region=? AND table_name=? AND pk=? AND sk=?", region, table, pk, sk).Scan(&n); err != nil {
 		return err
@@ -250,30 +250,36 @@ func (s *DynamoDBStore) PutItem(region, table, pk, sk, itemJSON, condition strin
 	return tx.Commit()
 }
 
-func (s *DynamoDBStore) GetItem(region, table, pk, sk string) (map[string]any, bool, error) {
-	var raw string
-	err := s.db.QueryRow("SELECT item FROM aws_dynamodb_items WHERE region=? AND table_name=? AND pk=? AND sk=?", region, table, pk, sk).Scan(&raw)
-	if err == sql.ErrNoRows {
-		return nil, false, nil
-	}
-	if err != nil {
-		return nil, false, err
-	}
-	var item map[string]any
-	if err := json.Unmarshal([]byte(raw), &item); err != nil {
-		return nil, false, err
-	}
-	return item, true, nil
+func (s *DynamoDBStore) GetItem(snapshot DynamoDBTable, pk, sk string) (map[string]any, bool, error) {
+ tx, err := s.db.Begin()
+ if err != nil { return nil, false, err }
+ defer tx.Rollback()
+ if err = checkDynamoGeneration(tx, snapshot); err != nil { return nil, false, err }
+ var raw string
+ err = tx.QueryRow("SELECT item FROM aws_dynamodb_items WHERE region=? AND table_name=? AND pk=? AND sk=?", snapshot.Region, snapshot.Name, pk, sk).Scan(&raw)
+ if err == sql.ErrNoRows { return nil, false, tx.Commit() }
+ if err != nil { return nil, false, err }
+ var item map[string]any
+ if json.Unmarshal([]byte(raw), &item) != nil { return nil, false, fmt.Errorf("invalid stored DynamoDB item") }
+ if _, err = dynamoItemSize(item); err != nil { return nil, false, fmt.Errorf("invalid stored DynamoDB item") }
+ actualPK, actualSK, err := snapshot.KeyFor(item)
+ if err != nil || actualPK != pk || actualSK != sk { return nil, false, fmt.Errorf("invalid stored DynamoDB key") }
+ if err = tx.Commit(); err != nil { return nil, false, err }
+ return item, true, nil
 }
 
 // DeleteItem removes the item if present. Deleting a missing item succeeds,
 // matching real DynamoDB, unless condition "exists" is requested.
-func (s *DynamoDBStore) DeleteItem(region, table, pk, sk, condition string) error {
+func (s *DynamoDBStore) DeleteItem(snapshot DynamoDBTable, pk, sk, condition string) error {
+ region, table := snapshot.Region, snapshot.Name
+ if err := validDynamoConditionMode(condition); err != nil { return err }
 	tx, err := s.db.Begin()
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback()
+ if err = checkDynamoGeneration(tx, snapshot); err != nil { return err }
+
 	var n int
 	if err := tx.QueryRow("SELECT count(*) FROM aws_dynamodb_items WHERE region=? AND table_name=? AND pk=? AND sk=?", region, table, pk, sk).Scan(&n); err != nil {
 		return err
