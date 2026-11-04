@@ -9,16 +9,18 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-BASE_MODELS = {'BrowserSessions', 'NativeIAMOwnership', 'ObjectStore', 'RESTDeploymentSnapshot', 'S3Versions', 'SSMParameterState', 'StackOwnership', 'StartupTokenVisibility'}
+BASE_MODELS = {'BrowserSessions', 'NativeIAMOwnership', 'ObjectStore', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'StackOwnership', 'StartupTokenVisibility'}
 BASE_INVARIANTS = {
-    'ObjectStore': {'DenyWins', 'NoOrphans', 'NoUnauthorizedMutation', 'TypeOK'},
-    'StackOwnership': {'OwnershipExclusive', 'TypeOK'},
-    'S3Versions': {'CurrentMatchesLatest', 'NoHistoryOrphans', 'TypeOK'},
-    'NativeIAMOwnership': {'OwnershipExclusive', 'TypeOK'},
-    'RESTDeploymentSnapshot': {'NoStageOrphans', 'SnapshotsFrozen', 'TypeOK'},
-    'StartupTokenVisibility': {'CreatedFilePrivate', 'FileIdentityFrozen', 'HistoryVisibility', 'InvalidFileNeverEmits', 'TypeOK'},
-    'SSMParameterState': {'DeleteEffect', 'DeniedPreservesState', 'OtherKeysUnchanged', 'OverwriteRefusal', 'PutVersion', 'ReadIsolation', 'TypeOK'},
     'BrowserSessions': {'AcceptedOnlyLiveParent', 'NoBrowserSDKAuthority', 'NoRawSDKCookie', 'ParentLifetimeBound', 'RevokedCookiesDenied', 'SDKAuthorityPreserved', 'TypeOK', 'UnrelatedSessionsPreserved'},
+    'NativeIAMOwnership': {'OwnershipExclusive', 'TypeOK'},
+    'ObjectStore': {'DenyWins', 'NoOrphans', 'NoUnauthorizedMutation', 'TypeOK'},
+    'RESTDeploymentSnapshot': {'NoStageOrphans', 'SnapshotsFrozen', 'TypeOK'},
+    'S3Versions': {'CurrentMatchesLatest', 'NoHistoryOrphans', 'TypeOK'},
+    'SQSLifecycle': {'AuthorizedMutations', 'ChangeOnlyInflight', 'FailedMutationAtomic', 'FreshReceipt', 'IdempotentCreateUnchanged', 'NoOrphans', 'ReceiptMutationCurrent', 'ReceiveOnlyEligible', 'ScopedMutation', 'TypeOK'},
+    'SQSStorageBudget': {'BudgetAccountsPhysical', 'DeleteScopeExact', 'FailedSendPreservesRows', 'ForeignRowsPreserved', 'LiveRowsPreserved', 'MaintenanceNotBudgetBlocked', 'PayloadByteCap', 'PhysicalRowCap', 'ReadRemovesOwnExpired', 'TypeOK'},
+    'SSMParameterState': {'DeleteEffect', 'DeniedPreservesState', 'OtherKeysUnchanged', 'OverwriteRefusal', 'PutVersion', 'ReadIsolation', 'TypeOK'},
+    'StackOwnership': {'OwnershipExclusive', 'TypeOK'},
+    'StartupTokenVisibility': {'CreatedFilePrivate', 'FileIdentityFrozen', 'HistoryVisibility', 'InvalidFileNeverEmits', 'TypeOK'},
 }
 IDENTIFIER = re.compile(r'^[A-Za-z][A-Za-z0-9_]*$')
 

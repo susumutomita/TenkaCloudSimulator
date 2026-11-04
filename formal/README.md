@@ -92,6 +92,28 @@ and actual browser assertions. Listing those paths binds source review, not Go
 refinement or a UI/TLS/cryptography proof. See
 [session contract](../docs/console-sessions.md) for the independent checks.
 
-The current combined registry has 8 baselines and 18 required mutation controls.
 Startup, SSM and Browser inventory/property removal are rejected. Source
 integration is not a new-head TLC or runtime execution result.
+
+## SQS lifecycle and physical storage budget
+
+SQSLifecycle bounds two valid queue scopes, one queue/message lifetime per scope,
+two deliveries and a coarse clock; its eleven mutations cover parent lifetime,
+IAM/scope, delay/retention eligibility, atomic failure and receipt rotation.
+SQSStorageBudget separately checks two trusted queue scopes, up to three legacy
+rows plus one fresh ID, abstract payload weights 1–2, caps of two rows/three
+units and preserved legacy over-cap state. Its seven mutations exercise row/byte
+admission, expired foreign charging, scoped purge, failure rollback, live-row
+preservation and available legacy maintenance. The 729 unique-ID initial row
+sets use an equivalent seed-assignment product, avoiding enumeration of every
+subset of the larger record universe. Accounting invariants apply to accepted
+admissions; failures independently preserve the complete prior physical state.
+
+The combined inventory includes ten baselines and thirty-six mandatory mutants after the BrowserSessions union.
+All original, SSM and Startup required properties remain protected. Model/source
+integration must pass the immutable-head gate separately for each new head. These finite abstractions do not
+prove Go/SQLite refinement, actual byte/JSON/Unicode arithmetic, filesystem size,
+concurrency scheduling, persistence/crashes, distributed delivery or liveness.
+See [SQS limits and concrete test boundaries](../docs/sqs.md).
+
+The combined registry requires 10 finite baselines and 36 named mutation controls, including BrowserSessions, SQSLifecycle and SQSStorageBudget. This source integration is not a new-head TLC or Go execution result.
