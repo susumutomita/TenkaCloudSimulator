@@ -159,6 +159,7 @@ func TestDynamoDBSemanticSizeSDKHTTP(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 25*time.Second)
 	defer cancel()
 	cmd := exec.CommandContext(ctx, python, "testdata/dynamodb_size_sdk.py", server.URL)
+	cmd.Env = append(os.Environ(), "AWS_CONFIG_FILE=/dev/null", "AWS_SHARED_CREDENTIALS_FILE=/dev/null", "AWS_EC2_METADATA_DISABLED=true")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		t.Fatalf("boto3 HTTP failed: %v %s", err, out)

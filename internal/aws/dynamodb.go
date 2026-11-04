@@ -583,8 +583,10 @@ func (g *Gateway) dynamoDescription(region string, t DynamoDBTable, deleting boo
 		desc["ProvisionedThroughput"] = map[string]any{"ReadCapacityUnits": t.ReadUnits, "WriteCapacityUnits": t.WriteUnits, "NumberOfDecreasesToday": 0}
 	}
 	var count, size int64
- var err error
- if !deleting { count, size, err = g.DynamoDB.TableStats(t) }
+	var err error
+	if !deleting {
+		count, size, err = g.DynamoDB.TableStats(t)
+	}
 	if err != nil {
 		return nil, err
 	}

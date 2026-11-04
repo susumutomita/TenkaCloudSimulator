@@ -58,3 +58,7 @@ TableSizeBytes は上記の項目サイズの即時合計であり、SQLiteフ�
 参照（2026-11-04確認）: [AWS item sizes and formats](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/CapacityUnitCalculations.html)、[AWS limits](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Constraints.html)、[TableDescription](https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_TableDescription.html)。
 
 開発者用の任意SDK検証は、既にboto3をインストール済みのPythonへのパスを `DYNAMODB_SIZE_SDK_PYTHON` に指定し、`go test ./internal/aws -run '^TestDynamoDBSemanticSizeSDKHTTP$' -v` で実行できる。実際のloopback HTTPとダミー資格情報を使用し、AWSへ接続しない。Python/boto3は製品バイナリの実行時依存ではない。通常のサイズ・永続化・境界テストにPythonは不要。
+
+## 世代・条件更新のローカル候補（native検証済み・統合未完了）
+
+現在の専用branchには、同一トランザクションでTableIDとキーschemaを再照合する変更を準備した。旧snapshotで削除済み／再作成済みテーブルを操作しない。既存orphan項目は削除・修復せず起動時に拒否する。schema migrationや旧DBの自動修復はない。選択したDynamoDBのnative Go通常／race、実boto3サイズ検証は成功した。全体coverage・形式検証・2プロセス認証・CIは未完了であり、[品質・モデル計画](dynamodb-quality-plan.md)の保留事項を完了するまで全体対応済みとは扱わない。
