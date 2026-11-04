@@ -20,6 +20,10 @@ func isSecretRequest(r *http.Request) bool {
 }
 
 func serveSecretGateway(w http.ResponseWriter, r *http.Request, store *SecretStore, identities *core.Identities) {
+	if !secretSingleSelectors(r) {
+		secretHTTPError(w, secretInvalid())
+		return
+	}
 	if store == nil || identities == nil {
 		secretHTTPError(w, errors.New("secret storage or identity authority is not configured"))
 		return

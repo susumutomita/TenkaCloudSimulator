@@ -153,11 +153,26 @@ func secretUniqueJSON(dec *json.Decoder, depth int) error {
 	return err
 }
 
+// Multiple wire selectors are ambiguous even when their first values match.
+// Do not let Header.Get choose authority/protocol on behalf of an intermediary.
+func secretSingleSelectors(r *http.Request) bool {
+	for _, name := range []string{"Content-Type", "X-Amz-Target", "X-Simulator-Service", "X-Simulator-Region", "Authorization", "X-Simulator-Principal", "X-Amz-Security-Token"} {
+		if len(r.Header.Values(name)) > 1 {
+			return false
+		}
+	}
+	return true
+}
+
 // ServeHTTP is a native JSON protocol adapter, not tenant authentication. The
 // Gateway must supply the region and a PURE, already captured policy callback;
 // several store methods authorize inside their short single-connection SQL Tx.
 func (s *SecretStore) ServeHTTP(w http.ResponseWriter, r *http.Request, region string, authorize SecretAuthorizer) {
 	fail := func(err error) { secretHTTPError(w, err) }
+	if !secretSingleSelectors(r) {
+		fail(secretInvalid())
+		return
+	}
 	media, _, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
 	if err != nil || media != "application/x-amz-json-1.1" || r.Method != "POST" || r.URL.Path != "/" || r.URL.RawQuery != "" || !secretRegion(region) {
 		fail(secretInvalid())

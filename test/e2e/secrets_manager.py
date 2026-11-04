@@ -8,6 +8,7 @@ import sqlite3
 import tempfile
 import urllib.error
 import urllib.request
+from urllib.parse import urlsplit
 from pathlib import Path
 
 from check import Config, ClientError, boto3, running
@@ -16,12 +17,26 @@ from check import Config, ClientError, boto3, running
 def client(endpoint, token, region="us-east-1"):
     sdk = boto3.client("secretsmanager", endpoint_url=endpoint, region_name=region,
                        aws_access_key_id="TCSIMSECRETS", aws_secret_access_key="dummy",
-                       config=Config(retries={"max_attempts": 0}))
+                       config=Config(retries={"max_attempts": 0}, connect_timeout=2, read_timeout=5))
     sdk.meta.events.register("before-sign", lambda request, **kwargs:
                              request.headers.add_header("X-Simulator-Token", token))
+    origin = urlsplit(endpoint)
+    assert origin.scheme == "http" and origin.hostname == "127.0.0.1" and origin.port
+    assert not origin.username and not origin.password and not origin.query and not origin.fragment
+    evidence = {"sends": 0, "statuses": []}
     def local_only(request, **kwargs):
-        assert request.url.startswith(endpoint + "/"), "SDK selected an external endpoint"
+        address = request.url.decode("ascii") if isinstance(request.url, bytes) else request.url
+        destination = urlsplit(address)
+        assert (destination.scheme, destination.hostname, destination.port) == (origin.scheme, origin.hostname, origin.port), "SDK selected a nonallocated origin"
+        assert not destination.username and not destination.password and not destination.query and not destination.fragment
+        assert destination.path == "/", "Secrets Manager native endpoint is the shared root"
+        evidence["sends"] += 1
+    def completed(http_response, **kwargs):
+        assert http_response.status_code not in range(300, 400), "Native SDK request redirected"
+        evidence["statuses"].append(http_response.status_code)
     sdk.meta.events.register("before-send", local_only)
+    sdk.meta.events.register("after-call", completed)
+    sdk._simulator_transport_evidence = evidence
     return sdk
 
 
@@ -53,13 +68,18 @@ def control(endpoint, token, path, body):
 
 
 def run():
+    tracked = []
+    def tracked_client(*args, **kwargs):
+        sdk = client(*args, **kwargs)
+        tracked.append(sdk)
+        return sdk
     a, b, c = [f"00000000-0000-0000-0000-{i:012d}" for i in (1, 2, 3)]
     name = "training/example"
     with tempfile.TemporaryDirectory(prefix="secret-native-") as directory:
         state_a, state_b = Path(directory) / "team-a.db", Path(directory) / "team-b.db"
         with running(db=state_a, authenticated=True) as (endpoint, operator), \
                 running(db=state_b, authenticated=True) as (other_endpoint, other_operator):
-            first, other = client(endpoint, operator), client(other_endpoint, other_operator)
+            first, other = tracked_client(endpoint, operator), tracked_client(other_endpoint, other_operator)
             created = metadata(first.create_secret(Name=name, Description="dummy metadata",
                                                    ClientRequestToken=a, SecretString="DUMMY-secret-team-a-A"))
             other_created = metadata(other.create_secret(Name=name, ClientRequestToken=a,
@@ -77,12 +97,32 @@ def run():
                 assert exc.code == 401
             else:
                 raise AssertionError("Local access token crossed team authorities")
+            for destination, foreign in ((endpoint, other_operator), (other_endpoint, operator)):
+                for credential in (None, foreign):
+                    request = urllib.request.Request(destination + "/", data=b"{}", method="POST",
+                        headers={"Content-Type": "application/x-amz-json-1.1", "X-Amz-Target": "secretsmanager.ListSecrets"})
+                    if credential is not None:
+                        request.add_header("X-Simulator-Token", credential)
+                    try:
+                        with urllib.request.urlopen(request, timeout=5):
+                            raise AssertionError("Missing/foreign local credential unexpectedly succeeded")
+                    except urllib.error.HTTPError as exc:
+                        assert exc.code == 401, "Outer authentication did not reject missing/foreign token"
+                        assert b"DUMMY-secret-" not in exc.read()
             policy = {"Version": "2012-10-17", "Statement": [
                 {"Effect": "Allow", "Action": "secretsmanager:GetSecretValue", "Resource": arn}]}
             control(endpoint, operator, "/_simulator/v1/iam/principals/secret-reader/policy", policy)
             participant = control(endpoint, operator, "/_simulator/v1/access", {"Principal": "secret-reader"})["AccessToken"]
-            limited = client(endpoint, participant)
+            limited = tracked_client(endpoint, participant)
             assert limited.get_secret_value(SecretId=name)["SecretString"] == "DUMMY-secret-team-a-A"
+            metadata_before_revoke = metadata(first.describe_secret(SecretId=arn))
+            control(endpoint, operator, "/_simulator/v1/iam/principals/secret-reader/policy", {
+                "Version": "2012-10-17", "Statement": [{"Effect": "Deny", "Action": "secretsmanager:*", "Resource": "*"}]})
+            error("AccessDeniedException", lambda: limited.get_secret_value(SecretId=name))
+            metadata_after_revoke = metadata(first.describe_secret(SecretId=arn))
+            assert {k:v for k,v in metadata_before_revoke.items() if k != "ResponseMetadata"} == {k:v for k,v in metadata_after_revoke.items() if k != "ResponseMetadata"}, "Revoked retrieval changed secret state"
+            control(endpoint, operator, "/_simulator/v1/iam/principals/secret-reader/policy", policy)
+            assert limited.get_secret_value(SecretId=name)["SecretString"] == "DUMMY-secret-team-a-A", "Restored IAM policy did not permit a clean retry"
             error("AccessDeniedException", lambda: limited.list_secrets())
             error("AccessDeniedException", lambda: limited.put_secret_value(
                 SecretId=name, ClientRequestToken=b, SecretString="DUMMY-secret-denied"))
@@ -114,7 +154,7 @@ def run():
             assert other.get_secret_value(SecretId=name)["SecretString"] == "DUMMY-secret-team-b"
             metadata(other.delete_secret(SecretId=other_created["ARN"], ForceDeleteWithoutRecovery=True))
         with running(db=state_a, authenticated=True) as (endpoint, operator):
-            first = client(endpoint, operator)
+            first = tracked_client(endpoint, operator)
             assert first.get_secret_value(SecretId=arn)["SecretString"] == "DUMMY-secret-team-a-A"
             assert first.get_secret_value(SecretId=arn, VersionId=b)["SecretString"] == "DUMMY-secret-team-a-B"
             page = metadata(first.list_secrets(MaxResults=1, SortOrder="asc", NextToken=cursor))
@@ -127,7 +167,7 @@ def run():
             metadata(first.delete_secret(SecretId=arn, ForceDeleteWithoutRecovery=True))
             assert first.get_secret_value(SecretId=replacement["ARN"])["SecretString"] == "DUMMY-secret-recreated"
             participant = control(endpoint, operator, "/_simulator/v1/access", {"Principal": "secret-reader"})["AccessToken"]
-            error("AccessDeniedException", lambda: client(endpoint, participant).get_secret_value(SecretId=name))
+            error("AccessDeniedException", lambda: tracked_client(endpoint, participant).get_secret_value(SecretId=name))
             error("ResourceNotFoundException", lambda: first.get_secret_value(SecretId=arn))
             metadata(first.delete_secret(SecretId=replacement["ARN"], ForceDeleteWithoutRecovery=True))
             metadata(first.delete_secret(SecretId=second["ARN"], ForceDeleteWithoutRecovery=True))
@@ -137,6 +177,10 @@ def run():
                 for table in ("aws_secrets", "aws_secret_versions", "aws_secret_stages"):
                     assert database.execute("SELECT count(*) FROM " + table).fetchone()[0] == 0
                 assert database.execute("SELECT count(*) FROM aws_secret_arns").fetchone()[0] == reservations
+    for sdk in tracked:
+        evidence = sdk._simulator_transport_evidence
+        assert evidence["sends"] > 0 and len(evidence["statuses"]) == evidence["sends"], "Transport oracle was empty or did not observe each actual SDK response"
+        sdk.close()
     print("Secrets Manager real SDK/7ops/2teams/IAM/restart/physical-ARN cleanup PASS")
 
 

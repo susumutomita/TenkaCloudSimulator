@@ -14,6 +14,17 @@ Five real SQLite ignored-write cases reproduced false acknowledgements on the
 prior source; exact affected-row checks now reject them, roll back every private
 table and permit a clean retry after the fault is removed.
 
+A subsequent source-only change rejects duplicate protocol/authority selector
+headers before first-value selection at either gateway or direct native adapter.
+New tests prepare signed-service/missing-target isolation, conflicting selectors,
+missing identity, canceled/real unavailable identity DB, full-state preservation
+and recovery; they have not run. The new canonical server fixture checks S3
+literal neighbors alongside native Secrets. The two-process SDK fixture now
+requires exact allocated-loopback origins and nonzero balanced transport events,
+checks missing/cross-token authentication and IAM revoke/restore. It too has not
+run on this combined source; the native sixteen-test result above is historical
+to `9a6629e`, not validation of these new header guards.
+
 The next local source checkpoint adds normal CLI server store initialization,
 seven-operation capabilities, a Secrets Manager navigation entry, shared-root
 OpenAPI examples, three mandatory E2E helper registrations, and the three finite
