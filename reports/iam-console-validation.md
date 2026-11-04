@@ -1,6 +1,6 @@
 # Local IAM-to-Lambda deployment increment
 
-Base main2b625ddf2a7fa3b8f8c044d0e5fdd3914794e473, branch fix/iam-lambda-console-20261104. No push, PR or merge was performed for this increment. Existing SDK-publication denial remains separate and has not been bypassed.
+Base main2b625ddf2a7fa3b8f8c044d0e5fdd3914794e473, branch fix/iam-lambda-console-20261104. The original local validation preceded publication. Renewed owner instructions subsequently permitted SDK PR34 creation and normal publication; this independent IAM increment is now Draft PR35. Exact-head CI/CodeQL and completed reviews remain required; no merge has been performed.
 
 ## Main diagnosis and usable workaround
 
