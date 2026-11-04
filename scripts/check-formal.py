@@ -64,3 +64,22 @@ with tempfile.TemporaryDirectory(prefix='tcsim-native-iam-') as directory:
   if success:assert result.returncode==0 and 'No error has been found' in text,text
   else:assert result.returncode!=0 and 'Invariant OwnershipExclusive is violated' in text,text
   print(name+': '+('invariants hold' if success else 'native role adoption mutation detected'))
+# One API, two deployment IDs, two handler configurations and one stage. A
+# mutable route edit/deletion must not change an existing deployment snapshot.
+# Concrete SQLite, native HTTP, Python and two-team checks remain independent.
+with tempfile.TemporaryDirectory(prefix='tcsim-rest-snapshots-') as directory:
+ root=Path(directory)
+ model=Path('formal/RESTDeploymentSnapshot.tla').read_text()
+ cfg=Path('formal/RESTDeploymentSnapshot.cfg').read_text()
+ original='/\\ UNCHANGED <<exists, snapshots, baseline, stage>>'
+ replacement="/\\ snapshots' = [d \\in Deployments |-> IF snapshots[d] = None THEN None ELSE v] /\\ UNCHANGED <<exists, baseline, stage>>"
+ assert model.count(original)==1
+ mutant=model.replace('MODULE RESTDeploymentSnapshot ', 'MODULE RESTDeploymentSnapshotMutant ').replace(original,replacement)
+ for name,source,success in [('RESTDeploymentSnapshot',model,True),('RESTDeploymentSnapshotMutant',mutant,False)]:
+  (root/(name+'.tla')).write_text(source);(root/(name+'.cfg')).write_text(cfg)
+  result=subprocess.run(['java','-cp',str(jar),'tlc2.TLC','-workers','1','-metadir',str(root/(name+'-states')),'-config',str(root/(name+'.cfg')),str(root/(name+'.tla'))],capture_output=True,text=True,timeout=60)
+  text=result.stdout+result.stderr
+  Path('reports/'+name+'.txt').write_text(text)
+  if success:assert result.returncode==0 and 'No error has been found' in text,text
+  else:assert result.returncode!=0 and 'Invariant SnapshotsFrozen is violated' in text,text
+  print(name+': '+('invariants hold' if success else 'mutable deployment snapshot mutation detected'))

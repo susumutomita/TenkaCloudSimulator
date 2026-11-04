@@ -3,7 +3,7 @@
   "info": {
     "title": "TenkaCloud Simulator API",
     "version": "0.1.0",
-    "description": "Independent local cloud simulator. AWS is the first provider, with documented S3, Systems Manager Parameter Store, Lambda, CloudFormation and IAM role subsets. No real infrastructure is created. This document describes only implemented operations. S3 wire APIs retain their XML formats; Native IAM roles use Query/XML; legacy identity control remains a separate JSON API. Native role ownership blocks legacy PUT/DELETE with HTTP409. Use unsigned requests or dummy TCSIM SDK credentials. Default principal simulator-admin has full sandbox access. IAM Query routing uses X-Simulator-Service: iam (or the dummy SDK signature scope), root POST and Version2010-05-08. Nine bounded role/inline-policy operations are implemented; no STS, managed policies, Conditions or non-root paths. Native Lambda roles must trust lambda.amazonaws.com. Legacy CFN/local identity roles retain their prior metadata-only trust semantics. For IAM exercises send x-simulator-principal. SQLite is ephemeral by default; --state persists it. See /_simulator/v1/capabilities for limits and deviations. Lambda supports a bounded Python 3.12 ZIP subset through the native REST paths below. Host Python is not required. A limited saved-role local SSM/S3 function SDK is supported; arbitrary network/HTTP and Function URLs remain unsupported. CloudFormation supports inline Python AWS::Lambda::Function with index.handler, existing local role, Ref/Arn and explicit DependsOn. Caller requires Lambda Create/DeleteFunction and iam:PassRole; tagged creation also requires lambda:TagResource. Only the declared saved-role SSM/S3 capability bridge is available, with no arbitrary network or managed-policy grants. Function SDK limits: S3 object body32KiB, native response48KiB before capability encoding, message64KiB,128calls and1MiB request/response aggregate. Oversized native SSM or S3 responses return EntityTooLarge without a partial successful result.",
+    "description": "Independent local cloud simulator. AWS is the first provider, with documented S3, Systems Manager Parameter Store, Lambda, CloudFormation and IAM role subsets. No real infrastructure is created. This document describes only implemented operations. S3 wire APIs retain their XML formats; Native IAM roles use Query/XML; legacy identity control remains a separate JSON API. Native role ownership blocks legacy PUT/DELETE with HTTP409. Use unsigned requests or dummy TCSIM SDK credentials. Default principal simulator-admin has full sandbox access. IAM Query routing uses X-Simulator-Service: iam (or the dummy SDK signature scope), root POST and Version2010-05-08. Nine bounded role/inline-policy operations are implemented; no STS, managed policies, Conditions or non-root paths. Native Lambda roles must trust lambda.amazonaws.com. Legacy CFN/local identity roles retain their prior metadata-only trust semantics. For IAM exercises send x-simulator-principal. SQLite is ephemeral by default; --state persists it. See /_simulator/v1/capabilities for limits and deviations. Lambda supports a bounded Python 3.12 ZIP subset through the native REST paths below. Host Python is not required. A limited saved-role local SSM/S3 function SDK is supported; arbitrary network/HTTP and Function URLs remain unsupported. CloudFormation supports inline Python AWS::Lambda::Function with index.handler, existing local role, Ref/Arn and explicit DependsOn. Caller requires Lambda Create/DeleteFunction and iam:PassRole; tagged creation also requires lambda:TagResource. Only the declared saved-role SSM/S3 capability bridge is available, with no arbitrary network or managed-policy grants. Function SDK limits: S3 object body32KiB, native response48KiB before capability encoding, message64KiB,128calls and1MiB request/response aggregate. Oversized native SSM or S3 responses return EntityTooLarge without a partial successful result. API Gateway REST APIs support an explicit REGIONAL/NONE/Lambda AWS_PROXY subset. Deployments freeze resources and integrations; stages refer to a deployment. No public endpoint or real AWS is created. Local invocation requires the host access token/session and a bounded Lambda apigateway.amazonaws.com resource permission with a matching local execute-api SourceArn. Responses are non-executing downloads, with protected cookie/navigation/CORS/CSP headers removed. Active browser app hosting, WAF, custom domains, authorizers, binary media, API keys, caching, stage editing and full WP grading remain unsupported.",
     "license": {
       "name": "MIT"
     }
@@ -62,7 +62,7 @@
       },
       "post": {
         "summary": "SSM JSON, CloudFormation Query, or IAM Query operation",
-        "description": "Native regional root endpoint. SSM: X-Amz-Target AmazonSSM.PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter. CloudFormation: CreateStack, DescribeStacks, DeleteStack; only S3 buckets, SSM parameters, inline Python Lambda functions and one inline IAM identity policy per role. Unsupported options fail. Real credentials and session tokens are rejected. Create/DeleteStack also require the caller to allow the underlying S3/SSM/IAM/Lambda actions; CAPABILITY_IAM grants no permissions. No service RoleArn or general CloudFormation lifecycle is supported. IAM is global: send X-Simulator-Service: iam, Version2010-05-08 and one of CreateRole/GetRole/ListRoles/DeleteRole/PutRolePolicy/GetRolePolicy/DeleteRolePolicy/ListRolePolicies/UpdateAssumeRolePolicy. Policy documents are JSON strings; successful IAM XML returns them RFC3986 URL-encoded. Native role names use the local alphanumeric/underscore/hyphen subset,1\u201364; inline policy names1\u2013128 AWS characters. Trust and aggregate policies32KiB, at most10 inline policies/100 statements,1000 active+retired name claims. Deleted role names cannot be adopted by legacy identity writes. No managed grants or session issuance.",
+        "description": "Native regional root endpoint. SSM: X-Amz-Target AmazonSSM.PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter. CloudFormation: CreateStack, DescribeStacks, DeleteStack; only S3 buckets, SSM parameters, inline Python Lambda functions and one inline IAM identity policy per role. Unsupported options fail. Real credentials and session tokens are rejected. Create/DeleteStack also require the caller to allow the underlying S3/SSM/IAM/Lambda actions; CAPABILITY_IAM grants no permissions. No service RoleArn or general CloudFormation lifecycle is supported. IAM is global: send X-Simulator-Service: iam, Version2010-05-08 and one of CreateRole/GetRole/ListRoles/DeleteRole/PutRolePolicy/GetRolePolicy/DeleteRolePolicy/ListRolePolicies/UpdateAssumeRolePolicy. Policy documents are JSON strings; successful IAM XML returns them RFC3986 URL-encoded. Native role names use the local alphanumeric/underscore/hyphen subset,1–64; inline policy names1–128 AWS characters. Trust and aggregate policies32KiB, at most10 inline policies/100 statements,1000 active+retired name claims. Deleted role names cannot be adopted by legacy identity writes. No managed grants or session issuance.",
         "operationId": "awsRegionalOperation",
         "parameters": [
           {
@@ -463,7 +463,7 @@
           {
             "name": "max-keys",
             "in": "query",
-            "description": "0\u20131000 entries per page.",
+            "description": "0–1000 entries per page.",
             "schema": {
               "type": "integer",
               "default": 1000
@@ -2319,6 +2319,2089 @@
           }
         }
       }
+    },
+    "/restapis": {
+      "post": {
+        "operationId": "CreateRestApi",
+        "summary": "Create Regional REST API",
+        "tags": [
+          "API Gateway REST APIs"
+        ],
+        "description": "Uses the same SQLite state as the Cloudscape console and native SDK. Requires local access authentication and apigateway:POST on the actual management ARN. Unsupported fields fail explicitly.",
+        "parameters": [
+          {
+            "name": "X-Simulator-Service",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "apigateway",
+              "enum": [
+                "apigateway"
+              ]
+            },
+            "description": "Select native API Gateway for unsigned requests; dummy SDK credential scope also routes it."
+          },
+          {
+            "name": "X-Simulator-Region",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "us-east-1",
+                "us-west-2",
+                "ap-northeast-1",
+                "eu-west-1"
+              ],
+              "default": "us-east-1"
+            }
+          },
+          {
+            "name": "X-Simulator-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Host-issued local access token. Browser sessions use their same-origin cookie."
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Native JSON response; list wire field is item, with optional position."
+          },
+          "400": {
+            "description": "Invalid or unsupported fields, region, body or pagination"
+          },
+          "401": {
+            "description": "Missing or invalid local access token"
+          },
+          "403": {
+            "description": "IAM management action denied"
+          },
+          "404": {
+            "description": "Regional resource not found"
+          },
+          "409": {
+            "description": "Resource already exists"
+          },
+          "501": {
+            "description": "Operation or option not implemented"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "default": "example-rest"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "endpointConfiguration": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "types": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "REGIONAL"
+                          ]
+                        },
+                        "default": [
+                          "REGIONAL"
+                        ],
+                        "minItems": 1,
+                        "maxItems": 1
+                      }
+                    },
+                    "required": [
+                      "types"
+                    ]
+                  },
+                  "tags": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "name",
+                  "endpointConfiguration"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "GetRestApis",
+        "summary": "List REST APIs",
+        "tags": [
+          "API Gateway REST APIs"
+        ],
+        "description": "Uses the same SQLite state as the Cloudscape console and native SDK. Requires local access authentication and apigateway:GET on the actual management ARN. Unsupported fields fail explicitly.",
+        "parameters": [
+          {
+            "name": "X-Simulator-Service",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "apigateway",
+              "enum": [
+                "apigateway"
+              ]
+            },
+            "description": "Select native API Gateway for unsigned requests; dummy SDK credential scope also routes it."
+          },
+          {
+            "name": "X-Simulator-Region",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "us-east-1",
+                "us-west-2",
+                "ap-northeast-1",
+                "eu-west-1"
+              ],
+              "default": "us-east-1"
+            }
+          },
+          {
+            "name": "X-Simulator-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Host-issued local access token. Browser sessions use their same-origin cookie."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 500,
+              "default": 25
+            }
+          },
+          {
+            "name": "position",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Use the position from the previous page."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Native JSON response; list wire field is item, with optional position."
+          },
+          "400": {
+            "description": "Invalid or unsupported fields, region, body or pagination"
+          },
+          "401": {
+            "description": "Missing or invalid local access token"
+          },
+          "403": {
+            "description": "IAM management action denied"
+          },
+          "404": {
+            "description": "Regional resource not found"
+          },
+          "409": {
+            "description": "Resource already exists"
+          },
+          "501": {
+            "description": "Operation or option not implemented"
+          }
+        }
+      }
+    },
+    "/restapis/{RestApiId}/resources": {
+      "get": {
+        "operationId": "GetResources",
+        "summary": "List API resources",
+        "tags": [
+          "API Gateway REST APIs"
+        ],
+        "description": "Uses the same SQLite state as the Cloudscape console and native SDK. Requires local access authentication and apigateway:GET on the actual management ARN. Unsupported fields fail explicitly.",
+        "parameters": [
+          {
+            "name": "X-Simulator-Service",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "apigateway",
+              "enum": [
+                "apigateway"
+              ]
+            },
+            "description": "Select native API Gateway for unsigned requests; dummy SDK credential scope also routes it."
+          },
+          {
+            "name": "X-Simulator-Region",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "us-east-1",
+                "us-west-2",
+                "ap-northeast-1",
+                "eu-west-1"
+              ],
+              "default": "us-east-1"
+            }
+          },
+          {
+            "name": "X-Simulator-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Host-issued local access token. Browser sessions use their same-origin cookie."
+          },
+          {
+            "name": "RestApiId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Actual local RestApiId"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 500,
+              "default": 25
+            }
+          },
+          {
+            "name": "position",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Use the position from the previous page."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Native JSON response; list wire field is item, with optional position."
+          },
+          "400": {
+            "description": "Invalid or unsupported fields, region, body or pagination"
+          },
+          "401": {
+            "description": "Missing or invalid local access token"
+          },
+          "403": {
+            "description": "IAM management action denied"
+          },
+          "404": {
+            "description": "Regional resource not found"
+          },
+          "409": {
+            "description": "Resource already exists"
+          },
+          "501": {
+            "description": "Operation or option not implemented"
+          }
+        }
+      }
+    },
+    "/restapis/{RestApiId}": {
+      "get": {
+        "operationId": "GetRestApi",
+        "summary": "Read REST API",
+        "tags": [
+          "API Gateway REST APIs"
+        ],
+        "description": "Uses the same SQLite state as the Cloudscape console and native SDK. Requires local access authentication and apigateway:GET on the actual management ARN. Unsupported fields fail explicitly.",
+        "parameters": [
+          {
+            "name": "X-Simulator-Service",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "apigateway",
+              "enum": [
+                "apigateway"
+              ]
+            },
+            "description": "Select native API Gateway for unsigned requests; dummy SDK credential scope also routes it."
+          },
+          {
+            "name": "X-Simulator-Region",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "us-east-1",
+                "us-west-2",
+                "ap-northeast-1",
+                "eu-west-1"
+              ],
+              "default": "us-east-1"
+            }
+          },
+          {
+            "name": "X-Simulator-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Host-issued local access token. Browser sessions use their same-origin cookie."
+          },
+          {
+            "name": "RestApiId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Actual local RestApiId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Native JSON response; list wire field is item, with optional position."
+          },
+          "400": {
+            "description": "Invalid or unsupported fields, region, body or pagination"
+          },
+          "401": {
+            "description": "Missing or invalid local access token"
+          },
+          "403": {
+            "description": "IAM management action denied"
+          },
+          "404": {
+            "description": "Regional resource not found"
+          },
+          "409": {
+            "description": "Resource already exists"
+          },
+          "501": {
+            "description": "Operation or option not implemented"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "DeleteRestApi",
+        "summary": "Delete API and its deployments/stages/resources",
+        "tags": [
+          "API Gateway REST APIs"
+        ],
+        "description": "Uses the same SQLite state as the Cloudscape console and native SDK. Requires local access authentication and apigateway:DELETE on the actual management ARN. Unsupported fields fail explicitly.",
+        "parameters": [
+          {
+            "name": "X-Simulator-Service",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "apigateway",
+              "enum": [
+                "apigateway"
+              ]
+            },
+            "description": "Select native API Gateway for unsigned requests; dummy SDK credential scope also routes it."
+          },
+          {
+            "name": "X-Simulator-Region",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "us-east-1",
+                "us-west-2",
+                "ap-northeast-1",
+                "eu-west-1"
+              ],
+              "default": "us-east-1"
+            }
+          },
+          {
+            "name": "X-Simulator-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Host-issued local access token. Browser sessions use their same-origin cookie."
+          },
+          {
+            "name": "RestApiId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Actual local RestApiId"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Native JSON response; list wire field is item, with optional position."
+          },
+          "400": {
+            "description": "Invalid or unsupported fields, region, body or pagination"
+          },
+          "401": {
+            "description": "Missing or invalid local access token"
+          },
+          "403": {
+            "description": "IAM management action denied"
+          },
+          "404": {
+            "description": "Regional resource not found"
+          },
+          "409": {
+            "description": "Resource already exists"
+          },
+          "501": {
+            "description": "Operation or option not implemented"
+          }
+        }
+      }
+    },
+    "/restapis/{RestApiId}/resources/{ResourceId}": {
+      "post": {
+        "operationId": "CreateResource",
+        "summary": "Create child resource",
+        "tags": [
+          "API Gateway REST APIs"
+        ],
+        "description": "Uses the same SQLite state as the Cloudscape console and native SDK. Requires local access authentication and apigateway:POST on the actual management ARN. Unsupported fields fail explicitly.",
+        "parameters": [
+          {
+            "name": "X-Simulator-Service",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "apigateway",
+              "enum": [
+                "apigateway"
+              ]
+            },
+            "description": "Select native API Gateway for unsigned requests; dummy SDK credential scope also routes it."
+          },
+          {
+            "name": "X-Simulator-Region",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "us-east-1",
+                "us-west-2",
+                "ap-northeast-1",
+                "eu-west-1"
+              ],
+              "default": "us-east-1"
+            }
+          },
+          {
+            "name": "X-Simulator-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Host-issued local access token. Browser sessions use their same-origin cookie."
+          },
+          {
+            "name": "RestApiId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Actual local RestApiId"
+          },
+          {
+            "name": "ResourceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Actual local ResourceId"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Native JSON response; list wire field is item, with optional position."
+          },
+          "400": {
+            "description": "Invalid or unsupported fields, region, body or pagination"
+          },
+          "401": {
+            "description": "Missing or invalid local access token"
+          },
+          "403": {
+            "description": "IAM management action denied"
+          },
+          "404": {
+            "description": "Regional resource not found"
+          },
+          "409": {
+            "description": "Resource already exists"
+          },
+          "501": {
+            "description": "Operation or option not implemented"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "pathPart": {
+                    "type": "string",
+                    "default": "{proxy+}"
+                  }
+                },
+                "required": [
+                  "pathPart"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "GetResource",
+        "summary": "Read resource and methods",
+        "tags": [
+          "API Gateway REST APIs"
+        ],
+        "description": "Uses the same SQLite state as the Cloudscape console and native SDK. Requires local access authentication and apigateway:GET on the actual management ARN. Unsupported fields fail explicitly.",
+        "parameters": [
+          {
+            "name": "X-Simulator-Service",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "apigateway",
+              "enum": [
+                "apigateway"
+              ]
+            },
+            "description": "Select native API Gateway for unsigned requests; dummy SDK credential scope also routes it."
+          },
+          {
+            "name": "X-Simulator-Region",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "us-east-1",
+                "us-west-2",
+                "ap-northeast-1",
+                "eu-west-1"
+              ],
+              "default": "us-east-1"
+            }
+          },
+          {
+            "name": "X-Simulator-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Host-issued local access token. Browser sessions use their same-origin cookie."
+          },
+          {
+            "name": "RestApiId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Actual local RestApiId"
+          },
+          {
+            "name": "ResourceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Actual local ResourceId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Native JSON response; list wire field is item, with optional position."
+          },
+          "400": {
+            "description": "Invalid or unsupported fields, region, body or pagination"
+          },
+          "401": {
+            "description": "Missing or invalid local access token"
+          },
+          "403": {
+            "description": "IAM management action denied"
+          },
+          "404": {
+            "description": "Regional resource not found"
+          },
+          "409": {
+            "description": "Resource already exists"
+          },
+          "501": {
+            "description": "Operation or option not implemented"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "DeleteResource",
+        "summary": "Delete mutable resource subtree",
+        "tags": [
+          "API Gateway REST APIs"
+        ],
+        "description": "The root cannot be removed. Existing deployment snapshots remain unchanged; remove the API to remove its deployed snapshots.",
+        "parameters": [
+          {
+            "name": "X-Simulator-Service",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "apigateway",
+              "enum": [
+                "apigateway"
+              ]
+            },
+            "description": "Select native API Gateway for unsigned requests; dummy SDK credential scope also routes it."
+          },
+          {
+            "name": "X-Simulator-Region",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "us-east-1",
+                "us-west-2",
+                "ap-northeast-1",
+                "eu-west-1"
+              ],
+              "default": "us-east-1"
+            }
+          },
+          {
+            "name": "X-Simulator-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Host-issued local access token. Browser sessions use their same-origin cookie."
+          },
+          {
+            "name": "RestApiId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Actual local RestApiId"
+          },
+          {
+            "name": "ResourceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Actual local ResourceId"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Native JSON response; list wire field is item, with optional position."
+          },
+          "400": {
+            "description": "Invalid or unsupported fields, region, body or pagination"
+          },
+          "401": {
+            "description": "Missing or invalid local access token"
+          },
+          "403": {
+            "description": "IAM management action denied"
+          },
+          "404": {
+            "description": "Regional resource not found"
+          },
+          "409": {
+            "description": "Resource already exists"
+          },
+          "501": {
+            "description": "Operation or option not implemented"
+          }
+        }
+      }
+    },
+    "/restapis/{RestApiId}/resources/{ResourceId}/methods/{HttpMethod}": {
+      "put": {
+        "operationId": "PutMethod",
+        "summary": "Create NONE method",
+        "tags": [
+          "API Gateway REST APIs"
+        ],
+        "description": "Uses the same SQLite state as the Cloudscape console and native SDK. Requires local access authentication and apigateway:PUT on the actual management ARN. Unsupported fields fail explicitly.",
+        "parameters": [
+          {
+            "name": "X-Simulator-Service",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "apigateway",
+              "enum": [
+                "apigateway"
+              ]
+            },
+            "description": "Select native API Gateway for unsigned requests; dummy SDK credential scope also routes it."
+          },
+          {
+            "name": "X-Simulator-Region",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "us-east-1",
+                "us-west-2",
+                "ap-northeast-1",
+                "eu-west-1"
+              ],
+              "default": "us-east-1"
+            }
+          },
+          {
+            "name": "X-Simulator-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Host-issued local access token. Browser sessions use their same-origin cookie."
+          },
+          {
+            "name": "RestApiId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Actual local RestApiId"
+          },
+          {
+            "name": "ResourceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Actual local ResourceId"
+          },
+          {
+            "name": "HttpMethod",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Actual local HttpMethod"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Native JSON response; list wire field is item, with optional position."
+          },
+          "400": {
+            "description": "Invalid or unsupported fields, region, body or pagination"
+          },
+          "401": {
+            "description": "Missing or invalid local access token"
+          },
+          "403": {
+            "description": "IAM management action denied"
+          },
+          "404": {
+            "description": "Regional resource not found"
+          },
+          "409": {
+            "description": "Resource already exists"
+          },
+          "501": {
+            "description": "Operation or option not implemented"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "authorizationType": {
+                    "type": "string",
+                    "default": "NONE",
+                    "enum": [
+                      "NONE"
+                    ]
+                  },
+                  "apiKeyRequired": {
+                    "type": "boolean",
+                    "default": false
+                  },
+                  "requestParameters": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "boolean"
+                    },
+                    "description": "Only method.request.path.proxy=true on a {proxy+} resource."
+                  }
+                },
+                "required": [
+                  "authorizationType"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "GetMethod",
+        "summary": "Read method and integration",
+        "tags": [
+          "API Gateway REST APIs"
+        ],
+        "description": "Uses the same SQLite state as the Cloudscape console and native SDK. Requires local access authentication and apigateway:GET on the actual management ARN. Unsupported fields fail explicitly.",
+        "parameters": [
+          {
+            "name": "X-Simulator-Service",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "apigateway",
+              "enum": [
+                "apigateway"
+              ]
+            },
+            "description": "Select native API Gateway for unsigned requests; dummy SDK credential scope also routes it."
+          },
+          {
+            "name": "X-Simulator-Region",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "us-east-1",
+                "us-west-2",
+                "ap-northeast-1",
+                "eu-west-1"
+              ],
+              "default": "us-east-1"
+            }
+          },
+          {
+            "name": "X-Simulator-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Host-issued local access token. Browser sessions use their same-origin cookie."
+          },
+          {
+            "name": "RestApiId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Actual local RestApiId"
+          },
+          {
+            "name": "ResourceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Actual local ResourceId"
+          },
+          {
+            "name": "HttpMethod",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Actual local HttpMethod"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Native JSON response; list wire field is item, with optional position."
+          },
+          "400": {
+            "description": "Invalid or unsupported fields, region, body or pagination"
+          },
+          "401": {
+            "description": "Missing or invalid local access token"
+          },
+          "403": {
+            "description": "IAM management action denied"
+          },
+          "404": {
+            "description": "Regional resource not found"
+          },
+          "409": {
+            "description": "Resource already exists"
+          },
+          "501": {
+            "description": "Operation or option not implemented"
+          }
+        }
+      }
+    },
+    "/restapis/{RestApiId}/resources/{ResourceId}/methods/{HttpMethod}/integration": {
+      "put": {
+        "operationId": "PutIntegration",
+        "summary": "Set local Lambda proxy integration",
+        "tags": [
+          "API Gateway REST APIs"
+        ],
+        "description": "The integration URI must target an unqualified local-account function in the same region. No arbitrary HTTP endpoint, VPC link, credentials or mapping template is accepted. Changing mutable integration state does not update a previously created deployment.",
+        "parameters": [
+          {
+            "name": "X-Simulator-Service",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "apigateway",
+              "enum": [
+                "apigateway"
+              ]
+            },
+            "description": "Select native API Gateway for unsigned requests; dummy SDK credential scope also routes it."
+          },
+          {
+            "name": "X-Simulator-Region",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "us-east-1",
+                "us-west-2",
+                "ap-northeast-1",
+                "eu-west-1"
+              ],
+              "default": "us-east-1"
+            }
+          },
+          {
+            "name": "X-Simulator-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Host-issued local access token. Browser sessions use their same-origin cookie."
+          },
+          {
+            "name": "RestApiId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Actual local RestApiId"
+          },
+          {
+            "name": "ResourceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Actual local ResourceId"
+          },
+          {
+            "name": "HttpMethod",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Actual local HttpMethod"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Native JSON response; list wire field is item, with optional position."
+          },
+          "400": {
+            "description": "Invalid or unsupported fields, region, body or pagination"
+          },
+          "401": {
+            "description": "Missing or invalid local access token"
+          },
+          "403": {
+            "description": "IAM management action denied"
+          },
+          "404": {
+            "description": "Regional resource not found"
+          },
+          "409": {
+            "description": "Resource already exists"
+          },
+          "501": {
+            "description": "Operation or option not implemented"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "default": "AWS_PROXY",
+                    "enum": [
+                      "AWS_PROXY"
+                    ]
+                  },
+                  "httpMethod": {
+                    "type": "string",
+                    "default": "POST",
+                    "enum": [
+                      "POST"
+                    ]
+                  },
+                  "uri": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "type",
+                  "httpMethod",
+                  "uri"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/restapis/{RestApiId}/deployments": {
+      "post": {
+        "operationId": "CreateDeployment",
+        "summary": "Freeze integrated API deployment",
+        "tags": [
+          "API Gateway REST APIs"
+        ],
+        "description": "All methods must have local Lambda integrations. This bounded operation does not create a stage implicitly: call CreateStage next. An empty or incompletely integrated API fails.",
+        "parameters": [
+          {
+            "name": "X-Simulator-Service",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "apigateway",
+              "enum": [
+                "apigateway"
+              ]
+            },
+            "description": "Select native API Gateway for unsigned requests; dummy SDK credential scope also routes it."
+          },
+          {
+            "name": "X-Simulator-Region",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "us-east-1",
+                "us-west-2",
+                "ap-northeast-1",
+                "eu-west-1"
+              ],
+              "default": "us-east-1"
+            }
+          },
+          {
+            "name": "X-Simulator-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Host-issued local access token. Browser sessions use their same-origin cookie."
+          },
+          {
+            "name": "RestApiId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Actual local RestApiId"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Native JSON response; list wire field is item, with optional position."
+          },
+          "400": {
+            "description": "Invalid or unsupported fields, region, body or pagination"
+          },
+          "401": {
+            "description": "Missing or invalid local access token"
+          },
+          "403": {
+            "description": "IAM management action denied"
+          },
+          "404": {
+            "description": "Regional resource not found"
+          },
+          "409": {
+            "description": "Resource already exists"
+          },
+          "501": {
+            "description": "Operation or option not implemented"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "description": {
+                    "type": "string"
+                  }
+                },
+                "required": []
+              }
+            }
+          }
+        }
+      }
+    },
+    "/restapis/{RestApiId}/deployments/{DeploymentId}": {
+      "get": {
+        "operationId": "GetDeployment",
+        "summary": "Read frozen deployment metadata",
+        "tags": [
+          "API Gateway REST APIs"
+        ],
+        "description": "Uses the same SQLite state as the Cloudscape console and native SDK. Requires local access authentication and apigateway:GET on the actual management ARN. Unsupported fields fail explicitly.",
+        "parameters": [
+          {
+            "name": "X-Simulator-Service",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "apigateway",
+              "enum": [
+                "apigateway"
+              ]
+            },
+            "description": "Select native API Gateway for unsigned requests; dummy SDK credential scope also routes it."
+          },
+          {
+            "name": "X-Simulator-Region",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "us-east-1",
+                "us-west-2",
+                "ap-northeast-1",
+                "eu-west-1"
+              ],
+              "default": "us-east-1"
+            }
+          },
+          {
+            "name": "X-Simulator-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Host-issued local access token. Browser sessions use their same-origin cookie."
+          },
+          {
+            "name": "RestApiId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Actual local RestApiId"
+          },
+          {
+            "name": "DeploymentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Actual local DeploymentId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Native JSON response; list wire field is item, with optional position."
+          },
+          "400": {
+            "description": "Invalid or unsupported fields, region, body or pagination"
+          },
+          "401": {
+            "description": "Missing or invalid local access token"
+          },
+          "403": {
+            "description": "IAM management action denied"
+          },
+          "404": {
+            "description": "Regional resource not found"
+          },
+          "409": {
+            "description": "Resource already exists"
+          },
+          "501": {
+            "description": "Operation or option not implemented"
+          }
+        }
+      }
+    },
+    "/restapis/{RestApiId}/stages": {
+      "post": {
+        "operationId": "CreateStage",
+        "summary": "Bind new stage to frozen deployment",
+        "tags": [
+          "API Gateway REST APIs"
+        ],
+        "description": "Uses the same SQLite state as the Cloudscape console and native SDK. Requires local access authentication and apigateway:POST on the actual management ARN. Unsupported fields fail explicitly.",
+        "parameters": [
+          {
+            "name": "X-Simulator-Service",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "apigateway",
+              "enum": [
+                "apigateway"
+              ]
+            },
+            "description": "Select native API Gateway for unsigned requests; dummy SDK credential scope also routes it."
+          },
+          {
+            "name": "X-Simulator-Region",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "us-east-1",
+                "us-west-2",
+                "ap-northeast-1",
+                "eu-west-1"
+              ],
+              "default": "us-east-1"
+            }
+          },
+          {
+            "name": "X-Simulator-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Host-issued local access token. Browser sessions use their same-origin cookie."
+          },
+          {
+            "name": "RestApiId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Actual local RestApiId"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Native JSON response; list wire field is item, with optional position."
+          },
+          "400": {
+            "description": "Invalid or unsupported fields, region, body or pagination"
+          },
+          "401": {
+            "description": "Missing or invalid local access token"
+          },
+          "403": {
+            "description": "IAM management action denied"
+          },
+          "404": {
+            "description": "Regional resource not found"
+          },
+          "409": {
+            "description": "Resource already exists"
+          },
+          "501": {
+            "description": "Operation or option not implemented"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "stageName": {
+                    "type": "string",
+                    "default": "prod"
+                  },
+                  "deploymentId": {
+                    "type": "string"
+                  },
+                  "variables": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "stageName",
+                  "deploymentId"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/restapis/{RestApiId}/stages/{StageName}": {
+      "get": {
+        "operationId": "GetStage",
+        "summary": "Read stage",
+        "tags": [
+          "API Gateway REST APIs"
+        ],
+        "description": "Uses the same SQLite state as the Cloudscape console and native SDK. Requires local access authentication and apigateway:GET on the actual management ARN. Unsupported fields fail explicitly.",
+        "parameters": [
+          {
+            "name": "X-Simulator-Service",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "apigateway",
+              "enum": [
+                "apigateway"
+              ]
+            },
+            "description": "Select native API Gateway for unsigned requests; dummy SDK credential scope also routes it."
+          },
+          {
+            "name": "X-Simulator-Region",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "us-east-1",
+                "us-west-2",
+                "ap-northeast-1",
+                "eu-west-1"
+              ],
+              "default": "us-east-1"
+            }
+          },
+          {
+            "name": "X-Simulator-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Host-issued local access token. Browser sessions use their same-origin cookie."
+          },
+          {
+            "name": "RestApiId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Actual local RestApiId"
+          },
+          {
+            "name": "StageName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Actual local StageName"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Native JSON response; list wire field is item, with optional position."
+          },
+          "400": {
+            "description": "Invalid or unsupported fields, region, body or pagination"
+          },
+          "401": {
+            "description": "Missing or invalid local access token"
+          },
+          "403": {
+            "description": "IAM management action denied"
+          },
+          "404": {
+            "description": "Regional resource not found"
+          },
+          "409": {
+            "description": "Resource already exists"
+          },
+          "501": {
+            "description": "Operation or option not implemented"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "DeleteStage",
+        "summary": "Delete stage",
+        "tags": [
+          "API Gateway REST APIs"
+        ],
+        "description": "Uses the same SQLite state as the Cloudscape console and native SDK. Requires local access authentication and apigateway:DELETE on the actual management ARN. Unsupported fields fail explicitly.",
+        "parameters": [
+          {
+            "name": "X-Simulator-Service",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "apigateway",
+              "enum": [
+                "apigateway"
+              ]
+            },
+            "description": "Select native API Gateway for unsigned requests; dummy SDK credential scope also routes it."
+          },
+          {
+            "name": "X-Simulator-Region",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "us-east-1",
+                "us-west-2",
+                "ap-northeast-1",
+                "eu-west-1"
+              ],
+              "default": "us-east-1"
+            }
+          },
+          {
+            "name": "X-Simulator-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Host-issued local access token. Browser sessions use their same-origin cookie."
+          },
+          {
+            "name": "RestApiId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Actual local RestApiId"
+          },
+          {
+            "name": "StageName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Actual local StageName"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Native JSON response; list wire field is item, with optional position."
+          },
+          "400": {
+            "description": "Invalid or unsupported fields, region, body or pagination"
+          },
+          "401": {
+            "description": "Missing or invalid local access token"
+          },
+          "403": {
+            "description": "IAM management action denied"
+          },
+          "404": {
+            "description": "Regional resource not found"
+          },
+          "409": {
+            "description": "Resource already exists"
+          },
+          "501": {
+            "description": "Operation or option not implemented"
+          }
+        }
+      }
+    },
+    "/_simulator/providers/aws/_execute-api/{Region}/{RestApiId}/{StageName}/{ProxyPath}": {
+      "get": {
+        "operationId": "InvokeLocalRESTProxyGet",
+        "summary": "Invoke deployed local Lambda proxy",
+        "tags": [
+          "API Gateway REST APIs"
+        ],
+        "description": "Local simulator-only transport, not an AWS public URL. No IAM management grant is added by this call. The deployed NONE method still requires local host token/session authentication and the function resource policy must grant this exact service SourceArn. Lambda runs with its saved execution role. UTF-8 body/event/output maximum256KiB, integration deadline29seconds. Response status/body are preserved, but data is forced to application/octet-stream attachment with restrictive CSP; Set-Cookie, Location, CORS and simulator authority headers are removed. Browser application hosting remains unavailable.",
+        "parameters": [
+          {
+            "name": "X-Simulator-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Host-issued local access token. Browser sessions use their same-origin cookie."
+          },
+          {
+            "name": "Region",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Actual local Region"
+          },
+          {
+            "name": "RestApiId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Actual local RestApiId"
+          },
+          {
+            "name": "StageName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Actual local StageName"
+          },
+          {
+            "name": "ProxyPath",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Actual local ProxyPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Native JSON response; list wire field is item, with optional position."
+          },
+          "400": {
+            "description": "Invalid or unsupported fields, region, body or pagination"
+          },
+          "401": {
+            "description": "Missing or invalid local access token"
+          },
+          "403": {
+            "description": "IAM management action denied"
+          },
+          "404": {
+            "description": "Regional resource not found"
+          },
+          "409": {
+            "description": "Resource already exists"
+          },
+          "501": {
+            "description": "Operation or option not implemented"
+          },
+          "502": {
+            "description": "Missing/revoked SourceArn permission, missing target, invalid role trust, guest error/deadline or malformed/binary proxy response. Internal details are not exposed."
+          }
+        }
+      },
+      "post": {
+        "operationId": "InvokeLocalRESTProxyPost",
+        "summary": "Invoke deployed local Lambda proxy",
+        "tags": [
+          "API Gateway REST APIs"
+        ],
+        "description": "Local simulator-only transport, not an AWS public URL. No IAM management grant is added by this call. The deployed NONE method still requires local host token/session authentication and the function resource policy must grant this exact service SourceArn. Lambda runs with its saved execution role. UTF-8 body/event/output maximum256KiB, integration deadline29seconds. Response status/body are preserved, but data is forced to application/octet-stream attachment with restrictive CSP; Set-Cookie, Location, CORS and simulator authority headers are removed. Browser application hosting remains unavailable.",
+        "parameters": [
+          {
+            "name": "X-Simulator-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Host-issued local access token. Browser sessions use their same-origin cookie."
+          },
+          {
+            "name": "Region",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Actual local Region"
+          },
+          {
+            "name": "RestApiId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Actual local RestApiId"
+          },
+          {
+            "name": "StageName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Actual local StageName"
+          },
+          {
+            "name": "ProxyPath",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Actual local ProxyPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Native JSON response; list wire field is item, with optional position."
+          },
+          "400": {
+            "description": "Invalid or unsupported fields, region, body or pagination"
+          },
+          "401": {
+            "description": "Missing or invalid local access token"
+          },
+          "403": {
+            "description": "IAM management action denied"
+          },
+          "404": {
+            "description": "Regional resource not found"
+          },
+          "409": {
+            "description": "Resource already exists"
+          },
+          "501": {
+            "description": "Operation or option not implemented"
+          },
+          "502": {
+            "description": "Missing/revoked SourceArn permission, missing target, invalid role trust, guest error/deadline or malformed/binary proxy response. Internal details are not exposed."
+          }
+        },
+        "requestBody": {
+          "required": false,
+          "content": {
+            "text/plain": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/2015-03-31/functions/{FunctionName}/policy": {
+      "post": {
+        "operationId": "AddPermission",
+        "summary": "AddPermission",
+        "tags": [
+          "Lambda Python functions"
+        ],
+        "description": "Bounded native Lambda service resource policy: only apigateway.amazonaws.com, lambda:InvokeFunction and a SourceArn fixed to one local regional API ID. No public/cross-account grants, qualifiers, Function URLs or other service principals. IAM lambda:AddPermission on the function ARN is enforced. Deleting the function removes its policy; recreating the name cannot inherit grants.",
+        "parameters": [
+          {
+            "name": "X-Simulator-Service",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "lambda",
+              "enum": [
+                "lambda"
+              ]
+            },
+            "description": "Select native API Gateway for unsigned requests; dummy SDK credential scope also routes it."
+          },
+          {
+            "name": "X-Simulator-Region",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "us-east-1",
+                "us-west-2",
+                "ap-northeast-1",
+                "eu-west-1"
+              ],
+              "default": "us-east-1"
+            }
+          },
+          {
+            "name": "X-Simulator-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Host-issued local access token. Browser sessions use their same-origin cookie."
+          },
+          {
+            "name": "FunctionName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Actual local FunctionName"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Native JSON response; list wire field is item, with optional position."
+          },
+          "400": {
+            "description": "Invalid or unsupported fields, region, body or pagination"
+          },
+          "401": {
+            "description": "Missing or invalid local access token"
+          },
+          "403": {
+            "description": "IAM management action denied"
+          },
+          "404": {
+            "description": "Regional resource not found"
+          },
+          "409": {
+            "description": "Resource already exists"
+          },
+          "501": {
+            "description": "Operation or option not implemented"
+          },
+          "412": {
+            "description": "Resource-policy revision changed"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "StatementId",
+                  "Principal",
+                  "Action",
+                  "SourceArn"
+                ],
+                "properties": {
+                  "StatementId": {
+                    "type": "string",
+                    "default": "allow-local-api"
+                  },
+                  "Principal": {
+                    "type": "string",
+                    "default": "apigateway.amazonaws.com",
+                    "enum": [
+                      "apigateway.amazonaws.com"
+                    ]
+                  },
+                  "Action": {
+                    "type": "string",
+                    "default": "lambda:InvokeFunction",
+                    "enum": [
+                      "lambda:InvokeFunction"
+                    ]
+                  },
+                  "SourceArn": {
+                    "type": "string"
+                  },
+                  "RevisionId": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "GetPolicy",
+        "summary": "GetPolicy",
+        "tags": [
+          "Lambda Python functions"
+        ],
+        "description": "Bounded native Lambda service resource policy: only apigateway.amazonaws.com, lambda:InvokeFunction and a SourceArn fixed to one local regional API ID. No public/cross-account grants, qualifiers, Function URLs or other service principals. IAM lambda:GetPolicy on the function ARN is enforced. Deleting the function removes its policy; recreating the name cannot inherit grants.",
+        "parameters": [
+          {
+            "name": "X-Simulator-Service",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "lambda",
+              "enum": [
+                "lambda"
+              ]
+            },
+            "description": "Select native API Gateway for unsigned requests; dummy SDK credential scope also routes it."
+          },
+          {
+            "name": "X-Simulator-Region",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "us-east-1",
+                "us-west-2",
+                "ap-northeast-1",
+                "eu-west-1"
+              ],
+              "default": "us-east-1"
+            }
+          },
+          {
+            "name": "X-Simulator-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Host-issued local access token. Browser sessions use their same-origin cookie."
+          },
+          {
+            "name": "FunctionName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Actual local FunctionName"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Native JSON response; list wire field is item, with optional position."
+          },
+          "400": {
+            "description": "Invalid or unsupported fields, region, body or pagination"
+          },
+          "401": {
+            "description": "Missing or invalid local access token"
+          },
+          "403": {
+            "description": "IAM management action denied"
+          },
+          "404": {
+            "description": "Regional resource not found"
+          },
+          "409": {
+            "description": "Resource already exists"
+          },
+          "501": {
+            "description": "Operation or option not implemented"
+          },
+          "412": {
+            "description": "Resource-policy revision changed"
+          }
+        }
+      }
+    },
+    "/2015-03-31/functions/{FunctionName}/policy/{StatementId}": {
+      "delete": {
+        "operationId": "RemovePermission",
+        "summary": "RemovePermission",
+        "tags": [
+          "Lambda Python functions"
+        ],
+        "description": "Bounded native Lambda service resource policy: only apigateway.amazonaws.com, lambda:InvokeFunction and a SourceArn fixed to one local regional API ID. No public/cross-account grants, qualifiers, Function URLs or other service principals. IAM lambda:RemovePermission on the function ARN is enforced. Deleting the function removes its policy; recreating the name cannot inherit grants.",
+        "parameters": [
+          {
+            "name": "X-Simulator-Service",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "lambda",
+              "enum": [
+                "lambda"
+              ]
+            },
+            "description": "Select native API Gateway for unsigned requests; dummy SDK credential scope also routes it."
+          },
+          {
+            "name": "X-Simulator-Region",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "us-east-1",
+                "us-west-2",
+                "ap-northeast-1",
+                "eu-west-1"
+              ],
+              "default": "us-east-1"
+            }
+          },
+          {
+            "name": "X-Simulator-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Host-issued local access token. Browser sessions use their same-origin cookie."
+          },
+          {
+            "name": "FunctionName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Actual local FunctionName"
+          },
+          {
+            "name": "StatementId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Actual local StatementId"
+          },
+          {
+            "name": "RevisionId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional current resource-policy revision from GetPolicy; a stale revision returns412."
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Native JSON response; list wire field is item, with optional position."
+          },
+          "400": {
+            "description": "Invalid or unsupported fields, region, body or pagination"
+          },
+          "401": {
+            "description": "Missing or invalid local access token"
+          },
+          "403": {
+            "description": "IAM management action denied"
+          },
+          "404": {
+            "description": "Regional resource not found"
+          },
+          "409": {
+            "description": "Resource already exists"
+          },
+          "501": {
+            "description": "Operation or option not implemented"
+          },
+          "412": {
+            "description": "Resource-policy revision changed"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2395,6 +4478,10 @@
     {
       "name": "IAM roles",
       "description": "Native global roles, service trust, inline permissions and explicit limits. Same SQLite state as the console and SDK."
+    },
+    {
+      "name": "API Gateway REST APIs",
+      "description": "Actual native REST management plus authenticated local in-process Lambda proxy invocation. Original AWS JSON wire list field item maps to SDK items. See docs/apigateway.md for limits and non-executing download behavior."
     }
   ]
 }

@@ -19,13 +19,14 @@ Go 1.26が必要（CIは1.26.10）。コンソールは <http://127.0.0.1:4566/_
 | IAM | 9 role/inline-policy Query操作、Lambda service trust、Cloudscape作成Wizard | root path/限定service principal、managed policies/STSなし。[詳細](docs/iam.md) |
 | Systems Manager Parameter Store | PutParameter/GetParameter/GetParameters/GetParametersByPath/DescribeParameters/DeleteParameter | StandardのString/StringList/textのみ。SecureString/KMS/labelsなし |
 | CloudFormation | CreateStack/DescribeStacks/DeleteStack | S3 Bucket、SSM Parameter、inline Python Lambda Function、1 inline identity policy付きIAM Role。Ref/Sub/GetAttの限定評価。その他は明示エラー |
-| Lambda | CreateFunction/ListFunctions/GetFunctionConfiguration/UpdateFunctionCode/Invoke/DeleteFunction | 埋込CPython 3.12.16/WASIでPythonコードを実行。128 MiB/1–30秒、同期のみ。限定inline CFNに対応。関数内SSM/S3 SDKは限定対応。network・Function URLは未対応 |
+| API Gateway | Regional REST管理16操作、NONE/Lambda proxy、immutable deployment/stage、ローカルHTTP実行 | 同一region/accountのLambda SourceArn grantが必須。応答は非実行download。WAF/CFN/v2/authorizer/既存stage編集なし。[詳細](docs/apigateway.md) |
+| Lambda | CreateFunction/ListFunctions/GetFunctionConfiguration/UpdateFunctionCode/Invoke/DeleteFunction、Add/Get/RemovePermission | 埋込CPython 3.12.16/WASIでPythonコードを実行。128 MiB/1–30秒、同期のみ。限定inline CFNに対応。関数内SSM/S3 SDKは限定対応。network・Function URLは未対応 |
 
 リージョン: us-east-1、us-west-2、ap-northeast-1、eu-west-1。1プロセスの上限: 8 MiB/object、64 MiB retained object versions合計、1000 buckets、10000 objects/versions/delete markers、1000 parameters/identities、100 stacks、100 resources/stack。SSM値4096 UTF-8 bytes、TemplateBody51200 bytes。プロセスメモリ全体の上限ではない。
 
 S3の設定・version ID/IAM・履歴quota・削除境界は[対応詳細](docs/s3.md)。S3のCloudFormationはBucketName/Versioning/PublicAccessBlock/ユーザーTagsとRef/Arnに対応。空でない履歴は削除しない。CFN専用service roleは未対応で、呼出者にStack ARNと各リソース操作の両方の権限が必要。CAPABILITY_IAMは権限を与えない。
 
-IAMはidentity policyのVersion/Statement/Sid/Effect/Action/Resource、配列、`*`/`?`、明示Deny優先を評価する。Condition/Principal/NotAction/NotResource/resource policies/boundaries/SCPは未対応。CFNのRoleはローカルidentityを作り、trust metadataは認可に使用しない。カタログのSignInLocalDevelopmentAccess/AWSLambdaBasicExecutionRole ARNは記録のみで権限を付与しない。STS・AWSサインイン・CloudShellは未実装。
+IAMはidentity policyのVersion/Statement/Sid/Effect/Action/Resource、配列、`*`/`?`、明示Deny優先を評価する。一般のCondition/Principal/NotAction/NotResource/resource policies/boundaries/SCPは未対応。限定Lambda resource policyはAPI GatewayからのSourceArn付きInvokeだけを許可する。CFNのRoleはローカルidentityを作り、trust metadataは認可に使用しない。カタログのSignInLocalDevelopmentAccess/AWSLambdaBasicExecutionRole ARNは記録のみで権限を付与しない。STS・AWSサインイン・CloudShellは未実装。
 
 ## IAMからLambdaを作成
 
