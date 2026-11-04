@@ -1,33 +1,33 @@
 # Secrets Manager: bounded local subset
 
-Status: local candidate for Issue [266](https://github.com/susumutomita/TenkaCloudSimulator/issues/266),
-not a published release or complete AWS Secrets Manager implementation. The
-native endpoint and embedded Cloudscape console share the same SQLite state.
-Capabilities advertise exactly the seven documented operations, SecretString
-only, plaintext dummy storage, the two supported labels and force-delete-only
-cleanup. KMS, rotation, binary values, replication, recovery windows and
-CloudFormation are explicitly unavailable. The API reference declares all
-seven examples at the actual shared POST / with exact `secretsmanager.Operation`
-targets, preserving the existing43 operation IDs and all paths. Named request
-examples require matching target/service/region headers and live returned ARNs;
-static response examples are not executed results. Mandatory served-example
-execution is prepared but has not run against the new embedded spec.
+Status: **local source candidate**, Issue [266](https://github.com/susumutomita/TenkaCloudSimulator/issues/266).
+The preserved implementation is `96259aa423f105f83c276b14eca57e0af0d626c2`.
+It was normally merged with public main `b61d0299a2139661f01ef29ae5826e4c070cc7bf`
+in local integration commit `31f740a`; no rebase, force push or publication was
+performed. This is not a complete AWS service, public release or Challenge claim.
 
-Private redacted material, value-free metadata DTOs, immutable
-SQL schema, seven bounded store operations and a private JSON protocol adapter
-are implemented locally. Selected material/store/private-HTTP tests pass (14
-tests, latest1.294 seconds), including immutable values, unique labels, physical
-ARN protection, late-failure rollback and pure-policy handling. The real embedded
-CLI and boto3 exercise all seven operations, two authenticated persistent team
-databases, cross-team endpoint401, participant IAM, restart and physical cleanup.
-The prior embedded console/browser checks pass as described below. The original
-two bounded models and nine intended mutants pass focused TLC. This source
-phase normally merged public main2d8, registered three Secrets models alongside
-the original five, retained critical invariants and added native SDK, browser
-and served-document helpers as mandatory E2E tests. The new disclosure-channel
-model/five controls, full registered suite, exact-HEAD applicability receipt and
-complete quality gates have not run in this source phase. This is not a
-completed AWS service or Challenge claim.
+The seven store operations, private native JSON adapter, value-free metadata,
+version immutability, label transitions and dummy-value redaction source are
+preserved. Shared-file merge conflicts retain current main. As a result, this
+integration tree **does not initialize Secrets storage in the CLI server**, add
+its UI to the service menu, embed its console bundle, register its OpenAPI
+operations/E2E helpers, or register its three finite models. A direct native
+Gateway with no Secrets store fails closed; source files are not an enabled
+service. Root owns those integration changes and their final validation.
+
+Exact prior shared deltas and all three merge blobs were archived outside the
+repository for review; generated bundles must be regenerated from the final
+combined source instead of restoring an old bundle over current main. The old
+worktree and commit remain intact. No new SDK/dependency installation, real AWS
+operation, release, merge or issue comment is part of this phase.
+
+The saved handoff reports earlier selected native tests, actual two-team
+CLI/boto3/browser checks and eight registered baselines with nineteen intended
+counterexamples at the prior candidate. Those are **historical reports**, not
+current-HEAD test or CI results. This integration phase has not run Go, SDK,
+browser, full coverage or TLC checks yet. New boundary tests are source only.
+Potential ignored-SQL-write acknowledgement cases are under investigation;
+no runtime failure is claimed before executing their regression tests.
 
 ## Scope and explicit storage boundary
 
@@ -161,7 +161,7 @@ preserves ARN reservations. SQL/cancellation/quota failures leave names,
 versions, labels and values unchanged. Team hosts allocate separate processes,
 databases and token authorities; a selected principal is not tenant identity.
 
-## Reuse decision before code
+## Upstream design references; no engine adoption
 
 Kumo pin: `ce37a8fb406ecb96b5619204f645c26302b651a5`, MIT, copyright2025 sivchari.
 Full existing `third_party/KUMO-LICENSE.txt` and embedded original permission
@@ -172,7 +172,9 @@ reused token and rotates labels even for a retry; repeated rotation can leave
 several versions bearing AWSPREVIOUS; partial-ARN fallback can resolve a name
 without physical-identity protection. No UpdateSecretVersionStage store method
 was present in that pin. SQLite/immutability/label uniqueness/authority therefore
-need explicit adaptation and detectors. Do not import its broad DTO containing
+are implemented independently here with explicit detectors. No Kumo engine, fork,
+submodule, service implementation or dependency is imported by this candidate.
+Do not import its broad DTO containing
 SecretString into metadata responses.
 
 LocalStack public snapshot `8b9a79f05846835cf4dff63ab7eefdde9df83783` has Apache-2.0
@@ -182,7 +184,7 @@ reference-only: no LocalStack/moto code, runtime, image or dependency is copied.
 The public snapshot license is not permission for current proprietary images.
 No upstream program was executed. P0 adds no dependency or borrowed runtime.
 
-## Concrete acceptance and formal obligations
+## Acceptance obligations and archived predecessor evidence
 
 Before integration, native tests must demonstrate create→describe/list with no
 value→Put B→Get current B/previous A→promote A→force delete, including same-token
@@ -207,11 +209,11 @@ atomic deletion. Mutants must expose overwrite-on-retry, duplicate previous-labe
 owners, stale-ARN adoption and orphaned versions/stages. A separate view/reveal
 epoch model is needed if async response acceptance can retain a secret after
 navigation. These are finite abstractions, not encryption/SQL/React refinement
-proofs. Root must register applicable models under307 and run both global90%
-floors, full required CI/E2E/security/license gates before merge. gofmt,
-compilation, selected native tests and the real local SDK increment have run;
-the embedded console/browser increment has also run. Focused TLC has run as documented below. Full Go/coverage, AWS, publish,
-release and deployment have not run.
+proofs. Root must register applicable models and run both global 90% floors,
+required CI/E2E/security/license gates before any later merge. Current integration
+checks are unexecuted. The following UI and model details describe saved source
+and predecessor reports; they are not enabled or verified on this integration
+HEAD. No actual AWS, publication, release or deployment was performed.
 
 Public console reference: the official flow is Store a new secret → Other type
 of secret → key/value or Plaintext → name/description → rotation off → review →
@@ -219,9 +221,10 @@ Store. Use official Cloudscape components and these labels where implemented;
 disable unsupported database/rotation/KMS choices honestly. Authenticated AWS
 screens have not been observed, so no visual identity claim is justified.
 
-The console is composed through the normal service menu and region/principal/
+In the archived predecessor candidate, the console was composed through the normal service menu and region/principal/
 navigation lifetime key, with a canonical pinned Cloudscape bundle in the Go
-binary. The actual browser test has run against this binary. It never retrieves a
+binary. Prior handoff reports record actual browser checks against that prior
+binary; this integration retains main assets and has not rerun them. It never retrieves a
 value while listing or describing metadata. Explicit Retrieve secret value
 requests AWSCURRENT; Hide, navigation, opening a form and unmount invalidate
 pending results and clear the displayed value. An accepted reply must carry the
@@ -246,7 +249,11 @@ permission, missing Read team/generation binding, missing reply epoch/ARN guard
 and retained visible value after unmount. An initial mutant had a shadowed
 variable semantic error; that run was rejected, corrected and rerun. Parse
 errors/timeouts are never counted as counterexamples. The unchanged two model sources are now registered alongside the new channel
-model, but the registered suite and exact-HEAD receipt remain pending. These checks establish
+model in the predecessor history. The latest saved handoff reports all eight
+registered baselines and nineteen counterexamples passing at `96259aa`; this
+phase has not independently rerun that record. Current main model registration
+was retained, so these three Secrets models require a new integration and exact
+HEAD gate. These predecessor checks establish
 only the documented finite model properties. `test/e2e/secrets_manager_console.py` passed the actual
 browser/SDK wizard, metadata-only reads, genuine delayed Get rejection after
 Hide and list navigation, explicit reveal/edit, version rollback and keyboard
@@ -270,8 +277,9 @@ authorizes it and succeeds. `RawRequiresAuthorizedGet` and
 `MetadataLogErrorRedacted` and `DeniedNoRaw` describe private DTO/formatter/log/
 error output. Controls remove raw-access operation or permission guards, leak a
 private sink, retain raw state across contexts, or bypass the Get writer guard.
-Their TLC execution is pending; source/anchor validation is not counterexample
-evidence.
+The latest predecessor handoff reports these controls included in the eight
+baseline/nineteen-counterexample pass at `96259aa`. Current integration TLC has
+not run; source/anchor validation is not counterexample evidence.
 
 | Channel | Concrete path | Required actual evidence |
 |---|---|---|
@@ -281,13 +289,17 @@ evidence.
 | Denied Get before value access | `secret_values.go` saved-ARN resolve/pure authorize before querying values | `TestSecretGetAuthorizesSavedARNBeforeReadingAnyValue` uses a storage fault to distinguish denial from value access |
 | Sanitized errors | `secretHTTPError` fixed service errors and generic infrastructure failure | `TestSecretHTTPRejectsUnsupportedOrAmbiguousWritesWithoutDisclosure` and corrupted-policy500 test |
 
-Source scopes bind these specific confidentiality/authority boundaries. They do
+Proposed model source scopes describe these specific confidentiality/authority
+boundaries. They are not registered in this current integration yet. They do
 not prove Go reflection, JSON encoding, SQL, encryption, browser memory or
 whole-program noninterference. Unknown implementation paths still fail the
 applicability checker; no prose or directory-wide exemption was added. Stateful
 UI is bound to its reveal model rather than classified as presentation. Shared
 dispatch/server bindings concern only Secrets composition, preserving the other
 native APIs.
+
+Primary references checked 2026-11-04; API version 2017-10-17. No real AWS
+comparison or authenticated AWS console observation was performed.
 
 Sources: [CreateSecret](https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_CreateSecret.html),
 [PutSecretValue](https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_PutSecretValue.html),

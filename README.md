@@ -42,6 +42,8 @@ S3のCloudFormationはBucketName/Versioning/PublicAccessBlock/ユーザーTags�
 
 SQSはnative JSON 1.0 APIのみ対応します。保持中・期限切れ未回収を含む物理message rowはプロセス全体10000件、UTF-8 bodyとserialized attribute JSONの合計64 MiBまでです。これはSQLiteファイル全体・プロセスメモリ・AWS課金サイズの上限ではありません。Azure/GCP/Sakura等の他クラウドは現在のGo実装では未対応です。Issueや計画は実装完了を意味しません。[開発状況](docs/development-status.md)を参照してください。Cloudscapeを使用していますが、本物のAWSコンソールとの全画面・全挙動の一致や実AWSとの差分検証完了は主張していません。
 
+Secrets Managerは[既存のローカル候補](docs/secrets-manager.md)を保存済みソースから引き継いで検証中です。この候補では共有サーバー・コンソール・API資料・形式registryの統合が未完了で、利用可能なサービス一覧には含めません。SecretStringの練習用値はSQLite内の平文であり、実AWSのKMS暗号化を再現していません。
+
 ## IAMロールからLambdaを作る
 
 Services→IAM→Roles→Create roleで信頼先Lambda、権限なし、名前と確認へ進みます。RoleのPermissionsに必要なinline policyを追加し、Lambda→Create function→Permissions→Existing roleで選択します。CodeでZIPをDeployし、Testで実Pythonを実行します。権限なしはimplicit Denyです。未実装のmanaged policyを選んだ扱いで権限を与えません。
