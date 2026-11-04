@@ -1,4 +1,4 @@
-"""Real native Secrets console contract; needs integration owner's nav/bundle.
+"""Real native Secrets console contract against the canonical embedded UI.
 
 Dummy values only, no value screenshots/traces, no fabricated API responses.
 Source preparation is not evidence of a successful browser run.
@@ -143,11 +143,11 @@ def run():
             expect(page.get_by_label("Retrieved secret value", exact=True)).to_have_count(0)
             audit("metadata-desktop")
             assert_reflow(page)
-            page.screenshot(path=str(REPORTS/"secrets-metadata-desktop.png"), full_page=True)
+            page.screenshot(path=str(REPORTS/"secrets-metadata-desktop.png"), full_page=False, animations="disabled")
             page.set_viewport_size({"width": 390, "height": 844})
             assert_reflow(page)
             audit("metadata-mobile")
-            page.screenshot(path=str(REPORTS/"secrets-metadata-mobile.png"), full_page=True)
+            page.screenshot(path=str(REPORTS/"secrets-metadata-mobile.png"), full_page=False, animations="disabled")
             page.get_by_role("button", name="Secrets", exact=True).click()
             page.get_by_role("button", name="Store a new secret", exact=True).click()
             expect(page.get_by_label("Key 1", exact=True)).to_be_visible()
@@ -185,6 +185,65 @@ def run():
             finally:
                 limited_context.close()
 
+            # A region change remounts the view: a displayed value must not
+            # survive in the new region, which has no secret with this name.
+            page.get_by_role("button", name="Retrieve secret value", exact=True).click()
+            expect(page.get_by_label("Retrieved secret value", exact=True)).to_have_value("DUMMY-secret-console-A")
+            page.get_by_role("button", name="us-east-1", exact=True).click()
+            page.get_by_role("menuitem", name="us-west-2", exact=True).click()
+            expect(page.get_by_role("heading", name=re.compile(r"^Secrets"), level=1)).to_be_visible()
+            expect(page.get_by_label("Retrieved secret value", exact=True)).to_have_count(0)
+            expect(page.get_by_role("link", name="training/console-example", exact=True)).to_have_count(0)
+            assert "DUMMY-secret-" not in page.locator("body").inner_text()
+            assert client(endpoint, token, "us-west-2").list_secrets()["SecretList"] == []
+            page.get_by_role("button", name="us-west-2", exact=True).click()
+            page.get_by_role("menuitem", name="us-east-1", exact=True).click()
+            page.get_by_role("link", name="training/console-example", exact=True).click()
+            page.get_by_role("button", name="Retrieve secret value", exact=True).click()
+            expect(page.get_by_label("Retrieved secret value", exact=True)).to_have_value("DUMMY-secret-console-A")
+
+            def choose_identity(principal):
+                page.get_by_role("button", name="Account menu", exact=True).click()
+                page.get_by_role("menuitem", name="Choose identity", exact=True).click()
+                dialog = page.get_by_role("dialog")
+                dialog.get_by_label("Principal name", exact=True).fill(principal)
+                dialog.get_by_role("button", name="Choose identity", exact=True).click()
+            choose_identity("secret-console-reader")
+            expect(page.get_by_label("Retrieved secret value", exact=True)).to_have_count(0)
+            assert "DUMMY-secret-" not in page.locator("body").inner_text()
+            page.get_by_role("link", name="training/console-example", exact=True).click()
+            with page.expect_response(lambda response: response.request.headers.get("x-amz-target") == "secretsmanager.GetSecretValue") as selected_denied:
+                page.get_by_role("button", name="Retrieve secret value", exact=True).click()
+            assert selected_denied.value.status == 403
+            expect(page.get_by_label("Retrieved secret value", exact=True)).to_have_count(0)
+            choose_identity("simulator-admin")
+            page.get_by_role("link", name="training/console-example", exact=True).click()
+            page.get_by_role("button", name="Retrieve secret value", exact=True).click()
+            expect(page.get_by_label("Retrieved secret value", exact=True)).to_have_value("DUMMY-secret-console-A")
+
+            # Keyboard Sign out revokes only the actual browser cookie, not the
+            # host token used by the independent native SDK. Never report tokens.
+            cookies = [entry for entry in page.context.cookies(endpoint) if entry["name"].startswith("tcsim_")]
+            assert len(cookies) == 1
+            retired_cookie = cookies[0]["name"]+"="+cookies[0]["value"]
+            page.get_by_role("button", name="Account menu", exact=True).focus()
+            page.keyboard.press("Enter")
+            page.keyboard.press("ArrowDown")
+            expect(page.get_by_role("menuitem", name="Sign out", exact=True)).to_be_focused()
+            page.keyboard.press("Enter")
+            expect(page.get_by_label("Access token", exact=True)).to_be_visible()
+            expect(page.get_by_label("Retrieved secret value", exact=True)).to_have_count(0)
+            assert "DUMMY-secret-" not in page.locator("body").inner_text()
+            replay = page.context.request.get(endpoint+"/_simulator/v1/capabilities", headers={"Cookie": retired_cookie}, max_redirects=0)
+            assert replay.status == 401, "Retired browser cookie retained authority"
+            assert sdk.get_secret_value(SecretId=arn)["SecretString"] == "DUMMY-secret-console-A", "Sign out revoked the independent SDK credential"
+            page.get_by_label("Access token", exact=True).fill(token)
+            page.get_by_role("button", name="Open sandbox", exact=True).click()
+            page.get_by_role("button", name="Services", exact=True).click()
+            page.get_by_role("menuitem", name="Secrets Manager", exact=True).click()
+            page.get_by_role("link", name="training/console-example", exact=True).click()
+            expect(page.get_by_label("Retrieved secret value", exact=True)).to_have_count(0)
+
             page.get_by_role("button", name="Delete secret", exact=True).click()
             page.get_by_role("checkbox", name="Force delete without recovery", exact=True).check()
             page.get_by_label("Enter secret name to confirm", exact=True).fill("training/console-example")
@@ -193,11 +252,17 @@ def run():
             assert sdk.list_secrets()["SecretList"] == [], "Enter did not perform native deletion"
             assert errors == [], "Browser raised a page error"
             assert outside == [], "Browser attempted an external request"
-            (REPORTS/"secrets-a11y.json").write_text(json.dumps({"tool": provenance, "screens": audits}, indent=2)+"\n")
+            (REPORTS/"secrets-a11y.json").write_text(json.dumps({"tool": provenance, "screens": audits, "contextChecks": ["region-clear", "principal-clear-IAM403", "keyboard-signout", "revoked-cookie401-SDK-still-valid", "hide-and-navigation-stale-response"]}, indent=2)+"\n")
         finally:
             browser.close()
     print("Secrets Manager actual native console/reveal/cleanup/reflow/local-only contract PASS")
 
 
 if __name__ == "__main__":
-    run()
+    try:
+        run()
+    except Exception as error:
+        # Playwright may include current form fields in its automatic assertion
+        # snapshot. Preserve the failure without persisting practice value bytes.
+        message = re.sub(r"DUMMY-secret-[A-Za-z0-9_-]+", "[redacted dummy value]", str(error))
+        raise RuntimeError(message) from None

@@ -42,7 +42,17 @@ matched before/after copying, and the existing 22-package original notice
 inventory remained unchanged. Asset verification and the updated embedded CLI
 build passed. The served OpenAPI helper executed all seven documented request
 examples through actual native HTTP, checking the same state with boto3; it
-passed. **The new UI has not yet been browser-validated.** Complete repository
+passed. The canonical embedded UI subsequently passed the actual browser helper at
+1440px and 390px, including five zero-violation axe screens, native SDK readback,
+create/retrieve/edit/stage rollback/delete, genuine late-response rejection,
+region/principal value clearing, participant IAM403, and keyboard sign out.
+A retired browser cookie replay returned401 while the independent SDK credential
+continued to read; no page errors or external browser requests occurred.
+Only value-hidden metadata screenshots were captured. One expanded test initially
+misused DOM focus instead of Cloudscape menu selection; it activated Choose
+identity. The fixture was corrected to ArrowDown, asserted Sign out focus, and
+rerun without changing product code, timeouts or acceptance assertions.
+Complete repository
 coverage, thirteen-model/fifty-control TLC, full E2E and hosted CI are not run. Existing logout, Scalar/S3 guidance, SQS and
 raw-path source are preserved. The normal host access middleware continues to
 require a local credential; native dummy SigV4 fields are not authentication.
@@ -251,9 +261,9 @@ epoch model is needed if async response acceptance can retain a secret after
 navigation. These are finite abstractions, not encryption/SQL/React refinement
 proofs. Root must register applicable models and run both global 90% floors,
 required CI/E2E/security/license gates before any later merge. Current integration
-full integration checks remain unexecuted. The following UI and model details describe saved source
-and predecessor reports; they are not enabled or verified on this integration
-HEAD. No actual AWS, publication, release or deployment was performed.
+full integration checks remain unexecuted. The following UI flow is represented by current source and the canonical
+embedded bundle. Predecessor TLC counts below remain explicitly historical;
+current browser results are recorded separately from the pending model gate. No actual AWS, publication, release or deployment was performed.
 
 Public console reference: the official flow is Store a new secret → Other type
 of secret → key/value or Plaintext → name/description → rotation off → review →
@@ -261,10 +271,21 @@ Store. Use official Cloudscape components and these labels where implemented;
 disable unsupported database/rotation/KMS choices honestly. Authenticated AWS
 screens have not been observed, so no visual identity claim is justified.
 
-In the archived predecessor candidate, the console was composed through the normal service menu and region/principal/
+The following comparison was checked against public AWS guides on 2026-11-04,
+not an authenticated live console or real AWS resources:
+
+| Flow | Official public guide | Actual local flow / known difference |
+|---|---|---|
+| Create | [Creation guide](https://docs.aws.amazon.com/secretsmanager/latest/userguide/create_secret.html): secret type, values, encryption, name, rotation, review | Same basic wizard order; only other-type dummy text/key-value secrets. Encryption is explicitly absent; database/partner secrets, tags, policies, replicas and rotation are unavailable. Store opens local details rather than the documented list. |
+| Update | [Value update guide](https://docs.aws.amazon.com/secretsmanager/latest/userguide/manage_update-secret-value.html): detail, Retrieve, Edit; new current version | Explicit Retrieve then Edit uses native PutSecretValue. Empty draft is deliberate; it does not populate the old value automatically. |
+| Delete | [Deletion guide](https://docs.aws.amazon.com/secretsmanager/latest/userguide/manage_delete-secret.html): Actions, schedule deletion with recovery window | Local Delete secret is explicitly force-only, exact-name confirmation, no recovery or scheduled deletion. It is not the AWS console deletion flow. |
+| Labels | Public update/API guidance describes staged versions | Only current/previous labels. Rollback is labeled a simulator helper, not a copied AWS console control. |
+
+
+The current console is composed through the normal service menu and region/principal/
 navigation lifetime key, with a canonical pinned Cloudscape bundle in the Go
-binary. Prior handoff reports record actual browser checks against that prior
-binary; this integration retains main assets and has not rerun them. It never retrieves a
+binary. The focused browser validation uses this embedded binary and actual
+native state; its result is distinct from predecessor TLC reports. It never retrieves a
 value while listing or describing metadata. Explicit Retrieve secret value
 requests AWSCURRENT; Hide, navigation, opening a form and unmount invalidate
 pending results and clear the displayed value. An accepted reply must carry the
@@ -291,9 +312,8 @@ variable semantic error; that run was rejected, corrected and rerun. Parse
 errors/timeouts are never counted as counterexamples. The unchanged two model sources are now registered alongside the new channel
 model in the predecessor history. The latest saved handoff reports all eight
 registered baselines and nineteen counterexamples passing at `96259aa`; this
-phase has not independently rerun that record. Current main model registration
-was retained, so these three Secrets models require a new integration and exact
-HEAD gate. These predecessor checks establish
+phase has not independently rerun that record. The candidate appends the three Secrets models while retaining all current
+main registrations; the complete combined exact-HEAD gate remains pending. These predecessor checks establish
 only the documented finite model properties. `test/e2e/secrets_manager_console.py` passed the actual
 browser/SDK wizard, metadata-only reads, genuine delayed Get rejection after
 Hide and list navigation, explicit reveal/edit, version rollback and keyboard
@@ -330,7 +350,7 @@ not run; source/anchor validation is not counterexample evidence.
 | Sanitized errors | `secretHTTPError` fixed service errors and generic infrastructure failure | `TestSecretHTTPRejectsUnsupportedOrAmbiguousWritesWithoutDisclosure` and corrupted-policy500 test |
 
 Proposed model source scopes describe these specific confidentiality/authority
-boundaries. They are not registered in this current integration yet. They do
+boundaries. They are registered in source but the current combined gate is not run. They do
 not prove Go reflection, JSON encoding, SQL, encryption, browser memory or
 whole-program noninterference. Unknown implementation paths still fail the
 applicability checker; no prose or directory-wide exemption was added. Stateful
