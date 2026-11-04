@@ -58,7 +58,12 @@ func New(path string) (http.Handler, func() error, error) {
 		_ = store.Close()
 		return nil, nil, err
 	}
-	gateway := &aws.Gateway{APIGateway: apiGateway, LambdaPermissions: lambdaPermissions, Store: store, S3: s3, Identities: identities, Parameters: parameters, Stacks: stacks, Lambdas: lambdas, Roles: roles}
+	kms, err := aws.NewKMSStore(store.Database())
+	if err != nil {
+		_ = store.Close()
+		return nil, nil, err
+	}
+	gateway := &aws.Gateway{KMS: kms, APIGateway: apiGateway, LambdaPermissions: lambdaPermissions, Store: store, S3: s3, Identities: identities, Parameters: parameters, Stacks: stacks, Lambdas: lambdas, Roles: roles}
 	registry := provider.New("aws")
 	if err := registry.Register("aws", gateway); err != nil {
 		_ = store.Close()
