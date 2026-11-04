@@ -1,63 +1,96 @@
 # Development roster
 
-**Snapshot: 2026-11-04 07:36 UTC. Update owner: the integration owner (`root`).**
-This is the single active-assignment roster, maintained at claims, handoffs and
-integration milestones. It is a reviewed snapshot, not a live agent counter;
-follow each linked PR for its current HEAD and checks. The [parallel development
-rules](contributing/parallel-development.md) and [shared contracts](design/0005-parallel-service-contracts.md)
-apply. The [258-unit service backlog](https://github.com/susumutomita/TenkaCloudSimulator/issues/52)
-is a plan, not a second active roster or an implementation count.
+**Snapshot: 2026-11-04 12:35 UTC. Integration owner: `root`.** This is a reviewed
+assignment snapshot, not a live process count or completion percentage. Follow
+[parallel development rules](contributing/parallel-development.md),
+[shared contracts](design/0005-parallel-service-contracts.md), and the
+[public service verification matrix](service-verification.md). The
+[service backlog](https://github.com/susumutomita/TenkaCloudSimulator/issues/52)
+is a plan, not an implemented-service count.
 
-Verified public main baseline: `8cc07ca2e8da0c9d6a9df804d903c8a11727d96f`.
-API Gateway [PR45](https://github.com/susumutomita/TenkaCloudSimulator/pull/45)
-and workflow/roster [PR46](https://github.com/susumutomita/TenkaCloudSimulator/pull/46)
-are merged. Main [CI41785567246](https://github.com/susumutomita/TenkaCloudSimulator/actions/runs/41785567246)
-and [CodeQL41785567251](https://github.com/susumutomita/TenkaCloudSimulator/actions/runs/41785567251)
-succeeded. Six internal worker assignments plus root fit this environment's seven
-agent slots; that does not mean all workers run commands at every instant or
-that external agents consume these local slots. Heavy Go/WASI runs are reserved
-separately to avoid CPU contention in fixed-deadline tests.
+## Public main and supported boundary
 
-## Internal assignments and handoffs
+Verified public main is **`2d8a41a0cb576bd42561a7162d35129f44979c08`**.
+[PR310](https://github.com/susumutomita/TenkaCloudSimulator/pull/310) merged as
+`55a111953eb3eb0dfd90aaa473ac3fe39cb10b66`; the additive annotation classification
+[PR314](https://github.com/susumutomita/TenkaCloudSimulator/pull/314) merged as
+`2d8a41a0cb576bd42561a7162d35129f44979c08`. Exact-main
+[ci41828639809](https://github.com/susumutomita/TenkaCloudSimulator/actions/runs/41828639809),
+[Formal41828639605](https://github.com/susumutomita/TenkaCloudSimulator/actions/runs/41828639605)
+and [Push on main41828638968](https://github.com/susumutomita/TenkaCloudSimulator/actions/runs/41828638968)
+succeeded. These runs are evidence for that main commit, not later candidates.
 
-| Owner / boundary | Issue / PR | Actual evidence and state | Dependency / next action |
-|---|---|---|---|
-| `root`: shared integration, publication and final review | [37](https://github.com/susumutomita/TenkaCloudSimulator/issues/37), PR45/46 merged; [PR303](https://github.com/susumutomita/TenkaCloudSimulator/pull/303) in review | Native16-operation REST/Lambda increment is in main. API-only CFN is a separate public candidate; final metadata/test HEAD must pass its own CI/review before merge | Own shared Gateway/server/OpenAPI/navigation/assets/CI/catalog integration; recheck exact HEAD, unresolved findings and main CI |
-| `waf_service`: WAF backend, then read-only API-only CFN review | [38](https://github.com/susumutomita/TenkaCloudSimulator/issues/38), [Draft PR50](https://github.com/susumutomita/TenkaCloudSimulator/pull/50) | Native/backend/UI and original-handler Count→Block HTTP checks pass locally. Additional local fix is preserved; independent follow-up verification was stopped by a platform risk classification. Draft is not merge-ready | Do not retry or reroute the stopped verification. Source/coverage/CI and final review remain required; no completed-WAF or full-WP claim |
-| `cfn_adapters`: full CFN lifecycle and owned HTTP-scope port | [39](https://github.com/susumutomita/TenkaCloudSimulator/issues/39), [44](https://github.com/susumutomita/TenkaCloudSimulator/issues/44) | Full local candidate `0e8e025` passes race/build and 93.95% statements, but unfiltered source 88.59% fails 90%. Separate local scope port `918b29c` has focused tests; neither is merged | Full controller is frozen. Same-stack generation/config scope needs native invocation/atomic route integration; do not publish private progress logs/history |
-| `cfn_callback`: callback primitive and independently publishable CFN API slice | [40](https://github.com/susumutomita/TenkaCloudSimulator/issues/40), [39](https://github.com/susumutomita/TenkaCloudSimulator/issues/39), [PR303](https://github.com/susumutomita/TenkaCloudSimulator/pull/303) | Primitive local `70f90cc`; WAF finite model `0c93a94` / API docs `450f6f5` handed off. Clean API-only branch starts from public `8cc07ca` and contains no WAF/custom controller/private history. Its actual two-team SDK/HTTP/restart/delete and17 E2E pass | Explicit compiler-file handoff: this worker owns the API-only branch; the full-controller branch remains frozen. Final test/docs-only HEAD needs complete hosted coverage/review. Keep the branches separate |
-| `grader_http`: scoped HTTP execution and native Lambda activation | [41](https://github.com/susumutomita/TenkaCloudSimulator/issues/41) | Local executor4f8e3b8 passes actual urllib→native API→saved-role SSM/S3, two-outer capacity/sticky-error and child cancellation tests. Native SDK/CFN activation is being integrated on an isolated branch | No guest/environment-derived authority. Capture enrollment after native creation, validate scope and route in one Tx, release before guest and reject sticky infrastructure errors after Run. No full WP result |
-| `waf_console`: Cloudscape WAF UI and native browser helpers | [42](https://github.com/susumutomita/TenkaCloudSimulator/issues/42), Draft PR50 | Local UI and actual native create/update/stale-lock/reload/keyboard/delete, PC/390px reflow/axe and original-handler Count/leak→Block403/safe200 pass | Shared root navigation/assets are integrated separately. Authenticated AWS visual equivalence is unverified; no main-merge claim |
-| `issue_plan`: original WP preflight/oracles and independent read-only reviews | [43](https://github.com/susumutomita/TenkaCloudSimulator/issues/43) | Local444a8c0 prepares original-source guards and a two-process blocked preflight. Full host ledger/browser is not run. Earlier CFN state findings were independently reproduced and fixed; a later WAF follow-up turn was stopped | Preserve unexecuted/stopped status. Never substitute a test-only host, altered grader, or projected template for the original full lifecycle |
+Main has bounded AWS S3, Standard SSM Parameter Store, native IAM roles, Python
+Lambda with its limited S3/SSM SDK bridge, Regional REST API Gateway, and the
+documented CloudFormation subset. Only **five finite models** are registered:
+ObjectStore, S3Versions, StackOwnership, NativeIAMOwnership and
+RESTDeploymentSnapshot. Azure/GCP native services are not implemented in main.
+Only **hello-world** has completed host import→deploy→participant operation→score→cleanup;
+service code or API200 does not enable another catalog problem. Authenticated
+AWS console equivalence remains unverified.
 
-Local short SHAs are handoff references, not public merge evidence. There is one
-writer per active file/worktree; a frozen earlier branch is not permission to
-publish or overwrite it. PR24/27 are unrelated and remain outside these claims.
+## Public PR acceptance snapshot
 
-## External assignments: public evidence versus owner reports
+| Public change | Exact published source / base | Observed evidence and remaining acceptance |
+|---|---|---|
+| [PR308 authenticated make start](https://github.com/susumutomita/TenkaCloudSimulator/pull/308) | Draft `ac52f4b71abf37e5fa8f0441bdaea07562adac8f`, base `6ffbd188` | Historical [ci41804716967](https://github.com/susumutomita/TenkaCloudSimulator/actions/runs/41804716967) succeeded. Integration with the current formal policy/base and fresh exact-HEAD checks remain pending. Current main does not yet include this command. |
+| [PR309 DynamoDB](https://github.com/susumutomita/TenkaCloudSimulator/pull/309) | Draft `ed877ecc56c0fd4eef7a3a5a3b0b23d3ca435cfe`, base `6ffbd188` | [ci41797379476](https://github.com/susumutomita/TenkaCloudSimulator/actions/runs/41797379476) failed; separate code-scanning success is not a passing whole CI. State/validation/model and current-base integration still require acceptance. Not main support. |
+| [PR311 API reference](https://github.com/susumutomita/TenkaCloudSimulator/pull/311) | Draft `dada2ad5aa2850efd7b6e21defd9d63d93c86558`, base `55a11195` | [ci41823917760](https://github.com/susumutomita/TenkaCloudSimulator/actions/runs/41823917760) and [Formal41823917931](https://github.com/susumutomita/TenkaCloudSimulator/actions/runs/41823917931) succeeded on that source/base. Current-main integration, preserved Scalar request flows and fresh CI/review remain pending. |
+| [PR312 browser logout](https://github.com/susumutomita/TenkaCloudSimulator/pull/312) | Draft `ebbcdec654b34e44182521132e51ba944b01250f`, base `55a11195` | [ci41825440653](https://github.com/susumutomita/TenkaCloudSimulator/actions/runs/41825440653) and [Formal41825441004](https://github.com/susumutomita/TenkaCloudSimulator/actions/runs/41825441004) succeeded on that source/base. Current-base integration must preserve account menu, session separation, actual logout/replay and keyboard/browser checks. |
+| [PR313 SSM model](https://github.com/susumutomita/TenkaCloudSimulator/pull/313) | Draft `e5e5546510c866f97cfe7bf5e36e40f48e665ff3`, base `2d8a41a0` | [Formal41829572922](https://github.com/susumutomita/TenkaCloudSimulator/actions/runs/41829572922) succeeded; [ci41829572864](https://github.com/susumutomita/TenkaCloudSimulator/actions/runs/41829572864) was running at this snapshot. Earlier `ecc`/base55a results are historical. Do not infer current complete CI or merge. |
+| [PR315 SQS](https://github.com/susumutomita/TenkaCloudSimulator/pull/315) | Draft `95300b90ca74c5984ecf6627edfc010b5fc2496b`, base `55a11195` | [ci41824302719](https://github.com/susumutomita/TenkaCloudSimulator/actions/runs/41824302719) and [Formal41824302713](https://github.com/susumutomita/TenkaCloudSimulator/actions/runs/41824302713) failed. A later local correction cannot substitute for checks of the published exact HEAD. Not main support. |
+| [PR50 WAF](https://github.com/susumutomita/TenkaCloudSimulator/pull/50) | Open Draft; held/unmerged | Held status only; no new verification or main-support claim. |
 
-The snapshot reads found Issues47/48/49, no corresponding public service PR,
-and DynamoDB/SNS branches still at `bdff8b7`. Branch creation alone is not a
-pushed implementation. Local work may exist but is not inferred here.
+These are public observations, not permission to force updates. A successful run
+on an older base does not validate a new integration commit. Recheck current
+HEAD, all required checks, unresolved reviews and merge state immediately before
+an authorized merge; verify main CI afterward. Repository-settings changes are
+on hold; workflow execution does not establish configured branch protections.
 
-| Service | Issue / owner evidence | Actual start / implementation evidence | Handoff |
-|---|---|---|---|
-| SQS | [48](https://github.com/susumutomita/TenkaCloudSimulator/issues/48); personal owner unknown | Issue created; branch/commit/PR and local progress unconfirmed | [Composition boundary](https://github.com/susumutomita/TenkaCloudSimulator/issues/48#issuecomment-6623866640), [current API limits/compatibility](https://github.com/susumutomita/TenkaCloudSimulator/issues/48#issuecomment-6625188406) |
-| SNS | [49](https://github.com/susumutomita/TenkaCloudSimulator/issues/49); Grok Bot is user-reported, GitHub assignee empty | `feat/sns-basics-20261104` is at base `bdff8b7`. Latest user report is survey-only with 9% usage and reset 11/5 13:29 JST; earlier implementation-start language conflicts. Actual implementation start remains UNKNOWN | [Fanout/transaction boundary](https://github.com/susumutomita/TenkaCloudSimulator/issues/49#issuecomment-6623912371), [confirmation/delivery semantics](https://github.com/susumutomita/TenkaCloudSimulator/issues/49#issuecomment-6625191525) |
-| DynamoDB | [47](https://github.com/susumutomita/TenkaCloudSimulator/issues/47); Muse is user-reported, GitHub assignee empty | `feat/dynamodb-basics-20261104` is at base `bdff8b7`. No pushed implementation delta observed; local progress UNKNOWN | [Composition boundary](https://github.com/susumutomita/TenkaCloudSimulator/issues/47#issuecomment-6623865340), [item-size contract](https://github.com/susumutomita/TenkaCloudSimulator/issues/47#issuecomment-6625190075) |
+## Current assignments and dependencies
 
-Service-owned files/tests stay on dedicated branches. The integration owner is
-the final writer of shared `internal/aws/ssm.go`, `internal/aws/s3.go`,
-`internal/server/server.go` and root OpenAPI. Propose minimal additive hunks in a
-Draft PR; preserve existing dispatch, IAM and native SQLite state. SNS→SQS must
-agree atomicity/retry behavior without nested store transactions. Inspect the
-service backlog before opening another service issue.
+Seven assigned roles include the integration owner. This table does not claim
+seven concurrent tests or hundreds of running agents. Root schedules heavy
+Go/WASI/browser/TLC runs separately; source work can proceed independently.
+Local, unpublished implementation/test receipts are kept outside this public
+roster and do not change main support.
 
-## Completion boundaries
+| Owner | Public task / current responsibility | Dependency and acceptance boundary |
+|---|---|---|
+| `root` | Shared integration, review, formal registry/CI, assets and publication; PR310/314 merged | Own final shared-file composition and exact current-HEAD review/CI. Settings work remains on hold. Preserve distinct candidate histories; no force updates or inferred releases. |
+| `cfn_adapters` | [SQS48](https://github.com/susumutomita/TenkaCloudSimulator/issues/48) / PR315 correction and verification | Resolve public CI/formal failures; freeze explicit queue/receipt state contracts, safe cleanup and meaningful finite models. SDK, persistence, two-team isolation and both global90% floors remain required. |
+| `cfn_callback` | [Secrets Manager266](https://github.com/susumutomita/TenkaCloudSimulator/issues/266) bounded API/UI/model preparation | Define versioned JSON/API, saved-state and disclosure/authorization boundaries. Registry applicability, actual SDK/browser and exact whole gates must precede support claims; do not log secret values. |
+| `waf_service` | [SSM54](https://github.com/susumutomita/TenkaCloudSimulator/issues/54) / PR313 integration; [startup304](https://github.com/susumutomita/TenkaCloudSimulator/issues/304) / PR308 follow-up | SSM depends on the merged policy and fresh e5 CI; startup must account for current module-metadata rules and preserve TTY/auth/persistent state behavior. Other-cloud catalog plans are not running service implementations. |
+| `team_host` | [DynamoDB47](https://github.com/susumutomita/TenkaCloudSimulator/issues/47) / PR309 state and validation follow-up; dependency-lock verification | Preserve generation/ownership and document the accepted table/item subset. Failed public CI and unverified lock generation remain unresolved until reproducible evidence and fresh exact-HEAD checks exist. |
+| `waf_console` | [API reference305](https://github.com/susumutomita/TenkaCloudSimulator/issues/305) accessibility and request-flow follow-up | Preserve actual Scalar Send, original pinned dependencies/notices, full response access and PC/mobile keyboard checks. Preview styling is not complete accessibility acceptance; unverified dependency provenance must remain unverified. |
+| `grader_http` | Public management/verification docs and [Azure catalog316](https://github.com/susumutomita/TenkaCloudSimulator/issues/316) planning record | Keep the public matrix tied to real public bases/PRs and bounded support; maintain the dated product-source inventory without calling it implemented services or an official universal count. Service child links remain pending. |
 
-- Only hello-world has completed the real host import→deploy→participant browser→score→cleanup path. API support, projected tests and local commits do not enable other catalog problems.
-- Current TenkaCloud main remains `f99b3d9`; its native CFN host engine lacks original WP multi-flag deploy/recover/private-output/flag-ID submission/ledger integration. Simulator work does not silently modify that repository.
-- Challenge main remains `a749b142`. Original WP WebAclId uses WebACL Ref (`name|id|scope`) but its SDK Id use requires source-owner resolution. Do not falsify simulator Ref or alter original bytes unnoticed.
-- CFN-created IAM roles remain legacy identity aggregates, absent from native IAM Get/List/role pickers; metadata-only CFN trust is not native trust evaluation. This migration is still pending.
-- Only scoped documented services, one process/SQLite/token authority per team and bounded saved-role execution are claimed. No real AWS sign-in/resource creation, external delivery, deployment or public release has been performed.
-- Failed/stopped public writes stay stopped, with safe evidence outside the published tree. Do not republish a denied payload through this roster, docs, another API or agent. Whole-source 90% floors and exact-HEAD review/CI remain required.
+The Azure index is a dated official-products normalization, not an implementation
+count. Catalog categories, aliases, tools/suites, resource-provider namespaces,
+preview, renamed and retired offerings require separate applicability decisions.
+Azure and Google Cloud retain their own authority/resource/UI contracts; an AWS
+implementation does not supply their semantics.
+
+## Integration contract
+
+For each increment, record the exact public source/base and operation/field
+subset, official references, mandatory/optional/unconfirmed dependencies, a
+single writer for shared state/API files, and named acceptance tests. Shared
+service references must be validated and mutated in one provider transaction;
+do not create a second backend or hold a database transaction across a guest
+that needs that database. Root owns provider registration, common navigation,
+OpenAPI, generated assets and combined registry requirements.
+
+Before support changes, require actual initialization→operation→state observation→cleanup,
+denied/wrong-scope and two-team tests, restart/pagination/rollback, UI/API shared
+state and applicable finite models with intended mutation counterexamples.
+Retain race, statement and unfiltered whole-source90%, mandatory E2E/axe,
+license/security, cross-build and exact-HEAD review/CI gates. Profiles are not
+combined to manufacture coverage; source presence or model registration alone
+is not acceptance. Cross-compilation does not prove foreign-platform execution.
+
+Main remains a local single Go binary with embedded UI/SQLite/WASI. Each team
+needs a separate process, database and token authority; loopback is not
+authorization. No real cloud resources, sign-in, deployment, release, network
+forwarding or extra catalog grading is implied by this roster. CFN-created IAM
+roles remain legacy aggregates, not native IAM role-picker/trust integration.
