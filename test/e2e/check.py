@@ -263,6 +263,10 @@ def handler(event,context):
     f.delete_stack(StackName='inline-practice');self.assertEqual(c.list_functions()['Functions'],[])
  def test_cloudformation_rest_native_sdk_lifecycle(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('cloudformation_rest.py'))],check=True)
+ def test_secrets_manager_native_sdk_two_teams_and_restart(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('secrets_manager.py'))],check=True)
+ def test_secrets_manager_actual_console_and_disclosure_guards(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('secrets_manager_console.py'))],check=True)
  def test_apigateway_rest_sdk_permissions_and_two_teams(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('apigateway.py'))],check=True)
  def test_apigateway_console_and_actual_scalar_requests(self):

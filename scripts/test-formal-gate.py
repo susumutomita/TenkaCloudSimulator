@@ -34,7 +34,10 @@ class FormalGateTests(unittest.TestCase):
 
     def test_complete_registry_and_exact_mutations(self):
         registry = load_registry(self.root)
-        self.assertEqual(len(registry['models']), 5)
+        self.assertEqual({model['id'] for model in registry['models']}, {
+            'ObjectStore', 'StackOwnership', 'S3Versions', 'NativeIAMOwnership',
+            'RESTDeploymentSnapshot', 'SecretsVersionLifecycle', 'SecretsRevealEpoch',
+            'SecretsDisclosureChannels'})
         for model in registry['models']:
             source = (self.root / model['model']).read_text()
             for mutant in model['mutants']:
