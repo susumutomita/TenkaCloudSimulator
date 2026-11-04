@@ -31,3 +31,14 @@ S3Versions.tla separately models enabled versioning, retained versions/delete ma
 ## REST deployment snapshots
 
 RESTDeploymentSnapshot.tla bounds one API, two deployment IDs, two handler configurations and one stage. Mutable routing edits or removal preserve frozen snapshots, stage references cannot dangle, and API deletion removes its dependent snapshots/stage. A mutation that rewrites old snapshots when draft configuration changes must violate SnapshotsFrozen. The fifth normal model and fifth mutation control run in the same checked-TLC workflow. This abstracts SQL, permissions, actual handlers, crashes and team isolation; native HTTP/SDK/Python and two-process tests separately check those paths. It is not an implementation refinement or liveness proof.
+
+## Required gate and applicability
+
+The executable inventory is now `formal/models.json`; all five existing models
+and their exact sensitivity mutations remain mandatory. See
+[formal validation](../docs/formal-validation.md) for exact changed-blob records,
+negative controls, evidence and the distinction between a workflow check,
+human scope review and separately configured repository merge protection.
+New runtime/state transitions are not covered by the existing five models merely
+because this suite passes. No new service, callback or Python/HTTP state-machine
+proof is implied by this inventory.
