@@ -3,53 +3,342 @@
   "base_sha": "55a111953eb3eb0dfd90aaa473ac3fe39cb10b66",
   "changes": [
     {
+      "path": "Makefile",
+      "sha256": "e611062cc999d24594c8064484aadebbd6976d05e249151acd98e80e20dc6055",
+      "disposition": "modeled",
+      "reason": "Wires the authenticated foreground startup/test entrypoints. Only token-context/reuse/private-file portions are bound; source rebuild freshness and make/signal behavior need independent runtime tests.",
+      "models": [
+        {
+          "id": "StartupTokenVisibility",
+          "properties": [
+            "TypeOK",
+            "FileIdentityFrozen",
+            "CreatedFilePrivate",
+            "HistoryVisibility",
+            "InvalidFileNeverEmits"
+          ],
+          "limits": "Finite safety only; abstract validated file state and terminal context, not OS permissions/syscalls/randomness/crash-write atomicity, build freshness, process shutdown, liveness or Go refinement. One fixed file path; manual deletion/path changes/rotation are outside the model. Darwin/Windows helpers are not claimed executed by Linux PTY tests."
+        }
+      ]
+    },
+    {
+      "path": "README.md",
+      "sha256": "8dfc07374a0b26438e4ca00fc5adcd5db9dfd6be56c75d1fbcbb7e8120fc7e03",
+      "disposition": "documentation",
+      "reason": "Documents startup usage, original ownership snapshot, bounded correspondence or the private unmerged PR314 dependency and its input-guard correction; no new executable transition or complete implementation proof is asserted.",
+      "models": []
+    },
+    {
+      "path": "cmd/simulator/main.go",
+      "sha256": "4ce47b0014e2662bf3cebc5f4324091f1e067880dcfd934f26d9442516c62a37",
+      "disposition": "modeled",
+      "reason": "Declares or connects the bounded Startup token-file identity/private-creation and emission-context contract; does not claim proof of the whole CLI, build system, OS, process lifecycle or Go implementation.",
+      "models": [
+        {
+          "id": "StartupTokenVisibility",
+          "properties": [
+            "TypeOK",
+            "FileIdentityFrozen",
+            "CreatedFilePrivate",
+            "HistoryVisibility",
+            "InvalidFileNeverEmits"
+          ],
+          "limits": "Finite safety only; abstract validated file state and terminal context, not OS permissions/syscalls/randomness/crash-write atomicity, build freshness, process shutdown, liveness or Go refinement. One fixed file path; manual deletion/path changes/rotation are outside the model. Darwin/Windows helpers are not claimed executed by Linux PTY tests."
+        }
+      ]
+    },
+    {
+      "path": "cmd/simulator/terminal.go",
+      "sha256": "5472870623b5a97254bf4d6278d40213432ebbb06c91eaf1ff166ee5f6aae08f",
+      "disposition": "modeled",
+      "reason": "Declares or connects the bounded Startup token-file identity/private-creation and emission-context contract; does not claim proof of the whole CLI, build system, OS, process lifecycle or Go implementation.",
+      "models": [
+        {
+          "id": "StartupTokenVisibility",
+          "properties": [
+            "TypeOK",
+            "FileIdentityFrozen",
+            "CreatedFilePrivate",
+            "HistoryVisibility",
+            "InvalidFileNeverEmits"
+          ],
+          "limits": "Finite safety only; abstract validated file state and terminal context, not OS permissions/syscalls/randomness/crash-write atomicity, build freshness, process shutdown, liveness or Go refinement. One fixed file path; manual deletion/path changes/rotation are outside the model. Darwin/Windows helpers are not claimed executed by Linux PTY tests."
+        }
+      ]
+    },
+    {
+      "path": "cmd/simulator/terminal_darwin.go",
+      "sha256": "3b8999d1daf00f0118ab83a15c05935b9024bce9c56a28c51d8a13aa213ae35f",
+      "disposition": "modeled",
+      "reason": "Platform adapter supplies the abstract TTY input for visibility. No native Darwin/Windows execution or syscall proof is inferred from the model or Linux PTY/cross-compilation checks.",
+      "models": [
+        {
+          "id": "StartupTokenVisibility",
+          "properties": [
+            "TypeOK",
+            "FileIdentityFrozen",
+            "CreatedFilePrivate",
+            "HistoryVisibility",
+            "InvalidFileNeverEmits"
+          ],
+          "limits": "Finite safety only; abstract validated file state and terminal context, not OS permissions/syscalls/randomness/crash-write atomicity, build freshness, process shutdown, liveness or Go refinement. One fixed file path; manual deletion/path changes/rotation are outside the model. Darwin/Windows helpers are not claimed executed by Linux PTY tests."
+        }
+      ]
+    },
+    {
+      "path": "cmd/simulator/terminal_linux.go",
+      "sha256": "12de510bf595dbbfa45f56810352c9de797bc20faf8ecb7187fa2a84ff0c3c46",
+      "disposition": "modeled",
+      "reason": "Declares or connects the bounded Startup token-file identity/private-creation and emission-context contract; does not claim proof of the whole CLI, build system, OS, process lifecycle or Go implementation.",
+      "models": [
+        {
+          "id": "StartupTokenVisibility",
+          "properties": [
+            "TypeOK",
+            "FileIdentityFrozen",
+            "CreatedFilePrivate",
+            "HistoryVisibility",
+            "InvalidFileNeverEmits"
+          ],
+          "limits": "Finite safety only; abstract validated file state and terminal context, not OS permissions/syscalls/randomness/crash-write atomicity, build freshness, process shutdown, liveness or Go refinement. One fixed file path; manual deletion/path changes/rotation are outside the model. Darwin/Windows helpers are not claimed executed by Linux PTY tests."
+        }
+      ]
+    },
+    {
+      "path": "cmd/simulator/terminal_linux_test.go",
+      "sha256": "8ef183f2e93005d8262eec0f464db599bb9f70afaf1558682156f130f1c77f39",
+      "disposition": "modeled",
+      "reason": "Existing native/real-PTY/startup assertions connect runtime token visibility, unchanged saved-token identity and authentication boundaries to declared properties. Tests are preserved from public ac52; model limits exclude build freshness, OS correctness, shutdown and Go refinement.",
+      "models": [
+        {
+          "id": "StartupTokenVisibility",
+          "properties": [
+            "TypeOK",
+            "FileIdentityFrozen",
+            "CreatedFilePrivate",
+            "HistoryVisibility",
+            "InvalidFileNeverEmits"
+          ],
+          "limits": "Finite safety only; abstract validated file state and terminal context, not OS permissions/syscalls/randomness/crash-write atomicity, build freshness, process shutdown, liveness or Go refinement. One fixed file path; manual deletion/path changes/rotation are outside the model. Darwin/Windows helpers are not claimed executed by Linux PTY tests."
+        }
+      ]
+    },
+    {
+      "path": "cmd/simulator/terminal_other.go",
+      "sha256": "65b1d0ee3bd1e28877b7de6905f05398303a3b38db9dc6e4fbebe6148ae5b5c5",
+      "disposition": "modeled",
+      "reason": "Platform adapter supplies the abstract TTY input for visibility. No native Darwin/Windows execution or syscall proof is inferred from the model or Linux PTY/cross-compilation checks.",
+      "models": [
+        {
+          "id": "StartupTokenVisibility",
+          "properties": [
+            "TypeOK",
+            "FileIdentityFrozen",
+            "CreatedFilePrivate",
+            "HistoryVisibility",
+            "InvalidFileNeverEmits"
+          ],
+          "limits": "Finite safety only; abstract validated file state and terminal context, not OS permissions/syscalls/randomness/crash-write atomicity, build freshness, process shutdown, liveness or Go refinement. One fixed file path; manual deletion/path changes/rotation are outside the model. Darwin/Windows helpers are not claimed executed by Linux PTY tests."
+        }
+      ]
+    },
+    {
+      "path": "cmd/simulator/terminal_test.go",
+      "sha256": "192a111fc236b495d769bf6aa760f4543a2c972449e9361c6056e8fccf338621",
+      "disposition": "modeled",
+      "reason": "Existing native/real-PTY/startup assertions connect runtime token visibility, unchanged saved-token identity and authentication boundaries to declared properties. Tests are preserved from public ac52; model limits exclude build freshness, OS correctness, shutdown and Go refinement.",
+      "models": [
+        {
+          "id": "StartupTokenVisibility",
+          "properties": [
+            "TypeOK",
+            "FileIdentityFrozen",
+            "CreatedFilePrivate",
+            "HistoryVisibility",
+            "InvalidFileNeverEmits"
+          ],
+          "limits": "Finite safety only; abstract validated file state and terminal context, not OS permissions/syscalls/randomness/crash-write atomicity, build freshness, process shutdown, liveness or Go refinement. One fixed file path; manual deletion/path changes/rotation are outside the model. Darwin/Windows helpers are not claimed executed by Linux PTY tests."
+        }
+      ]
+    },
+    {
+      "path": "cmd/simulator/terminal_windows.go",
+      "sha256": "1743fa5be09de6394752bb35990a0d29935869958d50094170923dcbe834a481",
+      "disposition": "modeled",
+      "reason": "Platform adapter supplies the abstract TTY input for visibility. No native Darwin/Windows execution or syscall proof is inferred from the model or Linux PTY/cross-compilation checks.",
+      "models": [
+        {
+          "id": "StartupTokenVisibility",
+          "properties": [
+            "TypeOK",
+            "FileIdentityFrozen",
+            "CreatedFilePrivate",
+            "HistoryVisibility",
+            "InvalidFileNeverEmits"
+          ],
+          "limits": "Finite safety only; abstract validated file state and terminal context, not OS permissions/syscalls/randomness/crash-write atomicity, build freshness, process shutdown, liveness or Go refinement. One fixed file path; manual deletion/path changes/rotation are outside the model. Darwin/Windows helpers are not claimed executed by Linux PTY tests."
+        }
+      ]
+    },
+    {
+      "path": "docs/development-status.md",
+      "sha256": "a6dd2f2b5d457b1e55b5e35bcde9d50ad8063564ca3f635be927310ff7343734",
+      "disposition": "documentation",
+      "reason": "Documents startup usage, original ownership snapshot, bounded correspondence or the private unmerged PR314 dependency and its input-guard correction; no new executable transition or complete implementation proof is asserted.",
+      "models": []
+    },
+    {
       "path": "docs/formal-module-metadata.md",
       "sha256": "c8ae8dddb4565559e807d31f34fc96e2566212ccb50089907bf817fb6967214f",
       "disposition": "documentation",
-      "reason": "Documents narrow annotation recognition, corrected hidden-Git-flag input guard, scoped real-Git test results and explicit finite/implementation limits.",
+      "reason": "Documents startup usage, original ownership snapshot, bounded correspondence or the private unmerged PR314 dependency and its input-guard correction; no new executable transition or complete implementation proof is asserted.",
+      "models": []
+    },
+    {
+      "path": "docs/start.md",
+      "sha256": "42d815687007a43b583aff5f8d24fc49a506d6a7a940cf9fb0001fdde6f12b9f",
+      "disposition": "documentation",
+      "reason": "Documents startup usage, original ownership snapshot, bounded correspondence or the private unmerged PR314 dependency and its input-guard correction; no new executable transition or complete implementation proof is asserted.",
+      "models": []
+    },
+    {
+      "path": "formal/README.md",
+      "sha256": "b6abd9c8fbb4d74ba46c7cbdde839c503c712a87cf471a8b3ccfff9b675cf8a1",
+      "disposition": "documentation",
+      "reason": "Documents startup usage, original ownership snapshot, bounded correspondence or the private unmerged PR314 dependency and its input-guard correction; no new executable transition or complete implementation proof is asserted.",
+      "models": []
+    },
+    {
+      "path": "formal/StartupTokenVisibility.cfg",
+      "sha256": "dab3828c065dfc50af26a9dcf76f14ef6e8232f7ff58b64dd81617be41e0c9a3",
+      "disposition": "modeled",
+      "reason": "Declares or connects the bounded Startup token-file identity/private-creation and emission-context contract; does not claim proof of the whole CLI, build system, OS, process lifecycle or Go implementation.",
+      "models": [
+        {
+          "id": "StartupTokenVisibility",
+          "properties": [
+            "TypeOK",
+            "FileIdentityFrozen",
+            "CreatedFilePrivate",
+            "HistoryVisibility",
+            "InvalidFileNeverEmits"
+          ],
+          "limits": "Finite safety only; abstract validated file state and terminal context, not OS permissions/syscalls/randomness/crash-write atomicity, build freshness, process shutdown, liveness or Go refinement. One fixed file path; manual deletion/path changes/rotation are outside the model. Darwin/Windows helpers are not claimed executed by Linux PTY tests."
+        }
+      ]
+    },
+    {
+      "path": "formal/StartupTokenVisibility.tla",
+      "sha256": "772486b0a7e450ecbfae008ada870d68bf24cbf1d0a36f223f2bfb07430551e5",
+      "disposition": "modeled",
+      "reason": "Declares or connects the bounded Startup token-file identity/private-creation and emission-context contract; does not claim proof of the whole CLI, build system, OS, process lifecycle or Go implementation.",
+      "models": [
+        {
+          "id": "StartupTokenVisibility",
+          "properties": [
+            "TypeOK",
+            "FileIdentityFrozen",
+            "CreatedFilePrivate",
+            "HistoryVisibility",
+            "InvalidFileNeverEmits"
+          ],
+          "limits": "Finite safety only; abstract validated file state and terminal context, not OS permissions/syscalls/randomness/crash-write atomicity, build freshness, process shutdown, liveness or Go refinement. One fixed file path; manual deletion/path changes/rotation are outside the model. Darwin/Windows helpers are not claimed executed by Linux PTY tests."
+        }
+      ]
+    },
+    {
+      "path": "formal/models.json",
+      "sha256": "0826710f589fc853c8ebf067dd71d4a9737b860ce65369a8e5f0f405e0082518",
+      "disposition": "formal-infrastructure",
+      "reason": "Includes the private PR314 narrow module-annotation recognizer and direct literal go.mod/go.sum byte/mode guards, plus mandatory original-five-and-Startup inventory/rules and exact preserved mutation anchors. Existing protections are retained or strengthened; policy/classifier fixtures do not substitute for actual TLC/native/CI verification.",
+      "models": []
+    },
+    {
+      "path": "go.mod",
+      "sha256": "faa914c33f1d26d0744cec214889dc2b23d7ba7815919faa563b3218e51e62f5",
+      "disposition": "build-metadata",
+      "reason": "Same module/go header and exact required module-version mapping, unchanged go.sum: only x/sys grouping/indirect annotation changes for an existing direct import. Use inherited PR314 strict recognizer and literal HEAD byte/mode guards; no token invariant, new dependency or general module exemption is claimed.",
       "models": []
     },
     {
       "path": "scripts/formal_applicability.py",
       "sha256": "a389e8a406b8d85ebc3105301603300d35ab02eae37d9fbc549323c9aa9ebfbd",
       "disposition": "formal-infrastructure",
-      "reason": "Checks exact module/checksum bytes and regular nonexecutable modes before/after regardless of assume-unchanged/skip-worktree; narrows annotation-only classification without general module/runtime exemption. Expanded applicability21 and gate10 tests passed; actual TLC/immutable record are separate required results.",
+      "reason": "Includes the private PR314 narrow module-annotation recognizer and direct literal go.mod/go.sum byte/mode guards, plus mandatory original-five-and-Startup inventory/rules and exact preserved mutation anchors. Existing protections are retained or strengthened; policy/classifier fixtures do not substitute for actual TLC/native/CI verification.",
       "models": []
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "7a412c13548f80f107f5fb36cc7f3cb6d49dc28b07a052a42da9dde8e91bb716",
+      "sha256": "1408e9fd360ffc7b49b4bef3055d579f6a624199e234d380597c1e65d22c3ec5",
       "disposition": "formal-infrastructure",
-      "reason": "Checks exact module/checksum bytes and regular nonexecutable modes before/after regardless of assume-unchanged/skip-worktree; narrows annotation-only classification without general module/runtime exemption. Expanded applicability21 and gate10 tests passed; actual TLC/immutable record are separate required results.",
+      "reason": "Includes the private PR314 narrow module-annotation recognizer and direct literal go.mod/go.sum byte/mode guards, plus mandatory original-five-and-Startup inventory/rules and exact preserved mutation anchors. Existing protections are retained or strengthened; policy/classifier fixtures do not substitute for actual TLC/native/CI verification.",
       "models": []
     },
     {
       "path": "scripts/formal_module_metadata.py",
       "sha256": "ef1b2a1a0740ccecda7041ad004598dc753007a560524ea829b5cc15e45d0d25",
       "disposition": "formal-infrastructure",
-      "reason": "Checks exact module/checksum bytes and regular nonexecutable modes before/after regardless of assume-unchanged/skip-worktree; narrows annotation-only classification without general module/runtime exemption. Expanded applicability21 and gate10 tests passed; actual TLC/immutable record are separate required results.",
+      "reason": "Includes the private PR314 narrow module-annotation recognizer and direct literal go.mod/go.sum byte/mode guards, plus mandatory original-five-and-Startup inventory/rules and exact preserved mutation anchors. Existing protections are retained or strengthened; policy/classifier fixtures do not substitute for actual TLC/native/CI verification.",
       "models": []
+    },
+    {
+      "path": "scripts/start.sh",
+      "sha256": "b770637ffbbd5f3626832d612c225528f26b782a25d72c8e9c213edb4c819b02",
+      "disposition": "modeled",
+      "reason": "Forwards the existing authenticated startup configuration and only requests token display for terminal output with CI unset. Build failure/freshness, path operations and process cleanup are not proven by the finite token contract.",
+      "models": [
+        {
+          "id": "StartupTokenVisibility",
+          "properties": [
+            "TypeOK",
+            "FileIdentityFrozen",
+            "CreatedFilePrivate",
+            "HistoryVisibility",
+            "InvalidFileNeverEmits"
+          ],
+          "limits": "Finite safety only; abstract validated file state and terminal context, not OS permissions/syscalls/randomness/crash-write atomicity, build freshness, process shutdown, liveness or Go refinement. One fixed file path; manual deletion/path changes/rotation are outside the model. Darwin/Windows helpers are not claimed executed by Linux PTY tests."
+        }
+      ]
     },
     {
       "path": "scripts/test-formal-applicability.py",
       "sha256": "5596571973aaa556c1158316750aa2053ba490106a43dd48a4e0336abad8933c",
       "disposition": "formal-infrastructure",
-      "reason": "Checks exact module/checksum bytes and regular nonexecutable modes before/after regardless of assume-unchanged/skip-worktree; narrows annotation-only classification without general module/runtime exemption. Expanded applicability21 and gate10 tests passed; actual TLC/immutable record are separate required results.",
+      "reason": "Includes the private PR314 narrow module-annotation recognizer and direct literal go.mod/go.sum byte/mode guards, plus mandatory original-five-and-Startup inventory/rules and exact preserved mutation anchors. Existing protections are retained or strengthened; policy/classifier fixtures do not substitute for actual TLC/native/CI verification.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "71117354b700db4d16cc6590ca323d6803a2014371e9375c61c0498585e4bc93",
+      "sha256": "5168eaf6187e1d4036968e71b0c321872527e0b7d0055a446b9e3ecfca6a5e5b",
       "disposition": "formal-infrastructure",
-      "reason": "Checks exact module/checksum bytes and regular nonexecutable modes before/after regardless of assume-unchanged/skip-worktree; narrows annotation-only classification without general module/runtime exemption. Expanded applicability21 and gate10 tests passed; actual TLC/immutable record are separate required results.",
+      "reason": "Includes the private PR314 narrow module-annotation recognizer and direct literal go.mod/go.sum byte/mode guards, plus mandatory original-five-and-Startup inventory/rules and exact preserved mutation anchors. Existing protections are retained or strengthened; policy/classifier fixtures do not substitute for actual TLC/native/CI verification.",
       "models": []
     },
     {
       "path": "test/formal/startup-module-metadata.json",
       "sha256": "8b1d11863b1325b65d40dbd26974a423ea740823e992b6631947b43c931c8b60",
       "disposition": "test-support",
-      "reason": "Pinned public Startup308 module before/after and unchanged checksum blobs with SHA256 receipts for real-Git metadata acceptance and semantic negative controls.",
+      "reason": "Immutable public Startup before/after module/checksum fixture and hash receipts test only the narrow metadata recognizer. No runtime dependency/state or token-property claim follows from this data.",
       "models": []
+    },
+    {
+      "path": "test/start/check_start.py",
+      "sha256": "4b113effc4a67e35d04311b8f1ca59615b829a4ae7dd12ad3dc6fbfeb2efb610",
+      "disposition": "modeled",
+      "reason": "Existing native/real-PTY/startup assertions connect runtime token visibility, unchanged saved-token identity and authentication boundaries to declared properties. Tests are preserved from public ac52; model limits exclude build freshness, OS correctness, shutdown and Go refinement.",
+      "models": [
+        {
+          "id": "StartupTokenVisibility",
+          "properties": [
+            "TypeOK",
+            "FileIdentityFrozen",
+            "CreatedFilePrivate",
+            "HistoryVisibility",
+            "InvalidFileNeverEmits"
+          ],
+          "limits": "Finite safety only; abstract validated file state and terminal context, not OS permissions/syscalls/randomness/crash-write atomicity, build freshness, process shutdown, liveness or Go refinement. One fixed file path; manual deletion/path changes/rotation are outside the model. Darwin/Windows helpers are not claimed executed by Linux PTY tests."
+        }
+      ]
     }
   ]
 }

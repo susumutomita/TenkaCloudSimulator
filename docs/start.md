@@ -104,3 +104,35 @@ older emission. Guard-removal and token-overwrite mutations test sensitivity.
 This is a bounded design safety model, not a proof of OS permissions, syscalls,
 randomness, file-write/crash atomicity, build freshness, process shutdown or
 implementation refinement. Real file/PTY/build/HTTP tests are independent checks.
+
+
+### Formal registry candidate and source correspondence
+
+The original model/config and three mutation anchors are registered without
+changing the Startup implementation. Registry-safe mutation IDs are
+`OmittedCIGuard`, `OmittedTTYGuard` and `OverwriteExistingToken`; their expected
+invariants remain `HistoryVisibility`, `HistoryVisibility` and
+`FileIdentityFrozen`. Existing five models/rules remain mandatory; the registry
+contains six positives and eight required counterexamples. The checker also
+requires the Startup model and all five of its original invariants, so removing
+both a declaration and its files or removing a property in both registry/CFG
+cannot silently reduce protection.
+
+| Source / existing concrete test | Bounded correspondence and limits |
+|---|---|
+| `cmd/simulator/main.go` / `TestTokenDisplayCannotDisableAuthentication` | Explicit display cannot opt out of authentication; this does not prove the entire HTTP/server path |
+| `cmd/simulator/terminal.go` / `TestTokenDisplayRejectsRedirectsAndCI` | CI means variable **presence**, including empty/false values; non-file/nonterminal output remains file-only. Actual terminal detection is an input abstraction in TLA+ |
+| `cmd/simulator/terminal_linux.go` and `terminal_linux_test.go` / `TestExplicitTokenDisplayUsesActualTerminalAndPreservesFile` | Real Linux PTY assertions separately cover explicit visibility and unchanged saved token; they are not an OS-level mathematical proof |
+| Darwin/Windows/other terminal helpers | Platform implementations select the TTY input; unverified platforms conservatively return false. Native Darwin/Windows execution is not claimed by Linux/cross-compile evidence |
+| `Makefile`, `scripts/start.sh`, `test/start/check_start.py` | Launcher forwards authenticated/file-only or explicitly interactive context. Real temporary build/file/PTY/HTTP/signal checks cover other behavior separately; freshness, process cleanup and file-write atomicity are not token-model guarantees |
+
+The `go.mod` change only removes an indirect annotation for an already pinned,
+directly imported dependency; versions and go.sum are unchanged. It is classified
+by the separate strict metadata recognizer and direct HEAD byte/mode guards,
+**not** by a token invariant or a general dependency exemption.
+
+The local registration candidate incorporates main `55a1119` and privately
+includes unmerged PR #314 `74168f6` by normal merge. It preserves public Startup
+`ac52f4b` as an ancestor. Publication requires #314 on main, a fresh applicability
+record against the reviewed main base, and exact-HEAD CI/review. The registration
+source work itself does not claim those gates were run or the dependency merged.

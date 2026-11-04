@@ -42,3 +42,25 @@ human scope review and separately configured repository merge protection.
 New runtime/state transitions are not covered by the existing five models merely
 because this suite passes. No new service, callback or Python/HTTP state-machine
 proof is implied by this inventory.
+
+
+## Startup token visibility (private registration candidate)
+
+`StartupTokenVisibility.tla` models one fixed configured token file, two abstract
+token values, three initial file states and at most two historical emissions.
+It checks existing-file identity, private creation, invalid-file refusal and
+emission-time auth/explicit-show/TTY/CI-presence guards. Removing the CI or TTY
+guard must violate `HistoryVisibility`; overwriting an existing token must
+violate `FileIdentityFrozen`. Original model/config and exact mutation anchors
+are preserved. This is six positive models plus eight required negative
+controls (fourteen actual TLC cases when the registered gate is executed).
+
+`source_scope` binds CLI/launcher code and its real PTY/native tests. It does not
+prove terminal syscalls, OS ACLs, entropy, crash safety, build freshness, process
+shutdown or all Go behavior. The metadata-only `go.mod` annotation change uses
+the separate narrow recognizer and is not bound to token-state invariants.
+
+This registration candidate privately depends on **unmerged PR #314** at
+`74168f6`, normally merged on top of main `55a1119`. It must not be published as
+an updated Startup PR until that dependency is on main and the exact-base record
+and required checks are refreshed. See [startup usage and limits](../docs/start.md).
