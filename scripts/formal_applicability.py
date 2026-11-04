@@ -11,7 +11,7 @@ import re
 import subprocess
 from pathlib import Path
 
-from formal_model_gate import GateError, load_json, load_registry, require
+from formal_model_gate import GateError, load_json, load_registry, exact_head_inputs, require
 
 RECORD = 'formal/applicability.json'
 FORMAL_INFRA = {'formal/models.json', 'formal/tla2tools.sha256',
@@ -103,6 +103,7 @@ def base_models(root, base):
 
 def validate_record(root, base, registry=None):
     root = Path(root)
+    snapshot = exact_head_inputs(root)
     base = commit(root, base)
     registry = registry or load_registry(root)
     data = git(root, 'show', 'HEAD:' + RECORD)
@@ -116,6 +117,8 @@ def validate_record(root, base, registry=None):
     actual = changes(root, base)
     prior, models = base_models(root, base), {m['id']: m for m in registry['models']}
     require(set(prior) <= set(models), 'registered models cannot silently disappear')
+    for mid in prior:
+        require(set(prior[mid]['properties']) <= set(models[mid]['properties']), 'registered invariants cannot silently disappear')
     seen = set()
     evidence = []
     for item in record['changes']:
@@ -143,12 +146,14 @@ def validate_record(root, base, registry=None):
                 require(isinstance(binding['limits'], str) and binding['limits'].strip(), 'binding must acknowledge what is not modeled')
         else:
             kind = disposition(path)
-            require(not any(path in m['source_scope'] or path in (m['model'], m['config']) for m in models.values()), 'declared state/model scope requires a modeled disposition: ' + path)
+            require(not any(path in m['source_scope'] or path in (m['model'], m['config']) for m in [*models.values(), *prior.values()]), 'declared state/model scope requires a modeled disposition: ' + path)
             require(kind is not None, 'unclassified implementation/state path requires a model: ' + path)
             require(item['disposition'] == kind and not item['models'], 'nonformal disposition mismatch: ' + path)
         evidence.append(item)
     require(seen == set(actual), 'missing applicability entries: ' + ', '.join(sorted(set(actual) - seen)))
-    return {'kind': 'declared-applicability-not-semantic-proof', 'base_sha': base,
+    after = exact_head_inputs(root)
+    require(after['head'] == snapshot['head'] and after['hashes'] == snapshot['hashes'], 'applicability inputs changed during validation')
+    return {'input_mode': 'immutable-head', 'input_sha256': snapshot['hashes'], 'kind': 'declared-applicability-not-semantic-proof', 'base_sha': base,
             'head_sha': git(root, 'rev-parse', 'HEAD').decode().strip(), 'changes': evidence,
             'review': 'Human acceptance is external; this check does not authenticate a reviewer or prove refinement.'}
 

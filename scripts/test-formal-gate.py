@@ -1,4 +1,6 @@
 """Small real-filesystem tests of gate failure handling; these do not run TLC."""
+import contextlib
+import io
 import hashlib
 import json
 import shutil
@@ -8,13 +10,16 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from formal_model_gate import GateError, apply_mutant, load_registry, run_suite, validate_result
+from formal_model_gate import GateError, apply_mutant, load_registry, run_suite, validate_result, invariants
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 class FormalGateTests(unittest.TestCase):
     def setUp(self):
+        self.output_capture = contextlib.redirect_stdout(io.StringIO())
+        self.output_capture.__enter__()
+        self.addCleanup(self.output_capture.__exit__, None, None, None)
         self.temporary = tempfile.TemporaryDirectory(prefix='formal-gate-unit-')
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name)
@@ -109,6 +114,58 @@ class FormalGateTests(unittest.TestCase):
                 with self.assertRaises(GateError):
                     run_suite(self.root, jar, self.root / 'reports')
                 self.assertFalse(json.loads((self.root / 'reports/evidence.json').read_text())['success'])
+
+    def test_cfg_view_constraints_and_unknown_keywords_are_not_invariants(self):
+        for directive in ('VIEW V', 'CONSTRAINT Bound', 'CONSTRAINTS Bound', 'ACTION_CONSTRAINT Bound', 'ACTION_CONSTRAINTS Bound', 'TYPE T', 'TYPE_CONSTRAINT T', 'SYMMETRY Permutations'):
+            with self.subTest(directive=directive), self.assertRaises(GateError):
+                invariants('INIT Init\nNEXT Next\nINVARIANT Safe\n' + directive + '\n')
+        with self.assertRaises(GateError):
+            invariants('CONSTANT X = {a,b} VIEW V\nINVARIANT Safe')
+        with self.assertRaises(GateError):
+            invariants('INVARIANTS TypeOK Safe VIEW V')
+
+    def test_named_existing_safety_obligation_cannot_disappear(self):
+        config = self.root / 'formal/ObjectStore.cfg'
+        config.write_text(config.read_text().replace(' NoUnauthorizedMutation', ''))
+        path = self.root / 'formal/models.json'
+        registry = json.loads(path.read_text())
+        registry['models'][0]['properties'].remove('NoUnauthorizedMutation')
+        path.write_text(json.dumps(registry))
+        with self.assertRaises(GateError):
+            load_registry(self.root)
+
+    def test_merge_mode_uses_head_snapshots_and_rejects_changes_during_run(self):
+        # Controlled Java results exercise input protection only. This test does
+        # not use the official tool or claim that a model was actually checked.
+        jar = self.root / 'fixture.jar'
+        jar.write_bytes(b'unit classification fixture')
+        (self.root / 'formal/tla2tools.sha256').write_text(hashlib.sha256(jar.read_bytes()).hexdigest() + '  tla2tools.jar\n')
+        (self.root / '.gitignore').write_text('reports/\n')
+        for command in (['git','init','-q'], ['git','config','user.name','Fixture'], ['git','config','user.email','fixture@example.invalid'], ['git','add','.'], ['git','commit','-q','-m','controlled immutable tree']):
+            subprocess.run(command, cwd=self.root, check=True, capture_output=True)
+        registry = load_registry(self.root)
+        expected = {m['id'] + '_' + mutation['id']: mutation['expect_invariant'] for m in registry['models'] for mutation in m['mutants']}
+        real_run = subprocess.run
+        tamper = [False]
+        def controlled(command, **kwargs):
+            if command[0] != '/fixture/java':
+                return real_run(command, **kwargs)
+            self.assertEqual(Path(command[2]).read_bytes(), jar.read_bytes())
+            name = Path(command[-1]).stem
+            if tamper[0] and name == 'ObjectStore':
+                source = self.root / 'formal/ObjectStore.tla'
+                source.write_text(source.read_text() + '\nchanged while process was running\n')
+            if name in expected:
+                return subprocess.CompletedProcess(command, 12, 'Invariant ' + expected[name] + ' is violated.', '')
+            return subprocess.CompletedProcess(command, 0, 'No error has been found.', '')
+        with patch('formal_model_gate.shutil.which', return_value='/fixture/java'), patch('formal_model_gate.subprocess.run', side_effect=controlled):
+            result = run_suite(self.root, jar, self.root / 'reports/formal', merge_gate=True)
+            self.assertEqual(result['input_mode'], 'immutable-head')
+            self.assertTrue(result['success'])
+            tamper[0] = True
+            with self.assertRaises(GateError):
+                run_suite(self.root, jar, self.root / 'reports/formal', merge_gate=True)
+        self.assertFalse(json.loads((self.root / 'reports/formal/evidence.json').read_text())['success'])
 
 
 if __name__ == '__main__':

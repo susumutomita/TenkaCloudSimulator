@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from formal_applicability import GateError, RECORD, changes, disposition, git, initialize, load_registry, validate_record
+from formal_applicability import GateError, RECORD, changes, disposition, git, initialize, load_registry, validate_record, exact_head_inputs
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -22,6 +22,10 @@ class ApplicabilityTests(unittest.TestCase):
             record.unlink()
         self.registry = json.loads((ROOT / 'formal/models.json').read_text())
         for path in {p for m in self.registry['models'] for p in m['source_scope']}:
+            target = self.root / path
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(ROOT / path, target)
+        for path in ('scripts/formal_model_gate.py', 'scripts/formal_applicability.py'):
             target = self.root / path
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(ROOT / path, target)
@@ -168,6 +172,60 @@ class ApplicabilityTests(unittest.TestCase):
         self.write_record(record)
         self.commit('explicitly bound deletion')
         validate_record(self.root, self.base)
+
+    def test_dirty_and_staged_inputs_do_not_validate_committed_receipts(self):
+        self.prepare()
+        for path in ('formal/models.json', 'formal/ObjectStore.tla', 'formal/ObjectStore.cfg', 'scripts/formal_applicability.py', 'internal/core/store.go'):
+            with self.subTest(path=path):
+                target = self.root / path
+                original = target.read_bytes()
+                target.write_bytes(original + b'\nchanged after HEAD\n')
+                with self.assertRaises(GateError):
+                    validate_record(self.root, self.base)
+                git(self.root, 'add', path)
+                target.write_bytes(original)  # Worktree restored; index still differs.
+                with self.assertRaises(GateError):
+                    validate_record(self.root, self.base)
+                git(self.root, 'reset', '-q', 'HEAD', '--', path)
+        validate_record(self.root, self.base)
+
+    def test_untracked_and_ignored_policy_model_inputs_fail(self):
+        self.prepare()
+        target = self.root / 'new_state.go'
+        target.write_text('uncommitted implementation')
+        with self.assertRaises(GateError):
+            exact_head_inputs(self.root)
+        target.unlink()
+        ignored = self.root / 'scripts/ignored.py'
+        (self.root / '.git/info/exclude').write_text('scripts/ignored.py\n')
+        ignored.write_text('untracked policy replacement')
+        with self.assertRaises(GateError):
+            exact_head_inputs(self.root)
+
+    def test_prior_presentation_state_scope_cannot_be_deleted_and_relabeled(self):
+        path = 'tools/console/src/state.js'
+        target = self.root / path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text('previously modeled presentation state')
+        registry_path = self.root / 'formal/models.json'
+        registry = json.loads(registry_path.read_text())
+        registry['models'][0]['source_scope'].append(path)
+        registry_path.write_text(json.dumps(registry))
+        self.commit('prior declared UI state scope')
+        self.base = git(self.root, 'rev-parse', 'HEAD').decode().strip()
+        git(self.root, 'rm', path)
+        registry['models'][0]['source_scope'].remove(path)
+        registry_path.write_text(json.dumps(registry))
+        git(self.root, 'add', 'formal/models.json')
+        initialize(self.root, self.base)
+        record = json.loads((self.root / RECORD).read_text())
+        for item in record['changes']:
+            item['disposition'] = disposition(item['path'])
+            item['reason'] = 'A previous state scope cannot be erased by relabeling this deletion as UI.'
+        self.write_record(record)
+        self.commit('scope erasure is not an exception')
+        with self.assertRaises(GateError):
+            validate_record(self.root, self.base)
 
 
 if __name__ == '__main__':
