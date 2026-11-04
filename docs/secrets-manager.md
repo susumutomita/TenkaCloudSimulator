@@ -96,6 +96,22 @@ The10000 retired identities remain reserved after reopen. Large frame assertions
 stream typed/length-framed hashes over all five private tables and never dump
 values/cursor keys. No fake SQL driver or entropy/error accessor is substituted.
 
+At `0fe6174`, the next canonical whole-module invocation passed all Go race
+packages and the build: changed AWS tests reran147.298s; unchanged packages used
+standard Go test caching. Its one new profile passed statement6266/6615 (94.72%)
+but **failed** unfiltered source8180/9091 (89.98%). The exact90% threshold is not
+rounded away. Both failed profiles remain separate; neither is unioned with
+focused results.
+
+The unavailable-stage fixture is now extended to explicit VersionId retrieval,
+which reads a value before the late stage-metadata lookup. It requires zero
+partial store material and sanitized HTTP500 with no value, and refuses false
+acknowledgement of an immutable same-token Put when stage metadata is absent.
+After restoring the table, the exact Get/replay must succeed with the full
+private frame unchanged. This minimal test extension changes no production,
+limit, model or threshold; its own fresh selected and whole-profile results must
+be recorded separately from the prior two failures.
+
 These ten added tests are not yet a combined whole-profile pass. The former
 `bb802f2` model gate passed13 baselines and50 specified counterexamples plus
 19/21 policy/applicability units; all50 control identities are required and their

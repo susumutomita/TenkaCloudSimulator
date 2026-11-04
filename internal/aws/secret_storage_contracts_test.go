@@ -164,6 +164,22 @@ func TestSecretStorageUnavailableTablesAndCorruptMetadataFailClosed(t *testing.T
 					t.Fatal("listing unexpectedly requires value table")
 				}
 			}
+			if fault == "stages unavailable" {
+				// Explicit immutable-version reads load bytes before obtaining
+				// stage metadata. A late failure must not return partial data.
+				value, err := s.Get(ctx, "us-east-1", arn, secretContractB, "", secretContractAllow)
+				if err == nil || secretTestCode(err) != "infrastructure" || value.material.plaintext() != "" || value.ARN != "" {
+					t.Fatal("late stage lookup returned partial secret value")
+				}
+				response := secretHTTPCall(s, "GetSecretValue", secretJSONFixture(t, map[string]any{"SecretId": arn, "VersionId": secretContractB}), secretContractAllow)
+				if response.Code != 500 || strings.Contains(response.Body.String(), "DUMMY-") || strings.Contains(response.Body.String(), "SecretString") || strings.Contains(response.Body.String(), "secret_unavailable_stages") {
+					t.Fatal("late stage lookup disclosed value or storage details on native HTTP")
+				}
+				replay, err := s.Put(ctx, "us-east-1", arn, secretContractB, newSecretMaterial("DUMMY-storage-B"), secretContractAllow)
+				if err == nil || secretTestCode(err) != "infrastructure" || replay.VersionId != "" {
+					t.Fatal("same-token replay falsely acknowledged unavailable stage metadata")
+				}
+			}
 			operations := []string{"get", "put", "promote"}
 			if fault != "versions unavailable" {
 				operations = append(operations, "describe", "list")
@@ -200,6 +216,19 @@ func TestSecretStorageUnavailableTablesAndCorruptMetadataFailClosed(t *testing.T
 			}
 			if before != secretStateSnapshot(t, db) {
 				t.Fatal("failed query or mutation changed durable private state")
+			}
+			if fault == "stages unavailable" {
+				value, err := s.Get(ctx, "us-east-1", arn, secretContractB, "", secretContractAllow)
+				if err != nil || value.material.plaintext() != "DUMMY-storage-B" || len(value.VersionStages) != 1 || value.VersionStages[0] != "AWSCURRENT" {
+					t.Fatal("repaired explicit-version read did not return actual value/stage")
+				}
+				replay, err := s.Put(ctx, "us-east-1", arn, secretContractB, newSecretMaterial("DUMMY-storage-B"), secretContractAllow)
+				if err != nil || replay.VersionId != secretContractB || replay.ARN != arn {
+					t.Fatal("repaired immutable replay did not succeed")
+				}
+				if before != secretStateSnapshot(t, db) {
+					t.Fatal("repaired same-token replay changed private state")
+				}
 			}
 			if _, err := s.Put(ctx, "us-east-1", arn, secretContractC, newSecretMaterial("DUMMY-storage-C"), secretContractAllow); err != nil {
 				t.Fatal("repaired state could not accept clean retry")
