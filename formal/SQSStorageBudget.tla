@@ -4,7 +4,12 @@ CONSTANTS Scopes, SeedIDs, ExtraID, MaxRows, MaxBytes
 IDs == SeedIDs \cup {ExtraID}
 Row(id,s,n,expired) == [id |-> id,scope |-> s,size |-> n,expired |-> expired]
 RowSet == [id:IDs,scope:Scopes,size:1..2,expired:BOOLEAN]
-SeedRows == [id:SeedIDs,scope:Scopes,size:1..2,expired:BOOLEAN]
+\* Enumerate exactly the unique-ID initial rows by a 9^3 product, rather than
+\* filtering 2^24 candidate subsets. No valid initial row set is removed.
+SeedAssignments == [SeedIDs -> ({"Absent"} \cup [scope:Scopes,size:1..2,expired:BOOLEAN])]
+SeedProjection(a) == {Row(id,a[id].scope,a[id].size,a[id].expired) :
+                      id \in {key \in SeedIDs : a[key]#"Absent"}}
+SeedInitialRows == {SeedProjection(a) : a \in SeedAssignments}
 VARIABLES rows, before, actor, kind, outcome, requestID, requestBytes,
           chargedRows, chargedBytes
 vars == <<rows,before,actor,kind,outcome,requestID,requestBytes,
@@ -24,7 +29,7 @@ Fits(rs,s) == Cardinality(Chargeable(rs,s))<=MaxRows
               /\ Bytes(Chargeable(rs,s))<=MaxBytes
 Record(s,k) == /\ before'=rows /\ actor'=s /\ kind'=k
 Init ==
- /\ rows \in SUBSET SeedRows /\ UniqueIDs(rows)
+ /\ rows \in SeedInitialRows /\ UniqueIDs(rows)
  /\ before=rows /\ actor=CHOOSE s \in Scopes : TRUE
  /\ kind="Init" /\ outcome="Initial"
  /\ requestID=ExtraID /\ requestBytes=1 /\ chargedRows=0 /\ chargedBytes=0
@@ -74,7 +79,7 @@ LiveRowsPreserved == kind \in {"Send","Read"} => LiveOwn(before,actor) \subseteq
 ExpectedAdmission ==
  (before \ {r \in before : r.scope=actor /\ r.expired})
  \cup {Row(requestID,actor,requestBytes,FALSE)}
-BudgetAccountsPhysical == kind="Send" =>
+BudgetAccountsPhysical == kind="Send" /\ outcome="Accepted" =>
  chargedRows=Cardinality(ExpectedAdmission) /\ chargedBytes=Bytes(ExpectedAdmission)
 PhysicalRowCap == outcome="Accepted" => Cardinality(rows)<=MaxRows
 PayloadByteCap == outcome="Accepted" => Bytes(rows)<=MaxBytes
