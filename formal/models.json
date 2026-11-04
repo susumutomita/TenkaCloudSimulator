@@ -1313,6 +1313,184 @@
           "expect_invariant": "SourcePathImmutable"
         }
       ]
+    },
+    {
+      "id": "KMSKeyState",
+      "model": "formal/KMSKeyState.tla",
+      "config": "formal/KMSKeyState.cfg",
+      "bounds": "Two keys in distinct fixed team namespaces sharing one home region, two request regions, two contexts, two ciphertext slots, and two encryptions per key (abstract random-nonce ceiling).",
+      "properties": [
+        "TypeOK",
+        "AuthorizedEvents",
+        "EnabledCrypto",
+        "BoundContextAndKey"
+      ],
+      "limits": "Atomic bounded successful Create/SetEnabled/Encrypt/Decrypt events only; key/region/context labels are abstract values. No AES/nonce probability, JSON/IAM/SigV4 parsing, routing/protocol selection, SQLite RowsAffected/commit/crash refinement, rejected/error response frames, read-only Describe/List/GetPolicy outputs, host authentication, time, growing key population or arbitrary key policies. Last event captures pre-operation conditions so later Disable does not invalidate an earlier legitimate output.",
+      "source_scope": [
+        "internal/aws/kms_store.go",
+        "internal/aws/kms_crypto.go",
+        "internal/aws/kms_http.go",
+        "internal/aws/kms_types.go"
+      ],
+      "mutants": [
+        {
+          "id": "MissingPermissionGuard",
+          "edits": [
+            {
+              "old": "Authority(k,t,r,permit) == permit /\\ t = Owner(k) /\\ r = KeyRegion(k)",
+              "new": "Authority(k,t,r,permit) == t = Owner(k) /\\ r = KeyRegion(k)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AuthorizedEvents"
+        },
+        {
+          "id": "MissingTeamGuard",
+          "edits": [
+            {
+              "old": "Authority(k,t,r,permit) == permit /\\ t = Owner(k) /\\ r = KeyRegion(k)",
+              "new": "Authority(k,t,r,permit) == permit /\\ r = KeyRegion(k)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AuthorizedEvents"
+        },
+        {
+          "id": "MissingEnabledEncryptGuard",
+          "edits": [
+            {
+              "old": " /\\ k \\in enabled\n /\\ count[k] < 2",
+              "new": " /\\ count[k] < 2",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EnabledCrypto"
+        },
+        {
+          "id": "MissingContextGuard",
+          "edits": [
+            {
+              "old": " /\\ blobs[s].context = c\n /\\ last'",
+              "new": " /\\ last'",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BoundContextAndKey"
+        },
+        {
+          "id": "MissingRegionGuard",
+          "edits": [
+            {
+              "old": "Authority(k,t,r,permit) == permit /\\ t = Owner(k) /\\ r = KeyRegion(k)",
+              "new": "Authority(k,t,r,permit) == permit /\\ t = Owner(k)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AuthorizedEvents"
+        },
+        {
+          "id": "MissingKeyBinding",
+          "edits": [
+            {
+              "old": " /\\ blobs[s].key = k\n /\\ blobs[s].region = r",
+              "new": " /\\ blobs[s].region = r",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BoundContextAndKey"
+        },
+        {
+          "id": "MissingEnabledDecryptGuard",
+          "edits": [
+            {
+              "old": " /\\ k \\in enabled\n /\\ blobs[s] # None",
+              "new": " /\\ blobs[s] # None",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EnabledCrypto"
+        },
+        {
+          "id": "MissingEncryptionCeiling",
+          "edits": [
+            {
+              "old": " /\\ count[k] < 2\n /\\ count'",
+              "new": " /\\ count'",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TypeOK"
+        }
+      ]
+    },
+    {
+      "id": "KMSProtocolAdmission",
+      "model": "formal/KMSProtocolAdmission.tla",
+      "config": "formal/KMSProtocolAdmission.cfg",
+      "bounds": "One normalized nonoperator exercise request; target/hint/signing-scope each KMS/Other/None, four identity lookup results, two policy values, credential-valid/region-match/mutates Booleans, one optional live-policy flip after snapshot; one abstract resource bit and terminal response.",
+      "properties": [
+        "TypeOK",
+        "NoCrossServiceFallback",
+        "InfraNotDeny",
+        "MissingIdentityDenied",
+        "NoSuccessWithoutKMSTarget",
+        "NoAuthorityFromWireMetadata"
+      ],
+      "limits": "Normalized protocol/identity-policy admission abstraction after trusted outer exercise identity selection; not raw HTTP/SigV4 parsing or signature authentication, local token/Access or tenant-isolation proof, full IAM semantics, byte bodies/AES, real DB faults/transactions, Go refinement, timing/concurrency/crash proof or other-service authorization. Other route is only handoff, not modeled S3 success. Body-read-barrier native tests and nine actual Gateway metadata cases independently exercise the intended bridge; new tests and this model are initially UNRUN. Shared Gateway/server/SSM applicability is ONLY the new configured KMS route/module declaration, not unchanged AWS branches, nil-module/constructor behavior or whole provider wiring. Native tests are separate and initially unrun.",
+      "source_scope": [
+        "internal/aws/kms_dispatch.go",
+        "internal/aws/kms_http.go",
+        "internal/aws/ssm.go",
+        "internal/aws/kms_dispatch_boundary_test.go",
+        "internal/aws/s3.go",
+        "internal/server/server.go"
+      ],
+      "mutants": [
+        {
+          "id": "DropSigningIntent",
+          "edits": [
+            {
+              "old": "SelectKMS(q) == q.target=\"KMS\" \\/ q.hint=\"KMS\" \\/ q.signing=\"KMS\"",
+              "new": "SelectKMS(q) == q.target=\"KMS\" \\/ q.hint=\"KMS\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoCrossServiceFallback"
+        },
+        {
+          "id": "MaskIdentityOutage",
+          "edits": [
+            {
+              "old": "status'=IF request.lookup=\"Present\" THEN NoValue ELSE IF request.lookup=\"Missing\" THEN 403 ELSE 500",
+              "new": "status'=IF request.lookup=\"Present\" THEN NoValue ELSE IF request.lookup=\"Missing\" THEN 403 ELSE 403",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "InfraNotDeny"
+        },
+        {
+          "id": "IgnoreRequiredTarget",
+          "edits": [
+            {
+              "old": "targetOK == request.target=\"KMS\"",
+              "new": "targetOK == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoSuccessWithoutKMSTarget"
+        },
+        {
+          "id": "ReadLivePolicyInsteadOfSnapshot",
+          "edits": [
+            {
+              "old": "allowed == permit=TRUE",
+              "new": "allowed == policyLive=TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoAuthorityFromWireMetadata"
+        }
+      ]
     }
   ]
 }
