@@ -15,8 +15,9 @@ SigV4 credentials with service `kms`; real credentials and session tokens are
 rejected. The host's local access token must still be required. `server.New` alone is
 an unauthenticated composition API; hosts must wrap it in `NewAccess`. The refreshed private source now initializes KMS in regular server.New and
 advertises exactly these eight operations. Native fixtures also configure
-Gateway.KMS directly. The new composition, actual CLI/SDK and rebuilt console
-remain separate execution gates; source presence is not successful integration.
+Gateway.KMS directly. The regular server and actual CLI/SDK checks are recorded below; rebuilt console
+interaction and whole-CI remain separate gates. Source presence alone is not
+successful integration.
 An explicitly unconfigured store still returns501.
 
 ## Keys and identity permissions
@@ -97,9 +98,9 @@ CloudTrail/CloudWatch, rotation, scheduled deletion, grants, multi-region keys,
 external key material, AWS portable blobs, AWS eventual consistency, or CFN
 resource are supplied by this increment. A prepared isolated Cloudscape component targets these same native APIs for the
 regional key list, creation, metadata, read-only default policy, enable/disable
-and explicitly identified local encryption test. Shared navigation/component wiring is now registered in source. Canonical
-asset rebuild and actual browser verification remain pending; the old embedded
-bundle is not evidence that the new source view is usable.
+and explicitly identified local encryption test. Shared navigation/component wiring and canonical asset rebuild are now recorded
+below. Actual browser verification remains pending; a built bundle is not
+evidence that the new view is usable.
 No existing Challenge problem is enabled merely by these operations.
 
 ## Wire examples
@@ -217,8 +218,8 @@ success; a missing database refuses construction. These fault tests concern
 nonstandard SQL fault fixtures, not an ordinary API exploit or protection against
 an arbitrary host/database administrator. At native checkpoint f018bc6, all16 TestKMS functions passed normally (1.223s),
 under race (10.312s), and package vet passed (1CPU/-p1/offline/timeout60s).
-The owned native sources have not changed after that proof; later regular-server,
-OpenAPI/console source and model registration changes remain unexecuted.
+Subsequent dispatch and regular-server checks are recorded below. New model
+registration and actual console browser interaction remain separate gates.
 Old-candidate results are not fresh whole-integration evidence.
 
 | Actual operation group | Finite model correspondence | Native obligations outside the model |
@@ -256,9 +257,9 @@ X-Amz-Target manually to match the body; choosing a body example has not been
 verified to synchronize headers automatically. Create a key first, use its actual
 returned identifier, then copy actual local Encrypt output for Decrypt. The
 valid-base64 documentation placeholder is deliberately not decryptable.
-Parsed schema/source checks, served examples, SDK sends, browser operations,
-canonical bundle/NOTICE rebuild, complete coverage/security/CI and all12/48
-formal runs are distinct pending gates for this new source composition.
+Parsed schema/source checks, served examples, SDK sends and canonical bundle/NOTICE
+rebuild have separate results below. Browser operations, complete coverage/security/CI
+and all12/48 formal runs remain distinct pending gates for this composition.
 
 
 ## Protocol admission/refusal and snapshot contract (prepared, not verified)
@@ -306,7 +307,11 @@ including16,047 file hashes/modes and3 internal relative symlinks, matched befor
 and after copying/building. No install or lifecycle script ran. The canonical
 builder recorded22 actual dependency notice packages; original notices remained
 unchanged, and the asset/provenance checker passed. Browser operation and visual
-fidelity are not inferred from these asset checks. An extended driver is prepared
-to read the served embedded specification and execute its eight body examples
-against the same SQLite via official SDK calls; that new template flow is not
-claimed successful until its actual run is recorded.
+fidelity are not inferred from these asset checks. At canonical checkpoint c8cdb8f, the extended driver read the actual embedded
+specification and executed all eight body examples against the same restarted
+SQLite through official SDK methods, substituting only the actual returned key
+identifier/ciphertext. The documented placeholder was explicitly rejected;
+pagination was bounded and exact, and Disable/Enable state was read back. Eight
+clients had57 positive equal calls/sends/responses. Both actual CLI processes
+and the restart process completed/reaped cleanly. This is not Scalar browser
+interaction, automatic header synchronization or a whole-CI result.
