@@ -30,6 +30,7 @@ make build
 | --- | --- | --- |
 | [S3](docs/s3.md) | bucket作成・一覧・存在確認・region取得・削除、object PUT/GET/HEAD/DELETE・ListObjectsV2、bucket versioning・ListObjectVersions、public access block・tags | multipart、ACL、一般bucket policy、暗号化設定。path-styleのみ |
 | [SQS](docs/sqs.md) | Standard queue JSON 1.0 API 9操作：CreateQueue、GetQueueUrl、ListQueues、GetQueueAttributes、DeleteQueue、SendMessage、ReceiveMessage、DeleteMessage、ChangeMessageVisibility | UI、CloudFormation、function SDK bridge、Challenge連携、FIFO、batch、DLQ、SNS連携 |
+| [KMS](docs/kms.md) | CreateKey、DescribeKey、ListKeys、EnableKey、DisableKey、GetKeyPolicy、Encrypt、Decrypt。対称鍵・実ローカルAES-GCM、同一SQLiteのSDK/Cloudscape | alias、tags、grants、custom policy、rotation、scheduled deletion、CFN・他サービス暗号化。raw keyはSQLite保存でHSM/保存時暗号化保証ではない |
 | [Systems Manager Parameter Store](docs/console.md) | PutParameter、GetParameter、GetParameters、GetParametersByPath、DescribeParameters、DeleteParameter。最新値・version・overwrite判定 | SecureString/KMS、履歴・labels。StandardのString/StringList/textのみ |
 | [IAM](docs/iam.md) | Create/Get/List/DeleteRole、Put/Get/Delete/ListRolePolicy、UpdateAssumeRolePolicy。Lambda service trust、inline policy評価 | STS、managed policyの権限付与、一般Condition・permissions boundary・SCP |
 | [Lambda](docs/lambda.md) | CreateFunction、ListFunctions、GetFunctionConfiguration、UpdateFunctionCode、Invoke、DeleteFunction、AddPermission/GetPolicy/RemovePermission。固定CPython 3.12.16/WASIによるPython ZIP実行、限定S3/SSM SDK bridge | 他言語、非同期実行、Function URL、任意network。128 MiB・timeout 1–30秒 |
@@ -94,14 +95,14 @@ AXE_SCRIPT=/tmp/tcsim-audit/axe.min.js make e2e PYTHON=/tmp/tcsim-tests/bin/pyth
 TLA_JAR=/path/to/tla2tools.jar make formal
 ```
 
-この開発候補の同一全体profileではstatement94.95%・未フィルターsource-line90.46%を確認しました。正式SDK・hosted CI・最終固定HEADの結果は別途必要です。
+main由来の受入証拠とKMS旧HEADの証拠は別入力です。現mainを取り込んだKMS候補の全体coverage・SDK/browser・形式検査・hosted CIは未実行です。
 
 CIはstatementと未フィルターsource-line coverageを両方90%以上に強制します。`make before-commit`単独のcoverage判定はstatementのみで、source-line判定はCIのCobertura生成後ステージと上記の2コマンドで行います。SDK/browser、license、依存security、埋込asset、形式検査も行います。cross compileは他OSでの実行成功を意味しません。開発用Python/Node/Javaはruntime依存ではありません。UI・Scalarの再生成は権利表記とlockを保持する[各build手順](tools/console/README.md)・[Scalar手順](tools/scalar/README.md)・[Python runtimeの権利・再生成手順](tools/python/README.md)に従います。
 
-形式検査にはObjectStore、StackOwnership、S3Versions、NativeIAMOwnership、RESTDeploymentSnapshot、SSMParameterState、StartupTokenVisibility、BrowserSessions、SQSLifecycle、SQSStorageBudget、ProviderActor、GCPStorageState、AzureBlobState、ProjectAuthority、BlobRange、ProviderPath、CloudWatchLogsLifecycle、CloudWatchLogsViewEpochの18有限モデルと89の意図した欠陥検出をregistryへ登録しています。追加モデルの有限検査結果と、統合後の固定HEAD検査は区別して記録します。TLCと意図したmutantの反例で限定した安全条件を検査しますが、Go実装のrefinement、暗号、全AWS仕様・実AWSとの一致を証明するものではありません。変更はregistryとsource対応を更新し、固定HEADのCI結果で判断します。[形式検査](formal/README.md)、[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)。
+形式検査にはObjectStore、StackOwnership、S3Versions、NativeIAMOwnership、RESTDeploymentSnapshot、SSMParameterState、StartupTokenVisibility、BrowserSessions、SQSLifecycle、SQSStorageBudget、ProviderActor、GCPStorageState、AzureBlobState、ProjectAuthority、BlobRange、ProviderPath、KMSKeyState、KMSProtocolAdmissionの18有限モデルと94の意図した欠陥検出をregistryへ登録しています。追加モデルの有限検査結果と、統合後の固定HEAD検査は区別して記録します。TLCと意図したmutantの反例で限定した安全条件を検査しますが、Go実装のrefinement、暗号、全AWS仕様・実AWSとの一致を証明するものではありません。変更はregistryとsource対応を更新し、固定HEADのCI結果で判断します。[形式検査](formal/README.md)、[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)。
 
 ## ライセンス
 
 本体は[MIT](LICENSE)。`/_simulator/licenses/`にGo・Cloudscape・Scalar・CPython/WASI等の原文LICENSE/NOTICEを同梱しています。再配布時も保持してください。AWS公式サービスではなく、AWSロゴは使用しません。[設計・引継ぎ資料](docs/handoff/README.md)。
 
-CloudWatch Logs の基本7操作とローカルコンソールは [CloudWatch Logs](docs/cloudwatch-logs.md) を参照してください。保持期限、CloudFormation Logs resources、Lambda の自動配送は未対応です。
+CloudWatch Logs basic7 native API and console: [scope and limits](docs/cloudwatch-logs.md). The registry combines main18/94 with Logs2/7 (20 models/101 controls); no retention/CFN Logs/Lambda automatic delivery. Current-main integrated runtime checks remain pending.

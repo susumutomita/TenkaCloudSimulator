@@ -9,14 +9,16 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-BASE_MODELS = {'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'AzureBlobState', 'BlobRange', 'BrowserSessions', 'GCPStorageState', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'StackOwnership', 'StartupTokenVisibility'}
+BASE_MODELS = {'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'AzureBlobState', 'BlobRange', 'BrowserSessions', 'GCPStorageState', 'KMSKeyState', 'KMSProtocolAdmission', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'StackOwnership', 'StartupTokenVisibility'}
 BASE_INVARIANTS = {
-    'CloudWatchLogsLifecycle': {'NoOrphans', 'OnlyAcceptedWrites', 'TokenAuthority', 'TypeOK'},
-    'CloudWatchLogsViewEpoch': {'FreshResults', 'TypeOK', 'NoUnmountedResults'},
+    'CloudWatchLogsLifecycle': {'NoOrphans', 'TypeOK', 'TokenAuthority', 'OnlyAcceptedWrites'},
+    'CloudWatchLogsViewEpoch': {'TypeOK', 'NoUnmountedResults', 'FreshResults'},
     'AzureBlobState': {'BudgetBounded', 'ConditionEnforced', 'FailureAtomic', 'FreshWriteIdentity', 'NoDeniedRead', 'NoOrphans', 'NoUnauthorizedMutation', 'PeerStatePreserved', 'ReadExact', 'TypeOK'},
     'BlobRange': {'ChecksumBound', 'ConditionBeforeRange', 'DeniedNoDisclosure', 'ExactNormalRead', 'ExactSelectedBytes', 'Frame', 'InvalidRefused', 'MissingRangeChecksumRefused', 'NoFullMD5OnPartial', 'OutOfBoundsRefused', 'TypeOK'},
     'BrowserSessions': {'AcceptedOnlyLiveParent', 'NoBrowserSDKAuthority', 'NoRawSDKCookie', 'ParentLifetimeBound', 'RevokedCookiesDenied', 'SDKAuthorityPreserved', 'TypeOK', 'UnrelatedSessionsPreserved'},
     'GCPStorageState': {'Budget', 'DeniedFrame', 'GenerationFreshness', 'GenerationRefusal', 'NoOrphans', 'NonemptyDeleteRefused', 'OtherEnvironmentUnchanged', 'OtherProjectUnchanged', 'ReadIsolation', 'TypeOK'},
+    'KMSKeyState': {'AuthorizedEvents', 'BoundContextAndKey', 'EnabledCrypto', 'TypeOK'},
+    'KMSProtocolAdmission': {'InfraNotDeny', 'MissingIdentityDenied', 'NoAuthorityFromWireMetadata', 'NoCrossServiceFallback', 'NoSuccessWithoutKMSTarget', 'TypeOK'},
     'NativeIAMOwnership': {'OwnershipExclusive', 'TypeOK'},
     'ObjectStore': {'DenyWins', 'NoOrphans', 'NoUnauthorizedMutation', 'TypeOK'},
     'ProjectAuthority': {'ActorUsesPersistedProject', 'ConstructorRefusalFrame', 'DeniedFrame', 'FinitePermissions', 'FixedHostConfiguration', 'InitializationBindsConfigured', 'NoUnboundAdoption', 'OnlyActualOwnerAuthorized', 'OwnerBindingFrozen', 'TypeOK'},
@@ -32,12 +34,14 @@ BASE_INVARIANTS = {
 }
 # Established controls require an explicit gate-policy change before retirement.
 REQUIRED_MUTANTS = {
-    'CloudWatchLogsLifecycle': {'OmitPutAuthority', 'OmitTokenTeam', 'OmitDeleteEventCascade', 'OmitTokenGeneration', 'AcceptInvalidBatch'},
-    'CloudWatchLogsViewEpoch': {'AcceptUnmountedReply', 'OmitResponseEpoch'},
+    'CloudWatchLogsLifecycle': {'AcceptInvalidBatch', 'OmitTokenGeneration', 'OmitDeleteEventCascade', 'OmitTokenTeam', 'OmitPutAuthority'},
+    'CloudWatchLogsViewEpoch': {'OmitResponseEpoch', 'AcceptUnmountedReply'},
     'AzureBlobState': {'ContainerDeleteErasesPeer', 'ContainerDeleteLeavesBlobs', 'FailedPutCommits', 'IgnoreAccountOwner', 'IgnoreCreateOnly', 'IgnoreStaleETag', 'MissingTrustedActor', 'OmitByteBudget', 'OmitRowBudget', 'ReadNeighbor', 'ReuseETag'},
     'BlobRange': {'BypassAuthorization', 'DiscloseFullMD5OnPartial', 'IgnoreConditionDecision', 'IgnoreEndClamp', 'PermitExcessChecksum', 'ReadMutatesStoredBody', 'UncheckedBounds', 'WrongSliceStart'},
     'BrowserSessions': {'IgnoreParentValidity', 'LogoutClearsOthers', 'LogoutKeepsSession', 'LogoutRevokesSDK', 'RawOperatorCookie'},
     'GCPStorageState': {'DeleteNonemptyBucket', 'DeniedBucketCreate', 'IgnoreActualOwner', 'IgnoreGenerationMatch', 'IgnoreStateBudget', 'ReadWrongEnvironment', 'ResetSequenceAfterDelete', 'ReuseGeneration'},
+    'KMSKeyState': {'MissingContextGuard', 'MissingEnabledDecryptGuard', 'MissingEnabledEncryptGuard', 'MissingEncryptionCeiling', 'MissingKeyBinding', 'MissingPermissionGuard', 'MissingRegionGuard', 'MissingTeamGuard'},
+    'KMSProtocolAdmission': {'DropSigningIntent', 'IgnoreRequiredTarget', 'MaskIdentityOutage', 'ReadLivePolicyInsteadOfSnapshot'},
     'NativeIAMOwnership': {'LegacyAdoptsNativeRole'},
     'ObjectStore': {'MissingDeletionGuard'},
     'ProjectAuthority': {'AdoptUnboundResource', 'AllowOwnerRebinding', 'DefaultAllowUnknownPermission', 'PartialCommitOnRefusal', 'TrustClaimedProject', 'WriteDespiteDenial'},

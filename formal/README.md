@@ -124,7 +124,7 @@ BrowserSessions, SQSLifecycle and SQSStorageBudget remain mandatory in the large
 The registry adds ProviderActor (7 properties/6 sensitivity controls),
 GCPStorageState (10 properties/8 controls), and AzureBlobState (10 properties/11
 controls), plus ProjectAuthority (10 properties/6 controls), BlobRange (11 properties/8 controls), and ProviderPath (finite carrier properties/7 controls), retaining all existing models/controls. The current source registry
-has16 models/82 controls. Individual finite runs and the final immutable integrated
+has16 models/82 controls in main before this KMS restack. Individual finite runs and the final immutable integrated
 run are recorded separately; registration alone is not a successful TLC run.
 
 ProviderActor abstracts post-authentication emission, selected identity and
@@ -164,6 +164,52 @@ checks cover the wire format separately.
 
 All82 established sensitivity-control IDs (including36 earlier baseline controls) have literal per-model minimum sets. Real-filesystem tests remove each control individually and require rejection. This protects the checked inventory, not semantic completeness or a Go implementation proof.
 
+
+## Bounded KMS key-state registration
+
+KMSKeyState adds two fixed team/key namespaces sharing one home region, two request
+regions, two contexts/blob slots and an abstract two-encryption counter ceiling.
+Eight named controls exercise missing permission/team/region/state/context/key
+binding guards and the counter ceiling. Create/SetEnabled/Encrypt/Decrypt are
+atomic successful-event transitions; rejection frames, actual AES/nonce behavior,
+policy/JSON parsing, metadata/list outputs, SQL write acknowledgment/rollback,
+constructor wiring and host authentication remain native/integration obligations.
+The existing ten model entries and their36 controls are preserved; the new model
+and all four invariants are required by the loader and removal-negative fixtures.
+The registry is canonical; the old standalone KMS fragment is preserved outside
+production history as a handoff artifact and removed from the current tree.
+The immutable91172d0 source passed12 baselines/48 required controls and34 exact
+changed-blob declarations. Native/SDK/browser/whole-quality results are separate
+in [KMS service evidence](../docs/kms.md); current hosted CI remains required.
+
+
+## KMS protocol admission and policy snapshot
+
+KMSProtocolAdmission independently normalizes KMS/other/missing target, service
+hint and signing-scope metadata, credential-format/region consistency, four identity
+lookup outcomes and one immutable permission snapshot. One optional live-policy
+change after lookup must not replace the captured request permit. Five safety
+properties plus TypeOK reject KMS-to-S3 fallback, authority inferred from wire
+metadata,500-to403 outage masking, missing identity success and missing/conflicting
+KMS target success. Rejected/error replies expose no abstract resource data or
+mutation. Four controls remove signing intent, mask an outage, ignore the target
+or read live policy instead of the snapshot. Type/parse errors are not acceptable
+counterexamples. Actual91172d0 runs produced all four named invariant violations
+with exit12 and transition traces; the atomic model baseline and eight controls
+also passed their intended checks.
+This is not raw-header/SigV4 parsing, local token authentication, real IAM/SQL,
+other AWS branch authorization or a Go refinement proof. Atomic KMSKeyState and
+its eight controls remain unchanged; protocol claims are not assigned to that
+successful-event model. Real Gateway metadata/conflict cases, identity DB failure
+frames/retry and a real body-read-barrier snapshot test provide separate native
+bridge obligations. The registry is12/48, preserving all earlier models/invariants/controls.
+Native bridge results are recorded separately in [KMS](../docs/kms.md).
+Documentation-only children do not change model bytes; each final HEAD still
+requires its own immutable input/applicability gate before publication.
+
+
+Current main-preserving KMS restack:18 baselines/94 controls, retaining every main16/82 entry and adding only the two owned KMS models. The current merged source has not run TLC, native/browser or whole-profile acceptance. Earlier911/8ccc receipts do not establish current-head success.
+
 ## CloudWatch Logs basic slice
 
-CloudWatchLogsLifecycle / CloudWatchLogsViewEpoch の2有限モデル・7感度コントロールを追加し、registry合計18モデル・89コントロールを維持します。ネイティブ状態・UI応答世代の限定抽象でありGo/SQL/HTTPのrefinement証明ではありません。新main統合HEADでの実検査は未実行です。
+Preserve main18 finite models/94 required controls and add CloudWatchLogsLifecycle and CloudWatchLogsViewEpoch with7 controls:20/101 total. Native persistence and stale UI response finite abstractions do not prove Go/SQL/HTTP refinement. Current mergedHEAD formal executions pending.

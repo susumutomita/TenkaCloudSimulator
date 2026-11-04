@@ -30,6 +30,10 @@ func (g *Gateway) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		g.serveCloudWatchLogs(w, r)
 		return
 	}
+	if isKMS(r) {
+		g.serveKMS(w, r)
+		return
+	}
 	if isAPIGateway(r) {
 		g.serveAPIGateway(w, r)
 		return
