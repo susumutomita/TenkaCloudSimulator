@@ -62,7 +62,8 @@ make cross-check               # 5 OS/archのcompile
 python3 -m venv /tmp/tcsim-tests
 /tmp/tcsim-tests/bin/pip install -r scripts/requirements-test.txt
 /tmp/tcsim-tests/bin/playwright install chromium
-make e2e PYTHON=/tmp/tcsim-tests/bin/python
+/tmp/tcsim-tests/bin/python scripts/get-audit-tools.py /tmp/simulator-audit
+AXE_SCRIPT=/tmp/simulator-audit/axe.min.js make e2e PYTHON=/tmp/tcsim-tests/bin/python
 # システムChromiumも CHROMIUM_EXECUTABLE=/path/to/chromium で使用可能
 TLA_JAR=/path/to/tla2tools.jar make formal
 npm ci --prefix tools/console --ignore-scripts
