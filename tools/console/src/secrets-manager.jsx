@@ -1,0 +1,78 @@
+import React,{useEffect,useRef,useState} from 'react';
+import Alert from '@cloudscape-design/components/alert';
+import Box from '@cloudscape-design/components/box';
+import Button from '@cloudscape-design/components/button';
+import Checkbox from '@cloudscape-design/components/checkbox';
+import Container from '@cloudscape-design/components/container';
+import ContentLayout from '@cloudscape-design/components/content-layout';
+import Form from '@cloudscape-design/components/form';
+import FormField from '@cloudscape-design/components/form-field';
+import Header from '@cloudscape-design/components/header';
+import Input from '@cloudscape-design/components/input';
+import KeyValuePairs from '@cloudscape-design/components/key-value-pairs';
+import Link from '@cloudscape-design/components/link';
+import SpaceBetween from '@cloudscape-design/components/space-between';
+import Table from '@cloudscape-design/components/table';
+import Tabs from '@cloudscape-design/components/tabs';
+import Textarea from '@cloudscape-design/components/textarea';
+import TextFilter from '@cloudscape-design/components/text-filter';
+import Wizard from '@cloudscape-design/components/wizard';
+
+const identifier=text=><span className="resource-identifier">{text}</span>;
+const freshDraft=()=>({name:'',description:'',text:'',pairs:[{key:'',value:''}],format:'pairs',confirm:'',force:false});
+const warning='Local practice database stores dummy values without encryption. AWS KMS, automatic rotation, replicas, binary secrets and recovery windows are not implemented. Do not store real credentials.';
+
+// Parent remounts on region/identity/navigation changes. All API state is native;
+// the component keeps only transient form/selection/reveal state in memory.
+export default function SecretsManagerView({region,request,onSaving}) {
+ const [secrets,setSecrets]=useState([]),[detail,setDetail]=useState(null),[mode,setMode]=useState(''),[draft,setDraft]=useState(freshDraft),[step,setStep]=useState(0),[filter,setFilter]=useState(''),[error,setError]=useState(''),[notice,setNotice]=useState(''),[loading,setLoading]=useState(false),[busy,setBusy]=useState(false),[revealed,setRevealed]=useState(null),[revealing,setRevealing]=useState(false);
+ const epoch=useRef(0),alive=useRef(true),controller=useRef(new AbortController()),mutationToken=useRef('');
+ const change=(name,value)=>setDraft(old=>({...old,[name]:value}));
+ const call=async(operation,input={})=>{
+  const response=await request('/',{method:'POST',signal:controller.current.signal,headers:{'Content-Type':'application/x-amz-json-1.1','X-Amz-Target':'secretsmanager.'+operation,'X-Simulator-Service':'secretsmanager','X-Simulator-Region':region},body:JSON.stringify(input)});
+  return response.json();
+ };
+ const invalidate=()=>{epoch.current++;setRevealed(null);setRevealing(false);return epoch.current};
+ async function browse(arn=null){
+  const ticket=invalidate();setLoading(true);setError('');
+  try{
+   if(arn){const metadata=await call('DescribeSecret',{SecretId:arn});if(alive.current&&ticket===epoch.current){setDetail(metadata);setMode('')}}
+   else{const items=[];let next;do{const page=await call('ListSecrets',{MaxResults:100,SortBy:'name',SortOrder:'asc',...(next?{NextToken:next}:{})});items.push(...page.SecretList);next=page.NextToken}while(next&&alive.current&&ticket===epoch.current);if(alive.current&&ticket===epoch.current){setSecrets(items);setDetail(null);setMode('')}}
+  }catch(e){if(alive.current&&ticket===epoch.current)setError(e.message)}finally{if(alive.current&&ticket===epoch.current)setLoading(false)}
+ }
+ useEffect(()=>{browse();return()=>{alive.current=false;epoch.current++;controller.current.abort();onSaving?.(false)}},[]);
+ function open(next){invalidate();setDraft(freshDraft());setStep(0);setMode(next);setError('');setNotice('');mutationToken.current=crypto.randomUUID()}
+ function cancel(){invalidate();setDraft(freshDraft());mutationToken.current='';setMode('');setError('')}
+ function material(){
+  let value=draft.text;
+  if(draft.format==='pairs'){
+   const data={};let count=0;
+   for(const pair of draft.pairs){if(!pair.key&&!pair.value)continue;if(!pair.key||Object.hasOwn(data,pair.key))throw Error('Enter unique, nonempty keys.');Object.defineProperty(data,pair.key,{value:pair.value,enumerable:true});count++}
+   if(!count)throw Error('Enter at least one key/value pair.');value=JSON.stringify(data);
+  }
+  const size=new TextEncoder().encode(value).length;if(size<1||size>65536)throw Error('Secret value must contain 1–65536 UTF-8 bytes.');return value;
+ }
+ function validateName(){if(!/^[A-Za-z0-9/_+=.@-]{1,512}$/.test(draft.name))throw Error('Enter a valid secret name of 1–512 characters.');if(Array.from(draft.description).length>2048)throw Error('Description is limited to 2048 characters.')}
+ async function mutate(operation,input,message){
+  if(busy)return;const ticket=invalidate();setBusy(true);onSaving?.(true);setError('');
+  try{const result=await call(operation,input);if(!alive.current||ticket!==epoch.current)return;setDraft(freshDraft());mutationToken.current='';setNotice(message);await browse(operation==='DeleteSecret'?null:result.ARN)}catch(e){if(alive.current&&ticket===epoch.current)setError(e.message)}finally{if(alive.current){setBusy(false);onSaving?.(false)}}
+ }
+ function store(){try{validateName();const value=material();mutate('CreateSecret',{Name:draft.name,Description:draft.description,ClientRequestToken:mutationToken.current,SecretString:value},'Secret stored in the local practice database.')}catch(e){setError(e.message)}}
+ async function retrieve(){
+  const arn=detail.ARN,ticket=invalidate();setRevealing(true);setError('');
+  try{const value=await call('GetSecretValue',{SecretId:arn});if(!alive.current||ticket!==epoch.current)return;if(value.ARN!==arn||typeof value.SecretString!=='string')throw Error('Secret value response did not match the selected resource.');setRevealed({text:value.SecretString,version:value.VersionId})}catch(e){if(alive.current&&ticket===epoch.current)setError(e.message)}finally{if(alive.current&&ticket===epoch.current)setRevealing(false)}
+ }
+ const hide=()=>{invalidate();setError('')};
+ const pairsEditor=<SpaceBetween size="m">{draft.pairs.map((pair,index)=><SpaceBetween key={index} direction="horizontal" size="s"><FormField label={'Key '+(index+1)}><Input value={pair.key} autoComplete="off" onChange={({detail})=>change('pairs',draft.pairs.map((p,i)=>i===index?{...p,key:detail.value}:p))}/></FormField><FormField label={'Value '+(index+1)}><Input type="password" value={pair.value} autoComplete="off" onChange={({detail})=>change('pairs',draft.pairs.map((p,i)=>i===index?{...p,value:detail.value}:p))}/></FormField><Button formAction="none" ariaLabel={'Remove pair '+(index+1)} onClick={()=>change('pairs',draft.pairs.filter((_,i)=>i!==index))}>Remove</Button></SpaceBetween>)}<Button formAction="none" onClick={()=>change('pairs',[...draft.pairs,{key:'',value:''}])}>Add row</Button></SpaceBetween>;
+ const valueEditor=<Tabs activeTabId={draft.format} onChange={({detail})=>change('format',detail.activeTabId)} tabs={[{id:'pairs',label:'Key/value pairs',content:pairsEditor},{id:'text',label:'Plaintext',content:<FormField label="Plaintext secret value" description="This explicitly entered draft is visible while editing. It is hidden on review and cleared after save or navigation."><Textarea value={draft.text} rows={7} onChange={({detail})=>change('text',detail.value)}/></FormField>}]} />;
+ const labeled=detail?Object.entries(detail.VersionIdsToStages||{}).map(([id,stages])=>({id,stages})):[];
+ const current=labeled.find(v=>v.stages.includes('AWSCURRENT'))?.id;
+ const previous=labeled.find(v=>v.stages.includes('AWSPREVIOUS'))?.id;
+ return <SpaceBetween size="l"><Alert type="warning">{warning}</Alert>{error&&<Alert type="error" dismissible onDismiss={()=>setError('')}>{error}</Alert>}{notice&&<Alert type="success" dismissible onDismiss={()=>setNotice('')}>{notice}</Alert>}
+ {mode==='create'?<Wizard activeStepIndex={step} isLoadingNextStep={busy} onCancel={()=>!busy&&cancel()} onSubmit={store} onNavigate={({detail})=>{if(busy)return;try{if(detail.requestedStepIndex>step){if(step===0)material();if(step===1)validateName()}setError('');setStep(detail.requestedStepIndex)}catch(e){setError(e.message)}} i18nStrings={{stepNumberLabel:n=>'Step '+n,collapsedStepsLabel:(n,total)=>'Step '+n+' of '+total,skipToButtonLabel:step=>'Skip to '+step.title,navigationAriaLabel:'Secret creation steps',cancelButton:'Cancel',previousButton:'Previous',nextButton:'Next',submitButton:'Store',optional:'optional'}} steps={[
+  {title:'Choose secret type',content:<SpaceBetween size="l"><Container header={<Header variant="h2">Secret type</Header>}><Box>Other type of secret</Box></Container><Container header={<Header variant="h2">Secret value</Header>}>{valueEditor}</Container><Container header={<Header variant="h2">Encryption</Header>}><Alert type="warning">Local database storage is not encrypted. AWS KMS keys are unavailable in this increment.</Alert></Container></SpaceBetween>},
+  {title:'Configure secret',content:<Container header={<Header variant="h2">Secret name and description</Header>}><SpaceBetween size="l"><FormField label="Secret name" constraintText="1–512 ASCII letters, digits and /_+=.@- characters."><Input value={draft.name} onChange={({detail})=>change('name',detail.value)}/></FormField><FormField label="Description"><Textarea value={draft.description} onChange={({detail})=>change('description',detail.value)}/></FormField></SpaceBetween></Container>},
+  {title:'Configure rotation',content:<Container header={<Header variant="h2">Automatic rotation</Header>}><SpaceBetween size="l"><Checkbox disabled checked={false}>Automatic rotation</Checkbox><Box>Rotation is not implemented. Updating a local version does not update any database or external credential.</Box></SpaceBetween></Container>},
+  {title:'Review',content:<Container header={<Header variant="h2">Review secret</Header>}><KeyValuePairs columns={1} items={[{label:'Secret type',value:'Other type of secret'},{label:'Secret name',value:identifier(draft.name)},{label:'Description',value:draft.description||'—'},{label:'Secret value',value:'Entered value is hidden'},{label:'Encryption',value:'Local database; not encrypted'},{label:'Automatic rotation',value:'Not implemented'}]}/></Container>}
+ ]}/>:mode==='edit'||mode==='delete'?<ContentLayout header={<Header variant="h1">{mode==='edit'?'Edit secret value':'Force delete secret'}</Header>}><form onSubmit={event=>{event.preventDefault();try{if(mode==='edit')mutate('PutSecretValue',{SecretId:detail.ARN,ClientRequestToken:mutationToken.current,SecretString:material()},'A new local secret version was saved.');else{if(!draft.force||draft.confirm!==detail.Name)throw Error('Confirm force deletion and enter the exact secret name.');mutate('DeleteSecret',{SecretId:detail.ARN,ForceDeleteWithoutRecovery:true},'Secret and all stored versions were deleted.')}}catch(e){setError(e.message)}}><Form actions={<SpaceBetween direction="horizontal" size="xs"><Button formAction="none" disabled={busy} onClick={cancel}>Cancel</Button><Button formAction="submit" variant="primary" loading={busy}>{mode==='edit'?'Save':'Delete permanently'}</Button></SpaceBetween>}><Container><SpaceBetween size="l">{mode==='edit'?valueEditor:<><Alert type="warning">Only force deletion without recovery is implemented. This permanently removes every local version. AWS recovery windows and restore are unavailable.</Alert><Checkbox checked={draft.force} onChange={({detail})=>change('force',detail.checked)}>Force delete without recovery</Checkbox><FormField label="Enter secret name to confirm"><Input value={draft.confirm} onChange={({detail})=>change('confirm',detail.value)}/></FormField></>}</SpaceBetween></Container></Form></form></ContentLayout>:detail?<ContentLayout header={<Header variant="h1" actions={<SpaceBetween direction="horizontal" size="xs"><Button formAction="none" disabled={busy} onClick={()=>browse()}>Secrets</Button><Button formAction="none" disabled={busy} onClick={()=>open('delete')}>Delete secret</Button></SpaceBetween>}>{identifier(detail.Name)}</Header>}><SpaceBetween size="l"><Container header={<Header variant="h2" actions={<Button formAction="none" iconName="refresh" ariaLabel="Refresh secret metadata" disabled={busy} onClick={()=>browse(detail.ARN)}/>}>Secret details</Header>}><KeyValuePairs columns={1} items={[{label:'Secret name',value:identifier(detail.Name)},{label:'Secret ARN',value:identifier(detail.ARN)},{label:'Description',value:detail.Description||'—'},{label:'Encryption',value:'Local database; not encrypted'}]}/></Container><Container header={<Header variant="h2" actions={<SpaceBetween direction="horizontal" size="xs">{(revealed!==null||revealing)&&<Button formAction="none" onClick={hide}>Hide secret value</Button>}<Button formAction="none" loading={revealing} disabled={busy} onClick={retrieve}>Retrieve secret value</Button>{revealed!==null&&<Button formAction="none" disabled={busy} onClick={()=>open('edit')}>Edit</Button>}</SpaceBetween>}>Secret value</Header>}>{revealed===null?<Box>Choose Retrieve secret value to explicitly request AWSCURRENT. Metadata views do not retrieve values.</Box>:<SpaceBetween size="m"><Box>Version ID: {identifier(revealed.version)}</Box><FormField label="Retrieved secret value"><Textarea readOnly value={revealed.text} rows={7}/></FormField></SpaceBetween>}</Container><Table items={labeled} trackBy="id" ariaLabels={{tableLabel:'Labeled secret versions'}} columnDefinitions={[{id:'id',header:'Version ID',cell:v=>identifier(v.id)},{id:'stages',header:'Staging labels',cell:v=>v.stages.join(', ')}]} header={<Header variant="h2" actions={<Button formAction="none" disabled={busy||!current||!previous} onClick={()=>mutate('UpdateSecretVersionStage',{SecretId:detail.ARN,VersionStage:'AWSCURRENT',MoveToVersionId:previous,RemoveFromVersionId:current},'Previous version is now current. This simulator helper calls the native version-stage API.')}>Roll back to previous (simulator)</Button>}>Versions with labels</Header>} empty={<Box>No labeled versions.</Box>}/><Alert type="info">This table shows labeled versions only. Older retained versions can be retrieved by version ID through the API. The rollback button is a simulator helper; the public AWS guide uses CLI label moves.</Alert></SpaceBetween></ContentLayout>:<Table variant="full-page" loading={loading} loadingText="Loading secrets" items={secrets.filter(s=>(s.Name+' '+(s.Description||'')).toLowerCase().includes(filter.toLowerCase()))} trackBy="ARN" ariaLabels={{tableLabel:'Secrets'}} columnDefinitions={[{id:'name',header:'Secret name',cell:s=><Link href="#" onFollow={event=>{event.preventDefault();browse(s.ARN)}}>{s.Name}</Link>},{id:'description',header:'Description',cell:s=>s.Description||'—'},{id:'changed',header:'Last changed',cell:s=>new Date(s.LastChangedDate*1000).toISOString()}]} header={<Header variant="awsui-h1-sticky" counter={'('+secrets.length+')'} actions={<SpaceBetween direction="horizontal" size="xs"><Button formAction="none" iconName="refresh" ariaLabel="Refresh secrets" disabled={busy} onClick={()=>browse()}/><Button formAction="none" variant="primary" disabled={busy} onClick={()=>open('create')}>Store a new secret</Button></SpaceBetween>}>Secrets</Header>} filter={<TextFilter filteringText={filter} filteringPlaceholder="Find secrets" filteringAriaLabel="Find secrets" onChange={({detail})=>setFilter(detail.filteringText)}/>} empty={<Box textAlign="center" padding="l">No secrets.</Box>}/>}</SpaceBetween>
+}
