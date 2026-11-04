@@ -1791,8 +1791,8 @@
           "id": "IgnoreTableCountCap",
           "edits": [
             {
-              "old": " /\\ TableCount(tables)<MaxTables",
-              "new": "",
+              "old": "permit == initialized /\\ allow /\\ ~deny /\\ ~tables[s] /\\ TableCount(tables)<MaxTables",
+              "new": "permit == initialized /\\ allow /\\ ~deny /\\ ~tables[s]",
               "count": 1
             }
           ],
@@ -1900,8 +1900,8 @@
           "id": "RestartLosesStatistics",
           "edits": [
             {
-              "old": "Restart == /\\ initialized'=FALSE /\\ lastOp'=\"Restart\"\n /\\ UNCHANGED <<startupValid,tables,rows,stats,lastScope,lastToken,lastKind,lastAllow,\n lastDeny,lastAccepted,lastReady,lastKey,lastBytes>>\n /\\ Prior(lastScope,lastToken) /\\ Observe(lastScope)\n",
-              "new": "Restart == /\\ initialized'=FALSE /\\ lastOp'=\"Restart\"\n /\\ stats'=[s \\in Scopes |-> 0]\n /\\ UNCHANGED <<startupValid,tables,rows,lastScope,lastToken,lastKind,lastAllow,\n lastDeny,lastAccepted,lastReady,lastKey,lastBytes>>\n /\\ Prior(lastScope,lastToken) /\\ Observe(lastScope)\n",
+              "old": "Restart == /\\ initialized'=FALSE /\\ lastOp'=\"Restart\"\n /\\ UNCHANGED <<startupValid,tables,rows,stats,event,lastScope,\n lastAccepted,lastReady,lastKey,lastBytes>>\n /\\ Observe(lastScope)\n",
+              "new": "Restart == /\\ initialized'=FALSE /\\ lastOp'=\"Restart\"\n /\\ stats'=[s \\in Scopes |-> 0]\n /\\ UNCHANGED <<startupValid,tables,rows,event,lastScope,\n lastAccepted,lastReady,lastKey,lastBytes>>\n /\\ Observe(lastScope)\n",
               "count": 1
             }
           ],
