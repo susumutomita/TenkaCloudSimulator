@@ -131,8 +131,12 @@ directly imported dependency; versions and go.sum are unchanged. It is classifie
 by the separate strict metadata recognizer and direct HEAD byte/mode guards,
 **not** by a token invariant or a general dependency exemption.
 
-The local registration candidate incorporates main `55a1119` and privately
-includes unmerged PR #314 `74168f6` by normal merge. It preserves public Startup
-`ac52f4b` as an ancestor. Publication requires #314 on main, a fresh applicability
-record against the reviewed main base, and exact-HEAD CI/review. The registration
-source work itself does not claim those gates were run or the dependency merged.
+The local registration candidate normally merges main `2d8a41a`, which includes
+merged PR #314, while preserving public Startup `ac52f4b`, reviewed metadata
+`74168f6`, and private registration `f75b6ef` as ancestors. Its exact-blob record
+uses main `2d8a41a`. Existing Go/PTY/startup evidence belongs to the original
+source checks; it is not re-labeled as a fresh full Go/PTY run on this head.
+New validation covers Python gate/metadata self-tests, exact applicability, six
+bounded baselines and eight specified counterexamples with immutable HEAD
+inputs. Local reports identify the actual checked commit and outcomes; they do
+not imply hosted CI/review success, repository merge or Go refinement.

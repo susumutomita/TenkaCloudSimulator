@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "base_sha": "55a111953eb3eb0dfd90aaa473ac3fe39cb10b66",
+  "base_sha": "2d8a41a0cb576bd42561a7162d35129f44979c08",
   "changes": [
     {
       "path": "Makefile",
@@ -188,24 +188,17 @@
       "models": []
     },
     {
-      "path": "docs/formal-module-metadata.md",
-      "sha256": "c8ae8dddb4565559e807d31f34fc96e2566212ccb50089907bf817fb6967214f",
-      "disposition": "documentation",
-      "reason": "Documents startup usage, original ownership snapshot, bounded correspondence or the private unmerged PR314 dependency and its input-guard correction; no new executable transition or complete implementation proof is asserted.",
-      "models": []
-    },
-    {
       "path": "docs/start.md",
-      "sha256": "42d815687007a43b583aff5f8d24fc49a506d6a7a940cf9fb0001fdde6f12b9f",
+      "sha256": "ac58a3f7da75d5c76e0ae42bd4a91d34afad04a121e060d30670eb1d9a86cf9c",
       "disposition": "documentation",
-      "reason": "Documents startup usage, original ownership snapshot, bounded correspondence or the private unmerged PR314 dependency and its input-guard correction; no new executable transition or complete implementation proof is asserted.",
+      "reason": "Documents finite Startup scope, preserved source and normal main2d8 integration after PR314 merged. Separates inherited Go/PTY checks from new exact-head local formal evidence and unclaimed hosted CI/refinement.",
       "models": []
     },
     {
       "path": "formal/README.md",
-      "sha256": "b6abd9c8fbb4d74ba46c7cbdde839c503c712a87cf471a8b3ccfff9b675cf8a1",
+      "sha256": "1689ef9c02f016694510495dc8d67cacb4461e70bd742ab97a55ffbcc6544235",
       "disposition": "documentation",
-      "reason": "Documents startup usage, original ownership snapshot, bounded correspondence or the private unmerged PR314 dependency and its input-guard correction; no new executable transition or complete implementation proof is asserted.",
+      "reason": "Documents finite Startup scope, preserved source and normal main2d8 integration after PR314 merged. Separates inherited Go/PTY checks from new exact-head local formal evidence and unclaimed hosted CI/refinement.",
       "models": []
     },
     {
@@ -250,7 +243,7 @@
       "path": "formal/models.json",
       "sha256": "0826710f589fc853c8ebf067dd71d4a9737b860ce65369a8e5f0f405e0082518",
       "disposition": "formal-infrastructure",
-      "reason": "Includes the private PR314 narrow module-annotation recognizer and direct literal go.mod/go.sum byte/mode guards, plus mandatory original-five-and-Startup inventory/rules and exact preserved mutation anchors. Existing protections are retained or strengthened; policy/classifier fixtures do not substitute for actual TLC/native/CI verification.",
+      "reason": "Registers mandatory original five plus Startup model and exact sensitivity edits; retains all main PR314 metadata/direct module-input guards. Original model properties cannot be removed even together with registry/CFG changes. Classifier fixtures are not actual TLC or Go/PTY evidence.",
       "models": []
     },
     {
@@ -261,24 +254,10 @@
       "models": []
     },
     {
-      "path": "scripts/formal_applicability.py",
-      "sha256": "a389e8a406b8d85ebc3105301603300d35ab02eae37d9fbc549323c9aa9ebfbd",
-      "disposition": "formal-infrastructure",
-      "reason": "Includes the private PR314 narrow module-annotation recognizer and direct literal go.mod/go.sum byte/mode guards, plus mandatory original-five-and-Startup inventory/rules and exact preserved mutation anchors. Existing protections are retained or strengthened; policy/classifier fixtures do not substitute for actual TLC/native/CI verification.",
-      "models": []
-    },
-    {
       "path": "scripts/formal_model_gate.py",
       "sha256": "1408e9fd360ffc7b49b4bef3055d579f6a624199e234d380597c1e65d22c3ec5",
       "disposition": "formal-infrastructure",
-      "reason": "Includes the private PR314 narrow module-annotation recognizer and direct literal go.mod/go.sum byte/mode guards, plus mandatory original-five-and-Startup inventory/rules and exact preserved mutation anchors. Existing protections are retained or strengthened; policy/classifier fixtures do not substitute for actual TLC/native/CI verification.",
-      "models": []
-    },
-    {
-      "path": "scripts/formal_module_metadata.py",
-      "sha256": "ef1b2a1a0740ccecda7041ad004598dc753007a560524ea829b5cc15e45d0d25",
-      "disposition": "formal-infrastructure",
-      "reason": "Includes the private PR314 narrow module-annotation recognizer and direct literal go.mod/go.sum byte/mode guards, plus mandatory original-five-and-Startup inventory/rules and exact preserved mutation anchors. Existing protections are retained or strengthened; policy/classifier fixtures do not substitute for actual TLC/native/CI verification.",
+      "reason": "Registers mandatory original five plus Startup model and exact sensitivity edits; retains all main PR314 metadata/direct module-input guards. Original model properties cannot be removed even together with registry/CFG changes. Classifier fixtures are not actual TLC or Go/PTY evidence.",
       "models": []
     },
     {
@@ -301,24 +280,10 @@
       ]
     },
     {
-      "path": "scripts/test-formal-applicability.py",
-      "sha256": "5596571973aaa556c1158316750aa2053ba490106a43dd48a4e0336abad8933c",
-      "disposition": "formal-infrastructure",
-      "reason": "Includes the private PR314 narrow module-annotation recognizer and direct literal go.mod/go.sum byte/mode guards, plus mandatory original-five-and-Startup inventory/rules and exact preserved mutation anchors. Existing protections are retained or strengthened; policy/classifier fixtures do not substitute for actual TLC/native/CI verification.",
-      "models": []
-    },
-    {
       "path": "scripts/test-formal-gate.py",
       "sha256": "5168eaf6187e1d4036968e71b0c321872527e0b7d0055a446b9e3ecfca6a5e5b",
       "disposition": "formal-infrastructure",
-      "reason": "Includes the private PR314 narrow module-annotation recognizer and direct literal go.mod/go.sum byte/mode guards, plus mandatory original-five-and-Startup inventory/rules and exact preserved mutation anchors. Existing protections are retained or strengthened; policy/classifier fixtures do not substitute for actual TLC/native/CI verification.",
-      "models": []
-    },
-    {
-      "path": "test/formal/startup-module-metadata.json",
-      "sha256": "8b1d11863b1325b65d40dbd26974a423ea740823e992b6631947b43c931c8b60",
-      "disposition": "test-support",
-      "reason": "Immutable public Startup before/after module/checksum fixture and hash receipts test only the narrow metadata recognizer. No runtime dependency/state or token-property claim follows from this data.",
+      "reason": "Registers mandatory original five plus Startup model and exact sensitivity edits; retains all main PR314 metadata/direct module-input guards. Original model properties cannot be removed even together with registry/CFG changes. Classifier fixtures are not actual TLC or Go/PTY evidence.",
       "models": []
     },
     {

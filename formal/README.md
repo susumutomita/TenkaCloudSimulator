@@ -44,7 +44,7 @@ because this suite passes. No new service, callback or Python/HTTP state-machine
 proof is implied by this inventory.
 
 
-## Startup token visibility (private registration candidate)
+## Startup token visibility (registration candidate)
 
 `StartupTokenVisibility.tla` models one fixed configured token file, two abstract
 token values, three initial file states and at most two historical emissions.
@@ -60,7 +60,9 @@ prove terminal syscalls, OS ACLs, entropy, crash safety, build freshness, proces
 shutdown or all Go behavior. The metadata-only `go.mod` annotation change uses
 the separate narrow recognizer and is not bound to token-state invariants.
 
-This registration candidate privately depends on **unmerged PR #314** at
-`74168f6`, normally merged on top of main `55a1119`. It must not be published as
-an updated Startup PR until that dependency is on main and the exact-base record
-and required checks are refreshed. See [startup usage and limits](../docs/start.md).
+This candidate preserves the original public Startup `ac52f4b` and private
+registration `f75b6ef` history. Main `2d8a41a` (including merged module-metadata
+PR #314) is incorporated by normal merge. The exact-base record is refreshed
+against that main; metadata guard implementation and fixtures are unchanged.
+Exact-HEAD local results are separate from inherited original Go/PTY evidence
+and from required hosted CI/review. See [startup usage and limits](../docs/start.md).
