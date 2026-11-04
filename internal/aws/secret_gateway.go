@@ -8,8 +8,8 @@ import (
 	"github.com/susumutomita/TenkaCloudSimulator/internal/core"
 )
 
-// The shared Gateway may call these helpers after root accepts its minimal
-// field/dispatch/server initialization changes. No shared file is edited here.
+// Detect the native Secrets protocol before the other root protocols. Local
+// access-token authentication remains the outer server middleware boundary.
 func isSecretRequest(r *http.Request) bool {
 	if strings.HasPrefix(r.Header.Get("X-Amz-Target"), "secretsmanager.") || r.Header.Get("X-Simulator-Service") == "secretsmanager" {
 		return true

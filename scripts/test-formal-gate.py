@@ -54,6 +54,30 @@ class FormalGateTests(unittest.TestCase):
                     load_registry(self.root)
                 (self.root / path).write_bytes(original)
 
+    def test_secrets_critical_properties_cannot_be_removed_from_both_registry_and_cfg(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        registry = json.loads(original)
+        for model in registry['models']:
+            if not model['id'].startswith('Secrets'):
+                continue
+            config = self.root / model['config']
+            config_text = config.read_text()
+            for property_name in model['properties']:
+                with self.subTest(model=model['id'], property=property_name):
+                    candidate = json.loads(original)
+                    entry = next(m for m in candidate['models'] if m['id'] == model['id'])
+                    entry['properties'].remove(property_name)
+                    # Remove controls naming the property so unrelated mutation
+                    # validation cannot conceal a missing critical-property guard.
+                    entry['mutants'] = [m for m in entry['mutants'] if m['expect_invariant'] != property_name]
+                    path.write_text(json.dumps(candidate))
+                    config.write_text(config_text.replace('INVARIANT ' + property_name + '\n', ''))
+                    with self.assertRaisesRegex(GateError, 'required invariant was removed'):
+                        load_registry(self.root)
+                    path.write_text(original)
+                    config.write_text(config_text)
+
     def test_unregistered_or_silently_removed_model_fails(self):
         orphan = self.root / 'formal/Unknown.tla'
         orphan.write_text('---- MODULE Unknown ----\n====')
