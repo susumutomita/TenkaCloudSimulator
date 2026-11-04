@@ -1,54 +1,26 @@
 {
   "version": 1,
-  "base_sha": "55a111953eb3eb0dfd90aaa473ac3fe39cb10b66",
+  "base_sha": "2d8a41a0cb576bd42561a7162d35129f44979c08",
   "changes": [
     {
-      "path": "docs/formal-module-metadata.md",
-      "sha256": "c8ae8dddb4565559e807d31f34fc96e2566212ccb50089907bf817fb6967214f",
+      "path": "docs/s3.md",
+      "sha256": "b7c64c7fd9692b02dd47bd257dc5f4bc845dc7990d2476f3f3c6b65956360cd9",
       "disposition": "documentation",
-      "reason": "Documents narrow annotation recognition, corrected hidden-Git-flag input guard, scoped real-Git test results and explicit finite/implementation limits.",
+      "reason": "Documents historical main fix, exact native/SDK regression scope, no runtime changes and explicit URL/RawPath exclusion from existing finite state models.",
       "models": []
     },
     {
-      "path": "scripts/formal_applicability.py",
-      "sha256": "a389e8a406b8d85ebc3105301603300d35ab02eae37d9fbc549323c9aa9ebfbd",
-      "disposition": "formal-infrastructure",
-      "reason": "Checks exact module/checksum bytes and regular nonexecutable modes before/after regardless of assume-unchanged/skip-worktree; narrows annotation-only classification without general module/runtime exemption. Expanded applicability21 and gate10 tests passed; actual TLC/immutable record are separate required results.",
-      "models": []
-    },
-    {
-      "path": "scripts/formal_model_gate.py",
-      "sha256": "7a412c13548f80f107f5fb36cc7f3cb6d49dc28b07a052a42da9dde8e91bb716",
-      "disposition": "formal-infrastructure",
-      "reason": "Checks exact module/checksum bytes and regular nonexecutable modes before/after regardless of assume-unchanged/skip-worktree; narrows annotation-only classification without general module/runtime exemption. Expanded applicability21 and gate10 tests passed; actual TLC/immutable record are separate required results.",
-      "models": []
-    },
-    {
-      "path": "scripts/formal_module_metadata.py",
-      "sha256": "ef1b2a1a0740ccecda7041ad004598dc753007a560524ea829b5cc15e45d0d25",
-      "disposition": "formal-infrastructure",
-      "reason": "Checks exact module/checksum bytes and regular nonexecutable modes before/after regardless of assume-unchanged/skip-worktree; narrows annotation-only classification without general module/runtime exemption. Expanded applicability21 and gate10 tests passed; actual TLC/immutable record are separate required results.",
-      "models": []
-    },
-    {
-      "path": "scripts/test-formal-applicability.py",
-      "sha256": "5596571973aaa556c1158316750aa2053ba490106a43dd48a4e0336abad8933c",
-      "disposition": "formal-infrastructure",
-      "reason": "Checks exact module/checksum bytes and regular nonexecutable modes before/after regardless of assume-unchanged/skip-worktree; narrows annotation-only classification without general module/runtime exemption. Expanded applicability21 and gate10 tests passed; actual TLC/immutable record are separate required results.",
-      "models": []
-    },
-    {
-      "path": "scripts/test-formal-gate.py",
-      "sha256": "71117354b700db4d16cc6590ca323d6803a2014371e9375c61c0498585e4bc93",
-      "disposition": "formal-infrastructure",
-      "reason": "Checks exact module/checksum bytes and regular nonexecutable modes before/after regardless of assume-unchanged/skip-worktree; narrows annotation-only classification without general module/runtime exemption. Expanded applicability21 and gate10 tests passed; actual TLC/immutable record are separate required results.",
-      "models": []
-    },
-    {
-      "path": "test/formal/startup-module-metadata.json",
-      "sha256": "8b1d11863b1325b65d40dbd26974a423ea740823e992b6631947b43c931c8b60",
+      "path": "internal/server/provider_path_test.go",
+      "sha256": "e67ef808074b9032718a3f3419470cdaec5d6083c83861c584f58b88a6c290d6",
       "disposition": "test-support",
-      "reason": "Pinned public Startup308 module before/after and unchanged checksum blobs with SHA256 receipts for real-Git metadata acceptance and semantic negative controls.",
+      "reason": "Extends existing literal-key HTTP test with HEAD/escaped/Unicode/no-redirect assertions and token/cross-origin guards. Exercises HTTP routing outside abstract finite-key models; production source/state transitions unchanged.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/provider_paths.py",
+      "sha256": "c5a1769e94892a14d5de9c470294de1f883b6ee5f8a8e864b0b9a52d0777884b",
+      "disposition": "test-support",
+      "reason": "Actual authenticated local binary/native boto3 root-prefix PUT/GET/HEAD/DELETE, transport 3xx and neighbor/cleanup assertions. Test-only driver; no guest/cloud call or new runtime transition, no false formal URL refinement claim.",
       "models": []
     }
   ]
