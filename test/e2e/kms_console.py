@@ -40,7 +40,7 @@ with running(authenticated=True) as (endpoint,operator),sync_playwright() as p:
   page.get_by_role('button',name='Refresh keys',exact=True).click()
  expect(page.get_by_text('No customer managed keys',exact=True)).to_be_visible()
  held[0].fulfill(status=500,headers={'Content-Type':'application/x-amz-json-1.1','X-KMS-Older-Test':'yes'},body=json.dumps({'__type':'KMSInternalException','message':'older-refresh-must-not-win'}))
- page.wait_for_function('window.__kmsOlderBodyConsumed===true')
+ page.wait_for_function('()=>window.__kmsOlderBodyConsumed===true')
  expect(page.get_by_text('500: older-refresh-must-not-win',exact=True)).to_have_count(0)
  expect(page.get_by_text('No customer managed keys',exact=True)).to_be_visible()
  page.unroute(endpoint+'/',overlap);page.evaluate('window.fetch=window.__kmsOriginalFetch')
@@ -75,6 +75,21 @@ with running(authenticated=True) as (endpoint,operator),sync_playwright() as p:
   audit=page.evaluate("async()=>await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}})");assert not [v for v in audit['violations'] if v['impact'] in ['serious','critical']],audit['violations']
  page.get_by_role('button',name='Customer managed keys',exact=True).click();expect(page.get_by_role('heading',name='Customer managed keys (1)',exact=True)).to_be_visible()
  page.screenshot(path=str(REPORTS/'kms-keys-390.png'),full_page=True,animations='disabled');page.get_by_role('button',name='More',exact=True).click();page.get_by_role('button',name='us-east-1',exact=True).click();page.get_by_role('button',name='us-west-2',exact=True).click();expect(page.get_by_text('No customer managed keys',exact=True)).to_be_visible();expect(page.get_by_label('Plaintext',exact=True)).to_have_count(0)
+ # Return to east and change exercise identity,
+ # assert remount clears local sensitive fields and real IAM denial is visible.
+ page.set_viewport_size({'width':1440,'height':1000});page.get_by_role('button',name='us-west-2',exact=True).click();page.get_by_role('menuitem',name='us-east-1',exact=True).click()
+ expect(page.get_by_role('heading',name='Customer managed keys (1)',exact=True)).to_be_visible()
+ policy={'Version':'2012-10-17','Statement':[{'Effect':'Allow','Action':['kms:ListKeys','kms:DescribeKey','kms:GetKeyPolicy'],'Resource':'*'},{'Effect':'Deny','Action':['kms:Encrypt','kms:Decrypt'],'Resource':'*'}]}
+ response=page.request.put(endpoint+'/_simulator/v1/iam/principals/kms-reader/policy',headers={'Content-Type':'application/json','X-Simulator-Token':operator},data=json.dumps(policy));assert response.status==200
+ page.get_by_role('link',name=key_id,exact=True).click();page.get_by_role('tab',name='Local encryption test',exact=True).click();page.get_by_label('Plaintext',exact=True).fill('Dummy identity-local input')
+ page.get_by_role('button',name='Account menu',exact=True).click();page.get_by_role('menuitem',name='Choose identity',exact=True).click();page.get_by_label('Principal name',exact=True).fill('kms-reader');page.get_by_role('dialog').get_by_role('button',name='Choose identity',exact=True).click()
+ expect(page.get_by_label('Plaintext',exact=True)).to_have_count(0);expect(page.get_by_role('heading',name='Customer managed keys (1)',exact=True)).to_be_visible()
+ page.get_by_role('link',name=key_id,exact=True).click();page.get_by_role('tab',name='Local encryption test',exact=True).click();expect(page.get_by_label('Plaintext',exact=True)).to_have_value('');expect(page.get_by_label('Ciphertext blob',exact=True)).to_have_value('')
+ page.get_by_label('Plaintext',exact=True).fill('Dummy denied input');page.get_by_role('button',name='Encrypt',exact=True).click();expect(page.get_by_text('403: KMS permission denied.',exact=True)).to_be_visible();expect(page.get_by_label('Ciphertext blob',exact=True)).to_have_value('')
+ assert kms.describe_key(KeyId=key_id)['KeyMetadata']['KeyState']=='Enabled' and len(kms.list_keys()['Keys'])==1
+ page.get_by_role('button',name='Account menu',exact=True).click();page.get_by_role('menuitem',name='Sign out',exact=True).click();expect(page.get_by_role('heading',name='Open your local sandbox',exact=True)).to_be_visible()
+ assert kms.describe_key(KeyId=key_id)['KeyMetadata']['Description']=='Dummy browser key','Browser logout revoked independent SDK credential'
+ kms.close()
  assert not errors and not outside,(errors,outside)
  browser.close()
- print(json.dumps({'nativeCreatePolicyEncryptDecrypt':True,'cancelCreatesNothing':True,'SDKConfirmsUIState':True,'wrongContextRejected':True,'disabledGuard':True,'keyboard':True,'PC390AxeReflow':True,'regionRemount':True,'staleRefreshErrorIgnored':True,'outside':0,'pageerrors':0,'cleanup':'temporary process/DB removed; key scheduled deletion unsupported'}))
+ print(json.dumps({'nativeCreatePolicyEncryptDecrypt':True,'cancelCreatesNothing':True,'SDKConfirmsUIState':True,'wrongContextRejected':True,'disabledGuard':True,'keyboard':True,'PC390AxeReflow':True,'regionRemount':True,'staleRefreshErrorIgnored':True,'principalClearAndIAMDenied':True,'logoutPreservesSDK':True,'positiveCurrent500Recovered':True,'outside':0,'pageerrors':0,'cleanup':'temporary process/DB removed; key scheduled deletion unsupported'}))

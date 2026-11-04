@@ -99,8 +99,8 @@ external key material, AWS portable blobs, AWS eventual consistency, or CFN
 resource are supplied by this increment. A prepared isolated Cloudscape component targets these same native APIs for the
 regional key list, creation, metadata, read-only default policy, enable/disable
 and explicitly identified local encryption test. Shared navigation/component wiring and canonical asset rebuild are now recorded
-below. Actual browser verification remains pending; a built bundle is not
-evidence that the new view is usable.
+below. Actual PC1440/390 browser verification is recorded separately below;
+a built bundle alone is not evidence that the new view is usable.
 No existing Challenge problem is enabled merely by these operations.
 
 ## Wire examples
@@ -209,8 +209,8 @@ This source refresh normally merges main b61d029 into a separate candidate while
 preserving the original5862047 checkout. The initial merge preserved all five shared conflict files from main. A later
 authorized source phase adds regular server initialization/capabilities, minimal
 KMS navigation and eight header-target body templates while preserving the
-existing IAM alias and all43 OpenAPI operation IDs. Generated assets are not
-rebuilt yet; existing SQS/API/logout state and routes are preserved. New native tests use
+existing IAM alias and all43 OpenAPI operation IDs. Canonical assets were
+subsequently rebuilt as recorded below; existing SQS/API/logout state and routes are preserved. New native tests use
 independent literal operation/action/resource names, full persisted-key fingerprints,
 actual SQLite pure RAISE(IGNORE) failures and rejected transport frames. Expected
 single-row writes now require one affected row before any key/state/ciphertext
@@ -235,7 +235,13 @@ binding helpers and shared initialization/dispatch declarations. Its explicit
 limits exclude parser/crypto/read-output/host-authentication proofs. The prior
 standalone fragment is preserved outside the source tree, leaving one canonical
 registry. Twelve baselines and48 named controls are registered; existing ten
-models and36 controls remain intact. Current-head execution is still pending.
+models and36 controls remain intact. At immutable b11fbfe, all12 baselines and48
+controls passed with the pinned jar,512MiB heap,1 worker and unchanged60s
+per-case timeout. KMSKeyState explored737 distinct states; KMSProtocolAdmission
+explored5064. Every control returned exit12 with its named invariant and a
+transition trace or explicit initial-state counterexample. Model/cfg/registry
+bytes remain unchanged in this test/documentation follow-up; final-head CI
+execution is still required.
 
 
 ## Source composition and bounded API reference
@@ -258,11 +264,11 @@ verified to synchronize headers automatically. Create a key first, use its actua
 returned identifier, then copy actual local Encrypt output for Decrypt. The
 valid-base64 documentation placeholder is deliberately not decryptable.
 Parsed schema/source checks, served examples, SDK sends and canonical bundle/NOTICE
-rebuild have separate results below. Browser operations, complete coverage/security/CI
-and all12/48 formal runs remain distinct pending gates for this composition.
+rebuild have separate results below. Browser and bounded formal results are
+recorded below; complete coverage/security/CI remain separate pending gates.
 
 
-## Protocol admission/refusal and snapshot contract (prepared, not verified)
+## Protocol admission/refusal and snapshot contract
 
 The independent KMSProtocolAdmission model represents normalized selection,
 metadata consistency, identity lookup and a captured permit before executing one
@@ -287,8 +293,10 @@ provider-alias, two-DB/token and persistence test passed normally (1.388s) and
 under race (10.499s), with both-package vet passing. The body-read barrier proves
 captured permission is stable across later grant/revocation; the next request
 sees the changed policy. This is not full IAM, SigV4 or tenant-isolation proof.
-A same-view console refresh guard now rejects older errors, with prepared delayed
-old-error/current-error/recovery browser assertions; these are also unexecuted.
+A same-view console refresh guard rejects older errors. Actual browser tests
+observe the older500 response body being consumed after a newer real200, then
+assert the newer state remains visible. A current500 must be visible and a real
+refresh must recover, preventing a blanket error-suppression false positive.
 
 
 ## Canonical assets and actual SDK checkpoints
@@ -315,3 +323,32 @@ pagination was bounded and exact, and Disable/Enable state was read back. Eight
 clients had57 positive equal calls/sends/responses. Both actual CLI processes
 and the restart process completed/reaped cleanly. This is not Scalar browser
 interaction, automatic header synchronization or a whole-CI result.
+
+
+## Actual focused console acceptance
+
+The c8cdb8f embedded binary (SHA256
+`8e2a789eeb79a167294d8e61adf53aa9dab858516fdce8a1310de43050124c38`)
+was exercised at1440 and390 pixels with dummy data only. Native SDK readback
+confirmed cancellation creates no key, Create/metadata/default policy,
+Encrypt/Decrypt/context rejection and Disable/Enable state. Keyboard activation,
+reflow and serious/critical WCAG axe checks passed with no outside requests or
+browser page errors. Region and exercise-identity changes remount the view and
+clear plaintext/ciphertext; an explicit-deny reader receives actual403 without
+ciphertext or changed key state. Browser sign-out removes browser access while
+the independent operator SDK credential remains valid. Temporary CLI/DB fixtures
+are removed; scheduled key deletion remains unsupported.
+
+The mandatory helper keeps CSP enforced and uses a function-form Playwright
+predicate to observe the delayed response, avoiding string-expression unsafe-eval.
+Initial supplemental failures (a mobile/desktop menu-role mismatch and that
+predicate) were retained as test-procedure failures and corrected without product
+or bundle changes. Passing an outside supplemental script alone does not establish
+that the tracked helper passed; its exact final source hash/result is recorded
+separately by the focused acceptance run.
+
+The public AWS KMS guides linked above informed the list/detail/policy structure;
+no authenticated current AWS console was inspected, so pixel-identical fidelity
+is not claimed. “Local encryption test” is explicitly simulator-only, unlike the
+real AWS console. These checks do not establish full AWS KMS compatibility,
+full accessibility, cloud-grade key protection, or complete CI success.
