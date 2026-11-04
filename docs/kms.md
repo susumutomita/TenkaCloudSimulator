@@ -180,6 +180,22 @@ plan mentions aliases, grants and scheduled deletion, none of which this smaller
 increment implements. No key deletion API is invented: test-owned temporary DB
 cleanup is distinct from deleting a key with live ciphertext dependencies.
 
+## Current-main refresh status
+
+The private PR409 refresh normally merges main
+`5c97dc5916fa39fd43d80ae79532d5892fcb30ea` into the public
+`8cccb6b3e0807b48ef323884a23e71c2bccbe1cc` ancestry. It preserves main's
+independent GCP/Azure scopes, actual raw provider paths, read-only non-AWS scope
+menu,61 OpenAPI operation IDs and22 mandatory Conformance cases. Only the two
+KMS models/twelve controls and two KMS SDK/browser children are added, giving
+18 models/94 controls and24 cases. The SDK child also executes the eight served
+root POST examples. Current merged Go, canonical assets, full coverage, SDK,
+browser, TLC/applicability and hosted checks have NOT run. Generated assets
+remain main's prior bundle until an authorized canonical rebuild. Earlier
+acceptance tables below refer to their named old inputs, not this refresh.
+No Google/Azure official SDK execution or authenticated cloud-console visual
+comparison is implied. No full AWS parity, HSM or at-rest raw-key secrecy claim.
+
 ## Verification and finite model scope
 
 The current implementation has actual native, SDK and browser evidence; the

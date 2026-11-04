@@ -3,7 +3,7 @@
   "info": {
     "title": "TenkaCloud Simulator API",
     "version": "0.1.0",
-    "description": "Sign in through the local console first. The browser sends its same-origin session cookie; Test Request uses that session. For curl or SDKs add the host-issued `X-Simulator-Token` header. Dummy TCSIM signature credentials identify the AWS wire format; they are not host authentication. `x-simulator-principal` selects an exercise identity only. Participant sessions are already bound to an identity and cannot select simulator-admin. Never enter real AWS credentials here. \n\n**Examples are static documentation, not saved state.** Use Test Request \u2192 Send to query your environment. S3 responses remain native XML/bytes; expand typed schemas below to understand fields.\n\nIndependent local cloud simulator. AWS is the first provider, with documented S3, Systems Manager Parameter Store, SQS, Lambda, CloudFormation and IAM role subsets. No real infrastructure is created. This document describes only implemented operations. S3 wire APIs retain their XML formats; Native IAM roles use Query/XML; legacy identity control remains a separate JSON API. Native role ownership blocks legacy PUT/DELETE with HTTP409. Use unsigned requests or dummy TCSIM SDK credentials. Default principal simulator-admin has full sandbox access. IAM Query routing uses X-Simulator-Service: iam (or the dummy SDK signature scope), root POST and Version2010-05-08. Nine bounded role/inline-policy operations are implemented; no STS, managed policies, Conditions or non-root paths. Native Lambda roles must trust lambda.amazonaws.com. Legacy CFN/local identity roles retain their prior metadata-only trust semantics. For IAM exercises send x-simulator-principal. SQLite is ephemeral by default; --state persists it. See /_simulator/v1/capabilities for limits and deviations. Lambda supports a bounded Python 3.12 ZIP subset through the native REST paths below. Host Python is not required. A limited saved-role local SSM/S3 function SDK is supported; arbitrary network/HTTP and Function URLs remain unsupported. CloudFormation supports inline Python AWS::Lambda::Function with index.handler, existing local role, Ref/Arn and explicit DependsOn. Caller requires Lambda Create/DeleteFunction and iam:PassRole; tagged creation also requires lambda:TagResource. Only the declared saved-role SSM/S3 capability bridge is available, with no arbitrary network or managed-policy grants. Function SDK limits: S3 object body32KiB, native response48KiB before capability encoding, message64KiB,128calls and1MiB request/response aggregate. Oversized native SSM or S3 responses return EntityTooLarge without a partial successful result. API Gateway REST APIs support an explicit REGIONAL/NONE/Lambda AWS_PROXY subset. Deployments freeze resources and integrations; stages refer to a deployment. No public endpoint or real AWS is created. Local invocation requires the host access token/session and a bounded Lambda apigateway.amazonaws.com resource permission with a matching local execute-api SourceArn. Responses are non-executing downloads, with protected cookie/navigation/CORS/CSP headers removed. Active browser app hosting, WAF, custom domains, authorizers, binary media, API keys, caching, stage editing and full WP grading remain unsupported. CloudFormation also provisions the bounded RestApi/Resource/Method/Deployment/Stage and Lambda::Permission subset in the same native SQLite transaction. Deployment DependsOn methods is explicit; API children are same-stack, snapshots immutable, and native drift blocks destructive cleanup. No WAF or custom resources are supported.",
+    "description": "Sign in through the local console first. The browser sends its same-origin session cookie; Test Request uses that session. For curl or SDKs add the host-issued `X-Simulator-Token` header. Dummy TCSIM signature credentials identify the AWS wire format; they are not host authentication. `x-simulator-principal` selects an exercise identity only. Participant sessions are already bound to an identity and cannot select simulator-admin. Never enter real AWS credentials here. \n\n**Examples are static documentation, not saved state.** Use Test Request → Send to query your environment. S3 responses remain native XML/bytes; expand typed schemas below to understand fields.\n\nIndependent local cloud simulator. AWS is the first provider, with documented S3, Systems Manager Parameter Store, SQS, Lambda, CloudFormation and IAM role subsets. No real infrastructure is created. This document describes only implemented operations. S3 wire APIs retain their XML formats; Native IAM roles use Query/XML; legacy identity control remains a separate JSON API. Native role ownership blocks legacy PUT/DELETE with HTTP409. Use unsigned requests or dummy TCSIM SDK credentials. Default principal simulator-admin has full sandbox access. IAM Query routing uses X-Simulator-Service: iam (or the dummy SDK signature scope), root POST and Version2010-05-08. Nine bounded role/inline-policy operations are implemented; no STS, managed policies, Conditions or non-root paths. Native Lambda roles must trust lambda.amazonaws.com. Legacy CFN/local identity roles retain their prior metadata-only trust semantics. For IAM exercises send x-simulator-principal. SQLite is ephemeral by default; --state persists it. See /_simulator/v1/capabilities for limits and deviations. Lambda supports a bounded Python 3.12 ZIP subset through the native REST paths below. Host Python is not required. A limited saved-role local SSM/S3 function SDK is supported; arbitrary network/HTTP and Function URLs remain unsupported. CloudFormation supports inline Python AWS::Lambda::Function with index.handler, existing local role, Ref/Arn and explicit DependsOn. Caller requires Lambda Create/DeleteFunction and iam:PassRole; tagged creation also requires lambda:TagResource. Only the declared saved-role SSM/S3 capability bridge is available, with no arbitrary network or managed-policy grants. Function SDK limits: S3 object body32KiB, native response48KiB before capability encoding, message64KiB,128calls and1MiB request/response aggregate. Oversized native SSM or S3 responses return EntityTooLarge without a partial successful result. API Gateway REST APIs support an explicit REGIONAL/NONE/Lambda AWS_PROXY subset. Deployments freeze resources and integrations; stages refer to a deployment. No public endpoint or real AWS is created. Local invocation requires the host access token/session and a bounded Lambda apigateway.amazonaws.com resource permission with a matching local execute-api SourceArn. Responses are non-executing downloads, with protected cookie/navigation/CORS/CSP headers removed. Active browser app hosting, WAF, custom domains, authorizers, binary media, API keys, caching, stage editing and full WP grading remain unsupported. CloudFormation also provisions the bounded RestApi/Resource/Method/Deployment/Stage and Lambda::Permission subset in the same native SQLite transaction. Deployment DependsOn methods is explicit; API children are same-stack, snapshots immutable, and native drift blocks destructive cleanup. No WAF or custom resources are supported.\n\nGoogle Cloud Storage JSON API and Azure Blob Storage REST are bounded independently implemented local providers. Synthetic project/account scope and owner bindings are host configured; Google IAM/Azure RBAC, cloud account provisioning, OAuth/Entra/SharedKey/SAS are not implemented. See the provider-specific operations below and capabilities; SDK compatibility is separately tested and must not be inferred from API existence.",
     "license": {
       "name": "MIT"
     }
@@ -19,7 +19,7 @@
       "get": {
         "operationId": "ListBuckets",
         "summary": "List all buckets",
-        "description": "**Static examples below are sample documentation, not your current state.** Click **Test Request**, then **Send** to execute this operation. The client shows the live HTTP status, headers and body. Lists the buckets currently saved in this environment, across the supported regions. `Buckets/Bucket/Name` is a bucket name; `BucketRegion` is its saved region; `CreationDate` is UTC. An actually executed response with `<Buckets></Buckets>` is empty. The example below intentionally contains two sample buckets. Requires `s3:ListAllMyBuckets` on `*`.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.\n\nAfter a live S3 metadata request, use the **Live S3 result \u00b7 Read fields** button or **Alt+Shift+R** for a bounded field explanation. The API client keeps the original XML. The explanation is not available for arbitrary object bodies.",
+        "description": "**Static examples below are sample documentation, not your current state.** Click **Test Request**, then **Send** to execute this operation. The client shows the live HTTP status, headers and body. Lists the buckets currently saved in this environment, across the supported regions. `Buckets/Bucket/Name` is a bucket name; `BucketRegion` is its saved region; `CreationDate` is UTC. An actually executed response with `<Buckets></Buckets>` is empty. The example below intentionally contains two sample buckets. Requires `s3:ListAllMyBuckets` on `*`.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.\n\nAfter a live S3 metadata request, use the **Live S3 result · Read fields** button or **Alt+Shift+R** for a bounded field explanation. The API client keeps the original XML. The explanation is not available for arbitrary object bodies.",
         "tags": [
           "S3 basic object storage"
         ],
@@ -39,7 +39,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Static example \u2014 two sample buckets, not a live inventory. Expand the response schema for each field; execute Send for your actual list.",
+            "description": "Static example — two sample buckets, not a live inventory. Expand the response schema for each field; execute Send for your actual list.",
             "content": {
               "application/xml": {
                 "schema": {
@@ -78,7 +78,7 @@
       },
       "post": {
         "summary": "SSM/SQS/KMS JSON, CloudFormation Query, or IAM Query operation",
-        "description": "**Static request templates:** choose the correct Content-Type and routing headers before Test Request \u2192 Send. SSM/SQS send JSON with X-Amz-Target (JSON 1.1 for SSM, JSON 1.0 for SQS); CloudFormation/IAM send URL-encoded Query fields. The 200 response is JSON for SSM/SQS and XML for Query protocols. A successful DeleteStack has no result payload beyond Query response metadata.\n\nNative regional root endpoint. SQS: X-Amz-Target AmazonSQS.CreateQueue, ListQueues, GetQueueUrl, DeleteQueue, SendMessage, ReceiveMessage, DeleteMessage, ChangeMessageVisibility, GetQueueAttributes (JSON 1.0, Standard queues only; local body limit 256 KiB, aggregate physical storage 10000 messages/64 MiB across queues/regions including expired foreign rows until scoped cleanup; bytes count body UTF-8 plus stored attribute JSON. Over-budget SendMessage returns local SimulatorQuotaExceeded without mutation; existing over-cap data remains readable/deletable; FIFO, Query protocol, batch operations and dead-letter redrive are unsupported). SSM: X-Amz-Target AmazonSSM.PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter. CloudFormation: CreateStack, DescribeStacks, DeleteStack; S3 buckets, SSM parameters, inline Python Lambda functions, one inline IAM identity policy per role, five Regional REST API Gateway resource types, and bounded Lambda::Permission. Unsupported options fail. Real credentials and session tokens are rejected. Create/DeleteStack also require the caller to allow the underlying S3/SSM/IAM/Lambda actions; CAPABILITY_IAM grants no permissions. API resources use NONE/POST AWS_PROXY local Lambda, same-stack API children, explicit deployment DependsOn methods and reverse guarded cleanup. Lambda permission uses only apigateway.amazonaws.com and local execute-api SourceArn. No service RoleArn or general CloudFormation lifecycle is supported. IAM is global: send X-Simulator-Service: iam, Version2010-05-08 and one of CreateRole/GetRole/ListRoles/DeleteRole/PutRolePolicy/GetRolePolicy/DeleteRolePolicy/ListRolePolicies/UpdateAssumeRolePolicy. Policy documents are JSON strings; successful IAM XML returns them RFC3986 URL-encoded. Native role names use the local alphanumeric/underscore/hyphen subset,1\u201364; inline policy names1\u2013128 AWS characters. Trust and aggregate policies32KiB, at most10 inline policies/100 statements,1000 active+retired name claims. Deleted role names cannot be adopted by legacy identity writes. No managed grants or session issuance.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.\n\nUse X-Amz-Target TrentService.<operation> matching the selected body example; example choice does not change routing headers automatically. CreateKey first, copy returned KeyId into later requests, and copy an actual local Encrypt CiphertextBlob into Decrypt (the valid-base64 documentation placeholder is deliberately not decryptable). All calls require host X-Simulator-Token or signed-in local session. Dummy TCSIM SigV4 scope is not authentication.\n\nCreateKey/ListKeys require their exact kms action on *. DescribeKey/EnableKey/DisableKey/GetKeyPolicy/Encrypt/Decrypt require the actual key ARN. Decrypt without KeyId resolves the local blob key. Explicit Deny wins. Programmatic default policy only enables local identity-policy delegation; no grant for all participants.\n\nEnabled/Disabled only; disabled blocks Encrypt/Decrypt, metadata/default policy remain readable. Local request64KiB,1000keys,plaintext1\u20134096bytes,context100entries/8192canonicalbytes,counter2^32 ceiling. Ciphertext/material are simulator-local; SQLite stores raw material, not an at-rest security boundary. Unsupported aliases/tags/grants/custom policies/asymmetric/data keys/rotation/deletion/multi-region/CFN/other-service encryption fail; no problem availability is implied. Actual AWS eventual consistency and ciphertext portability are not reproduced.\n\nKMS JSON1.1 targets TrentService.CreateKey/DescribeKey/ListKeys/EnableKey/DisableKey/GetKeyPolicy/Encrypt/Decrypt are also accepted here. This root JSON1.1 section includes all eight bounded KMS body templates and limitations.",
+        "description": "**Static request templates:** choose the correct Content-Type and routing headers before Test Request → Send. SSM/SQS send JSON with X-Amz-Target (JSON 1.1 for SSM, JSON 1.0 for SQS); CloudFormation/IAM send URL-encoded Query fields. The 200 response is JSON for SSM/SQS and XML for Query protocols. A successful DeleteStack has no result payload beyond Query response metadata.\n\nNative regional root endpoint. SQS: X-Amz-Target AmazonSQS.CreateQueue, ListQueues, GetQueueUrl, DeleteQueue, SendMessage, ReceiveMessage, DeleteMessage, ChangeMessageVisibility, GetQueueAttributes (JSON 1.0, Standard queues only; local body limit 256 KiB, aggregate physical storage 10000 messages/64 MiB across queues/regions including expired foreign rows until scoped cleanup; bytes count body UTF-8 plus stored attribute JSON. Over-budget SendMessage returns local SimulatorQuotaExceeded without mutation; existing over-cap data remains readable/deletable; FIFO, Query protocol, batch operations and dead-letter redrive are unsupported). SSM: X-Amz-Target AmazonSSM.PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter. CloudFormation: CreateStack, DescribeStacks, DeleteStack; S3 buckets, SSM parameters, inline Python Lambda functions, one inline IAM identity policy per role, five Regional REST API Gateway resource types, and bounded Lambda::Permission. Unsupported options fail. Real credentials and session tokens are rejected. Create/DeleteStack also require the caller to allow the underlying S3/SSM/IAM/Lambda actions; CAPABILITY_IAM grants no permissions. API resources use NONE/POST AWS_PROXY local Lambda, same-stack API children, explicit deployment DependsOn methods and reverse guarded cleanup. Lambda permission uses only apigateway.amazonaws.com and local execute-api SourceArn. No service RoleArn or general CloudFormation lifecycle is supported. IAM is global: send X-Simulator-Service: iam, Version2010-05-08 and one of CreateRole/GetRole/ListRoles/DeleteRole/PutRolePolicy/GetRolePolicy/DeleteRolePolicy/ListRolePolicies/UpdateAssumeRolePolicy. Policy documents are JSON strings; successful IAM XML returns them RFC3986 URL-encoded. Native role names use the local alphanumeric/underscore/hyphen subset,1–64; inline policy names1–128 AWS characters. Trust and aggregate policies32KiB, at most10 inline policies/100 statements,1000 active+retired name claims. Deleted role names cannot be adopted by legacy identity writes. No managed grants or session issuance.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.\n\nUse X-Amz-Target TrentService.<operation> matching the selected body example; example choice does not change routing headers automatically. CreateKey first, copy returned KeyId into later requests, and copy an actual local Encrypt CiphertextBlob into Decrypt (the valid-base64 documentation placeholder is deliberately not decryptable). All calls require host X-Simulator-Token or signed-in local session. Dummy TCSIM SigV4 scope is not authentication.\n\nCreateKey/ListKeys require their exact kms action on *. DescribeKey/EnableKey/DisableKey/GetKeyPolicy/Encrypt/Decrypt require the actual key ARN. Decrypt without KeyId resolves the local blob key. Explicit Deny wins. Programmatic default policy only enables local identity-policy delegation; no grant for all participants.\n\nEnabled/Disabled only; disabled blocks Encrypt/Decrypt, metadata/default policy remain readable. Local request64KiB,1000keys,plaintext1–4096bytes,context100entries/8192canonicalbytes,counter2^32 ceiling. Ciphertext/material are simulator-local; SQLite stores raw material, not an at-rest security boundary. Unsupported aliases/tags/grants/custom policies/asymmetric/data keys/rotation/deletion/multi-region/CFN/other-service encryption fail; no problem availability is implied. Actual AWS eventual consistency and ciphertext portability are not reproduced.\n\nKMS JSON1.1 targets TrentService.CreateKey/DescribeKey/ListKeys/EnableKey/DisableKey/GetKeyPolicy/Encrypt/Decrypt are also accepted here. This root JSON1.1 section includes all eight bounded KMS body templates and limitations.",
         "operationId": "awsRegionalOperation",
         "parameters": [
           {
@@ -397,7 +397,7 @@
                   }
                 },
                 "CreateRESTStack": {
-                  "summary": "Local REST\u2192Lambda\u2192SSM stack (no real AWS)",
+                  "summary": "Local REST→Lambda→SSM stack (no real AWS)",
                   "value": {
                     "Action": "CreateStack",
                     "Version": "2010-05-15",
@@ -654,19 +654,19 @@
               "examples": {
                 "createBucket": {
                   "value": "<CreateBucketConfiguration><LocationConstraint>ap-northeast-1</LocationConstraint></CreateBucketConfiguration>",
-                  "summary": "STATIC request template \u2014 choose the matching query selector before Send"
+                  "summary": "STATIC request template — choose the matching query selector before Send"
                 },
                 "enableVersioning": {
                   "value": "<VersioningConfiguration><Status>Enabled</Status></VersioningConfiguration>",
-                  "summary": "STATIC request template \u2014 choose the matching query selector before Send"
+                  "summary": "STATIC request template — choose the matching query selector before Send"
                 },
                 "publicAccessBlock": {
                   "value": "<PublicAccessBlockConfiguration><BlockPublicAcls>true</BlockPublicAcls><IgnorePublicAcls>true</IgnorePublicAcls><BlockPublicPolicy>true</BlockPublicPolicy><RestrictPublicBuckets>true</RestrictPublicBuckets></PublicAccessBlockConfiguration>",
-                  "summary": "STATIC request template \u2014 choose the matching query selector before Send"
+                  "summary": "STATIC request template — choose the matching query selector before Send"
                 },
                 "bucketTags": {
                   "value": "<Tagging><TagSet><Tag><Key>Environment</Key><Value>practice</Value></Tag></TagSet></Tagging>",
-                  "summary": "STATIC request template \u2014 choose the matching query selector before Send",
+                  "summary": "STATIC request template — choose the matching query selector before Send",
                   "description": "For this exact minified XML template use ?tagging and Content-MD5: tIgFdZ9IMEXsF8MypLdCYQ==. Recompute if any body byte changes. This is a static request template, not an executed update."
                 }
               }
@@ -678,7 +678,7 @@
       "get": {
         "operationId": "ListObjectsV2OrGetBucketLocation",
         "summary": "List objects, versions or bucket settings",
-        "description": "**Static examples below are sample documentation, not your current state.** Click **Test Request**, then **Send** to execute this operation. The client shows the live HTTP status, headers and body. Choose **one** query mode. Do not combine selectors.\n\n| Goal | Query | XML root / what it means |\n| --- | --- | --- |\n| Current objects | `?list-type=2` (default) | `ListBucketResult`: `Contents/Key` is an object key, `Size` is bytes, `KeyCount` is this page's entries. |\n| Retained versions | `?versions` | `ListVersionsResult`: `Version` contains saved bodies; `DeleteMarker` hides a key without erasing old versions. |\n| Bucket region | `?location` | `LocationConstraint`: empty text means `us-east-1`. |\n| Versioning setting | `?versioning` | `VersioningConfiguration`: missing `Status` means never enabled. |\n| Public-access settings | `?publicAccessBlock` | `PublicAccessBlockConfiguration`: four saved booleans. |\n| User tags | `?tagging` | `Tagging/TagSet/Tag`: `Key` and `Value` pairs. |\n\nFor any setting/history mode, **remove `list-type=2`** and unrelated query fields in the request editor before Send. A 404 setting/tag error means that configuration is absent, not necessarily that the bucket is absent. Requires the corresponding S3 read action; this simulator rejects unsupported selectors, combined selectors and nonempty selector values. `ListBucketResult` is not a bucket list.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.\n\nAfter a live S3 metadata request, use the **Live S3 result \u00b7 Read fields** button or **Alt+Shift+R** for a bounded field explanation. The API client keeps the original XML. The explanation is not available for arbitrary object bodies.",
+        "description": "**Static examples below are sample documentation, not your current state.** Click **Test Request**, then **Send** to execute this operation. The client shows the live HTTP status, headers and body. Choose **one** query mode. Do not combine selectors.\n\n| Goal | Query | XML root / what it means |\n| --- | --- | --- |\n| Current objects | `?list-type=2` (default) | `ListBucketResult`: `Contents/Key` is an object key, `Size` is bytes, `KeyCount` is this page's entries. |\n| Retained versions | `?versions` | `ListVersionsResult`: `Version` contains saved bodies; `DeleteMarker` hides a key without erasing old versions. |\n| Bucket region | `?location` | `LocationConstraint`: empty text means `us-east-1`. |\n| Versioning setting | `?versioning` | `VersioningConfiguration`: missing `Status` means never enabled. |\n| Public-access settings | `?publicAccessBlock` | `PublicAccessBlockConfiguration`: four saved booleans. |\n| User tags | `?tagging` | `Tagging/TagSet/Tag`: `Key` and `Value` pairs. |\n\nFor any setting/history mode, **remove `list-type=2`** and unrelated query fields in the request editor before Send. A 404 setting/tag error means that configuration is absent, not necessarily that the bucket is absent. Requires the corresponding S3 read action; this simulator rejects unsupported selectors, combined selectors and nonempty selector values. `ListBucketResult` is not a bucket list.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.\n\nAfter a live S3 metadata request, use the **Live S3 result · Read fields** button or **Alt+Shift+R** for a bounded field explanation. The API client keeps the original XML. The explanation is not available for arbitrary object bodies.",
         "tags": [
           "S3 basic object storage"
         ],
@@ -721,7 +721,7 @@
           {
             "name": "max-keys",
             "in": "query",
-            "description": "Object/version list page size, 0\u20131000. REMOVE for location/versioning/publicAccessBlock/tagging reads.",
+            "description": "Object/version list page size, 0–1000. REMOVE for location/versioning/publicAccessBlock/tagging reads.",
             "schema": {
               "type": "integer",
               "default": 1000
@@ -819,7 +819,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Static examples \u2014 select the example matching your query. Actual state is read only after Test Request \u2192 Send.",
+            "description": "Static examples — select the example matching your query. Actual state is read only after Test Request → Send.",
             "content": {
               "application/xml": {
                 "schema": {
@@ -846,27 +846,27 @@
                 },
                 "examples": {
                   "currentObjects": {
-                    "summary": "STATIC: ?list-type=2 \u2014 one object, not buckets",
+                    "summary": "STATIC: ?list-type=2 — one object, not buckets",
                     "value": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<ListBucketResult xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">\n  <Name>practice-bucket</Name>\n  <Prefix></Prefix>\n  <MaxKeys>1000</MaxKeys>\n  <KeyCount>1</KeyCount>\n  <IsTruncated>false</IsTruncated>\n  <Contents>\n    <Key>hello.txt</Key>\n    <LastModified>2026-11-04T09:02:00Z</LastModified>\n    <ETag>&quot;dummy-entity-tag&quot;</ETag>\n    <Size>31</Size>\n    <StorageClass>STANDARD</StorageClass>\n  </Contents>\n</ListBucketResult>\n"
                   },
                   "versions": {
-                    "summary": "STATIC: ?versions \u2014 retained version",
+                    "summary": "STATIC: ?versions — retained version",
                     "value": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<ListVersionsResult xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">\n  <Name>practice-bucket</Name>\n  <Prefix></Prefix>\n  <KeyMarker></KeyMarker>\n  <VersionIdMarker></VersionIdMarker>\n  <MaxKeys>1000</MaxKeys>\n  <IsTruncated>false</IsTruncated>\n  <Version>\n    <Key>hello.txt</Key>\n    <VersionId>EXAMPLE-VERSION</VersionId>\n    <IsLatest>true</IsLatest>\n    <LastModified>2026-11-04T09:02:00Z</LastModified>\n    <ETag>&quot;dummy-entity-tag&quot;</ETag>\n    <Size>31</Size>\n    <StorageClass>STANDARD</StorageClass>\n  </Version>\n</ListVersionsResult>\n"
                   },
                   "location": {
-                    "summary": "STATIC: ?location \u2014 saved region",
+                    "summary": "STATIC: ?location — saved region",
                     "value": "<LocationConstraint xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">us-west-2</LocationConstraint>\n"
                   },
                   "versioning": {
-                    "summary": "STATIC: ?versioning \u2014 enabled",
+                    "summary": "STATIC: ?versioning — enabled",
                     "value": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<VersioningConfiguration xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">\n  <Status>Enabled</Status>\n</VersioningConfiguration>\n"
                   },
                   "publicAccessBlock": {
-                    "summary": "STATIC: ?publicAccessBlock \u2014 saved settings",
+                    "summary": "STATIC: ?publicAccessBlock — saved settings",
                     "value": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<PublicAccessBlockConfiguration xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">\n  <BlockPublicAcls>true</BlockPublicAcls>\n  <IgnorePublicAcls>true</IgnorePublicAcls>\n  <BlockPublicPolicy>true</BlockPublicPolicy>\n  <RestrictPublicBuckets>true</RestrictPublicBuckets>\n</PublicAccessBlockConfiguration>\n"
                   },
                   "tags": {
-                    "summary": "STATIC: ?tagging \u2014 one user tag",
+                    "summary": "STATIC: ?tagging — one user tag",
                     "value": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Tagging xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">\n  <TagSet>\n    <Tag>\n      <Key>Environment</Key>\n      <Value>practice</Value>\n    </Tag>\n  </TagSet>\n</Tagging>\n"
                   }
                 }
@@ -925,7 +925,7 @@
       "head": {
         "operationId": "HeadBucket",
         "summary": "Check whether a bucket exists",
-        "description": "**Static documentation, not a live existence check.** Use Test Request \u2192 Send; HEAD never returns an XML body. A live 200 means the bucket exists and the selected identity can list it. Read x-amz-bucket-region in Response Headers. Requires s3:ListBucket. Use GET ?location for readable region XML; bucket configuration selectors do not apply to HEAD.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.",
+        "description": "**Static documentation, not a live existence check.** Use Test Request → Send; HEAD never returns an XML body. A live 200 means the bucket exists and the selected identity can list it. Read x-amz-bucket-region in Response Headers. Requires s3:ListBucket. Use GET ?location for readable region XML; bucket configuration selectors do not apply to HEAD.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.",
         "tags": [
           "S3 basic object storage"
         ],
@@ -2945,7 +2945,7 @@
         ],
         "responses": {
           "201": {
-            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3149,7 +3149,7 @@
         ],
         "responses": {
           "200": {
-            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3315,7 +3315,7 @@
         ],
         "responses": {
           "200": {
-            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3470,7 +3470,7 @@
         ],
         "responses": {
           "200": {
-            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3746,7 +3746,7 @@
         ],
         "responses": {
           "201": {
-            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3924,7 +3924,7 @@
         ],
         "responses": {
           "200": {
-            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4225,7 +4225,7 @@
         ],
         "responses": {
           "201": {
-            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4418,7 +4418,7 @@
         ],
         "responses": {
           "200": {
-            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4579,7 +4579,7 @@
         ],
         "responses": {
           "201": {
-            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4752,7 +4752,7 @@
         ],
         "responses": {
           "201": {
-            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4915,7 +4915,7 @@
         ],
         "responses": {
           "200": {
-            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5052,7 +5052,7 @@
         ],
         "responses": {
           "201": {
-            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5229,7 +5229,7 @@
         ],
         "responses": {
           "200": {
-            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5498,7 +5498,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The saved Lambda application body, returned as a non-executing download. It may be text or JSON depending on your code; this is not a fixed simulator success object. App status codes can also be 2xx\u20135xx.",
+            "description": "The saved Lambda application body, returned as a non-executing download. It may be text or JSON depending on your code; this is not a fixed simulator success object. App status codes can also be 2xx–5xx.",
             "content": {
               "application/octet-stream": {
                 "schema": {
@@ -5581,7 +5581,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The saved Lambda application body, returned as a non-executing download. It may be text or JSON depending on your code; this is not a fixed simulator success object. App status codes can also be 2xx\u20135xx.",
+            "description": "The saved Lambda application body, returned as a non-executing download. It may be text or JSON depending on your code; this is not a fixed simulator success object. App status codes can also be 2xx–5xx.",
             "content": {
               "application/octet-stream": {
                 "schema": {
@@ -5677,7 +5677,7 @@
         ],
         "responses": {
           "201": {
-            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5866,7 +5866,7 @@
         ],
         "responses": {
           "200": {
-            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6111,6 +6111,3703 @@
                 },
                 "example": {
                   "message": "Static example: inspect the actual status, x-amzn-ErrorType and message after Send."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/_simulator/providers/gcp/storage/v1/b": {
+      "get": {
+        "operationId": "GCPListBuckets",
+        "summary": "List Cloud Storage buckets",
+        "tags": [
+          "Google Cloud Storage"
+        ],
+        "description": "**Static examples are documentation, not saved state.** Test Request → Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Returns only the configured project. Pagination uses maxResults/pageToken.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SimulatorToken"
+          },
+          {
+            "name": "project",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "tenkacloud-local"
+            },
+            "description": "Configured synthetic project ID."
+          },
+          {
+            "name": "maxResults",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "100"
+            },
+            "description": ""
+          },
+          {
+            "name": "pageToken",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Live local operation result. Expand a static sample below only as a reference.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "location": {
+                            "type": "string"
+                          },
+                          "storageClass": {
+                            "type": "string"
+                          },
+                          "projectNumber": {
+                            "type": "string"
+                          },
+                          "metageneration": {
+                            "type": "string"
+                          },
+                          "timeCreated": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "nextPageToken": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "items": [
+                    {
+                      "name": "practice-bucket",
+                      "location": "US",
+                      "storageClass": "STANDARD",
+                      "projectNumber": "100000000001"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed or unsupported option; no silent success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing/invalid/expired local credential.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated exercise identity is not the configured owner.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource or addressed generation does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "ETag/generation precondition failed; saved state unchanged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Documented local state budget exceeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Operation is not implemented.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "GCPCreateBucket",
+        "summary": "Create a Cloud Storage bucket",
+        "tags": [
+          "Google Cloud Storage"
+        ],
+        "description": "**Static examples are documentation, not saved state.** Test Request → Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. STANDARD storage and the documented bounded location subset. Global names are not real cloud names.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SimulatorToken"
+          },
+          {
+            "name": "project",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "tenkacloud-local"
+            },
+            "description": "Configured synthetic project ID."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Live local operation result. Expand a static sample below only as a reference.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "location": {
+                      "type": "string"
+                    },
+                    "storageClass": {
+                      "type": "string"
+                    },
+                    "projectNumber": {
+                      "type": "string"
+                    },
+                    "metageneration": {
+                      "type": "string"
+                    },
+                    "timeCreated": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "name": "practice-bucket",
+                  "location": "US",
+                  "storageClass": "STANDARD",
+                  "projectNumber": "100000000001"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed or unsupported option; no silent success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing/invalid/expired local credential.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated exercise identity is not the configured owner.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource or addressed generation does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "ETag/generation precondition failed; saved state unchanged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Documented local state budget exceeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Operation is not implemented.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "storageClass": {
+                    "type": "string"
+                  },
+                  "projectNumber": {
+                    "type": "string"
+                  },
+                  "metageneration": {
+                    "type": "string"
+                  },
+                  "timeCreated": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "name": "practice-bucket",
+                "location": "US",
+                "storageClass": "STANDARD"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/_simulator/providers/gcp/storage/v1/b/{BucketName}": {
+      "parameters": [
+        {
+          "name": "BucketName",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "default": "practice-bucket"
+          },
+          "description": ""
+        }
+      ],
+      "get": {
+        "operationId": "GCPGetBucket",
+        "summary": "Get Cloud Storage bucket metadata",
+        "tags": [
+          "Google Cloud Storage"
+        ],
+        "description": "**Static examples are documentation, not saved state.** Test Request → Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. ACL/resource policy fields are not implemented.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SimulatorToken"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Live local operation result. Expand a static sample below only as a reference.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "location": {
+                      "type": "string"
+                    },
+                    "storageClass": {
+                      "type": "string"
+                    },
+                    "projectNumber": {
+                      "type": "string"
+                    },
+                    "metageneration": {
+                      "type": "string"
+                    },
+                    "timeCreated": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "name": "practice-bucket",
+                  "location": "US",
+                  "storageClass": "STANDARD",
+                  "projectNumber": "100000000001"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed or unsupported option; no silent success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing/invalid/expired local credential.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated exercise identity is not the configured owner.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource or addressed generation does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "ETag/generation precondition failed; saved state unchanged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Documented local state budget exceeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Operation is not implemented.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "GCPDeleteBucket",
+        "summary": "Delete an empty Cloud Storage bucket",
+        "tags": [
+          "Google Cloud Storage"
+        ],
+        "description": "**Static examples are documentation, not saved state.** Test Request → Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. A non-empty bucket is refused; delete objects first.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SimulatorToken"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Live local operation result. Expand a static sample below only as a reference."
+          },
+          "400": {
+            "description": "Malformed or unsupported option; no silent success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing/invalid/expired local credential.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated exercise identity is not the configured owner.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource or addressed generation does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "ETag/generation precondition failed; saved state unchanged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Documented local state budget exceeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Operation is not implemented.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/_simulator/providers/gcp/storage/v1/b/{BucketName}/o": {
+      "parameters": [
+        {
+          "name": "BucketName",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "default": "practice-bucket"
+          },
+          "description": ""
+        }
+      ],
+      "get": {
+        "operationId": "GCPListObjects",
+        "summary": "List Cloud Storage objects",
+        "tags": [
+          "Google Cloud Storage"
+        ],
+        "description": "**Static examples are documentation, not saved state.** Test Request → Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Flat listing with bounded prefix/delimiter and pagination.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SimulatorToken"
+          },
+          {
+            "name": "maxResults",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "100"
+            },
+            "description": ""
+          },
+          {
+            "name": "pageToken",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          },
+          {
+            "name": "prefix",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Live local operation result. Expand a static sample below only as a reference.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "bucket": {
+                            "type": "string"
+                          },
+                          "generation": {
+                            "type": "string"
+                          },
+                          "size": {
+                            "type": "string"
+                          },
+                          "contentType": {
+                            "type": "string"
+                          },
+                          "crc32c": {
+                            "type": "string"
+                          },
+                          "md5Hash": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "nextPageToken": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "items": [
+                    {
+                      "name": "hello.txt",
+                      "bucket": "practice-bucket",
+                      "generation": "1",
+                      "size": "5"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed or unsupported option; no silent success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing/invalid/expired local credential.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated exercise identity is not the configured owner.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource or addressed generation does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "ETag/generation precondition failed; saved state unchanged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Documented local state budget exceeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Operation is not implemented.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/_simulator/providers/gcp/storage/v1/b/{BucketName}/o/{ObjectName}": {
+      "parameters": [
+        {
+          "name": "BucketName",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "default": "practice-bucket"
+          },
+          "description": ""
+        },
+        {
+          "name": "ObjectName",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "default": "hello.txt"
+          },
+          "description": "Entire object name percent encoded once; encoded slashes remain object-name data."
+        }
+      ],
+      "get": {
+        "operationId": "GCPGetObject",
+        "summary": "Read object metadata or bytes",
+        "tags": [
+          "Google Cloud Storage"
+        ],
+        "description": "**Static examples are documentation, not saved state.** Test Request → Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Default response is metadata. Use alt=media for original bytes; no HTML preview or resource policy evaluation.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SimulatorToken"
+          },
+          {
+            "name": "alt",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "json"
+            },
+            "description": ""
+          },
+          {
+            "name": "ifGenerationMatch",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          },
+          {
+            "name": "generation",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Only the current stored generation is available. An explicitly addressed older generation returns404, never newer bytes."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Live local operation result. Expand a static sample below only as a reference.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "bucket": {
+                      "type": "string"
+                    },
+                    "generation": {
+                      "type": "string"
+                    },
+                    "size": {
+                      "type": "string"
+                    },
+                    "contentType": {
+                      "type": "string"
+                    },
+                    "crc32c": {
+                      "type": "string"
+                    },
+                    "md5Hash": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "name": "hello.txt",
+                  "bucket": "practice-bucket",
+                  "generation": "1",
+                  "size": "5",
+                  "contentType": "text/plain"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed or unsupported option; no silent success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing/invalid/expired local credential.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated exercise identity is not the configured owner.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource or addressed generation does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "ETag/generation precondition failed; saved state unchanged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Documented local state budget exceeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Operation is not implemented.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "GCPDeleteObject",
+        "summary": "Delete a Cloud Storage object",
+        "tags": [
+          "Google Cloud Storage"
+        ],
+        "description": "**Static examples are documentation, not saved state.** Test Request → Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Use the generation observed from metadata to avoid deleting a newer value.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SimulatorToken"
+          },
+          {
+            "name": "ifGenerationMatch",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          },
+          {
+            "name": "generation",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Only the current stored generation is available. An explicitly addressed older generation returns404, never newer bytes."
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Live local operation result. Expand a static sample below only as a reference."
+          },
+          "400": {
+            "description": "Malformed or unsupported option; no silent success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing/invalid/expired local credential.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated exercise identity is not the configured owner.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource or addressed generation does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "ETag/generation precondition failed; saved state unchanged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Documented local state budget exceeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Operation is not implemented.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/_simulator/providers/gcp/upload/storage/v1/b/{BucketName}/o": {
+      "parameters": [
+        {
+          "name": "BucketName",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "default": "practice-bucket"
+          },
+          "description": ""
+        }
+      ],
+      "post": {
+        "operationId": "GCPUploadObject",
+        "summary": "Upload a Cloud Storage object",
+        "tags": [
+          "Google Cloud Storage"
+        ],
+        "description": "**Static examples are documentation, not saved state.** Test Request → Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Media upload shown here; bounded multipart is also supported. Max 1 MiB. ifGenerationMatch=0 creates only; overwrite requires both object create and delete permissions. Resumable uploads are unsupported.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SimulatorToken"
+          },
+          {
+            "name": "uploadType",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "media"
+            },
+            "description": ""
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "hello.txt"
+            },
+            "description": ""
+          },
+          {
+            "name": "ifGenerationMatch",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "0"
+            },
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Live local operation result. Expand a static sample below only as a reference.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "bucket": {
+                      "type": "string"
+                    },
+                    "generation": {
+                      "type": "string"
+                    },
+                    "size": {
+                      "type": "string"
+                    },
+                    "contentType": {
+                      "type": "string"
+                    },
+                    "crc32c": {
+                      "type": "string"
+                    },
+                    "md5Hash": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "name": "hello.txt",
+                  "generation": "1",
+                  "size": "5"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed or unsupported option; no silent success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing/invalid/expired local credential.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated exercise identity is not the configured owner.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource or addressed generation does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "ETag/generation precondition failed; saved state unchanged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Documented local state budget exceeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Operation is not implemented.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "text/plain": {
+              "schema": {
+                "type": "string"
+              },
+              "example": "hello"
+            }
+          }
+        }
+      }
+    },
+    "/_simulator/providers/azure/{StorageAccount}": {
+      "parameters": [
+        {
+          "name": "StorageAccount",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "default": "tenkacloudlocal"
+          },
+          "description": ""
+        }
+      ],
+      "get": {
+        "operationId": "AzureListContainers",
+        "summary": "List Blob Storage containers",
+        "tags": [
+          "Azure Blob Storage"
+        ],
+        "description": "**Static examples are documentation, not saved state.** Test Request → Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Account is preconfigured locally; ARM account creation is unsupported.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SimulatorToken"
+          },
+          {
+            "name": "x-ms-version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "2023-11-03"
+            },
+            "description": "Only this explicitly supported service version."
+          },
+          {
+            "name": "comp",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "list"
+            },
+            "description": ""
+          },
+          {
+            "name": "marker",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          },
+          {
+            "name": "maxresults",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "100"
+            },
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Live local operation result. Expand a static sample below only as a reference.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "<EnumerationResults><Containers><Container><Name>practice-container</Name></Container></Containers><NextMarker/></EnumerationResults>"
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed or unsupported option; no silent success.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing/invalid/expired local credential.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated exercise identity is not the configured owner.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource or addressed generation does not exist.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "ETag/generation precondition failed; saved state unchanged.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Documented local state budget exceeded.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Operation is not implemented.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/_simulator/providers/azure/{StorageAccount}/{ContainerName}": {
+      "parameters": [
+        {
+          "name": "StorageAccount",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "default": "tenkacloudlocal"
+          },
+          "description": ""
+        },
+        {
+          "name": "ContainerName",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "default": "practice-container"
+          },
+          "description": ""
+        }
+      ],
+      "put": {
+        "operationId": "AzureCreateContainer",
+        "summary": "Create a Blob Storage container",
+        "tags": [
+          "Azure Blob Storage"
+        ],
+        "description": "**Static examples are documentation, not saved state.** Test Request → Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Container names and local quotas are validated.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SimulatorToken"
+          },
+          {
+            "name": "x-ms-version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "2023-11-03"
+            },
+            "description": "Only this explicitly supported service version."
+          },
+          {
+            "name": "restype",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "container"
+            },
+            "description": ""
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Live local operation result. Expand a static sample below only as a reference."
+          },
+          "400": {
+            "description": "Malformed or unsupported option; no silent success.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing/invalid/expired local credential.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated exercise identity is not the configured owner.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource or addressed generation does not exist.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "ETag/generation precondition failed; saved state unchanged.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Documented local state budget exceeded.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Operation is not implemented.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "head": {
+        "operationId": "AzureGetContainerProperties",
+        "summary": "Read container properties",
+        "tags": [
+          "Azure Blob Storage"
+        ],
+        "description": "**Static examples are documentation, not saved state.** Test Request → Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Returns ETag and native property headers without a body.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SimulatorToken"
+          },
+          {
+            "name": "x-ms-version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "2023-11-03"
+            },
+            "description": "Only this explicitly supported service version."
+          },
+          {
+            "name": "restype",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "container"
+            },
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Live local operation result. Expand a static sample below only as a reference."
+          },
+          "400": {
+            "description": "Malformed or unsupported option; no silent success.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing/invalid/expired local credential.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated exercise identity is not the configured owner.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource or addressed generation does not exist.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "ETag/generation precondition failed; saved state unchanged.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Documented local state budget exceeded.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Operation is not implemented.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "AzureListBlobs",
+        "summary": "List blobs in a container",
+        "tags": [
+          "Azure Blob Storage"
+        ],
+        "description": "**Static examples are documentation, not saved state.** Test Request → Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Native XML with continuation marker; expand fields rather than treating the static sample as current state.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SimulatorToken"
+          },
+          {
+            "name": "x-ms-version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "2023-11-03"
+            },
+            "description": "Only this explicitly supported service version."
+          },
+          {
+            "name": "restype",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "container"
+            },
+            "description": ""
+          },
+          {
+            "name": "comp",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "list"
+            },
+            "description": ""
+          },
+          {
+            "name": "marker",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          },
+          {
+            "name": "maxresults",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "100"
+            },
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Live local operation result. Expand a static sample below only as a reference.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "<EnumerationResults><Blobs><Blob><Name>hello.txt</Name><Properties><Content-Length>5</Content-Length></Properties></Blob></Blobs><NextMarker/></EnumerationResults>"
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed or unsupported option; no silent success.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing/invalid/expired local credential.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated exercise identity is not the configured owner.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource or addressed generation does not exist.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "ETag/generation precondition failed; saved state unchanged.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Documented local state budget exceeded.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Operation is not implemented.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "AzureDeleteContainer",
+        "summary": "Delete a Blob Storage container",
+        "tags": [
+          "Azure Blob Storage"
+        ],
+        "description": "**Static examples are documentation, not saved state.** Test Request → Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Local deletion synchronously cascades to contained blobs. This differs from the asynchronous cloud deletion lifecycle.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SimulatorToken"
+          },
+          {
+            "name": "x-ms-version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "2023-11-03"
+            },
+            "description": "Only this explicitly supported service version."
+          },
+          {
+            "name": "restype",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "container"
+            },
+            "description": ""
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Live local operation result. Expand a static sample below only as a reference."
+          },
+          "400": {
+            "description": "Malformed or unsupported option; no silent success.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing/invalid/expired local credential.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated exercise identity is not the configured owner.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource or addressed generation does not exist.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "ETag/generation precondition failed; saved state unchanged.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Documented local state budget exceeded.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Operation is not implemented.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/_simulator/providers/azure/{StorageAccount}/{ContainerName}/{BlobName}": {
+      "parameters": [
+        {
+          "name": "StorageAccount",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "default": "tenkacloudlocal"
+          },
+          "description": ""
+        },
+        {
+          "name": "ContainerName",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "default": "practice-container"
+          },
+          "description": ""
+        },
+        {
+          "name": "BlobName",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "default": "hello.txt"
+          },
+          "description": "Blob name, percent encoded once. SDKs may preserve slash separators."
+        }
+      ],
+      "put": {
+        "operationId": "AzurePutBlob",
+        "summary": "Upload or replace a BlockBlob",
+        "tags": [
+          "Azure Blob Storage"
+        ],
+        "description": "**Static examples are documentation, not saved state.** Test Request → Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Max 8 MiB; 64 MiB aggregate local stored budget. Existing data is replaced unless If-Match/If-None-Match says otherwise. Staged blocks are unsupported.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SimulatorToken"
+          },
+          {
+            "name": "x-ms-version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "2023-11-03"
+            },
+            "description": "Only this explicitly supported service version."
+          },
+          {
+            "name": "x-ms-blob-type",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "BlockBlob"
+            },
+            "description": ""
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Live local operation result. Expand a static sample below only as a reference."
+          },
+          "400": {
+            "description": "Malformed or unsupported option; no silent success.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing/invalid/expired local credential.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated exercise identity is not the configured owner.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource or addressed generation does not exist.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "ETag/generation precondition failed; saved state unchanged.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Documented local state budget exceeded.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Operation is not implemented.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "text/plain": {
+              "schema": {
+                "type": "string"
+              },
+              "example": "hello"
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "AzureGetBlob",
+        "summary": "Download original blob bytes",
+        "tags": [
+          "Azure Blob Storage"
+        ],
+        "description": "**Static examples are documentation, not saved state.** Test Request → Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Non-executing attachment. ETag preconditions supported. Refer to current capabilities for optional range support. Native Range/x-ms-range supports bytes=start-end or bytes=start-. Single range returns206 and Content-Range; out-of-bounds returns416. x-ms-range takes precedence; suffix and multiple ranges are refused. An authorized ETag precondition is evaluated first.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SimulatorToken"
+          },
+          {
+            "name": "x-ms-version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "2023-11-03"
+            },
+            "description": "Only this explicitly supported service version."
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Live local operation result. Expand a static sample below only as a reference.",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed or unsupported option; no silent success.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing/invalid/expired local credential.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated exercise identity is not the configured owner.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource or addressed generation does not exist.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "ETag/generation precondition failed; saved state unchanged.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Documented local state budget exceeded.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Operation is not implemented.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "head": {
+        "operationId": "AzureGetBlobProperties",
+        "summary": "Read blob properties",
+        "tags": [
+          "Azure Blob Storage"
+        ],
+        "description": "**Static examples are documentation, not saved state.** Test Request → Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Returns Content-Length, Content-Type, ETag and native metadata headers, without blob bytes.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SimulatorToken"
+          },
+          {
+            "name": "x-ms-version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "2023-11-03"
+            },
+            "description": "Only this explicitly supported service version."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Live local operation result. Expand a static sample below only as a reference."
+          },
+          "400": {
+            "description": "Malformed or unsupported option; no silent success.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing/invalid/expired local credential.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated exercise identity is not the configured owner.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource or addressed generation does not exist.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "ETag/generation precondition failed; saved state unchanged.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Documented local state budget exceeded.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Operation is not implemented.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "AzureDeleteBlob",
+        "summary": "Delete a BlockBlob",
+        "tags": [
+          "Azure Blob Storage"
+        ],
+        "description": "**Static examples are documentation, not saved state.** Test Request → Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. If-Match guards against deleting a changed object; failed conditions leave all stored bytes unchanged.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SimulatorToken"
+          },
+          {
+            "name": "x-ms-version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "2023-11-03"
+            },
+            "description": "Only this explicitly supported service version."
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Live local operation result. Expand a static sample below only as a reference."
+          },
+          "400": {
+            "description": "Malformed or unsupported option; no silent success.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing/invalid/expired local credential.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated exercise identity is not the configured owner.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource or addressed generation does not exist.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "ETag/generation precondition failed; saved state unchanged.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Documented local state budget exceeded.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Operation is not implemented.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/_simulator/providers/gcp/download/storage/v1/b/{BucketName}/o/{ObjectName}": {
+      "parameters": [
+        {
+          "name": "BucketName",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "default": "practice-bucket"
+          },
+          "description": ""
+        },
+        {
+          "name": "ObjectName",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "default": "hello.txt"
+          },
+          "description": "Entire object name percent encoded once; encoded slashes remain object-name data."
+        }
+      ],
+      "get": {
+        "operationId": "GCPDownloadObject",
+        "summary": "Download a current Cloud Storage object",
+        "tags": [
+          "Google Cloud Storage"
+        ],
+        "description": "**Static examples are documentation, not saved state.** Test Request → Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Default response is metadata. Use alt=media for original bytes; no HTML preview or resource policy evaluation. The official SDK download endpoint requires alt=media. Range/resumable transfers remain unsupported.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SimulatorToken"
+          },
+          {
+            "name": "alt",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "media"
+            },
+            "description": ""
+          },
+          {
+            "name": "ifGenerationMatch",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          },
+          {
+            "name": "generation",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Only the current stored generation is available. An explicitly addressed older generation returns404, never newer bytes."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Live local operation result. Expand a static sample below only as a reference.",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed or unsupported option; no silent success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing/invalid/expired local credential.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated exercise identity is not the configured owner.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource or addressed generation does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "ETag/generation precondition failed; saved state unchanged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Documented local state budget exceeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Operation is not implemented.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -6448,7 +10145,7 @@
         "properties": {
           "Key": {
             "type": "string",
-            "description": "Unique tag key; 1\u2013128 Unicode characters. aws: prefixes are reserved."
+            "description": "Unique tag key; 1–128 Unicode characters. aws: prefixes are reserved."
           },
           "Value": {
             "type": "string",
@@ -7180,7 +10877,7 @@
             "contentEncoding": "base64",
             "minLength": 4,
             "maxLength": 5464,
-            "description": "Base64 of1\u20134096 arbitrary plaintext bytes; use dummy data."
+            "description": "Base64 of1–4096 arbitrary plaintext bytes; use dummy data."
           },
           "EncryptionContext": {
             "type": "object",
@@ -7500,6 +11197,14 @@
     {
       "name": "API Gateway REST APIs",
       "description": "Actual native REST management plus authenticated local in-process Lambda proxy invocation. Original AWS JSON wire list field item maps to SDK items. See docs/apigateway.md for limits and non-executing download behavior."
+    },
+    {
+      "name": "Google Cloud Storage",
+      "description": "Independent bounded local storage provider. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. "
+    },
+    {
+      "name": "Azure Blob Storage",
+      "description": "Independent bounded local storage provider. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. "
     },
     {
       "name": "KMS local symmetric keys",

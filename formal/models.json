@@ -640,6 +640,681 @@
       ]
     },
     {
+      "id": "ProviderActor",
+      "model": "formal/ProviderActor.tla",
+      "config": "formal/ProviderActor.cfg",
+      "bounds": "64 request combinations: authentication2 \u00d7 credential roles2 \u00d7 exercise selections4 \u00d7 spoofed wire roles2 \u00d7 capabilities2; captured emission includes original request; uniform tagged records distinguish absent/attached actors without TLC heterogeneous equality;65 reachable emissions expected, to be verified",
+      "properties": [
+        "TypeOK",
+        "NoActorOnRejected",
+        "AuthenticatedRequestsAttach",
+        "CredentialIdentityPreserved",
+        "CredentialRoleNotWireRole",
+        "ParticipantBound",
+        "OperatorExerciseSelection"
+      ],
+      "limits": "Finite auth-result/identity-selection attachment abstraction only. Not crypto/TTL/cookies/revocation/HTTP/context internals/Unicode/SQL/provider authorization or Go refinement proof. Actor validity checks also need Go unit evidence. Root adapter source binding is limited to ActorFromContext validity and forwarding ExerciseIdentity rather than CredentialIdentity/CredentialRole in the two extractor callbacks. It does not establish provider environment/owner policy, header authentication, SQL state, callbacks or downstream permission enforcement.",
+      "source_scope": [
+        "internal/provider/actor.go",
+        "internal/server/access.go",
+        "internal/server/cloud_storage.go"
+      ],
+      "mutants": [
+        {
+          "id": "UnauthenticatedAttachment",
+          "edits": [
+            {
+              "old": "Admission(r) == r.authenticated /\\",
+              "new": "Admission(r) == TRUE /\\",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoActorOnRejected"
+        },
+        {
+          "id": "ParticipantSelectionBypass",
+          "edits": [
+            {
+              "old": "Admission(r) == r.authenticated /\\ (r.role = \"operator\" \\/\n                    r.selected \\in {\"\", Credential(r)} \\/ r.capabilities)",
+              "new": "Admission(r) == r.authenticated /\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoActorOnRejected"
+        },
+        {
+          "id": "WireRoleSpoof",
+          "edits": [
+            {
+              "old": "exercise |-> Exercise(r), role |-> r.role",
+              "new": "exercise |-> Exercise(r), role |-> r.wireRole",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CredentialRoleNotWireRole"
+        },
+        {
+          "id": "SelectedCredentialConfusion",
+          "edits": [
+            {
+              "old": "THEN [present |-> TRUE, credential |-> Credential(r), exercise",
+              "new": "THEN [present |-> TRUE, credential |-> Exercise(r), exercise",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CredentialIdentityPreserved"
+        },
+        {
+          "id": "ParticipantCapabilitiesSelection",
+          "edits": [
+            {
+              "old": "Exercise(r) == IF r.role = \"participant\" THEN Credential(r)",
+              "new": "Exercise(r) == IF r.role = \"participant\" THEN IF r.selected = \"\" THEN Credential(r) ELSE r.selected",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ParticipantBound"
+        },
+        {
+          "id": "OperatorSelectionIgnored",
+          "edits": [
+            {
+              "old": "ELSE IF r.selected = \"\" THEN Credential(r) ELSE r.selected",
+              "new": "ELSE Credential(r)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OperatorExerciseSelection"
+        }
+      ]
+    },
+    {
+      "id": "GCPStorageState",
+      "model": "formal/GCPStorageState.tla",
+      "config": "formal/GCPStorageState.cfg",
+      "bounds": "Two trusted environments, two synthetic projects, one bucket name per environment, two keys, one-unit objects; one-object/one-unit per-environment budget; two-generation exploration cutoff, not an API generation cap.",
+      "properties": [
+        "TypeOK",
+        "DeniedFrame",
+        "NoOrphans",
+        "NonemptyDeleteRefused",
+        "GenerationRefusal",
+        "Budget",
+        "OtherEnvironmentUnchanged",
+        "OtherProjectUnchanged",
+        "ReadIsolation",
+        "GenerationFreshness"
+      ],
+      "limits": "Atomic abstract state transitions under a synthetic project-equality authorizer only; not GCP IAM/OAuth, HTTP/raw paths, SDK compatibility, SQLite execution/crashes/concurrency, metadata/checksums, byte accounting, pagination, persistence, server authentication, a Go refinement proof or live Google comparison. Leaf not registered.",
+      "source_scope": [
+        "internal/gcp/storage/store.go",
+        "internal/gcp/storage/operations.go",
+        "internal/gcp/storage/http.go",
+        "internal/gcp/storage/storage_test.go"
+      ],
+      "mutants": [
+        {
+          "id": "DeniedBucketCreate",
+          "edits": [
+            {
+              "old": "accepted == grant /\\ owners[e] = None",
+              "new": "accepted == owners[e] = None",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DeniedFrame"
+        },
+        {
+          "id": "DeleteNonemptyBucket",
+          "edits": [
+            {
+              "old": "accepted == CanAccess(owners[e],actor,grant) /\\ Count(e) = 0",
+              "new": "accepted == CanAccess(owners[e],actor,grant)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoOrphans"
+        },
+        {
+          "id": "IgnoreGenerationMatch",
+          "edits": [
+            {
+              "old": "accepted == authorized /\\ Matches(old,match) /\\ fits",
+              "new": "accepted == authorized /\\ fits",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GenerationRefusal"
+        },
+        {
+          "id": "IgnoreStateBudget",
+          "edits": [
+            {
+              "old": "fits == (old # None \\/ Count(e) < MaxObjects) /\\\n             (old # None \\/ Bytes(e) < MaxBytes)",
+              "new": "fits == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Budget"
+        },
+        {
+          "id": "ReadWrongEnvironment",
+          "edits": [
+            {
+              "old": "returned == IF authorized THEN objects[slot] ELSE None",
+              "new": "returned == IF authorized THEN objects[<<EnvironmentA,k>>] ELSE None",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadIsolation"
+        },
+        {
+          "id": "IgnoreActualOwner",
+          "edits": [
+            {
+              "old": "CanAccess(owner,actor,grant) == grant /\\ owner = actor",
+              "new": "CanAccess(owner,actor,grant) == grant /\\ owner # None",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OtherProjectUnchanged"
+        },
+        {
+          "id": "ReuseGeneration",
+          "edits": [
+            {
+              "old": "![slot] = [generation |-> sequence[e]+1, size |-> 1]",
+              "new": "![slot] = [generation |-> 1, size |-> 1]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GenerationFreshness"
+        },
+        {
+          "id": "ResetSequenceAfterDelete",
+          "edits": [
+            {
+              "old": "/\\ UNCHANGED <<owners,sequence>>",
+              "new": "/\\ UNCHANGED owners\n    /\\ sequence' = IF accepted THEN [sequence EXCEPT ![e] = 0] ELSE sequence",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GenerationFreshness"
+        }
+      ]
+    },
+    {
+      "id": "AzureBlobState",
+      "model": "formal/AzureBlobState.tla",
+      "config": "formal/AzureBlobState.cfg",
+      "bounds": "Two account/environment scopes with one container each, two distinct abstract keys and payload values1\u20132, at most three accepted puts, rowcap2 and abstractbytecap3. Context trust and two fixed owner subjects modeled explicitly. Three-write frontier is an exploration bound, not an API quota.",
+      "properties": [
+        "TypeOK",
+        "NoUnauthorizedMutation",
+        "PeerStatePreserved",
+        "NoOrphans",
+        "FailureAtomic",
+        "ReadExact",
+        "NoDeniedRead",
+        "ConditionEnforced",
+        "FreshWriteIdentity",
+        "BudgetBounded"
+      ],
+      "limits": "Finite selected store/auth safety model, no Go/SQL refinement, URI/percent/UTF8 fidelity, actual byte/JSON/hash arithmetic, real AzureRBAC/Entra, host authentication, signed paging, filesystem/crash/concurrency/liveness or SDK proof. Parsed targets and owner bindings are assumed exact, storage failures abstract atomic errors. Container metadata contributes no modeled weight; native bounded-budget tests separately cover actual variable footprint and legacy over-cap read/delete. Three accepted writes bound tag history; no proof past that frontier. No UI/ARM/catalog/registration claim. Composition source binding is limited to the configured Azure owner/account/environment passed to NewOwnedHandler and its subject-versus-persisted-owner admission that corresponds to Allowed/NoDeniedRead/NoUnauthorizedMutation. It does not prove the Azure constructor schema/orphan/owner initialization transaction, all action-name mapping, credential extraction, Get/Delete conditions or Range. Typed listing XML source binding is only the stuttering/read-only projection of an already authorized, bounded page: the serializer has no database/state-writing handle and must preserve source and peer state, including on serialization/size failure. This is a limited PeerStatePreserved/FailureAtomic frame correspondence, not a modeled List action or List disclosure proof. NoDeniedRead applies to existing authorization preconditions, not XML fields. ReadExact does not prove XML encoding/parsing, escaping, element ordering, metadata names, response headers, pagination or SDK wire compatibility. Those remain separate native golden/boundary/integration checks.",
+      "source_scope": [
+        "internal/azure/blob/types.go",
+        "internal/azure/blob/store.go",
+        "internal/azure/blob/list.go",
+        "internal/azure/blob/http.go",
+        "internal/azure/blob/composition.go",
+        "internal/server/cloud_storage.go",
+        "internal/azure/blob/listing_xml.go",
+        "internal/azure/blob/listing_xml_test.go"
+      ],
+      "mutants": [
+        {
+          "id": "MissingTrustedActor",
+          "edits": [
+            {
+              "old": "Allowed(s,a,t) == t /\\ a=Owners[s]",
+              "new": "Allowed(s,a,t) == a=Owners[s]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoUnauthorizedMutation"
+        },
+        {
+          "id": "IgnoreAccountOwner",
+          "edits": [
+            {
+              "old": "Allowed(s,a,t) == t /\\ a=Owners[s]",
+              "new": "Allowed(s,a,t) == t",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoUnauthorizedMutation"
+        },
+        {
+          "id": "ContainerDeleteLeavesBlobs",
+          "edits": [
+            {
+              "old": "/\\ blobs'=[p \\in Cells |-> IF p[1]=s THEN Empty ELSE blobs[p]]",
+              "new": "/\\ blobs'=blobs",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoOrphans"
+        },
+        {
+          "id": "ContainerDeleteErasesPeer",
+          "edits": [
+            {
+              "old": "/\\ blobs'=[p \\in Cells |-> IF p[1]=s THEN Empty ELSE blobs[p]]",
+              "new": "/\\ blobs'=[p \\in Cells |-> Empty]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PeerStatePreserved"
+        },
+        {
+          "id": "IgnoreStaleETag",
+          "edits": [
+            {
+              "old": "/\\ (m#\"Match\" \\/ (b[p].live /\\ b[p].tag=e))",
+              "new": "/\\ (m#\"Match\" \\/ TRUE)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ConditionEnforced"
+        },
+        {
+          "id": "IgnoreCreateOnly",
+          "edits": [
+            {
+              "old": "/\\ (m#\"Absent\" \\/ ~b[p].live)",
+              "new": "/\\ (m#\"Absent\" \\/ TRUE)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ConditionEnforced"
+        },
+        {
+          "id": "ReadNeighbor",
+          "edits": [
+            {
+              "old": "ELSE /\\ result'=\"Read\" /\\ response'=blobs[<<s,k>>].value",
+              "new": "ELSE /\\ result'=\"Read\" /\\ response'=blobs[<<s,CHOOSE other \\in Keys : other#k>>].value",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadExact"
+        },
+        {
+          "id": "ReuseETag",
+          "edits": [
+            {
+              "old": "candidate == [blobs EXCEPT ![p]=[live |-> TRUE,value |-> v,tag |-> serial+1]]",
+              "new": "candidate == [blobs EXCEPT ![p]=[live |-> TRUE,value |-> v,tag |-> IF blobs[p].live THEN blobs[p].tag ELSE serial+1]]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FreshWriteIdentity"
+        },
+        {
+          "id": "OmitRowBudget",
+          "edits": [
+            {
+              "old": "Fits(b) == Rows(b)<=MaxRows /\\ Weight(b,Cells)<=MaxBytes",
+              "new": "Fits(b) == Weight(b,Cells)<=MaxBytes",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BudgetBounded"
+        },
+        {
+          "id": "OmitByteBudget",
+          "edits": [
+            {
+              "old": "Fits(b) == Rows(b)<=MaxRows /\\ Weight(b,Cells)<=MaxBytes",
+              "new": "Fits(b) == Rows(b)<=MaxRows",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BudgetBounded"
+        },
+        {
+          "id": "FailedPutCommits",
+          "edits": [
+            {
+              "old": "ELSE IF ~ok THEN /\\ result'=\"StorageError\" /\\ Preserve\n       ELSE /\\ result'=\"Accepted\" /\\ blobs'=candidate",
+              "new": "ELSE IF ~ok THEN /\\ result'=\"StorageError\" /\\ blobs'=candidate /\\ serial'=serial+1 /\\ UNCHANGED containers\n       ELSE /\\ result'=\"Accepted\" /\\ blobs'=candidate",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FailureAtomic"
+        }
+      ]
+    },
+    {
+      "id": "ProjectAuthority",
+      "model": "formal/ProjectAuthority.tla",
+      "config": "formal/ProjectAuthority.cfg",
+      "bounds": "Two configured synthetic projects, two extracted exercise subjects, all four fixed owner mappings including alias ownership, one optional bucket, one optional unit-valued object, full/changed/removed-owner constructor candidates.",
+      "properties": [
+        "TypeOK",
+        "FixedHostConfiguration",
+        "OwnerBindingFrozen",
+        "ConstructorRefusalFrame",
+        "NoUnboundAdoption",
+        "InitializationBindsConfigured",
+        "DeniedFrame",
+        "FinitePermissions",
+        "ActorUsesPersistedProject",
+        "OnlyActualOwnerAuthorized"
+      ],
+      "limits": "GCP owner-only factory and actual-bucket-project authorization abstraction after a trusted subject extractor; not Google IAM/OAuth, credential validation/extraction, operator/control roles, Azure authorization, HTTP/path/generation semantics, SQLite/Go refinement, concurrency/crash proof, byte budgets, project-number parsing, growing configured project roster or actual SDK execution. One bucket stands for an existing resource; policy Allowed is not an HTTP success for every permission. Root source binding is limited to NewWithCloudStorage calling registerCloudStorage and the fixed GCP Environment/Project/Number/Owner argument construction for NewProjectHandler. This is an abstract constructor/admission contract, not a proof of core DB opening, registration rollback across providers, server dispatch order, capabilities metadata, HTTP or constructor SQL atomicity. CLI binding covers only trusted fixed GCP owner configuration and constructor refusal correspondence; argument grammar, startup I/O, Azure initialization, tokens and absence of AWS policy grants are checked natively, not proved by this model.",
+      "source_scope": [
+        "internal/gcp/storage/factory.go",
+        "internal/gcp/storage/store.go",
+        "internal/gcp/storage/factory_test.go",
+        "internal/server/cloud_storage.go",
+        "internal/server/server.go",
+        "cmd/simulator/main.go",
+        "cmd/simulator/cloud_owner_test.go"
+      ],
+      "mutants": [
+        {
+          "id": "AllowOwnerRebinding",
+          "edits": [
+            {
+              "old": "(persisted = EmptyOwners \\/ candidate = persisted)",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OwnerBindingFrozen"
+        },
+        {
+          "id": "AdoptUnboundResource",
+          "edits": [
+            {
+              "old": "accepted == valid /\\ ~unbound /\\",
+              "new": "accepted == valid /\\ TRUE /\\",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoUnboundAdoption"
+        },
+        {
+          "id": "PartialCommitOnRefusal",
+          "edits": [
+            {
+              "old": "persisted' = IF accepted THEN candidate ELSE persisted",
+              "new": "persisted' = IF accepted THEN candidate ELSE IF persisted = EmptyOwners THEN [persisted EXCEPT ![ProjectA] = configured[ProjectA]] ELSE persisted",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ConstructorRefusalFrame"
+        },
+        {
+          "id": "TrustClaimedProject",
+          "edits": [
+            {
+              "old": "LET actual == bucketProject",
+              "new": "LET actual == claimed",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ActorUsesPersistedProject"
+        },
+        {
+          "id": "DefaultAllowUnknownPermission",
+          "edits": [
+            {
+              "old": "accepted == ready /\\ permission \\in Permissions /\\ BoundOwner(actual,actor)",
+              "new": "accepted == ready /\\ BoundOwner(actual,actor)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FinitePermissions"
+        },
+        {
+          "id": "WriteDespiteDenial",
+          "edits": [
+            {
+              "old": "IF accepted /\\ permission = \"storage.objects.create\" THEN input",
+              "new": "IF permission = \"storage.objects.create\" THEN input",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DeniedFrame"
+        }
+      ]
+    },
+    {
+      "id": "BlobRange",
+      "model": "formal/BlobRange.tla",
+      "config": "formal/BlobRange.cfg",
+      "bounds": "One immutable body chosen from distinct byte prefixes of <<0,1,2>> (length0..3), starts/ends0..4, closed/open/invalid/no-range normalized request, two authorization values, three ETag decisions, requested checksum Boolean and abstract checksum cap2bytes. One decision then terminal stutter.",
+      "properties": [
+        "TypeOK",
+        "Frame",
+        "DeniedNoDisclosure",
+        "ConditionBeforeRange",
+        "InvalidRefused",
+        "OutOfBoundsRefused",
+        "ExactSelectedBytes",
+        "ChecksumBound",
+        "MissingRangeChecksumRefused",
+        "ExactNormalRead",
+        "NoFullMD5OnPartial"
+      ],
+      "limits": "Stateless normalized HTTP range decision abstraction, not Go/SQLite refinement or unbounded arithmetic proof. Object payload/length/content-range/ETag/MD5-kind are abstract, not XML error body length, full HTTP headers, actual hash bytes, cryptography, token authentication, AzureRBAC, ASCII parsing/overflow/suffix/multi/repeated-header grammar, x-ms-range precedence, pinned version validation, concurrency/crash proof or SDK compatibility. Invalid is one normalized rejection input; no detailed parser proof. Totalized Selected pads only mutant-invalid slices to keep intended failures as invariant counterexamples, not runtime errors. Existing AzureBlobState handles separate bounded persisted state.",
+      "source_scope": [
+        "internal/azure/blob/range.go",
+        "internal/azure/blob/range_test.go",
+        "internal/azure/blob/http.go"
+      ],
+      "mutants": [
+        {
+          "id": "BypassAuthorization",
+          "edits": [
+            {
+              "old": "status == IF ~q.authorized THEN 403",
+              "new": "status == IF FALSE THEN 403",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DeniedNoDisclosure"
+        },
+        {
+          "id": "IgnoreConditionDecision",
+          "edits": [
+            {
+              "old": "ELSE IF q.condition=\"NotModified\" THEN 304",
+              "new": "ELSE IF FALSE THEN 304",
+              "count": 1
+            },
+            {
+              "old": "ELSE IF q.condition=\"Failed\" THEN 412",
+              "new": "ELSE IF FALSE THEN 412",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ConditionBeforeRange"
+        },
+        {
+          "id": "WrongSliceStart",
+          "edits": [
+            {
+              "old": "ELSE IF status=206 THEN Selected(body,q.start,stop) ELSE <<>>",
+              "new": "ELSE IF status=206 THEN Selected(body,0,stop) ELSE <<>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactSelectedBytes"
+        },
+        {
+          "id": "UncheckedBounds",
+          "edits": [
+            {
+              "old": "ELSE IF q.start >= total \\/ (q.kind=\"Closed\" /\\ q.finish < q.start) THEN 416",
+              "new": "ELSE IF FALSE THEN 416",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OutOfBoundsRefused"
+        },
+        {
+          "id": "IgnoreEndClamp",
+          "edits": [
+            {
+              "old": "stop == IF q.kind=\"Open\" THEN total-1 ELSE Min(q.finish,total-1)",
+              "new": "stop == IF q.kind=\"Open\" THEN total-1 ELSE IF q.checksum THEN Min(q.finish,total-1) ELSE q.finish",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactSelectedBytes"
+        },
+        {
+          "id": "PermitExcessChecksum",
+          "edits": [
+            {
+              "old": "ELSE IF q.checksum /\\ stop-q.start+1 > ChecksumLimit THEN 400",
+              "new": "ELSE IF FALSE THEN 400",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ChecksumBound"
+        },
+        {
+          "id": "DiscloseFullMD5OnPartial",
+          "edits": [
+            {
+              "old": "ELSE IF status=206 /\\ q.checksum THEN \"Range\" ELSE \"None\",",
+              "new": "ELSE IF status=206 /\\ q.checksum THEN \"Range\" ELSE IF status=206 THEN \"Full\" ELSE \"None\",",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoFullMD5OnPartial"
+        },
+        {
+          "id": "ReadMutatesStoredBody",
+          "edits": [
+            {
+              "old": "/\\ UNCHANGED <<stored,request>>",
+              "new": "/\\ stored' = IF stored= <<>> THEN <<0>> ELSE <<>>\n /\\ UNCHANGED request",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Frame"
+        }
+      ]
+    },
+    {
+      "id": "ProviderPath",
+      "model": "formal/ProviderPath.tla",
+      "config": "formal/ProviderPath.cfg",
+      "bounds": "Stateless single-boundary routing: four registered providers with AWS default, one unregistered name, root/literal/encoded-ID/encoded-delimiter/double-encoded-delimiter descriptors, all ordered distinct pairs of the actual13 transport carriers, two opaque actor/header/query/body/original-RequestURI context snapshots.",
+      "properties": [
+        "TypeOK",
+        "SourcePathImmutable",
+        "ActorPreserved",
+        "ContextPreserved",
+        "UnregisteredRejected",
+        "EncodedProviderRejected",
+        "TailPreserved",
+        "EscapedTailPreserved",
+        "DistinctCarriersRemainDistinct",
+        "ProviderSelectedCorrectly"
+      ],
+      "limits": "Finite symbolic request/carrier copying abstraction, not a Go URL parser, percent decoder, path.Clean implementation, arbitrary byte/Unicode proof, logical cloud-object uniqueness, IAM/authentication, recursive/nested leaf routing, server dispatch bypass/order, HTTP redirects/transports, persistent state or Go refinement. a/b and a%2Fb intentionally may share decoded Path; pair identity is preserved for leaf interpretation. Root defaults to a registered AWS provider.",
+      "source_scope": [
+        "internal/provider/registry.go",
+        "internal/provider/registry_test.go",
+        "internal/provider/registry_path_test.go"
+      ],
+      "mutants": [
+        {
+          "id": "DropRawTail",
+          "edits": [
+            {
+              "old": "Forward(carrier) == Carriers[carrier]",
+              "new": "Forward(carrier) == [decoded |-> Carriers[carrier].decoded,escaped |-> Carriers[carrier].decoded]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EscapedTailPreserved"
+        },
+        {
+          "id": "CleanTail",
+          "edits": [
+            {
+              "old": "Forward(carrier) == Carriers[carrier]",
+              "new": "Forward(carrier) == [decoded |-> Clean(Carriers[carrier].decoded),escaped |-> Clean(Carriers[carrier].escaped)]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TailPreserved"
+        },
+        {
+          "id": "DecodeAgain",
+          "edits": [
+            {
+              "old": "Forward(carrier) == Carriers[carrier]",
+              "new": "Forward(carrier) == [decoded |-> DecodeAgain(Carriers[carrier].decoded),escaped |-> Carriers[carrier].escaped]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TailPreserved"
+        },
+        {
+          "id": "DropActor",
+          "edits": [
+            {
+              "old": "ForwardContext == request.context",
+              "new": "ForwardContext == [request.context EXCEPT !.actor = None]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ActorPreserved"
+        },
+        {
+          "id": "UnknownFallsBack",
+          "edits": [
+            {
+              "old": "SelectedProvider == IF request.mode = \"Root\" THEN DefaultProvider ELSE request.provider",
+              "new": "SelectedProvider == IF request.mode = \"Root\" \\/ request.provider \\notin Registered THEN DefaultProvider ELSE request.provider",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "UnregisteredRejected"
+        },
+        {
+          "id": "EncodedProviderAllowed",
+          "edits": [
+            {
+              "old": "BoundaryAllowed == request.mode \\in {\"Root\",\"Literal\"}",
+              "new": "BoundaryAllowed == request.mode \\in Modes",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EncodedProviderRejected"
+        },
+        {
+          "id": "MutateOriginalPath",
+          "edits": [
+            {
+              "old": "/\\ UNCHANGED <<request,original>>",
+              "new": "/\\ request' = [request EXCEPT !.left = IF @ = 1 THEN 2 ELSE 1]\n    /\\ UNCHANGED original",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SourcePathImmutable"
+        }
+      ]
+    },
+    {
       "id": "KMSKeyState",
       "model": "formal/KMSKeyState.tla",
       "config": "formal/KMSKeyState.cfg",
