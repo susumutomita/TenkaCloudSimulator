@@ -61,4 +61,4 @@ TableSizeBytes は上記の項目サイズの即時合計であり、SQLiteフ�
 
 ## 世代・条件更新のローカル候補（native検証済み・統合未完了）
 
-現在の専用branchには、同一トランザクションでTableIDとキーschemaを再照合する変更を準備した。旧snapshotで削除済み／再作成済みテーブルを操作しない。既存orphan項目は削除・修復せず起動時に拒否する。schema migrationや旧DBの自動修復はない。選択したDynamoDBのnative Go通常／race、実boto3サイズ検証は成功した。全体coverage・形式検証・2プロセス認証・CIは未完了であり、[品質・モデル計画](dynamodb-quality-plan.md)の保留事項を完了するまで全体対応済みとは扱わない。
+現在の専用branchには、同一トランザクションでTableIDとキーschemaを再照合する変更を準備した。旧snapshotで削除済み／再作成済みテーブルを操作しない。既存orphan項目は削除・修復せず起動時に拒否する。schema migrationや旧DBの自動修復はない。選択したDynamoDBのnative Go通常／race、実boto3サイズ検証は成功した。旧a6入力の全体raceと単一profile両90%閾値、a225入力のAdmission baselineと22制御、同一bytesのLifecycle baselineと8制御には実行証拠がある。現在の全144形式ケース・統合27 E2E・CIの完了を意味しない。入力と失敗を区別した[現在の検証状況](dynamodb-integration.md)を参照し、全体対応済みとは扱わない。

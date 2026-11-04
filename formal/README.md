@@ -209,3 +209,22 @@ requires its own immutable input/applicability gate before publication.
 
 
 Current main-preserving KMS restack:18 baselines/94 controls, retaining every main16/82 entry and adding only the two owned KMS models. The current merged source has not run TLC, native/browser or whole-profile acceptance. Earlier911/8ccc receipts do not establish current-head success.
+
+
+## DynamoDB current-main candidate
+
+The current candidate preserves main18 models/94 controls and adds
+DynamoDBLifecycle (eight controls) and DynamoDBAdmission (22 controls):
+20 baselines/124 controls,144 cases. Lifecycle separately passed its baseline
+and eight named counterexamples with unchanged current model/config bytes.
+Admission at a2253f5 actually passed its baseline (16,730 distinct states,49.900s)
+and all22 named controls with exit12 and real traces. These targeted receipts
+do not replace the still-pending whole144-case immutable-HEAD gate.
+
+Admission uses independent normalized key/semantic-size/pre-admission oracles
+and measured actual PRE/POST frames; its observation projection preserves
+all data actions and input domains. Earlier parser/type errors and60s timeouts
+remain failed diagnostics, never accepted negative controls. Both models are
+bounded abstractions, not Go/SQL/parser/IAM/team-authentication proofs.
+Current test input distinctions and remaining27-E2E/hosted-CI obligations are
+in [DynamoDB integration](../docs/dynamodb-integration.md).

@@ -1,15 +1,15 @@
-# PR309 current-main integration — SOURCE ONLY
+# PR309 current-main integration — staged verification
 
 2026-11-04. This private branch starts from the actual public PR309 head
 `ed877ecc56c0fd4eef7a3a5a3b0b23d3ca435cfe`; a normal two-parent merge incorporates
-main `5c97dc5916fa39fd43d80ae79532d5892fcb30ea` as `fc15261`. The next normal merge incorporates KMS main `0a4ed897f492011bcef0a5d8765f45c200809db9`; its18 models/94 controls and24 E2E cases are retained. External Muse work,
+main `5c97dc5916fa39fd43d80ae79532d5892fcb30ea` as `fc15261`, then KMS main `0a4ed897f492011bcef0a5d8765f45c200809db9`. The normal merge `33ece2d` incorporates main `26d51142703b2b32946e06363d0d1d299eaf87c9`; all18 main models/94 controls and25 main E2E methods are retained. External Muse work,
 the original public branch and previous local `e97f69f` candidate are preserved.
 No force push, public update, workflow rerun or repository-setting change occurred.
 
 ## Preserved contracts and selective source reuse
 
 Main GCP/Azure handlers, Actor/access context, raw path preservation, fixed provider
-scope menu, assets/dependencies/notices, all24 existing mandatory E2E methods and
+scope menu, assets/dependencies/notices, all25 existing mandatory E2E methods and
 all18 existing model entries/94 literal controls remain intact. Four conflicts
 were resolved additively: README, Gateway field, server initialization/capability
 metadata and two OpenAPI descriptions. OpenAPI paths and all61 operation IDs are retained, along with all main schema and example objects. Seven new DynamoDB JSON1.0 templates and two mandatory actual-process/served-template E2E sources are prepared; their current execution is UNRUN.
@@ -31,7 +31,7 @@ Same-Tx table/schema identity, conditional mutation, late SQL rollback and
 non-destructive orphan refusal are retained. Immediate local table lifecycle and
 32-hex TableID differ from AWS asynchronous state and documented UUID format.
 
-## Bounded formal correspondence — SOURCE, not yet executed
+## Bounded formal correspondence and executed targeted checks
 
 DynamoDBLifecycle is unchanged: two preselected DB/table scopes, one key, two
 generations, eight properties and eight exact controls. It models generation,
@@ -42,7 +42,7 @@ key tokens and six size fixtures. Its22 properties/22 controls cover constructor
 readiness, typed canonical aliases, normalized validation and semantic-byte
 admission, table/item quotas, replacement/statistics, acknowledged SQL effects,
 removal and refusal/peer frames. Main18/94 remains byte-identical in the registry;
-candidate inventory is20 baselines/124 controls (144 total cases, UNRUN).
+candidate inventory is20 baselines/124 controls (144 total cases). The unified immutable-HEAD suite remains pending; the targeted results below are not a substitute.
 
 This is bounded normalized admission, not a full decimal grammar, arbitrary
 UTF8/base64/JSON, exact400KiB private AWS encoding, SQL/driver, Go refinement,
@@ -55,7 +55,7 @@ local100/10000/409600 limits, not the actual runtime quota values.
 Admission scopes are two region/table namespaces inside ONE already-selected
 DB; Lifecycle owners abstract separately selected DB/table authorities. Neither
 is two authenticated CLI processes; the mandatory real-process acceptance is
-separate and has not run. Constructor startupValid is the normalized success/
+separate and remains incomplete. Constructor startupValid is the normalized success/
 orphan-refusal result, not a proof of arbitrary SQL discovery or imported data.
 Shared constructor/Gateway/dispatch files bind only to initialized-store and
 preflight-denial call contracts. Existing routes and actor authority retain their
@@ -68,6 +68,41 @@ test-support classification and negative nearby.py/.go fixtures are prepared;
 there is no broad testdata or Go exemption. Mandatory SDK tests do not skip.
 The exact applicability record is regenerated against the new main after the
 source merge; declaration and hash matching are not semantic verification.
+
+## Evidence boundaries (2026-11-04)
+
+Targeted canonical checking at `a2253f5cdb14f15fefe8a90355fd5d156aa1a3dd`
+actually completed DynamoDBAdmission: baseline exit0,7,788,018 generated and
+16,730 distinct states, queue0,49.900 seconds; all22 specified controls produced
+exit12, their required named invariant and a transition trace. Bounds remain
+one table/one item/four abstract bytes with all eight key tokens/six fixtures.
+The earlier unchanged DynamoDBLifecycle baseline (56,180 distinct states) and
+eight controls passed separately; exact model/config hashes match. These are
+32 owned cases across two snapshots, not a unified144-case merge-gate receipt.
+
+The earlier IF type evaluation failure, declaration-order semantic failures and
+two60-second timeouts are retained as failed diagnostics. They were never accepted
+as mutation counterexamples. The final event projection records observations of
+actual arguments and PRE state, with independent ExpectedKey/ExpectedSize/
+ExpectedPermit oracles; actual data actions, input loops and all original real
+mutation effects are unchanged. Initialize/Restart do not acquire artificial
+success flags. This source argument and bounded checking are not a Go refinement
+or a complete grammar/SQL/concurrency proof.
+
+An independent detached `a6ca113` native audit actually ran the whole Go race
+suite:325 top-level tests, zero skips, vet and CGO-disabled CLI build. One profile
+passed both unchanged90% floors:8,289/8,748 statements (94.75%) and
+10,853/12,042 unfiltered source lines (90.13%). The real boto3 binary350000-byte/
+escaped-string70000-character/oversize-refusal test ran. That input predates the
+26d merge: native/runtime source identity is provenance only, not a current-HEAD
+whole-suite or hosted-CI result. No profile union, exclusions or lower floors.
+
+The current mandatory E2E inventory is25 main plus two DynamoDB methods (27).
+Independent actual two-CLI verification is incomplete: its first attempt reached
+the token API but the test read `token` instead of the actual `AccessToken` field.
+That fixture failure is not a production authentication failure or a successful
+isolation proof. Seven served-example execution and the complete unified27-case
+run also require their own receipts. No helper is silently skipped.
 
 ## Verification queue
 
@@ -84,7 +119,7 @@ source merge; declaration and hash matching are not semantic verification.
    source87.91% failure remains a real historical blocker, not a current profile.
    Do not merge profiles, lower floors, add exclusions or infer global coverage
    from selected tests.
-5. Preserve all24 main E2E cases; retain two new mandatory real DynamoDB cases: two authenticated
+5. Preserve all25 main E2E cases; retain two new mandatory real DynamoDB cases: two authenticated
    CLI/processes, distinct DB/token, same-name keys, cross-token rejection,
    participant IAM refusal, restart and cleanup. Existing two-database native
    fixtures are not two authenticated processes. The optional SDK size test is

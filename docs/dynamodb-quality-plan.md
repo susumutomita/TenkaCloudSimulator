@@ -1,4 +1,4 @@
-> Historical native-source record. Current main0a4 integration, unrun gates and scope gaps are tracked in [dynamodb-integration.md](dynamodb-integration.md).
+> Historical native-source record. Current main26d integration, separate executed receipts, unrun gates and scope gaps are tracked in [dynamodb-integration.md](dynamodb-integration.md).
 
 # DynamoDB quality/generation follow-up — native checked, full gates pending
 
