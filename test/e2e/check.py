@@ -222,6 +222,8 @@ class Conformance(unittest.TestCase):
     f=client('cloudformation',endpoint,token);c=client('lambda',endpoint,token)
     result=c.invoke(FunctionName='cfn-inline-app',Payload=b'null');self.assertNotIn('FunctionError',result);self.assertEqual(json.loads(result['Payload'].read()),{'answer':42,'value':'team-one','event':None})
     f.delete_stack(StackName='inline-practice');self.assertEqual(c.list_functions()['Functions'],[])
+ def test_native_iam_query_and_console_to_lambda(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('native_iam.py'))],check=True)
  def test_iam_role_console_to_lambda_deploy_without_host_setup(self):
   with running(authenticated=True) as (endpoint,token),running(authenticated=True) as (other,other_token),sync_playwright() as p:
    browser=p.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE') or shutil.which('chromium'),args=['--no-sandbox']);page=browser.new_page(viewport={'width':1440,'height':1000});errors=[];outside=[]
@@ -232,7 +234,7 @@ class Conformance(unittest.TestCase):
    page.route('**/*',route)
    page.goto(endpoint+'/_simulator/console/');page.get_by_label('Access token',exact=True).fill(token);page.get_by_role('button',name='Open sandbox',exact=True).click()
    page.get_by_role('button',name='Services',exact=True).click();page.get_by_role('menuitem',name='Lambda',exact=True).click();page.get_by_role('button',name='Create function',exact=True).first.click();expect(page.get_by_text('No local execution roles exist.',exact=False)).to_be_visible()
-   page.get_by_role('button',name='Create role in IAM',exact=True).click();expect(page.get_by_role('heading',name='No roles yet',exact=True)).to_be_visible();page.get_by_role('button',name='Create role',exact=True).first.click()
+   page.get_by_role('button',name='Create role in IAM',exact=True).click();page.get_by_role('button',name='Local identities',exact=True).click();expect(page.get_by_role('heading',name='No roles yet',exact=True)).to_be_visible();page.get_by_role('button',name='Create role',exact=True).first.click()
    page.get_by_label('Role name',exact=True).fill('console-executor');page.get_by_role('button',name='Create role',exact=True).last.click();expect(page.get_by_role('heading',name='console-executor',exact=True)).to_be_visible();expect(page.get_by_text('arn:aws:iam::000000000000:role/console-executor',exact=True)).to_be_visible()
    expect(page.get_by_role('button',name='Global',exact=True)).to_be_visible();page.screenshot(path=str(REPORTS/'iam-role-desktop.png'),full_page=True);page.set_viewport_size({'width':390,'height':844});assert_reflow(page);page.screenshot(path=str(REPORTS/'iam-role-mobile.png'),full_page=True);page.set_viewport_size({'width':1440,'height':1000})
    page.get_by_role('button',name='Roles',exact=True).click();page.get_by_role('link',name='console-executor',exact=True).click();expect(page.get_by_role('heading',name='console-executor',exact=True)).to_be_visible();page.get_by_role('button',name='Edit permissions',exact=True).click()

@@ -1,0 +1,37 @@
+- banner:
+  - link "TenkaCloud Simulator":
+    - /url: /_simulator/console/
+  - button "Services"
+  - button "Global"
+  - button "Choose identity": simulator-admin
+  - link "API reference":
+    - /url: /_simulator/docs/
+- main:
+  - navigation "Service navigation":
+    - button "Toggle service navigation"
+  - navigation "Breadcrumbs":
+    - list:
+      - listitem:
+        - link "Services":
+          - /url: "#/s3"
+      - listitem:
+        - link "IAM" [disabled]
+  - button "Native IAM roles"
+  - group: Legacy local identities These global execution roles use the simulator's existing identity policies. Users and roles share one local name space. These legacy identities do not evaluate trust policies and are separate from native IAM roles. Native role names cannot be edited here. This creates no AWS role or CloudWatch permissions.
+  - heading "Create role" [level=1]
+  - heading "Role details" [level=2]
+  - text: Role name
+  - textbox "Role name"
+  - text: 1–64 letters, digits, hyphens or underscores. Existing identities cannot be overwritten. Permissions policy JSON The default explicit Deny grants no service access. Replace it with the least permissions your function needs; an explicit Deny takes precedence over Allow.
+  - textbox "Permissions policy JSON": "{ \"Version\": \"2012-10-17\", \"Statement\": [ { \"Effect\": \"Deny\", \"Action\": \"*\", \"Resource\": \"*\" } ] }"
+  - button "Cancel"
+  - button "Create role"
+  - complementary "Help panel":
+    - button "Close help panel"
+    - heading "Simulator scope" [level=2]
+    - paragraph: Independent local simulator. Not affiliated with AWS. No real cloud resources are created.
+    - paragraph: S3 basic operations, Standard SSM text parameters, Python 3.12 Lambda functions and limited CloudFormation stacks using S3 buckets, SSM parameters, inline Python functions and IAM identity policies.
+    - paragraph: Cloud IAM sessions, managed policies, EC2, KMS and other cloud providers are not implemented.
+    - button "Manage identity policy"
+    - link "Console licenses":
+      - /url: /_simulator/licenses/CONSOLE-NOTICES.txt

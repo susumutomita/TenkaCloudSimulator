@@ -1,0 +1,44 @@
+- banner:
+  - link "TenkaCloud Simulator":
+    - /url: /_simulator/console/
+  - button "Services"
+  - button "Global"
+  - button "Choose identity": simulator-admin
+  - link "API reference":
+    - /url: /_simulator/docs/
+- main:
+  - navigation "Service navigation":
+    - button "Toggle service navigation"
+  - navigation "Breadcrumbs":
+    - list:
+      - listitem:
+        - link "Services":
+          - /url: "#/s3"
+      - listitem:
+        - link "IAM" [disabled]
+  - group: Independent local IAM simulation Native roles, service-principal trust and inline permissions share the SDK state. STS, AWS managed policies, Conditions, users and non-root paths are unavailable. Legacy local identities remain separate.
+  - heading "Roles (0)" [level=1]
+  - button "Local identities"
+  - button "Refresh roles"
+  - button "Create role"
+  - searchbox "Find roles"
+  - table "IAM roles":
+    - rowgroup:
+      - row "Role name Trusted entities Creation time":
+        - columnheader "Role name"
+        - columnheader "Trusted entities"
+        - columnheader "Creation time"
+    - rowgroup:
+      - row "No roles yet Create role":
+        - cell "No roles yet Create role":
+          - heading "No roles yet" [level=2]
+          - button "Create role"
+  - complementary "Help panel":
+    - button "Close help panel"
+    - heading "Simulator scope" [level=2]
+    - paragraph: Independent local simulator. Not affiliated with AWS. No real cloud resources are created.
+    - paragraph: S3 basic operations, Standard SSM text parameters, Python 3.12 Lambda functions and limited CloudFormation stacks using S3 buckets, SSM parameters, inline Python functions and IAM identity policies.
+    - paragraph: Cloud IAM sessions, managed policies, EC2, KMS and other cloud providers are not implemented.
+    - button "Manage identity policy"
+    - link "Console licenses":
+      - /url: /_simulator/licenses/CONSOLE-NOTICES.txt

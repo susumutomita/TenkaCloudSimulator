@@ -138,30 +138,83 @@ func iamReadRole(ctx context.Context, query interface {
 func (s *IAMRoleStore) Get(ctx context.Context, name string) (IAMRole, error) {
 	return iamReadRole(ctx, s.db, name, false)
 }
+
+func (s *IAMRoleStore) List(ctx context.Context, after string, limit int) ([]IAMRole, error) {
+	rows, err := s.db.QueryContext(ctx, "SELECT name,role_id,trust,created,description,duration FROM aws_iam_roles WHERE deleted=0 AND name>? COLLATE NOCASE ORDER BY name COLLATE NOCASE LIMIT ?", after, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	roles := []IAMRole{}
+	for rows.Next() {
+		var role IAMRole
+		var created string
+		if err = rows.Scan(&role.RoleName, &role.RoleID, &role.AssumeRolePolicyDocument, &created, &role.Description, &role.MaxSessionDuration); err != nil {
+			return nil, err
+		}
+		role.CreateDate, err = time.Parse(time.RFC3339Nano, created)
+		if err != nil {
+			return nil, err
+		}
+		role.Path = "/"
+		role.Arn = "arn:aws:iam::000000000000:role/" + role.RoleName
+		roles = append(roles, role)
+	}
+	return roles, rows.Err()
+}
+func (s *IAMRoleStore) PolicyNames(ctx context.Context, name string) ([]string, error) {
+	role, err := s.Get(ctx, name)
+	if err != nil {
+		return nil, err
+	}
+	rows, err := s.db.QueryContext(ctx, "SELECT name FROM aws_iam_role_policies WHERE role_name=? ORDER BY name", role.RoleName)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	names := []string{}
+	for rows.Next() {
+		var name string
+		if err = rows.Scan(&name); err != nil {
+			return nil, err
+		}
+		names = append(names, name)
+	}
+	return names, rows.Err()
+}
 func (s *IAMRoleStore) Owns(ctx context.Context, name string) (bool, error) {
 	var count int
 	err := s.db.QueryRowContext(ctx, "SELECT count(*) FROM aws_iam_roles WHERE name=?", name).Scan(&count)
 	return count != 0, err
 }
-func (s *IAMRoleStore) LambdaTrust(ctx context.Context, arn string) (bool, bool, error) {
+
+func iamExecutionRole(ctx context.Context, query interface {
+	QueryRowContext(context.Context, string, ...any) *sql.Row
+}, arn string) error {
 	name := strings.TrimPrefix(arn, "arn:aws:iam::000000000000:role/")
-	owned, err := s.Owns(ctx, name)
-	if err != nil || !owned {
-		return owned, false, err
+	var owned int
+	if err := query.QueryRowContext(ctx, "SELECT count(*) FROM aws_iam_roles WHERE name=?", name).Scan(&owned); err != nil {
+		return err
 	}
-	role, err := s.Get(ctx, name)
+	if owned == 0 {
+		return nil
+	} // Legacy local identities retain their documented behavior.
+	role, err := iamReadRole(ctx, query, name, false)
 	if err != nil {
 		var missing ssmFailure
 		if errors.As(err, &missing) && missing.code == "NoSuchEntity" {
-			return true, false, nil
+			return ssmFailure{"InvalidParameterValueException", "Native execution role was deleted."}
 		}
-		return true, false, err
-	}
-	if role.Arn != arn {
-		return true, false, nil
+		return err
 	}
 	allowed, err := iamTrust(role.AssumeRolePolicyDocument)
-	return true, allowed, err
+	if err != nil {
+		return err
+	}
+	if !allowed || role.Arn != arn {
+		return ssmFailure{"InvalidParameterValueException", "Native role trust does not allow the Lambda service."}
+	}
+	return nil
 }
 func (s *IAMRoleStore) Create(ctx context.Context, name, trust, description string, duration int) (IAMRole, error) {
 	if !iamRoleName.MatchString(name) || strings.EqualFold(name, core.Administrator) || len(description) > 1000 || duration < 3600 || duration > 43200 {
@@ -190,6 +243,18 @@ func (s *IAMRoleStore) Create(ctx context.Context, name, trust, description stri
 	}
 	if lookup != sql.ErrNoRows {
 		return IAMRole{}, lookup
+	}
+	var claimsTable, claims int
+	if err = tx.QueryRowContext(ctx, "SELECT count(*) FROM sqlite_master WHERE type='table' AND name='aws_cfn_ownership'").Scan(&claimsTable); err != nil {
+		return IAMRole{}, err
+	}
+	if claimsTable != 0 {
+		if err = tx.QueryRowContext(ctx, "SELECT count(*) FROM aws_cfn_ownership WHERE kind='AWS::IAM::Role' AND lower(physical_id)=lower(?)", name).Scan(&claims); err != nil {
+			return IAMRole{}, err
+		}
+		if claims != 0 {
+			return IAMRole{}, ssmFailure{"EntityAlreadyExists", "The role name is reserved by a stack, including drifted resources."}
+		}
 	}
 	if err = tx.QueryRowContext(ctx, "SELECT count(*) FROM aws_iam_roles").Scan(&total); err != nil {
 		return IAMRole{}, err
@@ -273,11 +338,12 @@ func (s *IAMRoleStore) PutPolicy(ctx context.Context, name, policyName, document
 	if !iamInlineName.MatchString(policyName) || len(document) > 32<<10 {
 		return ssmFailure{"MalformedPolicyDocument", "Use a named inline policy of at most32KiB."}
 	}
-	p, err := core.ParsePolicy([]byte(document))
+	_, err := core.ParsePolicy([]byte(document))
 	if err != nil {
 		return ssmFailure{"MalformedPolicyDocument", err.Error()}
 	}
-	data, _ := json.Marshal(p)
+	// Preserve the validated wire document; aggregate authorization is normalized separately.
+	data := []byte(document)
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err

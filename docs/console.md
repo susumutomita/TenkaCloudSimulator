@@ -26,7 +26,7 @@
 
 リージョン変更は選択bucket/detail/modalを破棄して、そのリージョンのbucket一覧へ戻す。保存中のcontext変更をUIでガードし、古いregionのbucketへ誤って書き込まないことをSDK readback付きの実ブラウザ回帰で検証する。
 
-LambdaはFunctions一覧→Author from scratchで作成→CodeのZIP Deploy→Testの実Python実行→Configuration→確認入力付き削除を同じnative APIで行う。Invoke限定identityには一覧/configurationを開放せず、host提供の名前からTestする。inline editor/monitoring/role作成等の未再現点と実行制限は[Lambda](lambda.md)。公開AWS guideとの操作対応であり、ログイン済みAWS画面とのpixel一致は未検証。
+LambdaはFunctions一覧→Author from scratchで作成→CodeのZIP Deploy→Testの実Python実行→Configuration→確認入力付き削除を同じnative APIで行う。Invoke限定identityには一覧/configurationを開放せず、host提供の名前からTestする。inline editor/monitoring等の未再現点と実行制限は[Lambda](lambda.md)。公開AWS guideとの操作対応であり、ログイン済みAWS画面とのpixel一致は未検証。
 
 サービス変更はメニュー・breadcrumb・サービス単位hashのいずれも作成/編集/uploadフォームと入力・選択file・フォームerrorを破棄する。遷移先の一覧と操作を表示し、移動前の未送信フォームから別サービスのリソースを作らない。4種類のフォーム×menu/hashの8通りを実ブラウザとSDK readbackで検証する。
 
@@ -41,3 +41,5 @@ IAM→Roles→Create role→Role details→Lambda→Create function→Permission
 [公式Lambda execution-role手順](https://docs.aws.amazon.com/lambda/latest/dg/lambda-intro-execution-role.html)と[公式IAM role作成](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create.html)を参照した。公式はLambda service principalへのtrust、managed policies、自動role作成等を持つが、ここでは未対応。AWS風の項目名/Cloudscape componentの使用を、AWS画面の完全再現やtrust評価と扱わない。認証済みの現行AWS画面を直接確認していないため、pixel一致/最新の全配置は未検証。公開文書は操作の参考資料であり、実AWS画面を監査した証拠ではない。
 
 実ブラウザでは空のIAMからrole作成、Lambdaのrole選択、関数作成、ZIP Deploy、実Pythonが42を返すまで確認する。PC/390px、別teamのrole非共有、participant管理拒否も検証。残る差分はdocs/console-fidelity.mdに記録する。
+
+IAMはnative Query APIを使うCloudscape Wizard、Permissions/Trust relationshipsの実状態操作に対応する。従来のidentity方式はLocal identitiesへ残す。[導線・制限](iam.md)。

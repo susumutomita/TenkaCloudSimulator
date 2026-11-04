@@ -47,3 +47,20 @@ with tempfile.TemporaryDirectory(prefix='tcsim-s3-versions-') as directory:
   if success:assert result.returncode==0 and 'No error has been found' in text,text
   else:assert result.returncode!=0 and 'Invariant NoHistoryOrphans is violated' in text,text
   print(name+': '+('invariants hold' if success else 'current-only deletion mutation detected'))
+# Native/legacy writes must atomically reserve a shared name, including retired
+# native roles with no aggregate identity row. Abstracts two case-folded names;
+# native race/fault/HTTP tests separately exercise the implementation.
+with tempfile.TemporaryDirectory(prefix='tcsim-native-iam-') as directory:
+ root=Path(directory)
+ model=Path('formal/NativeIAMOwnership.tla').read_text()
+ cfg=Path('formal/NativeIAMOwnership.cfg').read_text()
+ mutant=model.replace('MODULE NativeIAMOwnership ', 'MODULE NativeIAMOwnershipMutant ').replace('LegacyPut(n) == /\\ n \\notin claimed','LegacyPut(n) == /\\ TRUE')
+ assert mutant!=model and 'LegacyPut(n) == /\\ TRUE' in mutant
+ for name,source,success in [('NativeIAMOwnership',model,True),('NativeIAMOwnershipMutant',mutant,False)]:
+  (root/(name+'.tla')).write_text(source);(root/(name+'.cfg')).write_text(cfg)
+  result=subprocess.run(['java','-cp',str(jar),'tlc2.TLC','-workers','1','-metadir',str(root/(name+'-states')),'-config',str(root/(name+'.cfg')),str(root/(name+'.tla'))],capture_output=True,text=True,timeout=60)
+  text=result.stdout+result.stderr
+  Path('reports/'+name+'.txt').write_text(text)
+  if success:assert result.returncode==0 and 'No error has been found' in text,text
+  else:assert result.returncode!=0 and 'Invariant OwnershipExclusive is violated' in text,text
+  print(name+': '+('invariants hold' if success else 'native role adoption mutation detected'))

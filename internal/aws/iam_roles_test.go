@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/susumutomita/TenkaCloudSimulator/internal/core"
@@ -19,6 +20,74 @@ func iamCode(err error) string {
 		return failure.code
 	}
 	return ""
+}
+
+func TestNativeIAMAndLegacyIdentityCreationAreAtomic(t *testing.T) {
+	ctx := context.Background()
+	db, _ := s3TestState(t)
+	roles, err := NewIAMRoleStore(db.Database())
+	if err != nil {
+		t.Fatal(err)
+	}
+	policy, err := core.ParsePolicy([]byte(nativeReadPolicy))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for round := 0; round < 12; round++ {
+		name := "race-role-" + string(rune('a'+round))
+		start := make(chan struct{})
+		var nativeErr, legacyErr error
+		var wg sync.WaitGroup
+		wg.Add(2)
+		go func() { defer wg.Done(); <-start; _, nativeErr = roles.Create(ctx, name, lambdaServiceTrust, "", 3600) }()
+		go func() { defer wg.Done(); <-start; legacyErr = roles.MutateIdentityPolicy(ctx, name, &policy, true) }()
+		close(start)
+		wg.Wait()
+		if nativeErr == nil {
+			if core.Code(legacyErr) != "Conflict" {
+				t.Fatal("native role overwritten by legacy API", legacyErr)
+			}
+			if err = roles.MutateIdentityPolicy(ctx, strings.ToUpper(name), nil, false); core.Code(err) != "Conflict" {
+				t.Fatal("case alias deleted native role", err)
+			}
+			if err = roles.Delete(ctx, name); err != nil {
+				t.Fatal(err)
+			}
+			if err = roles.MutateIdentityPolicy(ctx, name, &policy, false); core.Code(err) != "Conflict" {
+				t.Fatal("retired native name adopted", err)
+			}
+		} else if legacyErr != nil || iamCode(nativeErr) != "EntityAlreadyExists" {
+			t.Fatal(nativeErr, legacyErr)
+		}
+	}
+	if err = roles.MutateIdentityPolicy(ctx, "legacy", &policy, true); err != nil {
+		t.Fatal(err)
+	}
+	if err = roles.MutateIdentityPolicy(ctx, "legacy", &policy, true); core.Code(err) != "PreconditionFailed" {
+		t.Fatal(err)
+	}
+	if err = roles.MutateIdentityPolicy(ctx, "legacy", &policy, false); err != nil {
+		t.Fatal(err)
+	}
+	if err = roles.MutateIdentityPolicy(ctx, "legacy", nil, false); err != nil {
+		t.Fatal(err)
+	}
+	if err = roles.MutateIdentityPolicy(ctx, core.Administrator, &policy, false); core.Code(err) != "Conflict" {
+		t.Fatal(err)
+	}
+}
+
+// Inspect ownership and the exact production Lambda validation path together.
+func testNativeTrust(ctx context.Context, roles *IAMRoleStore, arn string) (bool, bool, error) {
+	owned, err := roles.Owns(ctx, strings.TrimPrefix(arn, "arn:aws:iam::000000000000:role/"))
+	if err != nil || !owned {
+		return owned, false, err
+	}
+	err = iamExecutionRole(ctx, roles.db, arn)
+	if iamCode(err) == "InvalidParameterValueException" {
+		return true, false, nil
+	}
+	return true, err == nil, err
 }
 
 func TestNativeIAMRoleTrustPolicyAndRetiredOwnership(t *testing.T) {
@@ -43,7 +112,7 @@ func TestNativeIAMRoleTrustPolicyAndRetiredOwnership(t *testing.T) {
 	if err != nil || read.RoleID != role.RoleID {
 		t.Fatal(read, err)
 	}
-	owned, allowed, err := roles.LambdaTrust(ctx, role.Arn)
+	owned, allowed, err := testNativeTrust(ctx, roles, role.Arn)
 	if err != nil || !owned || !allowed {
 		t.Fatal(owned, allowed, err)
 	}
@@ -80,7 +149,7 @@ func TestNativeIAMRoleTrustPolicyAndRetiredOwnership(t *testing.T) {
 	if err = roles.UpdateTrust(ctx, "CaseRole", strings.Replace(lambdaServiceTrust, "lambda.amazonaws.com", "ec2.amazonaws.com", 1)); err != nil {
 		t.Fatal(err)
 	}
-	if owned, allowed, err = roles.LambdaTrust(ctx, role.Arn); err != nil || !owned || allowed {
+	if owned, allowed, err = testNativeTrust(ctx, roles, role.Arn); err != nil || !owned || allowed {
 		t.Fatal("wrong service trust allowed Lambda", owned, allowed, err)
 	}
 	if err = roles.UpdateTrust(ctx, "CaseRole", lambdaServiceTrust); err != nil {
@@ -95,7 +164,7 @@ func TestNativeIAMRoleTrustPolicyAndRetiredOwnership(t *testing.T) {
 	if owned, err = roles.Owns(ctx, "CASEROLE"); err != nil || !owned {
 		t.Fatal("retired native name became a legacy identity", owned, err)
 	}
-	if owned, allowed, err = roles.LambdaTrust(ctx, role.Arn); err != nil || !owned || allowed {
+	if owned, allowed, err = testNativeTrust(ctx, roles, role.Arn); err != nil || !owned || allowed {
 		t.Fatal("deleted native role fell back to legacy trust", owned, allowed, err)
 	}
 	recreated, err := roles.Create(ctx, "CaseRole", lambdaServiceTrust, "recreated", 3600)
@@ -105,7 +174,7 @@ func TestNativeIAMRoleTrustPolicyAndRetiredOwnership(t *testing.T) {
 	if err = roles.UpdateTrust(ctx, "missing", lambdaServiceTrust); iamCode(err) != "NoSuchEntity" {
 		t.Fatal(err)
 	}
-	if owned, allowed, err = roles.LambdaTrust(ctx, "arn:aws:iam::000000000000:role/legacy"); err != nil || owned || allowed {
+	if owned, allowed, err = testNativeTrust(ctx, roles, "arn:aws:iam::000000000000:role/legacy"); err != nil || owned || allowed {
 		t.Fatal(owned, allowed, err)
 	}
 }
@@ -141,7 +210,7 @@ func TestNativeIAMRejectsUnknownTrustAndRollsBackAggregateLimit(t *testing.T) {
 	if err = roles.UpdateTrust(ctx, "limited", string(data)); err != nil {
 		t.Fatal(err)
 	}
-	if _, allow, err := roles.LambdaTrust(ctx, role.Arn); err != nil || allow {
+	if _, allow, err := testNativeTrust(ctx, roles, role.Arn); err != nil || allow {
 		t.Fatal("trust Deny did not win", err)
 	}
 	if err = roles.UpdateTrust(ctx, "limited", "{}"); iamCode(err) != "MalformedPolicyDocument" {

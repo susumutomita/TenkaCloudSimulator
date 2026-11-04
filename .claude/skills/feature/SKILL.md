@@ -82,7 +82,7 @@ AskUserQuestion ツールを使って以下を必ず確認する。質問は一�
 - データの流れ・責務の境界・依存の向き。
 - エッジケース・異常系・空状態・境界値。
 
-品質の正本は [`docs/architecture/quality-bar.md`](../../../docs/architecture/quality-bar.md)。MVP は完了条件ではない。
+品質の正本は [`docs/ci.md`](../../../docs/ci.md)。MVP は完了条件ではない。
 
 ---
 
@@ -117,7 +117,7 @@ AskUserQuestion ツールを使って以下を必ず確認する。質問は一�
 - テストを先に書く（Red）。正常・異常・境界を網羅する。
 - テストを通す実装（Green）。最小限で止めず、設計どおりの完成形にする。
 - リファクタリング（Refactor）。
-- `docs/architecture/quality-bar.md` の Definition of Done を満たす。MVP・仮実装・型エスケープで止めない。
+- `docs/ci.md` の 必須検証と受け入れ条件 を満たす。MVP・仮実装・型エスケープで止めない。
 - Go fmt/vet・race・coverage・asset gate（`make before-commit`）を通す。
 
 ### QA エージェント
@@ -147,7 +147,7 @@ AskUserQuestion ツールを使って以下を必ず確認する。質問は一�
 
 1. 各エージェントのアウトプットに矛盾・抜け漏れがないか確認
 2. QA・User のフィードバックを Developer に反映
-3. PM の受け入れ基準と `docs/architecture/quality-bar.md` の Definition of Done が全て満たされているか確認
+3. PM の受け入れ基準と `docs/ci.md` の 必須検証と受け入れ条件 が全て満たされているか確認
 4. 品質ゲートを実行: `make before-commit` → `nr typecheck && nr test:coverage && nr build`（カバレッジ 100%）
 5. PR を作成して人間のレビューを依頼
 

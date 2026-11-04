@@ -21,3 +21,7 @@ from claiming the same name, including drift. The normal finite model must pass;
 a mutant that allows reclaiming an absent resource must fail this invariant.
 This corresponds to aws_cfn_ownership and transactional create/delete in the Go
 AWS provider. It does not prove SQL crash behavior, authentication or IAM semantics.
+
+## Native IAM and legacy identities
+
+NativeIAMOwnership.tla models two case-folded role names, native active/retired claims, inline permissions and legacy identities. Native creation and legacy writes are atomic steps, native deletion preserves its claim, and policy-bearing roles cannot be deleted. TypeOK and OwnershipExclusive must hold; removing the LegacyPut native-claim guard must produce an OwnershipExclusive counterexample. This abstracts SQLite transactions, role case folding, trust/ARN parsing, HTTP authorization and process isolation. Actual concurrent Go/SDK/browser tests verify those paths separately. It is a finite state check, not an implementation refinement proof.
