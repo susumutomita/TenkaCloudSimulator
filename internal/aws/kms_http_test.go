@@ -105,9 +105,14 @@ func TestKMSStrictNativeFieldsAndNoSecretEcho(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, test := range []struct{ op, body string }{
-		{"CreateKey", `{"Policy":"private-value"}`}, {"CreateKey", `{"Tags":[]}`}, {"CreateKey", `{"KeySpec":"RSA_2048"}`}, {"CreateKey", `{"Origin":"EXTERNAL"}`}, {"CreateKey", `{"KeyUsage":"SIGN_VERIFY"}`}, {"CreateKey", `{"MultiRegion":true}`}, {"CreateKey", `{"Description":null}`}, {"CreateKey", `{"Description":"a","Description":"b"}`}, {"CreateKey", `{"description":"lowercase"}`}, {"CreateKey", `{"Description":"\ud800"}`}, {"CreateKey", `{"Description":"\udc00"}`}, {"CreateKey", `{"Description":"\ud800\u0041"}`}, {"CreateKey", `{"Description":"\uZZZZ"}`}, {"CreateKey", `[]`}, {"CreateKey", `null`}, {"CreateKey", `{} {}`}, {"CreateKey", `{"MultiRegion":1}`}, {"CreateKey", `{"KeySpec":""}`}, {"CreateKey", `{"Description":` + strings.Repeat("[", 10) + `0` + strings.Repeat("]", 10) + `}`},
+		{"CreateKey", `{"Policy":"private-value"}`}, {"CreateKey", `{"Tags":[]}`}, {"CreateKey", `{"KeySpec":"RSA_2048"}`}, {"CreateKey", `{"Origin":"EXTERNAL"}`}, {"CreateKey", `{"KeyUsage":"SIGN_VERIFY"}`}, {"CreateKey", `{"MultiRegion":true}`}, {"CreateKey", `{"Description":null}`}, {"CreateKey", `{"Description":"a","Description":"b"}`}, {"CreateKey", `{"description":"lowercase"}`}, {"CreateKey", `{"Description":"\ud800"}`}, {"CreateKey", `{"Description":"\udc00"}`}, {"CreateKey", `{"Description":"\ud800\u0041"}`}, {"CreateKey", `{"Description":"\uZZZZ"}`},
+		{"CreateKey", `{"Description":"\u12`},
+		{"CreateKey", `{"Description":"\`}, {"CreateKey", `[]`}, {"CreateKey", `null`}, {"CreateKey", `{} {}`}, {"CreateKey", `{"MultiRegion":1}`}, {"CreateKey", `{"KeySpec":""}`}, {"CreateKey", `{"Description":` + strings.Repeat("[", 10) + `0` + strings.Repeat("]", 10) + `}`},
 		{"ListKeys", `{"Limit":0}`}, {"ListKeys", `{"Limit":1001}`}, {"ListKeys", `{"Limit":1.5}`}, {"ListKeys", `{"Marker":""}`}, {"ListKeys", `{"Marker":"bad"}`}, {"ListKeys", `{"GrantTokens":[]}`},
-		{"DescribeKey", `{}`}, {"GetKeyPolicy", `{"KeyId":"` + key.KeyID + `","PolicyName":"other"}`},
+		{"DescribeKey", `{}`},
+		{"DescribeKey", `{"KeyId":"alias/unsupported"}`},
+		{"CreateKey", `{"Description":"x"]`},
+		{"CreateKey", `{"Description":[1}`}, {"GetKeyPolicy", `{"KeyId":"` + key.KeyID + `","PolicyName":"other"}`},
 		{"Encrypt", `{"KeyId":"` + key.KeyID + `","Plaintext":[1,2]}`}, {"Encrypt", `{"KeyId":"` + key.KeyID + `","Plaintext":"invalid base64"}`}, {"Encrypt", `{"KeyId":"` + key.KeyID + `","Plaintext":"eA==","DryRun":false}`}, {"Encrypt", `{"KeyId":"` + key.KeyID + `","Plaintext":"eA==","EncryptionAlgorithm":"RSAES_OAEP_SHA_256"}`}, {"Encrypt", `{"KeyId":"` + key.KeyID + `","Plaintext":"eA==","EncryptionContext":{"a":"b","a":"c"}}`}, {"Encrypt", `{"KeyId":"` + key.KeyID + `","Plaintext":"eA==","EncryptionContext":{"a":1}}`}, {"Encrypt", `{"KeyId":"` + key.KeyID + `","Plaintext":"eA==","EncryptionContext":{"":"b"}}`},
 		{"Decrypt", `{"CiphertextBlob":"eA=="}`}, {"Decrypt", `{"CiphertextBlob":""}`},
 	} {
@@ -116,7 +121,7 @@ func TestKMSStrictNativeFieldsAndNoSecretEcho(t *testing.T) {
 			t.Fatal(test, w.Code, w.Body.String())
 		}
 	}
-	for _, body := range []string{`{"Description":"\ud83d\ude00"}`, `{"Description":"日本語"}`, `{"Description":"literal \\ud800"}`} {
+	for _, body := range []string{`{"Description":"\uD83D\uDE00"}`, `{"Description":"\ud83d\ude00"}`, `{"Description":"日本語"}`, `{"Description":"literal \\ud800"}`} {
 		w, _ := kmsHTTP(t, g, "CreateKey", body, "")
 		if w.Code != 200 {
 			t.Fatal(body, w.Code, w.Body.String())

@@ -8,17 +8,23 @@ import (
 // This versioned simulator format is deliberately not an AWS portable ciphertext.
 const kmsBlobPrefix = "TCSIMKMS1"
 
-func kmsSeal(material []byte, region, id string, context map[string]string, plaintext []byte) ([]byte, error) {
-	if len(material) != 32 {
-		return nil, kmsInternal()
-	}
+// Both operations use the same checked AES-256/random-nonce construction.
+// The material is provider-private; errors never include it or any caller data.
+func kmsCipher(material []byte) (cipher.AEAD, error) {
 	block, err := aes.NewCipher(material)
-	if err != nil {
+	if err != nil || len(material) != 32 {
 		return nil, kmsInternal()
 	}
 	aead, err := cipher.NewGCMWithRandomNonce(block)
 	if err != nil {
 		return nil, kmsInternal()
+	}
+	return aead, nil
+}
+func kmsSeal(material []byte, region, id string, context map[string]string, plaintext []byte) ([]byte, error) {
+	aead, err := kmsCipher(material)
+	if err != nil {
+		return nil, err
 	}
 	aad, err := kmsAAD(region, id, context)
 	if err != nil {
@@ -46,16 +52,9 @@ func kmsBlob(blob []byte) (region, id string, encrypted []byte, err error) {
 	return region, id, blob[start+n+36:], nil
 }
 func kmsOpen(material []byte, region, id string, context map[string]string, encrypted []byte) ([]byte, error) {
-	if len(material) != 32 {
-		return nil, kmsInternal()
-	}
-	block, err := aes.NewCipher(material)
+	aead, err := kmsCipher(material)
 	if err != nil {
-		return nil, kmsInternal()
-	}
-	aead, err := cipher.NewGCMWithRandomNonce(block)
-	if err != nil {
-		return nil, kmsInternal()
+		return nil, err
 	}
 	aad, err := kmsAAD(region, id, context)
 	if err != nil {

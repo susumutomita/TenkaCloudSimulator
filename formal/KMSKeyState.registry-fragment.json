@@ -2,14 +2,108 @@
   "id": "KMSKeyState",
   "model": "formal/KMSKeyState.tla",
   "config": "formal/KMSKeyState.cfg",
-  "bounds": "Two keys in distinct fixed team/region namespaces, two contexts, two ciphertext slots, and two encryptions per key (abstract random-nonce ceiling).",
-  "properties": ["TypeOK", "AuthorizedEvents", "EnabledCrypto", "BoundContextAndKey"],
+  "bounds": "Two keys in distinct fixed team namespaces sharing one home region, two request regions, two contexts, two ciphertext slots, and two encryptions per key (abstract random-nonce ceiling).",
+  "properties": [
+    "TypeOK",
+    "AuthorizedEvents",
+    "EnabledCrypto",
+    "BoundContextAndKey"
+  ],
   "limits": "Atomic bounded successful events only; no AES proof, nonce probability, JSON/IAM parsing, SQLite crash refinement, host authentication, time or arbitrary key policies. Last event stores pre-operation conditions so later Disable does not invalidate an earlier legitimate output.",
-  "source_scope": ["internal/aws/kms_store.go", "internal/aws/kms_crypto.go", "internal/aws/kms_http.go", "internal/aws/kms_dispatch.go"],
+  "source_scope": [
+    "internal/aws/kms_store.go",
+    "internal/aws/kms_crypto.go",
+    "internal/aws/kms_http.go",
+    "internal/aws/kms_dispatch.go"
+  ],
   "mutants": [
-    {"id":"MissingPermissionGuard","edits":[{"old":"Authority(k,t,r,permit) == permit /\\ t = Owner(k) /\\ r = KeyRegion(k)","new":"Authority(k,t,r,permit) == t = Owner(k) /\\ r = KeyRegion(k)","count":1}],"expect_invariant":"AuthorizedEvents"},
-    {"id":"MissingTeamGuard","edits":[{"old":"Authority(k,t,r,permit) == permit /\\ t = Owner(k) /\\ r = KeyRegion(k)","new":"Authority(k,t,r,permit) == permit /\\ r = KeyRegion(k)","count":1}],"expect_invariant":"AuthorizedEvents"},
-    {"id":"MissingEnabledEncryptGuard","edits":[{"old":" /\\ k \\in enabled\n /\\ count[k] < 2","new":" /\\ count[k] < 2","count":1}],"expect_invariant":"EnabledCrypto"},
-    {"id":"MissingContextGuard","edits":[{"old":" /\\ blobs[s].context = c\n /\\ last'","new":" /\\ last'","count":1}],"expect_invariant":"BoundContextAndKey"}
+    {
+      "id": "MissingPermissionGuard",
+      "edits": [
+        {
+          "old": "Authority(k,t,r,permit) == permit /\\ t = Owner(k) /\\ r = KeyRegion(k)",
+          "new": "Authority(k,t,r,permit) == t = Owner(k) /\\ r = KeyRegion(k)",
+          "count": 1
+        }
+      ],
+      "expect_invariant": "AuthorizedEvents"
+    },
+    {
+      "id": "MissingTeamGuard",
+      "edits": [
+        {
+          "old": "Authority(k,t,r,permit) == permit /\\ t = Owner(k) /\\ r = KeyRegion(k)",
+          "new": "Authority(k,t,r,permit) == permit /\\ r = KeyRegion(k)",
+          "count": 1
+        }
+      ],
+      "expect_invariant": "AuthorizedEvents"
+    },
+    {
+      "id": "MissingEnabledEncryptGuard",
+      "edits": [
+        {
+          "old": " /\\ k \\in enabled\n /\\ count[k] < 2",
+          "new": " /\\ count[k] < 2",
+          "count": 1
+        }
+      ],
+      "expect_invariant": "EnabledCrypto"
+    },
+    {
+      "id": "MissingContextGuard",
+      "edits": [
+        {
+          "old": " /\\ blobs[s].context = c\n /\\ last'",
+          "new": " /\\ last'",
+          "count": 1
+        }
+      ],
+      "expect_invariant": "BoundContextAndKey"
+    },
+    {
+      "id": "MissingRegionGuard",
+      "edits": [
+        {
+          "old": "Authority(k,t,r,permit) == permit /\\ t = Owner(k) /\\ r = KeyRegion(k)",
+          "new": "Authority(k,t,r,permit) == permit /\\ t = Owner(k)",
+          "count": 1
+        }
+      ],
+      "expect_invariant": "AuthorizedEvents"
+    },
+    {
+      "id": "MissingKeyBinding",
+      "edits": [
+        {
+          "old": " /\\ blobs[s].key = k\n /\\ blobs[s].region = r",
+          "new": " /\\ blobs[s].region = r",
+          "count": 1
+        }
+      ],
+      "expect_invariant": "BoundContextAndKey"
+    },
+    {
+      "id": "MissingEnabledDecryptGuard",
+      "edits": [
+        {
+          "old": " /\\ k \\in enabled\n /\\ blobs[s] # None",
+          "new": " /\\ blobs[s] # None",
+          "count": 1
+        }
+      ],
+      "expect_invariant": "EnabledCrypto"
+    },
+    {
+      "id": "MissingEncryptionCeiling",
+      "edits": [
+        {
+          "old": " /\\ count[k] < 2\n /\\ count'",
+          "new": " /\\ count'",
+          "count": 1
+        }
+      ],
+      "expect_invariant": "TypeOK"
+    }
   ]
 }

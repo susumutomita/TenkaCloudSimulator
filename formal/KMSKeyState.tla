@@ -7,7 +7,8 @@ Regions == {RegionA, RegionB}
 Contexts == {ContextA, ContextB}
 Slots == {SlotA, SlotB}
 Owner(k) == IF k = KeyA THEN TeamA ELSE TeamB
-KeyRegion(k) == IF k = KeyA THEN RegionA ELSE RegionB
+\* Same-region keys make wrong-key binding independently observable.
+KeyRegion(k) == RegionA
 VARIABLES present, enabled, count, blobs, last
 vars == <<present, enabled, count, blobs, last>>
 Event(kind, k, t, r, permit, stateOK, contextOK, keyOK) ==

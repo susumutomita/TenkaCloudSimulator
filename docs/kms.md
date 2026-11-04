@@ -90,8 +90,9 @@ Unimplemented operations return HTTP 501; they never silently succeed.
 No asymmetric/HMAC/data keys, aliases, tags, custom key policies/stores,
 CloudTrail/CloudWatch, rotation, scheduled deletion, grants, multi-region keys,
 external key material, AWS portable blobs, AWS eventual consistency, or CFN
-resource are supplied by this increment. The isolated UI source is not available
-until shared navigation/capability/assets integration is completed and tested.
+resource are supplied by this increment. The Cloudscape console uses these same
+native APIs for the regional key list, creation, metadata, read-only default
+policy, enable/disable, and the explicitly identified local encryption test.
 No existing Challenge problem is enabled merely by these operations.
 
 ## Wire examples

@@ -178,3 +178,94 @@ func TestKMSCorruptMaterialAndContextLimitsFailClosed(t *testing.T) {
 		t.Fatal("wrong wire target accepted", w.Code)
 	}
 }
+
+// Deferred constraints exercise a real COMMIT failure after successful crypto or
+// insertion, not just an early SQL validation error. No result may escape.
+func TestKMSFailedCommitReturnsNoKeyOrCiphertext(t *testing.T) {
+	ctx := context.Background()
+	db, s := kmsTestStore(t, "")
+	_, err := db.Database().Exec(`CREATE TABLE kms_fixture_parent(id INTEGER PRIMARY KEY);
+ CREATE TABLE kms_fixture_child(parent INTEGER REFERENCES kms_fixture_parent(id) DEFERRABLE INITIALLY DEFERRED);
+ CREATE TRIGGER kms_commit_insert AFTER INSERT ON aws_kms_keys BEGIN INSERT INTO kms_fixture_child VALUES(1); END;`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	key, err := s.CreateKey(ctx, "us-east-1", "")
+	if err == nil || key.KeyID != "" {
+		t.Fatal("commit failure returned key")
+	}
+	keys, err := s.ListKeys(ctx, "us-east-1", 100, "")
+	if err != nil || len(keys.Keys) != 0 {
+		t.Fatal("failed create left state", err)
+	}
+	if _, err = db.Database().Exec("DROP TRIGGER kms_commit_insert"); err != nil {
+		t.Fatal(err)
+	}
+	key, err = s.CreateKey(ctx, "us-east-1", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = db.Database().Exec(`CREATE TRIGGER kms_commit_update AFTER UPDATE ON aws_kms_keys BEGIN INSERT INTO kms_fixture_child VALUES(1); END;`); err != nil {
+		t.Fatal(err)
+	}
+	blob, arn, err := s.Encrypt(ctx, "us-east-1", key.KeyID, nil, []byte("dummy"))
+	if err == nil || blob != nil || arn != "" {
+		t.Fatal("commit failure returned ciphertext")
+	}
+	row, err := kmsRead(ctx, db.Database(), "us-east-1", key.KeyID)
+	if err != nil || row.encryptions != 0 {
+		t.Fatal("failed encryption consumed state", err)
+	}
+	if err = s.SetEnabled(ctx, "us-east-1", key.KeyID, false); err == nil {
+		t.Fatal("failed commit disabled key")
+	}
+	row, err = kmsRead(ctx, db.Database(), "us-east-1", key.KeyID)
+	if err != nil || !row.metadata.Enabled {
+		t.Fatal("failed disable changed state", err)
+	}
+}
+func TestKMSKeyQuotaCorruptListAndMissingSchema(t *testing.T) {
+	ctx := context.Background()
+	db, s := kmsTestStore(t, "")
+	_, err := db.Database().Exec(`WITH RECURSIVE n(x) AS (SELECT 1 UNION ALL SELECT x+1 FROM n WHERE x<1000)
+ INSERT INTO aws_kms_keys(region,key_id,description,created,state,material,encryptions,policy)
+ SELECT 'us-east-1',printf('%08x-0000-4000-8000-%012x',x,x),'',1,'Enabled',zeroblob(32),0,? FROM n`, kmsDefaultPolicy)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = s.CreateKey(ctx, "us-east-1", "")
+	kmsWantCode(t, err, "LimitExceededException")
+	if _, err = db.Database().Exec("DELETE FROM aws_kms_keys WHERE key_id NOT IN (SELECT key_id FROM aws_kms_keys LIMIT 1); UPDATE aws_kms_keys SET key_id='corrupt'"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = s.ListKeys(ctx, "us-east-1", 100, ""); err == nil {
+		t.Fatal("corrupt identifier listed as a key")
+	}
+	if _, err = db.Database().Exec("DROP TABLE aws_kms_keys"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = s.CreateKey(ctx, "us-east-1", ""); err == nil {
+		t.Fatal("missing schema accepted Create")
+	}
+}
+func TestKMSTypedInternalErrorAndRedaction(t *testing.T) {
+	w := httptest.NewRecorder()
+	kmsWriteError(w, kmsInternal())
+	if w.Code != 500 || !strings.Contains(w.Body.String(), "KMSInternalException") {
+		t.Fatal(w.Code, w.Body.String())
+	}
+	_, s := kmsTestStore(t, "")
+	ctx := context.Background()
+	key, err := s.CreateKey(ctx, "us-east-1", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	blob, _, err := s.Encrypt(ctx, "us-east-1", key.KeyID, map[string]string{"context": "private-value"}, []byte("private-plaintext"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, _, err = s.Decrypt(ctx, "us-east-1", "", nil, blob)
+	if err == nil || strings.Contains(err.Error(), "private-") {
+		t.Fatal("error disclosed request data")
+	}
+}

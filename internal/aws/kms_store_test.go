@@ -3,6 +3,7 @@ package aws
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"github.com/susumutomita/TenkaCloudSimulator/internal/core"
@@ -90,8 +91,12 @@ func TestKMSRoundtripStatePersistenceAndTeamIsolation(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
+	var privateMaterial []byte
+	if err = db.Database().QueryRow("SELECT material FROM aws_kms_keys WHERE key_id=?", key.KeyID).Scan(&privateMaterial); err != nil || len(privateMaterial) != 32 {
+		t.Fatal("private stored material", err)
+	}
 	encoded, err := json.Marshal(key)
-	if err != nil || bytes.Contains(encoded, plaintext) || bytes.Contains(encoded, []byte("material")) {
+	if err != nil || bytes.Contains(encoded, plaintext) || bytes.Contains(encoded, []byte("material")) || bytes.Contains(encoded, []byte(base64.StdEncoding.EncodeToString(privateMaterial))) {
 		t.Fatal("private material in metadata", err)
 	}
 	if err = db.Close(); err != nil {
@@ -165,6 +170,10 @@ func TestKMSBoundsListAndFailClosedPersistence(t *testing.T) {
 	if _, _, err = s.Decrypt(ctx, "us-east-1", "", map[string]string{}, empty); err != nil {
 		t.Fatal("empty context equivalence", err)
 	}
+	_, _, err = s.Decrypt(ctx, "us-east-1", "alias/unsupported", nil, empty)
+	kmsWantCode(t, err, "ValidationException")
+	_, _, err = s.Decrypt(ctx, "us-east-1", "", map[string]string{"": "invalid"}, empty)
+	kmsWantCode(t, err, "ValidationException")
 	_, _, err = s.Encrypt(ctx, "us-east-1", key.KeyID, map[string]string{"k": strings.Repeat("x", 8193)}, []byte("x"))
 	kmsWantCode(t, err, "ValidationException")
 	for _, bad := range []string{"alias/test", "arn:aws:kms:us-west-2:000000000000:key/" + key.KeyID, "arn:aws:kms:us-east-1:111111111111:key/" + key.KeyID, "", "uppercase"} {
@@ -217,6 +226,15 @@ func TestKMSBlobAndContextBindings(t *testing.T) {
 		_, _, _, err = kmsBlob(bad)
 		kmsWantCode(t, err, "InvalidCiphertextException")
 	}
+	badHeader := bytes.Clone(blob)
+	badHeader[len(kmsBlobPrefix)+1] = '?'
+	_, _, _, err = kmsBlob(badHeader)
+	kmsWantCode(t, err, "InvalidCiphertextException")
+	badContext := map[string]string{"": "invalid"}
+	_, err = kmsSeal(material, region, id, badContext, []byte("x"))
+	kmsWantCode(t, err, "ValidationException")
+	_, err = kmsOpen(material, region, id, badContext, encrypted)
+	kmsWantCode(t, err, "ValidationException")
 	_, err = kmsSeal(nil, region, id, nil, []byte("x"))
 	kmsWantCode(t, err, "KMSInternalException")
 	_, err = kmsOpen(nil, region, id, nil, encrypted)
