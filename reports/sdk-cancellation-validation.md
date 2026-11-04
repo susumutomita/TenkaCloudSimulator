@@ -1,6 +1,6 @@
 # SDK cancellation hardening — local candidate
 
-This follows public SDK branch HEAD f3dadb9eb5f1a6819d22aede2dc5a71ef62316a3 on base main 2b625ddf2a7fa3b8f8c044d0e5fdd3914794e473. It is a separate local branch, local/sdk-cancellation-hardening-20261103; no push or PR has been performed for this fix.
+This follows public SDK branch HEAD f3dadb9eb5f1a6819d22aede2dc5a71ef62316a3 on base main 2b625ddf2a7fa3b8f8c044d0e5fdd3914794e473. The cancellation fix was first validated on local/sdk-cancellation-hardening-20261103. After renewed owner instructions and confirming no duplicate PR existed, one permitted retry created Draft PR34; fix commit abc21a837ebd59cc314383c663210c60414e2b2b was then fast-forward pushed to its original SDK branch.
 
 ## Reproduced failure
 
@@ -25,6 +25,6 @@ Logs named above are under /workspace/simulator-python-build. Local testing used
 
 ## Publication state
 
-The public SDK baseline passed push CI 41728456359, but has no PR, CodeQL or PR reviews. Draft PR creation for feat/lambda-sdk-bridge-20261103 was rejected by automatic approval review, stating that external PR publication was not explicitly authorized. A scoped remote query confirms no PR exists. The denied action has not been retried or routed through another tool. The public baseline must not be merged while this local regression fix and the required exact-head reviews are outstanding.
+The original f3dadb9 baseline passed push CI41728456359 before this regression was found. Draft PR creation was initially rejected by automatic approval review. On2026-11-04 the actual owner renewed autonomous development instructions; a scoped query confirmed no PR existed, and the explicitly permitted single retry created PR34. The tested cancellation fix was added by normal fast-forward push, without force or an alternative publication route. Exact latest-head CI, CodeQL and completed code/security reviews remain required before merge; the earlier baseline run is not evidence for the new head.
 
 Only hello-world is selectable. API Gateway, WAF, original custom resources and the seven original WP grading checks remain unsupported.
