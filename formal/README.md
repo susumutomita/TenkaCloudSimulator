@@ -150,7 +150,9 @@ IDs in the checker, rather than relying only on a nonempty list per model.
 A negative unit fixture removes each control individually; omitting any of the
 main thirty-six or Secrets fourteen must fail. This guard ports only the
 reviewed required-ID mechanism, not unrelated provider/CFG extensions.
-The first immutable `d791669` run passed all thirteen baselines and fifty
-specified counterexamples; the strengthened policy needs its own fresh-head
-unit/applicability and full model run. Initial-state invariant violations include
+Both immutable `d791669` and strengthened-policy `bb802f2` passed all thirteen
+baselines and fifty specified counterexamples. At `bb802f2`, nineteen gate tests
+(including each-of-fifty removals), twenty-one applicability tests, and forty-blob
+exact applicability passed. Subsequent native-test/document additions still need
+fresh exact-head integration evidence. Initial-state invariant violations include
 explicit valuations and are valid counterexamples, distinct from parser errors.

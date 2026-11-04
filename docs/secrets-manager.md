@@ -73,6 +73,36 @@ roll back all five Secrets tables, and allow clean corrected retries.
 Same-token retries and repeated deletion remain idempotent. This is a local
 persistence failure-atomicity correction, not an HTTP exploit claim.
 
+## Whole-profile gate and additional native contracts
+
+At immutable `bb802f2`, the complete `make before-commit` passed all Go race
+packages, formatting, vet, assets, dependency verification and the CLI build.
+The same one fresh profile passed statement coverage6178/6615 (93.39%), but the
+unfiltered pinned Cobertura result **failed** source coverage7944/9091 (87.38%)
+against the unchanged90% floor. This is a real outstanding gate, not a complete
+quality/merge claim; no profile union, exclusion or threshold adjustment is used.
+
+Two added test files target actual uncovered contracts. The HTTP matrix checks
+strict wire/document/field/Unicode/size/selector and disclosure/refusal/retry
+boundaries; its four tests passed selected normal/race/vet in the independent
+author's checkout and the exact file was copied after SHA verification. Six
+storage tests passed selected normal/race/vet at `a35b3dd`: real SQLite ABORT and
+deferred-FK commit rollback with repaired retries, temporarily unavailable tables,
+invalid persisted identity/timestamps, missing-current and promotion ownership,
+exact descending/timestamp-tied paging and cursor tamper/expiry, and documented
+physical storage limits. The64MiB fixture uses actual immutable BLOB rows with
+reachable staging labels; native deletion frees capacity for a successful retry.
+The10000 retired identities remain reserved after reopen. Large frame assertions
+stream typed/length-framed hashes over all five private tables and never dump
+values/cursor keys. No fake SQL driver or entropy/error accessor is substituted.
+
+These ten added tests are not yet a combined whole-profile pass. The former
+`bb802f2` model gate passed13 baselines and50 specified counterexamples plus
+19/21 policy/applicability units; all50 control identities are required and their
+individual removal is rejected. New test/document blobs need fresh exact-head
+applicability and final integration gates even though production/model/assets
+remain unchanged. Full E2E/start and hosted CI remain pending.
+
 ## Scope and explicit storage boundary
 
 The proposed first increment is seven native operations over **dummy SecretString
