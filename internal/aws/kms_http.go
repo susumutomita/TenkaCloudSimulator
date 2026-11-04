@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+"mime"
 	"net/http"
 	"strings"
 	"unicode/utf8"
@@ -241,7 +242,10 @@ func kmsDecode(data []byte, op string) (kmsRequest, error) {
 }
 func (s *KMSStore) ServeHTTP(w http.ResponseWriter, r *http.Request, region string, authorize func(string, string) bool) {
 	op := strings.TrimPrefix(r.Header.Get("X-Amz-Target"), "TrentService.")
-	if !strings.HasPrefix(r.Header.Get("X-Amz-Target"), "TrentService.") || r.Method != "POST" || r.URL.Path != "/" || r.URL.RawQuery != "" || !strings.HasPrefix(r.Header.Get("Content-Type"), "application/x-amz-json-1.1") || !kmsRegion(region) {
+ mediaType,parameters,mediaError:=mime.ParseMediaType(r.Header.Get("Content-Type"))
+ validMedia:=mediaError==nil && mediaType=="application/x-amz-json-1.1"
+ for name,value:=range parameters{if name!="charset" || !strings.EqualFold(value,"utf-8"){validMedia=false}}
+	if !strings.HasPrefix(r.Header.Get("X-Amz-Target"), "TrentService.") || len(r.Header.Values("X-Amz-Target"))!=1 || len(r.Header.Values("Content-Type"))!=1 || r.Method != "POST" || r.URL.Path != "/" || r.URL.RawQuery != "" || !validMedia || !kmsRegion(region) {
 		kmsWriteError(w, kmsInvalid())
 		return
 	}

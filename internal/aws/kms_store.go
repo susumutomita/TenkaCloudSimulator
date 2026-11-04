@@ -20,6 +20,7 @@ type kmsStored struct {
 }
 
 func NewKMSStore(db *sql.DB) (*KMSStore, error) {
+	if db == nil { return nil, errors.New("KMS requires a SQLite database") }
 	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS aws_kms_keys (
  region TEXT NOT NULL,key_id TEXT NOT NULL,description TEXT NOT NULL,created REAL NOT NULL,
  state TEXT NOT NULL CHECK(state IN ('Enabled','Disabled')),
@@ -75,7 +76,7 @@ func (s *KMSStore) CreateKey(ctx context.Context, region, description string) (K
 	if count >= 1000 {
 		return KMSKeyMetadata{}, kmsFailure("LimitExceededException", "Local KMS key limit reached.")
 	}
-	_, err = tx.ExecContext(ctx, `INSERT INTO aws_kms_keys VALUES(?,?,?,?,'Enabled',?,0,?)`, region, id, description, created, material, kmsDefaultPolicy)
+	err = kmsRequireOne(tx.ExecContext(ctx, `INSERT INTO aws_kms_keys VALUES(?,?,?,?,'Enabled',?,0,?)`, region, id, description, created, material, kmsDefaultPolicy))
 	if err != nil {
 		return KMSKeyMetadata{}, err
 	}
@@ -109,7 +110,7 @@ func (s *KMSStore) SetEnabled(ctx context.Context, region, id string, enabled bo
 	if enabled {
 		state = "Enabled"
 	}
-	if _, err = tx.ExecContext(ctx, "UPDATE aws_kms_keys SET state=? WHERE region=? AND key_id=?", state, region, parsed); err != nil {
+	if err = kmsRequireOne(tx.ExecContext(ctx, "UPDATE aws_kms_keys SET state=? WHERE region=? AND key_id=?", state, region, parsed)); err != nil {
 		return err
 	}
 	return tx.Commit()
@@ -194,7 +195,7 @@ func (s *KMSStore) Encrypt(ctx context.Context, region, id string, contextMap ma
 	if err != nil {
 		return nil, "", err
 	}
-	if _, err = tx.ExecContext(ctx, "UPDATE aws_kms_keys SET encryptions=encryptions+1 WHERE region=? AND key_id=?", region, parsed); err != nil {
+	if err = kmsRequireOne(tx.ExecContext(ctx, "UPDATE aws_kms_keys SET encryptions=encryptions+1 WHERE region=? AND key_id=?", region, parsed)); err != nil {
 		return nil, "", err
 	}
 	if err = tx.Commit(); err != nil {
@@ -242,4 +243,12 @@ func (s *KMSStore) Decrypt(ctx context.Context, region, requestedID string, cont
 		return nil, "", err
 	}
 	return plaintext, row.metadata.Arn, nil
+}
+
+// Expected-single-row mutations must be persisted before acknowledging key,
+// state, or ciphertext success. SQLite IGNORE is not an acknowledged write.
+func kmsRequireOne(result sql.Result,err error)error{
+ if err!=nil{return err}
+ n,err:=result.RowsAffected();if err!=nil{return err}
+ if n!=1{return kmsInternal()};return nil
 }
