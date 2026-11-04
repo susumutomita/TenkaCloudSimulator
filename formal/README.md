@@ -212,7 +212,7 @@ Current main-preserving KMS restack:18 baselines/94 controls, retaining every ma
 
 ## Current SQS console main integration
 
-Main0a4 contributes18 baselines/94 mandatory controls, including the two
+Main26d contributes18 baselines/94 mandatory controls, including the two
 merged KMS models. SQSConsoleEpoch adds one baseline/four literal-protected
 controls:19 baselines/98 controls,117 planned executions. Every existing
 main model/property/bound/control/config and removal fixture is retained.

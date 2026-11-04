@@ -71,6 +71,8 @@ def submit(page):
  if dialog.is_visible():dialog.get_by_role('button').last.click()
  else:page.get_by_role('button',name=re.compile('^(Create bucket|Upload|Create parameter|Save changes)$')).last.click()
 class Conformance(unittest.TestCase):
+ def test_s3_provider_prefix_preserves_literal_keys(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('provider_paths.py'))],check=True)
  def test_crossprovider_console_two_cli_state_and_authority(self):
   # Run the actual standalone acceptance as a required case, never a source-only
   # or optional/skip check. It must import the real browser/audit dependencies.

@@ -1,18 +1,14 @@
-# Current SQS/main0a4 source refresh
+# Current SQS/main26d source refresh
 
-Main0a4 contains individually merged KMS plus the prior GCP/Azure integration.
-Owner cfn_callback is preparing a normal merge into existing PR410 ancestry,
-preserving all main native/auth/raw-path behavior, KMS constructor/store/dispatch
-and view/navigation/sidebar, fixed non-AWS scope utilities and SQS custody.
-The source union is19 models/98 controls and26 mandatory E2E cases. Canonical
-UI/22 notices/assets, targeted SQS+KMS native/default-server/auth/actor/path
-normal/race/vet/CLI and policy26/app21 checks pass. Actual SQS console and nine
-served-reference flows pass with their shared-state/denial/custody/cleanup
-assertions. The fixture uses one exact-origin route owner after an actual
-duplicate-route failure; the initial long-TMP launch failure is also retained.
-Full26 E2E, one-profile dual90%,117 actual TLC executions and hosted CI remain
-required. Targeted success is not those full gates.
-Old99/base5c97 evidence remains separate; no unrelated unmerged service is added.
+Main26d adds S3 regression test/documentation/application-record changes to
+main0a4; runtime/UI/model/asset inputs are byte-identical. The existing SQS
+candidate preserves its public99/private-deeb ancestry through a normal merge.
+Main25 E2E method bodies plus the two owned SQS helpers make27 mandatory;
+19 models/98 controls remain117 planned executions. Prior targeted acceptance
+stays attached to the unchanged recorded inputs. This source-only refresh has
+not rerun Go/Node/browser/Java; fresh applicability/policy and final hosted
+whole-suite/dual90/formal validation remain required. No unrelated unmerged
+service, public action or settings change is included.
 
 ---
 
