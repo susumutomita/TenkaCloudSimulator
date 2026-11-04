@@ -264,6 +264,8 @@ def handler(event,context):
  def test_console_account_sign_out_revokes_browser_session_only(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('console_logout.py'))],check=True)
 
+ def test_openapi_parameter_detector_controls(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('test_openapi_parameters.py'))],check=True)
  def test_scalar_s3_docs_live_response_reader(self):
   from scalar_s3_docs import run_scalar_s3_docs
   run_scalar_s3_docs()
