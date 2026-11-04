@@ -40,7 +40,7 @@ make build
 
 S3のCloudFormationはBucketName/Versioning/PublicAccessBlock/ユーザーTagsとRef/Arnに対応し、空でない履歴は削除しません。呼出者にはStack ARNと各リソース操作の両方の権限が必要で、CAPABILITY_IAMは権限を付与しません。
 
-SQSはnative JSON 1.0 APIのみ対応します。保持中・期限切れ未回収を含む物理message rowはプロセス全体10000件、UTF-8 bodyとserialized attribute JSONの合計64 MiBまでです。これはSQLiteファイル全体・プロセスメモリ・AWS課金サイズの上限ではありません。Azure/GCP/Sakura等の他クラウドは現在のGo実装では未対応です。Issueや計画は実装完了を意味しません。[開発状況](docs/development-status.md)を参照してください。Cloudscapeを使用していますが、本物のAWSコンソールとの全画面・全挙動の一致や実AWSとの差分検証完了は主張していません。
+SQSはnative JSON 1.0 APIのみ対応します。保持中・期限切れ未回収を含む物理message rowはプロセス全体10000件、UTF-8 bodyとserialized attribute JSONの合計64 MiBまでです。これはSQLiteファイル全体・プロセスメモリ・AWS課金サイズの上限ではありません。この開発候補には下記の限定GCP Storage・Azure Blob実装がありますが、両クラウドの他サービスとSakuraは未対応です。Issueや計画は実装完了を意味しません。[開発状況](docs/development-status.md)を参照してください。Cloudscapeを使用していますが、本物のAWSコンソールとの全画面・全挙動の一致や実AWSとの差分検証完了は主張していません。
 
 ## Google Cloud Storage・Azure Blob Storageのローカル接続候補
 

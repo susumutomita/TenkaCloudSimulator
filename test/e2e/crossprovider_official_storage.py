@@ -257,8 +257,9 @@ def azure_verify_delete(team, label):
         assert set(x.name for x in bounded_items(container.list_blobs(results_per_page=2))) == set(KEYS)
         for key in KEYS:
             blob = container.get_blob_client(key); properties = blob.get_blob_properties()
-            # Real SDK download emits Range. Current leaf rejects it; that is a
-            # compatibility failure, never strip its header or replace with raw HTTP.
+            # Keep the real SDK Range request on the native bounded-range path.
+            # Any compatibility failure must fail this test, without stripping
+            # headers or substituting raw HTTP for the SDK operation.
             data = blob.download_blob(max_concurrency=1).readall()
             assert data == (label + ':' + key).encode()
             assert bytes(properties.content_settings.content_md5) == hashlib.md5(data).digest()

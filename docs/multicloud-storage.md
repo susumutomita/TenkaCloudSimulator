@@ -1,6 +1,6 @@
 # Local multi-cloud storage candidate
 
-This branch composes separately implemented Google Cloud Storage JSON API and Azure Blob Storage REST handlers with the existing local access boundary. It is a development candidate until the complete integrated gates, official SDK acceptance and browser flows pass. Native composition and the two-CLI browser acceptance now pass; full-module regression/coverage and immutable formal checks remain pending. Its presence here is not evidence that all catalog problems or all cloud services work.
+This branch composes separately implemented Google Cloud Storage JSON API and Azure Blob Storage REST handlers with the existing local access boundary. Native composition, the two-CLI browser acceptance, full-module regression and both coverage thresholds pass. Immutable formal checks also pass for the recorded code input; current exact-HEAD hosted results are tracked in Draft PR406. Official SDK execution remains unverified because its required packages are absent. This remains an unmerged development candidate, and its presence here is not evidence that all catalog problems or all cloud services work.
 
 ## Access and fixed scopes
 
