@@ -39,7 +39,7 @@
     },
     {
       "path": "internal/server/apidocs/openapi.json",
-      "sha256": "8befd088ae51c10b196f9b54762c8a8e31f12a5ab3e0668ab3c324455f173228",
+      "sha256": "0a6be26612cf644207c6d46380469c70f9050d172e63d81be8920c5193e32bb2",
       "disposition": "presentation",
       "reason": "Expand static response schemas, examples and error/token/header documentation for the existing native APIs; preserve all 43 operation IDs, HTTP method/path pairs, server targets and security schemes. These are documentation/schema corrections, not new native wire behavior: all Go and embedded runtime implementation bytes are unchanged from the reviewed candidate. Static samples are explicitly distinguished from executed responses.",
       "models": []
@@ -80,11 +80,25 @@
       "models": []
     },
     {
+      "path": "test/e2e/openapi_parameters.py",
+      "disposition": "test-support",
+      "reason": "Statically validate OpenAPI effective parameter uniqueness by (name,in), reference resolution and legal operation-over-path overrides; mandatory Scalar helper executes the detector before browser work and against the embedded document. Does not alter API runtime or claim browser execution.",
+      "models": [],
+      "sha256": "c17ea0897394b63de894da04f3ec1283dc67b68c975f2c878cedc83acd2d358a"
+    },
+    {
       "path": "test/e2e/scalar_s3_docs.py",
-      "sha256": "cdf493cd453bd0c6e4c0a7c129b07d321c7e041d0cd1163156d7cbd137b6fa34",
+      "sha256": "12b01b49dd3f7e12280163e931fd243676b5ced9377435ad74131260c8cc35ee",
       "disposition": "test-support",
       "reason": "Exercise actual Scalar Send against native S3 metadata plus explicitly synthetic parser fixtures, hostile XML/text bounds, timeout/stale-view handling, keyboard/reflow and mandatory axe checks. This helper is development-only evidence and grants no simulator authority or implementation/model proof.",
       "models": []
+    },
+    {
+      "path": "test/e2e/test_openapi_parameters.py",
+      "disposition": "test-support",
+      "reason": "Statically validate OpenAPI effective parameter uniqueness by (name,in), reference resolution and legal operation-over-path overrides; mandatory Scalar helper executes the detector before browser work and against the embedded document. Does not alter API runtime or claim browser execution.",
+      "models": [],
+      "sha256": "19092594ecf5475e969e9b0396e54bb8fb3607b2e815218a1396280e701d270e"
     }
   ]
 }
