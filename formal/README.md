@@ -132,7 +132,9 @@ The existing ten model entries and their36 controls are preserved; the new model
 and all four invariants are required by the loader and removal-negative fixtures.
 The registry is canonical; the old standalone KMS fragment is preserved outside
 production history as a handoff artifact and removed from the current tree.
-This source registration is not a new-head TLC, SDK, browser or whole-CI success.
+The immutable91172d0 source passed12 baselines/48 required controls and34 exact
+changed-blob declarations. Native/SDK/browser/whole-quality results are separate
+in [KMS service evidence](../docs/kms.md); current hosted CI remains required.
 
 
 ## KMS protocol admission and policy snapshot
@@ -146,10 +148,15 @@ metadata,500-to403 outage masking, missing identity success and missing/conflict
 KMS target success. Rejected/error replies expose no abstract resource data or
 mutation. Four controls remove signing intent, mask an outage, ignore the target
 or read live policy instead of the snapshot. Type/parse errors are not acceptable
-counterexamples; actual named traces remain pending.
+counterexamples. Actual91172d0 runs produced all four named invariant violations
+with exit12 and transition traces; the atomic model baseline and eight controls
+also passed their intended checks.
 This is not raw-header/SigV4 parsing, local token authentication, real IAM/SQL,
 other AWS branch authorization or a Go refinement proof. Atomic KMSKeyState and
 its eight controls remain unchanged; protocol claims are not assigned to that
 successful-event model. Real Gateway metadata/conflict cases, identity DB failure
 frames/retry and a real body-read-barrier snapshot test provide separate native
-bridge obligations. Source registry is now12/48. Native bridge results are recorded separately in docs/kms.md; current exact-head TLC remains unrun.
+bridge obligations. The registry is12/48, preserving all earlier models/invariants/controls.
+Native bridge results are recorded separately in [KMS](../docs/kms.md).
+Documentation-only children do not change model bytes; each final HEAD still
+requires its own immutable input/applicability gate before publication.

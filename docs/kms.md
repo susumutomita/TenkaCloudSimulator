@@ -1,24 +1,20 @@
 # KMS: bounded local keys
 
-This local module supplies eight bounded native KMS JSON 1.1 operations: `CreateKey`,
-`DescribeKey`, `ListKeys`, `EnableKey`, `DisableKey`, `GetKeyPolicy`, `Encrypt`,
-and `Decrypt`. It is an independent learning simulator. Its key storage and
-ciphertext are **not AWS KMS, an HSM, an at-rest encryption guarantee, or an AWS
-portable ciphertext format**. No AWS credentials or network access are required.
+Eight native KMS JSON1.1 operations and their embedded Cloudscape workflow share
+the team's SQLite state. The regular server initializes KMS; use the authenticated
+CLI described in [startup](start.md). Direct server.New is a composition API and
+must be wrapped in NewAccess by embedding hosts. An unconfigured Gateway returns501.
 
-After root configures the shared AWS Gateway with this module, send
-`POST /_simulator/providers/aws/` with
-`Content-Type: application/x-amz-json-1.1` and
-`X-Amz-Target: TrentService.<Operation>`. `X-Simulator-Region` selects one of the
-four supported local regions (default `us-east-1`). SDKs use dummy `TCSIM...`
-SigV4 credentials with service `kms`; real credentials and session tokens are
-rejected. The host's local access token must still be required. `server.New` alone is
-an unauthenticated composition API; hosts must wrap it in `NewAccess`. The refreshed private source now initializes KMS in regular server.New and
-advertises exactly these eight operations. Native fixtures also configure
-Gateway.KMS directly. The regular server and actual CLI/SDK checks are recorded below; rebuilt console
-interaction and whole-CI remain separate gates. Source presence alone is not
-successful integration.
-An explicitly unconfigured store still returns501.
+Send POST to `/` or `/_simulator/providers/aws/`, Content-Type
+`application/x-amz-json-1.1`, and X-Amz-Target `TrentService.<Operation>`.
+Unsigned local requests or dummy TCSIM-prefixed SDK credentials scoped to `kms`
+are accepted only behind the host's local authentication. Real AWS credentials
+and session tokens are rejected. The four supported local regions default to
+us-east-1. Wire service/credential metadata selects protocol, never authority.
+
+This is an independent learning simulator: raw key material persists in SQLite.
+It is not AWS KMS, an HSM, an at-rest protection guarantee or an AWS portable
+ciphertext format. Use dummy data; no real cloud/network dependency is required.
 
 ## Keys and identity permissions
 
@@ -96,11 +92,10 @@ Unimplemented operations return HTTP 501; they never silently succeed.
 No asymmetric/HMAC/data keys, aliases, tags, custom key policies/stores,
 CloudTrail/CloudWatch, rotation, scheduled deletion, grants, multi-region keys,
 external key material, AWS portable blobs, AWS eventual consistency, or CFN
-resource are supplied by this increment. A prepared isolated Cloudscape component targets these same native APIs for the
-regional key list, creation, metadata, read-only default policy, enable/disable
-and explicitly identified local encryption test. Shared navigation/component wiring and canonical asset rebuild are now recorded
-below. Actual PC1440/390 browser verification is recorded separately below;
-a built bundle alone is not evidence that the new view is usable.
+resource are supplied by this increment. The embedded Cloudscape console uses these same native APIs for the regional
+key list, creation, metadata, read-only default policy, enable/disable and an
+explicitly identified local encryption test. PC1440/390 interaction is verified;
+this does not establish authenticated AWS visual equivalence.
 No existing Challenge problem is enabled merely by these operations.
 
 ## Wire examples
@@ -185,207 +180,49 @@ plan mentions aliases, grants and scheduled deletion, none of which this smaller
 increment implements. No key deletion API is invented: test-owned temporary DB
 cleanup is distinct from deleting a key with live ciphertext dependencies.
 
-## Dependencies and independent test/model evidence
+## Verification and finite model scope
 
-Mandatory host dependencies are the existing provider SQLite connection, request
-region/identity snapshot and root Access token boundary. Core IAM decision logic
-is the existing limited identity matcher, not a new AWS authorization engine.
-AES-GCM uses only the Go standard library; no external KMS, HSM, process, network
-or SDK runtime is required. S3 SSE-KMS, SSM SecureString, Secrets Manager encryption,
-Lambda guest KMS and CloudFormation KMS resources are separate unimplemented
-integrations. Enabling this native module does not enable any existing problem.
+The current implementation has actual native, SDK and browser evidence; the
+following are distinct input-scoped results, not a claim that an unpublished
+HEAD has passed hosted CI.
 
-The KMSKeyState model bounds two keys/teams, two request regions, two context
-values, two blob slots and two encryptions per key. Eight controls target permission,
-team, region, enabled encrypt/decrypt, context/key binding and the abstract counter
-ceiling. It describes only atomic successful state events: rejected response frames,
-SQL RowsAffected/commit failures, payload/header/JSON parsing, ciphertext bytes,
-cryptography and probability, pagination, host authentication and read-only metadata
-outputs are not proved. The canonical model registry and four required properties are integrated in
-source; the final exact HEAD must pass the immutable applicability and TLC gates.
-A registry declaration alone is not an executed proof.
+| Check | Actual result and scope |
+| --- | --- |
+| Native and regular server |19 AWS KMS tests and1 regular-server test pass normal/race, with both-package vet. Independent literal IAM/ARN expectations, real SQLIGNORE rollback/full key frames, identity outage500 vs missing403 and body-read policy-snapshot barriers are tested. |
+| Whole quality, e094485 | All packages actually ran with race (no cached labels); formatting, vet, assets/rights, module verification and static build pass. One fresh profile:6114/6435 statements95.01%,8016/8848 unfiltered source90.60%, v1.4.0 converter. Both90% floors unchanged; no union/exclusions/timeout changes. |
+| Whole conformance,5ca45ea | All23 mandatory cases pass in402.411s, including the KMS SDK and browser children with check=True/no skip/fallback. A separate1-case reflow detector and actual make-start unbuilt/built/rebuild/failure/private-token/TTY/CI/auth/signal-cleanup checks pass. |
+| Actual KMS SDK | Eight boto3 clients:57 positive equal calls/sends/responses, numeric-loopback guard, two CLI processes/private DBs, restart, exact IAM/explicit Deny, disabled/context/key/region/tamper refusals. Eight examples fetched from the embedded specification execute against the same SQLite. No header/body auto-synchronization claim. |
+| Actual console |1440/390 key create/cancel/detail/policy/crypto/disable-enable with SDK readback; keyboard/reflow/axe, older500 after newer200, visible current500/recovery, region/principal field clearing, IAM403 and browser logout preserving independent SDK. Outside requests/page errors0. |
+| Screen audit |50 actual regression screens, zero automated WCAG violations; not full accessibility certification. KMS screens have separate focused interaction evidence. |
+| Cross builds | CGO-disabled Linux/Darwin amd64/arm64 and Windows/amd64 compile; foreign execution unverified. |
+| Immutable finite TLC,91172d0 |12 baselines and48 exact named mutation counterexamples; each mutant exit12 with intended invariant and transition or initial-state witness. Exact34 changed-blob declarations pass. Fixed jar/512MiB/1worker/60s per case. |
 
-This source refresh normally merges main b61d029 into a separate candidate while
-preserving the original5862047 checkout. The initial merge preserved all five shared conflict files from main. A later
-authorized source phase adds regular server initialization/capabilities, minimal
-KMS navigation and eight header-target body templates while preserving the
-existing IAM alias and all43 OpenAPI operation IDs. Canonical assets were
-subsequently rebuilt as recorded below; existing SQS/API/logout state and routes are preserved. New native tests use
-independent literal operation/action/resource names, full persisted-key fingerprints,
-actual SQLite pure RAISE(IGNORE) failures and rejected transport frames. Expected
-single-row writes now require one affected row before any key/state/ciphertext
-success; a missing database refuses construction. These fault tests concern
-nonstandard SQL fault fixtures, not an ordinary API exploit or protection against
-an arbitrary host/database administrator. At native checkpoint f018bc6, all16 TestKMS functions passed normally (1.223s),
-under race (10.312s), and package vet passed (1CPU/-p1/offline/timeout60s).
-Subsequent dispatch and regular-server checks are recorded below. New model
-registration and actual console browser interaction remain separate gates.
-Old-candidate results are not fresh whole-integration evidence.
+Go/native-test/model/asset bytes and embedded binary are unchanged across these
+quality/conformance/formal inputs; subsequent documentation/applicability-only
+children retain that scoped evidence. Every final committed HEAD must still
+pass its immutable policy/applicability gate. Canonical current hosted CI/security
+and final independent publication review remain required. No push/release/merge
+or real AWS resource creation is implied by local acceptance.
 
-| Actual operation group | Finite model correspondence | Native obligations outside the model |
-|---|---|---|
-| CreateKey | Create + AuthorizedEvents/TypeOK | Native defaults, random key/UUID, IAM action *, quota, one-row write/commit acknowledgment |
-| EnableKey/DisableKey | SetEnabled + AuthorizedEvents; later crypto checks EnabledCrypto | Exact key ARN, empty wire body, failed/ignored SQL update frames |
-| Encrypt | Encrypt + TypeOK count0..2, EnabledCrypto, AuthorizedEvents | Actual2^32 ceiling, nonce construction, AES-GCM/AAD bytes, ciphertext format and counter commit |
-| Decrypt | Decrypt + BoundContextAndKey, EnabledCrypto, AuthorizedEvents | Actual tag verification, case-sensitive context JSON, no plaintext on denial/error, counter/material read invariance |
-| DescribeKey/ListKeys/GetKeyPolicy | No separate read-output transition | Independent native permission/resource checks, pagination, schema/redaction, disabled-state metadata/default policy |
+KMSKeyState abstracts two keys/teams, two request regions/contexts/blob slots and
+two encryptions per key; eight controls cover permission/team/region/enabled-state,
+context/key binding and the counter ceiling for successful atomic state events.
+KMSProtocolAdmission separately abstracts normalized service metadata, credential
+format/region, identity lookup outcomes and one captured policy; four controls
+cover cross-service fallback, outage classification, required target and policy
+snapshot authority. The original10 models/36 controls are preserved, giving12/48.
+All48 sensitivity IDs and required invariants have real removal-negative fixtures.
 
-The canonical registry includes kms_types.go for abstract key/region/context
-binding helpers and shared initialization/dispatch declarations. Its explicit
-limits exclude parser/crypto/read-output/host-authentication proofs. The prior
-standalone fragment is preserved outside the source tree, leaving one canonical
-registry. Twelve baselines and48 named controls are registered; existing ten
-models and36 controls remain intact. At immutable b11fbfe, all12 baselines and48
-controls passed with the pinned jar,512MiB heap,1 worker and unchanged60s
-per-case timeout. KMSKeyState explored737 distinct states; KMSProtocolAdmission
-explored5064. Every control returned exit12 with its named invariant and a
-transition trace or explicit initial-state counterexample. Model/cfg/registry
-bytes remain unchanged in this test/documentation follow-up; final-head CI
-execution is still required.
+These finite checks are not Go/SQLite/AES/nonce/IAM/SigV4/parser refinement proofs,
+read-output proofs or complete AWS compatibility. Native error/rollback/crypto
+and transport cases supply separate evidence. The original pre-fix dispatch
+counterexamples remain in development history (ebb6f78), corrected at a6f3e0e;
+original native provenance is preserved in5862047 and the cited rights files.
 
-
-## Source composition and bounded API reference
-
-Regular server.New uses the same provider SQLite connection for KMS and closes
-it with the existing team lifecycle. Existing Access remains mandatory in the CLI;
-no new login path, principal bypass, AWS account configuration or public endpoint
-is added. Capabilities explicitly list eight operations and unsupported scope.
-The console imports the isolated Cloudscape view with region/principal/navigation
-remount keys and the existing authenticated request helper; logout/account/API
-reference controls retain their prior source. The view is not an AWS-authenticated
-console capture or a promise of exact current layout.
-
-The existing root POST OpenAPI operation now contains eight named KMS JSON1.1 body
-examples with exact per-target request/response schema mapping. The IAM Query
-provider alias and all43 existing operation IDs remain unchanged: eight target
-headers are not misrepresented as eight distinct path/method operations. Select
-X-Amz-Target manually to match the body; choosing a body example has not been
-verified to synchronize headers automatically. Create a key first, use its actual
-returned identifier, then copy actual local Encrypt output for Decrypt. The
-valid-base64 documentation placeholder is deliberately not decryptable.
-Parsed schema/source checks, served examples, SDK sends and canonical bundle/NOTICE
-rebuild have separate results below. Browser and bounded formal results are
-recorded below; whole coverage now passed on the unchanged Go input, while
-current security/CI remain separate required gates.
-
-
-## Protocol admission/refusal and snapshot contract
-
-The independent KMSProtocolAdmission model represents normalized selection,
-metadata consistency, identity lookup and a captured permit before executing one
-request. KMS signing scope is a routing hint only, never authenticated authority.
-An identity-store failure/cancellation is an internal500; a missing identity is403.
-A live policy change after snapshot must affect the next request, not silently
-replace the current captured permit. Missing/conflicting targets cannot become
-S3 success. Error/denial replies preserve the abstract resource and disclose none.
-Four new controls accompany five safety invariants plus TypeOK. Raw header/SDK
-signature parsing, host token authentication, SQL implementation and other-service
-behavior are not formally established; actual Gateway/native tests are separate.
-The atomic KMS model's8 controls do not prove these protocol/refusal properties.
-
-At pre-fix checkpoint ebb6f78, actual tests reproduced both dispatch findings:
-identity SQLite outage became403, while signed KMS intent without/conflicting
-target could return S3/SQS success or the wrong service error. Those failures are
-preserved. The minimal a6f3e0e correction uses PolicyContext with request context,
-separates missing identity403 from internal500 and recognizes KMS signing scope
-as routing metadata without granting authorization. All19 AWS KMS test functions
-passed normally (1.260s) and under race (10.174s); the regular-server Access,
-provider-alias, two-DB/token and persistence test passed normally (1.388s) and
-under race (10.499s), with both-package vet passing. The body-read barrier proves
-captured permission is stable across later grant/revocation; the next request
-sees the changed policy. This is not full IAM, SigV4 or tenant-isolation proof.
-A same-view console refresh guard rejects older errors. Actual browser tests
-observe the older500 response body being consumed after a newer real200, then
-assert the newer state remains visible. A current500 must be visible and a real
-refresh must recover, preventing a blanket error-suppression false positive.
-
-
-## Canonical assets and actual SDK checkpoints
-
-At driver checkpoint8a1fbb1, an offline CGO0 current-source binary and existing
-boto3 1.42.0 exercised all eight operations through two real CLI processes/DBs,
-actual local token/role IAM, context/key/region/tamper refusal, disabled state and
-restart. Eight clients had42 calls,42 sends and42 responses, with positive equal
-counts per client. A numeric-loopback/exact-origin guard runs before SDK send;
-proxy use is disabled. No overlay, old binary, dependency install, actual AWS,
-browser or guest Python runtime was used. Temporary fixture processes were reaped.
-
-The canonical Cloudscape build used Node24.19.0 and a byte-identical package/lock
-pair from the existing verified physical dependency tree. All19,261 entries,
-including16,047 file hashes/modes and3 internal relative symlinks, matched before
-and after copying/building. No install or lifecycle script ran. The canonical
-builder recorded22 actual dependency notice packages; original notices remained
-unchanged, and the asset/provenance checker passed. Browser operation and visual
-fidelity are not inferred from these asset checks. At canonical checkpoint c8cdb8f, the extended driver read the actual embedded
-specification and executed all eight body examples against the same restarted
-SQLite through official SDK methods, substituting only the actual returned key
-identifier/ciphertext. The documented placeholder was explicitly rejected;
-pagination was bounded and exact, and Disable/Enable state was read back. Eight
-clients had57 positive equal calls/sends/responses. Both actual CLI processes
-and the restart process completed/reaped cleanly. This is not Scalar browser
-interaction, automatic header synchronization or a whole-CI result.
-
-
-## Actual focused console acceptance
-
-The c8cdb8f embedded binary (SHA256
-`8e2a789eeb79a167294d8e61adf53aa9dab858516fdce8a1310de43050124c38`)
-was exercised at1440 and390 pixels with dummy data only. Native SDK readback
-confirmed cancellation creates no key, Create/metadata/default policy,
-Encrypt/Decrypt/context rejection and Disable/Enable state. Keyboard activation,
-reflow and serious/critical WCAG axe checks passed with no outside requests or
-browser page errors. Region and exercise-identity changes remount the view and
-clear plaintext/ciphertext; an explicit-deny reader receives actual403 without
-ciphertext or changed key state. Browser sign-out removes browser access while
-the independent operator SDK credential remains valid. Temporary CLI/DB fixtures
-are removed; scheduled key deletion remains unsupported.
-
-The mandatory helper keeps CSP enforced and uses a function-form Playwright
-predicate to observe the delayed response, avoiding string-expression unsafe-eval.
-Initial supplemental failures (a mobile/desktop menu-role mismatch and that
-predicate) were retained as test-procedure failures and corrected without product
-or bundle changes. Passing an outside supplemental script alone does not establish
-that the tracked helper passed; its exact final source hash/result is recorded
-separately by the focused acceptance run.
-
-The public AWS KMS guides linked above informed the list/detail/policy structure;
-no authenticated current AWS console was inspected, so pixel-identical fidelity
-is not claimed. “Local encryption test” is explicitly simulator-only, unlike the
-real AWS console. These checks do not establish full AWS KMS compatibility,
-full accessibility, cloud-grade key protection, or complete CI success.
-
-
-The final conformance harness now includes23 mandatory cases: both the unchanged
-KMS57-call SDK/served-example driver and the tracked KMS browser helper run as
-checked child processes. Either child failure fails the suite; neither has a
-skip/fallback. These wrappers were missing from the earlier21-case baseline;
-focused SDK/browser successes above are separate evidence. This test-support-only
-follow-up preserves every Go/model/asset byte and the embedded binary from e094485.
-The five CGO-disabled Linux/Darwin amd64/arm64 and Windows/amd64 cross-compilations
-passed at that unchanged runtime input; foreign-platform execution is unverified.
-At exact5ca45ea, all23 whole-conformance cases passed in402.411s, followed by
-actual make-start checks (unbuilt/built, stale source, compiler failure, private
-state/token, TTY/CI suppression, authentication and signal cleanup). The separate
-reflow gate passed its1 case. The50-screen actual audit reported zero automated
-violations; KMS1440/390 native interaction/accessibility/state assertions ran
-inside the mandatory suite. No earlier success is relabeled as this source HEAD.
-The immutable formal check must still run on each final committed source HEAD.
-
-
-The preceding unchanged Go input e094485 passed make before-commit with every
-race-tested package actually executing (no cached result labels), vet, formatting,
-embedded rights/assets, module verification and static build. One fresh whole
-profile measured6114/6435 statements (95.01%) and8016/8848 unfiltered source lines
-(90.60%) using the pinned v1.4.0 Cobertura converter. Both90% floors stayed enforced;
-no profile union, exclusions or timeout changes were used. OOM and OOM-kill
-counters remained zero. The only changes after that proof are test harness,
-documentation and applicability declarations; Go/native-test/model/asset bytes
-and embedded binary remain identical. These are input-scoped carried proofs,
-not a claim that a newer GitHub HEAD already passed hosted CI.
-
-Screenshots capture dummy data only. Earlier full-page shots retain the keyboard
-focused scroll position, which can place sticky Cloudscape controls mid-image;
-settled viewport captures are separate visual-review artifacts and do not replace
-the mandatory interaction proof. Authenticated real AWS screen fidelity,
-canonical current hosted security/CI and final independent publication review
-remain unverified/required. This candidate has not been pushed or released.
+Cloudscape assets were canonically rebuilt with Node24.19.0 from byte-identical
+package/lock and a fully hashed existing dependency tree;22 notices remain intact.
+No install, lifecycle script, external dependency or Kumo engine was introduced.
+Screenshots contain dummy data only; focused-scroll full-page captures and later
+settled viewport captures are distinct visual artifacts, not new regression proof.
+S3 SSE-KMS, SSM SecureString, Secrets Manager encryption, Lambda guest KMS and CFN
+KMS resources remain unsupported. No Challenge problem is enabled by this module.

@@ -3,10 +3,17 @@
   "base_sha": "b61d0299a2139661f01ef29ae5826e4c070cc7bf",
   "changes": [
     {
-      "path": "docs/kms.md",
-      "sha256": "0137ed589581e8b3670b420d19e53652076e716d2183aa8839ab69702b43885c",
+      "path": "README.md",
+      "sha256": "e0270e5762c7d3e1db9eb19daabe6a05ec15e8229ad87be56c50e116c18e452f",
       "disposition": "documentation",
-      "reason": "Document exact local KMS contract, official sources, legacy rights and proof boundaries; known dispatch blockers and new source execution status are explicit. No proof by prose.",
+      "reason": "Expose the eight bounded KMS operations, service limits/link and12model/48control inventory; distinguish actual local acceptance from AWS compatibility and hosted review. No runtime or model authority is introduced.",
+      "models": []
+    },
+    {
+      "path": "docs/kms.md",
+      "sha256": "9152939e3ba81b177ba9f1ad4db7ed314f19725b27a48e8a796b39fd4c7bcc5e",
+      "disposition": "documentation",
+      "reason": "Document exact local KMS contract, official sources, legacy rights and proof boundaries; executed local acceptance and remaining hosted-review limits are explicit. No proof by prose.",
       "models": []
     },
     {
@@ -47,7 +54,7 @@
       "path": "formal/KMSProtocolAdmission.cfg",
       "sha256": "3fa7b1add3c018834091b1d6e7ac618ae8615c24ab72a11dd83fa3d4a1b7ce39",
       "disposition": "modeled",
-      "reason": "ONLY the new configured KMS selection/policy-snapshot/refusal branch is declared under the normalized protocol model. Raw headers/SigV4, real identity SQL errors, parsing and unchanged S3/SSM/other AWS branches are not modeled. Tests-first native bridge still expected to fail old dispatch until executable reproduction and correction.",
+      "reason": "ONLY the new configured KMS selection/policy-snapshot/refusal branch is declared under the normalized protocol model. Raw headers/SigV4, real identity SQL errors, parsing and unchanged S3/SSM/other AWS branches are not modeled. Old dispatch failures were reproduced and corrected; native tests exercise the real bridge separately from this finite abstraction.",
       "models": [
         {
           "id": "KMSProtocolAdmission",
@@ -66,7 +73,7 @@
       "path": "formal/KMSProtocolAdmission.tla",
       "sha256": "9ee09a99354a4472cf7bf07054eee95739b8a6e448b4c7ee317443d414ac33ca",
       "disposition": "modeled",
-      "reason": "ONLY the new configured KMS selection/policy-snapshot/refusal branch is declared under the normalized protocol model. Raw headers/SigV4, real identity SQL errors, parsing and unchanged S3/SSM/other AWS branches are not modeled. Tests-first native bridge still expected to fail old dispatch until executable reproduction and correction.",
+      "reason": "ONLY the new configured KMS selection/policy-snapshot/refusal branch is declared under the normalized protocol model. Raw headers/SigV4, real identity SQL errors, parsing and unchanged S3/SSM/other AWS branches are not modeled. Old dispatch failures were reproduced and corrected; native tests exercise the real bridge separately from this finite abstraction.",
       "models": [
         {
           "id": "KMSProtocolAdmission",
@@ -83,23 +90,23 @@
     },
     {
       "path": "formal/README.md",
-      "sha256": "089d8146a64a6a8b5c3c4c1744dfd27cd0f96a57ec4c50cb2dfd36b6bdc886cb",
+      "sha256": "a6da83ac226c89e3f39f78809398d8a7884fc6f6dc8ce3c1c6456485de709315",
       "disposition": "documentation",
-      "reason": "Document exact local KMS contract, official sources, legacy rights and proof boundaries; known dispatch blockers and new source execution status are explicit. No proof by prose.",
+      "reason": "Document exact local KMS contract, official sources, legacy rights and proof boundaries; executed local acceptance and remaining hosted-review limits are explicit. No proof by prose.",
       "models": []
     },
     {
       "path": "formal/models.json",
       "sha256": "ae7adf465f9fa3354872619fc9fa258fdf6fa4b1a1a49f23466dec8c6f8e930f",
       "disposition": "formal-infrastructure",
-      "reason": "Source-register KMS atomic/protocol models and protect required inventory/properties with removal-negative fixtures; preserve original ten entries/properties/thirty-six controls. Exact current-head actual model execution remains pending.",
+      "reason": "Source-register KMS atomic/protocol models and protect required inventory/properties with removal-negative fixtures; preserve original ten entries/properties/thirty-six controls. Immutable91172d0 runs exercised all12 baselines/48 controls; each final committed HEAD requires its own gate.",
       "models": []
     },
     {
       "path": "internal/aws/kms_ack_boundary_test.go",
       "sha256": "ee74374beae7c73ff2d95dc6ca5222c09daaf127cddd6471655eebb10dc01bad",
       "disposition": "test-support",
-      "reason": "Real native/SQLite/SDK/browser boundary assertions with independent literals and positive outcomes; new dispatch counterexamples remain expected-fail until reproduced and fixed, no full IAM/token proof.",
+      "reason": "Real native/SQLite/SDK/browser boundary assertions with independent literals and positive outcomes; old-source dispatch counterexamples were reproduced, corrected and followed by positive native regression execution; no full IAM/token proof.",
       "models": []
     },
     {
@@ -142,7 +149,7 @@
       "path": "internal/aws/kms_dispatch_boundary_test.go",
       "sha256": "fb58a6888da0c8b0229c4e10a20201d9e1a2edc9d6bf4aa248bb676edfd0a017",
       "disposition": "modeled",
-      "reason": "ONLY the new configured KMS selection/policy-snapshot/refusal branch is declared under the normalized protocol model. Raw headers/SigV4, real identity SQL errors, parsing and unchanged S3/SSM/other AWS branches are not modeled. Tests-first native bridge still expected to fail old dispatch until executable reproduction and correction.",
+      "reason": "ONLY the new configured KMS selection/policy-snapshot/refusal branch is declared under the normalized protocol model. Raw headers/SigV4, real identity SQL errors, parsing and unchanged S3/SSM/other AWS branches are not modeled. Old dispatch failures were reproduced and corrected; native tests exercise the real bridge separately from this finite abstraction.",
       "models": [
         {
           "id": "KMSProtocolAdmission",
@@ -161,14 +168,14 @@
       "path": "internal/aws/kms_fault_test.go",
       "sha256": "9368d7b6e7846e6897ca4301ee15c6d5cd3dba6a0e86a46da565dffc41dc6488",
       "disposition": "test-support",
-      "reason": "Real native/SQLite/SDK/browser boundary assertions with independent literals and positive outcomes; new dispatch counterexamples remain expected-fail until reproduced and fixed, no full IAM/token proof.",
+      "reason": "Real native/SQLite/SDK/browser boundary assertions with independent literals and positive outcomes; old-source dispatch counterexamples were reproduced, corrected and followed by positive native regression execution; no full IAM/token proof.",
       "models": []
     },
     {
       "path": "internal/aws/kms_http.go",
       "sha256": "f51d6e6d5d7da55a8a2125d095fd40a61e599d43d29e5d671532a14e11ef4aec",
       "disposition": "modeled",
-      "reason": "ONLY the new configured KMS selection/policy-snapshot/refusal branch is declared under the normalized protocol model. Raw headers/SigV4, real identity SQL errors, parsing and unchanged S3/SSM/other AWS branches are not modeled. Tests-first native bridge still expected to fail old dispatch until executable reproduction and correction. The native operation bridge separately uses the atomic key-state model for successful events only, never as routing/refusal proof.",
+      "reason": "ONLY the new configured KMS selection/policy-snapshot/refusal branch is declared under the normalized protocol model. Raw headers/SigV4, real identity SQL errors, parsing and unchanged S3/SSM/other AWS branches are not modeled. Old dispatch failures were reproduced and corrected; native tests exercise the real bridge separately from this finite abstraction. The native operation bridge separately uses the atomic key-state model for successful events only, never as routing/refusal proof.",
       "models": [
         {
           "id": "KMSProtocolAdmission",
@@ -196,14 +203,14 @@
       "path": "internal/aws/kms_http_test.go",
       "sha256": "6a56418db8b0a65b142870a985ec2a6144277ea02182f019902a13e76c2d4c1a",
       "disposition": "test-support",
-      "reason": "Real native/SQLite/SDK/browser boundary assertions with independent literals and positive outcomes; new dispatch counterexamples remain expected-fail until reproduced and fixed, no full IAM/token proof.",
+      "reason": "Real native/SQLite/SDK/browser boundary assertions with independent literals and positive outcomes; old-source dispatch counterexamples were reproduced, corrected and followed by positive native regression execution; no full IAM/token proof.",
       "models": []
     },
     {
       "path": "internal/aws/kms_permission_boundary_test.go",
       "sha256": "854fd3e8f08e806b127ec53262d9d37190bdd765ff9e6712b8015676d3dcb361",
       "disposition": "test-support",
-      "reason": "Real native/SQLite/SDK/browser boundary assertions with independent literals and positive outcomes; new dispatch counterexamples remain expected-fail until reproduced and fixed, no full IAM/token proof.",
+      "reason": "Real native/SQLite/SDK/browser boundary assertions with independent literals and positive outcomes; old-source dispatch counterexamples were reproduced, corrected and followed by positive native regression execution; no full IAM/token proof.",
       "models": []
     },
     {
@@ -227,7 +234,7 @@
       "path": "internal/aws/kms_store_test.go",
       "sha256": "023ee5513b83331665174f9d9d9c4622516b01e23eec5a6ea235b447e666badd",
       "disposition": "test-support",
-      "reason": "Real native/SQLite/SDK/browser boundary assertions with independent literals and positive outcomes; new dispatch counterexamples remain expected-fail until reproduced and fixed, no full IAM/token proof.",
+      "reason": "Real native/SQLite/SDK/browser boundary assertions with independent literals and positive outcomes; old-source dispatch counterexamples were reproduced, corrected and followed by positive native regression execution; no full IAM/token proof.",
       "models": []
     },
     {
@@ -251,7 +258,7 @@
       "path": "internal/aws/s3.go",
       "sha256": "3d545074fab864eee93d5aa68d3142014f6625a5a51ca2d137e54c158b7e434e",
       "disposition": "modeled",
-      "reason": "ONLY the new configured KMS selection/policy-snapshot/refusal branch is declared under the normalized protocol model. Raw headers/SigV4, real identity SQL errors, parsing and unchanged S3/SSM/other AWS branches are not modeled. Tests-first native bridge still expected to fail old dispatch until executable reproduction and correction.",
+      "reason": "ONLY the new configured KMS selection/policy-snapshot/refusal branch is declared under the normalized protocol model. Raw headers/SigV4, real identity SQL errors, parsing and unchanged S3/SSM/other AWS branches are not modeled. Old dispatch failures were reproduced and corrected; native tests exercise the real bridge separately from this finite abstraction.",
       "models": [
         {
           "id": "KMSProtocolAdmission",
@@ -270,7 +277,7 @@
       "path": "internal/aws/ssm.go",
       "sha256": "c617d506f07815e83b23db158b65ce8f8649bdc5986553a603d4acffe883e57e",
       "disposition": "modeled",
-      "reason": "ONLY the new configured KMS selection/policy-snapshot/refusal branch is declared under the normalized protocol model. Raw headers/SigV4, real identity SQL errors, parsing and unchanged S3/SSM/other AWS branches are not modeled. Tests-first native bridge still expected to fail old dispatch until executable reproduction and correction.",
+      "reason": "ONLY the new configured KMS selection/policy-snapshot/refusal branch is declared under the normalized protocol model. Raw headers/SigV4, real identity SQL errors, parsing and unchanged S3/SSM/other AWS branches are not modeled. Old dispatch failures were reproduced and corrected; native tests exercise the real bridge separately from this finite abstraction.",
       "models": [
         {
           "id": "KMSProtocolAdmission",
@@ -289,21 +296,21 @@
       "path": "internal/server/apidocs/openapi.json",
       "sha256": "22297a764cb9925037a51d9d6fa5720ee5178eb292568418ac867e4db70e6194",
       "disposition": "presentation",
-      "reason": "KMS component/API templates use native authenticated requests and known backend state; no frontend authority is granted. Revision guard and delayed-refresh positive/recovery source fixture are prepared, not browser-proven; no API/visual fidelity inferred from presentation.",
+      "reason": "KMS component/API templates use native authenticated requests and known backend state; no frontend authority is granted. Revision guard and delayed-refresh positive/recovery assertions ran in the actual mandatory browser case; no API/visual fidelity inferred from presentation.",
       "models": []
     },
     {
       "path": "internal/server/kms_integration_test.go",
       "sha256": "fd377b0fee0e2136ffd4584e766880ee51fd61f5c3915e3a93bc900a89636204",
       "disposition": "test-support",
-      "reason": "Real native/SQLite/SDK/browser boundary assertions with independent literals and positive outcomes; new dispatch counterexamples remain expected-fail until reproduced and fixed, no full IAM/token proof.",
+      "reason": "Real native/SQLite/SDK/browser boundary assertions with independent literals and positive outcomes; old-source dispatch counterexamples were reproduced, corrected and followed by positive native regression execution; no full IAM/token proof.",
       "models": []
     },
     {
       "path": "internal/server/server.go",
       "sha256": "1181c2ee0619dacec5bc7c792bef5d195e7d1ef9ec5eb3bf5435b3fdf0b876f0",
       "disposition": "modeled",
-      "reason": "ONLY the new configured KMS selection/policy-snapshot/refusal branch is declared under the normalized protocol model. Raw headers/SigV4, real identity SQL errors, parsing and unchanged S3/SSM/other AWS branches are not modeled. Tests-first native bridge still expected to fail old dispatch until executable reproduction and correction.",
+      "reason": "ONLY the new configured KMS selection/policy-snapshot/refusal branch is declared under the normalized protocol model. Raw headers/SigV4, real identity SQL errors, parsing and unchanged S3/SSM/other AWS branches are not modeled. Old dispatch failures were reproduced and corrected; native tests exercise the real bridge separately from this finite abstraction.",
       "models": [
         {
           "id": "KMSProtocolAdmission",
@@ -322,7 +329,7 @@
       "path": "internal/server/web/app.js",
       "sha256": "7cad54446ba1bf1ab660e73bfe96ed9eae9f78b9ac00bce3bc813c9e76458297",
       "disposition": "presentation",
-      "reason": "Canonical Cloudscape output/input manifest rebuilt from byte-identical package/lock and verified existing physical dependency tree, retaining original22 dependency notices. No install/lifecycle/network. Native authority remains backend; browser behavior is a separate pending gate.",
+      "reason": "Canonical Cloudscape output/input manifest rebuilt from byte-identical package/lock and verified existing physical dependency tree, retaining original22 dependency notices. No install/lifecycle/network. Native authority remains backend; actual browser acceptance is recorded separately and is not inferred from bundle bytes.",
       "models": []
     },
     {
@@ -343,14 +350,14 @@
       "path": "test/e2e/check.py",
       "sha256": "ef8baeafd9e9412514ea5898cd40108ff4676a0bf3cbf45643476af70cdb1b09",
       "disposition": "test-support",
-      "reason": "Add two mandatory KMS conformance child executions with check=True; preserve all21 existing tests and no skip/fallback. This harness checks already implemented SDK/browser behavior and is not new runtime authority or a finite model proof. Current23case execution remains pending.",
+      "reason": "Add two mandatory KMS conformance child executions with check=True; preserve all21 existing tests and no skip/fallback. This harness checks already implemented SDK/browser behavior and is not new runtime authority or a finite model proof. All23 cases actually passed at5ca45ea; this is separate from finite model evidence.",
       "models": []
     },
     {
       "path": "test/e2e/kms.py",
       "sha256": "233cdab12932326196fa800701c275d95a54df58ac0d0f422f715e6da3b4cba4",
       "disposition": "test-support",
-      "reason": "Actual official boto3 CLI lifecycle guard: validate exact numeric-loopback origin before send, disable proxies, require positive equal per-client calls/sends/responses including native errors and host401, then close clients. Existing real IAM/two-CLI/crypto/tamper/context/region/restart/refusal assertions retained. SDK execution pending at this source checkpoint.",
+      "reason": "Actual official boto3 CLI lifecycle guard: validate exact numeric-loopback origin before send, disable proxies, require positive equal per-client calls/sends/responses including native errors and host401, then close clients. Existing real IAM/two-CLI/crypto/tamper/context/region/restart/refusal assertions retained. Actual SDK57-call acceptance is recorded separately with exact input provenance.",
       "models": []
     },
     {
@@ -364,28 +371,28 @@
       "path": "third_party/kumo-kms.json",
       "sha256": "390e17eadda7556773b5d43c84ad7fda83846404d19984f91841eac848197f8b",
       "disposition": "documentation",
-      "reason": "Document exact local KMS contract, official sources, legacy rights and proof boundaries; known dispatch blockers and new source execution status are explicit. No proof by prose.",
+      "reason": "Document exact local KMS contract, official sources, legacy rights and proof boundaries; executed local acceptance and remaining hosted-review limits are explicit. No proof by prose.",
       "models": []
     },
     {
       "path": "tools/console/bundle-digests.json",
       "sha256": "60eb501d211a4195c293caab30facb5c850c39fb83a2b5188afa8482992b7e0e",
       "disposition": "presentation",
-      "reason": "Canonical Cloudscape output/input manifest rebuilt from byte-identical package/lock and verified existing physical dependency tree, retaining original22 dependency notices. No install/lifecycle/network. Native authority remains backend; browser behavior is a separate pending gate.",
+      "reason": "Canonical Cloudscape output/input manifest rebuilt from byte-identical package/lock and verified existing physical dependency tree, retaining original22 dependency notices. No install/lifecycle/network. Native authority remains backend; actual browser acceptance is recorded separately and is not inferred from bundle bytes.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
       "sha256": "4cb5e3350e3171d4baf5d92024b233d2efcb16d7bb92fa2400492522394581cd",
       "disposition": "presentation",
-      "reason": "Canonical Cloudscape output/input manifest rebuilt from byte-identical package/lock and verified existing physical dependency tree, retaining original22 dependency notices. No install/lifecycle/network. Native authority remains backend; browser behavior is a separate pending gate.",
+      "reason": "Canonical Cloudscape output/input manifest rebuilt from byte-identical package/lock and verified existing physical dependency tree, retaining original22 dependency notices. No install/lifecycle/network. Native authority remains backend; actual browser acceptance is recorded separately and is not inferred from bundle bytes.",
       "models": []
     },
     {
       "path": "tools/console/src/kms.jsx",
       "sha256": "0ec874c48156cdab640ebb80a8b7cb5505ba0fde89bbc5184071548e5d82ae6d",
       "disposition": "presentation",
-      "reason": "KMS component/API templates use native authenticated requests and known backend state; no frontend authority is granted. Revision guard and delayed-refresh positive/recovery source fixture are prepared, not browser-proven; no API/visual fidelity inferred from presentation.",
+      "reason": "KMS component/API templates use native authenticated requests and known backend state; no frontend authority is granted. Revision guard and delayed-refresh positive/recovery assertions ran in the actual mandatory browser case; no API/visual fidelity inferred from presentation.",
       "models": []
     },
     {
