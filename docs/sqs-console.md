@@ -84,3 +84,41 @@ thirty-six controls remain unchanged. Policy fixtures protect all forty IDs and
 each new critical property. Strict applicability records use baseb61; Conformance
 includes the actual helper as mandatory source. Registration is not an execution
 result. No Node/Go/Java/browser or new Python unit suite has run for this source.
+
+## Canonical build and API-reference checkpoint
+
+After the SOURCE25cc checkpoint, same-lock existing dependencies were physically
+byte-verified (16047 files/3internal symlinks; no install), canonical Cloudscape
+build/22 original package notices and asset checks passed, and the offline
+CGO0 binary built. Its unchanged native nine-API SDK driver passed335 matched
+calls/sends/responses over two persistent team DBs, two regions, restart,
+receipts,60second retention and cleanup. This is not browser/UI or model proof.
+
+That built binary preceded the new API-reference source below. Root POST now
+has a prepared JSON1.0 content choice and nine exact static examples/request
+subsets alongside the preserved43 operation IDs/25 paths, JSON1.1 and Query.
+Use the matching AmazonSQS target/service/region. Create/Get actual QueueUrl
+first; use a current ReceiveMessage receipt for visibility/delete. MessageId
+is not a receipt, and __QUEUE_URL__/__RECEIPT_HANDLE__ are placeholders, not live
+values. Static templates never mean resources exist. Native responses properly
+return receipts to authorized API callers; this console still keeps its receipt
+values transient and does not render/log them.
+
+The mandatory `sqs_docs.py` helper is prepared to fetch the ACTUALLY SERVED spec,
+execute all nine templates in sequence with explicit live substitutions, read
+the same bodies/attributes through the real SDK and remove everything. The new
+reference/helper is unrun until its new embedded binary is built. Existing SDK
+results from the earlier binary are not relabeled as served-example results.
+Browser, TLC, policy units, globalGo/both90 and immutable/current CI remain
+pending; no public action has occurred.
+
+### Actual served-reference result (working-tree checkpoint)
+
+The newly embedded binary now serves the same JSON as source. All nine named
+JSON1.0 examples executed in order with actual QueueUrl/current ReceiptHandle,
+not static-placeholder success. HTTP13/13 responses include two refused
+unsubstituted fixture placeholders; SDK10calls/sends/responses confirm exact
+body/attributes in the same SQLite, fresh receipt/stale refusal and cleanup.
+All43 IDs/25 paths and JSON1.1/Query formats remain served. No receipt/token
+values appear in the helper report. These working-tree results do not replace
+UI/browser, TLC/policy, full-module both90 or immutable/current hosted gates.

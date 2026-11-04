@@ -109,3 +109,17 @@ applicability and one mandatory Conformance method. All main10/36 are preserved;
 new11/40 registration and actual UI/helper remain unrun. Participant, region,
 late native reply, wrong-token and restart coverage are prepared in the helper,
 not claimed successful. The original five-file source bundle remains preserved.
+
+SQS canonical-node phase: same-lock physical16047files/3symlinks verified,
+22package canonical build/rights/assets and offlineCGO0 binary passed. Native
+nine-API SDK335calls/sends/responses passed on that binary (no browser). Its
+spec lacked full JSON1.0 templates. New owned root-POST typed examples and
+mandatory `sqs_docs.py` are SOURCE now, awaiting a new embedded build; do not
+relabel the old binary's native proof as served-reference execution. No native/
+server/core changes, new dependency, actual cloud or publication.
+
+SQS new-reference checkpoint: cached canonical rebuild/assets and new offline
+embedded binary passed. Actual served9JSON1.0 templates passed with explicit
+live substitutions, HTTP13/13 and SDK10/10/10, sameSQLite bytes, refused old/
+fixture receipts and cleanup.43IDs/25paths/JSON1.1/Query preserved. All processes
+closed; no UI/browser/model/globalGo/currentCI success or publication claimed.

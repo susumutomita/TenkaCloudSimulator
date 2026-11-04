@@ -53,7 +53,8 @@ The helper `test/e2e/sqs_console.py` is mandatory in Conformance source and is
 prepared for two real authenticated CLI processes/databases, current native
 state, cross-token401, participant-denied send with no mutation, same-name
 regional state, delayed native reply, restart/relogin and cleanup. Native/server/
-core files remain byte-identical to mainb61. All new runtime/browser/model/policy
-execution remains **unrun** at this source checkpoint; no previous head's proof
-is used as new success. The official AWS screenshots returned403; public text
+core files remain byte-identical to mainb61. Browser/model/policy execution remains **unrun**. A subsequent canonical
+Node/build and unchanged-native SDK checkpoint is recorded separately in the
+console document; it does not prove the new view/model or newly added served
+examples. No previous head's proof is used as new success. The official AWS screenshots returned403; public text
 references do not establish authenticated AWS screen equivalence.

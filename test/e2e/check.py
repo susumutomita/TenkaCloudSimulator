@@ -271,6 +271,9 @@ def handler(event,context):
   run_scalar_s3_docs()
  def test_cloudformation_rest_native_sdk_lifecycle(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('cloudformation_rest.py'))],check=True)
+ def test_sqs_served_static_templates_execute_against_native_state(self):
+  from sqs_docs import run
+  run()
  def test_sqs_console_native_state_scope_and_receipt_custody(self):
   from sqs_console import run
   run()

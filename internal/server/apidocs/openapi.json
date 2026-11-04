@@ -78,16 +78,33 @@
       },
       "post": {
         "summary": "SSM/SQS JSON, CloudFormation Query, or IAM Query operation",
-        "description": "**Static request templates:** choose the correct Content-Type and routing headers before Test Request → Send. SSM/SQS send JSON with X-Amz-Target (JSON 1.1 for SSM, JSON 1.0 for SQS); CloudFormation/IAM send URL-encoded Query fields. The 200 response is JSON for SSM/SQS and XML for Query protocols. A successful DeleteStack has no result payload beyond Query response metadata.\n\nNative regional root endpoint. SQS: X-Amz-Target AmazonSQS.CreateQueue, ListQueues, GetQueueUrl, DeleteQueue, SendMessage, ReceiveMessage, DeleteMessage, ChangeMessageVisibility, GetQueueAttributes (JSON 1.0, Standard queues only; local body limit 256 KiB, aggregate physical storage 10000 messages/64 MiB across queues/regions including expired foreign rows until scoped cleanup; bytes count body UTF-8 plus stored attribute JSON. Over-budget SendMessage returns local SimulatorQuotaExceeded without mutation; existing over-cap data remains readable/deletable; FIFO, Query protocol, batch operations and dead-letter redrive are unsupported). SSM: X-Amz-Target AmazonSSM.PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter. CloudFormation: CreateStack, DescribeStacks, DeleteStack; S3 buckets, SSM parameters, inline Python Lambda functions, one inline IAM identity policy per role, five Regional REST API Gateway resource types, and bounded Lambda::Permission. Unsupported options fail. Real credentials and session tokens are rejected. Create/DeleteStack also require the caller to allow the underlying S3/SSM/IAM/Lambda actions; CAPABILITY_IAM grants no permissions. API resources use NONE/POST AWS_PROXY local Lambda, same-stack API children, explicit deployment DependsOn methods and reverse guarded cleanup. Lambda permission uses only apigateway.amazonaws.com and local execute-api SourceArn. No service RoleArn or general CloudFormation lifecycle is supported. IAM is global: send X-Simulator-Service: iam, Version2010-05-08 and one of CreateRole/GetRole/ListRoles/DeleteRole/PutRolePolicy/GetRolePolicy/DeleteRolePolicy/ListRolePolicies/UpdateAssumeRolePolicy. Policy documents are JSON strings; successful IAM XML returns them RFC3986 URL-encoded. Native role names use the local alphanumeric/underscore/hyphen subset,1–64; inline policy names1–128 AWS characters. Trust and aggregate policies32KiB, at most10 inline policies/100 statements,1000 active+retired name claims. Deleted role names cannot be adopted by legacy identity writes. No managed grants or session issuance.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.",
+        "description": "**Static request templates:** choose the correct Content-Type and routing headers before Test Request → Send. SSM/SQS send JSON with X-Amz-Target (JSON 1.1 for SSM, JSON 1.0 for SQS); CloudFormation/IAM send URL-encoded Query fields. The 200 response is JSON for SSM/SQS and XML for Query protocols. A successful DeleteStack has no result payload beyond Query response metadata.\n\nNative regional root endpoint. SQS: X-Amz-Target AmazonSQS.CreateQueue, ListQueues, GetQueueUrl, DeleteQueue, SendMessage, ReceiveMessage, DeleteMessage, ChangeMessageVisibility, GetQueueAttributes (JSON 1.0, Standard queues only; local body limit 256 KiB, aggregate physical storage 10000 messages/64 MiB across queues/regions including expired foreign rows until scoped cleanup; bytes count body UTF-8 plus stored attribute JSON. Over-budget SendMessage returns local SimulatorQuotaExceeded without mutation; existing over-cap data remains readable/deletable; FIFO, Query protocol, batch operations and dead-letter redrive are unsupported). SSM: X-Amz-Target AmazonSSM.PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter. CloudFormation: CreateStack, DescribeStacks, DeleteStack; S3 buckets, SSM parameters, inline Python Lambda functions, one inline IAM identity policy per role, five Regional REST API Gateway resource types, and bounded Lambda::Permission. Unsupported options fail. Real credentials and session tokens are rejected. Create/DeleteStack also require the caller to allow the underlying S3/SSM/IAM/Lambda actions; CAPABILITY_IAM grants no permissions. API resources use NONE/POST AWS_PROXY local Lambda, same-stack API children, explicit deployment DependsOn methods and reverse guarded cleanup. Lambda permission uses only apigateway.amazonaws.com and local execute-api SourceArn. No service RoleArn or general CloudFormation lifecycle is supported. IAM is global: send X-Simulator-Service: iam, Version2010-05-08 and one of CreateRole/GetRole/ListRoles/DeleteRole/PutRolePolicy/GetRolePolicy/DeleteRolePolicy/ListRolePolicies/UpdateAssumeRolePolicy. Policy documents are JSON strings; successful IAM XML returns them RFC3986 URL-encoded. Native role names use the local alphanumeric/underscore/hyphen subset,1–64; inline policy names1–128 AWS characters. Trust and aggregate policies32KiB, at most10 inline policies/100 statements,1000 active+retired name claims. Deleted role names cannot be adopted by legacy identity writes. No managed grants or session issuance.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.\n\n**SQS static templates:** select application/x-amz-json-1.0, matching AmazonSQS target and sqs routing service. Run CreateQueue first, use returned QueueUrl in later requests, and replace ReceiptHandle only from actual current ReceiveMessage; MessageId is not interchangeable. A static example is never evidence of existing queues/messages or successful prior operations. No automatic retries/real AWS calls. FIFO, batch, encryption/KMS, resource policies/tags, purge, redrive, CFN and Lambda event delivery remain unsupported.",
         "operationId": "awsRegionalOperation",
         "parameters": [
           {
             "name": "X-Amz-Target",
             "in": "header",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "enum": [
+                "AmazonSSM.PutParameter",
+                "AmazonSSM.GetParameter",
+                "AmazonSSM.GetParameters",
+                "AmazonSSM.GetParametersByPath",
+                "AmazonSSM.DescribeParameters",
+                "AmazonSSM.DeleteParameter",
+                "AmazonSQS.CreateQueue",
+                "AmazonSQS.ListQueues",
+                "AmazonSQS.GetQueueUrl",
+                "AmazonSQS.GetQueueAttributes",
+                "AmazonSQS.SendMessage",
+                "AmazonSQS.ReceiveMessage",
+                "AmazonSQS.ChangeMessageVisibility",
+                "AmazonSQS.DeleteMessage",
+                "AmazonSQS.DeleteQueue"
+              ]
             },
-            "description": "AmazonSSM.<operation> for SSM only"
+            "description": "Select AmazonSSM.<operation> with JSON1.1 or AmazonSQS.<operation> with JSON1.0. Query IAM/CloudFormation use Action fields instead; omit this header for those protocols."
           },
           {
             "name": "X-Simulator-Region",
@@ -111,10 +128,11 @@
               "enum": [
                 "ssm",
                 "cloudformation",
-                "iam"
+                "iam",
+                "sqs"
               ]
             },
-            "description": "iam selects IAM Query; omit or use cloudformation for CloudFormation, and omit or use ssm for SSM JSON. Do not select iam for CreateStack/DescribeStacks/DeleteStack."
+            "description": "iam selects IAM Query; omit or use cloudformation for CloudFormation, and omit or use ssm for SSM JSON. Do not select iam for CreateStack/DescribeStacks/DeleteStack. For SQS choose sqs and the selected region; AmazonSQS target remains required. This is protocol routing, not authentication or an IAM grant."
           },
           {
             "$ref": "#/components/parameters/SimulatorToken"
@@ -314,21 +332,208 @@
                   }
                 }
               }
+            },
+            "application/x-amz-json-1.0": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/SQSCreateQueueRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SQSListQueuesRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SQSGetQueueUrlRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SQSGetQueueAttributesRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SQSSendMessageRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SQSReceiveMessageRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SQSChangeMessageVisibilityRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SQSDeleteMessageRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SQSDeleteQueueRequest"
+                  }
+                ],
+                "description": "Header X-Amz-Target selects the operation; request shapes may overlap, so this is anyOf rather than oneOf. Static templates require live substitutions."
+              },
+              "examples": {
+                "CreateQueue": {
+                  "summary": "SQS CreateQueue",
+                  "description": "STATIC TEMPLATE, not live state. Use X-Amz-Target: AmazonSQS.CreateQueue, X-Simulator-Service:sqs, selected region and JSON1.0. Create/Get actual QueueUrl first; Receive supplies current MessageId/ReceiptHandle. Replace all __...__ placeholders with actual responses. Never use MessageId as a receipt or send real AWS credentials.",
+                  "value": {
+                    "QueueName": "api-reference-queue",
+                    "Attributes": {
+                      "VisibilityTimeout": "30",
+                      "DelaySeconds": "0",
+                      "MessageRetentionPeriod": "60"
+                    }
+                  },
+                  "x-simulator-operation": "CreateQueue",
+                  "x-simulator-static-template": true
+                },
+                "ListQueues": {
+                  "summary": "SQS ListQueues",
+                  "description": "STATIC TEMPLATE, not live state. Use X-Amz-Target: AmazonSQS.ListQueues, X-Simulator-Service:sqs, selected region and JSON1.0. Create/Get actual QueueUrl first; Receive supplies current MessageId/ReceiptHandle. Replace all __...__ placeholders with actual responses. Never use MessageId as a receipt or send real AWS credentials.",
+                  "value": {
+                    "QueueNamePrefix": "api-reference-queue",
+                    "MaxResults": 25
+                  },
+                  "x-simulator-operation": "ListQueues",
+                  "x-simulator-static-template": true
+                },
+                "GetQueueUrl": {
+                  "summary": "SQS GetQueueUrl",
+                  "description": "STATIC TEMPLATE, not live state. Use X-Amz-Target: AmazonSQS.GetQueueUrl, X-Simulator-Service:sqs, selected region and JSON1.0. Create/Get actual QueueUrl first; Receive supplies current MessageId/ReceiptHandle. Replace all __...__ placeholders with actual responses. Never use MessageId as a receipt or send real AWS credentials.",
+                  "value": {
+                    "QueueName": "api-reference-queue"
+                  },
+                  "x-simulator-operation": "GetQueueUrl",
+                  "x-simulator-static-template": true
+                },
+                "GetQueueAttributes": {
+                  "summary": "SQS GetQueueAttributes",
+                  "description": "STATIC TEMPLATE, not live state. Use X-Amz-Target: AmazonSQS.GetQueueAttributes, X-Simulator-Service:sqs, selected region and JSON1.0. Create/Get actual QueueUrl first; Receive supplies current MessageId/ReceiptHandle. Replace all __...__ placeholders with actual responses. Never use MessageId as a receipt or send real AWS credentials.",
+                  "value": {
+                    "QueueUrl": "__QUEUE_URL__",
+                    "AttributeNames": [
+                      "All"
+                    ]
+                  },
+                  "x-simulator-operation": "GetQueueAttributes",
+                  "x-simulator-static-template": true
+                },
+                "SendMessage": {
+                  "summary": "SQS SendMessage",
+                  "description": "STATIC TEMPLATE, not live state. Use X-Amz-Target: AmazonSQS.SendMessage, X-Simulator-Service:sqs, selected region and JSON1.0. Create/Get actual QueueUrl first; Receive supplies current MessageId/ReceiptHandle. Replace all __...__ placeholders with actual responses. Never use MessageId as a receipt or send real AWS credentials.",
+                  "value": {
+                    "QueueUrl": "__QUEUE_URL__",
+                    "MessageBody": "Actual API reference message",
+                    "DelaySeconds": 0
+                  },
+                  "x-simulator-operation": "SendMessage",
+                  "x-simulator-static-template": true
+                },
+                "ReceiveMessage": {
+                  "summary": "SQS ReceiveMessage",
+                  "description": "STATIC TEMPLATE, not live state. Use X-Amz-Target: AmazonSQS.ReceiveMessage, X-Simulator-Service:sqs, selected region and JSON1.0. Create/Get actual QueueUrl first; Receive supplies current MessageId/ReceiptHandle. Replace all __...__ placeholders with actual responses. Never use MessageId as a receipt or send real AWS credentials.",
+                  "value": {
+                    "QueueUrl": "__QUEUE_URL__",
+                    "MaxNumberOfMessages": 1,
+                    "VisibilityTimeout": 30,
+                    "WaitTimeSeconds": 0,
+                    "MessageSystemAttributeNames": [
+                      "All"
+                    ],
+                    "MessageAttributeNames": [
+                      "All"
+                    ]
+                  },
+                  "x-simulator-operation": "ReceiveMessage",
+                  "x-simulator-static-template": true
+                },
+                "ChangeMessageVisibility": {
+                  "summary": "SQS ChangeMessageVisibility",
+                  "description": "STATIC TEMPLATE, not live state. Use X-Amz-Target: AmazonSQS.ChangeMessageVisibility, X-Simulator-Service:sqs, selected region and JSON1.0. Create/Get actual QueueUrl first; Receive supplies current MessageId/ReceiptHandle. Replace all __...__ placeholders with actual responses. Never use MessageId as a receipt or send real AWS credentials.",
+                  "value": {
+                    "QueueUrl": "__QUEUE_URL__",
+                    "ReceiptHandle": "__RECEIPT_HANDLE__",
+                    "VisibilityTimeout": 30
+                  },
+                  "x-simulator-operation": "ChangeMessageVisibility",
+                  "x-simulator-static-template": true
+                },
+                "DeleteMessage": {
+                  "summary": "SQS DeleteMessage",
+                  "description": "STATIC TEMPLATE, not live state. Use X-Amz-Target: AmazonSQS.DeleteMessage, X-Simulator-Service:sqs, selected region and JSON1.0. Create/Get actual QueueUrl first; Receive supplies current MessageId/ReceiptHandle. Replace all __...__ placeholders with actual responses. Never use MessageId as a receipt or send real AWS credentials.",
+                  "value": {
+                    "QueueUrl": "__QUEUE_URL__",
+                    "ReceiptHandle": "__RECEIPT_HANDLE__"
+                  },
+                  "x-simulator-operation": "DeleteMessage",
+                  "x-simulator-static-template": true
+                },
+                "DeleteQueue": {
+                  "summary": "SQS DeleteQueue",
+                  "description": "STATIC TEMPLATE, not live state. Use X-Amz-Target: AmazonSQS.DeleteQueue, X-Simulator-Service:sqs, selected region and JSON1.0. Create/Get actual QueueUrl first; Receive supplies current MessageId/ReceiptHandle. Replace all __...__ placeholders with actual responses. Never use MessageId as a receipt or send real AWS credentials.",
+                  "value": {
+                    "QueueUrl": "__QUEUE_URL__"
+                  },
+                  "x-simulator-operation": "DeleteQueue",
+                  "x-simulator-static-template": true
+                }
+              }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Native JSON 1.1 SSM or XML Query response"
+            "description": "Native JSON1.0 SQS, JSON1.1 SSM or XML Query response. Static schema/example is not current saved state.",
+            "content": {
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/SQSQueueURLResult"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SQSQueueListResult"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SQSSendResult"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SQSReceiveResult"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SQSAttributesResult"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SQSEmptyResult"
+                    }
+                  ]
+                }
+              }
+            }
           },
           "400": {
-            "description": "Validation/unsupported field/state conflict IAM ValidationError/MalformedPolicyDocument reject unknown trust or permissions semantics."
+            "description": "Validation/unsupported field/state conflict IAM ValidationError/MalformedPolicyDocument reject unknown trust or permissions semantics. SQS uses native400 for invalid/missing/state/receipt/attribute/quota errors, including320KiB transport and aggregate10000physical rows/64MiB payload. Expired foreign rows count until scoped cleanup; rejected send is atomic. No SQS413 promise.",
+            "content": {
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/SQSAPIError"
+                }
+              }
+            }
           },
           "403": {
-            "description": "Exercise IAM denied"
+            "description": "Exercise IAM denied",
+            "content": {
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/SQSAPIError"
+                }
+              }
+            }
           },
           "501": {
-            "description": "Unsupported operation"
+            "description": "Unsupported operation",
+            "content": {
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/SQSAPIError"
+                }
+              }
+            }
           },
           "404": {
             "description": "IAM NoSuchEntity: role or inline policy does not exist."
@@ -341,6 +546,16 @@
           },
           "401": {
             "$ref": "#/components/responses/HostAccessRequired"
+          },
+          "500": {
+            "description": "SQS database/policy infrastructure failure: sanitized InternalError500, not IAM AccessDenied403. No success acknowledgment or partial write.",
+            "content": {
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/SQSAPIError"
+                }
+              }
+            }
           }
         }
       }
@@ -6905,6 +7120,411 @@
           }
         },
         "required": []
+      },
+      "SQSQueueConfiguration": {
+        "type": "object",
+        "properties": {
+          "VisibilityTimeout": {
+            "type": "string",
+            "description": "Integer string0–43200 seconds; default30."
+          },
+          "DelaySeconds": {
+            "type": "string",
+            "description": "Integer string0–900 seconds; default0."
+          },
+          "MessageRetentionPeriod": {
+            "type": "string",
+            "description": "Integer string60–1209600 seconds; default345600."
+          }
+        },
+        "additionalProperties": false,
+        "description": "Exactly these three optional attributes. No SetQueueAttributes, SSE/KMS, policy, redrive, maximum-size or tags. No encryption claim."
+      },
+      "SQSMessageAttribute": {
+        "type": "object",
+        "properties": {
+          "DataType": {
+            "type": "string",
+            "description": "String, Number or Binary, optionally followed by a custom .suffix. Local Number/name validation is not complete AWS semantics."
+          },
+          "StringValue": {
+            "type": "string",
+            "description": "Required for String/Number; cannot be combined with BinaryValue."
+          },
+          "BinaryValue": {
+            "type": "string",
+            "contentEncoding": "base64",
+            "description": "Required for Binary; cannot be combined with StringValue."
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "DataType"
+        ]
+      },
+      "SQSCreateQueueRequest": {
+        "type": "object",
+        "properties": {
+          "QueueName": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]{1,80}$",
+            "description": "Standard name only; FIFO suffix/dots unsupported."
+          },
+          "Attributes": {
+            "$ref": "#/components/schemas/SQSQueueConfiguration"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "QueueName"
+        ],
+        "description": "Native CreateQueue request subset. Choose header AmazonSQS.CreateQueue. Unknown fields, explicit top-level nulls, wrong types and unsupported options fail; do not infer full AWS compatibility."
+      },
+      "SQSListQueuesRequest": {
+        "type": "object",
+        "properties": {
+          "QueueNamePrefix": {
+            "type": "string"
+          },
+          "MaxResults": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000,
+            "default": 1000
+          },
+          "NextToken": {
+            "type": "string",
+            "description": "Use the actual previous page token for the same region/prefix; static templates contain no live continuation."
+          }
+        },
+        "additionalProperties": false,
+        "description": "Native ListQueues request subset. Choose header AmazonSQS.ListQueues. Unknown fields, explicit top-level nulls, wrong types and unsupported options fail; do not infer full AWS compatibility."
+      },
+      "SQSGetQueueUrlRequest": {
+        "type": "object",
+        "properties": {
+          "QueueName": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]{1,80}$",
+            "description": "Standard name only; FIFO suffix/dots unsupported."
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "QueueName"
+        ],
+        "description": "Native GetQueueUrl request subset. Choose header AmazonSQS.GetQueueUrl. Unknown fields, explicit top-level nulls, wrong types and unsupported options fail; do not infer full AWS compatibility."
+      },
+      "SQSGetQueueAttributesRequest": {
+        "type": "object",
+        "properties": {
+          "QueueUrl": {
+            "type": "string",
+            "description": "Actual QueueUrl returned by CreateQueue/GetQueueUrl. Replace __QUEUE_URL__; never fetch this URL as an external endpoint. The local API also accepts a bare name/final name segment, a documented deviation."
+          },
+          "AttributeNames": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "enum": [
+                "All",
+                "QueueArn",
+                "CreatedTimestamp",
+                "VisibilityTimeout",
+                "DelaySeconds",
+                "MessageRetentionPeriod",
+                "ApproximateNumberOfMessages",
+                "ApproximateNumberOfMessagesNotVisible"
+              ]
+            }
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "QueueUrl",
+          "AttributeNames"
+        ],
+        "description": "Native GetQueueAttributes request subset. Choose header AmazonSQS.GetQueueAttributes. Unknown fields, explicit top-level nulls, wrong types and unsupported options fail; do not infer full AWS compatibility."
+      },
+      "SQSSendMessageRequest": {
+        "type": "object",
+        "properties": {
+          "QueueUrl": {
+            "type": "string",
+            "description": "Actual QueueUrl returned by CreateQueue/GetQueueUrl. Replace __QUEUE_URL__; never fetch this URL as an external endpoint. The local API also accepts a bare name/final name segment, a documented deviation."
+          },
+          "MessageBody": {
+            "type": "string",
+            "description": "1–262144 UTF-8 bytes, a fixed local limit versus current AWS1MiB; SQS-compatible characters only. JSON request <=320KiB including encoding/attributes."
+          },
+          "DelaySeconds": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 900
+          },
+          "MessageAttributes": {
+            "type": "object",
+            "maxProperties": 10,
+            "additionalProperties": {
+              "$ref": "#/components/schemas/SQSMessageAttribute"
+            }
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "QueueUrl",
+          "MessageBody"
+        ],
+        "description": "Native SendMessage request subset. Choose header AmazonSQS.SendMessage. Unknown fields, explicit top-level nulls, wrong types and unsupported options fail; do not infer full AWS compatibility."
+      },
+      "SQSReceiveMessageRequest": {
+        "type": "object",
+        "properties": {
+          "QueueUrl": {
+            "type": "string",
+            "description": "Actual QueueUrl returned by CreateQueue/GetQueueUrl. Replace __QUEUE_URL__; never fetch this URL as an external endpoint. The local API also accepts a bare name/final name segment, a documented deviation."
+          },
+          "MaxNumberOfMessages": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10,
+            "default": 1
+          },
+          "VisibilityTimeout": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 43200
+          },
+          "WaitTimeSeconds": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 20,
+            "default": 0
+          },
+          "MessageAttributeNames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Exact names, All or .* only; no prefix wildcard semantics."
+          },
+          "MessageSystemAttributeNames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The local response always returns its fixed four system fields; complete AWS system selection is not implemented."
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "QueueUrl"
+        ],
+        "description": "Native ReceiveMessage request subset. Choose header AmazonSQS.ReceiveMessage. Unknown fields, explicit top-level nulls, wrong types and unsupported options fail; do not infer full AWS compatibility."
+      },
+      "SQSChangeMessageVisibilityRequest": {
+        "type": "object",
+        "properties": {
+          "QueueUrl": {
+            "type": "string",
+            "description": "Actual QueueUrl returned by CreateQueue/GetQueueUrl. Replace __QUEUE_URL__; never fetch this URL as an external endpoint. The local API also accepts a bare name/final name segment, a documented deviation."
+          },
+          "ReceiptHandle": {
+            "type": "string",
+            "description": "Replace __RECEIPT_HANDLE__ with the latest actual ReceiveMessage receipt. MessageId is not a receipt. Do not log or expose receipt values."
+          },
+          "VisibilityTimeout": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 43200
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "QueueUrl",
+          "ReceiptHandle",
+          "VisibilityTimeout"
+        ],
+        "description": "Native ChangeMessageVisibility request subset. Choose header AmazonSQS.ChangeMessageVisibility. Unknown fields, explicit top-level nulls, wrong types and unsupported options fail; do not infer full AWS compatibility."
+      },
+      "SQSDeleteMessageRequest": {
+        "type": "object",
+        "properties": {
+          "QueueUrl": {
+            "type": "string",
+            "description": "Actual QueueUrl returned by CreateQueue/GetQueueUrl. Replace __QUEUE_URL__; never fetch this URL as an external endpoint. The local API also accepts a bare name/final name segment, a documented deviation."
+          },
+          "ReceiptHandle": {
+            "type": "string",
+            "description": "Replace __RECEIPT_HANDLE__ with the latest actual ReceiveMessage receipt. MessageId is not a receipt. Do not log or expose receipt values."
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "QueueUrl",
+          "ReceiptHandle"
+        ],
+        "description": "Native DeleteMessage request subset. Choose header AmazonSQS.DeleteMessage. Unknown fields, explicit top-level nulls, wrong types and unsupported options fail; do not infer full AWS compatibility."
+      },
+      "SQSDeleteQueueRequest": {
+        "type": "object",
+        "properties": {
+          "QueueUrl": {
+            "type": "string",
+            "description": "Actual QueueUrl returned by CreateQueue/GetQueueUrl. Replace __QUEUE_URL__; never fetch this URL as an external endpoint. The local API also accepts a bare name/final name segment, a documented deviation."
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "QueueUrl"
+        ],
+        "description": "Native DeleteQueue request subset. Choose header AmazonSQS.DeleteQueue. Unknown fields, explicit top-level nulls, wrong types and unsupported options fail; do not infer full AWS compatibility."
+      },
+      "SQSQueueURLResult": {
+        "type": "object",
+        "properties": {
+          "QueueUrl": {
+            "type": "string",
+            "description": "Actual local queue identifier, not a remote endpoint."
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "QueueUrl"
+        ]
+      },
+      "SQSQueueListResult": {
+        "type": "object",
+        "properties": {
+          "QueueUrls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "NextToken": {
+            "type": "string",
+            "description": "Actual continuation, omitted at end."
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "QueueUrls"
+        ]
+      },
+      "SQSSendResult": {
+        "type": "object",
+        "properties": {
+          "MessageId": {
+            "type": "string",
+            "description": "Actual native ID, not a receipt."
+          },
+          "MD5OfMessageBody": {
+            "type": "string"
+          },
+          "MD5OfMessageAttributes": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "MessageId",
+          "MD5OfMessageBody"
+        ]
+      },
+      "SQSReceivedMessage": {
+        "type": "object",
+        "properties": {
+          "MessageId": {
+            "type": "string"
+          },
+          "ReceiptHandle": {
+            "type": "string",
+            "description": "Actual opaque authority from this ReceiveMessage delivery, not MessageId. A later delivery rotates it; keep transient and never log raw values. The native API response legitimately returns it to its authorized caller."
+          },
+          "MD5OfBody": {
+            "type": "string"
+          },
+          "Body": {
+            "type": "string"
+          },
+          "Attributes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Fixed local subset: SenderId,SentTimestamp,ApproximateReceiveCount,ApproximateFirstReceiveTimestamp. First receive currently uses stored send timestamp."
+          },
+          "MessageAttributes": {
+            "type": "object",
+            "maxProperties": 10,
+            "additionalProperties": {
+              "$ref": "#/components/schemas/SQSMessageAttribute"
+            }
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "MessageId",
+          "ReceiptHandle",
+          "MD5OfBody",
+          "Body",
+          "Attributes"
+        ]
+      },
+      "SQSReceiveResult": {
+        "type": "object",
+        "properties": {
+          "Messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SQSReceivedMessage"
+            }
+          }
+        },
+        "additionalProperties": false,
+        "description": "No Messages field when no eligible message is delivered; {} is a valid empty result. Receive changes visibility and receipt authority; not automatic deletion."
+      },
+      "SQSAttributesResult": {
+        "type": "object",
+        "properties": {
+          "Attributes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Only the seven supported queue attributes; local read-time counts, not eventual AWS approximations."
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "Attributes"
+        ]
+      },
+      "SQSEmptyResult": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false,
+        "description": "Actual successful DeleteQueue/DeleteMessage/ChangeMessageVisibility returns {}. It is an acknowledgment, not a manufactured message/value."
+      },
+      "SQSAPIError": {
+        "type": "object",
+        "properties": {
+          "__type": {
+            "type": "string",
+            "description": "Native code, e.g. InvalidParameterValue, InvalidMessageContents, InvalidAttributeName, QueueNameExists, AWS.SimpleQueueService.NonExistentQueue, ReceiptHandleIsInvalid, SimulatorQuotaExceeded, AccessDenied, InternalError, UnknownOperationException."
+          },
+          "Message": {
+            "type": "string",
+            "description": "Sanitized native message. Internal errors do not expose driver/payload/receipt data."
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "__type",
+          "Message"
+        ]
       }
     },
     "responses": {
