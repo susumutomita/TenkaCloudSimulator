@@ -108,8 +108,14 @@ func (s *SQSStore) CreateQueue(region string, q SQSQueue) (SQSQueue, error) {
 		return SQSQueue{}, sqsFailure{"QueueLimitExceeded", "Simulator queue limit reached."}
 	}
 	q.Region, q.Created = region, sqsNow()
-	if _, err = tx.Exec("INSERT INTO aws_sqs_queues VALUES(?,?,?,?,?,?)", q.Region, q.Name, q.Created, q.VisibilityTimeout, q.DelaySeconds, q.RetentionSeconds); err != nil {
+	written, err := tx.Exec("INSERT INTO aws_sqs_queues VALUES(?,?,?,?,?,?)", q.Region, q.Name, q.Created, q.VisibilityTimeout, q.DelaySeconds, q.RetentionSeconds)
+	if err != nil {
 		return SQSQueue{}, err
+	}
+	if affected, err := written.RowsAffected(); err != nil {
+		return SQSQueue{}, err
+	} else if affected != 1 {
+		return SQSQueue{}, errors.New("SQS creation did not persist exactly one queue")
 	}
 	return q, tx.Commit()
 }
@@ -157,8 +163,15 @@ func (s *SQSStore) DeleteQueue(region, name string) error {
 	if err != nil {
 		return err
 	}
-	if n, _ := r.RowsAffected(); n == 0 {
+	affected, err := r.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
 		return errQueueMissing
+	}
+	if affected != 1 {
+		return errors.New("SQS queue deletion did not affect exactly one queue")
 	}
 	if _, err = tx.Exec("DELETE FROM aws_sqs_messages WHERE region=? AND queue=?", region, name); err != nil {
 		return err
@@ -256,10 +269,15 @@ func (s *SQSStore) Send(region string, q SQSQueue, body string, attrs map[string
 	if delaySeconds >= 0 {
 		delay = delaySeconds
 	}
-	_, err = tx.Exec("INSERT INTO aws_sqs_messages VALUES(?,?,?,?,?,?,?,?,?)",
+	written, err := tx.Exec("INSERT INTO aws_sqs_messages VALUES(?,?,?,?,?,?,?,?,?)",
 		m.ID, region, q.Name, body, string(encoded), now, now+float64(delay), 0, "")
 	if err != nil {
 		return SQSMessage{}, err
+	}
+	if affected, err := written.RowsAffected(); err != nil {
+		return SQSMessage{}, err
+	} else if affected != 1 {
+		return SQSMessage{}, errors.New("SQS send did not persist exactly one message")
 	}
 	return m, tx.Commit()
 }
@@ -310,9 +328,15 @@ func (s *SQSStore) Receive(region string, q SQSQueue, maxN, visibilityTimeout in
 	result := []SQSMessage{}
 	for _, r := range picked {
 		receipt := newSQSID() + newSQSID()
-		if _, err = tx.Exec("UPDATE aws_sqs_messages SET visible=?, receive_count=receive_count+1, receipt=? WHERE region=? AND queue=? AND id=?",
-			now+float64(visibilityTimeout), receipt, region, q.Name, r.id); err != nil {
+		written, err := tx.Exec("UPDATE aws_sqs_messages SET visible=?, receive_count=receive_count+1, receipt=? WHERE region=? AND queue=? AND id=?",
+			now+float64(visibilityTimeout), receipt, region, q.Name, r.id)
+		if err != nil {
 			return nil, err
+		}
+		if affected, err := written.RowsAffected(); err != nil {
+			return nil, err
+		} else if affected != 1 {
+			return nil, errors.New("SQS receive did not persist exactly one message claim")
 		}
 		m := SQSMessage{ID: r.id, Body: r.body, Sent: r.sent, ReceiveCount: r.count + 1, ReceiptHandle: receipt}
 		if err = json.Unmarshal([]byte(r.attrs), &m.Attributes); err != nil {

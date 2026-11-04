@@ -11,7 +11,7 @@
     },
     {
       "path": "docs/sqs.md",
-      "sha256": "9bf3856604b6697683a117cbe9ac9afbf349e3d795035e1f99e6b1252debe50b",
+      "sha256": "617b3b10f92ce4412be59bf7e0e2bfe872145cc1870148adef8c5156974548af",
       "disposition": "documentation",
       "reason": "Document the bounded native SQS subset, local 256 KiB versus current operation-reference 1 MiB, repair provenance, actual focused tests and explicit compatibility/model/coverage limits. No service or formal-proof completion is asserted by prose.",
       "models": []
@@ -186,7 +186,7 @@
     },
     {
       "path": "internal/aws/sqs_store.go",
-      "sha256": "c44fcf3178ae260d7977d05c0fb936a189b1683e0ae602fb19005e59fe0a1900",
+      "sha256": "233f679648ae6f7c2728541494af87f8a758de4914c0502b0725e721d357095e",
       "disposition": "modeled",
       "reason": "Actual queue-parent admission, expiry and message/receipt mutation now share native SQLite transactions; failed cleanup or multi-row writes roll back. Native trigger/reopen/redelivery/orphan-preservation tests passed at 0a28266 before this binding. Delivered/in-flight counts now exclude initial-delay rows that have never been received; this metric requires native and wire tests and is outside the finite lifecycle model counter abstraction. Enforce local global physical10000-row/64MiB stored body+attributeJSON budget inside the Send transaction after own scoped expiry cleanup; native concurrent/fault/legacy tests required. Byte/count arithmetic and SQLite isolation are not proved by abstract weights.",
       "models": [
@@ -227,6 +227,13 @@
       "disposition": "test-support",
       "reason": "Verify native SQS positive/negative lifecycle, expiry/receipt scope, reopen and real SQLite rollback/storage failures without real AWS or a guest VM. Tests do not exempt implementation from finite applicability or the unchanged full source/statement coverage floors.",
       "models": []
+    },
+    {
+      "path": "internal/aws/sqs_write_ack_test.go",
+      "disposition": "test-support",
+      "reason": "Real nonstandard/corrupt SQLite IGNORE-trigger fixtures verify expected-single-row create/send/receive/delete acknowledgements and rollback; not an ordinary API exploit or arbitrary host-writer guarantee. No fake SQL result/driver mocks.",
+      "models": [],
+      "sha256": "c759118d52c4fb2f35ff33e7570e0093e5b248c609de40f67d18ada98fe6fe05"
     },
     {
       "path": "internal/aws/ssm.go",
