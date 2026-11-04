@@ -92,3 +92,16 @@ Native IAM reference examples execute all nine Query operations. Native/legacy s
 The local SDK bridge tests exercise actual CPython, native SSM/S3 shared state, execution-role rather than caller authority, private-resource denial, two authenticated team processes, explicitDeny, frame/message/aggregate limits, unconsumed replies, canceled stdin/callback and four independent concurrent capability channels.
 
 A required pinned-catalog subset rehearsal runs the unchanged original wp2shell handler (SHA2568d559b2b8ad72f7a281d3ef5cd3ba804d76cb01d6f2d45049baf56ee4c8a4f03) through real Python/SQLite and native role-bound SSM. The test-only projection excludes unsupported resources and supplies a dummy unavailable HTTP URL. It observes the original SQL/routing defects, then native SSM configuration changes produce400/401. This is explicitly not a full-template deployment, seven-check grading or permission to select the problem.
+
+## Formal validation merge check
+
+The standalone `Formal validation` job is proposed as a stable required check;
+its inventory/applicability contract is documented in
+[formal-validation.md](formal-validation.md). The checker always runs all five
+registered models and requires the intended invariant counterexamples. Exact
+base/blob-bound dispositions prevent absent/stale applicability metadata from
+silently passing; unknown implementation paths fail. This validates declared
+bounded correspondence, not Go refinement or authenticated human review.
+Repository protection/ruleset inspection returned403 through the available
+integration, so actual merge enforcement remains unverified and must be configured
+separately by an authorized maintainer. No repository settings were changed.

@@ -1,0 +1,163 @@
+{
+  "version": 1,
+  "tool": {
+    "version": "1.7.4",
+    "checksum_file": "formal/tla2tools.sha256",
+    "release_url": "https://github.com/tlaplus/tlaplus/releases/download/v1.7.4/tla2tools.jar"
+  },
+  "models": [
+    {
+      "id": "ObjectStore",
+      "model": "formal/ObjectStore.tla",
+      "config": "formal/ObjectStore.cfg",
+      "bounds": "Two bucket names, two keys, Boolean allow and deny.",
+      "properties": [
+        "TypeOK",
+        "NoOrphans",
+        "NoUnauthorizedMutation",
+        "DenyWins"
+      ],
+      "limits": "Abstract authorization and atomic transitions only; not IAM parsing/ARN matching, SQL, HTTP, quotas, crashes or a Go refinement proof.",
+      "source_scope": [
+        "internal/core/store.go",
+        "internal/core/policy.go",
+        "internal/aws/s3.go"
+      ],
+      "mutants": [
+        {
+          "id": "MissingDeletionGuard",
+          "edits": [
+            {
+              "old": "ObjectsFor(b) = {}",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoOrphans"
+        }
+      ]
+    },
+    {
+      "id": "StackOwnership",
+      "model": "formal/StackOwnership.tla",
+      "config": "formal/StackOwnership.cfg",
+      "bounds": "Two owners and two physical names with retained drift claims.",
+      "properties": [
+        "TypeOK",
+        "OwnershipExclusive"
+      ],
+      "limits": "Exclusive reservation and cleanup abstraction only; not authentication, SQL crash recovery, custom callbacks or full CFN behavior.",
+      "source_scope": [
+        "internal/aws/cloudformation.go",
+        "internal/aws/s3_cloudformation.go",
+        "internal/aws/apigateway_cloudformation.go"
+      ],
+      "mutants": [
+        {
+          "id": "ReclaimDriftedResource",
+          "edits": [
+            {
+              "old": "/\\ Unclaimed(p)",
+              "new": "/\\ p \\notin present",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OwnershipExclusive"
+        }
+      ]
+    },
+    {
+      "id": "S3Versions",
+      "model": "formal/S3Versions.tla",
+      "config": "formal/S3Versions.cfg",
+      "bounds": "One bucket, two keys, bounded enabled history and delete markers.",
+      "properties": [
+        "TypeOK",
+        "NoHistoryOrphans",
+        "CurrentMatchesLatest"
+      ],
+      "limits": "Enabled version history only; suspension, byte/version IDs, quotas, SQL and HTTP are independently tested.",
+      "source_scope": [
+        "internal/aws/s3_versions.go",
+        "internal/aws/s3_list_versions.go",
+        "internal/aws/s3_configuration.go",
+        "internal/aws/s3_cloudformation.go"
+      ],
+      "mutants": [
+        {
+          "id": "CurrentOnlyDeletion",
+          "edits": [
+            {
+              "old": "bucket /\\ EmptyHistory",
+              "new": "bucket /\\ current = {}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoHistoryOrphans"
+        }
+      ]
+    },
+    {
+      "id": "NativeIAMOwnership",
+      "model": "formal/NativeIAMOwnership.tla",
+      "config": "formal/NativeIAMOwnership.cfg",
+      "bounds": "Two case-folded names; native active/retired claims and legacy identities.",
+      "properties": [
+        "TypeOK",
+        "OwnershipExclusive"
+      ],
+      "limits": "Atomic name ownership abstraction only; not service trust parsing, complete IAM semantics, SQL isolation or HTTP authorization.",
+      "source_scope": [
+        "internal/aws/iam_roles.go",
+        "internal/aws/iam_legacy.go",
+        "internal/aws/iam_query.go",
+        "internal/core/policy.go",
+        "internal/server/identity.go"
+      ],
+      "mutants": [
+        {
+          "id": "LegacyAdoptsNativeRole",
+          "edits": [
+            {
+              "old": "LegacyPut(n) == /\\ n \\notin claimed",
+              "new": "LegacyPut(n) == /\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OwnershipExclusive"
+        }
+      ]
+    },
+    {
+      "id": "RESTDeploymentSnapshot",
+      "model": "formal/RESTDeploymentSnapshot.tla",
+      "config": "formal/RESTDeploymentSnapshot.cfg",
+      "bounds": "One API, two deployment IDs, two handler configurations and one stage.",
+      "properties": [
+        "TypeOK",
+        "SnapshotsFrozen",
+        "NoStageOrphans"
+      ],
+      "limits": "Frozen deployment references only; not path matcher correctness, Lambda permissions, HTTP execution, WASI, SQL recovery or WAF.",
+      "source_scope": [
+        "internal/aws/apigateway_store.go",
+        "internal/aws/apigateway_resources.go",
+        "internal/aws/apigateway_deployments.go",
+        "internal/aws/apigateway_routing.go"
+      ],
+      "mutants": [
+        {
+          "id": "MutableSnapshot",
+          "edits": [
+            {
+              "old": "/\\ UNCHANGED <<exists, snapshots, baseline, stage>>",
+              "new": "/\\ snapshots' = [d \\in Deployments |-> IF snapshots[d] = None THEN None ELSE v] /\\ UNCHANGED <<exists, baseline, stage>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SnapshotsFrozen"
+        }
+      ]
+    }
+  ]
+}
