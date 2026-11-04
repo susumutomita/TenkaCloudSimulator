@@ -9,14 +9,16 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-BASE_MODELS = {'DynamoDBAdmission', 'DynamoDBLifecycle', 'AzureBlobState', 'BlobRange', 'BrowserSessions', 'GCPStorageState', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'StackOwnership', 'StartupTokenVisibility'}
+BASE_MODELS = {'DynamoDBAdmission', 'DynamoDBLifecycle', 'AzureBlobState', 'BlobRange', 'BrowserSessions', 'GCPStorageState', 'KMSKeyState', 'KMSProtocolAdmission', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'StackOwnership', 'StartupTokenVisibility'}
 BASE_INVARIANTS = {
-    'DynamoDBAdmission': {'AcknowledgedRemoval', 'ActiveTableRequired', 'AdmissionExact', 'CanonicalKeys', 'CommittedBytes', 'CreateCommitted', 'DeniedFrame', 'InitializedBeforeMutation', 'ItemBudget', 'ItemCountBudget', 'NoOrphans', 'PeerFrame', 'RefusalFrame', 'RemovalAdmissionExact', 'SemanticBytes', 'StartupAdmission', 'StartupRefusedFrame', 'StatisticsExact', 'TableAdmissionExact', 'TableBudget', 'TypeOK', 'ValidKeysOnly'},
     'DynamoDBLifecycle': {'ConditionalAtomicity', 'FailedUnchanged', 'GenerationChecked', 'NoForeignMutation', 'NoOrphans', 'NoStaleItems', 'NoUnauthorizedMutation', 'TypeOK'},
+    'DynamoDBAdmission': {'AcknowledgedRemoval', 'ActiveTableRequired', 'AdmissionExact', 'CanonicalKeys', 'CommittedBytes', 'CreateCommitted', 'DeniedFrame', 'InitializedBeforeMutation', 'ItemBudget', 'ItemCountBudget', 'NoOrphans', 'PeerFrame', 'RefusalFrame', 'RemovalAdmissionExact', 'SemanticBytes', 'StartupAdmission', 'StartupRefusedFrame', 'StatisticsExact', 'TableAdmissionExact', 'TableBudget', 'TypeOK', 'ValidKeysOnly'},
     'AzureBlobState': {'BudgetBounded', 'ConditionEnforced', 'FailureAtomic', 'FreshWriteIdentity', 'NoDeniedRead', 'NoOrphans', 'NoUnauthorizedMutation', 'PeerStatePreserved', 'ReadExact', 'TypeOK'},
     'BlobRange': {'ChecksumBound', 'ConditionBeforeRange', 'DeniedNoDisclosure', 'ExactNormalRead', 'ExactSelectedBytes', 'Frame', 'InvalidRefused', 'MissingRangeChecksumRefused', 'NoFullMD5OnPartial', 'OutOfBoundsRefused', 'TypeOK'},
     'BrowserSessions': {'AcceptedOnlyLiveParent', 'NoBrowserSDKAuthority', 'NoRawSDKCookie', 'ParentLifetimeBound', 'RevokedCookiesDenied', 'SDKAuthorityPreserved', 'TypeOK', 'UnrelatedSessionsPreserved'},
     'GCPStorageState': {'Budget', 'DeniedFrame', 'GenerationFreshness', 'GenerationRefusal', 'NoOrphans', 'NonemptyDeleteRefused', 'OtherEnvironmentUnchanged', 'OtherProjectUnchanged', 'ReadIsolation', 'TypeOK'},
+    'KMSKeyState': {'AuthorizedEvents', 'BoundContextAndKey', 'EnabledCrypto', 'TypeOK'},
+    'KMSProtocolAdmission': {'InfraNotDeny', 'MissingIdentityDenied', 'NoAuthorityFromWireMetadata', 'NoCrossServiceFallback', 'NoSuccessWithoutKMSTarget', 'TypeOK'},
     'NativeIAMOwnership': {'OwnershipExclusive', 'TypeOK'},
     'ObjectStore': {'DenyWins', 'NoOrphans', 'NoUnauthorizedMutation', 'TypeOK'},
     'ProjectAuthority': {'ActorUsesPersistedProject', 'ConstructorRefusalFrame', 'DeniedFrame', 'FinitePermissions', 'FixedHostConfiguration', 'InitializationBindsConfigured', 'NoUnboundAdoption', 'OnlyActualOwnerAuthorized', 'OwnerBindingFrozen', 'TypeOK'},
@@ -32,12 +34,14 @@ BASE_INVARIANTS = {
 }
 # Established controls require an explicit gate-policy change before retirement.
 REQUIRED_MUTANTS = {
-    'DynamoDBAdmission': {'AcknowledgeIgnoredChildDelete', 'AcknowledgeIgnoredCreate', 'AcknowledgeIgnoredItemDelete', 'AcknowledgeIgnoredTableDelete', 'AcknowledgeIgnoredWrite', 'AdmitInvalidKey', 'BypassStartupValidation', 'ChargeWireEncoding', 'DirtyOversizeRefusal', 'EraseKeyType', 'IgnoreAllow', 'IgnoreDeny', 'IgnoreItemByteCap', 'IgnoreItemCountCap', 'IgnoreTableCountCap', 'OmitNestedOverhead', 'RestartLosesStatistics', 'SplitNumericAlias', 'WriteBeforeInitialization', 'WritePeerScope', 'WriteWithoutTable', 'WrongTableStatistics'},
     'DynamoDBLifecycle': {'AcceptRecreatedGeneration', 'CachedCondition', 'DirtyRollback', 'ForeignPut', 'IgnoreAllow', 'IgnoreDeny', 'MissingDropChildCleanup', 'MissingPutGenerationGuard'},
+    'DynamoDBAdmission': {'AcknowledgeIgnoredChildDelete', 'AcknowledgeIgnoredCreate', 'AcknowledgeIgnoredItemDelete', 'AcknowledgeIgnoredTableDelete', 'AcknowledgeIgnoredWrite', 'AdmitInvalidKey', 'BypassStartupValidation', 'ChargeWireEncoding', 'DirtyOversizeRefusal', 'EraseKeyType', 'IgnoreAllow', 'IgnoreDeny', 'IgnoreItemByteCap', 'IgnoreItemCountCap', 'IgnoreTableCountCap', 'OmitNestedOverhead', 'RestartLosesStatistics', 'SplitNumericAlias', 'WriteBeforeInitialization', 'WritePeerScope', 'WriteWithoutTable', 'WrongTableStatistics'},
     'AzureBlobState': {'ContainerDeleteErasesPeer', 'ContainerDeleteLeavesBlobs', 'FailedPutCommits', 'IgnoreAccountOwner', 'IgnoreCreateOnly', 'IgnoreStaleETag', 'MissingTrustedActor', 'OmitByteBudget', 'OmitRowBudget', 'ReadNeighbor', 'ReuseETag'},
     'BlobRange': {'BypassAuthorization', 'DiscloseFullMD5OnPartial', 'IgnoreConditionDecision', 'IgnoreEndClamp', 'PermitExcessChecksum', 'ReadMutatesStoredBody', 'UncheckedBounds', 'WrongSliceStart'},
     'BrowserSessions': {'IgnoreParentValidity', 'LogoutClearsOthers', 'LogoutKeepsSession', 'LogoutRevokesSDK', 'RawOperatorCookie'},
     'GCPStorageState': {'DeleteNonemptyBucket', 'DeniedBucketCreate', 'IgnoreActualOwner', 'IgnoreGenerationMatch', 'IgnoreStateBudget', 'ReadWrongEnvironment', 'ResetSequenceAfterDelete', 'ReuseGeneration'},
+    'KMSKeyState': {'MissingContextGuard', 'MissingEnabledDecryptGuard', 'MissingEnabledEncryptGuard', 'MissingEncryptionCeiling', 'MissingKeyBinding', 'MissingPermissionGuard', 'MissingRegionGuard', 'MissingTeamGuard'},
+    'KMSProtocolAdmission': {'DropSigningIntent', 'IgnoreRequiredTarget', 'MaskIdentityOutage', 'ReadLivePolicyInsteadOfSnapshot'},
     'NativeIAMOwnership': {'LegacyAdoptsNativeRole'},
     'ObjectStore': {'MissingDeletionGuard'},
     'ProjectAuthority': {'AdoptUnboundResource', 'AllowOwnerRebinding', 'DefaultAllowUnknownPermission', 'PartialCommitOnRefusal', 'TrustClaimedProject', 'WriteDespiteDenial'},
