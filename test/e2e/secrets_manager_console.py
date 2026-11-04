@@ -12,7 +12,7 @@ import time
 from pathlib import Path
 
 from check import REPORTS, assert_reflow, expect, running, sync_playwright
-from secrets_manager import client
+from secrets_manager import client, control
 
 
 def run():
@@ -49,6 +49,7 @@ def run():
                 result = page.evaluate("async()=>await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}})")
                 audits.append({"screen": name, "violations": result["violations"],
                                "passes": len(result["passes"])})
+                (REPORTS/"secrets-a11y.json").write_text(json.dumps({"tool": provenance, "screens": audits}, indent=2)+"\n")
                 assert result["violations"] == [], [(v["id"], len(v["nodes"])) for v in result["violations"]]
 
             page.route("**/*", local_only)
@@ -57,7 +58,7 @@ def run():
             page.get_by_role("button", name="Open sandbox", exact=True).click()
             page.get_by_role("button", name="Services", exact=True).click()
             page.get_by_role("menuitem", name="Secrets Manager", exact=True).click()
-            expect(page.get_by_role("heading", name=re.compile(r"^Secrets"))).to_be_visible()
+            expect(page.get_by_role("heading", name=re.compile(r"^Secrets"), level=1)).to_be_visible()
             audit("secrets-list")
             page.get_by_role("button", name="Store a new secret", exact=True).click()
             page.get_by_role("tab", name="Plaintext", exact=True).click()
@@ -98,11 +99,30 @@ def run():
             page.get_by_role("button", name="Hide secret value", exact=True).click()
             with page.expect_response(lambda response: response.request.headers.get("x-amz-target") == "secretsmanager.GetSecretValue") as stale_response:
                 held[0].continue_()
-            stale_response.value.finished()
+            stale_response.value.body()
             page.evaluate("async()=>await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))")
             page.unroute(endpoint+"/", hold_read)
             expect(page.get_by_label("Retrieved secret value", exact=True)).to_have_count(0)
             expect(page.get_by_role("button", name="Retrieve secret value", exact=True)).to_be_enabled()
+
+            held.clear()
+            page.route(endpoint+"/", hold_read)
+            page.get_by_role("button", name="Retrieve secret value", exact=True).click()
+            deadline = time.monotonic()+5
+            while not held:
+                assert time.monotonic() < deadline, "Navigation Get was not dispatched"
+                page.wait_for_timeout(10)
+            page.get_by_role("button", name="Secrets", exact=True).click()
+            expect(page.get_by_role("heading", name=re.compile(r"^Secrets"), level=1)).to_be_visible()
+            with page.expect_response(lambda response: response.request.headers.get("x-amz-target") == "secretsmanager.GetSecretValue") as stale_navigation:
+                held[0].continue_()
+            stale_navigation.value.body()
+            page.evaluate("async()=>await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))")
+            page.unroute(endpoint+"/", hold_read)
+            expect(page.get_by_label("Retrieved secret value", exact=True)).to_have_count(0)
+            expect(page.get_by_role("heading", name=re.compile(r"^Secrets"), level=1)).to_be_visible()
+            page.get_by_role("link", name="training/console-example", exact=True).click()
+            expect(page.get_by_role("heading", name="Secret details", exact=True)).to_be_visible()
 
             page.get_by_role("button", name="Retrieve secret value", exact=True).click()
             expect(page.get_by_label("Retrieved secret value", exact=True)).to_have_value("DUMMY-secret-console-A")
@@ -128,12 +148,48 @@ def run():
             assert_reflow(page)
             audit("metadata-mobile")
             page.screenshot(path=str(REPORTS/"secrets-metadata-mobile.png"), full_page=True)
+            page.get_by_role("button", name="Secrets", exact=True).click()
+            page.get_by_role("button", name="Store a new secret", exact=True).click()
+            expect(page.get_by_label("Key 1", exact=True)).to_be_visible()
+            assert_reflow(page)
+            audit("create-pairs-mobile")
+            page.get_by_role("button", name="Cancel", exact=True).click()
+            page.get_by_role("link", name="training/console-example", exact=True).click()
             page.set_viewport_size({"width": 1440, "height": 1000})
+
+            # A separately authenticated participant can list/describe metadata
+            # but cannot reveal a value. UI selection is not authorization.
+            control(endpoint, token, "/_simulator/v1/iam/principals/secret-console-reader/policy", {
+                "Version": "2012-10-17", "Statement": [
+                    {"Effect": "Allow", "Action": "secretsmanager:ListSecrets", "Resource": "*"},
+                    {"Effect": "Allow", "Action": "secretsmanager:DescribeSecret", "Resource": arn}]})
+            participant = control(endpoint, token, "/_simulator/v1/access", {"Principal": "secret-console-reader"})["AccessToken"]
+            limited_context = browser.new_context(viewport={"width": 1440, "height": 1000})
+            try:
+                limited = limited_context.new_page()
+                limited.route("**/*", local_only)
+                limited.on("pageerror", lambda error: errors.append(str(error)))
+                limited.goto(endpoint+"/_simulator/console/#/secretsmanager")
+                limited.get_by_label("Access token", exact=True).fill(participant)
+                limited.get_by_role("button", name="Open sandbox", exact=True).click()
+                # Login returns to the default service; choose the actual menu.
+                limited.get_by_role("button", name="Services", exact=True).click()
+                limited.get_by_role("menuitem", name="Secrets Manager", exact=True).click()
+                limited.get_by_role("link", name="training/console-example", exact=True).click()
+                with limited.expect_response(lambda response: response.request.headers.get("x-amz-target") == "secretsmanager.GetSecretValue") as denied:
+                    limited.get_by_role("button", name="Retrieve secret value", exact=True).click()
+                assert denied.value.status == 403, "Participant reveal bypassed native IAM"
+                expect(limited.get_by_text(re.compile(r"^403: IAM evaluation:"))).to_be_visible()
+                expect(limited.get_by_label("Retrieved secret value", exact=True)).to_have_count(0)
+                assert "DUMMY-secret-" not in limited.locator("body").inner_text()
+            finally:
+                limited_context.close()
+
             page.get_by_role("button", name="Delete secret", exact=True).click()
             page.get_by_role("checkbox", name="Force delete without recovery", exact=True).check()
             page.get_by_label("Enter secret name to confirm", exact=True).fill("training/console-example")
             page.get_by_label("Enter secret name to confirm", exact=True).press("Enter")
-            expect(page.get_by_role("heading", name=re.compile(r"^Secrets"))).to_be_visible()
+            expect(page.get_by_role("heading", name=re.compile(r"^Secrets"), level=1)).to_be_visible()
             assert sdk.list_secrets()["SecretList"] == [], "Enter did not perform native deletion"
             assert errors == [], "Browser raised a page error"
             assert outside == [], "Browser attempted an external request"

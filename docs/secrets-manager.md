@@ -1,24 +1,23 @@
 # Secrets Manager: P0 contract and bounded increment
 
-Status: local native increment under validation. Issue [266](https://github.com/susumutomita/TenkaCloudSimulator/issues/266)
-is owned by `cfn_callback`, branch `feat/secrets-manager-native-20261104`, worktree
-`/workspace/secrets-manager-native`, public base `6ffbd1881dad3589469fdf1809654b7483bd6ac4`.
-Root checked the open Issue and absence of an existing service PR before assigning
-this increment. Root owns the shared roster, Gateway, server, navigation,
-OpenAPI, generated assets and public actions. After P0, root approved the minimal
-CLI composition in this branch. Public main55a was normally merged without
-rewriting the original source checkpoints. This increment is not published or
-merged; capabilities, Scalar navigation and service console are not advertised.
+Status: local candidate for Issue [266](https://github.com/susumutomita/TenkaCloudSimulator/issues/266),
+not a published release or complete AWS Secrets Manager implementation. The
+native endpoint and embedded Cloudscape console share the same SQLite state.
+Capabilities advertise exactly the seven documented operations, SecretString
+only, plaintext dummy storage, the two supported labels and force-delete-only
+cleanup. KMS, rotation, binary values, replication, recovery windows and
+CloudFormation are explicitly unavailable. Scalar operation registration remains
+an integration task; the API reference must not advertise an unverified action.
 
-Source checkpoint: private redacted material, value-free metadata DTOs, immutable
+Private redacted material, value-free metadata DTOs, immutable
 SQL schema, seven bounded store operations and a private JSON protocol adapter
 are implemented locally. Selected material/store/private-HTTP tests pass (14
 tests, latest1.294 seconds), including immutable values, unique labels, physical
 ARN protection, late-failure rollback and pure-policy handling. The real embedded
 CLI and boto3 exercise all seven operations, two authenticated persistent team
 databases, cross-team endpoint401, participant IAM, restart and physical cleanup.
-UI, model execution, applicability registration and complete quality gates remain
-unfinished. These checks are not a completed AWS service or Challenge claim.
+The actual embedded console/browser checks pass as described below; model
+execution, applicability registration and complete quality gates remain unfinished. These checks are not a completed AWS service or Challenge claim.
 
 ## Scope and explicit storage boundary
 
@@ -201,7 +200,8 @@ navigation. These are finite abstractions, not encryption/SQL/React refinement
 proofs. Root must register applicable models under307 and run both global90%
 floors, full required CI/E2E/security/license gates before merge. gofmt,
 compilation, selected native tests and the real local SDK increment have run;
-full Go/coverage, TLC, browser, AWS, publish, release and deployment have not run.
+the embedded console/browser increment has also run. Full Go/coverage, TLC,
+AWS, publish, release and deployment have not run.
 
 Public console reference: the official flow is Store a new secret → Other type
 of secret → key/value or Plaintext → name/description → rotation off → review →
@@ -209,8 +209,9 @@ Store. Use official Cloudscape components and these labels where implemented;
 disable unsupported database/rotation/KMS choices honestly. Authenticated AWS
 screens have not been observed, so no visual identity claim is justified.
 
-The isolated console component is source-only until navigation composition,
-canonical bundle/embed and real browser validation run. It never retrieves a
+The console is composed through the normal service menu and region/principal/
+navigation lifetime key, with a canonical pinned Cloudscape bundle in the Go
+binary. The actual browser test has run against this binary. It never retrieves a
 value while listing or describing metadata. Explicit Retrieve secret value
 requests AWSCURRENT; Hide, navigation, opening a form and unmount invalidate
 pending results and clear the displayed value. An accepted reply must carry the
@@ -227,11 +228,15 @@ unmount, response ARN binding and historical acceptance context with two
 resources and two request/navigation epochs. `SecretsVersionLifecycle` also
 checks that every active resource has exactly one current label. The source
 and nine intended mutant definitions are prepared, but TLC and applicability
-registration have not run. `test/e2e/secrets_manager_console.py` is a prepared
-actual browser/SDK test for the wizard, metadata-only reads, delayed genuine
-Get after Hide, explicit reveal/edit, version rollback, keyboard deletion,
-desktop/mobile reflow, canonical axe and local-only requests. It has not run;
-its presence is not browser evidence. Screenshots are captured only after values
+registration have not run. `test/e2e/secrets_manager_console.py` passed the actual
+browser/SDK wizard, metadata-only reads, genuine delayed Get rejection after
+Hide and list navigation, explicit reveal/edit, version rollback and keyboard
+deletion with native SDK state assertions. A separately authenticated participant
+can list/describe metadata but receives a native403 on Retrieve and never sees
+the value. PC1440 and mobile390 reflow pass, including the mobile pair-entry
+form; all five canonical axe screens have zero violations, with zero page
+errors/external requests. The checker initially found unnamed notification
+dismiss buttons; explicit accessible names fixed the product issue. Screenshots are captured only after values
 are hidden, and no browser trace/HAR with dummy or user values is produced.
 
 Sources: [CreateSecret](https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_CreateSecret.html),
