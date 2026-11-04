@@ -144,6 +144,26 @@ func stackResourcePermissions(record StackRecord, deleting bool, authorize func(
 		actions := []string{}
 		resource := ""
 		switch r.Type {
+		case "AWS::ApiGateway::RestApi", "AWS::ApiGateway::Resource", "AWS::ApiGateway::Method", "AWS::ApiGateway::Deployment", "AWS::ApiGateway::Stage":
+			resource = stackAPIPermissionARN(record.Region, r, deleting)
+			if deleting {
+				actions = []string{"apigateway:DELETE"}
+			} else {
+				actions = []string{"apigateway:POST"}
+				if r.Type == "AWS::ApiGateway::Method" {
+					actions = []string{"apigateway:PUT"}
+					if err := authorize("apigateway:PUT", resource+"/integration"); err != nil {
+						return err
+					}
+				}
+			}
+		case "AWS::Lambda::Permission":
+			resource = lambdaARN(record.Region, stackPermissionFunction(record.Region, stringValue(r.Properties["FunctionName"])))
+			if deleting {
+				actions = []string{"lambda:RemovePermission"}
+			} else {
+				actions = []string{"lambda:AddPermission"}
+			}
 		case "AWS::SSM::Parameter":
 			resource = "arn:aws:ssm:" + record.Region + ":000000000000:parameter/" + trimParameterSlash(r.PhysicalID)
 			if deleting {

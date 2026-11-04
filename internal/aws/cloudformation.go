@@ -2,6 +2,7 @@ package aws
 
 import (
 	"bytes"
+	"context"
 	"crypto/rand"
 	"crypto/sha256"
 	"database/sql"
@@ -27,6 +28,8 @@ type StackStore struct{ db *sql.DB }
 type StackResource struct {
 	LogicalID, Type, PhysicalID string
 	Properties                  map[string]any
+	StateHash                   string            `json:",omitempty"`
+	StateParts                  map[string]string `json:",omitempty"`
 }
 type StackRecord struct {
 	ClientToken               string
@@ -39,6 +42,12 @@ type StackRecord struct {
 }
 
 func NewStackStore(db *sql.DB) (*StackStore, error) {
+	if _, err := NewAPIGatewayStore(db); err != nil {
+		return nil, err
+	}
+	if _, err := NewLambdaPermissionStore(db); err != nil {
+		return nil, err
+	}
 	if _, err := NewIAMRoleStore(db); err != nil {
 		return nil, err
 	}
@@ -310,7 +319,7 @@ func compileStack(region, name, body string, parameters map[string]string, capab
 	for _, value := range resources {
 		r := object(value)
 		kind := stringValue(r["Type"])
-		if kind != "AWS::SSM::Parameter" && kind != "AWS::IAM::Role" && kind != "AWS::S3::Bucket" && kind != "AWS::Lambda::Function" {
+		if kind != "AWS::SSM::Parameter" && kind != "AWS::IAM::Role" && kind != "AWS::S3::Bucket" && kind != "AWS::Lambda::Function" && !stackAPIKind(kind) {
 			return fail("Unsupported resource type: " + kind)
 		}
 		for k := range r {
@@ -386,7 +395,12 @@ func compileStack(region, name, body string, parameters map[string]string, capab
 			return fail("Resource Properties must be an object.")
 		}
 		physical := ""
-		if kind == "AWS::SSM::Parameter" {
+		if stackAPIKind(kind) {
+			physical, e = compileStackAPI(region, id, key, kind, properties, attrs)
+			if e != nil {
+				return fail(e.Error())
+			}
+		} else if kind == "AWS::SSM::Parameter" {
 			for k := range properties {
 				switch k {
 				case "Name", "Value", "Type", "Description", "Tier":
@@ -481,7 +495,10 @@ func compileStack(region, name, body string, parameters map[string]string, capab
 			attrs[key+".Arn"] = "arn:aws:iam::000000000000:role/" + physical
 		}
 		refs[key] = physical
-		record.Resources = append(record.Resources, StackResource{key, kind, physical, properties})
+		if kind == "AWS::ApiGateway::Stage" {
+			refs[key] = stringValue(properties["StageName"])
+		}
+		record.Resources = append(record.Resources, StackResource{LogicalID: key, Type: kind, PhysicalID: physical, Properties: properties})
 	}
 	for key, raw := range object(template["Outputs"]) {
 		for field := range object(raw) {
@@ -522,6 +539,15 @@ func (s *StackStore) Create(record StackRecord) error {
 		return ssmFailure{"AlreadyExistsException", "Stack already exists."}
 	}
 	for _, r := range record.Resources {
+		if stackAPIKind(r.Type) {
+			if err = claimStackAPI(tx, record, r); err != nil {
+				return err
+			}
+			if err = createStackAPI(context.Background(), tx, record, r); err != nil {
+				return err
+			}
+			continue
+		}
 		table, limit := "aws_ssm_parameters", 1000
 		if r.Type == "AWS::S3::Bucket" {
 			table, limit = "buckets", core.MaxBuckets
@@ -569,6 +595,9 @@ func (s *StackStore) Create(record StackRecord) error {
 		if err != nil {
 			return ssmFailure{"AlreadyExistsException", "A resource already exists or its creation was rejected."}
 		}
+	}
+	if err = saveStackAPIFingerprints(tx, &record); err != nil {
+		return err
 	}
 	return tx.Commit()
 }
@@ -632,6 +661,9 @@ func (s *StackStore) deleteChecked(region, name string, authorize func(StackReco
 			return err
 		}
 	}
+	if err = checkStackAPIFingerprints(tx, records[0]); err != nil {
+		return err
+	}
 	for i := len(records[0].Resources) - 1; i >= 0; i-- {
 		r := records[0].Resources[i]
 		namespace := stackResourceNamespace(region, r.Type)
@@ -642,7 +674,9 @@ func (s *StackStore) deleteChecked(region, name string, authorize func(StackReco
 		if owned != 1 {
 			return ssmFailure{"ValidationError", "Stack resource ownership changed; deletion refused."}
 		}
-		if r.Type == "AWS::SSM::Parameter" {
+		if stackAPIKind(r.Type) {
+			err = deleteStackAPI(context.Background(), tx, region, r)
+		} else if r.Type == "AWS::SSM::Parameter" {
 			_, err = tx.Exec("DELETE FROM aws_ssm_parameters WHERE region=? AND name=?", region, r.PhysicalID)
 		} else if r.Type == "AWS::Lambda::Function" {
 			_, err = tx.Exec("DELETE FROM aws_lambda_functions WHERE region=? AND name=?", region, r.PhysicalID)

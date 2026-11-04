@@ -69,7 +69,7 @@ A successful function returns a REST proxy object with statusCode200–599, a UT
 
 One environment has at most100 APIs,100 resources per API,100 deployment snapshots per API and10 stages per API. Management bodies are at most128KiB. REST body/encoded event/response limits are256KiB; invalid UTF-8 and malformed query encodings are rejected. Resource policies have at most20 statements and20KiB. Stage variables have at most20 entries and4096 aggregate bytes, with the documented AWS variable-name/value character subset.
 
-No WAF, custom resource callback, authorizer, HTTP API/v2, API key/usage plan, cache, VPC link, domain, binary media, mapping template, stage editing, method deletion or native CloudFormation API Gateway/Lambda::Permission resource support is included. The existing WP workload and remaining unsupported Challenge problems remain disabled. API support alone is not original-problem scoring completion.
+[CloudFormation provisioning](cloudformation-rest.md) supports the five bounded REST resource types and Lambda::Permission using the same native state. No WAF, custom resource callback, authorizer, HTTP API/v2, API key/usage plan, cache, VPC link, domain, binary media, mapping template, stage editing, method deletion is included. The existing WP workload and remaining unsupported Challenge problems remain disabled. API support alone is not original-problem scoring completion.
 
 ## Console and evidence
 
