@@ -118,7 +118,7 @@ func TestSQSBodyEncodingRejectedWithoutNormalization(t *testing.T) {
 	if attrs["ApproximateNumberOfMessages"] != "0" {
 		t.Fatal("invalid encoding was normalized and enqueued", attrs)
 	}
-	for _, test := range []struct { raw, body string }{
+	for _, test := range []struct{ raw, body string }{
 		{`"\ud83d\ude00"`, "😀"},
 		{`"literal \\ud800"`, `literal \ud800`},
 		{`"replacement \ufffd"`, "replacement �"},
