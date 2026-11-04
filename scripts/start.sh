@@ -35,8 +35,8 @@ mv -f "$build_file" ./dist/tenkacloud-simulator
 build_file=
 # These directories may be new overrides; existing files and permissions are not
 # reset. The CLI validates/reuses a private regular token file, without rotation.
-if [ "$state" != ':memory:' ]; then mkdir -p "$(dirname "$state")"; fi
-mkdir -p "$(dirname "$token_file")"
+if [ "$state" != ':memory:' ]; then mkdir -p -- "$(dirname -- "$state")"; fi
+mkdir -p -- "$(dirname -- "$token_file")"
 set -- "--listen=$listen" "--state=$state" "--token-file=$token_file"
 # Printing is deliberate for an interactive developer. CI (even CI='') and
 # stdout redirection suppress it; the CLI independently enforces the same guard.

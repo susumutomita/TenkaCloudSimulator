@@ -70,9 +70,14 @@ def launch(command, cwd, env, terminal=False, stop_signal=signal.SIGTERM):
         yield endpoint, bytes(output).decode(errors='replace')
     finally:
         if process.poll() is None:
-            # Signal the make PID, not only a terminal process group: GNU make
-            # must forward termination to its exec'd foreground CLI child.
-            process.send_signal(stop_signal)
+            if stop_signal == signal.SIGINT:
+                # Ctrl+C is delivered to the foreground process group. Sending
+                # SIGINT only to make is not a terminal interrupt and GNU make
+                # may wait for a child which never received that signal.
+                os.killpg(process.pid, stop_signal)
+            else:
+                # Programmatic SIGTERM to make must stop its exec'd CLI child.
+                process.send_signal(stop_signal)
         try:
             process.wait(timeout=10)
         except subprocess.TimeoutExpired:
@@ -93,7 +98,7 @@ def launch(command, cwd, env, terminal=False, stop_signal=signal.SIGTERM):
 def main():
     env = {**os.environ, 'GO': COMPILER}
     env.pop('CI', None)
-    for name in ['MAKEFLAGS', 'MFLAGS', 'MAKEOVERRIDES']:
+    for name in ['MAKEFLAGS', 'MFLAGS', 'MAKEOVERRIDES', 'START_LISTEN', 'START_STATE', 'START_TOKEN_FILE']:
         env.pop(name, None)
     with tempfile.TemporaryDirectory(prefix='simulator-start-') as directory:
         home = Path(directory)
@@ -148,21 +153,32 @@ def main():
                 check(request(endpoint, token=token)[0] == 200, 'make start terminal auth failed')
         before_binary = (repo / 'dist/tenkacloud-simulator').read_bytes()
         before_state = state.read_bytes()
-        for compiler in ['/nonexistent/simulator-go', str(home / 'failing go')]:
-            if 'failing go' in compiler:
+        for kind in ['missing', 'failed', 'empty']:
+            compiler = '/nonexistent/simulator-go' if kind == 'missing' else str(home / (kind + ' go'))
+            if kind != 'missing':
                 wrapper = Path(compiler)
-                wrapper.write_text('#!/bin/sh\nprintf "simulated compiler failure\\n" >&2\nexit 17\n')
+                wrapper.write_text('#!/bin/sh\nexit ' + ('17' if kind == 'failed' else '0') + '\n')
                 wrapper.chmod(0o700)
             result = subprocess.run(command, cwd=repo, env={**env, 'GO': compiler},
                                     stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=30)
             check(result.returncode != 0, 'missing/failed compiler started an old executable')
-            expected = b'Go is required' if compiler.startswith('/nonexistent/') else b'Build failed'
+            expected = {'missing': b'Go is required', 'failed': b'Build failed',
+                        'empty': b'Go did not produce'}[kind]
             check(expected in result.stdout, 'compiler failure lacked readable guidance')
             check(not list((repo / 'dist').glob('.simulator-start.*')), 'failed build left staged executable')
             check(token.encode() not in result.stdout, 'compiler error path displayed token')
             check(token_file.read_bytes() == original_token, 'failed build changed existing token')
             check(state.read_bytes() == before_state, 'failed build changed existing state')
             check((repo / 'dist/tenkacloud-simulator').read_bytes() == before_binary, 'failed build replaced good binary')
+        # Existing README paths remain the real defaults, relative to the source
+        # checkout even when make -C is called from another working directory.
+        defaults = ['make', '--no-print-directory', '-C', str(repo), 'start',
+                    'START_LISTEN=127.0.0.1:0']
+        with launch(defaults, home, env) as (endpoint, output):
+            default_token = (repo / 'simulator-token').read_text().strip()
+            check((repo / 'practice.db').is_file(), 'default state path changed')
+            check(default_token not in output, 'default captured startup displayed token')
+            check(request(endpoint, token=default_token)[0] == 200, 'default token cannot authenticate')
         binary = str(repo / 'dist/tenkacloud-simulator')
         direct = [binary, '--listen=127.0.0.1:0', '--token-file=' + str(token_file)]
         # The already built runtime needs no Go/Node/Python executable on PATH.

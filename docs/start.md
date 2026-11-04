@@ -48,7 +48,9 @@ does not expose externally, configure real AWS, deploy or provide a daemon.
 There is no free-form extra-flags override to disable auth or allow remote
 binding through `make start`.
 
-Ctrl+C/SIGINT and SIGTERM stop the foreground CLI and close its listener/state.
+Ctrl+C sends SIGINT to the foreground terminal process group; SIGTERM to make
+is forwarded to the foreground CLI. Both stop its listener/state. When sending
+SIGINT programmatically, target the CLI or its process group, not make alone.
 Restart preserves the operator token and SQLite resources. There is no automatic
 browser launch or background process to clean up. Port-in-use and invalid token
 errors are printed without token contents.
