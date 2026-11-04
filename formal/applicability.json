@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "base_sha": "2d8a41a0cb576bd42561a7162d35129f44979c08",
+  "base_sha": "464b4f913c6bcd3200a1bfa1081507df5d7a92cb",
   "changes": [
     {
       "path": ".github/workflows/ci.yml",
@@ -15,6 +15,13 @@
       "disposition": "documentation",
       "reason": "Document the pinned axe-core preparation and explicit AXE_SCRIPT prerequisite for the unchanged make e2e entry point; no application behavior or mathematical property is introduced.",
       "models": []
+    },
+    {
+      "path": "formal/README.md",
+      "disposition": "documentation",
+      "reason": "Integrate the current SSM and feature model inventory, mandatory IDs/invariants and fail-closed removal fixtures without dropping existing controls. New-head execution remains separate.",
+      "models": [],
+      "sha256": "78008915f279206fc9478b4f83e82210b30f9d5a18a7c144088b088cba59eca8"
     },
     {
       "path": "internal/server/apidocs/index.html",
@@ -50,6 +57,20 @@
       "disposition": "presentation",
       "reason": "Render bounded metadata from a cloned native S3 response without changing Scalar native responses or reading credentials/object bodies. The existing same-origin request guard and authority remain unchanged. This is browser presentation/async read-only inspection, not provider state; existing storage/IAM models do not prove DOM parsing, stale-view suppression or accessibility, which remain covered by dedicated browser tests.",
       "models": []
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "disposition": "formal-infrastructure",
+      "reason": "Integrate the current SSM and feature model inventory, mandatory IDs/invariants and fail-closed removal fixtures without dropping existing controls. New-head execution remains separate.",
+      "models": [],
+      "sha256": "6aa3cac1e51b18a558916a89b3c83162c2a6abe89042e10052bffe42372b86f7"
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "disposition": "formal-infrastructure",
+      "reason": "Integrate the current SSM and feature model inventory, mandatory IDs/invariants and fail-closed removal fixtures without dropping existing controls. New-head execution remains separate.",
+      "models": [],
+      "sha256": "6135adad207528d00b71124efb49bedd1a06cb7e53f7511dd417e9e8100584f1"
     },
     {
       "path": "test/e2e/check.py",
