@@ -118,6 +118,12 @@ local default and tests will specify direction when ordering matters.
 
 ## State, IAM and redaction contract
 
+The protected value channel is `SecretString`/`secretMaterial`. This is not
+automatic data-loss prevention for arbitrary text: names and descriptions are
+metadata, so callers must not put secret values there. Redaction does not claim
+encryption at rest, memory zeroization, SQLite free-page erasure or protection
+from a host account that can read the private database.
+
 Provider-owned tables are proposed as:
 
 - `aws_secret_arns`: persistent issued/retired ARN reservations, not values.
