@@ -265,7 +265,8 @@ returned identifier, then copy actual local Encrypt output for Decrypt. The
 valid-base64 documentation placeholder is deliberately not decryptable.
 Parsed schema/source checks, served examples, SDK sends and canonical bundle/NOTICE
 rebuild have separate results below. Browser and bounded formal results are
-recorded below; complete coverage/security/CI remain separate pending gates.
+recorded below; whole coverage now passed on the unchanged Go input, while
+current security/CI remain separate required gates.
 
 
 ## Protocol admission/refusal and snapshot contract
@@ -362,5 +363,29 @@ focused SDK/browser successes above are separate evidence. This test-support-onl
 follow-up preserves every Go/model/asset byte and the embedded binary from e094485.
 The five CGO-disabled Linux/Darwin amd64/arm64 and Windows/amd64 cross-compilations
 passed at that unchanged runtime input; foreign-platform execution is unverified.
-The new23-case whole E2E, startup, audit and immutable final-head formal gate remain
-pending until actually run. No earlier success is relabeled as this source HEAD.
+At exact5ca45ea, all23 whole-conformance cases passed in402.411s, followed by
+actual make-start checks (unbuilt/built, stale source, compiler failure, private
+state/token, TTY/CI suppression, authentication and signal cleanup). The separate
+reflow gate passed its1 case. The50-screen actual audit reported zero automated
+violations; KMS1440/390 native interaction/accessibility/state assertions ran
+inside the mandatory suite. No earlier success is relabeled as this source HEAD.
+The immutable formal check must still run on each final committed source HEAD.
+
+
+The preceding unchanged Go input e094485 passed make before-commit with every
+race-tested package actually executing (no cached result labels), vet, formatting,
+embedded rights/assets, module verification and static build. One fresh whole
+profile measured6114/6435 statements (95.01%) and8016/8848 unfiltered source lines
+(90.60%) using the pinned v1.4.0 Cobertura converter. Both90% floors stayed enforced;
+no profile union, exclusions or timeout changes were used. OOM and OOM-kill
+counters remained zero. The only changes after that proof are test harness,
+documentation and applicability declarations; Go/native-test/model/asset bytes
+and embedded binary remain identical. These are input-scoped carried proofs,
+not a claim that a newer GitHub HEAD already passed hosted CI.
+
+Screenshots capture dummy data only. Earlier full-page shots retain the keyboard
+focused scroll position, which can place sticky Cloudscape controls mid-image;
+settled viewport captures are separate visual-review artifacts and do not replace
+the mandatory interaction proof. Authenticated real AWS screen fidelity,
+canonical current hosted security/CI and final independent publication review
+remain unverified/required. This candidate has not been pushed or released.
