@@ -44,7 +44,24 @@ because this suite passes. No new service, callback or Python/HTTP state-machine
 proof is implied by this inventory.
 
 
-## Startup token visibility (registration candidate)
+## SSM latest parameter state
+
+`SSMParameterState.tla` is the sixth registered finite model. It bounds two
+regions by two names, two validated abstract values and latest-row versions
+1–2, with a success-prefix cutoff rather than an API version cap. It checks
+explicit-Deny preservation, no-overwrite refusal, successful version advance,
+exact-key deletion/frame conditions and region/name read isolation. Five
+specified mutations must fail the appropriate named property. Existing five
+models and their controls remain mandatory; the combined inventory is six
+positive models and ten negative controls (sixteen TLC cases).
+
+See [the SSM contract and source/test correspondence](../docs/formal-ssm.md).
+The native HTTP integration test uses distinct values and runtime versions
+1–4; there is no version-history/selector, live-AWS differential, liveness or
+Go refinement claim. New candidate execution and hosted CI must be checked separately; model checking is not Go refinement.
+
+
+## Startup token visibility
 
 `StartupTokenVisibility.tla` models one fixed configured token file, two abstract
 token values, three initial file states and at most two historical emissions.
@@ -52,17 +69,13 @@ It checks existing-file identity, private creation, invalid-file refusal and
 emission-time auth/explicit-show/TTY/CI-presence guards. Removing the CI or TTY
 guard must violate `HistoryVisibility`; overwriting an existing token must
 violate `FileIdentityFrozen`. Original model/config and exact mutation anchors
-are preserved. This is six positive models plus eight required negative
-controls (fourteen actual TLC cases when the registered gate is executed).
+are preserved.
 
 `source_scope` binds CLI/launcher code and its real PTY/native tests. It does not
 prove terminal syscalls, OS ACLs, entropy, crash safety, build freshness, process
 shutdown or all Go behavior. The metadata-only `go.mod` annotation change uses
 the separate narrow recognizer and is not bound to token-state invariants.
 
-This candidate preserves the original public Startup `ac52f4b` and private
-registration `f75b6ef` history. Main `2d8a41a` (including merged module-metadata
-PR #314) is incorporated by normal merge. The exact-base record is refreshed
-against that main; metadata guard implementation and fixtures are unchanged.
-Exact-HEAD local results are separate from inherited original Go/PTY evidence
-and from required hosted CI/review. See [startup usage and limits](../docs/start.md).
+
+
+The current combined registry has 7 baselines and 13 required mutation controls. SSM and feature inventory/property removal are rejected. Source integration does not constitute a new-head TLC or runtime execution result.

@@ -9,7 +9,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-BASE_MODELS = {'ObjectStore', 'StackOwnership', 'S3Versions', 'NativeIAMOwnership', 'RESTDeploymentSnapshot', 'StartupTokenVisibility'}
+BASE_MODELS = {'ObjectStore', 'StackOwnership', 'S3Versions', 'NativeIAMOwnership', 'RESTDeploymentSnapshot', 'SSMParameterState', 'StartupTokenVisibility'}
 BASE_INVARIANTS = {
     'ObjectStore': {'TypeOK', 'NoOrphans', 'NoUnauthorizedMutation', 'DenyWins'},
     'StackOwnership': {'TypeOK', 'OwnershipExclusive'},
@@ -17,6 +17,7 @@ BASE_INVARIANTS = {
     'NativeIAMOwnership': {'TypeOK', 'OwnershipExclusive'},
     'RESTDeploymentSnapshot': {'TypeOK', 'SnapshotsFrozen', 'NoStageOrphans'},
     'StartupTokenVisibility': {'TypeOK', 'FileIdentityFrozen', 'CreatedFilePrivate', 'HistoryVisibility', 'InvalidFileNeverEmits'},
+    'SSMParameterState': {'TypeOK', 'DeleteEffect', 'OtherKeysUnchanged', 'OverwriteRefusal', 'ReadIsolation', 'DeniedPreservesState', 'PutVersion'},
 }
 IDENTIFIER = re.compile(r'^[A-Za-z][A-Za-z0-9_]*$')
 

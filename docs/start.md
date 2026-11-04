@@ -113,7 +113,7 @@ changing the Startup implementation. Registry-safe mutation IDs are
 `OmittedCIGuard`, `OmittedTTYGuard` and `OverwriteExistingToken`; their expected
 invariants remain `HistoryVisibility`, `HistoryVisibility` and
 `FileIdentityFrozen`. Existing five models/rules remain mandatory; the registry
-contains six positives and eight required counterexamples. The checker also
+contains seven positives and thirteen required counterexamples. The checker also
 requires the Startup model and all five of its original invariants, so removing
 both a declaration and its files or removing a property in both registry/CFG
 cannot silently reduce protection.
@@ -131,12 +131,7 @@ directly imported dependency; versions and go.sum are unchanged. It is classifie
 by the separate strict metadata recognizer and direct HEAD byte/mode guards,
 **not** by a token invariant or a general dependency exemption.
 
-The local registration candidate normally merges main `2d8a41a`, which includes
-merged PR #314, while preserving public Startup `ac52f4b`, reviewed metadata
-`74168f6`, and private registration `f75b6ef` as ancestors. Its exact-blob record
-uses main `2d8a41a`. Existing Go/PTY/startup evidence belongs to the original
-source checks; it is not re-labeled as a fresh full Go/PTY run on this head.
-New validation covers Python gate/metadata self-tests, exact applicability, six
-bounded baselines and eight specified counterexamples with immutable HEAD
-inputs. Local reports identify the actual checked commit and outcomes; they do
-not imply hosted CI/review success, repository merge or Go refinement.
+The current registry combines StartupTokenVisibility, SSMParameterState and the
+original five protected models. Exact changed-blob records and required model/
+property guards are maintained together. New integration-head Go/PTY/TLC and
+hosted CI are separate checks; source-only restacking is not fresh execution.
