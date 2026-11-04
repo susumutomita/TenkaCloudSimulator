@@ -28,13 +28,24 @@ BASE_INVARIANTS = {
     'StackOwnership': {'OwnershipExclusive', 'TypeOK'},
     'StartupTokenVisibility': {'CreatedFilePrivate', 'FileIdentityFrozen', 'HistoryVisibility', 'InvalidFileNeverEmits', 'TypeOK'},
 }
+# Established controls require an explicit gate-policy change before retirement.
 REQUIRED_MUTANTS = {
     'AzureBlobState': {'ContainerDeleteErasesPeer', 'ContainerDeleteLeavesBlobs', 'FailedPutCommits', 'IgnoreAccountOwner', 'IgnoreCreateOnly', 'IgnoreStaleETag', 'MissingTrustedActor', 'OmitByteBudget', 'OmitRowBudget', 'ReadNeighbor', 'ReuseETag'},
     'BlobRange': {'BypassAuthorization', 'DiscloseFullMD5OnPartial', 'IgnoreConditionDecision', 'IgnoreEndClamp', 'PermitExcessChecksum', 'ReadMutatesStoredBody', 'UncheckedBounds', 'WrongSliceStart'},
+    'BrowserSessions': {'IgnoreParentValidity', 'LogoutClearsOthers', 'LogoutKeepsSession', 'LogoutRevokesSDK', 'RawOperatorCookie'},
     'GCPStorageState': {'DeleteNonemptyBucket', 'DeniedBucketCreate', 'IgnoreActualOwner', 'IgnoreGenerationMatch', 'IgnoreStateBudget', 'ReadWrongEnvironment', 'ResetSequenceAfterDelete', 'ReuseGeneration'},
+    'NativeIAMOwnership': {'LegacyAdoptsNativeRole'},
+    'ObjectStore': {'MissingDeletionGuard'},
     'ProjectAuthority': {'AdoptUnboundResource', 'AllowOwnerRebinding', 'DefaultAllowUnknownPermission', 'PartialCommitOnRefusal', 'TrustClaimedProject', 'WriteDespiteDenial'},
     'ProviderActor': {'OperatorSelectionIgnored', 'ParticipantCapabilitiesSelection', 'ParticipantSelectionBypass', 'SelectedCredentialConfusion', 'UnauthenticatedAttachment', 'WireRoleSpoof'},
     'ProviderPath': {'CleanTail', 'DecodeAgain', 'DropActor', 'DropRawTail', 'EncodedProviderAllowed', 'MutateOriginalPath', 'UnknownFallsBack'},
+    'RESTDeploymentSnapshot': {'MutableSnapshot'},
+    'S3Versions': {'CurrentOnlyDeletion'},
+    'SQSLifecycle': {'AcceptStaleReceipt', 'ChangeWithoutInflight', 'CrossScopeQueueDelete', 'DeleteWithoutCascade', 'FailedWriteChangesState', 'IdempotentCreateChangesState', 'ReceiptNotRotated', 'ReceiveAfterRetention', 'ReceiveBeforeDelay', 'SendWithoutParentCheck', 'UnauthorizedSend'},
+    'SQSStorageBudget': {'BlockLegacyMaintenance', 'CommitPurgeOnFailedSend', 'DiscardOwnedLiveRows', 'IgnoreExpiredForeignCharge', 'OmitPayloadByteCap', 'OmitPhysicalRowCap', 'PurgeExpiredForeignRows'},
+    'SSMParameterState': {'DoNotAdvanceVersion', 'IgnoreExplicitDeny', 'IgnoreOverwriteGuard', 'ReadWrongName', 'ReadWrongRegion'},
+    'StackOwnership': {'ReclaimDriftedResource'},
+    'StartupTokenVisibility': {'OmittedCIGuard', 'OmittedTTYGuard', 'OverwriteExistingToken'},
 }
 IDENTIFIER = re.compile(r'^[A-Za-z][A-Za-z0-9_]*$')
 

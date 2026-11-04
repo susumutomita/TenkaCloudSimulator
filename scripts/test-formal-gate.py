@@ -455,5 +455,20 @@ class FormalGateTests(unittest.TestCase):
                         load_registry(self.root)
             path.write_text(original)
 
+    def test_each_established_mutation_control_cannot_be_removed(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        baseline = json.loads(original)
+        for model in baseline['models']:
+            for mutant in model['mutants']:
+                with self.subTest(model=model['id'], mutant=mutant['id']):
+                    changed = json.loads(original)
+                    entry = next(m for m in changed['models'] if m['id'] == model['id'])
+                    entry['mutants'] = [m for m in entry['mutants'] if m['id'] != mutant['id']]
+                    path.write_text(json.dumps(changed))
+                    with self.assertRaisesRegex(GateError, 'required mutation control was removed|model needs a sensitivity control'):
+                        load_registry(self.root)
+        path.write_text(original)
+
 if __name__ == '__main__':
     unittest.main()

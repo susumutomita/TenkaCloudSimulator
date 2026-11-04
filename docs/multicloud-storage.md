@@ -6,6 +6,8 @@ This branch composes separately implemented Google Cloud Storage JSON API and Az
 
 The CLI still binds numeric loopback and requires a private local access token. `NewAccess` places a validated, immutable credential/exercise Actor in the request context. Provider adapters use its exercise identity and the host-configured environment, not arbitrary HTTP headers, the AWS policy table or an operator-role shortcut.
 
+The top utility shows only the configured, read-only project or storage account; AWS region choices belong to the AWS views. Scope selection/provisioning remains unsupported.
+
 Default synthetic scopes are Google project `tenkacloud-local`/number `100000000001`, Azure account `tenkacloudlocal`, environment `local`; their explicit local owner is `simulator-admin`. Other selected identities receive403. A trusted CLI host can select `--cloud-storage-owner=learner` when creating a fresh environment, then issue a participant token bound to `learner`. The flag validates a1–64 character ASCII exercise identity before opening a listener, database or token file. An existing persisted owner cannot be changed by reusing the same database with a different flag. The default owner remains `simulator-admin`.
 
 A trusted Go host can use `server.NewWithCloudStorage(path, cfg)` to bind a participant identity as the local project/account owner; real participant credentials remain bound to that identity. This is owner-only local authorization, not Google IAM, Azure RBAC, OAuth, Entra, SharedKey or SAS. Persisted ownership cannot be silently reassigned on restart. A separate process, database and token authority per team remains necessary.

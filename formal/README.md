@@ -161,3 +161,5 @@ bounded page data. The state models' frame properties apply only to persistence;
 XML order, escaping, disclosure, actual SDK parsing and SQL initialization are not
 proved by this association. Independent serializer byte-goldens and native HTTP
 checks cover the wire format separately.
+
+All82 established sensitivity-control IDs (including36 earlier baseline controls) have literal per-model minimum sets. Real-filesystem tests remove each control individually and require rejection. This protects the checked inventory, not semantic completeness or a Go implementation proof.
