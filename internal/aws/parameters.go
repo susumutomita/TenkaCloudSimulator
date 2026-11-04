@@ -1,6 +1,7 @@
 package aws
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"time"
@@ -54,7 +55,10 @@ func (s *ParameterStore) Put(region, name, kind, value string, description *stri
 	return version, tx.Commit()
 }
 func (s *ParameterStore) List(region string) ([]Parameter, error) {
-	rows, err := s.db.Query("SELECT name,type,value,description,version,modified FROM aws_ssm_parameters WHERE region=? ORDER BY name", region)
+	return s.ListContext(context.Background(), region)
+}
+func (s *ParameterStore) ListContext(ctx context.Context, region string) ([]Parameter, error) {
+	rows, err := s.db.QueryContext(ctx, "SELECT name,type,value,description,version,modified FROM aws_ssm_parameters WHERE region=? ORDER BY name", region)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +76,10 @@ func (s *ParameterStore) List(region string) ([]Parameter, error) {
 	return result, rows.Err()
 }
 func (s *ParameterStore) Get(region, name string) (Parameter, error) {
-	values, err := s.List(region)
+	return s.GetContext(context.Background(), region, name)
+}
+func (s *ParameterStore) GetContext(ctx context.Context, region, name string) (Parameter, error) {
+	values, err := s.ListContext(ctx, region)
 	if err != nil {
 		return Parameter{}, err
 	}

@@ -428,6 +428,44 @@ class Conformance(unittest.TestCase):
    with self.assertRaises(ClientError) as denied:client(other_endpoint,participant).invoke(FunctionName='ui-lambda',Payload=b'{}')
    self.assertEqual(denied.exception.response['ResponseMetadata']['HTTPStatusCode'],401)
    page.get_by_role('button',name='Functions',exact=True).click();page.get_by_role('radio',name='Select ui-lambda',exact=True).check();page.get_by_role('button',name='Delete',exact=True).click();page.get_by_label('Type ui-lambda to confirm',exact=True).fill('ui-lambda');page.get_by_role('dialog').get_by_role('button',name='Delete',exact=True).click();expect(page.get_by_role('heading',name='No functions yet',exact=True)).to_be_visible();self.assertEqual(c.list_functions()['Functions'],[]);self.assertEqual(len(other.list_functions()['Functions']),1);other.delete_function(FunctionName='ui-lambda');self.assertEqual(errors,[]);self.assertEqual(outside,[]);browser.close()
+ def test_lambda_execution_role_sdk_bridge_two_teams(self):
+  with running(authenticated=True) as (endpoint,operator),running(authenticated=True) as (other,other_operator):
+   def client(service,url,token):
+    c=boto3.client(service,endpoint_url=url,region_name='us-east-1',aws_access_key_id='TCSIMLOCAL',aws_secret_access_key='dummy',config=Config(s3={'addressing_style':'path'},retries={'max_attempts':0},request_checksum_calculation='when_required',response_checksum_validation='when_required'))
+    c.meta.events.register('before-sign.'+service,lambda request,**kwargs:request.headers.add_header('X-Simulator-Token',token));return c
+   def control(url,token,path,data):
+    request=urllib.request.Request(url+path,data=json.dumps(data).encode(),headers={'Content-Type':'application/json','X-Simulator-Token':token},method='POST' if path.endswith('/access') else 'PUT')
+    with urllib.request.urlopen(request) as response:return json.load(response)
+   role={'Version':'2012-10-17','Statement':[{'Effect':'Allow','Action':['ssm:GetParameter','ssm:GetParameters'],'Resource':'arn:aws:ssm:us-east-1:000000000000:parameter/sdk-own/*'},{'Effect':'Allow','Action':['s3:GetObject','s3:PutObject','s3:DeleteObject'],'Resource':'arn:aws:s3:::sdk-evidence/*'}]}
+   source="""import boto3
+from botocore.exceptions import ClientError
+ssm=boto3.client('ssm')
+s3=boto3.client('s3')
+def handler(event,context):
+    value=ssm.get_parameter(Name='/sdk-own/value')['Parameter']['Value']
+    s3.put_object(Bucket='sdk-evidence',Key='result.txt',Body=value,ContentType='text/plain')
+    result=s3.get_object(Bucket='sdk-evidence',Key='result.txt')['Body'].read().decode()
+    try:
+        ssm.get_parameter(Name='/sdk-private/value')
+        denied=False
+    except ClientError as error:
+        denied=error.response['Error']['Code']=='AccessDeniedException'
+    return {'value':result,'privateDenied':denied}
+"""
+   code=io.BytesIO()
+   with zipfile.ZipFile(code,'w') as z:z.writestr('index.py',source)
+   clients=[]
+   for url,token,value in ((endpoint,operator,'team-one'),(other,other_operator,'team-two')):
+    control(url,token,'/_simulator/v1/iam/principals/executor/policy',role);ssm=client('ssm',url,token);ssm.put_parameter(Name='/sdk-own/value',Type='String',Value=value);ssm.put_parameter(Name='/sdk-private/value',Type='String',Value='private-dummy');s3=client('s3',url,token);s3.create_bucket(Bucket='sdk-evidence');lc=client('lambda',url,token)
+    created=lc.create_function(FunctionName='guest-sdk',Runtime='python3.12',Role='arn:aws:iam::000000000000:role/executor',Handler='index.handler',Timeout=15,Code={'ZipFile':code.getvalue()})
+    control(url,token,'/_simulator/v1/iam/principals/invoker/policy',{'Version':'2012-10-17','Statement':[{'Effect':'Allow','Action':'lambda:InvokeFunction','Resource':created['FunctionArn']}]});participant=control(url,token,'/_simulator/v1/access',{'Principal':'invoker'})['AccessToken'];limited=client('lambda',url,participant)
+    with self.assertRaises(ClientError) as denied:client('ssm',url,participant).get_parameter(Name='/sdk-own/value')
+    self.assertEqual(denied.exception.response['ResponseMetadata']['HTTPStatusCode'],403)
+    result=limited.invoke(FunctionName='guest-sdk',Payload=b'{}');self.assertNotIn('FunctionError',result);self.assertEqual(json.loads(result['Payload'].read()),{'value':value,'privateDenied':True});self.assertEqual(s3.get_object(Bucket='sdk-evidence',Key='result.txt')['Body'].read().decode(),value);clients.append((limited,s3,participant))
+   with self.assertRaises(ClientError) as denied:client('lambda',other,clients[0][2]).invoke(FunctionName='guest-sdk',Payload=b'{}')
+   self.assertEqual(denied.exception.response['ResponseMetadata']['HTTPStatusCode'],401)
+   role['Statement'].append({'Effect':'Deny','Action':'s3:PutObject','Resource':'arn:aws:s3:::sdk-evidence/result.txt'});control(endpoint,operator,'/_simulator/v1/iam/principals/executor/policy',role)
+   result=clients[0][0].invoke(FunctionName='guest-sdk',Payload=b'{}');self.assertEqual(result['FunctionError'],'Unhandled');self.assertEqual(json.loads(result['Payload'].read())['errorType'],'ClientError');self.assertEqual(clients[0][1].get_object(Bucket='sdk-evidence',Key='result.txt')['Body'].read(),b'team-one');self.assertEqual(clients[1][1].get_object(Bucket='sdk-evidence',Key='result.txt')['Body'].read(),b'team-two')
  def test_refuses_non_loopback_by_default(self):
   result=subprocess.run([str(BINARY),'--listen','0.0.0.0:0'],capture_output=True,text=True);self.assertNotEqual(result.returncode,0);self.assertIn('--allow-remote',result.stderr)
 if __name__=='__main__':unittest.main(verbosity=2)

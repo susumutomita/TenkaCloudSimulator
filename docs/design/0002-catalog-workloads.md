@@ -25,3 +25,5 @@ CPythonを利用する場合も、実行時の外部Python/Docker/Nodeを要求�
 一次資料: [CPython WASI build](https://github.com/python/cpython/blob/3.12/Tools/wasm/README.md)、[wazero](https://wazero.io/docs/)、[Lambda CreateFunction](https://docs.aws.amazon.com/lambda/latest/api/API_CreateFunction.html)、[Lambda Invoke](https://docs.aws.amazon.com/lambda/latest/api/API_Invoke.html)。これらは対応完了の証拠ではなく実装契約の参照元。
 
 追加段階: Lambda inline CFNと明示DependsOnの作成/逆順削除をnative保存処理に接続する。これだけでstep3/4やWP採点が完成するわけではない。managed BasicExecutionRoleはmetadataのみ。次は保存execution roleに固定した制限付きSDK bridgeで、ネットワークや任意endpointは与えない。
+
+SDK段階: 元のhandlerに必要なSSM GetParameter/GetParametersとS3 Get/Put/DeleteObjectの限定shimを保存execution role・regionに固定する。任意networkは開かない。元のWPのHTTP replay/API Gateway/WAF/custom resourceと7採点は依然未完了で、カタログ選択を有効にしない。

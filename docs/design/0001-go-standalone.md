@@ -4,7 +4,7 @@
 
 Coreは問題ID/採点を知らない。SSM・stack/ownershipのschemaはAWS layerがcoreの共有DBを使用して初期化する。CFNはcompileで全リソースと参照を検証後、stack、ownership claim、parameter、identity、S3 bucket/config/tagsを単一transactionで作成。削除でも同一transaction。手動削除されたparameterのclaimを残し、他stackが再取得して旧stackのcleanupで消される事故を防ぐ。role/bucket namespaceはglobal、SSM/stackはregion別、Lambda claimはlambda:<region>。
 
-Lambda定義/ZIP/region/role/environment/revisionはAWS layerのprovider-owned SQLite tableに保存する。native APIのIAM・PassRoleを評価した後、provider-neutralなinternal/workload/pythonへコード/event/contextだけを渡す。固定CPython/WASI・選択stdlib・原文rightsを埋め込み、host filesystem/environment/process/socketは渡さない。guest memory/時間/出力量/同時実行を制限する。限定inline Lambda CFNを同じ保存処理へ接続する。現段階に関数内SDK bridgeや問題固有のhandlerはない。[制限](../lambda.md)。
+Lambda定義/ZIP/region/role/environment/revisionはAWS layerのprovider-owned SQLite tableに保存する。native APIのIAM・PassRoleを評価した後、provider-neutralなinternal/workload/pythonへコード/event/contextと明示したbounded capability・固定module FSを渡す。固定CPython/WASI・選択stdlib・原文rightsを埋め込み、host filesystem/environment/process/socketは渡さない。guest memory/時間/出力量/同時実行を制限する。限定inline Lambda CFNを同じ保存処理へ接続する。関数内SDKは保存role/regionに固定したnative SSM/S3 subsetのみ。問題固有のhandlerや任意HTTP proxyはない。[制限](../lambda.md)。
 
 Consoleは公式Cloudscape/Reactを開発時にbundleし、fonts/assets/licensesを埋め込む。独自模倣CSSではない。UI/SDK/Scalarはいずれも実HTTPを通り同一SQLite状態を使う。実行時Node/npm、CDN、クラウドproxy不要。UIは実AWS全機能と同一ではない。[比較](../console.md)。
 
@@ -25,3 +25,5 @@ S3 version history/public-access-blockはAWS layerのaws_s3_versions/aws_s3_conf
 CloudFormationはservice RoleArnを受け付けず、呼出者のimmutable policy snapshotでStack ARNに加え全resource actionを事前確認する。SSM Put/DeleteParameter、IAM Create/DeleteRole・inline policy・指定managed policyのattach/detach・作成時TagRole、S3 Create/DeleteBucketと指定設定のPut actionを個別評価する。CAPABILITY_IAMは権限付与ではない。resource事前確認の拒否は変更を残さない。version履歴が残るbucketのDeleteStackはAPIエラーとなり、先行削除もrollbackする。非同期AWS lifecycle/Eventsとの同等性は主張しない。
 
 CFNのDependsOn文字列/配列をimplicit Ref/GetAtt/Subと統合して事前検証し、依存順で作成・逆順で削除する。inline Pythonはindex.pyのZIPへ変換し、native saveLambdaFunctionを同じtransactionで呼び出す。新しいresource typeのclaim namespaceは未対応旧readerのIAM fallbackに一致させず、未知kindはdefault処理で削除しない。旧binaryとのDB共有/downgradeはサポートしない。
+
+SDK bridgeはAWS layerの固定shimとrole-bound closureが所有し、runtimeにはAWS service/action、DB、tokenや問題IDを渡さない。guest stdoutのbounded JSON交換は権限の根拠ではなく、各native handlerでIAMを再評価する。S3は直接S3 handlerへdispatchし、bucket/keyがLambda protocol pathに似ていても別serviceへ解釈しない。
