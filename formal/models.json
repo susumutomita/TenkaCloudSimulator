@@ -1802,7 +1802,7 @@
           "id": "AcknowledgeIgnoredCreate",
           "edits": [
             {
-              "old": "tables'=IF permit THEN [tables EXCEPT ![s]=TRUE] ELSE tables",
+              "old": "tables'=(IF permit THEN [tables EXCEPT ![s]=TRUE] ELSE tables)",
               "new": "tables'=tables",
               "count": 1
             }
@@ -1813,7 +1813,7 @@
           "id": "AcknowledgeIgnoredWrite",
           "edits": [
             {
-              "old": " IN /\\ rows'=IF permit THEN replacement ELSE rows\n    /\\ stats'=IF permit THEN [stats EXCEPT ![s]=Sum(replacement[s])] ELSE stats\n    /\\ UNCHANGED <<initialized,startupValid,tables>>\n    /\\ Trace(s,\"Put\",t,k,allow,deny,permit,key,bytes)",
+              "old": " IN /\\ rows'=(IF permit THEN replacement ELSE rows)\n    /\\ stats'=(IF permit THEN [stats EXCEPT ![s]=Sum(replacement[s])] ELSE stats)\n    /\\ UNCHANGED <<initialized,startupValid,tables>>\n    /\\ Trace(s,\"Put\",t,k,allow,deny,permit,key,bytes)",
               "new": " IN /\\ rows'=rows\n    /\\ stats'=stats\n    /\\ UNCHANGED <<initialized,startupValid,tables>>\n    /\\ Trace(s,\"Put\",t,k,allow,deny,permit,key,bytes)",
               "count": 1
             }
@@ -1824,8 +1824,8 @@
           "id": "WrongTableStatistics",
           "edits": [
             {
-              "old": " IN /\\ rows'=IF permit THEN replacement ELSE rows\n    /\\ stats'=IF permit THEN [stats EXCEPT ![s]=Sum(replacement[s])] ELSE stats\n    /\\ UNCHANGED <<initialized,startupValid,tables>>\n    /\\ Trace(s,\"Put\",t,k,allow,deny,permit,key,bytes)",
-              "new": " IN /\\ rows'=IF permit THEN replacement ELSE rows\n    /\\ stats'=IF permit THEN [stats EXCEPT ![s]=Sum(replacement[s])+1] ELSE stats\n    /\\ UNCHANGED <<initialized,startupValid,tables>>\n    /\\ Trace(s,\"Put\",t,k,allow,deny,permit,key,bytes)",
+              "old": " IN /\\ rows'=(IF permit THEN replacement ELSE rows)\n    /\\ stats'=(IF permit THEN [stats EXCEPT ![s]=Sum(replacement[s])] ELSE stats)\n    /\\ UNCHANGED <<initialized,startupValid,tables>>\n    /\\ Trace(s,\"Put\",t,k,allow,deny,permit,key,bytes)",
+              "new": " IN /\\ rows'=(IF permit THEN replacement ELSE rows)\n    /\\ stats'=(IF permit THEN [stats EXCEPT ![s]=Sum(replacement[s])+1] ELSE stats)\n    /\\ UNCHANGED <<initialized,startupValid,tables>>\n    /\\ Trace(s,\"Put\",t,k,allow,deny,permit,key,bytes)",
               "count": 1
             }
           ],
@@ -1840,8 +1840,8 @@
               "count": 1
             },
             {
-              "old": " IN /\\ rows'=IF permit THEN replacement ELSE rows\n    /\\ stats'=IF permit THEN [stats EXCEPT ![s]=Sum(replacement[s])] ELSE stats\n    /\\ UNCHANGED <<initialized,startupValid,tables>>\n    /\\ Trace(s,\"Put\",t,k,allow,deny,permit,key,bytes)",
-              "new": " IN /\\ rows'=IF permit THEN replacement ELSE rows\n    /\\ stats'=IF permit THEN [stats EXCEPT ![s]=Sum(replacement[s]), ![CHOOSE peer \\in Scopes : peer#s]=Sum(replacement[CHOOSE peer \\in Scopes : peer#s])] ELSE stats\n    /\\ UNCHANGED <<initialized,startupValid,tables>>\n    /\\ Trace(s,\"Put\",t,k,allow,deny,permit,key,bytes)",
+              "old": " IN /\\ rows'=(IF permit THEN replacement ELSE rows)\n    /\\ stats'=(IF permit THEN [stats EXCEPT ![s]=Sum(replacement[s])] ELSE stats)\n    /\\ UNCHANGED <<initialized,startupValid,tables>>\n    /\\ Trace(s,\"Put\",t,k,allow,deny,permit,key,bytes)",
+              "new": " IN /\\ rows'=(IF permit THEN replacement ELSE rows)\n    /\\ stats'=(IF permit THEN [stats EXCEPT ![s]=Sum(replacement[s]), ![CHOOSE peer \\in Scopes : peer#s]=Sum(replacement[CHOOSE peer \\in Scopes : peer#s])] ELSE stats)\n    /\\ UNCHANGED <<initialized,startupValid,tables>>\n    /\\ Trace(s,\"Put\",t,k,allow,deny,permit,key,bytes)",
               "count": 1
             }
           ],
@@ -1851,8 +1851,8 @@
           "id": "DirtyOversizeRefusal",
           "edits": [
             {
-              "old": " IN /\\ rows'=IF permit THEN replacement ELSE rows\n    /\\ stats'=IF permit THEN [stats EXCEPT ![s]=Sum(replacement[s])] ELSE stats\n    /\\ UNCHANGED <<initialized,startupValid,tables>>\n    /\\ Trace(s,\"Put\",t,k,allow,deny,permit,key,bytes)",
-              "new": " IN /\\ rows'=IF permit THEN replacement ELSE IF initialized /\\ tables[s] /\\ Valid(t) /\\ allow /\\ ~deny /\\ bytes>MaxItemBytes /\\ rows[s][key]#0 THEN [rows EXCEPT ![s][key]=2] ELSE rows\n    /\\ stats'=IF permit THEN [stats EXCEPT ![s]=Sum(replacement[s])] ELSE IF initialized /\\ tables[s] /\\ Valid(t) /\\ allow /\\ ~deny /\\ bytes>MaxItemBytes /\\ rows[s][key]#0 THEN [stats EXCEPT ![s]=Sum([rows EXCEPT ![s][key]=2][s])] ELSE stats\n    /\\ UNCHANGED <<initialized,startupValid,tables>>\n    /\\ Trace(s,\"Put\",t,k,allow,deny,permit,key,bytes)",
+              "old": " IN /\\ rows'=(IF permit THEN replacement ELSE rows)\n    /\\ stats'=(IF permit THEN [stats EXCEPT ![s]=Sum(replacement[s])] ELSE stats)\n    /\\ UNCHANGED <<initialized,startupValid,tables>>\n    /\\ Trace(s,\"Put\",t,k,allow,deny,permit,key,bytes)",
+              "new": " IN /\\ rows'=(IF permit THEN replacement ELSE IF initialized /\\ tables[s] /\\ Valid(t) /\\ allow /\\ ~deny /\\ bytes>MaxItemBytes /\\ rows[s][key]#0 THEN [rows EXCEPT ![s][key]=2] ELSE rows)\n    /\\ stats'=(IF permit THEN [stats EXCEPT ![s]=Sum(replacement[s])] ELSE IF initialized /\\ tables[s] /\\ Valid(t) /\\ allow /\\ ~deny /\\ bytes>MaxItemBytes /\\ rows[s][key]#0 THEN [stats EXCEPT ![s]=Sum([rows EXCEPT ![s][key]=2][s])] ELSE stats)\n    /\\ UNCHANGED <<initialized,startupValid,tables>>\n    /\\ Trace(s,\"Put\",t,k,allow,deny,permit,key,bytes)",
               "count": 1
             }
           ],
@@ -1862,7 +1862,7 @@
           "id": "AcknowledgeIgnoredItemDelete",
           "edits": [
             {
-              "old": " IN /\\ rows'=IF permit THEN replacement ELSE rows\n    /\\ stats'=IF permit THEN [stats EXCEPT ![s]=Sum(replacement[s])] ELSE stats\n    /\\ UNCHANGED <<initialized,startupValid,tables>>\n    /\\ Trace(s,\"Delete\",t,\"small\",allow,deny,permit,key,0)",
+              "old": " IN /\\ rows'=(IF permit THEN replacement ELSE rows)\n    /\\ stats'=(IF permit THEN [stats EXCEPT ![s]=Sum(replacement[s])] ELSE stats)\n    /\\ UNCHANGED <<initialized,startupValid,tables>>\n    /\\ Trace(s,\"Delete\",t,\"small\",allow,deny,permit,key,0)",
               "new": " IN /\\ rows'=rows\n    /\\ stats'=stats\n    /\\ UNCHANGED <<initialized,startupValid,tables>>\n    /\\ Trace(s,\"Delete\",t,\"small\",allow,deny,permit,key,0)",
               "count": 1
             }
@@ -1873,7 +1873,7 @@
           "id": "AcknowledgeIgnoredTableDelete",
           "edits": [
             {
-              "old": "tables'=IF permit THEN [tables EXCEPT ![s]=FALSE] ELSE tables",
+              "old": "tables'=(IF permit THEN [tables EXCEPT ![s]=FALSE] ELSE tables)",
               "new": "tables'=tables",
               "count": 1
             }
@@ -1884,12 +1884,12 @@
           "id": "AcknowledgeIgnoredChildDelete",
           "edits": [
             {
-              "old": "rows'=IF permit THEN [rows EXCEPT ![s]=Empty] ELSE rows",
+              "old": "rows'=(IF permit THEN [rows EXCEPT ![s]=Empty] ELSE rows)",
               "new": "rows'=rows",
               "count": 1
             },
             {
-              "old": "stats'=IF permit THEN [stats EXCEPT ![s]=0] ELSE stats",
+              "old": "stats'=(IF permit THEN [stats EXCEPT ![s]=0] ELSE stats)",
               "new": "stats'=stats",
               "count": 1
             }

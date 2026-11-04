@@ -47,7 +47,7 @@ RefuseStartup == /\ ~initialized /\ ~startupValid /\ initialized'=FALSE
  lastDeny,lastAccepted,lastReady,lastKey,lastBytes>>
 Create(s,allow,deny) ==
  LET permit == initialized /\ allow /\ ~deny /\ ~tables[s] /\ TableCount(tables)<MaxTables
- IN /\ tables'=IF permit THEN [tables EXCEPT ![s]=TRUE] ELSE tables
+ IN /\ tables'=(IF permit THEN [tables EXCEPT ![s]=TRUE] ELSE tables)
  /\ UNCHANGED <<initialized,startupValid,rows,stats>>
  /\ Trace(s,"Create","nInteger","small",allow,deny,permit,"N1",0)
 Put(s,t,k,allow,deny) ==
@@ -56,23 +56,23 @@ Put(s,t,k,allow,deny) ==
      permit == initialized /\ tables[s] /\ Valid(t) /\ allow /\ ~deny /\ bytes<=MaxItemBytes /\
                (rows[s][key] # 0 \/ Count(rows[s])<MaxItems)
      replacement == [rows EXCEPT ![s][key]=bytes]
- IN /\ rows'=IF permit THEN replacement ELSE rows
-    /\ stats'=IF permit THEN [stats EXCEPT ![s]=Sum(replacement[s])] ELSE stats
+ IN /\ rows'=(IF permit THEN replacement ELSE rows)
+    /\ stats'=(IF permit THEN [stats EXCEPT ![s]=Sum(replacement[s])] ELSE stats)
     /\ UNCHANGED <<initialized,startupValid,tables>>
     /\ Trace(s,"Put",t,k,allow,deny,permit,key,bytes)
 Delete(s,t,allow,deny) ==
  LET key == Key(t)
      permit == initialized /\ tables[s] /\ Valid(t) /\ allow /\ ~deny
      replacement == [rows EXCEPT ![s][key]=0]
- IN /\ rows'=IF permit THEN replacement ELSE rows
-    /\ stats'=IF permit THEN [stats EXCEPT ![s]=Sum(replacement[s])] ELSE stats
+ IN /\ rows'=(IF permit THEN replacement ELSE rows)
+    /\ stats'=(IF permit THEN [stats EXCEPT ![s]=Sum(replacement[s])] ELSE stats)
     /\ UNCHANGED <<initialized,startupValid,tables>>
     /\ Trace(s,"Delete",t,"small",allow,deny,permit,key,0)
 Drop(s,allow,deny) ==
  LET permit == initialized /\ tables[s] /\ allow /\ ~deny
- IN /\ tables'=IF permit THEN [tables EXCEPT ![s]=FALSE] ELSE tables
- /\ rows'=IF permit THEN [rows EXCEPT ![s]=Empty] ELSE rows
- /\ stats'=IF permit THEN [stats EXCEPT ![s]=0] ELSE stats
+ IN /\ tables'=(IF permit THEN [tables EXCEPT ![s]=FALSE] ELSE tables)
+ /\ rows'=(IF permit THEN [rows EXCEPT ![s]=Empty] ELSE rows)
+ /\ stats'=(IF permit THEN [stats EXCEPT ![s]=0] ELSE stats)
  /\ UNCHANGED <<initialized,startupValid>>
  /\ Trace(s,"Drop","nInteger","small",allow,deny,permit,"N1",0)
 Restart == /\ initialized'=FALSE /\ lastOp'="Restart"
