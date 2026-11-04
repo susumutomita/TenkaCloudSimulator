@@ -212,12 +212,31 @@ def main():
                               MessageAttributes={'label': {'DataType': 'String', 'StringValue': str(index)},
                                                  'bytes': {'DataType': 'Binary', 'BinaryValue': b'dummy'}})
                 assert sent['MD5OfMessageBody'] == hashlib.md5(body.encode()).hexdigest()
-            for index, (client, queue) in enumerate(zip(clients, queues)):
+            # Read each process's second region before its first: a shared
+            # insertion-order reader with a missing region filter must fail.
+            for index in (3, 1, 2, 0):
+                client, queue = clients[index], queues[index]
                 message = one_message(client, queue, f'cell-{index}-雪')
                 assert message['MessageAttributes']['label']['StringValue'] == str(index)
                 assert message['MessageAttributes']['bytes']['BinaryValue'] == b'dummy'
                 invoke(client, 'delete_message', QueueUrl=queue, ReceiptHandle=message['ReceiptHandle'])
                 counts(client, queue, 0, 0)
+
+            # A stronger absence oracle: only the peer region has a message.
+            # An empty-region Receive must neither disclose nor claim it, even
+            # if a buggy implementation happens to preserve insertion order.
+            for own, peer in ((0, 1), (2, 3)):
+                body = f'peer-region-only-{peer}'
+                invoke(clients[peer], 'send_message', QueueUrl=queues[peer], MessageBody=body)
+                counts(clients[own], queues[own], 0, 0)
+                counts(clients[peer], queues[peer], 1, 0)
+                assert receive(clients[own], queues[own]) == [], 'Empty region disclosed a peer message'
+                counts(clients[own], queues[own], 0, 0)
+                counts(clients[peer], queues[peer], 1, 0)
+                message = one_message(clients[peer], queues[peer], body)
+                invoke(clients[peer], 'delete_message', QueueUrl=queues[peer],
+                       ReceiptHandle=message['ReceiptHandle'])
+                counts(clients[peer], queues[peer], 0, 0)
 
             # Queue metadata, in-flight visibility and its current receipt persist.
             invoke(clients[0], 'send_message', QueueUrl=queues[0], MessageBody='restart-persistent')
@@ -295,7 +314,9 @@ def main():
             assert COUNTS['calls'] > 0 and COUNTS['calls'] == COUNTS['sends'] == COUNTS['responses']
             report = {'nativeSDK': 'boto3 ' + boto3.__version__, 'operations': sorted(SUCCEEDED),
                       'twoAuthenticatedProcesses': True, 'twoSQLiteDatabases': True, 'regions': REGIONS,
-                      'sameNameIsolation': True, 'crossToken401': True, 'restartMetadataVisibilityReceipt': True,
+                      'sameNameIsolation': True, 'receiveCellOrder': [3, 1, 2, 0],
+                      'emptyRegionCannotClaimPeerMessage': True, 'crossToken401': True,
+                      'restartMetadataVisibilityReceipt': True,
                       'receiptRotationAndRegionalRejection': True, 'delayAndVisibilitySeconds': True,
                       'actualRetentionSeconds': 60, 'prefixScope': 'GetQueueUrl and ListQueues',
                       'counts': COUNTS, 'cleanup': 'DELETED', 'realAWS': False, 'uiTested': False}
