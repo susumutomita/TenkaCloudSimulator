@@ -113,7 +113,7 @@
           "limits": "Finite physical-payload budget abstraction, not Go/SQLite refinement, SQL transaction/crash proof, Unicode/UTF8/string-byte counting, JSON attribute serialization, actual64MiB/10000row arithmetic, file size/SQLite overhead, clock/retention, receipt/IAM authorization or random-ID collision resistance. Row weights abstract persisted body+serialized-attribute bytes; all foreign rows, including expired ones, consume budget. Scopes/parent queues are assumed already valid and trusted; SQSLifecycle/native tests separately handle authority, parent lifetime and receipts. Maintenance enabledness assumes these preconditions, not unauthorized access or liveness/fairness. Charged counters describe successful admission accounting, not a claim that an actual storage-error path computed counters. FailedSendPreservesRows still applies to every rejected/storage-error send. Legacy overcap rows are retained: only new accepted sends must fit both caps, own expired cleanup is explicit/scoped and rollback preserves every row on send failure."
         }
       ],
-      "sha256": "b1fbad34eda211e01de403d79b47fc6f16c309054154a35973273dee60d73b8d"
+      "sha256": "4547b7d035374806e5f165d538e7aaf85b897c043d08244a5f0673ae155f35a9"
     },
     {
       "path": "formal/models.json",

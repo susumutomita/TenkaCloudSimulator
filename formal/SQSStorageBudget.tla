@@ -6,9 +6,10 @@ Row(id,s,n,expired) == [id |-> id,scope |-> s,size |-> n,expired |-> expired]
 RowSet == [id:IDs,scope:Scopes,size:1..2,expired:BOOLEAN]
 \* Enumerate exactly the unique-ID initial rows by a 9^3 product, rather than
 \* filtering 2^24 candidate subsets. No valid initial row set is removed.
-SeedAssignments == [SeedIDs -> ({"Absent"} \cup [scope:Scopes,size:1..2,expired:BOOLEAN])]
+EmptySeed == [scope |-> CHOOSE s \in Scopes : TRUE, size |-> 0, expired |-> FALSE]
+SeedAssignments == [SeedIDs -> ({EmptySeed} \cup [scope:Scopes,size:1..2,expired:BOOLEAN])]
 SeedProjection(a) == {Row(id,a[id].scope,a[id].size,a[id].expired) :
-                      id \in {key \in SeedIDs : a[key]#"Absent"}}
+                      id \in {key \in SeedIDs : a[key].size#0}}
 SeedInitialRows == {SeedProjection(a) : a \in SeedAssignments}
 VARIABLES rows, before, actor, kind, outcome, requestID, requestBytes,
           chargedRows, chargedBytes
