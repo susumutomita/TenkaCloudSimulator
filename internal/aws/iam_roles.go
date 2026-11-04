@@ -61,6 +61,39 @@ type iamTrustStatement struct {
 }
 type iamTrustStatements []iamTrustStatement
 
+// encoding/json's case-insensitive struct matching is broader than this trust
+// wire contract. Preserve the accepted original document, but require exact
+// field names at every object level before it can enter shared API/UI state.
+func iamTrustFields(data []byte, allowed ...string) bool {
+	var fields map[string]json.RawMessage
+	if json.Unmarshal(data, &fields) != nil || fields == nil {
+		return false
+	}
+	for field := range fields {
+		found := false
+		for _, name := range allowed {
+			found = found || field == name
+		}
+		if !found {
+			return false
+		}
+	}
+	return true
+}
+
+func (s *iamTrustStatement) UnmarshalJSON(data []byte) error {
+	if !iamTrustFields(data, "Sid", "Effect", "Action", "Principal") {
+		return fmt.Errorf("use canonical trust statement field names")
+	}
+	var fields map[string]json.RawMessage
+	_ = json.Unmarshal(data, &fields)
+	if !iamTrustFields(fields["Principal"], "Service") {
+		return fmt.Errorf("use canonical Service principal fields")
+	}
+	type plain iamTrustStatement
+	return iamStrictJSON(data, (*plain)(s))
+}
+
 func iamStrictJSON(data []byte, out any) error {
 	d := json.NewDecoder(bytes.NewReader(data))
 	d.DisallowUnknownFields()
@@ -94,7 +127,7 @@ func iamTrust(document string) (bool, error) {
 		Version   string
 		Statement iamTrustStatements
 	}
-	if len(document) > 32<<10 || iamStrictJSON([]byte(document), &trust) != nil || trust.Version != "2012-10-17" || len(trust.Statement) == 0 || len(trust.Statement) > 10 {
+	if len(document) > 32<<10 || !iamTrustFields([]byte(document), "Version", "Statement") || iamStrictJSON([]byte(document), &trust) != nil || trust.Version != "2012-10-17" || len(trust.Statement) == 0 || len(trust.Statement) > 10 {
 		return false, ssmFailure{"MalformedPolicyDocument", "Use the bounded service-principal trust policy subset."}
 	}
 	allowed, denied := false, false

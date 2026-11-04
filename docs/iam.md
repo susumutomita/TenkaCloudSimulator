@@ -18,7 +18,7 @@ Create a Lambda function→Create function→Existing roleで空の権限のロ�
 | --- | --- |
 | scope/name | Global、root pathのみ。role名は1–64の英数字・`_`・`-`。AWSが許す他の記号と非root pathは未対応 |
 | 名前の同一性 | role名はcase insensitive。一意なRoleId、作成日時、ARN、description、MaxSessionDurationを保持 |
-| trust | Version2012-10-17、1–10 statements、Allow/Deny、Action sts:AssumeRole、明示Service principalのみ。lambda.amazonaws.comへのAllowが必要、Deny優先。32KiBまで |
+| trust | JSON keyはVersion/Statement/Sid/Effect/Action/Principal/Serviceの正確な綴りを要求。Version2012-10-17、1–10 statements、Allow/Deny、Action sts:AssumeRole、明示Service principalのみ。lambda.amazonaws.comへのAllowが必要、Deny優先。32KiBまで |
 | inline permissions | identity policy subset、最大10policy/100aggregate statements/32KiB。未知のCondition等は拒否。明示Deny優先 |
 | pagination | ListRoles/ListRolePoliciesのMaxItems1–1000、返却Markerで継続 |
 | limits | Query本文128KiB。active+retired role名1000まで。削除ロールのnative再作成は新RoleIdを発行 |

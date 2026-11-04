@@ -293,3 +293,33 @@ func TestNativeIAMDescriptionRoundTripsWithoutSilentXMLReplacement(t *testing.T)
 		t.Fatal("description changed across XML", read.Description, err)
 	}
 }
+
+func TestNativeIAMTrustRequiresCanonicalJSONKeys(t *testing.T) {
+	ctx := context.Background()
+	db, _ := s3TestState(t)
+	roles, err := NewIAMRoleStore(db.Database())
+	if err != nil {
+		t.Fatal(err)
+	}
+	canonical := strings.Replace(lambdaServiceTrust, `"Effect":"Allow"`, `"Sid":"Canonical","Effect":"Allow"`, 1)
+	role, err := roles.Create(ctx, "canonical-trust", canonical, "", 3600)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, key := range []string{"Version", "Statement", "Sid", "Effect", "Action", "Principal", "Service"} {
+		bad := strings.Replace(canonical, `"`+key+`"`, `"`+strings.ToLower(key)+`"`, 1)
+		if _, err = roles.Create(ctx, "bad-key", bad, "", 3600); iamCode(err) != "MalformedPolicyDocument" {
+			t.Fatalf("accepted noncanonical %s: %v", key, err)
+		}
+		if err = roles.UpdateTrust(ctx, role.RoleName, bad); iamCode(err) != "MalformedPolicyDocument" {
+			t.Fatalf("updated noncanonical %s: %v", key, err)
+		}
+		stored, e := roles.Get(ctx, role.RoleName)
+		if e != nil || stored.AssumeRolePolicyDocument != canonical {
+			t.Fatal("invalid update changed trust", stored, e)
+		}
+	}
+	if _, err = roles.Get(ctx, "bad-key"); iamCode(err) != "NoSuchEntity" {
+		t.Fatal("invalid case left role state", err)
+	}
+}

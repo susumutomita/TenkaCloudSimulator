@@ -17,6 +17,10 @@ with running(authenticated=True) as (endpoint,token):
   except ClientError as e:assert e.response['Error']['Code']==code,(code,e.response['Error'])
   else:raise AssertionError('Expected '+code)
  iam=client('iam');functions=client('lambda');s3=client('s3')
+ for key in ('Version','Statement','Effect','Action','Principal','Service'):
+  malformed=json.dumps(trust).replace('"'+key+'"','"'+key.lower()+'"',1)
+  error('MalformedPolicyDocument',lambda:iam.create_role(RoleName='noncanonical-trust',AssumeRolePolicyDocument=malformed))
+
  role=iam.create_role(RoleName='NativeExecutor',AssumeRolePolicyDocument=json.dumps(trust))['Role']
  assert role['AssumeRolePolicyDocument']==trust
  assert role['MaxSessionDuration']==3600 and role['Path']=='/'
@@ -132,6 +136,13 @@ with running(authenticated=True) as (endpoint,token),sync_playwright() as p:
  for n in range(21):native.create_role(RoleName=f'page-role-{n:02d}',AssumeRolePolicyDocument=json.dumps(trust))
  page.get_by_role('button',name='Refresh roles',exact=True).click();expect(page.get_by_role('link',name='page-role-00',exact=True)).to_be_visible();expect(page.get_by_role('link',name='page-role-20',exact=True)).to_have_count(0);page.get_by_role('button',name='Next page',exact=True).click();expect(page.get_by_role('link',name='page-role-20',exact=True)).to_be_visible();expect(page.get_by_role('link',name='page-role-00',exact=True)).to_have_count(0)
  page.get_by_placeholder('Find roles',exact=True).fill('page-role-00');expect(page.get_by_role('link',name='page-role-00',exact=True)).to_be_visible()
+ # Old persisted documents with lower-case keys must not crash the role table.
+ def historical_trust(route):
+  if urllib.parse.parse_qs(route.request.post_data or '').get('Action')!=['ListRoles']:route.fallback();return
+  response=route.fetch();original=response.text();changed=original.replace('%22Statement%22','%22statement%22');assert changed!=original
+  route.fulfill(response=response,body=changed)
+ page.route(endpoint+'/',historical_trust);page.get_by_role('button',name='Refresh roles',exact=True).click();expect(page.get_by_text('Unrecognized stored trust policy',exact=True)).to_be_visible();expect(page.get_by_role('link',name='page-role-00',exact=True)).to_be_visible();page.unroute(endpoint+'/',historical_trust)
+ page.get_by_role('button',name='Refresh roles',exact=True).click();expect(page.get_by_text('Unrecognized stored trust policy',exact=True)).to_have_count(0)
  for n in range(21):native.delete_role(RoleName=f'page-role-{n:02d}')
  response=page.request.delete(endpoint+'/2015-03-31/functions/native-console-function',headers={'X-Simulator-Service':'lambda','X-Simulator-Region':'us-east-1'});assert response.status==204
  from native_iam_docs import verify_native_iam_docs
