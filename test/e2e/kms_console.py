@@ -21,7 +21,28 @@ with running(authenticated=True) as (endpoint,operator),sync_playwright() as p:
   else:outside.append(r.request.url);r.abort()
  context.route('**/*',route)
  page.goto(endpoint+'/_simulator/console/');page.get_by_label('Access token',exact=True).fill(operator);page.get_by_role('button',name='Open sandbox',exact=True).click()
- page.get_by_role('button',name='Services',exact=True).click();page.get_by_role('menuitem',name='KMS',exact=True).click()
+ page.get_by_role('button',name='Services',exact=True).click();page.get_by_role('menuitem',name='Key Management Service',exact=True).click()
+ # Keep the first refresh pending, let a newer real native request succeed,
+ # then retire the older500. Its error must not replace the newer successful view.
+ expect(page.get_by_text('No customer managed keys',exact=True)).to_be_visible()
+ page.evaluate("""()=>{window.__kmsOriginalFetch=window.fetch;window.__kmsOlderBodyConsumed=false;
+ window.fetch=async(...args)=>{const response=await window.__kmsOriginalFetch(...args);
+ if(response.headers.get('X-KMS-Older-Test')==='yes'){const original=response.text.bind(response);response.text=async()=>{try{return await original()}finally{setTimeout(()=>window.__kmsOlderBodyConsumed=true,0)}}}return response}}""")
+ held=[]
+ def overlap(route):
+  if route.request.headers.get('x-amz-target')=='TrentService.ListKeys' and not held:held.append(route)
+  else:route.continue_()
+ page.route(endpoint+'/',overlap)
+ page.get_by_role('button',name='Refresh keys',exact=True).click()
+ assert len(held)==1,'First refresh did not reach the controlled route'
+ with page.expect_response(lambda response:response.request.headers.get('x-amz-target')=='TrentService.ListKeys' and response.status==200):
+  page.get_by_role('button',name='Refresh keys',exact=True).click()
+ expect(page.get_by_text('No customer managed keys',exact=True)).to_be_visible()
+ held[0].fulfill(status=500,headers={'Content-Type':'application/x-amz-json-1.1','X-KMS-Older-Test':'yes'},body=json.dumps({'__type':'KMSInternalException','message':'older-refresh-must-not-win'}))
+ page.wait_for_function('window.__kmsOlderBodyConsumed===true')
+ expect(page.get_by_text('500: older-refresh-must-not-win',exact=True)).to_have_count(0)
+ expect(page.get_by_text('No customer managed keys',exact=True)).to_be_visible()
+ page.unroute(endpoint+'/',overlap);page.evaluate('window.fetch=window.__kmsOriginalFetch')
  page.get_by_role('button',name='Create key',exact=True).first.click();page.get_by_label('Description',exact=True).fill('Cancelled dummy key');page.get_by_role('button',name='Cancel',exact=True).click();expect(page.get_by_role('heading',name='Customer managed keys (0)',exact=True)).to_be_visible();assert kms.list_keys()['Keys']==[]
  page.get_by_role('button',name='Create key',exact=True).first.click();page.get_by_label('Description',exact=True).fill('Dummy browser key');page.screenshot(path=str(REPORTS/'kms-create-1440.png'),full_page=True,animations='disabled');page.get_by_role('button',name='Create key',exact=True).click()
  expect(page.get_by_role('heading',name='General configuration',exact=True)).to_be_visible();page.screenshot(path=str(REPORTS/'kms-key-1440.png'),full_page=True,animations='disabled')
@@ -45,4 +66,4 @@ with running(authenticated=True) as (endpoint,operator),sync_playwright() as p:
  page.screenshot(path=str(REPORTS/'kms-keys-390.png'),full_page=True,animations='disabled');page.get_by_role('button',name='More',exact=True).click();page.get_by_role('button',name='us-east-1',exact=True).click();page.get_by_role('button',name='us-west-2',exact=True).click();expect(page.get_by_text('No customer managed keys',exact=True)).to_be_visible();expect(page.get_by_label('Plaintext',exact=True)).to_have_count(0)
  assert not errors and not outside,(errors,outside)
  browser.close()
- print(json.dumps({'nativeCreatePolicyEncryptDecrypt':True,'cancelCreatesNothing':True,'SDKConfirmsUIState':True,'wrongContextRejected':True,'disabledGuard':True,'keyboard':True,'PC390AxeReflow':True,'regionRemount':True,'outside':0,'pageerrors':0,'cleanup':'temporary process/DB removed; key scheduled deletion unsupported'}))
+ print(json.dumps({'nativeCreatePolicyEncryptDecrypt':True,'cancelCreatesNothing':True,'SDKConfirmsUIState':True,'wrongContextRejected':True,'disabledGuard':True,'keyboard':True,'PC390AxeReflow':True,'regionRemount':True,'staleRefreshErrorIgnored':True,'outside':0,'pageerrors':0,'cleanup':'temporary process/DB removed; key scheduled deletion unsupported'}))

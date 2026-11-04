@@ -265,9 +265,9 @@
     },
     {
       "path": "test/e2e/kms_console.py",
-      "sha256": "59b7a8e588dffe8a9938b68fd6471f4fde38c86760c9151ff1df9cca81d010ee",
+      "sha256": "12c82facd91ff20dfa21b50e857217df2c427bfc8c171b56f4518d5a35382e66",
       "disposition": "test-support",
-      "reason": "Add/retain real KMS native/SQLite/SDK/browser assertions with literal operation resources, positive crypto, failed-write frames and state persistence; these tests are validation support, not a formal implementation proof.",
+      "reason": "Add/retain real KMS native/SQLite/SDK/browser assertions with literal operation resources, positive crypto, failed-write frames and state persistence; these tests are validation support, not a formal implementation proof. Minimal same-view refresh revision check prevents an older error overwriting a newer result; controlled delayed-refresh actual browser fixture is prepared but not executed.",
       "models": []
     },
     {
@@ -279,9 +279,9 @@
     },
     {
       "path": "tools/console/src/kms.jsx",
-      "sha256": "a88a1c821136795e3478838128beacef69cf039d59cbfe7ee40aef83e13791e5",
+      "sha256": "0ec874c48156cdab640ebb80a8b7cb5505ba0fde89bbc5184071548e5d82ae6d",
       "disposition": "presentation",
-      "reason": "Expose existing same-origin KMS API requests/typed documentation and minimal Cloudscape component presentation. Backend remains authoritative; generated assets, served examples, async UI/reflow and real browser operation are separate pending tests, not established by a presentation disposition.",
+      "reason": "Expose existing same-origin KMS API requests/typed documentation and minimal Cloudscape component presentation. Backend remains authoritative; generated assets, served examples, async UI/reflow and real browser operation are separate pending tests, not established by a presentation disposition. Minimal same-view refresh revision check prevents an older error overwriting a newer result; controlled delayed-refresh actual browser fixture is prepared but not executed.",
       "models": []
     },
     {
