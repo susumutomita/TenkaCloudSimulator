@@ -45,3 +45,35 @@ IAM→Roles→Create role→Role details→Lambda→Create function→Permission
 IAMはnative Query APIを使うCloudscape Wizard、Permissions/Trust relationshipsの実状態操作に対応する。従来のidentity方式はLocal identitiesへ残す。[導線・制限](iam.md)。
 
 API GatewayはAPIs→Regional REST作成→resource/method→Lambda proxy→Deploy API/new stage→stage実行をnative APIと共有する。作成時はAPI/method限定Lambda resource permissionを追加し、実行ロールによるサービスアクセスとは分離する。応答は安全な非実行downloadで、AWSのbrowser app hostingとは異なる。resource tree、既存stage編集等の差と実確認範囲は[API Gateway](apigateway.md)と[再現差分](console-fidelity.md)を参照。
+
+
+## Access-token paste boundary (local candidate)
+
+Login uses the real Cloudscape password Input. The field accepts only the token
+itself; command labels, surrounding spaces and invalid/expired tokens are not
+trimmed or granted access. Clipboard HTML is never interpreted. Copy a plain-text
+token when the clipboard contains no text/plain representation. CR/LF are removed
+only as required by the existing HTML password-input behavior.
+
+A capture-phase backup records an explicit plain-text paste and its selection.
+Normal native insertion/onChange cancels that backup, preserving native undo.
+Only a paste without the normal state update uses the next-task fallback; newer
+typing/paste/navigation invalidates it, and keyboard submission flushes it first.
+No token is logged, stored in browser storage, or granted authority by this UI.
+The server still checks its exact local credential and issues its separate opaque
+browser session.401 remains invalid/expired; connection failures and other HTTP
+errors have fixed distinct messages without reflecting response bodies.
+
+Baseline cloud Chromium tests used actual Clipboard.writeText and trusted paste
+events, not fill() as paste evidence. Valid generated tokens logged in/out/in;
+invalid/spaces/label inputs remained401. An artificial target preventDefault
+fixture caused the old input to stay empty and is a regression seam, not a Dia
+root-cause claim. An HTML-only clipboard also produced empty password input while
+a rich editor received its content, but the user's clipboard format is unknown.
+Linux Meta+V is not Mac proof; native context-menu Paste and real Mac/Dia remain
+unverified. No Mac or real user credentials were accessed. Candidate browser and
+final immutable gates must run before claiming the new behavior passes.
+
+References: [React capture-phase paste events](https://react.dev/reference/react-dom/components/common#onpaste),
+[HTML password sanitization](https://html.spec.whatwg.org/multipage/input.html#password-state-(type=password)),
+and [official Cloudscape Input](https://cloudscape.design/components/input/).
