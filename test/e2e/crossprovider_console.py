@@ -93,6 +93,35 @@ def run_crossprovider_console():
                     path = item.path()
                     assert path and Path(path).read_bytes() == wanted, 'Actual download bytes differ from uploaded fixture'
 
+                def fixed_scope_menu(page, kind, value):
+                    # Open the actual utility, including Cloudscape's compact More view.
+                    # A configured provider scope must never offer AWS region choices.
+                    trigger = page.get_by_role('button', name=kind+' menu', exact=True)
+                    compact = not trigger.is_visible()
+                    if compact:
+                        page.get_by_role('button', name='More', exact=True).click()
+                        scope = page.get_by_role('button', name=value, exact=True)
+                        expect(scope).to_be_visible()
+                        scope.click()
+                    else:
+                        expect(trigger).to_contain_text(value)
+                        trigger.click()
+                    label = 'Configured '+kind.lower()+': '+value+' (read only)'
+                    for region in ('us-east-1', 'ap-northeast-1', 'us-west-2', 'eu-west-1'):
+                        expect(page.get_by_role('menuitem', name=region, exact=True)).to_have_count(0)
+                        expect(page.get_by_role('button', name=region, exact=True)).to_have_count(0)
+                    if compact:
+                        # The pinned compact renderer does not propagate item.disabled.
+                        # Clicking its descriptive row must still be a no-op, never changeRegion.
+                        page.get_by_role('button', name=label, exact=True).click()
+                        page.get_by_role('button', name='More', exact=True).click()
+                        expect(page.get_by_role('button', name=value, exact=True)).to_be_visible()
+                        page.get_by_role('button', name='Close', exact=True).click()
+                    else:
+                        expect(page.get_by_role('menuitem', name=label, exact=True)).to_be_disabled()
+                        page.keyboard.press('Escape')
+                        expect(trigger).to_contain_text(value)
+
                 owner = page_for(a); first_cookie = login(owner, a, operator)
                 peer = page_for(b); login(peer, b, other)
                 # Services entries are real controls; the actual flows below also exercise bookmark routes.
@@ -116,6 +145,7 @@ def run_crossprovider_console():
                     view = owner.get_by_role('region', name='Cloud Storage', exact=True)
                     expect(view.get_by_role('heading', name='Buckets', exact=True)).to_be_visible()
                     expect(view.get_by_role('button', name='Create bucket', exact=True)).to_be_enabled()
+                    fixed_scope_menu(owner, 'Project', 'tenkacloud-local')
                     await_cancel = view.get_by_role('button', name='Create bucket', exact=True)
                     await_cancel.focus(); owner.keyboard.press('Enter')
                     expect(view.get_by_label('Bucket name', exact=True)).to_be_focused()
@@ -159,6 +189,7 @@ def run_crossprovider_console():
                     owner.goto(a+'/_simulator/console/#/azure-blob')
                     azure_view = owner.locator('.azure-blob-view')
                     expect(azure_view.get_by_role('button', name='+ Container', exact=True)).to_be_enabled()
+                    fixed_scope_menu(owner, 'Storage account', 'tenkacloudlocal')
                     azure_view.get_by_role('button', name='+ Container', exact=True).click()
                     modal = owner.get_by_role('dialog', name='New container', exact=True)
                     modal.get_by_label('Name', exact=True).fill(container)
@@ -255,7 +286,7 @@ def run_crossprovider_console():
                 assert not errors,'Browser page errors (see evidence counts; no secret-bearing error text emitted)'
                 assert not outside,'Unexpected network request outside the selected local CLI'
                 report={'actualBinaryTwoCLIs':True,'twoSQLiteDBs':True,'browserSessionsMinted':True,
-                        'gcpAndAzureActualUILifecycle':[1440,390],'nativeHTTPStateOracle':True,
+                        'gcpAndAzureActualUILifecycle':[1440,390],'configuredProviderScopeMenu':[1440,390],'nativeHTTPStateOracle':True,
                         'downloadExactBytes':True,'peerSameNameStatePreserved':True,'readerNative403FramesUnchanged':True,
                         'readerUI403':True,'crossTeamTokensAndCookie401':True,'logoutReplay401Relogin':True,
                         'scalarStaticThenActualSend':True,'axeStates':audits,'outsideRequests':0,'pageErrors':0,
