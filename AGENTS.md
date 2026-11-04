@@ -11,6 +11,8 @@ This repository owns an independent Go single-binary multi-cloud simulator. AWS 
 
 Read README and docs/design/0001-go-standalone.md before changing public contracts. Search for related capabilities, handlers, and tests. Preserve Git history and unrelated/uncommitted work. Never read/write `.env`, credentials, or secret directories. Do not perform release, deployment, cloud provisioning, push, or PR without the relevant authorization.
 
+For authorized parallel work, follow [parallel development rules](docs/contributing/parallel-development.md) and check/update the single [development roster](docs/development-status.md) before claiming a task or starting another agent.
+
 Do not silently simulate success for unsupported operations. Unsupported policy fields must be rejected. IAM principal selection is exercise context, not authentication or tenant isolation. The CLI must require local access tokens by default; hosts allocate separate processes/SQLite/token authorities per team. Participant tokens bind an identity and cannot select admin. Keep default numeric loopback binding, no outbound cloud calls, payload limits, and SQLite transaction/foreign-key invariants.
 
 Before completing a change run `make before-commit`; for protocol, persistence, console, or documentation-UI changes also run `make e2e`. For model changes run `TLA_JAR=... make formal`. Cross-platform execution is not implied by successful cross-compilation. Record acceptance criteria, verification, compatibility impact, remaining risks, and unverified behavior. Do not overstate bounded TLA+ checking as a proof of implementation.
