@@ -1,5 +1,6 @@
 """Real temporary Git trees test exact binding, not semantic proof or review."""
 import copy
+import hashlib
 import json
 import shutil
 import subprocess
@@ -7,6 +8,9 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
+
+import formal_applicability
 
 from formal_applicability import GateError, RECORD, changes, disposition, git, initialize, load_registry, validate_record, exact_head_inputs
 
@@ -19,6 +23,8 @@ class ApplicabilityTests(unittest.TestCase):
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name)
         shutil.copytree(ROOT / 'formal', self.root / 'formal')
+        for path in ('go.mod', 'go.sum'):
+            shutil.copyfile(ROOT / path, self.root / path)
         shutil.copyfile(ROOT / '.gitignore', self.root / '.gitignore')
         record = self.root / RECORD
         if record.exists():
@@ -28,7 +34,7 @@ class ApplicabilityTests(unittest.TestCase):
             target = self.root / path
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(ROOT / path, target)
-        for path in ('scripts/formal_model_gate.py', 'scripts/formal_applicability.py'):
+        for path in ('scripts/formal_model_gate.py', 'scripts/formal_applicability.py', 'scripts/formal_module_metadata.py'):
             target = self.root / path
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(ROOT / path, target)
@@ -235,6 +241,187 @@ class ApplicabilityTests(unittest.TestCase):
         result = subprocess.run([sys.executable, str(ROOT / 'scripts/check-formal-applicability.py'), 'check', '--base', self.base], cwd=self.root, capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertTrue((self.root / 'reports/formal/applicability.json').is_file())
+        validate_record(self.root, self.base)
+
+
+    def module_baseline(self):
+        self.module = b'module example.com/fixture\n\ngo 1.26.0\n\nrequire (\n\texample.com/a v1.2.3\n\texample.com/b v2.3.4 // indirect\n)\n'
+        (self.root / 'go.mod').write_bytes(self.module)
+        (self.root / 'go.sum').write_bytes(b'fixture-checksums-unchanged\n')
+        self.commit('module baseline')
+        self.base = git(self.root, 'rev-parse', 'HEAD').decode().strip()
+        return self.module.replace(b'\texample.com/b v2.3.4 // indirect', b'\texample.com/b v2.3.4')
+
+    def module_record(self, after):
+        (self.root / 'go.mod').write_bytes(after)
+        git(self.root, 'add', '.')
+        initialize(self.root, self.base)
+        record = json.loads((self.root / RECORD).read_text())
+        for item in record['changes']:
+            item.update(disposition='build-metadata', reason='Require set and other directives unchanged; no token-state invariant is claimed.', models=[])
+        self.write_record(record)
+        self.commit('module annotation candidate')
+
+    def test_module_indirect_and_grouping_metadata_only(self):
+        after = self.module_baseline()
+        # Merge blocks into individual directives and change order/annotation.
+        after = b'module example.com/fixture\n\ngo 1.26.0\n\nrequire example.com/b v2.3.4\nrequire example.com/a v1.2.3 // indirect\n'
+        self.module_record(after)
+        self.assertEqual(validate_record(self.root, self.base)['changes'][0]['disposition'], 'build-metadata')
+        self.assertIsNone(disposition('go.mod'))  # Not a general allowlist.
+
+    def test_module_semantic_and_unknown_changes_are_rejected(self):
+        after = self.module_baseline()
+        variants = {
+            'version': after.replace(b'v1.2.3', b'v1.2.4'),
+            'added': after.replace(b')\n', b'\texample.com/c v1.0.0\n)\n'),
+            'deleted': after.replace(b'\texample.com/a v1.2.3\n', b''),
+            'go': after.replace(b'go 1.26.0', b'go 1.26.1'),
+            'toolchain': after.replace(b'go 1.26.0', b'go 1.26.0\ntoolchain go1.26.1'),
+            'replace': after + b'replace example.com/a => ./local\n',
+            'exclude': after + b'exclude example.com/a v1.2.3\n',
+            'retract': after + b'retract v1.0.0\n',
+            'unknown': after + b'tool example.com/a/tool\n',
+            'duplicate': after.replace(b')\n', b'\texample.com/a v1.2.3\n)\n'),
+            'quoted': after.replace(b'example.com/a', b'"example.com/a"'),
+            'comment': after + b'// other comment\n',
+            'semantic-comment': after + b'//go:debug panicnil=1\n',
+            'unknown-header-comment': b'// note\n' + after,
+            'unicode': after.replace(b'example.com/a', 'example.com/é'.encode()),
+            'prerelease': after.replace(b'v1.2.3', b'v1.2.3-rc1'),
+            'empty-block': after + b'require (\n)\n',
+            'unclosed-block': after + b'require (\n',
+            'inline': after.replace(b'require (\n', b'require ( '),
+            'crlf': after.replace(b'\n', b'\r\n'),
+        }
+        for kind, changed in variants.items():
+            with self.subTest(kind=kind):
+                self.module_record(changed)
+                with self.assertRaises(GateError):
+                    validate_record(self.root, self.base)
+
+    def test_module_changed_or_missing_sum_and_symlink_fail(self):
+        after = self.module_baseline()
+        self.module_record(after)
+        (self.root / 'go.sum').write_bytes(b'changed checksums\n')
+        self.module_record(after)
+        with self.assertRaises(GateError):
+            validate_record(self.root, self.base)
+        git(self.root, 'rm', 'go.sum')
+        self.module_record(after)
+        with self.assertRaises(GateError):
+            validate_record(self.root, self.base)
+        (self.root / 'go.sum').symlink_to('go.mod')
+        with self.assertRaises(GateError):
+            self.module_record(after)
+
+    def test_module_dirty_staged_and_unrelated_runtime_cannot_be_exempted(self):
+        after = self.module_baseline()
+        self.module_record(after)
+        (self.root / 'go.mod').write_bytes(self.module)
+        with self.assertRaises(GateError):
+            validate_record(self.root, self.base)
+        git(self.root, 'add', 'go.mod')
+        (self.root / 'go.mod').write_bytes(after)
+        with self.assertRaises(GateError):
+            validate_record(self.root, self.base)
+        git(self.root, 'reset', '-q', 'HEAD', '--', 'go.mod')
+        (self.root / 'go.mod').write_bytes(after)
+        record = self.prepare('internal/aws/unmodeled_module_user.go')
+        for item in record['changes']:
+            item.update(disposition='build-metadata', models=[])
+        self.write_record(record)
+        self.commit('module exception does not exempt Go source')
+        with self.assertRaises(GateError):
+            validate_record(self.root, self.base)
+
+
+
+    def test_original_startup_module_blobs_and_negative_controls(self):
+        fixture = json.loads((ROOT / 'test/formal/startup-module-metadata.json').read_text())
+        for key in ('before', 'after', 'go_sum'):
+            self.assertEqual(hashlib.sha256(fixture[key].encode()).hexdigest(), fixture['sha256'][key])
+        (self.root / 'go.mod').write_text(fixture['before'])
+        (self.root / 'go.sum').write_text(fixture['go_sum'])
+        git(self.root, 'add', 'go.mod', 'go.sum')
+        # Current formal baseline may already contain these exact public blobs.
+        git(self.root, 'commit', '-q', '--allow-empty', '-m', 'original public Startup308 module baseline')
+        self.base = git(self.root, 'rev-parse', 'HEAD').decode().strip()
+        self.module_record(fixture['after'].encode())
+        result = validate_record(self.root, self.base)
+        self.assertEqual([(c['path'], c['disposition'], c['models']) for c in result['changes']], [('go.mod', 'build-metadata', [])])
+        self.module_record(fixture['after'].replace('v0.44.0', 'v0.45.0').encode())
+        with self.assertRaises(GateError):
+            validate_record(self.root, self.base)
+        (self.root / 'go.sum').write_text(fixture['go_sum'] + 'changed checksum fixture\n')
+        self.module_record(fixture['after'].encode())
+        with self.assertRaises(GateError):
+            validate_record(self.root, self.base)
+
+
+
+    def test_git_flags_cannot_hide_module_or_sum_bytes(self):
+        after = self.module_baseline()
+        self.module_record(after)
+        before = exact_head_inputs(self.root)
+        self.assertTrue({'go.mod', 'go.sum'} <= set(before['hashes']))
+        for flag, undo in (('--assume-unchanged', '--no-assume-unchanged'), ('--skip-worktree', '--no-skip-worktree')):
+            for path in ('go.mod', 'go.sum'):
+                with self.subTest(flag=flag, path=path):
+                    target = self.root / path
+                    original = target.read_bytes()
+                    git(self.root, 'update-index', flag, path)
+                    target.write_bytes(original + b'\nchanged but hidden by Git flag\n')
+                    self.assertEqual(git(self.root, 'status', '--porcelain'), b'')
+                    with self.assertRaises(GateError):
+                        validate_record(self.root, self.base)
+                    target.write_bytes(original)
+                    git(self.root, 'update-index', undo, path)
+        validate_record(self.root, self.base)
+
+    def test_git_flags_cannot_hide_module_mode_or_symlink(self):
+        after = self.module_baseline()
+        self.module_record(after)
+        for flag, undo in (('--assume-unchanged', '--no-assume-unchanged'), ('--skip-worktree', '--no-skip-worktree')):
+            for path in ('go.mod', 'go.sum'):
+                with self.subTest(flag=flag, path=path):
+                    target = self.root / path
+                    original = target.read_bytes()
+                    git(self.root, 'update-index', flag, path)
+                    target.chmod(0o755)
+                    with self.assertRaises(GateError):
+                        validate_record(self.root, self.base)
+                    target.chmod(0o644)
+                    target.unlink()
+                    target.symlink_to('formal/models.json')
+                    with self.assertRaises(GateError):
+                        validate_record(self.root, self.base)
+                    target.unlink()
+                    with self.assertRaises(GateError):
+                        validate_record(self.root, self.base)
+                    target.write_bytes(original)
+                    git(self.root, 'update-index', undo, path)
+        validate_record(self.root, self.base)
+
+    def test_module_inputs_are_rechecked_after_classification_with_git_flags(self):
+        after = self.module_baseline()
+        self.module_record(after)
+        real = formal_applicability.module_metadata_change
+        for flag, undo in (('--assume-unchanged', '--no-assume-unchanged'), ('--skip-worktree', '--no-skip-worktree')):
+            for path in ('go.mod', 'go.sum'):
+                target = self.root / path
+                original = target.read_bytes()
+                def tamper(*args):
+                    result = real(*args)
+                    target.write_bytes(original + b'\nchanged after classification\n')
+                    return result
+                with self.subTest(flag=flag, path=path):
+                    git(self.root, 'update-index', flag, path)
+                    with patch('formal_applicability.module_metadata_change', side_effect=tamper):
+                        with self.assertRaises(GateError):
+                            validate_record(self.root, self.base)
+                    target.write_bytes(original)
+                    git(self.root, 'update-index', undo, path)
         validate_record(self.root, self.base)
 
 
