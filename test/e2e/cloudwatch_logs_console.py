@@ -57,9 +57,10 @@ def run():
             with page.expect_response(lambda response:response.request.headers.get("x-amz-target")=="TrentService.ListKeys") as keys_response:
                 page.get_by_role("menuitem", name="Key Management Service", exact=True).click()
             assert keys_response.value.status==200
-            assert keys_response.value.json()["Keys"]==[]
             expect(page.get_by_role("heading", name=re.compile(r"^Customer managed keys"))).to_be_visible()
             expect(page.get_by_role("table", name="Customer managed keys", exact=True)).to_be_visible()
+            expect(page.get_by_role("heading", name="No customer managed keys", exact=True)).to_be_visible()
+            expect(page.get_by_role("button", name="Refresh keys", exact=True)).to_be_enabled()
             page.get_by_role("button", name="Services", exact=True).click()
             page.get_by_role("menuitem", name="CloudWatch Logs", exact=True).click()
             expect(page.get_by_role("heading", name=re.compile(r"^Log groups"))).to_be_visible()
