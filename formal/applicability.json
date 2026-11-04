@@ -1,415 +1,478 @@
 {
   "version": 1,
-  "base_sha": "5c97dc5916fa39fd43d80ae79532d5892fcb30ea",
+  "base_sha": "0a4ed897f492011bcef0a5d8765f45c200809db9",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "2358c6769999dd01853f245c1baec05936050bb965b4fb1a7209c5e212535d55",
+      "sha256": "c30a45a0162ae09feecd9b394b25e586159ad66ee39b551e9aad43fd4a4d86ab",
       "disposition": "documentation",
-      "reason": "Preserve main multi-cloud contracts and document bounded KMS plus current18/94 source inventory. Historical acceptance is input-scoped; all new merged runtime/assets/TLC/full gates remain UNRUN.",
+      "reason": "DynamoDB bounded API/compatibility/source history and explicit verified-versus-unrun limitations. No new runtime, model completeness, multi-cloud or Challenge grading claim; original problems, rights and unsupported features preserved.",
       "models": []
     },
     {
-      "path": "docs/kms.md",
-      "sha256": "46179ef38da253a96c4bb7b6cd7c5bdf0d79ded54cbdeb6fe078a1abd281ed01",
+      "path": "docs/dynamodb-formal-scope.md",
+      "sha256": "fc0ecd4902e810c0f30e7f9c2e1f14b90c95e54c64ce0e07ae24ac6b42b6f49e",
       "disposition": "documentation",
-      "reason": "Preserve main multi-cloud contracts and document bounded KMS plus current18/94 source inventory. Historical acceptance is input-scoped; all new merged runtime/assets/TLC/full gates remain UNRUN.",
+      "reason": "DynamoDB bounded API/compatibility/source history and explicit verified-versus-unrun limitations. No new runtime, model completeness, multi-cloud or Challenge grading claim; original problems, rights and unsupported features preserved.",
       "models": []
     },
     {
-      "path": "formal/KMSKeyState.cfg",
-      "sha256": "44b027d39cbebe6030053b599ff398a66bbe423b504d57fa2e46007cd1fce8fa",
-      "disposition": "modeled",
-      "reason": "Bounded successful native key/crypto state events only. SQL acknowledgment/commit failures, read metadata, JSON decoding, real AES/counter arithmetic and raw headers remain native/integration obligations, not formal refinement.",
-      "models": [
-        {
-          "id": "KMSKeyState",
-          "properties": [
-            "AuthorizedEvents",
-            "EnabledCrypto",
-            "BoundContextAndKey"
-          ],
-          "limits": "Atomic bounded successful Create/SetEnabled/Encrypt/Decrypt events only; key/region/context labels are abstract values. No AES/nonce probability, JSON/IAM/SigV4 parsing, routing/protocol selection, SQLite RowsAffected/commit/crash refinement, rejected/error response frames, read-only Describe/List/GetPolicy outputs, host authentication, time, growing key population or arbitrary key policies. Last event captures pre-operation conditions so later Disable does not invalidate an earlier legitimate output."
-        }
-      ]
-    },
-    {
-      "path": "formal/KMSKeyState.tla",
-      "sha256": "26dae0bb9da92a19190b613c4d870d23356b2571374639ff0116229b8ee6edaf",
-      "disposition": "modeled",
-      "reason": "Bounded successful native key/crypto state events only. SQL acknowledgment/commit failures, read metadata, JSON decoding, real AES/counter arithmetic and raw headers remain native/integration obligations, not formal refinement.",
-      "models": [
-        {
-          "id": "KMSKeyState",
-          "properties": [
-            "AuthorizedEvents",
-            "EnabledCrypto",
-            "BoundContextAndKey"
-          ],
-          "limits": "Atomic bounded successful Create/SetEnabled/Encrypt/Decrypt events only; key/region/context labels are abstract values. No AES/nonce probability, JSON/IAM/SigV4 parsing, routing/protocol selection, SQLite RowsAffected/commit/crash refinement, rejected/error response frames, read-only Describe/List/GetPolicy outputs, host authentication, time, growing key population or arbitrary key policies. Last event captures pre-operation conditions so later Disable does not invalidate an earlier legitimate output."
-        }
-      ]
-    },
-    {
-      "path": "formal/KMSProtocolAdmission.cfg",
-      "sha256": "3fa7b1add3c018834091b1d6e7ac618ae8615c24ab72a11dd83fa3d4a1b7ce39",
-      "disposition": "modeled",
-      "reason": "ONLY the new configured KMS selection/policy-snapshot/refusal branch is declared under the normalized protocol model. Raw headers/SigV4, real identity SQL errors, parsing and unchanged S3/SSM/other AWS branches are not modeled. Old dispatch failures were reproduced and corrected; native tests exercise the real bridge separately from this finite abstraction.",
-      "models": [
-        {
-          "id": "KMSProtocolAdmission",
-          "properties": [
-            "NoCrossServiceFallback",
-            "InfraNotDeny",
-            "MissingIdentityDenied",
-            "NoSuccessWithoutKMSTarget",
-            "NoAuthorityFromWireMetadata"
-          ],
-          "limits": "Normalized protocol/identity-policy admission abstraction after trusted outer exercise identity selection; not raw HTTP/SigV4 parsing or signature authentication, local token/Access or tenant-isolation proof, full IAM semantics, byte bodies/AES, real DB faults/transactions, Go refinement, timing/concurrency/crash proof or other-service authorization. Other route is only handoff, not modeled S3 success. Body-read-barrier native tests and nine actual Gateway metadata cases independently exercise the intended bridge; new tests and this model are initially UNRUN. Shared Gateway/server/SSM applicability is ONLY the new configured KMS route/module declaration, not unchanged AWS branches, nil-module/constructor behavior or whole provider wiring. Native tests are separate and initially unrun."
-        }
-      ]
-    },
-    {
-      "path": "formal/KMSProtocolAdmission.tla",
-      "sha256": "9ee09a99354a4472cf7bf07054eee95739b8a6e448b4c7ee317443d414ac33ca",
-      "disposition": "modeled",
-      "reason": "ONLY the new configured KMS selection/policy-snapshot/refusal branch is declared under the normalized protocol model. Raw headers/SigV4, real identity SQL errors, parsing and unchanged S3/SSM/other AWS branches are not modeled. Old dispatch failures were reproduced and corrected; native tests exercise the real bridge separately from this finite abstraction.",
-      "models": [
-        {
-          "id": "KMSProtocolAdmission",
-          "properties": [
-            "NoCrossServiceFallback",
-            "InfraNotDeny",
-            "MissingIdentityDenied",
-            "NoSuccessWithoutKMSTarget",
-            "NoAuthorityFromWireMetadata"
-          ],
-          "limits": "Normalized protocol/identity-policy admission abstraction after trusted outer exercise identity selection; not raw HTTP/SigV4 parsing or signature authentication, local token/Access or tenant-isolation proof, full IAM semantics, byte bodies/AES, real DB faults/transactions, Go refinement, timing/concurrency/crash proof or other-service authorization. Other route is only handoff, not modeled S3 success. Body-read-barrier native tests and nine actual Gateway metadata cases independently exercise the intended bridge; new tests and this model are initially UNRUN. Shared Gateway/server/SSM applicability is ONLY the new configured KMS route/module declaration, not unchanged AWS branches, nil-module/constructor behavior or whole provider wiring. Native tests are separate and initially unrun."
-        }
-      ]
-    },
-    {
-      "path": "formal/README.md",
-      "sha256": "b5cc6dabc0324ae714054c82fca4932398f9dcce59a3eabec00b5d395f266266",
+      "path": "docs/dynamodb-integration.md",
+      "sha256": "d89dfd4faebfd178f9cbf9756fc94bb1d3ee29d123e820fe98176c70862c41f8",
       "disposition": "documentation",
-      "reason": "Preserve main multi-cloud contracts and document bounded KMS plus current18/94 source inventory. Historical acceptance is input-scoped; all new merged runtime/assets/TLC/full gates remain UNRUN.",
+      "reason": "DynamoDB bounded API/compatibility/source history and explicit verified-versus-unrun limitations. No new runtime, model completeness, multi-cloud or Challenge grading claim; original problems, rights and unsupported features preserved.",
       "models": []
+    },
+    {
+      "path": "docs/dynamodb-quality-plan.md",
+      "sha256": "47083787ec9d44b25db80280a6cacfc75e3630759cfe64353a3fae5faa78f722",
+      "disposition": "documentation",
+      "reason": "DynamoDB bounded API/compatibility/source history and explicit verified-versus-unrun limitations. No new runtime, model completeness, multi-cloud or Challenge grading claim; original problems, rights and unsupported features preserved.",
+      "models": []
+    },
+    {
+      "path": "docs/dynamodb.md",
+      "sha256": "9374d64329806405178cf3f94fcc2ac57821681f809d959bf1acfdbaea7bda99",
+      "disposition": "documentation",
+      "reason": "DynamoDB bounded API/compatibility/source history and explicit verified-versus-unrun limitations. No new runtime, model completeness, multi-cloud or Challenge grading claim; original problems, rights and unsupported features preserved.",
+      "models": []
+    },
+    {
+      "path": "formal/DynamoDBAdmission.cfg",
+      "sha256": "d50ce8e0541451e9e81eaf965c5ba61f43fe0a4f5509b961916e1ce6e8ede8c4",
+      "disposition": "modeled",
+      "reason": "Exact owned finite model/config with declared bounds and specifically classified mutation controls. This record binds source bytes only; new canonical baseline/mutant runs remain required. Neither source registration nor this declaration proves Go/SQL refinement.",
+      "models": [
+        {
+          "id": "DynamoDBAdmission",
+          "properties": [
+            "TypeOK",
+            "InitializedBeforeMutation",
+            "DeniedFrame",
+            "ValidKeysOnly",
+            "CanonicalKeys",
+            "SemanticBytes",
+            "CommittedBytes",
+            "CreateCommitted",
+            "AcknowledgedRemoval",
+            "ActiveTableRequired",
+            "TableBudget",
+            "ItemBudget",
+            "ItemCountBudget",
+            "StatisticsExact",
+            "PeerFrame",
+            "NoOrphans",
+            "RefusalFrame",
+            "AdmissionExact",
+            "TableAdmissionExact",
+            "RemovalAdmissionExact",
+            "StartupAdmission",
+            "StartupRefusedFrame"
+          ],
+          "limits": "Finite normalized admission, acknowledgement/row-effect, canonical-key and semantic-byte fixtures with independent literal oracle functions. Actual Go literal/SQL IGNORE tests are separate evidence. No full decimal grammar/UTF8/base64/JSON or 400KiB exhaustive arithmetic proof, SQL/driver/Go refinement/durability, arbitrary persisted-data import, live external writers, IAM/token/HTTP parsing, host or multi-process authentication proof. startupValid abstracts constructor success/orphan-refusal, not discovery/validation of arbitrary SQL. Scopes are fixed region/table namespaces inside one selected DB, not row tenants or two authenticated teams. Shared factory/dispatch/Gateway-field files are narrow call-contract seams for initialized-store and preflight denial only; their other routes/authority are not modeled. Lifecycle generations/conditional races are the separate unchanged DynamoDBLifecycle model. Source/model/mutants UNRUN until granted canonical TLC. "
+        }
+      ]
+    },
+    {
+      "path": "formal/DynamoDBAdmission.tla",
+      "sha256": "b006fd6e947a4728ce85f791ebd42cb48b1ed26cef9e4dfe53a0a86cbcf2804e",
+      "disposition": "modeled",
+      "reason": "Exact owned finite model/config with declared bounds and specifically classified mutation controls. This record binds source bytes only; new canonical baseline/mutant runs remain required. Neither source registration nor this declaration proves Go/SQL refinement.",
+      "models": [
+        {
+          "id": "DynamoDBAdmission",
+          "properties": [
+            "TypeOK",
+            "InitializedBeforeMutation",
+            "DeniedFrame",
+            "ValidKeysOnly",
+            "CanonicalKeys",
+            "SemanticBytes",
+            "CommittedBytes",
+            "CreateCommitted",
+            "AcknowledgedRemoval",
+            "ActiveTableRequired",
+            "TableBudget",
+            "ItemBudget",
+            "ItemCountBudget",
+            "StatisticsExact",
+            "PeerFrame",
+            "NoOrphans",
+            "RefusalFrame",
+            "AdmissionExact",
+            "TableAdmissionExact",
+            "RemovalAdmissionExact",
+            "StartupAdmission",
+            "StartupRefusedFrame"
+          ],
+          "limits": "Finite normalized admission, acknowledgement/row-effect, canonical-key and semantic-byte fixtures with independent literal oracle functions. Actual Go literal/SQL IGNORE tests are separate evidence. No full decimal grammar/UTF8/base64/JSON or 400KiB exhaustive arithmetic proof, SQL/driver/Go refinement/durability, arbitrary persisted-data import, live external writers, IAM/token/HTTP parsing, host or multi-process authentication proof. startupValid abstracts constructor success/orphan-refusal, not discovery/validation of arbitrary SQL. Scopes are fixed region/table namespaces inside one selected DB, not row tenants or two authenticated teams. Shared factory/dispatch/Gateway-field files are narrow call-contract seams for initialized-store and preflight denial only; their other routes/authority are not modeled. Lifecycle generations/conditional races are the separate unchanged DynamoDBLifecycle model. Source/model/mutants UNRUN until granted canonical TLC. "
+        }
+      ]
+    },
+    {
+      "path": "formal/DynamoDBLifecycle.cfg",
+      "sha256": "1c8d8dbac03183080178e51a983bc386aacc7466e97b87a4ed2a61e2230bc15c",
+      "disposition": "modeled",
+      "reason": "Exact owned finite model/config with declared bounds and specifically classified mutation controls. This record binds source bytes only; new canonical baseline/mutant runs remain required. Neither source registration nor this declaration proves Go/SQL refinement.",
+      "models": [
+        {
+          "id": "DynamoDBLifecycle",
+          "properties": [
+            "TypeOK",
+            "NoOrphans",
+            "GenerationChecked",
+            "NoStaleItems",
+            "ConditionalAtomicity",
+            "NoUnauthorizedMutation",
+            "NoForeignMutation",
+            "FailedUnchanged"
+          ],
+          "limits": "Generation/condition/atomic-commit abstraction only. Store is trusted internal composition; IAM is Gateway preflight, not a Store policy check. Owners are separate process databases, not row-level tenants. No SQL/Go refinement, real IAM parsing, tokens/two-auth-process proof, payload size/quotas/stat arithmetic, async AWS lifecycle, liveness or full API completeness. Model and mutants remain UNRUN until a reserved TLC check. "
+        }
+      ]
+    },
+    {
+      "path": "formal/DynamoDBLifecycle.tla",
+      "sha256": "34016384f030fa5a1fad347da16b237365972ee76c33b7d77c30d1362f9ad9e0",
+      "disposition": "modeled",
+      "reason": "Exact owned finite model/config with declared bounds and specifically classified mutation controls. This record binds source bytes only; new canonical baseline/mutant runs remain required. Neither source registration nor this declaration proves Go/SQL refinement.",
+      "models": [
+        {
+          "id": "DynamoDBLifecycle",
+          "properties": [
+            "TypeOK",
+            "NoOrphans",
+            "GenerationChecked",
+            "NoStaleItems",
+            "ConditionalAtomicity",
+            "NoUnauthorizedMutation",
+            "NoForeignMutation",
+            "FailedUnchanged"
+          ],
+          "limits": "Generation/condition/atomic-commit abstraction only. Store is trusted internal composition; IAM is Gateway preflight, not a Store policy check. Owners are separate process databases, not row-level tenants. No SQL/Go refinement, real IAM parsing, tokens/two-auth-process proof, payload size/quotas/stat arithmetic, async AWS lifecycle, liveness or full API completeness. Model and mutants remain UNRUN until a reserved TLC check. "
+        }
+      ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "fe2e0ad89595b95706654074e338e3de98f7d05a8193fa11cb2cf3aa5d557ad4",
+      "sha256": "7796531ddcab4d325deaa4db2854e91be604da6ad95b308aca2efa5f3157c44a",
       "disposition": "formal-infrastructure",
-      "reason": "Preserve every main16 model entry/property/bound and82 literal control IDs, append only owned KMS2models/12 controls and individual-removal fixtures for all94. No grammar/exit-code/unknown-model weakening; source-only before reserved execution.",
+      "reason": "Preserves main18/94 minimum inventory and adds only owned DDB model/property/control guards, omission fixture source and the exact test-only Python helper classification with near-path negative controls. No lowered checks, no broad Go/runtime exemption, no workflow/security-setting change. Python unit/model execution is separate.",
       "models": []
     },
     {
-      "path": "internal/aws/kms_ack_boundary_test.go",
-      "sha256": "ee74374beae7c73ff2d95dc6ca5222c09daaf127cddd6471655eebb10dc01bad",
-      "disposition": "test-support",
-      "reason": "Real native/SQLite/SDK/browser boundary assertions with independent literals and positive outcomes; old-source dispatch counterexamples were reproduced, corrected and followed by positive native regression execution; no full IAM/token proof.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/kms_crypto.go",
-      "sha256": "2026f074a7cd0b20684f4ab01219cef89a1668933fc51452105bf49df694e32a",
+      "path": "internal/aws/dynamodb.go",
+      "sha256": "11f4b7668f3ced5e388191be140e5fb96397d8c0c5a7cfcffeeff2b73c5684af",
       "disposition": "modeled",
-      "reason": "Bounded successful native key/crypto state events only. SQL acknowledgment/commit failures, read metadata, JSON decoding, real AES/counter arithmetic and raw headers remain native/integration obligations, not formal refinement.",
+      "reason": "Gateway preflight DecisionContext supplies the normalized allow/deny; validated key and semantic-size admission precede passing an immutable captured table snapshot to same-Tx Store operations. Lifecycle models generation/condition interleavings; Admission models selected normalized request predicates. HTTP/JSON/signing/ARN/IAM parser correctness is native-tested separately, not proved by either model.",
       "models": [
         {
-          "id": "KMSKeyState",
+          "id": "DynamoDBLifecycle",
           "properties": [
-            "AuthorizedEvents",
-            "EnabledCrypto",
-            "BoundContextAndKey"
+            "GenerationChecked",
+            "ConditionalAtomicity",
+            "NoUnauthorizedMutation",
+            "FailedUnchanged"
           ],
-          "limits": "Atomic bounded successful Create/SetEnabled/Encrypt/Decrypt events only; key/region/context labels are abstract values. No AES/nonce probability, JSON/IAM/SigV4 parsing, routing/protocol selection, SQLite RowsAffected/commit/crash refinement, rejected/error response frames, read-only Describe/List/GetPolicy outputs, host authentication, time, growing key population or arbitrary key policies. Last event captures pre-operation conditions so later Disable does not invalidate an earlier legitimate output."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/kms_dispatch.go",
-      "sha256": "fbcf7576ae4e1c73e2cb4aee8d367f9a2031c50fc27489f4c42fb2d3c74eb86b",
-      "disposition": "modeled",
-      "reason": "Minimal correction after real old-source failures: signing scope classifies KMS protocol intent without granting authority; required target validation cannot fall through to S3. Context-bound identity policy read distinguishes missing identity403 from infrastructure500 and captures immutable request policy. Normalized protocol model only, not SigV4/token/SQL refinement; actual native regression execution remains separate.",
-      "models": [
-        {
-          "id": "KMSProtocolAdmission",
-          "properties": [
-            "NoCrossServiceFallback",
-            "InfraNotDeny",
-            "MissingIdentityDenied",
-            "NoSuccessWithoutKMSTarget",
-            "NoAuthorityFromWireMetadata"
-          ],
-          "limits": "Normalized protocol/identity-policy admission abstraction after trusted outer exercise identity selection; not raw HTTP/SigV4 parsing or signature authentication, local token/Access or tenant-isolation proof, full IAM semantics, byte bodies/AES, real DB faults/transactions, Go refinement, timing/concurrency/crash proof or other-service authorization. Other route is only handoff, not modeled S3 success. Body-read-barrier native tests and nine actual Gateway metadata cases independently exercise the intended bridge; new tests and this model are initially UNRUN. Shared Gateway/server/SSM applicability is ONLY the new configured KMS route/module declaration, not unchanged AWS branches, nil-module/constructor behavior or whole provider wiring. Native tests are separate and initially unrun."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/kms_dispatch_boundary_test.go",
-      "sha256": "fb58a6888da0c8b0229c4e10a20201d9e1a2edc9d6bf4aa248bb676edfd0a017",
-      "disposition": "modeled",
-      "reason": "ONLY the new configured KMS selection/policy-snapshot/refusal branch is declared under the normalized protocol model. Raw headers/SigV4, real identity SQL errors, parsing and unchanged S3/SSM/other AWS branches are not modeled. Old dispatch failures were reproduced and corrected; native tests exercise the real bridge separately from this finite abstraction.",
-      "models": [
-        {
-          "id": "KMSProtocolAdmission",
-          "properties": [
-            "NoCrossServiceFallback",
-            "InfraNotDeny",
-            "MissingIdentityDenied",
-            "NoSuccessWithoutKMSTarget",
-            "NoAuthorityFromWireMetadata"
-          ],
-          "limits": "Normalized protocol/identity-policy admission abstraction after trusted outer exercise identity selection; not raw HTTP/SigV4 parsing or signature authentication, local token/Access or tenant-isolation proof, full IAM semantics, byte bodies/AES, real DB faults/transactions, Go refinement, timing/concurrency/crash proof or other-service authorization. Other route is only handoff, not modeled S3 success. Body-read-barrier native tests and nine actual Gateway metadata cases independently exercise the intended bridge; new tests and this model are initially UNRUN. Shared Gateway/server/SSM applicability is ONLY the new configured KMS route/module declaration, not unchanged AWS branches, nil-module/constructor behavior or whole provider wiring. Native tests are separate and initially unrun."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/kms_fault_test.go",
-      "sha256": "9368d7b6e7846e6897ca4301ee15c6d5cd3dba6a0e86a46da565dffc41dc6488",
-      "disposition": "test-support",
-      "reason": "Real native/SQLite/SDK/browser boundary assertions with independent literals and positive outcomes; old-source dispatch counterexamples were reproduced, corrected and followed by positive native regression execution; no full IAM/token proof.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/kms_http.go",
-      "sha256": "f51d6e6d5d7da55a8a2125d095fd40a61e599d43d29e5d671532a14e11ef4aec",
-      "disposition": "modeled",
-      "reason": "ONLY the new configured KMS selection/policy-snapshot/refusal branch is declared under the normalized protocol model. Raw headers/SigV4, real identity SQL errors, parsing and unchanged S3/SSM/other AWS branches are not modeled. Old dispatch failures were reproduced and corrected; native tests exercise the real bridge separately from this finite abstraction. The native operation bridge separately uses the atomic key-state model for successful events only, never as routing/refusal proof.",
-      "models": [
-        {
-          "id": "KMSProtocolAdmission",
-          "properties": [
-            "NoCrossServiceFallback",
-            "InfraNotDeny",
-            "MissingIdentityDenied",
-            "NoSuccessWithoutKMSTarget",
-            "NoAuthorityFromWireMetadata"
-          ],
-          "limits": "Normalized protocol/identity-policy admission abstraction after trusted outer exercise identity selection; not raw HTTP/SigV4 parsing or signature authentication, local token/Access or tenant-isolation proof, full IAM semantics, byte bodies/AES, real DB faults/transactions, Go refinement, timing/concurrency/crash proof or other-service authorization. Other route is only handoff, not modeled S3 success. Body-read-barrier native tests and nine actual Gateway metadata cases independently exercise the intended bridge; new tests and this model are initially UNRUN. Shared Gateway/server/SSM applicability is ONLY the new configured KMS route/module declaration, not unchanged AWS branches, nil-module/constructor behavior or whole provider wiring. Native tests are separate and initially unrun."
+          "limits": "Generation/condition/atomic-commit abstraction only. Store is trusted internal composition; IAM is Gateway preflight, not a Store policy check. Owners are separate process databases, not row-level tenants. No SQL/Go refinement, real IAM parsing, tokens/two-auth-process proof, payload size/quotas/stat arithmetic, async AWS lifecycle, liveness or full API completeness. Model and mutants remain UNRUN until a reserved TLC check. "
         },
         {
-          "id": "KMSKeyState",
+          "id": "DynamoDBAdmission",
           "properties": [
-            "AuthorizedEvents",
-            "EnabledCrypto",
-            "BoundContextAndKey"
+            "InitializedBeforeMutation",
+            "DeniedFrame",
+            "ValidKeysOnly",
+            "CanonicalKeys",
+            "SemanticBytes",
+            "ItemBudget",
+            "AdmissionExact"
           ],
-          "limits": "Atomic bounded successful Create/SetEnabled/Encrypt/Decrypt events only; key/region/context labels are abstract values. No AES/nonce probability, JSON/IAM/SigV4 parsing, routing/protocol selection, SQLite RowsAffected/commit/crash refinement, rejected/error response frames, read-only Describe/List/GetPolicy outputs, host authentication, time, growing key population or arbitrary key policies. Last event captures pre-operation conditions so later Disable does not invalidate an earlier legitimate output."
+          "limits": "Finite normalized admission, acknowledgement/row-effect, canonical-key and semantic-byte fixtures with independent literal oracle functions. Actual Go literal/SQL IGNORE tests are separate evidence. No full decimal grammar/UTF8/base64/JSON or 400KiB exhaustive arithmetic proof, SQL/driver/Go refinement/durability, arbitrary persisted-data import, live external writers, IAM/token/HTTP parsing, host or multi-process authentication proof. startupValid abstracts constructor success/orphan-refusal, not discovery/validation of arbitrary SQL. Scopes are fixed region/table namespaces inside one selected DB, not row tenants or two authenticated teams. Shared factory/dispatch/Gateway-field files are narrow call-contract seams for initialized-store and preflight denial only; their other routes/authority are not modeled. Lifecycle generations/conditional races are the separate unchanged DynamoDBLifecycle model. Source/model/mutants UNRUN until granted canonical TLC. "
         }
       ]
     },
     {
-      "path": "internal/aws/kms_http_test.go",
-      "sha256": "6a56418db8b0a65b142870a985ec2a6144277ea02182f019902a13e76c2d4c1a",
+      "path": "internal/aws/dynamodb_admission_test.go",
+      "sha256": "30e316bbaae8fa44f6c3e571f771e29950d8df96dc03a06319f0742925b8f58b",
       "disposition": "test-support",
-      "reason": "Real native/SQLite/SDK/browser boundary assertions with independent literals and positive outcomes; old-source dispatch counterexamples were reproduced, corrected and followed by positive native regression execution; no full IAM/token proof.",
+      "reason": "Concrete test/mandatory real local binary SDK/reference acceptance source; no product runtime import or dependency. The exact internal/aws/testdata/dynamodb_size_sdk.py path is referenced only by *_test.go and is outside product embed globs. No fixture source presence or local prior-source receipt is counted as current execution.",
       "models": []
     },
     {
-      "path": "internal/aws/kms_permission_boundary_test.go",
-      "sha256": "854fd3e8f08e806b127ec53262d9d37190bdd765ff9e6712b8015676d3dcb361",
+      "path": "internal/aws/dynamodb_ci_validation_test.go",
+      "sha256": "533b0c4d4c8af0114f45a95727b415a99c48d0cbf19bcf79b9328daa0f628670",
       "disposition": "test-support",
-      "reason": "Real native/SQLite/SDK/browser boundary assertions with independent literals and positive outcomes; old-source dispatch counterexamples were reproduced, corrected and followed by positive native regression execution; no full IAM/token proof.",
+      "reason": "Concrete test/mandatory real local binary SDK/reference acceptance source; no product runtime import or dependency. The exact internal/aws/testdata/dynamodb_size_sdk.py path is referenced only by *_test.go and is outside product embed globs. No fixture source presence or local prior-source receipt is counted as current execution.",
       "models": []
     },
     {
-      "path": "internal/aws/kms_store.go",
-      "sha256": "9b1339304fd6e3aabf5dd8b33d09d699f219784b5b828bd7fdf77de9977fa1b8",
+      "path": "internal/aws/dynamodb_generation.go",
+      "sha256": "79c7f8a83a295ba490f4db6cb9cd69499704ede99389c8660e187eafa38bffcb",
       "disposition": "modeled",
-      "reason": "Bounded successful native key/crypto state events only. SQL acknowledgment/commit failures, read metadata, JSON decoding, real AES/counter arithmetic and raw headers remain native/integration obligations, not formal refinement.",
+      "reason": "Same-transaction reread of TableID and captured key schema rejects a deleted/recreated table or corrupt generation metadata. Finite generation guards abstract this boundary; schema JSON/deep-equality/SQL parsing and cryptographic ID generation are NOT proved. Native cached-snapshot and corruption tests are distinct evidence.",
       "models": [
         {
-          "id": "KMSKeyState",
+          "id": "DynamoDBLifecycle",
           "properties": [
-            "AuthorizedEvents",
-            "EnabledCrypto",
-            "BoundContextAndKey"
+            "NoOrphans",
+            "GenerationChecked",
+            "NoStaleItems",
+            "FailedUnchanged"
           ],
-          "limits": "Atomic bounded successful Create/SetEnabled/Encrypt/Decrypt events only; key/region/context labels are abstract values. No AES/nonce probability, JSON/IAM/SigV4 parsing, routing/protocol selection, SQLite RowsAffected/commit/crash refinement, rejected/error response frames, read-only Describe/List/GetPolicy outputs, host authentication, time, growing key population or arbitrary key policies. Last event captures pre-operation conditions so later Disable does not invalidate an earlier legitimate output."
+          "limits": "Generation/condition/atomic-commit abstraction only. Store is trusted internal composition; IAM is Gateway preflight, not a Store policy check. Owners are separate process databases, not row-level tenants. No SQL/Go refinement, real IAM parsing, tokens/two-auth-process proof, payload size/quotas/stat arithmetic, async AWS lifecycle, liveness or full API completeness. Model and mutants remain UNRUN until a reserved TLC check. "
         }
       ]
     },
     {
-      "path": "internal/aws/kms_store_test.go",
-      "sha256": "023ee5513b83331665174f9d9d9c4622516b01e23eec5a6ea235b447e666badd",
+      "path": "internal/aws/dynamodb_generation_test.go",
+      "sha256": "239fbe256771c06c57ebf208fd03c48b28a44ecfe92d8c7dea88e7e9773912d2",
       "disposition": "test-support",
-      "reason": "Real native/SQLite/SDK/browser boundary assertions with independent literals and positive outcomes; old-source dispatch counterexamples were reproduced, corrected and followed by positive native regression execution; no full IAM/token proof.",
+      "reason": "Concrete test/mandatory real local binary SDK/reference acceptance source; no product runtime import or dependency. The exact internal/aws/testdata/dynamodb_size_sdk.py path is referenced only by *_test.go and is outside product embed globs. No fixture source presence or local prior-source receipt is counted as current execution.",
       "models": []
     },
     {
-      "path": "internal/aws/kms_types.go",
-      "sha256": "7853b7463b96c8122ef0d274dd84bc8dce64923336a9c00f490d21ca8811f172",
+      "path": "internal/aws/dynamodb_ignored_write_test.go",
+      "sha256": "7860a96a7fcc4accb0f068c6094335c0ff7198c465ffd55d2a35212912c80469",
+      "disposition": "test-support",
+      "reason": "Concrete test/mandatory real local binary SDK/reference acceptance source; no product runtime import or dependency. The exact internal/aws/testdata/dynamodb_size_sdk.py path is referenced only by *_test.go and is outside product embed globs. No fixture source presence or local prior-source receipt is counted as current execution.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/dynamodb_number.go",
+      "sha256": "47b82e2b6b8c54b41309e65e593aa0414d2f34d5f717231f9bbf22eb0178e1f8",
       "disposition": "modeled",
-      "reason": "Bounded successful native key/crypto state events only. SQL acknowledgment/commit failures, read metadata, JSON decoding, real AES/counter arithmetic and raw headers remain native/integration obligations, not formal refinement.",
+      "reason": "Selected finite normalized numeric-alias/type-tag and invalid-key fixtures correspond to canonicalDynamoNumber/dynamoKeyComponent admission. Independent Go literal tests cover examples and concrete bounds. The full regex/decimal grammar, all precision/exponent combinations and numeric-size approximation are expressly NOT formalized or exempted as a general Go policy; this is a bounded semantic contract only.",
       "models": [
         {
-          "id": "KMSKeyState",
+          "id": "DynamoDBAdmission",
           "properties": [
-            "AuthorizedEvents",
-            "EnabledCrypto",
-            "BoundContextAndKey"
+            "ValidKeysOnly",
+            "CanonicalKeys"
           ],
-          "limits": "Atomic bounded successful Create/SetEnabled/Encrypt/Decrypt events only; key/region/context labels are abstract values. No AES/nonce probability, JSON/IAM/SigV4 parsing, routing/protocol selection, SQLite RowsAffected/commit/crash refinement, rejected/error response frames, read-only Describe/List/GetPolicy outputs, host authentication, time, growing key population or arbitrary key policies. Last event captures pre-operation conditions so later Disable does not invalidate an earlier legitimate output."
+          "limits": "Finite normalized admission, acknowledgement/row-effect, canonical-key and semantic-byte fixtures with independent literal oracle functions. Actual Go literal/SQL IGNORE tests are separate evidence. No full decimal grammar/UTF8/base64/JSON or 400KiB exhaustive arithmetic proof, SQL/driver/Go refinement/durability, arbitrary persisted-data import, live external writers, IAM/token/HTTP parsing, host or multi-process authentication proof. startupValid abstracts constructor success/orphan-refusal, not discovery/validation of arbitrary SQL. Scopes are fixed region/table namespaces inside one selected DB, not row tenants or two authenticated teams. Shared factory/dispatch/Gateway-field files are narrow call-contract seams for initialized-store and preflight denial only; their other routes/authority are not modeled. Lifecycle generations/conditional races are the separate unchanged DynamoDBLifecycle model. Source/model/mutants UNRUN until granted canonical TLC. Selected aliases N1 and typed S1/B1 plus fraction/precision/range refusal classes only; full lexical grammar, all magnitude/precision cases and number-size arithmetic are NOT proved."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/dynamodb_number_test.go",
+      "sha256": "1842d21f17d55860e2d32c604eb7f6820e1bf2917d9182c25a95d49a5d4edee9",
+      "disposition": "test-support",
+      "reason": "Concrete test/mandatory real local binary SDK/reference acceptance source; no product runtime import or dependency. The exact internal/aws/testdata/dynamodb_size_sdk.py path is referenced only by *_test.go and is outside product embed globs. No fixture source presence or local prior-source receipt is counted as current execution.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/dynamodb_quota_test.go",
+      "sha256": "649ef3440be4a9d51c4c148e5335b835d7615d631ac49171a2da1634305236ee",
+      "disposition": "test-support",
+      "reason": "Concrete test/mandatory real local binary SDK/reference acceptance source; no product runtime import or dependency. The exact internal/aws/testdata/dynamodb_size_sdk.py path is referenced only by *_test.go and is outside product embed globs. No fixture source presence or local prior-source receipt is counted as current execution.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/dynamodb_size.go",
+      "sha256": "c489dbb526f82416f2b76ecf88723c6b1182a37b9c7ccc212b0129fca422a515",
+      "disposition": "modeled",
+      "reason": "Finite normalized semantic byte fixtures and quota-admission/derived-statistics properties correspond to validated attribute measurement. Literal Go tests separately execute UTF8 names, decoded binary, escaped strings, nested structures/sets and actual409599/409600/409601 boundaries. No exhaustive UTF8/base64/recursive grammar or private AWS number-encoding/refinement proof is claimed.",
+      "models": [
+        {
+          "id": "DynamoDBAdmission",
+          "properties": [
+            "SemanticBytes",
+            "ItemBudget",
+            "StatisticsExact",
+            "AdmissionExact"
+          ],
+          "limits": "Finite normalized admission, acknowledgement/row-effect, canonical-key and semantic-byte fixtures with independent literal oracle functions. Actual Go literal/SQL IGNORE tests are separate evidence. No full decimal grammar/UTF8/base64/JSON or 400KiB exhaustive arithmetic proof, SQL/driver/Go refinement/durability, arbitrary persisted-data import, live external writers, IAM/token/HTTP parsing, host or multi-process authentication proof. startupValid abstracts constructor success/orphan-refusal, not discovery/validation of arbitrary SQL. Scopes are fixed region/table namespaces inside one selected DB, not row tenants or two authenticated teams. Shared factory/dispatch/Gateway-field files are narrow call-contract seams for initialized-store and preflight denial only; their other routes/authority are not modeled. Lifecycle generations/conditional races are the separate unchanged DynamoDBLifecycle model. Source/model/mutants UNRUN until granted canonical TLC. Only normalized size fixtures and admission/statistics contracts at a small abstract bound; full recursive value semantics, UTF8/base64 implementation, actual400KiB exhaustive behavior and number encoding are NOT proved."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/dynamodb_size_test.go",
+      "sha256": "03d3fd57d9796199e5ef03b13fa41aada68d51657bb78778fe4a15bcf242d4f6",
+      "disposition": "test-support",
+      "reason": "Concrete test/mandatory real local binary SDK/reference acceptance source; no product runtime import or dependency. The exact internal/aws/testdata/dynamodb_size_sdk.py path is referenced only by *_test.go and is outside product embed globs. No fixture source presence or local prior-source receipt is counted as current execution.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/dynamodb_store.go",
+      "sha256": "529fdec2eaf7ed6cb134e0250404c35bc90946613c909e02e84dbd604c5d39ac",
+      "disposition": "modeled",
+      "reason": "Trusted Store owns the selected DB and region/table predicates. Same-Tx generation/condition checks, transaction rollback, table/item quotas, semantic-size revalidation, exact affected-row acknowledgement and immediate statistics correspond to the declared state contracts. Store has NO IAM/token authentication boundary; no NoUnauthorizedMutation binding is assigned to Store. Constructor startupValid abstracts its success/orphan-refusal result; no arbitrary SQL import, trigger, driver or Go refinement proof.",
+      "models": [
+        {
+          "id": "DynamoDBLifecycle",
+          "properties": [
+            "NoOrphans",
+            "GenerationChecked",
+            "NoStaleItems",
+            "ConditionalAtomicity",
+            "FailedUnchanged",
+            "NoForeignMutation"
+          ],
+          "limits": "Generation/condition/atomic-commit abstraction only. Store is trusted internal composition; IAM is Gateway preflight, not a Store policy check. Owners are separate process databases, not row-level tenants. No SQL/Go refinement, real IAM parsing, tokens/two-auth-process proof, payload size/quotas/stat arithmetic, async AWS lifecycle, liveness or full API completeness. Model and mutants remain UNRUN until a reserved TLC check. "
+        },
+        {
+          "id": "DynamoDBAdmission",
+          "properties": [
+            "CreateCommitted",
+            "CommittedBytes",
+            "AcknowledgedRemoval",
+            "ActiveTableRequired",
+            "TableBudget",
+            "ItemBudget",
+            "ItemCountBudget",
+            "StatisticsExact",
+            "PeerFrame",
+            "RefusalFrame",
+            "NoOrphans",
+            "StartupAdmission",
+            "StartupRefusedFrame"
+          ],
+          "limits": "Finite normalized admission, acknowledgement/row-effect, canonical-key and semantic-byte fixtures with independent literal oracle functions. Actual Go literal/SQL IGNORE tests are separate evidence. No full decimal grammar/UTF8/base64/JSON or 400KiB exhaustive arithmetic proof, SQL/driver/Go refinement/durability, arbitrary persisted-data import, live external writers, IAM/token/HTTP parsing, host or multi-process authentication proof. startupValid abstracts constructor success/orphan-refusal, not discovery/validation of arbitrary SQL. Scopes are fixed region/table namespaces inside one selected DB, not row tenants or two authenticated teams. Shared factory/dispatch/Gateway-field files are narrow call-contract seams for initialized-store and preflight denial only; their other routes/authority are not modeled. Lifecycle generations/conditional races are the separate unchanged DynamoDBLifecycle model. Source/model/mutants UNRUN until granted canonical TLC. "
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/dynamodb_test.go",
+      "sha256": "6a5746ed43c87ed6c9bd3246b7cafc5abbd347be9146a85acb16aa523eae1aeb",
+      "disposition": "test-support",
+      "reason": "Concrete test/mandatory real local binary SDK/reference acceptance source; no product runtime import or dependency. The exact internal/aws/testdata/dynamodb_size_sdk.py path is referenced only by *_test.go and is outside product embed globs. No fixture source presence or local prior-source receipt is counted as current execution.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/dynamodb_write.go",
+      "sha256": "2999308799506564a1104cbcca94b53d63fe1d935eb6a8a183dc662c6735d73d",
+      "disposition": "modeled",
+      "reason": "Checks exact RowsAffected before a native acknowledgement, within the caller transaction whose deferred rollback handles failure. Normalized successful-effect/refusal properties capture that call contract; helper alone is NOT an independent transaction/security boundary. Genuine SQLite RAISE(IGNORE) regressions demonstrate six guarded paths separately; no all-SQL-trigger/driver proof.",
+      "models": [
+        {
+          "id": "DynamoDBAdmission",
+          "properties": [
+            "CreateCommitted",
+            "CommittedBytes",
+            "AcknowledgedRemoval",
+            "RefusalFrame"
+          ],
+          "limits": "Finite normalized admission, acknowledgement/row-effect, canonical-key and semantic-byte fixtures with independent literal oracle functions. Actual Go literal/SQL IGNORE tests are separate evidence. No full decimal grammar/UTF8/base64/JSON or 400KiB exhaustive arithmetic proof, SQL/driver/Go refinement/durability, arbitrary persisted-data import, live external writers, IAM/token/HTTP parsing, host or multi-process authentication proof. startupValid abstracts constructor success/orphan-refusal, not discovery/validation of arbitrary SQL. Scopes are fixed region/table namespaces inside one selected DB, not row tenants or two authenticated teams. Shared factory/dispatch/Gateway-field files are narrow call-contract seams for initialized-store and preflight denial only; their other routes/authority are not modeled. Lifecycle generations/conditional races are the separate unchanged DynamoDBLifecycle model. Source/model/mutants UNRUN until granted canonical TLC. "
         }
       ]
     },
     {
       "path": "internal/aws/s3.go",
-      "sha256": "3d545074fab864eee93d5aa68d3142014f6625a5a51ca2d137e54c158b7e434e",
+      "sha256": "feb8c103acb5df7bdcdd0903008b91316f3c47c504b9756ccf4aa7adfbbedd23",
       "disposition": "modeled",
-      "reason": "ONLY the new configured KMS selection/policy-snapshot/refusal branch is declared under the normalized protocol model. Raw headers/SigV4, real identity SQL errors, parsing and unchanged S3/SSM/other AWS branches are not modeled. Old dispatch failures were reproduced and corrected; native tests exercise the real bridge separately from this finite abstraction.",
+      "reason": "Only adds the typed DynamoDB Store field to the preserved main Gateway. Binding is the initialized-Store installation/call contract, not a proof of S3 routes, constructor implementation, identity extraction or all struct behavior. Main existing services remain unchanged.",
       "models": [
         {
-          "id": "KMSProtocolAdmission",
+          "id": "DynamoDBAdmission",
           "properties": [
-            "NoCrossServiceFallback",
-            "InfraNotDeny",
-            "MissingIdentityDenied",
-            "NoSuccessWithoutKMSTarget",
-            "NoAuthorityFromWireMetadata"
+            "InitializedBeforeMutation"
           ],
-          "limits": "Normalized protocol/identity-policy admission abstraction after trusted outer exercise identity selection; not raw HTTP/SigV4 parsing or signature authentication, local token/Access or tenant-isolation proof, full IAM semantics, byte bodies/AES, real DB faults/transactions, Go refinement, timing/concurrency/crash proof or other-service authorization. Other route is only handoff, not modeled S3 success. Body-read-barrier native tests and nine actual Gateway metadata cases independently exercise the intended bridge; new tests and this model are initially UNRUN. Shared Gateway/server/SSM applicability is ONLY the new configured KMS route/module declaration, not unchanged AWS branches, nil-module/constructor behavior or whole provider wiring. Native tests are separate and initially unrun."
+          "limits": "Finite normalized admission, acknowledgement/row-effect, canonical-key and semantic-byte fixtures with independent literal oracle functions. Actual Go literal/SQL IGNORE tests are separate evidence. No full decimal grammar/UTF8/base64/JSON or 400KiB exhaustive arithmetic proof, SQL/driver/Go refinement/durability, arbitrary persisted-data import, live external writers, IAM/token/HTTP parsing, host or multi-process authentication proof. startupValid abstracts constructor success/orphan-refusal, not discovery/validation of arbitrary SQL. Scopes are fixed region/table namespaces inside one selected DB, not row tenants or two authenticated teams. Shared factory/dispatch/Gateway-field files are narrow call-contract seams for initialized-store and preflight denial only; their other routes/authority are not modeled. Lifecycle generations/conditional races are the separate unchanged DynamoDBLifecycle model. Source/model/mutants UNRUN until granted canonical TLC. Typed field/call-contract seam only; no proof of arbitrary struct construction, other AWS services or identity."
         }
       ]
     },
     {
       "path": "internal/aws/ssm.go",
-      "sha256": "c617d506f07815e83b23db158b65ce8f8649bdc5986553a603d4acffe883e57e",
+      "sha256": "ea11da4598b28f0b81e9a685e7b34b356b231cc478bde191e5d4122ef4182cd1",
       "disposition": "modeled",
-      "reason": "ONLY the new configured KMS selection/policy-snapshot/refusal branch is declared under the normalized protocol model. Raw headers/SigV4, real identity SQL errors, parsing and unchanged S3/SSM/other AWS branches are not modeled. Old dispatch failures were reproduced and corrected; native tests exercise the real bridge separately from this finite abstraction.",
+      "reason": "Only adds the DynamoDB_20120810 target dispatch to the existing AWS Gateway. Selected binding is the call seam into an initialized DynamoDB handler with its own preflight deny guard; it does NOT prove prefix/HTTP parsing or other AWS routes. Main routing checks and required concrete native/SDK tests remain separate.",
       "models": [
         {
-          "id": "KMSProtocolAdmission",
+          "id": "DynamoDBAdmission",
           "properties": [
-            "NoCrossServiceFallback",
-            "InfraNotDeny",
-            "MissingIdentityDenied",
-            "NoSuccessWithoutKMSTarget",
-            "NoAuthorityFromWireMetadata"
+            "InitializedBeforeMutation",
+            "DeniedFrame"
           ],
-          "limits": "Normalized protocol/identity-policy admission abstraction after trusted outer exercise identity selection; not raw HTTP/SigV4 parsing or signature authentication, local token/Access or tenant-isolation proof, full IAM semantics, byte bodies/AES, real DB faults/transactions, Go refinement, timing/concurrency/crash proof or other-service authorization. Other route is only handoff, not modeled S3 success. Body-read-barrier native tests and nine actual Gateway metadata cases independently exercise the intended bridge; new tests and this model are initially UNRUN. Shared Gateway/server/SSM applicability is ONLY the new configured KMS route/module declaration, not unchanged AWS branches, nil-module/constructor behavior or whole provider wiring. Native tests are separate and initially unrun."
+          "limits": "Finite normalized admission, acknowledgement/row-effect, canonical-key and semantic-byte fixtures with independent literal oracle functions. Actual Go literal/SQL IGNORE tests are separate evidence. No full decimal grammar/UTF8/base64/JSON or 400KiB exhaustive arithmetic proof, SQL/driver/Go refinement/durability, arbitrary persisted-data import, live external writers, IAM/token/HTTP parsing, host or multi-process authentication proof. startupValid abstracts constructor success/orphan-refusal, not discovery/validation of arbitrary SQL. Scopes are fixed region/table namespaces inside one selected DB, not row tenants or two authenticated teams. Shared factory/dispatch/Gateway-field files are narrow call-contract seams for initialized-store and preflight denial only; their other routes/authority are not modeled. Lifecycle generations/conditional races are the separate unchanged DynamoDBLifecycle model. Source/model/mutants UNRUN until granted canonical TLC. DDB call-contract seam only; no HTTP/prefix/header parser or other-route proof."
         }
       ]
     },
     {
-      "path": "internal/server/apidocs/openapi.json",
-      "sha256": "ad0f1d249caa6f9543ed7802863e2ef431b173d5bb2dc4c358f21428f3e3139c",
-      "disposition": "presentation",
-      "reason": "KMS component/API templates use native authenticated requests and known backend state; no frontend authority is granted. Revision guard and delayed-refresh positive/recovery assertions ran in the actual mandatory browser case; no API/visual fidelity inferred from presentation.",
+      "path": "internal/aws/testdata/dynamodb_size_sdk.py",
+      "sha256": "54c71034f7798c7558405adbd9870d95aab63ade62566f83132ea73bd462338f",
+      "disposition": "test-support",
+      "reason": "Concrete test/mandatory real local binary SDK/reference acceptance source; no product runtime import or dependency. The exact internal/aws/testdata/dynamodb_size_sdk.py path is referenced only by *_test.go and is outside product embed globs. No fixture source presence or local prior-source receipt is counted as current execution.",
       "models": []
     },
     {
-      "path": "internal/server/kms_integration_test.go",
-      "sha256": "fd377b0fee0e2136ffd4584e766880ee51fd61f5c3915e3a93bc900a89636204",
+      "path": "internal/server/apidocs/openapi.json",
+      "sha256": "57c9a47b6dc7846086a6fb82b8ebb84fc1c473d05fcdbf2e565b23f18d96a94b",
+      "disposition": "presentation",
+      "reason": "Preserves all main61 operation IDs/34 paths and main schemas/examples; adds seven static DynamoDB JSON1.0 templates and protocol/error descriptions. Samples are not current state or automatic routing. Mandatory served-template HTTP/SDK shared-state test must execute them; no Scalar bundle/dependency/feed change.",
+      "models": []
+    },
+    {
+      "path": "internal/server/dynamodb_test.go",
+      "sha256": "f31dfc88d2fdf15c72f81327166a23c2faca3e6511e4fa05f809eac432796893",
       "disposition": "test-support",
-      "reason": "Real native/SQLite/SDK/browser boundary assertions with independent literals and positive outcomes; old-source dispatch counterexamples were reproduced, corrected and followed by positive native regression execution; no full IAM/token proof.",
+      "reason": "Concrete test/mandatory real local binary SDK/reference acceptance source; no product runtime import or dependency. The exact internal/aws/testdata/dynamodb_size_sdk.py path is referenced only by *_test.go and is outside product embed globs. No fixture source presence or local prior-source receipt is counted as current execution.",
       "models": []
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "4d5642e8bd3b1ff09dd6f6eee502407b93b9d18bc5cd8266357d121e669ca925",
+      "sha256": "8d57c39bb57fb4225780e6184b7fd92999f30c916d4a3df308bf2efc8aa28d8d",
       "disposition": "modeled",
-      "reason": "ONLY the new configured KMS selection/policy-snapshot/refusal branch is declared under the normalized protocol model. Raw headers/SigV4, real identity SQL errors, parsing and unchanged S3/SSM/other AWS branches are not modeled. Old dispatch failures were reproduced and corrected; native tests exercise the real bridge separately from this finite abstraction.",
+      "reason": "Only adds DynamoDB initialization, closes/returns error before serving on constructor refusal, installs its Store after success, and declares bounded capabilities. startupValid is the normalized constructor result. No Go/SQL constructor proof, host/Actor routing, authentication or other-provider behavior is inferred. Capability metadata is checked by the required SDK/reference acceptance, not executed by TLC.",
       "models": [
         {
-          "id": "KMSProtocolAdmission",
+          "id": "DynamoDBAdmission",
           "properties": [
-            "NoCrossServiceFallback",
-            "InfraNotDeny",
-            "MissingIdentityDenied",
-            "NoSuccessWithoutKMSTarget",
-            "NoAuthorityFromWireMetadata"
+            "StartupAdmission",
+            "StartupRefusedFrame",
+            "InitializedBeforeMutation"
           ],
-          "limits": "Normalized protocol/identity-policy admission abstraction after trusted outer exercise identity selection; not raw HTTP/SigV4 parsing or signature authentication, local token/Access or tenant-isolation proof, full IAM semantics, byte bodies/AES, real DB faults/transactions, Go refinement, timing/concurrency/crash proof or other-service authorization. Other route is only handoff, not modeled S3 success. Body-read-barrier native tests and nine actual Gateway metadata cases independently exercise the intended bridge; new tests and this model are initially UNRUN. Shared Gateway/server/SSM applicability is ONLY the new configured KMS route/module declaration, not unchanged AWS branches, nil-module/constructor behavior or whole provider wiring. Native tests are separate and initially unrun."
+          "limits": "Finite normalized admission, acknowledgement/row-effect, canonical-key and semantic-byte fixtures with independent literal oracle functions. Actual Go literal/SQL IGNORE tests are separate evidence. No full decimal grammar/UTF8/base64/JSON or 400KiB exhaustive arithmetic proof, SQL/driver/Go refinement/durability, arbitrary persisted-data import, live external writers, IAM/token/HTTP parsing, host or multi-process authentication proof. startupValid abstracts constructor success/orphan-refusal, not discovery/validation of arbitrary SQL. Scopes are fixed region/table namespaces inside one selected DB, not row tenants or two authenticated teams. Shared factory/dispatch/Gateway-field files are narrow call-contract seams for initialized-store and preflight denial only; their other routes/authority are not modeled. Lifecycle generations/conditional races are the separate unchanged DynamoDBLifecycle model. Source/model/mutants UNRUN until granted canonical TLC. Constructor-result/install seam only; no arbitrary SQL discovery/import, actual host token/Actor authority or other-provider construction proof."
         }
       ]
     },
     {
-      "path": "internal/server/web/app.js",
-      "sha256": "c09e0be5c9f827df5acfdc44de97cd9a6ada22f1b5edb9af6215082cf529c34a",
-      "disposition": "presentation",
-      "reason": "Canonical Cloudscape generated asset/input/digest from exact verified existing package/lock/tree, Node24.19 and22 unchanged original rights. Only owned KMS UI additions atop main multi-cloud source; no Scalar rebuild/dependency install. Runtime/browser/global/model acceptance is separate and pending.",
+      "path": "scripts/formal_applicability.py",
+      "sha256": "72fe4b13dc018eb2e45a10eeeb6d968458404d7703f6ff8c4fca115a73c391a5",
+      "disposition": "formal-infrastructure",
+      "reason": "Preserves main18/94 minimum inventory and adds only owned DDB model/property/control guards, omission fixture source and the exact test-only Python helper classification with near-path negative controls. No lowered checks, no broad Go/runtime exemption, no workflow/security-setting change. Python unit/model execution is separate.",
       "models": []
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "01d9097f09eb7ce00f30fc01641e5d2bb41025ac3e74c13036a7fe2ad0bef96f",
+      "sha256": "a16aa713c32a67870d86c77276c99e5bbf07d9bb9c2460c69c09741b7f281fb9",
       "disposition": "formal-infrastructure",
-      "reason": "Preserve every main16 model entry/property/bound and82 literal control IDs, append only owned KMS2models/12 controls and individual-removal fixtures for all94. No grammar/exit-code/unknown-model weakening; source-only before reserved execution.",
+      "reason": "Preserves main18/94 minimum inventory and adds only owned DDB model/property/control guards, omission fixture source and the exact test-only Python helper classification with near-path negative controls. No lowered checks, no broad Go/runtime exemption, no workflow/security-setting change. Python unit/model execution is separate.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-applicability.py",
+      "sha256": "1814db364c85381b81c91d3096cc5a52b94a960b1d29cd1ee666a125c4cf50f7",
+      "disposition": "formal-infrastructure",
+      "reason": "Preserves main18/94 minimum inventory and adds only owned DDB model/property/control guards, omission fixture source and the exact test-only Python helper classification with near-path negative controls. No lowered checks, no broad Go/runtime exemption, no workflow/security-setting change. Python unit/model execution is separate.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "13e8e16690e020ec558b17db8f08788f8cdd7095dd995390a5dd1dc83873c1ce",
+      "sha256": "d285d981e4dd6733398ba83cf183095ef61e86f691a3b912f79dfba02527f0d0",
       "disposition": "formal-infrastructure",
-      "reason": "Preserve every main16 model entry/property/bound and82 literal control IDs, append only owned KMS2models/12 controls and individual-removal fixtures for all94. No grammar/exit-code/unknown-model weakening; source-only before reserved execution.",
+      "reason": "Preserves main18/94 minimum inventory and adds only owned DDB model/property/control guards, omission fixture source and the exact test-only Python helper classification with near-path negative controls. No lowered checks, no broad Go/runtime exemption, no workflow/security-setting change. Python unit/model execution is separate.",
       "models": []
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "a397e6bacb03c52df90b5b1cc3a2da26dfc1aea3cde8d80e032a836ff63f0042",
+      "sha256": "1d1947fba209d07b242c5cfe2caf188e3b5a88501f1433dd872fcca5b3dc2562",
       "disposition": "test-support",
-      "reason": "Add two mandatory KMS conformance child executions with check=True; preserve all21 existing tests and no skip/fallback. This harness checks already implemented SDK/browser behavior and is not new runtime authority or a finite model proof. All23 cases actually passed at5ca45ea; this is separate from finite model evidence.",
+      "reason": "Concrete test/mandatory real local binary SDK/reference acceptance source; no product runtime import or dependency. The exact internal/aws/testdata/dynamodb_size_sdk.py path is referenced only by *_test.go and is outside product embed globs. No fixture source presence or local prior-source receipt is counted as current execution.",
       "models": []
     },
     {
-      "path": "test/e2e/kms.py",
-      "sha256": "233cdab12932326196fa800701c275d95a54df58ac0d0f422f715e6da3b4cba4",
+      "path": "test/e2e/dynamodb.py",
+      "sha256": "7c7d21f1615956a19a26631201508a800ebc60b480fe0b081e8403fecfbfad2c",
       "disposition": "test-support",
-      "reason": "Actual official boto3 CLI lifecycle guard: validate exact numeric-loopback origin before send, disable proxies, require positive equal per-client calls/sends/responses including native errors and host401, then close clients. Existing real IAM/two-CLI/crypto/tamper/context/region/restart/refusal assertions retained. Actual SDK57-call acceptance is recorded separately with exact input provenance.",
+      "reason": "Concrete test/mandatory real local binary SDK/reference acceptance source; no product runtime import or dependency. The exact internal/aws/testdata/dynamodb_size_sdk.py path is referenced only by *_test.go and is outside product embed globs. No fixture source presence or local prior-source receipt is counted as current execution.",
       "models": []
     },
     {
-      "path": "test/e2e/kms_console.py",
-      "sha256": "aaa514a05c0c99a4f92de4c4de4f7210b0c2a46ab2bd3544c370ef9da09e72e7",
+      "path": "test/e2e/dynamodb_docs.py",
+      "sha256": "f03a4c898990e67d2e8c9ee709b95897c3a4ce0d7a40c46cf50955b21c49bd72",
       "disposition": "test-support",
-      "reason": "Mandatory actual embedded KMS console regression helper: independently assert stale/current response errors, PC390 accessibility/reflow, real IAM403 and principal field clearing, browser logout with independent SDK preserved; function-form predicate retains application CSP. Test support, not runtime or a formal proof.",
+      "reason": "Concrete test/mandatory real local binary SDK/reference acceptance source; no product runtime import or dependency. The exact internal/aws/testdata/dynamodb_size_sdk.py path is referenced only by *_test.go and is outside product embed globs. No fixture source presence or local prior-source receipt is counted as current execution.",
       "models": []
-    },
-    {
-      "path": "third_party/kumo-kms.json",
-      "sha256": "390e17eadda7556773b5d43c84ad7fda83846404d19984f91841eac848197f8b",
-      "disposition": "documentation",
-      "reason": "Document exact local KMS contract, official sources, legacy rights and proof boundaries; executed local acceptance and remaining hosted-review limits are explicit. No proof by prose.",
-      "models": []
-    },
-    {
-      "path": "tools/console/bundle-digests.json",
-      "sha256": "7c5d2204c6654037b67974b667d76bf9cd4990db0c53c88280f2bc17aaaee3be",
-      "disposition": "presentation",
-      "reason": "Canonical Cloudscape generated asset/input/digest from exact verified existing package/lock/tree, Node24.19 and22 unchanged original rights. Only owned KMS UI additions atop main multi-cloud source; no Scalar rebuild/dependency install. Runtime/browser/global/model acceptance is separate and pending.",
-      "models": []
-    },
-    {
-      "path": "tools/console/bundle-inputs.json",
-      "sha256": "4b4f607ed76b1e48ccd8518f1f488126bd5f491de684eb44981dc1fb365431ad",
-      "disposition": "presentation",
-      "reason": "Canonical Cloudscape generated asset/input/digest from exact verified existing package/lock/tree, Node24.19 and22 unchanged original rights. Only owned KMS UI additions atop main multi-cloud source; no Scalar rebuild/dependency install. Runtime/browser/global/model acceptance is separate and pending.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/kms.jsx",
-      "sha256": "0ec874c48156cdab640ebb80a8b7cb5505ba0fde89bbc5184071548e5d82ae6d",
-      "disposition": "presentation",
-      "reason": "KMS component/API templates use native authenticated requests and known backend state; no frontend authority is granted. Revision guard and delayed-refresh positive/recovery assertions ran in the actual mandatory browser case; no API/visual fidelity inferred from presentation.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/main.jsx",
-      "sha256": "9cc45c286b0789f86265438b2687028536671bbb0c0db19da6912f5b8d2e5c8a",
-      "disposition": "modeled",
-      "reason": "Minimal KMS navigation keeps existing browser session/logout/request authority; model covers bounded credential revocation, not visual/async UI behavior. Actual browser validation remains required.",
-      "models": [
-        {
-          "id": "BrowserSessions",
-          "properties": [
-            "RevokedCookiesDenied",
-            "NoBrowserSDKAuthority"
-          ],
-          "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them."
-        }
-      ]
     }
   ]
 }

@@ -77,7 +77,7 @@ source merge; declaration and hash matching are not semantic verification.
 2. Reserved focused native normal/race/vet and the real semantic-size SDK helper;
    verify deterministic stale snapshot, conditional writers, late commit and
    non-destructive orphan refusal on this exact source.
-3. Implement/register missing helper/initialization contracts, exact-HEAD formal
+3. Review the registered normalized helper/initialization call contracts, exact-HEAD formal
    baseline and specifically classified mutant runs, guard omission fixtures and
    exact applicability. Parsing/runtime errors never count as counterexamples.
 4. One current whole-module profile for both original90% floors. Public old

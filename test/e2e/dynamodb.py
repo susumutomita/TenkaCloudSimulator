@@ -79,6 +79,7 @@ def run():
             reject(lambda:sdk.put_item(TableName=name,Item={'id':{'N':'1.0'},'payload':{'S':'blocked'}},ConditionExpression='attribute_not_exists(id)'),code='ConditionalCheckFailedException')
             prefix=client(a,prefixed=True);assert prefix.get_item(TableName=name,Key=key)['Item']['id']=={'N':'1'}
             wrong=client(b,token=a.token);reject(lambda:wrong.list_tables(),http=401)
+            reject(lambda:client(a,token=b.token).list_tables(),http=401)
             sdk.put_item(TableName=name,Item={'id':{'N':'2'},'binary':{'B':b'x'*350000}})
             sdk.put_item(TableName=name,Item={'id':{'N':'3'},'escaped':{'S':'<'*70000}})
             assert sdk.get_item(TableName=name,Key={'id':{'N':'2'}})['Item']['binary']['B']==b'x'*350000
@@ -96,6 +97,9 @@ def run():
             participant=control(a,'/_simulator/v1/access',{'principal':'ddb-reader'})['token']
             reader=client(a,token=participant)
             assert reader.get_item(TableName=name,Key=key)['Item']['payload']=={'S':'team-a'}
+            spoof=client(a,token=participant)
+            spoof.meta.events.register('before-sign.dynamodb',lambda request,**_:request.headers.add_header('X-Simulator-Principal','simulator-admin'))
+            reject(lambda:spoof.get_item(TableName=name,Key=key),http=403)
             reject(lambda:reader.put_item(TableName=name,Item={**key,'payload':{'S':'not-authorized'}}),code='AccessDeniedException',http=403)
             reject(lambda:reader.delete_item(TableName=name,Key=key),code='AccessDeniedException',http=403)
             reject(lambda:reader.delete_table(TableName=name),code='AccessDeniedException',http=403)
