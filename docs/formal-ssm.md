@@ -2,7 +2,14 @@
 
 `formal/SSMParameterState.tla` is a bounded safety model of the **existing native
 SSM authorization gate plus ParameterStore's latest-row operations**. Reviewed
-source baseline: `6ffbd1881dad3589469fdf1809654b7483bd6ac4`. The model adds no
+source baseline: `6ffbd1881dad3589469fdf1809654b7483bd6ac4`.
+
+This registry integration is **stacked on unmerged formal PR #310**, exact base
+`ebf5b5d29c3616c57afcd6a6542829d8a741218c`. It must not be treated as a
+main-based or merged change. The applicability record deliberately uses that
+immutable dependency base; regenerate it against the actual reviewed base after
+any dependency rebase, squash merge or restacking. Source/model/native test bytes
+from the standalone SSM candidate are preserved. The model adds no
 runtime API, stored history, authorization implementation or new dependency.
 `ParameterStore` itself is a trusted internal storage adapter; authorization is
 performed by `Gateway.serveSSM` before its native operations. This model does
@@ -139,8 +146,18 @@ cp formal/SSMParameterState.tla formal/SSMParameterState.cfg "$SSM_MODEL_TMP/"
 )
 ```
 
-The source branch intentionally does **not** change the existing five-model
-runner or claim automatic CI registration. The integration owner must register
-this model and its five exact mutation edits in the reviewed registry before
-claiming a required CI gate. Until then, this is a locally checked model
-candidate; no merge or hosted-check result is implied.
+This candidate registers `SSMParameterState` and all five exact mutation edits
+in `formal/models.json`, alongside the unchanged original five models. The
+runner and applicability checker implementations remain unchanged. The gate's
+inventory self-test now requires the exact six model IDs; additional negative
+tests reject a missing/changed SSM config, dirty config input after HEAD capture,
+and a counterexample for a different invariant. Their classifier fixtures are
+not passed off as actual TLC runs.
+
+`formal/applicability.json` classifies and hashes every changed blob relative to
+the stacked dependency base. Native test/model/config paths are bound to the
+seven named SSM properties and their limits. Registration and a valid declared
+scope do not themselves prove refinement, human acceptance, hosted CI success,
+repository merge protection or main integration. Exact-HEAD applicability and
+the complete registered model/sensitivity suite must pass for the final
+candidate before claiming a required-gate result.

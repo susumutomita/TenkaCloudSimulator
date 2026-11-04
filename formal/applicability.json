@@ -1,89 +1,96 @@
 {
   "version": 1,
-  "base_sha": "6ffbd1881dad3589469fdf1809654b7483bd6ac4",
+  "base_sha": "ebf5b5d29c3616c57afcd6a6542829d8a741218c",
   "changes": [
     {
-      "path": ".github/workflows/formal.yml",
-      "sha256": "3e8a66f278d22a6c9fbf2761c784a97b7923d933d9307964139e26c4d83ea7b6",
-      "disposition": "formal-infrastructure",
-      "reason": "Run the exact-HEAD formal gate in an unprivileged Actions job; define runner-dependent bytecode cache only in supported step env contexts.",
-      "models": []
-    },
-    {
-      "path": ".gitignore",
-      "sha256": "a49de3a7afae4ca42ecfdb1f064a98cad1c0bbce18bddc63a01ad6e9c3097286",
-      "disposition": "build-metadata",
-      "reason": "Ignore only generated reports/formal evidence so the validator does not mistake its own output for uncommitted source. No model, source or validation input is excluded.",
-      "models": []
-    },
-    {
-      "path": "docs/ci.md",
-      "sha256": "35bf55f6279fcc7106ff832e0f886a63a575d0c582715eb818b06a3d7e588a3e",
+      "path": "docs/formal-ssm.md",
+      "sha256": "62af902919a343ae2337ee69700cadb9c5e659318530db6e111c58de7c552d15",
       "disposition": "documentation",
-      "reason": "Explains finite bounds, declared correspondence, exact-input checks and separately configured merge protection; no application transition or mathematical implementation proof is introduced by this prose.",
-      "models": []
-    },
-    {
-      "path": "docs/formal-validation.md",
-      "sha256": "3aca4a0d7a833f84e96155d756371f85f85fa807c0869ebac022dea994ab3703",
-      "disposition": "documentation",
-      "reason": "Explains finite bounds, declared correspondence, exact-input checks and separately configured merge protection; no application transition or mathematical implementation proof is introduced by this prose.",
+      "reason": "Records official SSM API/date references, finite limits, actual standalone model/native-test evidence and the unmerged stacked dependency. It does not add runtime transitions or claim hosted CI/refinement.",
       "models": []
     },
     {
       "path": "formal/README.md",
-      "sha256": "65776efb4f747c0f8cb07d22c90ad451b52fecec0cdbb80160be0e4b306b743f",
+      "sha256": "dd6866d7d986f99e433217852f684280b554e06a20198397f168cd57afb5520d",
       "disposition": "documentation",
-      "reason": "Explains finite bounds, declared correspondence, exact-input checks and separately configured merge protection; no application transition or mathematical implementation proof is introduced by this prose.",
+      "reason": "Explains the sixth finite model, retained original five, sixteen required positive/negative cases and unsupported behavior. This prose is not executable business state.",
       "models": []
+    },
+    {
+      "path": "formal/SSMParameterState.cfg",
+      "sha256": "ec27d73e1b7b75d3e8844c4ba40fbe6e20eb26ba878d4ac6dd4e816e2fc58aed",
+      "disposition": "modeled",
+      "reason": "Declares two regions by two names, two values and a version-prefix cutoff of two; enables all seven exact SSM invariants. The finite cutoff is not an AWS/runtime version limit or stored history.",
+      "models": [
+        {
+          "id": "SSMParameterState",
+          "properties": [
+            "TypeOK",
+            "DeniedPreservesState",
+            "OverwriteRefusal",
+            "PutVersion",
+            "DeleteEffect",
+            "OtherKeysUnchanged",
+            "ReadIsolation"
+          ],
+          "limits": "Atomic accepted operations and abstract allow/explicit-deny only; no IAM parser/ARN matching, HTTP syntax, type/description/time fields, pagination/path queries, SQLite crash/interleaving proof, version history/selectors/labels, AWS recreation delay, live AWS differential run or Go refinement proof."
+        }
+      ]
+    },
+    {
+      "path": "formal/SSMParameterState.tla",
+      "sha256": "6362cf048f12886dda55c27332b97d24f166af81ef9392a105940af224c90c63",
+      "disposition": "modeled",
+      "reason": "Atomic abstraction of the existing validated native SSM authorization gate and latest-row Put/overwrite/Delete/Get transitions, with frame, version and exact read-address properties. It does not implement new APIs or prove Go/SQL refinement.",
+      "models": [
+        {
+          "id": "SSMParameterState",
+          "properties": [
+            "TypeOK",
+            "DeniedPreservesState",
+            "OverwriteRefusal",
+            "PutVersion",
+            "DeleteEffect",
+            "OtherKeysUnchanged",
+            "ReadIsolation"
+          ],
+          "limits": "Atomic accepted operations and abstract allow/explicit-deny only; no IAM parser/ARN matching, HTTP syntax, type/description/time fields, pagination/path queries, SQLite crash/interleaving proof, version history/selectors/labels, AWS recreation delay, live AWS differential run or Go refinement proof."
+        }
+      ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "ed8bd53c5b16d33443c4bf89c7c13eef41ae2632b740083f08e69cc2ee8b8e96",
+      "sha256": "420363f2818b096cd5ddec9f9d5ab2bca8ddcb38c40fe52d35eec2ceb9fe4dd6",
       "disposition": "formal-infrastructure",
-      "reason": "Changes validation orchestration or its executable inventory, not simulator resource transitions. Strict real-Git/input and failure-classification negative tests exercise the mechanism; the unchanged five finite specifications still require actual TLC baseline and sensitivity runs. Human acceptance and policy self-edit protection remain separate.",
+      "reason": "Adds the exact SSM model/config/source scope and five required counterexamples to the executable inventory; preserves all original models, properties, tool identity and checker protections.",
       "models": []
     },
     {
-      "path": "scripts/check-formal-applicability.py",
-      "sha256": "47045d256c9b3c9ac7b4e1342368b6ce6aa17f74d689f62b6ae7d5b7592dfb84",
-      "disposition": "formal-infrastructure",
-      "reason": "Changes validation orchestration or its executable inventory, not simulator resource transitions. Strict real-Git/input and failure-classification negative tests exercise the mechanism; the unchanged five finite specifications still require actual TLC baseline and sensitivity runs. Human acceptance and policy self-edit protection remain separate.",
-      "models": []
-    },
-    {
-      "path": "scripts/check-formal.py",
-      "sha256": "de54b5df0d2c3306b9a97542d87777c9dc0298ae9fc255b13b8a66d19e660253",
-      "disposition": "formal-infrastructure",
-      "reason": "Changes validation orchestration or its executable inventory, not simulator resource transitions. Strict real-Git/input and failure-classification negative tests exercise the mechanism; the unchanged five finite specifications still require actual TLC baseline and sensitivity runs. Human acceptance and policy self-edit protection remain separate.",
-      "models": []
-    },
-    {
-      "path": "scripts/formal_applicability.py",
-      "sha256": "a1e8baf590a398039395827e206a20c98871f198b5c558eb97744ae1679028cd",
-      "disposition": "formal-infrastructure",
-      "reason": "Changes validation orchestration or its executable inventory, not simulator resource transitions. Strict real-Git/input and failure-classification negative tests exercise the mechanism; the unchanged five finite specifications still require actual TLC baseline and sensitivity runs. Human acceptance and policy self-edit protection remain separate.",
-      "models": []
-    },
-    {
-      "path": "scripts/formal_model_gate.py",
-      "sha256": "d08008ba7c3445eb3f2abff7cc4275d5829ff017d342ea48e421a70d2fb77248",
-      "disposition": "formal-infrastructure",
-      "reason": "Changes validation orchestration or its executable inventory, not simulator resource transitions. Strict real-Git/input and failure-classification negative tests exercise the mechanism; the unchanged five finite specifications still require actual TLC baseline and sensitivity runs. Human acceptance and policy self-edit protection remain separate.",
-      "models": []
-    },
-    {
-      "path": "scripts/test-formal-applicability.py",
-      "sha256": "68a801b2146e3ecb7763f6dc7e00212f1ccda35beb6203f84d136d782801c044",
-      "disposition": "formal-infrastructure",
-      "reason": "Changes validation orchestration or its executable inventory, not simulator resource transitions. Strict real-Git/input and failure-classification negative tests exercise the mechanism; the unchanged five finite specifications still require actual TLC baseline and sensitivity runs. Human acceptance and policy self-edit protection remain separate.",
-      "models": []
+      "path": "internal/server/ssm_model_contract_test.go",
+      "sha256": "ae893d2818d6bde526cb31bb67ae55fc9ccc8ebeab2fcbdc59ef3e4ac8c04419",
+      "disposition": "modeled",
+      "reason": "Binds the declared SSM contract to actual native HTTP calls: four distinct region/name values and versions, Allow plus explicit Deny, state preservation, no-overwrite refusal, deletion and recreation. Test-only source is in the model scope; this is not an exhaustive/refinement proof.",
+      "models": [
+        {
+          "id": "SSMParameterState",
+          "properties": [
+            "TypeOK",
+            "DeniedPreservesState",
+            "OverwriteRefusal",
+            "PutVersion",
+            "DeleteEffect",
+            "OtherKeysUnchanged",
+            "ReadIsolation"
+          ],
+          "limits": "Atomic accepted operations and abstract allow/explicit-deny only; no IAM parser/ARN matching, HTTP syntax, type/description/time fields, pagination/path queries, SQLite crash/interleaving proof, version history/selectors/labels, AWS recreation delay, live AWS differential run or Go refinement proof."
+        }
+      ]
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "2e02b5c95eb2d9a5dd9bc801a884590b7d4c2e29741c3481a90f217653b2dd1b",
+      "sha256": "24c1fc26f871ec354839261be6d78e4511171169a09e1e1ee967b534ba950fce",
       "disposition": "formal-infrastructure",
-      "reason": "Changes validation orchestration or its executable inventory, not simulator resource transitions. Strict real-Git/input and failure-classification negative tests exercise the mechanism; the unchanged five finite specifications still require actual TLC baseline and sensitivity runs. Human acceptance and policy self-edit protection remain separate.",
+      "reason": "Test-only inventory expectation now names exactly the original five models plus SSM; adds missing/changed-config and wrong-invariant rejection fixtures. The runner, applicability checker and policy are unchanged; fixtures are not actual TLC evidence.",
       "models": []
     }
   ]
