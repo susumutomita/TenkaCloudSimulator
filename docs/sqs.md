@@ -204,3 +204,16 @@ Native and wire regressions distinguish initial delay, available, received/hidde
 and released visibility states. This subset still does not expose the separate
 ApproximateNumberOfMessagesDelayed attribute. Counts changes await execution;
 previous focused results apply only to the exact preceding 285827a checkpoint.
+
+
+Latest local scoped verification: runtime/test checkpoint a938f3b passed the full
+`^TestSQS` selection under race in internal/aws (10.262 s) and internal/server
+(11.594 s), including the admission, raw-body roundtrip, real SQLite wire-error
+rollback and delayed/in-flight counter regressions above. The preceding 285827a
+checkpoint also passed normal and race selections before the Counts correction.
+Policy/applicability unit controls passed 10+21 cases, and the exact nineteen
+changed-blob record validated against base 2d8a41a. This supersedes the historical
+UNRUN labels for these scoped tests only. A fresh successful whole-module run,
+unfiltered 90% source floor, independent standalone SDK two-team/restart test
+and new-head hosted CI are still pending. No new model execution or broad service
+completion is claimed; the model/config/registry bytes are unchanged from 06d.
