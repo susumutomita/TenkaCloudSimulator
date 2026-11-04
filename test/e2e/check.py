@@ -271,6 +271,9 @@ def handler(event,context):
   run_scalar_s3_docs()
  def test_cloudformation_rest_native_sdk_lifecycle(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('cloudformation_rest.py'))],check=True)
+ def test_sqs_console_native_state_scope_and_receipt_custody(self):
+  from sqs_console import run
+  run()
  def test_sqs_native_sdk_two_teams_restart_retention_and_cleanup(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('sqs.py'))],check=True)
  def test_apigateway_rest_sdk_permissions_and_two_teams(self):

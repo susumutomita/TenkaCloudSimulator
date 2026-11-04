@@ -157,3 +157,11 @@ concrete tests. Bounds are exploration limits, not production quotas.
 - [ChangeMessageVisibility](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_ChangeMessageVisibility.html)
 - [Queue count attributes](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_GetQueueAttributes.html)
 - [SQLite trigger cautions and RAISE](https://www.sqlite.org/lang_createtrigger.html)
+
+## Separate console source candidate
+
+A bounded Cloudscape view is being prepared separately over these exact nine
+native APIs; see [source scope and pending acceptance](sqs-console.md). No native
+code/schema/IAM behavior changes with that view. The canonical embedded bundle,
+actual UI execution and its registered async-view model remain unverified at
+this source checkpoint. This does not expand FIFO/CFN/Lambda/Challenge support.

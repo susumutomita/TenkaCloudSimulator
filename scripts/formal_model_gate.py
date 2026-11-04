@@ -9,8 +9,9 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-BASE_MODELS = {'BrowserSessions', 'NativeIAMOwnership', 'ObjectStore', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'StackOwnership', 'StartupTokenVisibility'}
+BASE_MODELS = {'SQSConsoleEpoch', 'BrowserSessions', 'NativeIAMOwnership', 'ObjectStore', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'StackOwnership', 'StartupTokenVisibility'}
 BASE_INVARIANTS = {
+    'SQSConsoleEpoch': {'TypeOK', 'OnlyCurrentReplies', 'NoUnmountedAcceptance', 'ReceiptCustodyBound', 'RawReceiptsPrivate'},
     'BrowserSessions': {'AcceptedOnlyLiveParent', 'NoBrowserSDKAuthority', 'NoRawSDKCookie', 'ParentLifetimeBound', 'RevokedCookiesDenied', 'SDKAuthorityPreserved', 'TypeOK', 'UnrelatedSessionsPreserved'},
     'NativeIAMOwnership': {'OwnershipExclusive', 'TypeOK'},
     'ObjectStore': {'DenyWins', 'NoOrphans', 'NoUnauthorizedMutation', 'TypeOK'},
@@ -21,6 +22,19 @@ BASE_INVARIANTS = {
     'SSMParameterState': {'DeleteEffect', 'DeniedPreservesState', 'OtherKeysUnchanged', 'OverwriteRefusal', 'PutVersion', 'ReadIsolation', 'TypeOK'},
     'StackOwnership': {'OwnershipExclusive', 'TypeOK'},
     'StartupTokenVisibility': {'CreatedFilePrivate', 'FileIdentityFrozen', 'HistoryVisibility', 'InvalidFileNeverEmits', 'TypeOK'},
+}
+REQUIRED_MUTANTS = {
+    'BrowserSessions': {'IgnoreParentValidity', 'LogoutClearsOthers', 'LogoutKeepsSession', 'LogoutRevokesSDK', 'RawOperatorCookie'},
+    'NativeIAMOwnership': {'LegacyAdoptsNativeRole'},
+    'ObjectStore': {'MissingDeletionGuard'},
+    'RESTDeploymentSnapshot': {'MutableSnapshot'},
+    'S3Versions': {'CurrentOnlyDeletion'},
+    'SQSConsoleEpoch': {'OmitReplyEpochGuard', 'OmitUnmountGuardAndEpochAdvance', 'RenderRawReceiptInRows', 'RetainReceiptsAcrossContextSwitch'},
+    'SQSLifecycle': {'AcceptStaleReceipt', 'ChangeWithoutInflight', 'CrossScopeQueueDelete', 'DeleteWithoutCascade', 'FailedWriteChangesState', 'IdempotentCreateChangesState', 'ReceiptNotRotated', 'ReceiveAfterRetention', 'ReceiveBeforeDelay', 'SendWithoutParentCheck', 'UnauthorizedSend'},
+    'SQSStorageBudget': {'BlockLegacyMaintenance', 'CommitPurgeOnFailedSend', 'DiscardOwnedLiveRows', 'IgnoreExpiredForeignCharge', 'OmitPayloadByteCap', 'OmitPhysicalRowCap', 'PurgeExpiredForeignRows'},
+    'SSMParameterState': {'DoNotAdvanceVersion', 'IgnoreExplicitDeny', 'IgnoreOverwriteGuard', 'ReadWrongName', 'ReadWrongRegion'},
+    'StackOwnership': {'ReclaimDriftedResource'},
+    'StartupTokenVisibility': {'OmittedCIGuard', 'OmittedTTYGuard', 'OverwriteExistingToken'},
 }
 IDENTIFIER = re.compile(r'^[A-Za-z][A-Za-z0-9_]*$')
 
@@ -139,6 +153,7 @@ def load_registry(root, relative='formal/models.json'):
             mutant_ids.add(mutant['id'])
             require(mutant['expect_invariant'] in model['properties'], 'mutant expects unchecked invariant')
             apply_mutant(source, name, mutant)
+        require(REQUIRED_MUTANTS.get(name, set()) <= mutant_ids, 'a required sensitivity control was removed')
     require(BASE_MODELS <= ids, 'a required existing model was removed')
     actual = {p.relative_to(root).as_posix() for suffix in ('*.tla', '*.cfg') for p in (root / 'formal').glob(suffix)}
     require(actual == files, 'unregistered or missing model/config artifact')

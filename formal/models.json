@@ -638,6 +638,75 @@
           "expect_invariant": "SDKAuthorityPreserved"
         }
       ]
+    },
+    {
+      "id": "SQSConsoleEpoch",
+      "model": "formal/SQSConsoleEpoch.tla",
+      "config": "formal/SQSConsoleEpoch.cfg",
+      "bounds": "Two abstract queue/context labels, epochs0..1 with no wrap, one abstract response/receipt per context+epoch; finite pending/display/custody and captured acceptance history.",
+      "properties": [
+        "TypeOK",
+        "OnlyCurrentReplies",
+        "NoUnmountedAcceptance",
+        "ReceiptCustodyBound",
+        "RawReceiptsPrivate"
+      ],
+      "limits": "Finite view acceptance/custody abstraction only, not React/AbortController/DOM/thread execution, token authentication, IAM, native receipt validity/freshness, Go/SQL, cryptography or AWS visual parity. Native requests may finish after cancellation; only current replies enter the view. Accepted history captures its original mounted/context/epoch, so later changes cannot relabel an old acceptance. Unmount epoch advance is redundant with the alive guard and the combined mutant deliberately removes both. Receipt values abstract one response identity per context/epoch; native freshness and release require actual browser/SDK tests. main.jsx source scope is only added SQS keyed-remount/navigation seam, not all other services or authentication.",
+      "source_scope": [
+        "tools/console/src/sqs.jsx",
+        "tools/console/src/main.jsx"
+      ],
+      "mutants": [
+        {
+          "id": "OmitReplyEpochGuard",
+          "edits": [
+            {
+              "old": "ReplyEpochOK(r) == r.epoch = epoch",
+              "new": "ReplyEpochOK(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OnlyCurrentReplies"
+        },
+        {
+          "id": "OmitUnmountGuardAndEpochAdvance",
+          "edits": [
+            {
+              "old": "MountedOK == mounted",
+              "new": "MountedOK == TRUE",
+              "count": 1
+            },
+            {
+              "old": "AdvanceUnmountEpoch == TRUE",
+              "new": "AdvanceUnmountEpoch == FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoUnmountedAcceptance"
+        },
+        {
+          "id": "RetainReceiptsAcrossContextSwitch",
+          "edits": [
+            {
+              "old": "ClearSwitchHandles == TRUE",
+              "new": "ClearSwitchHandles == FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReceiptCustodyBound"
+        },
+        {
+          "id": "RenderRawReceiptInRows",
+          "edits": [
+            {
+              "old": "CopyRawReceiptIntoRows == FALSE",
+              "new": "CopyRawReceiptIntoRows == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RawReceiptsPrivate"
+        }
+      ]
     }
   ]
 }

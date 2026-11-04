@@ -109,11 +109,21 @@ sets use an equivalent seed-assignment product, avoiding enumeration of every
 subset of the larger record universe. Accounting invariants apply to accepted
 admissions; failures independently preserve the complete prior physical state.
 
-The combined inventory includes ten baselines and thirty-six mandatory mutants after the BrowserSessions union.
+Recorded mainb61 included ten baselines and thirty-six mandatory mutants after the BrowserSessions union.
 All original, SSM and Startup required properties remain protected. Model/source
 integration must pass the immutable-head gate separately for each new head. These finite abstractions do not
 prove Go/SQLite refinement, actual byte/JSON/Unicode arithmetic, filesystem size,
 concurrency scheduling, persistence/crashes, distributed delivery or liveness.
 See [SQS limits and concrete test boundaries](../docs/sqs.md).
 
-The combined registry requires 10 finite baselines and 36 named mutation controls, including BrowserSessions, SQSLifecycle and SQSStorageBudget. This source integration is not a new-head TLC or Go execution result.
+Recorded mainb61 required10 finite baselines and36 named mutation controls, including BrowserSessions, SQSLifecycle and SQSStorageBudget. This source integration is not a new-head TLC or Go execution result.
+
+## SQS console source registration
+
+The source candidate registers `SQSConsoleEpoch` in addition to all unchanged
+mainb61 entries: eleven finite baselines and forty literal-required controls.
+The new four controls target response epochs, paired unmount defenses, receipt
+custody on context switches and raw receipt rendering. Forty prepared negative
+fixtures individually remove each old/new control. The new model and mandatory
+browser helper have not run at this source checkpoint. See the
+[exact source/native correspondence and limitations](../docs/formal-sqs-console.md).

@@ -83,3 +83,29 @@ shared Gateway/dispatch/server/OpenAPI/navigation/assets/CI. Propose minimal
 additive hunks; preserve existing providers, IAM and SQLite state. SNS-to-SQS
 composition must agree atomicity/retry behavior without nested transactions.
 Inspect the service backlog and roster before claiming another service.
+
+## Local SQS console source assignment (2026-11-04)
+
+`cfn_callback` owns `feat/sqs-console-native-20261104` at recorded main `b61d029`,
+worktree `/workspace/sqs-console-native-b61`. Issue48 and merged PR315 supply the
+existing nine native APIs; the console was explicitly outside that native slice.
+Targeted public open/closed PR and branch searches and72 allowlisted private
+worktree console directories found no console-specific candidate. These are
+targeted observations, not an exhaustive alias inventory. No public Issue action
+is authorized for this assignment. External native/SNS/DynamoDB ownership is
+unchanged.
+
+Owned source: new `tools/console/src/sqs.jsx`, new `docs/sqs-console.md`, new
+`test/e2e/sqs_console.py`, and minimal own-tree navigation/remount hunks in
+`main.jsx`. No server/native/core edits. Queues, supported Standard creation,
+details, explicit send/poll, current-receipt visibility/delete and queue deletion
+use actual native HTTP only. Receipt handles stay transient and are never
+rendered, logged or persisted by the console. Heavy execution is unrun/reserved
+by root; no API/UI success, formal result or global gate is claimed from source.
+
+SQS followup SOURCE now also owns `formal/SQSConsoleEpoch.tla/.cfg`, the additive
+registry/policy minimum and negative fixtures, `docs/formal-sqs-console.md`, exact
+applicability and one mandatory Conformance method. All main10/36 are preserved;
+new11/40 registration and actual UI/helper remain unrun. Participant, region,
+late native reply, wrong-token and restart coverage are prepared in the helper,
+not claimed successful. The original five-file source bundle remains preserved.

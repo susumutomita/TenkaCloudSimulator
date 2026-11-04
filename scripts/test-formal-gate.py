@@ -10,7 +10,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from formal_model_gate import GateError, apply_mutant, load_registry, run_suite, validate_result, invariants, exact_head_inputs
+from formal_model_gate import GateError, apply_mutant, load_registry, run_suite, validate_result, invariants, exact_head_inputs, REQUIRED_MUTANTS
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -34,13 +34,55 @@ class FormalGateTests(unittest.TestCase):
 
     def test_complete_registry_and_exact_mutations(self):
         registry = load_registry(self.root)
-        self.assertEqual({model['id'] for model in registry['models']}, {'RESTDeploymentSnapshot', 'S3Versions', 'SSMParameterState', 'SQSLifecycle', 'SQSStorageBudget', 'StackOwnership', 'ObjectStore', 'StartupTokenVisibility', 'BrowserSessions', 'NativeIAMOwnership'})
+        self.assertEqual({model['id'] for model in registry['models']}, {'SQSConsoleEpoch', 'RESTDeploymentSnapshot', 'S3Versions', 'SSMParameterState', 'SQSLifecycle', 'SQSStorageBudget', 'StackOwnership', 'ObjectStore', 'StartupTokenVisibility', 'BrowserSessions', 'NativeIAMOwnership'})
         for model in registry['models']:
             source = (self.root / model['model']).read_text()
             for mutant in model['mutants']:
                 name, mutated = apply_mutant(source, model['id'], mutant)
                 self.assertNotEqual(mutated, source)
                 self.assertIn('MODULE ' + name, mutated)
+
+    def test_every_required_control_is_protected_against_single_removal(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        self.assertEqual(sum(len(v) for v in REQUIRED_MUTANTS.values()), 40)
+        for model_id, controls in REQUIRED_MUTANTS.items():
+            for control in controls:
+                with self.subTest(model=model_id, control=control):
+                    registry = json.loads(original)
+                    model = next(m for m in registry['models'] if m['id'] == model_id)
+                    model['mutants'] = [m for m in model['mutants'] if m['id'] != control]
+                    path.write_text(json.dumps(registry))
+                    with self.assertRaises(GateError):
+                        load_registry(self.root)
+        path.write_text(original)
+
+    def test_sqs_view_required_model_and_each_property_are_protected(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        registry = json.loads(original)
+        registry['models'] = [m for m in registry['models'] if m['id'] != 'SQSConsoleEpoch']
+        path.write_text(json.dumps(registry))
+        with self.assertRaises(GateError):
+            load_registry(self.root)
+        path.write_text(original)
+        source = json.loads(original)
+        model = next(m for m in source['models'] if m['id'] == 'SQSConsoleEpoch')
+        cfg_path = self.root / model['config']
+        cfg_original = cfg_path.read_text()
+        for prop in model['properties']:
+            with self.subTest(property=prop):
+                registry = json.loads(original)
+                candidate = next(m for m in registry['models'] if m['id'] == 'SQSConsoleEpoch')
+                candidate['properties'].remove(prop)
+                # Remove both declarations to test the literal minimum invariant
+                # guard, rather than only registry/CFG mismatch detection.
+                cfg_path.write_text(cfg_original.replace(' ' + prop, ''))
+                path.write_text(json.dumps(registry))
+                with self.assertRaises(GateError):
+                    load_registry(self.root)
+        cfg_path.write_text(cfg_original)
+        path.write_text(original)
 
     def test_startup_required_model_and_properties_cannot_disappear(self):
         path = self.root / 'formal/models.json'
