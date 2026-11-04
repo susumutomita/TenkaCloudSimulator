@@ -28,7 +28,7 @@ func TestSQSInsertIgnoreCannotAcknowledgeUnpersistedMessage(t *testing.T) {
 }
 
 func TestSQSReceiveIgnoredClaimCannotLoseMessageOrAcknowledgeReceipt(t *testing.T) {
-	s, q := sqsQueueFixture(t)
+	g, s, q := sqsAdditionalFixture(t)
 	for _, body := range []string{"first", "second", "expired"} {
 		if _, err := s.Send(q.Region, q, body, nil, 0); err != nil {
 			t.Fatal(err)
@@ -37,9 +37,10 @@ func TestSQSReceiveIgnoredClaimCannotLoseMessageOrAcknowledgeReceipt(t *testing.
 	if _, err := s.db.Exec("UPDATE aws_sqs_messages SET sent=CASE body WHEN 'expired' THEN 0 WHEN 'first' THEN ? ELSE ? END", sqsNow()-2, sqsNow()-1); err != nil {
 		t.Fatal(err)
 	}
-	// The first claim is written, then the second row is deleted and its update
-	// silently skipped. The entire batch and preceding expiry must roll back.
-	if _, err := s.db.Exec("CREATE TRIGGER ignore_sqs_claim BEFORE UPDATE ON aws_sqs_messages WHEN old.body='second' BEGIN DELETE FROM aws_sqs_messages WHERE id=old.id; SELECT RAISE(IGNORE); END"); err != nil {
+	// The first claim is written, then the second UPDATE is silently skipped.
+	// Pure IGNORE avoids SQLite's undefined BEFORE-trigger target-deletion
+	// behavior. The entire batch and preceding expiry must roll back.
+	if _, err := s.db.Exec("CREATE TRIGGER ignore_sqs_claim BEFORE UPDATE ON aws_sqs_messages WHEN old.body='second' BEGIN SELECT RAISE(IGNORE); END"); err != nil {
 		t.Fatal(err)
 	}
 	messages, err := s.Receive(q.Region, q, 2, 30)
@@ -49,6 +50,13 @@ func TestSQSReceiveIgnoredClaimCannotLoseMessageOrAcknowledgeReceipt(t *testing.
 	var claimed int
 	if err = s.db.QueryRow("SELECT count(*) FROM aws_sqs_messages WHERE receive_count<>0 OR receipt<>''").Scan(&claimed); err != nil || claimed != 0 {
 		t.Fatal("failed batch left receipt authority", claimed, err)
+	}
+	out := sqsWire(t, g, "ReceiveMessage", map[string]any{"QueueUrl": q.Name, "MaxNumberOfMessages": 2}, 500)
+	if out["__type"] != "InternalError" || out["Messages"] != nil || sqsSQLCount(t, s, "aws_sqs_messages") != 3 {
+		t.Fatal("wire acknowledged a failed claim batch", out)
+	}
+	if err = s.db.QueryRow("SELECT count(*) FROM aws_sqs_messages WHERE receive_count<>0 OR receipt<>''").Scan(&claimed); err != nil || claimed != 0 {
+		t.Fatal("failed wire batch left receipt authority", claimed, err)
 	}
 	if _, err = s.db.Exec("DROP TRIGGER ignore_sqs_claim"); err != nil {
 		t.Fatal(err)

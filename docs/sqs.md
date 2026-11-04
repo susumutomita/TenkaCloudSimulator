@@ -259,8 +259,8 @@ Go refinement.
 Expected-single-row writes additionally verify SQLite RowsAffected before
 acknowledging CreateQueue, SendMessage or each ReceiveMessage claim; DeleteQueue
 also checks the result and preserves its missing-queue response. Real SQLite
-RAISE(IGNORE) regression fixtures cover ignored creation/insertion, a deleted
-second batch-claim row and ignored queue deletion, including preceding expiry
+RAISE(IGNORE) regression fixtures cover ignored creation/insertion, an ignored
+second batch-claim write and ignored queue deletion, including preceding expiry
 and receipt rollback. These require a nonstandard/corrupt SQLite trigger; they
 are ordinary storage-ack resilience tests, not an ordinary API exploit claim or
 protection against arbitrary malicious database/host writers (which SECURITY.md
@@ -268,3 +268,9 @@ excludes). Other existing storage faults and tests remain scoped evidence, not a
 proof that all possible host database tampering is detected. The 53a6 whole run
 was intentionally interrupted before these changes; its partial profile is
 diagnostic only and is not a new coverage/whole-suite result.
+
+The IGNORE fixtures use pure SELECT RAISE(IGNORE) for UPDATE, preserving defined
+SQLite behavior instead of deleting an UPDATE target in a BEFORE trigger
+([SQLite trigger cautions and RAISE semantics](https://www.sqlite.org/lang_createtrigger.html)).
+Receive also verifies the wire response is HTTP 500 with no message/receipt
+acknowledgement and that the prior batch and expiry state remain unchanged.

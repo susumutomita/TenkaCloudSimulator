@@ -310,7 +310,7 @@ func TestSQSAdditionalParentDeleteSQLFaultPreservesGraph(t *testing.T) {
 	}
 }
 
-func TestSQSAdditionalSkippedVisibilityUpdateRollsBackTriggerDeletion(t *testing.T) {
+func TestSQSAdditionalSkippedVisibilityUpdatePreservesCurrentRow(t *testing.T) {
 	g, store, q := sqsAdditionalFixture(t)
 	if _, err := store.Send(q.Region, q, "current receipt", nil, -1); err != nil {
 		t.Fatal(err)
@@ -320,9 +320,9 @@ func TestSQSAdditionalSkippedVisibilityUpdateRollsBackTriggerDeletion(t *testing
 		t.Fatal(got, err)
 	}
 	before := sqsAdditionalRows(t, store)
-	// A real SQLite trigger can delete the selected row then skip its UPDATE.
-	// The affected-row guard must reject this and roll back that deletion.
-	if _, err = store.db.Exec("CREATE TRIGGER sqs_additional_skip_visibility BEFORE UPDATE ON aws_sqs_messages BEGIN DELETE FROM aws_sqs_messages WHERE id=old.id AND region=old.region AND queue=old.queue; SELECT RAISE(IGNORE); END"); err != nil {
+	// Pure IGNORE skips the UPDATE without undefined BEFORE-trigger target
+	// mutation. The affected-row guard must reject an unpersisted visibility.
+	if _, err = store.db.Exec("CREATE TRIGGER sqs_additional_skip_visibility BEFORE UPDATE ON aws_sqs_messages BEGIN SELECT RAISE(IGNORE); END"); err != nil {
 		t.Fatal(err)
 	}
 	body, err := json.Marshal(map[string]any{"QueueUrl": q.Name, "ReceiptHandle": got[0].ReceiptHandle, "VisibilityTimeout": 60})
@@ -331,7 +331,7 @@ func TestSQSAdditionalSkippedVisibilityUpdateRollsBackTriggerDeletion(t *testing
 	}
 	sqsAdditionalResponse(t, g, sqsAdditionalRequest("POST", "/", "ChangeMessageVisibility", string(body)), 500, "InternalError")
 	if !reflect.DeepEqual(before, sqsAdditionalRows(t, store)) {
-		t.Fatal("zero-row visibility update committed trigger-side deletion")
+		t.Fatal("zero-row visibility update changed the current receipt row")
 	}
 	if _, err = store.db.Exec("DROP TRIGGER sqs_additional_skip_visibility"); err != nil {
 		t.Fatal(err)

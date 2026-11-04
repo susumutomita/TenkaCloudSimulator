@@ -11,7 +11,7 @@
     },
     {
       "path": "docs/sqs.md",
-      "sha256": "617b3b10f92ce4412be59bf7e0e2bfe872145cc1870148adef8c5156974548af",
+      "sha256": "93826d6cd094e77b03b2dda920c54931fc24e154168c399821392fad0bd80948",
       "disposition": "documentation",
       "reason": "Document the bounded native SQS subset, local 256 KiB versus current operation-reference 1 MiB, repair provenance, actual focused tests and explicit compatibility/model/coverage limits. No service or formal-proof completion is asserted by prose.",
       "models": []
@@ -168,7 +168,7 @@
       "disposition": "test-support",
       "reason": "Concrete SQS quota/admission/SQLite rollback and standalone two-team SDK tests; no finite model or new-head execution proof is implied by test source.",
       "models": [],
-      "sha256": "4c231c3820aae4c7b8df18cc185b49233339c79e699a1561859a0af154a28549"
+      "sha256": "3ed9b8bf66cfe059bdd3cfb06d639efd68e1f103635bcf276946408e395092ef"
     },
     {
       "path": "internal/aws/sqs_atomic_boundaries_test.go",
@@ -233,7 +233,7 @@
       "disposition": "test-support",
       "reason": "Real nonstandard/corrupt SQLite IGNORE-trigger fixtures verify expected-single-row create/send/receive/delete acknowledgements and rollback; not an ordinary API exploit or arbitrary host-writer guarantee. No fake SQL result/driver mocks.",
       "models": [],
-      "sha256": "c759118d52c4fb2f35ff33e7570e0093e5b248c609de40f67d18ada98fe6fe05"
+      "sha256": "9a8494cfc25811f3db9eba3158edb679f8bc6504e7dcfc8c16116eaf20017324"
     },
     {
       "path": "internal/aws/ssm.go",
