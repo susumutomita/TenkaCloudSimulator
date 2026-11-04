@@ -9,13 +9,43 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-BASE_MODELS = {'ObjectStore', 'StackOwnership', 'S3Versions', 'NativeIAMOwnership', 'RESTDeploymentSnapshot'}
+BASE_MODELS = {'AzureBlobState', 'BlobRange', 'BrowserSessions', 'GCPStorageState', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'StackOwnership', 'StartupTokenVisibility'}
 BASE_INVARIANTS = {
-    'ObjectStore': {'TypeOK', 'NoOrphans', 'NoUnauthorizedMutation', 'DenyWins'},
-    'StackOwnership': {'TypeOK', 'OwnershipExclusive'},
-    'S3Versions': {'TypeOK', 'NoHistoryOrphans', 'CurrentMatchesLatest'},
-    'NativeIAMOwnership': {'TypeOK', 'OwnershipExclusive'},
-    'RESTDeploymentSnapshot': {'TypeOK', 'SnapshotsFrozen', 'NoStageOrphans'},
+    'AzureBlobState': {'BudgetBounded', 'ConditionEnforced', 'FailureAtomic', 'FreshWriteIdentity', 'NoDeniedRead', 'NoOrphans', 'NoUnauthorizedMutation', 'PeerStatePreserved', 'ReadExact', 'TypeOK'},
+    'BlobRange': {'ChecksumBound', 'ConditionBeforeRange', 'DeniedNoDisclosure', 'ExactNormalRead', 'ExactSelectedBytes', 'Frame', 'InvalidRefused', 'MissingRangeChecksumRefused', 'NoFullMD5OnPartial', 'OutOfBoundsRefused', 'TypeOK'},
+    'BrowserSessions': {'AcceptedOnlyLiveParent', 'NoBrowserSDKAuthority', 'NoRawSDKCookie', 'ParentLifetimeBound', 'RevokedCookiesDenied', 'SDKAuthorityPreserved', 'TypeOK', 'UnrelatedSessionsPreserved'},
+    'GCPStorageState': {'Budget', 'DeniedFrame', 'GenerationFreshness', 'GenerationRefusal', 'NoOrphans', 'NonemptyDeleteRefused', 'OtherEnvironmentUnchanged', 'OtherProjectUnchanged', 'ReadIsolation', 'TypeOK'},
+    'NativeIAMOwnership': {'OwnershipExclusive', 'TypeOK'},
+    'ObjectStore': {'DenyWins', 'NoOrphans', 'NoUnauthorizedMutation', 'TypeOK'},
+    'ProjectAuthority': {'ActorUsesPersistedProject', 'ConstructorRefusalFrame', 'DeniedFrame', 'FinitePermissions', 'FixedHostConfiguration', 'InitializationBindsConfigured', 'NoUnboundAdoption', 'OnlyActualOwnerAuthorized', 'OwnerBindingFrozen', 'TypeOK'},
+    'ProviderActor': {'AuthenticatedRequestsAttach', 'CredentialIdentityPreserved', 'CredentialRoleNotWireRole', 'NoActorOnRejected', 'OperatorExerciseSelection', 'ParticipantBound', 'TypeOK'},
+    'ProviderPath': {'ActorPreserved', 'ContextPreserved', 'DistinctCarriersRemainDistinct', 'EncodedProviderRejected', 'EscapedTailPreserved', 'ProviderSelectedCorrectly', 'SourcePathImmutable', 'TailPreserved', 'TypeOK', 'UnregisteredRejected'},
+    'RESTDeploymentSnapshot': {'NoStageOrphans', 'SnapshotsFrozen', 'TypeOK'},
+    'S3Versions': {'CurrentMatchesLatest', 'NoHistoryOrphans', 'TypeOK'},
+    'SQSLifecycle': {'AuthorizedMutations', 'ChangeOnlyInflight', 'FailedMutationAtomic', 'FreshReceipt', 'IdempotentCreateUnchanged', 'NoOrphans', 'ReceiptMutationCurrent', 'ReceiveOnlyEligible', 'ScopedMutation', 'TypeOK'},
+    'SQSStorageBudget': {'BudgetAccountsPhysical', 'DeleteScopeExact', 'FailedSendPreservesRows', 'ForeignRowsPreserved', 'LiveRowsPreserved', 'MaintenanceNotBudgetBlocked', 'PayloadByteCap', 'PhysicalRowCap', 'ReadRemovesOwnExpired', 'TypeOK'},
+    'SSMParameterState': {'DeleteEffect', 'DeniedPreservesState', 'OtherKeysUnchanged', 'OverwriteRefusal', 'PutVersion', 'ReadIsolation', 'TypeOK'},
+    'StackOwnership': {'OwnershipExclusive', 'TypeOK'},
+    'StartupTokenVisibility': {'CreatedFilePrivate', 'FileIdentityFrozen', 'HistoryVisibility', 'InvalidFileNeverEmits', 'TypeOK'},
+}
+# Established controls require an explicit gate-policy change before retirement.
+REQUIRED_MUTANTS = {
+    'AzureBlobState': {'ContainerDeleteErasesPeer', 'ContainerDeleteLeavesBlobs', 'FailedPutCommits', 'IgnoreAccountOwner', 'IgnoreCreateOnly', 'IgnoreStaleETag', 'MissingTrustedActor', 'OmitByteBudget', 'OmitRowBudget', 'ReadNeighbor', 'ReuseETag'},
+    'BlobRange': {'BypassAuthorization', 'DiscloseFullMD5OnPartial', 'IgnoreConditionDecision', 'IgnoreEndClamp', 'PermitExcessChecksum', 'ReadMutatesStoredBody', 'UncheckedBounds', 'WrongSliceStart'},
+    'BrowserSessions': {'IgnoreParentValidity', 'LogoutClearsOthers', 'LogoutKeepsSession', 'LogoutRevokesSDK', 'RawOperatorCookie'},
+    'GCPStorageState': {'DeleteNonemptyBucket', 'DeniedBucketCreate', 'IgnoreActualOwner', 'IgnoreGenerationMatch', 'IgnoreStateBudget', 'ReadWrongEnvironment', 'ResetSequenceAfterDelete', 'ReuseGeneration'},
+    'NativeIAMOwnership': {'LegacyAdoptsNativeRole'},
+    'ObjectStore': {'MissingDeletionGuard'},
+    'ProjectAuthority': {'AdoptUnboundResource', 'AllowOwnerRebinding', 'DefaultAllowUnknownPermission', 'PartialCommitOnRefusal', 'TrustClaimedProject', 'WriteDespiteDenial'},
+    'ProviderActor': {'OperatorSelectionIgnored', 'ParticipantCapabilitiesSelection', 'ParticipantSelectionBypass', 'SelectedCredentialConfusion', 'UnauthenticatedAttachment', 'WireRoleSpoof'},
+    'ProviderPath': {'CleanTail', 'DecodeAgain', 'DropActor', 'DropRawTail', 'EncodedProviderAllowed', 'MutateOriginalPath', 'UnknownFallsBack'},
+    'RESTDeploymentSnapshot': {'MutableSnapshot'},
+    'S3Versions': {'CurrentOnlyDeletion'},
+    'SQSLifecycle': {'AcceptStaleReceipt', 'ChangeWithoutInflight', 'CrossScopeQueueDelete', 'DeleteWithoutCascade', 'FailedWriteChangesState', 'IdempotentCreateChangesState', 'ReceiptNotRotated', 'ReceiveAfterRetention', 'ReceiveBeforeDelay', 'SendWithoutParentCheck', 'UnauthorizedSend'},
+    'SQSStorageBudget': {'BlockLegacyMaintenance', 'CommitPurgeOnFailedSend', 'DiscardOwnedLiveRows', 'IgnoreExpiredForeignCharge', 'OmitPayloadByteCap', 'OmitPhysicalRowCap', 'PurgeExpiredForeignRows'},
+    'SSMParameterState': {'DoNotAdvanceVersion', 'IgnoreExplicitDeny', 'IgnoreOverwriteGuard', 'ReadWrongName', 'ReadWrongRegion'},
+    'StackOwnership': {'ReclaimDriftedResource'},
+    'StartupTokenVisibility': {'OmittedCIGuard', 'OmittedTTYGuard', 'OverwriteExistingToken'},
 }
 IDENTIFIER = re.compile(r'^[A-Za-z][A-Za-z0-9_]*$')
 
@@ -60,15 +90,26 @@ def asset(root, name):
     return path
 
 
-def invariants(config):
+def invariants(config, model_name=None):
     # Deliberately small CFG grammar: named invariants, init/next/specification,
     # Boolean deadlock setting and finite literal constant assignments only.
     # Views/constraints/substitutions cannot silently become fake invariants or
-    # prune the checked behavior. Extend this grammar only with explicit review.
+    # prune checked behavior. The one explicit Azure binding below supplies a
+    # trusted finite owner function, never an invariant/operator constraint.
+    # Registry metadata cannot grant additional substitution permissions.
     names, constants = [], False
+    owner_binding_seen = False
     literal = r'(?:[A-Za-z][A-Za-z0-9_]*|[0-9]+|"(?:[^"\\]|\\.)*")'
     value = rf'(?:{literal}|\{{(?:\s*{literal}(?:\s*,\s*{literal})*\s*)?\}})'
     assignment = re.compile(rf'^[A-Za-z][A-Za-z0-9_]*\s*=\s*{value}$')
+    def constant_assignment(text):
+        nonlocal owner_binding_seen
+        if assignment.fullmatch(text):
+            return True
+        if model_name == 'AzureBlobState' and re.fullmatch(r'Owners\s*<-\s*AccountOwners', text) and not owner_binding_seen:
+            owner_binding_seen = True
+            return True
+        return False
     for raw in config.splitlines():
         line = raw.split('\\*', 1)[0].strip()
         if not line:
@@ -87,9 +128,10 @@ def invariants(config):
         elif words[0] in ('CONSTANT', 'CONSTANTS'):
             constants = True
             remainder = line[len(words[0]):].strip()
-            require(not remainder or assignment.fullmatch(remainder), 'unsupported constant declaration')
+            require(not remainder or constant_assignment(remainder), 'unsupported constant declaration')
         else:
-            require(constants and assignment.fullmatch(line), 'unsupported CFG directive or continuation: ' + words[0])
+            require(constants and constant_assignment(line), 'unsupported CFG directive or continuation: ' + words[0])
+    require(model_name != 'AzureBlobState' or owner_binding_seen, 'Azure finite owner binding is required')
     require(names and len(names) == len(set(names)), 'invalid or absent config invariants')
     return names
 
@@ -120,7 +162,7 @@ def load_registry(root, relative='formal/models.json'):
         files.update((model['model'], model['config']))
         require(len(re.findall(r'\bMODULE\s+' + re.escape(name) + r'\b', source)) == 1, 'model module declaration mismatch')
         require(isinstance(model['bounds'], str) and model['bounds'].strip() and isinstance(model['limits'], str) and model['limits'].strip(), 'model bounds/limits must be explicit')
-        require(isinstance(model['properties'], list) and len(model['properties']) == len(set(model['properties'])) and set(model['properties']) == set(invariants(config)), 'registry/config invariants mismatch')
+        require(isinstance(model['properties'], list) and len(model['properties']) == len(set(model['properties'])) and set(model['properties']) == set(invariants(config, name)), 'registry/config invariants mismatch')
         require(BASE_INVARIANTS.get(name, set()) <= set(model['properties']), 'an existing required invariant was removed')
         require(isinstance(model['source_scope'], list) and all(isinstance(p, str) and p and not Path(p).is_absolute() and '..' not in Path(p).parts and not any(c in p for c in '*?[') for p in model['source_scope']), 'source scope must name exact reviewed paths')
         require(len(set(model['source_scope'])) == len(model['source_scope']), 'duplicate model source scope')
@@ -134,6 +176,7 @@ def load_registry(root, relative='formal/models.json'):
             mutant_ids.add(mutant['id'])
             require(mutant['expect_invariant'] in model['properties'], 'mutant expects unchecked invariant')
             apply_mutant(source, name, mutant)
+        require(REQUIRED_MUTANTS.get(name, set()) <= mutant_ids, 'a required mutation control was removed')
     require(BASE_MODELS <= ids, 'a required existing model was removed')
     actual = {p.relative_to(root).as_posix() for suffix in ('*.tla', '*.cfg') for p in (root / 'formal').glob(suffix)}
     require(actual == files, 'unregistered or missing model/config artifact')

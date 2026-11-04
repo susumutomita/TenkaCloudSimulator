@@ -1,14 +1,24 @@
 GO ?= go
 PYTHON ?= python3
 BINARY := dist/tenkacloud-simulator
+START_LISTEN ?= 127.0.0.1:4566
+START_STATE ?= ./practice.db
+START_TOKEN_FILE ?= ./simulator-token
+export GO START_LISTEN START_STATE START_TOKEN_FILE
 
-.PHONY: build dev test vet format-check before-commit e2e formal verify-assets cross-check
+.PHONY: build dev start test-start test vet format-check before-commit e2e formal verify-assets cross-check
 build:
 	mkdir -p dist
 	CGO_ENABLED=0 $(GO) build -trimpath -ldflags='-s -w' -o $(BINARY) ./cmd/simulator
 
 dev: build
 	./$(BINARY)
+
+start:
+	@sh scripts/start.sh
+
+test-start:
+	$(PYTHON) test/start/check_start.py
 
 test:
 	mkdir -p reports
@@ -35,6 +45,7 @@ before-commit: format-check vet verify-assets
 e2e: build
 	$(PYTHON) test/e2e/reflow_test.py
 	$(PYTHON) test/e2e/check.py
+	$(MAKE) test-start
 
 formal:
 	$(PYTHON) scripts/check-formal.py

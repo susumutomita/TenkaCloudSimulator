@@ -8,12 +8,15 @@ The native race, SDK, browser, containment and coverage gates remain independent
 ## Model inventory and sensitivity
 
 `formal/models.json` is the executable inventory. Every `.tla` and `.cfg` in
-`formal/` must be registered; the five existing models cannot be removed.
+`formal/` must be registered; required existing models cannot be removed.
 Each entry names exact implementation paths, finite bounds, limitations, checked
 invariants and mutations. The registry is a reviewable correspondence claim, not
 machine-discovered semantic coverage. A newly added implementation file is not
 covered merely because an existing model passes: its exact path must have an
 appropriate reviewed scope mapping and property argument.
+
+The current source registry has16 baselines/82 required named mutation controls.
+Registration and Python guards are not a successful immutable TLC execution.
 
 | Model | Finite contract | Important exclusions |
 |---|---|---|

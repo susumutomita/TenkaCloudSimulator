@@ -10,11 +10,19 @@
     <title>TenkaCloud Simulator · API reference</title>
     <link rel="icon" href="data:," />
     <link rel="stylesheet" href="./scalar.css" />
+    <link rel="stylesheet" href="./response-guide.css" />
     <script src="./boot.js" defer></script>
     <script src="./scalar.js" defer></script>
+    <script src="./response-guide.js" defer></script>
     <script src="./init.js" defer></script>
   </head>
   <body>
     <div id="reference"></div>
+    <div id="s3-result-announcement" class="reader-sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+    <button id="s3-result-trigger" type="button" aria-haspopup="dialog" aria-controls="s3-result-dialog" aria-keyshortcuts="Alt+Shift+R" hidden>Read live S3 response</button>
+    <dialog id="s3-result-dialog" aria-labelledby="s3-result-title">
+      <header><h2 id="s3-result-title">Understand the live S3 response</h2><button id="s3-result-close" type="button" aria-label="Close response explanation">Close</button></header>
+      <div id="s3-result-content"></div>
+    </dialog>
   </body>
 </html>
