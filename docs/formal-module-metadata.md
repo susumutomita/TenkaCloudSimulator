@@ -53,10 +53,20 @@ real-Git fixtures exercise accepted annotation/group changes and rejection of
 semantic/unknown syntax, checksum, dirty/index and unrelated runtime changes.
 No workflow, settings, Go module file, application code or finite model changes.
 
-At source handoff, the new fixtures are **UNRUN** pending root's CPU window;
-syntax/source construction and `git diff --check` are not execution evidence.
-The final committed applicability record is based on full ebf5b5d SHA and labels
-only actual helper/checker/test changes as formal-infrastructure and this text
-as documentation. Exact record validation and existing negative controls remain
-required before integration. Startup's real runtime source changes still need
-their own model/property correspondence and required whole CI checks.
+Initial source-only handoff5976deb did not execute tests. After root granted a
+short Python-only window, the expanded real-Git applicability suite passed
+18tests in9.535s and the existing formal-gate suite passed10tests in0.403s.
+The new actual-flow fixture preserves public Startup308 before/after module
+blobs (base6ffbd188,headac52f4b) with SHA256 receipts and unchanged go.sum.
+It validates a committed real Git record as build-metadata with no model claim;
+changing x/sys version or checksum bytes is rejected. The fixture does not test
+the Startup runtime or claim dependency security/whole-CI equivalence.
+
+The committed applicability record is based on full ebf5b5d SHA and labels only
+actual helper/checker/test changes as formal-infrastructure, the immutable blob
+fixture as test-support, and this text as documentation. Unknown runtime Go
+continues to fail in the negative suite. Existing finite models were not changed
+or executed; no Go/TLC/browser test, workflow/settings change or publication was
+performed. Startup runtime changes still require their own model/property
+correspondence and whole CI checks. Immutable-HEAD record validation is a
+separate final check and its result is reported in the handoff.

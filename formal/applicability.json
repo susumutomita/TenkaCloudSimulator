@@ -4,30 +4,37 @@
   "changes": [
     {
       "path": "docs/formal-module-metadata.md",
-      "sha256": "1230b74eb3534efcc2707b4c556e87caf5a62cf43f8b2fb5f46de35247017a95",
+      "sha256": "c9a9afba3a49b3972d9d88f92271b3eebcb5cfa4a98abb628639bd6bd6b9f600",
       "disposition": "documentation",
-      "reason": "Documents the narrow immutable module-annotation recognizer and unexecuted acceptance/limitations; no runtime transition changes.",
+      "reason": "Explains narrow metadata-only recognition and actual scoped Python evidence, not an implementation or dependency security proof.",
       "models": []
     },
     {
       "path": "scripts/formal_applicability.py",
       "sha256": "a389e8a406b8d85ebc3105301603300d35ab02eae37d9fbc549323c9aa9ebfbd",
       "disposition": "formal-infrastructure",
-      "reason": "Adds narrow fail-closed classification of byte-bound same-requirements annotations/grouping only; unknown dependencies/directives/checksum/dirty input remain rejected. New real-Git negative fixtures are source-only and unrun at handoff; no unrelated model proof is claimed.",
+      "reason": "Narrow immutable same-requirements annotation/grouping recognition only; no general go.mod exemption or unrelated model binding. Expanded real-Git applicability18 and existing gate10 controls passed; unknown syntax/dependencies/checksum/dirty/runtime input remain rejected.",
       "models": []
     },
     {
       "path": "scripts/formal_module_metadata.py",
       "sha256": "ef1b2a1a0740ccecda7041ad004598dc753007a560524ea829b5cc15e45d0d25",
       "disposition": "formal-infrastructure",
-      "reason": "Adds narrow fail-closed classification of byte-bound same-requirements annotations/grouping only; unknown dependencies/directives/checksum/dirty input remain rejected. New real-Git negative fixtures are source-only and unrun at handoff; no unrelated model proof is claimed.",
+      "reason": "Narrow immutable same-requirements annotation/grouping recognition only; no general go.mod exemption or unrelated model binding. Expanded real-Git applicability18 and existing gate10 controls passed; unknown syntax/dependencies/checksum/dirty/runtime input remain rejected.",
       "models": []
     },
     {
       "path": "scripts/test-formal-applicability.py",
-      "sha256": "ea24bfc15ac2738a6bae5ae2024792c58b899f5ba15f9c216b5f19d4a87d6b90",
+      "sha256": "52b5376faff7521e520a7e00593d54096d1e3df832d3c84ae9ab485d806b735f",
       "disposition": "formal-infrastructure",
-      "reason": "Adds narrow fail-closed classification of byte-bound same-requirements annotations/grouping only; unknown dependencies/directives/checksum/dirty input remain rejected. New real-Git negative fixtures are source-only and unrun at handoff; no unrelated model proof is claimed.",
+      "reason": "Narrow immutable same-requirements annotation/grouping recognition only; no general go.mod exemption or unrelated model binding. Expanded real-Git applicability18 and existing gate10 controls passed; unknown syntax/dependencies/checksum/dirty/runtime input remain rejected.",
+      "models": []
+    },
+    {
+      "path": "test/formal/startup-module-metadata.json",
+      "sha256": "8b1d11863b1325b65d40dbd26974a423ea740823e992b6631947b43c931c8b60",
+      "disposition": "test-support",
+      "reason": "Pinned public Startup308 go.mod before/after and unchanged go.sum blobs plus SHA256 receipts; used in a real Git acceptance/version/checksum rejection fixture, not runtime state.",
       "models": []
     }
   ]

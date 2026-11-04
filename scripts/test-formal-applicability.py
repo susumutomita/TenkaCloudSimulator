@@ -1,5 +1,6 @@
 """Real temporary Git trees test exact binding, not semantic proof or review."""
 import copy
+import hashlib
 import json
 import shutil
 import subprocess
@@ -326,6 +327,27 @@ class ApplicabilityTests(unittest.TestCase):
             item.update(disposition='build-metadata', models=[])
         self.write_record(record)
         self.commit('module exception does not exempt Go source')
+        with self.assertRaises(GateError):
+            validate_record(self.root, self.base)
+
+
+
+    def test_original_startup_module_blobs_and_negative_controls(self):
+        fixture = json.loads((ROOT / 'test/formal/startup-module-metadata.json').read_text())
+        for key in ('before', 'after', 'go_sum'):
+            self.assertEqual(hashlib.sha256(fixture[key].encode()).hexdigest(), fixture['sha256'][key])
+        (self.root / 'go.mod').write_text(fixture['before'])
+        (self.root / 'go.sum').write_text(fixture['go_sum'])
+        self.commit('original public Startup308 module baseline')
+        self.base = git(self.root, 'rev-parse', 'HEAD').decode().strip()
+        self.module_record(fixture['after'].encode())
+        result = validate_record(self.root, self.base)
+        self.assertEqual([(c['path'], c['disposition'], c['models']) for c in result['changes']], [('go.mod', 'build-metadata', [])])
+        self.module_record(fixture['after'].replace('v0.44.0', 'v0.45.0').encode())
+        with self.assertRaises(GateError):
+            validate_record(self.root, self.base)
+        (self.root / 'go.sum').write_text(fixture['go_sum'] + 'changed checksum fixture\n')
+        self.module_record(fixture['after'].encode())
         with self.assertRaises(GateError):
             validate_record(self.root, self.base)
 
