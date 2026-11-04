@@ -70,7 +70,7 @@ def run():
     page.goto(a.endpoint+'/_simulator/console/#/sqs');page.get_by_label('Access token',exact=True).fill(a.token);page.get_by_role('button',name='Open sandbox',exact=True).click()
     # Login intentionally navigates to the console root. Use the actual service menu.
     page.get_by_role('button',name='Services',exact=True).click();page.get_by_role('menuitem',name='SQS',exact=True).click()
-    expect(page.get_by_role('heading',name='Queues',exact=False)).to_be_visible()
+    expect(page.get_by_role('heading',level=1,name='Queues',exact=False)).to_be_visible()
     page.get_by_role('button',name='Create queue',exact=True).click();page.get_by_label('Name',exact=True).fill('cancelled-queue')
     page.get_by_role('button',name='Cancel',exact=True).click();assert sdk.list_queues().get('QueueUrls',[])==[],'Cancel submitted queue'
     page.get_by_role('button',name='Create queue',exact=True).click();page.get_by_label('Name',exact=True).fill('console-standard')
@@ -149,7 +149,7 @@ def run():
     try:route.fulfill(response=response)
     except PlaywrightError as failure:
      assert any(part in str(failure).lower() for part in ('already handled','invalid interception','invalidinterception','target closed','request was cancelled','request was canceled')),'Unexpected delayed route delivery failure'
-    page.unroute(a.endpoint+'/',delay_poll);expect(page.get_by_role('heading',name='Queues',exact=False)).to_be_visible()
+    page.unroute(a.endpoint+'/',delay_poll);expect(page.get_by_role('heading',level=1,name='Queues',exact=False)).to_be_visible()
     assert page.get_by_label('Received message body',exact=True).count()==0 and 'west-only' not in page.locator('body').inner_text(),'Late west response painted east view'
     west.delete_queue(QueueUrl=west_url)
     page.get_by_role('link',name='console-standard',exact=True).click()
