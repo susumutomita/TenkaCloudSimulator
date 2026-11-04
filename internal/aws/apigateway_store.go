@@ -77,7 +77,7 @@ func NewAPIGatewayStore(db *sql.DB) (*APIGatewayStore, error) {
  CREATE TABLE IF NOT EXISTS aws_apigateway_stages (
  region TEXT NOT NULL,api_id TEXT NOT NULL,name TEXT NOT NULL,deployment_id TEXT NOT NULL,document TEXT NOT NULL,
  PRIMARY KEY(region,api_id,name),FOREIGN KEY(region,api_id,deployment_id) REFERENCES aws_apigateway_deployments(region,api_id,id));`)
-	return &APIGatewayStore{db}, err
+	return &APIGatewayStore{db: db}, err
 }
 func apiFailure(code, message string) error { return ssmFailure{code, message} }
 func apiRead(ctx context.Context, query interface {
@@ -104,6 +104,18 @@ func (s *APIGatewayStore) API(ctx context.Context, region, id string) (RESTAPI, 
 	return apiRead(ctx, s.db, region, id)
 }
 func (s *APIGatewayStore) CreateAPI(ctx context.Context, region, name, description string, tags map[string]string) (RESTAPI, error) {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return RESTAPI{}, err
+	}
+	defer tx.Rollback()
+	result, err := createAPITx(ctx, tx, region, name, description, tags, "", "")
+	if err != nil {
+		return RESTAPI{}, err
+	}
+	return result, tx.Commit()
+}
+func createAPITx(ctx context.Context, tx *sql.Tx, region, name, description string, tags map[string]string, idOverride, rootOverride string) (RESTAPI, error) {
 	if !slices.Contains(Regions, region) || strings.TrimSpace(name) == "" || len(name) > 128 || !utf8.ValidString(name) || len(description) > 1024 || !utf8.ValidString(description) || len(tags) > 50 {
 		return RESTAPI{}, apiFailure("BadRequestException", "Use the documented regional REST API name, description and tag limits.")
 	}
@@ -120,14 +132,21 @@ func (s *APIGatewayStore) CreateAPI(ctx context.Context, region, name, descripti
 	if err != nil {
 		return RESTAPI{}, err
 	}
+	if idOverride != "" {
+		if !apiLocalID.MatchString(idOverride) {
+			return RESTAPI{}, apiFailure("BadRequestException", "Invalid provisioned API identifier.")
+		}
+		id = idOverride
+	}
+	if rootOverride != "" {
+		if !apiLocalID.MatchString(rootOverride) {
+			return RESTAPI{}, apiFailure("BadRequestException", "Invalid provisioned root identifier.")
+		}
+		root = rootOverride
+	}
 	api := RESTAPI{ID: id[:10], Name: name, Description: description, RootResourceID: root[:10], CreatedDate: float64(time.Now().UnixMilli()) / 1000, Tags: tags, EndpointConfiguration: RESTEndpoint{Types: []string{"REGIONAL"}}}
 	document, _ := json.Marshal(api)
 	resource, _ := json.Marshal(RESTResource{ID: api.RootResourceID, Path: "/"})
-	tx, err := s.db.BeginTx(ctx, nil)
-	if err != nil {
-		return RESTAPI{}, err
-	}
-	defer tx.Rollback()
 	var count int
 	if err = tx.QueryRowContext(ctx, "SELECT count(*) FROM aws_apigateway_apis").Scan(&count); err != nil {
 		return RESTAPI{}, err
@@ -141,7 +160,7 @@ func (s *APIGatewayStore) CreateAPI(ctx context.Context, region, name, descripti
 	if _, err = tx.ExecContext(ctx, "INSERT INTO aws_apigateway_resources(region,api_id,id,parent_id,path,document) VALUES(?,?,?,NULL,'/',?)", region, api.ID, api.RootResourceID, string(resource)); err != nil {
 		return RESTAPI{}, err
 	}
-	return api, tx.Commit()
+	return api, nil
 }
 func (s *APIGatewayStore) APIs(ctx context.Context, region, after string, limit int) ([]RESTAPI, error) {
 	rows, err := s.db.QueryContext(ctx, "SELECT document FROM aws_apigateway_apis WHERE region=? AND id>? ORDER BY id LIMIT ?", region, after, limit)
@@ -169,6 +188,13 @@ func (s *APIGatewayStore) DeleteAPI(ctx context.Context, region, id string) erro
 		return err
 	}
 	defer tx.Rollback()
+	if err = deleteAPITx(ctx, tx, region, id); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+func deleteAPITx(ctx context.Context, tx *sql.Tx, region, id string) error {
+	var err error
 	if _, err = apiRead(ctx, tx, region, id); err != nil {
 		return err
 	}
@@ -179,5 +205,5 @@ func (s *APIGatewayStore) DeleteAPI(ctx context.Context, region, id string) erro
 	if _, err = tx.ExecContext(ctx, "DELETE FROM aws_apigateway_apis WHERE region=? AND id=?", region, id); err != nil {
 		return err
 	}
-	return tx.Commit()
+	return nil
 }

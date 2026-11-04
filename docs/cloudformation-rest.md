@@ -1,0 +1,87 @@
+# CloudFormation REST API → Lambda example
+
+`examples/cloudformation-rest-lambda.json` creates a local SSM parameter, one
+inline-policy IAM role, a Python Lambda, Regional REST API/resource/method,
+immutable deployment, stage and bounded Lambda permission. It is a runnable
+learning example, not a completed Challenge problem or a real AWS deployment.
+The Go binary embeds all runtime dependencies; boto3 is only a development client.
+
+Start the simulator as described in README. Use an explicit local endpoint,
+dummy TCSIM SDK credentials and the operator token hook in `test/e2e/check.py`.
+Then create the stack with the example's TemplateBody and `CAPABILITY_IAM`:
+
+```python
+from pathlib import Path
+import boto3
+from botocore.config import Config
+endpoint = 'http://127.0.0.1:4566'
+token = Path('simulator-token').read_text().strip()
+cloudformation = boto3.client('cloudformation', endpoint_url=endpoint,
+    region_name='us-east-1', aws_access_key_id='TCSIMLOCAL',
+    aws_secret_access_key='dummy', config=Config(retries={'max_attempts': 0}))
+cloudformation.meta.events.register('before-sign.cloudformation',
+    lambda request, **kwargs: request.headers.add_header('X-Simulator-Token', token))
+created = cloudformation.create_stack(StackName='rest-practice',
+    TemplateBody=Path('examples/cloudformation-rest-lambda.json').read_text(),
+    Parameters=[{'ParameterKey': 'Value', 'ParameterValue': 'safe-dummy'}],
+    Capabilities=['CAPABILITY_IAM'])
+stack = cloudformation.describe_stacks(StackName=created['StackId'])['Stacks'][0]
+outputs = {item['OutputKey']: item['OutputValue'] for item in stack['Outputs']}
+# GET endpoint + outputs['LocalPath'], using the local host access token/session.
+# The response is a non-executing attachment containing JSON value/path fields.
+cloudformation.delete_stack(StackName=created['StackId'])
+```
+
+No automatic public AWS URL exists. `LocalPath` is the authenticated simulator
+route. `/config` returns the saved-role SSM value; asking for `/private/dummy`
+through `?name=` returns the function's403 because its policy only permits the
+example's `/cfn-rest/public`. Two teams need separate process/SQLite/token
+instances. IAM identity selection alone does not isolate participants.
+
+## Supported resources and boundaries
+
+The existing S3 Bucket, SSM Parameter, IAM Role and inline Python Lambda Function
+remain supported. This slice adds exactly:
+
+| Type | Supported properties/behavior |
+| --- | --- |
+| AWS::ApiGateway::RestApi | Name/Description/Tags, explicit EndpointConfiguration.Types:[REGIONAL]; Ref gives API ID, GetAtt RootResourceId |
+| AWS::ApiGateway::Resource | RestApiId, ParentId, PathPart; same-stack API only, Ref gives resource ID |
+| AWS::ApiGateway::Method | NONE, supported HTTP method, optional greedy-proxy binding, POST AWS_PROXY local Lambda integration; no API keys |
+| AWS::ApiGateway::Deployment | RestApiId/Description; explicit DependsOn on methods; immutable snapshot |
+| AWS::ApiGateway::Stage | RestApiId/DeploymentId/StageName/Variables; Ref gives stage name |
+| AWS::Lambda::Permission | Local function name/ARN, lambda:InvokeFunction, apigateway.amazonaws.com, bounded same-region/account execute-api SourceArn |
+
+Native API/CFN use the same transaction-aware primitives and SQLite rows. Create
+is atomic; cleanup runs in reverse dependency order. API children must belong to
+an API created in the same stack. Deployment ordering must be explicit where a
+reference alone cannot express dependency on methods. A template that declares
+unsupported fields fails rather than producing a partially represented resource.
+
+Per-row fingerprints protect native drift: changed/new/unowned API rows block
+DeleteStack; already removed unchanged owned rows do not strand cleanup. A
+missing stack grant may be cleaned up without deleting another statement added
+to the same function policy. An altered replacement grant is preserved and blocks
+cleanup. Store/SQL read failures are not interpreted as missing resources.
+
+The caller still needs cloudformation actions and underlying API Gateway
+POST/PUT/DELETE, Lambda AddPermission/RemovePermission, Lambda Create/Delete,
+iam:PassRole, SSM Put/Delete and IAM role/inline-policy actions. CAPABILITY_IAM
+acknowledges role creation; it does not grant permissions. Native role trust
+validation is unchanged. Existing CFN roles retain their documented legacy
+metadata-only trust behavior; arbitrary managed-policy permissions are not added.
+
+No UpdateStack/change sets, authorizers, API Gateway v2, WAF, custom resources,
+guest HTTP networking, active browser application hosting or full problem grading
+is enabled by this change. Native stage edits/method deletion remain unsupported.
+The existing bounded local saved-role SSM/S3 SDK is the only guest SDK transport.
+
+## Verification
+
+`test/e2e/cloudformation_rest.py`, registered in the normal E2E suite, runs real
+binaries/SDKs in two team environments: CreateStack → native API/grant inspection
+→ actual local HTTP → saved-role SSM access/denial → DeleteStack/native cleanup.
+It checks cross-team token rejection, persistence across process restart and
+preservation of unrelated SSM state. It does not return fabricated grading flags.
+The Go adapter tests additionally cover rollback, foreign native children/policy
+statements, missing owned state and immutable deployment behavior.

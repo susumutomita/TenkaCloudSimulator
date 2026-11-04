@@ -79,14 +79,22 @@ func (s *LambdaPermissionStore) Policy(ctx context.Context, region, name string)
 	return lambdaPolicyRead(ctx, s.db, region, name)
 }
 func (s *LambdaPermissionStore) Add(ctx context.Context, region, name, sid, principal, action, source, revision string) (LambdaResourceStatement, error) {
-	if !lambdaStatementID.MatchString(sid) || principal != "apigateway.amazonaws.com" || action != "lambda:InvokeFunction" || !localAPISource(region, source) {
-		return LambdaResourceStatement{}, apiFailure("InvalidParameterValueException", "Use a bounded local API Gateway SourceArn and InvokeFunction permission.")
-	}
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return LambdaResourceStatement{}, err
 	}
 	defer tx.Rollback()
+	result, err := addTx(ctx, tx, region, name, sid, principal, action, source, revision)
+	if err != nil {
+		return LambdaResourceStatement{}, err
+	}
+	return result, tx.Commit()
+}
+func addTx(ctx context.Context, tx *sql.Tx, region, name, sid, principal, action, source, revision string) (LambdaResourceStatement, error) {
+	var err error
+	if !lambdaStatementID.MatchString(sid) || principal != "apigateway.amazonaws.com" || action != "lambda:InvokeFunction" || !localAPISource(region, source) {
+		return LambdaResourceStatement{}, apiFailure("InvalidParameterValueException", "Use a bounded local API Gateway SourceArn and InvokeFunction permission.")
+	}
 	policy, current, err := lambdaPolicyRead(ctx, tx, region, name)
 	if err != nil {
 		return LambdaResourceStatement{}, err
@@ -116,7 +124,7 @@ func (s *LambdaPermissionStore) Add(ctx context.Context, region, name, sid, prin
 	if err != nil {
 		return LambdaResourceStatement{}, err
 	}
-	return statement, tx.Commit()
+	return statement, nil
 }
 func (s *LambdaPermissionStore) AllowsAPI(ctx context.Context, region, name, source string) (bool, error) {
 	if !localAPISource(region, source) || strings.ContainsAny(source, "*?") {
@@ -153,6 +161,13 @@ func (s *LambdaPermissionStore) Remove(ctx context.Context, region, name, sid, r
 		return err
 	}
 	defer tx.Rollback()
+	if err = removeTx(ctx, tx, region, name, sid, revision); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+func removeTx(ctx context.Context, tx *sql.Tx, region, name, sid, revision string) error {
+	var err error
 	policy, current, err := lambdaPolicyRead(ctx, tx, region, name)
 	if err != nil {
 		return err
@@ -179,5 +194,5 @@ func (s *LambdaPermissionStore) Remove(ctx context.Context, region, name, sid, r
 	if _, err = tx.ExecContext(ctx, "UPDATE aws_lambda_resource_policies SET revision=?,document=? WHERE region=? AND function_name=?", next, string(data), region, name); err != nil {
 		return err
 	}
-	return tx.Commit()
+	return nil
 }
