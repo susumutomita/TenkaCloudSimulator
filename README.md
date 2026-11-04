@@ -30,6 +30,7 @@ make build
 | --- | --- | --- |
 | [S3](docs/s3.md) | bucket作成・一覧・存在確認・region取得・削除、object PUT/GET/HEAD/DELETE・ListObjectsV2、bucket versioning・ListObjectVersions、public access block・tags | multipart、ACL、一般bucket policy、暗号化設定。path-styleのみ |
 | [SQS](docs/sqs.md) | Standard queue JSON 1.0 API 9操作：CreateQueue、GetQueueUrl、ListQueues、GetQueueAttributes、DeleteQueue、SendMessage、ReceiveMessage、DeleteMessage、ChangeMessageVisibility | UI、CloudFormation、function SDK bridge、Challenge連携、FIFO、batch、DLQ、SNS連携 |
+| [Secrets Manager](docs/secrets-manager.md) | native JSON 1.1 API 7操作、Cloudscape作成・明示取得・更新・current/previous版切替・force削除。SDKと同じSQLite状態・不変version・ARN単位IAM評価 | **練習用値は平文**。KMS暗号化、binary、tags、resource policy、rotation、replication、recovery window、CloudFormation |
 | [Systems Manager Parameter Store](docs/console.md) | PutParameter、GetParameter、GetParameters、GetParametersByPath、DescribeParameters、DeleteParameter。最新値・version・overwrite判定 | SecureString/KMS、履歴・labels。StandardのString/StringList/textのみ |
 | [IAM](docs/iam.md) | Create/Get/List/DeleteRole、Put/Get/Delete/ListRolePolicy、UpdateAssumeRolePolicy。Lambda service trust、inline policy評価 | STS、managed policyの権限付与、一般Condition・permissions boundary・SCP |
 | [Lambda](docs/lambda.md) | CreateFunction、ListFunctions、GetFunctionConfiguration、UpdateFunctionCode、Invoke、DeleteFunction、AddPermission/GetPolicy/RemovePermission。固定CPython 3.12.16/WASIによるPython ZIP実行、限定S3/SSM SDK bridge | 他言語、非同期実行、Function URL、任意network。128 MiB・timeout 1–30秒 |
@@ -42,7 +43,7 @@ S3のCloudFormationはBucketName/Versioning/PublicAccessBlock/ユーザーTags�
 
 SQSはnative JSON 1.0 APIのみ対応します。保持中・期限切れ未回収を含む物理message rowはプロセス全体10000件、UTF-8 bodyとserialized attribute JSONの合計64 MiBまでです。これはSQLiteファイル全体・プロセスメモリ・AWS課金サイズの上限ではありません。Azure/GCP/Sakura等の他クラウドは現在のGo実装では未対応です。Issueや計画は実装完了を意味しません。[開発状況](docs/development-status.md)を参照してください。Cloudscapeを使用していますが、本物のAWSコンソールとの全画面・全挙動の一致や実AWSとの差分検証完了は主張していません。
 
-Secrets Managerは[既存のローカル候補](docs/secrets-manager.md)を保存済みソースから引き継いで検証中です。CLIサーバー・コンソール導線・API資料・形式registryへの接続ソースを準備中ですが、限定ネイティブ/race/vet・実2プロセスSDKは確認済みですが画面・全体CI検証は未実施のため、利用可能なサービス一覧には含めません。SecretStringの練習用値はSQLite内の平文であり、実AWSのKMS暗号化を再現していません。
+Secrets Managerのローカル候補はnative/SDK/browser・全24 E2E・実起動を検証済みです。`0888924`の同一全体profileでstatement94.78%、無除外source90.12%を確認しました。SecretStringはSQLite内の平文で、実AWSのKMS暗号化やAWSコンソールの全機能は再現しません。最終docs更新HEADの形式・画面監査・CIは別途確認し、公開・release・merge済みとは扱いません。
 
 ## IAMロールからLambdaを作る
 

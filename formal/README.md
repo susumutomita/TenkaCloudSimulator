@@ -140,8 +140,9 @@ The native `TestSecretIgnoredWritesFailClosedAndRollback` checks five real SQLit
 ignored writes and full private-table rollback separately; the finite lifecycle
 model is not evidence of that failure atomicity. Focused native/race/vet and actual two-process CLI/SDK checks passed at
 `b7940c4`; the canonical bundle and served seven-operation examples also passed
-subsequently. Current browser/full-suite coverage and the complete registered TLC
-gate remain pending.
+subsequently. At `0888924`, whole Go/race/build plus one-profile statement94.78%
+and unfiltered source90.12%, full24 E2E and actual start passed. The final
+docs/applicability HEAD still requires the complete registered TLC gate.
 See [Secrets Manager scope and primary API references](../docs/secrets-manager.md).
 
 

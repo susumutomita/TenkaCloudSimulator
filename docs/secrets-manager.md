@@ -52,8 +52,9 @@ Only value-hidden metadata screenshots were captured. One expanded test initiall
 misused DOM focus instead of Cloudscape menu selection; it activated Choose
 identity. The fixture was corrected to ArrowDown, asserted Sign out focus, and
 rerun without changing product code, timeouts or acceptance assertions.
-Complete repository
-coverage, thirteen-model/fifty-control TLC, full E2E and hosted CI are not run. Existing logout, Scalar/S3 guidance, SQS and
+Whole-module coverage and full E2E/start subsequently passed at `0888924`
+as detailed below. Fresh final-head formal/applicability, screen audit and hosted
+CI remain pending. Existing logout, Scalar/S3 guidance, SQS and
 raw-path source are preserved. The normal host access middleware continues to
 require a local credential; native dummy SigV4 fields are not authentication.
 
@@ -112,12 +113,45 @@ private frame unchanged. This minimal test extension changes no production,
 limit, model or threshold; its own fresh selected and whole-profile results must
 be recorded separately from the prior two failures.
 
-These ten added tests are not yet a combined whole-profile pass. The former
+At `08889244436a692f394733606eb27f0f1da78c10`, the third canonical
+`make before-commit` passed. Changed AWS tests actually reran140.462s; unchanged
+packages used standard Go test caching. Its one newly generated profile passed
+both unchanged90% floors: **6270/6615 statements (94.78%)** and **8193/9091
+unfiltered source lines (90.12%)**. The pinned converter is v1.4.0; profiles are
+never manually unioned. Source HEAD/tree/index/diff were identical before/after.
+
+The same source and canonical embedded binary passed `make e2e`: one reflow
+unit plus all24 Conformance cases (341.074s), preserving the prior21 cases and
+requiring the three Secrets SDK/browser/served-example helpers. Actual start
+checks passed unbuilt/built startup, stale-source rebuild, build-failure refusal,
+private persistent state/token, path overrides with spaces, TTY opt-in, redirect
+and CI suppression, required authentication, SIGTERM/SIGINT cleanup and a runtime
+without host executables. No case skip, timeout relaxation, external request,
+real AWS operation or new package installation was introduced.
+
+CGO-disabled cross-compilation also passed for linux/amd64, linux/arm64,
+darwin/amd64, darwin/arm64 and windows/amd64 using the pinned offline Go toolchain.
+These are compiler checks only; foreign binaries were not executed and no Mac
+was used. No release artifact was published.
+
+Before this full pass, combined29 selected AWS/server tests passed normal/race
+and vet at `0fe6174`. The later stage-table-outage subcase passed selected normal
+1.193s/race10.474s/vet before the third complete profile. The earlier87.38% and
+89.98% failed source results remain retained; they were not rounded into success.
+
+The former
 `bb802f2` model gate passed13 baselines and50 specified counterexamples plus
 19/21 policy/applicability units; all50 control identities are required and their
-individual removal is rejected. New test/document blobs need fresh exact-head
+individual removal is rejected. Of the fifty actual negative controls, forty-eight
+showed a behavior trace; `BrowserSessions_RawOperatorCookie` and
+`SQSStorageBudget_BlockLegacyMaintenance` instead showed the explicit violating
+initial-state variable valuation. Those are real exit12 invariant failures, not
+parser/type/runtime errors or fabricated multi-step traces. New test/document
+blobs need fresh exact-head
 applicability and final integration gates even though production/model/assets
-remain unchanged. Full E2E/start and hosted CI remain pending.
+remain unchanged. A final docs/applicability checkpoint still needs its own
+immutable formal gate, screen audit and hosted CI. No public release/merge is
+claimed.
 
 ## Scope and explicit storage boundary
 
