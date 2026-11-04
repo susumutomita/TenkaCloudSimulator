@@ -18,7 +18,7 @@ with running(authenticated=True) as (endpoint,token),sync_playwright() as p:
   def guard(route):
    if route.request.url.startswith(endpoint+'/'):route.continue_()
    else:outside.append('external origin');route.abort()
-  context.add_init_script("""window.__pasteEvents=[];document.addEventListener('paste',e=>window.__pasteEvents.push({trusted:e.isTrusted,plainAvailable:!!e.clipboardData.getData('text/plain'),types:[...e.clipboardData.types]}));""")
+  context.add_init_script("""window.__pasteEvents=[];document.addEventListener('paste',e=>window.__pasteEvents.push({trusted:e.isTrusted,plainAvailable:!!e.clipboardData.getData('text/plain'),types:[...e.clipboardData.types]}),true);""")
   context.route('**/*',guard);page.goto(endpoint+'/_simulator/login');expect(page.get_by_label('Access token',exact=True)).to_have_attribute('type','password');return page
  def field(page):return page.get_by_label('Access token',exact=True)
  def paste(page,value,select_all=True):
