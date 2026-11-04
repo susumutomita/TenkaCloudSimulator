@@ -143,7 +143,7 @@ func (g *Gateway) lambdaExchange(f LambdaFunction, region string) pythonruntime.
 			g.serveS3(w, r)
 		}
 		if w.exceeded {
-			return bridgeFailure("EntityTooLarge", "Local SDK responses support object bodies of at most 32 KiB.", 400), nil
+			return bridgeFailure("EntityTooLarge", "Local SDK native responses support at most 48 KiB before capability encoding.", 400), nil
 		}
 		if w.code >= 300 {
 			code, message := "ServiceException", "Local service operation failed."

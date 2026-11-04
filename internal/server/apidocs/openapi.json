@@ -3,7 +3,7 @@
   "info": {
     "title": "TenkaCloud Simulator API",
     "version": "0.1.0",
-    "description": "Independent local cloud simulator. AWS S3 is the first provider. No real infrastructure is created. This document describes only implemented operations. S3 wire APIs retain their XML formats; simulator IAM control is explicitly a separate JSON API. Use unsigned requests or dummy TCSIM SDK credentials. Default principal simulator-admin has full sandbox access. For IAM exercises send x-simulator-principal. SQLite is ephemeral by default; --state persists it. See /_simulator/v1/capabilities for limits and deviations. Lambda supports a bounded Python 3.12 ZIP subset through the native REST paths below. Host Python is not required. A limited saved-role local SSM/S3 function SDK is supported; arbitrary network/HTTP and Function URLs remain unsupported. CloudFormation supports inline Python AWS::Lambda::Function with index.handler, existing local role, Ref/Arn and explicit DependsOn. Caller requires Lambda Create/DeleteFunction and iam:PassRole; tagged creation also requires lambda:TagResource. Only the declared saved-role SSM/S3 capability bridge is available, with no arbitrary network or managed-policy grants.",
+    "description": "Independent local cloud simulator. AWS S3 is the first provider. No real infrastructure is created. This document describes only implemented operations. S3 wire APIs retain their XML formats; simulator IAM control is explicitly a separate JSON API. Use unsigned requests or dummy TCSIM SDK credentials. Default principal simulator-admin has full sandbox access. For IAM exercises send x-simulator-principal. SQLite is ephemeral by default; --state persists it. See /_simulator/v1/capabilities for limits and deviations. Lambda supports a bounded Python 3.12 ZIP subset through the native REST paths below. Host Python is not required. A limited saved-role local SSM/S3 function SDK is supported; arbitrary network/HTTP and Function URLs remain unsupported. CloudFormation supports inline Python AWS::Lambda::Function with index.handler, existing local role, Ref/Arn and explicit DependsOn. Caller requires Lambda Create/DeleteFunction and iam:PassRole; tagged creation also requires lambda:TagResource. Only the declared saved-role SSM/S3 capability bridge is available, with no arbitrary network or managed-policy grants. Function SDK limits: S3 object body32KiB, native response48KiB before capability encoding, message64KiB,128calls and1MiB request/response aggregate. Oversized native SSM or S3 responses return EntityTooLarge without a partial successful result.",
     "license": {
       "name": "MIT"
     }
@@ -308,7 +308,7 @@
           {
             "name": "max-keys",
             "in": "query",
-            "description": "0\u20131000 entries per page.",
+            "description": "0–1000 entries per page.",
             "schema": {
               "type": "integer",
               "default": 1000

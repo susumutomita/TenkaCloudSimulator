@@ -88,6 +88,17 @@ func TestLambdaCapabilityUsesSavedRoleAndNativeState(t *testing.T) {
 	if multiple["error"] != nil {
 		t.Fatal(multiple)
 	}
+	names := []string{"/own/escaped-a", "/own/escaped-b", "/own/escaped-c"}
+	for _, name := range names {
+		if _, err := parameters.Put("us-east-1", name, "String", strings.Repeat("\x01", 4096), nil, false); err != nil {
+			t.Fatal(err)
+		}
+	}
+	largeSSM := call("ssm", "GetParameters", map[string]any{"Names": names})
+	failure := largeSSM["error"].(map[string]any)
+	if failure["code"] != "EntityTooLarge" || !strings.Contains(failure["message"].(string), "48 KiB") || largeSSM["result"] != nil {
+		t.Fatal("oversized encoded SSM values did not produce the documented transport error", largeSSM)
+	}
 	deniedMultiple := call("ssm", "GetParameters", map[string]any{"Names": []string{"/own/value", "/private/value"}})
 	if deniedMultiple["error"] == nil || strings.Contains(string(mustBridgeJSON(t, deniedMultiple)), "safe-value") {
 		t.Fatal(deniedMultiple)

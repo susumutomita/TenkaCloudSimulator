@@ -28,3 +28,7 @@ Logs named above are under /workspace/simulator-python-build. Local testing used
 The original f3dadb9 baseline passed push CI41728456359 before this regression was found. Draft PR creation was initially rejected by automatic approval review. On2026-11-04 the actual owner renewed autonomous development instructions; a scoped query confirmed no PR existed, and the explicitly permitted single retry created PR34. The tested cancellation fix was added by normal fast-forward push, without force or an alternative publication route. Exact latest-head CI, CodeQL and completed code/security reviews remain required before merge; the earlier baseline run is not evidence for the new head.
 
 Only hello-world is selectable. API Gateway, WAF, original custom resources and the seven original WP grading checks remain unsupported.
+
+## API documentation and response-bound follow-up
+
+The48KiB native-response buffer now has its own accurate EntityTooLarge message, separately from32KiB S3 object bodies. Capabilities and the embedded API description expose the distinct32/48/64KiB limits,128calls and1MiB aggregate. A native SSM regression uses valid stored values whose JSON escaping exceeds the transport buffer and requires an error without a partial successful result. Final full local gates pass with statements3263/3425=95.27% and source4239/4650=91.16%; all12 binary/SDK/browser E2E cases and the responsive detector pass. Logs: sdk-final-api-doc-gates.log and sdk-final-api-doc-e2e.log. Exact latest-head CI and reviews remain required.
