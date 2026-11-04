@@ -121,9 +121,9 @@
     },
     {
       "path": "internal/aws/kms_dispatch.go",
-      "sha256": "5cdedf5cec3687361c32d0f68b92a2cead937444d1822aa2f101afb7ef0b5ee9",
+      "sha256": "fbcf7576ae4e1c73e2cb4aee8d367f9a2031c50fc27489f4c42fb2d3c74eb86b",
       "disposition": "modeled",
-      "reason": "ONLY the new configured KMS selection/policy-snapshot/refusal branch is declared under the normalized protocol model. Raw headers/SigV4, real identity SQL errors, parsing and unchanged S3/SSM/other AWS branches are not modeled. Tests-first native bridge still expected to fail old dispatch until executable reproduction and correction.",
+      "reason": "Minimal correction after real old-source failures: signing scope classifies KMS protocol intent without granting authority; required target validation cannot fall through to S3. Context-bound identity policy read distinguishes missing identity403 from infrastructure500 and captures immutable request policy. Normalized protocol model only, not SigV4/token/SQL refinement; actual native regression execution remains separate.",
       "models": [
         {
           "id": "KMSProtocolAdmission",

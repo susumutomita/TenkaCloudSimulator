@@ -7,7 +7,23 @@ import (
 )
 
 func isKMS(r *http.Request) bool {
-	return strings.HasPrefix(r.Header.Get("X-Amz-Target"), "TrentService.") || r.Header.Get("X-Simulator-Service") == "kms"
+	if strings.HasPrefix(r.Header.Get("X-Amz-Target"), "TrentService.") || r.Header.Get("X-Simulator-Service") == "kms" {
+		return true
+	}
+	// Signing scope is protocol metadata, not authenticated authority. Recognize
+	// KMS intent even when the required native target is absent/conflicting, so
+	// its validation cannot silently fall through to a successful S3 operation.
+	for _, authorization := range r.Header.Values("Authorization") {
+		_, scope, ok := strings.Cut(authorization, "Credential=")
+		if !ok {
+			continue
+		}
+		parts := strings.SplitN(scope, "/", 5)
+		if len(parts) >= 4 && parts[3] == "kms" {
+			return true
+		}
+	}
+	return false
 }
 func kmsRequestRegion(r *http.Request) (string, error) {
 	region := r.Header.Get("X-Simulator-Region")
@@ -56,8 +72,13 @@ func (g *Gateway) serveKMS(w http.ResponseWriter, r *http.Request) {
 			kmsWriteError(w, kmsFailure("AccessDeniedException", "KMS identity authority is unavailable."))
 			return
 		}
-		policy, _, err = g.Identities.Policy(principal)
+		var found bool
+		policy, found, err = g.Identities.PolicyContext(r.Context(), principal)
 		if err != nil {
+			kmsWriteError(w, kmsInternal())
+			return
+		}
+		if !found {
 			kmsWriteError(w, kmsFailure("AccessDeniedException", "KMS identity is unavailable."))
 			return
 		}
