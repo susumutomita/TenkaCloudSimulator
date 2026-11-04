@@ -340,8 +340,8 @@ func (g *Gateway) serveSQS(w http.ResponseWriter, r *http.Request) {
 		if !ok {
 			return
 		}
-		if len(input.MessageBody) == 0 || len(input.MessageBody) > 262144 || !utf8.ValidString(input.MessageBody) {
-			sqsError(w, sqsFailure{"InvalidParameterValue", "Use a 1–262144 byte UTF-8 message body."})
+		if err := validateSQSBody(input.MessageBody); err != nil {
+			sqsError(w, err)
 			return
 		}
 		delay := -1
@@ -550,4 +550,19 @@ func (g *Gateway) serveSQS(w http.ResponseWriter, r *http.Request) {
 		}
 		sqsJSON(w, 200, map[string]any{"Attributes": out})
 	}
+}
+
+// AWS permits XML-compatible Unicode in message bodies. The byte limit is this
+// simulator's explicit 256 KiB local bound, not AWS's current 1 MiB maximum.
+func validateSQSBody(body string) error {
+	if len(body) == 0 || len(body) > 262144 || !utf8.ValidString(body) {
+		return sqsFailure{"InvalidParameterValue", "Use a 1–262144 byte UTF-8 message body (local limit)."}
+	}
+	for _, r := range body {
+		if r == 0x9 || r == 0xA || r == 0xD || (r >= 0x20 && r <= 0xD7FF) || (r >= 0xE000 && r <= 0xFFFD) || (r >= 0x10000 && r <= 0x10FFFF) {
+			continue
+		}
+		return sqsFailure{"InvalidMessageContents", "The message contains a character SQS does not permit."}
+	}
+	return nil
 }

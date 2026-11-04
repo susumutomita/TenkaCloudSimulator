@@ -52,3 +52,33 @@ SDK clients that post back the URL returned by CreateQueue.
   CreateQueue, FIFO rejection, unknown-operation 501, IAM allow/deny per
   action and queue ARN, region isolation, visibility override +
   ChangeMessageVisibility redelivery.
+
+## Local repair candidate (PR #315)
+
+This isolated proposal starts from public `95300b9` and normally merges formal
+baseline `55a1119`; it does not overwrite the external service owner's branch.
+The original Formal validation run failed before TLC because the old branch did
+not yet contain `scripts/test-formal-gate.py`. Restoring the checker alone does
+not establish SQS model applicability or a passing quality gate.
+
+The native repair rechecks the actual queue in the same SQLite transaction as
+send/receive/count/receipt operations. Expiry cleanup errors propagate and roll
+back the operation. A failed multi-message receive or queue deletion preserves
+the whole graph. ChangeMessageVisibility rejects a message whose visibility
+window has expired; redelivery rotates its receipt handle. Invalid persisted
+attribute data fails instead of being acknowledged. Startup refuses existing
+orphan message rows and preserves them for explicit repair; it does not silently
+delete or adopt corrupt original state.
+
+Message bodies are limited to **256 KiB locally**. The current AWS SendMessage
+reference permits **1 MiB**; this simulator's smaller bound is not an AWS quota.
+Forbidden message Unicode such as NUL returns InvalidMessageContents. Existing
+strict-current-receipt rejection is also bounded behavior: AWS documents that
+an old handle may return success without deleting the message. The simulator
+does not reproduce distributed replicas, probabilistic delivery, exact-once
+processing or every AWS receipt/error timing detail.
+
+Focused native regression/rollback tests have been prepared but have not run
+for this checkpoint. Full unfiltered source coverage remains a separate blocker:
+the original hosted run reported 86.92% against the unchanged 90% floor. Adding
+formal files or exempting runtime paths cannot resolve that test deficit.

@@ -8,7 +8,9 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"sort"
+	"strings"
 	"time"
 )
 
@@ -45,9 +47,22 @@ type SQSMessage struct {
 const maxQueues = 1000
 
 func NewSQSStore(db *sql.DB) (*SQSStore, error) {
+	if db == nil {
+		return nil, errors.New("SQS requires a provider database")
+	}
 	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS aws_sqs_queues(region TEXT NOT NULL,name TEXT NOT NULL,created REAL NOT NULL,visibility_timeout INTEGER NOT NULL,delay_seconds INTEGER NOT NULL,retention_seconds INTEGER NOT NULL,PRIMARY KEY(region,name));
 CREATE TABLE IF NOT EXISTS aws_sqs_messages(id TEXT NOT NULL,region TEXT NOT NULL,queue TEXT NOT NULL,body TEXT NOT NULL,attributes TEXT NOT NULL,sent REAL NOT NULL,visible REAL NOT NULL,receive_count INTEGER NOT NULL,receipt TEXT NOT NULL,PRIMARY KEY(region,queue,id));`)
-	return &SQSStore{db}, err
+	if err != nil {
+		return nil, err
+	}
+	var orphans int
+	if err = db.QueryRow("SELECT count(*) FROM aws_sqs_messages m WHERE NOT EXISTS(SELECT 1 FROM aws_sqs_queues q WHERE q.region=m.region AND q.name=m.queue)").Scan(&orphans); err != nil {
+		return nil, err
+	}
+	if orphans != 0 {
+		return nil, errors.New("SQS state contains orphan messages; preserved for explicit repair")
+	}
+	return &SQSStore{db}, nil
 }
 
 func newSQSID() string {
@@ -146,9 +161,19 @@ func (s *SQSStore) DeleteQueue(region, name string) error {
 	return tx.Commit()
 }
 
-// purgeExpired removes messages older than the queue retention period.
-func (s *SQSStore) purgeExpired(q SQSQueue) {
-	_, _ = s.db.Exec("DELETE FROM aws_sqs_messages WHERE region=? AND queue=? AND sent < ?", q.Region, q.Name, sqsNow()-float64(q.RetentionSeconds))
+// sqsQueueTx and purgeExpiredTx keep parent admission, expiry cleanup and the
+// requested mutation in one caller-owned transaction. Cached HTTP queue values
+// never authorize a write after another request has deleted that queue.
+func sqsQueueTx(tx *sql.Tx, region, name string) (SQSQueue, error) {
+	q, err := scanQueue(tx.QueryRow("SELECT region,name,created,visibility_timeout,delay_seconds,retention_seconds FROM aws_sqs_queues WHERE region=? AND name=?", region, name))
+	if errors.Is(err, sql.ErrNoRows) {
+		return q, errQueueMissing
+	}
+	return q, err
+}
+func purgeExpiredTx(tx *sql.Tx, q SQSQueue, now float64) error {
+	_, err := tx.Exec("DELETE FROM aws_sqs_messages WHERE region=? AND queue=? AND sent<=?", q.Region, q.Name, now-float64(q.RetentionSeconds))
+	return err
 }
 
 func md5Hex(b []byte) string { sum := md5.Sum(b); return hex.EncodeToString(sum[:]) }
@@ -186,12 +211,29 @@ func MD5OfMessageAttributes(attrs map[string]SQSMessageAttribute) string {
 }
 
 func (s *SQSStore) Send(region string, q SQSQueue, body string, attrs map[string]SQSMessageAttribute, delaySeconds int) (SQSMessage, error) {
-	s.purgeExpired(q)
-	encoded, err := json.Marshal(attrs)
+	if err := validateSQSBody(body); err != nil {
+		return SQSMessage{}, err
+	}
+	if delaySeconds < -1 || delaySeconds > 900 {
+		return SQSMessage{}, sqsFailure{"InvalidParameterValue", "DelaySeconds must be 0–900 or the internal default sentinel."}
+	}
+	tx, err := s.db.Begin()
+	if err != nil {
+		return SQSMessage{}, err
+	}
+	defer tx.Rollback()
+	q, err = sqsQueueTx(tx, region, q.Name)
 	if err != nil {
 		return SQSMessage{}, err
 	}
 	now := sqsNow()
+	if err = purgeExpiredTx(tx, q, now); err != nil {
+		return SQSMessage{}, err
+	}
+	encoded, err := json.Marshal(attrs)
+	if err != nil {
+		return SQSMessage{}, err
+	}
 	m := SQSMessage{ID: newSQSID(), Body: body, Attributes: attrs, Sent: now, ReceiptHandle: ""}
 	m.MD5OfBody = md5Hex([]byte(body))
 	if len(attrs) > 0 {
@@ -201,22 +243,34 @@ func (s *SQSStore) Send(region string, q SQSQueue, body string, attrs map[string
 	if delaySeconds >= 0 {
 		delay = delaySeconds
 	}
-	_, err = s.db.Exec("INSERT INTO aws_sqs_messages VALUES(?,?,?,?,?,?,?,?,?)",
+	_, err = tx.Exec("INSERT INTO aws_sqs_messages VALUES(?,?,?,?,?,?,?,?,?)",
 		m.ID, region, q.Name, body, string(encoded), now, now+float64(delay), 0, "")
-	return m, err
+	if err != nil {
+		return SQSMessage{}, err
+	}
+	return m, tx.Commit()
 }
 
 // Receive atomically claims up to maxN currently visible messages: each gets a
 // fresh receipt handle, an incremented receive count and a new invisibility
 // deadline of now + visibilityTimeout seconds.
 func (s *SQSStore) Receive(region string, q SQSQueue, maxN, visibilityTimeout int) ([]SQSMessage, error) {
-	s.purgeExpired(q)
+	if maxN < 1 || maxN > 10 || visibilityTimeout < 0 || visibilityTimeout > 43200 {
+		return nil, sqsFailure{"InvalidParameterValue", "Use 1–10 messages and a 0–43200 second visibility timeout."}
+	}
 	tx, err := s.db.Begin()
 	if err != nil {
 		return nil, err
 	}
 	defer tx.Rollback()
+	q, err = sqsQueueTx(tx, region, q.Name)
+	if err != nil {
+		return nil, err
+	}
 	now := sqsNow()
+	if err = purgeExpiredTx(tx, q, now); err != nil {
+		return nil, err
+	}
 	rows, err := tx.Query("SELECT id,body,attributes,sent,receive_count FROM aws_sqs_messages WHERE region=? AND queue=? AND visible<=? ORDER BY sent,id LIMIT ?", region, q.Name, now, maxN)
 	if err != nil {
 		return nil, err
@@ -248,7 +302,22 @@ func (s *SQSStore) Receive(region string, q SQSQueue, maxN, visibilityTimeout in
 			return nil, err
 		}
 		m := SQSMessage{ID: r.id, Body: r.body, Sent: r.sent, ReceiveCount: r.count + 1, ReceiptHandle: receipt}
-		_ = json.Unmarshal([]byte(r.attrs), &m.Attributes)
+		if err = json.Unmarshal([]byte(r.attrs), &m.Attributes); err != nil {
+			return nil, err
+		}
+		for _, a := range m.Attributes {
+			base := strings.SplitN(a.DataType, ".", 2)[0]
+			if (base == "String" || base == "Number") && a.StringValue != nil && a.BinaryValue == nil {
+				continue
+			}
+			if base == "Binary" && a.BinaryValue != nil && a.StringValue == nil {
+				if _, err = base64.StdEncoding.DecodeString(*a.BinaryValue); err != nil {
+					return nil, err
+				}
+				continue
+			}
+			return nil, errors.New("Corrupt persisted SQS message attributes")
+		}
 		if m.Attributes == nil {
 			m.Attributes = map[string]SQSMessageAttribute{}
 		}
@@ -262,33 +331,97 @@ func (s *SQSStore) Receive(region string, q SQSQueue, maxN, visibilityTimeout in
 }
 
 func (s *SQSStore) DeleteMessage(region, queue, receipt string) error {
-	r, err := s.db.Exec("DELETE FROM aws_sqs_messages WHERE region=? AND queue=? AND receipt<>'' AND receipt=?", region, queue, receipt)
+	tx, err := s.db.Begin()
 	if err != nil {
 		return err
 	}
-	if n, _ := r.RowsAffected(); n == 0 {
+	defer tx.Rollback()
+	q, err := sqsQueueTx(tx, region, queue)
+	if err != nil {
+		return err
+	}
+	if err = purgeExpiredTx(tx, q, sqsNow()); err != nil {
+		return err
+	}
+	r, err := tx.Exec("DELETE FROM aws_sqs_messages WHERE region=? AND queue=? AND receipt<>'' AND receipt=?", region, queue, receipt)
+	if err != nil {
+		return err
+	}
+	n, err := r.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if n != 1 {
 		return sqsFailure{"ReceiptHandleIsInvalid", "The input receipt handle is invalid."}
 	}
-	return nil
+	return tx.Commit()
 }
 
 func (s *SQSStore) ChangeVisibility(region, queue, receipt string, timeout int) error {
-	r, err := s.db.Exec("UPDATE aws_sqs_messages SET visible=? WHERE region=? AND queue=? AND receipt<>'' AND receipt=?", sqsNow()+float64(timeout), region, queue, receipt)
+	if timeout < 0 || timeout > 43200 {
+		return sqsFailure{"InvalidParameterValue", "VisibilityTimeout must be 0–43200 seconds."}
+	}
+	tx, err := s.db.Begin()
 	if err != nil {
 		return err
 	}
-	if n, _ := r.RowsAffected(); n == 0 {
+	defer tx.Rollback()
+	q, err := sqsQueueTx(tx, region, queue)
+	if err != nil {
+		return err
+	}
+	now := sqsNow()
+	if err = purgeExpiredTx(tx, q, now); err != nil {
+		return err
+	}
+	var until float64
+	err = tx.QueryRow("SELECT visible FROM aws_sqs_messages WHERE region=? AND queue=? AND receipt<>'' AND receipt=?", region, queue, receipt).Scan(&until)
+	if errors.Is(err, sql.ErrNoRows) {
 		return sqsFailure{"ReceiptHandleIsInvalid", "The input receipt handle is invalid."}
 	}
-	return nil
+	if err != nil {
+		return err
+	}
+	if until <= now {
+		return sqsFailure{"MessageNotInflight", "The message is no longer in flight."}
+	}
+	r, err := tx.Exec("UPDATE aws_sqs_messages SET visible=? WHERE region=? AND queue=? AND receipt=?", now+float64(timeout), region, queue, receipt)
+	if err != nil {
+		return err
+	}
+	n, err := r.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if n != 1 {
+		return errors.New("SQS message disappeared during visibility mutation")
+	}
+	return tx.Commit()
 }
 
-// Counts returns (visible, notVisible) message counts for GetQueueAttributes.
+// Counts purges expiry and reads the regional queue in one transaction. Storage
+// errors remain infrastructure failures; an ignored purge may expose old data.
 func (s *SQSStore) Counts(region string, q SQSQueue) (int, int, error) {
-	q.Region = region
-	s.purgeExpired(q)
-	var visible, notVisible int
+	tx, err := s.db.Begin()
+	if err != nil {
+		return 0, 0, err
+	}
+	defer tx.Rollback()
+	q, err = sqsQueueTx(tx, region, q.Name)
+	if err != nil {
+		return 0, 0, err
+	}
 	now := sqsNow()
-	err := s.db.QueryRow("SELECT COALESCE(SUM(CASE WHEN visible<=? THEN 1 ELSE 0 END),0), COALESCE(SUM(CASE WHEN visible>? THEN 1 ELSE 0 END),0) FROM aws_sqs_messages WHERE region=? AND queue=?", now, now, region, q.Name).Scan(&visible, &notVisible)
-	return visible, notVisible, err
+	if err = purgeExpiredTx(tx, q, now); err != nil {
+		return 0, 0, err
+	}
+	var visible, notVisible int
+	err = tx.QueryRow("SELECT COALESCE(SUM(CASE WHEN visible<=? THEN 1 ELSE 0 END),0), COALESCE(SUM(CASE WHEN visible>? THEN 1 ELSE 0 END),0) FROM aws_sqs_messages WHERE region=? AND queue=?", now, now, region, q.Name).Scan(&visible, &notVisible)
+	if err != nil {
+		return 0, 0, err
+	}
+	if err = tx.Commit(); err != nil {
+		return 0, 0, err
+	}
+	return visible, notVisible, nil
 }
