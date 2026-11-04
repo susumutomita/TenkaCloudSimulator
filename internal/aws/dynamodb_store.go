@@ -191,9 +191,32 @@ func (s *DynamoDBStore) DeleteTable(region, name string) (DynamoDBTable, error) 
 }
 
 func (s *DynamoDBStore) TableStats(region, name string) (int64, int64, error) {
+	rows, err := s.db.Query("SELECT item FROM aws_dynamodb_items WHERE region=? AND table_name=?", region, name)
+	if err != nil {
+		return 0, 0, err
+	}
+	defer rows.Close()
 	var count, size int64
-	err := s.db.QueryRow("SELECT count(*),COALESCE(sum(length(item)),0) FROM aws_dynamodb_items WHERE region=? AND table_name=?", region, name).Scan(&count, &size)
-	return count, size, err
+	for rows.Next() {
+		var encoded string
+		if err := rows.Scan(&encoded); err != nil {
+			return 0, 0, err
+		}
+		var item map[string]any
+		if err := json.Unmarshal([]byte(encoded), &item); err != nil {
+			return 0, 0, fmt.Errorf("invalid stored DynamoDB item: %v", err)
+		}
+		n, err := dynamoItemSize(item)
+		if err != nil {
+			return 0, 0, fmt.Errorf("invalid stored DynamoDB item: %v", err)
+		}
+		count++
+		size += n
+	}
+	if err := rows.Err(); err != nil {
+		return 0, 0, err
+	}
+	return count, size, nil
 }
 
 // PutItem stores itemJSON under (pk, sk). condition is "", "exists" or

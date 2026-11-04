@@ -10,9 +10,9 @@
 | --- | --- |
 | CreateTable | HASH 1つ + RANGE 0/1つ。キー属性は `S`/`N`/`B` のみ。AttributeDefinitions はキー属性ちょうどと一致すること（非キー属性の定義は ValidationException）。BillingMode は `PAY_PER_REQUEST`、または ProvisionedThroughput（各1以上）付きの `PROVISIONED` |
 | ListTables | 名前順。`Limit`（1–100）と `ExclusiveStartTableName` によるページング、`LastEvaluatedTableName` を返す |
-| DescribeTable | KeySchema/AttributeDefinitions/BillingModeSummary/ProvisionedThroughput に加え、実測の ItemCount と TableSizeBytes |
+| DescribeTable | KeySchema/AttributeDefinitions/BillingModeSummary/ProvisionedThroughput に加え、即時の ItemCount と semantic size 合計の TableSizeBytes（下記制限あり） |
 | DeleteTable | テーブルと全項目を同一トランザクションで削除。応答の TableStatus は `DELETING` |
-| PutItem | 属性値 `S/N/B/BOOL/NULL/SS/NS/BS/L/M` を再帰検証（深さ32まで）。項目サイズ上限400KB（実DynamoDBと同じ）。数値キーは正規化するので `2` と `2.0` は同一キー |
+| PutItem | 属性値 `S/N/B/BOOL/NULL/SS/NS/BS/L/M` を再帰検証（深さ32まで）。項目サイズ上限409600 bytes（数値のサイズは下記の推定式）。数値キーは正規化するので `2` と `2.0` は同一キー |
 | GetItem | キー完全一致。存在しない項目はエラーではなく空応答。キーの型不一致・不足・余分な属性は ValidationException |
 | DeleteItem | 存在しない項目の削除も成功（実DynamoDBと同じ） |
 
@@ -46,3 +46,15 @@ ConditionExpression は `attribute_not_exists(<パーティションキー>)` �
 旧実装の `big.Rat` が受け付けた分数、16進数、範囲外・精度超過の数値は新規操作で ValidationException となる。既存の有効な10進数の canonical key は保持し、保存した AttributeValue の原文を変更しない。DB migration、既存データの削除・自動修復は行わない。旧実装で保存された範囲外の数値は未対応の既存データとして扱う。
 
 参照（2026-11-04確認）: [AWS DynamoDB constraints](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Constraints.html)。全てのAWS数値パーサーの字句互換を実証したものではない。
+
+## 項目サイズとテーブル統計（2026-11-04）
+
+PutItem の上限判定と DescribeTable の TableSizeBytes は同じ計算を使う。属性名と文字列はUTF-8のバイト数、B/BSはBase64復号後のバイト数、BOOL/NULLは値1 byte。SS/BS/NSは各値の和、L/Mはコンテナ3 bytesと各要素1 byteを加え、M内の属性名も含める。JSONの引用符・エスケープ・Base64の転送用膨張は含めない。409600 bytesちょうどは受付け、超過した更新は既存の項目・統計を変更せず拒否する。
+
+数値とNSは先頭・末尾のゼロを除いた有効数字をdとして `ceil(d/2)+1` bytes（ゼロは2 bytes）と推定する。AWS自身が概算として公開する式を用いたもので、負数・ゼロを含む非公開の内部エンコードや数値を含む400KiB付近の完全互換は保証しない。料金計算、容量消費、100 bytesの項目別ストレージ課金オーバーヘッドは実装していない。
+
+TableSizeBytes は上記の項目サイズの即時合計であり、SQLiteファイル・JSON文字数や課金ストレージ容量ではない。AWSの統計は約6時間ごとに更新されるため、この更新タイミングも異なる。再起動後は保存JSONを再計算する。JSON破損や現在の検証範囲外の旧数値がある場合は、架空のサイズを返さず InternalServerError とする。自動migration・データ削除は行わない。
+
+参照（2026-11-04確認）: [AWS item sizes and formats](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/CapacityUnitCalculations.html)、[AWS limits](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Constraints.html)、[TableDescription](https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_TableDescription.html)。
+
+開発者用の任意SDK検証は、既にboto3をインストール済みのPythonへのパスを `DYNAMODB_SIZE_SDK_PYTHON` に指定し、`go test ./internal/aws -run '^TestDynamoDBSemanticSizeSDKHTTP$' -v` で実行できる。実際のloopback HTTPとダミー資格情報を使用し、AWSへ接続しない。Python/boto3は製品バイナリの実行時依存ではない。通常のサイズ・永続化・境界テストにPythonは不要。

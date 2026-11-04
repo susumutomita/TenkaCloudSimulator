@@ -414,7 +414,12 @@ func (g *Gateway) serveDynamoDB(w http.ResponseWriter, r *http.Request) {
 			dynamoError(w, err)
 			return
 		}
-		if len(encoded) > maxDynamoDBItemBytes {
+		size, err := dynamoItemSize(input.Item)
+		if err != nil {
+			invalid(err.Error())
+			return
+		}
+		if size > maxDynamoDBItemBytes {
 			invalid("Item size has exceeded the maximum allowed size")
 			return
 		}
