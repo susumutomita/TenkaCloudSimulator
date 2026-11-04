@@ -18,7 +18,9 @@ func newSecretMaterial(value string) secretMaterial { return secretMaterial{raw:
 // plaintext is an explicit escape hatch for validated request comparison and
 // an authorized Get response. It must never be passed to a logger or metadata.
 func (s secretMaterial) plaintext() string {
-	if s.raw == nil { return "" }
+	if s.raw == nil {
+		return ""
+	}
 	return *s.raw
 }
 

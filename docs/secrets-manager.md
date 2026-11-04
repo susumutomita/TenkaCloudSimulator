@@ -7,6 +7,13 @@ Root checked the open Issue and absence of an existing service PR before assigni
 this increment. Root owns the shared roster, Gateway, server, navigation,
 OpenAPI, generated assets and public actions. No service is registered by this P0.
 
+Source checkpoint: private redacted material, value-free metadata DTOs, immutable
+SQL schema and transactional Create are prepared. Focused material/metadata/store
+tests pass (4 tests, 1.183 seconds), including reflective formatting, same-token
+retry, overwrite denial and late-failure rollback. This does not establish any
+HTTP/API/SDK support. Other native operations, protocol, UI and model execution
+remain unfinished.
+
 ## Scope and explicit storage boundary
 
 The proposed first increment is seven native operations over **dummy SecretString
@@ -19,8 +26,8 @@ It does **not** perform AWS envelope encryption. Proposed local values are
 plaintext in the private simulator database, with an explicit dummy-only UI and
 documentation boundary and `X-Simulator-Encryption: none` response header.
 No UI key selector may display `aws/secretsmanager` as an operative encryption
-choice. Root must accept this training-only boundary before runtime integration;
-otherwise real local encryption/key custody needs a separately agreed dependency.
+choice. Root accepted this training-only boundary; real local encryption/key
+custody would require a separately agreed dependency and truthful UI behavior.
 
 ## Verified wire contract
 
@@ -174,8 +181,9 @@ owners, stale-ARN adoption and orphaned versions/stages. A separate view/reveal
 epoch model is needed if async response acceptance can retain a secret after
 navigation. These are finite abstractions, not encryption/SQL/React refinement
 proofs. Root must register applicable models under307 and run both global90%
-floors, full required CI/E2E/security/license gates before merge. P0 has run no
-Go, TLC, browser, AWS, publish, release or deployment commands.
+floors, full required CI/E2E/security/license gates before merge. Only gofmt,
+compilation and the selected pure material/store tests have run; full Go,
+SDK, TLC, browser, AWS, publish, release and deployment have not run.
 
 Public console reference: the official flow is Store a new secret → Other type
 of secret → key/value or Plaintext → name/description → rotation off → review →

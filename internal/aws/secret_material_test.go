@@ -2,6 +2,7 @@ package aws
 
 import (
 	"bytes"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"log/slog"
@@ -15,7 +16,7 @@ func TestSecretMaterialGenericFormattingAndLoggingCannotExposeValues(t *testing.
 	for _, value := range []any{material, &material, struct{ Value secretMaterial }{material}, struct{ private secretMaterial }{material}} {
 		for _, format := range []string{"%v", "%+v", "%#v", "%s", "%q", "%x"} {
 			output := fmt.Sprintf(format, value)
-			if strings.Contains(output, sentinel) || strings.Contains(output, "privacy-sentinel") {
+			if strings.Contains(output, sentinel) || strings.Contains(output, "privacy-sentinel") || strings.Contains(output, hex.EncodeToString([]byte(sentinel))) {
 				t.Fatal("generic formatting exposed secret material")
 			}
 		}
@@ -35,6 +36,13 @@ func TestSecretMaterialGenericFormattingAndLoggingCannotExposeValues(t *testing.
 	}
 	if material.plaintext() != sentinel {
 		t.Fatal("redaction destroyed the stored value")
+	}
+	// Negative control: a nested unexported plain-string field really bypasses
+	// Stringer dispatch. The protected representation above must withstand the
+	// same reflective traversal without emitting those bytes.
+	unsafeFixture := struct{ private struct{ raw string } }{private: struct{ raw string }{raw: sentinel}}
+	if !strings.Contains(fmt.Sprintf("%+v", unsafeFixture), sentinel) {
+		t.Fatal("formatting fixture no longer exercises private-field traversal")
 	}
 }
 
