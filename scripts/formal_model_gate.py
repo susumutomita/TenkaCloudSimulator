@@ -9,8 +9,9 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-BASE_MODELS = {'KMSKeyState', 'BrowserSessions', 'NativeIAMOwnership', 'ObjectStore', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'StackOwnership', 'StartupTokenVisibility'}
+BASE_MODELS = {'KMSProtocolAdmission', 'KMSKeyState', 'BrowserSessions', 'NativeIAMOwnership', 'ObjectStore', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'StackOwnership', 'StartupTokenVisibility'}
 BASE_INVARIANTS = {
+    'KMSProtocolAdmission': {'TypeOK', 'NoCrossServiceFallback', 'InfraNotDeny', 'MissingIdentityDenied', 'NoSuccessWithoutKMSTarget', 'NoAuthorityFromWireMetadata'},
     'KMSKeyState': {'TypeOK', 'AuthorizedEvents', 'EnabledCrypto', 'BoundContextAndKey'},
     'BrowserSessions': {'AcceptedOnlyLiveParent', 'NoBrowserSDKAuthority', 'NoRawSDKCookie', 'ParentLifetimeBound', 'RevokedCookiesDenied', 'SDKAuthorityPreserved', 'TypeOK', 'UnrelatedSessionsPreserved'},
     'NativeIAMOwnership': {'OwnershipExclusive', 'TypeOK'},

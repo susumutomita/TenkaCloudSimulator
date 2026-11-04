@@ -34,13 +34,35 @@ class FormalGateTests(unittest.TestCase):
 
     def test_complete_registry_and_exact_mutations(self):
         registry = load_registry(self.root)
-        self.assertEqual({model['id'] for model in registry['models']}, {'KMSKeyState', 'RESTDeploymentSnapshot', 'S3Versions', 'SSMParameterState', 'SQSLifecycle', 'SQSStorageBudget', 'StackOwnership', 'ObjectStore', 'StartupTokenVisibility', 'BrowserSessions', 'NativeIAMOwnership'})
+        self.assertEqual({model['id'] for model in registry['models']}, {'KMSProtocolAdmission', 'KMSKeyState', 'RESTDeploymentSnapshot', 'S3Versions', 'SSMParameterState', 'SQSLifecycle', 'SQSStorageBudget', 'StackOwnership', 'ObjectStore', 'StartupTokenVisibility', 'BrowserSessions', 'NativeIAMOwnership'})
         for model in registry['models']:
             source = (self.root / model['model']).read_text()
             for mutant in model['mutants']:
                 name, mutated = apply_mutant(source, model['id'], mutant)
                 self.assertNotEqual(mutated, source)
                 self.assertIn('MODULE ' + name, mutated)
+
+    def test_kms_protocol_required_model_and_invariants_cannot_disappear(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        registry = json.loads(original)
+        registry['models'] = [m for m in registry['models'] if m['id'] != 'KMSProtocolAdmission']
+        path.write_text(json.dumps(registry))
+        model = self.root / 'formal/KMSProtocolAdmission.tla'
+        config = self.root / 'formal/KMSProtocolAdmission.cfg'
+        model_bytes, config_bytes = model.read_bytes(), config.read_bytes()
+        model.unlink(); config.unlink()
+        with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+            load_registry(self.root)
+        model.write_bytes(model_bytes); config.write_bytes(config_bytes)
+        registry = json.loads(original)
+        protocol = next(m for m in registry['models'] if m['id'] == 'KMSProtocolAdmission')
+        protocol['properties'].remove('InfraNotDeny')
+        protocol['mutants'] = [m for m in protocol['mutants'] if m['expect_invariant'] != 'InfraNotDeny']
+        config.write_text(config_bytes.decode().replace('INVARIANT InfraNotDeny\n',''))
+        path.write_text(json.dumps(registry))
+        with self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+            load_registry(self.root)
 
     def test_kms_required_model_and_invariants_cannot_disappear(self):
         path = self.root / 'formal/models.json'

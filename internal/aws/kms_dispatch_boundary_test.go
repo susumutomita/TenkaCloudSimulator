@@ -5,6 +5,8 @@ import (
  "encoding/json"
  "net/http/httptest"
  "strings"
+ "sync"
+ "time"
  "testing"
 
  "github.com/susumutomita/TenkaCloudSimulator/internal/core"
@@ -56,4 +58,23 @@ func TestKMSSigningMetadataMissingTargetCannotFallThroughToS3(t *testing.T){
  })}
  // A genuine S3 request remains S3 after tightening KMS intent recognition.
  for _,auth:=range []string{"",signature("s3","TCSIMLOCAL")}{r:=httptest.NewRequest("GET","/",nil);r.Header.Set("Authorization",auth);w:=httptest.NewRecorder();g.ServeHTTP(w,r);if w.Code!=200 || !strings.Contains(w.Body.String(),"ListAllMyBucketsResult") || !strings.Contains(w.Body.String(),"kms-route-peer"){t.Fatal("ordinary S3 routing regressed",w.Code,w.Body.String())}}
+}
+
+// The barrier is the real HTTP body reader, which runs after dispatch captures
+// policy and before native authorization. It is not a replacement authorizer.
+type kmsPolicyBodyBarrier struct{reader *strings.Reader;started,resume chan struct{};once sync.Once}
+func(b *kmsPolicyBodyBarrier)Read(p []byte)(int,error){b.once.Do(func(){close(b.started);<-b.resume});return b.reader.Read(p)}
+func TestKMSNativePolicySnapshotRemainsImmutableAcrossBodyRead(t *testing.T){
+ for _,initialAllow:=range []bool{true,false}{t.Run(map[bool]string{true:"revoke-after-snapshot",false:"grant-after-snapshot"}[initialAllow],func(t *testing.T){
+  db,s:=kmsTestStore(t,"");ids:=core.NewIdentities(db);g:=&Gateway{KMS:s,Identities:ids};key,err:=s.CreateKey(context.Background(),"us-east-1","dummy");if err!=nil{t.Fatal(err)}
+  set:=func(allow bool){effect:="Deny";if allow{effect="Allow"};if e:=ids.Set("snapshot-user",core.Policy{Version:"2012-10-17",Statement:core.Statements{{Effect:effect,Action:core.StringList{"kms:DescribeKey"},Resource:core.StringList{key.Arn}}}});e!=nil{t.Fatal(e)}}
+  set(initialAllow);before:=kmsStateFingerprint(t,s)
+  barrier:=&kmsPolicyBodyBarrier{reader:strings.NewReader(`{"KeyId":"`+key.KeyID+`"}`),started:make(chan struct{}),resume:make(chan struct{})};r:=httptest.NewRequest("POST","/",barrier);r.Header.Set("Content-Type","application/x-amz-json-1.1");r.Header.Set("X-Amz-Target","TrentService.DescribeKey");r.Header.Set("X-Simulator-Principal","snapshot-user");w:=httptest.NewRecorder();done:=make(chan struct{});go func(){g.ServeHTTP(w,r);close(done)}();var releaseOnce sync.Once;releaseBody:=func(){releaseOnce.Do(func(){close(barrier.resume)})};defer func(){releaseBody();select{case <-done:case <-time.After(5*time.Second):t.Error("owned snapshot request did not terminate")}}()
+  select{case <-barrier.started:case <-time.After(5*time.Second):releaseBody();t.Fatal("request did not reach body reader after policy capture")}
+  set(!initialAllow);releaseBody()
+  select{case <-done:case <-time.After(5*time.Second):t.Fatal("request failed to complete after body release")}
+  want:=403;if initialAllow{want=200};if w.Code!=want{t.Fatal("inflight request adopted changed policy",w.Code,want)}
+  next,_:=kmsHTTP(t,g,"DescribeKey",`{"KeyId":"`+key.KeyID+`"}`,"snapshot-user");nextWant:=200;if initialAllow{nextWant=403};if next.Code!=nextWant{t.Fatal("subsequent request did not observe changed policy",next.Code,nextWant)}
+  if kmsStateFingerprint(t,s)!=before{t.Fatal("policy snapshot requests changed persisted keys")}
+ })}
 }

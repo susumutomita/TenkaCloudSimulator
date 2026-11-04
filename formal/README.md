@@ -109,14 +109,14 @@ sets use an equivalent seed-assignment product, avoiding enumeration of every
 subset of the larger record universe. Accounting invariants apply to accepted
 admissions; failures independently preserve the complete prior physical state.
 
-The combined inventory includes eleven baselines and forty-four mandatory mutants after the bounded KMS union.
+The combined inventory includes twelve baselines and forty-eight mandatory mutants after the bounded KMS union.
 All original, SSM and Startup required properties remain protected. Model/source
 integration must pass the immutable-head gate separately for each new head. These finite abstractions do not
 prove Go/SQLite refinement, actual byte/JSON/Unicode arithmetic, filesystem size,
 concurrency scheduling, persistence/crashes, distributed delivery or liveness.
 See [SQS limits and concrete test boundaries](../docs/sqs.md).
 
-The combined registry requires 11 finite baselines and 44 named mutation controls, including BrowserSessions, SQSLifecycle and SQSStorageBudget. This source integration is not a new-head TLC or Go execution result.
+The combined registry requires 12 finite baselines and 48 named mutation controls, including BrowserSessions, SQSLifecycle and SQSStorageBudget. This source integration is not a new-head TLC or Go execution result.
 
 
 ## Bounded KMS key-state registration
@@ -133,3 +133,23 @@ and all four invariants are required by the loader and removal-negative fixtures
 The registry is canonical; the old standalone KMS fragment is preserved outside
 production history as a handoff artifact and removed from the current tree.
 This source registration is not a new-head TLC, SDK, browser or whole-CI success.
+
+
+## KMS protocol admission and policy snapshot
+
+KMSProtocolAdmission independently normalizes KMS/other/missing target, service
+hint and signing-scope metadata, credential-format/region consistency, four identity
+lookup outcomes and one immutable permission snapshot. One optional live-policy
+change after lookup must not replace the captured request permit. Five safety
+properties plus TypeOK reject KMS-to-S3 fallback, authority inferred from wire
+metadata,500-to403 outage masking, missing identity success and missing/conflicting
+KMS target success. Rejected/error replies expose no abstract resource data or
+mutation. Four controls remove signing intent, mask an outage, ignore the target
+or read live policy instead of the snapshot. Type/parse errors are not acceptable
+counterexamples; actual named traces remain pending.
+This is not raw-header/SigV4 parsing, local token authentication, real IAM/SQL,
+other AWS branch authorization or a Go refinement proof. Atomic KMSKeyState and
+its eight controls remain unchanged; protocol claims are not assigned to that
+successful-event model. Real Gateway metadata/conflict cases, identity DB failure
+frames/retry and a real body-read-barrier snapshot test provide separate native
+bridge obligations. Source registry is now12/48; current tests/TLC remain unrun.

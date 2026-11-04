@@ -233,7 +233,7 @@ The canonical registry includes kms_types.go for abstract key/region/context
 binding helpers and shared initialization/dispatch declarations. Its explicit
 limits exclude parser/crypto/read-output/host-authentication proofs. The prior
 standalone fragment is preserved outside the source tree, leaving one canonical
-registry. Eleven baselines and44 named controls are registered; existing ten
+registry. Twelve baselines and48 named controls are registered; existing ten
 models and36 controls remain intact. Current-head execution is still pending.
 
 
@@ -257,5 +257,28 @@ verified to synchronize headers automatically. Create a key first, use its actua
 returned identifier, then copy actual local Encrypt output for Decrypt. The
 valid-base64 documentation placeholder is deliberately not decryptable.
 Parsed schema/source checks, served examples, SDK sends, browser operations,
-canonical bundle/NOTICE rebuild, complete coverage/security/CI and all11/44
+canonical bundle/NOTICE rebuild, complete coverage/security/CI and all12/48
 formal runs are distinct pending gates for this new source composition.
+
+
+## Protocol admission/refusal and snapshot contract (prepared, not verified)
+
+The independent KMSProtocolAdmission model represents normalized selection,
+metadata consistency, identity lookup and a captured permit before executing one
+request. KMS signing scope is a routing hint only, never authenticated authority.
+An identity-store failure/cancellation is an internal500; a missing identity is403.
+A live policy change after snapshot must affect the next request, not silently
+replace the current captured permit. Missing/conflicting targets cannot become
+S3 success. Error/denial replies preserve the abstract resource and disclose none.
+Four new controls accompany five safety invariants plus TypeOK. Raw header/SDK
+signature parsing, host token authentication, SQL implementation and other-service
+behavior are not formally established; actual Gateway/native tests are separate.
+The atomic KMS model's8 controls do not prove these protocol/refusal properties.
+
+Two independent source findings remain blocked pending executable reproduction:
+old dispatch converts identity DB errors to403 and can miss signed KMS intent when
+X-Amz-Target is absent. Tests-first cases are saved; production dispatch is still
+unchanged until the required actual-failure run and minimal correction. Native
+f018 evidence predates these regressions and does not mean this candidate passes.
+A same-view console refresh guard now rejects older errors, with prepared delayed
+old-error/current-error/recovery browser assertions; these are also unexecuted.

@@ -650,16 +650,12 @@
         "EnabledCrypto",
         "BoundContextAndKey"
       ],
-      "limits": "Atomic bounded successful Create/SetEnabled/Encrypt/Decrypt events only; key/region/context labels are abstract values. No AES proof, nonce probability, JSON/IAM parsing, SQLite RowsAffected/commit/crash refinement, rejected/error response frames, read-only Describe/List/GetPolicy outputs, host authentication, time, growing key population or arbitrary key policies. Last event captures pre-operation conditions so later Disable does not invalidate an earlier legitimate output. Shared Gateway/dispatch/server paths are wiring declarations only; this model does not establish host-token authentication, constructor rollback or UI/SDK integration.",
+      "limits": "Atomic bounded successful Create/SetEnabled/Encrypt/Decrypt events only; key/region/context labels are abstract values. No AES/nonce probability, JSON/IAM/SigV4 parsing, routing/protocol selection, SQLite RowsAffected/commit/crash refinement, rejected/error response frames, read-only Describe/List/GetPolicy outputs, host authentication, time, growing key population or arbitrary key policies. Last event captures pre-operation conditions so later Disable does not invalidate an earlier legitimate output.",
       "source_scope": [
         "internal/aws/kms_store.go",
         "internal/aws/kms_crypto.go",
         "internal/aws/kms_http.go",
-        "internal/aws/kms_dispatch.go",
-        "internal/aws/kms_types.go",
-        "internal/aws/s3.go",
-        "internal/aws/ssm.go",
-        "internal/server/server.go"
+        "internal/aws/kms_types.go"
       ],
       "mutants": [
         {
@@ -749,6 +745,75 @@
             }
           ],
           "expect_invariant": "TypeOK"
+        }
+      ]
+    },
+    {
+      "id": "KMSProtocolAdmission",
+      "model": "formal/KMSProtocolAdmission.tla",
+      "config": "formal/KMSProtocolAdmission.cfg",
+      "bounds": "One normalized nonoperator exercise request; target/hint/signing-scope each KMS/Other/None, four identity lookup results, two policy values, credential-valid/region-match/mutates Booleans, one optional live-policy flip after snapshot; one abstract resource bit and terminal response.",
+      "properties": [
+        "TypeOK",
+        "NoCrossServiceFallback",
+        "InfraNotDeny",
+        "MissingIdentityDenied",
+        "NoSuccessWithoutKMSTarget",
+        "NoAuthorityFromWireMetadata"
+      ],
+      "limits": "Normalized protocol/identity-policy admission abstraction after trusted outer exercise identity selection; not raw HTTP/SigV4 parsing or signature authentication, local token/Access or tenant-isolation proof, full IAM semantics, byte bodies/AES, real DB faults/transactions, Go refinement, timing/concurrency/crash proof or other-service authorization. Other route is only handoff, not modeled S3 success. Body-read-barrier native tests and nine actual Gateway metadata cases independently exercise the intended bridge; new tests and this model are initially UNRUN. Shared Gateway/server/SSM applicability is ONLY the new configured KMS route/module declaration, not unchanged AWS branches, nil-module/constructor behavior or whole provider wiring. Native tests are separate and initially unrun.",
+      "source_scope": [
+        "internal/aws/kms_dispatch.go",
+        "internal/aws/kms_http.go",
+        "internal/aws/ssm.go",
+        "internal/aws/kms_dispatch_boundary_test.go",
+        "internal/aws/s3.go",
+        "internal/server/server.go"
+      ],
+      "mutants": [
+        {
+          "id": "DropSigningIntent",
+          "edits": [
+            {
+              "old": "SelectKMS(q) == q.target=\"KMS\" \\/ q.hint=\"KMS\" \\/ q.signing=\"KMS\"",
+              "new": "SelectKMS(q) == q.target=\"KMS\" \\/ q.hint=\"KMS\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoCrossServiceFallback"
+        },
+        {
+          "id": "MaskIdentityOutage",
+          "edits": [
+            {
+              "old": "status'=IF request.lookup=\"Present\" THEN NoValue ELSE IF request.lookup=\"Missing\" THEN 403 ELSE 500",
+              "new": "status'=IF request.lookup=\"Present\" THEN NoValue ELSE IF request.lookup=\"Missing\" THEN 403 ELSE 403",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "InfraNotDeny"
+        },
+        {
+          "id": "IgnoreRequiredTarget",
+          "edits": [
+            {
+              "old": "targetOK == request.target=\"KMS\"",
+              "new": "targetOK == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoSuccessWithoutKMSTarget"
+        },
+        {
+          "id": "ReadLivePolicyInsteadOfSnapshot",
+          "edits": [
+            {
+              "old": "allowed == permit=TRUE",
+              "new": "allowed == policyLive=TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoAuthorityFromWireMetadata"
         }
       ]
     }
