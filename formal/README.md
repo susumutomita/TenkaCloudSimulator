@@ -34,8 +34,8 @@ RESTDeploymentSnapshot.tla bounds one API, two deployment IDs, two handler confi
 
 ## Required gate and applicability
 
-The executable inventory is now `formal/models.json`; all five prior models
-and BrowserSessions plus their exact sensitivity mutations remain mandatory. See
+The executable inventory is now `formal/models.json`; all five existing models
+and their exact sensitivity mutations remain mandatory. See
 [formal validation](../docs/formal-validation.md) for exact changed-blob records,
 negative controls, evidence and the distinction between a workflow check,
 human scope review and separately configured repository merge protection.
@@ -43,9 +43,27 @@ New runtime/state transitions are not covered by the existing five models merely
 because this suite passes. No new service, callback or Python/HTTP state-machine
 proof is implied by this inventory.
 
+
+## SSM latest parameter state
+
+`SSMParameterState.tla` is the sixth registered finite model. It bounds two
+regions by two names, two validated abstract values and latest-row versions
+1–2, with a success-prefix cutoff rather than an API version cap. It checks
+explicit-Deny preservation, no-overwrite refusal, successful version advance,
+exact-key deletion/frame conditions and region/name read isolation. Five
+specified mutations must fail the appropriate named property. Existing five
+models and their controls remain mandatory; the combined inventory is six
+positive models and ten negative controls (sixteen TLC cases).
+
+See [the SSM contract and source/test correspondence](../docs/formal-ssm.md).
+The native HTTP integration test uses distinct values and runtime versions
+1–4; there is no version-history/selector, live-AWS differential, liveness or
+Go refinement claim. New candidate execution and hosted CI must be checked separately; model checking is not Go refinement.
+
+
 ## Browser session revocation
 
-BrowserSessions is the sixth required model. Its two clients, three fresh browser
+BrowserSessions is required alongside SSMParameterState and the original five models. Its two clients, three fresh browser
 credentials, one operator and one participant parent, clock0..3 and TTL2/1 bound
 login→cookie use→logout/replay→parent expiry/invalidation. Five named mutants
 retain a revoked session, ignore parent validity, accept raw operator cookies,
@@ -58,3 +76,6 @@ menu's caller, and access_browser_test.go/console_logout.py hold separate native
 and actual browser assertions. Listing those paths binds source review, not Go
 refinement or a UI/TLS/cryptography proof. See
 [session contract](../docs/console-sessions.md) for the independent checks.
+
+
+The current combined registry has 7 baselines and 15 required mutation controls. SSM and feature inventory/property removal are rejected. Source integration does not constitute a new-head TLC or runtime execution result.

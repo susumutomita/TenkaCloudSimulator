@@ -160,6 +160,84 @@
       ]
     },
     {
+      "id": "SSMParameterState",
+      "model": "formal/SSMParameterState.tla",
+      "config": "formal/SSMParameterState.cfg",
+      "bounds": "Two regions x two names, two abstract validated values, latest-row versions1..2. Successful overwrites beyond2 are an exploration cutoff, not an API/runtime limit. One ghost pre-event snapshot; no stored version history.",
+      "properties": [
+        "TypeOK",
+        "DeniedPreservesState",
+        "OverwriteRefusal",
+        "PutVersion",
+        "DeleteEffect",
+        "OtherKeysUnchanged",
+        "ReadIsolation"
+      ],
+      "limits": "Atomic accepted operations and abstract allow/explicit-deny only; no IAM parser/ARN matching, HTTP syntax, type/description/time fields, pagination/path queries, SQLite crash/interleaving proof, version history/selectors/labels, AWS recreation delay, live AWS differential run or Go refinement proof.",
+      "source_scope": [
+        "internal/aws/parameters.go",
+        "internal/aws/ssm.go",
+        "internal/server/ssm_model_contract_test.go"
+      ],
+      "mutants": [
+        {
+          "id": "IgnoreExplicitDeny",
+          "edits": [
+            {
+              "old": "Permitted(allow,deny) == allow /\\ ~deny",
+              "new": "Permitted(allow,deny) == allow",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DeniedPreservesState"
+        },
+        {
+          "id": "IgnoreOverwriteGuard",
+          "edits": [
+            {
+              "old": "accepted == Permitted(allow,deny) /\\ (old = None \\/ overwrite)",
+              "new": "accepted == Permitted(allow,deny)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OverwriteRefusal"
+        },
+        {
+          "id": "DoNotAdvanceVersion",
+          "edits": [
+            {
+              "old": "nextVersion == IF old = None THEN 1 ELSE old.version + 1",
+              "new": "nextVersion == IF old = None THEN 1 ELSE old.version",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PutVersion"
+        },
+        {
+          "id": "ReadWrongRegion",
+          "edits": [
+            {
+              "old": "served == <<r,n>>",
+              "new": "served == <<IF r = RegionA THEN RegionB ELSE RegionA,n>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadIsolation"
+        },
+        {
+          "id": "ReadWrongName",
+          "edits": [
+            {
+              "old": "served == <<r,n>>",
+              "new": "served == <<r,IF n = NameA THEN NameB ELSE NameA>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadIsolation"
+        }
+      ]
+    },
+    {
       "id": "BrowserSessions",
       "model": "formal/BrowserSessions.tla",
       "config": "formal/BrowserSessions.cfg",
