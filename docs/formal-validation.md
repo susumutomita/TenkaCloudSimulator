@@ -137,14 +137,27 @@ integration`, so required-check/ruleset enforcement is **unknown**, not claimed
 configured. No security-sensitive repository settings were changed.
 
 
-## Pending Secrets Manager registration
+## Secrets Manager registration and executed evidence
 
-The local candidate extends main's ten required models/thirty-six controls with
-SecretsVersionLifecycle (six controls), SecretsRevealEpoch (three), and
-SecretsDisclosureChannels (five): thirteen baselines and fifty controls. All
-existing mandatory model/invariant sets remain protected. These additions are
-source declarations until the exact combined HEAD passes the complete gate.
-The applicability record binds only the named finite state/channel properties;
-SQL rollback/ignored-write faults, concrete policy matching, physical persistence,
-raw routing, browser accessibility and cryptography need separate native tests.
-No Go refinement, encryption or real-AWS equivalence is implied.
+The registry includes main's ten models/thirty-six controls plus
+SecretsVersionLifecycle (six), SecretsRevealEpoch (three), and
+SecretsDisclosureChannels (five): thirteen baselines and fifty controls.
+All required models/invariants and each reviewed control identity are protected;
+unit fixtures reject every individual control removal.
+
+At immutable `c97bdde`, the complete63 TLC cases,19 gate units,21 applicability
+units and42 exact changed blobs passed. Forty-eight controls have behavior
+traces; BrowserSessions_RawOperatorCookie and
+SQSStorageBudget_BlockLegacyMaintenance contain explicit violating initial-state
+valuations. Runtime/parser/type errors and timeouts are not counterexamples.
+Named local receipts remain distinct from subsequent commits and hosted CI.
+Documentation-only changes still require fresh immutable-head applicability/TLC
+checks; the declaration itself never grants a new-head execution result.
+
+The bindings cover named finite state/channel properties, not Go/SQL refinement,
+cryptography or full AWS equivalence. Separate concrete results at `0888924`
+cover full Go/race/build, one-profile94.78% statement/90.12% unfiltered source,
+24 E2E and actual start checks; baseline50 and separate Secrets5 automated screen
+checks also passed. SQL rollback/ignored-write faults, policy matching, storage
+budgets, persistence, raw routing and browser behavior are exercised independently.
+Hosted exact-HEAD CI and publication review remain separate from local results.
