@@ -50,4 +50,4 @@ with running(authenticated=True) as (endpoint,token):
     assert invoke_http()['status']==401
     api.delete_rest_api(restApiId=rest['id'])
     cfn.delete_stack(StackName='wp-sdk-subset');assert functions.list_functions()['Functions']==[]
-    print(json.dumps({'originalHandlerSha256':projection['handlerSha256'],'originalHandlerUnmodified':True,'initialSQLLeak':True,'actualRESTHTTPOriginalHandler':True,'parameterizedQueryStatus':400,'routeIsolationStatus':401,'teardown':'DELETED','fullProblemSupported':False,'browserAppHosting':False,'missing':['CloudFormation API Gateway/Lambda::Permission provisioning','WAF','custom resource lifecycle','seven original grading checks']}))
+    print(json.dumps({'originalHandlerSha256':projection['handlerSha256'],'originalHandlerUnmodified':True,'initialSQLLeak':True,'actualRESTHTTPOriginalHandler':True,'parameterizedQueryStatus':400,'routeIsolationStatus':401,'teardown':'DELETED','fullProblemSupported':False,'browserAppHosting':False,'notExercisedByThisProjection':['CloudFormation API Gateway/Lambda::Permission provisioning','WAF','custom resource lifecycle','seven original grading checks']}))
