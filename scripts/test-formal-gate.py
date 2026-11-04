@@ -34,7 +34,7 @@ class FormalGateTests(unittest.TestCase):
 
     def test_complete_registry_and_exact_mutations(self):
         registry = load_registry(self.root)
-        self.assertEqual({model['id'] for model in registry['models']}, {'StackOwnership', 'SQSLifecycle', 'RESTDeploymentSnapshot', 'NativeIAMOwnership', 'ObjectStore', 'S3Versions', 'SSMParameterState'})
+        self.assertEqual({model['id'] for model in registry['models']}, {'S3Versions', 'StartupTokenVisibility', 'ObjectStore', 'SSMParameterState', 'RESTDeploymentSnapshot', 'StackOwnership', 'NativeIAMOwnership', 'SQSLifecycle', 'SQSStorageBudget'})
         for model in registry['models']:
             source = (self.root / model['model']).read_text()
             for mutant in model['mutants']:
@@ -42,9 +42,36 @@ class FormalGateTests(unittest.TestCase):
                 self.assertNotEqual(mutated, source)
                 self.assertIn('MODULE ' + name, mutated)
 
+    def test_startup_required_model_and_properties_cannot_disappear(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        registry = json.loads(original)
+        registry['models'] = [m for m in registry['models'] if m['id'] != 'StartupTokenVisibility']
+        path.write_text(json.dumps(registry))
+        # Remove the files too: required inventory protection must detect this,
+        # rather than relying only on the unregistered-artifact check.
+        model = self.root / 'formal/StartupTokenVisibility.tla'
+        config = self.root / 'formal/StartupTokenVisibility.cfg'
+        model_bytes, config_bytes = model.read_bytes(), config.read_bytes()
+        model.unlink(); config.unlink()
+        with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+            load_registry(self.root)
+        model.write_bytes(model_bytes); config.write_bytes(config_bytes)
+        registry = json.loads(original)
+        startup = next(m for m in registry['models'] if m['id'] == 'StartupTokenVisibility')
+        startup['properties'].remove('HistoryVisibility')
+        startup['mutants'] = [m for m in startup['mutants'] if m['expect_invariant'] != 'HistoryVisibility']
+        config.write_text(config.read_text().replace('INVARIANT HistoryVisibility\n',''))
+        # Updating both declaration and CFG still cannot remove a required rule.
+        path.write_text(json.dumps(registry))
+        with self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+            load_registry(self.root)
+
     def test_missing_model_config_checksum_each_fail(self):
         for path in ('formal/ObjectStore.tla', 'formal/ObjectStore.cfg',
                      'formal/SSMParameterState.tla', 'formal/SSMParameterState.cfg',
+                     'formal/SQSLifecycle.tla', 'formal/SQSLifecycle.cfg',
+                     'formal/SQSStorageBudget.tla', 'formal/SQSStorageBudget.cfg',
                      'formal/tla2tools.sha256'):
             with self.subTest(path=path):
                 original = (self.root / path).read_bytes()
@@ -222,6 +249,33 @@ class FormalGateTests(unittest.TestCase):
         path.write_text(json.dumps(registry))
         with self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
             load_registry(self.root)
+
+
+    def test_sqs_required_inventory_and_all_properties_cannot_disappear(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        for name in ('SQSLifecycle', 'SQSStorageBudget'):
+            model = self.root / ('formal/' + name + '.tla')
+            config = self.root / ('formal/' + name + '.cfg')
+            saved_model, saved_config = model.read_bytes(), config.read_bytes()
+            registry = json.loads(original)
+            registry['models'] = [m for m in registry['models'] if m['id'] != name]
+            path.write_text(json.dumps(registry))
+            model.unlink(); config.unlink()
+            with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+                load_registry(self.root)
+            model.write_bytes(saved_model); config.write_bytes(saved_config)
+            for prop in next(m for m in json.loads(original)['models'] if m['id'] == name)['properties']:
+                with self.subTest(model=name, property=prop):
+                    registry = json.loads(original)
+                    entry = next(m for m in registry['models'] if m['id'] == name)
+                    entry['properties'].remove(prop)
+                    entry['mutants'] = [m for m in entry['mutants'] if m['expect_invariant'] != prop]
+                    config.write_text(saved_config.decode().replace('INVARIANT ' + prop + '\n', ''))
+                    path.write_text(json.dumps(registry))
+                    with self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                        load_registry(self.root)
+            path.write_text(original); config.write_bytes(saved_config)
 
 if __name__ == '__main__':
     unittest.main()

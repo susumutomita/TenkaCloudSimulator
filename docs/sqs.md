@@ -22,7 +22,22 @@ simulator runs with `--state <file>`. No real AWS access is involved.
 
 Queue names are 1–80 letters, digits, hyphens or underscores, scoped per
 region (us-east-1, us-west-2, ap-northeast-1, eu-west-1). At most 1000 queues
-per process. Every operation is authorized as the IAM action `sqs:<Operation>`
+per process. Per provider database, local physical storage is additionally bounded
+by **10,000 persisted messages** and **64 MiB of stored payload bytes** across all
+queues and regions. Payload bytes mean UTF-8 body bytes plus the exact serialized
+message-attribute JSON bytes, including JSON field/escape/base64 overhead. These
+are simulator safety limits, not AWS quotas. A send that would exceed either
+limit returns HTTP 400 `SimulatorQuotaExceeded` without acknowledging a message.
+Its own-queue expiry cleanup and insertion share one transaction; rejected or
+failed insertion rolls that cleanup back too. Expired rows of other queues or
+regions still consume the physical budget until their own scoped read/delete
+cleanup removes them. Send does not delete another scope's rows to make space.
+Existing over-cap databases are preserved and remain readable/deletable; startup
+does not discard rows. Sends are admitted only when their post-scoped-cleanup
+physical state fits both budgets. The budget is recomputed in the same SQLite
+transaction instead of trusting an independently mutable quota counter.
+
+Every operation is authorized as the IAM action `sqs:<Operation>`
 against `arn:aws:sqs:<region>:000000000000:<queue>` (`*` for ListQueues), the
 same identity-policy engine as the other services.
 
@@ -227,3 +242,15 @@ separate SQLite/token state, two regions, restart, receipt rotation, real minimu
 60-second retention and cleanup. Its source handoff is integrated; actual
 execution on the new binary is still pending. No SQS console UI is implemented,
 and native service support is not original-problem or full-service completion.
+
+
+Storage-budget repair checkpoint: source changes and real SQLite acceptance tests
+are prepared for count/encoded-byte boundaries, two concurrent last-slot writers,
+expired foreign rows, scoped purge rollback, failed insertion and legacy over-cap
+read/delete recovery. These changes invalidate prior whole-runtime/coverage
+claims for the new source until fresh execution. The last completed whole run
+on fa26f98 passed tests/build and 93.97% statements, but unfiltered source lines
+were 88.92%, below the unchanged 90% requirement. No E2E or coverage success is
+inherited from that failed quality gate. The separate bounded storage model uses
+abstract byte units; it does not prove UTF-8, SQL isolation, filesystem size or
+Go refinement.

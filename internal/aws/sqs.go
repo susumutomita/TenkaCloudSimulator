@@ -85,7 +85,7 @@ func queueNameFromURL(raw string) string {
 func (g *Gateway) serveSQS(w http.ResponseWriter, r *http.Request) {
 	invalid := func(message string) { sqsError(w, sqsFailure{"InvalidParameterValue", message}) }
 	if g.Queues == nil {
-		sqsError(w, sqsFailure{"InternalError", "SQS store is not configured."})
+		sqsError(w, errors.New("SQS store is not configured"))
 		return
 	}
 	if r.Method != "POST" || r.URL.Path != "/" || r.URL.RawQuery != "" {

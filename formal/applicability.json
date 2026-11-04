@@ -1,17 +1,17 @@
 {
   "version": 1,
-  "base_sha": "464b4f913c6bcd3200a1bfa1081507df5d7a92cb",
+  "base_sha": "0725e521660132b198c350bcb80d39ee406ff7ba",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "e9a77274a1c13c517935c9b811e90d89e5880a8534ecb712fd172796c054ab60",
+      "sha256": "968a71ec7cffd44bdf95014b4b8ff32635143d15bea9eaccdc602b379bc45aa4",
       "disposition": "documentation",
       "reason": "Document the bounded native SQS subset, local 256 KiB versus current operation-reference 1 MiB, repair provenance, actual focused tests and explicit compatibility/model/coverage limits. No service or formal-proof completion is asserted by prose.",
       "models": []
     },
     {
       "path": "docs/sqs.md",
-      "sha256": "3afce36370976e634529efbe0b8b96308c18478efe073fc4dcc48b9ad9077832",
+      "sha256": "9bf3856604b6697683a117cbe9ac9afbf349e3d795035e1f99e6b1252debe50b",
       "disposition": "documentation",
       "reason": "Document the bounded native SQS subset, local 256 KiB versus current operation-reference 1 MiB, repair provenance, actual focused tests and explicit compatibility/model/coverage limits. No service or formal-proof completion is asserted by prose.",
       "models": []
@@ -21,7 +21,7 @@
       "disposition": "documentation",
       "reason": "Combine accepted SSM and SQS model inventories with mandatory IDs/properties and missing-artifact negative controls, retaining original five protections. No new-head TLC proof implied.",
       "models": [],
-      "sha256": "948acdbece314245f46f706790f9c607a02321ea06b8b760def2b880ff53fa65"
+      "sha256": "78d5ca7cd45a67277953d7a49c9fab409b95056b5fead21e7e50f5341bc51acd"
     },
     {
       "path": "formal/SQSLifecycle.cfg",
@@ -70,8 +70,54 @@
       ]
     },
     {
+      "path": "formal/SQSStorageBudget.cfg",
+      "disposition": "modeled",
+      "reason": "Finite local physical storage budget abstraction for transactional Send, scoped expiry cleanup, failure rollback and legacy over-cap maintenance; execution pending, not Go/SQL or Unicode refinement.",
+      "models": [
+        {
+          "id": "SQSStorageBudget",
+          "properties": [
+            "FailedSendPreservesRows",
+            "ForeignRowsPreserved",
+            "LiveRowsPreserved",
+            "BudgetAccountsPhysical",
+            "PhysicalRowCap",
+            "PayloadByteCap",
+            "ReadRemovesOwnExpired",
+            "DeleteScopeExact",
+            "MaintenanceNotBudgetBlocked"
+          ],
+          "limits": "Finite physical-payload budget abstraction, not Go/SQLite refinement, SQL transaction/crash proof, Unicode/UTF8/string-byte counting, JSON attribute serialization, actual64MiB/10000row arithmetic, file size/SQLite overhead, clock/retention, receipt/IAM authorization or random-ID collision resistance. Row weights abstract persisted body+serialized-attribute bytes; all foreign rows, including expired ones, consume budget. Scopes/parent queues are assumed already valid and trusted; SQSLifecycle/native tests separately handle authority, parent lifetime and receipts. Maintenance enabledness assumes these preconditions, not unauthorized access or liveness/fairness. Charged counters describe successful admission accounting, not a claim that an actual storage-error path computed counters. FailedSendPreservesRows still applies to every rejected/storage-error send. Legacy overcap rows are retained: only new accepted sends must fit both caps, own expired cleanup is explicit/scoped and rollback preserves every row on send failure."
+        }
+      ],
+      "sha256": "5ddbbf39056344584d96cdecef4de1621bc9eb0add908ad8a51983ab1325cc65"
+    },
+    {
+      "path": "formal/SQSStorageBudget.tla",
+      "disposition": "modeled",
+      "reason": "Finite local physical storage budget abstraction for transactional Send, scoped expiry cleanup, failure rollback and legacy over-cap maintenance; execution pending, not Go/SQL or Unicode refinement.",
+      "models": [
+        {
+          "id": "SQSStorageBudget",
+          "properties": [
+            "FailedSendPreservesRows",
+            "ForeignRowsPreserved",
+            "LiveRowsPreserved",
+            "BudgetAccountsPhysical",
+            "PhysicalRowCap",
+            "PayloadByteCap",
+            "ReadRemovesOwnExpired",
+            "DeleteScopeExact",
+            "MaintenanceNotBudgetBlocked"
+          ],
+          "limits": "Finite physical-payload budget abstraction, not Go/SQLite refinement, SQL transaction/crash proof, Unicode/UTF8/string-byte counting, JSON attribute serialization, actual64MiB/10000row arithmetic, file size/SQLite overhead, clock/retention, receipt/IAM authorization or random-ID collision resistance. Row weights abstract persisted body+serialized-attribute bytes; all foreign rows, including expired ones, consume budget. Scopes/parent queues are assumed already valid and trusted; SQSLifecycle/native tests separately handle authority, parent lifetime and receipts. Maintenance enabledness assumes these preconditions, not unauthorized access or liveness/fairness. Charged counters describe successful admission accounting, not a claim that an actual storage-error path computed counters. FailedSendPreservesRows still applies to every rejected/storage-error send. Legacy overcap rows are retained: only new accepted sends must fit both caps, own expired cleanup is explicit/scoped and rollback preserves every row on send failure."
+        }
+      ],
+      "sha256": "b1fbad34eda211e01de403d79b47fc6f16c309054154a35973273dee60d73b8d"
+    },
+    {
       "path": "formal/models.json",
-      "sha256": "cdb8f5ab2e5f798e052fae7d23d2191ba2ae8712236885d7f7b72a7c6f290ed1",
+      "sha256": "68aeb5ac6454d336bdda88f19ffb824041efe9e933e32691ca0df7a6813275c8",
       "disposition": "formal-infrastructure",
       "reason": "Register SQSLifecycle and add its required invariant/ID set while preserving every original five model/property requirements and strict missing/stale/exit guards. The self-test requires the exact original-five-plus-SQS set and iterates all mutation anchors; future combined service registries need an explicitly merged set, not a lowered check.",
       "models": []
@@ -93,7 +139,7 @@
     },
     {
       "path": "internal/aws/sqs.go",
-      "sha256": "3870d8b7ed98d6b936b9e0696da1d64b53545cdf3e75aafefd7fe99f68232dbd",
+      "sha256": "0384e3bc02f5ecf597e5aa247b425f970b35995db874d04d718eb1e4cfd20162",
       "disposition": "modeled",
       "reason": "Authorize the selected SQS action/regional queue ARN before native operations, retain bounded request validation and pass the same regional queue/receipt target to the repaired store. Body Unicode is additionally tested as a separate protocol contract. Additional admission fixes distinguish explicit-zero limits from omission, reject nested unsupported members and All-order bypass, and refuse malformed MessageBody Unicode before silent decoder replacement. These parser/encoding behaviors require native wire tests; the lifecycle model does not prove them.",
       "models": [
@@ -118,6 +164,13 @@
       "models": []
     },
     {
+      "path": "internal/aws/sqs_additional_boundaries_test.go",
+      "disposition": "test-support",
+      "reason": "Concrete SQS quota/admission/SQLite rollback and standalone two-team SDK tests; no finite model or new-head execution proof is implied by test source.",
+      "models": [],
+      "sha256": "faeff13beb051297076bfb8f38c9a2309db2272e580f0c68f86196e3f26934bb"
+    },
+    {
       "path": "internal/aws/sqs_atomic_boundaries_test.go",
       "sha256": "b5f4e45edf70fd570acc88a10a60bc1a6105afd0666fc64c8c7da0294a2db214",
       "disposition": "test-support",
@@ -125,10 +178,17 @@
       "models": []
     },
     {
+      "path": "internal/aws/sqs_storage_budget_test.go",
+      "disposition": "test-support",
+      "reason": "Concrete SQS quota/admission/SQLite rollback and standalone two-team SDK tests; no finite model or new-head execution proof is implied by test source.",
+      "models": [],
+      "sha256": "ada27b97d1de49bfab7b4af08315de843791f8912052295c3ff48aa62f42d1c3"
+    },
+    {
       "path": "internal/aws/sqs_store.go",
-      "sha256": "4ac1bf12b32b2c0a394025504b38930f92f643b0f782e266d5f1dc1570272e9e",
+      "sha256": "c44fcf3178ae260d7977d05c0fb936a189b1683e0ae602fb19005e59fe0a1900",
       "disposition": "modeled",
-      "reason": "Actual queue-parent admission, expiry and message/receipt mutation now share native SQLite transactions; failed cleanup or multi-row writes roll back. Native trigger/reopen/redelivery/orphan-preservation tests passed at 0a28266 before this binding. Delivered/in-flight counts now exclude initial-delay rows that have never been received; this metric requires native and wire tests and is outside the finite lifecycle model counter abstraction.",
+      "reason": "Actual queue-parent admission, expiry and message/receipt mutation now share native SQLite transactions; failed cleanup or multi-row writes roll back. Native trigger/reopen/redelivery/orphan-preservation tests passed at 0a28266 before this binding. Delivered/in-flight counts now exclude initial-delay rows that have never been received; this metric requires native and wire tests and is outside the finite lifecycle model counter abstraction. Enforce local global physical10000-row/64MiB stored body+attributeJSON budget inside the Send transaction after own scoped expiry cleanup; native concurrent/fault/legacy tests required. Byte/count arithmetic and SQLite isolation are not proved by abstract weights.",
       "models": [
         {
           "id": "SQSLifecycle",
@@ -143,6 +203,21 @@
             "ChangeOnlyInflight"
           ],
           "limits": "Atomic finite specification only, not SQL/Go refinement, randomness, real clocks, queue name reuse, distributed delivery or multi-message batch proof."
+        },
+        {
+          "id": "SQSStorageBudget",
+          "properties": [
+            "FailedSendPreservesRows",
+            "ForeignRowsPreserved",
+            "LiveRowsPreserved",
+            "BudgetAccountsPhysical",
+            "PhysicalRowCap",
+            "PayloadByteCap",
+            "ReadRemovesOwnExpired",
+            "DeleteScopeExact",
+            "MaintenanceNotBudgetBlocked"
+          ],
+          "limits": "Finite physical-payload budget abstraction, not Go/SQLite refinement, SQL transaction/crash proof, Unicode/UTF8/string-byte counting, JSON attribute serialization, actual64MiB/10000row arithmetic, file size/SQLite overhead, clock/retention, receipt/IAM authorization or random-ID collision resistance. Row weights abstract persisted body+serialized-attribute bytes; all foreign rows, including expired ones, consume budget. Scopes/parent queues are assumed already valid and trusted; SQSLifecycle/native tests separately handle authority, parent lifetime and receipts. Maintenance enabledness assumes these preconditions, not unauthorized access or liveness/fairness. Charged counters describe successful admission accounting, not a claim that an actual storage-error path computed counters. FailedSendPreservesRows still applies to every rejected/storage-error send. Legacy overcap rows are retained: only new accepted sends must fit both caps, own expired cleanup is explicit/scoped and rollback preserves every row on send failure."
         }
       ]
     },
@@ -171,7 +246,7 @@
     },
     {
       "path": "internal/server/apidocs/openapi.json",
-      "sha256": "04765c73090c334d0e16ef6a74593d01369051f7ad30eab4fc5ee544f1d4e874",
+      "sha256": "1662d426db2ffbe3452ba83f5a3cd94f247ebcd96a54d9845670410398ded325",
       "disposition": "presentation",
       "reason": "Add descriptive SQS provider metadata to the local reference; this does not replace native operations or introduce a different API/backend. Scalar/SDK share the existing SQS HTTP handler; documentation metadata is not a proof of API fidelity.",
       "models": []
@@ -215,14 +290,14 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "691b90d54b1d1926602c2ab29d79729c84dae2da852c22786060d5de6a137882",
+      "sha256": "d967e120475a1716cb3d736e7b2a510164d2d5417037cd27f91052a5cc874a95",
       "disposition": "formal-infrastructure",
       "reason": "Register SQSLifecycle and add its required invariant/ID set while preserving every original five model/property requirements and strict missing/stale/exit guards. The self-test requires the exact original-five-plus-SQS set and iterates all mutation anchors; future combined service registries need an explicitly merged set, not a lowered check.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "b5705f665952588b837e08a295da1dfbc9fc6c6e48117bf45ac2381b7962774b",
+      "sha256": "9b1c3d3ba3706e658ed84e801a063847e79d183965aa82032a45785eaa73a13f",
       "disposition": "formal-infrastructure",
       "reason": "Register SQSLifecycle and add its required invariant/ID set while preserving every original five model/property requirements and strict missing/stale/exit guards. The self-test requires the exact original-five-plus-SQS set and iterates all mutation anchors; future combined service registries need an explicitly merged set, not a lowered check.",
       "models": []

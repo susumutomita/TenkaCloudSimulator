@@ -46,6 +46,11 @@ type SQSMessage struct {
 
 const maxQueues = 1000
 
+// Local physical storage budgets, not AWS service quotas. All queue/region rows
+// count, including expired rows until their own scoped cleanup removes them.
+const maxSQSMessages = 10000
+const maxSQSStoredPayloadBytes int64 = 64 << 20
+
 func NewSQSStore(db *sql.DB) (*SQSStore, error) {
 	if db == nil {
 		return nil, errors.New("SQS requires a provider database")
@@ -233,6 +238,14 @@ func (s *SQSStore) Send(region string, q SQSQueue, body string, attrs map[string
 	encoded, err := json.Marshal(attrs)
 	if err != nil {
 		return SQSMessage{}, err
+	}
+	var storedMessages, storedBytes int64
+	if err = tx.QueryRow("SELECT count(*), COALESCE(SUM(length(CAST(body AS BLOB)) + length(CAST(attributes AS BLOB))),0) FROM aws_sqs_messages").Scan(&storedMessages, &storedBytes); err != nil {
+		return SQSMessage{}, err
+	}
+	newBytes := int64(len(body)) + int64(len(encoded))
+	if storedMessages >= maxSQSMessages || storedBytes > maxSQSStoredPayloadBytes-newBytes {
+		return SQSMessage{}, sqsFailure{"SimulatorQuotaExceeded", "Local SQS physical message or stored-payload budget exceeded; delete messages or queues before retrying."}
 	}
 	m := SQSMessage{ID: newSQSID(), Body: body, Attributes: attrs, Sent: now, ReceiptHandle: ""}
 	m.MD5OfBody = md5Hex([]byte(body))

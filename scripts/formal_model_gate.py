@@ -9,15 +9,17 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-BASE_MODELS = {'ObjectStore', 'StackOwnership', 'S3Versions', 'NativeIAMOwnership', 'RESTDeploymentSnapshot', 'SSMParameterState', 'SQSLifecycle'}
+BASE_MODELS = {'S3Versions', 'StartupTokenVisibility', 'ObjectStore', 'SSMParameterState', 'RESTDeploymentSnapshot', 'StackOwnership', 'NativeIAMOwnership', 'SQSLifecycle', 'SQSStorageBudget'}
 BASE_INVARIANTS = {
     'ObjectStore': {'TypeOK', 'NoOrphans', 'NoUnauthorizedMutation', 'DenyWins'},
     'StackOwnership': {'TypeOK', 'OwnershipExclusive'},
     'S3Versions': {'TypeOK', 'NoHistoryOrphans', 'CurrentMatchesLatest'},
     'NativeIAMOwnership': {'TypeOK', 'OwnershipExclusive'},
     'RESTDeploymentSnapshot': {'TypeOK', 'SnapshotsFrozen', 'NoStageOrphans'},
-    'SQSLifecycle': {'TypeOK', 'NoOrphans', 'AuthorizedMutations', 'ScopedMutation', 'FailedMutationAtomic', 'IdempotentCreateUnchanged', 'ReceiveOnlyEligible', 'FreshReceipt', 'ReceiptMutationCurrent', 'ChangeOnlyInflight'},
-    'SSMParameterState': {'DeniedPreservesState', 'OverwriteRefusal', 'ReadIsolation', 'OtherKeysUnchanged', 'TypeOK', 'DeleteEffect', 'PutVersion'},
+    'StartupTokenVisibility': {'TypeOK', 'FileIdentityFrozen', 'CreatedFilePrivate', 'HistoryVisibility', 'InvalidFileNeverEmits'},
+    'SSMParameterState': {'TypeOK', 'DeleteEffect', 'OtherKeysUnchanged', 'OverwriteRefusal', 'ReadIsolation', 'DeniedPreservesState', 'PutVersion'},
+    'SQSLifecycle': {'AuthorizedMutations', 'NoOrphans', 'ChangeOnlyInflight', 'TypeOK', 'IdempotentCreateUnchanged', 'FreshReceipt', 'ReceiveOnlyEligible', 'ReceiptMutationCurrent', 'ScopedMutation', 'FailedMutationAtomic'},
+    'SQSStorageBudget': {'MaintenanceNotBudgetBlocked', 'TypeOK', 'FailedSendPreservesRows', 'ReadRemovesOwnExpired', 'BudgetAccountsPhysical', 'DeleteScopeExact', 'ForeignRowsPreserved', 'LiveRowsPreserved', 'PayloadByteCap', 'PhysicalRowCap'},
 }
 IDENTIFIER = re.compile(r'^[A-Za-z][A-Za-z0-9_]*$')
 

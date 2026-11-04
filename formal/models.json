@@ -238,6 +238,68 @@
       ]
     },
     {
+      "id": "StartupTokenVisibility",
+      "model": "formal/StartupTokenVisibility.tla",
+      "config": "formal/StartupTokenVisibility.cfg",
+      "bounds": "One configured token file, two abstract token values, three initial file states, four Boolean context inputs (auth, explicit show, real stdout TTY, CI environment-variable presence) and at most two recorded emissions.",
+      "properties": [
+        "TypeOK",
+        "FileIdentityFrozen",
+        "CreatedFilePrivate",
+        "HistoryVisibility",
+        "InvalidFileNeverEmits"
+      ],
+      "limits": "Finite safety only; abstract validated file state and terminal context, not OS permissions/syscalls/randomness/crash-write atomicity, build freshness, process shutdown, liveness or Go refinement. One fixed file path; manual deletion/path changes/rotation are outside the model. Darwin/Windows helpers are not claimed executed by Linux PTY tests.",
+      "source_scope": [
+        "Makefile",
+        "scripts/start.sh",
+        "cmd/simulator/main.go",
+        "cmd/simulator/terminal.go",
+        "cmd/simulator/terminal_linux.go",
+        "cmd/simulator/terminal_darwin.go",
+        "cmd/simulator/terminal_windows.go",
+        "cmd/simulator/terminal_other.go",
+        "cmd/simulator/terminal_test.go",
+        "cmd/simulator/terminal_linux_test.go",
+        "test/start/check_start.py"
+      ],
+      "mutants": [
+        {
+          "id": "OmittedCIGuard",
+          "edits": [
+            {
+              "old": "PrintAllowed == context.show /\\ context.tty /\\ ~context.ci /\\ context.auth",
+              "new": "PrintAllowed == context.show /\\ context.tty /\\ context.auth",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "HistoryVisibility"
+        },
+        {
+          "id": "OmittedTTYGuard",
+          "edits": [
+            {
+              "old": "PrintAllowed == context.show /\\ context.tty /\\ ~context.ci /\\ context.auth",
+              "new": "PrintAllowed == context.show /\\ ~context.ci /\\ context.auth",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "HistoryVisibility"
+        },
+        {
+          "id": "OverwriteExistingToken",
+          "edits": [
+            {
+              "old": "Chosen(t) == IF fileState = \"absent\" THEN t ELSE fileToken",
+              "new": "Chosen(t) == t",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FileIdentityFrozen"
+        }
+      ]
+    },
+    {
       "id": "SQSLifecycle",
       "model": "formal/SQSLifecycle.tla",
       "config": "formal/SQSLifecycle.cfg",
@@ -383,6 +445,117 @@
             }
           ],
           "expect_invariant": "IdempotentCreateUnchanged"
+        }
+      ]
+    },
+    {
+      "id": "SQSStorageBudget",
+      "model": "formal/SQSStorageBudget.tla",
+      "config": "formal/SQSStorageBudget.cfg",
+      "bounds": "Two trusted queue scopes; three possible pre-existing row IDs plus one additional fresh ID; each row weight1\u20132 abstract payload units. MaxRows2/MaxBytes3. Initial unique-ID row sets include legacy states with3rows and up to6units, beyond either cap. Initial enumeration uses the exact729 unique-ID assignments, not a powerset filter. No time transition: expiry is a pre-existing Boolean classification.",
+      "properties": [
+        "TypeOK",
+        "FailedSendPreservesRows",
+        "ForeignRowsPreserved",
+        "LiveRowsPreserved",
+        "BudgetAccountsPhysical",
+        "PhysicalRowCap",
+        "PayloadByteCap",
+        "ReadRemovesOwnExpired",
+        "DeleteScopeExact",
+        "MaintenanceNotBudgetBlocked"
+      ],
+      "limits": "Finite physical-payload budget abstraction, not Go/SQLite refinement, SQL transaction/crash proof, Unicode/UTF8/string-byte counting, JSON attribute serialization, actual64MiB/10000row arithmetic, file size/SQLite overhead, clock/retention, receipt/IAM authorization or random-ID collision resistance. Row weights abstract persisted body+serialized-attribute bytes; all foreign rows, including expired ones, consume budget. Scopes/parent queues are assumed already valid and trusted; SQSLifecycle/native tests separately handle authority, parent lifetime and receipts. Maintenance enabledness assumes these preconditions, not unauthorized access or liveness/fairness. Charged counters describe successful admission accounting, not a claim that an actual storage-error path computed counters. FailedSendPreservesRows still applies to every rejected/storage-error send. Legacy overcap rows are retained: only new accepted sends must fit both caps, own expired cleanup is explicit/scoped and rollback preserves every row on send failure.",
+      "source_scope": [
+        "internal/aws/sqs_store.go"
+      ],
+      "mutants": [
+        {
+          "id": "OmitPhysicalRowCap",
+          "edits": [
+            {
+              "old": "Fits(rs,s) == Cardinality(Chargeable(rs,s))<=MaxRows\n              /\\ Bytes(Chargeable(rs,s))<=MaxBytes",
+              "new": "Fits(rs,s) == Bytes(Chargeable(rs,s))<=MaxBytes",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PhysicalRowCap"
+        },
+        {
+          "id": "OmitPayloadByteCap",
+          "edits": [
+            {
+              "old": "Fits(rs,s) == Cardinality(Chargeable(rs,s))<=MaxRows\n              /\\ Bytes(Chargeable(rs,s))<=MaxBytes",
+              "new": "Fits(rs,s) == Cardinality(Chargeable(rs,s))<=MaxRows",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PayloadByteCap"
+        },
+        {
+          "id": "IgnoreExpiredForeignCharge",
+          "edits": [
+            {
+              "old": "Chargeable(rs,s) == rs",
+              "new": "Chargeable(rs,s) == {r \\in rs : r.scope=s \\/ ~r.expired}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BudgetAccountsPhysical"
+        },
+        {
+          "id": "PurgeExpiredForeignRows",
+          "edits": [
+            {
+              "old": "PurgeOwn(rs,s) == {r \\in rs : r.scope#s \\/ ~r.expired}",
+              "new": "PurgeOwn(rs,s) == {r \\in rs : ~r.expired}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ForeignRowsPreserved"
+        },
+        {
+          "id": "CommitPurgeOnFailedSend",
+          "edits": [
+            {
+              "old": "THEN /\\ outcome'=\"StorageError\" /\\ rows'=rows",
+              "new": "THEN /\\ outcome'=\"StorageError\" /\\ rows'=post",
+              "count": 1
+            },
+            {
+              "old": "ELSE /\\ outcome'=\"QuotaRejected\" /\\ rows'=rows",
+              "new": "ELSE /\\ outcome'=\"QuotaRejected\" /\\ rows'=post",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FailedSendPreservesRows"
+        },
+        {
+          "id": "DiscardOwnedLiveRows",
+          "edits": [
+            {
+              "old": "PurgeOwn(rs,s) == {r \\in rs : r.scope#s \\/ ~r.expired}",
+              "new": "PurgeOwn(rs,s) == {r \\in rs : r.scope#s}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "LiveRowsPreserved"
+        },
+        {
+          "id": "BlockLegacyMaintenance",
+          "edits": [
+            {
+              "old": "Read(s) ==\n",
+              "new": "Read(s) ==\n /\\ Cardinality(rows)<=MaxRows /\\ Bytes(rows)<=MaxBytes\n",
+              "count": 1
+            },
+            {
+              "old": "Delete(s) ==\n",
+              "new": "Delete(s) ==\n /\\ Cardinality(rows)<=MaxRows /\\ Bytes(rows)<=MaxBytes\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MaintenanceNotBudgetBlocked"
         }
       ]
     }

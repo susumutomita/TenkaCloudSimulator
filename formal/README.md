@@ -60,4 +60,42 @@ The native HTTP integration test uses distinct values and runtime versions
 1–4; there is no version-history/selector, live-AWS differential, liveness or
 Go refinement claim. New candidate execution and hosted CI must be checked separately; model checking is not Go refinement.
 
-The current combined registry has 7 baselines and 21 required mutation controls. SSM and feature inventory/property removal are rejected. Source integration does not constitute a new-head TLC or runtime execution result.
+
+## Startup token visibility
+
+`StartupTokenVisibility.tla` models one fixed configured token file, two abstract
+token values, three initial file states and at most two historical emissions.
+It checks existing-file identity, private creation, invalid-file refusal and
+emission-time auth/explicit-show/TTY/CI-presence guards. Removing the CI or TTY
+guard must violate `HistoryVisibility`; overwriting an existing token must
+violate `FileIdentityFrozen`. Original model/config and exact mutation anchors
+are preserved.
+
+`source_scope` binds CLI/launcher code and its real PTY/native tests. It does not
+prove terminal syscalls, OS ACLs, entropy, crash safety, build freshness, process
+shutdown or all Go behavior. The metadata-only `go.mod` annotation change uses
+the separate narrow recognizer and is not bound to token-state invariants.
+
+
+
+
+## SQS lifecycle and physical storage budget
+
+SQSLifecycle bounds two valid queue scopes, one queue/message lifetime per scope,
+two deliveries and a coarse clock; its eleven mutations cover parent lifetime,
+IAM/scope, delay/retention eligibility, atomic failure and receipt rotation.
+SQSStorageBudget separately checks two trusted queue scopes, up to three legacy
+rows plus one fresh ID, abstract payload weights 1–2, caps of two rows/three
+units and preserved legacy over-cap state. Its seven mutations exercise row/byte
+admission, expired foreign charging, scoped purge, failure rollback, live-row
+preservation and available legacy maintenance. The 729 unique-ID initial row
+sets use an equivalent seed-assignment product, avoiding enumeration of every
+subset of the larger record universe. Accounting invariants apply to accepted
+admissions; failures independently preserve the complete prior physical state.
+
+The combined inventory is nine baselines and thirty-one mandatory mutants.
+All original, SSM and Startup required properties remain protected. Model/source
+integration is unexecuted on this new head. These finite abstractions do not
+prove Go/SQLite refinement, actual byte/JSON/Unicode arithmetic, filesystem size,
+concurrency scheduling, persistence/crashes, distributed delivery or liveness.
+See [SQS limits and concrete test boundaries](../docs/sqs.md).
