@@ -85,6 +85,24 @@ class FormalGateTests(unittest.TestCase):
                     load_registry(self.root)
         path.write_text(original)
 
+    def test_each_required_mutation_control_cannot_disappear(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        registry = json.loads(original)
+        checked = 0
+        for model in registry['models']:
+            for control in model['mutants']:
+                with self.subTest(model=model['id'], control=control['id']):
+                    candidate = json.loads(original)
+                    entry = next(m for m in candidate['models'] if m['id'] == model['id'])
+                    entry['mutants'] = [m for m in entry['mutants'] if m['id'] != control['id']]
+                    path.write_text(json.dumps(candidate))
+                    with self.assertRaisesRegex(GateError, 'required mutation control|needs a sensitivity control'):
+                        load_registry(self.root)
+                    checked += 1
+        self.assertEqual(checked, 50)
+        path.write_text(original)
+
     def test_missing_model_config_checksum_each_fail(self):
         for path in ('formal/ObjectStore.tla', 'formal/ObjectStore.cfg',
                      'formal/SSMParameterState.tla', 'formal/SSMParameterState.cfg',

@@ -25,6 +25,23 @@ BASE_INVARIANTS = {
     'StackOwnership': {'TypeOK', 'OwnershipExclusive'},
     'StartupTokenVisibility': {'HistoryVisibility', 'InvalidFileNeverEmits', 'TypeOK', 'FileIdentityFrozen', 'CreatedFilePrivate'},
 }
+# Freeze the reviewed control identities as well as requiring a nonempty set.
+# Keep this independent of the editable JSON registry.
+REQUIRED_MUTANTS = {
+    'BrowserSessions': {'IgnoreParentValidity', 'LogoutClearsOthers', 'LogoutKeepsSession', 'LogoutRevokesSDK', 'RawOperatorCookie'},
+    'NativeIAMOwnership': {'LegacyAdoptsNativeRole'},
+    'ObjectStore': {'MissingDeletionGuard'},
+    'RESTDeploymentSnapshot': {'MutableSnapshot'},
+    'S3Versions': {'CurrentOnlyDeletion'},
+    'SQSLifecycle': {'AcceptStaleReceipt', 'ChangeWithoutInflight', 'CrossScopeQueueDelete', 'DeleteWithoutCascade', 'FailedWriteChangesState', 'IdempotentCreateChangesState', 'ReceiptNotRotated', 'ReceiveAfterRetention', 'ReceiveBeforeDelay', 'SendWithoutParentCheck', 'UnauthorizedSend'},
+    'SQSStorageBudget': {'BlockLegacyMaintenance', 'CommitPurgeOnFailedSend', 'DiscardOwnedLiveRows', 'IgnoreExpiredForeignCharge', 'OmitPayloadByteCap', 'OmitPhysicalRowCap', 'PurgeExpiredForeignRows'},
+    'SSMParameterState': {'DoNotAdvanceVersion', 'IgnoreExplicitDeny', 'IgnoreOverwriteGuard', 'ReadWrongName', 'ReadWrongRegion'},
+    'SecretsDisclosureChannels': {'DirectDeniedGetWriter', 'PrivateSinkGetsRaw', 'RawAccessorDenied', 'RawAccessorForMetadata', 'RetainRawAcrossContext'},
+    'SecretsRevealEpoch': {'OmitReplyEpoch', 'OmitResponseArnBinding', 'RetainVisibleValueOnUnmount'},
+    'SecretsVersionLifecycle': {'OmitCreatePermission', 'OmitReadGenerationBinding', 'OmitReadTeamBinding', 'OverwriteConflictingVersion', 'RetainDeletedVersions', 'RetainPreviousLabelOnPromote'},
+    'StackOwnership': {'ReclaimDriftedResource'},
+    'StartupTokenVisibility': {'OmittedCIGuard', 'OmittedTTYGuard', 'OverwriteExistingToken'},
+}
 IDENTIFIER = re.compile(r'^[A-Za-z][A-Za-z0-9_]*$')
 
 # TLC1.7.4 ModelConfig.ALL_KEYWORDS. A directive cannot masquerade as a
@@ -142,6 +159,7 @@ def load_registry(root, relative='formal/models.json'):
             mutant_ids.add(mutant['id'])
             require(mutant['expect_invariant'] in model['properties'], 'mutant expects unchecked invariant')
             apply_mutant(source, name, mutant)
+        require(REQUIRED_MUTANTS.get(name, set()) <= mutant_ids, 'a required mutation control was removed')
     require(BASE_MODELS <= ids, 'a required existing model was removed')
     actual = {p.relative_to(root).as_posix() for suffix in ('*.tla', '*.cfg') for p in (root / 'formal').glob(suffix)}
     require(actual == files, 'unregistered or missing model/config artifact')

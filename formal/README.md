@@ -143,3 +143,14 @@ model is not evidence of that failure atomicity. Focused native/race/vet and act
 subsequently. Current browser/full-suite coverage and the complete registered TLC
 gate remain pending.
 See [Secrets Manager scope and primary API references](../docs/secrets-manager.md).
+
+
+The Secrets integration candidate additionally freezes all fifty reviewed mutant
+IDs in the checker, rather than relying only on a nonempty list per model.
+A negative unit fixture removes each control individually; omitting any of the
+main thirty-six or Secrets fourteen must fail. This guard ports only the
+reviewed required-ID mechanism, not unrelated provider/CFG extensions.
+The first immutable `d791669` run passed all thirteen baselines and fifty
+specified counterexamples; the strengthened policy needs its own fresh-head
+unit/applicability and full model run. Initial-state invariant violations include
+explicit valuations and are valid counterexamples, distinct from parser errors.
