@@ -308,7 +308,7 @@
           {
             "name": "max-keys",
             "in": "query",
-            "description": "0\u20131000 entries per page.",
+            "description": "0–1000 entries per page.",
             "schema": {
               "type": "integer",
               "default": 1000
@@ -918,6 +918,18 @@
               "type": "string",
               "default": "simulator-admin"
             }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "required": false,
+            "description": "Use * to create only; an existing identity returns 412 without mutation. Omit for an explicit policy edit.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "*"
+              ]
+            }
           }
         ],
         "description": "Simulator-admin only. Identity policy subset: Action/Resource string or array; Statement object or array; wildcard * and ?; explicit Deny wins; absent Allow implicitly denies. Rejects Condition, Principal, NotAction, NotResource, boundaries, sessions and SCPs. Principal selection is not authentication.",
@@ -937,6 +949,9 @@
           },
           "403": {
             "description": "Only simulator-admin may manage policies."
+          },
+          "412": {
+            "description": "Identity already exists; its permissions are unchanged."
           }
         },
         "requestBody": {

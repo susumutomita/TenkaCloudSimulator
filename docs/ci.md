@@ -84,3 +84,5 @@ The full-module Go race command runs packages with `-p 1`: several test binaries
 ## Responsive layout synchronization
 
 The main f790403 run41706632955 passed Go/coverage/security but caught an SSM mobile width assertion immediately after viewport change/Cancel. Cloudscape processes resize asynchronously; E2E now waits up to3s for the exact document.scrollWidth<=innerWidth geometry to stay stable100ms. A real Chromium regression first observes temporary overflow, then waits for a delayed responsive update, and requires permanent1000px overflow at390px to fail. No width tolerance, ignored failure or coverage change is introduced. All viewport geometry assertions use this gate; persistent overflow reports geometry only, without text/input/token data.
+
+IAM console increment: twelve actual-binary/SDK/browser E2E cases and28scoped axe/keyboard/reflow states now include local role creation/read/edit, existing-role selection and ZIP deployment. Conditional identity creation races must yield exactly one success without overwriting prior permissions; a delayed detail read must not replace a new role form. Native IAM/trust/STS remain unsupported.
