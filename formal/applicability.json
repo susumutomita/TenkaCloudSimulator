@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "base_sha": "2d8a41a0cb576bd42561a7162d35129f44979c08",
+  "base_sha": "464b4f913c6bcd3200a1bfa1081507df5d7a92cb",
   "changes": [
     {
       "path": "README.md",
@@ -11,10 +11,17 @@
     },
     {
       "path": "docs/sqs.md",
-      "sha256": "7b29dcc8440bca1f470ecf7ed3f3959b1b3743ccdbe0d0776e858343422450b0",
+      "sha256": "3afce36370976e634529efbe0b8b96308c18478efe073fc4dcc48b9ad9077832",
       "disposition": "documentation",
       "reason": "Document the bounded native SQS subset, local 256 KiB versus current operation-reference 1 MiB, repair provenance, actual focused tests and explicit compatibility/model/coverage limits. No service or formal-proof completion is asserted by prose.",
       "models": []
+    },
+    {
+      "path": "formal/README.md",
+      "disposition": "documentation",
+      "reason": "Combine accepted SSM and SQS model inventories with mandatory IDs/properties and missing-artifact negative controls, retaining original five protections. No new-head TLC proof implied.",
+      "models": [],
+      "sha256": "c4df2821b630b70f221202a4e83c9f7646508fc794cc3bbc0b57d9a1bb9eec9b"
     },
     {
       "path": "formal/SQSLifecycle.cfg",
@@ -64,7 +71,7 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "74c47e6ca5c54dba015ed2a43c5f96366bdea4f6978a7195e7ac560f376d4eb8",
+      "sha256": "cdb8f5ab2e5f798e052fae7d23d2191ba2ae8712236885d7f7b72a7c6f290ed1",
       "disposition": "formal-infrastructure",
       "reason": "Register SQSLifecycle and add its required invariant/ID set while preserving every original five model/property requirements and strict missing/stale/exit guards. The self-test requires the exact original-five-plus-SQS set and iterates all mutation anchors; future combined service registries need an explicitly merged set, not a lowered check.",
       "models": []
@@ -208,17 +215,31 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "bcea331cbed71ff9307d76e2b7247ebc0b74ea5f6b7f804a16e69b4efc0a7b2f",
+      "sha256": "691b90d54b1d1926602c2ab29d79729c84dae2da852c22786060d5de6a137882",
       "disposition": "formal-infrastructure",
       "reason": "Register SQSLifecycle and add its required invariant/ID set while preserving every original five model/property requirements and strict missing/stale/exit guards. The self-test requires the exact original-five-plus-SQS set and iterates all mutation anchors; future combined service registries need an explicitly merged set, not a lowered check.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "e63efedb0db7862bb1e78c2c1e07c605ea4c2b3fa0be7a5bb5fc8bd7ce3c7ad8",
+      "sha256": "b5705f665952588b837e08a295da1dfbc9fc6c6e48117bf45ac2381b7962774b",
       "disposition": "formal-infrastructure",
       "reason": "Register SQSLifecycle and add its required invariant/ID set while preserving every original five model/property requirements and strict missing/stale/exit guards. The self-test requires the exact original-five-plus-SQS set and iterates all mutation anchors; future combined service registries need an explicitly merged set, not a lowered check.",
       "models": []
+    },
+    {
+      "path": "test/e2e/check.py",
+      "disposition": "test-support",
+      "reason": "Mandatory standalone real local SQS SDK lifecycle through authenticated two-team CLI/SQLite/token processes, regional isolation, restart/current receipts, delays and actual retention wait/cleanup. Source handoff only; execution pending; no console/fullservice proof.",
+      "models": [],
+      "sha256": "3bbe433f5944f2581fef2c4088e1506865c10f5b4926c22b3467c407d343a143"
+    },
+    {
+      "path": "test/e2e/sqs.py",
+      "disposition": "test-support",
+      "reason": "Mandatory standalone real local SQS SDK lifecycle through authenticated two-team CLI/SQLite/token processes, regional isolation, restart/current receipts, delays and actual retention wait/cleanup. Source handoff only; execution pending; no console/fullservice proof.",
+      "models": [],
+      "sha256": "f595ed36c9813d63a663e617b013b3a0edfb659f9791314d7af953fd4f2fa236"
     }
   ]
 }

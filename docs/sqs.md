@@ -217,3 +217,13 @@ UNRUN labels for these scoped tests only. A fresh successful whole-module run,
 unfiltered 90% source floor, independent standalone SDK two-team/restart test
 and new-head hosted CI are still pending. No new model execution or broad service
 completion is claimed; the model/config/registry bytes are unchanged from 06d.
+
+
+Current source integration includes the main SSMParameterState contract alongside
+SQSLifecycle and the original five mandatory models. Both inventories and every
+required invariant remain protected. The independent standalone SDK driver is
+mandatory through test/e2e/check.py and uses two authenticated CLI processes,
+separate SQLite/token state, two regions, restart, receipt rotation, real minimum
+60-second retention and cleanup. Its source handoff is integrated; actual
+execution on the new binary is still pending. No SQS console UI is implemented,
+and native service support is not original-problem or full-service completion.
