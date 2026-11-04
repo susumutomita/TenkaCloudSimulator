@@ -35,11 +35,15 @@ helper required nonzero balanced send/response counts and no redirects.
 
 Normal server initialization, seven-operation capabilities, navigation source,
 shared-root OpenAPI examples, three mandatory E2E helper registrations and three
-finite models are connected in source. **The embedded console bundle still
-contains main's UI until a canonical frontend build is granted.** Changing JSX
-alone does not enable its served screen. The new browser and served OpenAPI
-example helpers, complete repository coverage, thirteen-model/fifty-control TLC,
-full E2E and hosted CI are not run. Existing logout, Scalar/S3 guidance, SQS and
+finite models are connected in source. The canonical frontend bundle was regenerated from a verified physical copy of
+the existing installed dependency tree, with byte-identical package/lock files;
+no package installation occurred. All 16,050 files/internal relative symlinks
+matched before/after copying, and the existing 22-package original notice
+inventory remained unchanged. Asset verification and the updated embedded CLI
+build passed. The served OpenAPI helper executed all seven documented request
+examples through actual native HTTP, checking the same state with boto3; it
+passed. **The new UI has not yet been browser-validated.** Complete repository
+coverage, thirteen-model/fifty-control TLC, full E2E and hosted CI are not run. Existing logout, Scalar/S3 guidance, SQS and
 raw-path source are preserved. The normal host access middleware continues to
 require a local credential; native dummy SigV4 fields are not authentication.
 
