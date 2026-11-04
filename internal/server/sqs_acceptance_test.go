@@ -50,6 +50,10 @@ func TestSQSQueueDefaultsDelayOverrideAndExactAttributeSelection(t *testing.T) {
 		t.Fatal("queue settings not persisted", attrs)
 	}
 	sqsCall(t, s, "SendMessage", map[string]any{"QueueUrl": url, "MessageBody": "default-delayed"}, 200, nil)
+	counters := sqsCall(t, s, "GetQueueAttributes", map[string]any{"QueueUrl": url, "AttributeNames": []string{"ApproximateNumberOfMessages", "ApproximateNumberOfMessagesNotVisible"}}, 200, nil)["Attributes"].(map[string]any)
+	if counters["ApproximateNumberOfMessages"] != "0" || counters["ApproximateNumberOfMessagesNotVisible"] != "0" {
+		t.Fatal("delayed message is not delivered/inflight", counters)
+	}
 	if empty := sqsCall(t, s, "ReceiveMessage", map[string]any{"QueueUrl": url}, 200, nil); empty["Messages"] != nil {
 		t.Fatal("queue default delay ignored", empty)
 	}
@@ -66,6 +70,10 @@ func TestSQSQueueDefaultsDelayOverrideAndExactAttributeSelection(t *testing.T) {
 	selected := msg["MessageAttributes"].(map[string]any)
 	if msg["Body"] != "override-immediate" || len(selected) != 1 {
 		t.Fatal("wrong message or unrequested attributes", msg)
+	}
+	counters = sqsCall(t, s, "GetQueueAttributes", map[string]any{"QueueUrl": url, "AttributeNames": []string{"ApproximateNumberOfMessages", "ApproximateNumberOfMessagesNotVisible"}}, 200, nil)["Attributes"].(map[string]any)
+	if counters["ApproximateNumberOfMessages"] != "0" || counters["ApproximateNumberOfMessagesNotVisible"] != "1" {
+		t.Fatal("inflight counter includes undelivered delayed message", counters)
 	}
 	keep := selected["Keep"].(map[string]any)
 	if keep["DataType"] != "String.local" || keep["StringValue"] != "selected" {

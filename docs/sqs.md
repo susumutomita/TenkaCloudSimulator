@@ -196,3 +196,11 @@ requests to real AWS. Valid surrogate pairs, escaped literal backslash-u text,
 mixed literal/escaped UTF-8 and deliberate U+FFFD remain valid and have wire
 roundtrip regression cases. The finite lifecycle model does not model this parser
 or prove Unicode validation. All these latest source changes remain unexecuted.
+
+The delivered/in-flight count excludes messages still under their initial send
+or queue delay: NotVisible means already delivered and currently hidden, not all
+future-visible rows ([GetQueueAttributes](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_GetQueueAttributes.html)).
+Native and wire regressions distinguish initial delay, available, received/hidden
+and released visibility states. This subset still does not expose the separate
+ApproximateNumberOfMessagesDelayed attribute. Counts changes await execution;
+previous focused results apply only to the exact preceding 285827a checkpoint.

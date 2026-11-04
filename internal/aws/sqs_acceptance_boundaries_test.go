@@ -146,3 +146,33 @@ func TestSQSQueueCapacityPreservesIdempotency(t *testing.T) {
 		t.Fatal("capacity refusal changed queue set")
 	}
 }
+
+func TestSQSCountsSeparateDelayedFromDeliveredInflight(t *testing.T) {
+	s, q := sqsQueueFixture(t)
+	if _, err := s.Send(q.Region, q, "not delivered", nil, 900); err != nil {
+		t.Fatal(err)
+	}
+	if visible, inflight, err := s.Counts(q.Region, q); err != nil || visible != 0 || inflight != 0 {
+		t.Fatal("delayed message counted as inflight", visible, inflight, err)
+	}
+	m, err := s.Send(q.Region, q, "deliver now", nil, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if visible, inflight, err := s.Counts(q.Region, q); err != nil || visible != 1 || inflight != 0 {
+		t.Fatal("available message counters", visible, inflight, err)
+	}
+	got, err := s.Receive(q.Region, q, 1, 900)
+	if err != nil || len(got) != 1 || got[0].ID != m.ID {
+		t.Fatal(got, err)
+	}
+	if visible, inflight, err := s.Counts(q.Region, q); err != nil || visible != 0 || inflight != 1 {
+		t.Fatal("delivered message counters", visible, inflight, err)
+	}
+	if err = s.ChangeVisibility(q.Region, q.Name, got[0].ReceiptHandle, 0); err != nil {
+		t.Fatal(err)
+	}
+	if visible, inflight, err := s.Counts(q.Region, q); err != nil || visible != 1 || inflight != 0 {
+		t.Fatal("visibility release counters", visible, inflight, err)
+	}
+}

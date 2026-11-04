@@ -416,7 +416,7 @@ func (s *SQSStore) Counts(region string, q SQSQueue) (int, int, error) {
 		return 0, 0, err
 	}
 	var visible, notVisible int
-	err = tx.QueryRow("SELECT COALESCE(SUM(CASE WHEN visible<=? THEN 1 ELSE 0 END),0), COALESCE(SUM(CASE WHEN visible>? THEN 1 ELSE 0 END),0) FROM aws_sqs_messages WHERE region=? AND queue=?", now, now, region, q.Name).Scan(&visible, &notVisible)
+	err = tx.QueryRow("SELECT COALESCE(SUM(CASE WHEN visible<=? THEN 1 ELSE 0 END),0), COALESCE(SUM(CASE WHEN visible>? AND receive_count>0 THEN 1 ELSE 0 END),0) FROM aws_sqs_messages WHERE region=? AND queue=?", now, now, region, q.Name).Scan(&visible, &notVisible)
 	if err != nil {
 		return 0, 0, err
 	}

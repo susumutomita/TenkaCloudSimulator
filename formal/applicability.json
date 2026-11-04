@@ -11,7 +11,7 @@
     },
     {
       "path": "docs/sqs.md",
-      "sha256": "02227797c7ab9dcab8403fa433dbaa90e21e0b4b33bfc6018216b66825acd2d9",
+      "sha256": "a3f00bd676051aa5d3b9b788317f99a2aad359e7efb54ffc61b2911bf4b36598",
       "disposition": "documentation",
       "reason": "Document the bounded native SQS subset, local 256 KiB versus current operation-reference 1 MiB, repair provenance, actual focused tests and explicit compatibility/model/coverage limits. No service or formal-proof completion is asserted by prose.",
       "models": []
@@ -105,7 +105,7 @@
     },
     {
       "path": "internal/aws/sqs_acceptance_boundaries_test.go",
-      "sha256": "dae170523ce42cdcb0aed7d62c84abb52c1edbc1ee0a30730287b370dce0e62e",
+      "sha256": "4e392a15b22e891093653aefa66bfe5efa95670e38621d071ec8ed98fc9d3fc1",
       "disposition": "test-support",
       "reason": "Add acceptance regressions for explicit-zero versus omitted bounds, nondefault delay/attribute roundtrips, native composition and quota guards, and actual SQLite transaction faults surfaced as HTTP 500 with preserved state. Source-only checkpoint: execution pending, no coverage claim.",
       "models": []
@@ -119,9 +119,9 @@
     },
     {
       "path": "internal/aws/sqs_store.go",
-      "sha256": "116cb29f5cf7b639c2898e1f2e88992470204053a93fdc6f3f4e63097a219453",
+      "sha256": "4ac1bf12b32b2c0a394025504b38930f92f643b0f782e266d5f1dc1570272e9e",
       "disposition": "modeled",
-      "reason": "Actual queue-parent admission, expiry and message/receipt mutation now share native SQLite transactions; failed cleanup or multi-row writes roll back. Native trigger/reopen/redelivery/orphan-preservation tests passed at 0a28266 before this binding.",
+      "reason": "Actual queue-parent admission, expiry and message/receipt mutation now share native SQLite transactions; failed cleanup or multi-row writes roll back. Native trigger/reopen/redelivery/orphan-preservation tests passed at 0a28266 before this binding. Delivered/in-flight counts now exclude initial-delay rows that have never been received; this metric requires native and wire tests and is outside the finite lifecycle model counter abstraction.",
       "models": [
         {
           "id": "SQSLifecycle",
@@ -187,7 +187,7 @@
     },
     {
       "path": "internal/server/sqs_acceptance_test.go",
-      "sha256": "37c5bcc5d851caa13f8b3037aafaf3c8021784e4bfcdbeb0010c6f8c425cc01b",
+      "sha256": "6f4be63b309cbb5bb3a9da2cb2d75fdbff791fe573139ac9ae66ba3053c2d9bd",
       "disposition": "test-support",
       "reason": "Add acceptance regressions for explicit-zero versus omitted bounds, nondefault delay/attribute roundtrips, native composition and quota guards, and actual SQLite transaction faults surfaced as HTTP 500 with preserved state. Source-only checkpoint: execution pending, no coverage claim.",
       "models": []
