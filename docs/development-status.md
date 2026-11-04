@@ -88,7 +88,7 @@ Inspect the service backlog and roster before claiming another service.
 
 | Owner | Base/branch | Verified local scope | Remaining gates |
 | --- | --- | --- | --- |
-| cfn_callback | mainb61 / feat/sqs-console-native-20261104 | Existing9nativeAPIs unchanged; Cloudscape queue/create/details/send/poll/visibility/delete; served9templates share actualSQLite. Canonical22packagebuild/assets/rights, nativeSDK335, focusedUI/SDK25, servedHTTP13/SDK10 passed. | Full23E2E/start/audit, finaldocHEAD immutable51/applicability, currenthostedCI/security; no public merge |
+| cfn_callback | mainb61 / feat/sqs-console-native-20261104 | Existing9nativeAPIs unchanged; Cloudscape queue/create/details/send/poll/visibility/delete; served9templates share actualSQLite. Canonical22packagebuild/assets/rights, nativeSDK335, focusedUI/SDK25, servedHTTP13/SDK10 and full23E2E/start/audit50 passed. | FinaldocHEAD immutable51/applicability receipts and currenthostedCI/security; no public merge |
 
 Native/server/core remain byte-identical to recorded mainb61; external native
 SQS/SNS/DynamoDB ownership is not overwritten. Issue48 and merged PR315 supplied
@@ -110,3 +110,8 @@ were not retried by another route. No authenticatedAWS pixels, actualSQS,
 cloud credentials, deployment or billing changes are part of this work. All
 public merges remainHOLD. Runtime leases are root-coordinated; local evidence
 and assignments do not imply all-service or full-AWS completion.
+
+The full23-case run at ebb3ba5 passed in374.264seconds with actual make-start
+and the50-screen audit; all21source hashes stayed unchanged and audit outputs
+were saved outside without restoring tracked files. Final documentationHEAD
+receipts are separate immutable evidence, not inferred from341/e039/ebb3 hashes.

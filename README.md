@@ -96,4 +96,4 @@ CIはstatementと未フィルターsource-line coverageを両方90%以上に強�
 
 本体は[MIT](LICENSE)。`/_simulator/licenses/`にGo・Cloudscape・Scalar・CPython/WASI等の原文LICENSE/NOTICEを同梱しています。再配布時も保持してください。AWS公式サービスではなく、AWSロゴは使用しません。[設計・引継ぎ資料](docs/handoff/README.md)。
 
-SQSの[基本コンソール](docs/sqs-console.md)は実ブラウザー／SDKで、配信API例9操作はHTTP／SDKで、同じSQLiteの実データを検証済みです。Go全体の単一プロファイルはstatement94.80%・source90.21%。全23件E2E・最終HEAD形式検査・現在の公開CIは別gateで、未完了を成功扱いしません。
+SQSの[基本コンソール](docs/sqs-console.md)は実ブラウザー／SDKで、配信API例9操作はHTTP／SDKで、同じSQLiteの実データを検証済みです。Go全体の単一プロファイルはstatement94.80%・source90.21%。全23件E2E・実make start・50画面監査はebb3ba5で成功しています。最終HEADの形式／適用検査はそのHEADの証拠で確認し、現在の公開CI・公開マージは別gateです。

@@ -83,10 +83,12 @@ receipt values are omitted from reports.
   policy19/applicability21 units and20exact blob declarations also passed.
   [Model correspondence and limitations](formal-sqs-console.md) remain explicit.
 
-The full23-case Conformance suite/start/audit and final documentation-HEAD
-immutable formal/applicability checks are still pending for this candidate.
-Current hosted CI/security/public merge have not been performed. Existing
-21cases and both new mandatory helpers remain enabled.
+At code inputebb3ba5, all23 Conformance cases passed in374.264seconds, plus
+responsive layout, actual built/unbuilt make-start/TTY/auth/signals and the
+50-screen global audit (zero automated violations). All21previous cases and both
+new mandatory helpers remain enabled. Final documentation-HEAD immutable
+formal/applicability receipts are recorded separately; older results are not
+current CI. Current hosted CI/security/public merge have not been performed.
 
 ## AWS reference boundary
 
