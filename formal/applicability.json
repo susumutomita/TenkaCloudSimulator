@@ -18,7 +18,7 @@
     },
     {
       "path": "docs/secrets-manager.md",
-      "sha256": "102805bf400b03294e66c384a0dd8eeafc4b56bc0413eb94118607a6f7f4d09d",
+      "sha256": "ec3f5d57f91deb6bba2ebbb21ac915c9c4a45eb04b8b3f8fe38ebf6d1854bcd3",
       "disposition": "documentation",
       "reason": "Truthfully documents recovered local scope, actual limited native results, primary API references and pending combined validation. No new runtime claim.",
       "models": []
@@ -205,7 +205,7 @@
     },
     {
       "path": "internal/aws/secret_gateway.go",
-      "sha256": "668a49a85b2bc06c1b1cd6f8d22472a75ab016e233603ac6bde12a1e40cbbc4e",
+      "sha256": "652e89dc5a59e06677389996ff2899e3d35ea55abc4e2d659ab3feb8951d0ab4",
       "disposition": "modeled",
       "reason": "Correspondence to the named finite Secrets or pre-existing state abstraction only. Source registration is not new-head TLC/native/browser execution; no general protocol, transaction failure or refinement claim.",
       "models": [
@@ -225,8 +225,15 @@
       ]
     },
     {
+      "path": "internal/aws/secret_gateway_boundaries_test.go",
+      "sha256": "76eff33d78485204b7e30b3d382398c7858a625dced79dd1f276f096bae91f97",
+      "disposition": "test-support",
+      "reason": "Prepared native composition/authority/state-frame regression assertions, including literal S3 neighbors and real SQL identity outage. Source-only and NOT RUN on this checkpoint; no Go/HTTP/formal execution claim.",
+      "models": []
+    },
+    {
       "path": "internal/aws/secret_http.go",
-      "sha256": "5d81fb88522a81aac475153ccf80d742a7e6d486c2b062b73a33935825cb9897",
+      "sha256": "b831eec16a9faccfd8887e98cc05c6cc14fff9399e7ad43d167e5fe871795025",
       "disposition": "modeled",
       "reason": "Correspondence to the named finite Secrets or pre-existing state abstraction only. Source registration is not new-head TLC/native/browser execution; no general protocol, transaction failure or refinement claim.",
       "models": [
@@ -414,6 +421,13 @@
       "models": []
     },
     {
+      "path": "internal/server/secrets_composition_test.go",
+      "sha256": "55aa5549e5a69941553cc34aeeb48b460b208d506394d668c58d6616f4642f95",
+      "disposition": "test-support",
+      "reason": "Prepared native composition/authority/state-frame regression assertions, including literal S3 neighbors and real SQL identity outage. Source-only and NOT RUN on this checkpoint; no Go/HTTP/formal execution claim.",
+      "models": []
+    },
+    {
       "path": "internal/server/server.go",
       "sha256": "c5b6acf6fb851b65c61087bf7aca582bc6e88f1b6d33a0603c0379f47434a1f1",
       "disposition": "modeled",
@@ -472,7 +486,7 @@
     },
     {
       "path": "test/e2e/secrets_manager.py",
-      "sha256": "ddb1b3946c2d21e192f0a46c3c45e4bd3be7055932e6c6c4cb32ecd221ef83d9",
+      "sha256": "0325c9a8b024c1ab43882af8e418cc2140e65d94a43002a6e3310ebc2775634d",
       "disposition": "test-support",
       "reason": "Meaningful native/SDK/UI regression assertions or mandatory test registration. Source presence is not a passing runtime result.",
       "models": []
