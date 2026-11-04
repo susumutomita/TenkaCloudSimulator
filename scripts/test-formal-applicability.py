@@ -70,6 +70,15 @@ class ApplicabilityTests(unittest.TestCase):
     def write_record(self, record):
         (self.root / RECORD).write_text(json.dumps(record, indent=2) + '\n')
 
+    def test_dynamodb_optional_sdk_fixture_classification_is_exact(self):
+        self.assertEqual(disposition('internal/aws/testdata/dynamodb_size_sdk.py'), 'test-support')
+        for path in ('internal/aws/testdata/other_sdk.py',
+                     'internal/aws/testdata/dynamodb_size_sdk.go',
+                     'internal/aws/dynamodb_size.go',
+                     'internal/aws/dynamodb_number.go',
+                     'internal/aws/dynamodb_store.go'):
+            self.assertIsNone(disposition(path), path)
+
     def test_exact_modeled_change_and_known_documentation(self):
         self.prepare()
         evidence = validate_record(self.root, self.base)

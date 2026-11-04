@@ -77,8 +77,8 @@
         }
       },
       "post": {
-        "summary": "SSM/SQS JSON, CloudFormation Query, or IAM Query operation",
-        "description": "**Static request templates:** choose the correct Content-Type and routing headers before Test Request → Send. SSM/SQS send JSON with X-Amz-Target (JSON 1.1 for SSM, JSON 1.0 for SQS); CloudFormation/IAM send URL-encoded Query fields. The 200 response is JSON for SSM/SQS and XML for Query protocols. A successful DeleteStack has no result payload beyond Query response metadata.\n\nNative regional root endpoint. SQS: X-Amz-Target AmazonSQS.CreateQueue, ListQueues, GetQueueUrl, DeleteQueue, SendMessage, ReceiveMessage, DeleteMessage, ChangeMessageVisibility, GetQueueAttributes (JSON 1.0, Standard queues only; local body limit 256 KiB, aggregate physical storage 10000 messages/64 MiB across queues/regions including expired foreign rows until scoped cleanup; bytes count body UTF-8 plus stored attribute JSON. Over-budget SendMessage returns local SimulatorQuotaExceeded without mutation; existing over-cap data remains readable/deletable; FIFO, Query protocol, batch operations and dead-letter redrive are unsupported). SSM: X-Amz-Target AmazonSSM.PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter. CloudFormation: CreateStack, DescribeStacks, DeleteStack; S3 buckets, SSM parameters, inline Python Lambda functions, one inline IAM identity policy per role, five Regional REST API Gateway resource types, and bounded Lambda::Permission. Unsupported options fail. Real credentials and session tokens are rejected. Create/DeleteStack also require the caller to allow the underlying S3/SSM/IAM/Lambda actions; CAPABILITY_IAM grants no permissions. API resources use NONE/POST AWS_PROXY local Lambda, same-stack API children, explicit deployment DependsOn methods and reverse guarded cleanup. Lambda permission uses only apigateway.amazonaws.com and local execute-api SourceArn. No service RoleArn or general CloudFormation lifecycle is supported. IAM is global: send X-Simulator-Service: iam, Version2010-05-08 and one of CreateRole/GetRole/ListRoles/DeleteRole/PutRolePolicy/GetRolePolicy/DeleteRolePolicy/ListRolePolicies/UpdateAssumeRolePolicy. Policy documents are JSON strings; successful IAM XML returns them RFC3986 URL-encoded. Native role names use the local alphanumeric/underscore/hyphen subset,1–64; inline policy names1–128 AWS characters. Trust and aggregate policies32KiB, at most10 inline policies/100 statements,1000 active+retired name claims. Deleted role names cannot be adopted by legacy identity writes. No managed grants or session issuance.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission. DynamoDB: X-Amz-Target DynamoDB_20120810.CreateTable, ListTables, DescribeTable, DeleteTable, PutItem, GetItem, DeleteItem. ",
+        "summary": "SSM/DynamoDB JSON, CloudFormation Query, or IAM Query operation",
+        "description": "**Static request templates:** choose the correct Content-Type and routing headers before Test Request → Send. SSM/SQS send JSON with X-Amz-Target (JSON 1.1 for SSM, JSON 1.0 for SQS); CloudFormation/IAM send URL-encoded Query fields. The 200 response is JSON for SSM/SQS and XML for Query protocols. A successful DeleteStack has no result payload beyond Query response metadata.\n\nNative regional root endpoint. SQS: X-Amz-Target AmazonSQS.CreateQueue, ListQueues, GetQueueUrl, DeleteQueue, SendMessage, ReceiveMessage, DeleteMessage, ChangeMessageVisibility, GetQueueAttributes (JSON 1.0, Standard queues only; local body limit 256 KiB, aggregate physical storage 10000 messages/64 MiB across queues/regions including expired foreign rows until scoped cleanup; bytes count body UTF-8 plus stored attribute JSON. Over-budget SendMessage returns local SimulatorQuotaExceeded without mutation; existing over-cap data remains readable/deletable; FIFO, Query protocol, batch operations and dead-letter redrive are unsupported). SSM: X-Amz-Target AmazonSSM.PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter. CloudFormation: CreateStack, DescribeStacks, DeleteStack; S3 buckets, SSM parameters, inline Python Lambda functions, one inline IAM identity policy per role, five Regional REST API Gateway resource types, and bounded Lambda::Permission. Unsupported options fail. Real credentials and session tokens are rejected. Create/DeleteStack also require the caller to allow the underlying S3/SSM/IAM/Lambda actions; CAPABILITY_IAM grants no permissions. API resources use NONE/POST AWS_PROXY local Lambda, same-stack API children, explicit deployment DependsOn methods and reverse guarded cleanup. Lambda permission uses only apigateway.amazonaws.com and local execute-api SourceArn. No service RoleArn or general CloudFormation lifecycle is supported. IAM is global: send X-Simulator-Service: iam, Version2010-05-08 and one of CreateRole/GetRole/ListRoles/DeleteRole/PutRolePolicy/GetRolePolicy/DeleteRolePolicy/ListRolePolicies/UpdateAssumeRolePolicy. Policy documents are JSON strings; successful IAM XML returns them RFC3986 URL-encoded. Native role names use the local alphanumeric/underscore/hyphen subset,1–64; inline policy names1–128 AWS characters. Trust and aggregate policies32KiB, at most10 inline policies/100 statements,1000 active+retired name claims. Deleted role names cannot be adopted by legacy identity writes. No managed grants or session issuance.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission. DynamoDB: X-Amz-Target DynamoDB_20120810.CreateTable, ListTables, DescribeTable, DeleteTable, PutItem, GetItem, DeleteItem. \n\n**DynamoDB JSON 1.0 static templates:** select application/x-amz-json-1.0 and set X-Amz-Target to the exact DynamoDB_20120810.<operation> shown by the selected example. X-Simulator-Service may be dynamodb. Use a private practice table name; samples are not current state and selecting a body does not automatically change the target header. Seven basic operations only; immediate local lifecycle, no indexes/Query/Scan/console/CFN. DeleteItem of an absent key is idempotent; unsupported options fail. Item bytes use UTF-8 and decoded binary rather than JSON transfer length; numeric sizing is approximate. Failed conditional, oversized and IAM-refused writes leave saved state unchanged. DeleteTable permanently removes that practice table and all its items.",
         "operationId": "awsRegionalOperation",
         "parameters": [
           {
@@ -87,7 +87,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "AmazonSSM.<operation> for SSM only"
+            "description": "AmazonSSM.<operation> for SSM, AmazonSQS.<operation> for SQS, or DynamoDB_20120810.<operation> for DynamoDB. Set the exact target required by the chosen body; a static example does not select a header."
           },
           {
             "name": "X-Simulator-Region",
@@ -111,10 +111,11 @@
               "enum": [
                 "ssm",
                 "cloudformation",
-                "iam"
+                "iam",
+                "dynamodb"
               ]
             },
-            "description": "iam selects IAM Query; omit or use cloudformation for CloudFormation, and omit or use ssm for SSM JSON. Do not select iam for CreateStack/DescribeStacks/DeleteStack."
+            "description": "iam selects IAM Query; omit or use cloudformation for CloudFormation, and omit or use ssm for SSM JSON. Do not select iam for CreateStack/DescribeStacks/DeleteStack. DynamoDB uses X-Amz-Target DynamoDB_20120810.<operation> (JSON 1.0)."
           },
           {
             "$ref": "#/components/parameters/SimulatorToken"
@@ -314,12 +315,108 @@
                   }
                 }
               }
+            },
+            "application/x-amz-json-1.0": {
+              "schema": {
+                "type": "object"
+              },
+              "examples": {
+                "DynamoDBCreateTable": {
+                  "summary": "CreateTable — set X-Amz-Target: DynamoDB_20120810.CreateTable",
+                  "description": "Static private-table request template. Execute operations in documented order; no real AWS or automatic header selection.",
+                  "x-simulator-target": "DynamoDB_20120810.CreateTable",
+                  "value": {
+                    "TableName": "ddb-reference",
+                    "AttributeDefinitions": [
+                      {
+                        "AttributeName": "id",
+                        "AttributeType": "S"
+                      }
+                    ],
+                    "KeySchema": [
+                      {
+                        "AttributeName": "id",
+                        "KeyType": "HASH"
+                      }
+                    ],
+                    "BillingMode": "PAY_PER_REQUEST"
+                  }
+                },
+                "DynamoDBListTables": {
+                  "summary": "ListTables — set X-Amz-Target: DynamoDB_20120810.ListTables",
+                  "description": "Static private-table request template. Execute operations in documented order; no real AWS or automatic header selection.",
+                  "x-simulator-target": "DynamoDB_20120810.ListTables",
+                  "value": {
+                    "Limit": 10
+                  }
+                },
+                "DynamoDBDescribeTable": {
+                  "summary": "DescribeTable — set X-Amz-Target: DynamoDB_20120810.DescribeTable",
+                  "description": "Static private-table request template. Execute operations in documented order; no real AWS or automatic header selection.",
+                  "x-simulator-target": "DynamoDB_20120810.DescribeTable",
+                  "value": {
+                    "TableName": "ddb-reference"
+                  }
+                },
+                "DynamoDBPutItem": {
+                  "summary": "PutItem — set X-Amz-Target: DynamoDB_20120810.PutItem",
+                  "description": "Static private-table request template. Execute operations in documented order; no real AWS or automatic header selection.",
+                  "x-simulator-target": "DynamoDB_20120810.PutItem",
+                  "value": {
+                    "TableName": "ddb-reference",
+                    "Item": {
+                      "id": {
+                        "S": "documented"
+                      },
+                      "payload": {
+                        "S": "sample <value> 日本語"
+                      }
+                    },
+                    "ConditionExpression": "attribute_not_exists(id)"
+                  }
+                },
+                "DynamoDBGetItem": {
+                  "summary": "GetItem — set X-Amz-Target: DynamoDB_20120810.GetItem",
+                  "description": "Static private-table request template. Execute operations in documented order; no real AWS or automatic header selection.",
+                  "x-simulator-target": "DynamoDB_20120810.GetItem",
+                  "value": {
+                    "TableName": "ddb-reference",
+                    "Key": {
+                      "id": {
+                        "S": "documented"
+                      }
+                    },
+                    "ConsistentRead": true
+                  }
+                },
+                "DynamoDBDeleteItem": {
+                  "summary": "DeleteItem — set X-Amz-Target: DynamoDB_20120810.DeleteItem",
+                  "description": "Static private-table request template. Execute operations in documented order; no real AWS or automatic header selection.",
+                  "x-simulator-target": "DynamoDB_20120810.DeleteItem",
+                  "value": {
+                    "TableName": "ddb-reference",
+                    "Key": {
+                      "id": {
+                        "S": "documented"
+                      }
+                    }
+                  }
+                },
+                "DynamoDBDeleteTable": {
+                  "summary": "DeleteTable — set X-Amz-Target: DynamoDB_20120810.DeleteTable",
+                  "description": "Static private-table request template. Execute operations in documented order; no real AWS or automatic header selection.",
+                  "x-simulator-target": "DynamoDB_20120810.DeleteTable",
+                  "value": {
+                    "TableName": "ddb-reference"
+                  }
+                }
+              }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Native JSON 1.1 SSM or XML Query response"
+            "description": "Native JSON 1.0 DynamoDB, JSON 1.1 SSM, or XML Query response; examples are static, not current saved state."
           },
           "400": {
             "description": "Validation/unsupported field/state conflict IAM ValidationError/MalformedPolicyDocument reject unknown trust or permissions semantics."
@@ -341,6 +438,9 @@
           },
           "401": {
             "$ref": "#/components/responses/HostAccessRequired"
+          },
+          "500": {
+            "description": "Bounded native InternalServerError on storage/driver failure, including ignored required writes; no SQL details or false success."
           }
         }
       }

@@ -34,7 +34,7 @@ class FormalGateTests(unittest.TestCase):
 
     def test_complete_registry_and_exact_mutations(self):
         registry = load_registry(self.root)
-        self.assertEqual({model['id'] for model in registry['models']}, {'AzureBlobState', 'BlobRange', 'BrowserSessions', 'DynamoDBLifecycle', 'GCPStorageState', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'StackOwnership', 'StartupTokenVisibility'})
+        self.assertEqual({model['id'] for model in registry['models']}, {'AzureBlobState', 'BlobRange', 'BrowserSessions', 'DynamoDBAdmission', 'DynamoDBLifecycle', 'GCPStorageState', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'StackOwnership', 'StartupTokenVisibility'})
         for model in registry['models']:
             source = (self.root / model['model']).read_text()
             for mutant in model['mutants']:
@@ -455,10 +455,10 @@ class FormalGateTests(unittest.TestCase):
                         load_registry(self.root)
             path.write_text(original)
 
-    def test_dynamodb_lifecycle_properties_and_all_eight_controls_are_required(self):
+    def test_dynamodb_models_properties_and_all_controls_are_required(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
-        for name in ('DynamoDBLifecycle',):
+        for name in ('DynamoDBLifecycle', 'DynamoDBAdmission'):
             entry = next(m for m in json.loads(original)['models'] if m['id'] == name)
             model = self.root / entry['model']
             config = self.root / entry['config']

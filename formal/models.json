@@ -1435,6 +1435,301 @@
           "expect_invariant": "FailedUnchanged"
         }
       ]
+    },
+    {
+      "id": "DynamoDBAdmission",
+      "model": "formal/DynamoDBAdmission.tla",
+      "config": "formal/DynamoDBAdmission.cfg",
+      "bounds": "One preselected trusted Store/DB authority, two region/table slots, at most one active table and one item per table; four abstract semantic bytes, eight normalized key tokens/five canonical keys and six size fixtures; constructor predicate and restart.",
+      "properties": [
+        "TypeOK",
+        "InitializedBeforeMutation",
+        "DeniedFrame",
+        "ValidKeysOnly",
+        "CanonicalKeys",
+        "SemanticBytes",
+        "CommittedBytes",
+        "CreateCommitted",
+        "AcknowledgedRemoval",
+        "ActiveTableRequired",
+        "TableBudget",
+        "ItemBudget",
+        "ItemCountBudget",
+        "StatisticsExact",
+        "PeerFrame",
+        "NoOrphans",
+        "RefusalFrame",
+        "AdmissionExact",
+        "TableAdmissionExact",
+        "RemovalAdmissionExact",
+        "StartupAdmission",
+        "StartupRefusedFrame"
+      ],
+      "limits": "Finite normalized admission, acknowledgement/row-effect, canonical-key and semantic-byte fixtures with independent literal oracle functions. Actual Go literal/SQL IGNORE tests are separate evidence. No full decimal grammar/UTF8/base64/JSON or 400KiB exhaustive arithmetic proof, SQL/driver/Go refinement/durability, arbitrary persisted-data import, live external writers, IAM/token/HTTP parsing, host or multi-process authentication proof. startupValid abstracts constructor success/orphan-refusal, not discovery/validation of arbitrary SQL. Scopes are fixed region/table namespaces inside one selected DB, not row tenants or two authenticated teams. Shared factory/dispatch/Gateway-field files are narrow call-contract seams for initialized-store and preflight denial only; their other routes/authority are not modeled. Lifecycle generations/conditional races are the separate unchanged DynamoDBLifecycle model. Source/model/mutants UNRUN until granted canonical TLC.",
+      "source_scope": [
+        "internal/aws/dynamodb.go",
+        "internal/aws/dynamodb_store.go",
+        "internal/aws/dynamodb_number.go",
+        "internal/aws/dynamodb_size.go",
+        "internal/aws/dynamodb_write.go",
+        "internal/aws/s3.go",
+        "internal/aws/ssm.go",
+        "internal/server/server.go"
+      ],
+      "mutants": [
+        {
+          "id": "BypassStartupValidation",
+          "edits": [
+            {
+              "old": "Initialize == /\\ ~initialized /\\ startupValid /\\ initialized'=TRUE",
+              "new": "Initialize == /\\ ~initialized /\\ initialized'=TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StartupAdmission"
+        },
+        {
+          "id": "WriteBeforeInitialization",
+          "edits": [
+            {
+              "old": "permit == initialized /\\ tables[s] /\\ Valid(t) /\\ allow /\\ ~deny /\\ bytes<=MaxItemBytes",
+              "new": "permit == tables[s] /\\ Valid(t) /\\ allow /\\ ~deny /\\ bytes<=MaxItemBytes",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "InitializedBeforeMutation"
+        },
+        {
+          "id": "IgnoreDeny",
+          "edits": [
+            {
+              "old": "permit == initialized /\\ tables[s] /\\ Valid(t) /\\ allow /\\ ~deny /\\ bytes<=MaxItemBytes",
+              "new": "permit == initialized /\\ tables[s] /\\ Valid(t) /\\ allow /\\ bytes<=MaxItemBytes",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DeniedFrame"
+        },
+        {
+          "id": "IgnoreAllow",
+          "edits": [
+            {
+              "old": "permit == initialized /\\ tables[s] /\\ Valid(t) /\\ allow /\\ ~deny /\\ bytes<=MaxItemBytes",
+              "new": "permit == initialized /\\ tables[s] /\\ Valid(t) /\\ ~deny /\\ bytes<=MaxItemBytes",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DeniedFrame"
+        },
+        {
+          "id": "AdmitInvalidKey",
+          "edits": [
+            {
+              "old": "permit == initialized /\\ tables[s] /\\ Valid(t) /\\ allow /\\ ~deny /\\ bytes<=MaxItemBytes",
+              "new": "permit == initialized /\\ tables[s] /\\ allow /\\ ~deny /\\ bytes<=MaxItemBytes",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ValidKeysOnly"
+        },
+        {
+          "id": "WriteWithoutTable",
+          "edits": [
+            {
+              "old": "permit == initialized /\\ tables[s] /\\ Valid(t) /\\ allow /\\ ~deny /\\ bytes<=MaxItemBytes",
+              "new": "permit == initialized /\\ Valid(t) /\\ allow /\\ ~deny /\\ bytes<=MaxItemBytes",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ActiveTableRequired"
+        },
+        {
+          "id": "SplitNumericAlias",
+          "edits": [
+            {
+              "old": "Key(t) == ExpectedKey(t)",
+              "new": "Key(t) == IF t=\"nExponent\" THEN \"N2\" ELSE ExpectedKey(t)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CanonicalKeys"
+        },
+        {
+          "id": "EraseKeyType",
+          "edits": [
+            {
+              "old": "Key(t) == ExpectedKey(t)",
+              "new": "Key(t) == IF t \\in {\"sOne\",\"bOne\"} THEN \"N1\" ELSE ExpectedKey(t)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CanonicalKeys"
+        },
+        {
+          "id": "ChargeWireEncoding",
+          "edits": [
+            {
+              "old": "Size(k) == ExpectedSize(k)",
+              "new": "Size(k) == WireSize(k)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionExact"
+        },
+        {
+          "id": "OmitNestedOverhead",
+          "edits": [
+            {
+              "old": "Size(k) == ExpectedSize(k)",
+              "new": "Size(k) == IF k=\"nested\" THEN 2 ELSE ExpectedSize(k)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SemanticBytes"
+        },
+        {
+          "id": "IgnoreItemByteCap",
+          "edits": [
+            {
+              "old": " /\\ bytes<=MaxItemBytes",
+              "new": "",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ItemBudget"
+        },
+        {
+          "id": "IgnoreItemCountCap",
+          "edits": [
+            {
+              "old": "(rows[s][key] # 0 \\/ Count(rows[s])<MaxItems)",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ItemCountBudget"
+        },
+        {
+          "id": "IgnoreTableCountCap",
+          "edits": [
+            {
+              "old": " /\\ TableCount(tables)<MaxTables",
+              "new": "",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TableBudget"
+        },
+        {
+          "id": "AcknowledgeIgnoredCreate",
+          "edits": [
+            {
+              "old": "tables'=IF permit THEN [tables EXCEPT ![s]=TRUE] ELSE tables",
+              "new": "tables'=tables",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CreateCommitted"
+        },
+        {
+          "id": "AcknowledgeIgnoredWrite",
+          "edits": [
+            {
+              "old": " IN /\\ rows'=IF permit THEN replacement ELSE rows\n    /\\ stats'=IF permit THEN [stats EXCEPT ![s]=Sum(replacement[s])] ELSE stats\n    /\\ UNCHANGED <<initialized,startupValid,tables>>\n    /\\ Trace(s,\"Put\",t,k,allow,deny,permit,key,bytes)",
+              "new": " IN /\\ rows'=rows\n    /\\ stats'=stats\n    /\\ UNCHANGED <<initialized,startupValid,tables>>\n    /\\ Trace(s,\"Put\",t,k,allow,deny,permit,key,bytes)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CommittedBytes"
+        },
+        {
+          "id": "WrongTableStatistics",
+          "edits": [
+            {
+              "old": " IN /\\ rows'=IF permit THEN replacement ELSE rows\n    /\\ stats'=IF permit THEN [stats EXCEPT ![s]=Sum(replacement[s])] ELSE stats\n    /\\ UNCHANGED <<initialized,startupValid,tables>>\n    /\\ Trace(s,\"Put\",t,k,allow,deny,permit,key,bytes)",
+              "new": " IN /\\ rows'=IF permit THEN replacement ELSE rows\n    /\\ stats'=IF permit THEN [stats EXCEPT ![s]=Sum(replacement[s])+1] ELSE stats\n    /\\ UNCHANGED <<initialized,startupValid,tables>>\n    /\\ Trace(s,\"Put\",t,k,allow,deny,permit,key,bytes)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StatisticsExact"
+        },
+        {
+          "id": "WritePeerScope",
+          "edits": [
+            {
+              "old": "replacement == [rows EXCEPT ![s][key]=bytes]",
+              "new": "replacement == [rows EXCEPT ![s][key]=bytes, ![CHOOSE peer \\in Scopes : peer#s][key]=bytes]",
+              "count": 1
+            },
+            {
+              "old": " IN /\\ rows'=IF permit THEN replacement ELSE rows\n    /\\ stats'=IF permit THEN [stats EXCEPT ![s]=Sum(replacement[s])] ELSE stats\n    /\\ UNCHANGED <<initialized,startupValid,tables>>\n    /\\ Trace(s,\"Put\",t,k,allow,deny,permit,key,bytes)",
+              "new": " IN /\\ rows'=IF permit THEN replacement ELSE rows\n    /\\ stats'=IF permit THEN [stats EXCEPT ![s]=Sum(replacement[s]), ![CHOOSE peer \\in Scopes : peer#s]=Sum(replacement[CHOOSE peer \\in Scopes : peer#s])] ELSE stats\n    /\\ UNCHANGED <<initialized,startupValid,tables>>\n    /\\ Trace(s,\"Put\",t,k,allow,deny,permit,key,bytes)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PeerFrame"
+        },
+        {
+          "id": "DirtyOversizeRefusal",
+          "edits": [
+            {
+              "old": " IN /\\ rows'=IF permit THEN replacement ELSE rows\n    /\\ stats'=IF permit THEN [stats EXCEPT ![s]=Sum(replacement[s])] ELSE stats\n    /\\ UNCHANGED <<initialized,startupValid,tables>>\n    /\\ Trace(s,\"Put\",t,k,allow,deny,permit,key,bytes)",
+              "new": " IN /\\ rows'=IF permit THEN replacement ELSE IF initialized /\\ tables[s] /\\ Valid(t) /\\ allow /\\ ~deny /\\ bytes>MaxItemBytes /\\ rows[s][key]#0 THEN [rows EXCEPT ![s][key]=2] ELSE rows\n    /\\ stats'=IF permit THEN [stats EXCEPT ![s]=Sum(replacement[s])] ELSE IF initialized /\\ tables[s] /\\ Valid(t) /\\ allow /\\ ~deny /\\ bytes>MaxItemBytes /\\ rows[s][key]#0 THEN [stats EXCEPT ![s]=Sum([rows EXCEPT ![s][key]=2][s])] ELSE stats\n    /\\ UNCHANGED <<initialized,startupValid,tables>>\n    /\\ Trace(s,\"Put\",t,k,allow,deny,permit,key,bytes)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RefusalFrame"
+        },
+        {
+          "id": "AcknowledgeIgnoredItemDelete",
+          "edits": [
+            {
+              "old": " IN /\\ rows'=IF permit THEN replacement ELSE rows\n    /\\ stats'=IF permit THEN [stats EXCEPT ![s]=Sum(replacement[s])] ELSE stats\n    /\\ UNCHANGED <<initialized,startupValid,tables>>\n    /\\ Trace(s,\"Delete\",t,\"small\",allow,deny,permit,key,0)",
+              "new": " IN /\\ rows'=rows\n    /\\ stats'=stats\n    /\\ UNCHANGED <<initialized,startupValid,tables>>\n    /\\ Trace(s,\"Delete\",t,\"small\",allow,deny,permit,key,0)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AcknowledgedRemoval"
+        },
+        {
+          "id": "AcknowledgeIgnoredTableDelete",
+          "edits": [
+            {
+              "old": "tables'=IF permit THEN [tables EXCEPT ![s]=FALSE] ELSE tables",
+              "new": "tables'=tables",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AcknowledgedRemoval"
+        },
+        {
+          "id": "AcknowledgeIgnoredChildDelete",
+          "edits": [
+            {
+              "old": "rows'=IF permit THEN [rows EXCEPT ![s]=Empty] ELSE rows",
+              "new": "rows'=rows",
+              "count": 1
+            },
+            {
+              "old": "stats'=IF permit THEN [stats EXCEPT ![s]=0] ELSE stats",
+              "new": "stats'=stats",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AcknowledgedRemoval"
+        },
+        {
+          "id": "RestartLosesStatistics",
+          "edits": [
+            {
+              "old": "Restart == /\\ initialized'=FALSE /\\ lastOp'=\"Restart\"\n /\\ beforeTables'=tables /\\ beforeRows'=rows /\\ beforeStats'=stats\n /\\ UNCHANGED <<startupValid,tables,rows,stats,lastScope,lastToken,lastKind,lastAllow,\n lastDeny,lastAccepted,lastReady,lastKey,lastBytes>>\n",
+              "new": "Restart == /\\ initialized'=FALSE /\\ lastOp'=\"Restart\"\n /\\ beforeTables'=tables /\\ beforeRows'=rows /\\ beforeStats'=stats\n /\\ stats'=[s \\in Scopes |-> 0]\n /\\ UNCHANGED <<startupValid,tables,rows,lastScope,lastToken,lastKind,lastAllow,\n lastDeny,lastAccepted,lastReady,lastKey,lastBytes>>\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StatisticsExact"
+        }
+      ]
     }
   ]
 }
