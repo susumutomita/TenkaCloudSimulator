@@ -10,7 +10,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from formal_model_gate import GateError, apply_mutant, load_registry, run_suite, validate_result, invariants, exact_head_inputs
+from formal_model_gate import REQUIRED_MUTANTS, BASE_MODELS, GateError, apply_mutant, load_registry, run_suite, validate_result, invariants, exact_head_inputs
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -331,6 +331,25 @@ class FormalGateTests(unittest.TestCase):
                     with self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
                         load_registry(self.root)
             path.write_text(original); config.write_bytes(saved_config)
+
+    def test_each_required_mutation_control_cannot_disappear(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        registry = json.loads(original)
+        self.assertEqual(set(REQUIRED_MUTANTS), BASE_MODELS)
+        self.assertEqual(sum(map(len, REQUIRED_MUTANTS.values())), 48)
+        self.assertEqual({m['id']: {c['id'] for c in m['mutants']} for m in registry['models']}, REQUIRED_MUTANTS)
+        for model in registry['models']:
+            for mutant in model['mutants']:
+                with self.subTest(model=model['id'], mutant=mutant['id']):
+                    changed = json.loads(original)
+                    target = next(m for m in changed['models'] if m['id'] == model['id'])
+                    target['mutants'] = [m for m in target['mutants'] if m['id'] != mutant['id']]
+                    path.write_text(json.dumps(changed))
+                    expected = 'required mutation control was removed' if target['mutants'] else 'model needs a sensitivity control'
+                    with self.assertRaisesRegex(GateError, expected):
+                        load_registry(self.root)
+        path.write_text(original)
 
 if __name__ == '__main__':
     unittest.main()
