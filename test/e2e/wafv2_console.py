@@ -21,7 +21,7 @@ def choose(page,label,value):
 with running(authenticated=True) as (endpoint,token),sync_playwright() as p:
  waf=client(endpoint,token)
  browser=p.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE') or shutil.which('chromium'),args=['--no-sandbox'])
- context=browser.new_context(viewport={'width':1440,'height':1000});page=context.new_page();errors=[];outside=[]
+ context=browser.new_context(viewport={'width':1440,'height':1000},bypass_csp=bool(os.environ.get('AXE_SCRIPT_PATH')));page=context.new_page();errors=[];outside=[]
  page.on('pageerror',lambda error:errors.append(str(error)))
  def route(r):
   if r.request.url.startswith(endpoint+'/'):r.continue_()
@@ -51,7 +51,7 @@ with running(authenticated=True) as (endpoint,token),sync_playwright() as p:
  if axe:
   page.add_script_tag(path=axe)
   for width in (1440,390):
-   page.set_viewport_size({'width':width,'height':1000});audit=page.evaluate("async()=>await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}})");assert not audit['violations'],audit['violations']
+   page.set_viewport_size({'width':width,'height':1000});assert_reflow(page);page.screenshot(path=str(REPORTS/('wafv2-audit-'+str(width)+'.png')),full_page=True,animations='disabled');audit=page.evaluate("async()=>await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}})");assert not audit['violations'],audit['violations']
  page.get_by_role('button',name='Delete web ACL',exact=True).click();page.get_by_label('Enter web ACL name to confirm',exact=True).fill('dummy-console-waf');page.get_by_role('button',name='Delete web ACL',exact=True).click();expect(page.get_by_text('Web ACL deleted.',exact=True)).to_be_visible();assert waf.list_web_acls(Scope='REGIONAL')['WebACLs']==[]
  assert errors==[],errors;assert outside==[],outside;browser.close()
  print(json.dumps({'nativeCloudscapeWAFRoundTrip':True,'countToBlockPreservesStatementAndVisibility':True,'staleLockRejectedAndReloaded':True,'keyboardSave':True,'desktopMobileReflow':True,'axe':bool(axe),'externalRequests':0,'browserErrors':0,'teardown':'DELETED','authenticatedAWSScreenObserved':False,'actualHTTPCountBlockVerifiedHere':False}))
