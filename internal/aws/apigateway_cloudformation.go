@@ -43,6 +43,11 @@ func compileStackAPI(region, stackID, logical, kind string, p map[string]any, at
 			return "", fmt.Errorf("unsupported %s property %s", kind, key)
 		}
 	}
+	if raw, exists := p["Description"]; exists {
+		if _, ok := raw.(string); !ok {
+			return "", fmt.Errorf("Description must be a string")
+		}
+	}
 	id := stackGeneratedID(stackID, logical)
 	switch kind {
 	case "AWS::ApiGateway::RestApi":

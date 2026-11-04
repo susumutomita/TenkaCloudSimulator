@@ -2,6 +2,8 @@ package aws
 
 import (
 	"context"
+	"encoding/json"
+	"go.yaml.in/yaml/v3"
 	"strings"
 	"testing"
 )
@@ -113,5 +115,58 @@ func TestCFNAPITagsCannotSilentlyCoerceUnsupportedValues(t *testing.T) {
 				t.Fatal("invalid metadata left native API", count, err)
 			}
 		})
+	}
+}
+
+func TestCFNAPIOptionalDescriptionsCannotDiscardStructuredValues(t *testing.T) {
+	for _, kind := range []string{"AWS::ApiGateway::RestApi", "AWS::ApiGateway::Deployment"} {
+		for _, invalid := range []any{true, 42, map[string]any{"unexpected": "metadata"}, []any{"metadata"}, nil} {
+			properties := map[string]any{"Description": invalid}
+			if kind == "AWS::ApiGateway::RestApi" {
+				properties["Name"] = "strict-description"
+				properties["EndpointConfiguration"] = map[string]any{"Types": []any{"REGIONAL"}}
+			}
+			if _, err := compileStackAPI("us-east-1", "stack-id", "Resource", kind, properties, map[string]string{}); err == nil {
+				t.Fatalf("%s silently discarded %T Description", kind, invalid)
+			}
+		}
+	}
+	for _, kind := range []string{"AWS::ApiGateway::RestApi", "AWS::ApiGateway::Deployment"} {
+		for _, value := range []any{true, map[string]any{"invalid": "shape"}} {
+			db, _, stacks, _ := s3StackState(t)
+			var node yaml.Node
+			if err := yaml.Unmarshal([]byte(apiStackTemplate), &node); err != nil {
+				t.Fatal(err)
+			}
+			valueTree, err := taggedYAML(&node)
+			if err != nil {
+				t.Fatal(err)
+			}
+			doc := object(valueTree)
+			// Use actual CloudFormation JSON input so unsupported data is rejected before
+			// any native graph or ownership rows can be persisted.
+			resources := doc["Resources"].(map[string]any)
+			for _, raw := range resources {
+				resource := raw.(map[string]any)
+				if resource["Type"] == kind {
+					resource["Properties"].(map[string]any)["Description"] = value
+				}
+			}
+			body, err := json.Marshal(doc)
+			if err != nil {
+				t.Fatal(err)
+			}
+			record, err := compileStack("us-east-1", "bad-description", string(body), nil, "")
+			if err == nil {
+				err = stacks.Create(record)
+			}
+			if err == nil {
+				t.Fatal("structured Description was silently stored as empty")
+			}
+			var count int
+			if err = db.Database().QueryRow("SELECT count(*) FROM aws_apigateway_apis").Scan(&count); err != nil || count != 0 {
+				t.Fatal("invalid Description left partial native state", count, err)
+			}
+		}
 	}
 }
