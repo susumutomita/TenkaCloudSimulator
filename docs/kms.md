@@ -275,10 +275,38 @@ signature parsing, host token authentication, SQL implementation and other-servi
 behavior are not formally established; actual Gateway/native tests are separate.
 The atomic KMS model's8 controls do not prove these protocol/refusal properties.
 
-Two independent source findings remain blocked pending executable reproduction:
-old dispatch converts identity DB errors to403 and can miss signed KMS intent when
-X-Amz-Target is absent. Tests-first cases are saved; production dispatch is still
-unchanged until the required actual-failure run and minimal correction. Native
-f018 evidence predates these regressions and does not mean this candidate passes.
+At pre-fix checkpoint ebb6f78, actual tests reproduced both dispatch findings:
+identity SQLite outage became403, while signed KMS intent without/conflicting
+target could return S3/SQS success or the wrong service error. Those failures are
+preserved. The minimal a6f3e0e correction uses PolicyContext with request context,
+separates missing identity403 from internal500 and recognizes KMS signing scope
+as routing metadata without granting authorization. All19 AWS KMS test functions
+passed normally (1.260s) and under race (10.174s); the regular-server Access,
+provider-alias, two-DB/token and persistence test passed normally (1.388s) and
+under race (10.499s), with both-package vet passing. The body-read barrier proves
+captured permission is stable across later grant/revocation; the next request
+sees the changed policy. This is not full IAM, SigV4 or tenant-isolation proof.
 A same-view console refresh guard now rejects older errors, with prepared delayed
 old-error/current-error/recovery browser assertions; these are also unexecuted.
+
+
+## Canonical assets and actual SDK checkpoints
+
+At driver checkpoint8a1fbb1, an offline CGO0 current-source binary and existing
+boto3 1.42.0 exercised all eight operations through two real CLI processes/DBs,
+actual local token/role IAM, context/key/region/tamper refusal, disabled state and
+restart. Eight clients had42 calls,42 sends and42 responses, with positive equal
+counts per client. A numeric-loopback/exact-origin guard runs before SDK send;
+proxy use is disabled. No overlay, old binary, dependency install, actual AWS,
+browser or guest Python runtime was used. Temporary fixture processes were reaped.
+
+The canonical Cloudscape build used Node24.19.0 and a byte-identical package/lock
+pair from the existing verified physical dependency tree. All19,261 entries,
+including16,047 file hashes/modes and3 internal relative symlinks, matched before
+and after copying/building. No install or lifecycle script ran. The canonical
+builder recorded22 actual dependency notice packages; original notices remained
+unchanged, and the asset/provenance checker passed. Browser operation and visual
+fidelity are not inferred from these asset checks. An extended driver is prepared
+to read the served embedded specification and execute its eight body examples
+against the same SQLite via official SDK calls; that new template flow is not
+claimed successful until its actual run is recorded.

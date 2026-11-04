@@ -1,5 +1,5 @@
 """Actual local KMS SDK/identity/crypto/restart/two-team contract; no AWS calls."""
-import ipaddress,json,sys,tempfile,urllib.request
+import base64,ipaddress,json,sys,tempfile,urllib.request
 from urllib.parse import urlsplit
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parent))
@@ -78,7 +78,44 @@ with tempfile.TemporaryDirectory(prefix='kms-sdk-') as d:
  with running(state,authenticated=True) as (endpoint,new_operator):
   resumed=client('kms',endpoint,new_operator);assert resumed.decrypt(CiphertextBlob=blob,EncryptionContext=ctx)['Plaintext']==plain
   assert resumed.describe_key(KeyId=kid)['KeyMetadata']['Description']=='Local dummy key'
+  # Read the actual embedded reference from this exact running CLI, preserving
+  # the same SQLite state and real SDK wire. Body examples do not select headers;
+  # the official SDK chooses the matching TrentService operation explicitly.
+  spec_request=urllib.request.Request(endpoint+'/_simulator/docs/openapi.json',headers={'X-Simulator-Token':new_operator})
+  local_target(spec_request.full_url,endpoint)
+  with urllib.request.build_opener(urllib.request.ProxyHandler({})).open(spec_request) as response:served_spec=json.load(response)
+  root_operation=served_spec['paths']['/']['post'];examples=root_operation['requestBody']['content']['application/x-amz-json-1.1']['examples'];mapping=root_operation['x-simulator-kms-operation-schemas']
+  expected_ops={'CreateKey','DescribeKey','ListKeys','EnableKey','DisableKey','GetKeyPolicy','Encrypt','Decrypt'}
+  assert set(mapping)==expected_ops and {name[3:] for name in examples if name.startswith('KMS')}==expected_ops
+  for operation in expected_ops:assert mapping[operation]['target']=='TrentService.'+operation
+  def template(operation):return json.loads(json.dumps(examples['KMS'+operation]['value']))
+  docs_key=resumed.create_key(**template('CreateKey'))['KeyMetadata'];docs_id=docs_key['KeyId'];docs_arn=docs_key['Arn']
+  assert docs_id not in {kid,wrong} and docs_arn=='arn:aws:kms:us-east-1:000000000000:key/'+docs_id
+  describe=template('DescribeKey');describe['KeyId']=docs_id
+  assert resumed.describe_key(**describe)['KeyMetadata']['Description']==template('CreateKey')['Description']
+  page_input=template('ListKeys');all_docs_keys=[];seen_markers=set()
+  while True:
+   page=resumed.list_keys(**page_input);assert len(page['Keys'])<=page_input['Limit'];all_docs_keys+=page['Keys'];assert len(all_docs_keys)<=1000
+   if not page['Truncated']:break
+   assert page['NextMarker'] and page['NextMarker'] not in seen_markers;seen_markers.add(page['NextMarker']);page_input['Marker']=page['NextMarker']
+  assert len({entry['KeyId'] for entry in all_docs_keys})==len(all_docs_keys)
+  assert [entry['KeyArn'] for entry in all_docs_keys if entry['KeyId']==docs_id]==[docs_arn]
+  policy_input=template('GetKeyPolicy');policy_input['KeyId']=docs_id
+  assert resumed.get_key_policy(**policy_input)['PolicyName']=='default'
+  encrypt_input=template('Encrypt');encrypt_input['KeyId']=docs_id;encrypt_input['Plaintext']=base64.b64decode(encrypt_input['Plaintext'],validate=True)
+  docs_ciphertext=resumed.encrypt(**encrypt_input);assert docs_ciphertext['KeyId']==docs_arn
+  decrypt_input=template('Decrypt')
+  placeholder=base64.b64decode(decrypt_input['CiphertextBlob'],validate=True)
+  denied('InvalidCiphertextException',lambda:resumed.decrypt(CiphertextBlob=placeholder,EncryptionContext=decrypt_input['EncryptionContext']))
+  decrypt_input['CiphertextBlob']=docs_ciphertext['CiphertextBlob']
+  assert resumed.decrypt(**decrypt_input)['Plaintext']==encrypt_input['Plaintext']
+  disable_input=template('DisableKey');disable_input['KeyId']=docs_id;resumed.disable_key(**disable_input)
+  assert resumed.describe_key(**describe)['KeyMetadata']['KeyState']=='Disabled'
+  denied('DisabledException',lambda:resumed.decrypt(**decrypt_input))
+  enable_input=template('EnableKey');enable_input['KeyId']=docs_id;resumed.enable_key(**enable_input)
+  assert resumed.describe_key(**describe)['KeyMetadata']['KeyState']=='Enabled'
+  assert resumed.decrypt(**decrypt_input)['Plaintext']==encrypt_input['Plaintext']
  for stats in sdk_stats:assert stats['calls']>0 and stats['calls']==stats['sends']==stats['responses'],stats
  totals={key:sum(stats[key] for stats in sdk_stats) for key in ('calls','sends','responses')}
  for c in sdk_clients:c.close()
- print(json.dumps({'nativeEightOperations':True,'guardedSDKCounts':totals,'sdkClients':len(sdk_stats),'beforeSendLoopbackGuard':True,'binaryRoundtrip':True,'contextKeyRegionTamperGuards':True,'disabledGuard':True,'IAMExactKeyAndExplicitDeny':True,'twoTeamDBs':True,'crossToken':401,'restart':True,'scheduledDeletion':'unsupported; temporary fixture DBs removed'}))
+ print(json.dumps({'nativeEightOperations':True,'servedOpenAPIExamples':8,'servedExamplesUseSameSQLite':True,'guardedSDKCounts':totals,'sdkClients':len(sdk_stats),'beforeSendLoopbackGuard':True,'binaryRoundtrip':True,'contextKeyRegionTamperGuards':True,'disabledGuard':True,'IAMExactKeyAndExplicitDeny':True,'twoTeamDBs':True,'crossToken':401,'restart':True,'scheduledDeletion':'unsupported; temporary fixture DBs removed'}))

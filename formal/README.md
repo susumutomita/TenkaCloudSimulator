@@ -152,4 +152,4 @@ other AWS branch authorization or a Go refinement proof. Atomic KMSKeyState and
 its eight controls remain unchanged; protocol claims are not assigned to that
 successful-event model. Real Gateway metadata/conflict cases, identity DB failure
 frames/retry and a real body-read-barrier snapshot test provide separate native
-bridge obligations. Source registry is now12/48; current tests/TLC remain unrun.
+bridge obligations. Source registry is now12/48. Native bridge results are recorded separately in docs/kms.md; current exact-head TLC remains unrun.
