@@ -66,6 +66,8 @@ NoOrphans == /\ \A r \in versions : r.team \in active /\ r.gen=generation[r.team
              /\ \A t \in Teams : current[t] \cup previous[t] \subseteq IDsFor(t)
 UniqueLabels == \A t \in Teams : Cardinality(current[t])<=1 /\ Cardinality(previous[t])<=1
 SeparateCurrentPrevious == \A t \in Teams : current[t] \cap previous[t]={}
+ActiveHasCurrent == \A t \in Teams :
+    IF t \in active THEN Cardinality(current[t])=1 ELSE current[t]={} /\ previous[t]={}
 AuthorizedVersions == \A r \in history : r.allowed
 AuthorizedDisclosure == \A r \in receipts : r.allowed /\ r.team=r.caller /\ r.requestedGen=r.activeGen
 =============================================================================

@@ -209,6 +209,31 @@ Store. Use official Cloudscape components and these labels where implemented;
 disable unsupported database/rotation/KMS choices honestly. Authenticated AWS
 screens have not been observed, so no visual identity claim is justified.
 
+The isolated console component is source-only until navigation composition,
+canonical bundle/embed and real browser validation run. It never retrieves a
+value while listing or describing metadata. Explicit Retrieve secret value
+requests AWSCURRENT; Hide, navigation, opening a form and unmount invalidate
+pending results and clear the displayed value. An accepted reply must carry the
+selected ARN. Drafts remain only in component memory, survive a failed write
+with the same request token for an idempotent retry, and clear on successful
+write/cancel/navigation. This does not promise memory zeroization or protection
+from a browser extension/devtools. Editing a new version starts with an empty
+draft rather than implicitly loading the saved value. The clearly labeled
+simulator rollback helper uses UpdateSecretVersionStage; the public AWS guide
+describes CLI label moves, so it is not claimed as the actual AWS console flow.
+
+`SecretsRevealEpoch` separately models explicit retrieve, Hide/navigation,
+unmount, response ARN binding and historical acceptance context with two
+resources and two request/navigation epochs. `SecretsVersionLifecycle` also
+checks that every active resource has exactly one current label. The source
+and nine intended mutant definitions are prepared, but TLC and applicability
+registration have not run. `test/e2e/secrets_manager_console.py` is a prepared
+actual browser/SDK test for the wizard, metadata-only reads, delayed genuine
+Get after Hide, explicit reveal/edit, version rollback, keyboard deletion,
+desktop/mobile reflow, canonical axe and local-only requests. It has not run;
+its presence is not browser evidence. Screenshots are captured only after values
+are hidden, and no browser trace/HAR with dummy or user values is produced.
+
 Sources: [CreateSecret](https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_CreateSecret.html),
 [PutSecretValue](https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_PutSecretValue.html),
 [GetSecretValue](https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html),
