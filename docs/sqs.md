@@ -105,8 +105,18 @@ the original five models and controls but the new baseline hit the unchanged
 The model now normalizes deleted-row metadata (matching actual SQL DELETE) and
 enumerates current/previous/unissued/peer receipt candidates instead of disabled
 receipt tuples; the baseline receipt equality still admits exactly the same
-current-handle transitions. All properties and eleven controls remain. A new
-strict run is pending, with an explicit local 512 MiB Java heap cap.
+current-handle transitions. All properties and eleven controls remain. At
+immutable `9145461`, the strict merge-gate run completed with an explicit 512 MiB
+Java heap, one worker and the unchanged 60-second per-case timeout: six baseline
+models and sixteen required controls all passed. SQSLifecycle explored 5,518,200
+generated / 413,116 distinct states. Each of its eleven controls returned exit 12
+with the exact named NoOrphans, ScopedMutation, ReceiveOnlyEligible, FreshReceipt,
+ReceiptMutationCurrent, AuthorizedMutations, ChangeOnlyInflight,
+FailedMutationAtomic or IdempotentCreateUnchanged violation. The five original
+models/configs/registry entries and all strict gate function bodies remain
+unchanged; the added required SQS ID/property set is checked explicitly. Python
+unit controls (10+13) and all seventeen exact changed-blob declarations passed.
+These are local bounded-model results, not new-head hosted CI or coverage proof.
 
 The actual native repair precedes these bindings: sqsQueueTx rechecks the parent
 inside Send/Receive/Counts/receipt transactions; purgeExpiredTx errors propagate;
@@ -142,3 +152,11 @@ Primary references (inspected without real AWS requests):
 - [DeleteMessage: most-recent receipt and distributed-delivery limits](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_DeleteMessage.html)
 - [ChangeMessageVisibility: in-flight clock semantics](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_ChangeMessageVisibility.html)
 - [Regional endpoints](https://docs.aws.amazon.com/general/latest/gr/sqs-service.html)
+
+
+The installed development SDK's SQS metadata was also inspected: API model
+`2012-11-05`, JSON protocol version `1.0`, target prefix `AmazonSQS`. The JSON
+wire uses the target/content-type headers above; the legacy Query protocol's
+Version parameter is not an extra supported JSON request field. Regional
+production endpoint examples in the linked AWS reference are documentation only;
+all native tests target the local simulator and use dummy credentials.
