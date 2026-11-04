@@ -9,12 +9,13 @@
     "EnabledCrypto",
     "BoundContextAndKey"
   ],
-  "limits": "Atomic bounded successful events only; no AES proof, nonce probability, JSON/IAM parsing, SQLite crash refinement, host authentication, time or arbitrary key policies. Last event stores pre-operation conditions so later Disable does not invalidate an earlier legitimate output.",
+  "limits": "Atomic bounded successful Create/SetEnabled/Encrypt/Decrypt events only; key/region/context labels are abstract values. No AES proof, nonce probability, JSON/IAM parsing, SQLite RowsAffected/commit/crash refinement, rejected/error response frames, read-only Describe/List/GetPolicy outputs, host authentication, time, growing key population or arbitrary key policies. Last event captures pre-operation conditions so later Disable does not invalidate an earlier legitimate output.",
   "source_scope": [
     "internal/aws/kms_store.go",
     "internal/aws/kms_crypto.go",
     "internal/aws/kms_http.go",
-    "internal/aws/kms_dispatch.go"
+    "internal/aws/kms_dispatch.go",
+    "internal/aws/kms_types.go"
   ],
   "mutants": [
     {

@@ -215,3 +215,16 @@ nonstandard SQL fault fixtures, not an ordinary API exploit or protection agains
 an arbitrary host/database administrator. Native/model tests and whole integration
 have not yet been executed at this source refresh; old-candidate results are not
 fresh evidence.
+
+| Actual operation group | Finite model correspondence | Native obligations outside the model |
+|---|---|---|
+| CreateKey | Create + AuthorizedEvents/TypeOK | Native defaults, random key/UUID, IAM action *, quota, one-row write/commit acknowledgment |
+| EnableKey/DisableKey | SetEnabled + AuthorizedEvents; later crypto checks EnabledCrypto | Exact key ARN, empty wire body, failed/ignored SQL update frames |
+| Encrypt | Encrypt + TypeOK count0..2, EnabledCrypto, AuthorizedEvents | Actual2^32 ceiling, nonce construction, AES-GCM/AAD bytes, ciphertext format and counter commit |
+| Decrypt | Decrypt + BoundContextAndKey, EnabledCrypto, AuthorizedEvents | Actual tag verification, case-sensitive context JSON, no plaintext on denial/error, counter/material read invariance |
+| DescribeKey/ListKeys/GetKeyPolicy | No separate read-output transition | Independent native permission/resource checks, pagination, schema/redaction, disabled-state metadata/default policy |
+
+The candidate registry fragment now includes kms_types.go for the abstract key,
+region and context binding helpers, with explicit parser/crypto/read-output limits.
+It is an unregistered proposal until root integrates the model list, protected
+baseline requirements, applicability and immutable-head validation together.
