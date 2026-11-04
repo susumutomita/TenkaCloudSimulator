@@ -1,11 +1,14 @@
 # SQS console: bounded Standard queues
 
-> Current source union: normal merge of main0a4 (merged KMS) into public
-> SQS HEAD99e3e4f. Main24 mandatory cases remain, plus two owned SQS helpers
-> (26 total). Registry19 baselines/98 controls (117 planned runs) is unexecuted.
-> Canonical UI rebuild,22 original notices and asset checks pass.
-> New-head native/browser/coverage/E2E/formal/CI are pending. Old99/base5c97
-> runtime and actual103 formal successes are historical, not this new base.
+> Current integration uses main0a4 (merged KMS) plus the existing SQS slice.
+> Main24 E2E methods remain unchanged; two owned SQS helpers make26 mandatory.
+> Canonical UI/22 notices/assets, targeted native/race/vet/CLI, policy26 units
+> protecting all98 controls, app21 units and actual SQS console/reference pass.
+> The real delayed-response fixture now has one exact-origin interception owner;
+> it retains the actual west-body/receipt oracle and stale-view refusal checks.
+> Registry19 baselines/98 controls needs117 actual TLC executions. Full26 E2E,
+> one-profile dual90%, final immutable formal/applicability and hosted CI remain
+> separate required gates. Old99/base5c97 results are historical only.
 
 
 The embedded console uses official Cloudscape components and the same nine

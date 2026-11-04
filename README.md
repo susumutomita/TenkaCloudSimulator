@@ -95,7 +95,7 @@ AXE_SCRIPT=/tmp/tcsim-audit/axe.min.js make e2e PYTHON=/tmp/tcsim-tests/bin/pyth
 TLA_JAR=/path/to/tla2tools.jar make formal
 ```
 
-main統合済みKMSの受入証拠とSQS旧HEAD99の証拠は別入力です。今回のSQSとKMSを含むmain0a4の統合ソースは、全体coverage・SDK/browser・形式検査・hosted CIが未実行です。
+main0a4とSQSの統合候補では、限定native/race、実SQSコンソールと9配信例の共有状態を確認しました。旧HEAD99の証拠とは分けて記録しています。全体26件E2E・同一profileの両90%・19モデル98変異検査・最終hosted CIは別途必要です。
 
 CIはstatementと未フィルターsource-line coverageを両方90%以上に強制します。`make before-commit`単独のcoverage判定はstatementのみで、source-line判定はCIのCobertura生成後ステージと上記の2コマンドで行います。SDK/browser、license、依存security、埋込asset、形式検査も行います。cross compileは他OSでの実行成功を意味しません。開発用Python/Node/Javaはruntime依存ではありません。UI・Scalarの再生成は権利表記とlockを保持する[各build手順](tools/console/README.md)・[Scalar手順](tools/scalar/README.md)・[Python runtimeの権利・再生成手順](tools/python/README.md)に従います。
 
