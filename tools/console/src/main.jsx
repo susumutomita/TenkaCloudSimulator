@@ -63,17 +63,17 @@ function Login(){
   function capturePaste(event){
     const input=event.target;
     if(!(input instanceof HTMLInputElement)||input.type!=='password')return;
-    const plain=event.clipboardData.getData('text/plain');
+    clearPendingPaste();const revision=++inputRevision.current;
+    const clipboard=event.clipboardData,plain=clipboard?.getData('text/plain')||'';
     if(!plain){
-      if(event.clipboardData.types.length)setError('The clipboard has no plain-text token. Copy the token as plain text and paste again.');
+      if(clipboard?.types?.length)setError('The clipboard has no plain-text token. Copy the token as plain text and paste again.');
       return;
     }
-    clearPendingPaste();
     const start=input.selectionStart??input.value.length,end=input.selectionEnd??start;
     // Match the HTML password input's CR/LF sanitization; never trim spaces,
     // remove labels or reinterpret HTML. Normal native editing keeps its undo.
     const value=input.value.slice(0,start)+plain.replace(/[\r\n]/g,'')+input.value.slice(end);
-    pendingPaste.current={input,value,revision:++inputRevision.current};
+    pendingPaste.current={input,value,revision};
     // Native onChange invalidates this backup. Use it only when a real paste
     // reaches the field without the normal input/change state update.
     pasteTimer.current=setTimeout(flushPendingPaste,0);

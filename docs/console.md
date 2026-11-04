@@ -58,7 +58,8 @@ only as required by the existing HTML password-input behavior.
 A capture-phase backup records an explicit plain-text paste and its selection.
 Normal native insertion/onChange cancels that backup, preserving native undo.
 Only a paste without the normal state update uses the next-task fallback; newer
-typing/paste/navigation invalidates it, and keyboard submission flushes it first.
+typing/paste/navigation invalidates it, including a later empty/HTML-only paste;
+nullable clipboard data is ignored safely. Keyboard submission flushes it first.
 No token is logged, stored in browser storage, or granted authority by this UI.
 The server still checks its exact local credential and issues its separate opaque
 browser session.401 remains invalid/expired; connection failures and other HTTP
@@ -72,8 +73,28 @@ root-cause claim. An HTML-only clipboard also produced empty password input whil
 a rich editor received its content, but the user's clipboard format is unknown.
 Linux Meta+V is not Mac proof; native context-menu Paste and real Mac/Dia remain
 unverified. No Mac or real user credentials were accessed. Candidate browser and
-final immutable gates must run before claiming the new behavior passes.
+final immutable gates remain required. The final focused helper passed real
+trusted plain/HTML clipboard cases, native and selected-replacement Undo, the
+artificial canceled/default/bubble path, stale typing/paste/navigation boundaries,
+immediate Enter, invalid inputs, safe HTTP/network errors, busy-submit guards and
+PC1440/390 reflow/axe with zero external requests/page errors. The null-data case
+is explicitly synthetic, not OS-paste evidence. This is not real Mac/Dia validation.
 
 References: [React capture-phase paste events](https://react.dev/reference/react-dom/components/common#onpaste),
 [HTML password sanitization](https://html.spec.whatwg.org/multipage/input.html#password-state-(type=password)),
 and [official Cloudscape Input](https://cloudscape.design/components/input/).
+
+### Update and retry after this fix is merged
+
+Stop the old simulator with Ctrl+C in its terminal, then run `git pull --ff-only`
+and `make start` in the repository. The start helper rebuilds current source and
+reuses `./practice.db` and `./simulator-token`; preserve any configured
+`START_STATE` / `START_TOKEN_FILE` overrides. In the browser use Cmd+Shift+R to
+reload the updated page, then paste into Access token and choose Open sandbox.
+On the owner's Mac, `pbcopy < ./simulator-token` is an optional plain-text copy
+command (substitute the configured private token path). It is documentation only,
+not a command executed during this investigation. Never send the token in chat or
+include it in logs/screenshots. If paste still leaves the field empty, the actual
+Mac/Dia behavior needs owner-device verification; no official Dia-specific cause
+is confirmed. Native paste is preserved following
+[Chrome's paste guidance](https://developer.chrome.com/docs/lighthouse/best-practices/paste-preventing-inputs).
