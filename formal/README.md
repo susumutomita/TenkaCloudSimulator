@@ -61,6 +61,21 @@ The native HTTP integration test uses distinct values and runtime versions
 Go refinement claim. New candidate execution and hosted CI must be checked separately; model checking is not Go refinement.
 
 
+## Startup token visibility
+
+`StartupTokenVisibility.tla` models one fixed configured token file, two abstract
+token values, three initial file states and at most two historical emissions.
+It checks existing-file identity, private creation, invalid-file refusal and
+emission-time auth/explicit-show/TTY/CI-presence guards. Removing the CI or TTY
+guard must violate `HistoryVisibility`; overwriting an existing token must
+violate `FileIdentityFrozen`. Original model/config and exact mutation anchors
+are preserved.
+
+`source_scope` binds CLI/launcher code and its real PTY/native tests. It does not
+prove terminal syscalls, OS ACLs, entropy, crash safety, build freshness, process
+shutdown or all Go behavior. The metadata-only `go.mod` annotation change uses
+the separate narrow recognizer and is not bound to token-state invariants.
+
 ## Browser session revocation
 
 BrowserSessions is required alongside SSMParameterState and the original five models. Its two clients, three fresh browser
@@ -77,5 +92,6 @@ and actual browser assertions. Listing those paths binds source review, not Go
 refinement or a UI/TLS/cryptography proof. See
 [session contract](../docs/console-sessions.md) for the independent checks.
 
-
-The current combined registry has 7 baselines and 15 required mutation controls. SSM and feature inventory/property removal are rejected. Source integration does not constitute a new-head TLC or runtime execution result.
+The current combined registry has 8 baselines and 18 required mutation controls.
+Startup, SSM and Browser inventory/property removal are rejected. Source
+integration is not a new-head TLC or runtime execution result.

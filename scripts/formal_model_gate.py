@@ -9,17 +9,16 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-BASE_MODELS = {'ObjectStore', 'StackOwnership', 'S3Versions', 'NativeIAMOwnership', 'RESTDeploymentSnapshot', 'SSMParameterState', 'BrowserSessions'}
+BASE_MODELS = {'BrowserSessions', 'NativeIAMOwnership', 'ObjectStore', 'RESTDeploymentSnapshot', 'S3Versions', 'SSMParameterState', 'StackOwnership', 'StartupTokenVisibility'}
 BASE_INVARIANTS = {
-    'ObjectStore': {'TypeOK', 'NoOrphans', 'NoUnauthorizedMutation', 'DenyWins'},
-    'StackOwnership': {'TypeOK', 'OwnershipExclusive'},
-    'S3Versions': {'TypeOK', 'NoHistoryOrphans', 'CurrentMatchesLatest'},
-    'NativeIAMOwnership': {'TypeOK', 'OwnershipExclusive'},
-    'RESTDeploymentSnapshot': {'TypeOK', 'SnapshotsFrozen', 'NoStageOrphans'},
-    'BrowserSessions': {'TypeOK', 'RevokedCookiesDenied', 'AcceptedOnlyLiveParent',
-                        'SDKAuthorityPreserved', 'UnrelatedSessionsPreserved',
-                        'NoRawSDKCookie', 'NoBrowserSDKAuthority', 'ParentLifetimeBound'},
-    'SSMParameterState': {'TypeOK', 'DeleteEffect', 'OtherKeysUnchanged', 'OverwriteRefusal', 'ReadIsolation', 'DeniedPreservesState', 'PutVersion'},
+    'ObjectStore': {'DenyWins', 'NoOrphans', 'NoUnauthorizedMutation', 'TypeOK'},
+    'StackOwnership': {'OwnershipExclusive', 'TypeOK'},
+    'S3Versions': {'CurrentMatchesLatest', 'NoHistoryOrphans', 'TypeOK'},
+    'NativeIAMOwnership': {'OwnershipExclusive', 'TypeOK'},
+    'RESTDeploymentSnapshot': {'NoStageOrphans', 'SnapshotsFrozen', 'TypeOK'},
+    'StartupTokenVisibility': {'CreatedFilePrivate', 'FileIdentityFrozen', 'HistoryVisibility', 'InvalidFileNeverEmits', 'TypeOK'},
+    'SSMParameterState': {'DeleteEffect', 'DeniedPreservesState', 'OtherKeysUnchanged', 'OverwriteRefusal', 'PutVersion', 'ReadIsolation', 'TypeOK'},
+    'BrowserSessions': {'AcceptedOnlyLiveParent', 'NoBrowserSDKAuthority', 'NoRawSDKCookie', 'ParentLifetimeBound', 'RevokedCookiesDenied', 'SDKAuthorityPreserved', 'TypeOK', 'UnrelatedSessionsPreserved'},
 }
 IDENTIFIER = re.compile(r'^[A-Za-z][A-Za-z0-9_]*$')
 
