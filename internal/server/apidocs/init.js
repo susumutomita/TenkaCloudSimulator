@@ -11,7 +11,7 @@ Scalar.createApiReference("#reference", {
   agent: { disabled: true },
   proxyUrl: "",
   persistAuth: false,
-  customFetch: (input, init) => {
+  customFetch: SimulatorS3ResponseGuide.wrapFetch((input, init) => {
     const url = new URL(
       typeof input === "string"
         ? input
@@ -25,5 +25,5 @@ Scalar.createApiReference("#reference", {
         new Error("Only this simulator origin is allowed."),
       );
     return fetch(input, init);
-  },
+  }),
 });
