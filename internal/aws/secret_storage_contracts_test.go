@@ -489,6 +489,11 @@ func TestSecretStorageLocalCapsRetainFramesAndPermitSupportedRelief(t *testing.T
 			if _, err = db.Database().Exec(`WITH RECURSIVE ids(n) AS (VALUES(2) UNION ALL SELECT n+1 FROM ids WHERE n<?) INSERT INTO aws_secret_versions SELECT 'us-east-1',?,printf('%036d',n),value,created FROM ids,aws_secret_versions WHERE region='us-east-1' AND arn=? AND version_id=?`, last, m.ARN, m.ARN, secretContractA); err != nil {
 				t.Fatal("cannot materialize actual retained bytes")
 			}
+			// This is the reachable state after inserting each immutable
+			// version and promoting the original version back to current.
+			if _, err := db.Database().Exec("INSERT INTO aws_secret_stages VALUES('us-east-1',?,'AWSPREVIOUS',?)", m.ARN, fmt.Sprintf("%036d", last)); err != nil {
+				t.Fatal("cannot materialize historical label")
+			}
 		}
 		var rows, bytes int64
 		if err := db.Database().QueryRow("SELECT count(*),sum(length(value)) FROM aws_secret_versions").Scan(&rows, &bytes); err != nil || rows != 1024 || bytes != 64<<20 {
