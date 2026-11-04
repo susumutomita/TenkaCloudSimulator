@@ -3,7 +3,7 @@
   "info": {
     "title": "TenkaCloud Simulator API",
     "version": "0.1.0",
-    "description": "Sign in through the local console first. The browser sends its same-origin session cookie; Test Request uses that session. For curl or SDKs add the host-issued `X-Simulator-Token` header. Dummy TCSIM signature credentials identify the AWS wire format; they are not host authentication. `x-simulator-principal` selects an exercise identity only. Participant sessions are already bound to an identity and cannot select simulator-admin. Never enter real AWS credentials here. \n\n**Examples are static documentation, not saved state.** Use Test Request → Send to query your environment. S3 responses remain native XML/bytes; expand typed schemas below to understand fields.\n\nIndependent local cloud simulator. AWS is the first provider, with documented S3, Systems Manager Parameter Store, SQS, Lambda, CloudFormation and IAM role subsets. No real infrastructure is created. This document describes only implemented operations. S3 wire APIs retain their XML formats; Native IAM roles use Query/XML; legacy identity control remains a separate JSON API. Native role ownership blocks legacy PUT/DELETE with HTTP409. Use unsigned requests or dummy TCSIM SDK credentials. Default principal simulator-admin has full sandbox access. IAM Query routing uses X-Simulator-Service: iam (or the dummy SDK signature scope), root POST and Version2010-05-08. Nine bounded role/inline-policy operations are implemented; no STS, managed policies, Conditions or non-root paths. Native Lambda roles must trust lambda.amazonaws.com. Legacy CFN/local identity roles retain their prior metadata-only trust semantics. For IAM exercises send x-simulator-principal. SQLite is ephemeral by default; --state persists it. See /_simulator/v1/capabilities for limits and deviations. Lambda supports a bounded Python 3.12 ZIP subset through the native REST paths below. Host Python is not required. A limited saved-role local SSM/S3 function SDK is supported; arbitrary network/HTTP and Function URLs remain unsupported. CloudFormation supports inline Python AWS::Lambda::Function with index.handler, existing local role, Ref/Arn and explicit DependsOn. Caller requires Lambda Create/DeleteFunction and iam:PassRole; tagged creation also requires lambda:TagResource. Only the declared saved-role SSM/S3 capability bridge is available, with no arbitrary network or managed-policy grants. Function SDK limits: S3 object body32KiB, native response48KiB before capability encoding, message64KiB,128calls and1MiB request/response aggregate. Oversized native SSM or S3 responses return EntityTooLarge without a partial successful result. API Gateway REST APIs support an explicit REGIONAL/NONE/Lambda AWS_PROXY subset. Deployments freeze resources and integrations; stages refer to a deployment. No public endpoint or real AWS is created. Local invocation requires the host access token/session and a bounded Lambda apigateway.amazonaws.com resource permission with a matching local execute-api SourceArn. Responses are non-executing downloads, with protected cookie/navigation/CORS/CSP headers removed. Active browser app hosting, WAF, custom domains, authorizers, binary media, API keys, caching, stage editing and full WP grading remain unsupported. CloudFormation also provisions the bounded RestApi/Resource/Method/Deployment/Stage and Lambda::Permission subset in the same native SQLite transaction. Deployment DependsOn methods is explicit; API children are same-stack, snapshots immutable, and native drift blocks destructive cleanup. No WAF or custom resources are supported.",
+    "description": "Sign in through the local console first. The browser sends its same-origin session cookie; Test Request uses that session. For curl or SDKs add the host-issued `X-Simulator-Token` header. Dummy TCSIM signature credentials identify the AWS wire format; they are not host authentication. `x-simulator-principal` selects an exercise identity only. Participant sessions are already bound to an identity and cannot select simulator-admin. Never enter real AWS credentials here. \n\n**Examples are static documentation, not saved state.** Use Test Request → Send to query your environment. S3 responses remain native XML/bytes; expand typed schemas below to understand fields.\n\nIndependent local cloud simulator. AWS is the first provider, with documented S3, Systems Manager Parameter Store, SQS, Lambda, CloudFormation and IAM role subsets. No real infrastructure is created. This document describes only implemented operations. S3 wire APIs retain their XML formats; Native IAM roles use Query/XML; legacy identity control remains a separate JSON API. Native role ownership blocks legacy PUT/DELETE with HTTP409. Use unsigned requests or dummy TCSIM SDK credentials. Default principal simulator-admin has full sandbox access. IAM Query routing uses X-Simulator-Service: iam (or the dummy SDK signature scope), root POST and Version2010-05-08. Nine bounded role/inline-policy operations are implemented; no STS, managed policies, Conditions or non-root paths. Native Lambda roles must trust lambda.amazonaws.com. Legacy CFN/local identity roles retain their prior metadata-only trust semantics. For IAM exercises send x-simulator-principal. SQLite is ephemeral by default; --state persists it. See /_simulator/v1/capabilities for limits and deviations. Lambda supports a bounded Python 3.12 ZIP subset through the native REST paths below. Host Python is not required. A limited saved-role local SSM/S3 function SDK is supported; arbitrary network/HTTP and Function URLs remain unsupported. CloudFormation supports inline Python AWS::Lambda::Function with index.handler, existing local role, Ref/Arn and explicit DependsOn. Caller requires Lambda Create/DeleteFunction and iam:PassRole; tagged creation also requires lambda:TagResource. Only the declared saved-role SSM/S3 capability bridge is available, with no arbitrary network or managed-policy grants. Function SDK limits: S3 object body32KiB, native response48KiB before capability encoding, message64KiB,128calls and1MiB request/response aggregate. Oversized native SSM or S3 responses return EntityTooLarge without a partial successful result. API Gateway REST APIs support an explicit REGIONAL/NONE/Lambda AWS_PROXY subset. Deployments freeze resources and integrations; stages refer to a deployment. No public endpoint or real AWS is created. Local invocation requires the host access token/session and a bounded Lambda apigateway.amazonaws.com resource permission with a matching local execute-api SourceArn. Responses are non-executing downloads, with protected cookie/navigation/CORS/CSP headers removed. Active browser app hosting, WAF, custom domains, authorizers, binary media, API keys, caching, stage editing and full WP grading remain unsupported. CloudFormation also provisions the bounded RestApi/Resource/Method/Deployment/Stage and Lambda::Permission subset in the same native SQLite transaction. Deployment DependsOn methods is explicit; API children are same-stack, snapshots immutable, and native drift blocks destructive cleanup. No WAF or custom resources are supported. Secrets Manager provides seven bounded local JSON 1.1 actions. Dummy values are plaintext in private SQLite; there is no encryption/KMS guarantee, rotation, binary values, recovery window, custom policy or CloudFormation support. GetSecretValue alone reveals an authorized value. Examples are static, not executed state.",
     "license": {
       "name": "MIT"
     }
@@ -87,7 +87,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "AmazonSSM.<operation> for SSM only"
+            "description": "AmazonSSM.<operation> for SSM only Secrets Manager uses secretsmanager.<operation> (API version 2017-10-17); action-specific required and allowed fields differ."
           },
           {
             "name": "X-Simulator-Region",
@@ -111,7 +111,8 @@
               "enum": [
                 "ssm",
                 "cloudformation",
-                "iam"
+                "iam",
+                "secretsmanager"
               ]
             },
             "description": "iam selects IAM Query; omit or use cloudformation for CloudFormation, and omit or use ssm for SSM JSON. Do not select iam for CreateStack/DescribeStacks/DeleteStack."
@@ -125,10 +126,168 @@
           "content": {
             "application/x-amz-json-1.1": {
               "schema": {
-                "type": "object"
+                "type": "object",
+                "description": "Action-specific union for the shared JSON1.1 endpoint, not a claim that every property is accepted by every action. Native service rejects unknown/duplicate/null/wrong-type fields for the selected target. Select the exact target header described in the named example.",
+                "properties": {
+                  "Name": {
+                    "type": "string",
+                    "description": "CreateSecret1–512 ASCII name characters [A-Za-z0-9/_+=.@-]; SSM uses its own Name semantics."
+                  },
+                  "Description": {
+                    "type": "string",
+                    "description": "CreateSecret optional description, up to2048 Unicode characters."
+                  },
+                  "SecretId": {
+                    "type": "string",
+                    "description": "Exact local name or full ARN for Describe/Get/Put/UpdateStage. Delete accepts the full local ARN only; partial ARNs and cross-account/region references fail."
+                  },
+                  "ClientRequestToken": {
+                    "type": "string",
+                    "minLength": 32,
+                    "maxLength": 64,
+                    "description": "Required CreateSecret/PutSecretValue native JSON field. Stable immutable version ID; same token cannot replace different bytes. SDK auto-generates a token."
+                  },
+                  "SecretString": {
+                    "type": "string",
+                    "description": "Required CreateSecret/PutSecretValue,1–65536 UTF-8 bytes. Dummy local plaintext only. No Binary or KMS encryption."
+                  },
+                  "VersionId": {
+                    "type": "string",
+                    "minLength": 32,
+                    "maxLength": 64,
+                    "description": "GetSecretValue exact version; can retrieve an unlabeled retained version."
+                  },
+                  "VersionStage": {
+                    "type": "string",
+                    "enum": [
+                      "AWSCURRENT",
+                      "AWSPREVIOUS"
+                    ],
+                    "description": "Get accepts either label; UpdateSecretVersionStage accepts AWSCURRENT only."
+                  },
+                  "VersionStages": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "AWSCURRENT"
+                      ]
+                    },
+                    "minItems": 1,
+                    "maxItems": 1,
+                    "description": "Put only: absent or exactly [AWSCURRENT]. Custom stages/AWSPENDING unsupported."
+                  },
+                  "MoveToVersionId": {
+                    "type": "string",
+                    "description": "UpdateSecretVersionStage target existing immutable version."
+                  },
+                  "RemoveFromVersionId": {
+                    "type": "string",
+                    "description": "UpdateSecretVersionStage must match the current AWSCURRENT owner when moving. Same-owner request is a no-op."
+                  },
+                  "ForceDeleteWithoutRecovery": {
+                    "type": "boolean",
+                    "const": true,
+                    "description": "DeleteSecret requires true. No recoverable scheduling or RestoreSecret."
+                  },
+                  "MaxResults": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 100,
+                    "description": "ListSecrets page size. SSM operations have their separately implemented limits."
+                  },
+                  "NextToken": {
+                    "type": "string",
+                    "description": "Opaque ListSecrets cursor bound to DB/region/sort; expires after24h. Use returned value unchanged."
+                  },
+                  "SortBy": {
+                    "type": "string",
+                    "enum": [
+                      "created-date",
+                      "name"
+                    ],
+                    "description": "ListSecrets optional; default created-date. Older SDK models may reject this field before HTTP."
+                  },
+                  "SortOrder": {
+                    "type": "string",
+                    "enum": [
+                      "asc",
+                      "desc"
+                    ],
+                    "description": "ListSecrets optional, local default asc. Uses full ARN tie-breaker. No snapshot across pages."
+                  }
+                }
               },
-              "example": {
-                "Name": "/practice/hello"
+              "examples": {
+                "SSMGetParameter": {
+                  "summary": "AmazonSSM.GetParameter; SSM service header",
+                  "value": {
+                    "Name": "/practice/hello"
+                  }
+                },
+                "CreateSecret": {
+                  "summary": "X-Amz-Target: secretsmanager.CreateSecret",
+                  "description": "Static request example using dummy values and a placeholder ARN. Run CreateSecret first and replace ARN/version IDs with live returned identifiers. Changing this body does not select its header.",
+                  "value": {
+                    "Name": "training/example",
+                    "Description": "Dummy local practice value",
+                    "ClientRequestToken": "00000000-0000-0000-0000-000000000001",
+                    "SecretString": "DUMMY-secret-example"
+                  }
+                },
+                "DescribeSecret": {
+                  "summary": "X-Amz-Target: secretsmanager.DescribeSecret",
+                  "description": "Static request example using dummy values and a placeholder ARN. Run CreateSecret first and replace ARN/version IDs with live returned identifiers. Changing this body does not select its header.",
+                  "value": {
+                    "SecretId": "arn:aws:secretsmanager:us-east-1:000000000000:secret:training/example-ABC123"
+                  }
+                },
+                "ListSecrets": {
+                  "summary": "X-Amz-Target: secretsmanager.ListSecrets",
+                  "description": "Static request example using dummy values and a placeholder ARN. Run CreateSecret first and replace ARN/version IDs with live returned identifiers. Changing this body does not select its header.",
+                  "value": {
+                    "MaxResults": 10,
+                    "SortOrder": "asc"
+                  }
+                },
+                "PutSecretValue": {
+                  "summary": "X-Amz-Target: secretsmanager.PutSecretValue",
+                  "description": "Static request example using dummy values and a placeholder ARN. Run CreateSecret first and replace ARN/version IDs with live returned identifiers. Changing this body does not select its header.",
+                  "value": {
+                    "SecretId": "arn:aws:secretsmanager:us-east-1:000000000000:secret:training/example-ABC123",
+                    "ClientRequestToken": "00000000-0000-0000-0000-000000000002",
+                    "SecretString": "DUMMY-secret-example-updated",
+                    "VersionStages": [
+                      "AWSCURRENT"
+                    ]
+                  }
+                },
+                "GetSecretValue": {
+                  "summary": "X-Amz-Target: secretsmanager.GetSecretValue",
+                  "description": "Static request example using dummy values and a placeholder ARN. Run CreateSecret first and replace ARN/version IDs with live returned identifiers. Changing this body does not select its header.",
+                  "value": {
+                    "SecretId": "arn:aws:secretsmanager:us-east-1:000000000000:secret:training/example-ABC123",
+                    "VersionStage": "AWSCURRENT"
+                  }
+                },
+                "UpdateSecretVersionStage": {
+                  "summary": "X-Amz-Target: secretsmanager.UpdateSecretVersionStage",
+                  "description": "Static request example using dummy values and a placeholder ARN. Run CreateSecret first and replace ARN/version IDs with live returned identifiers. Changing this body does not select its header.",
+                  "value": {
+                    "SecretId": "arn:aws:secretsmanager:us-east-1:000000000000:secret:training/example-ABC123",
+                    "VersionStage": "AWSCURRENT",
+                    "MoveToVersionId": "00000000-0000-0000-0000-000000000001",
+                    "RemoveFromVersionId": "00000000-0000-0000-0000-000000000002"
+                  }
+                },
+                "DeleteSecret": {
+                  "summary": "X-Amz-Target: secretsmanager.DeleteSecret",
+                  "description": "Static request example using dummy values and a placeholder ARN. Run CreateSecret first and replace ARN/version IDs with live returned identifiers. Changing this body does not select its header.",
+                  "value": {
+                    "SecretId": "arn:aws:secretsmanager:us-east-1:000000000000:secret:training/example-ABC123",
+                    "ForceDeleteWithoutRecovery": true
+                  }
+                }
               }
             },
             "application/x-www-form-urlencoded": {
@@ -319,7 +478,95 @@
         },
         "responses": {
           "200": {
-            "description": "Native JSON 1.1 SSM or XML Query response"
+            "description": "Native JSON 1.1 SSM or XML Query response",
+            "content": {
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "type": "object"
+                },
+                "examples": {
+                  "CreateSecret": {
+                    "summary": "Static Secrets CreateSecret success",
+                    "value": {
+                      "ARN": "arn:aws:secretsmanager:us-east-1:000000000000:secret:training/example-ABC123",
+                      "Name": "training/example",
+                      "VersionId": "00000000-0000-0000-0000-000000000001"
+                    }
+                  },
+                  "DescribeSecret": {
+                    "summary": "Static Secrets DescribeSecret success",
+                    "value": {
+                      "ARN": "arn:aws:secretsmanager:us-east-1:000000000000:secret:training/example-ABC123",
+                      "Name": "training/example",
+                      "Description": "Dummy local practice value",
+                      "CreatedDate": 1700000000,
+                      "LastChangedDate": 1700000000,
+                      "VersionIdsToStages": {
+                        "00000000-0000-0000-0000-000000000001": [
+                          "AWSCURRENT"
+                        ]
+                      }
+                    }
+                  },
+                  "ListSecrets": {
+                    "summary": "Static Secrets ListSecrets success",
+                    "value": {
+                      "SecretList": [
+                        {
+                          "ARN": "arn:aws:secretsmanager:us-east-1:000000000000:secret:training/example-ABC123",
+                          "Name": "training/example",
+                          "CreatedDate": 1700000000,
+                          "LastChangedDate": 1700000000,
+                          "SecretVersionsToStages": {
+                            "00000000-0000-0000-0000-000000000001": [
+                              "AWSCURRENT"
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "PutSecretValue": {
+                    "summary": "Static Secrets PutSecretValue success",
+                    "value": {
+                      "ARN": "arn:aws:secretsmanager:us-east-1:000000000000:secret:training/example-ABC123",
+                      "Name": "training/example",
+                      "VersionId": "00000000-0000-0000-0000-000000000002",
+                      "VersionStages": [
+                        "AWSCURRENT"
+                      ]
+                    }
+                  },
+                  "GetSecretValue": {
+                    "summary": "Static Secrets GetSecretValue success",
+                    "value": {
+                      "ARN": "arn:aws:secretsmanager:us-east-1:000000000000:secret:training/example-ABC123",
+                      "Name": "training/example",
+                      "VersionId": "00000000-0000-0000-0000-000000000001",
+                      "SecretString": "DUMMY-secret-example",
+                      "VersionStages": [
+                        "AWSCURRENT"
+                      ],
+                      "CreatedDate": 1700000000
+                    }
+                  },
+                  "UpdateSecretVersionStage": {
+                    "summary": "Static Secrets UpdateSecretVersionStage success",
+                    "value": {
+                      "ARN": "arn:aws:secretsmanager:us-east-1:000000000000:secret:training/example-ABC123",
+                      "Name": "training/example"
+                    }
+                  },
+                  "DeleteSecret": {
+                    "summary": "Static Secrets DeleteSecret success",
+                    "value": {
+                      "ARN": "arn:aws:secretsmanager:us-east-1:000000000000:secret:training/example-ABC123",
+                      "Name": "training/example"
+                    }
+                  }
+                }
+              }
+            }
           },
           "400": {
             "description": "Validation/unsupported field/state conflict IAM ValidationError/MalformedPolicyDocument reject unknown trust or permissions semantics."
@@ -341,6 +588,9 @@
           },
           "401": {
             "$ref": "#/components/responses/HostAccessRequired"
+          },
+          "500": {
+            "description": "Secrets InternalServiceError: sanitized infrastructure/policy/database failure, no value or raw error disclosure."
           }
         }
       }

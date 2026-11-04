@@ -9,18 +9,21 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-BASE_MODELS = {'BrowserSessions', 'NativeIAMOwnership', 'ObjectStore', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'StackOwnership', 'StartupTokenVisibility'}
+BASE_MODELS = {'StackOwnership', 'BrowserSessions', 'SecretsDisclosureChannels', 'S3Versions', 'RESTDeploymentSnapshot', 'SecretsRevealEpoch', 'SQSStorageBudget', 'SecretsVersionLifecycle', 'ObjectStore', 'SQSLifecycle', 'StartupTokenVisibility', 'NativeIAMOwnership', 'SSMParameterState'}
 BASE_INVARIANTS = {
-    'BrowserSessions': {'AcceptedOnlyLiveParent', 'NoBrowserSDKAuthority', 'NoRawSDKCookie', 'ParentLifetimeBound', 'RevokedCookiesDenied', 'SDKAuthorityPreserved', 'TypeOK', 'UnrelatedSessionsPreserved'},
-    'NativeIAMOwnership': {'OwnershipExclusive', 'TypeOK'},
-    'ObjectStore': {'DenyWins', 'NoOrphans', 'NoUnauthorizedMutation', 'TypeOK'},
-    'RESTDeploymentSnapshot': {'NoStageOrphans', 'SnapshotsFrozen', 'TypeOK'},
-    'S3Versions': {'CurrentMatchesLatest', 'NoHistoryOrphans', 'TypeOK'},
-    'SQSLifecycle': {'AuthorizedMutations', 'ChangeOnlyInflight', 'FailedMutationAtomic', 'FreshReceipt', 'IdempotentCreateUnchanged', 'NoOrphans', 'ReceiptMutationCurrent', 'ReceiveOnlyEligible', 'ScopedMutation', 'TypeOK'},
-    'SQSStorageBudget': {'BudgetAccountsPhysical', 'DeleteScopeExact', 'FailedSendPreservesRows', 'ForeignRowsPreserved', 'LiveRowsPreserved', 'MaintenanceNotBudgetBlocked', 'PayloadByteCap', 'PhysicalRowCap', 'ReadRemovesOwnExpired', 'TypeOK'},
-    'SSMParameterState': {'DeleteEffect', 'DeniedPreservesState', 'OtherKeysUnchanged', 'OverwriteRefusal', 'PutVersion', 'ReadIsolation', 'TypeOK'},
-    'StackOwnership': {'OwnershipExclusive', 'TypeOK'},
-    'StartupTokenVisibility': {'CreatedFilePrivate', 'FileIdentityFrozen', 'HistoryVisibility', 'InvalidFileNeverEmits', 'TypeOK'},
+    'BrowserSessions': {'RevokedCookiesDenied', 'NoBrowserSDKAuthority', 'TypeOK', 'ParentLifetimeBound', 'AcceptedOnlyLiveParent', 'UnrelatedSessionsPreserved', 'NoRawSDKCookie', 'SDKAuthorityPreserved'},
+    'NativeIAMOwnership': {'TypeOK', 'OwnershipExclusive'},
+    'ObjectStore': {'TypeOK', 'NoOrphans', 'DenyWins', 'NoUnauthorizedMutation'},
+    'RESTDeploymentSnapshot': {'TypeOK', 'SnapshotsFrozen', 'NoStageOrphans'},
+    'S3Versions': {'CurrentMatchesLatest', 'TypeOK', 'NoHistoryOrphans'},
+    'SQSLifecycle': {'ReceiveOnlyEligible', 'FreshReceipt', 'ChangeOnlyInflight', 'IdempotentCreateUnchanged', 'NoOrphans', 'TypeOK', 'AuthorizedMutations', 'FailedMutationAtomic', 'ScopedMutation', 'ReceiptMutationCurrent'},
+    'SQSStorageBudget': {'FailedSendPreservesRows', 'ReadRemovesOwnExpired', 'LiveRowsPreserved', 'PayloadByteCap', 'DeleteScopeExact', 'ForeignRowsPreserved', 'BudgetAccountsPhysical', 'TypeOK', 'MaintenanceNotBudgetBlocked', 'PhysicalRowCap'},
+    'SSMParameterState': {'DeniedPreservesState', 'OverwriteRefusal', 'PutVersion', 'DeleteEffect', 'ReadIsolation', 'TypeOK', 'OtherKeysUnchanged'},
+    'SecretsDisclosureChannels': {'MetadataLogErrorRedacted', 'DeniedNoRaw', 'RawRequiresAuthorizedGet', 'TypeOK', 'RawEmissionRequiresGet'},
+    'SecretsRevealEpoch': {'ReturnedARNMatches', 'FreshEmissionHistory', 'TypeOK', 'NoUnmountedDisplay', 'VisibleContextMatches'},
+    'SecretsVersionLifecycle': {'ActiveHasCurrent', 'UniqueLabels', 'SeparateCurrentPrevious', 'NoOrphans', 'AuthorizedDisclosure', 'TypeOK', 'AuthorizedVersions', 'ImmutableVersions'},
+    'StackOwnership': {'TypeOK', 'OwnershipExclusive'},
+    'StartupTokenVisibility': {'HistoryVisibility', 'InvalidFileNeverEmits', 'TypeOK', 'FileIdentityFrozen', 'CreatedFilePrivate'},
 }
 IDENTIFIER = re.compile(r'^[A-Za-z][A-Za-z0-9_]*$')
 

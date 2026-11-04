@@ -8,13 +8,22 @@ performed. This is not a complete AWS service, public release or Challenge claim
 
 The seven store operations, private native JSON adapter, value-free metadata,
 version immutability, label transitions and dummy-value redaction source are
-preserved. Shared-file merge conflicts retain current main. As a result, this
-integration tree **does not initialize Secrets storage in the CLI server**, add
-its UI to the service menu, embed its console bundle, register its OpenAPI
-operations/E2E helpers, or register its three finite models. A direct native
-Gateway with no Secrets store fails closed; source files are not an enabled
-service. Root owns those integration changes and their final validation.
+preserved. The recovered native source at `9a6629e` passed all sixteen
+`TestSecret` cases normally and under the race detector, plus package vet.
+Five real SQLite ignored-write cases reproduced false acknowledgements on the
+prior source; exact affected-row checks now reject them, roll back every private
+table and permit a clean retry after the fault is removed.
 
+The next local source checkpoint adds normal CLI server store initialization,
+seven-operation capabilities, a Secrets Manager navigation entry, shared-root
+OpenAPI examples, three mandatory E2E helper registrations, and the three finite
+models. **Those new composition changes have not been built or executed yet.**
+The embedded console bundle still contains current main's UI until a canonical
+build is granted; changing a JSX import alone does not enable the served screen.
+No new CLI/SDK/browser, full-suite coverage, thirteen-model TLC or hosted CI pass
+is claimed. Existing main logout, Scalar/S3 guidance, SQS and raw-path source are
+preserved. The normal access middleware continues to require the host's local
+credential; native dummy SigV4 fields are not authentication.
 Exact prior shared deltas and all three merge blobs were archived outside the
 repository for review; generated bundles must be regenerated from the final
 combined source instead of restoring an old bundle over current main. The old

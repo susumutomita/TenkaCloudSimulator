@@ -34,7 +34,7 @@ class FormalGateTests(unittest.TestCase):
 
     def test_complete_registry_and_exact_mutations(self):
         registry = load_registry(self.root)
-        self.assertEqual({model['id'] for model in registry['models']}, {'RESTDeploymentSnapshot', 'S3Versions', 'SSMParameterState', 'SQSLifecycle', 'SQSStorageBudget', 'StackOwnership', 'ObjectStore', 'StartupTokenVisibility', 'BrowserSessions', 'NativeIAMOwnership'})
+        self.assertEqual({model['id'] for model in registry['models']}, {'RESTDeploymentSnapshot', 'S3Versions', 'SSMParameterState', 'SQSLifecycle', 'SQSStorageBudget', 'StackOwnership', 'ObjectStore', 'StartupTokenVisibility', 'BrowserSessions', 'NativeIAMOwnership', 'SecretsVersionLifecycle', 'SecretsRevealEpoch', 'SecretsDisclosureChannels'})
         for model in registry['models']:
             source = (self.root / model['model']).read_text()
             for mutant in model['mutants']:
@@ -66,6 +66,24 @@ class FormalGateTests(unittest.TestCase):
         path.write_text(json.dumps(registry))
         with self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
             load_registry(self.root)
+
+    def test_secrets_required_models_and_properties_cannot_disappear(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        for mid in ('SecretsVersionLifecycle', 'SecretsRevealEpoch', 'SecretsDisclosureChannels'):
+            with self.subTest(model=mid):
+                registry = json.loads(original)
+                registry['models'] = [m for m in registry['models'] if m['id'] != mid]
+                path.write_text(json.dumps(registry))
+                with self.assertRaises(GateError):
+                    load_registry(self.root)
+                registry = json.loads(original)
+                model = next(m for m in registry['models'] if m['id'] == mid)
+                model['properties'].remove(next(p for p in model['properties'] if p != 'TypeOK'))
+                path.write_text(json.dumps(registry))
+                with self.assertRaises(GateError):
+                    load_registry(self.root)
+        path.write_text(original)
 
     def test_missing_model_config_checksum_each_fail(self):
         for path in ('formal/ObjectStore.tla', 'formal/ObjectStore.cfg',

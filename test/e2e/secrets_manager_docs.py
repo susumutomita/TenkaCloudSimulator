@@ -27,8 +27,10 @@ def run():
         names = ["CreateSecret", "DescribeSecret", "ListSecrets", "PutSecretValue",
                  "GetSecretValue", "UpdateSecretVersionStage", "DeleteSecret"]
         examples = root["requestBody"]["content"]["application/x-amz-json-1.1"]["examples"]
-        targets = next(p for p in root["parameters"] if p["name"] == "X-Amz-Target")["schema"]["enum"]
-        assert all("secretsmanager."+name in targets and name in examples for name in names)
+        target = next(p for p in root["parameters"] if p.get("name") == "X-Amz-Target")
+        assert target["schema"]["type"] == "string", "Shared target header must not exclude other native services"
+        assert "secretsmanager.<operation>" in target["description"]
+        assert all(name in examples for name in names)
         sdk = client(endpoint, token)
 
         def send(name, value):

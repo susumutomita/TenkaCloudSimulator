@@ -271,6 +271,12 @@ def handler(event,context):
   run_scalar_s3_docs()
  def test_cloudformation_rest_native_sdk_lifecycle(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('cloudformation_rest.py'))],check=True)
+ def test_secrets_manager_native_two_teams_restart_and_redaction(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('secrets_manager.py'))],check=True)
+ def test_secrets_manager_console_reveal_context_and_hide(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('secrets_manager_console.py'))],check=True)
+ def test_secrets_manager_served_openapi_examples(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('secrets_manager_docs.py'))],check=True)
  def test_sqs_native_sdk_two_teams_restart_retention_and_cleanup(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('sqs.py'))],check=True)
  def test_apigateway_rest_sdk_permissions_and_two_teams(self):

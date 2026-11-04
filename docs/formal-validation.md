@@ -135,3 +135,16 @@ settings are not performed by this gate. Actual protection inspection through th
 available GitHub integration returned HTTP403 `Resource not accessible by
 integration`, so required-check/ruleset enforcement is **unknown**, not claimed
 configured. No security-sensitive repository settings were changed.
+
+
+## Pending Secrets Manager registration
+
+The local candidate extends main's ten required models/thirty-six controls with
+SecretsVersionLifecycle (six controls), SecretsRevealEpoch (three), and
+SecretsDisclosureChannels (five): thirteen baselines and fifty controls. All
+existing mandatory model/invariant sets remain protected. These additions are
+source declarations until the exact combined HEAD passes the complete gate.
+The applicability record binds only the named finite state/channel properties;
+SQL rollback/ignored-write faults, concrete policy matching, physical persistence,
+raw routing, browser accessibility and cryptography need separate native tests.
+No Go refinement, encryption or real-AWS equivalence is implied.

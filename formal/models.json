@@ -638,6 +638,229 @@
           "expect_invariant": "SDKAuthorityPreserved"
         }
       ]
+    },
+    {
+      "id": "SecretsVersionLifecycle",
+      "model": "formal/SecretsVersionLifecycle.tla",
+      "config": "formal/SecretsVersionLifecycle.cfg",
+      "bounds": "teams=2; versionsPerIncarnation=2; dummyValues=2; incarnationsPerTeam=2.",
+      "properties": [
+        "TypeOK",
+        "ImmutableVersions",
+        "NoOrphans",
+        "UniqueLabels",
+        "SeparateCurrentPrevious",
+        "ActiveHasCurrent",
+        "AuthorizedVersions",
+        "AuthorizedDisclosure"
+      ],
+      "limits": "Finite lifecycle/authority abstraction, not SQL transaction, cryptography, OS authentication, formatter redaction or Go implementation refinement. A team models one secret name and two never-reused ARN incarnations; process/token isolation and cursor bindings require actual native SDK tests. History contains abstract dummy values solely to detect an attempted immutable-version overwrite; runtime force deletion does not retain secret values. IAM is represented by a pure Boolean decision for the resolved resource; policy loading/error ordering and actual IAM rules require concrete Go tests. Shared Gateway/dispatch/server paths bind only Secrets composition into the native SQLite/immutable-policy authority path, not unrelated S3/SSM behavior or a proof of HTTP routing. Cursor signatures, quotas and restart persistence require concrete tests.",
+      "source_scope": [
+        "internal/aws/secret_store.go",
+        "internal/aws/secret_values.go",
+        "internal/aws/secret_query.go",
+        "internal/aws/secret_gateway.go",
+        "internal/aws/s3.go",
+        "internal/aws/ssm.go",
+        "internal/server/server.go"
+      ],
+      "mutants": [
+        {
+          "id": "OverwriteConflictingVersion",
+          "edits": [
+            {
+              "old": "                         /\\ UNCHANGED vars",
+              "new": "                         /\\ versions'={stored \\in versions : ~(stored.team=t /\\ stored.gen=generation[t] /\\ stored.id=i)} \\cup {Record(t,generation[t],i,v,a)}\n                         /\\ history'=history \\cup {Record(t,generation[t],i,v,a)}\n                         /\\ UNCHANGED <<active,generation,current,previous,receipts>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ImmutableVersions"
+        },
+        {
+          "id": "RetainDeletedVersions",
+          "edits": [
+            {
+              "old": "/\\ versions'={r \\in versions : r.team#t}",
+              "new": "/\\ versions'=versions",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoOrphans"
+        },
+        {
+          "id": "RetainPreviousLabelOnPromote",
+          "edits": [
+            {
+              "old": "/\\ previous'=[previous EXCEPT ![t]={remove}]",
+              "new": "/\\ previous'=[previous EXCEPT ![t]=@ \\cup {remove}]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "UniqueLabels"
+        },
+        {
+          "id": "OmitCreatePermission",
+          "edits": [
+            {
+              "old": "/\\ t \\notin active /\\ generation[t]<2 /\\ a",
+              "new": "/\\ t \\notin active /\\ generation[t]<2",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AuthorizedVersions"
+        },
+        {
+          "id": "OmitReadTeamBinding",
+          "edits": [
+            {
+              "old": "/\\ t \\in active /\\ caller=t /\\ g=generation[t] /\\ a",
+              "new": "/\\ t \\in active /\\ g=generation[t] /\\ a",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AuthorizedDisclosure"
+        },
+        {
+          "id": "OmitReadGenerationBinding",
+          "edits": [
+            {
+              "old": "/\\ t \\in active /\\ caller=t /\\ g=generation[t] /\\ a",
+              "new": "/\\ t \\in active /\\ caller=t /\\ a",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AuthorizedDisclosure"
+        }
+      ]
+    },
+    {
+      "id": "SecretsRevealEpoch",
+      "model": "formal/SecretsRevealEpoch.tla",
+      "config": "formal/SecretsRevealEpoch.cfg",
+      "bounds": "resources=2; requestOrNavigationEpochs=2; componentLifetimes=1.",
+      "properties": [
+        "TypeOK",
+        "NoUnmountedDisplay",
+        "FreshEmissionHistory",
+        "ReturnedARNMatches",
+        "VisibleContextMatches"
+      ],
+      "limits": "Finite explicit-retrieve/display model, not React, DOM, AbortController, memory zeroization or implementation refinement. Only the successful response path is modeled; native store/IAM must authorize before returning any secret. A returned ARN can differ and must be rejected. Retrieve, Hide and navigation invalidate epochs; unmount also clears visible state. Parent must remount on region/principal changes. Emission history captures the context at each acceptance so later Hide/navigation cannot relabel an earlier stale acceptance. Draft entry, mutation atomicity and form layout are outside this model. Parent main.jsx scope binds only Secrets routing/remount key (region/principal/navigation); the generated app.js binding is the canonical compiled artifact of those source inputs, independently checked by bundle/asset hashes. It does not model unrelated existing console services or prove JavaScript compilation.",
+      "source_scope": [
+        "tools/console/src/secrets-manager.jsx",
+        "tools/console/src/main.jsx",
+        "internal/server/web/app.js"
+      ],
+      "mutants": [
+        {
+          "id": "OmitReplyEpoch",
+          "edits": [
+            {
+              "old": "/\\ alive /\\ req.ticket=epoch /\\ returned=req.resource",
+              "new": "/\\ alive /\\ returned=req.resource",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FreshEmissionHistory"
+        },
+        {
+          "id": "OmitResponseArnBinding",
+          "edits": [
+            {
+              "old": "/\\ alive /\\ req.ticket=epoch /\\ returned=req.resource",
+              "new": "/\\ alive /\\ req.ticket=epoch",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReturnedARNMatches"
+        },
+        {
+          "id": "RetainVisibleValueOnUnmount",
+          "edits": [
+            {
+              "old": "/\\ alive'=FALSE /\\ epoch'=epoch+1 /\\ visible'={}",
+              "new": "/\\ alive'=FALSE /\\ epoch'=epoch+1 /\\ visible'=visible",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoUnmountedDisplay"
+        }
+      ]
+    },
+    {
+      "id": "SecretsDisclosureChannels",
+      "model": "formal/SecretsDisclosureChannels.tla",
+      "config": "formal/SecretsDisclosureChannels.cfg",
+      "bounds": "Four operation contexts, Boolean native authorization, four output sinks, and at most two captured emissions.",
+      "properties": [
+        "TypeOK",
+        "RawRequiresAuthorizedGet",
+        "MetadataLogErrorRedacted",
+        "DeniedNoRaw",
+        "RawEmissionRequiresGet"
+      ],
+      "limits": "Finite classification of plaintext acquisition/output call sites, not Go fmt/JSON/slog, SQL, encryption, memory secrecy or implementation refinement. The private plaintext() accessor itself has no authorization: its only production writer call site must follow successful native Get authorization. Actual private-holder formatting/JSON/slog sentinel tests and native denied-Get/error/metadata tests verify the Go mechanisms independently.",
+      "source_scope": [
+        "internal/aws/secret_material.go",
+        "internal/aws/secret_http.go"
+      ],
+      "mutants": [
+        {
+          "id": "RawAccessorForMetadata",
+          "edits": [
+            {
+              "old": "AcquireRaw == /\\ context.operation=GetValue /\\ context.allowed",
+              "new": "AcquireRaw == /\\ context.allowed",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RawRequiresAuthorizedGet"
+        },
+        {
+          "id": "RawAccessorDenied",
+          "edits": [
+            {
+              "old": "AcquireRaw == /\\ context.operation=GetValue /\\ context.allowed",
+              "new": "AcquireRaw == /\\ context.operation=GetValue",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RawRequiresAuthorizedGet"
+        },
+        {
+          "id": "PrivateSinkGetsRaw",
+          "edits": [
+            {
+              "old": "Emission(sink,FALSE)",
+              "new": "Emission(sink,TRUE)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MetadataLogErrorRedacted"
+        },
+        {
+          "id": "RetainRawAcrossContext",
+          "edits": [
+            {
+              "old": "/\\ raw'=FALSE",
+              "new": "/\\ raw'=raw",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RawRequiresAuthorizedGet"
+        },
+        {
+          "id": "DirectDeniedGetWriter",
+          "edits": [
+            {
+              "old": "/\\ context.operation=GetValue /\\ context.allowed /\\ raw",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DeniedNoRaw"
+        }
+      ]
     }
   ]
 }

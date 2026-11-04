@@ -42,7 +42,7 @@ S3のCloudFormationはBucketName/Versioning/PublicAccessBlock/ユーザーTags�
 
 SQSはnative JSON 1.0 APIのみ対応します。保持中・期限切れ未回収を含む物理message rowはプロセス全体10000件、UTF-8 bodyとserialized attribute JSONの合計64 MiBまでです。これはSQLiteファイル全体・プロセスメモリ・AWS課金サイズの上限ではありません。Azure/GCP/Sakura等の他クラウドは現在のGo実装では未対応です。Issueや計画は実装完了を意味しません。[開発状況](docs/development-status.md)を参照してください。Cloudscapeを使用していますが、本物のAWSコンソールとの全画面・全挙動の一致や実AWSとの差分検証完了は主張していません。
 
-Secrets Managerは[既存のローカル候補](docs/secrets-manager.md)を保存済みソースから引き継いで検証中です。この候補では共有サーバー・コンソール・API資料・形式registryの統合が未完了で、利用可能なサービス一覧には含めません。SecretStringの練習用値はSQLite内の平文であり、実AWSのKMS暗号化を再現していません。
+Secrets Managerは[既存のローカル候補](docs/secrets-manager.md)を保存済みソースから引き継いで検証中です。CLIサーバー・コンソール導線・API資料・形式registryへの接続ソースを準備中ですが、最新統合のビルド・実SDK・画面・全体CI検証は未実施のため、利用可能なサービス一覧には含めません。SecretStringの練習用値はSQLite内の平文であり、実AWSのKMS暗号化を再現していません。
 
 ## IAMロールからLambdaを作る
 
@@ -92,7 +92,7 @@ TLA_JAR=/path/to/tla2tools.jar make formal
 
 CIはstatementと未フィルターsource-line coverageを両方90%以上に強制します。`make before-commit`単独のcoverage判定はstatementのみで、source-line判定はCIのCobertura生成後ステージと上記の2コマンドで行います。SDK/browser、license、依存security、埋込asset、形式検査も行います。cross compileは他OSでの実行成功を意味しません。開発用Python/Node/Javaはruntime依存ではありません。UI・Scalarの再生成は権利表記とlockを保持する[各build手順](tools/console/README.md)・[Scalar手順](tools/scalar/README.md)・[Python runtimeの権利・再生成手順](tools/python/README.md)に従います。
 
-形式検査にはObjectStore、StackOwnership、S3Versions、NativeIAMOwnership、RESTDeploymentSnapshot、SSMParameterState、StartupTokenVisibility、BrowserSessions、SQSLifecycle、SQSStorageBudgetの10有限モデルと36の意図した欠陥検出があります。TLCと意図したmutantの反例で限定した安全条件を検査しますが、Go実装のrefinement、暗号、全AWS仕様・実AWSとの一致を証明するものではありません。変更はregistryとsource対応を更新し、固定HEADのCI結果で判断します。[形式検査](formal/README.md)、[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)。
+形式検査にはObjectStore、StackOwnership、S3Versions、NativeIAMOwnership、RESTDeploymentSnapshot、SSMParameterState、StartupTokenVisibility、BrowserSessions、SQSLifecycle、SQSStorageBudgetにSecretsVersionLifecycle、SecretsRevealEpoch、SecretsDisclosureChannelsを加える候補では13有限モデルと50の意図した欠陥検出を登録します（この統合HEADのTLC実行は未実施）。TLCと意図したmutantの反例で限定した安全条件を検査しますが、Go実装のrefinement、暗号、全AWS仕様・実AWSとの一致を証明するものではありません。変更はregistryとsource対応を更新し、固定HEADのCI結果で判断します。[形式検査](formal/README.md)、[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)。
 
 ## ライセンス
 

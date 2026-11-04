@@ -117,3 +117,27 @@ concurrency scheduling, persistence/crashes, distributed delivery or liveness.
 See [SQS limits and concrete test boundaries](../docs/sqs.md).
 
 The combined registry requires 10 finite baselines and 36 named mutation controls, including BrowserSessions, SQSLifecycle and SQSStorageBudget. This source integration is not a new-head TLC or Go execution result.
+
+
+## Secrets Manager local registration candidate
+
+The candidate appends three independent finite models while retaining main's ten
+models and all thirty-six controls unchanged: **13 baselines / 50 controls**.
+This is a source inventory, not a fresh execution result.
+
+- `SecretsVersionLifecycle`: two teams, two ARN incarnations, two immutable
+  versions and dummy values. Six mutations target version/label ownership and
+  abstract authorization. It does not model SQL failures, quotas, physical deletion,
+  cryptography, cursor signatures, concurrency or implementation refinement.
+- `SecretsRevealEpoch`: mounted view, changing identity/region/resource epochs,
+  returned ARN and late response emissions. Three mutations target stale reveal
+  visibility. This is not React/browser/fetch execution or accessibility proof.
+- `SecretsDisclosureChannels`: explicit authorized Get versus metadata/error/log
+  channel emission. Five mutations target raw-value disclosure. It does not prove
+  arbitrary Go formatting, memory erasure or metadata-field DLP.
+
+The native `TestSecretIgnoredWritesFailClosedAndRollback` checks five real SQLite
+ignored writes and full private-table rollback separately; the finite lifecycle
+model is not evidence of that failure atomicity. Current integration build,
+actual CLI/SDK/browser and the complete registered TLC gate remain pending.
+See [Secrets Manager scope and primary API references](../docs/secrets-manager.md).
