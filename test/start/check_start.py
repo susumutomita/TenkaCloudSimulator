@@ -10,11 +10,13 @@ import pty
 import select
 import shutil
 import signal
+import socket
 import subprocess
 import tempfile
 import time
 import urllib.error
 import urllib.request
+import urllib.parse
 
 ROOT = Path(__file__).resolve().parents[2]
 COMPILER = shutil.which(os.environ.get('GO', 'go'))
@@ -87,11 +89,13 @@ def launch(command, cwd, env, terminal=False, stop_signal=signal.SIGTERM):
         if master is not None:
             os.close(master)
         if endpoint:
+            address = urllib.parse.urlsplit(endpoint)
             try:
-                urllib.request.urlopen(endpoint + '/_simulator/health', timeout=.5)
+                connection = socket.create_connection((address.hostname, address.port), timeout=.5)
             except OSError:
                 pass
             else:
+                connection.close()
                 raise AssertionError('listener survived foreground shutdown')
 
 
