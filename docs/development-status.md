@@ -5,7 +5,8 @@ Owner cfn_callback is preparing a normal merge into existing PR410 ancestry,
 preserving all main native/auth/raw-path behavior, KMS constructor/store/dispatch
 and view/navigation/sidebar, fixed non-AWS scope utilities and SQS custody.
 The source union is19 models/98 controls and26 mandatory E2E cases. It is not
-a current execution result: canonical UI and every fresh gate remain pending.
+a current execution result: canonical UI rebuild,22 notices and asset checks
+pass; fresh native/browser, full coverage/E2E/formal and CI remain pending.
 Old99/base5c97 evidence remains separate; no unrelated unmerged service is added.
 
 ---

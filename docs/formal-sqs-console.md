@@ -3,7 +3,7 @@
 > Current source union: normal merge of main0a4 (merged KMS) into public
 > SQS HEAD99e3e4f. Main24 mandatory cases remain, plus two owned SQS helpers
 > (26 total). Registry19 baselines/98 controls (117 planned runs) is unexecuted.
-> Generated UI is provisional main bytes until the next canonical rebuild.
+> Canonical UI rebuild,22 original notices and asset checks pass.
 > New-head native/browser/coverage/E2E/formal/CI are pending. Old99/base5c97
 > runtime and actual103 formal successes are historical, not this new base.
 
