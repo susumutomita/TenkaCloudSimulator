@@ -82,6 +82,8 @@ jobs:
         run: |
           /tmp/simulator-tests/bin/python scripts/get-audit-tools.py /tmp/simulator-audit
           AXE_SCRIPT=/tmp/simulator-audit/axe.min.js make audit PYTHON=/tmp/simulator-tests/bin/python
+          AXE_SCRIPT_PATH=/tmp/simulator-audit/axe.min.js /tmp/simulator-tests/bin/python test/e2e/wafv2_console.py
+          CHALLENGE_ROOT=/tmp/simulator-challenges AXE_SCRIPT_PATH=/tmp/simulator-audit/axe.min.js /tmp/simulator-tests/bin/python test/e2e/wafv2_original_http.py
       - name: Finite state model check and deletion-guard mutation
         run: |
           curl --fail --location https://github.com/tlaplus/tlaplus/releases/download/v1.7.4/tla2tools.jar --output /tmp/tla2tools.jar

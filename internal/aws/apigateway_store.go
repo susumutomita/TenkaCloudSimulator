@@ -174,7 +174,7 @@ func (s *APIGatewayStore) DeleteAPI(ctx context.Context, region, id string) erro
 	}
 	// Stages are explicitly removed first; their immutable snapshot FK is strict.
 	if _, err = tx.ExecContext(ctx, "DELETE FROM aws_apigateway_stages WHERE region=? AND api_id=?", region, id); err != nil {
-		return err
+		return wafDeletionError(err)
 	}
 	if _, err = tx.ExecContext(ctx, "DELETE FROM aws_apigateway_apis WHERE region=? AND id=?", region, id); err != nil {
 		return err

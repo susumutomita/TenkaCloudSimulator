@@ -1,0 +1,23 @@
+SQL injection detector provenance
+
+Runtime dependency: github.com/corazawaf/libinjection-go v0.3.5
+Tag commit: de4ec9bfed163a9499c426e8c53af0805973cb35
+Module source: https://github.com/corazawaf/libinjection-go/tree/v0.3.5
+Exact module license is reproduced in GO-NOTICES.txt (BSD-3-Clause,
+Copyright (c) 2022-Present, Coraza). No source is copied into this repository.
+The module README identifies it as a Go port of libinjection. It has no
+required Go modules, cgo imports, runtime subprocess or network dependency.
+
+Original C project: https://github.com/libinjection/libinjection
+Additional original BSD-3-Clause copyright and license are retained in
+LIBINJECTION-COPYING.txt, obtained from pinned v3.10.0 commit
+bf234eb2f385b969c4f803b35fda53cffdd93922/COPYING. This identifies the upstream
+license, not a claim that the Go port exactly matches that C release.
+Copyright (c) 2012-2016, Nick Galbreath
+Copyright (c) 2017-2024, libinjection Contributors
+
+The simulator evaluates the documented supported WAF rule structure using
+libinjection tokenization/fingerprints. This is not AWS's proprietary SQLi
+engine and detection parity, LOW/HIGH equivalence, CloudWatch metrics,
+sampling, managed rule groups and global CloudFront WAF are not claimed.
+No payload-specific UNION/string shortcut or challenge-specific rule exists.
