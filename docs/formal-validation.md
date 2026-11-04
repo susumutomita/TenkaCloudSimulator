@@ -8,7 +8,8 @@ The native race, SDK, browser, containment and coverage gates remain independent
 ## Model inventory and sensitivity
 
 `formal/models.json` is the executable inventory. Every `.tla` and `.cfg` in
-`formal/` must be registered; the five existing models cannot be removed.
+`formal/` must be registered; the five original models and three Secrets models
+cannot silently disappear or lose their critical invariants.
 Each entry names exact implementation paths, finite bounds, limitations, checked
 invariants and mutations. The registry is a reviewable correspondence claim, not
 machine-discovered semantic coverage. A newly added implementation file is not
@@ -22,6 +23,9 @@ appropriate reviewed scope mapping and property argument.
 | S3Versions | one bucket/two keys; at most three history entries per key | suspended versions, byte quotas, SQL |
 | NativeIAMOwnership | two case-folded names; native/legacy exclusivity | trust parsing, full IAM, process isolation |
 | RESTDeploymentSnapshot | one API/two deployments/two handlers/one stage | path matching, Lambda execution/permissions |
+| SecretsVersionLifecycle | two teams/two versions/two values/two resource incarnations; immutable versions, labels, authority, deletion | SQL, concrete IAM/ARN parser, cursor signatures, quotas |
+| SecretsRevealEpoch | two resources/two request-navigation epochs; reveal freshness and ARN binding | React/DOM/AbortController, memory zeroization, backend authorization |
+| SecretsDisclosureChannels | four operation contexts/four sinks/two emissions; authorized raw acquisition and redacted private outputs | actual Go fmt/JSON/slog behavior, SQL, encryption, memory secrecy |
 
 All registered models run even for documentation-only changes. The supported CFG
 grammar is deliberately restricted to named invariants, init/next/specification,

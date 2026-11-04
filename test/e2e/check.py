@@ -267,6 +267,8 @@ def handler(event,context):
   subprocess.run([sys.executable,str(Path(__file__).with_name('secrets_manager.py'))],check=True)
  def test_secrets_manager_actual_console_and_disclosure_guards(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('secrets_manager_console.py'))],check=True)
+ def test_secrets_manager_served_api_examples_and_native_state(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('secrets_manager_docs.py'))],check=True)
  def test_apigateway_rest_sdk_permissions_and_two_teams(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('apigateway.py'))],check=True)
  def test_apigateway_console_and_actual_scalar_requests(self):

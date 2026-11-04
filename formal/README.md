@@ -35,10 +35,38 @@ RESTDeploymentSnapshot.tla bounds one API, two deployment IDs, two handler confi
 ## Required gate and applicability
 
 The executable inventory is now `formal/models.json`; all five existing models
-and their exact sensitivity mutations remain mandatory. See
+and their exact sensitivity mutations remain mandatory, alongside three bounded
+Secrets models (eight normals and nineteen controls in this candidate). See
 [formal validation](../docs/formal-validation.md) for exact changed-blob records,
 negative controls, evidence and the distinction between a workflow check,
 human scope review and separately configured repository merge protection.
 New runtime/state transitions are not covered by the existing five models merely
 because this suite passes. No new service, callback or Python/HTTP state-machine
 proof is implied by this inventory.
+
+## Secrets lifecycle, reveal and output channels
+
+`SecretsVersionLifecycle` checks two teams, two version IDs and dummy values,
+and two never-reused resource incarnations per team. Immutable history, one
+current/at-most-one previous label, guarded promotion, authorized version writes,
+physical-generation reads and cascade deletion are abstract transitions. Shared
+Gateway/server bindings cover only Secrets composition, not unrelated S3/SSM
+behavior, SQL refinement, cursor cryptography or full IAM. Actual store, fault,
+native SDK, persistence and isolation tests remain required.
+
+`SecretsRevealEpoch` captures response-acceptance context when an explicit
+retrieve succeeds. Hide/navigation/unmount must invalidate or clear it; the
+returned ARN must match. It bounds two resources and two request/navigation
+epochs, not React/AbortController/DOM or secret memory zeroization.
+
+`SecretsDisclosureChannels` bounds plaintext acquisition and output channels.
+Only the authorized Get writer may acquire raw material; metadata, private
+formatting/logging and sanitized errors must remain redacted, including denied
+requests. The model names the **call-site obligation**: `plaintext()` itself
+does not perform authorization. It bounds four operation contexts, four sinks
+and two historical emissions. Go formatting/JSON/slog rules are not proven by
+this abstraction. The generic private-holder formatting sentinel test remains
+required because Go fmt can bypass a Stringer in an unexported nested field.
+Actual native denied-Get/metadata/error tests exercise the concrete HTTP sink.
+Model guards, controls and tests are separate evidence; registering a path does
+not establish semantic coverage.

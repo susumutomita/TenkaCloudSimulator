@@ -1,4 +1,4 @@
-# Secrets Manager: P0 contract and bounded increment
+# Secrets Manager: bounded local subset
 
 Status: local candidate for Issue [266](https://github.com/susumutomita/TenkaCloudSimulator/issues/266),
 not a published release or complete AWS Secrets Manager implementation. The
@@ -6,8 +6,12 @@ native endpoint and embedded Cloudscape console share the same SQLite state.
 Capabilities advertise exactly the seven documented operations, SecretString
 only, plaintext dummy storage, the two supported labels and force-delete-only
 cleanup. KMS, rotation, binary values, replication, recovery windows and
-CloudFormation are explicitly unavailable. Scalar operation registration remains
-an integration task; the API reference must not advertise an unverified action.
+CloudFormation are explicitly unavailable. The API reference declares all
+seven examples at the actual shared POST / with exact `secretsmanager.Operation`
+targets, preserving the existing43 operation IDs and all paths. Named request
+examples require matching target/service/region headers and live returned ARNs;
+static response examples are not executed results. Mandatory served-example
+execution is prepared but has not run against the new embedded spec.
 
 Private redacted material, value-free metadata DTOs, immutable
 SQL schema, seven bounded store operations and a private JSON protocol adapter
@@ -16,8 +20,14 @@ tests, latest1.294 seconds), including immutable values, unique labels, physical
 ARN protection, late-failure rollback and pure-policy handling. The real embedded
 CLI and boto3 exercise all seven operations, two authenticated persistent team
 databases, cross-team endpoint401, participant IAM, restart and physical cleanup.
-The actual embedded console/browser checks pass as described below; applicability registration and complete quality gates remain unfinished; both
-bounded models and all nine intended mutants pass the focused TLC check. These checks are not a completed AWS service or Challenge claim.
+The prior embedded console/browser checks pass as described below. The original
+two bounded models and nine intended mutants pass focused TLC. This source
+phase normally merged public main2d8, registered three Secrets models alongside
+the original five, retained critical invariants and added native SDK, browser
+and served-document helpers as mandatory E2E tests. The new disclosure-channel
+model/five controls, full registered suite, exact-HEAD applicability receipt and
+complete quality gates have not run in this source phase. This is not a
+completed AWS service or Challenge claim.
 
 ## Scope and explicit storage boundary
 
@@ -235,8 +245,8 @@ overwrite, missing delete cascade, duplicate previous label, missing Create
 permission, missing Read team/generation binding, missing reply epoch/ARN guard
 and retained visible value after unmount. An initial mutant had a shadowed
 variable semantic error; that run was rejected, corrected and rerun. Parse
-errors/timeouts are never counted as counterexamples. Registry/applicability
-integration and its exact-HEAD receipt remain pending. These checks establish
+errors/timeouts are never counted as counterexamples. The unchanged two model sources are now registered alongside the new channel
+model, but the registered suite and exact-HEAD receipt remain pending. These checks establish
 only the documented finite model properties. `test/e2e/secrets_manager_console.py` passed the actual
 browser/SDK wizard, metadata-only reads, genuine delayed Get rejection after
 Hide and list navigation, explicit reveal/edit, version rollback and keyboard
@@ -247,6 +257,37 @@ form; all five canonical axe screens have zero violations, with zero page
 errors/external requests. The checker initially found unnamed notification
 dismiss buttons; explicit accessible names fixed the product issue. Screenshots are captured only after values
 are hidden, and no browser trace/HAR with dummy or user values is produced.
+
+### Disclosure-channel correspondence and limits
+
+The new `SecretsDisclosureChannels` model separates four operation contexts and
+four sinks, with at most two emissions. `AcquireRaw` represents the authorized
+Get **call site**, not a permission check inside `secretMaterial.plaintext()`.
+That accessor returns its bytes; the sole production plaintext writer in
+`secret_http.go` runs only after `SecretStore.Get` resolves the saved ARN,
+authorizes it and succeeds. `RawRequiresAuthorizedGet` and
+`RawEmissionRequiresGet` describe this call-site obligation.
+`MetadataLogErrorRedacted` and `DeniedNoRaw` describe private DTO/formatter/log/
+error output. Controls remove raw-access operation or permission guards, leak a
+private sink, retain raw state across contexts, or bypass the Get writer guard.
+Their TLC execution is pending; source/anchor validation is not counterexample
+evidence.
+
+| Channel | Concrete path | Required actual evidence |
+|---|---|---|
+| Private material / generic formatting | `secret_material.go` String/GoString/LogValue/MarshalJSON and private pointer indirection | `TestSecretMaterialGenericFormattingAndLoggingCannotExposeValues`: exported/private holders, JSON, slog and an unprotected negative control |
+| Metadata DTO | `SecretMetadata`, `SecretDescription`, `SecretListEntry` omit value fields | `TestSecretMetadataUsesValueFreeNativeWireShapes` and actual Describe/List responses |
+| Authorized Get writer | `secret_http.go` Get success explicitly calls plaintext after native Get | `TestSecretHTTPSevenOperationLifecycleRevealsOnlyAuthorizedGet` and participant IAM native/browser checks |
+| Denied Get before value access | `secret_values.go` saved-ARN resolve/pure authorize before querying values | `TestSecretGetAuthorizesSavedARNBeforeReadingAnyValue` uses a storage fault to distinguish denial from value access |
+| Sanitized errors | `secretHTTPError` fixed service errors and generic infrastructure failure | `TestSecretHTTPRejectsUnsupportedOrAmbiguousWritesWithoutDisclosure` and corrupted-policy500 test |
+
+Source scopes bind these specific confidentiality/authority boundaries. They do
+not prove Go reflection, JSON encoding, SQL, encryption, browser memory or
+whole-program noninterference. Unknown implementation paths still fail the
+applicability checker; no prose or directory-wide exemption was added. Stateful
+UI is bound to its reveal model rather than classified as presentation. Shared
+dispatch/server bindings concern only Secrets composition, preserving the other
+native APIs.
 
 Sources: [CreateSecret](https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_CreateSecret.html),
 [PutSecretValue](https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_PutSecretValue.html),
