@@ -99,6 +99,13 @@
       ]
     },
     {
+      "path": "internal/aws/kms_dispatch_boundary_test.go",
+      "sha256": "7d51ed25d64f4a34c359dedd4b66b03f679c5e04941228a77861cdb3c71c3d5b",
+      "disposition": "test-support",
+      "reason": "Tests-first actual Gateway regressions for identity-store outage/cancellation versus ordinary denial, clean retry and state frames; signed KMS intent with absent/conflicting target must not fall through to S3 or other services, while genuine native S3 stays intact. Current dispatch is unchanged and tests are expected to fail before the authorized fix. No full IAM or host-isolation proof.",
+      "models": []
+    },
+    {
       "path": "internal/aws/kms_fault_test.go",
       "sha256": "9368d7b6e7846e6897ca4301ee15c6d5cd3dba6a0e86a46da565dffc41dc6488",
       "disposition": "test-support",
