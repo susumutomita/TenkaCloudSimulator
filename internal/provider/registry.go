@@ -52,11 +52,27 @@ func (r *Registry) ServeHTTP(w http.ResponseWriter, request *http.Request) {
 		if !found {
 			path = ""
 		}
+		// Provider identifiers are literal routing syntax. Reject an encoded
+		// identifier or delimiter instead of letting URL.Path's decoding turn
+		// one segment into a different provider boundary.
+		prefix := Prefix + name
+		escaped := request.URL.EscapedPath()
+		if !strings.HasPrefix(escaped, prefix) || (len(escaped) > len(prefix) && escaped[len(prefix)] != '/') {
+			http.Error(w, "Provider not implemented", http.StatusNotFound)
+			return
+		}
+		tail := strings.TrimPrefix(escaped, prefix)
+		if tail == "" {
+			tail = "/"
+		}
 		clone := request.Clone(request.Context())
 		u := *request.URL
 		clone.URL = &u
 		clone.URL.Path = "/" + path
-		clone.URL.RawPath = ""
+		// Keep the escaped tail paired with the decoded Path. Leaf protocols
+		// must still distinguish an encoded separator from a literal separator.
+		// Never clean, redirect, or decode the provider-owned tail again.
+		clone.URL.RawPath = tail
 		request = clone
 	}
 	handler, ok := r.handlers[name]

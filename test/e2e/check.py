@@ -71,6 +71,10 @@ def submit(page):
  if dialog.is_visible():dialog.get_by_role('button').last.click()
  else:page.get_by_role('button',name=re.compile('^(Create bucket|Upload|Create parameter|Save changes)$')).last.click()
 class Conformance(unittest.TestCase):
+ def test_crossprovider_console_two_cli_state_and_authority(self):
+  # Run the actual standalone acceptance as a required case, never a source-only
+  # or optional/skip check. It must import the real browser/audit dependencies.
+  subprocess.run([sys.executable, str(Path(__file__).with_name('crossprovider_console.py'))], check=True, timeout=300)
  def test_lambda_execution_role_sdk_bridge_two_teams(self):
   with running(authenticated=True) as (endpoint,operator),running(authenticated=True) as (other,other_operator):
    def client(service,url,token):

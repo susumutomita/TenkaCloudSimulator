@@ -15,6 +15,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/susumutomita/TenkaCloudSimulator/internal/provider"
 )
 
 type accessSession struct {
@@ -243,6 +245,19 @@ func (a *Access) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		r.Header.Set("X-Simulator-Principal", principal)
 	}
+	// Preserve the authenticated credential identity independently of an operator's
+	// exercise selection. New providers consume this trusted context, not headers.
+	exerciseIdentity := r.Header.Get("X-Simulator-Principal")
+	if exerciseIdentity == "" {
+		exerciseIdentity = principal
+	}
+	credentialRole := provider.CredentialOperator
+	if principal != "simulator-admin" {
+		credentialRole = provider.CredentialParticipant
+	}
+	r = r.WithContext(provider.WithActor(r.Context(), provider.Actor{
+		CredentialIdentity: principal, ExerciseIdentity: exerciseIdentity, CredentialRole: credentialRole,
+	}))
 	if r.URL.Path == "/_simulator/v1/access" {
 		if principal != "simulator-admin" {
 			http.Error(w, "Only the host may issue participant access", 403)
