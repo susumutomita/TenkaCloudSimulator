@@ -352,3 +352,15 @@ no authenticated current AWS console was inspected, so pixel-identical fidelity
 is not claimed. “Local encryption test” is explicitly simulator-only, unlike the
 real AWS console. These checks do not establish full AWS KMS compatibility,
 full accessibility, cloud-grade key protection, or complete CI success.
+
+
+The final conformance harness now includes23 mandatory cases: both the unchanged
+KMS57-call SDK/served-example driver and the tracked KMS browser helper run as
+checked child processes. Either child failure fails the suite; neither has a
+skip/fallback. These wrappers were missing from the earlier21-case baseline;
+focused SDK/browser successes above are separate evidence. This test-support-only
+follow-up preserves every Go/model/asset byte and the embedded binary from e094485.
+The five CGO-disabled Linux/Darwin amd64/arm64 and Windows/amd64 cross-compilations
+passed at that unchanged runtime input; foreign-platform execution is unverified.
+The new23-case whole E2E, startup, audit and immutable final-head formal gate remain
+pending until actually run. No earlier success is relabeled as this source HEAD.

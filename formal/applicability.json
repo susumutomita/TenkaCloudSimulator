@@ -4,7 +4,7 @@
   "changes": [
     {
       "path": "docs/kms.md",
-      "sha256": "336f29293cbcd46ad938faff4459775ac42cc972862425bce0b481a7699008d9",
+      "sha256": "8537f416e6810640f37dd599460ca3ad646c6e098b2c2497e0bf9ccf1213bda8",
       "disposition": "documentation",
       "reason": "Document exact local KMS contract, official sources, legacy rights and proof boundaries; known dispatch blockers and new source execution status are explicit. No proof by prose.",
       "models": []
@@ -337,6 +337,13 @@
       "sha256": "0aeb1e523bb600f911cbc721ff2e8e9c12387dd3bf865449e158bc1d40acfba3",
       "disposition": "formal-infrastructure",
       "reason": "Validate finite model inputs and result classification; preserve all required model/invariant obligations and require all 48 existing per-model mutation IDs, with each individual removal rejected. This protects sensitivity-control inventory, not semantic coverage or Go refinement.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/check.py",
+      "sha256": "ef8baeafd9e9412514ea5898cd40108ff4676a0bf3cbf45643476af70cdb1b09",
+      "disposition": "test-support",
+      "reason": "Add two mandatory KMS conformance child executions with check=True; preserve all21 existing tests and no skip/fallback. This harness checks already implemented SDK/browser behavior and is not new runtime authority or a finite model proof. Current23case execution remains pending.",
       "models": []
     },
     {
