@@ -189,11 +189,10 @@ func secretMoveCurrent(ctx context.Context, tx *sql.Tx, region, arn, old, target
 	if _, err := tx.ExecContext(ctx, "DELETE FROM aws_secret_stages WHERE region=? AND arn=?", region, arn); err != nil {
 		return err
 	}
-	if _, err := tx.ExecContext(ctx, "INSERT INTO aws_secret_stages VALUES(?,?,'AWSPREVIOUS',?)", region, arn, old); err != nil {
+	if err := secretExecRows(ctx, tx, 1, "INSERT INTO aws_secret_stages VALUES(?,?,'AWSPREVIOUS',?)", region, arn, old); err != nil {
 		return err
 	}
-	_, err := tx.ExecContext(ctx, "INSERT INTO aws_secret_stages VALUES(?,?,'AWSCURRENT',?)", region, arn, target)
-	return err
+	return secretExecRows(ctx, tx, 1, "INSERT INTO aws_secret_stages VALUES(?,?,'AWSCURRENT',?)", region, arn, target)
 }
 
 func (s *SecretStore) Put(ctx context.Context, region, id, token string, material secretMaterial, authorize SecretAuthorizer) (SecretMutationResult, error) {
@@ -245,13 +244,13 @@ func (s *SecretStore) Put(ctx context.Context, region, id, token string, materia
 		return SecretMutationResult{}, err
 	}
 	now := s.now().UnixMilli()
-	if _, err = tx.ExecContext(ctx, "INSERT INTO aws_secret_versions VALUES(?,?,?,?,?)", region, meta.ARN, token, []byte(material.plaintext()), now); err != nil {
+	if err = secretExecRows(ctx, tx, 1, "INSERT INTO aws_secret_versions VALUES(?,?,?,?,?)", region, meta.ARN, token, []byte(material.plaintext()), now); err != nil {
 		return SecretMutationResult{}, err
 	}
 	if err = secretMoveCurrent(ctx, tx, region, meta.ARN, current, token); err != nil {
 		return SecretMutationResult{}, err
 	}
-	if _, err = tx.ExecContext(ctx, "UPDATE aws_secrets SET changed=? WHERE region=? AND arn=?", now, region, meta.ARN); err != nil {
+	if err = secretExecRows(ctx, tx, 1, "UPDATE aws_secrets SET changed=? WHERE region=? AND arn=?", now, region, meta.ARN); err != nil {
 		return SecretMutationResult{}, err
 	}
 	if err = tx.Commit(); err != nil {
@@ -298,7 +297,7 @@ func (s *SecretStore) Promote(ctx context.Context, region, id, target, remove st
 		if err = secretMoveCurrent(ctx, tx, region, meta.ARN, current, target); err != nil {
 			return SecretIdentity{}, err
 		}
-		if _, err = tx.ExecContext(ctx, "UPDATE aws_secrets SET changed=? WHERE region=? AND arn=?", s.now().UnixMilli(), region, meta.ARN); err != nil {
+		if err = secretExecRows(ctx, tx, 1, "UPDATE aws_secrets SET changed=? WHERE region=? AND arn=?", s.now().UnixMilli(), region, meta.ARN); err != nil {
 			return SecretIdentity{}, err
 		}
 	}

@@ -24,10 +24,21 @@ operation, release, merge or issue comment is part of this phase.
 The saved handoff reports earlier selected native tests, actual two-team
 CLI/boto3/browser checks and eight registered baselines with nineteen intended
 counterexamples at the prior candidate. Those are **historical reports**, not
-current-HEAD test or CI results. This integration phase has not run Go, SDK,
-browser, full coverage or TLC checks yet. New boundary tests are source only.
-Potential ignored-SQL-write acknowledgement cases are under investigation;
-no runtime failure is claimed before executing their regression tests.
+current-HEAD test or CI results. This integration phase ran all sixteen
+`TestSecret` native tests normally (1.527s) and under race (10.907s), and
+`go vet ./internal/aws` passed. It has not run CLI/SDK/browser, full repository
+coverage or TLC checks. The selected native tests do not establish server
+integration or a whole-repository coverage pass.
+
+Five real SQLite `RAISE(IGNORE)` controls failed on the preserved source:
+initial current-label insert, previous-label insert, new current-label insert,
+metadata timestamp update and parent deletion incorrectly acknowledged success.
+The fix checks directly affected rows before transaction commit: inserts and
+metadata updates require one; deletion requires one for an existing physical
+ARN or zero for an already absent ARN. All five now reject the ignored write,
+roll back all five Secrets tables, and allow clean corrected retries.
+Same-token retries and repeated deletion remain idempotent. This is a local
+persistence failure-atomicity correction, not an HTTP exploit claim.
 
 ## Scope and explicit storage boundary
 
@@ -217,7 +228,7 @@ epoch model is needed if async response acceptance can retain a secret after
 navigation. These are finite abstractions, not encryption/SQL/React refinement
 proofs. Root must register applicable models and run both global 90% floors,
 required CI/E2E/security/license gates before any later merge. Current integration
-checks are unexecuted. The following UI and model details describe saved source
+full integration checks remain unexecuted. The following UI and model details describe saved source
 and predecessor reports; they are not enabled or verified on this integration
 HEAD. No actual AWS, publication, release or deployment was performed.
 

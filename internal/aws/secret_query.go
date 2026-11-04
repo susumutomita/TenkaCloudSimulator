@@ -42,7 +42,11 @@ func (s *SecretStore) DeleteForce(ctx context.Context, region, arn string, autho
 		prefix := "arn:aws:secretsmanager:" + region + ":000000000000:secret:"
 		name = strings.TrimPrefix(arn[:len(arn)-7], prefix)
 	}
-	if _, err = tx.ExecContext(ctx, "DELETE FROM aws_secrets WHERE region=? AND arn=?", region, arn); err != nil {
+	expected := int64(0)
+	if meta.ARN != "" {
+		expected = 1
+	}
+	if err = secretExecRows(ctx, tx, expected, "DELETE FROM aws_secrets WHERE region=? AND arn=?", region, arn); err != nil {
 		return SecretDeletionResult{}, err
 	}
 	if err = tx.Commit(); err != nil {

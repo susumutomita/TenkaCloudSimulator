@@ -101,6 +101,39 @@ func TestSecretIgnoredWritesFailClosedAndRollback(t *testing.T) {
 			if after := secretStateSnapshot(t, db); after != before {
 				t.Fatal("ignored durable write left partial state", scenario)
 			}
+			// After removing the actual SQL fault, the same request must be
+			// retryable and idempotent; refusal cannot leave a hidden tombstone.
+			switch scenario {
+			case "initial-current":
+				created, retryErr := s.Create(ctx, "us-east-1", "training/ignored", "", first, newSecretMaterial("DUMMY-new"), allow)
+				if retryErr != nil {
+					t.Fatal("corrected create retry failed")
+				}
+				value, retryErr := s.Get(ctx, "us-east-1", created.ARN, "", "", allow)
+				if retryErr != nil || value.material.plaintext() != "DUMMY-new" {
+					t.Fatal("corrected create has wrong current value")
+				}
+			case "previous-label", "put-current", "metadata-update":
+				if _, retryErr := s.Put(ctx, "us-east-1", arn, second, newSecretMaterial("DUMMY-replacement"), allow); retryErr != nil {
+					t.Fatal("corrected put retry failed")
+				}
+				value, retryErr := s.Get(ctx, "us-east-1", arn, "", "AWSPREVIOUS", allow)
+				if retryErr != nil || value.VersionId != first || value.material.plaintext() != "DUMMY-original" {
+					t.Fatal("corrected retry did not restore previous/current invariant")
+				}
+				saved := secretStateSnapshot(t, db)
+				if _, retryErr = s.Put(ctx, "us-east-1", arn, second, newSecretMaterial("DUMMY-replacement"), allow); retryErr != nil || secretStateSnapshot(t, db) != saved {
+					t.Fatal("same-token retry changed state after fault recovery")
+				}
+			case "delete-parent":
+				if _, retryErr := s.DeleteForce(ctx, "us-east-1", arn, allow); retryErr != nil {
+					t.Fatal("corrected delete retry failed")
+				}
+				saved := secretStateSnapshot(t, db)
+				if _, retryErr := s.DeleteForce(ctx, "us-east-1", arn, allow); retryErr != nil || secretStateSnapshot(t, db) != saved {
+					t.Fatal("absent physical ARN delete ceased to be idempotent")
+				}
+			}
 		})
 	}
 }

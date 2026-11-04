@@ -85,6 +85,24 @@ func secretAuthorize(authorize SecretAuthorizer, action, arn string) error {
 	return authorize("secretsmanager:"+action, arn)
 }
 
+// SQL errors alone do not acknowledge a durable mutation: SQLite triggers can
+// RAISE(IGNORE) and report success with zero directly affected rows. Reject that
+// mismatch while the transaction can still roll back values and label changes.
+func secretExecRows(ctx context.Context, tx *sql.Tx, expected int64, query string, args ...any) error {
+	result, err := tx.ExecContext(ctx, query, args...)
+	if err != nil {
+		return err
+	}
+	changed, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if changed != expected {
+		return errors.New("secret durable mutation affected an unexpected row count")
+	}
+	return nil
+}
+
 func (s *SecretStore) Create(ctx context.Context, region, name, description, token string, material secretMaterial, authorize SecretAuthorizer) (SecretMutationResult, error) {
 	if !secretRegion(region) || !secretNamePattern.MatchString(name) || !secretToken(token) || !utf8.ValidString(description) || utf8.RuneCountInString(description) > 2048 || !utf8.ValidString(material.plaintext()) || len(material.plaintext()) < 1 || len(material.plaintext()) > 65536 {
 		return SecretMutationResult{}, secretInvalid()
@@ -153,16 +171,16 @@ func (s *SecretStore) Create(ctx context.Context, region, name, description, tok
 		return SecretMutationResult{}, err
 	}
 	now := s.now().UnixMilli()
-	if _, err = tx.ExecContext(ctx, "INSERT INTO aws_secret_arns VALUES(?,?,?,?)", arn, region, name, now); err != nil {
+	if err = secretExecRows(ctx, tx, 1, "INSERT INTO aws_secret_arns VALUES(?,?,?,?)", arn, region, name, now); err != nil {
 		return SecretMutationResult{}, err
 	}
-	if _, err = tx.ExecContext(ctx, "INSERT INTO aws_secrets VALUES(?,?,?,?,?,?)", region, arn, name, description, now, now); err != nil {
+	if err = secretExecRows(ctx, tx, 1, "INSERT INTO aws_secrets VALUES(?,?,?,?,?,?)", region, arn, name, description, now, now); err != nil {
 		return SecretMutationResult{}, err
 	}
-	if _, err = tx.ExecContext(ctx, "INSERT INTO aws_secret_versions VALUES(?,?,?,?,?)", region, arn, token, []byte(material.plaintext()), now); err != nil {
+	if err = secretExecRows(ctx, tx, 1, "INSERT INTO aws_secret_versions VALUES(?,?,?,?,?)", region, arn, token, []byte(material.plaintext()), now); err != nil {
 		return SecretMutationResult{}, err
 	}
-	if _, err = tx.ExecContext(ctx, "INSERT INTO aws_secret_stages VALUES(?,?,?,?)", region, arn, "AWSCURRENT", token); err != nil {
+	if err = secretExecRows(ctx, tx, 1, "INSERT INTO aws_secret_stages VALUES(?,?,?,?)", region, arn, "AWSCURRENT", token); err != nil {
 		return SecretMutationResult{}, err
 	}
 	if err = tx.Commit(); err != nil {
