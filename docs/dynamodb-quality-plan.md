@@ -144,3 +144,26 @@ production changes were formatted and passed. Only the late-commit fixture and
 SDK test environment were strengthened, then rechecked. A new main merge changes
 the candidate and requires appropriate fresh exact-source validation; do not
 carry these results over automatically.
+
+
+## Current main5c97 ignored-write repair (native checks executed)
+
+An immutable9b7f365 probe with only a new regression test reproduced five false
+HTTP200 acknowledgements under genuine SQLite RAISE(IGNORE): new/replacement
+PutItem, DeleteItem, and both DeleteTable child/parent refusal. The latter two
+changed owned rows. Ignored CreateTable instead surfaced400 ResourceNotFound
+while keeping rows; it was not a false200. Previous evidence is preserved.
+
+The current candidate checks exact RowsAffected in the same transaction for
+CreateTable, PutItem, DeleteItem and table+child deletion. A genuine missing-item
+DeleteItem accepts zero affected rows. Internal Store PutItem also revalidates
+semantic size rather than relying only on the HTTP caller. All six regression
+cases now return bounded500 with exact table/item row frames unchanged;
+missing-item deletion still returns200. No SQL details or row payloads are logged.
+
+Current selected ^TestDynamoDB aws/server normal PASS1.574s/1.160s; race
+PASS17.846s/12.969s; vet passed. The optional SDK test was skipped in that
+selection, then explicitly executed with the already-installed boto3 interpreter:
+PASS1.503s, actual loopbackB350000/S70000 roundtrip, oversize refusal and preserved
+state. The standalone two-CLI mandatory E2E is separate and still UNRUN.
+Whole-profile90%, full E2E, current formal models and applicability remain pending.

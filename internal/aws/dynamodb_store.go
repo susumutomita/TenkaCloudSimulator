@@ -127,7 +127,7 @@ func (s *DynamoDBStore) CreateTable(t DynamoDBTable) (DynamoDBTable, error) {
 	if err != nil {
 		return DynamoDBTable{}, err
 	}
-	if _, err = tx.Exec(`INSERT INTO aws_dynamodb_tables VALUES(?,?,?,?,?,?,?,?)`, t.Region, t.Name, t.TableID, string(schema), t.BillingMode, t.ReadUnits, t.WriteUnits, t.Created); err != nil {
+	if err = dynamoExecExact(tx, 1, `INSERT INTO aws_dynamodb_tables VALUES(?,?,?,?,?,?,?,?)`, t.Region, t.Name, t.TableID, string(schema), t.BillingMode, t.ReadUnits, t.WriteUnits, t.Created); err != nil {
 		return DynamoDBTable{}, err
 	}
 	return t, tx.Commit()
@@ -181,10 +181,14 @@ func (s *DynamoDBStore) deleteTableSnapshot(table DynamoDBTable) (DynamoDBTable,
 	if err = checkDynamoGeneration(tx, table); err != nil {
 		return DynamoDBTable{}, err
 	}
-	if _, err = tx.Exec("DELETE FROM aws_dynamodb_items WHERE region=? AND table_name=?", table.Region, table.Name); err != nil {
+	var children int64
+	if err = tx.QueryRow("SELECT count(*) FROM aws_dynamodb_items WHERE region=? AND table_name=?", table.Region, table.Name).Scan(&children); err != nil {
 		return DynamoDBTable{}, err
 	}
-	if _, err = tx.Exec("DELETE FROM aws_dynamodb_tables WHERE region=? AND name=? AND table_id=?", table.Region, table.Name, table.TableID); err != nil {
+	if err = dynamoExecExact(tx, children, "DELETE FROM aws_dynamodb_items WHERE region=? AND table_name=?", table.Region, table.Name); err != nil {
+		return DynamoDBTable{}, err
+	}
+	if err = dynamoExecExact(tx, 1, "DELETE FROM aws_dynamodb_tables WHERE region=? AND name=? AND table_id=?", table.Region, table.Name, table.TableID); err != nil {
 		return DynamoDBTable{}, err
 	}
 	if err = tx.Commit(); err != nil {
@@ -255,6 +259,13 @@ func (s *DynamoDBStore) PutItem(snapshot DynamoDBTable, pk, sk, itemJSON, condit
 	if err = json.Unmarshal([]byte(itemJSON), &item); err != nil {
 		return fmt.Errorf("invalid DynamoDB item document")
 	}
+	size, err := dynamoItemSize(item)
+	if err != nil {
+		return err
+	}
+	if size > maxDynamoDBItemBytes {
+		return dynamoFailure{"ValidationException", "Item exceeds the supported 400 KiB limit"}
+	}
 	actualPK, actualSK, err := snapshot.KeyFor(item)
 	if err != nil {
 		return err
@@ -280,7 +291,7 @@ func (s *DynamoDBStore) PutItem(snapshot DynamoDBTable, pk, sk, itemJSON, condit
 			return dynamoFailure{"LimitExceededException", "Simulator DynamoDB per-table item limit reached."}
 		}
 	}
-	if _, err = tx.Exec(`INSERT INTO aws_dynamodb_items VALUES(?,?,?,?,?) ON CONFLICT(region,table_name,pk,sk) DO UPDATE SET item=excluded.item`, region, table, pk, sk, itemJSON); err != nil {
+	if err = dynamoExecExact(tx, 1, `INSERT INTO aws_dynamodb_items VALUES(?,?,?,?,?) ON CONFLICT(region,table_name,pk,sk) DO UPDATE SET item=excluded.item`, region, table, pk, sk, itemJSON); err != nil {
 		return err
 	}
 	return tx.Commit()
@@ -343,7 +354,7 @@ func (s *DynamoDBStore) DeleteItem(snapshot DynamoDBTable, pk, sk, condition str
 	if condition == "exists" && n == 0 || condition == "not_exists" && n > 0 {
 		return dynamoFailure{"ConditionalCheckFailedException", "The conditional request failed"}
 	}
-	if _, err = tx.Exec("DELETE FROM aws_dynamodb_items WHERE region=? AND table_name=? AND pk=? AND sk=?", region, table, pk, sk); err != nil {
+	if err = dynamoExecExact(tx, int64(n), "DELETE FROM aws_dynamodb_items WHERE region=? AND table_name=? AND pk=? AND sk=?", region, table, pk, sk); err != nil {
 		return err
 	}
 	return tx.Commit()
