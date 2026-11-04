@@ -12,12 +12,14 @@ import subprocess
 from pathlib import Path
 
 from formal_model_gate import GateError, load_json, load_registry, exact_head_inputs, require
+from formal_module_metadata import require_metadata_only
 
 RECORD = 'formal/applicability.json'
 FORMAL_INFRA = {'formal/models.json', 'formal/tla2tools.sha256',
                 'scripts/check-formal.py', 'scripts/formal_model_gate.py',
                 'scripts/check-formal-applicability.py', 'scripts/formal_applicability.py',
-                'scripts/test-formal-gate.py', 'scripts/test-formal-applicability.py'}
+                'scripts/test-formal-gate.py', 'scripts/test-formal-applicability.py',
+                'scripts/formal_module_metadata.py'}
 KNOWN_VALIDATION = {
     'scripts/build-vulndb-snapshot.py', 'scripts/catalog-matrix.py',
     'scripts/check-assets.py', 'scripts/check-coverage.py', 'scripts/check-cross-build.py',
@@ -90,6 +92,21 @@ def disposition(path):
     return None
 
 
+def module_metadata_change(root, base):
+    # Never classify from the index/worktree or trust only a prose claim. Both
+    # files must already exist as ordinary blobs on both sides of this range.
+    inputs = []
+    for revision in (base, 'HEAD'):
+        pair = []
+        for path in ('go.mod', 'go.sum'):
+            entry = git(root, 'ls-tree', revision, '--', path).decode().split()
+            if not entry or entry[0] != '100644':
+                return False
+            pair.append(git(root, 'show', revision + ':' + path))
+        inputs.append(pair)
+    return require_metadata_only(inputs[0][0], inputs[1][0], inputs[0][1], inputs[1][1])
+
+
 def base_models(root, base):
     data = git(root, 'show', base + ':formal/models.json', optional=True)
     if data is None:
@@ -146,6 +163,9 @@ def validate_record(root, base, registry=None):
                 require(isinstance(binding['limits'], str) and binding['limits'].strip(), 'binding must acknowledge what is not modeled')
         else:
             kind = disposition(path)
+            if path == 'go.mod' and item['disposition'] == 'build-metadata':
+                require(module_metadata_change(root, base), 'go.mod is not a recognized require-annotation/grouping-only change with unchanged go.sum')
+                kind = 'build-metadata'
             require(not any(path in m['source_scope'] or path in (m['model'], m['config']) for m in [*models.values(), *prior.values()]), 'declared state/model scope requires a modeled disposition: ' + path)
             require(kind is not None, 'unclassified implementation/state path requires a model: ' + path)
             require(item['disposition'] == kind and not item['models'], 'nonformal disposition mismatch: ' + path)
