@@ -1,13 +1,12 @@
-# Current PR410 main-refresh source snapshot
+# Current SQS/main0a4 source refresh
 
-Public PR410 remains Draft at725960e; main5c97dc5 includes the merged local
-GCP/Azure storage integration. Owner `cfn_callback` is preparing a normal merge
-in an isolated worktree, preserving main native/auth/raw-path/menu behavior and
-adding only the SQS console/reference slice. This is source preparation:
-17 models/86 controls and24 mandatory E2E cases are the required union, not new
-execution results. Canonical generated UI rebuild, original22-package notices,
-asset checks and10 parameter-detector tests pass. Fresh native/browser,
-coverage/E2E/formal and hosted merge gates remain pending. Prior worktrees and private service candidates are preserved.
+Main0a4 contains individually merged KMS plus the prior GCP/Azure integration.
+Owner cfn_callback is preparing a normal merge into existing PR410 ancestry,
+preserving all main native/auth/raw-path behavior, KMS constructor/store/dispatch
+and view/navigation/sidebar, fixed non-AWS scope utilities and SQS custody.
+The source union is19 models/98 controls and26 mandatory E2E cases. It is not
+a current execution result: canonical UI and every fresh gate remain pending.
+Old99/base5c97 evidence remains separate; no unrelated unmerged service is added.
 
 ---
 
@@ -143,35 +142,3 @@ shared Gateway/dispatch/server/OpenAPI/navigation/assets/CI. Propose minimal
 additive hunks; preserve existing providers, IAM and SQLite state. SNS-to-SQS
 composition must agree atomicity/retry behavior without nested transactions.
 Inspect the service backlog and roster before claiming another service.
-
-## Local SQS console assignment — current bounded candidate
-
-| Owner | Base/branch | Verified local scope | Remaining gates |
-| --- | --- | --- | --- |
-| cfn_callback | mainb61 / feat/sqs-console-native-20261104 | Existing9nativeAPIs unchanged; Cloudscape queue/create/details/send/poll/visibility/delete; served9templates share actualSQLite. Canonical22packagebuild/assets/rights, nativeSDK335, focusedUI/SDK25, servedHTTP13/SDK10 and full23E2E/start/audit50 passed. | FinaldocHEAD immutable51/applicability receipts and currenthostedCI/security; no public merge |
-
-Native/server/core remain byte-identical to recorded mainb61; external native
-SQS/SNS/DynamoDB ownership is not overwritten. Issue48 and merged PR315 supplied
-the native slice and explicitly excluded UI. Targeted public/private duplicate
-checks found no separate console candidate; they are not an exhaustive alias
-inventory. No public Issue/comment/push/PR operation occurred in this assignment.
-
-FullGo/race/vet/assets/module/build passed at e039c50 from one fresh profile:
-statements94.80%, unfilteredsource90.21%, unchanged floors/no profile union.
-The last immutable model input341dec2 passed11baselines/40specific controls;
-policy19/applicability21 units and20exact blobs passed. The UI's first run found
-only a heading-selector ambiguity; two assertions now require h1, with no timeout
-or production changes. Its corrected run passed all9UIoperations, role403 and
-peer/token/region/restart isolation, current receipts and fourPC/mobileaxe states.
-See [scope/limits](sqs-console.md) and [formal correspondence](formal-sqs-console.md).
-
-AWS public text guides were read; two official screenshot GETs returned403 and
-were not retried by another route. No authenticatedAWS pixels, actualSQS,
-cloud credentials, deployment or billing changes are part of this work. All
-public merges remainHOLD. Runtime leases are root-coordinated; local evidence
-and assignments do not imply all-service or full-AWS completion.
-
-The full23-case run at ebb3ba5 passed in374.264seconds with actual make-start
-and the50-screen audit; all21source hashes stayed unchanged and audit outputs
-were saved outside without restoring tracked files. Final documentationHEAD
-receipts are separate immutable evidence, not inferred from341/e039/ebb3 hashes.

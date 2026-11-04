@@ -10,7 +10,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from formal_model_gate import GateError, apply_mutant, load_registry, run_suite, validate_result, invariants, exact_head_inputs, REQUIRED_MUTANTS
+from formal_model_gate import BASE_MODELS, REQUIRED_MUTANTS, GateError, apply_mutant, load_registry, run_suite, validate_result, invariants, exact_head_inputs
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -34,7 +34,7 @@ class FormalGateTests(unittest.TestCase):
 
     def test_complete_registry_and_exact_mutations(self):
         registry = load_registry(self.root)
-        self.assertEqual({model['id'] for model in registry['models']}, {'AzureBlobState', 'BlobRange', 'BrowserSessions', 'GCPStorageState', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'StackOwnership', 'StartupTokenVisibility', 'SQSConsoleEpoch'})
+        self.assertEqual({model['id'] for model in registry['models']}, {'ObjectStore', 'StackOwnership', 'S3Versions', 'NativeIAMOwnership', 'RESTDeploymentSnapshot', 'SSMParameterState', 'StartupTokenVisibility', 'SQSLifecycle', 'SQSStorageBudget', 'BrowserSessions', 'ProviderActor', 'GCPStorageState', 'AzureBlobState', 'ProjectAuthority', 'BlobRange', 'ProviderPath', 'KMSKeyState', 'KMSProtocolAdmission', 'SQSConsoleEpoch'})
         for model in registry['models']:
             source = (self.root / model['model']).read_text()
             for mutant in model['mutants']:
@@ -45,7 +45,7 @@ class FormalGateTests(unittest.TestCase):
     def test_every_required_control_is_protected_against_single_removal(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
-        self.assertEqual(sum(len(v) for v in REQUIRED_MUTANTS.values()), 86)
+        self.assertEqual(sum(len(v) for v in REQUIRED_MUTANTS.values()), 98)
         for model_id, controls in REQUIRED_MUTANTS.items():
             for control in controls:
                 with self.subTest(model=model_id, control=control):
@@ -509,6 +509,25 @@ class FormalGateTests(unittest.TestCase):
                     entry['mutants'] = [m for m in entry['mutants'] if m['id'] != mutant['id']]
                     path.write_text(json.dumps(changed))
                     with self.assertRaisesRegex(GateError, 'required mutation control was removed|model needs a sensitivity control'):
+                        load_registry(self.root)
+        path.write_text(original)
+
+    def test_each_required_mutation_control_cannot_disappear(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        registry = json.loads(original)
+        self.assertEqual(set(REQUIRED_MUTANTS), BASE_MODELS)
+        self.assertEqual(sum(map(len, REQUIRED_MUTANTS.values())), 98)
+        self.assertEqual({m['id']: {c['id'] for c in m['mutants']} for m in registry['models']}, REQUIRED_MUTANTS)
+        for model in registry['models']:
+            for mutant in model['mutants']:
+                with self.subTest(model=model['id'], mutant=mutant['id']):
+                    changed = json.loads(original)
+                    target = next(m for m in changed['models'] if m['id'] == model['id'])
+                    target['mutants'] = [m for m in target['mutants'] if m['id'] != mutant['id']]
+                    path.write_text(json.dumps(changed))
+                    expected = 'required mutation control was removed' if target['mutants'] else 'model needs a sensitivity control'
+                    with self.assertRaisesRegex(GateError, expected):
                         load_registry(self.root)
         path.write_text(original)
 

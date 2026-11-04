@@ -124,7 +124,7 @@ BrowserSessions, SQSLifecycle and SQSStorageBudget remain mandatory in the large
 The registry adds ProviderActor (7 properties/6 sensitivity controls),
 GCPStorageState (10 properties/8 controls), and AzureBlobState (10 properties/11
 controls), plus ProjectAuthority (10 properties/6 controls), BlobRange (11 properties/8 controls), and ProviderPath (finite carrier properties/7 controls), retaining all existing models/controls. The current source registry
-has17 models/86 controls. Individual finite runs and the final immutable integrated
+has19 models/98 controls in main before this KMS restack. Individual finite runs and the final immutable integrated
 run are recorded separately; registration alone is not a successful TLC run.
 
 ProviderActor abstracts post-authentication emission, selected identity and
@@ -162,17 +162,61 @@ XML order, escaping, disclosure, actual SDK parsing and SQL initialization are n
 proved by this association. Independent serializer byte-goldens and native HTTP
 checks cover the wire format separately.
 
-All86 established sensitivity-control IDs (including36 earlier baseline controls) have literal per-model minimum sets. Real-filesystem tests remove each control individually and require rejection. This protects the checked inventory, not semantic completeness or a Go implementation proof.
+All98 established sensitivity-control IDs (including36 earlier baseline controls) have literal per-model minimum sets. Real-filesystem tests remove each control individually and require rejection. This protects the checked inventory, not semantic completeness or a Go implementation proof.
 
-## SQS console epoch and receipt custody
 
-`SQSConsoleEpoch` adds one finite baseline and four literal-required controls to
-the main16-model/82-control registry:17 baselines and86 controls (103 runs).
-All main properties, bounds, original controls and individual-removal fixtures
-remain required. Registration is source preparation, not a new-head TLC result.
-The older SQS branch725960e and its51 runs are historical evidence only.
+## Bounded KMS key-state registration
 
-The model covers bounded view epochs, accepted replies and private receipt
-custody. It does not prove native receipt validity, authentication, React/DOM or
-thread execution, HTTP/SQL behavior, or a Go implementation refinement. See
-[source/native correspondence and limits](../docs/formal-sqs-console.md).
+KMSKeyState adds two fixed team/key namespaces sharing one home region, two request
+regions, two contexts/blob slots and an abstract two-encryption counter ceiling.
+Eight named controls exercise missing permission/team/region/state/context/key
+binding guards and the counter ceiling. Create/SetEnabled/Encrypt/Decrypt are
+atomic successful-event transitions; rejection frames, actual AES/nonce behavior,
+policy/JSON parsing, metadata/list outputs, SQL write acknowledgment/rollback,
+constructor wiring and host authentication remain native/integration obligations.
+The existing ten model entries and their36 controls are preserved; the new model
+and all four invariants are required by the loader and removal-negative fixtures.
+The registry is canonical; the old standalone KMS fragment is preserved outside
+production history as a handoff artifact and removed from the current tree.
+The immutable91172d0 source passed12 baselines/48 required controls and34 exact
+changed-blob declarations. Native/SDK/browser/whole-quality results are separate
+in [KMS service evidence](../docs/kms.md); current hosted CI remains required.
+
+
+## KMS protocol admission and policy snapshot
+
+KMSProtocolAdmission independently normalizes KMS/other/missing target, service
+hint and signing-scope metadata, credential-format/region consistency, four identity
+lookup outcomes and one immutable permission snapshot. One optional live-policy
+change after lookup must not replace the captured request permit. Five safety
+properties plus TypeOK reject KMS-to-S3 fallback, authority inferred from wire
+metadata,500-to403 outage masking, missing identity success and missing/conflicting
+KMS target success. Rejected/error replies expose no abstract resource data or
+mutation. Four controls remove signing intent, mask an outage, ignore the target
+or read live policy instead of the snapshot. Type/parse errors are not acceptable
+counterexamples. Actual91172d0 runs produced all four named invariant violations
+with exit12 and transition traces; the atomic model baseline and eight controls
+also passed their intended checks.
+This is not raw-header/SigV4 parsing, local token authentication, real IAM/SQL,
+other AWS branch authorization or a Go refinement proof. Atomic KMSKeyState and
+its eight controls remain unchanged; protocol claims are not assigned to that
+successful-event model. Real Gateway metadata/conflict cases, identity DB failure
+frames/retry and a real body-read-barrier snapshot test provide separate native
+bridge obligations. The registry is12/48, preserving all earlier models/invariants/controls.
+Native bridge results are recorded separately in [KMS](../docs/kms.md).
+Documentation-only children do not change model bytes; each final HEAD still
+requires its own immutable input/applicability gate before publication.
+
+
+Current main-preserving KMS restack:18 baselines/94 controls, retaining every main16/82 entry and adding only the two owned KMS models. The current merged source has not run TLC, native/browser or whole-profile acceptance. Earlier911/8ccc receipts do not establish current-head success.
+
+## Current SQS console main integration
+
+Main0a4 contributes18 baselines/94 mandatory controls, including the two
+merged KMS models. SQSConsoleEpoch adds one baseline/four literal-protected
+controls:19 baselines/98 controls,117 planned executions. Every existing
+main model/property/bound/control/config and removal fixture is retained.
+This source union has not run TLC; old99/base5c97 actual103 success is historical.
+The SQS epoch model covers bounded accepted replies/private receipt custody,
+not native receipt validity, authentication, React/DOM/thread execution or
+Go/SQLite refinement. See [correspondence](../docs/formal-sqs-console.md).
