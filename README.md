@@ -18,6 +18,7 @@ Go 1.26が必要（CIは1.26.10）。コンソールは <http://127.0.0.1:4566/_
 | S3 | ListBuckets/CreateBucket/HeadBucket/GetBucketLocation/DeleteBucket/ListObjectsV2/PutObject/GetObject/HeadObject/DeleteObject、Get/PutBucketVersioning、ListObjectVersions、Get/Put/DeletePublicAccessBlock、Get/Put/DeleteBucketTagging | path-style、4リージョン。versioning/versions・bucket public-access-block対応。multipart/ACLなし |
 | IAM | 9 role/inline-policy Query操作、Lambda service trust、Cloudscape作成Wizard | root path/限定service principal、managed policies/STSなし。[詳細](docs/iam.md) |
 | Systems Manager Parameter Store | PutParameter/GetParameter/GetParameters/GetParametersByPath/DescribeParameters/DeleteParameter | StandardのString/StringList/textのみ。SecureString/KMS/labelsなし |
+| DynamoDB | CreateTable/ListTables/DescribeTable/DeleteTable、PutItem/GetItem/DeleteItem | キーはS/N/B、HASH+RANGE任意。条件式はattribute_(not_)exists(パーティションキー)のみ。Query/Scan/索引/Streamsなし。[詳細](docs/dynamodb.md) |
 | CloudFormation | CreateStack/DescribeStacks/DeleteStack | S3 Bucket、SSM Parameter、inline Python Lambda Function、1 inline identity policy付きIAM Role。Ref/Sub/GetAttの限定評価。その他は明示エラー |
 | Lambda | CreateFunction/ListFunctions/GetFunctionConfiguration/UpdateFunctionCode/Invoke/DeleteFunction | 埋込CPython 3.12.16/WASIでPythonコードを実行。128 MiB/1–30秒、同期のみ。限定inline CFNに対応。関数内SSM/S3 SDKは限定対応。network・Function URLは未対応 |
 

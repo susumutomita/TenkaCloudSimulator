@@ -42,6 +42,10 @@ func (g *Gateway) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		g.serveSSM(w, r)
 		return
 	}
+	if strings.HasPrefix(r.Header.Get("X-Amz-Target"), "DynamoDB_20120810.") {
+		g.serveDynamoDB(w, r)
+		return
+	}
 	g.serveS3(w, r)
 }
 func ssmJSON(w http.ResponseWriter, status int, value any) {

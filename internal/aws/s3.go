@@ -42,6 +42,7 @@ type Gateway struct {
 	Stacks     *StackStore
 	Lambdas    *LambdaStore
 	Roles      *IAMRoleStore
+	DynamoDB   *DynamoDBStore
 }
 type failure struct {
 	XMLName   xml.Name `xml:"Error"`
