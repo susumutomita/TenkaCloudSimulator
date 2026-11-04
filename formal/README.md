@@ -141,3 +141,5 @@ pass on merged source; those do not execute a TLA model. The combined registered
 TLC suite, full Go/dual90 coverage, canonical UI rebuild, whole E2E and
 exact-HEAD/hosted CI have not run on this merged candidate. No successful whole
 or formal gate is claimed.
+
+All43 established sensitivity-control IDs are protected by literal per-model minimum sets. Removing any single control, including an older baseline control, is a gate error; real-filesystem negative tests exercise each removal. This protects the finite-check inventory, not the semantic completeness of the models or a refinement proof.

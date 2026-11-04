@@ -25,7 +25,21 @@ BASE_INVARIANTS = {
     'StackOwnership': {'OwnershipExclusive', 'TypeOK'},
     'StartupTokenVisibility': {'CreatedFilePrivate', 'FileIdentityFrozen', 'HistoryVisibility', 'InvalidFileNeverEmits', 'TypeOK'},
 }
-REQUIRED_MUTANTS = {'CloudWatchLogsLifecycle': {'OmitPutAuthority', 'AcceptInvalidBatch', 'OmitTokenGeneration', 'OmitDeleteEventCascade', 'OmitTokenTeam'}, 'CloudWatchLogsViewEpoch': {'OmitResponseEpoch', 'AcceptUnmountedReply'}}
+# Established sensitivity controls may be retired only by an explicit gate-policy change.
+REQUIRED_MUTANTS = {
+    'BrowserSessions': {'IgnoreParentValidity', 'LogoutClearsOthers', 'LogoutKeepsSession', 'LogoutRevokesSDK', 'RawOperatorCookie'},
+    'CloudWatchLogsLifecycle': {'AcceptInvalidBatch', 'OmitDeleteEventCascade', 'OmitPutAuthority', 'OmitTokenGeneration', 'OmitTokenTeam'},
+    'CloudWatchLogsViewEpoch': {'AcceptUnmountedReply', 'OmitResponseEpoch'},
+    'NativeIAMOwnership': {'LegacyAdoptsNativeRole'},
+    'ObjectStore': {'MissingDeletionGuard'},
+    'RESTDeploymentSnapshot': {'MutableSnapshot'},
+    'S3Versions': {'CurrentOnlyDeletion'},
+    'SQSLifecycle': {'AcceptStaleReceipt', 'ChangeWithoutInflight', 'CrossScopeQueueDelete', 'DeleteWithoutCascade', 'FailedWriteChangesState', 'IdempotentCreateChangesState', 'ReceiptNotRotated', 'ReceiveAfterRetention', 'ReceiveBeforeDelay', 'SendWithoutParentCheck', 'UnauthorizedSend'},
+    'SQSStorageBudget': {'BlockLegacyMaintenance', 'CommitPurgeOnFailedSend', 'DiscardOwnedLiveRows', 'IgnoreExpiredForeignCharge', 'OmitPayloadByteCap', 'OmitPhysicalRowCap', 'PurgeExpiredForeignRows'},
+    'SSMParameterState': {'DoNotAdvanceVersion', 'IgnoreExplicitDeny', 'IgnoreOverwriteGuard', 'ReadWrongName', 'ReadWrongRegion'},
+    'StackOwnership': {'ReclaimDriftedResource'},
+    'StartupTokenVisibility': {'OmittedCIGuard', 'OmittedTTYGuard', 'OverwriteExistingToken'},
+}
 IDENTIFIER = re.compile(r'^[A-Za-z][A-Za-z0-9_]*$')
 
 # TLC1.7.4 ModelConfig.ALL_KEYWORDS. A directive cannot masquerade as a
