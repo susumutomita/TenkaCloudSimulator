@@ -63,12 +63,15 @@ make cross-check               # 5 OS/archのcompile
 python3 -m venv /tmp/tcsim-tests
 /tmp/tcsim-tests/bin/pip install -r scripts/requirements-test.txt
 /tmp/tcsim-tests/bin/playwright install chromium
-make e2e PYTHON=/tmp/tcsim-tests/bin/python
+/tmp/tcsim-tests/bin/python scripts/get-audit-tools.py /tmp/simulator-audit
+AXE_SCRIPT=/tmp/simulator-audit/axe.min.js make e2e PYTHON=/tmp/tcsim-tests/bin/python
 # システムChromiumも CHROMIUM_EXECUTABLE=/path/to/chromium で使用可能
 TLA_JAR=/path/to/tla2tools.jar make formal
 npm ci --prefix tools/console --ignore-scripts
 node tools/console/build.mjs
 ```
+
+E2Eのアカウントメニュー検証はaxeを必須とする。上記の固定ツール取得と`AXE_SCRIPT`指定を省略すると失敗し、アクセシビリティ検証をskipしない。
 
 statementとsource-line coverageの両方90%必須。ホストPythonはSDK/browser/coverage/license等の開発支援だけに使用する。Lambda用CPythonはGoに埋め込み、実行時の外部Pythonは不要。[Lambdaの範囲・制限](docs/lambda.md)、[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)、[画面の再現範囲](docs/console.md)、[形式検証](formal/README.md)、[引継ぎ](docs/handoff/README.md)。
 

@@ -42,3 +42,13 @@ The finite `formal/BrowserSessions.tla` model abstracts opaque/hash credentials 
 
 
 Focused verification on 2026-11-04: `go test -race ./internal/server -run 'TestAccess|TestBrowser' -count=1` passed (1.074s); the official Cloudscape bundle and standalone binary built. The finite baseline checked 7,348 distinct states, and all five mutations failed their exact intended invariants (logout retains selected session, ignores parent validity, accepts raw operator cookie, clears unrelated sessions, or revokes SDK authority). The actual standalone browser helper passed operator and participant sign-out, protected/replayed-cookie401, re-login, unrelated browser/SDK preservation, two-team separation, failed-network/server sign-out and retry, and truthful unsafe-mode controls. Keyboard navigation uses the pinned official component's ArrowDown and verifies focus on Sign out before Enter; End is not claimed as supported. Four operator/participant × 1440px/390px account-menu states passed axe and reflow. External requests and browser errors were zero; local dummy buckets were deleted and all test processes closed. Screenshots contain only dummy data and masked login input. Full repository regression/coverage and registered model gates remain integration responsibilities.
+
+
+The account-menu helper is a mandatory `Conformance` subprocess in `make e2e`. Prepare the pinned development-only tool first and pass the same canonical variable as `audit.py`:
+
+```sh
+/tmp/tcsim-tests/bin/python scripts/get-audit-tools.py /tmp/simulator-audit
+AXE_SCRIPT=/tmp/simulator-audit/axe.min.js make e2e PYTHON=/tmp/tcsim-tests/bin/python
+```
+
+Missing `AXE_SCRIPT` or an unreadable tool fails the helper; there is no optional accessibility skip. CI obtains the existing pinned axe tool before E2E and continues to run the separate `make audit` checks afterward.

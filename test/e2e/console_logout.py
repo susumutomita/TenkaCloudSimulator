@@ -8,7 +8,7 @@ from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parent))
 from check import running,boto3,Config,sync_playwright,expect,REPORTS,assert_reflow
 
-axe=Path(os.environ['AXE_SCRIPT_PATH']).read_text()
+axe=Path(os.environ['AXE_SCRIPT']).read_text()
 def sdk(endpoint,token):
  client=boto3.client('s3',endpoint_url=endpoint,region_name='us-east-1',aws_access_key_id='TCSIMLOCAL',aws_secret_access_key='dummy',config=Config(s3={'addressing_style':'path'},retries={'max_attempts':0}))
  client.meta.events.register('before-sign.s3',lambda request,**kwargs:request.headers.add_header('X-Simulator-Token',token));return client
