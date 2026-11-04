@@ -20,6 +20,8 @@ from botocore.exceptions import ClientError
 OPERATIONS=('CreateQueue','ListQueues','GetQueueUrl','GetQueueAttributes',
             'SendMessage','ReceiveMessage','ChangeMessageVisibility',
             'DeleteMessage','DeleteQueue')
+MAIN_OPERATION_IDS=('AddPermission', 'AzureCreateContainer', 'AzureDeleteBlob', 'AzureDeleteContainer', 'AzureGetBlob', 'AzureGetBlobProperties', 'AzureGetContainerProperties', 'AzureListBlobs', 'AzureListContainers', 'AzurePutBlob', 'Capabilities', 'CreateBucket', 'CreateDeployment', 'CreateFunction', 'CreateResource', 'CreateRestApi', 'CreateStage', 'DeleteBucket', 'DeleteFunction', 'DeleteIdentityPolicy', 'DeleteObject', 'DeleteResource', 'DeleteRestApi', 'DeleteStage', 'GCPCreateBucket', 'GCPDeleteBucket', 'GCPDeleteObject', 'GCPDownloadObject', 'GCPGetBucket', 'GCPGetObject', 'GCPListBuckets', 'GCPListObjects', 'GCPUploadObject', 'GetDeployment', 'GetFunctionConfiguration', 'GetIdentityPolicy', 'GetMethod', 'GetObject', 'GetPolicy', 'GetResource', 'GetResources', 'GetRestApi', 'GetRestApis', 'GetStage', 'HeadBucket', 'HeadObject', 'IAMRoleQueryOperation', 'Invoke', 'InvokeLocalRESTProxyGet', 'InvokeLocalRESTProxyPost', 'ListBuckets', 'ListFunctions', 'ListObjectsV2OrGetBucketLocation', 'ListPrincipals', 'PutIdentityPolicy', 'PutIntegration', 'PutMethod', 'PutObject', 'RemovePermission', 'UpdateFunctionCode', 'awsRegionalOperation')
+MAIN_PATHS=('/', '/2015-03-31/functions', '/2015-03-31/functions/{FunctionName}', '/2015-03-31/functions/{FunctionName}/code', '/2015-03-31/functions/{FunctionName}/configuration', '/2015-03-31/functions/{FunctionName}/invocations', '/2015-03-31/functions/{FunctionName}/policy', '/2015-03-31/functions/{FunctionName}/policy/{StatementId}', '/_simulator/providers/aws/', '/_simulator/providers/aws/_execute-api/{Region}/{RestApiId}/{StageName}/{ProxyPath}', '/_simulator/providers/azure/{StorageAccount}', '/_simulator/providers/azure/{StorageAccount}/{ContainerName}', '/_simulator/providers/azure/{StorageAccount}/{ContainerName}/{BlobName}', '/_simulator/providers/gcp/download/storage/v1/b/{BucketName}/o/{ObjectName}', '/_simulator/providers/gcp/storage/v1/b', '/_simulator/providers/gcp/storage/v1/b/{BucketName}', '/_simulator/providers/gcp/storage/v1/b/{BucketName}/o', '/_simulator/providers/gcp/storage/v1/b/{BucketName}/o/{ObjectName}', '/_simulator/providers/gcp/upload/storage/v1/b/{BucketName}/o', '/_simulator/v1/capabilities', '/_simulator/v1/iam/principals', '/_simulator/v1/iam/principals/{principal}/policy', '/restapis', '/restapis/{RestApiId}', '/restapis/{RestApiId}/deployments', '/restapis/{RestApiId}/deployments/{DeploymentId}', '/restapis/{RestApiId}/resources', '/restapis/{RestApiId}/resources/{ResourceId}', '/restapis/{RestApiId}/resources/{ResourceId}/methods/{HttpMethod}', '/restapis/{RestApiId}/resources/{ResourceId}/methods/{HttpMethod}/integration', '/restapis/{RestApiId}/stages', '/restapis/{RestApiId}/stages/{StageName}', '/{bucket}', '/{bucket}/{key}')
 REPORTS=Path(os.environ.get('SIMULATOR_REPORTS','reports')).resolve()
 
 
@@ -47,7 +49,8 @@ def run():
    spec=wire('/_simulator/docs/openapi.json');caps=wire('/_simulator/v1/capabilities')
    source=json.loads(Path('internal/server/apidocs/openapi.json').read_text());assert spec==source,'Embedded served spec differs from source'
    ids=[value['operationId'] for path in spec['paths'].values() for method,value in path.items() if method in ('get','post','put','head','delete')]
-   assert len(ids)==43 and len(set(ids))==43 and len(spec['paths'])==25
+   assert len(ids)==61 and len(set(ids))==61 and set(ids)==set(MAIN_OPERATION_IDS)
+   assert set(spec['paths'])==set(MAIN_PATHS) and len(spec['paths'])==34
    root=spec['paths']['/']['post'];assert root['operationId']=='awsRegionalOperation'
    assert {'application/x-amz-json-1.0','application/x-amz-json-1.1','application/x-www-form-urlencoded'}<=set(root['requestBody']['content'])
    examples=root['requestBody']['content']['application/x-amz-json-1.0']['examples'];assert set(examples)==set(OPERATIONS)
@@ -103,7 +106,7 @@ def run():
     elif operation=='DeleteQueue':assert response=={} and sdk.list_queues().get('QueueUrls',[])==[]
    assert tuple(executed)==OPERATIONS and http_counts['calls']==13==http_counts['responses']
    assert sdk_counts['calls']>0 and sdk_counts['calls']==sdk_counts['sends']==sdk_counts['responses']
-   result={'servedSpecEqualsSource':True,'operationIDsPreserved':43,'pathsPreserved':25,'actualServedTemplatesExecuted':executed,'explicitLiveSubstitution':['QueueUrl','ReceiptHandle'],'MessageIdFromActualResponse':True,'SDKSameSQLiteBytes':True,'nativeReceiptRotationAndStaleRefusal':True,'unsubstitutedFixturePlaceholdersRefused':True,'staticIsNotLiveState':True,'HTTPCounts':http_counts,'SDKCounts':sdk_counts,'receiptAndCredentialValuesOmitted':True,'cleanup':'DELETED','realAWS':False,'uiTested':False}
+   result={'servedSpecEqualsSource':True,'operationIDsPreserved':61,'pathsPreserved':34,'actualServedTemplatesExecuted':executed,'explicitLiveSubstitution':['QueueUrl','ReceiptHandle'],'MessageIdFromActualResponse':True,'SDKSameSQLiteBytes':True,'nativeReceiptRotationAndStaleRefusal':True,'unsubstitutedFixturePlaceholdersRefused':True,'staticIsNotLiveState':True,'HTTPCounts':http_counts,'SDKCounts':sdk_counts,'receiptAndCredentialValuesOmitted':True,'cleanup':'DELETED','realAWS':False,'uiTested':False}
    (REPORTS/'sqs-reference.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result))
   finally:team.stop()
 

@@ -1,5 +1,13 @@
 # SQS console: bounded Standard queues
 
+> Current integration source: normal merge of public SQS HEAD725960e with
+> main5c97dc5. The main22 mandatory cases remain unchanged and the two owned
+> SQS console/reference cases remain mandatory (24 total). The registry union
+> contains17 baselines/86 controls. Canonical UI rebuild, current-head native
+> and browser execution, both90% coverage floors, E2E/formal/applicability and
+> hosted CI are pending. Prior results below belong to the named older heads.
+
+
 The embedded console uses official Cloudscape components and the same nine
 native SQS HTTP operations and SQLite state as SDK clients. No separate browser
 queue/message store, native API change, actual AWS connection or host runtime is
@@ -50,7 +58,7 @@ A stale native receipt is rejected under the documented local semantics.
 
 ## API reference
 
-The existing shared root operation retains all43 operation IDs/25 paths,
+The existing shared root operation retains all61 operation IDs/34 paths,
 JSON1.1 and Query forms. Its JSON1.0 content offers nine typed SQS request/response
 subsets and named static examples. Select the matching AmazonSQS target, sqs
 service hint and region. Create/Get actual QueueUrl first; replace receipt

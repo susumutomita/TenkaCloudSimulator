@@ -12,8 +12,12 @@ Every push, pull request and manual run checks out the exact tested head and run
 3. Unfiltered Cobertura conversion and Go HTML coverage view. Both full-module
    statement coverage and source-line coverage must be at least 90%.
 4. Locked npm dependency audit (high/critical fail) and canonical Go govulncheck.
-5. Sixteen real binary + SDK + offline console/Scalar E2E cases, 50-state accessibility audit,
-   five finite TLC models and five required mutation counterexamples.
+5. Required real-binary/SDK/console/Scalar regression, including the new two-provider
+   PC/mobile acceptance, plus the existing accessibility audit. The current source
+   registers24 Conformance cases and17 finite TLC baselines/86 named sensitivity
+   counterexamples; only completed exact-head runs count as verified. Official
+   Google/Azure SDK execution is separately pending development dependency availability;
+   native HTTP and browser proof must not be labelled official SDK compatibility.
 
 Coverage generation and threshold checks are ordinary required steps. An absent,
 empty, malformed or below-floor report exits nonzero. Regression tests exercise
@@ -97,11 +101,13 @@ A required pinned-catalog subset rehearsal runs the unchanged original wp2shell 
 
 The standalone `Formal validation` job is proposed as a stable required check;
 its inventory/applicability contract is documented in
-[formal-validation.md](formal-validation.md). The checker always runs all five
+[formal-validation.md](formal-validation.md). The checker always runs all
 registered models and requires the intended invariant counterexamples. Exact
 base/blob-bound dispositions prevent absent/stale applicability metadata from
 silently passing; unknown implementation paths fail. This validates declared
 bounded correspondence, not Go refinement or authenticated human review.
-Repository protection/ruleset inspection returned403 through the available
-integration, so actual merge enforcement remains unverified and must be configured
-separately by an authorized maintainer. No repository settings were changed.
+A later read-only inspection observed a main ruleset requiring `ci`, without a
+separate required `Formal validation` context. Adding that requirement remains on
+hold under the latest owner instruction; Composio and alternate settings routes
+are not used. No repository settings were changed. A green workflow is distinct
+from verified merge enforcement.

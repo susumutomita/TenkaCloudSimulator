@@ -34,7 +34,7 @@ RESTDeploymentSnapshot.tla bounds one API, two deployment IDs, two handler confi
 
 ## Required gate and applicability
 
-The executable inventory is now `formal/models.json`; all five existing models
+The executable inventory is now `formal/models.json`; all registered models, including the original five,
 and their exact sensitivity mutations remain mandatory. See
 [formal validation](../docs/formal-validation.md) for exact changed-blob records,
 negative controls, evidence and the distinction between a workflow check,
@@ -109,28 +109,70 @@ sets use an equivalent seed-assignment product, avoiding enumeration of every
 subset of the larger record universe. Accounting invariants apply to accepted
 admissions; failures independently preserve the complete prior physical state.
 
-Recorded mainb61 included ten baselines and thirty-six mandatory mutants after the BrowserSessions union.
+The earlier BrowserSessions/SQS integration contributed ten baselines and thirty-six mandatory mutants; the current union is listed below.
 All original, SSM and Startup required properties remain protected. Model/source
 integration must pass the immutable-head gate separately for each new head. These finite abstractions do not
 prove Go/SQLite refinement, actual byte/JSON/Unicode arithmetic, filesystem size,
 concurrency scheduling, persistence/crashes, distributed delivery or liveness.
 See [SQS limits and concrete test boundaries](../docs/sqs.md).
 
-Recorded mainb61 required10 finite baselines and36 named mutation controls, including BrowserSessions, SQSLifecycle and SQSStorageBudget. That baseline history is not a new-head TLC or Go execution result.
+BrowserSessions, SQSLifecycle and SQSStorageBudget remain mandatory in the larger current registry. A source integration is not a new-head TLC or Go execution result.
+
+
+## Multi-cloud storage integration models
+
+The registry adds ProviderActor (7 properties/6 sensitivity controls),
+GCPStorageState (10 properties/8 controls), and AzureBlobState (10 properties/11
+controls), plus ProjectAuthority (10 properties/6 controls), BlobRange (11 properties/8 controls), and ProviderPath (finite carrier properties/7 controls), retaining all existing models/controls. The current source registry
+has17 models/86 controls. Individual finite runs and the final immutable integrated
+run are recorded separately; registration alone is not a successful TLC run.
+
+ProviderActor abstracts post-authentication emission, selected identity and
+participant binding. GCPStorageState abstracts bounded state/checksum-independent
+generation and authorization decisions; AzureBlobState abstracts owner/budget,
+transaction frames, current data and conditional Put. New factory initialization,
+URI parsing, HTTP Range, UI/SDK behavior, credential cryptography and SQL behavior
+require native/integration tests and are not automatically covered by leaf models.
+ProjectAuthority is registered as a source candidate for fixed GCP project-owner bindings, refusal frames and actual-owner decisions. Its execution is recorded separately; it does not prove the SQL implementation, authentication extractor, growing project roster, Azure RBAC or API success/liveness.
+
+Azure's finite owner function uses the exact `Owners <- AccountOwners` CFG binding.
+The parser permits only that binding for AzureBlobState, requires its presence,
+and rejects duplicate/other bindings, invariant substitution, views and constraints.
+Registry metadata cannot grant a general substitution exception. The original
+model/config bytes and finite state space are preserved.
+
+
+BlobRange checks normalized finite response selection (body length0–3, starts/ends0–4,
+checksum limit2 abstract units), authorization/condition gates, bounds/refusals,
+selected bytes and persistent frame. It does not parse HTTP headers or prove real
+MD5 correctness/Go slicing/SQL behavior. Its initial lexical parse failure was
+retained; the corrected same-domain model explored9,600 distinct states and all8
+specified mutants reached their intended invariant counterexamples.
+
+ProviderPath checks13 finite decoded/escaped carrier pairs, known/unknown/encoded
+provider modes and opaque contexts. It preserves carrier pairs and contexts; it
+does not claim that all distinct URI representations must name different logical
+objects, parse Go percent encoding, or prove the outer server dispatch ordering.
+Its independent baseline explored13,104 states and all7 specified mutants failed
+at their intended invariants. Final immutable integrated checking is separate.
+
+Typed Azure listing XML is a state-stuttering projection of already-authorized,
+bounded page data. The state models' frame properties apply only to persistence;
+XML order, escaping, disclosure, actual SDK parsing and SQL initialization are not
+proved by this association. Independent serializer byte-goldens and native HTTP
+checks cover the wire format separately.
+
+All86 established sensitivity-control IDs (including36 earlier baseline controls) have literal per-model minimum sets. Real-filesystem tests remove each control individually and require rejection. This protects the checked inventory, not semantic completeness or a Go implementation proof.
 
 ## SQS console epoch and receipt custody
 
-`SQSConsoleEpoch` adds one baseline/four specific controls to unchanged mainb61:
-eleven baselines and forty literal-required controls in total. SANY and all51
-cases passed at immutable341dec2. The new model explored86distinct states;
-each new control violated its intended named invariant. Policy fixtures remove
-every individual old/new control and critical new property. Final documentation
-HEAD requires its own immutable receipt; an older HEAD is not current CI.
+`SQSConsoleEpoch` adds one finite baseline and four literal-required controls to
+the main16-model/82-control registry:17 baselines and86 controls (103 runs).
+All main properties, bounds, original controls and individual-removal fixtures
+remain required. Registration is source preparation, not a new-head TLC result.
+The older SQS branch725960e and its51 runs are historical evidence only.
 
-The model covers bounded view epochs/accepted replies/private receipt custody,
-not native receipt validity, authentication, React/DOM/thread execution or an
-implementation refinement. See [source/native correspondence and limits](../docs/formal-sqs-console.md).
-
-The SQS candidate full23E2E/start and50screen audit passed at codeinputebb3ba5.
-Final documentationHEAD immutable51/applicability results are recorded separately
-and do not imply React/DOM/auth/Go refinement or current hostedCI success.
+The model covers bounded view epochs, accepted replies and private receipt
+custody. It does not prove native receipt validity, authentication, React/DOM or
+thread execution, HTTP/SQL behavior, or a Go implementation refinement. See
+[source/native correspondence and limits](../docs/formal-sqs-console.md).
