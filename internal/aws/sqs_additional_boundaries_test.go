@@ -27,7 +27,7 @@ func sqsAdditionalFixture(t *testing.T) (*Gateway, *SQSStore, SQSQueue) {
 
 type sqsAdditionalRow struct {
 	Region, Queue, ID, Body, Attributes, Receives, Receipt string
-	Sent, Visible                                      float64
+	Sent, Visible                                          float64
 }
 
 // Preserve persisted values even when the test deliberately corrupts an integer
