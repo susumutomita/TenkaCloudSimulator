@@ -76,8 +76,24 @@ prove terminal syscalls, OS ACLs, entropy, crash safety, build freshness, proces
 shutdown or all Go behavior. The metadata-only `go.mod` annotation change uses
 the separate narrow recognizer and is not bound to token-state invariants.
 
+## Browser session revocation
 
+BrowserSessions is required alongside StartupTokenVisibility, SSMParameterState and the original five models. Its two clients, three fresh browser
+credentials, one operator and one participant parent, clock0..3 and TTL2/1 bound
+login→cookie use→logout/replay→parent expiry/invalidation. Five named mutants
+retain a revoked session, ignore parent validity, accept raw operator cookies,
+clear other sessions or remove SDK authority; each must violate its declared
+invariant. Existing five models and protected invariants remain unchanged.
 
+The registry is the only executable inventory; there is no checked-in companion
+registration fragment. access.go is the runtime seam; main.jsx is the account
+menu's caller, and access_browser_test.go/console_logout.py hold separate native
+and actual browser assertions. Listing those paths binds source review, not Go
+refinement or a UI/TLS/cryptography proof. See
+[session contract](../docs/console-sessions.md) for the independent checks.
+
+Startup, SSM and Browser inventory/property removal are rejected. Source
+integration is not a new-head TLC or runtime execution result.
 
 ## SQS lifecycle and physical storage budget
 
@@ -93,9 +109,11 @@ sets use an equivalent seed-assignment product, avoiding enumeration of every
 subset of the larger record universe. Accounting invariants apply to accepted
 admissions; failures independently preserve the complete prior physical state.
 
-The combined inventory is nine baselines and thirty-one mandatory mutants.
+The combined inventory includes ten baselines and thirty-six mandatory mutants after the BrowserSessions union.
 All original, SSM and Startup required properties remain protected. Model/source
 integration must pass the immutable-head gate separately for each new head. These finite abstractions do not
 prove Go/SQLite refinement, actual byte/JSON/Unicode arithmetic, filesystem size,
 concurrency scheduling, persistence/crashes, distributed delivery or liveness.
 See [SQS limits and concrete test boundaries](../docs/sqs.md).
+
+The combined registry requires 10 finite baselines and 36 named mutation controls, including BrowserSessions, SQSLifecycle and SQSStorageBudget. This source integration is not a new-head TLC or Go execution result.

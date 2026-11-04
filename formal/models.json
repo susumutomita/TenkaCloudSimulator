@@ -558,6 +558,86 @@
           "expect_invariant": "MaintenanceNotBudgetBlocked"
         }
       ]
+    },
+    {
+      "id": "BrowserSessions",
+      "model": "formal/BrowserSessions.tla",
+      "config": "formal/BrowserSessions.cfg",
+      "bounds": "2 browser clients, 3 fresh opaque browser tokens, 1 operator and 1 participant SDK credential; integer clock0..3, browserTTL2,parentTTL1; login only while expiry fits boundedclock",
+      "properties": [
+        "TypeOK",
+        "RevokedCookiesDenied",
+        "AcceptedOnlyLiveParent",
+        "SDKAuthorityPreserved",
+        "UnrelatedSessionsPreserved",
+        "NoRawSDKCookie",
+        "NoBrowserSDKAuthority",
+        "ParentLifetimeBound"
+      ],
+      "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them.",
+      "source_scope": [
+        "internal/server/access.go",
+        "tools/console/src/main.jsx",
+        "internal/server/access_browser_test.go",
+        "test/e2e/console_logout.py"
+      ],
+      "mutants": [
+        {
+          "id": "LogoutKeepsSession",
+          "edits": [
+            {
+              "old": "RemoveBrowser(t) == active \\ {t}",
+              "new": "RemoveBrowser(t) == active",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RevokedCookiesDenied"
+        },
+        {
+          "id": "IgnoreParentValidity",
+          "edits": [
+            {
+              "old": "/\\ ParentValid(binding[t])",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AcceptedOnlyLiveParent"
+        },
+        {
+          "id": "RawOperatorCookie",
+          "edits": [
+            {
+              "old": "RawCookieAllowed(t) == FALSE",
+              "new": "RawCookieAllowed(t) == (t = OperatorToken)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoRawSDKCookie"
+        },
+        {
+          "id": "LogoutClearsOthers",
+          "edits": [
+            {
+              "old": "RemoveBrowser(t) == active \\ {t}",
+              "new": "RemoveBrowser(t) == {}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "UnrelatedSessionsPreserved"
+        },
+        {
+          "id": "LogoutRevokesSDK",
+          "edits": [
+            {
+              "old": "SDKAfterLogout == sdkAuthority",
+              "new": "SDKAfterLogout == {}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SDKAuthorityPreserved"
+        }
+      ]
     }
   ]
 }

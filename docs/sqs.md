@@ -137,9 +137,9 @@ lifetime, scope/IAM, eligibility, rollback and current receipts. SQSStorageBudge
 bounds two trusted scopes, three possible legacy rows plus one fresh ID,
 abstract row weights1–2 and caps2rows/3units. Its seven mutants exercise row/byte
 caps, expired foreign charging, scoped purge, rollback, live-row preservation
-and legacy maintenance. All original, SSM and Startup models and protected
-properties remain required; the combined inventory has nine baselines and
-31 specified mutants. Exact immutable-head execution is required separately.
+and legacy maintenance. All original, SSM, Startup and BrowserSessions models and protected
+properties remain required; the combined inventory has ten baselines and
+36 specified mutants. Exact immutable-head execution is required separately.
 
 These are finite abstract safety checks, not Go/SQLite refinement, actual
 UTF-8/JSON arithmetic, crypto, SQL concurrency/crash or filesystem-size proofs.

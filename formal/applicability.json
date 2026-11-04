@@ -1,327 +1,212 @@
 {
   "version": 1,
-  "base_sha": "59e8b2279f8278d6af82af973ae4c23b219866b5",
+  "base_sha": "cb529272ce14be9cab645e284b1733da37b21cda",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "db1793483f7e9481266ec9f300d0e6390e4f5187da0f00ee36f20681d5e47738",
+      "sha256": "b6beb58c7999f991cddf8910c45f5eb50193ebd78318cfe37770e0a5f0ad896f",
       "disposition": "documentation",
-      "reason": "Document the bounded native SQS subset, local 256 KiB versus current operation-reference 1 MiB, repair provenance, actual focused tests and explicit compatibility/model/coverage limits. No service or formal-proof completion is asserted by prose.",
+      "reason": "Describe the merged native-only SQS scope, preserved browser logout security, ten bounded models and36 required mutants; no runtime/Go refinement proof or full catalog/multicloud claim.",
+      "models": []
+    },
+    {
+      "path": "SECURITY.md",
+      "sha256": "b0c9b8f83fa38d42f1b5994d5c19e434fcdaa0f55c603ca73e57d14d8f47d3dc",
+      "disposition": "documentation",
+      "reason": "Corrects stale descriptive logout text to match the existing parent-bound ephemeral browser credential/revocation code. SDK/other-session preservation, trusted-host/proxy boundaries and limitations remain; no new security-policy exception or runtime grant.",
+      "models": []
+    },
+    {
+      "path": "docs/console-sessions.md",
+      "sha256": "12378cda75394ad91e483cb2bbbeed585f0453d92e085ecbc108e20a95b677e0",
+      "disposition": "documentation",
+      "reason": "Documents current eight-model/eighteen-control combined inventory and explicit bounded session limits; source restack/policy checks do not imply fresh runtime/browser/TLC/hosted CI execution.",
       "models": []
     },
     {
       "path": "docs/sqs.md",
-      "sha256": "681881c7d166366397568bce6e055cad1a52f30239afe2b5c11f63f71498ea80",
+      "sha256": "7c812f381803172147e4aefe33d555e4aad0c64ab12eeeb13d088d870d18e526",
       "disposition": "documentation",
-      "reason": "Describe the current bounded SQS operations, quotas, atomic/ack behavior, concrete validation and explicit compatibility/model/UI/catalog limits without stale source-handoff narrative. Local checkpoint evidence remains separated from new-head hosted CI.",
+      "reason": "Describe the merged native-only SQS scope, preserved browser logout security, ten bounded models and36 required mutants; no runtime/Go refinement proof or full catalog/multicloud claim.",
       "models": []
+    },
+    {
+      "path": "formal/BrowserSessions.cfg",
+      "sha256": "6c9a3ec3c355763cb5d212c2da845085be53e302df956a87c94bb479e2e5640f",
+      "disposition": "modeled",
+      "reason": "The changed source is a caller/test correspondence seam for selected browser revocation and independent SDK/session preservation; actual UI/HTTP behavior is validated separately, not executed by TLC.",
+      "models": [
+        {
+          "id": "BrowserSessions",
+          "properties": [
+            "RevokedCookiesDenied",
+            "AcceptedOnlyLiveParent",
+            "SDKAuthorityPreserved",
+            "UnrelatedSessionsPreserved",
+            "NoRawSDKCookie",
+            "NoBrowserSDKAuthority",
+            "ParentLifetimeBound"
+          ],
+          "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them."
+        }
+      ]
+    },
+    {
+      "path": "formal/BrowserSessions.tla",
+      "sha256": "cde5633b5b190063d8c65205680c1a10f399430469b1562562a467133098b40a",
+      "disposition": "modeled",
+      "reason": "The changed source is a caller/test correspondence seam for selected browser revocation and independent SDK/session preservation; actual UI/HTTP behavior is validated separately, not executed by TLC.",
+      "models": [
+        {
+          "id": "BrowserSessions",
+          "properties": [
+            "RevokedCookiesDenied",
+            "AcceptedOnlyLiveParent",
+            "SDKAuthorityPreserved",
+            "UnrelatedSessionsPreserved",
+            "NoRawSDKCookie",
+            "NoBrowserSDKAuthority",
+            "ParentLifetimeBound"
+          ],
+          "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them."
+        }
+      ]
     },
     {
       "path": "formal/README.md",
+      "sha256": "59bcde31c59d93f105a72611ea3d7f7bebe2189cee35be03c595a6504707a9a5",
       "disposition": "documentation",
-      "reason": "Combine accepted SSM and SQS model inventories with mandatory IDs/properties and missing-artifact negative controls, retaining original five protections. No new-head TLC proof implied.",
-      "models": [],
-      "sha256": "9c6bbcf47a57d9811c55b6a4ef0ab99f991fa81352f3c1cc5173a64d39ee2bdc"
-    },
-    {
-      "path": "formal/SQSLifecycle.cfg",
-      "sha256": "1b15948015f67dbacacdb06856b510027f7e562fe0fc37dd352bb86d85fec9d1",
-      "disposition": "modeled",
-      "reason": "Introduce the finite SQS queue/visibility/receipt safety contract and explicit error/rollback outcomes with eleven exact invariant sensitivity controls. Native repair and tests precede the applicability binding; actual TLC execution remains required.",
-      "models": [
-        {
-          "id": "SQSLifecycle",
-          "properties": [
-            "NoOrphans",
-            "ScopedMutation",
-            "FailedMutationAtomic",
-            "IdempotentCreateUnchanged",
-            "ReceiveOnlyEligible",
-            "FreshReceipt",
-            "ReceiptMutationCurrent",
-            "ChangeOnlyInflight",
-            "AuthorizedMutations"
-          ],
-          "limits": "Two scopes, one queue/message lifetime, two receives and coarse finite clock; no Go/SQL refinement, crypto, persistence, batch/long-poll liveness or full AWS proof."
-        }
-      ]
-    },
-    {
-      "path": "formal/SQSLifecycle.tla",
-      "sha256": "159e4a17e09bf3c3387d1c938d43bb26940dcda6c5a417299c59d61e7b39efb7",
-      "disposition": "modeled",
-      "reason": "Introduce the finite SQS queue/visibility/receipt safety contract and explicit error/rollback outcomes with eleven exact invariant sensitivity controls. Native repair and tests precede the applicability binding; actual TLC execution remains required.",
-      "models": [
-        {
-          "id": "SQSLifecycle",
-          "properties": [
-            "NoOrphans",
-            "ScopedMutation",
-            "FailedMutationAtomic",
-            "IdempotentCreateUnchanged",
-            "ReceiveOnlyEligible",
-            "FreshReceipt",
-            "ReceiptMutationCurrent",
-            "ChangeOnlyInflight",
-            "AuthorizedMutations"
-          ],
-          "limits": "Two scopes, one queue/message lifetime, two receives and coarse finite clock; no Go/SQL refinement, crypto, persistence, batch/long-poll liveness or full AWS proof."
-        }
-      ]
-    },
-    {
-      "path": "formal/SQSStorageBudget.cfg",
-      "disposition": "modeled",
-      "reason": "Finite local physical storage budget abstraction for transactional Send, scoped expiry cleanup, failure rollback and legacy over-cap maintenance; execution pending, not Go/SQL or Unicode refinement.",
-      "models": [
-        {
-          "id": "SQSStorageBudget",
-          "properties": [
-            "FailedSendPreservesRows",
-            "ForeignRowsPreserved",
-            "LiveRowsPreserved",
-            "BudgetAccountsPhysical",
-            "PhysicalRowCap",
-            "PayloadByteCap",
-            "ReadRemovesOwnExpired",
-            "DeleteScopeExact",
-            "MaintenanceNotBudgetBlocked"
-          ],
-          "limits": "Finite physical-payload budget abstraction, not Go/SQLite refinement, SQL transaction/crash proof, Unicode/UTF8/string-byte counting, JSON attribute serialization, actual64MiB/10000row arithmetic, file size/SQLite overhead, clock/retention, receipt/IAM authorization or random-ID collision resistance. Row weights abstract persisted body+serialized-attribute bytes; all foreign rows, including expired ones, consume budget. Scopes/parent queues are assumed already valid and trusted; SQSLifecycle/native tests separately handle authority, parent lifetime and receipts. Maintenance enabledness assumes these preconditions, not unauthorized access or liveness/fairness. Charged counters describe successful admission accounting, not a claim that an actual storage-error path computed counters. FailedSendPreservesRows still applies to every rejected/storage-error send. Legacy overcap rows are retained: only new accepted sends must fit both caps, own expired cleanup is explicit/scoped and rollback preserves every row on send failure."
-        }
-      ],
-      "sha256": "5ddbbf39056344584d96cdecef4de1621bc9eb0add908ad8a51983ab1325cc65"
-    },
-    {
-      "path": "formal/SQSStorageBudget.tla",
-      "disposition": "modeled",
-      "reason": "Finite local physical storage budget abstraction for transactional Send, scoped expiry cleanup, failure rollback and legacy over-cap maintenance; execution pending, not Go/SQL or Unicode refinement.",
-      "models": [
-        {
-          "id": "SQSStorageBudget",
-          "properties": [
-            "FailedSendPreservesRows",
-            "ForeignRowsPreserved",
-            "LiveRowsPreserved",
-            "BudgetAccountsPhysical",
-            "PhysicalRowCap",
-            "PayloadByteCap",
-            "ReadRemovesOwnExpired",
-            "DeleteScopeExact",
-            "MaintenanceNotBudgetBlocked"
-          ],
-          "limits": "Finite physical-payload budget abstraction, not Go/SQLite refinement, SQL transaction/crash proof, Unicode/UTF8/string-byte counting, JSON attribute serialization, actual64MiB/10000row arithmetic, file size/SQLite overhead, clock/retention, receipt/IAM authorization or random-ID collision resistance. Row weights abstract persisted body+serialized-attribute bytes; all foreign rows, including expired ones, consume budget. Scopes/parent queues are assumed already valid and trusted; SQSLifecycle/native tests separately handle authority, parent lifetime and receipts. Maintenance enabledness assumes these preconditions, not unauthorized access or liveness/fairness. Charged counters describe successful admission accounting, not a claim that an actual storage-error path computed counters. FailedSendPreservesRows still applies to every rejected/storage-error send. Legacy overcap rows are retained: only new accepted sends must fit both caps, own expired cleanup is explicit/scoped and rollback preserves every row on send failure."
-        }
-      ],
-      "sha256": "4547b7d035374806e5f165d538e7aaf85b897c043d08244a5f0673ae155f35a9"
+      "reason": "Describe the merged native-only SQS scope, preserved browser logout security, ten bounded models and36 required mutants; no runtime/Go refinement proof or full catalog/multicloud claim.",
+      "models": []
     },
     {
       "path": "formal/models.json",
-      "sha256": "68aeb5ac6454d336bdda88f19ffb824041efe9e933e32691ca0df7a6813275c8",
+      "sha256": "38b7a5a2812e49cf318cc6588b4d4f2898a553bce0f0eded7295d5683bbf8d37",
       "disposition": "formal-infrastructure",
-      "reason": "Register SQSLifecycle and add its required invariant/ID set while preserving every original five model/property requirements and strict missing/stale/exit guards. The self-test requires the exact original-five-plus-SQS set and iterates all mutation anchors; future combined service registries need an explicitly merged set, not a lowered check.",
+      "reason": "Additive union of Startup, SSM and Browser inventories/required IDs/critical invariants and all feature-specific negative controls; exact guard function bodies, strict module metadata recognizer/fixtures and mandatory canonical axe/E2E preparation are preserved. Eight normal/eighteen sensitivity cases require fresh immutable-HEAD TLC; no new runtime proof is inferred.",
       "models": []
     },
     {
-      "path": "internal/aws/s3.go",
-      "sha256": "b9a0ff9ba8ded51578427533868f29dbcf8deaf5a4f155318b3f3bd51f65c284",
+      "path": "internal/server/access.go",
+      "sha256": "039384e1f22a36807ff8b1942cb0211eed58f7f044c45e7ce40428562a02fd7b",
       "disposition": "modeled",
-      "reason": "Add a distinct SQSStore field to the existing Gateway composition; no S3 operation or storage path is replaced. The SQS-specific field routes to its own scoped provider tables.",
+      "reason": "Introduces independent browser credential state with bounded lifetime, live-parent use checks and selective logout without mutating raw SDK authority. BrowserSessions checks the bounded design transitions; native concurrency/HTTP tests remain independent.",
       "models": [
         {
-          "id": "SQSLifecycle",
+          "id": "BrowserSessions",
           "properties": [
-            "ScopedMutation"
+            "RevokedCookiesDenied",
+            "AcceptedOnlyLiveParent",
+            "SDKAuthorityPreserved",
+            "UnrelatedSessionsPreserved",
+            "NoRawSDKCookie",
+            "NoBrowserSDKAuthority",
+            "ParentLifetimeBound"
           ],
-          "limits": "Composition correspondence for the added SQS field only; no new claim about S3 semantics, authentication or Go refinement."
+          "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them."
         }
       ]
     },
     {
-      "path": "internal/aws/sqs.go",
-      "sha256": "0384e3bc02f5ecf597e5aa247b425f970b35995db874d04d718eb1e4cfd20162",
+      "path": "internal/server/access_browser_test.go",
+      "sha256": "a1d06a5c4a5a185627cd3ae97952891b733509d72032b9ed3095a58250f53af0",
       "disposition": "modeled",
-      "reason": "Authorize the selected SQS action/regional queue ARN before native operations, retain bounded request validation and pass the same regional queue/receipt target to the repaired store. Body Unicode is additionally tested as a separate protocol contract. Additional admission fixes distinguish explicit-zero limits from omission, reject nested unsupported members and All-order bypass, and refuse malformed MessageBody Unicode before silent decoder replacement. These parser/encoding behaviors require native wire tests; the lifecycle model does not prove them.",
+      "reason": "The changed source is a caller/test correspondence seam for selected browser revocation and independent SDK/session preservation; actual UI/HTTP behavior is validated separately, not executed by TLC.",
       "models": [
         {
-          "id": "SQSLifecycle",
+          "id": "BrowserSessions",
           "properties": [
-            "AuthorizedMutations",
-            "ScopedMutation",
-            "ReceiveOnlyEligible",
-            "ReceiptMutationCurrent",
-            "ChangeOnlyInflight"
+            "RevokedCookiesDenied",
+            "AcceptedOnlyLiveParent",
+            "SDKAuthorityPreserved",
+            "UnrelatedSessionsPreserved",
+            "NoRawSDKCookie",
+            "NoBrowserSDKAuthority",
+            "ParentLifetimeBound"
           ],
-          "limits": "The model assumes an immutable Boolean authorization result and fresh handles; it does not prove IAM matching, QueueUrl parsing, JSON, body/attribute validation, MD5, long polling or HTTP error equivalence."
+          "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them."
         }
       ]
     },
     {
-      "path": "internal/aws/sqs_acceptance_boundaries_test.go",
-      "sha256": "4e392a15b22e891093653aefa66bfe5efa95670e38621d071ec8ed98fc9d3fc1",
-      "disposition": "test-support",
-      "reason": "Add acceptance regressions for explicit-zero versus omitted bounds, nondefault delay/attribute roundtrips, native composition and quota guards, and actual SQLite transaction faults surfaced as HTTP 500 with preserved state. Source-only checkpoint: execution pending, no coverage claim.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/sqs_additional_boundaries_test.go",
-      "disposition": "test-support",
-      "reason": "Concrete SQS quota/admission/SQLite rollback and standalone two-team SDK tests; no finite model or new-head execution proof is implied by test source.",
-      "models": [],
-      "sha256": "3ed9b8bf66cfe059bdd3cfb06d639efd68e1f103635bcf276946408e395092ef"
-    },
-    {
-      "path": "internal/aws/sqs_atomic_boundaries_test.go",
-      "sha256": "b5f4e45edf70fd570acc88a10a60bc1a6105afd0666fc64c8c7da0294a2db214",
-      "disposition": "test-support",
-      "reason": "Verify native SQS positive/negative lifecycle, expiry/receipt scope, reopen and real SQLite rollback/storage failures without real AWS or a guest VM. Tests do not exempt implementation from finite applicability or the unchanged full source/statement coverage floors.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/sqs_storage_budget_test.go",
-      "disposition": "test-support",
-      "reason": "Concrete SQS quota/admission/SQLite rollback and standalone two-team SDK tests; no finite model or new-head execution proof is implied by test source.",
-      "models": [],
-      "sha256": "ada27b97d1de49bfab7b4af08315de843791f8912052295c3ff48aa62f42d1c3"
-    },
-    {
-      "path": "internal/aws/sqs_store.go",
-      "sha256": "233f679648ae6f7c2728541494af87f8a758de4914c0502b0725e721d357095e",
-      "disposition": "modeled",
-      "reason": "Actual queue-parent admission, expiry and message/receipt mutation now share native SQLite transactions; failed cleanup or multi-row writes roll back. Native trigger/reopen/redelivery/orphan-preservation tests passed at 0a28266 before this binding. Delivered/in-flight counts now exclude initial-delay rows that have never been received; this metric requires native and wire tests and is outside the finite lifecycle model counter abstraction. Enforce local global physical10000-row/64MiB stored body+attributeJSON budget inside the Send transaction after own scoped expiry cleanup; native concurrent/fault/legacy tests required. Byte/count arithmetic and SQLite isolation are not proved by abstract weights.",
-      "models": [
-        {
-          "id": "SQSLifecycle",
-          "properties": [
-            "NoOrphans",
-            "ScopedMutation",
-            "FailedMutationAtomic",
-            "IdempotentCreateUnchanged",
-            "ReceiveOnlyEligible",
-            "FreshReceipt",
-            "ReceiptMutationCurrent",
-            "ChangeOnlyInflight"
-          ],
-          "limits": "Atomic finite specification only, not SQL/Go refinement, randomness, real clocks, queue name reuse, distributed delivery or multi-message batch proof."
-        },
-        {
-          "id": "SQSStorageBudget",
-          "properties": [
-            "FailedSendPreservesRows",
-            "ForeignRowsPreserved",
-            "LiveRowsPreserved",
-            "BudgetAccountsPhysical",
-            "PhysicalRowCap",
-            "PayloadByteCap",
-            "ReadRemovesOwnExpired",
-            "DeleteScopeExact",
-            "MaintenanceNotBudgetBlocked"
-          ],
-          "limits": "Finite physical-payload budget abstraction, not Go/SQLite refinement, SQL transaction/crash proof, Unicode/UTF8/string-byte counting, JSON attribute serialization, actual64MiB/10000row arithmetic, file size/SQLite overhead, clock/retention, receipt/IAM authorization or random-ID collision resistance. Row weights abstract persisted body+serialized-attribute bytes; all foreign rows, including expired ones, consume budget. Scopes/parent queues are assumed already valid and trusted; SQSLifecycle/native tests separately handle authority, parent lifetime and receipts. Maintenance enabledness assumes these preconditions, not unauthorized access or liveness/fairness. Charged counters describe successful admission accounting, not a claim that an actual storage-error path computed counters. FailedSendPreservesRows still applies to every rejected/storage-error send. Legacy overcap rows are retained: only new accepted sends must fit both caps, own expired cleanup is explicit/scoped and rollback preserves every row on send failure."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/sqs_store_test.go",
-      "sha256": "d33abe42423a1aff6887672f086b9c1a7380bfca3d7ebaed9373c368ad175d91",
-      "disposition": "test-support",
-      "reason": "Verify native SQS positive/negative lifecycle, expiry/receipt scope, reopen and real SQLite rollback/storage failures without real AWS or a guest VM. Tests do not exempt implementation from finite applicability or the unchanged full source/statement coverage floors.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/sqs_write_ack_test.go",
-      "disposition": "test-support",
-      "reason": "Real nonstandard/corrupt SQLite IGNORE-trigger fixtures verify expected-single-row create/send/receive/delete acknowledgements and rollback; not an ordinary API exploit or arbitrary host-writer guarantee. No fake SQL result/driver mocks.",
-      "models": [],
-      "sha256": "9a8494cfc25811f3db9eba3158edb679f8bc6504e7dcfc8c16116eaf20017324"
-    },
-    {
-      "path": "internal/aws/ssm.go",
-      "sha256": "7239098145eef0f233a66f68f14e0035a7b61fe7d9ad6fcbbce22b3739a63389",
-      "disposition": "modeled",
-      "reason": "Add AmazonSQS target dispatch to the SQS handler before existing service dispatch; existing SSM/S3/Lambda/CFN paths remain intact. The handler performs SQS action/ARN authorization and regional targeting.",
-      "models": [
-        {
-          "id": "SQSLifecycle",
-          "properties": [
-            "AuthorizedMutations",
-            "ScopedMutation"
-          ],
-          "limits": "Abstract caller authorization/scoped target assumptions only; no proof of header parsing, dummy signatures, HTTP routing or existing other-service behavior."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/apidocs/openapi.json",
-      "sha256": "81fc6e6ce92d61c6c1d918bb1d95c1ff3227fe9032fda8aadc4240630146fd8c",
+      "path": "internal/server/web/app.js",
+      "sha256": "3e3ba30db04307b2e064c4cfca07749dee4ef2cd65e3935256d9bbadd00fe497",
       "disposition": "presentation",
-      "reason": "Add descriptive SQS provider metadata to the local reference; this does not replace native operations or introduce a different API/backend. Scalar/SDK share the existing SQS HTTP handler; documentation metadata is not a proof of API fidelity.",
-      "models": []
-    },
-    {
-      "path": "internal/server/server.go",
-      "sha256": "596211eb8be7e6a1b237f387935f5dec77e41f1865d388a2a817e35065d39ca2",
-      "disposition": "modeled",
-      "reason": "Initialize the native SQS store on the same provider DB, propagate constructor failure and expose an additive bounded capability entry. Existing #303 resource/operation capability entries are preserved by public 95300b9.",
-      "models": [
-        {
-          "id": "SQSLifecycle",
-          "properties": [
-            "NoOrphans",
-            "ScopedMutation"
-          ],
-          "limits": "Initial valid graph and separate host/database authority assumptions; constructor/orphan retention is native-tested. No server/token/IAM implementation proof or full capability-catalog acceptance."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/sqs_acceptance_test.go",
-      "sha256": "6f4be63b309cbb5bb3a9da2cb2d75fdbff791fe573139ac9ae66ba3053c2d9bd",
-      "disposition": "test-support",
-      "reason": "Add acceptance regressions for explicit-zero versus omitted bounds, nondefault delay/attribute roundtrips, native composition and quota guards, and actual SQLite transaction faults surfaced as HTTP 500 with preserved state. Source-only checkpoint: execution pending, no coverage claim.",
-      "models": []
-    },
-    {
-      "path": "internal/server/sqs_boundaries_test.go",
-      "sha256": "4e9b59c794070da7f279bce6fafee907552e6373fa461e0739ffc36da3857013",
-      "disposition": "test-support",
-      "reason": "Verify native SQS positive/negative lifecycle, expiry/receipt scope, reopen and real SQLite rollback/storage failures without real AWS or a guest VM. Tests do not exempt implementation from finite applicability or the unchanged full source/statement coverage floors.",
-      "models": []
-    },
-    {
-      "path": "internal/server/sqs_test.go",
-      "sha256": "26e6f4fc9876d0e2e2d279e083f20eca00fadcda8d9e795ca6e23c177dee5cdb",
-      "disposition": "test-support",
-      "reason": "Verify native SQS positive/negative lifecycle, expiry/receipt scope, reopen and real SQLite rollback/storage failures without real AWS or a guest VM. Tests do not exempt implementation from finite applicability or the unchanged full source/statement coverage floors.",
+      "reason": "Canonical embedded UI/bundle metadata for the reviewed account-menu caller; source account state correspondence is explicitly bound separately. Bundle provenance and actual browser checks remain required.",
       "models": []
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "d967e120475a1716cb3d736e7b2a510164d2d5417037cd27f91052a5cc874a95",
+      "sha256": "c6e8e2b841cc2adee4201aa57a2c3a324edaa987453f5382ef906f0f5e31b692",
       "disposition": "formal-infrastructure",
-      "reason": "Register SQSLifecycle and add its required invariant/ID set while preserving every original five model/property requirements and strict missing/stale/exit guards. The self-test requires the exact original-five-plus-SQS set and iterates all mutation anchors; future combined service registries need an explicitly merged set, not a lowered check.",
+      "reason": "Additive union of Startup, SSM and Browser inventories/required IDs/critical invariants and all feature-specific negative controls; exact guard function bodies, strict module metadata recognizer/fixtures and mandatory canonical axe/E2E preparation are preserved. Eight normal/eighteen sensitivity cases require fresh immutable-HEAD TLC; no new runtime proof is inferred.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "9b1c3d3ba3706e658ed84e801a063847e79d183965aa82032a45785eaa73a13f",
+      "sha256": "ae93870dbe1697067b0cfa3f756709f949d320b39bd660979686c869186958ee",
       "disposition": "formal-infrastructure",
-      "reason": "Register SQSLifecycle and add its required invariant/ID set while preserving every original five model/property requirements and strict missing/stale/exit guards. The self-test requires the exact original-five-plus-SQS set and iterates all mutation anchors; future combined service registries need an explicitly merged set, not a lowered check.",
+      "reason": "Additive union of Startup, SSM and Browser inventories/required IDs/critical invariants and all feature-specific negative controls; exact guard function bodies, strict module metadata recognizer/fixtures and mandatory canonical axe/E2E preparation are preserved. Eight normal/eighteen sensitivity cases require fresh immutable-HEAD TLC; no new runtime proof is inferred.",
       "models": []
     },
     {
       "path": "test/e2e/check.py",
+      "sha256": "c4d9ef1f80a66ad9986e623a6c62eca060b2ad0be49528ee3bbdce14228e0f9e",
       "disposition": "test-support",
-      "reason": "Mandatory standalone real local SQS SDK lifecycle through authenticated two-team CLI/SQLite/token processes, regional isolation, restart/current receipts, delays and actual retention wait/cleanup. Source handoff only; execution pending; no console/fullservice proof.",
-      "models": [],
-      "sha256": "2cf27984c6e8e5dff232e3cdae3767fa0f5124d1dd8ea0e32f012f2ed4c34a27"
+      "reason": "Retains main real Scalar Send/response-reader+parameter detector hook and all earlier native/browser methods, adds mandatory detector-negative controls and keeps real logout helper check=True. Tests are caller/correspondence seams, not executed by TLC; actual final-head native/browser/CI remains required.",
+      "models": []
     },
     {
-      "path": "test/e2e/sqs.py",
-      "disposition": "test-support",
-      "reason": "Mandatory standalone real local SQS SDK lifecycle through authenticated two-team CLI/SQLite/token processes, regional isolation, restart/current receipts, delays and actual retention wait/cleanup. Source handoff only; execution pending; no console/fullservice proof.",
-      "models": [],
-      "sha256": "c0153a7f0e3b7674dd9f1ef3bcce9f9adc7e023708193f7137934e7df046fab1"
+      "path": "test/e2e/console_logout.py",
+      "sha256": "7c5b4595f85f17a5ad4eb9b034a4d9700d27b8942e02cedfaa389adbdcfb04a1",
+      "disposition": "modeled",
+      "reason": "The changed source is a caller/test correspondence seam for selected browser revocation and independent SDK/session preservation; actual UI/HTTP behavior is validated separately, not executed by TLC.",
+      "models": [
+        {
+          "id": "BrowserSessions",
+          "properties": [
+            "RevokedCookiesDenied",
+            "AcceptedOnlyLiveParent",
+            "SDKAuthorityPreserved",
+            "UnrelatedSessionsPreserved",
+            "NoRawSDKCookie",
+            "NoBrowserSDKAuthority",
+            "ParentLifetimeBound"
+          ],
+          "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "97868208b7a19d8b0b9fd242f61c1dadaa0376e6934408dd863c907b620db496",
+      "disposition": "presentation",
+      "reason": "Canonical embedded UI/bundle metadata for the reviewed account-menu caller; source account state correspondence is explicitly bound separately. Bundle provenance and actual browser checks remain required.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "1abfb7427675e3eff370edd2201d258609310757777129fb2b020d11b4e3ca54",
+      "disposition": "presentation",
+      "reason": "Canonical embedded UI/bundle metadata for the reviewed account-menu caller; source account state correspondence is explicitly bound separately. Bundle provenance and actual browser checks remain required.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/main.jsx",
+      "sha256": "632a8cae47145ae8d65746c2bf3b7ece9edf7ea846ee0a012b7f865f75b3d1c9",
+      "disposition": "modeled",
+      "reason": "The changed source is a caller/test correspondence seam for selected browser revocation and independent SDK/session preservation; actual UI/HTTP behavior is validated separately, not executed by TLC.",
+      "models": [
+        {
+          "id": "BrowserSessions",
+          "properties": [
+            "RevokedCookiesDenied",
+            "SDKAuthorityPreserved",
+            "UnrelatedSessionsPreserved"
+          ],
+          "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them."
+        }
+      ]
     }
   ]
 }

@@ -261,6 +261,11 @@ def handler(event,context):
     f=client('cloudformation',endpoint,token);c=client('lambda',endpoint,token)
     result=c.invoke(FunctionName='cfn-inline-app',Payload=b'null');self.assertNotIn('FunctionError',result);self.assertEqual(json.loads(result['Payload'].read()),{'answer':42,'value':'team-one','event':None})
     f.delete_stack(StackName='inline-practice');self.assertEqual(c.list_functions()['Functions'],[])
+ def test_console_account_sign_out_revokes_browser_session_only(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('console_logout.py'))],check=True)
+
+ def test_openapi_parameter_detector_controls(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('test_openapi_parameters.py'))],check=True)
  def test_scalar_s3_docs_live_response_reader(self):
   from scalar_s3_docs import run_scalar_s3_docs
   run_scalar_s3_docs()
@@ -327,8 +332,13 @@ def handler(event,context):
    with page.expect_download() as download:submit(page)
    self.assertEqual(Path(download.value.path()).read_bytes(),b'hello from UI')
    page.get_by_role('link',name='General purpose buckets',exact=True).click();page.get_by_role('radio',name='Select ui-practice',exact=True).check();page.get_by_role('button',name='Delete',exact=True).click();page.get_by_label('Type ui-practice to confirm').fill('ui-practice');submit(page);expect(page.get_by_role('dialog')).to_contain_text('BucketNotEmpty');page.get_by_role('button',name='Cancel',exact=True).click()
-   page.get_by_role('link',name='Identity policies',exact=True).click();page.get_by_label('Principal name',exact=True).fill('reader');submit(page);page.get_by_role('button',name='Choose identity',exact=True).click();page.get_by_label('Principal name',exact=True).fill('reader');submit(page);expect(page.get_by_role('button',name='Choose identity',exact=True)).to_have_text('reader')
-   page.get_by_role('button',name='Create bucket',exact=True).first.click();page.get_by_label('Bucket name',exact=True).fill('denied-bucket');submit(page);expect(page.locator('[id^=form-error-]')).to_contain_text('implicitDeny');page.get_by_role('button',name='Cancel',exact=True).click();self.assertNotIn('denied-bucket',[b['Name'] for b in c.list_buckets()['Buckets']])
+   page.get_by_role('link',name='Identity policies',exact=True).click();page.get_by_label('Principal name',exact=True).fill('reader');submit(page)
+   page.get_by_role('button',name='Account menu',exact=True).click();page.get_by_role('menuitem',name='Choose identity',exact=True).click();page.get_by_label('Principal name',exact=True).fill('reader');submit(page);expect(page.get_by_role('button',name='Account menu',exact=True)).to_contain_text('reader')
+   buckets_before=sorted(b['Name'] for b in c.list_buckets()['Buckets'])
+   page.get_by_role('button',name='Create bucket',exact=True).first.click();page.get_by_label('Bucket name',exact=True).fill('denied-bucket')
+   with page.expect_response(lambda response:response.request.method=='PUT' and response.url==endpoint+'/denied-bucket') as denied_create:submit(page)
+   self.assertEqual(denied_create.value.status,403);self.assertEqual(denied_create.value.request.headers.get('x-simulator-principal'),'reader');expect(page.locator('[id^=form-error-]')).to_contain_text('implicitDeny');page.get_by_role('button',name='Cancel',exact=True).click()
+   self.assertNotIn('denied-bucket',[b['Name'] for b in c.list_buckets()['Buckets']]);self.assertEqual(sorted(b['Name'] for b in c.list_buckets()['Buckets']),buckets_before);self.assertEqual(c.get_object(Bucket='ui-practice',Key='docs/hello.txt')['Body'].read(),b'hello from UI');self.assertEqual(c.get_object(Bucket='ui-practice',Key='from-sdk.txt')['Body'].read(),b'shared')
    page.get_by_role('searchbox',name='Find resources',exact=True).fill('no-matches');expect(page.get_by_role('heading',name='No matching resources')).to_be_visible();page.get_by_role('searchbox',name='Find resources',exact=True).fill('')
    page.set_viewport_size({'width':390,'height':844});expect(page.get_by_role('button',name='Create bucket',exact=True).first).to_be_visible();page.screenshot(path=str(REPORTS/'console-mobile.png'),full_page=True);assert_reflow(page)
    self.assertEqual(page.evaluate('window.__policyViolations'),[]);page.set_viewport_size({'width':1440,'height':1000});page.goto(endpoint+'/_simulator/docs/');expect(page.get_by_role('heading',name='TenkaCloud Simulator API',exact=True)).to_be_visible(timeout=15000)
@@ -421,7 +431,7 @@ def handler(event,context):
     else:outside.append(r.request.url);r.abort()
    page.route('**/*',route)
    page.goto(endpoint+'/_simulator/console/');expect(page.get_by_role('heading',name='Open your local sandbox',exact=True)).to_be_visible();page.get_by_label('Access token',exact=True).fill(token);page.get_by_role('button',name='Open sandbox',exact=True).click()
-   expect(page.get_by_role('button',name='Choose identity',exact=True)).to_have_count(0)
+   page.get_by_role('button',name='Account menu',exact=True).click();expect(page.get_by_role('menuitem',name='Sign out',exact=True)).to_be_visible();expect(page.get_by_role('menuitem',name='Choose identity',exact=True)).to_have_count(0);page.keyboard.press('Escape')
    page.get_by_role('button',name='Services',exact=True).click();page.get_by_role('menuitem',name='Systems Manager',exact=True).click();page.get_by_role('link',name=outputs['ParameterName'],exact=True).click();expect(page.get_by_label('Value',exact=True)).to_have_value('TC{'+seed+'}');expect(page.get_by_role('tab',name='Overview',exact=True)).to_be_visible()
    page.get_by_role('button',name='Edit parameter',exact=True).click();expect(page.get_by_role('button',name='Type String',exact=True)).to_be_disabled();page.get_by_label('Value',exact=True).fill('unauthorized change');page.get_by_role('button',name='Save changes',exact=True).click();expect(page.locator('[id^=form-error-]')).to_contain_text('403');self.assertEqual(client('ssm',token).get_parameter(Name=outputs['ParameterName'])['Parameter']['Value'],'TC{'+seed+'}')
    page.get_by_role('button',name='Cancel',exact=True).click();page.set_viewport_size({'width':390,'height':844});assert_reflow(page);self.assertEqual(errors,[]);self.assertEqual(outside,[])
