@@ -58,5 +58,6 @@ positive models and ten negative controls (sixteen TLC cases).
 See [the SSM contract and source/test correspondence](../docs/formal-ssm.md).
 The native HTTP integration test uses distinct values and runtime versions
 1–4; there is no version-history/selector, live-AWS differential, liveness or
-Go refinement claim. This integration stacks on PR #310's unmerged formal-gate
-base, rather than asserting that its new registry/checks are already on main.
+Go refinement claim. This candidate incorporated main `55a1119` by normal
+merge after PR #310 merged; its SSM additions still require their own exact-HEAD
+checks and PR acceptance. The original standalone/stacked commits are retained.

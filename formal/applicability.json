@@ -1,19 +1,19 @@
 {
   "version": 1,
-  "base_sha": "ebf5b5d29c3616c57afcd6a6542829d8a741218c",
+  "base_sha": "55a111953eb3eb0dfd90aaa473ac3fe39cb10b66",
   "changes": [
     {
       "path": "docs/formal-ssm.md",
-      "sha256": "62af902919a343ae2337ee69700cadb9c5e659318530db6e111c58de7c552d15",
+      "sha256": "fd25ae13bffbce785121da32522a0a404ae5dbbdee7e79875f9756c033db866b",
       "disposition": "documentation",
-      "reason": "Records official SSM API/date references, finite limits, actual standalone model/native-test evidence and the unmerged stacked dependency. It does not add runtime transitions or claim hosted CI/refinement.",
+      "reason": "Records official SSM API/date references, finite limits, standalone model/native-test evidence and normal integration of reviewed main after formal PR310 merged. It does not add runtime transitions or claim hosted CI/refinement.",
       "models": []
     },
     {
       "path": "formal/README.md",
-      "sha256": "dd6866d7d986f99e433217852f684280b554e06a20198397f168cd57afb5520d",
+      "sha256": "6e9b5764154f4ff3955e38c7e3d442fce218339812a95505428b4f3b6b143ddb",
       "disposition": "documentation",
-      "reason": "Explains the sixth finite model, retained original five, sixteen required positive/negative cases and unsupported behavior. This prose is not executable business state.",
+      "reason": "Explains the sixth finite model, retained original five, sixteen required cases and the current main-based candidate. This prose is not executable business state.",
       "models": []
     },
     {
@@ -41,7 +41,7 @@
       "path": "formal/SSMParameterState.tla",
       "sha256": "6362cf048f12886dda55c27332b97d24f166af81ef9392a105940af224c90c63",
       "disposition": "modeled",
-      "reason": "Atomic abstraction of the existing validated native SSM authorization gate and latest-row Put/overwrite/Delete/Get transitions, with frame, version and exact read-address properties. It does not implement new APIs or prove Go/SQL refinement.",
+      "reason": "Atomic abstraction of existing validated native SSM authorization and latest-row Put/overwrite/Delete/Get transitions, with frame, version and exact read-address properties; no new API or Go/SQL refinement proof.",
       "models": [
         {
           "id": "SSMParameterState",
@@ -69,7 +69,7 @@
       "path": "internal/server/ssm_model_contract_test.go",
       "sha256": "ae893d2818d6bde526cb31bb67ae55fc9ccc8ebeab2fcbdc59ef3e4ac8c04419",
       "disposition": "modeled",
-      "reason": "Binds the declared SSM contract to actual native HTTP calls: four distinct region/name values and versions, Allow plus explicit Deny, state preservation, no-overwrite refusal, deletion and recreation. Test-only source is in the model scope; this is not an exhaustive/refinement proof.",
+      "reason": "Binds the SSM contract to native HTTP calls: four distinct regional/name values and versions, Allow plus explicit Deny, state preservation, overwrite refusal, deletion/recreation. Test-only source is in the model scope; not exhaustive/refinement proof.",
       "models": [
         {
           "id": "SSMParameterState",

@@ -4,12 +4,14 @@
 SSM authorization gate plus ParameterStore's latest-row operations**. Reviewed
 source baseline: `6ffbd1881dad3589469fdf1809654b7483bd6ac4`.
 
-This registry integration is **stacked on unmerged formal PR #310**, exact base
-`ebf5b5d29c3616c57afcd6a6542829d8a741218c`. It must not be treated as a
-main-based or merged change. The applicability record deliberately uses that
-immutable dependency base; regenerate it against the actual reviewed base after
-any dependency rebase, squash merge or restacking. Source/model/native test bytes
-from the standalone SSM candidate are preserved. The model adds no
+This registry integration originally stacked on formal PR #310's exact
+`ebf5b5d29c3616c57afcd6a6542829d8a741218c` head. After that PR merged, main
+`55a111953eb3eb0dfd90aaa473ac3fe39cb10b66` was incorporated by a **normal merge**,
+retaining the original SSM commits. The applicability record now uses that
+reviewed main base. Regenerate the record for any later base change; a valid
+local record does not imply that the SSM candidate itself has merged.
+Source/model/native test bytes from the standalone SSM candidate are preserved.
+The model adds no
 runtime API, stored history, authorization implementation or new dependency.
 `ParameterStore` itself is a trusted internal storage adapter; authorization is
 performed by `Gateway.serveSSM` before its native operations. This model does
@@ -155,7 +157,7 @@ and a counterexample for a different invariant. Their classifier fixtures are
 not passed off as actual TLC runs.
 
 `formal/applicability.json` classifies and hashes every changed blob relative to
-the stacked dependency base. Native test/model/config paths are bound to the
+the reviewed main base. Native test/model/config paths are bound to the
 seven named SSM properties and their limits. Registration and a valid declared
 scope do not themselves prove refinement, human acceptance, hosted CI success,
 repository merge protection or main integration. Exact-HEAD applicability and
