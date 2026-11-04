@@ -42,3 +42,22 @@ human scope review and separately configured repository merge protection.
 New runtime/state transitions are not covered by the existing five models merely
 because this suite passes. No new service, callback or Python/HTTP state-machine
 proof is implied by this inventory.
+
+
+## SSM latest parameter state
+
+`SSMParameterState.tla` is the sixth registered finite model. It bounds two
+regions by two names, two validated abstract values and latest-row versions
+1–2, with a success-prefix cutoff rather than an API version cap. It checks
+explicit-Deny preservation, no-overwrite refusal, successful version advance,
+exact-key deletion/frame conditions and region/name read isolation. Five
+specified mutations must fail the appropriate named property. Existing five
+models and their controls remain mandatory; the combined inventory is six
+positive models and ten negative controls (sixteen TLC cases).
+
+See [the SSM contract and source/test correspondence](../docs/formal-ssm.md).
+The native HTTP integration test uses distinct values and runtime versions
+1–4; there is no version-history/selector, live-AWS differential, liveness or
+Go refinement claim. This candidate incorporated main `55a1119` and PR #314 main `2d8a41a` by normal
+merge after PR #310 merged; its SSM additions still require their own exact-HEAD
+checks and PR acceptance. The original standalone/stacked commits are retained.

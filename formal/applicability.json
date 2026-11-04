@@ -1,54 +1,96 @@
 {
   "version": 1,
-  "base_sha": "55a111953eb3eb0dfd90aaa473ac3fe39cb10b66",
+  "base_sha": "2d8a41a0cb576bd42561a7162d35129f44979c08",
   "changes": [
     {
-      "path": "docs/formal-module-metadata.md",
-      "sha256": "c8ae8dddb4565559e807d31f34fc96e2566212ccb50089907bf817fb6967214f",
+      "path": "docs/formal-ssm.md",
+      "sha256": "b655fd1b30691a585e36e4e1be295af583e73135edb8f12bb7ea02b43c793280",
       "disposition": "documentation",
-      "reason": "Documents narrow annotation recognition, corrected hidden-Git-flag input guard, scoped real-Git test results and explicit finite/implementation limits.",
+      "reason": "Records official SSM API/date references, finite limits, standalone model/native-test evidence and normal integration of reviewed main after formal PR310 merged. It does not add runtime transitions or claim hosted CI/refinement.",
       "models": []
     },
     {
-      "path": "scripts/formal_applicability.py",
-      "sha256": "a389e8a406b8d85ebc3105301603300d35ab02eae37d9fbc549323c9aa9ebfbd",
-      "disposition": "formal-infrastructure",
-      "reason": "Checks exact module/checksum bytes and regular nonexecutable modes before/after regardless of assume-unchanged/skip-worktree; narrows annotation-only classification without general module/runtime exemption. Expanded applicability21 and gate10 tests passed; actual TLC/immutable record are separate required results.",
+      "path": "formal/README.md",
+      "sha256": "9f864547015eb2d5502b55032f75a0dccc818e0b2bc7b41aa6d349c124e3841c",
+      "disposition": "documentation",
+      "reason": "Explains the sixth finite model, retained original five, sixteen required cases and the current main-based candidate. This prose is not executable business state.",
       "models": []
     },
     {
-      "path": "scripts/formal_model_gate.py",
-      "sha256": "7a412c13548f80f107f5fb36cc7f3cb6d49dc28b07a052a42da9dde8e91bb716",
+      "path": "formal/SSMParameterState.cfg",
+      "sha256": "ec27d73e1b7b75d3e8844c4ba40fbe6e20eb26ba878d4ac6dd4e816e2fc58aed",
+      "disposition": "modeled",
+      "reason": "Declares two regions by two names, two values and a version-prefix cutoff of two; enables all seven exact SSM invariants. The finite cutoff is not an AWS/runtime version limit or stored history.",
+      "models": [
+        {
+          "id": "SSMParameterState",
+          "properties": [
+            "TypeOK",
+            "DeniedPreservesState",
+            "OverwriteRefusal",
+            "PutVersion",
+            "DeleteEffect",
+            "OtherKeysUnchanged",
+            "ReadIsolation"
+          ],
+          "limits": "Atomic accepted operations and abstract allow/explicit-deny only; no IAM parser/ARN matching, HTTP syntax, type/description/time fields, pagination/path queries, SQLite crash/interleaving proof, version history/selectors/labels, AWS recreation delay, live AWS differential run or Go refinement proof."
+        }
+      ]
+    },
+    {
+      "path": "formal/SSMParameterState.tla",
+      "sha256": "6362cf048f12886dda55c27332b97d24f166af81ef9392a105940af224c90c63",
+      "disposition": "modeled",
+      "reason": "Atomic abstraction of existing validated native SSM authorization and latest-row Put/overwrite/Delete/Get transitions, with frame, version and exact read-address properties; no new API or Go/SQL refinement proof.",
+      "models": [
+        {
+          "id": "SSMParameterState",
+          "properties": [
+            "TypeOK",
+            "DeniedPreservesState",
+            "OverwriteRefusal",
+            "PutVersion",
+            "DeleteEffect",
+            "OtherKeysUnchanged",
+            "ReadIsolation"
+          ],
+          "limits": "Atomic accepted operations and abstract allow/explicit-deny only; no IAM parser/ARN matching, HTTP syntax, type/description/time fields, pagination/path queries, SQLite crash/interleaving proof, version history/selectors/labels, AWS recreation delay, live AWS differential run or Go refinement proof."
+        }
+      ]
+    },
+    {
+      "path": "formal/models.json",
+      "sha256": "420363f2818b096cd5ddec9f9d5ab2bca8ddcb38c40fe52d35eec2ceb9fe4dd6",
       "disposition": "formal-infrastructure",
-      "reason": "Checks exact module/checksum bytes and regular nonexecutable modes before/after regardless of assume-unchanged/skip-worktree; narrows annotation-only classification without general module/runtime exemption. Expanded applicability21 and gate10 tests passed; actual TLC/immutable record are separate required results.",
+      "reason": "Adds the exact SSM model/config/source scope and five required counterexamples to the executable inventory; preserves all original models, properties, tool identity and checker protections.",
       "models": []
     },
     {
-      "path": "scripts/formal_module_metadata.py",
-      "sha256": "ef1b2a1a0740ccecda7041ad004598dc753007a560524ea829b5cc15e45d0d25",
-      "disposition": "formal-infrastructure",
-      "reason": "Checks exact module/checksum bytes and regular nonexecutable modes before/after regardless of assume-unchanged/skip-worktree; narrows annotation-only classification without general module/runtime exemption. Expanded applicability21 and gate10 tests passed; actual TLC/immutable record are separate required results.",
-      "models": []
-    },
-    {
-      "path": "scripts/test-formal-applicability.py",
-      "sha256": "5596571973aaa556c1158316750aa2053ba490106a43dd48a4e0336abad8933c",
-      "disposition": "formal-infrastructure",
-      "reason": "Checks exact module/checksum bytes and regular nonexecutable modes before/after regardless of assume-unchanged/skip-worktree; narrows annotation-only classification without general module/runtime exemption. Expanded applicability21 and gate10 tests passed; actual TLC/immutable record are separate required results.",
-      "models": []
+      "path": "internal/server/ssm_model_contract_test.go",
+      "sha256": "ae893d2818d6bde526cb31bb67ae55fc9ccc8ebeab2fcbdc59ef3e4ac8c04419",
+      "disposition": "modeled",
+      "reason": "Binds the SSM contract to native HTTP calls: four distinct regional/name values and versions, Allow plus explicit Deny, state preservation, overwrite refusal, deletion/recreation. Test-only source is in the model scope; not exhaustive/refinement proof.",
+      "models": [
+        {
+          "id": "SSMParameterState",
+          "properties": [
+            "TypeOK",
+            "DeniedPreservesState",
+            "OverwriteRefusal",
+            "PutVersion",
+            "DeleteEffect",
+            "OtherKeysUnchanged",
+            "ReadIsolation"
+          ],
+          "limits": "Atomic accepted operations and abstract allow/explicit-deny only; no IAM parser/ARN matching, HTTP syntax, type/description/time fields, pagination/path queries, SQLite crash/interleaving proof, version history/selectors/labels, AWS recreation delay, live AWS differential run or Go refinement proof."
+        }
+      ]
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "71117354b700db4d16cc6590ca323d6803a2014371e9375c61c0498585e4bc93",
+      "sha256": "ef4f1d06c94c2ffc7e62a89aeb16c27d1a492b02d508793074c939ed7ef6ba83",
       "disposition": "formal-infrastructure",
-      "reason": "Checks exact module/checksum bytes and regular nonexecutable modes before/after regardless of assume-unchanged/skip-worktree; narrows annotation-only classification without general module/runtime exemption. Expanded applicability21 and gate10 tests passed; actual TLC/immutable record are separate required results.",
-      "models": []
-    },
-    {
-      "path": "test/formal/startup-module-metadata.json",
-      "sha256": "8b1d11863b1325b65d40dbd26974a423ea740823e992b6631947b43c931c8b60",
-      "disposition": "test-support",
-      "reason": "Pinned public Startup308 module before/after and unchanged checksum blobs with SHA256 receipts for real-Git metadata acceptance and semantic negative controls.",
+      "reason": "Retains main PR314 direct module-byte/mode guards and metadata fixtures; test-only inventory expectation requires exact original five plus SSM. Adds missing/changed-config and wrong-invariant rejection fixtures without weakening runner/checker policy. Fixtures are separate from actual TLC evidence.",
       "models": []
     }
   ]

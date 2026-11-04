@@ -10,7 +10,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from formal_model_gate import GateError, apply_mutant, load_registry, run_suite, validate_result, invariants
+from formal_model_gate import GateError, apply_mutant, load_registry, run_suite, validate_result, invariants, exact_head_inputs
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -34,7 +34,10 @@ class FormalGateTests(unittest.TestCase):
 
     def test_complete_registry_and_exact_mutations(self):
         registry = load_registry(self.root)
-        self.assertEqual(len(registry['models']), 5)
+        self.assertEqual({model['id'] for model in registry['models']}, {
+            'ObjectStore', 'StackOwnership', 'S3Versions', 'NativeIAMOwnership',
+            'RESTDeploymentSnapshot', 'SSMParameterState',
+        })
         for model in registry['models']:
             source = (self.root / model['model']).read_text()
             for mutant in model['mutants']:
@@ -43,13 +46,43 @@ class FormalGateTests(unittest.TestCase):
                 self.assertIn('MODULE ' + name, mutated)
 
     def test_missing_model_config_checksum_each_fail(self):
-        for path in ('formal/ObjectStore.tla', 'formal/ObjectStore.cfg', 'formal/tla2tools.sha256'):
+        for path in ('formal/ObjectStore.tla', 'formal/ObjectStore.cfg',
+                     'formal/SSMParameterState.tla', 'formal/SSMParameterState.cfg',
+                     'formal/tla2tools.sha256'):
             with self.subTest(path=path):
                 original = (self.root / path).read_bytes()
                 (self.root / path).unlink()
                 with self.assertRaises(GateError):
                     load_registry(self.root)
                 (self.root / path).write_bytes(original)
+
+    def test_ssm_changed_config_cannot_remove_a_required_property(self):
+        config = self.root / 'formal/SSMParameterState.cfg'
+        config.write_text(config.read_text().replace('INVARIANT ReadIsolation', 'INVARIANT TypeOK'))
+        with self.assertRaises(GateError):
+            load_registry(self.root)
+
+    def test_ssm_changed_cfg_is_not_exact_head_evidence(self):
+        for command in (['git','init','-q'], ['git','config','user.name','Fixture'],
+                        ['git','config','user.email','fixture@example.invalid'],
+                        ['git','add','.'], ['git','commit','-q','-m','immutable SSM fixture']):
+            subprocess.run(command, cwd=self.root, check=True, capture_output=True)
+        exact_head_inputs(self.root)
+        config = self.root / 'formal/SSMParameterState.cfg'
+        config.write_text(config.read_text() + '\n\\* Changed after immutable input capture\n')
+        with self.assertRaises(GateError):
+            exact_head_inputs(self.root)
+
+    def test_ssm_wrong_expected_invariant_is_not_a_sensitivity_pass(self):
+        # Result-classification fixture only; actual TLC sensitivity is checked
+        # separately. A different valid registered invariant is still wrong.
+        registry = load_registry(self.root)
+        model = next(m for m in registry['models'] if m['id'] == 'SSMParameterState')
+        mutation = next(m for m in model['mutants'] if m['id'] == 'ReadWrongName')
+        self.assertEqual(mutation['expect_invariant'], 'ReadIsolation')
+        validate_result(12, 'Invariant ReadIsolation is violated.', mutation['expect_invariant'])
+        with self.assertRaises(GateError):
+            validate_result(12, 'Invariant ReadIsolation is violated.', 'PutVersion')
 
     def test_unregistered_or_silently_removed_model_fails(self):
         orphan = self.root / 'formal/Unknown.tla'
