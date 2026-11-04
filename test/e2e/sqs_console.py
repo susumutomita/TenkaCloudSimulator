@@ -56,9 +56,14 @@ def run():
     browser=p.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE') or shutil.which('chromium'),args=['--no-sandbox'])
     context=browser.new_context(viewport={'width':1440,'height':1000});page=context.new_page()
     page.on('pageerror',lambda error:errors.append(str(error)));page.on('console',lambda message:console_output.append(message.text))
+    held=[];hold_next_poll=[False]
     def local_only(route):
-     if urlsplit(route.request.url).scheme=='http' and urlsplit(route.request.url).netloc==urlsplit(a.endpoint).netloc:route.continue_()
-     else:outside.append(urlsplit(route.request.url).netloc);route.abort()
+     if urlsplit(route.request.url).scheme!='http' or urlsplit(route.request.url).netloc!=urlsplit(a.endpoint).netloc:
+      outside.append(urlsplit(route.request.url).netloc);route.abort();return
+     if hold_next_poll[0] and route.request.headers.get('x-amz-target')=='AmazonSQS.ReceiveMessage':
+      hold_next_poll[0]=False
+      held.append((route,route.fetch()))
+     else:route.continue_()
     context.route('**/*',local_only)
     def observe_request(request):
      target=request.headers.get('x-amz-target','')
@@ -131,12 +136,10 @@ def run():
     assert sdk.get_queue_attributes(QueueUrl=url,AttributeNames=['All'])['Attributes']['ApproximateNumberOfMessages']=='0'
     # Hold an ACTUAL native poll response while changing region. Cancellation
     # may abort delivery; either way no old body/receipt may enter the new view.
-    held=[]
-    def delay_poll(route):
-     assert urlsplit(route.request.url).netloc==urlsplit(a.endpoint).netloc
-     if route.request.headers.get('x-amz-target')=='AmazonSQS.ReceiveMessage':held.append((route,route.fetch()))
-     else:route.continue_()
-    page.route(a.endpoint+'/',delay_poll);page.get_by_role('button',name='Poll for messages',exact=True).click()
+    # One exact-origin handler owns every interception. A layered page/context
+    # route plus unroute can try to continue an already-cancelled interception.
+    # Hold exactly one REAL native response; no mocked fetch or response body.
+    hold_next_poll[0]=True;page.get_by_role('button',name='Poll for messages',exact=True).click()
     deadline=time.monotonic()+10
     while not held and time.monotonic()<deadline:page.wait_for_timeout(10)
     assert len(held)==1,'No actual delayed native response obtained'
@@ -149,7 +152,7 @@ def run():
     try:route.fulfill(response=response)
     except PlaywrightError as failure:
      assert any(part in str(failure).lower() for part in ('already handled','invalid interception','invalidinterception','target closed','request was cancelled','request was canceled')),'Unexpected delayed route delivery failure'
-    page.unroute(a.endpoint+'/',delay_poll);expect(page.get_by_role('heading',level=1,name='Queues',exact=False)).to_be_visible()
+    expect(page.get_by_role('heading',level=1,name='Queues',exact=False)).to_be_visible()
     assert page.get_by_label('Received message body',exact=True).count()==0 and 'west-only' not in page.locator('body').inner_text(),'Late west response painted east view'
     west.delete_queue(QueueUrl=west_url)
     page.get_by_role('link',name='console-standard',exact=True).click()
