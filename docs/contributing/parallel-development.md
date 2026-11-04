@@ -23,8 +23,8 @@ not a second live roster. Update the snapshot at claims, handoffs and merges.
    unsupported behavior. A short Issue note is enough; do not invent a separate
    approval ceremony for routine work already authorized.
 3. Check actual available agent slots, CPU/memory and heavy-test reservations.
-   Count the integration owner and active external workers. Start only independent
-   tasks that fit the available capacity. A plan for many tasks is not evidence
+   Count the integration owner against local slots; track independently hosted
+   external workers separately. Start only independent tasks that fit the available capacity. A plan for many tasks is not evidence
    that those agents exist, have accepted them or are running.
 
 Use explicit status: **planned** means proposed, **reserved** means awaiting an
