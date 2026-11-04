@@ -1,12 +1,29 @@
 """Actual local KMS SDK/identity/crypto/restart/two-team contract; no AWS calls."""
-import json,sys,tempfile,urllib.request
+import ipaddress,json,sys,tempfile,urllib.request
+from urllib.parse import urlsplit
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parent))
 from check import running,boto3,Config,ClientError
 
+sdk_stats=[]
+sdk_clients=[]
+def local_target(url,endpoint):
+ origin=urlsplit(endpoint);target=urlsplit(url)
+ assert origin.scheme=='http' and origin.port and origin.username is None and origin.password is None
+ assert ipaddress.ip_address(origin.hostname).is_loopback,'Only numeric-loopback endpoints are allowed'
+ assert target.scheme=='http' and target.netloc==origin.netloc and target.username is None and target.password is None and not target.fragment,'Outbound target refused before send'
+ assert ipaddress.ip_address(target.hostname).is_loopback
+
 def client(service,endpoint,token,region='us-east-1'):
- c=boto3.client(service,endpoint_url=endpoint,region_name=region,aws_access_key_id='TCSIMLOCAL',aws_secret_access_key='dummy',config=Config(retries={'max_attempts':0}))
- c.meta.events.register('before-sign.'+service,lambda request,**kwargs:request.headers.add_header('X-Simulator-Token',token));return c
+ local_target(endpoint,endpoint)
+ stats={'service':service,'region':region,'calls':0,'sends':0,'responses':0};sdk_stats.append(stats)
+ c=boto3.client(service,endpoint_url=endpoint,region_name=region,aws_access_key_id='TCSIMLOCAL',aws_secret_access_key='dummy',config=Config(retries={'max_attempts':0},proxies={}))
+ c.meta.events.register('before-sign.'+service,lambda request,**kwargs:request.headers.add_header('X-Simulator-Token',token))
+ def called(**kwargs):stats['calls']+=1
+ def sending(request,**kwargs):local_target(request.url,endpoint);stats['sends']+=1
+ def responded(**kwargs):stats['responses']+=1
+ c.meta.events.register('before-call.'+service,called);c.meta.events.register('before-send.'+service,sending);c.meta.events.register('after-call.'+service,responded)
+ sdk_clients.append(c);return c
 
 def denied(code,action):
  try:action()
@@ -15,7 +32,8 @@ def denied(code,action):
 
 def participant(endpoint,operator,name):
  request=urllib.request.Request(endpoint+'/_simulator/v1/access',data=json.dumps({'Principal':name}).encode(),headers={'Content-Type':'application/json','X-Simulator-Token':operator})
- with urllib.request.urlopen(request) as response:return json.load(response)['AccessToken']
+ local_target(request.full_url,endpoint)
+ with urllib.request.build_opener(urllib.request.ProxyHandler({})).open(request) as response:return json.load(response)['AccessToken']
 
 with tempfile.TemporaryDirectory(prefix='kms-sdk-') as d:
  state=Path(d)/'team-a.db'
@@ -60,4 +78,7 @@ with tempfile.TemporaryDirectory(prefix='kms-sdk-') as d:
  with running(state,authenticated=True) as (endpoint,new_operator):
   resumed=client('kms',endpoint,new_operator);assert resumed.decrypt(CiphertextBlob=blob,EncryptionContext=ctx)['Plaintext']==plain
   assert resumed.describe_key(KeyId=kid)['KeyMetadata']['Description']=='Local dummy key'
- print(json.dumps({'nativeEightOperations':True,'binaryRoundtrip':True,'contextKeyRegionTamperGuards':True,'disabledGuard':True,'IAMExactKeyAndExplicitDeny':True,'twoTeamDBs':True,'crossToken':401,'restart':True,'scheduledDeletion':'unsupported; temporary fixture DBs removed'}))
+ for stats in sdk_stats:assert stats['calls']>0 and stats['calls']==stats['sends']==stats['responses'],stats
+ totals={key:sum(stats[key] for stats in sdk_stats) for key in ('calls','sends','responses')}
+ for c in sdk_clients:c.close()
+ print(json.dumps({'nativeEightOperations':True,'guardedSDKCounts':totals,'sdkClients':len(sdk_stats),'beforeSendLoopbackGuard':True,'binaryRoundtrip':True,'contextKeyRegionTamperGuards':True,'disabledGuard':True,'IAMExactKeyAndExplicitDeny':True,'twoTeamDBs':True,'crossToken':401,'restart':True,'scheduledDeletion':'unsupported; temporary fixture DBs removed'}))
