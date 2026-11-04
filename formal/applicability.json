@@ -1,89 +1,68 @@
 {
   "version": 1,
-  "base_sha": "6ffbd1881dad3589469fdf1809654b7483bd6ac4",
+  "base_sha": "55a111953eb3eb0dfd90aaa473ac3fe39cb10b66",
   "changes": [
     {
-      "path": ".github/workflows/formal.yml",
-      "sha256": "3e8a66f278d22a6c9fbf2761c784a97b7923d933d9307964139e26c4d83ea7b6",
+      "path": ".github/workflows/ci.yml",
+      "sha256": "678936ddb1e20c9e031a9ad665e58ee175cfd4395d12d34043d2f754190e28c5",
       "disposition": "formal-infrastructure",
-      "reason": "Run the exact-HEAD formal gate in an unprivileged Actions job; define runner-dependent bytecode cache only in supported step env contexts.",
+      "reason": "Prepare the same pinned axe-core asset before mandatory browser E2E and pass AXE_SCRIPT into that existing gate; the later audit consumes the same asset. Existing Go/race/build/platform/formal/security checks retain their scope, with no ignored failures or path skip. This changes validation ordering/environment, not a provider transition.",
       "models": []
     },
     {
-      "path": ".gitignore",
-      "sha256": "a49de3a7afae4ca42ecfdb1f064a98cad1c0bbce18bddc63a01ad6e9c3097286",
-      "disposition": "build-metadata",
-      "reason": "Ignore only generated reports/formal evidence so the validator does not mistake its own output for uncommitted source. No model, source or validation input is excluded.",
-      "models": []
-    },
-    {
-      "path": "docs/ci.md",
-      "sha256": "35bf55f6279fcc7106ff832e0f886a63a575d0c582715eb818b06a3d7e588a3e",
+      "path": "README.md",
+      "sha256": "3949a33e501b4476202cfea04b62dcfea2c1f5ee780b5a2c8b099a1651d8eb6e",
       "disposition": "documentation",
-      "reason": "Explains finite bounds, declared correspondence, exact-input checks and separately configured merge protection; no application transition or mathematical implementation proof is introduced by this prose.",
+      "reason": "Document the pinned axe-core preparation and explicit AXE_SCRIPT prerequisite for the unchanged make e2e entry point; no application behavior or mathematical property is introduced.",
       "models": []
     },
     {
-      "path": "docs/formal-validation.md",
-      "sha256": "3aca4a0d7a833f84e96155d756371f85f85fa807c0869ebac022dea994ab3703",
-      "disposition": "documentation",
-      "reason": "Explains finite bounds, declared correspondence, exact-input checks and separately configured merge protection; no application transition or mathematical implementation proof is introduced by this prose.",
+      "path": "internal/server/apidocs/index.html",
+      "sha256": "6965a835fd1fd9b3101287b200eedc89649594e4ca430704746d01faba75fcdd",
+      "disposition": "presentation",
+      "reason": "Add local CSS/script references and accessible live-response dialog/status elements. These render a read-only explanation of existing S3 responses; no provider state or authority is granted. Browser operation, keyboard and accessibility behavior require separate tests, not provider-model claims.",
       "models": []
     },
     {
-      "path": "formal/README.md",
-      "sha256": "65776efb4f747c0f8cb07d22c90ad451b52fecec0cdbb80160be0e4b306b743f",
-      "disposition": "documentation",
-      "reason": "Explains finite bounds, declared correspondence, exact-input checks and separately configured merge protection; no application transition or mathematical implementation proof is introduced by this prose.",
+      "path": "internal/server/apidocs/init.js",
+      "sha256": "ef6a09d45cd28986fc665d8fd645b59077fc90c2db21dc596d019b88c0259946",
+      "disposition": "presentation",
+      "reason": "Wrap the existing same-origin customFetch with the bounded read-only response guide while retaining the native fetch result, offline origin restriction and disabled auth persistence. No native endpoint or storage/IAM evaluator changes; cloned-response rendering and async UI handling are browser-tested, outside the existing provider finite models.",
       "models": []
     },
     {
-      "path": "formal/models.json",
-      "sha256": "ed8bd53c5b16d33443c4bf89c7c13eef41ae2632b740083f08e69cc2ee8b8e96",
-      "disposition": "formal-infrastructure",
-      "reason": "Changes validation orchestration or its executable inventory, not simulator resource transitions. Strict real-Git/input and failure-classification negative tests exercise the mechanism; the unchanged five finite specifications still require actual TLC baseline and sensitivity runs. Human acceptance and policy self-edit protection remain separate.",
+      "path": "internal/server/apidocs/openapi.json",
+      "sha256": "8befd088ae51c10b196f9b54762c8a8e31f12a5ab3e0668ab3c324455f173228",
+      "disposition": "presentation",
+      "reason": "Expand static response schemas, examples and error/token/header documentation for the existing native APIs; preserve all 43 operation IDs, HTTP method/path pairs, server targets and security schemes. These are documentation/schema corrections, not new native wire behavior: all Go and embedded runtime implementation bytes are unchanged from the reviewed candidate. Static samples are explicitly distinguished from executed responses.",
       "models": []
     },
     {
-      "path": "scripts/check-formal-applicability.py",
-      "sha256": "47045d256c9b3c9ac7b4e1342368b6ce6aa17f74d689f62b6ae7d5b7592dfb84",
-      "disposition": "formal-infrastructure",
-      "reason": "Changes validation orchestration or its executable inventory, not simulator resource transitions. Strict real-Git/input and failure-classification negative tests exercise the mechanism; the unchanged five finite specifications still require actual TLC baseline and sensitivity runs. Human acceptance and policy self-edit protection remain separate.",
+      "path": "internal/server/apidocs/response-guide.css",
+      "sha256": "43392904f7da8023c990af7c2525107e021e7e6cf0ee4526f15580d49577eef7",
+      "disposition": "presentation",
+      "reason": "Style the local response explanation dialog, trigger and screen-reader announcement. No resource state, protocol dispatch or authorization transition is represented by CSS; visual reflow/accessibility need separate browser evidence.",
       "models": []
     },
     {
-      "path": "scripts/check-formal.py",
-      "sha256": "de54b5df0d2c3306b9a97542d87777c9dc0298ae9fc255b13b8a66d19e660253",
-      "disposition": "formal-infrastructure",
-      "reason": "Changes validation orchestration or its executable inventory, not simulator resource transitions. Strict real-Git/input and failure-classification negative tests exercise the mechanism; the unchanged five finite specifications still require actual TLC baseline and sensitivity runs. Human acceptance and policy self-edit protection remain separate.",
+      "path": "internal/server/apidocs/response-guide.js",
+      "sha256": "4ce7ee33b209439b6c55d3686c50c80b5498f8ea7ae280b3c537cd59d5c6e320",
+      "disposition": "presentation",
+      "reason": "Render bounded metadata from a cloned native S3 response without changing Scalar native responses or reading credentials/object bodies. The existing same-origin request guard and authority remain unchanged. This is browser presentation/async read-only inspection, not provider state; existing storage/IAM models do not prove DOM parsing, stale-view suppression or accessibility, which remain covered by dedicated browser tests.",
       "models": []
     },
     {
-      "path": "scripts/formal_applicability.py",
-      "sha256": "a1e8baf590a398039395827e206a20c98871f198b5c558eb97744ae1679028cd",
-      "disposition": "formal-infrastructure",
-      "reason": "Changes validation orchestration or its executable inventory, not simulator resource transitions. Strict real-Git/input and failure-classification negative tests exercise the mechanism; the unchanged five finite specifications still require actual TLC baseline and sensitivity runs. Human acceptance and policy self-edit protection remain separate.",
+      "path": "test/e2e/check.py",
+      "sha256": "482ed4d598525ee581639a540dd0817fc4879b51b9ab6e90917e9767305ed64e",
+      "disposition": "test-support",
+      "reason": "Register mandatory real Scalar/S3 response guidance checks and assert embedded documentation keeps 43 unique existing operations and accurate schemas. This adds tests to the existing E2E entry point and does not remove native SDK, console, cross-team or containment checks.",
       "models": []
     },
     {
-      "path": "scripts/formal_model_gate.py",
-      "sha256": "d08008ba7c3445eb3f2abff7cc4275d5829ff017d342ea48e421a70d2fb77248",
-      "disposition": "formal-infrastructure",
-      "reason": "Changes validation orchestration or its executable inventory, not simulator resource transitions. Strict real-Git/input and failure-classification negative tests exercise the mechanism; the unchanged five finite specifications still require actual TLC baseline and sensitivity runs. Human acceptance and policy self-edit protection remain separate.",
-      "models": []
-    },
-    {
-      "path": "scripts/test-formal-applicability.py",
-      "sha256": "68a801b2146e3ecb7763f6dc7e00212f1ccda35beb6203f84d136d782801c044",
-      "disposition": "formal-infrastructure",
-      "reason": "Changes validation orchestration or its executable inventory, not simulator resource transitions. Strict real-Git/input and failure-classification negative tests exercise the mechanism; the unchanged five finite specifications still require actual TLC baseline and sensitivity runs. Human acceptance and policy self-edit protection remain separate.",
-      "models": []
-    },
-    {
-      "path": "scripts/test-formal-gate.py",
-      "sha256": "2e02b5c95eb2d9a5dd9bc801a884590b7d4c2e29741c3481a90f217653b2dd1b",
-      "disposition": "formal-infrastructure",
-      "reason": "Changes validation orchestration or its executable inventory, not simulator resource transitions. Strict real-Git/input and failure-classification negative tests exercise the mechanism; the unchanged five finite specifications still require actual TLC baseline and sensitivity runs. Human acceptance and policy self-edit protection remain separate.",
+      "path": "test/e2e/scalar_s3_docs.py",
+      "sha256": "cdf493cd453bd0c6e4c0a7c129b07d321c7e041d0cd1163156d7cbd137b6fa34",
+      "disposition": "test-support",
+      "reason": "Exercise actual Scalar Send against native S3 metadata plus explicitly synthetic parser fixtures, hostile XML/text bounds, timeout/stale-view handling, keyboard/reflow and mandatory axe checks. This helper is development-only evidence and grants no simulator authority or implementation/model proof.",
       "models": []
     }
   ]
