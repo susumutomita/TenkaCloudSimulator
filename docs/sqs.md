@@ -1,10 +1,11 @@
-# SQS (Simple Queue Service) — supported subset
+# SQS supported subset
 
-Standard queues only, over the SQS JSON 1.0 protocol
-(`X-Amz-Target: AmazonSQS.<Operation>`, `application/x-amz-json-1.0`) that
-current AWS SDKs speak. State lives in provider-owned SQLite tables
-(`aws_sqs_queues`, `aws_sqs_messages`) and survives process restarts when the
-simulator runs with `--state <file>`. No real AWS access is involved.
+The simulator implements nine Standard-queue operations over AWS JSON 1.0:
+root `POST`, `Content-Type: application/x-amz-json-1.0`, and
+`X-Amz-Target: AmazonSQS.<Operation>`. The provider prefix
+`/_simulator/providers/aws/` reaches the same SQLite state. No real AWS access,
+external queue service, host Python or Node runtime is required by the binary.
+Use `--state <file>` to retain queues and messages across process restarts.
 
 ## Operations
 
@@ -20,257 +21,139 @@ simulator runs with `--state <file>`. No real AWS access is involved.
 | ChangeMessageVisibility | Sets a claimed message's invisibility deadline (0 makes it deliverable again). |
 | GetQueueAttributes | `All` or a subset of `QueueArn`, `CreatedTimestamp`, `VisibilityTimeout`, `DelaySeconds`, `MessageRetentionPeriod`, `ApproximateNumberOfMessages`, `ApproximateNumberOfMessagesNotVisible`. Unknown names fail with `InvalidAttributeName`. |
 
-Queue names are 1–80 letters, digits, hyphens or underscores, scoped per
-region (us-east-1, us-west-2, ap-northeast-1, eu-west-1). At most 1000 queues
-per process. Per provider database, local physical storage is additionally bounded
-by **10,000 persisted messages** and **64 MiB of stored payload bytes** across all
-queues and regions. Payload bytes mean UTF-8 body bytes plus the exact serialized
-message-attribute JSON bytes, including JSON field/escape/base64 overhead. These
-are simulator safety limits, not AWS quotas. A send that would exceed either
-limit returns HTTP 400 `SimulatorQuotaExceeded` without acknowledging a message.
-Its own-queue expiry cleanup and insertion share one transaction; rejected or
-failed insertion rolls that cleanup back too. Expired rows of other queues or
-regions still consume the physical budget until their own scoped read/delete
-cleanup removes them. Send does not delete another scope's rows to make space.
-Existing over-cap databases are preserved and remain readable/deletable; startup
-does not discard rows. Sends are admitted only when their post-scoped-cleanup
-physical state fits both budgets. The budget is recomputed in the same SQLite
-transaction instead of trusting an independently mutable quota counter.
 
-Every operation is authorized as the IAM action `sqs:<Operation>`
-against `arn:aws:sqs:<region>:000000000000:<queue>` (`*` for ListQueues), the
-same identity-policy engine as the other services.
+Receive returns a fresh opaque receipt on every delivery. Delete and visibility
+changes require the current receipt; ChangeMessageVisibility also requires a
+currently in-flight message. A visibility timeout of zero releases it. An expired
+receipt cannot extend a visibility window; redelivery invalidates the old handle.
+Explicit zero list/receive counts fail; omitted counts retain defaults of 1000/1.
+Unknown operations return 501; unsupported request fields, nested attribute
+members and invalid types return errors rather than being silently discarded.
 
-Queue URLs use the AWS shape `<scheme>://<host>/000000000000/<name>`; message
-operations resolve the queue from the URL's final path segment, exactly like
-SDK clients that post back the URL returned by CreateQueue.
+## Authentication, scope and local limits
 
-## Deliberately unsupported (explicit errors, never silent success)
+The CLI requires host-issued access tokens by default. Dummy `TCSIM...` signing
+keys identify the wire format and request region, not the host identity. Real
+AWS-style keys, session tokens and conflicting explicit/credential regions are
+rejected. IAM evaluates `sqs:<Operation>` against
+`arn:aws:sqs:<region>:000000000000:<queue>` (`*` for ListQueues). Identity
+selection is not authentication. Hosts must allocate separate process, SQLite
+file and token authority per team; see [the access boundary](../SECURITY.md).
 
-- FIFO queues (`.fifo` names, ordering, deduplication, content-based dedup).
-- The SQS Query protocol (form-encoded/XML). Requests dispatched as
-  CloudFormation form posts are unaffected.
-- Batch operations: `SendMessageBatch`, `DeleteMessageBatch`,
-  `ChangeMessageVisibilityBatch`.
-- Dead-letter queues / redrive policies, SSE-SQS / SSE-KMS encryption
-  attributes, queue tags, queue policies, `PurgeQueue`, and message/group
-  system attributes beyond the documented response subset.
-- Approximate counts are exact counts of the simulator's own state at read
-  time; real SQS may report eventually consistent approximations.
+Queue names use 1–80 ASCII letters, digits, underscore or hyphen. The supported
+regions are us-east-1, us-west-2, ap-northeast-1 and eu-west-1. Limits below are
+**local simulator limits**, not AWS service quotas:
 
-## Verification
+| Limit | Behavior |
+| --- | --- |
+| HTTP request | At most 320 KiB |
+| Message body | 1–262144 UTF-8 bytes; forbidden SQS body characters are rejected |
+| Message attributes | At most 10; String/Number/Binary with optional custom data-type suffix |
+| Queue inventory | At most 1000 queues per provider database |
+| Physical message inventory | At most 10000 persisted messages across every queue/region |
+| Stored payload | At most 64 MiB: UTF-8 body bytes plus exact serialized attribute JSON bytes, including encoding overhead |
 
-- `internal/aws/sqs_store_test.go`: store lifecycle, visibility timeout,
-  receipt-handle errors, attribute checksum, and persistence across a SQLite
-  reopen (simulated restart).
-- `internal/server/sqs_test.go`: full HTTP lifecycle, idempotent/conflicting
-  CreateQueue, FIFO rejection, unknown-operation 501, IAM allow/deny per
-  action and queue ARN, region isolation, visibility override +
-  ChangeMessageVisibility redelivery.
+SendMessage admits the new row only if both aggregate budgets fit in the same
+SQLite transaction. A refusal returns HTTP 400 `SimulatorQuotaExceeded`. Expired
+rows in other queues/regions still consume capacity until their own scoped
+read/delete cleanup removes them. Send never purges foreign rows to make space.
+Own expiry cleanup and insertion commit together or roll back together, including
+on quota refusal. Usage is read from actual rows rather than a separate mutable
+counter. Valid legacy over-cap state is preserved and remains readable/deletable;
+new sends require their post-scoped-cleanup state to fit the limits. The payload
+limit is not a promise about SQLite file size, metadata, WAL or filesystem quotas.
 
-## Local repair candidate (PR #315)
+Startup refuses existing orphan message rows without deleting or adopting them.
+Native operations recheck the parent inside the transaction. SQL/scan failures
+abort instead of becoming empty successful results. Expected-single-row create,
+send and receive writes check RowsAffected before acknowledging a queue/message/
+receipt; queue deletion also checks its result. Real SQLite ABORT/IGNORE and
+schema/corrupt-row fixtures test scoped rollback. IGNORE fixtures use defined
+pure RAISE(IGNORE) behavior for UPDATE. These are tested storage-fault classes,
+not protection against arbitrary malicious database/host writers, which the
+security policy excludes.
 
-This isolated proposal starts from public `95300b9` and normally merges formal
-baseline `55a1119`; it does not overwrite the external service owner's branch.
-The original Formal validation run failed before TLC because the old branch did
-not yet contain `scripts/test-formal-gate.py`. Restoring the checker alone does
-not establish SQS model applicability or a passing quality gate.
+## Compatibility boundaries
 
-The native repair rechecks the actual queue in the same SQLite transaction as
-send/receive/count/receipt operations. Expiry cleanup errors propagate and roll
-back the operation. A failed multi-message receive or queue deletion preserves
-the whole graph. ChangeMessageVisibility rejects a message whose visibility
-window has expired; redelivery rotates its receipt handle. Invalid persisted
-attribute data fails instead of being acknowledged. Startup refuses existing
-orphan message rows and preserves them for explicit repair; it does not silently
-delete or adopt corrupt original state.
+- The current AWS SendMessage reference permits 1 MiB; the simulator's body bound
+  is deliberately smaller. JSON body encoding rejects malformed UTF-8/unpaired
+  surrogate escapes before Go can replace them. Valid surrogate pairs, escaped
+  literal backslash-u, mixed escaped/literal UTF-8 and intentional U+FFFD retain
+  their decoded bytes. Malformed-input responses were not compared with live AWS.
+- QueueUrl resolves its final name segment (or a bare name); the entire supplied
+  host/account/region is not validated. Request region and IAM choose the local
+  target. QueueUrl never causes an outbound connection.
+- Message attribute selection supports exact names, All and .*; prefix wildcard
+  selection, complete AWS name/Number semantics, aggregate AWS message sizing
+  and full system-attribute selection are not reproduced. The first-receive
+  timestamp currently uses the stored send timestamp.
+- NotVisible counts delivered messages still hidden, excluding initial-delay
+  messages. These are local read-time counts, not AWS eventual approximations;
+  the separate delayed-count attribute is unsupported.
+- Stale receipt deletion is strictly rejected locally. AWS documents that old
+  receipt deletion may succeed without deleting the message. No distributed
+  replicas, probabilistic delivery or exactly-once processing is simulated.
+- FIFO, batch APIs, Query/XML, DLQ/redrive, encryption, queue tags/policies,
+  PurgeQueue, CloudFormation SQS resources, Lambda SQS event sources/guest SDK
+  capability and a SQS console screen are not implemented. Existing unsupported
+  Challenge problems are not marked runnable by this native API increment.
 
-Message bodies are limited to **256 KiB locally**. The current AWS SendMessage
-reference permits **1 MiB**; this simulator's smaller bound is not an AWS quota.
-Forbidden message Unicode such as NUL returns InvalidMessageContents. Existing
-strict-current-receipt rejection is also bounded behavior: AWS documents that
-an old handle may return success without deleting the message. The simulator
-does not reproduce distributed replicas, probabilistic delivery, exact-once
-processing or every AWS receipt/error timing detail.
+## Reproducible verification
 
-At immutable native repair checkpoint `0a28266`, focused `^TestSQS` tests
-passed in internal/aws and internal/server: normal 1.047s/1.144s and race
-13.968s/11.339s with GOMAXPROCS=1 and -p 1. These include actual rollback,
-cached-parent deletion, expiry/redelivery, regional receipt rejection and
-non-destructive orphan startup failure. No guest VM was executed. These focused
-checks do not establish whole-module coverage or real standalone SDK acceptance
-for the repaired source. Full unfiltered source coverage remains a separate blocker:
-the original hosted run reported 86.92% against the unchanged 90% floor. Adding
-formal files or exempting runtime paths cannot resolve that test deficit.
+```sh
+make before-commit
+AXE_SCRIPT=/path/to/pinned/axe.min.js make e2e
+TLA_JAR=/path/to/pinned/tla2tools.jar make formal
+```
 
+The repository requires both full-module statement and unfiltered Cobertura
+source-line coverage to reach 90%. On runtime/test checkpoint d61e0ed, a fresh
+single-profile before-commit run passed all race tests/build with 5583/5888
+statements (94.82%) and 7306/8098 source lines (90.22%). Earlier failed/interrupted
+attempts were retained as diagnostics and were not combined into this profile.
 
-## Formal applicability and bounded contract
+The complete local E2E gate on that checkpoint passed one reflow control,
+18 Conformance tests and the real make-start helper. The mandatory SQS driver
+uses two authenticated CLI processes, separate SQLite/token state and two
+regions; it checks all nine operations, permuted cross-region receives, an
+empty-region/peer-only oracle, token rejection, restart/persisted visibility,
+receipt rotation, actual delay/visibility and minimum60-second retention, prefix
+routing and cleanup. Its 338 calls, sends and responses matched. This proves the
+bounded native lifecycle tested, not UI or full service/problem completion.
+Native Go tests additionally exercise exact row/encoded-byte quota boundaries,
+two concurrent last-slot writers, expired foreign charging, legacy over-cap
+read/delete, corrupt persisted data, IAM and real SQL rollback/ack failures.
 
-`SQSLifecycle` models two distinct queue scopes (database/region/name tuples),
-one queue creation and one message per scope, at most two deliveries, clock
-0..2, delay/visibility 0..1 and retention two abstract ticks. A cached queue
-lookup may interleave with deletion before the send transaction. Queue creation
-is idempotent for equal attributes; mismatches and storage errors preserve state.
-The model checks parent lifetime, abstract caller authorization, scoped mutation,
-failed-operation atomicity, receive eligibility, fresh/current receipt use and
-in-flight visibility changes. Eleven targeted mutants remove those guards or
-introduce partial/cross-scope writes. The first immutable full-gate attempt passed
-the original five models and controls but the new baseline hit the unchanged
-60-second timeout; that attempt is a failure, not a counterexample or proof.
-The model now normalizes deleted-row metadata (matching actual SQL DELETE) and
-enumerates current/previous/unissued/peer receipt candidates instead of disabled
-receipt tuples; the baseline receipt equality still admits exactly the same
-current-handle transitions. All properties and eleven controls remain. At
-immutable `9145461`, the strict merge-gate run completed with an explicit 512 MiB
-Java heap, one worker and the unchanged 60-second per-case timeout: six baseline
-models and sixteen required controls all passed. SQSLifecycle explored 5,518,200
-generated / 413,116 distinct states. Each of its eleven controls returned exit 12
-with the exact named NoOrphans, ScopedMutation, ReceiveOnlyEligible, FreshReceipt,
-ReceiptMutationCurrent, AuthorizedMutations, ChangeOnlyInflight,
-FailedMutationAtomic or IdempotentCreateUnchanged violation. The five original
-models/configs/registry entries and all strict gate function bodies remain
-unchanged; the added required SQS ID/property set is checked explicitly. Python
-unit controls (10+13) and all seventeen exact changed-blob declarations passed.
-These are local bounded-model results, not new-head hosted CI or coverage proof.
+The later main integration changes API-reference assets/helpers, not these Go
+runtime/test bytes. Its rebuilt combined Scalar check and immutable formal gate
+remain separate required results; new-head hosted CI/review are not implied by
+the earlier local checkpoint.
 
-The actual native repair precedes these bindings: sqsQueueTx rechecks the parent
-inside Send/Receive/Counts/receipt transactions; purgeExpiredTx errors propagate;
-Receive commits fresh receipt updates atomically; ChangeVisibility verifies both
-retention and the current in-flight deadline. SQL trigger tests exercise failed
-purge, insert, multi-row receive and cascade deletion rollback. NoOrphans assumes
-valid initial state; the constructor enforces that precondition by refusing
-orphans without deleting them. Startup/reopen persistence is separately tested.
+## Finite model contracts
 
-The model does not prove Go/SQLite refinement, random-ID collision resistance,
-real time, long-poll liveness/cancellation, multiple-message batch atomicity,
-queue-name reuse beyond one lifetime, message-body/attribute checksums, size or
-Unicode correctness, full QueueUrl parsing, IAM policy matching or distributed
-SQS delivery semantics. It assumes fresh opaque receipt handles. It does not
-prove FIFO or exactly-once processing. Those limits also apply to the formal
-record; existing unrelated models are retained, not presented as SQS proofs.
+SQSLifecycle bounds two queue scopes, one queue/message lifetime per scope, two
+deliveries and a coarse clock. Its eleven sensitivity mutations cover parent
+lifetime, scope/IAM, eligibility, rollback and current receipts. SQSStorageBudget
+bounds two trusted scopes, three possible legacy rows plus one fresh ID,
+abstract row weights1–2 and caps2rows/3units. Its seven mutants exercise row/byte
+caps, expired foreign charging, scoped purge, rollback, live-row preservation
+and legacy maintenance. All original, SSM and Startup models and protected
+properties remain required; the combined inventory has nine baselines and
+31 specified mutants. Exact immutable-head execution is required separately.
 
-The current URL parser accepts the final queue-name segment (including a bare
-name); it does not validate the entire supplied host/account/region URL. No
-outbound connection is made from QueueUrl, and the native request region and
-IAM queue ARN still select the local target. This convenience is a local
-compatibility limit, not complete AWS QueueUrl validation. Some returned system
-attributes are simplified; in particular ApproximateFirstReceiveTimestamp uses
-the stored send timestamp and must not be claimed as an accurate first-delivery
-clock. Full attribute-name selection, attribute/body aggregate sizing and
-number-attribute semantic validation also remain outside this repair.
+These are finite abstract safety checks, not Go/SQLite refinement, actual
+UTF-8/JSON arithmetic, crypto, SQL concurrency/crash or filesystem-size proofs.
+They do not prove real time, long-poll liveness, distributed delivery or complete
+AWS IAM. Native multi-row batch atomicity and two-process authority are separate
+concrete tests. Bounds are exploration limits, not production quotas.
 
-Primary references (inspected without real AWS requests):
+## Primary references
 
-- [SQS JSON protocol and independent regional endpoints](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-making-api-requests-json.html)
-- [SendMessage: current 1 MiB bound and permitted Unicode](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_SendMessage.html)
-- [ReceiveMessage: per-call visibility and receipt handles](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_ReceiveMessage.html)
-- [DeleteMessage: most-recent receipt and distributed-delivery limits](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_DeleteMessage.html)
-- [ChangeMessageVisibility: in-flight clock semantics](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_ChangeMessageVisibility.html)
-- [Regional endpoints](https://docs.aws.amazon.com/general/latest/gr/sqs-service.html)
-
-
-The installed development SDK's SQS metadata was also inspected: API model
-`2012-11-05`, JSON protocol version `1.0`, target prefix `AmazonSQS`. The JSON
-wire uses the target/content-type headers above; the legacy Query protocol's
-Version parameter is not an extra supported JSON request field. Regional
-production endpoint examples in the linked AWS reference are documentation only;
-all native tests target the local simulator and use dummy credentials.
-
-
-Additional acceptance checkpoint (source-only; not executed yet): explicit JSON
-`MaxResults: 0` and `MaxNumberOfMessages: 0` now fail instead of selecting omitted
-parameter defaults. Their documented minima are 1; omission retains 1000 and 1,
-respectively ([ListQueues](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_ListQueues.html),
-[ReceiveMessage](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_ReceiveMessage.html)).
-New regression cases cover these distinctions, GetQueueUrl, persisted nondefault
-queue settings, per-message delay override, exact attribute selection, native
-composition bounds, capacity/idempotency and real SQLite-to-HTTP rollback errors.
-The unused isSQS helper was removed after a whole-repository reference search
-found only its declaration; actual dispatch already selects the AmazonSQS target.
-These new tests and changes require fresh execution. A previous whole-suite
-attempt failed the unchanged bounded-output VM deadline; one isolated retry
-passed. Its failed profile was inspected only for diagnostic uncovered blocks,
-never combined with another profile or accepted as whole coverage evidence.
-The finite model files remain unchanged; their previous bounded results do not
-prove JSON validation, HTTP errors or the new acceptance tests.
-
-The additional checkpoint also rejects unknown nested message-attribute members
-(including unsupported StringListValues/BinaryListValues) instead of silently
-dropping them during typed decoding. This enforces the documented local subset;
-it does not add list-attribute support. Rejection/no-enqueue and supported custom
-data-type suffix regressions accompany the decoder change. The 8bd checkpoint's
-whole run was deliberately terminated after source review found this gap; its
-partial profile is diagnostic only. New-head execution remains pending.
-
-GetQueueAttributes now validates every requested name before applying All,
-preventing unsupported names from being accepted depending on list order. A raw
-MessageBody encoding guard refuses malformed UTF-8 and unpaired UTF-16 surrogate
-escapes before Go's JSON decoder can silently replace them. This is an explicit
-local no-silent-rewrite rule; malformed-input behavior has not been compared by
-requests to real AWS. Valid surrogate pairs, escaped literal backslash-u text,
-mixed literal/escaped UTF-8 and deliberate U+FFFD remain valid and have wire
-roundtrip regression cases. The finite lifecycle model does not model this parser
-or prove Unicode validation. All these latest source changes remain unexecuted.
-
-The delivered/in-flight count excludes messages still under their initial send
-or queue delay: NotVisible means already delivered and currently hidden, not all
-future-visible rows ([GetQueueAttributes](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_GetQueueAttributes.html)).
-Native and wire regressions distinguish initial delay, available, received/hidden
-and released visibility states. This subset still does not expose the separate
-ApproximateNumberOfMessagesDelayed attribute. Counts changes await execution;
-previous focused results apply only to the exact preceding 285827a checkpoint.
-
-
-Latest local scoped verification: runtime/test checkpoint a938f3b passed the full
-`^TestSQS` selection under race in internal/aws (10.262 s) and internal/server
-(11.594 s), including the admission, raw-body roundtrip, real SQLite wire-error
-rollback and delayed/in-flight counter regressions above. The preceding 285827a
-checkpoint also passed normal and race selections before the Counts correction.
-Policy/applicability unit controls passed 10+21 cases, and the exact nineteen
-changed-blob record validated against base 2d8a41a. This supersedes the historical
-UNRUN labels for these scoped tests only. A fresh successful whole-module run,
-unfiltered 90% source floor, independent standalone SDK two-team/restart test
-and new-head hosted CI are still pending. No new model execution or broad service
-completion is claimed; the model/config/registry bytes are unchanged from 06d.
-
-
-Current source integration includes the main SSMParameterState contract alongside
-SQSLifecycle and the original five mandatory models. Both inventories and every
-required invariant remain protected. The independent standalone SDK driver is
-mandatory through test/e2e/check.py and uses two authenticated CLI processes,
-separate SQLite/token state, two regions, restart, receipt rotation, real minimum
-60-second retention and cleanup. Its source handoff is integrated; actual
-execution on the new binary is still pending. No SQS console UI is implemented,
-and native service support is not original-problem or full-service completion.
-
-
-Storage-budget repair checkpoint: source changes and real SQLite acceptance tests
-are prepared for count/encoded-byte boundaries, two concurrent last-slot writers,
-expired foreign rows, scoped purge rollback, failed insertion and legacy over-cap
-read/delete recovery. These changes invalidate prior whole-runtime/coverage
-claims for the new source until fresh execution. The last completed whole run
-on fa26f98 passed tests/build and 93.97% statements, but unfiltered source lines
-were 88.92%, below the unchanged 90% requirement. No E2E or coverage success is
-inherited from that failed quality gate. The separate bounded storage model uses
-abstract byte units; it does not prove UTF-8, SQL isolation, filesystem size or
-Go refinement.
-
-
-Expected-single-row writes additionally verify SQLite RowsAffected before
-acknowledging CreateQueue, SendMessage or each ReceiveMessage claim; DeleteQueue
-also checks the result and preserves its missing-queue response. Real SQLite
-RAISE(IGNORE) regression fixtures cover ignored creation/insertion, an ignored
-second batch-claim write and ignored queue deletion, including preceding expiry
-and receipt rollback. These require a nonstandard/corrupt SQLite trigger; they
-are ordinary storage-ack resilience tests, not an ordinary API exploit claim or
-protection against arbitrary malicious database/host writers (which SECURITY.md
-excludes). Other existing storage faults and tests remain scoped evidence, not a
-proof that all possible host database tampering is detected. The 53a6 whole run
-was intentionally interrupted before these changes; its partial profile is
-diagnostic only and is not a new coverage/whole-suite result.
-
-The IGNORE fixtures use pure SELECT RAISE(IGNORE) for UPDATE, preserving defined
-SQLite behavior instead of deleting an UPDATE target in a BEFORE trigger
-([SQLite trigger cautions and RAISE semantics](https://www.sqlite.org/lang_createtrigger.html)).
-Receive also verifies the wire response is HTTP 500 with no message/receipt
-acknowledgement and that the prior batch and expiry state remain unchanged.
+- [SQS JSON wire protocol](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-making-api-requests-json.html)
+- [SendMessage body size and permitted Unicode](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_SendMessage.html)
+- [ListQueues pagination](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_ListQueues.html)
+- [ReceiveMessage and receipt handles](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_ReceiveMessage.html)
+- [DeleteMessage distributed-delivery limits](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_DeleteMessage.html)
+- [ChangeMessageVisibility](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_ChangeMessageVisibility.html)
+- [Queue count attributes](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_GetQueueAttributes.html)
+- [SQLite trigger cautions and RAISE](https://www.sqlite.org/lang_createtrigger.html)

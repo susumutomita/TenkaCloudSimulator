@@ -1,19 +1,19 @@
 {
   "version": 1,
-  "base_sha": "0725e521660132b198c350bcb80d39ee406ff7ba",
+  "base_sha": "59e8b2279f8278d6af82af973ae4c23b219866b5",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "968a71ec7cffd44bdf95014b4b8ff32635143d15bea9eaccdc602b379bc45aa4",
+      "sha256": "db1793483f7e9481266ec9f300d0e6390e4f5187da0f00ee36f20681d5e47738",
       "disposition": "documentation",
       "reason": "Document the bounded native SQS subset, local 256 KiB versus current operation-reference 1 MiB, repair provenance, actual focused tests and explicit compatibility/model/coverage limits. No service or formal-proof completion is asserted by prose.",
       "models": []
     },
     {
       "path": "docs/sqs.md",
-      "sha256": "93826d6cd094e77b03b2dda920c54931fc24e154168c399821392fad0bd80948",
+      "sha256": "681881c7d166366397568bce6e055cad1a52f30239afe2b5c11f63f71498ea80",
       "disposition": "documentation",
-      "reason": "Document the bounded native SQS subset, local 256 KiB versus current operation-reference 1 MiB, repair provenance, actual focused tests and explicit compatibility/model/coverage limits. No service or formal-proof completion is asserted by prose.",
+      "reason": "Describe the current bounded SQS operations, quotas, atomic/ack behavior, concrete validation and explicit compatibility/model/UI/catalog limits without stale source-handoff narrative. Local checkpoint evidence remains separated from new-head hosted CI.",
       "models": []
     },
     {
@@ -253,7 +253,7 @@
     },
     {
       "path": "internal/server/apidocs/openapi.json",
-      "sha256": "1662d426db2ffbe3452ba83f5a3cd94f247ebcd96a54d9845670410398ded325",
+      "sha256": "81fc6e6ce92d61c6c1d918bb1d95c1ff3227fe9032fda8aadc4240630146fd8c",
       "disposition": "presentation",
       "reason": "Add descriptive SQS provider metadata to the local reference; this does not replace native operations or introduce a different API/backend. Scalar/SDK share the existing SQS HTTP handler; documentation metadata is not a proof of API fidelity.",
       "models": []
@@ -314,7 +314,7 @@
       "disposition": "test-support",
       "reason": "Mandatory standalone real local SQS SDK lifecycle through authenticated two-team CLI/SQLite/token processes, regional isolation, restart/current receipts, delays and actual retention wait/cleanup. Source handoff only; execution pending; no console/fullservice proof.",
       "models": [],
-      "sha256": "3bbe433f5944f2581fef2c4088e1506865c10f5b4926c22b3467c407d343a143"
+      "sha256": "2cf27984c6e8e5dff232e3cdae3767fa0f5124d1dd8ea0e32f012f2ed4c34a27"
     },
     {
       "path": "test/e2e/sqs.py",
