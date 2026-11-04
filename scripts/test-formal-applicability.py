@@ -8,6 +8,9 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
+
+import formal_applicability
 
 from formal_applicability import GateError, RECORD, changes, disposition, git, initialize, load_registry, validate_record, exact_head_inputs
 
@@ -20,6 +23,8 @@ class ApplicabilityTests(unittest.TestCase):
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name)
         shutil.copytree(ROOT / 'formal', self.root / 'formal')
+        for path in ('go.mod', 'go.sum'):
+            shutil.copyfile(ROOT / path, self.root / path)
         shutil.copyfile(ROOT / '.gitignore', self.root / '.gitignore')
         record = self.root / RECORD
         if record.exists():
@@ -338,7 +343,9 @@ class ApplicabilityTests(unittest.TestCase):
             self.assertEqual(hashlib.sha256(fixture[key].encode()).hexdigest(), fixture['sha256'][key])
         (self.root / 'go.mod').write_text(fixture['before'])
         (self.root / 'go.sum').write_text(fixture['go_sum'])
-        self.commit('original public Startup308 module baseline')
+        git(self.root, 'add', 'go.mod', 'go.sum')
+        # Current formal baseline may already contain these exact public blobs.
+        git(self.root, 'commit', '-q', '--allow-empty', '-m', 'original public Startup308 module baseline')
         self.base = git(self.root, 'rev-parse', 'HEAD').decode().strip()
         self.module_record(fixture['after'].encode())
         result = validate_record(self.root, self.base)
@@ -350,6 +357,72 @@ class ApplicabilityTests(unittest.TestCase):
         self.module_record(fixture['after'].encode())
         with self.assertRaises(GateError):
             validate_record(self.root, self.base)
+
+
+
+    def test_git_flags_cannot_hide_module_or_sum_bytes(self):
+        after = self.module_baseline()
+        self.module_record(after)
+        before = exact_head_inputs(self.root)
+        self.assertTrue({'go.mod', 'go.sum'} <= set(before['hashes']))
+        for flag, undo in (('--assume-unchanged', '--no-assume-unchanged'), ('--skip-worktree', '--no-skip-worktree')):
+            for path in ('go.mod', 'go.sum'):
+                with self.subTest(flag=flag, path=path):
+                    target = self.root / path
+                    original = target.read_bytes()
+                    git(self.root, 'update-index', flag, path)
+                    target.write_bytes(original + b'\nchanged but hidden by Git flag\n')
+                    self.assertEqual(git(self.root, 'status', '--porcelain'), b'')
+                    with self.assertRaises(GateError):
+                        validate_record(self.root, self.base)
+                    target.write_bytes(original)
+                    git(self.root, 'update-index', undo, path)
+        validate_record(self.root, self.base)
+
+    def test_git_flags_cannot_hide_module_mode_or_symlink(self):
+        after = self.module_baseline()
+        self.module_record(after)
+        for flag, undo in (('--assume-unchanged', '--no-assume-unchanged'), ('--skip-worktree', '--no-skip-worktree')):
+            for path in ('go.mod', 'go.sum'):
+                with self.subTest(flag=flag, path=path):
+                    target = self.root / path
+                    original = target.read_bytes()
+                    git(self.root, 'update-index', flag, path)
+                    target.chmod(0o755)
+                    with self.assertRaises(GateError):
+                        validate_record(self.root, self.base)
+                    target.chmod(0o644)
+                    target.unlink()
+                    target.symlink_to('formal/models.json')
+                    with self.assertRaises(GateError):
+                        validate_record(self.root, self.base)
+                    target.unlink()
+                    with self.assertRaises(GateError):
+                        validate_record(self.root, self.base)
+                    target.write_bytes(original)
+                    git(self.root, 'update-index', undo, path)
+        validate_record(self.root, self.base)
+
+    def test_module_inputs_are_rechecked_after_classification_with_git_flags(self):
+        after = self.module_baseline()
+        self.module_record(after)
+        real = formal_applicability.module_metadata_change
+        for flag, undo in (('--assume-unchanged', '--no-assume-unchanged'), ('--skip-worktree', '--no-skip-worktree')):
+            for path in ('go.mod', 'go.sum'):
+                target = self.root / path
+                original = target.read_bytes()
+                def tamper(*args):
+                    result = real(*args)
+                    target.write_bytes(original + b'\nchanged after classification\n')
+                    return result
+                with self.subTest(flag=flag, path=path):
+                    git(self.root, 'update-index', flag, path)
+                    with patch('formal_applicability.module_metadata_change', side_effect=tamper):
+                        with self.assertRaises(GateError):
+                            validate_record(self.root, self.base)
+                    target.write_bytes(original)
+                    git(self.root, 'update-index', undo, path)
+        validate_record(self.root, self.base)
 
 
 if __name__ == '__main__':

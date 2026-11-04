@@ -1,7 +1,8 @@
 # Narrow Go module annotation classification
 
 This proposal extends formal applicability classification on exact base
-`ebf5b5d` without exempting general dependency changes or binding them to an
+`55a111953eb3eb0dfd90aaa473ac3fe39cb10b66` after a normal merge of public
+formal-policy main, without exempting general dependency changes or binding them to an
 unrelated token-state invariant. It is not a Go parser or a proof of an entire
 dependency graph. A caller still supplies an explicit, digest-bound applicability
 record, and human dependency/semantic review remains required.
@@ -62,7 +63,7 @@ It validates a committed real Git record as build-metadata with no model claim;
 changing x/sys version or checksum bytes is rejected. The fixture does not test
 the Startup runtime or claim dependency security/whole-CI equivalence.
 
-The committed applicability record is based on full ebf5b5d SHA and labels only
+The committed applicability record is based on full55a111953eb3eb0dfd90aaa473ac3fe39cb10b66 SHA and labels only
 actual helper/checker/test changes as formal-infrastructure, the immutable blob
 fixture as test-support, and this text as documentation. Unknown runtime Go
 continues to fail in the negative suite. Existing finite models were not changed
@@ -70,3 +71,28 @@ or executed; no Go/TLC/browser test, workflow/settings change or publication was
 performed. Startup runtime changes still require their own model/property
 correspondence and whole CI checks. Immutable-HEAD record validation is a
 separate final check and its result is reported in the handoff.
+
+## Git flag bypass correction
+
+The initial51fc457 candidate was insufficient: Git diff/status can hide working
+module/checksum edits under assume-unchanged or skip-worktree, and the direct
+input snapshot previously omitted these two paths. Parent independently
+reproduced false acceptance. This is a corrected implementation defect, not an
+approved metadata exception or a successful negative control.
+
+`exact_head_inputs` now requires literal go.mod and go.sum in HEAD and directly
+compares both working files to the committed bytes before and after validation,
+regardless of Git flags. Both committed modes must be100644; working files must
+be ordinary nonexecutable files, never symlinks. Their hashes enter the returned
+evidence receipt. The existing index/untracked/ignored-policy guards remain.
+
+Three real-Git regression methods cover both flags and both paths: hidden byte
+changes despite empty status, executable/symlink/missing inputs, and mutation
+after metadata classification but before the final snapshot. A valid unchanged
+control includes both hashes and still passes. The fixture setup now includes
+module files for the stricter input contract; its public-Startup baseline may
+use an intentional empty commit when those exact blobs are already present.
+The first expanded run exposed that empty-fixture-commit setup error; it was
+corrected without changing any rejection assertion. Final applicability21tests
+passed12.856s; existing gate10tests passed0.427s. Final immutable record/TLC
+results are reported separately at handoff, never inferred from these unit runs.

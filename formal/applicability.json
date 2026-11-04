@@ -1,40 +1,54 @@
 {
   "version": 1,
-  "base_sha": "ebf5b5d29c3616c57afcd6a6542829d8a741218c",
+  "base_sha": "55a111953eb3eb0dfd90aaa473ac3fe39cb10b66",
   "changes": [
     {
       "path": "docs/formal-module-metadata.md",
-      "sha256": "c9a9afba3a49b3972d9d88f92271b3eebcb5cfa4a98abb628639bd6bd6b9f600",
+      "sha256": "c8ae8dddb4565559e807d31f34fc96e2566212ccb50089907bf817fb6967214f",
       "disposition": "documentation",
-      "reason": "Explains narrow metadata-only recognition and actual scoped Python evidence, not an implementation or dependency security proof.",
+      "reason": "Documents narrow annotation recognition, corrected hidden-Git-flag input guard, scoped real-Git test results and explicit finite/implementation limits.",
       "models": []
     },
     {
       "path": "scripts/formal_applicability.py",
       "sha256": "a389e8a406b8d85ebc3105301603300d35ab02eae37d9fbc549323c9aa9ebfbd",
       "disposition": "formal-infrastructure",
-      "reason": "Narrow immutable same-requirements annotation/grouping recognition only; no general go.mod exemption or unrelated model binding. Expanded real-Git applicability18 and existing gate10 controls passed; unknown syntax/dependencies/checksum/dirty/runtime input remain rejected.",
+      "reason": "Checks exact module/checksum bytes and regular nonexecutable modes before/after regardless of assume-unchanged/skip-worktree; narrows annotation-only classification without general module/runtime exemption. Expanded applicability21 and gate10 tests passed; actual TLC/immutable record are separate required results.",
+      "models": []
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "7a412c13548f80f107f5fb36cc7f3cb6d49dc28b07a052a42da9dde8e91bb716",
+      "disposition": "formal-infrastructure",
+      "reason": "Checks exact module/checksum bytes and regular nonexecutable modes before/after regardless of assume-unchanged/skip-worktree; narrows annotation-only classification without general module/runtime exemption. Expanded applicability21 and gate10 tests passed; actual TLC/immutable record are separate required results.",
       "models": []
     },
     {
       "path": "scripts/formal_module_metadata.py",
       "sha256": "ef1b2a1a0740ccecda7041ad004598dc753007a560524ea829b5cc15e45d0d25",
       "disposition": "formal-infrastructure",
-      "reason": "Narrow immutable same-requirements annotation/grouping recognition only; no general go.mod exemption or unrelated model binding. Expanded real-Git applicability18 and existing gate10 controls passed; unknown syntax/dependencies/checksum/dirty/runtime input remain rejected.",
+      "reason": "Checks exact module/checksum bytes and regular nonexecutable modes before/after regardless of assume-unchanged/skip-worktree; narrows annotation-only classification without general module/runtime exemption. Expanded applicability21 and gate10 tests passed; actual TLC/immutable record are separate required results.",
       "models": []
     },
     {
       "path": "scripts/test-formal-applicability.py",
-      "sha256": "52b5376faff7521e520a7e00593d54096d1e3df832d3c84ae9ab485d806b735f",
+      "sha256": "5596571973aaa556c1158316750aa2053ba490106a43dd48a4e0336abad8933c",
       "disposition": "formal-infrastructure",
-      "reason": "Narrow immutable same-requirements annotation/grouping recognition only; no general go.mod exemption or unrelated model binding. Expanded real-Git applicability18 and existing gate10 controls passed; unknown syntax/dependencies/checksum/dirty/runtime input remain rejected.",
+      "reason": "Checks exact module/checksum bytes and regular nonexecutable modes before/after regardless of assume-unchanged/skip-worktree; narrows annotation-only classification without general module/runtime exemption. Expanded applicability21 and gate10 tests passed; actual TLC/immutable record are separate required results.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "71117354b700db4d16cc6590ca323d6803a2014371e9375c61c0498585e4bc93",
+      "disposition": "formal-infrastructure",
+      "reason": "Checks exact module/checksum bytes and regular nonexecutable modes before/after regardless of assume-unchanged/skip-worktree; narrows annotation-only classification without general module/runtime exemption. Expanded applicability21 and gate10 tests passed; actual TLC/immutable record are separate required results.",
       "models": []
     },
     {
       "path": "test/formal/startup-module-metadata.json",
       "sha256": "8b1d11863b1325b65d40dbd26974a423ea740823e992b6631947b43c931c8b60",
       "disposition": "test-support",
-      "reason": "Pinned public Startup308 go.mod before/after and unchanged go.sum blobs plus SHA256 receipts; used in a real Git acceptance/version/checksum rejection fixture, not runtime state.",
+      "reason": "Pinned public Startup308 module before/after and unchanged checksum blobs with SHA256 receipts for real-Git metadata acceptance and semantic negative controls.",
       "models": []
     }
   ]
