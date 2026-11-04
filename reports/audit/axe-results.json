@@ -3991,7 +3991,7 @@
             "all": [],
             "none": [],
             "impact": "serious",
-            "html": "<span class=\"resource-identifier\">c75a5684ce</span>",
+            "html": "<span class=\"resource-identifier\">7ecb6af5e8</span>",
             "target": [
               "dd > .resource-identifier"
             ],
@@ -4130,6 +4130,62 @@
       }
     ],
     "passes": 32
+  },
+  {
+    "step": "rest-04b-resources-mobile",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "tags": [
+          "cat.color",
+          "wcag2aa",
+          "wcag143",
+          "TTv5",
+          "TT13.c",
+          "EN-301-549",
+          "EN-9.1.4.3",
+          "ACT",
+          "RGAAv4",
+          "RGAA-3.2.1"
+        ],
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=axeAPI",
+        "nodes": [
+          {
+            "any": [
+              {
+                "id": "color-contrast",
+                "data": {
+                  "fgColor": null,
+                  "bgColor": null,
+                  "contrastRatio": 0,
+                  "fontSize": "10.5pt (14px)",
+                  "fontWeight": "normal",
+                  "messageKey": "elmPartiallyObscuring",
+                  "expectedContrastRatio": "4.5:1",
+                  "shadowColor": null
+                },
+                "relatedNodes": [],
+                "impact": "serious",
+                "message": "Element's background color could not be determined because it partially overlaps other elements"
+              }
+            ],
+            "all": [],
+            "none": [],
+            "impact": "serious",
+            "html": "<p>S3 basic operations, Standard SSM text parameters, Python 3.12 Lambda functions and limited CloudFormation stacks using S3 buckets, SSM parameters, inline Python functions and IAM identity policies.</p>",
+            "target": [
+              ".awsui_child_18582_s2eix_13:nth-child(2) > p"
+            ],
+            "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+          }
+        ]
+      }
+    ],
+    "passes": 18
   },
   {
     "step": "rest-05-resource-form",
@@ -4393,9 +4449,9 @@
                 },
                 "relatedNodes": [
                   {
-                    "html": "<textarea aria-labelledby=\"formField_r_1rm_-label\" class=\"awsui_textarea_qk1j1_yoeut_31 awsui_textarea-resize-both_qk1j1_yoeut_86\" autocomplete=\"on\" rows=\"3\" id=\"formField_r_1rm_\" style=\"\"></textarea>",
+                    "html": "<textarea aria-labelledby=\"formField_r_1t4_-label\" class=\"awsui_textarea_qk1j1_yoeut_31 awsui_textarea-resize-both_qk1j1_yoeut_86\" autocomplete=\"on\" rows=\"3\" id=\"formField_r_1t4_\" style=\"\"></textarea>",
                     "target": [
-                      "#formField_r_1rm_"
+                      "#formField_r_1t4_"
                     ]
                   }
                 ],
@@ -4406,9 +4462,9 @@
             "all": [],
             "none": [],
             "impact": "serious",
-            "html": "<textarea aria-labelledby=\"formField_r_1rm_-label\" class=\"awsui_textarea_qk1j1_yoeut_31 awsui_textarea-resize-both_qk1j1_yoeut_86\" autocomplete=\"on\" rows=\"3\" id=\"formField_r_1rm_\" style=\"\"></textarea>",
+            "html": "<textarea aria-labelledby=\"formField_r_1t4_-label\" class=\"awsui_textarea_qk1j1_yoeut_31 awsui_textarea-resize-both_qk1j1_yoeut_86\" autocomplete=\"on\" rows=\"3\" id=\"formField_r_1t4_\" style=\"\"></textarea>",
             "target": [
-              "#formField_r_1rm_"
+              "#formField_r_1t4_"
             ],
             "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
           },
@@ -4532,7 +4588,7 @@
             "all": [],
             "none": [],
             "impact": "serious",
-            "html": "<span class=\"resource-identifier\">c75a5684ce</span>",
+            "html": "<span class=\"resource-identifier\">7ecb6af5e8</span>",
             "target": [
               ".resource-identifier"
             ],
@@ -4635,7 +4691,7 @@
             "impact": "serious",
             "html": "<span>Stages</span>",
             "target": [
-              "#awsui-tabs-_r_1s4_-stages > .awsui_tabs-tab-label_14rmt_ib7qg_86.awsui_tab-label_1acwa_dp0cl_7 > span"
+              "#awsui-tabs-_r_1ti_-stages > .awsui_tabs-tab-label_14rmt_ib7qg_86.awsui_tab-label_1acwa_dp0cl_7 > span"
             ],
             "failureSummary": "Fix any of the following:\n  Element's background color could not be determined due to a pseudo element"
           },
@@ -4671,6 +4727,62 @@
       }
     ],
     "passes": 31
+  },
+  {
+    "step": "rest-09b-stage-mobile",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "tags": [
+          "cat.color",
+          "wcag2aa",
+          "wcag143",
+          "TTv5",
+          "TT13.c",
+          "EN-301-549",
+          "EN-9.1.4.3",
+          "ACT",
+          "RGAAv4",
+          "RGAA-3.2.1"
+        ],
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=axeAPI",
+        "nodes": [
+          {
+            "any": [
+              {
+                "id": "color-contrast",
+                "data": {
+                  "fgColor": null,
+                  "bgColor": null,
+                  "contrastRatio": 0,
+                  "fontSize": "10.5pt (14px)",
+                  "fontWeight": "normal",
+                  "messageKey": "elmPartiallyObscuring",
+                  "expectedContrastRatio": "4.5:1",
+                  "shadowColor": null
+                },
+                "relatedNodes": [],
+                "impact": "serious",
+                "message": "Element's background color could not be determined because it partially overlaps other elements"
+              }
+            ],
+            "all": [],
+            "none": [],
+            "impact": "serious",
+            "html": "<p>S3 basic operations, Standard SSM text parameters, Python 3.12 Lambda functions and limited CloudFormation stacks using S3 buckets, SSM parameters, inline Python functions and IAM identity policies.</p>",
+            "target": [
+              ".awsui_child_18582_s2eix_13:nth-child(2) > p"
+            ],
+            "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+          }
+        ]
+      }
+    ],
+    "passes": 18
   },
   {
     "step": "rest-10-delete-form",

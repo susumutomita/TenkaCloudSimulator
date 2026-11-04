@@ -4,7 +4,7 @@ This AWS provider implements a bounded Regional REST API/Lambda proxy slice in t
 
 ## Actual operations and state
 
-Native management paths use `X-Simulator-Service: apigateway` and `X-Simulator-Region` for unsigned console/reference requests. A dummy SDK signature scope selects the same handler; access keys must start with `TCSIM`. The local host token/session is required independently by the CLI. Management IAM uses `apigateway:GET`, `POST`, `PUT` or `DELETE` and the actual `arn:aws:apigateway:REGION::/restapis/...` resource. Unsupported regions, session credentials, mixed scope/region and unknown body/query fields fail explicitly.
+Native management paths use `X-Simulator-Service: apigateway` and `X-Simulator-Region` for unsigned console/reference requests. A dummy SDK signature scope selects the same handler; access keys must start with `TCSIM`. The local host token/session is required independently by the CLI. Management IAM uses `apigateway:GET`, `POST`, `PUT` or `DELETE` and the actual `arn:aws:apigateway:REGION::/restapis/...` resource. Unsupported regions, session credentials, mixed scope/region and unknown body/query fields fail explicitly. Canonical field-name checking covers top-level management fields; the nested endpoint types field is normalized through its typed decoder.
 
 | SDK operation | Method and path | Behavior |
 |---|---|---|

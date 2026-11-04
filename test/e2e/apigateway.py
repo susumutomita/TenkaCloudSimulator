@@ -1,5 +1,5 @@
 """Real local SDK/API Gateway/Lambda vertical slice; no external AWS endpoints."""
-import io,json,sys,zipfile,urllib.request,urllib.error
+import io,json,sys,time,zipfile,urllib.request,urllib.error
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parent))
 from check import running,boto3,Config,ClientError
@@ -27,8 +27,6 @@ def handler(event,context):
  return {'statusCode':201,'headers':{'X-App-Result':'executed'},'body':json.dumps({'path':event['path'],'resource':event['resource'],'query':event['multiValueQueryStringParameters'],'headers':event['headers'],'proxy':event['pathParameters']['proxy'],'value':value})}
 ''')
  functions.create_function(FunctionName='rest-proxy-function',Runtime='python3.12',Role=role['Arn'],Handler='app.handler',Timeout=10,Code={'ZipFile':code.getvalue()})
- # Compile the fixed embedded interpreter before measuring integration execution.
- functions.invoke(FunctionName='rest-proxy-function',Payload=b'{}')['Payload'].read()
  rest=api.create_rest_api(name='local-proxy',endpointConfiguration={'types':['REGIONAL']},tags={'Team':'dummy'})
  api_id=rest['id'];root=rest['rootResourceId'];assert [item['id'] for item in api.get_rest_apis()['items']]==[api_id];assert api.get_resources(restApiId=api_id)['items'][0]['path']=='/';proxy=api.create_resource(restApiId=api_id,parentId=root,pathPart='{proxy+}')['id']
  api.put_method(restApiId=api_id,resourceId=proxy,httpMethod='ANY',authorizationType='NONE',requestParameters={'method.request.path.proxy':True})
@@ -48,7 +46,7 @@ def handler(event,context):
  grant=functions.add_permission(FunctionName='rest-proxy-function',StatementId='allow-rest',Action='lambda:InvokeFunction',Principal='apigateway.amazonaws.com',SourceArn=source)
  assert json.loads(grant['Statement'])['Condition']['ArnLike']['AWS:SourceArn']==source
  policy=functions.get_policy(FunctionName='rest-proxy-function');old_revision=policy['RevisionId']
- headers,data=invoke();result=json.loads(data)
+ cold_started=time.monotonic();headers,data=invoke();cold_seconds=time.monotonic()-cold_started;result=json.loads(data)
  assert result['value']=='dummy first team' and result['path']=='/wp-json/batch/v1' and result['resource']=='/{proxy+}' and result['proxy']=='wp-json/batch/v1' and result['query']['query']==['one','two']
  assert result['headers']['authorization']=='Bearer application-only-dummy' and 'cookie' not in result['headers']
  assert b'private-local' not in data and b'private-host-session' not in data and token.encode() not in data and 'x-simulator-token' not in result['headers']
@@ -62,7 +60,7 @@ def handler(event,context):
  expect_error('PreconditionFailedException',lambda:functions.add_permission(FunctionName='rest-proxy-function',StatementId='stale-grant',Action='lambda:InvokeFunction',Principal='apigateway.amazonaws.com',SourceArn=source,RevisionId=old_revision))
  api.delete_rest_api(restApiId=api_id);expect_error('NotFoundException',lambda:api.get_rest_api(restApiId=api_id))
  functions.delete_function(FunctionName='rest-proxy-function');iam.delete_role_policy(RoleName=role['RoleName'],PolicyName='ReadOwnParameter');iam.delete_role(RoleName=role['RoleName']);ssm.delete_parameter(Name='/api-gateway/team')
- print(json.dumps({'realAPIGatewaySDK':True,'nativeSourceARNPermission':True,'actualSavedRolePythonAndSSM':True,'frozenDeploymentAfterEditAndDelete':True,'duplicateQueryPreserved':True,'transportCredentialsRedacted':True,'untrustedHTMLDownloaded':True,'permissionRevocation':True,'teardown':'DELETED','realAWS':False}))
+ print(json.dumps({'realAPIGatewaySDK':True,'coldAPIFirstInvocationSeconds':round(cold_seconds,3),'nativeSourceARNPermission':True,'actualSavedRolePythonAndSSM':True,'frozenDeploymentAfterEditAndDelete':True,'duplicateQueryPreserved':True,'transportCredentialsRedacted':True,'untrustedHTMLDownloaded':True,'permissionRevocation':True,'teardown':'DELETED','realAWS':False}))
 
 # Separate actual processes/DBs/token authorities: same names and paths must
 # resolve to each team's own saved-role state, never a shared global registry.
