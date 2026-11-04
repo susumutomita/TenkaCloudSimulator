@@ -21,6 +21,8 @@ Sum(values) == values["N1"]+values["N2"]+values["S1"]+values["B1"]+values["inval
 ExpectedPermit(ready,tableReady,itemPresent,itemCount,t,k,allow,deny) ==
  ready /\ tableReady /\ Valid(t) /\ allow /\ ~deny /\ ExpectedSize(k)<=MaxItemBytes /\
  (itemPresent \/ itemCount<MaxItems)
+VARIABLES initialized, startupValid, tables, rows, stats, event, allFrame, peerFrame,
+ lastOp, lastScope, lastAccepted, lastReady, lastKey, lastBytes
 \* Independent event observations use ACTUAL arguments and PRE data only.
 \* No event field uses implementation permit, mutated Key/Size as its oracle,
 \* or history from a previous event. Data actions never read these ghosts.
@@ -33,8 +35,6 @@ Event(s,op,t,k,allow,deny,key,bytes) ==
   create |-> (initialized /\ allow /\ ~deny /\ ~tables[s] /\ TableCount(tables)<MaxTables),
   removal |-> (initialized /\ tables[s] /\ allow /\ ~deny /\ (op="Delete" => Valid(t)))]
 EventFields == {"valid","canonical","semantic","denied","tableReady","put","create","removal"}
-VARIABLES initialized, startupValid, tables, rows, stats, event, allFrame, peerFrame,
- lastOp, lastScope, lastAccepted, lastReady, lastKey, lastBytes
 vars == <<initialized,startupValid,tables,rows,stats,event,allFrame,peerFrame,
  lastOp,lastScope,lastAccepted,lastReady,lastKey,lastBytes>>
 Init == /\ initialized=FALSE /\ startupValid \in BOOLEAN
