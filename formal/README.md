@@ -52,12 +52,30 @@ regions by two names, two validated abstract values and latest-row versions
 explicit-Deny preservation, no-overwrite refusal, successful version advance,
 exact-key deletion/frame conditions and region/name read isolation. Five
 specified mutations must fail the appropriate named property. Existing five
-models and their controls remain mandatory; the combined inventory is six
-positive models and ten negative controls (sixteen TLC cases).
+models and their controls remain mandatory. SSM adds one baseline and five
+negative controls; the complete combined inventory is stated below.
 
 See [the SSM contract and source/test correspondence](../docs/formal-ssm.md).
 The native HTTP integration test uses distinct values and runtime versions
 1–4; there is no version-history/selector, live-AWS differential, liveness or
-Go refinement claim. This candidate incorporated main `55a1119` and PR #314 main `2d8a41a` by normal
-merge after PR #310 merged; its SSM additions still require their own exact-HEAD
-checks and PR acceptance. The original standalone/stacked commits are retained.
+Go refinement claim. New candidate execution and hosted CI must be checked separately; model checking is not Go refinement.
+
+
+## Startup token visibility
+
+`StartupTokenVisibility.tla` models one fixed configured token file, two abstract
+token values, three initial file states and at most two historical emissions.
+It checks existing-file identity, private creation, invalid-file refusal and
+emission-time auth/explicit-show/TTY/CI-presence guards. Removing the CI or TTY
+guard must violate `HistoryVisibility`; overwriting an existing token must
+violate `FileIdentityFrozen`. Original model/config and exact mutation anchors
+are preserved.
+
+`source_scope` binds CLI/launcher code and its real PTY/native tests. It does not
+prove terminal syscalls, OS ACLs, entropy, crash safety, build freshness, process
+shutdown or all Go behavior. The metadata-only `go.mod` annotation change uses
+the separate narrow recognizer and is not bound to token-state invariants.
+
+
+
+The current combined registry has 7 baselines and 13 required mutation controls. SSM and feature inventory/property removal are rejected. Source integration does not constitute a new-head TLC or runtime execution result.

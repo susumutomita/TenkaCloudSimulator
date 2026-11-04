@@ -5,11 +5,10 @@
 ## 起動
 
 ```sh
-make build
-./dist/tenkacloud-simulator --state ./practice.db --token-file ./simulator-token
+make start
 ```
 
-Go 1.26が必要（CIは1.26.10）。コンソールは <http://127.0.0.1:4566/_simulator/console/>。ローカルの`simulator-token`に生成される秘密のoperator tokenでサインインする。ファイルは0600で保管し、参加者には渡さない。Scalarは `/_simulator/docs/`、能力表は `/_simulator/v1/capabilities`。SIGINT/SIGTERMで終了。`--state`省略は毎回空のメモリーDB。
+Go 1.26が必要（CIは1.26.10）。`make start`は毎回現在のソースをビルドし、`./practice.db`と`./simulator-token`を再利用する。コンソールは <http://127.0.0.1:4566/_simulator/console/>。対話端末ではoperator tokenを表示し、同じ値を`simulator-token`に0600で保存する。CI環境や出力のリダイレクト時には値を表示しない。この秘密は参加者へ渡さない。[起動・上書き設定・既存バイナリの使い方](docs/start.md)。Scalarは `/_simulator/docs/`、能力表は `/_simulator/v1/capabilities`。SIGINT/SIGTERMで終了。`--state`省略は毎回空のメモリーDB。
 
 ## 対応範囲
 
