@@ -85,44 +85,6 @@
             "name": "X-Amz-Target",
             "in": "header",
             "schema": {
-              "type": "string"
-            },
-            "description": "AmazonSSM.<operation> for SSM only"
-          },
-          {
-            "name": "X-Simulator-Region",
-            "in": "header",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "us-east-1",
-                "us-west-2",
-                "ap-northeast-1",
-                "eu-west-1"
-              ]
-            },
-            "example": "us-east-1"
-          },
-          {
-            "name": "X-Simulator-Service",
-            "in": "header",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "ssm",
-                "cloudformation",
-                "iam"
-              ]
-            },
-            "description": "iam selects IAM Query; omit or use cloudformation for CloudFormation, and omit or use ssm for SSM JSON. Do not select iam for CreateStack/DescribeStacks/DeleteStack."
-          },
-          {
-            "$ref": "#/components/parameters/SimulatorToken"
-          },
-          {
-            "name": "X-Amz-Target",
-            "in": "header",
-            "schema": {
               "type": "string",
               "enum": [
                 "AmazonSSM.PutParameter",
@@ -152,6 +114,20 @@
             "description": "JSON protocols only: AmazonSSM.<operation>, AmazonSQS.<operation>, or Logs_20140328.<operation>. For Logs choose application/x-amz-json-1.1 and X-Simulator-Service=logs; match the selected request example. Query IAM/CloudFormation do not use this header."
           },
           {
+            "name": "X-Simulator-Region",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "us-east-1",
+                "us-west-2",
+                "ap-northeast-1",
+                "eu-west-1"
+              ]
+            },
+            "example": "us-east-1"
+          },
+          {
             "name": "X-Simulator-Service",
             "in": "header",
             "schema": {
@@ -165,6 +141,9 @@
               ]
             },
             "description": "iam selects IAM Query; omit or use cloudformation for CloudFormation, and omit or use ssm for SSM JSON. Do not select iam for CreateStack/DescribeStacks/DeleteStack. Select logs for the bounded CloudWatch Logs JSON1.1 operations. Metrics/alarms, Logs Insights and Lambda automatic delivery are not implemented. sqs is the existing JSON1.0 queue subset."
+          },
+          {
+            "$ref": "#/components/parameters/SimulatorToken"
           }
         ],
         "requestBody": {
