@@ -27,13 +27,14 @@ with running(authenticated=True) as (endpoint,operator),sync_playwright() as p:
  expect(page.get_by_text('No customer managed keys',exact=True)).to_be_visible()
  page.evaluate("""()=>{window.__kmsOriginalFetch=window.fetch;window.__kmsOlderBodyConsumed=false;
  window.fetch=async(...args)=>{const response=await window.__kmsOriginalFetch(...args);
- if(response.headers.get('X-KMS-Older-Test')==='yes'){const original=response.text.bind(response);response.text=async()=>{try{return await original()}finally{setTimeout(()=>window.__kmsOlderBodyConsumed=true,0)}}}return response}}""")
+ if(response.headers.get('X-KMS-Older-Test')==='yes'){const original=response.text.bind(response);response.text=async()=>{try{return await original()}finally{setTimeout(()=>requestAnimationFrame(()=>requestAnimationFrame(()=>window.__kmsOlderBodyConsumed=true)),0)}}}return response}}""")
  held=[]
  def overlap(route):
   if route.request.headers.get('x-amz-target')=='TrentService.ListKeys' and not held:held.append(route)
   else:route.continue_()
  page.route(endpoint+'/',overlap)
- page.get_by_role('button',name='Refresh keys',exact=True).click()
+ with page.expect_request(lambda request:request.headers.get('x-amz-target')=='TrentService.ListKeys'):
+  page.get_by_role('button',name='Refresh keys',exact=True).click()
  assert len(held)==1,'First refresh did not reach the controlled route'
  with page.expect_response(lambda response:response.request.headers.get('x-amz-target')=='TrentService.ListKeys' and response.status==200):
   page.get_by_role('button',name='Refresh keys',exact=True).click()
@@ -43,6 +44,16 @@ with running(authenticated=True) as (endpoint,operator),sync_playwright() as p:
  expect(page.get_by_text('500: older-refresh-must-not-win',exact=True)).to_have_count(0)
  expect(page.get_by_text('No customer managed keys',exact=True)).to_be_visible()
  page.unroute(endpoint+'/',overlap);page.evaluate('window.fetch=window.__kmsOriginalFetch')
+ # A current-generation error must still be visible, then recover on a real
+ # request. This prevents a blanket "ignore all errors" implementation passing.
+ def current_error(route):
+  if route.request.headers.get('x-amz-target')=='TrentService.ListKeys':route.fulfill(status=500,headers={'Content-Type':'application/x-amz-json-1.1'},body=json.dumps({'__type':'KMSInternalException','message':'current-refresh-must-be-visible'}))
+  else:route.continue_()
+ page.route(endpoint+'/',current_error);page.get_by_role('button',name='Refresh keys',exact=True).click()
+ expect(page.get_by_text('500: current-refresh-must-be-visible',exact=True)).to_be_visible()
+ page.unroute(endpoint+'/',current_error);page.get_by_role('button',name='Refresh keys',exact=True).click()
+ expect(page.get_by_text('500: current-refresh-must-be-visible',exact=True)).to_have_count(0)
+ expect(page.get_by_text('No customer managed keys',exact=True)).to_be_visible()
  page.get_by_role('button',name='Create key',exact=True).first.click();page.get_by_label('Description',exact=True).fill('Cancelled dummy key');page.get_by_role('button',name='Cancel',exact=True).click();expect(page.get_by_role('heading',name='Customer managed keys (0)',exact=True)).to_be_visible();assert kms.list_keys()['Keys']==[]
  page.get_by_role('button',name='Create key',exact=True).first.click();page.get_by_label('Description',exact=True).fill('Dummy browser key');page.screenshot(path=str(REPORTS/'kms-create-1440.png'),full_page=True,animations='disabled');page.get_by_role('button',name='Create key',exact=True).click()
  expect(page.get_by_role('heading',name='General configuration',exact=True)).to_be_visible();page.screenshot(path=str(REPORTS/'kms-key-1440.png'),full_page=True,animations='disabled')
