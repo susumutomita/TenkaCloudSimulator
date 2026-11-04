@@ -4,6 +4,7 @@ import json
 import os
 import re
 import shutil
+import stat
 import subprocess
 import tempfile
 from pathlib import Path
@@ -181,11 +182,19 @@ def exact_head_inputs(root):
     tracked = git('ls-tree', '-r', '--name-only', '-z', head).decode().split('\0')
     registry = load_json(git('show', head + ':formal/models.json'))
     scope = {p for model in registry['models'] for p in model['source_scope']}
-    paths = {p for p in tracked if p and (p.startswith(('formal/', 'scripts/', '.github/')) or p == 'Makefile' or p in scope)}
+    module_inputs = {'go.mod', 'go.sum'}
+    require(module_inputs <= set(tracked), 'module/checksum inputs must exist in immutable HEAD')
+    paths = {p for p in tracked if p and (p.startswith(('formal/', 'scripts/', '.github/')) or p == 'Makefile' or p in scope or p in module_inputs)}
     content, hashes = {}, {}
     for path in sorted(paths):
         expected = git('show', head + ':' + path)
-        actual = asset(root, path).read_bytes()
+        actual_path = asset(root, path)
+        if path in module_inputs:
+            entry = git('ls-tree', head, '--', path).decode().split()
+            require(entry and entry[0] == '100644', 'module input HEAD mode must be regular nonexecutable: ' + path)
+            current_mode = actual_path.lstat().st_mode
+            require(stat.S_ISREG(current_mode) and not current_mode & 0o111, 'module input working mode must be regular nonexecutable: ' + path)
+        actual = actual_path.read_bytes()
         require(actual == expected, 'working input differs from HEAD: ' + path)
         content[path], hashes[path] = expected, digest(expected)
     return {'head': head, 'content': content, 'hashes': hashes}
