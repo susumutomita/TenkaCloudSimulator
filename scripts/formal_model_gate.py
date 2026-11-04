@@ -9,8 +9,9 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-BASE_MODELS = {'AzureBlobState', 'BlobRange', 'BrowserSessions', 'GCPStorageState', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'StackOwnership', 'StartupTokenVisibility'}
+BASE_MODELS = {'DynamoDBLifecycle', 'AzureBlobState', 'BlobRange', 'BrowserSessions', 'GCPStorageState', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'StackOwnership', 'StartupTokenVisibility'}
 BASE_INVARIANTS = {
+    'DynamoDBLifecycle': {'ConditionalAtomicity', 'FailedUnchanged', 'GenerationChecked', 'NoForeignMutation', 'NoOrphans', 'NoStaleItems', 'NoUnauthorizedMutation', 'TypeOK'},
     'AzureBlobState': {'BudgetBounded', 'ConditionEnforced', 'FailureAtomic', 'FreshWriteIdentity', 'NoDeniedRead', 'NoOrphans', 'NoUnauthorizedMutation', 'PeerStatePreserved', 'ReadExact', 'TypeOK'},
     'BlobRange': {'ChecksumBound', 'ConditionBeforeRange', 'DeniedNoDisclosure', 'ExactNormalRead', 'ExactSelectedBytes', 'Frame', 'InvalidRefused', 'MissingRangeChecksumRefused', 'NoFullMD5OnPartial', 'OutOfBoundsRefused', 'TypeOK'},
     'BrowserSessions': {'AcceptedOnlyLiveParent', 'NoBrowserSDKAuthority', 'NoRawSDKCookie', 'ParentLifetimeBound', 'RevokedCookiesDenied', 'SDKAuthorityPreserved', 'TypeOK', 'UnrelatedSessionsPreserved'},
@@ -30,6 +31,7 @@ BASE_INVARIANTS = {
 }
 # Established controls require an explicit gate-policy change before retirement.
 REQUIRED_MUTANTS = {
+    'DynamoDBLifecycle': {'AcceptRecreatedGeneration', 'CachedCondition', 'DirtyRollback', 'ForeignPut', 'IgnoreAllow', 'IgnoreDeny', 'MissingDropChildCleanup', 'MissingPutGenerationGuard'},
     'AzureBlobState': {'ContainerDeleteErasesPeer', 'ContainerDeleteLeavesBlobs', 'FailedPutCommits', 'IgnoreAccountOwner', 'IgnoreCreateOnly', 'IgnoreStaleETag', 'MissingTrustedActor', 'OmitByteBudget', 'OmitRowBudget', 'ReadNeighbor', 'ReuseETag'},
     'BlobRange': {'BypassAuthorization', 'DiscloseFullMD5OnPartial', 'IgnoreConditionDecision', 'IgnoreEndClamp', 'PermitExcessChecksum', 'ReadMutatesStoredBody', 'UncheckedBounds', 'WrongSliceStart'},
     'BrowserSessions': {'IgnoreParentValidity', 'LogoutClearsOthers', 'LogoutKeepsSession', 'LogoutRevokesSDK', 'RawOperatorCookie'},

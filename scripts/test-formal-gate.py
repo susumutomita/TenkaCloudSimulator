@@ -34,7 +34,7 @@ class FormalGateTests(unittest.TestCase):
 
     def test_complete_registry_and_exact_mutations(self):
         registry = load_registry(self.root)
-        self.assertEqual({model['id'] for model in registry['models']}, {'AzureBlobState', 'BlobRange', 'BrowserSessions', 'GCPStorageState', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'StackOwnership', 'StartupTokenVisibility'})
+        self.assertEqual({model['id'] for model in registry['models']}, {'AzureBlobState', 'BlobRange', 'BrowserSessions', 'DynamoDBLifecycle', 'GCPStorageState', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'StackOwnership', 'StartupTokenVisibility'})
         for model in registry['models']:
             source = (self.root / model['model']).read_text()
             for mutant in model['mutants']:
@@ -422,6 +422,43 @@ class FormalGateTests(unittest.TestCase):
         path = self.root / 'formal/models.json'
         original = path.read_text()
         for name in ('BlobRange', 'ProviderPath'):
+            entry = next(m for m in json.loads(original)['models'] if m['id'] == name)
+            model = self.root / entry['model']
+            config = self.root / entry['config']
+            saved_model, saved_config = model.read_bytes(), config.read_bytes()
+            with self.subTest(model=name, omission='model-and-artifacts'):
+                registry = json.loads(original)
+                registry['models'] = [m for m in registry['models'] if m['id'] != name]
+                path.write_text(json.dumps(registry))
+                model.unlink(); config.unlink()
+                with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+                    load_registry(self.root)
+            model.write_bytes(saved_model); config.write_bytes(saved_config)
+            for prop in entry['properties']:
+                with self.subTest(model=name, property=prop):
+                    registry = json.loads(original)
+                    changed = next(m for m in registry['models'] if m['id'] == name)
+                    changed['properties'].remove(prop)
+                    changed['mutants'] = [m for m in changed['mutants'] if m['expect_invariant'] != prop]
+                    config.write_text(saved_config.decode().replace('INVARIANT ' + prop + '\n', ''))
+                    path.write_text(json.dumps(registry))
+                    with self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                        load_registry(self.root)
+            config.write_bytes(saved_config)
+            for mutant in entry['mutants']:
+                with self.subTest(model=name, control=mutant['id']):
+                    registry = json.loads(original)
+                    changed = next(m for m in registry['models'] if m['id'] == name)
+                    changed['mutants'] = [m for m in changed['mutants'] if m['id'] != mutant['id']]
+                    path.write_text(json.dumps(registry))
+                    with self.assertRaisesRegex(GateError, 'required mutation control was removed'):
+                        load_registry(self.root)
+            path.write_text(original)
+
+    def test_dynamodb_lifecycle_properties_and_all_eight_controls_are_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        for name in ('DynamoDBLifecycle',):
             entry = next(m for m in json.loads(original)['models'] if m['id'] == name)
             model = self.root / entry['model']
             config = self.root / entry['config']

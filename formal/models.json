@@ -1313,6 +1313,128 @@
           "expect_invariant": "SourcePathImmutable"
         }
       ]
+    },
+    {
+      "id": "DynamoDBLifecycle",
+      "model": "formal/DynamoDBLifecycle.tla",
+      "config": "formal/DynamoDBLifecycle.cfg",
+      "bounds": "Two abstract owner/database+fixed-region/table scopes, one key, at most two immutable table generations; one delayed request interleaves with complete other writes/deletion/recreation.",
+      "properties": [
+        "TypeOK",
+        "NoOrphans",
+        "GenerationChecked",
+        "NoStaleItems",
+        "ConditionalAtomicity",
+        "NoUnauthorizedMutation",
+        "NoForeignMutation",
+        "FailedUnchanged"
+      ],
+      "limits": "Generation/condition/atomic-commit abstraction only. Store is trusted internal composition; IAM is Gateway preflight, not a Store policy check. Owners are separate process databases, not row-level tenants. No SQL/Go refinement, real IAM parsing, tokens/two-auth-process proof, payload size/quotas/stat arithmetic, async AWS lifecycle, liveness or full API completeness. Model and mutants remain UNRUN until a reserved TLC check.",
+      "source_scope": [
+        "internal/aws/dynamodb.go",
+        "internal/aws/dynamodb_store.go",
+        "internal/aws/dynamodb_generation.go"
+      ],
+      "mutants": [
+        {
+          "id": "MissingPutGenerationGuard",
+          "edits": [
+            {
+              "old": " /\\ tables[reqOwner] # 0 /\\ tables[reqOwner] = reqGeneration",
+              "new": " /\\ reqAction = \"Put\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoOrphans"
+        },
+        {
+          "id": "AcceptRecreatedGeneration",
+          "edits": [
+            {
+              "old": " /\\ tables[reqOwner] # 0 /\\ tables[reqOwner] = reqGeneration",
+              "new": " /\\ tables[reqOwner] # 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GenerationChecked"
+        },
+        {
+          "id": "CachedCondition",
+          "edits": [
+            {
+              "old": " /\\ ConditionHolds(reqCondition,items[reqOwner][reqKey] # 0)",
+              "new": " /\\ ConditionHolds(reqCondition,reqSawExists)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ConditionalAtomicity"
+        },
+        {
+          "id": "IgnoreDeny",
+          "edits": [
+            {
+              "old": " /\\ pending /\\ reqAllow /\\ ~reqDeny",
+              "new": " /\\ pending /\\ reqAllow",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoUnauthorizedMutation"
+        },
+        {
+          "id": "IgnoreAllow",
+          "edits": [
+            {
+              "old": " /\\ pending /\\ reqAllow /\\ ~reqDeny",
+              "new": " /\\ pending /\\ ~reqDeny",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoUnauthorizedMutation"
+        },
+        {
+          "id": "MissingDropChildCleanup",
+          "edits": [
+            {
+              "old": " /\\ items' = [items EXCEPT ![owner] = Empty]\n /\\ Trace(owner,\"OtherDrop\"",
+              "new": " /\\ items' = items\n /\\ Trace(owner,\"OtherDrop\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoOrphans"
+        },
+        {
+          "id": "ForeignPut",
+          "edits": [
+            {
+              "old": " /\\ tables[reqOwner] # 0 /\\ tables[reqOwner] = reqGeneration",
+              "new": " /\\ tables[reqOwner] # 0 /\\ tables[reqOwner] = reqGeneration\n /\\ reqAction = \"Put\" /\\ \\A owner \\in Owners : tables[owner] = reqGeneration",
+              "count": 1
+            },
+            {
+              "old": "items' = [items EXCEPT ![reqOwner][reqKey] =",
+              "new": "items' = [items EXCEPT ![CHOOSE owner \\in Owners : owner # reqOwner][reqKey] =",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoForeignMutation"
+        },
+        {
+          "id": "DirtyRollback",
+          "edits": [
+            {
+              "old": "SQLRollback ==\n /\\ pending /\\ pending' = FALSE",
+              "new": "SQLRollback ==\n /\\ pending /\\ reqAllow /\\ ~reqDeny /\\ reqGeneration # 0 /\\ tables[reqOwner] = reqGeneration\n /\\ pending' = FALSE\n /\\ items' = [items EXCEPT ![reqOwner][reqKey] = reqGeneration]",
+              "count": 1
+            },
+            {
+              "old": " /\\ UNCHANGED <<tables,serial,items,reqOwner,reqKey,reqGeneration,reqAction,\n                reqCondition,reqAllow,reqDeny,reqSawExists>>\nRestart ==",
+              "new": " /\\ UNCHANGED <<tables,serial,reqOwner,reqKey,reqGeneration,reqAction,\n                reqCondition,reqAllow,reqDeny,reqSawExists>>\nRestart ==",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FailedUnchanged"
+        }
+      ]
     }
   ]
 }

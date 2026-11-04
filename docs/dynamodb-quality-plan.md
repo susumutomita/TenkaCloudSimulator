@@ -1,3 +1,5 @@
+> Historical native-source record. Current main5c97 integration, unrun gates and scope gaps are tracked in [dynamodb-integration.md](dynamodb-integration.md).
+
 # DynamoDB quality/generation follow-up — native checked, full gates pending
 
 2026-11-04. External Muse PR309/head `ed877ecc56c0fd4eef7a3a5a3b0b23d3ca435cfe`
