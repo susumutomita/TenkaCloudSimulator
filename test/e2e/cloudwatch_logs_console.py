@@ -12,7 +12,7 @@ from cloudwatch_logs import client
 
 
 def run():
-    for name in ("cloudwatch-logs-events-desktop.png", "cloudwatch-logs-events-mobile.png", "cloudwatch-logs-a11y.json"):
+    for name in ("cloudwatch-logs-events-desktop.png", "cloudwatch-logs-events-mobile.png", "cloudwatch-logs-events-mobile-scrolled.png", "cloudwatch-logs-a11y.json"):
         (REPORTS/name).unlink(missing_ok=True)
     # The canonical pinned audit asset is supplied by the host, never downloaded
     # by the running simulator or substituted with an empty checker.
@@ -105,6 +105,16 @@ def run():
             assert_reflow(page)
             audit("log-events-mobile")
             page.screenshot(path=str(REPORTS / "cloudwatch-logs-events-mobile.png"), full_page=True)
+            # A data table may scroll within its own container. Verify that the
+            # message remains readable rather than shrinking to a few letters,
+            # and that actual horizontal navigation exposes the full column.
+            message_cell=page.get_by_role("cell",name="<script>dummy markup remains text</script>",exact=True)
+            assert message_cell.bounding_box()["width"]>=300
+            message_cell.scroll_into_view_if_needed()
+            assert_reflow(page)
+            box=message_cell.bounding_box()
+            assert box["x"]>=0 and box["x"]+box["width"]<=390, box
+            page.screenshot(path=str(REPORTS / "cloudwatch-logs-events-mobile-scrolled.png"),full_page=True)
             page.set_viewport_size({"width": 1440, "height": 1000})
             page.get_by_role("button", name="Log streams", exact=True).click()
             page.get_by_role("button", name="Delete log group", exact=True).click()

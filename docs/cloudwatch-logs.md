@@ -3,8 +3,8 @@
 This increment adds CloudWatch **Logs**, not CloudWatch metrics or alarms. Its API
 and console use provider-owned SQLite tables. It does not deliver Lambda logs
 automatically, provision an agent, enable a Challenge problem, or claim visual
-parity with an authenticated AWS console. The isolated Cloudscape component must
-be connected by the integration owner before the console is available.
+parity with an authenticated AWS console. The Cloudscape console calls the same
+seven native operations as SDK clients.
 
 ## Native protocol and supported operations
 
@@ -161,3 +161,5 @@ pickers remain UI gaps. The API supports time bounds, but the initial screen doe
 not present those as a complete AWS picker. No authenticated AWS screen was
 accessed, so pixel/layout identity has not been verified. The explicit ingestion
 helper is labeled simulator-only and does not invent an AWS console flow.
+At a narrow viewport the event table scrolls inside its own container; the page
+itself does not overflow. Message columns retain a readable minimum width.
