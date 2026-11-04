@@ -4,7 +4,7 @@
   "changes": [
     {
       "path": "docs/s3.md",
-      "sha256": "b7c64c7fd9692b02dd47bd257dc5f4bc845dc7990d2476f3f3c6b65956360cd9",
+      "sha256": "80ef2f465a53f03b7a06171247be4776bc922162d6c044a20b3beeb83de60d43",
       "disposition": "documentation",
       "reason": "Documents historical main fix, exact native/SDK regression scope, no runtime changes and explicit URL/RawPath exclusion from existing finite state models.",
       "models": []
@@ -21,6 +21,13 @@
       "sha256": "c5a1769e94892a14d5de9c470294de1f883b6ee5f8a8e864b0b9a52d0777884b",
       "disposition": "test-support",
       "reason": "Actual authenticated local binary/native boto3 root-prefix PUT/GET/HEAD/DELETE, transport 3xx and neighbor/cleanup assertions. Test-only driver; no guest/cloud call or new runtime transition, no false formal URL refinement claim.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/check.py",
+      "sha256": "c1a29a8530e23ead19bcf9aea2b1b66d056cfb5c228778ce253de54bb98354c8",
+      "disposition": "test-support",
+      "reason": "Makes the real authenticated literal-key boto3 driver mandatory in the existing E2E gate; subprocess failure propagates through check=True. No production state or URL contract changes.",
       "models": []
     }
   ]
