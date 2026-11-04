@@ -1,0 +1,16 @@
+{
+  "repository": "https://github.com/sivchari/kumo",
+  "commit": "ce37a8fb406ecb96b5619204f645c26302b651a5",
+  "license": "MIT",
+  "copyright": "Copyright (c) 2025 sivchari",
+  "source": "internal/service/iam/types.go",
+  "sourceSha256": "be19438a4f5be46e446a2965fddcba524723942ea7978bbf5ed24476756c14dc",
+  "selectedType": "Role",
+  "modifications": [
+    "Provider-local IAMRole name",
+    "Only implemented root-path role fields retained; unused attached-policy/tag DTO fields not copied",
+    "Provider-owned SQLite and trust validation; no Kumo memory backend or dependencies"
+  ],
+  "licenseSha256": "02f8d83277fea29291727639f45ddafcbcbf7cbc2d92ea1297eb84f0b8ee9fe2",
+  "status": "Native IAM Role wire fields adapted; only the documented and tested bounded role subset is implemented"
+}

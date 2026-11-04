@@ -16,6 +16,7 @@ Go 1.26が必要（CIは1.26.10）。コンソールは <http://127.0.0.1:4566/_
 | サービス | 対応 | 制限 |
 | --- | --- | --- |
 | S3 | ListBuckets/CreateBucket/HeadBucket/GetBucketLocation/DeleteBucket/ListObjectsV2/PutObject/GetObject/HeadObject/DeleteObject、Get/PutBucketVersioning、ListObjectVersions、Get/Put/DeletePublicAccessBlock、Get/Put/DeleteBucketTagging | path-style、4リージョン。versioning/versions・bucket public-access-block対応。multipart/ACLなし |
+| IAM | 9 role/inline-policy Query操作、Lambda service trust、Cloudscape作成Wizard | root path/限定service principal、managed policies/STSなし。[詳細](docs/iam.md) |
 | Systems Manager Parameter Store | PutParameter/GetParameter/GetParameters/GetParametersByPath/DescribeParameters/DeleteParameter | StandardのString/StringList/textのみ。SecureString/KMS/labelsなし |
 | CloudFormation | CreateStack/DescribeStacks/DeleteStack | S3 Bucket、SSM Parameter、inline Python Lambda Function、1 inline identity policy付きIAM Role。Ref/Sub/GetAttの限定評価。その他は明示エラー |
 | Lambda | CreateFunction/ListFunctions/GetFunctionConfiguration/UpdateFunctionCode/Invoke/DeleteFunction | 埋込CPython 3.12.16/WASIでPythonコードを実行。128 MiB/1–30秒、同期のみ。限定inline CFNに対応。関数内SSM/S3 SDKは限定対応。network・Function URLは未対応 |
@@ -28,9 +29,9 @@ IAMはidentity policyのVersion/Statement/Sid/Effect/Action/Resource、配列、
 
 ## IAMからLambdaを作成
 
-管理者でServices→IAM→Roles→Create roleを開き、Role nameと限定identity policyを保存する。初期policyは明示Denyでservice権限を与えない。role詳細のCreate a Lambda functionからCreate functionへ進み、Permissions→Existing roleで作成済みroleを選ぶ。Python関数を作成後、Code→Function ZIP→Deploy→Testで実コードを実行する。既存のExecution role ARN手入力も使える。
+Services→IAM→Roles→Create roleで信頼先Lambda→権限なし→名前と確認へ進む。roleのPermissionsで必要なinline policyを追加する。Create a Lambda function→Permissions→Existing roleで選び、Code→ZIP Deploy→Testで実Pythonを実行する。trust policyは作成・実行時に評価し、権限なしはimplicit Deny。未実装のAWS managed policiesを付与した扱いにしない。
 
-IAM画面は既存のローカルidentity policyを実行roleとして管理する限定UI。IAM Query API、別のuser/role namespace、trust policy/STS、AWS managed policies、CloudWatch権限の自動付与は未対応。AWSのIAM role作成と同等ではない。参加者tokenはIAM管理不可で、Lambda作成には既存のlambda:CreateFunctionとiam:PassRoleの判定を保つ。
+既存のlocal identity/CFN roleは従来の方式を維持し、Local identitiesから管理する。native IAM roleとは別の保存モデルで、相互の名前採用は拒否。参加者もiam操作・PassRoleの個別認可が必要。[IAM仕様・制限・API例](docs/iam.md)。
 
 ## API/SDK
 

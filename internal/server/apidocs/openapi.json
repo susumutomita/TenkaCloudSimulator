@@ -3,7 +3,7 @@
   "info": {
     "title": "TenkaCloud Simulator API",
     "version": "0.1.0",
-    "description": "Independent local cloud simulator. AWS S3 is the first provider. No real infrastructure is created. This document describes only implemented operations. S3 wire APIs retain their XML formats; simulator IAM control is explicitly a separate JSON API. Use unsigned requests or dummy TCSIM SDK credentials. Default principal simulator-admin has full sandbox access. For IAM exercises send x-simulator-principal. SQLite is ephemeral by default; --state persists it. See /_simulator/v1/capabilities for limits and deviations. Lambda supports a bounded Python 3.12 ZIP subset through the native REST paths below. Host Python is not required. A limited saved-role local SSM/S3 function SDK is supported; arbitrary network/HTTP and Function URLs remain unsupported. CloudFormation supports inline Python AWS::Lambda::Function with index.handler, existing local role, Ref/Arn and explicit DependsOn. Caller requires Lambda Create/DeleteFunction and iam:PassRole; tagged creation also requires lambda:TagResource. Only the declared saved-role SSM/S3 capability bridge is available, with no arbitrary network or managed-policy grants. Function SDK limits: S3 object body32KiB, native response48KiB before capability encoding, message64KiB,128calls and1MiB request/response aggregate. Oversized native SSM or S3 responses return EntityTooLarge without a partial successful result.",
+    "description": "Independent local cloud simulator. AWS is the first provider, with documented S3, Systems Manager Parameter Store, Lambda, CloudFormation and IAM role subsets. No real infrastructure is created. This document describes only implemented operations. S3 wire APIs retain their XML formats; Native IAM roles use Query/XML; legacy identity control remains a separate JSON API. Native role ownership blocks legacy PUT/DELETE with HTTP409. Use unsigned requests or dummy TCSIM SDK credentials. Default principal simulator-admin has full sandbox access. IAM Query routing uses X-Simulator-Service: iam (or the dummy SDK signature scope), root POST and Version2010-05-08. Nine bounded role/inline-policy operations are implemented; no STS, managed policies, Conditions or non-root paths. Native Lambda roles must trust lambda.amazonaws.com. Legacy CFN/local identity roles retain their prior metadata-only trust semantics. For IAM exercises send x-simulator-principal. SQLite is ephemeral by default; --state persists it. See /_simulator/v1/capabilities for limits and deviations. Lambda supports a bounded Python 3.12 ZIP subset through the native REST paths below. Host Python is not required. A limited saved-role local SSM/S3 function SDK is supported; arbitrary network/HTTP and Function URLs remain unsupported. CloudFormation supports inline Python AWS::Lambda::Function with index.handler, existing local role, Ref/Arn and explicit DependsOn. Caller requires Lambda Create/DeleteFunction and iam:PassRole; tagged creation also requires lambda:TagResource. Only the declared saved-role SSM/S3 capability bridge is available, with no arbitrary network or managed-policy grants. Function SDK limits: S3 object body32KiB, native response48KiB before capability encoding, message64KiB,128calls and1MiB request/response aggregate. Oversized native SSM or S3 responses return EntityTooLarge without a partial successful result.",
     "license": {
       "name": "MIT"
     }
@@ -61,8 +61,8 @@
         }
       },
       "post": {
-        "summary": "SSM JSON or CloudFormation Query operation",
-        "description": "Native regional root endpoint. SSM: X-Amz-Target AmazonSSM.PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter. CloudFormation: CreateStack, DescribeStacks, DeleteStack; only S3 buckets, SSM parameters, inline Python Lambda functions and one inline IAM identity policy per role. Unsupported options fail. Real credentials and session tokens are rejected. Create/DeleteStack also require the caller to allow the underlying S3/SSM/IAM/Lambda actions; CAPABILITY_IAM grants no permissions. No service RoleArn or general CloudFormation lifecycle is supported.",
+        "summary": "SSM JSON, CloudFormation Query, or IAM Query operation",
+        "description": "Native regional root endpoint. SSM: X-Amz-Target AmazonSSM.PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter. CloudFormation: CreateStack, DescribeStacks, DeleteStack; only S3 buckets, SSM parameters, inline Python Lambda functions and one inline IAM identity policy per role. Unsupported options fail. Real credentials and session tokens are rejected. Create/DeleteStack also require the caller to allow the underlying S3/SSM/IAM/Lambda actions; CAPABILITY_IAM grants no permissions. No service RoleArn or general CloudFormation lifecycle is supported. IAM is global: send X-Simulator-Service: iam, Version2010-05-08 and one of CreateRole/GetRole/ListRoles/DeleteRole/PutRolePolicy/GetRolePolicy/DeleteRolePolicy/ListRolePolicies/UpdateAssumeRolePolicy. Policy documents are JSON strings; successful IAM XML returns them RFC3986 URL-encoded. Native role names use the local alphanumeric/underscore/hyphen subset,1\u201364; inline policy names1\u2013128 AWS characters. Trust and aggregate policies32KiB, at most10 inline policies/100 statements,1000 active+retired name claims. Deleted role names cannot be adopted by legacy identity writes. No managed grants or session issuance.",
         "operationId": "awsRegionalOperation",
         "parameters": [
           {
@@ -86,6 +86,17 @@
               ]
             },
             "example": "us-east-1"
+          },
+          {
+            "name": "X-Simulator-Service",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "iam"
+              ]
+            },
+            "description": "Use iam for IAM Query only; omit for SSM or CloudFormation."
           }
         ],
         "requestBody": {
@@ -108,13 +119,23 @@
                     "enum": [
                       "CreateStack",
                       "DescribeStacks",
-                      "DeleteStack"
+                      "DeleteStack",
+                      "CreateRole",
+                      "GetRole",
+                      "ListRoles",
+                      "DeleteRole",
+                      "PutRolePolicy",
+                      "GetRolePolicy",
+                      "DeleteRolePolicy",
+                      "ListRolePolicies",
+                      "UpdateAssumeRolePolicy"
                     ]
                   },
                   "Version": {
                     "type": "string",
                     "enum": [
-                      "2010-05-15"
+                      "2010-05-15",
+                      "2010-05-08"
                     ]
                   },
                   "StackName": {
@@ -122,12 +143,137 @@
                   },
                   "TemplateBody": {
                     "type": "string"
+                  },
+                  "RoleName": {
+                    "type": "string",
+                    "description": "IAM action-specific field; unsupported fields fail explicitly."
+                  },
+                  "AssumeRolePolicyDocument": {
+                    "type": "string",
+                    "description": "IAM action-specific field; unsupported fields fail explicitly."
+                  },
+                  "PolicyName": {
+                    "type": "string",
+                    "description": "IAM action-specific field; unsupported fields fail explicitly."
+                  },
+                  "PolicyDocument": {
+                    "type": "string",
+                    "description": "IAM action-specific field; unsupported fields fail explicitly."
+                  },
+                  "Description": {
+                    "type": "string",
+                    "description": "IAM action-specific field; unsupported fields fail explicitly."
+                  },
+                  "Path": {
+                    "type": "string",
+                    "description": "IAM action-specific field; unsupported fields fail explicitly."
+                  },
+                  "PathPrefix": {
+                    "type": "string",
+                    "description": "IAM action-specific field; unsupported fields fail explicitly."
+                  },
+                  "Marker": {
+                    "type": "string",
+                    "description": "IAM action-specific field; unsupported fields fail explicitly."
+                  },
+                  "MaxItems": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1000
+                  },
+                  "MaxSessionDuration": {
+                    "type": "integer",
+                    "minimum": 3600,
+                    "maximum": 43200
                   }
                 }
               },
-              "example": {
-                "Action": "DescribeStacks",
-                "Version": "2010-05-15"
+              "examples": {
+                "DescribeStacks": {
+                  "value": {
+                    "Action": "DescribeStacks",
+                    "Version": "2010-05-15"
+                  }
+                },
+                "CreateRole": {
+                  "summary": "CreateRole (IAM service header required)",
+                  "value": {
+                    "Action": "CreateRole",
+                    "Version": "2010-05-08",
+                    "RoleName": "practice-executor",
+                    "AssumeRolePolicyDocument": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"sts:AssumeRole\",\"Principal\":{\"Service\":\"lambda.amazonaws.com\"}}]}"
+                  }
+                },
+                "GetRole": {
+                  "summary": "GetRole (IAM service header required)",
+                  "value": {
+                    "Action": "GetRole",
+                    "Version": "2010-05-08",
+                    "RoleName": "practice-executor"
+                  }
+                },
+                "ListRoles": {
+                  "summary": "ListRoles (IAM service header required)",
+                  "value": {
+                    "Action": "ListRoles",
+                    "Version": "2010-05-08",
+                    "MaxItems": 100
+                  }
+                },
+                "DeleteRole": {
+                  "summary": "DeleteRole (IAM service header required)",
+                  "value": {
+                    "Action": "DeleteRole",
+                    "Version": "2010-05-08",
+                    "RoleName": "practice-executor"
+                  }
+                },
+                "PutRolePolicy": {
+                  "summary": "PutRolePolicy (IAM service header required)",
+                  "value": {
+                    "Action": "PutRolePolicy",
+                    "Version": "2010-05-08",
+                    "RoleName": "practice-executor",
+                    "PolicyName": "ReadObjects",
+                    "PolicyDocument": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"s3:GetObject\",\"Resource\":\"arn:aws:s3:::practice-bucket/*\"}]}"
+                  }
+                },
+                "GetRolePolicy": {
+                  "summary": "GetRolePolicy (IAM service header required)",
+                  "value": {
+                    "Action": "GetRolePolicy",
+                    "Version": "2010-05-08",
+                    "RoleName": "practice-executor",
+                    "PolicyName": "ReadObjects"
+                  }
+                },
+                "DeleteRolePolicy": {
+                  "summary": "DeleteRolePolicy (IAM service header required)",
+                  "value": {
+                    "Action": "DeleteRolePolicy",
+                    "Version": "2010-05-08",
+                    "RoleName": "practice-executor",
+                    "PolicyName": "ReadObjects"
+                  }
+                },
+                "ListRolePolicies": {
+                  "summary": "ListRolePolicies (IAM service header required)",
+                  "value": {
+                    "Action": "ListRolePolicies",
+                    "Version": "2010-05-08",
+                    "RoleName": "practice-executor",
+                    "MaxItems": 100
+                  }
+                },
+                "UpdateAssumeRolePolicy": {
+                  "summary": "UpdateAssumeRolePolicy (IAM service header required)",
+                  "value": {
+                    "Action": "UpdateAssumeRolePolicy",
+                    "Version": "2010-05-08",
+                    "RoleName": "practice-executor",
+                    "PolicyDocument": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"sts:AssumeRole\",\"Principal\":{\"Service\":\"lambda.amazonaws.com\"}}]}"
+                  }
+                }
               }
             }
           }
@@ -137,13 +283,22 @@
             "description": "Native JSON 1.1 SSM or XML Query response"
           },
           "400": {
-            "description": "Validation/unsupported field/state conflict"
+            "description": "Validation/unsupported field/state conflict IAM ValidationError/MalformedPolicyDocument reject unknown trust or permissions semantics."
           },
           "403": {
             "description": "Exercise IAM denied"
           },
           "501": {
             "description": "Unsupported operation"
+          },
+          "404": {
+            "description": "IAM NoSuchEntity: role or inline policy does not exist."
+          },
+          "409": {
+            "description": "IAM EntityAlreadyExists, DeleteConflict (remove inline policies first), or LimitExceeded. No partial aggregate update."
+          },
+          "413": {
+            "description": "IAM Query body exceeds128KiB."
           }
         }
       }
@@ -308,7 +463,7 @@
           {
             "name": "max-keys",
             "in": "query",
-            "description": "0–1000 entries per page.",
+            "description": "0\u20131000 entries per page.",
             "schema": {
               "type": "integer",
               "default": 1000
@@ -952,6 +1107,9 @@
           },
           "412": {
             "description": "Identity already exists; its permissions are unchanged."
+          },
+          "409": {
+            "description": "Name is owned by an active or retired native IAM role. Use IAM Query; legacy writes cannot adopt it."
           }
         },
         "requestBody": {
@@ -1018,6 +1176,9 @@
           },
           "403": {
             "description": "Only simulator-admin may manage policies."
+          },
+          "409": {
+            "description": "Name is owned by an active or retired native IAM role. Use IAM Query; legacy writes cannot adopt it."
           }
         }
       }
@@ -1646,6 +1807,518 @@
           }
         }
       }
+    },
+    "/_simulator/providers/aws/": {
+      "post": {
+        "operationId": "IAMRoleQueryOperation",
+        "summary": "Manage IAM roles and inline policies",
+        "tags": [
+          "IAM roles"
+        ],
+        "description": "Global native IAM Query/XML on the existing AWS provider alias. This is the same role/inline-policy SQLite state used by native SDKs, Lambda and the console. The IAM service header below is required and prefilled. Select one of the nine verified request examples. Policies are JSON strings; response policy documents are RFC3986 URL encoded. Only root-path local role names and explicit service-principal trust are supported. No STS, managed policies, advanced Conditions, users or federation. Default roles grant no service permissions. Delete inline policies before DeleteRole. Local tokens remain mandatory in the CLI. See capabilities for limits and docs/iam.md for the bounded contract.",
+        "parameters": [
+          {
+            "name": "X-Simulator-Service",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "iam"
+              ],
+              "default": "iam"
+            },
+            "example": "iam",
+            "description": "Routes this provider alias to IAM Query. SDK callers use the dummy iam signing scope automatically."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "title": "CreateRole",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "Action",
+                      "Version",
+                      "RoleName",
+                      "AssumeRolePolicyDocument"
+                    ],
+                    "properties": {
+                      "Action": {
+                        "type": "string",
+                        "enum": [
+                          "CreateRole"
+                        ],
+                        "default": "CreateRole"
+                      },
+                      "Version": {
+                        "type": "string",
+                        "enum": [
+                          "2010-05-08"
+                        ],
+                        "default": "2010-05-08"
+                      },
+                      "RoleName": {
+                        "type": "string",
+                        "description": "IAM action-specific field; unsupported fields fail explicitly.",
+                        "minLength": 1,
+                        "maxLength": 64,
+                        "pattern": "^[a-zA-Z0-9_-]+$"
+                      },
+                      "AssumeRolePolicyDocument": {
+                        "type": "string",
+                        "description": "IAM action-specific field; unsupported fields fail explicitly."
+                      },
+                      "Description": {
+                        "type": "string",
+                        "description": "IAM description character range, up to1000 characters. NUL, invalid UTF-8 and characters outside this AWS range are rejected before storage.",
+                        "maxLength": 1000,
+                        "pattern": "^[\\u0009\\u000A\\u000D\\u0020-\\u007E\\u00A1-\\u00FF]*$"
+                      },
+                      "Path": {
+                        "type": "string",
+                        "description": "IAM action-specific field; unsupported fields fail explicitly."
+                      },
+                      "MaxSessionDuration": {
+                        "type": "integer",
+                        "minimum": 3600,
+                        "maximum": 43200
+                      }
+                    }
+                  },
+                  {
+                    "title": "GetRole",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "Action",
+                      "Version",
+                      "RoleName"
+                    ],
+                    "properties": {
+                      "Action": {
+                        "type": "string",
+                        "enum": [
+                          "GetRole"
+                        ],
+                        "default": "GetRole"
+                      },
+                      "Version": {
+                        "type": "string",
+                        "enum": [
+                          "2010-05-08"
+                        ],
+                        "default": "2010-05-08"
+                      },
+                      "RoleName": {
+                        "type": "string",
+                        "description": "IAM action-specific field; unsupported fields fail explicitly.",
+                        "minLength": 1,
+                        "maxLength": 64,
+                        "pattern": "^[a-zA-Z0-9_-]+$"
+                      }
+                    }
+                  },
+                  {
+                    "title": "ListRoles",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "Action",
+                      "Version"
+                    ],
+                    "properties": {
+                      "Action": {
+                        "type": "string",
+                        "enum": [
+                          "ListRoles"
+                        ],
+                        "default": "ListRoles"
+                      },
+                      "Version": {
+                        "type": "string",
+                        "enum": [
+                          "2010-05-08"
+                        ],
+                        "default": "2010-05-08"
+                      },
+                      "PathPrefix": {
+                        "type": "string",
+                        "description": "IAM action-specific field; unsupported fields fail explicitly."
+                      },
+                      "Marker": {
+                        "type": "string",
+                        "description": "IAM action-specific field; unsupported fields fail explicitly."
+                      },
+                      "MaxItems": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 1000
+                      }
+                    }
+                  },
+                  {
+                    "title": "DeleteRole",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "Action",
+                      "Version",
+                      "RoleName"
+                    ],
+                    "properties": {
+                      "Action": {
+                        "type": "string",
+                        "enum": [
+                          "DeleteRole"
+                        ],
+                        "default": "DeleteRole"
+                      },
+                      "Version": {
+                        "type": "string",
+                        "enum": [
+                          "2010-05-08"
+                        ],
+                        "default": "2010-05-08"
+                      },
+                      "RoleName": {
+                        "type": "string",
+                        "description": "IAM action-specific field; unsupported fields fail explicitly.",
+                        "minLength": 1,
+                        "maxLength": 64,
+                        "pattern": "^[a-zA-Z0-9_-]+$"
+                      }
+                    }
+                  },
+                  {
+                    "title": "PutRolePolicy",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "Action",
+                      "Version",
+                      "RoleName",
+                      "PolicyName",
+                      "PolicyDocument"
+                    ],
+                    "properties": {
+                      "Action": {
+                        "type": "string",
+                        "enum": [
+                          "PutRolePolicy"
+                        ],
+                        "default": "PutRolePolicy"
+                      },
+                      "Version": {
+                        "type": "string",
+                        "enum": [
+                          "2010-05-08"
+                        ],
+                        "default": "2010-05-08"
+                      },
+                      "RoleName": {
+                        "type": "string",
+                        "description": "IAM action-specific field; unsupported fields fail explicitly.",
+                        "minLength": 1,
+                        "maxLength": 64,
+                        "pattern": "^[a-zA-Z0-9_-]+$"
+                      },
+                      "PolicyName": {
+                        "type": "string",
+                        "description": "IAM action-specific field; unsupported fields fail explicitly.",
+                        "minLength": 1,
+                        "maxLength": 128,
+                        "pattern": "^[a-zA-Z0-9_+=,.@-]+$"
+                      },
+                      "PolicyDocument": {
+                        "type": "string",
+                        "description": "IAM action-specific field; unsupported fields fail explicitly."
+                      }
+                    }
+                  },
+                  {
+                    "title": "GetRolePolicy",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "Action",
+                      "Version",
+                      "RoleName",
+                      "PolicyName"
+                    ],
+                    "properties": {
+                      "Action": {
+                        "type": "string",
+                        "enum": [
+                          "GetRolePolicy"
+                        ],
+                        "default": "GetRolePolicy"
+                      },
+                      "Version": {
+                        "type": "string",
+                        "enum": [
+                          "2010-05-08"
+                        ],
+                        "default": "2010-05-08"
+                      },
+                      "RoleName": {
+                        "type": "string",
+                        "description": "IAM action-specific field; unsupported fields fail explicitly.",
+                        "minLength": 1,
+                        "maxLength": 64,
+                        "pattern": "^[a-zA-Z0-9_-]+$"
+                      },
+                      "PolicyName": {
+                        "type": "string",
+                        "description": "IAM action-specific field; unsupported fields fail explicitly.",
+                        "minLength": 1,
+                        "maxLength": 128,
+                        "pattern": "^[a-zA-Z0-9_+=,.@-]+$"
+                      }
+                    }
+                  },
+                  {
+                    "title": "DeleteRolePolicy",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "Action",
+                      "Version",
+                      "RoleName",
+                      "PolicyName"
+                    ],
+                    "properties": {
+                      "Action": {
+                        "type": "string",
+                        "enum": [
+                          "DeleteRolePolicy"
+                        ],
+                        "default": "DeleteRolePolicy"
+                      },
+                      "Version": {
+                        "type": "string",
+                        "enum": [
+                          "2010-05-08"
+                        ],
+                        "default": "2010-05-08"
+                      },
+                      "RoleName": {
+                        "type": "string",
+                        "description": "IAM action-specific field; unsupported fields fail explicitly.",
+                        "minLength": 1,
+                        "maxLength": 64,
+                        "pattern": "^[a-zA-Z0-9_-]+$"
+                      },
+                      "PolicyName": {
+                        "type": "string",
+                        "description": "IAM action-specific field; unsupported fields fail explicitly.",
+                        "minLength": 1,
+                        "maxLength": 128,
+                        "pattern": "^[a-zA-Z0-9_+=,.@-]+$"
+                      }
+                    }
+                  },
+                  {
+                    "title": "ListRolePolicies",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "Action",
+                      "Version",
+                      "RoleName"
+                    ],
+                    "properties": {
+                      "Action": {
+                        "type": "string",
+                        "enum": [
+                          "ListRolePolicies"
+                        ],
+                        "default": "ListRolePolicies"
+                      },
+                      "Version": {
+                        "type": "string",
+                        "enum": [
+                          "2010-05-08"
+                        ],
+                        "default": "2010-05-08"
+                      },
+                      "RoleName": {
+                        "type": "string",
+                        "description": "IAM action-specific field; unsupported fields fail explicitly.",
+                        "minLength": 1,
+                        "maxLength": 64,
+                        "pattern": "^[a-zA-Z0-9_-]+$"
+                      },
+                      "Marker": {
+                        "type": "string",
+                        "description": "IAM action-specific field; unsupported fields fail explicitly."
+                      },
+                      "MaxItems": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 1000
+                      }
+                    }
+                  },
+                  {
+                    "title": "UpdateAssumeRolePolicy",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "Action",
+                      "Version",
+                      "RoleName",
+                      "PolicyDocument"
+                    ],
+                    "properties": {
+                      "Action": {
+                        "type": "string",
+                        "enum": [
+                          "UpdateAssumeRolePolicy"
+                        ],
+                        "default": "UpdateAssumeRolePolicy"
+                      },
+                      "Version": {
+                        "type": "string",
+                        "enum": [
+                          "2010-05-08"
+                        ],
+                        "default": "2010-05-08"
+                      },
+                      "RoleName": {
+                        "type": "string",
+                        "description": "IAM action-specific field; unsupported fields fail explicitly.",
+                        "minLength": 1,
+                        "maxLength": 64,
+                        "pattern": "^[a-zA-Z0-9_-]+$"
+                      },
+                      "PolicyDocument": {
+                        "type": "string",
+                        "description": "IAM action-specific field; unsupported fields fail explicitly."
+                      }
+                    }
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "Action"
+                }
+              },
+              "examples": {
+                "CreateRole": {
+                  "summary": "CreateRole (IAM service header required)",
+                  "value": {
+                    "Action": "CreateRole",
+                    "Version": "2010-05-08",
+                    "RoleName": "practice-executor",
+                    "AssumeRolePolicyDocument": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"sts:AssumeRole\",\"Principal\":{\"Service\":\"lambda.amazonaws.com\"}}]}"
+                  }
+                },
+                "GetRole": {
+                  "summary": "GetRole (IAM service header required)",
+                  "value": {
+                    "Action": "GetRole",
+                    "Version": "2010-05-08",
+                    "RoleName": "practice-executor"
+                  }
+                },
+                "ListRoles": {
+                  "summary": "ListRoles (IAM service header required)",
+                  "value": {
+                    "Action": "ListRoles",
+                    "Version": "2010-05-08",
+                    "MaxItems": 100
+                  }
+                },
+                "DeleteRole": {
+                  "summary": "DeleteRole (IAM service header required)",
+                  "value": {
+                    "Action": "DeleteRole",
+                    "Version": "2010-05-08",
+                    "RoleName": "practice-executor"
+                  }
+                },
+                "PutRolePolicy": {
+                  "summary": "PutRolePolicy (IAM service header required)",
+                  "value": {
+                    "Action": "PutRolePolicy",
+                    "Version": "2010-05-08",
+                    "RoleName": "practice-executor",
+                    "PolicyName": "ReadObjects",
+                    "PolicyDocument": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"s3:GetObject\",\"Resource\":\"arn:aws:s3:::practice-bucket/*\"}]}"
+                  }
+                },
+                "GetRolePolicy": {
+                  "summary": "GetRolePolicy (IAM service header required)",
+                  "value": {
+                    "Action": "GetRolePolicy",
+                    "Version": "2010-05-08",
+                    "RoleName": "practice-executor",
+                    "PolicyName": "ReadObjects"
+                  }
+                },
+                "DeleteRolePolicy": {
+                  "summary": "DeleteRolePolicy (IAM service header required)",
+                  "value": {
+                    "Action": "DeleteRolePolicy",
+                    "Version": "2010-05-08",
+                    "RoleName": "practice-executor",
+                    "PolicyName": "ReadObjects"
+                  }
+                },
+                "ListRolePolicies": {
+                  "summary": "ListRolePolicies (IAM service header required)",
+                  "value": {
+                    "Action": "ListRolePolicies",
+                    "Version": "2010-05-08",
+                    "RoleName": "practice-executor",
+                    "MaxItems": 100
+                  }
+                },
+                "UpdateAssumeRolePolicy": {
+                  "summary": "UpdateAssumeRolePolicy (IAM service header required)",
+                  "value": {
+                    "Action": "UpdateAssumeRolePolicy",
+                    "Version": "2010-05-08",
+                    "RoleName": "practice-executor",
+                    "PolicyDocument": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"sts:AssumeRole\",\"Principal\":{\"Service\":\"lambda.amazonaws.com\"}}]}"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "IAM Query XML response. Policy documents are RFC3986 URL encoded; SDKs may decode them automatically."
+          },
+          "400": {
+            "description": "Validation/unsupported field/state conflict IAM ValidationError/MalformedPolicyDocument reject unknown trust or permissions semantics."
+          },
+          "403": {
+            "description": "Exercise IAM denied"
+          },
+          "501": {
+            "description": "Unsupported operation"
+          },
+          "404": {
+            "description": "IAM NoSuchEntity: role or inline policy does not exist."
+          },
+          "409": {
+            "description": "IAM EntityAlreadyExists, DeleteConflict (remove inline policies first), or LimitExceeded. No partial aggregate update."
+          },
+          "413": {
+            "description": "IAM Query body exceeds128KiB."
+          },
+          "500": {
+            "description": "ServiceFailure: local state operation failed; internal SQL details are not exposed."
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1705,5 +2378,23 @@
         }
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "S3 basic object storage"
+    },
+    {
+      "name": "Simulator control"
+    },
+    {
+      "name": "Simulator IAM state"
+    },
+    {
+      "name": "Lambda Python functions"
+    },
+    {
+      "name": "IAM roles",
+      "description": "Native global roles, service trust, inline permissions and explicit limits. Same SQLite state as the console and SDK."
+    }
+  ]
 }

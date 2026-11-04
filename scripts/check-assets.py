@@ -41,3 +41,11 @@ print('Cloudscape bundle, original notices and regional API description verified
 
 import runpy
 runpy.run_path('tools/python/check.py',run_name='__main__')
+
+kumo=json.loads(Path('third_party/kumo-iam.json').read_text())
+kumo_license=Path('third_party/KUMO-LICENSE.txt').read_bytes()
+assert hashlib.sha256(kumo_license).hexdigest()==kumo['licenseSha256']
+assert kumo_license==Path('internal/legal/assets/KUMO-LICENSE.txt').read_bytes()
+assert kumo['copyright'] in kumo_license.decode() and 'Permission is hereby granted' in kumo_license.decode()
+assert kumo['commit'] in Path('internal/aws/iam_roles.go').read_text()
+print('Adapted Kumo IAM model provenance and original MIT permission notice verified.')

@@ -41,6 +41,7 @@ type Gateway struct {
 	Parameters *ParameterStore
 	Stacks     *StackStore
 	Lambdas    *LambdaStore
+	Roles      *IAMRoleStore
 }
 type failure struct {
 	XMLName   xml.Name `xml:"Error"`

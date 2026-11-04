@@ -44,6 +44,9 @@ type LambdaStore struct {
 }
 
 func NewLambdaStore(db *sql.DB) (*LambdaStore, error) {
+	if _, err := NewIAMRoleStore(db); err != nil {
+		return nil, err
+	}
 	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS aws_lambda_functions(region TEXT NOT NULL,name TEXT NOT NULL,document TEXT NOT NULL,code_bytes INTEGER NOT NULL,PRIMARY KEY(region,name));`)
 	if err != nil {
 		return nil, err
@@ -178,12 +181,16 @@ func saveLambdaFunction(tx *sql.Tx, f *LambdaFunction, create bool, revision str
 		return ssmFailure{"TooManyRequestsException", "Simulator function count or total code quota exceeded."}
 	}
 	var role int
-	err = tx.QueryRow("SELECT count(*) FROM identity_policies WHERE name=?", strings.TrimPrefix(f.Role, "arn:aws:iam::000000000000:role/")).Scan(&role)
+	name := strings.TrimPrefix(f.Role, "arn:aws:iam::000000000000:role/")
+	err = tx.QueryRow("SELECT (SELECT count(*) FROM identity_policies WHERE name=?)+(SELECT count(*) FROM aws_iam_roles WHERE name=? AND deleted=0)", name, name).Scan(&role)
 	if err != nil {
 		return err
 	}
-	if role != 1 {
+	if role == 0 {
 		return ssmFailure{"InvalidParameterValueException", "Execution role must be an existing local identity."}
+	}
+	if err = iamExecutionRole(context.Background(), tx, f.Role); err != nil {
+		return err
 	}
 	// This concrete record contains only strings, integers, byte slices and
 	// string maps; it cannot contain an unsupported JSON value.
@@ -586,6 +593,10 @@ func (g *Gateway) serveLambda(w http.ResponseWriter, r *http.Request) {
 		}
 		f, e := g.Lambdas.get(region, name)
 		if e != nil {
+			lambdaError(w, e)
+			return
+		}
+		if e = iamExecutionRole(r.Context(), g.Lambdas.db, f.Role); e != nil {
 			lambdaError(w, e)
 			return
 		}

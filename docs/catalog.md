@@ -46,4 +46,4 @@ hello-worldだけを開発用ローカル接続で完走確認済み。TenkaClou
 | 採点 | TenkaCloud既存HostingServiceのsubmit-flag | ホストのprivate outputと比較。採点ledgerはホストDB | 他チームflagはwrong、100/95点、8同時提出1加点 |
 | 分離/終了 | 2チーム別Go process/SQLite/token authority、DeleteStack | 他チームtoken 401、participant DescribeStacks 403。driftでも所有権保持 | DELETEDまで確認 |
 
-実STS、AWS federation/CloudShell/managed-policy権限・trust-policy評価は実装しない。接続用のローカルルーティングを本物の一時AWS資格情報として提示しない。テンプレートに含まれるAWS console URLはローカルアクセス先の根拠にしない。
+実STS、AWS federation/CloudShell/managed-policy権限は実装しない。native IAMは限定service trustを評価するが、既存CFN roleのtrustは従来どおりmetadataのみ。[IAM](iam.md)。接続用のローカルルーティングを本物の一時AWS資格情報として提示しない。テンプレートに含まれるAWS console URLはローカルアクセス先の根拠にしない。

@@ -1,0 +1,56 @@
+- banner:
+  - link "TenkaCloud Simulator":
+    - /url: /_simulator/console/
+  - button "Services"
+  - button "Global"
+  - button "Choose identity": simulator-admin
+  - link "API reference":
+    - /url: /_simulator/docs/
+- main:
+  - navigation "Service navigation":
+    - button "Toggle service navigation"
+  - navigation "Breadcrumbs":
+    - list:
+      - listitem:
+        - link "Services":
+          - /url: "#/s3"
+      - listitem:
+        - link "IAM" [disabled]
+  - group: Independent local IAM simulation Native roles, service-principal trust and inline permissions share the SDK state. STS, AWS managed policies, Conditions, users and non-root paths are unavailable. Legacy local identities remain separate.
+  - heading "Create role" [level=1]
+  - navigation "Role creation steps":
+    - list:
+      - listitem:
+        - separator
+        - text: Step 1
+        - 'button "Step 1: Select trusted entity"': Select trusted entity
+      - listitem:
+        - separator
+        - text: Step 2
+        - 'button "Step 2: Add permissions"': Add permissions
+      - listitem:
+        - separator
+        - text: Step 3
+        - 'button "Step 3: Name, review, and create"': Name, review, and create
+  - heading "Name, review, and create" [level=1]
+  - heading "Role details" [level=2]
+  - text: Role name
+  - textbox "Role name": audit-native-role
+  - text: "Local subset: 1–64 letters, digits, hyphens or underscores; root path only. Description"
+  - textbox "Description"
+  - text: Maximum 1000 characters in the IAM description character range.
+  - heading "Trust policy" [level=2]
+  - text: Reviewed trust policy
+  - textbox "Reviewed trust policy": "{ \"Version\": \"2012-10-17\", \"Statement\": [ { \"Effect\": \"Allow\", \"Action\": \"sts:AssumeRole\", \"Principal\": { \"Service\": \"lambda.amazonaws.com\" } } ] }"
+  - button "Cancel"
+  - button "Previous"
+  - button "Create role"
+  - complementary "Help panel":
+    - button "Close help panel"
+    - heading "Simulator scope" [level=2]
+    - paragraph: Independent local simulator. Not affiliated with AWS. No real cloud resources are created.
+    - paragraph: S3 basic operations, Standard SSM text parameters, Python 3.12 Lambda functions and limited CloudFormation stacks using S3 buckets, SSM parameters, inline Python functions and IAM identity policies.
+    - paragraph: Cloud IAM sessions, managed policies, EC2, KMS and other cloud providers are not implemented.
+    - button "Manage identity policy"
+    - link "Console licenses":
+      - /url: /_simulator/licenses/CONSOLE-NOTICES.txt

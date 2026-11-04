@@ -31,9 +31,18 @@
   - textbox "Function name"
   - text: Runtime
   - button "Runtime Python 3.12" [disabled]: Python 3.12
-  - text: Execution role ARN Use an existing local IAM identity created by your host. Creating an AWS IAM role from this form is not implemented.
+  - heading "Permissions" [level=2]
+  - text: Execution role
+  - radiogroup "Execution role":
+    - radio "Use an existing role" [checked]
+    - text: Use an existing role
+  - text: Existing role Native IAM roles and legacy local execution identities. Listing native roles requires iam:ListRoles; a participant with PassRole may enter a supplied ARN directly.
+  - button "Existing role Choose an existing role": Choose an existing role
+  - text: Execution role ARN
   - textbox "Execution role ARN":
     - /placeholder: arn:aws:iam::000000000000:role/executor
+  - button "Refresh roles"
+  - button "Create role in IAM"
   - button "Cancel"
   - button "Create function"
   - complementary "Help panel":

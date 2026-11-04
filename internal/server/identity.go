@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"log/slog"
@@ -14,7 +15,11 @@ import (
 
 var principalName = regexp.MustCompile(`^[a-zA-Z0-9_-]{1,64}$`)
 
-func identityAPI(identities *core.Identities) http.Handler {
+type identityMutator interface {
+	MutateIdentityPolicy(context.Context, string, *core.Policy, bool) error
+}
+
+func identityAPI(identities *core.Identities, mutator identityMutator) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		fail := func(status int, message string) {
@@ -46,6 +51,7 @@ func identityAPI(identities *core.Identities) http.Handler {
 			fail(400, "Use /_simulator/v1/iam/principals/{name}/policy with a non-reserved 1–64 character name.")
 			return
 		}
+
 		switch r.Method {
 		case "GET":
 			p, exists, err := identities.Policy(name)
@@ -74,13 +80,11 @@ func identityAPI(identities *core.Identities) http.Handler {
 				fail(400, err.Error())
 				return
 			}
-			if condition == "*" {
-				err = identities.Create(name, p)
-			} else {
-				err = identities.Set(name, p)
-			}
+			err = mutator.MutateIdentityPolicy(r.Context(), name, &p, condition == "*")
 			if err != nil {
-				if core.Code(err) == "PreconditionFailed" {
+				if core.Code(err) == "Conflict" {
+					fail(409, err.Error())
+				} else if core.Code(err) == "PreconditionFailed" {
 					fail(412, err.Error())
 				} else if core.Code(err) == "ServiceUnavailable" {
 					fail(503, err.Error())
@@ -92,8 +96,13 @@ func identityAPI(identities *core.Identities) http.Handler {
 			}
 			_ = json.NewEncoder(w).Encode(p)
 		case "DELETE":
-			if err := identities.Delete(name); err != nil {
-				fail(500, "Could not delete identity policy.")
+			err := mutator.MutateIdentityPolicy(r.Context(), name, nil, false)
+			if err != nil {
+				if core.Code(err) == "Conflict" {
+					fail(409, err.Error())
+				} else {
+					fail(500, "Could not delete identity policy.")
+				}
 				return
 			}
 			w.WriteHeader(204)

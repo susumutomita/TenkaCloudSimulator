@@ -39,6 +39,9 @@ type StackRecord struct {
 }
 
 func NewStackStore(db *sql.DB) (*StackStore, error) {
+	if _, err := NewIAMRoleStore(db); err != nil {
+		return nil, err
+	}
 	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS aws_cfn_stacks(region TEXT NOT NULL,name TEXT NOT NULL,id TEXT NOT NULL UNIQUE,document TEXT NOT NULL,PRIMARY KEY(region,name)); CREATE TABLE IF NOT EXISTS aws_cfn_ownership(namespace TEXT NOT NULL,kind TEXT NOT NULL,physical_id TEXT NOT NULL,stack_id TEXT NOT NULL REFERENCES aws_cfn_stacks(id) ON DELETE RESTRICT,PRIMARY KEY(namespace,kind,physical_id));`)
 	return &StackStore{db}, err
 }
@@ -528,6 +531,13 @@ func (s *StackStore) Create(record StackRecord) error {
 		}
 		if r.Type == "AWS::IAM::Role" {
 			table, limit = "identity_policies", 1000
+			var reserved int
+			if err = tx.QueryRow("SELECT (SELECT count(*) FROM aws_iam_roles WHERE name=?)+(SELECT count(*) FROM identity_policies WHERE lower(name)=lower(?))", r.PhysicalID, r.PhysicalID).Scan(&reserved); err != nil {
+				return err
+			}
+			if reserved != 0 {
+				return ssmFailure{"AlreadyExistsException", "Role name belongs to a native or existing local identity."}
+			}
 		}
 		if err = tx.QueryRow("SELECT count(*) FROM " + table).Scan(&count); err != nil {
 			return err
