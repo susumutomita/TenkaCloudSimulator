@@ -222,6 +222,37 @@ class Conformance(unittest.TestCase):
     f=client('cloudformation',endpoint,token);c=client('lambda',endpoint,token)
     result=c.invoke(FunctionName='cfn-inline-app',Payload=b'null');self.assertNotIn('FunctionError',result);self.assertEqual(json.loads(result['Payload'].read()),{'answer':42,'value':'team-one','event':None})
     f.delete_stack(StackName='inline-practice');self.assertEqual(c.list_functions()['Functions'],[])
+ def test_iam_role_console_to_lambda_deploy_without_host_setup(self):
+  with running(authenticated=True) as (endpoint,token),running(authenticated=True) as (other,other_token),sync_playwright() as p:
+   browser=p.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE') or shutil.which('chromium'),args=['--no-sandbox']);page=browser.new_page(viewport={'width':1440,'height':1000});errors=[];outside=[]
+   page.on('pageerror',lambda e:errors.append(str(e)))
+   def route(r):
+    if r.request.url.startswith(endpoint+'/'):r.continue_()
+    else:outside.append(r.request.url);r.abort()
+   page.route('**/*',route)
+   page.goto(endpoint+'/_simulator/console/');page.get_by_label('Access token',exact=True).fill(token);page.get_by_role('button',name='Open sandbox',exact=True).click()
+   page.get_by_role('button',name='Services',exact=True).click();page.get_by_role('menuitem',name='Lambda',exact=True).click();page.get_by_role('button',name='Create function',exact=True).first.click();expect(page.get_by_text('No local execution roles exist.',exact=False)).to_be_visible()
+   page.get_by_role('button',name='Create role in IAM',exact=True).click();expect(page.get_by_role('heading',name='No roles yet',exact=True)).to_be_visible();page.get_by_role('button',name='Create role',exact=True).first.click()
+   page.get_by_label('Role name',exact=True).fill('console-executor');page.get_by_role('button',name='Create role',exact=True).last.click();expect(page.get_by_role('heading',name='console-executor',exact=True)).to_be_visible();expect(page.get_by_text('arn:aws:iam::000000000000:role/console-executor',exact=True)).to_be_visible()
+   expect(page.get_by_role('button',name='Global',exact=True)).to_be_visible();page.screenshot(path=str(REPORTS/'iam-role-desktop.png'),full_page=True);page.set_viewport_size({'width':390,'height':844});assert_reflow(page);page.screenshot(path=str(REPORTS/'iam-role-mobile.png'),full_page=True);page.set_viewport_size({'width':1440,'height':1000})
+   page.get_by_role('button',name='Roles',exact=True).click();page.get_by_role('link',name='console-executor',exact=True).click();expect(page.get_by_role('heading',name='console-executor',exact=True)).to_be_visible();page.get_by_role('button',name='Edit permissions',exact=True).click()
+   document=json.loads(page.get_by_label('Permissions policy JSON',exact=True).input_value());document['Statement'][0]['Sid']='Reviewed';page.get_by_label('Permissions policy JSON',exact=True).fill(json.dumps(document));page.get_by_role('button',name='Save changes',exact=True).click();expect(page.get_by_role('heading',name='console-executor',exact=True)).to_be_visible()
+   saved=page.request.get(endpoint+'/_simulator/v1/iam/principals/console-executor/policy',headers={'X-Simulator-Token':token});self.assertEqual(saved.json()['Statement'][0]['Sid'],'Reviewed')
+   page.get_by_role('button',name='Roles',exact=True).click();pending=[];pattern='**/_simulator/v1/iam/principals/console-executor/policy';page.route(pattern,lambda r:pending.append(r) if r.request.method=='GET' else r.continue_());page.get_by_role('link',name='console-executor',exact=True).click();page.get_by_role('button',name='Create role',exact=True).first.click()
+   with page.expect_response(lambda r:r.url.endswith('/console-executor/policy')) as response:pending[0].continue_()
+   self.assertEqual(response.value.json()['Statement'][0]['Sid'],'Reviewed');page.evaluate('()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))');self.assertNotIn('Reviewed',page.get_by_label('Permissions policy JSON',exact=True).input_value());page.unroute(pattern)
+   page.get_by_label('Role name',exact=True).fill('console-executor');page.get_by_role('button',name='Create role',exact=True).last.click();expect(page.get_by_text('412: An identity with this name already exists.',exact=True)).to_be_visible();page.get_by_role('button',name='Cancel',exact=True).click();page.get_by_role('link',name='console-executor',exact=True).click();expect(page.get_by_label('Permissions policy JSON',exact=True)).to_have_value(re.compile('Reviewed'))
+   page.get_by_role('button',name='Create a Lambda function',exact=True).click();page.get_by_role('button',name='Create function',exact=True).first.click();page.get_by_label('Function name',exact=True).fill('console-iam-function');page.get_by_label('Existing role',exact=True).click();page.get_by_role('option',name='console-executor',exact=True).click();self.assertEqual(page.get_by_label('Execution role ARN',exact=True).input_value(),'arn:aws:iam::000000000000:role/console-executor');page.get_by_role('button',name='Create function',exact=True).last.click();expect(page.get_by_role('heading',name='console-iam-function',exact=True)).to_be_visible();page.get_by_role('button',name='Test',exact=True).click();expect(page.get_by_text('Execution succeeded',exact=True)).to_be_visible(timeout=20000)
+   page.get_by_role('tab',name='Code',exact=True).click()
+   data=io.BytesIO()
+   with zipfile.ZipFile(data,'w') as z:z.writestr('lambda_function.py','def lambda_handler(event, context): return {"deployed": event["value"] * 6}')
+   page.get_by_label('Function ZIP',exact=True).set_input_files({'name':'function.zip','mimeType':'application/zip','buffer':data.getvalue()});page.get_by_role('button',name='Deploy',exact=True).click();expect(page.get_by_text('Function code deployed.',exact=True)).to_be_visible();page.get_by_role('tab',name='Test',exact=True).click();page.get_by_role('button',name='Test',exact=True).click();expect(page.get_by_text('Execution succeeded',exact=True)).to_be_visible(timeout=20000);self.assertEqual(json.loads(page.get_by_label('Response',exact=True).input_value()),{'deployed':42});page.screenshot(path=str(REPORTS/'iam-lambda-deployed.png'),full_page=True)
+   remote=urllib.request.Request(other+'/_simulator/v1/iam/principals',headers={'X-Simulator-Token':other_token})
+   with urllib.request.urlopen(remote) as r:self.assertEqual(json.load(r)['principals'],['simulator-admin'])
+   access=page.request.post(endpoint+'/_simulator/v1/access',data={'Principal':'console-executor'},headers={'X-Simulator-Token':token});self.assertEqual(access.status,200);participant=access.json()['AccessToken']
+   self.assertEqual(page.request.get(endpoint+'/_simulator/v1/iam/principals',headers={'X-Simulator-Token':participant}).status,403)
+   self.assertEqual(page.request.put(endpoint+'/_simulator/v1/iam/principals/unauthorized/policy',data={'Version':'2012-10-17','Statement':[{'Effect':'Allow','Action':'*','Resource':'*'}]},headers={'X-Simulator-Token':participant}).status,403)
+   self.assertEqual(errors,[]);self.assertEqual(outside,[]);browser.close()
  def test_console_and_api_share_state_offline(self):
   with running() as endpoint,sync_playwright() as p:
    executable=os.environ.get('CHROMIUM_EXECUTABLE') or shutil.which('chromium')

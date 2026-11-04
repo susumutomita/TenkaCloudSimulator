@@ -59,6 +59,11 @@ func identityAPI(identities *core.Identities) http.Handler {
 			}
 			_ = json.NewEncoder(w).Encode(p)
 		case "PUT":
+			condition := r.Header.Get("If-None-Match")
+			if condition != "" && condition != "*" {
+				fail(400, "Only If-None-Match: * is supported for identity creation.")
+				return
+			}
 			data, err := io.ReadAll(http.MaxBytesReader(w, r.Body, 32<<10))
 			if err != nil {
 				fail(413, "Policies are limited to 32 KiB.")
@@ -69,8 +74,15 @@ func identityAPI(identities *core.Identities) http.Handler {
 				fail(400, err.Error())
 				return
 			}
-			if err = identities.Set(name, p); err != nil {
-				if core.Code(err) == "ServiceUnavailable" {
+			if condition == "*" {
+				err = identities.Create(name, p)
+			} else {
+				err = identities.Set(name, p)
+			}
+			if err != nil {
+				if core.Code(err) == "PreconditionFailed" {
+					fail(412, err.Error())
+				} else if core.Code(err) == "ServiceUnavailable" {
 					fail(503, err.Error())
 				} else {
 					slog.Error("simulator identity write failed", "error", err)
