@@ -42,7 +42,7 @@ S3のCloudFormationはBucketName/Versioning/PublicAccessBlock/ユーザーTags�
 
 SQSはnative JSON 1.0 APIのみ対応します。保持中・期限切れ未回収を含む物理message rowはプロセス全体10000件、UTF-8 bodyとserialized attribute JSONの合計64 MiBまでです。これはSQLiteファイル全体・プロセスメモリ・AWS課金サイズの上限ではありません。Azure/GCP/Sakura等の他クラウドは現在のGo実装では未対応です。Issueや計画は実装完了を意味しません。[開発状況](docs/development-status.md)を参照してください。Cloudscapeを使用していますが、本物のAWSコンソールとの全画面・全挙動の一致や実AWSとの差分検証完了は主張していません。
 
-Secrets Managerは[既存のローカル候補](docs/secrets-manager.md)を保存済みソースから引き継いで検証中です。CLIサーバー・コンソール導線・API資料・形式registryへの接続ソースを準備中ですが、最新統合のビルド・実SDK・画面・全体CI検証は未実施のため、利用可能なサービス一覧には含めません。SecretStringの練習用値はSQLite内の平文であり、実AWSのKMS暗号化を再現していません。
+Secrets Managerは[既存のローカル候補](docs/secrets-manager.md)を保存済みソースから引き継いで検証中です。CLIサーバー・コンソール導線・API資料・形式registryへの接続ソースを準備中ですが、限定ネイティブ/race/vet・実2プロセスSDKは確認済みですが画面・全体CI検証は未実施のため、利用可能なサービス一覧には含めません。SecretStringの練習用値はSQLite内の平文であり、実AWSのKMS暗号化を再現していません。
 
 ## IAMロールからLambdaを作る
 

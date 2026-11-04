@@ -14,41 +14,40 @@ Five real SQLite ignored-write cases reproduced false acknowledgements on the
 prior source; exact affected-row checks now reject them, roll back every private
 table and permit a clean retry after the fault is removed.
 
-A subsequent source-only change rejects duplicate protocol/authority selector
-headers before first-value selection at either gateway or direct native adapter.
-New tests prepare signed-service/missing-target isolation, conflicting selectors,
-missing identity, canceled/real unavailable identity DB, full-state preservation
-and recovery; they have not run. The new canonical server fixture checks S3
-literal neighbors alongside native Secrets. The two-process SDK fixture now
-requires exact allocated-loopback origins and nonzero balanced transport events,
-checks missing/cross-token authentication and IAM revoke/restore. It too has not
-run on this combined source; the native sixteen-test result above is historical
-to `9a6629e`, not validation of these new header guards.
+At source checkpoint `b7940c40e77384e19749d3333e040c62d877b620`,
+nineteen selected `TestSecret` cases passed normally and under race across
+`internal/aws` and `internal/server`; both packages passed vet. These include
+duplicate protocol/authority selector rejection, signed-service/missing-target
+isolation, conflicting selectors, missing identity, canceled/real unavailable
+identity DB, full-state preservation, recovery, native server initialization and
+simultaneous literal S3 neighbors. The source did not need a further runtime fix
+in this focused validation window.
 
-The next local source checkpoint adds normal CLI server store initialization,
-seven-operation capabilities, a Secrets Manager navigation entry, shared-root
-OpenAPI examples, three mandatory E2E helper registrations, and the three finite
-models. **Those new composition changes have not been built or executed yet.**
-The embedded console bundle still contains current main's UI until a canonical
-build is granted; changing a JSX import alone does not enable the served screen.
-No new CLI/SDK/browser, full-suite coverage, thirteen-model TLC or hosted CI pass
-is claimed. Existing main logout, Scalar/S3 guidance, SQS and raw-path source are
-preserved. The normal access middleware continues to require the host's local
-credential; native dummy SigV4 fields are not authentication.
-Exact prior shared deltas and all three merge blobs were archived outside the
-repository for review; generated bundles must be regenerated from the final
-combined source instead of restoring an old bundle over current main. The old
-worktree and commit remain intact. No new SDK/dependency installation, real AWS
-operation, release, merge or issue comment is part of this phase.
+An offline CGO-disabled CLI build passed. This executor could not stamp VCS
+metadata, so the diagnostic build explicitly used `-buildvcs=false`; this does
+not substitute for a canonical release or CI build. The resulting binary passed
+the strengthened official boto3 helper with two actual CLI processes, independent
+SQLite files and host tokens: all seven operations, distinct same-name values,
+IAM revoke/restore, missing/cross-token 401, value-free metadata, restart
+persistence, old physical-ARN isolation and cleanup. Every observed SDK send was
+restricted before transport to its exact allocated loopback origin/root; the
+helper required nonzero balanced send/response counts and no redirects.
 
-The saved handoff reports earlier selected native tests, actual two-team
-CLI/boto3/browser checks and eight registered baselines with nineteen intended
-counterexamples at the prior candidate. Those are **historical reports**, not
-current-HEAD test or CI results. This integration phase ran all sixteen
-`TestSecret` native tests normally (1.527s) and under race (10.907s), and
-`go vet ./internal/aws` passed. It has not run CLI/SDK/browser, full repository
-coverage or TLC checks. The selected native tests do not establish server
-integration or a whole-repository coverage pass.
+Normal server initialization, seven-operation capabilities, navigation source,
+shared-root OpenAPI examples, three mandatory E2E helper registrations and three
+finite models are connected in source. **The embedded console bundle still
+contains main's UI until a canonical frontend build is granted.** Changing JSX
+alone does not enable its served screen. The new browser and served OpenAPI
+example helpers, complete repository coverage, thirteen-model/fifty-control TLC,
+full E2E and hosted CI are not run. Existing logout, Scalar/S3 guidance, SQS and
+raw-path source are preserved. The normal host access middleware continues to
+require a local credential; native dummy SigV4 fields are not authentication.
+
+Exact prior shared deltas and all three merge blobs remain archived outside the
+repository for review; final assets must be regenerated, not replaced with an old
+bundle. The old worktree remains intact. No new SDK/dependency installation,
+real AWS, release, merge or publication occurred. Earlier `96259aa` browser and
+model results are historical reports, not current-HEAD gate results.
 
 Five real SQLite `RAISE(IGNORE)` controls failed on the preserved source:
 initial current-label insert, previous-label insert, new current-label insert,

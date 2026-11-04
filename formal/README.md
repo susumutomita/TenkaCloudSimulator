@@ -138,6 +138,7 @@ This is a source inventory, not a fresh execution result.
 
 The native `TestSecretIgnoredWritesFailClosedAndRollback` checks five real SQLite
 ignored writes and full private-table rollback separately; the finite lifecycle
-model is not evidence of that failure atomicity. Current integration build,
-actual CLI/SDK/browser and the complete registered TLC gate remain pending.
+model is not evidence of that failure atomicity. Focused native/race/vet and actual two-process CLI/SDK checks passed at
+`b7940c4`; current browser/full-suite coverage and the complete registered TLC
+gate remain pending.
 See [Secrets Manager scope and primary API references](../docs/secrets-manager.md).
