@@ -95,7 +95,7 @@ admissions; failures independently preserve the complete prior physical state.
 
 The combined inventory is nine baselines and thirty-one mandatory mutants.
 All original, SSM and Startup required properties remain protected. Model/source
-integration is unexecuted on this new head. These finite abstractions do not
+integration must pass the immutable-head gate separately for each new head. These finite abstractions do not
 prove Go/SQLite refinement, actual byte/JSON/Unicode arithmetic, filesystem size,
 concurrency scheduling, persistence/crashes, distributed delivery or liveness.
 See [SQS limits and concrete test boundaries](../docs/sqs.md).
