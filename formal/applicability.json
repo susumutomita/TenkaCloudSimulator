@@ -90,6 +90,13 @@
       "models": []
     },
     {
+      "path": "internal/aws/dynamodb_recovery_contracts_416_test.go",
+      "sha256": "6ee4937ae373a5c50f1741a9d022099caebbdeca57f75c3e7414ecce849f40e9",
+      "disposition": "test-support",
+      "reason": "Issue416 test-only native DynamoDB/real SQLite storage failure and repaired-retry contracts. Verify refusal retains complete stored frames and peer scope, followed by actual native recovery after repair. No production, threshold, exclusion, profile-union or model changes. These SQL/storage fault states are not claimed as TLA-modeled. Standalone focused normal/race results and diagnostic newly covered lines do not establish a whole-module90% result; one fresh full profile and hosted gates remain required.",
+      "models": []
+    },
+    {
       "path": "internal/server/web/app.js",
       "sha256": "f91929745a123f07fc0e39935df95e16fd24673a467d907d02be2a95f6994cb1",
       "disposition": "modeled",
