@@ -3,7 +3,9 @@
 Sakura is **disabled by default**. This optional provider implements five local
 IaaS API 1.1 Disk configuration operations. It does not allocate storage, create
 VMs, attach disks, boot an OS, provide SSH/block I/O, or report physical
-`Availability`. There is no Sakura console or Scalar operation inventory yet.
+`Availability`. The local Scalar reference documents only these five Disk
+operations. Console availability is a separate capability; this reference makes
+no claim of real Sakura console workflow or fidelity.
 Object Storage management and its separate S3-compatible API, Server, networking
 and AppRun are unsupported; AWS CreateBucket is not Sakura Object Storage.
 
@@ -79,6 +81,43 @@ is created. Neutral empty Tags/Icon/KMS/placement markers do not implement those
 features; see the exact [community SDK no-icon subset](sakura-sdk-compatibility.md).
 Nonempty tags, real icons/KMS, disk copies, archives, resize and attachment remain
 unsupported.
+
+These are deliberate local deviations from the broader public API. The primary
+Disk reference includes other plans, optional source/copy and server-related
+fields, Availability, and an update example containing Description null. This
+local slice requires Plan4/SizeMB20480 for empty metadata creation, rejects null
+descriptions, and omits physical/readiness fields. No live-cloud differential
+comparison is implied by using the same endpoint names.
+
+## API reference examples
+
+The **Sakura Cloud → Sakura Disk configuration** group exposes exactly five
+native operations on the collection and ID paths. The OpenAPI 3.1 schemas contain
+configuration metadata and local error envelopes; they do not advertise VM or
+storage readiness. The group also explains default-disabled availability.
+
+Sign into the local reference first, or supply the host-issued
+`X-Simulator-Token`. For its Basic Auth fields use only public username
+`TCSIMSAKURA` and password `dummy-local-only`. This Basic marker is not host
+authentication, owner authorization, real Sakura IAM or a place for cloud keys.
+An operator must select the configured exercise identity; a participant stays
+bound to its own identity. Examples containing `is1a` or Disk ID`1` are static:
+use the configured zone and the IDs returned by actual Create/List requests.
+
+The standard OpenAPI query builder cannot encode the unnamed JSON query syntax.
+List without a query works; for paging, manually append the once-encoded JSON
+suffix shown above. The reference deliberately does not invent `?From=…&Count=…`
+parameters. GET/DELETE require no body and do not accept extra query fields.
+The structural schemas cannot express every lexical JSON/UTF8/duplicate-member
+rule enforced by the native parser; their descriptions retain those limits.
+Host401 JSON, participant-selection403 text, and disabled-provider404 text differ
+from the enabled leaf's local JSON error envelope. Those distinctions are kept
+rather than presenting an AWS/S3 fallback or a fabricated common error.
+
+Reference schemas/examples have static regression checks. Served Scalar Send,
+actual SDK effects, private host token/session behavior and full runtime gates
+remain separate acceptance evidence; selecting a static example is not a request
+and does not demonstrate a saved resource.
 
 ## Verification scope
 

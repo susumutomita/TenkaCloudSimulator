@@ -11124,6 +11124,1381 @@
           }
         }
       }
+    },
+    "/_simulator/providers/sakura/cloud/zone/{zone}/api/cloud/1.1/disk": {
+      "parameters": [
+        {
+          "name": "zone",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]{0,31}$",
+            "default": "is1a"
+          },
+          "description": "Exact zone fixed by host startup; is1a is only a static tutorial example. This parameter cannot switch the configured zone; wrong literal zone404, encoded syntax400."
+        }
+      ],
+      "get": {
+        "operationId": "SakuraListDisks",
+        "summary": "List Disk configurations",
+        "tags": [
+          "Sakura Disk configuration"
+        ],
+        "description": "**Static examples are documentation, not current saved state.** This is opt-in local Disk configuration metadata only. The provider is disabled by default; authenticated requests then receive plain-text404 Provider not implemented. The host must enable --enable-sakura-disks with all four fixed scope flags, establish its opaque token/session, and attach a typed Actor bound to the configured exercise owner. The fixed public dummy Basic marker is required AFTER owner authorization and grants nothing. Never use real Sakura keys. No implicit owner/operator bypass, real Sakura IAM, VM, boot/block storage, Availability, billing, server attachment, copies/resize, Object Storage or AppRun. Create/Read/Update/Delete/List share actual SQLite state; no simulator success for unsupported options. Mutating bodies are strict UTF-8 JSON at most64KiB; duplicate/case-ambiguous keys and unsupported fields are refused. Integer lexical forms and Unicode/encoding rules are stricter than structural JSON Schema. Error envelopes differ for host authentication and disabled provider. No authenticated real-console or live cloud differential equivalence is claimed. The no-query default works with Test Request→Send. Optional paging uses an UNNAMED raw/once-encoded JSON query object, not From/Count form parameters: append ?%7B%22From%22%3A0%2C%22Count%22%3A1%7D manually. The standard OpenAPI query builder cannot represent that syntax. Count omitted/0 means remaining rows up to100; query bound8KiB. No Filter/Sort parameters.",
+        "security": [
+          {
+            "SakuraDummyProtocolMarker": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SimulatorToken"
+          },
+          {
+            "$ref": "#/components/parameters/SakuraExerciseIdentity"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Live local response. Shown values are static examples; returned IDs and timestamps come from the actual operation.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
+                },
+                "description": "Leaf response is not cacheable."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SakuraListDisksResult"
+                },
+                "examples": {
+                  "StaticResult": {
+                    "summary": "Static successful shape, never a claim of existing resources",
+                    "value": {
+                      "From": 0,
+                      "Count": 1,
+                      "Total": 1,
+                      "Disks": [
+                        {
+                          "ID": "1",
+                          "Name": "practice-disk",
+                          "Description": "dummy local configuration",
+                          "SizeMB": 20480,
+                          "Plan": {
+                            "ID": 4
+                          },
+                          "Connection": "virtio",
+                          "CreatedAt": "2026-11-05T00:00:00Z",
+                          "ModifiedAt": "2026-11-05T00:00:00Z"
+                        }
+                      ],
+                      "is_ok": true
+                    }
+                  },
+                  "Empty": {
+                    "value": {
+                      "From": 0,
+                      "Count": 0,
+                      "Total": 0,
+                      "Disks": [],
+                      "is_ok": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Local bounded refusal; no silent success. Native status/error code is preserved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SakuraDiskError"
+                },
+                "examples": {
+                  "LocalLeafError": {
+                    "summary": "Static leaf refusal, not saved state",
+                    "value": {
+                      "is_ok": false,
+                      "is_fatal": true,
+                      "serial": "local-0000000000000001",
+                      "status": "400 Bad Request",
+                      "error_code": "bad_request",
+                      "error_msg": "Invalid or ambiguous JSON request"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Host token/session missing/invalid: outer host JSON401. With valid owner Actor, absent/wrong dummy marker: leaf JSON401. The Basic marker alone never grants access.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/SakuraDiskError"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SakuraHostAccessError"
+                    }
+                  ]
+                },
+                "examples": {
+                  "LocalLeafError": {
+                    "summary": "Static leaf refusal, not saved state",
+                    "value": {
+                      "is_ok": false,
+                      "is_fatal": true,
+                      "serial": "local-0000000000000001",
+                      "status": "401 Unauthorized",
+                      "error_code": "unauthorized",
+                      "error_msg": "The fixed local dummy Basic marker is required"
+                    }
+                  },
+                  "MissingHostCredential": {
+                    "value": {
+                      "error": "A valid simulator access token is required"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Valid host credential but wrong configured owner: leaf JSON403. Participant attempts to select another exercise identity are refused by the host as plain-text403.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SakuraDiskError"
+                },
+                "examples": {
+                  "LocalLeafError": {
+                    "summary": "Static leaf refusal, not saved state",
+                    "value": {
+                      "is_ok": false,
+                      "is_fatal": true,
+                      "serial": "local-0000000000000001",
+                      "status": "403 Forbidden",
+                      "error_code": "forbidden",
+                      "error_msg": "Local disk owner authority required"
+                    }
+                  }
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Cannot select another identity with this access token\n"
+              }
+            }
+          },
+          "404": {
+            "description": "Default disabled/unregistered provider: plain-text404 Provider not implemented. Enabled provider with missing Disk or wrong literal zone: leaf JSON404. No AWS/S3 fallback.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SakuraDiskError"
+                },
+                "examples": {
+                  "LocalLeafError": {
+                    "summary": "Static leaf refusal, not saved state",
+                    "value": {
+                      "is_ok": false,
+                      "is_fatal": true,
+                      "serial": "local-0000000000000001",
+                      "status": "404 Not Found",
+                      "error_code": "not_found",
+                      "error_msg": "Disk not found"
+                    }
+                  }
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Provider not implemented\n"
+              }
+            }
+          },
+          "413": {
+            "description": "Local bounded refusal; no silent success. Native status/error code is preserved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SakuraDiskError"
+                },
+                "examples": {
+                  "LocalLeafError": {
+                    "summary": "Static leaf refusal, not saved state",
+                    "value": {
+                      "is_ok": false,
+                      "is_fatal": true,
+                      "serial": "local-0000000000000001",
+                      "status": "413 Request Entity Too Large",
+                      "error_code": "simulator_request_limit",
+                      "error_msg": "Request exceeds the local bound"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Local bounded refusal; no silent success. Native status/error code is preserved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SakuraDiskError"
+                },
+                "examples": {
+                  "LocalLeafError": {
+                    "summary": "Static leaf refusal, not saved state",
+                    "value": {
+                      "is_ok": false,
+                      "is_fatal": true,
+                      "serial": "local-0000000000000001",
+                      "status": "500 Internal Server Error",
+                      "error_code": "simulator_internal",
+                      "error_msg": "Local disk state unavailable"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Local bounded refusal; no silent success. Native status/error code is preserved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SakuraDiskError"
+                },
+                "examples": {
+                  "LocalLeafError": {
+                    "summary": "Static leaf refusal, not saved state",
+                    "value": {
+                      "is_ok": false,
+                      "is_fatal": true,
+                      "serial": "local-0000000000000001",
+                      "status": "501 Not Implemented",
+                      "error_code": "simulator_unsupported",
+                      "error_msg": "Requested option is not implemented"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-sakura-raw-json-query": {
+          "schema": {
+            "$ref": "#/components/schemas/SakuraDiskListWindow"
+          },
+          "example": {
+            "From": 0,
+            "Count": 1
+          },
+          "encodedSuffix": "?%7B%22From%22%3A0%2C%22Count%22%3A1%7D",
+          "standardQueryBuilderSupported": false
+        }
+      },
+      "post": {
+        "operationId": "SakuraCreateDisk",
+        "summary": "Create one Disk configuration",
+        "tags": [
+          "Sakura Disk configuration"
+        ],
+        "description": "**Static examples are documentation, not current saved state.** This is opt-in local Disk configuration metadata only. The provider is disabled by default; authenticated requests then receive plain-text404 Provider not implemented. The host must enable --enable-sakura-disks with all four fixed scope flags, establish its opaque token/session, and attach a typed Actor bound to the configured exercise owner. The fixed public dummy Basic marker is required AFTER owner authorization and grants nothing. Never use real Sakura keys. No implicit owner/operator bypass, real Sakura IAM, VM, boot/block storage, Availability, billing, server attachment, copies/resize, Object Storage or AppRun. Create/Read/Update/Delete/List share actual SQLite state; no simulator success for unsupported options. Mutating bodies are strict UTF-8 JSON at most64KiB; duplicate/case-ambiguous keys and unsupported fields are refused. Integer lexical forms and Unicode/encoding rules are stricter than structural JSON Schema. Error envelopes differ for host authentication and disabled provider. No authenticated real-console or live cloud differential equivalence is claimed.",
+        "security": [
+          {
+            "SakuraDummyProtocolMarker": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SimulatorToken"
+          },
+          {
+            "$ref": "#/components/parameters/SakuraExerciseIdentity"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Live local response. Shown values are static examples; returned IDs and timestamps come from the actual operation.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
+                },
+                "description": "Leaf response is not cacheable."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SakuraCreateDiskResult"
+                },
+                "examples": {
+                  "StaticResult": {
+                    "summary": "Static successful shape, never a claim of existing resources",
+                    "value": {
+                      "Disk": {
+                        "ID": "1",
+                        "Name": "practice-disk",
+                        "Description": "dummy local configuration",
+                        "SizeMB": 20480,
+                        "Plan": {
+                          "ID": 4
+                        },
+                        "Connection": "virtio",
+                        "CreatedAt": "2026-11-05T00:00:00Z",
+                        "ModifiedAt": "2026-11-05T00:00:00Z"
+                      },
+                      "Success": "Created",
+                      "is_ok": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Local bounded refusal; no silent success. Native status/error code is preserved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SakuraDiskError"
+                },
+                "examples": {
+                  "LocalLeafError": {
+                    "summary": "Static leaf refusal, not saved state",
+                    "value": {
+                      "is_ok": false,
+                      "is_fatal": true,
+                      "serial": "local-0000000000000001",
+                      "status": "400 Bad Request",
+                      "error_code": "bad_request",
+                      "error_msg": "Invalid or ambiguous JSON request"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Host token/session missing/invalid: outer host JSON401. With valid owner Actor, absent/wrong dummy marker: leaf JSON401. The Basic marker alone never grants access.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/SakuraDiskError"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SakuraHostAccessError"
+                    }
+                  ]
+                },
+                "examples": {
+                  "LocalLeafError": {
+                    "summary": "Static leaf refusal, not saved state",
+                    "value": {
+                      "is_ok": false,
+                      "is_fatal": true,
+                      "serial": "local-0000000000000001",
+                      "status": "401 Unauthorized",
+                      "error_code": "unauthorized",
+                      "error_msg": "The fixed local dummy Basic marker is required"
+                    }
+                  },
+                  "MissingHostCredential": {
+                    "value": {
+                      "error": "A valid simulator access token is required"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Valid host credential but wrong configured owner: leaf JSON403. Participant attempts to select another exercise identity are refused by the host as plain-text403.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SakuraDiskError"
+                },
+                "examples": {
+                  "LocalLeafError": {
+                    "summary": "Static leaf refusal, not saved state",
+                    "value": {
+                      "is_ok": false,
+                      "is_fatal": true,
+                      "serial": "local-0000000000000001",
+                      "status": "403 Forbidden",
+                      "error_code": "forbidden",
+                      "error_msg": "Local disk owner authority required"
+                    }
+                  }
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Cannot select another identity with this access token\n"
+              }
+            }
+          },
+          "404": {
+            "description": "Default disabled/unregistered provider: plain-text404 Provider not implemented. Enabled provider with missing Disk or wrong literal zone: leaf JSON404. No AWS/S3 fallback.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SakuraDiskError"
+                },
+                "examples": {
+                  "LocalLeafError": {
+                    "summary": "Static leaf refusal, not saved state",
+                    "value": {
+                      "is_ok": false,
+                      "is_fatal": true,
+                      "serial": "local-0000000000000001",
+                      "status": "404 Not Found",
+                      "error_code": "not_found",
+                      "error_msg": "Disk not found"
+                    }
+                  }
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Provider not implemented\n"
+              }
+            }
+          },
+          "406": {
+            "description": "Local bounded refusal; no silent success. Native status/error code is preserved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SakuraDiskError"
+                },
+                "examples": {
+                  "LocalLeafError": {
+                    "summary": "Static leaf refusal, not saved state",
+                    "value": {
+                      "is_ok": false,
+                      "is_fatal": true,
+                      "serial": "local-0000000000000001",
+                      "status": "406 Not Acceptable",
+                      "error_code": "simulator_quota",
+                      "error_msg": "Local disk metadata limit reached"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Local bounded refusal; no silent success. Native status/error code is preserved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SakuraDiskError"
+                },
+                "examples": {
+                  "LocalLeafError": {
+                    "summary": "Static leaf refusal, not saved state",
+                    "value": {
+                      "is_ok": false,
+                      "is_fatal": true,
+                      "serial": "local-0000000000000001",
+                      "status": "413 Request Entity Too Large",
+                      "error_code": "simulator_request_limit",
+                      "error_msg": "Request exceeds the local bound"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Local bounded refusal; no silent success. Native status/error code is preserved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SakuraDiskError"
+                },
+                "examples": {
+                  "LocalLeafError": {
+                    "summary": "Static leaf refusal, not saved state",
+                    "value": {
+                      "is_ok": false,
+                      "is_fatal": true,
+                      "serial": "local-0000000000000001",
+                      "status": "415 Unsupported Media Type",
+                      "error_code": "unsupported_media_type",
+                      "error_msg": "application/json is required"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Local bounded refusal; no silent success. Native status/error code is preserved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SakuraDiskError"
+                },
+                "examples": {
+                  "LocalLeafError": {
+                    "summary": "Static leaf refusal, not saved state",
+                    "value": {
+                      "is_ok": false,
+                      "is_fatal": true,
+                      "serial": "local-0000000000000001",
+                      "status": "500 Internal Server Error",
+                      "error_code": "simulator_internal",
+                      "error_msg": "Local disk state unavailable"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Local bounded refusal; no silent success. Native status/error code is preserved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SakuraDiskError"
+                },
+                "examples": {
+                  "LocalLeafError": {
+                    "summary": "Static leaf refusal, not saved state",
+                    "value": {
+                      "is_ok": false,
+                      "is_fatal": true,
+                      "serial": "local-0000000000000001",
+                      "status": "501 Not Implemented",
+                      "error_code": "simulator_unsupported",
+                      "error_msg": "Requested option is not implemented"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SakuraCreateDiskRequest"
+              },
+              "examples": {
+                "StaticConfiguration": {
+                  "summary": "Dummy static body; send only to your own enabled local provider",
+                  "value": {
+                    "Disk": {
+                      "Name": "practice-disk",
+                      "Description": "dummy local configuration",
+                      "Plan": {
+                        "ID": 4
+                      },
+                      "SizeMB": 20480
+                    }
+                  }
+                },
+                "CommunitySDKNeutralDefaults": {
+                  "value": {
+                    "Disk": {
+                      "Name": "practice-disk",
+                      "Description": "dummy local configuration",
+                      "Plan": {
+                        "ID": 4
+                      },
+                      "SizeMB": 20480,
+                      "Tags": [],
+                      "Icon": {
+                        "ID": 0,
+                        "Tags": []
+                      }
+                    },
+                    "KMSKey": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/_simulator/providers/sakura/cloud/zone/{zone}/api/cloud/1.1/disk/{diskId}": {
+      "parameters": [
+        {
+          "name": "zone",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]{0,31}$",
+            "default": "is1a"
+          },
+          "description": "Exact zone fixed by host startup; is1a is only a static tutorial example. This parameter cannot switch the configured zone; wrong literal zone404, encoded syntax400."
+        },
+        {
+          "name": "diskId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]{0,18}$",
+            "maxLength": 19,
+            "description": "Canonical positive decimal int64, at most9223372036854775807. No leading zero, sign, fraction, exponent, or encoded path spelling; the native handler enforces overflow beyond this string shape."
+          },
+          "description": "Replace static example1 with the ID returned by actual Create/List. Missing ID404; IDs never reused after deletion/restart."
+        }
+      ],
+      "get": {
+        "operationId": "SakuraGetDisk",
+        "summary": "Read saved Disk metadata",
+        "tags": [
+          "Sakura Disk configuration"
+        ],
+        "description": "**Static examples are documentation, not current saved state.** This is opt-in local Disk configuration metadata only. The provider is disabled by default; authenticated requests then receive plain-text404 Provider not implemented. The host must enable --enable-sakura-disks with all four fixed scope flags, establish its opaque token/session, and attach a typed Actor bound to the configured exercise owner. The fixed public dummy Basic marker is required AFTER owner authorization and grants nothing. Never use real Sakura keys. No implicit owner/operator bypass, real Sakura IAM, VM, boot/block storage, Availability, billing, server attachment, copies/resize, Object Storage or AppRun. Create/Read/Update/Delete/List share actual SQLite state; no simulator success for unsupported options. Mutating bodies are strict UTF-8 JSON at most64KiB; duplicate/case-ambiguous keys and unsupported fields are refused. Integer lexical forms and Unicode/encoding rules are stricter than structural JSON Schema. Error envelopes differ for host authentication and disabled provider. No authenticated real-console or live cloud differential equivalence is claimed.",
+        "security": [
+          {
+            "SakuraDummyProtocolMarker": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SimulatorToken"
+          },
+          {
+            "$ref": "#/components/parameters/SakuraExerciseIdentity"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Live local response. Shown values are static examples; returned IDs and timestamps come from the actual operation.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
+                },
+                "description": "Leaf response is not cacheable."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SakuraGetDiskResult"
+                },
+                "examples": {
+                  "StaticResult": {
+                    "summary": "Static successful shape, never a claim of existing resources",
+                    "value": {
+                      "Disk": {
+                        "ID": "1",
+                        "Name": "practice-disk",
+                        "Description": "dummy local configuration",
+                        "SizeMB": 20480,
+                        "Plan": {
+                          "ID": 4
+                        },
+                        "Connection": "virtio",
+                        "CreatedAt": "2026-11-05T00:00:00Z",
+                        "ModifiedAt": "2026-11-05T00:00:00Z"
+                      },
+                      "is_ok": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Local bounded refusal; no silent success. Native status/error code is preserved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SakuraDiskError"
+                },
+                "examples": {
+                  "LocalLeafError": {
+                    "summary": "Static leaf refusal, not saved state",
+                    "value": {
+                      "is_ok": false,
+                      "is_fatal": true,
+                      "serial": "local-0000000000000001",
+                      "status": "400 Bad Request",
+                      "error_code": "bad_request",
+                      "error_msg": "Invalid or ambiguous JSON request"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Host token/session missing/invalid: outer host JSON401. With valid owner Actor, absent/wrong dummy marker: leaf JSON401. The Basic marker alone never grants access.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/SakuraDiskError"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SakuraHostAccessError"
+                    }
+                  ]
+                },
+                "examples": {
+                  "LocalLeafError": {
+                    "summary": "Static leaf refusal, not saved state",
+                    "value": {
+                      "is_ok": false,
+                      "is_fatal": true,
+                      "serial": "local-0000000000000001",
+                      "status": "401 Unauthorized",
+                      "error_code": "unauthorized",
+                      "error_msg": "The fixed local dummy Basic marker is required"
+                    }
+                  },
+                  "MissingHostCredential": {
+                    "value": {
+                      "error": "A valid simulator access token is required"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Valid host credential but wrong configured owner: leaf JSON403. Participant attempts to select another exercise identity are refused by the host as plain-text403.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SakuraDiskError"
+                },
+                "examples": {
+                  "LocalLeafError": {
+                    "summary": "Static leaf refusal, not saved state",
+                    "value": {
+                      "is_ok": false,
+                      "is_fatal": true,
+                      "serial": "local-0000000000000001",
+                      "status": "403 Forbidden",
+                      "error_code": "forbidden",
+                      "error_msg": "Local disk owner authority required"
+                    }
+                  }
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Cannot select another identity with this access token\n"
+              }
+            }
+          },
+          "404": {
+            "description": "Default disabled/unregistered provider: plain-text404 Provider not implemented. Enabled provider with missing Disk or wrong literal zone: leaf JSON404. No AWS/S3 fallback.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SakuraDiskError"
+                },
+                "examples": {
+                  "LocalLeafError": {
+                    "summary": "Static leaf refusal, not saved state",
+                    "value": {
+                      "is_ok": false,
+                      "is_fatal": true,
+                      "serial": "local-0000000000000001",
+                      "status": "404 Not Found",
+                      "error_code": "not_found",
+                      "error_msg": "Disk not found"
+                    }
+                  }
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Provider not implemented\n"
+              }
+            }
+          },
+          "413": {
+            "description": "Local bounded refusal; no silent success. Native status/error code is preserved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SakuraDiskError"
+                },
+                "examples": {
+                  "LocalLeafError": {
+                    "summary": "Static leaf refusal, not saved state",
+                    "value": {
+                      "is_ok": false,
+                      "is_fatal": true,
+                      "serial": "local-0000000000000001",
+                      "status": "413 Request Entity Too Large",
+                      "error_code": "simulator_request_limit",
+                      "error_msg": "Request exceeds the local bound"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Local bounded refusal; no silent success. Native status/error code is preserved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SakuraDiskError"
+                },
+                "examples": {
+                  "LocalLeafError": {
+                    "summary": "Static leaf refusal, not saved state",
+                    "value": {
+                      "is_ok": false,
+                      "is_fatal": true,
+                      "serial": "local-0000000000000001",
+                      "status": "500 Internal Server Error",
+                      "error_code": "simulator_internal",
+                      "error_msg": "Local disk state unavailable"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "SakuraUpdateDisk",
+        "summary": "Update Disk name and description",
+        "tags": [
+          "Sakura Disk configuration"
+        ],
+        "description": "**Static examples are documentation, not current saved state.** This is opt-in local Disk configuration metadata only. The provider is disabled by default; authenticated requests then receive plain-text404 Provider not implemented. The host must enable --enable-sakura-disks with all four fixed scope flags, establish its opaque token/session, and attach a typed Actor bound to the configured exercise owner. The fixed public dummy Basic marker is required AFTER owner authorization and grants nothing. Never use real Sakura keys. No implicit owner/operator bypass, real Sakura IAM, VM, boot/block storage, Availability, billing, server attachment, copies/resize, Object Storage or AppRun. Create/Read/Update/Delete/List share actual SQLite state; no simulator success for unsupported options. Mutating bodies are strict UTF-8 JSON at most64KiB; duplicate/case-ambiguous keys and unsupported fields are refused. Integer lexical forms and Unicode/encoding rules are stricter than structural JSON Schema. Error envelopes differ for host authentication and disabled provider. No authenticated real-console or live cloud differential equivalence is claimed.",
+        "security": [
+          {
+            "SakuraDummyProtocolMarker": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SimulatorToken"
+          },
+          {
+            "$ref": "#/components/parameters/SakuraExerciseIdentity"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Live local response. Shown values are static examples; returned IDs and timestamps come from the actual operation.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
+                },
+                "description": "Leaf response is not cacheable."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SakuraUpdateDiskResult"
+                },
+                "examples": {
+                  "StaticResult": {
+                    "summary": "Static successful shape, never a claim of existing resources",
+                    "value": {
+                      "Disk": {
+                        "ID": "1",
+                        "Name": "practice-disk-renamed",
+                        "Description": "",
+                        "SizeMB": 20480,
+                        "Plan": {
+                          "ID": 4
+                        },
+                        "Connection": "virtio",
+                        "CreatedAt": "2026-11-05T00:00:00Z",
+                        "ModifiedAt": "2026-11-05T00:00:00Z"
+                      },
+                      "Success": true,
+                      "is_ok": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Local bounded refusal; no silent success. Native status/error code is preserved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SakuraDiskError"
+                },
+                "examples": {
+                  "LocalLeafError": {
+                    "summary": "Static leaf refusal, not saved state",
+                    "value": {
+                      "is_ok": false,
+                      "is_fatal": true,
+                      "serial": "local-0000000000000001",
+                      "status": "400 Bad Request",
+                      "error_code": "bad_request",
+                      "error_msg": "Invalid or ambiguous JSON request"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Host token/session missing/invalid: outer host JSON401. With valid owner Actor, absent/wrong dummy marker: leaf JSON401. The Basic marker alone never grants access.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/SakuraDiskError"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SakuraHostAccessError"
+                    }
+                  ]
+                },
+                "examples": {
+                  "LocalLeafError": {
+                    "summary": "Static leaf refusal, not saved state",
+                    "value": {
+                      "is_ok": false,
+                      "is_fatal": true,
+                      "serial": "local-0000000000000001",
+                      "status": "401 Unauthorized",
+                      "error_code": "unauthorized",
+                      "error_msg": "The fixed local dummy Basic marker is required"
+                    }
+                  },
+                  "MissingHostCredential": {
+                    "value": {
+                      "error": "A valid simulator access token is required"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Valid host credential but wrong configured owner: leaf JSON403. Participant attempts to select another exercise identity are refused by the host as plain-text403.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SakuraDiskError"
+                },
+                "examples": {
+                  "LocalLeafError": {
+                    "summary": "Static leaf refusal, not saved state",
+                    "value": {
+                      "is_ok": false,
+                      "is_fatal": true,
+                      "serial": "local-0000000000000001",
+                      "status": "403 Forbidden",
+                      "error_code": "forbidden",
+                      "error_msg": "Local disk owner authority required"
+                    }
+                  }
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Cannot select another identity with this access token\n"
+              }
+            }
+          },
+          "404": {
+            "description": "Default disabled/unregistered provider: plain-text404 Provider not implemented. Enabled provider with missing Disk or wrong literal zone: leaf JSON404. No AWS/S3 fallback.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SakuraDiskError"
+                },
+                "examples": {
+                  "LocalLeafError": {
+                    "summary": "Static leaf refusal, not saved state",
+                    "value": {
+                      "is_ok": false,
+                      "is_fatal": true,
+                      "serial": "local-0000000000000001",
+                      "status": "404 Not Found",
+                      "error_code": "not_found",
+                      "error_msg": "Disk not found"
+                    }
+                  }
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Provider not implemented\n"
+              }
+            }
+          },
+          "413": {
+            "description": "Local bounded refusal; no silent success. Native status/error code is preserved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SakuraDiskError"
+                },
+                "examples": {
+                  "LocalLeafError": {
+                    "summary": "Static leaf refusal, not saved state",
+                    "value": {
+                      "is_ok": false,
+                      "is_fatal": true,
+                      "serial": "local-0000000000000001",
+                      "status": "413 Request Entity Too Large",
+                      "error_code": "simulator_request_limit",
+                      "error_msg": "Request exceeds the local bound"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Local bounded refusal; no silent success. Native status/error code is preserved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SakuraDiskError"
+                },
+                "examples": {
+                  "LocalLeafError": {
+                    "summary": "Static leaf refusal, not saved state",
+                    "value": {
+                      "is_ok": false,
+                      "is_fatal": true,
+                      "serial": "local-0000000000000001",
+                      "status": "415 Unsupported Media Type",
+                      "error_code": "unsupported_media_type",
+                      "error_msg": "application/json is required"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Local bounded refusal; no silent success. Native status/error code is preserved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SakuraDiskError"
+                },
+                "examples": {
+                  "LocalLeafError": {
+                    "summary": "Static leaf refusal, not saved state",
+                    "value": {
+                      "is_ok": false,
+                      "is_fatal": true,
+                      "serial": "local-0000000000000001",
+                      "status": "500 Internal Server Error",
+                      "error_code": "simulator_internal",
+                      "error_msg": "Local disk state unavailable"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Local bounded refusal; no silent success. Native status/error code is preserved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SakuraDiskError"
+                },
+                "examples": {
+                  "LocalLeafError": {
+                    "summary": "Static leaf refusal, not saved state",
+                    "value": {
+                      "is_ok": false,
+                      "is_fatal": true,
+                      "serial": "local-0000000000000001",
+                      "status": "501 Not Implemented",
+                      "error_code": "simulator_unsupported",
+                      "error_msg": "Requested option is not implemented"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SakuraUpdateDiskRequest"
+              },
+              "examples": {
+                "StaticConfiguration": {
+                  "summary": "Dummy static body; send only to your own enabled local provider",
+                  "value": {
+                    "Disk": {
+                      "Name": "practice-disk-renamed",
+                      "Description": ""
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "SakuraDeleteDisk",
+        "summary": "Delete one Disk configuration",
+        "tags": [
+          "Sakura Disk configuration"
+        ],
+        "description": "**Static examples are documentation, not current saved state.** This is opt-in local Disk configuration metadata only. The provider is disabled by default; authenticated requests then receive plain-text404 Provider not implemented. The host must enable --enable-sakura-disks with all four fixed scope flags, establish its opaque token/session, and attach a typed Actor bound to the configured exercise owner. The fixed public dummy Basic marker is required AFTER owner authorization and grants nothing. Never use real Sakura keys. No implicit owner/operator bypass, real Sakura IAM, VM, boot/block storage, Availability, billing, server attachment, copies/resize, Object Storage or AppRun. Create/Read/Update/Delete/List share actual SQLite state; no simulator success for unsupported options. Mutating bodies are strict UTF-8 JSON at most64KiB; duplicate/case-ambiguous keys and unsupported fields are refused. Integer lexical forms and Unicode/encoding rules are stricter than structural JSON Schema. Error envelopes differ for host authentication and disabled provider. No authenticated real-console or live cloud differential equivalence is claimed. Delete requires an empty body and no query. It removes only the addressed saved row; missing rows return404, not idempotent synthetic success. Use a current ID returned by an actual request.",
+        "security": [
+          {
+            "SakuraDummyProtocolMarker": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SimulatorToken"
+          },
+          {
+            "$ref": "#/components/parameters/SakuraExerciseIdentity"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Live local response. Shown values are static examples; returned IDs and timestamps come from the actual operation.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
+                },
+                "description": "Leaf response is not cacheable."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SakuraDeleteDiskResult"
+                },
+                "examples": {
+                  "StaticResult": {
+                    "summary": "Static successful shape, never a claim of existing resources",
+                    "value": {
+                      "Success": true,
+                      "is_ok": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Local bounded refusal; no silent success. Native status/error code is preserved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SakuraDiskError"
+                },
+                "examples": {
+                  "LocalLeafError": {
+                    "summary": "Static leaf refusal, not saved state",
+                    "value": {
+                      "is_ok": false,
+                      "is_fatal": true,
+                      "serial": "local-0000000000000001",
+                      "status": "400 Bad Request",
+                      "error_code": "bad_request",
+                      "error_msg": "Invalid or ambiguous JSON request"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Host token/session missing/invalid: outer host JSON401. With valid owner Actor, absent/wrong dummy marker: leaf JSON401. The Basic marker alone never grants access.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/SakuraDiskError"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SakuraHostAccessError"
+                    }
+                  ]
+                },
+                "examples": {
+                  "LocalLeafError": {
+                    "summary": "Static leaf refusal, not saved state",
+                    "value": {
+                      "is_ok": false,
+                      "is_fatal": true,
+                      "serial": "local-0000000000000001",
+                      "status": "401 Unauthorized",
+                      "error_code": "unauthorized",
+                      "error_msg": "The fixed local dummy Basic marker is required"
+                    }
+                  },
+                  "MissingHostCredential": {
+                    "value": {
+                      "error": "A valid simulator access token is required"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Valid host credential but wrong configured owner: leaf JSON403. Participant attempts to select another exercise identity are refused by the host as plain-text403.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SakuraDiskError"
+                },
+                "examples": {
+                  "LocalLeafError": {
+                    "summary": "Static leaf refusal, not saved state",
+                    "value": {
+                      "is_ok": false,
+                      "is_fatal": true,
+                      "serial": "local-0000000000000001",
+                      "status": "403 Forbidden",
+                      "error_code": "forbidden",
+                      "error_msg": "Local disk owner authority required"
+                    }
+                  }
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Cannot select another identity with this access token\n"
+              }
+            }
+          },
+          "404": {
+            "description": "Default disabled/unregistered provider: plain-text404 Provider not implemented. Enabled provider with missing Disk or wrong literal zone: leaf JSON404. No AWS/S3 fallback.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SakuraDiskError"
+                },
+                "examples": {
+                  "LocalLeafError": {
+                    "summary": "Static leaf refusal, not saved state",
+                    "value": {
+                      "is_ok": false,
+                      "is_fatal": true,
+                      "serial": "local-0000000000000001",
+                      "status": "404 Not Found",
+                      "error_code": "not_found",
+                      "error_msg": "Disk not found"
+                    }
+                  }
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Provider not implemented\n"
+              }
+            }
+          },
+          "413": {
+            "description": "Local bounded refusal; no silent success. Native status/error code is preserved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SakuraDiskError"
+                },
+                "examples": {
+                  "LocalLeafError": {
+                    "summary": "Static leaf refusal, not saved state",
+                    "value": {
+                      "is_ok": false,
+                      "is_fatal": true,
+                      "serial": "local-0000000000000001",
+                      "status": "413 Request Entity Too Large",
+                      "error_code": "simulator_request_limit",
+                      "error_msg": "Request exceeds the local bound"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Local bounded refusal; no silent success. Native status/error code is preserved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SakuraDiskError"
+                },
+                "examples": {
+                  "LocalLeafError": {
+                    "summary": "Static leaf refusal, not saved state",
+                    "value": {
+                      "is_ok": false,
+                      "is_fatal": true,
+                      "serial": "local-0000000000000001",
+                      "status": "500 Internal Server Error",
+                      "error_code": "simulator_internal",
+                      "error_msg": "Local disk state unavailable"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -13919,6 +15294,439 @@
             "description": "Omitted at terminal. Scope binds DB authority, region, physical ARN and IncludeDeprecated, expires24h; live keyset not a snapshot or permission."
           }
         }
+      },
+      "SakuraNeutralIcon": {
+        "anyOf": [
+          {
+            "type": "null"
+          },
+          {
+            "type": "object",
+            "maxProperties": 0,
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "ID": {
+                "type": "integer",
+                "const": 0
+              },
+              "Tags": {
+                "type": "array",
+                "maxItems": 0,
+                "items": false
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "ID"
+            ]
+          }
+        ],
+        "description": "Only an unset-icon marker: null, {}, or numeric canonical ID0 with optional empty Tags[]. No string0, null Tags, custom members, real Icon or resource attachment. JSON Schema numeric values do not describe lexical differences: native JSON rejects0.0/0e0/-0."
+      },
+      "SakuraDisk": {
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]{0,18}$",
+            "maxLength": 19,
+            "description": "Canonical positive decimal int64, at most9223372036854775807. No leading zero, sign, fraction, exponent, or encoded path spelling; the native handler enforces overflow beyond this string shape."
+          },
+          "Name": {
+            "type": "string",
+            "pattern": "^[^\\u0000-\\u001f\\u007f-\\u009f]*$",
+            "minLength": 1,
+            "maxLength": 64,
+            "description": "Local Unicode rune bound, without control characters. Invalid UTF-8, unpaired surrogate encodings and duplicate/case-ambiguous JSON members are rejected by the native parser."
+          },
+          "Description": {
+            "type": "string",
+            "pattern": "^[^\\u0000-\\u001f\\u007f-\\u009f]*$",
+            "maxLength": 512,
+            "description": "Omit on update to preserve; empty string clears. null is invalid."
+          },
+          "SizeMB": {
+            "type": "integer",
+            "const": 20480
+          },
+          "Plan": {
+            "type": "object",
+            "properties": {
+              "ID": {
+                "type": "integer",
+                "const": 4
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "ID"
+            ]
+          },
+          "Connection": {
+            "type": "string",
+            "const": "virtio"
+          },
+          "CreatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ModifiedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "ID",
+          "Name",
+          "Description",
+          "SizeMB",
+          "Plan",
+          "Connection",
+          "CreatedAt",
+          "ModifiedAt"
+        ],
+        "description": "Saved local configuration only. No Availability, Storage, Server, Owner or private Generation field; no physical readiness, VM or billing state."
+      },
+      "SakuraCreateDiskRequest": {
+        "type": "object",
+        "properties": {
+          "Disk": {
+            "type": "object",
+            "properties": {
+              "Name": {
+                "type": "string",
+                "pattern": "^[^\\u0000-\\u001f\\u007f-\\u009f]*$",
+                "minLength": 1,
+                "maxLength": 64,
+                "description": "Local Unicode rune bound, without control characters. Invalid UTF-8, unpaired surrogate encodings and duplicate/case-ambiguous JSON members are rejected by the native parser."
+              },
+              "Description": {
+                "type": "string",
+                "pattern": "^[^\\u0000-\\u001f\\u007f-\\u009f]*$",
+                "maxLength": 512,
+                "description": "Omit on update to preserve; empty string clears. null is invalid."
+              },
+              "Connection": {
+                "type": "string",
+                "const": "virtio"
+              },
+              "Tags": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "maxItems": 0,
+                    "items": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "Icon": {
+                "$ref": "#/components/schemas/SakuraNeutralIcon"
+              },
+              "Plan": {
+                "type": "object",
+                "properties": {
+                  "ID": {
+                    "oneOf": [
+                      {
+                        "type": "integer",
+                        "const": 4
+                      },
+                      {
+                        "type": "string",
+                        "const": "4"
+                      }
+                    ],
+                    "description": "Plan4 only; numeric JSON must use canonical integer spelling4, not4.0/4e0."
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "ID"
+                ]
+              },
+              "SizeMB": {
+                "type": "integer",
+                "const": 20480,
+                "description": "Exactly20480 logical MB. Native parser also requires canonical integer JSON spelling."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "Name",
+              "Plan",
+              "SizeMB"
+            ]
+          },
+          "DistantFrom": {
+            "anyOf": [
+              {
+                "type": "array",
+                "maxItems": 0,
+                "items": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "KMSKey": {
+            "anyOf": [
+              {
+                "type": "object",
+                "maxProperties": 0,
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "Disk"
+        ]
+      },
+      "SakuraUpdateDiskRequest": {
+        "type": "object",
+        "properties": {
+          "Disk": {
+            "type": "object",
+            "properties": {
+              "Name": {
+                "type": "string",
+                "pattern": "^[^\\u0000-\\u001f\\u007f-\\u009f]*$",
+                "minLength": 1,
+                "maxLength": 64,
+                "description": "Local Unicode rune bound, without control characters. Invalid UTF-8, unpaired surrogate encodings and duplicate/case-ambiguous JSON members are rejected by the native parser."
+              },
+              "Description": {
+                "type": "string",
+                "pattern": "^[^\\u0000-\\u001f\\u007f-\\u009f]*$",
+                "maxLength": 512,
+                "description": "Omit on update to preserve; empty string clears. null is invalid."
+              },
+              "Connection": {
+                "type": "string",
+                "const": "virtio"
+              },
+              "Tags": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "maxItems": 0,
+                    "items": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "Icon": {
+                "$ref": "#/components/schemas/SakuraNeutralIcon"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "Disk"
+        ],
+        "description": "Name/Description are optional: omitted values preserved; Disk:{} is a no-op. Neutral markers do not create tags/icons. Plan/SizeMB are immutable and unsupported in updates."
+      },
+      "SakuraGetDiskResult": {
+        "type": "object",
+        "properties": {
+          "Disk": {
+            "$ref": "#/components/schemas/SakuraDisk"
+          },
+          "is_ok": {
+            "const": true
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "Disk",
+          "is_ok"
+        ]
+      },
+      "SakuraCreateDiskResult": {
+        "type": "object",
+        "properties": {
+          "Disk": {
+            "$ref": "#/components/schemas/SakuraDisk"
+          },
+          "Success": {
+            "const": "Created"
+          },
+          "is_ok": {
+            "const": true
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "Disk",
+          "Success",
+          "is_ok"
+        ]
+      },
+      "SakuraUpdateDiskResult": {
+        "type": "object",
+        "properties": {
+          "Disk": {
+            "$ref": "#/components/schemas/SakuraDisk"
+          },
+          "Success": {
+            "const": true
+          },
+          "is_ok": {
+            "const": true
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "Disk",
+          "Success",
+          "is_ok"
+        ]
+      },
+      "SakuraDeleteDiskResult": {
+        "type": "object",
+        "properties": {
+          "Success": {
+            "const": true
+          },
+          "is_ok": {
+            "const": true
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "Success",
+          "is_ok"
+        ]
+      },
+      "SakuraDiskListWindow": {
+        "type": "object",
+        "properties": {
+          "From": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9223372036854775807
+          },
+          "Count": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+          }
+        },
+        "additionalProperties": false,
+        "description": "Optional raw JSON query object, NOT named/form query parameters. From omitted=0; Count omitted/0 means remaining up to100. Native integer spelling is canonical. This component is a reference for manual URI construction; the standard OpenAPI query builder cannot represent this unnamed JSON query."
+      },
+      "SakuraListDisksResult": {
+        "type": "object",
+        "properties": {
+          "From": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "Count": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "Total": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "Disks": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "$ref": "#/components/schemas/SakuraDisk"
+            }
+          },
+          "is_ok": {
+            "const": true
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "From",
+          "Count",
+          "Total",
+          "Disks",
+          "is_ok"
+        ],
+        "description": "Count equals this page length; Total is active local rows. Names may repeat; IDs identify actual rows. No fake server or ready-state list."
+      },
+      "SakuraDiskError": {
+        "type": "object",
+        "properties": {
+          "is_ok": {
+            "const": false
+          },
+          "is_fatal": {
+            "const": true
+          },
+          "serial": {
+            "type": "string",
+            "pattern": "^local-[0-9a-f]{16}$"
+          },
+          "status": {
+            "type": "string"
+          },
+          "error_code": {
+            "type": "string",
+            "enum": [
+              "bad_request",
+              "unauthorized",
+              "forbidden",
+              "not_found",
+              "conflict",
+              "simulator_quota",
+              "simulator_internal",
+              "simulator_request_limit",
+              "simulator_unsupported",
+              "unsupported_media_type",
+              "method_not_allowed"
+            ]
+          },
+          "error_msg": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "is_ok",
+          "is_fatal",
+          "serial",
+          "status",
+          "error_code",
+          "error_msg"
+        ],
+        "description": "Bounded local leaf error vocabulary; not a promise of real Sakura error equivalence. Host authentication/selection and disabled-provider errors have different outer envelopes/media below."
+      },
+      "SakuraHostAccessError": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "error"
+        ]
       }
     },
     "responses": {
@@ -13946,6 +15754,23 @@
           "writeOnly": true
         },
         "description": "Local host access token for curl/SDK or a browser without a signed-in session. Leave blank when the browser session already authenticates you. Never enter a real AWS key; do not share an operator token with participants."
+      },
+      "SakuraExerciseIdentity": {
+        "name": "X-Simulator-Principal",
+        "in": "header",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$"
+        },
+        "description": "Operator only: select the configured exercise owner, e.g. learner in the tutorial. This is not authentication or tenant isolation. Participant/browser identity remains bound; choosing another returns403. Omit for a participant already bound to the owner; operator credentials alone grant no owner bypass."
+      }
+    },
+    "securitySchemes": {
+      "SakuraDummyProtocolMarker": {
+        "type": "http",
+        "scheme": "basic",
+        "description": "PUBLIC protocol marker only: username TCSIMSAKURA, password dummy-local-only. Never enter real Sakura credentials. This does NOT authenticate the host or grant owner authority: signed-in same-origin host cookie or X-Simulator-Token plus host-bound typed Actor is separately mandatory."
       }
     }
   },
@@ -14013,7 +15838,11 @@
     },
     {
       "name": "Sakura Cloud status",
-      "description": "**Not implemented.** Sakura Cloud currently has no simulator API operations, endpoints, authorization adapter, SDK compatibility or console execution workflow. This is an availability status section only; no Test Request or Send operation is provided. AWS, GCP and Azure sections describe their separately implemented local subsets, not Sakura compatibility."
+      "description": "Optional Disk configuration API only, disabled by default. The five operations below require explicit host opt-in, fixed local scope and host owner authentication; an unregistered provider returns plain-text404. Console availability is a separate capability; this native reference does not claim console workflow/fidelity, real VM/block storage, Object Storage/AppRun or general service coverage. Community SDK serializer/decoder compatibility uses a separately tested terminal local middleware, not stock authentication/retry certification."
+    },
+    {
+      "name": "Sakura Disk configuration",
+      "description": "Five actual local API1.1 Disk metadata operations. **Static examples, not saved state.** Enable the provider on the host first; use real returned Disk IDs. The Basic Auth fields take public TCSIMSAKURA / dummy-local-only only; host cookie or X-Simulator-Token remains independently required. Exact subset/deviations: docs/sakura.md; primary public Disk API https://manual.sakura.ad.jp/cloud-api/1.1/disk/ ."
     }
   ],
   "x-tagGroups": [
@@ -14049,7 +15878,8 @@
     {
       "name": "Sakura Cloud",
       "tags": [
-        "Sakura Cloud status"
+        "Sakura Cloud status",
+        "Sakura Disk configuration"
       ]
     },
     {
