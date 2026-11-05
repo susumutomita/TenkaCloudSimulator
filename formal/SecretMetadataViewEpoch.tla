@@ -130,11 +130,11 @@ Unmount == /\ step<MaxSteps /\ mounted /\ epoch<MaxEpoch
                             nextID,requests,pending,result,problem,loading,locale,receipts,lastLocale,parentReveal>>
 LocaleFlip == /\ step<MaxSteps /\ mode="Locale" /\ mounted /\ ~layoutPending
               /\ locale'=1-locale /\ arn'=arn /\ include'=include
-              /\ lastLocale'=[seen |-> TRUE,before |-> ViewFrame,after |-> ViewFrame']
-              /\ step'=step+1
               /\ UNCHANGED <<mode,mounted,alive,renderScope,committedScope,layoutPending,
                                epoch,nextID,requests,pending,aborted,latest,result,problem,
                                loading,receipts,parentReveal>>
+              /\ lastLocale'=[seen |-> TRUE,before |-> ViewFrame,after |-> ViewFrame']
+              /\ step'=step+1
 (* Tab seed starts after an explicit prior parent reveal, outside this child's
    request log. Parent onChange invalidates that state before entering metadata.
    This Boolean models the React state protocol, not memory zeroization or Get. *)
@@ -174,7 +174,7 @@ NoStaleRenderedError == ShownProblem =>
     problem.scope=renderScope /\ problem.arn=arn /\ problem.include=include
 LoadingTracksLatest == mounted => (loading=LatestPending)
 PendingClearsMetadata == mounted /\ loading => ~result.present /\ ~problem.present
-NoRowsOnError == ShownProblem => ShownRows=<<>>
+NoRowsOnError == ShownProblem => ShownRows = <<>>
 ValidatedMetadataOnly == result.present => result.valid
 CurrentPageOnly == result.present =>
     \A i \in 1..Len(result.rows) : result.rows[i].page=result.page
