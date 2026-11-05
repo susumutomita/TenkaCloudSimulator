@@ -247,6 +247,9 @@ func stackConditionValues(definitions map[string]any, references map[string]stri
 		return nil, fmt.Errorf("local condition count exceeds 100")
 	}
 	result, state := map[string]bool{}, map[string]uint8{}
+	// Cache structural height with each completed value. A later root may
+	// reach that value below other aliases; cached work must not erase depth.
+	heights := map[string]int{}
 	var evaluate func(string, int) (bool, error)
 	operand := func(value any) (string, error) {
 		if text, ok := stackScalarText(value); ok {
@@ -277,6 +280,9 @@ func stackConditionValues(definitions map[string]any, references map[string]stri
 			return false, fmt.Errorf("invalid condition name")
 		}
 		if state[name] == 2 {
+			if depth+heights[name]-1 > stackConditionalDepth {
+				return false, fmt.Errorf("condition depth exceeds 32")
+			}
 			return result[name], nil
 		}
 		if state[name] == 1 {
@@ -292,6 +298,7 @@ func stackConditionValues(definitions map[string]any, references map[string]stri
 		}
 		state[name] = 1
 		var value bool
+		height := 1
 		if alias, exists := expression["Condition"]; exists {
 			target, ok := alias.(string)
 			if !ok {
@@ -302,6 +309,7 @@ func stackConditionValues(definitions map[string]any, references map[string]stri
 			if err != nil {
 				return false, err
 			}
+			height += heights[target]
 		} else if raw, exists := expression["Fn::Equals"]; exists {
 			args, ok := raw.([]any)
 			if !ok || len(args) != 2 {
@@ -319,7 +327,7 @@ func stackConditionValues(definitions map[string]any, references map[string]stri
 		} else {
 			return false, fmt.Errorf("unsupported condition expression")
 		}
-		result[name], state[name] = value, 2
+		result[name], heights[name], state[name] = value, height, 2
 		return value, nil
 	}
 	names := make([]string, 0, len(definitions))

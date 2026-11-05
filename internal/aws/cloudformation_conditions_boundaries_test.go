@@ -271,3 +271,119 @@ func TestStackConditionBoundaryPolicyOutageIsNotDeniedAndRecovers(t *testing.T) 
 		t.Fatal("post-repair lifecycle changed preexisting identity")
 	}
 }
+
+// Depth is a property of the entire named expression graph, not the amount of
+// work left after an earlier root populated the result cache. Both sorted-name
+// directions and a shared cached child must obey the same structural limit.
+func TestStackConditionBoundaryAliasDepthIndependentOfMemoOrder(t *testing.T) {
+	chain := func(length int, cachedFirst bool) map[string]any {
+		defs := map[string]any{}
+		for i := 0; i < length; i++ {
+			name := fmt.Sprintf("C%02d", i)
+			if cachedFirst && i == 0 || !cachedFirst && i == length-1 {
+				defs[name] = map[string]any{"Fn::Equals": []any{"same", "same"}}
+				continue
+			}
+			next := i + 1
+			if cachedFirst {
+				next = i - 1
+			}
+			defs[name] = map[string]any{"Condition": fmt.Sprintf("C%02d", next)}
+		}
+		return defs
+	}
+	shared := func(tooDeep bool) map[string]any {
+		defs := chain(31, true)
+		defs["YParent"] = map[string]any{"Condition": "C30"}
+		defs["YSibling"] = map[string]any{"Condition": "C30"}
+		if tooDeep {
+			defs["ZGrandparent"] = map[string]any{"Condition": "YParent"}
+		}
+		return defs
+	}
+	cycle := func(reverse bool) map[string]any {
+		defs := map[string]any{"AEqual": map[string]any{"Fn::Equals": []any{"same", "same"}}}
+		a, b, c := "MCycle", "NCycle", "ZCycle"
+		if reverse {
+			a, c = c, a
+		}
+		defs[a] = map[string]any{"Condition": b}
+		defs[b] = map[string]any{"Condition": c}
+		defs[c] = map[string]any{"Condition": b}
+		return defs
+	}
+	cases := []struct {
+		name   string
+		defs   map[string]any
+		reject string
+	}{
+		{"cached_first_32", chain(32, true), ""},
+		{"cached_first_33", chain(33, true), "condition depth exceeds 32"},
+		{"uncached_first_32", chain(32, false), ""},
+		{"uncached_first_33", chain(33, false), "condition depth exceeds 32"},
+		{"shared_cached_32", shared(false), ""},
+		{"shared_cached_33", shared(true), "condition depth exceeds 32"},
+		{"cycle_after_cached_equal", cycle(false), "condition cycle"},
+		{"reverse_cycle_after_cached_equal", cycle(true), "condition cycle"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			inputBefore := stackConditionTestCopy(t, tc.defs)
+			values, valueErr := stackConditionValues(tc.defs, nil)
+			if !reflect.DeepEqual(tc.defs, inputBefore) {
+				t.Fatal("condition preparation changed caller definitions")
+			}
+			template := map[string]any{"Conditions": tc.defs, "Resources": map[string]any{"Live": map[string]any{"Type": "AWS::SSM::Parameter", "Properties": map[string]any{"Name": "/boundary/live", "Type": "String", "Value": "safe"}}}}
+			body := conditionBoundaryBody(t, template)
+			compiled, compileErr := compileStack("ap-northeast-1", "boundary", body, nil, "")
+			db, s3, stacks, parameters := s3StackState(t)
+			g := &Gateway{Store: db, S3: s3, Stacks: stacks, Parameters: parameters, Identities: core.NewIdentities(db)}
+			before := stackConditionalDBFrame(t, db.Database())
+			response := conditionBoundarySend(g, "CreateStack", body, "", nil)
+			if tc.reject != "" {
+				if valueErr == nil || values != nil || !strings.Contains(valueErr.Error(), tc.reject) {
+					t.Error("invalid graph returned condition values or wrong refusal")
+				}
+				if compileErr == nil || !reflect.DeepEqual(compiled, StackRecord{}) {
+					t.Error("invalid graph produced a native resource plan")
+				}
+				if response.Code != 400 {
+					t.Errorf("invalid graph received native HTTP %d instead of 400", response.Code)
+				} else {
+					conditionBoundaryError(t, response, 400, "ValidationError", tc.reject)
+				}
+				if stackConditionalDBFrame(t, db.Database()) != before {
+					t.Error("invalid graph persisted stack/claim/SSM state")
+				}
+				// Only the test-owned false-ACK stack can exist on the old faulty revision.
+				// Real cleanup makes the regression safe to run before applying the fix.
+				if response.Code == 200 {
+					if cleanup := conditionBoundarySend(g, "DeleteStack", "", "", nil); cleanup.Code != 200 {
+						t.Fatal("false-ACK fixture cleanup failed")
+					}
+				}
+			} else {
+				if valueErr != nil || len(values) != len(tc.defs) || compileErr != nil || len(compiled.Resources) != 1 {
+					t.Fatal("valid depth32 graph refused or incomplete")
+				}
+				for _, v := range values {
+					if !v {
+						t.Fatal("valid equal/alias graph changed truth value")
+					}
+				}
+				if response.Code != 200 {
+					t.Fatalf("valid graph native HTTP %d", response.Code)
+				}
+				if item, err := parameters.Get("ap-northeast-1", "/boundary/live"); err != nil || item.Value != "safe" {
+					t.Fatal("accepted graph did not create native SSM")
+				}
+				if cleanup := conditionBoundarySend(g, "DeleteStack", "", "", nil); cleanup.Code != 200 {
+					t.Fatal("valid graph cleanup failed")
+				}
+			}
+			if stackConditionalDBFrame(t, db.Database()) != before {
+				t.Fatal("test-owned cleanup did not restore original graph")
+			}
+		})
+	}
+}
