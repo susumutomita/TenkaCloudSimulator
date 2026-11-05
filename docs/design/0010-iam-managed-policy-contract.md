@@ -55,7 +55,7 @@ The official [IAM service-authorization reference](https://docs.aws.amazon.com/s
 
 Use existing IAM error handling: invalid/malformed inputs400, explicit denial403, missing404, duplicate/delete conflict/quota409, unsupported501, infrastructure/corrupt state sanitized ServiceFailure500. Do not convert database errors into denial, not-found or success. Exact validation precedence and existing old-operation codes must be preserved by tests.
 
-ListPolicyVersions returns **parent policy metadata, items and error** from the same read transaction. ListAttachedRolePolicies returns **parent role metadata, items and error** from the same transaction. Query uses those parent generations to validate cursors; it must not perform a separate lookup that races recreation. Store and Query owners agree the exact exported names/types before coding; this document does not impose a competing DTO set. All database calls carry the request context.
+ListPolicyVersions returns **parent policy metadata, items and error** from the same read transaction. ListAttachedRolePolicies returns **parent role metadata, items and error** from the same transaction. Query uses those parent generations to validate cursors; it must not perform a separate lookup that races recreation. The implemented store/Query port uses the same parent-return contract; this document does not introduce a competing DTO set. All database calls carry the request context.
 
 ## Ownership and acceptance
 
@@ -68,7 +68,7 @@ ListPolicyVersions returns **parent policy metadata, items and error** from the 
 | cfn_callback | This contract and primary-spec research |
 | root | Shared composition/capabilities/OpenAPI/navigation/assets, integration, review and publication |
 
-New managed-policy implementation is original TenkaCloud code. Preserve existing Role wire adaptation's Kumo MIT copyright and notice; do not replace its provenance or adopt an emulator engine. Do not edit external Issue51 S3 multipart work. Tests may call existing S3 APIs as permission oracles.
+Managed-policy storage and aggregation remain provider-owned. The former selected Role wire type adaptation is historical (`metadataHistorical`); its fixed Kumo source and MIT notice remain in [provenance](../../third_party/kumo-iam.json). Current Role output uses an explicit XML projection retaining RoleId, wrapper, escaping and omission semantics; existing role JSON/SQL, trust and managed aggregates are unchanged by that projection. This is not an authorship or clean-room certification, and no emulator engine is adopted. Do not edit external Issue51 S3 multipart work. Tests may call existing S3 APIs as permission oracles.
 
 Acceptance requires two authenticated local CLI processes with separate persistent DB/token authorities: create/attach to two native roles; verify effective Allow and inline Deny; create nondefault without changing authority; default flip across both roles; quota/fault rollback; detach/version/delete cleanup; restart persistence and unaffected peer/role state. Query tests cover literal plus/percent/document encoding, omitted-vs-explicit unsupported filters, pagination generation mismatch, exact response omissions and malformed/duplicate fields. The console must use the same native state and clear stale scoped responses. Official SDK success must be observed, not inferred from DTOs or stubs.
 
