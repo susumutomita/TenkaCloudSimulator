@@ -1,22 +1,21 @@
 # Finite state models
 
-Current registry: **37 models / 258 literal-protected controls**
-(**295 required executions**). All actual-main 34 model entries and 210 controls
-are retained. The three customer-alias models separately describe catalog
-admission/paging, concrete-key crypto transactions and UI epochs/mutation refresh.
-Their scoped evidence and limits are described below. Native wire/route models
-and SecretVersionListing retain their existing source scopes and properties.
+Current registry: **39 models / 281 literal-protected controls**
+(**320 required executions**). All actual-main 35 model entries and 220 controls
+are retained. Four separate customer-alias models describe catalog admission,
+concrete-key crypto, UI epochs/refresh and first-use transaction bootstrap.
+Their finite scopes and evidence are distinct from native/SDK/whole-quality proof.
 
 Registration is source evidence, not a successful current-HEAD execution claim.
-The complete immutable 295-case gate must run for this combined revision;
-historical scoped or integration receipts do not replace it. IAMManagedPolicies
-keeps its four API-reachable seeds and two-request suffixes; its earlier broader
-four-request trial timed out and is not claimed. These finite checks do not prove
-Go/SQL/HTTP/UI refinement, cryptography or complete cloud compatibility.
+The complete immutable 320-case gate must actually run for this combined revision.
+Historical scoped/integration receipts do not replace it. IAMManagedPolicies
+retains four reachable seeds and two-request suffixes; its broader four-request
+trial timed out and is not claimed. There is no Go/SQL/HTTP/UI refinement,
+cryptographic or complete cloud-compatibility proof.
 
-Legacy sections retain dated counts/status for traceability; their “current”
-refers to that recorded integration. Today's authoritative inventory is 37/258
-above, and every execution claim must identify its exact revision.
+Legacy sections retain dated counts/status for traceability; “current” in those
+sections refers to that integration, not this authoritative 39/281 inventory.
+Every execution claim must identify its exact revision.
 
 `ObjectStore.tla` models two buckets and two keys, shared object ownership, create/put/delete transitions, and an abstract identity decision `allow /\ ~deny`. `ObjectStore.cfg` checks type correctness, no orphan objects, no unauthorized mutation, and explicit-deny precedence.
 
@@ -339,13 +338,48 @@ or a refinement proof. The entire original30/175 inventory, timeouts and tool pi
 remain unchanged. All three exact native source scopes and all new properties
 and control IDs are protected by the loader and failure tests.
 
+## DynamoDB console request epochs and acknowledged writes
+
+DynamoDBConsoleEpoch binds tools/console/src/dynamodb.jsx, the narrow DynamoDB
+route/mount-key caller in main.jsx, and canonical embedded app.js as its derived
+artifact. It does not prove other shell/components or compiler/bundler correctness.
+Separate read
+and write scenarios cover two combined authority/region labels, one remount,
+epochs0..2 without wrap, two one-use pending-read slots, two exact keys, two
+symbolic TableIds with one recreation, one form/write intent and en/ja.
+Acceptance snapshots reject old request epochs/instances and failed post-read
+TableId verification. Key edits clear displayed item/delete bindings;
+invalidation clears loading even when an older finally is discarded. A
+synchronous owner ticket refuses repeated submission. An accepted write ACK
+closes the form and clears its draft before independent metadata refresh;
+read-only Retry does not resend a write. Locale presentation preserves the draft.
+
+The scoped baseline completed3,832 distinct states (16,950 generated), and each
+of ten semantic mutants exited12 with its exact expected invariant and a real
+transition trace. An earlier string-versus-record sentinel type error exited75
+and is retained as a failed attempt; replacing it with one configured model-value
+sentinel changed no transition, property, control or finite bound. This result
+is leaf evidence for those model bytes, not the registered241-case suite.
+
+This is not a JavaScript/React/AbortController/HTTP/IAM/SQLite refinement proof.
+It does not prove concrete AttributeValue parsing, sizes, numbers, credentials,
+missing-item/delete-confirmation behavior, arbitrary pagination or the full
+read/write interleaving. TableId agreement is checked at item-read acceptance;
+it does not promise freshness after a later native change or an atomic TableId
+compare-and-swap on official TableName-only mutations. A server may commit a
+write before a client aborts it. Stutter observation admits no liveness claim.
+Native DynamoDBAdmission/Lifecycle and concrete tests remain separate evidence.
+The root mount key (region|principal|navigation) and actual UI state changes are
+independently exercised by the mandatory dynamodb_console.py helper, not proved
+by a complete shell/React refinement.
+
 
 ## Secret version metadata listing
 
 SecretVersionListing adds nine invariants and thirteen literal-protected semantic
 controls, preserving all prior33 registry objects and197 controls and their
-TLA/CFG bytes. The combined inventory is34 baselines +210 controls =244 required
-executions. Registration and earlier independent scoped results are not a
+TLA/CFG bytes. The Secrets-only addition had34 baselines +210 controls =244 required
+executions. The current combined inventory above also includes DynamoDBConsoleEpoch. Registration and earlier independent scoped results are not a
 successful immutable244-case integration gate or hosted-CI result.
 
 Four-transition suffixes cover four ordered symbolic version keys, two database
@@ -399,8 +433,8 @@ refinement, backend admission coverage or liveness.
 The scoped model executions are separate evidence: the UI baseline visited
 431,932 distinct states and all eleven controls produced their named invariant
 violations; the crypto author's scoped evidence records its fourteen cases.
-Registration now requires 37 baselines and 258 controls (295 executions), with
-all main 34 models and 210 controls retained. A fresh immutable combined gate
+Registration now requires 39 baselines and 281 controls (320 executions), with
+all main 35 models and 220 controls retained. A fresh immutable combined gate
 must actually execute before reporting this inventory as current-HEAD passed.
 Catalog/CRUD/paging is represented separately below; neither of these two
 entries supplies catalog behavior or native implementation proof.
@@ -422,7 +456,7 @@ The corrected scoped baseline completed13,025 distinct states in47.395 seconds;
 all twenty-four controls exited12 with their exact named invariant and a
 transition trace. The earlier same-key contradictory-permission witnesses are
 not reused. Source review and existing scoped logs were independently checked;
-registration is not a fresh295-case current-HEAD gate or Go/SQL refinement proof.
+registration is not a fresh320-case current-HEAD gate or Go/SQL refinement proof.
 
 Only catalog portions of kms_aliases.go correspond to this model; crypto and UI
 remain separate entries. MAC integrity/authority are abstract predicates, not
@@ -431,3 +465,20 @@ key parents exclude DeleteKey/recreation, AWS-managed aliases, alias targets,
 grants and alias ABAC. Limits two/one are abstractions of native1000/50, not
 unbounded-quota proofs. Public JSON projection, authentication, physical clock,
 locking, SQL acknowledgments and commit behavior require native/SDK evidence.
+
+## First-use alias transaction bootstrap
+
+KMSBootstrapTransaction adds ten properties and thirteen semantic controls over
+two regions and one finite request. Tentative schema, regional cursor authority
+and operation data are explicit; failed/missing authorization, operation or
+commit cannot publish or persist that tentative frame. A successful operation
+is applied once and publication follows commit. Trusted explicit initializing
+NewKMSAliasStore calls are excluded from the denied-HTTP no-write promise.
+
+The corrected scoped baseline visited15,860 distinct states; all thirteen
+controls produced their specific named invariant and a transition trace. This
+scoped evidence is not the fresh320-case integration gate. Operation predicates
+and SQLite transactions/DDL/commit are abstract; actual cold known-policy403,
+real SQLite failure/rollback and SDK tests independently check the native seam.
+Catalog/crypto/UI remain separate; no raw JSON/IAM/HMAC/SQL or Go refinement,
+unbounded concurrency, liveness or full AWS behavior is inferred.

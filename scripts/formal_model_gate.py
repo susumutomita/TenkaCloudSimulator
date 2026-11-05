@@ -9,10 +9,9 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-BASE_MODELS = {'KMSBootstrapTransaction', 'KMSAliasCatalog', 'AzureBlobState', 'AzurePropertiesEpoch', 'AzurePropertiesTarget', 'BlobRange', 'BrowserSessions', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'DynamoDBAdmission', 'DynamoDBLifecycle', 'GCPStorageState', 'IAMManagedPolicies', 'KMSAliasCrypto', 'KMSAliasesViewEpoch', 'KMSKeyState', 'KMSProtocolAdmission', 'NativeIAMOwnership', 'NativeWireProjection', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'RESTProxyEventBoundary', 'RESTRouteMatching', 'S3Versions', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'SecretVersionListing', 'SecretsDisclosureChannels', 'SecretsMutationRefresh', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'StackOwnership', 'StartupTokenVisibility'}
+BASE_MODELS = {'AzureBlobState', 'AzurePropertiesEpoch', 'AzurePropertiesTarget', 'BlobRange', 'BrowserSessions', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'DynamoDBAdmission', 'DynamoDBConsoleEpoch', 'DynamoDBLifecycle', 'GCPStorageState', 'IAMManagedPolicies', 'KMSAliasCatalog', 'KMSAliasCrypto', 'KMSAliasesViewEpoch', 'KMSBootstrapTransaction', 'KMSKeyState', 'KMSProtocolAdmission', 'NativeIAMOwnership', 'NativeWireProjection', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'RESTProxyEventBoundary', 'RESTRouteMatching', 'S3Versions', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'SecretVersionListing', 'SecretsDisclosureChannels', 'SecretsMutationRefresh', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'StackOwnership', 'StartupTokenVisibility'}
 BASE_INVARIANTS = {
-    'KMSBootstrapTransaction': {'PreCommitFrame', 'CommitAuthorized', 'SuccessComplete', 'RejectedDurableFrame', 'OperationAuthorized', 'PeerFrame', 'AdmissionRequired', 'TypeOK', 'SuccessfulScope', 'PublishedAfterCommit'},
-    'KMSAliasCatalog': {'TypeOK', 'AcknowledgedSuccess', 'MutationAuthority', 'ConcreteTarget', 'FailureFrame', 'PeerRegionFrame', 'MutationEffect', 'CreationIdentity', 'AdmissionBudgets', 'RevisionFresh', 'ListAuthorized', 'CursorBound', 'ListPageExact', 'ListMoreExact', 'ContinuationAfterLast', 'ReadFrame', 'NoPartialRead'},
+    'DynamoDBConsoleEpoch': {'AckBelongsToCurrentView', 'AckClosesDraft', 'CancelNoOrphanLoading', 'DisplayedKeyBound', 'LocalePreservesDraft', 'NoStalePublication', 'ReadGenerationVerified', 'ReadRetryNeverWrites', 'SingleSendBeforeACK', 'TypeOK'},
     'SecretVersionListing': {'ContinuationPosition', 'FilterBeforePageLimit', 'NoDeniedEmission', 'ReadAfterAuthorization', 'ReadFramePreserved', 'StrictForwardKeyset', 'TerminalConverges', 'TokenScopeBound', 'TypeOK'},
     'NativeWireProjection': {'BadValueRefused', 'CompleteProjection', 'FailureNoPartial', 'OmissionExact', 'OrderExact', 'SkippedBadDoesNotFail', 'TypeOK', 'ValueKindsPreserved'},
     'RESTRouteMatching': {'CaptureFidelity', 'InvalidTemplateRejected', 'MatchOracle', 'RejectedShape', 'Specificity', 'TypeOK'},
@@ -47,13 +46,14 @@ BASE_INVARIANTS = {
     'SecretsVersionLifecycle': {'ActiveHasCurrent', 'AuthorizedDisclosure', 'AuthorizedVersions', 'ImmutableVersions', 'NoOrphans', 'SeparateCurrentPrevious', 'TypeOK', 'UniqueLabels'},
     'StackOwnership': {'OwnershipExclusive', 'TypeOK'},
     'StartupTokenVisibility': {'CreatedFilePrivate', 'FileIdentityFrozen', 'HistoryVisibility', 'InvalidFileNeverEmits', 'TypeOK'},
+    'KMSBootstrapTransaction': {'AdmissionRequired', 'CommitAuthorized', 'OperationAuthorized', 'PeerFrame', 'PreCommitFrame', 'PublishedAfterCommit', 'RejectedDurableFrame', 'SuccessComplete', 'SuccessfulScope', 'TypeOK'},
+    'KMSAliasCatalog': {'AcknowledgedSuccess', 'AdmissionBudgets', 'ConcreteTarget', 'ContinuationAfterLast', 'CreationIdentity', 'CursorBound', 'FailureFrame', 'ListAuthorized', 'ListMoreExact', 'ListPageExact', 'MutationAuthority', 'MutationEffect', 'NoPartialRead', 'PeerRegionFrame', 'ReadFrame', 'RevisionFresh', 'TypeOK'},
     'KMSAliasCrypto': {'AliasResolutionCurrent', 'AuthorizationBeforeMismatch', 'AuthorizedCryptoStages', 'ConcreteKeyAuthorization', 'DecryptCounterFrame', 'EncryptCounterExact', 'FailureCounterFrame', 'FailureNoPublication', 'NoPublicationBeforeCommit', 'OmittedDecryptUsesBlob', 'PublishedKeyBound', 'TransactionSnapshotStable', 'TypeOK', 'WriteFailureRefused'},
     'KMSAliasesViewEpoch': {'AckClearsDraft', 'AckClosesForm', 'ClosedFormHasNoTarget', 'CurrentListOutcome', 'CurrentTargetMetadata', 'DeleteRequiresExactConfirmation', 'LocalePreservesIntent', 'NoCachedRowsOnFailure', 'OnlyVerifiedTargetSubmitted', 'ReadRetryNeverWrites', 'TypeOK'},
 }
 # Established controls require an explicit gate-policy change before retirement.
 REQUIRED_MUTANTS = {
-    'KMSBootstrapTransaction': {'PublishBeforeCommit', 'CommitAfterFailure', 'PersistSchemaAtBootstrap', 'BypassActionPermission', 'BypassAliasPermission', 'BypassKeyPermission', 'CommitWrongRegion', 'DiscardPeerCursor', 'PersistCursorAtBootstrap', 'OperationNoEffect', 'PersistDeniedBootstrap', 'BypassInvalidAdmission', 'BypassMissingPolicy'},
-    'KMSAliasCatalog': {'OmitAliasCreatePermission', 'OmitNewKeyCreatePermission', 'OmitOldKeyUpdatePermission', 'OmitNewKeyUpdatePermission', 'OmitDeleteTargetPermission', 'AliasAsTarget', 'CrossRegionMutation', 'ReplaceCreationOnUpdate', 'IgnoreGlobalCap', 'IgnorePerKeyCap', 'DirtyFailedCommit', 'IgnoreWriteAcknowledgement', 'OmitRevisionAdvance', 'IgnoreCursorRevision', 'IgnoreCursorAuthority', 'BypassMACIntegrity', 'IgnoreCursorFilter', 'IgnoreCursorLimit', 'InclusiveResume', 'PublishPartialReadFailure', 'FilterAfterLimit', 'OmitListPermission', 'MissingContinuation', 'StaleContinuationPosition'},
+    'DynamoDBConsoleEpoch': {'ACKKeepsDraft', 'ACKKeepsForm', 'CancelKeepsLoading', 'IgnorePostReadGeneration', 'IgnoreReadViewGuard', 'IgnoreWriteViewGuard', 'KeepDisplayedItemOnKeyEdit', 'LocaleClearsDirtyDraft', 'RemoveSynchronousOwnerLock', 'RetryRepeatsWrite'},
     'SecretVersionListing': {'AuthorityKeyBypass', 'AuthorizationBypass', 'DomainBypass', 'ExpiryBypass', 'FilterAfterLimit', 'FilterBindingBypass', 'GenerationBindingBypass', 'InclusiveResume', 'MissingNextToken', 'ReadWritesVersionState', 'RegionBindingBypass', 'SignatureBypass', 'StaleNextPosition'},
     'NativeWireProjection': {'AcceptBadValue', 'CollapseNullToZero', 'EncodeOmittedBad', 'IgnoreOmission', 'PublishErrorPrefix', 'ReverseFieldOrder'},
     'RESTRouteMatching': {'AllowEmptyGreedy', 'BadRejectedScore', 'FirstDuplicateCaptureWins', 'IgnoreLiteral', 'LoseSpecificity', 'TruncateGreedy'},
@@ -88,16 +88,19 @@ REQUIRED_MUTANTS = {
     'SecretsVersionLifecycle': {'OmitCreatePermission', 'OmitReadGenerationBinding', 'OmitReadTeamBinding', 'OverwriteConflictingVersion', 'RetainDeletedVersions', 'RetainPreviousLabelOnPromote'},
     'StackOwnership': {'ReclaimDriftedResource'},
     'StartupTokenVisibility': {'OmittedCIGuard', 'OmittedTTYGuard', 'OverwriteExistingToken'},
+    'KMSBootstrapTransaction': {'BypassActionPermission', 'BypassAliasPermission', 'BypassInvalidAdmission', 'BypassKeyPermission', 'BypassMissingPolicy', 'CommitAfterFailure', 'CommitWrongRegion', 'DiscardPeerCursor', 'OperationNoEffect', 'PersistCursorAtBootstrap', 'PersistDeniedBootstrap', 'PersistSchemaAtBootstrap', 'PublishBeforeCommit'},
+    'KMSAliasCatalog': {'AliasAsTarget', 'BypassMACIntegrity', 'CrossRegionMutation', 'DirtyFailedCommit', 'FilterAfterLimit', 'IgnoreCursorAuthority', 'IgnoreCursorFilter', 'IgnoreCursorLimit', 'IgnoreCursorRevision', 'IgnoreGlobalCap', 'IgnorePerKeyCap', 'IgnoreWriteAcknowledgement', 'InclusiveResume', 'MissingContinuation', 'OmitAliasCreatePermission', 'OmitDeleteTargetPermission', 'OmitListPermission', 'OmitNewKeyCreatePermission', 'OmitNewKeyUpdatePermission', 'OmitOldKeyUpdatePermission', 'OmitRevisionAdvance', 'PublishPartialReadFailure', 'ReplaceCreationOnUpdate', 'StaleContinuationPosition'},
     'KMSAliasCrypto': {'AllowMidTransactionRetarget', 'AuthorizeAliasResource', 'BypassConcreteKeyDenial', 'ChargeNeighborCounter', 'DecryptChangesCounter', 'IgnoreCiphertextMismatch', 'IgnoreCounterAcknowledgement', 'MismatchBeforeAuthorization', 'OmittedDecryptUsesLiveAlias', 'PersistOnFailedCommit', 'PublishBeforeCommit', 'PublishOnFailedCommit', 'UseStaleAliasTarget'},
     'KMSAliasesViewEpoch': {'BypassRetiredListLife', 'DeleteWithoutExactConfirmation', 'IgnoreSameLifeListRevision', 'IgnoreSelectedTargetRevision', 'KeepDraftAfterAcknowledgedWrite', 'KeepFormAfterAcknowledgedWrite', 'LocaleClearsUnsavedDraft', 'ReplayWriteOnReadRetry', 'RetainRowsOnCurrentReadFailure', 'RetainTargetMetadataOnCancel', 'SubmitWithoutVerifiedTarget'},
 }
 REQUIRED_SOURCE_SCOPES = {
-    'KMSBootstrapTransaction': {'internal/aws/kms_aliases.go', 'internal/aws/kms_http.go'},
-    'KMSAliasCatalog': {'internal/aws/kms_aliases.go'},
-    'SecretVersionListing': {'internal/aws/secrets_manager_versions_http_test.go', 'internal/aws/secret_http.go', 'internal/aws/secrets_manager_versions.go', 'internal/aws/secrets_manager_versions_test.go'},
+    'DynamoDBConsoleEpoch': {'internal/server/web/app.js', 'tools/console/src/dynamodb.jsx', 'tools/console/src/main.jsx'},
+    'SecretVersionListing': {'internal/aws/secret_http.go', 'internal/aws/secrets_manager_versions.go', 'internal/aws/secrets_manager_versions_http_test.go', 'internal/aws/secrets_manager_versions_test.go'},
     'NativeWireProjection': {'internal/aws/wire_json_projection.go'},
     'RESTRouteMatching': {'internal/aws/apirouting/path.go'},
     'RESTProxyEventBoundary': {'internal/aws/apirouting/event.go'},
+    'KMSBootstrapTransaction': {'internal/aws/kms_aliases.go', 'internal/aws/kms_http.go'},
+    'KMSAliasCatalog': {'internal/aws/kms_aliases.go'},
 }
 IDENTIFIER = re.compile(r'^[A-Za-z][A-Za-z0-9_]*$')
 

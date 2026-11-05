@@ -1,17 +1,17 @@
 {
   "version": 1,
-  "base_sha": "a8b920b264cf8060c6a49f7c4cd421a317ba94d2",
+  "base_sha": "74c93ea9b00818b83ea87d78a7946600ad823680",
   "changes": [
     {
       "path": "README.ja.md",
-      "sha256": "5cb1ebc006d583e754b3842f5af273c1d5dd284d5be5cacf755edae9a0b1560c",
+      "sha256": "fec7755f1659aeda3f81bdc5c29f8f9d9269ee0d3f3356859a5b3f058f5f71c4",
       "disposition": "documentation",
       "reason": "Document the current twelve-operation KMS subset, local customer aliases, separate bounded model scopes and exact-revision acceptance requirements; preserve rights/history and unsupported limits.",
       "models": []
     },
     {
       "path": "README.md",
-      "sha256": "e359caa21cca1bc8c5b9f3fd790f6e86e5b770d55123e1b42c1479711117f01b",
+      "sha256": "e3df6a029d3e6cf47f8cea07b59265ce9cd8ea37cb62754b86cd171bc525b089",
       "disposition": "documentation",
       "reason": "Document the current twelve-operation KMS subset, local customer aliases, separate bounded model scopes and exact-revision acceptance requirements; preserve rights/history and unsupported limits.",
       "models": []
@@ -27,7 +27,7 @@
       "path": "formal/KMSAliasCatalog.cfg",
       "sha256": "ddb1aaa22dd90ee4726c1453bc5d9a949139764cb98e4763986f4cb73a187faa",
       "disposition": "modeled",
-      "reason": "Register the exact independently checked bounded specification/configuration; named properties and semantic sensitivity controls are mandatory. Scoped execution evidence is not a fresh combined295-case result or native refinement proof.",
+      "reason": "Register exact finite specification/configuration with mandatory properties and semantic control IDs. Scoped author traces and independent source review are separate from the required new320-case immutable combined run and native implementation evidence.",
       "models": [
         {
           "id": "KMSAliasCatalog",
@@ -58,7 +58,7 @@
       "path": "formal/KMSAliasCatalog.tla",
       "sha256": "31cc7675ba200cac03c61a2b93a4d45c335ab2b8737d7de23df83c7f05a44a08",
       "disposition": "modeled",
-      "reason": "Register the exact independently checked bounded specification/configuration; named properties and semantic sensitivity controls are mandatory. Scoped execution evidence is not a fresh combined295-case result or native refinement proof.",
+      "reason": "Register exact finite specification/configuration with mandatory properties and semantic control IDs. Scoped author traces and independent source review are separate from the required new320-case immutable combined run and native implementation evidence.",
       "models": [
         {
           "id": "KMSAliasCatalog",
@@ -89,7 +89,7 @@
       "path": "formal/KMSAliasCrypto.cfg",
       "sha256": "baceb597f2a967cb5784a74beb127ff60800bdde8f7a7f432b274edd6c2d10c5",
       "disposition": "modeled",
-      "reason": "Register the exact independently checked bounded specification/configuration; named properties and semantic sensitivity controls are mandatory. Scoped execution evidence is not a fresh combined295-case result or native refinement proof.",
+      "reason": "Register exact finite specification/configuration with mandatory properties and semantic control IDs. Scoped author traces and independent source review are separate from the required new320-case immutable combined run and native implementation evidence.",
       "models": [
         {
           "id": "KMSAliasCrypto",
@@ -117,7 +117,7 @@
       "path": "formal/KMSAliasCrypto.tla",
       "sha256": "a1c944d072aa298a5e891a79d4acbf3e866352f16465e91a1fe343508988b38e",
       "disposition": "modeled",
-      "reason": "Register the exact independently checked bounded specification/configuration; named properties and semantic sensitivity controls are mandatory. Scoped execution evidence is not a fresh combined295-case result or native refinement proof.",
+      "reason": "Register exact finite specification/configuration with mandatory properties and semantic control IDs. Scoped author traces and independent source review are separate from the required new320-case immutable combined run and native implementation evidence.",
       "models": [
         {
           "id": "KMSAliasCrypto",
@@ -145,7 +145,7 @@
       "path": "formal/KMSAliasesViewEpoch.cfg",
       "sha256": "c59e76d2ed57685f7230a9da345ac5e8e8739421a7a5851c4ef631b73b091cf3",
       "disposition": "modeled",
-      "reason": "Register the exact independently checked bounded specification/configuration; named properties and semantic sensitivity controls are mandatory. Scoped execution evidence is not a fresh combined295-case result or native refinement proof.",
+      "reason": "Register exact finite specification/configuration with mandatory properties and semantic control IDs. Scoped author traces and independent source review are separate from the required new320-case immutable combined run and native implementation evidence.",
       "models": [
         {
           "id": "KMSAliasesViewEpoch",
@@ -170,7 +170,7 @@
       "path": "formal/KMSAliasesViewEpoch.tla",
       "sha256": "aa1a6994e460abee3a1ccc68a6f4e255d9ec8f25d2985bb5949dbe60191f87db",
       "disposition": "modeled",
-      "reason": "Register the exact independently checked bounded specification/configuration; named properties and semantic sensitivity controls are mandatory. Scoped execution evidence is not a fresh combined295-case result or native refinement proof.",
+      "reason": "Register exact finite specification/configuration with mandatory properties and semantic control IDs. Scoped author traces and independent source review are separate from the required new320-case immutable combined run and native implementation evidence.",
       "models": [
         {
           "id": "KMSAliasesViewEpoch",
@@ -192,17 +192,72 @@
       ]
     },
     {
+      "path": "formal/KMSBootstrapTransaction.cfg",
+      "sha256": "19bb43a88c9fc58fae50d2e85278ff5c954e2ef5402396f2ac1d97667ef745b2",
+      "disposition": "modeled",
+      "reason": "Register exact finite specification/configuration with mandatory properties and semantic control IDs. Scoped author traces and independent source review are separate from the required new320-case immutable combined run and native implementation evidence.",
+      "models": [
+        {
+          "id": "KMSBootstrapTransaction",
+          "properties": [
+            "TypeOK",
+            "PreCommitFrame",
+            "RejectedDurableFrame",
+            "AdmissionRequired",
+            "OperationAuthorized",
+            "CommitAuthorized",
+            "PublishedAfterCommit",
+            "SuccessfulScope",
+            "PeerFrame",
+            "SuccessComplete"
+          ],
+          "limits": "Intended HTTP transaction seam; base eb03 has confirmed constructor persistence bug; repaired c4d412f source inspected separately, not refinement-proven. Trusted host public NewKMSAliasStore explicitly initializes state and is EXCLUDED from denied HTTP no-write contract. Two regions, one request, optional global logical schema and per-region cursor-row membership; region data is one abstract operation effect bit, not alias CRUD/crypto correctness. Action/alias/key Boolean requirements model bounded operations requiring all three; ListAliases only-action projection is represented by other permissions TRUE, not assertion all operations require alias and key authorization. valid is early wire admission; lateValid is separate target/marker admission after tentative initialization and authorization; no byte/JSON/marker-MAC/SQLite/DDL/Go/HTTP-auth refinement. Captured immutable pure policy, single transaction; no adversarial policy mutation or authorization-before-target-lookup promise. Schema frame is logical table/row state, not WAL/page-byte identity or zero SQL syscall guarantee. Scoped SANY+baseline+13 controls passed at6278443; native Go validation belongs to independent author receipts, not model refinement. Native repair c4d412f source seam independently reviewed; early/late validation order is abstract, not native error-precedence refinement. Scoped627 proof is independent, not canonical current registry proof."
+        }
+      ]
+    },
+    {
+      "path": "formal/KMSBootstrapTransaction.tla",
+      "sha256": "de6d8132c0a4fa623e0734fa7d9fbcd337b058ea1892f741001bf38eb0971d15",
+      "disposition": "modeled",
+      "reason": "Register exact finite specification/configuration with mandatory properties and semantic control IDs. Scoped author traces and independent source review are separate from the required new320-case immutable combined run and native implementation evidence.",
+      "models": [
+        {
+          "id": "KMSBootstrapTransaction",
+          "properties": [
+            "TypeOK",
+            "PreCommitFrame",
+            "RejectedDurableFrame",
+            "AdmissionRequired",
+            "OperationAuthorized",
+            "CommitAuthorized",
+            "PublishedAfterCommit",
+            "SuccessfulScope",
+            "PeerFrame",
+            "SuccessComplete"
+          ],
+          "limits": "Intended HTTP transaction seam; base eb03 has confirmed constructor persistence bug; repaired c4d412f source inspected separately, not refinement-proven. Trusted host public NewKMSAliasStore explicitly initializes state and is EXCLUDED from denied HTTP no-write contract. Two regions, one request, optional global logical schema and per-region cursor-row membership; region data is one abstract operation effect bit, not alias CRUD/crypto correctness. Action/alias/key Boolean requirements model bounded operations requiring all three; ListAliases only-action projection is represented by other permissions TRUE, not assertion all operations require alias and key authorization. valid is early wire admission; lateValid is separate target/marker admission after tentative initialization and authorization; no byte/JSON/marker-MAC/SQLite/DDL/Go/HTTP-auth refinement. Captured immutable pure policy, single transaction; no adversarial policy mutation or authorization-before-target-lookup promise. Schema frame is logical table/row state, not WAL/page-byte identity or zero SQL syscall guarantee. Scoped SANY+baseline+13 controls passed at6278443; native Go validation belongs to independent author receipts, not model refinement. Native repair c4d412f source seam independently reviewed; early/late validation order is abstract, not native error-precedence refinement. Scoped627 proof is independent, not canonical current registry proof."
+        }
+      ]
+    },
+    {
       "path": "formal/README.md",
-      "sha256": "61c3133638dbcd5a4fee487109fefa25010489e2448d8a2dbc8a9252ab9a7968",
+      "sha256": "65982a74e268a7437d1d8fff1ab16962c4888efd594fcab311bae2e47d7ed492",
       "disposition": "documentation",
       "reason": "Document the current twelve-operation KMS subset, local customer aliases, separate bounded model scopes and exact-revision acceptance requirements; preserve rights/history and unsupported limits.",
       "models": []
     },
     {
       "path": "formal/models.json",
-      "sha256": "c862384f2775148ee7cf20674501ab66730a3852da286a3d8ce8877ed3f1c552",
+      "sha256": "4416d7fb49f470ba9c3ce32fa8caf058f2b8be67316982a4b8fe675c0f43444e",
       "disposition": "formal-infrastructure",
       "reason": "Add mandatory registry/model/property/control inventories and individual-removal negatives without changing existing checker semantics, tool pins, bounds, timeouts or prior models.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/kms_alias_failure_frames_test.go",
+      "sha256": "9a258e737ee4ad62f25057394ce03d007bbcc0f5032e82c9041a555c387bbed7",
+      "disposition": "test-support",
+      "reason": "Add real known-policy cold native/SDK denial frames including schema and cursor authority, borrowed transaction ownership, query/metadata/commit faults and repair. Preserve old assertions; no mocks, credential output, lowered floors, timeout changes or proof-by-test-count.",
       "models": []
     },
     {
@@ -214,9 +269,9 @@
     },
     {
       "path": "internal/aws/kms_aliases.go",
-      "sha256": "2778bc1e48106cd110b736734bec4f2c9d5f0a8970cf3700d54a9ff4bfb7e750",
+      "sha256": "f956e50ba6d4adb25b2838dc4e169ac4d72b735466d338512ebe9342c8c4ff93",
       "disposition": "modeled",
-      "reason": "Catalog CRUD authorization/admission, atomic acknowledgment/revision/cursor frames and separately alias-resolved concrete-key crypto stages. Native tests/SDK separately exercise SQLite/codec/actual policy; models are bounded projections, not complete file/refinement proof.",
+      "reason": "Three separate finite contracts: native alias catalog admission/cursor/failure frames; concrete-key crypto authorization/commit; and first-use HTTP bootstrap, authorization, operation and publication in one caller-owned transaction. Trusted public initializing constructor is excluded from denied-HTTP no-write scope. Real cold known-policy403/schema+allrows, real SQLite faults and SDK independently exercise the concrete bridge; not Go/SQL refinement.",
       "models": [
         {
           "id": "KMSAliasCatalog",
@@ -260,6 +315,22 @@
             "DecryptCounterFrame"
           ],
           "limits": "New alias selection/concrete authorization/ciphertext match/commit publication finite projection. Not AES/nonce/HMAC, raw ARN/JSON/SigV4/IAM parsing, host authority, arbitrary policies, actualSQLite locking/commit/Go refinement, retries/unbounded history, alias CRUD/capacity/pagination or full lifecycle proof. Trusted authorizer is pure captured policy or SELECT on provided transaction; immediate transaction serialization is an assumption grounded in current core store, not proved. Native crypto/error classes abstract existing KMS helper behavior. Choose phase guard is factored outside its binder by exact logical equivalence, not a state-space reduction."
+        },
+        {
+          "id": "KMSBootstrapTransaction",
+          "properties": [
+            "TypeOK",
+            "PreCommitFrame",
+            "RejectedDurableFrame",
+            "AdmissionRequired",
+            "OperationAuthorized",
+            "CommitAuthorized",
+            "PublishedAfterCommit",
+            "SuccessfulScope",
+            "PeerFrame",
+            "SuccessComplete"
+          ],
+          "limits": "Intended HTTP transaction seam; base eb03 has confirmed constructor persistence bug; repaired c4d412f source inspected separately, not refinement-proven. Trusted host public NewKMSAliasStore explicitly initializes state and is EXCLUDED from denied HTTP no-write contract. Two regions, one request, optional global logical schema and per-region cursor-row membership; region data is one abstract operation effect bit, not alias CRUD/crypto correctness. Action/alias/key Boolean requirements model bounded operations requiring all three; ListAliases only-action projection is represented by other permissions TRUE, not assertion all operations require alias and key authorization. valid is early wire admission; lateValid is separate target/marker admission after tentative initialization and authorization; no byte/JSON/marker-MAC/SQLite/DDL/Go/HTTP-auth refinement. Captured immutable pure policy, single transaction; no adversarial policy mutation or authorization-before-target-lookup promise. Schema frame is logical table/row state, not WAL/page-byte identity or zero SQL syscall guarantee. Scoped SANY+baseline+13 controls passed at6278443; native Go validation belongs to independent author receipts, not model refinement. Native repair c4d412f source seam independently reviewed; early/late validation order is abstract, not native error-precedence refinement. Scoped627 proof is independent, not canonical current registry proof."
         }
       ]
     },
@@ -354,7 +425,7 @@
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "78849432a86c5d9ce9fdfe1aed038b8b1fb1866962b20d2eeface647fde7fc94",
+      "sha256": "ec404a983bb2b2c9b32ac07809c71e44f83b1ee4798bc460160d9f7b4d528771",
       "disposition": "modeled",
       "reason": "Canonical compiled output of the added aliases component/mount; verified build-input/asset hashes establish correspondence. The finite model does not execute/prove minified JavaScript, compiler correctness, CSS or unrelated bundled services.",
       "models": [
@@ -379,21 +450,21 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "c356aaafe1ba7cd7045ad886be54f9e2e30d95c2869801b43876b7ff32b84895",
+      "sha256": "9044b6f95ab46e4f6cc8b1450b3ed3a66cac4c7383ff2e1eda1e684c7515ec8c",
       "disposition": "formal-infrastructure",
       "reason": "Add mandatory registry/model/property/control inventories and individual-removal negatives without changing existing checker semantics, tool pins, bounds, timeouts or prior models.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "5af95b491db7b6586afcaed7cd78dba00f9ec1702f48b2b421cf406e395c7fce",
+      "sha256": "366c0ba0c7d6934d61f177fcd9f4c772ae8f032c73314ca96bb8b0e2d78a7c66",
       "disposition": "formal-infrastructure",
       "reason": "Add mandatory registry/model/property/control inventories and individual-removal negatives without changing existing checker semantics, tool pins, bounds, timeouts or prior models.",
       "models": []
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "5a2daf99a7ea25fc022c3a5dc299b102149af213978a927135341fddf096ccc6",
+      "sha256": "c8ea9de2e2ec3db290dc8808c0bbeff73260cbe4a59c553cc3e3c50ca9411de6",
       "disposition": "test-support",
       "reason": "Preserve all existing acceptance assertions and add literal alias schemas, actual native SDK/shared-state and mounted UI regressions; tests support concrete contracts without substituting for formal or whole-quality evidence.",
       "models": []
@@ -414,7 +485,7 @@
     },
     {
       "path": "test/e2e/kms_aliases.py",
-      "sha256": "938e7b0c98c15062f7811fa0f2c9685c915c0d3cc9a2bd4ffe228682f993dcf0",
+      "sha256": "fc68148cdf07b56f7bdc676b105b27f0edd4dc481a1a66c2969aca9952c19782",
       "disposition": "test-support",
       "reason": "Preserve all existing acceptance assertions and add literal alias schemas, actual native SDK/shared-state and mounted UI regressions; tests support concrete contracts without substituting for formal or whole-quality evidence.",
       "models": []
@@ -435,14 +506,14 @@
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "adde59aca2c5f86170357519e130677afdafab0a087a1743b716de6a7c2df9c5",
+      "sha256": "21d138181259958d0788d1fdc6f0e00c6607ffa41a1709866a521bd1fa9c9935",
       "disposition": "presentation",
       "reason": "Static API/schema/example or canonical console build-input/digest declaration. Preserve existing operation IDs, all main examples/media and original dependency rights; this metadata is not an API/state implementation proof.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "95f729df93ff4cbe24aff2f2af1a136a50d2d59db3e1425ce32079da2c315095",
+      "sha256": "1a168354eb376473de8813781fba2379b4aa49894dd817238f14318812dbb397",
       "disposition": "presentation",
       "reason": "Static API/schema/example or canonical console build-input/digest declaration. Preserve existing operation IDs, all main examples/media and original dependency rights; this metadata is not an API/state implementation proof.",
       "models": []
@@ -499,7 +570,7 @@
     },
     {
       "path": "tools/console/src/main.jsx",
-      "sha256": "9258b9891cb66567028cc1eecc4c599e13a688ede7a157437503f8f52866c767",
+      "sha256": "398113fc766beb1f536efa61277f5aeab8b75a38f35c688747d1ea9062668c89",
       "disposition": "modeled",
       "reason": "Only passes the actual selected principal to the KMS view, whose existing parent key retires context on region/principal/navigation. This binding covers the aliases mount identity seam, not other services, login, request transport or all navigation.",
       "models": [
