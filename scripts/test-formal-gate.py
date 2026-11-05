@@ -476,7 +476,7 @@ class FormalGateTests(unittest.TestCase):
         original = path.read_text()
         registry = json.loads(original)
         self.assertEqual(set(REQUIRED_MUTANTS), BASE_MODELS)
-        self.assertEqual(sum(map(len, REQUIRED_MUTANTS.values())), 197)
+        self.assertEqual(sum(map(len, REQUIRED_MUTANTS.values())), 210)
         self.assertEqual({m['id']: {c['id'] for c in m['mutants']} for m in registry['models']}, REQUIRED_MUTANTS)
         for model in registry['models']:
             for mutant in model['mutants']:
@@ -493,7 +493,7 @@ class FormalGateTests(unittest.TestCase):
     def test_every_required_control_is_protected_against_single_removal(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
-        self.assertEqual(sum(len(v) for v in REQUIRED_MUTANTS.values()), 197)
+        self.assertEqual(sum(len(v) for v in REQUIRED_MUTANTS.values()), 210)
         for model_id, controls in REQUIRED_MUTANTS.items():
             for control in controls:
                 with self.subTest(model=model_id, control=control):
