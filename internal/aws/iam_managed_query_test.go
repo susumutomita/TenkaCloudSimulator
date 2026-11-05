@@ -5,6 +5,10 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"encoding/xml"
+	"errors"
+	"go/ast"
+	"go/parser"
+	"go/token"
 	"net/http/httptest"
 	"net/url"
 	"strings"
@@ -234,6 +238,109 @@ func TestIAMManagedQueryCursorParentGenerationAndCanonicalJSON(t *testing.T) {
 	for _, bad := range [][]byte{append([]byte(" "), data...), []byte(strings.Replace(string(data), `"scope":"Local"`, `"scope":"Local","scope":"Local"`, 1)), []byte(strings.Replace(string(data), `"scope"`, `"Scope"`, 1))} {
 		if _, err := iamManagedQueryDecodeMarker(base64.RawURLEncoding.EncodeToString(bad), iamManagedQueryMarker{Action: "ListPolicies", Scope: "Local", Prefix: "/"}); err == nil {
 			t.Fatal("noncanonical cursor accepted")
+		}
+	}
+}
+
+// This deterministic boundary test is not a claim of scheduling two HTTP calls
+// at an uninstrumented exact point. It freezes the actual IAM preauthorization,
+// replaces the saved role generation, then exercises the real transaction ports.
+func TestIAMManagedQueryPreauthorizedGenerationCannotAdoptReplacement(t *testing.T) {
+	p := newManagedQueryProbe(t)
+	ctx := context.Background()
+	policy := p.create("GenerationFence")
+	p.role("CaseVictim")
+	saved, err := p.gateway.Roles.Get(ctx, "CaseVictim")
+	if err != nil {
+		t.Fatal(err)
+	}
+	grant, err := core.ParsePolicy([]byte(`{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["iam:AttachRolePolicy","iam:DetachRolePolicy","iam:ListAttachedRolePolicies"],"Resource":"arn:aws:iam::000000000000:role/CaseVictim"}]}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = p.gateway.Identities.Set("preauthorizer", grant); err != nil {
+		t.Fatal(err)
+	}
+	for _, action := range []string{"AttachRolePolicy", "DetachRolePolicy", "ListAttachedRolePolicies"} {
+		decision, e := p.gateway.Identities.DecisionContext(ctx, "preauthorizer", "iam:"+action, saved.Arn)
+		if e != nil || decision != "allowed" {
+			t.Fatal("old canonical authorization was not established", e)
+		}
+	}
+	p.call("DeleteRole", "", url.Values{"RoleName": {"CaseVictim"}}, 200, "DeleteRoleResponse")
+	p.role("CASEVICTIM")
+	current, err := p.gateway.Roles.Get(ctx, "CaseVictim")
+	if err != nil || current.RoleID == saved.RoleID || current.Arn == saved.Arn {
+		t.Fatal("replacement did not create distinct generation/resource", err)
+	}
+	for _, action := range []string{"AttachRolePolicy", "DetachRolePolicy", "ListAttachedRolePolicies"} {
+		decision, e := p.gateway.Identities.DecisionContext(ctx, "preauthorizer", "iam:"+action, current.Arn)
+		if e != nil || decision != "implicitDeny" {
+			t.Fatal("new canonical ARN unexpectedly authorized", e)
+		}
+	}
+	p.call("AttachRolePolicy", "", url.Values{"RoleName": {"CASEVICTIM"}, "PolicyArn": {policy.Arn}}, 200, "AttachRolePolicyResponse")
+	before := managedFrame(t, p.gateway.Store.Database())
+	checks := []func() error{
+		func() error { return p.gateway.Roles.AttachRolePolicy(ctx, saved.RoleName, policy.Arn, saved.RoleID) },
+		func() error { return p.gateway.Roles.DetachRolePolicy(ctx, saved.RoleName, policy.Arn, saved.RoleID) },
+		func() error {
+			_, _, e := p.gateway.Roles.AttachedRolePolicies(ctx, saved.RoleName, "", 100, saved.RoleID)
+			return e
+		},
+	}
+	for _, check := range checks {
+		var failure ssmFailure
+		if e := check(); !errors.As(e, &failure) || failure.code != "NoSuchEntity" {
+			t.Fatal("stale preauthorization did not fail closed")
+		}
+		if managedFrame(t, p.gateway.Store.Database()) != before {
+			t.Fatal("stale generation call changed IAM frame")
+		}
+	}
+}
+
+// Guard the actual HTTP composition: an internal trusted call may omit the
+// optional fence, but no native Query port may drop its preauthorized RoleID.
+func TestIAMManagedQueryAllRolePortsCarryPreauthorizedID(t *testing.T) {
+	tree, err := parser.ParseFile(token.NewFileSet(), "iam_managed_query.go", nil, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	expected := map[string]int{"AttachRolePolicy": 4, "DetachRolePolicy": 4, "AttachedRolePolicies": 5}
+	seen := map[string]int{}
+	ast.Inspect(tree, func(node ast.Node) bool {
+		call, ok := node.(*ast.CallExpr)
+		if !ok {
+			return true
+		}
+		selector, ok := call.Fun.(*ast.SelectorExpr)
+		if !ok {
+			return true
+		}
+		count, needed := expected[selector.Sel.Name]
+		if !needed {
+			return true
+		}
+		seen[selector.Sel.Name]++
+		if len(call.Args) != count {
+			t.Error("Query omitted generation argument", selector.Sel.Name)
+			return true
+		}
+		last, ok := call.Args[count-1].(*ast.SelectorExpr)
+		if !ok || last.Sel.Name != "RoleID" {
+			t.Error("Query did not bind saved RoleID", selector.Sel.Name)
+			return true
+		}
+		parent, ok := last.X.(*ast.Ident)
+		if !ok || parent.Name != "role" {
+			t.Error("Query did not bind preauthorized role snapshot", selector.Sel.Name)
+		}
+		return true
+	})
+	for name := range expected {
+		if seen[name] != 1 {
+			t.Error("Expected exactly one managed Query role port", name)
 		}
 	}
 }
