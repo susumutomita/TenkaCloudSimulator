@@ -23,33 +23,6 @@ type ProxyRequest struct {
 	PathParameters, StageVariables              map[string]string
 }
 
-// ProxyEventV1 and ProxyContextV1 describe the supported public wire fields.
-// Identity/authorizer/domain/time fields and binary media are not implemented.
-type ProxyEventV1 struct {
-	Resource                        string              `json:"resource"`
-	Path                            string              `json:"path"`
-	HTTPMethod                      string              `json:"httpMethod"`
-	Headers                         map[string]string   `json:"headers"`
-	MultiValueHeaders               map[string][]string `json:"multiValueHeaders"`
-	QueryStringParameters           map[string]string   `json:"queryStringParameters"`
-	MultiValueQueryStringParameters map[string][]string `json:"multiValueQueryStringParameters"`
-	PathParameters                  map[string]string   `json:"pathParameters"`
-	StageVariables                  map[string]string   `json:"stageVariables"`
-	RequestContext                  ProxyContextV1      `json:"requestContext"`
-	Body                            string              `json:"body"`
-	IsBase64Encoded                 bool                `json:"isBase64Encoded"`
-}
-
-type ProxyContextV1 struct {
-	ResourcePath string `json:"resourcePath"`
-	HTTPMethod   string `json:"httpMethod"`
-	Path         string `json:"path"`
-	APIID        string `json:"apiId"`
-	Stage        string `json:"stage"`
-	RequestID    string `json:"requestId"`
-	AccountID    string `json:"accountId"`
-}
-
 var errEventBudget = errors.New("encoded REST proxy event exceeds the local Lambda event limit")
 
 // The encoder's terminal newline is allowed separately from the event budget.

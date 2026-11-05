@@ -74,8 +74,8 @@ func TestOriginalEventProjectionFieldSetAndInputFrame(t *testing.T) {
 	if bytes.Contains(data, []byte("host-only")) || bytes.HasSuffix(data, []byte("\n")) {
 		t.Fatal("transport authority or serializer terminator entered the event")
 	}
-	var event ProxyEventV1
-	if err := json.Unmarshal(data, &event); err != nil {
+	event, err := observeProxyJSON(data)
+	if err != nil {
 		t.Fatal(err)
 	}
 	if event.HTTPMethod != http.MethodPatch || event.Body != "<application>\n日本語" || event.Path != "/actual" || event.Resource != "/{id}" || event.RequestContext.Path != "/prod/actual" {
@@ -101,6 +101,10 @@ func TestOriginalEventProjectionFieldSetAndInputFrame(t *testing.T) {
 		if _, exists := fields[key]; !exists {
 			t.Fatal("required event field omitted", key)
 		}
+	}
+	var observedPathParameters map[string]string
+	if err := json.Unmarshal(fields["pathParameters"], &observedPathParameters); err != nil || !reflect.DeepEqual(observedPathParameters, beforePath) || !reflect.DeepEqual(event.StageVariables, beforeStage) {
+		t.Fatal("owned routing maps changed in the event", observedPathParameters, event.StageVariables, err)
 	}
 	var context map[string]json.RawMessage
 	if err := json.Unmarshal(fields["requestContext"], &context); err != nil || len(context) != 7 {
