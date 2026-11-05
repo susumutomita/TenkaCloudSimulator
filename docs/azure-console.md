@@ -178,3 +178,34 @@ modal. Combined-head execution remains pending after this normal merge.
 Primary API reference: [Get Blob Properties](https://learn.microsoft.com/en-us/rest/api/storageservices/get-blob-properties).
 Authenticated Azure Portal pixels, broader Azure RBAC/ARM and unsupported system
 properties remain unverified or unavailable; no actual cloud resource is used.
+
+## Local Container Properties follow-up (not yet integrated)
+
+The private follow-up adds a read-only **More → Container properties** action
+for a selected row in the Containers list. The container name link still opens
+its blobs; Blob Properties keeps its existing fields and heading. The new pane
+uses the existing native `HEAD .../{container}?restype=container`, with the
+configured API version and unchanged local subject authorization. It displays
+only the returned ETag, Last-Modified and supported metadata, plus the selected
+container name. It does not enumerate blobs, fetch blob content or infer a
+container size from HTTP Content-Length.
+
+Loading, errors and Close clear old properties; the shared epoch/abort lifetime
+and explicit target kind keep container and blob data separate. Metadata remains
+text, not HTML or translation keys. Container HEAD does not supply BlobType or
+Content-Type, so those blob-only fields are not required or invented. Container
+metadata editing, GET compatibility expansion, SAS, leases, Azure RBAC, account
+management, public-access settings and legal holds are outside this follow-up.
+
+`test/e2e/azure_container_properties.py` will exercise actual local responses,
+empty and bounded metadata, explicit dummy delete/recreate after listing,
+denied/missing/error cases, Close/reopen, same-name blob versus container, locale,
+peer preservation, keyboard and desktop/mobile accessibility. Source preparation
+is not a successful runtime or formal result. The existing Blob Properties
+regression must also pass unchanged. The integration owner must review model
+target-kind correspondence and register mandatory tests/assets/applicability
+before any completion claim.
+
+References: [Portal container properties](https://learn.microsoft.com/en-us/azure/storage/blobs/blob-containers-portal)
+and [Get Container Properties](https://learn.microsoft.com/en-us/rest/api/storageservices/get-container-properties).
+Only public documentation has been inspected, not an authenticated Azure Portal.
