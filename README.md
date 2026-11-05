@@ -103,8 +103,9 @@ SQS permits at most 10,000 physical message rows and 64 MiB of UTF-8 bodies plus
 serialized attribute JSON across the process, including expired rows not yet
 collected. This is not the SQLite file size, process-memory usage, or AWS billing
 size. Other Google Cloud/Azure services are not implemented. An explicit opt-in
-[Sakura Disk metadata API](docs/sakura.md) is available without VM/block storage
-or a Sakura console; it is disabled by default. Using
+[Sakura Disk configuration API and console](docs/sakura.md) support local metadata only,
+without VM or block storage. The provider is disabled by default; explicit
+host scope enables Sakura Cloud → Disks alongside the other cloud selectors. Using
 Cloudscape does not establish full AWS console fidelity or completed comparison
 against authenticated cloud consoles.
 
@@ -164,8 +165,9 @@ not permission grants. See [IAM details](docs/iam.md).
 
 After signing in, open `/_simulator/docs/`. Examples are **static documentation,
 not current saved state**. Navigation separates AWS, Google Cloud, Azure and a
-Sakura console-unavailable status. The optional [Sakura Disk native API](docs/sakura.md)
-is separate from that unimplemented console/reference surface. Shared AWS endpoint guides explain the
+Sakura Disk configuration section. Its [five native Disk operations](docs/sakura.md)
+require the explicitly enabled local provider and configured owner; documentation
+discovery does not enable it or grant permission. Shared AWS endpoint guides explain the
 required routing fields; see [reference navigation](docs/api-reference.md).
 Use **Test Request → Send** to inspect the real status,
 headers and body. Native formats remain intact: S3 XML/bytes, SSM JSON 1.1,
@@ -245,9 +247,9 @@ not binary runtime dependencies. Regeneration must preserve locks and original
 rights: [console](tools/console/README.md), [Scalar](tools/scalar/README.md),
 [Python/WASI runtime](tools/python/README.md).
 
-The registry contains 37 finite models and 245 deliberate defect controls
-(282 required model/check executions), including three Sakura metadata/admission/startup
-models. Registration is not an integrated-revision execution receipt. The new IAM scenario checks two requests
+The registry contains 39 finite models and 272 deliberate defect controls
+(311 required model/check executions), including four Sakura metadata/admission/startup/view
+models and the preserved DynamoDB console model. Registration is not an integrated-revision execution receipt. The new IAM scenario checks two requests
 from each of four reachable seeds. A broader four-request trial timed out and
 is not claimed as verified. TLC examines bounded safety properties and checks
 that targeted mutants produce real counterexamples. It does not prove Go/JS

@@ -4,8 +4,9 @@ Sakura is **disabled by default**. This optional provider implements five local
 IaaS API 1.1 Disk configuration operations. It does not allocate storage, create
 VMs, attach disks, boot an OS, provide SSH/block I/O, or report physical
 `Availability`. The local Scalar reference documents only these five Disk
-operations. Console availability is a separate capability; this reference makes
-no claim of real Sakura console workflow or fidelity.
+operations. The original local configuration console uses the same five native
+operations and configured owner. Neither the console nor this reference claims
+authenticated real Sakura console fidelity.
 Object Storage management and its separate S3-compatible API, Server, networking
 and AppRun are unsupported; AWS CreateBucket is not Sakura Object Storage.
 
@@ -136,11 +137,14 @@ credentials, default endpoint rewriting, retries, waiters or real-cloud behavior
 The initial real SDK501 for its no-icon default was preserved before the narrow
 compatibility fix. No console materials or real cloud resources were used.
 
-The registered `SakuraDiskMetadata` and `SakuraDiskAdmission` add22 controls;
-`SakuraStartupAdmission` adds13 more (37 baselines +245 controls =282 executions).
-All main34 models/210 controls and both earlier Sakura model objects are retained.
-The author previously ran the two scoped baselines and22 controls. A complete
-immutable282-case execution on the integrated revision is still required.
+The current registry has39 baselines and272 controls (311 executions), preserving
+main35/220. SakuraDiskMetadata/SakuraDiskAdmission add22 controls,
+SakuraStartupAdmission adds13 and SakuraDisksViewEpoch adds17. All four scoped
+baselines and52 controls passed separately; the full integrated311 cases remain
+pending. Historical282-case source registrations are not current-revision proof.
+The UI model retains14 properties and the original15 faults; two targeted
+publication controls supplement the broad read-guard faults. Its first wrong
+expected invariant is retained, then all17 named controls produced real traces.
 Metadata models abstract atomic resource/allocator/binding/peer frames. Admission
 models validated common Actor mapping, fixed configured realm, dummy-marker and
 request/lookup ordering. The Startup model separately checks abstract parsed presence/validity, explicit
@@ -148,7 +152,7 @@ opt-in/authenticated-mode admission before effects, and the successful optional
 construction/registration sequence. Its initial TLC baseline stopped with an
 enumeration error before states; the same324-input finite domain was rewritten
 as explicit membership. Corrected source passed independent SANY, baseline and
-all13 named controls; integrated282-case execution is still required. The models do
+all13 named controls; integrated311-case execution is still required. The models do
 not prove private context keys, host token cryptography, concrete Go flag/regex/
 UTF8 parsing, exact JSON neutral markers, full Registry composition, later startup
 failures or cleanup, constructor atomicity, SQLite/locking/crashes, DB leases,
@@ -160,3 +164,18 @@ and [documented startup-script tuple](https://manual.sakura.ad.jp/cloud/startup-
 The compatibility client is the Apache-2.0 community
 [`sacloud-sdk-go` pinned source](https://github.com/sacloud/sacloud-sdk-go/tree/d8e98d8762e049e3ffd40bc70667cf9ad20029c0),
 not an official-service compatibility certification or a runtime engine.
+
+## Local Disk console
+
+After the provider is explicitly enabled, sign in with a host-issued participant
+credential whose trusted exercise identity matches `--sakura-owner`, then choose
+**Sakura Cloud → Disks**. The view lists real saved configurations and supports
+Create, name/description changes and confirmed Delete. The console shares the
+native API's SQLite authority, fixed project/environment/zone and quotas. It does
+not offer an owner selector, physical storage, attachment or VM operations.
+
+The separate UI acceptance ran native HTTP against two isolated local CLI/DB/token
+authorities at1440 and390 widths, including same-mount locale draft preservation,
+real read-after-ACK failure/retry and consumed older-body rejection. Both widths
+had zero serious/critical axe findings and no external requests. These focused
+receipts do not replace current combined Go/E2E/formal/hosted verification.

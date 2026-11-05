@@ -1,15 +1,18 @@
 # Finite state model
 
-Current registry: 37 models / 245 literal-protected controls
-(282 required executions). All main34 model objects, TLA/CFG bytes, properties
-and210 controls are preserved. SakuraDiskMetadata/SakuraDiskAdmission retain
-22 controls; SakuraStartupAdmission adds13 more. They cover bounded metadata,
-fixed binding/issued-ID/peer frames, validated Actor mapping/admission and parsed
-opt-in startup order. All three scoped baselines and35 controls passed separately;
-the current integrated immutable282-case gate is still pending. Startup's first
-TLC enumeration failure and its equivalent324-valuation correction are preserved.
-No CLI string/regex refinement, DB lease, Icon resource, constructor atomicity,
-physical storage/VM or Go implementation proof is implied. See [Sakura scope](../docs/sakura.md).
+Current registry: 39 models / 272 literal-protected controls
+(311 required executions). All main35 model objects, TLA/CFG bytes, properties
+and220 controls are preserved. Sakura metadata/admission/startup add35 controls;
+SakuraDisksViewEpoch adds17 more for request scope/sequence, stale frames,
+ACK/form exit, read-only retry and locale continuity. These four scoped baselines
+and52 controls passed separately. The integrated immutable311-case gate remains
+pending; registrations and independent source review do not substitute for it.
+The initial Startup enumeration failure and UI wrong-first-invariant attempt
+remain recorded. The UI retains its original15 faults and adds two targeted
+publication controls; all14 UI properties and bounds remain unchanged.
+No concrete parser/regex, DB lease, constructor atomicity, physical VM/storage,
+React/compiler/SQLite/Go refinement or authenticated console parity is implied.
+See [Sakura scope](../docs/sakura.md).
 The prior native projection/routing model bounds and properties remain intact.
 IAMManagedPolicies retains its four API-reachable seeds and two-request suffixes;
 the earlier four-request exploration timed out and is not claimed.
@@ -19,7 +22,7 @@ finite models do not prove Go/SQL/HTTP/UI refinement or complete cloud compatibi
 
 Legacy integration sections below retain historical counts and status statements
 for traceability. Their word “current” refers to the recorded integration, not
-today's registry. The authoritative current inventory is the 37/245 registry
+today's registry. The authoritative current inventory is the 39/272 registry
 above; proof claims always require evidence for the exact revision.
 
 `ObjectStore.tla` models two buckets and two keys, shared object ownership, create/put/delete transitions, and an abstract identity decision `allow /\ ~deny`. `ObjectStore.cfg` checks type correctness, no orphan objects, no unauthorized mutation, and explicit-deny precedence.
