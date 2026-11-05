@@ -116,7 +116,7 @@ def _run():
                         before=list(calls);locale('ja');expect(page.get_by_label('テーブル名',exact=True)).to_have_value(name);assert calls==before;locale('en')
                         audit('create-table-draft');native('Create table','CreateTable');expect(page.get_by_role('heading',name=name,exact=True)).to_be_visible()
                         meta=own.describe_table(TableName=name)['Table'];assert meta['KeySchema']==schema['KeySchema'];assert meta['BillingModeSummary']['BillingMode']=='PAY_PER_REQUEST'
-                        page.get_by_role('tab',name='Explore items',exact=True).click();page.get_by_role('button',name='Create item',exact=True).click();page.get_by_label('Item JSON',exact=True).fill(json.dumps(raw,ensure_ascii=False))
+                        page.get_by_role('tab',name='Explore table items',exact=True).click();page.get_by_role('button',name='Create item',exact=True).click();page.get_by_label('Item JSON',exact=True).fill(json.dumps(raw,ensure_ascii=False))
                         before=list(calls);locale('ja');expect(page.get_by_label('項目 JSON',exact=True)).to_have_value(json.dumps(raw,ensure_ascii=False));assert calls==before;locale('en');audit('item-draft')
                         fixture={'ack':False,'abort':0}
                         def acknowledged(response):
@@ -124,22 +124,22 @@ def _run():
                         def fail_read(route):
                             if operation(route.request)=='DescribeTable' and fixture['ack']:fixture['ack']=False;fixture['abort']+=1;route.abort('failed');return True
                             return False
-                        intercept[0]=fail_read;page.on('response',acknowledged);native('Write item','PutItem')
+                        intercept[0]=fail_read;page.on('response',acknowledged);native('Create item','PutItem')
                         expect(page.get_by_role('button',name='Retry read',exact=True)).to_be_visible();expect(page.get_by_label('Item JSON',exact=True)).to_have_count(0)
                         assert wire(own.get_item(TableName=name,Key=key)['Item'])==raw;assert fixture['abort']==1;native('Retry read','DescribeTable')
                         expect(page.get_by_role('button',name='Refresh table',exact=True)).to_be_enabled();assert calls.count('PutItem')==1
                         intercept[0]=None;page.remove_listener('response',acknowledged)
-                        page.get_by_role('tab',name='Explore items',exact=True).click();page.get_by_role('button',name='Create item',exact=True).click();page.get_by_label('Item JSON',exact=True).fill(json.dumps({**raw,'payload':{'S':'must not replace'}}));conditional=native('Write item','PutItem',status=400);assert conditional['__type'].endswith('#ConditionalCheckFailedException')
+                        page.get_by_role('tab',name='Explore table items',exact=True).click();page.get_by_role('button',name='Create item',exact=True).click();page.get_by_label('Item JSON',exact=True).fill(json.dumps({**raw,'payload':{'S':'must not replace'}}));conditional=native('Create item','PutItem',status=400);assert conditional['__type'].endswith('#ConditionalCheckFailedException')
                         assert wire(own.get_item(TableName=name,Key=key)['Item'])==raw;assert own.describe_table(TableName=name)['Table']['ItemCount']==1;page.get_by_role('button',name='Cancel',exact=True).click()
                         # Raw duplicate Item members must reach the strict native decoder unchanged.
-                        page.get_by_role('button',name='Create item',exact=True).click();duplicate=json.dumps(raw)[:-1]+',"payload":{"S":"duplicate must fail"}}';page.get_by_label('Item JSON',exact=True).fill(duplicate);duplicate_error=native('Write item','PutItem',status=400);assert duplicate_error['__type'].endswith('#ValidationException')
+                        page.get_by_role('button',name='Create item',exact=True).click();duplicate=json.dumps(raw)[:-1]+',"payload":{"S":"duplicate must fail"}}';page.get_by_label('Item JSON',exact=True).fill(duplicate);duplicate_error=native('Create item','PutItem',status=400);assert duplicate_error['__type'].endswith('#ValidationException')
                         assert wire(own.get_item(TableName=name,Key=key)['Item'])==raw;page.get_by_role('button',name='Cancel',exact=True).click()
                         keys();native('Get item','GetItem');expect(page.get_by_label('Returned item JSON',exact=True)).not_to_have_value('');assert json.loads(page.get_by_label('Returned item JSON',exact=True).input_value())==wire(own.get_item(TableName=name,Key=key)['Item']);audit('item-returned')
                         page.get_by_label('id ('+kind+')',exact=True).fill('different' if kind=='S' else '3' if kind=='N' else 'Aw==');expect(page.get_by_label('Returned item JSON',exact=True)).to_have_count(0);expect(page.get_by_role('button',name='Delete item',exact=True)).to_have_count(0)
                         keys();native('Get item','GetItem');page.get_by_role('button',name='Delete item',exact=True).click();page.get_by_role('dialog').get_by_role('button',name='Cancel',exact=True).click();assert calls.count('DeleteItem')==0
                         page.get_by_role('button',name='Delete item',exact=True).click();page.get_by_label('Type delete to confirm',exact=True).fill('delete');native('Delete','DeleteItem',page.get_by_role('dialog'))
                         assert own.get_item(TableName=name,Key=key).get('Item') is None;own.delete_item(TableName=name,Key=key);assert own.get_item(TableName=name,Key=key).get('Item') is None;assert own.describe_table(TableName=name)['Table']['ItemCount']==0
-                        page.get_by_role('tab',name='Explore items',exact=True).click();keys();native('Get item','GetItem');expect(page.get_by_role('heading',name='Item not found',exact=True)).to_be_visible();audit('item-not-found')
+                        page.get_by_role('tab',name='Explore table items',exact=True).click();keys();native('Get item','GetItem');expect(page.get_by_role('heading',name='Item not found',exact=True)).to_be_visible();audit('item-not-found')
                         # Participant can read but cannot put; SDK confirms no new data.
                         limited=browser.new_context(viewport={'width':width,'height':1000});contexts.append(limited);lp=limited.new_page();lp.set_default_timeout(10000);lp.on('pageerror',lambda _:errors.append(True))
                         def limited_guard(route):
@@ -147,8 +147,8 @@ def _run():
                             if target.scheme=='http' and target.netloc==urlsplit(a.endpoint).netloc:route.continue_()
                             else:outside.append(True);route.abort()
                         limited.route('**/*',limited_guard)
-                        login(lp,participant);lp.get_by_role('link',name=name,exact=True).click();lp.get_by_role('tab',name='Explore items',exact=True).click();lp.get_by_role('button',name='Create item',exact=True).click();lp.get_by_label('Item JSON',exact=True).fill(json.dumps(raw))
-                        with lp.expect_response(lambda response:response.request.headers.get('x-amz-target')=='DynamoDB_20120810.PutItem') as denied:lp.get_by_role('button',name='Write item',exact=True).click()
+                        login(lp,participant);lp.get_by_role('link',name=name,exact=True).click();lp.get_by_role('tab',name='Explore table items',exact=True).click();lp.get_by_role('button',name='Create item',exact=True).click();lp.get_by_label('Item JSON',exact=True).fill(json.dumps(raw))
+                        with lp.expect_response(lambda response:response.request.headers.get('x-amz-target')=='DynamoDB_20120810.PutItem') as denied:lp.get_by_role('button',name='Create item',exact=True).click()
                         assert denied.value.status==403;expect(lp.get_by_text('DynamoDB request failed',exact=True)).to_be_visible();audit('reader403',lp);assert own.get_item(TableName=name,Key=key).get('Item') is None;limited.close();contexts.remove(limited)
                         page.get_by_role('button',name='Delete table',exact=True).click();page.get_by_role('dialog').get_by_role('button',name='Cancel',exact=True).click();assert own.describe_table(TableName=name)['Table']['TableId']==meta['TableId']
                         page.get_by_role('button',name='Delete table',exact=True).click();page.get_by_label('Confirm table name',exact=True).fill(name);native('Delete','DeleteTable',page.get_by_role('dialog'));expect(page.get_by_role('button',name='Refresh tables',exact=True)).to_be_enabled()
