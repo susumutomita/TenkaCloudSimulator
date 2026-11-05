@@ -35,7 +35,7 @@ class FormalGateTests(unittest.TestCase):
 
     def test_complete_registry_and_exact_mutations(self):
         registry = load_registry(self.root)
-        self.assertEqual({model['id'] for model in registry['models']}, {'KMSAliasCrypto', 'KMSAliasesViewEpoch', 'NativeWireProjection', 'RESTRouteMatching', 'RESTProxyEventBoundary', 'AzurePropertiesTarget', 'AzurePropertiesEpoch', 'AzureBlobState', 'BlobRange', 'BrowserSessions', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'DynamoDBAdmission', 'DynamoDBLifecycle', 'GCPStorageState', 'KMSKeyState', 'KMSProtocolAdmission', 'IAMManagedPolicies', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'SecretsDisclosureChannels', 'SecretsMutationRefresh', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'StackOwnership', 'StartupTokenVisibility'})
+        self.assertEqual({model['id'] for model in registry['models']}, {'SecretVersionListing', 'KMSAliasCrypto', 'KMSAliasesViewEpoch', 'NativeWireProjection', 'RESTRouteMatching', 'RESTProxyEventBoundary', 'AzurePropertiesTarget', 'AzurePropertiesEpoch', 'AzureBlobState', 'BlobRange', 'BrowserSessions', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'DynamoDBAdmission', 'DynamoDBLifecycle', 'GCPStorageState', 'KMSKeyState', 'KMSProtocolAdmission', 'IAMManagedPolicies', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'SecretsDisclosureChannels', 'SecretsMutationRefresh', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'StackOwnership', 'StartupTokenVisibility'})
         for model in registry['models']:
             source = (self.root / model['model']).read_text()
             for mutant in model['mutants']:
@@ -500,7 +500,7 @@ class FormalGateTests(unittest.TestCase):
         original = path.read_text()
         registry = json.loads(original)
         self.assertEqual(set(REQUIRED_MUTANTS), BASE_MODELS)
-        self.assertEqual(sum(map(len, REQUIRED_MUTANTS.values())), 221)
+        self.assertEqual(sum(map(len, REQUIRED_MUTANTS.values())), 234)
         self.assertEqual({m['id']: {c['id'] for c in m['mutants']} for m in registry['models']}, REQUIRED_MUTANTS)
         for model in registry['models']:
             for mutant in model['mutants']:
@@ -517,7 +517,7 @@ class FormalGateTests(unittest.TestCase):
     def test_every_required_control_is_protected_against_single_removal(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
-        self.assertEqual(sum(len(v) for v in REQUIRED_MUTANTS.values()), 221)
+        self.assertEqual(sum(len(v) for v in REQUIRED_MUTANTS.values()), 234)
         for model_id, controls in REQUIRED_MUTANTS.items():
             for control in controls:
                 with self.subTest(model=model_id, control=control):
@@ -737,6 +737,84 @@ class FormalGateTests(unittest.TestCase):
                                          (1, 'Semantic errors: fixture')):
                         with self.assertRaisesRegex(GateError, 'required invariant counterexample'):
                             validate_result(code, output, expected)
+    def test_secret_version_listing_model_and_every_property_are_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'SecretVersionListing')
+        tla, cfg = self.root / entry['model'], self.root / entry['config']
+        source, config = tla.read_bytes(), cfg.read_bytes()
+        removed = json.loads(original)
+        removed['models'] = [m for m in removed['models'] if m['id'] != entry['id']]
+        path.write_text(json.dumps(removed)); tla.unlink(); cfg.unlink()
+        with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+            load_registry(self.root)
+        tla.write_bytes(source); cfg.write_bytes(config)
+        for prop in entry['properties']:
+            changed = json.loads(original)
+            target = next(m for m in changed['models'] if m['id'] == entry['id'])
+            target['properties'].remove(prop)
+            target['mutants'] = [m for m in target['mutants'] if m['expect_invariant'] != prop]
+            cfg.write_text('\n'.join(line for line in config.decode().splitlines()
+                                     if line != 'INVARIANT '+prop)+'\n')
+            path.write_text(json.dumps(changed))
+            with self.subTest(property=prop):
+                with self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                    load_registry(self.root)
+        cfg.write_bytes(config); path.write_text(original)
+
+
+    def test_secret_version_listing_each_control_rejects_removal_and_placeholder(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'SecretVersionListing')
+        for control in entry['mutants']:
+            for fault in ('remove', 'noop', 'stale', 'wrong-invariant'):
+                changed = json.loads(original)
+                target = next(m for m in changed['models'] if m['id'] == entry['id'])
+                candidate = next(m for m in target['mutants'] if m['id'] == control['id'])
+                if fault == 'remove':
+                    target['mutants'].remove(candidate)
+                    error = 'required mutation control was removed'
+                elif fault == 'noop':
+                    candidate['edits'][0]['new'] = candidate['edits'][0]['old']
+                    error = 'mutation must change a nonempty exact anchor'
+                elif fault == 'stale':
+                    candidate['edits'][0]['old'] += ' absent anchor'
+                    error = 'mutation anchor count mismatch'
+                else:
+                    candidate['expect_invariant'] = 'UncheckedPlaceholder'
+                    error = 'mutant expects unchecked invariant'
+                path.write_text(json.dumps(changed))
+                with self.subTest(control=control['id'], fault=fault):
+                    with self.assertRaisesRegex(GateError, error):
+                        load_registry(self.root)
+        path.write_text(original)
+
+
+    def test_secret_version_listing_exact_scope_and_semantic_oracles_are_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'SecretVersionListing')
+        for scope in ([], ['internal/aws/secret_http.go'], ['internal/server/server.go']):
+            changed = json.loads(original)
+            target = next(m for m in changed['models'] if m['id'] == entry['id'])
+            target['source_scope'] = scope
+            path.write_text(json.dumps(changed))
+            with self.subTest(scope=scope):
+                with self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+                    load_registry(self.root)
+        path.write_text(original)
+        for control in entry['mutants']:
+            expected = control['expect_invariant']
+            validate_result(12, 'Invariant '+expected+' is violated.', expected)
+            for code, text in ((12, 'Invariant TypeOK is violated.'),
+                               (0, 'No error has been found.'),
+                               (1, 'Semantic errors: placeholder')):
+                with self.subTest(control=control['id'], code=code):
+                    with self.assertRaisesRegex(GateError, 'required invariant counterexample'):
+                        validate_result(code, text, expected)
+
+
 
 if __name__ == '__main__':
     unittest.main()

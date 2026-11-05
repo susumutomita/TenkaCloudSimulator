@@ -1,7 +1,7 @@
 # Finite state model
 
-Current registry: 33 models / 197 literal-protected controls
-(230 required executions). All previous30 model entries, TLA/CFG bytes,
+Current registry: 34 models / 210 literal-protected controls
+(244 required executions). All previous30 model entries, TLA/CFG bytes,
 properties and175 controls are preserved. RESTRouteMatching adds six properties
 and six semantic controls; RESTProxyEventBoundary adds eight properties and ten
 controls. NativeWireProjection adds eight properties and six controls for the
@@ -16,7 +16,7 @@ finite models do not prove Go/SQL/HTTP/UI refinement or complete cloud compatibi
 
 Legacy integration sections below retain historical counts and status statements
 for traceability. Their word “current” refers to the recorded integration, not
-today's registry. The authoritative current inventory is the 33/197 registry
+today's registry. The authoritative current inventory is the 34/210 registry
 above; proof claims always require evidence for the exact revision.
 
 `ObjectStore.tla` models two buckets and two keys, shared object ownership, create/put/delete transitions, and an abstract identity decision `allow /\ ~deny`. `ObjectStore.cfg` checks type correctness, no orphan objects, no unauthorized mutation, and explicit-deny precedence.
@@ -340,6 +340,41 @@ or a refinement proof. The entire original30/175 inventory, timeouts and tool pi
 remain unchanged. All three exact native source scopes and all new properties
 and control IDs are protected by the loader and failure tests.
 
+
+## Secret version metadata listing
+
+SecretVersionListing adds nine invariants and thirteen literal-protected semantic
+controls, preserving all prior33 registry objects and197 controls and their
+TLA/CFG bytes. The combined inventory is34 baselines +210 controls =244 required
+executions. Registration and earlier independent scoped results are not a
+successful immutable244-case integration gate or hosted-CI result.
+
+Four-transition suffixes cover four ordered symbolic version keys, two database
+authorities/regions, two physical generations and page size one. List permission
+is independent of value-read permission. The finite query resolves the parent
+before saved-ARN authorization; only an admitted request scans version/stage
+metadata and validates its continuation. Cursor predicates bind database key,
+region, domain, physical generation, IncludeDeprecated and expiry. Filtering
+precedes the page limit, resume positions advance strictly, and reads preserve
+version/stage state. Add/promote/delete/recreate/reopen expose live keyset changes;
+this is not a stable snapshot or a proof of eventual termination.
+
+Correspondence is limited to ListSecretVersionIDs metadata enumeration/cursor
+logic in `secrets_manager_versions.go` and the exact added operation dispatch in
+`secret_http.go`; the other seven operations do not acquire new guarantees. Native
+store and HTTP tests named in source_scope separately exercise denied frames,
+physical recreation, database reopen, malformed requests and fault recovery.
+The public reference is [AWS ListSecretVersionIds](https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_ListSecretVersionIds.html),
+reviewed2026-11-05. No server capability or generic Gateway parsing guarantee is
+inferred from this state projection.
+
+The token validity/key/expiry fields are abstractions, not HMAC, time or encoding
+proofs. SQL isolation/commit faults, concrete IAM/host authentication, JSON/UTF8/ARN
+parsing, actual timestamp/UUID order, variable page sizes, secret-value redaction,
+retention, UI and Go refinement remain native/integration obligations. All thirteen
+controls must fail their exact named semantic invariant with a behavioral trace;
+syntax/type/config failures or timeouts are not accepted counterexamples.
+
 ## Customer-alias crypto and aliases UI
 
 KMSAliasCrypto adds fourteen mandatory properties and thirteen sensitivity
@@ -365,8 +400,8 @@ refinement, backend admission coverage or liveness.
 The scoped model executions are separate evidence: the UI baseline visited
 431,932 distinct states and all eleven controls produced their named invariant
 violations; the crypto author's scoped evidence records its fourteen cases.
-Registration now requires 35 baselines and 221 controls (256 executions), with
-all previous 33 models and 197 controls retained. A fresh immutable combined gate
+Registration now requires 36 baselines and 234 controls (270 executions), with
+all main 34 models and 210 controls retained. A fresh immutable combined gate
 must actually execute before reporting this inventory as current-HEAD passed.
 Catalog/CRUD/paging correspondence remains a separate integration obligation;
 these two entries do not supply that missing proof.

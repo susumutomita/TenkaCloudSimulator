@@ -3,9 +3,11 @@
 > This bounded native implementation preserves the 42 acceptance cases and 26 models/149 controls from baseline `0a6bdce41c773f651a5bd9a8a128da4e45b8b2c2`. The ACK observation contract adds one model/four controls (27/153,180 finite cases). Combined runtime, browser and model results are revision-specific: consult the exact commit in [CI](https://github.com/susumutomita/TenkaCloudSimulator/actions/workflows/ci.yml) and [Formal validation](https://github.com/susumutomita/TenkaCloudSimulator/actions/workflows/formal.yml). Historical receipts below do not establish a different revision’s success.
 
 
-Seven native Secrets Manager operations, the Cloudscape console, SDK clients and
+Eight native Secrets Manager operations, the Cloudscape console, SDK clients and
 the embedded API reference use the same SQLite state. This is an independent,
 bounded training implementation, not a complete AWS service or a hosted release.
+Version listing is available through the native API/SDK/reference; the console
+retains its existing labeled-version view without a separate full-history pager.
 
 **Use dummy values only. SecretString is plaintext in the private database.**
 There is no KMS/envelope encryption, HSM, secure-erasure or production-vault
@@ -27,10 +29,11 @@ SigV4 signing service is `secretsmanager`. SDK wire credentials must be dummy
 `TCSIM...` values; they do not authenticate the caller or validate a real AWS
 signature. The outer local access-token middleware remains required.
 
-The embedded reference at `/_simulator/docs/` contains seven named request and
-response examples under the existing shared-root operation. They are **static
-examples**, not a view of executed state. The request examples have been run
-against the actual binary and checked against SDK state. A reproducible
+The embedded reference at `/_simulator/docs/` contains eight named request templates and
+illustrative version metadata under the existing shared-root operation. They are **static
+examples**, not a view of executed state. The original seven request examples have been run
+against the actual binary and checked against SDK state. The new version-list
+example requires exact-revision validation; it is not a live-state receipt. A reproducible
 [two-team boto3 lifecycle](../test/e2e/secrets_manager.py) demonstrates endpoint,
 dummy credentials, token injection and exact loopback-origin transport guards;
 [the example runner](../test/e2e/secrets_manager_docs.py) executes the served
@@ -42,6 +45,7 @@ runtime dependency.
 | CreateSecret | Name, optional Description, SecretString, ClientRequestToken | ARN/Name/VersionId; exact generated ARN |
 | DescribeSecret | SecretId: exact name or full local ARN | Value-free metadata and labeled version IDs; resolved ARN |
 | ListSecrets | MaxResults 1–100, NextToken, SortBy created-date/name, SortOrder asc/desc | Value-free metadata; `secretsmanager:ListSecrets` on `*` |
+| ListSecretVersionIds | SecretId; IncludeDeprecated default false; MaxResults 1–100, local default100; NextToken | ARN/Name/Versions metadata; only `secretsmanager:ListSecretVersionIds` on resolved saved ARN |
 | PutSecretValue | SecretId, SecretString, ClientRequestToken; VersionStages absent or `[AWSCURRENT]` | New immutable version/current transition; resolved ARN |
 | GetSecretValue | SecretId, optional VersionId and/or VersionStage AWSCURRENT/AWSPREVIOUS | The only operation returning SecretString; resolved ARN |
 | UpdateSecretVersionStage | SecretId, VersionStage=AWSCURRENT, MoveToVersionId; matching RemoveFromVersionId when moving | Current/previous promotion; resolved ARN |
@@ -53,6 +57,46 @@ sanitized500. Missing/expired/foreign host credentials return401 at the outer
 access layer. Duplicate protocol/authority headers, duplicate JSON keys, null or
 wrong field types, invalid Unicode scalars and oversized bodies are rejected.
 Signed Secrets requests with missing/foreign targets do not fall through to S3.
+
+## Version metadata and continuation
+
+`ListSecretVersionIds` reads version IDs, labels and creation time, never the
+stored value column. `CreatedDate` is epoch seconds; deprecated entries omit
+`VersionStages`. `Versions` is an array even when empty, and `NextToken` is omitted
+at terminal. KmsKeyIds and LastAccessedDate are not recorded or fabricated. List
+permission does not grant GetSecretValue. Unknown/null/duplicate fields fail400;
+InvalidNextTokenException and ResourceNotFoundException use400, denial403 and
+sanitized infrastructure failure500. Local host-token authentication is separate.
+
+Set JSON1.1 and `X-Amz-Target: secretsmanager.ListSecretVersionIds` on root POST.
+The static `training/version-list` example needs an existing secret; selecting
+it does not create data or change Scalar headers. The dedicated
+[official boto3 helper](../test/e2e/secrets_versions.py) uses two real local CLI/DB/
+token authorities, native IAM role Allow/Deny, value-read403, region/cursor checks,
+actual process restart, name recreation and cleanup. Its initial leaf run
+observed42 calls/sends/responses; this is revision-specific evidence, not whole
+CI or a different integrated revision's success claim.
+
+Pagination is a live ascending `(created timestamp, VersionId)` keyset, not a
+snapshot. A signed token uses the persistent per-DB HMAC key, an operation domain,
+region, full physical ARN, IncludeDeprecated, last key and24h expiry. Keep the
+filter unchanged; MaxResults may change. Tokens grant no permission: each page
+resolves the parent and authorizes its saved ARN in the same transaction before
+version/stage metadata reads. Parent resolution necessarily precedes ARN-based
+authorization; no authorization-before-parent-lookup guarantee is made.
+
+Later keys can appear; insertions at/before position, including same-timestamp
+lexically earlier IDs, need not appear. Label changes alter filtered membership
+and can make a continuation empty. Follow returned positions; replaying an old
+token can repeat its page. Recreated names cannot adopt former physical-ARN
+tokens; wrong DB/region/filter/operation, tampered or expired tokens are refused.
+Reopening the same persistent DB retains cursor authority.
+
+The separate [listing model](../formal/SecretVersionListing.tla) checks a bounded
+read/continuation projection: four ordered keys, one changing primary catalog,
+static peer targets, two incarnations and four steps. HMAC/SQL/JSON/IAM parsing,
+actual quotas, full concurrency and implementation refinement are not proved.
+Model registration and global acceptance gates remain separate integration work.
 
 ## Values, identity, versions and limits
 
@@ -72,8 +116,9 @@ A known token with identical bytes is an immutable retry/no-op; different bytes
 for that token fail. Create on an existing name with a fresh token fails: use
 PutSecretValue for another version. New current versions move the previous
 current to AWSPREVIOUS and remove that label from its old owner. Unlabeled
-retained versions remain readable by VersionId; Describe/List show only labeled
-versions. Supplying both ID and stage requires them to select the same version.
+retained versions remain readable by VersionId; DescribeSecret/ListSecrets show
+only labeled versions. ListSecretVersionIds includes unlabeled versions only
+with `IncludeDeprecated=true`. Supplying both ID and stage requires them to select the same version.
 Promotion checks the current label's owner; same-owner promotion is a no-op.
 Retries do not rewrite values, labels or timestamps.
 
@@ -204,6 +249,7 @@ Primary API references, checked2026-11-04:
 [CreateSecret](https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_CreateSecret.html),
 [DescribeSecret](https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_DescribeSecret.html),
 [ListSecrets](https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_ListSecrets.html),
+[ListSecretVersionIds](https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_ListSecretVersionIds.html),
 [PutSecretValue](https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_PutSecretValue.html),
 [GetSecretValue](https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html),
 [UpdateSecretVersionStage](https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_UpdateSecretVersionStage.html),

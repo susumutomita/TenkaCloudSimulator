@@ -49,7 +49,7 @@ make build
 | [S3](docs/s3.md) | bucket作成・一覧・存在確認・region取得・削除、object PUT/GET/HEAD/DELETE・ListObjectsV2、bucket versioning・ListObjectVersions、public access block・tags | multipart、ACL、一般bucket policy、暗号化設定。path-styleのみ |
 | [SQS](docs/sqs.md) | Cloudscape操作画面とStandard queue JSON 1.0 API 9操作：CreateQueue、GetQueueUrl、ListQueues、GetQueueAttributes、DeleteQueue、SendMessage、ReceiveMessage、DeleteMessage、ChangeMessageVisibility | CloudFormation、function SDK bridge、Challenge連携、FIFO、batch、DLQ、SNS連携 |
 | [CloudWatch Logs](docs/cloudwatch-logs.md) | ロググループ／ストリームの作成・一覧、グループ削除、PutLogEvents・GetLogEvents。7 APIと同一状態の操作画面 | メトリクス、アラーム、保持期間、Lambda自動配送、CFN、Insights |
-| [Secrets Manager](docs/secrets-manager.md) | Create/Describe/ListSecret、Put/GetSecretValue、UpdateSecretVersionStage、即時DeleteSecret。7 APIとバージョン／明示表示付き操作画面 | KMS暗号化、実秘密情報の保管、rotation、replica、SecretBinary、scheduled deletion、CFN。ダミー値はSQLiteに平文保存 |
+| [Secrets Manager](docs/secrets-manager.md) | Create/Describe/ListSecret、値を返さないListSecretVersionIds、Put/GetSecretValue、UpdateSecretVersionStage、即時DeleteSecret。8 APIとバージョン／明示表示付き操作画面 | KMS暗号化、実秘密情報の保管、rotation、replica、SecretBinary、scheduled deletion、CFN。ダミー値はSQLiteに平文保存 |
 | [KMS](docs/kms.md) |12 API。対称キー・ローカルAES-GCM、Create/List/Update/DeleteAlias、同一Txのalias暗号操作。SDK／Cloudscapeのキー詳細「エイリアス」タブ | AWSマネージドalias／alias ABAC、tags、grants、custom policy、rotation、キー削除、CFN・他サービス暗号化。raw keyはSQLite保存でHSM／保存時暗号化保証ではない |
 | [Systems Manager Parameter Store](docs/console.md) | PutParameter、GetParameter、GetParameters、GetParametersByPath、DescribeParameters、DeleteParameter。最新値・version・overwrite判定 | SecureString/KMS、履歴・labels。StandardのString/StringList/textのみ |
 | [DynamoDB](docs/dynamodb.md) | CreateTable/ListTables/DescribeTable/DeleteTable、PutItem/GetItem/DeleteItem | Native JSON 1.0 API only; S/N/B keys, optional sort key; only partition-key attribute_(not_)exists conditions. No Query/Scan/indexes/Streams/console/CFN/Challenge integration |
@@ -120,7 +120,7 @@ SDK、操作画面、再起動、チーム分離の受入検証は `make e2e` �
 
 CIはstatementと未フィルターsource-line coverageを両方90%以上に強制します。`make before-commit`単独のcoverage判定はstatementのみで、source-line判定はCIのCobertura生成後ステージと上記の2コマンドで行います。SDK/browser、license、依存security、埋込asset、形式検査も行います。cross compileは他OSでの実行成功を意味しません。開発用Python/Node/Javaはruntime依存ではありません。UI・Scalarの再生成は権利表記とlockを保持する[各build手順](tools/console/README.md)・[Scalar手順](tools/scalar/README.md)・[Python runtimeの権利・再生成手順](tools/python/README.md)に従います。
 
-形式検査にはObjectStore、StackOwnership、S3Versions、NativeIAMOwnership、RESTDeploymentSnapshot、SSMParameterState、StartupTokenVisibility、BrowserSessions、SQSLifecycle、SQSStorageBudget、ProviderActor、GCPStorageState、AzureBlobState、ProjectAuthority、BlobRange、ProviderPath、KMSKeyState、KMSProtocolAdmission、SQSConsoleEpoch、CloudWatchLogsLifecycle、CloudWatchLogsViewEpoch、SecretsVersionLifecycle、SecretsRevealEpoch、SecretsDisclosureChannels、DynamoDBLifecycle、DynamoDBAdmission、SecretsMutationRefresh、AzurePropertiesEpoch、AzurePropertiesTargetの29有限モデルと164の意図した欠陥検出をregistryへ登録しています。追加モデルの有限検査結果と、統合後の固定HEAD検査は区別して記録します。TLCと意図したmutantの反例で限定した安全条件を検査しますが、Go実装のrefinement、暗号、全AWS仕様・実AWSとの一致を証明するものではありません。変更はregistryとsource対応を更新し、固定HEADのCI結果で判断します。[形式検査](formal/README.md)、[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)。
+形式検査はregistryに34有限モデル・210の意図した欠陥検出を登録しています（基準モデルと陰性検査で244ケース）。SecretVersionListingは保存済みARNの認可後に行うメタデータ一覧と限定的なcursor境界を対象とし、値の読取許可や完全な履歴画面を追加しません。追加モデルの有限検査結果と統合後の固定HEAD検査は区別します。TLCは限定した状態空間の安全条件と意図したmutantの反例を検査し、Go実装のrefinement、暗号、全AWS仕様・実AWSとの一致を証明するものではありません。[形式検査](formal/README.md)、[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)。
 
 ## ライセンス
 
@@ -134,10 +134,10 @@ CIはstatementと未フィルターsource-line coverageを両方90%以上に強�
 Main `ce1ddd1` contains the provider-aware Secrets Manager integration and
 preserves its token-file Login, native services and locale behavior. Secrets Manager is discoverable only inside AWS when
 its actual capability is present; /secretsmanager and the /secrets alias select the
-same child. Seven native APIs and dummy plaintext values remain the documented
-limit; no KMS/rotation/recovery/CFN behavior is added. Earlier Secrets/native/main
-receipts remain separate from later Azure Properties extensions. Their combined
-29 models/164 controls require verification at the exact revision being reviewed.
+same child. That historical revision had seven native APIs and dummy plaintext values;
+the current subset adds metadata-only ListSecretVersionIds as its eighth API; no KMS/rotation/recovery/CFN behavior is added. Earlier Secrets/native/main
+receipts remain separate from later Azure Properties extensions. Their historical combined29 models/164 controls are not the current registry;
+consult the current registry and exact-revision CI for acceptance.
 
 An acknowledged Secrets create/update now closes and clears its form before the
 independent metadata read. Read failure permits read-only refresh, not a replayed

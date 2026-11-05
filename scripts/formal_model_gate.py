@@ -9,16 +9,15 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-BASE_MODELS = {'KMSAliasCrypto', 'KMSAliasesViewEpoch', 'NativeWireProjection', 'RESTRouteMatching', 'RESTProxyEventBoundary', 'AzurePropertiesTarget', 'AzurePropertiesEpoch', 'AzureBlobState', 'BlobRange', 'BrowserSessions', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'DynamoDBAdmission', 'DynamoDBLifecycle', 'GCPStorageState', 'KMSKeyState', 'KMSProtocolAdmission', 'IAMManagedPolicies', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'SecretsDisclosureChannels', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'SecretsMutationRefresh', 'StackOwnership', 'StartupTokenVisibility'}
+BASE_MODELS = {'AzureBlobState', 'AzurePropertiesEpoch', 'AzurePropertiesTarget', 'BlobRange', 'BrowserSessions', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'DynamoDBAdmission', 'DynamoDBLifecycle', 'GCPStorageState', 'IAMManagedPolicies', 'KMSAliasCrypto', 'KMSAliasesViewEpoch', 'KMSKeyState', 'KMSProtocolAdmission', 'NativeIAMOwnership', 'NativeWireProjection', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'RESTProxyEventBoundary', 'RESTRouteMatching', 'S3Versions', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'SecretVersionListing', 'SecretsDisclosureChannels', 'SecretsMutationRefresh', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'StackOwnership', 'StartupTokenVisibility'}
 BASE_INVARIANTS = {
-    'KMSAliasCrypto': {'TypeOK', 'TransactionSnapshotStable', 'AliasResolutionCurrent', 'OmittedDecryptUsesBlob', 'ConcreteKeyAuthorization', 'AuthorizedCryptoStages', 'AuthorizationBeforeMismatch', 'NoPublicationBeforeCommit', 'FailureCounterFrame', 'FailureNoPublication', 'WriteFailureRefused', 'PublishedKeyBound', 'EncryptCounterExact', 'DecryptCounterFrame'},
-    'KMSAliasesViewEpoch': {'TypeOK', 'CurrentListOutcome', 'NoCachedRowsOnFailure', 'CurrentTargetMetadata', 'ClosedFormHasNoTarget', 'AckClosesForm', 'AckClearsDraft', 'ReadRetryNeverWrites', 'OnlyVerifiedTargetSubmitted', 'DeleteRequiresExactConfirmation', 'LocalePreservesIntent'},
-    'NativeWireProjection': {'BadValueRefused', 'ValueKindsPreserved', 'FailureNoPartial', 'OmissionExact', 'OrderExact', 'TypeOK', 'SkippedBadDoesNotFail', 'CompleteProjection'},
-    'RESTRouteMatching': {'MatchOracle', 'CaptureFidelity', 'InvalidTemplateRejected', 'Specificity', 'TypeOK', 'RejectedShape'},
-    'RESTProxyEventBoundary': {'QueryProjection', 'ActualRoute', 'Admission', 'BodyPreserved', 'TypeOK', 'FailureNoEvent', 'ApplicationData', 'CredentialSealed'},
+    'SecretVersionListing': {'ContinuationPosition', 'FilterBeforePageLimit', 'NoDeniedEmission', 'ReadAfterAuthorization', 'ReadFramePreserved', 'StrictForwardKeyset', 'TerminalConverges', 'TokenScopeBound', 'TypeOK'},
+    'NativeWireProjection': {'BadValueRefused', 'CompleteProjection', 'FailureNoPartial', 'OmissionExact', 'OrderExact', 'SkippedBadDoesNotFail', 'TypeOK', 'ValueKindsPreserved'},
+    'RESTRouteMatching': {'CaptureFidelity', 'InvalidTemplateRejected', 'MatchOracle', 'RejectedShape', 'Specificity', 'TypeOK'},
+    'RESTProxyEventBoundary': {'ActualRoute', 'Admission', 'ApplicationData', 'BodyPreserved', 'CredentialSealed', 'FailureNoEvent', 'QueryProjection', 'TypeOK'},
     'AzurePropertiesTarget': {'DetailCapturedIdentity', 'DistinctTargetCarriers', 'FieldShapeExact', 'NativeHeadOnly', 'RequestIdentityExact', 'RouteMatchesTarget', 'TypeOK'},
-    'AzurePropertiesEpoch': {'CurrentProperties', 'SuccessfulOnly', 'ClearedWhenClosed', 'FailureNoDisclosure', 'CurrentRequestLoading', 'TypeOK', 'LocaleStable', 'AcceptedOnlyCurrent', 'LoadingClearsPrevious'},
-    'SecretsMutationRefresh': {'TypeOK', 'AckClosesForm', 'AckClearsDraft', 'FreshFormHasToken', 'NoWriteOnReadRetry'},
+    'AzurePropertiesEpoch': {'AcceptedOnlyCurrent', 'ClearedWhenClosed', 'CurrentProperties', 'CurrentRequestLoading', 'FailureNoDisclosure', 'LoadingClearsPrevious', 'LocaleStable', 'SuccessfulOnly', 'TypeOK'},
+    'SecretsMutationRefresh': {'AckClearsDraft', 'AckClosesForm', 'FreshFormHasToken', 'NoWriteOnReadRetry', 'TypeOK'},
     'AzureBlobState': {'BudgetBounded', 'ConditionEnforced', 'FailureAtomic', 'FreshWriteIdentity', 'NoDeniedRead', 'NoOrphans', 'NoUnauthorizedMutation', 'PeerStatePreserved', 'ReadExact', 'TypeOK'},
     'BlobRange': {'ChecksumBound', 'ConditionBeforeRange', 'DeniedNoDisclosure', 'ExactNormalRead', 'ExactSelectedBytes', 'Frame', 'InvalidRefused', 'MissingRangeChecksumRefused', 'NoFullMD5OnPartial', 'OutOfBoundsRefused', 'TypeOK'},
     'BrowserSessions': {'AcceptedOnlyLiveParent', 'NoBrowserSDKAuthority', 'NoRawSDKCookie', 'ParentLifetimeBound', 'RevokedCookiesDenied', 'SDKAuthorityPreserved', 'TypeOK', 'UnrelatedSessionsPreserved'},
@@ -29,7 +28,7 @@ BASE_INVARIANTS = {
     'GCPStorageState': {'Budget', 'DeniedFrame', 'GenerationFreshness', 'GenerationRefusal', 'NoOrphans', 'NonemptyDeleteRefused', 'OtherEnvironmentUnchanged', 'OtherProjectUnchanged', 'ReadIsolation', 'TypeOK'},
     'KMSKeyState': {'AuthorizedEvents', 'BoundContextAndKey', 'EnabledCrypto', 'TypeOK'},
     'KMSProtocolAdmission': {'InfraNotDeny', 'MissingIdentityDenied', 'NoAuthorityFromWireMetadata', 'NoCrossServiceFallback', 'NoSuccessWithoutKMSTarget', 'TypeOK'},
-    'IAMManagedPolicies': {'FailureFrame', 'AttachmentAuthority', 'PeerFrame', 'FreshIncarnations', 'ExplicitDenyWins', 'ImmutableVersions', 'AggregateBudget', 'VersionCap', 'DefaultExists', 'RoleViewsExact', 'DeleteDependencies', 'VersionIDsMonotonic', 'TypeOK'},
+    'IAMManagedPolicies': {'AggregateBudget', 'AttachmentAuthority', 'DefaultExists', 'DeleteDependencies', 'ExplicitDenyWins', 'FailureFrame', 'FreshIncarnations', 'ImmutableVersions', 'PeerFrame', 'RoleViewsExact', 'TypeOK', 'VersionCap', 'VersionIDsMonotonic'},
     'NativeIAMOwnership': {'OwnershipExclusive', 'TypeOK'},
     'ObjectStore': {'DenyWins', 'NoOrphans', 'NoUnauthorizedMutation', 'TypeOK'},
     'ProjectAuthority': {'ActorUsesPersistedProject', 'ConstructorRefusalFrame', 'DeniedFrame', 'FinitePermissions', 'FixedHostConfiguration', 'InitializationBindsConfigured', 'NoUnboundAdoption', 'OnlyActualOwnerAuthorized', 'OwnerBindingFrozen', 'TypeOK'},
@@ -46,17 +45,18 @@ BASE_INVARIANTS = {
     'SecretsVersionLifecycle': {'ActiveHasCurrent', 'AuthorizedDisclosure', 'AuthorizedVersions', 'ImmutableVersions', 'NoOrphans', 'SeparateCurrentPrevious', 'TypeOK', 'UniqueLabels'},
     'StackOwnership': {'OwnershipExclusive', 'TypeOK'},
     'StartupTokenVisibility': {'CreatedFilePrivate', 'FileIdentityFrozen', 'HistoryVisibility', 'InvalidFileNeverEmits', 'TypeOK'},
+    'KMSAliasCrypto': {'AliasResolutionCurrent', 'AuthorizationBeforeMismatch', 'AuthorizedCryptoStages', 'ConcreteKeyAuthorization', 'DecryptCounterFrame', 'EncryptCounterExact', 'FailureCounterFrame', 'FailureNoPublication', 'NoPublicationBeforeCommit', 'OmittedDecryptUsesBlob', 'PublishedKeyBound', 'TransactionSnapshotStable', 'TypeOK', 'WriteFailureRefused'},
+    'KMSAliasesViewEpoch': {'AckClearsDraft', 'AckClosesForm', 'ClosedFormHasNoTarget', 'CurrentListOutcome', 'CurrentTargetMetadata', 'DeleteRequiresExactConfirmation', 'LocalePreservesIntent', 'NoCachedRowsOnFailure', 'OnlyVerifiedTargetSubmitted', 'ReadRetryNeverWrites', 'TypeOK'},
 }
 # Established controls require an explicit gate-policy change before retirement.
 REQUIRED_MUTANTS = {
-    'KMSAliasCrypto': {'UseStaleAliasTarget', 'OmittedDecryptUsesLiveAlias', 'AuthorizeAliasResource', 'MismatchBeforeAuthorization', 'IgnoreCiphertextMismatch', 'AllowMidTransactionRetarget', 'IgnoreCounterAcknowledgement', 'PublishBeforeCommit', 'PublishOnFailedCommit', 'PersistOnFailedCommit', 'ChargeNeighborCounter', 'DecryptChangesCounter', 'BypassConcreteKeyDenial'},
-    'KMSAliasesViewEpoch': {'IgnoreSameLifeListRevision', 'BypassRetiredListLife', 'RetainRowsOnCurrentReadFailure', 'IgnoreSelectedTargetRevision', 'RetainTargetMetadataOnCancel', 'KeepFormAfterAcknowledgedWrite', 'KeepDraftAfterAcknowledgedWrite', 'ReplayWriteOnReadRetry', 'SubmitWithoutVerifiedTarget', 'DeleteWithoutExactConfirmation', 'LocaleClearsUnsavedDraft'},
-    'NativeWireProjection': {'AcceptBadValue', 'IgnoreOmission', 'PublishErrorPrefix', 'ReverseFieldOrder', 'EncodeOmittedBad', 'CollapseNullToZero'},
-    'RESTRouteMatching': {'BadRejectedScore', 'AllowEmptyGreedy', 'FirstDuplicateCaptureWins', 'LoseSpecificity', 'IgnoreLiteral', 'TruncateGreedy'},
-    'RESTProxyEventBoundary': {'AcceptMalformedQuery', 'FirstHeaderValueWins', 'IgnoreEncodedBudget', 'EmitRejectedEvent', 'ReplaceBody', 'TemplateAsActualPath', 'FirstQueryValueWins', 'ForwardAWSSignature', 'ForwardLocalCredentials', 'DropBearerApplication'},
+    'SecretVersionListing': {'AuthorityKeyBypass', 'AuthorizationBypass', 'DomainBypass', 'ExpiryBypass', 'FilterAfterLimit', 'FilterBindingBypass', 'GenerationBindingBypass', 'InclusiveResume', 'MissingNextToken', 'ReadWritesVersionState', 'RegionBindingBypass', 'SignatureBypass', 'StaleNextPosition'},
+    'NativeWireProjection': {'AcceptBadValue', 'CollapseNullToZero', 'EncodeOmittedBad', 'IgnoreOmission', 'PublishErrorPrefix', 'ReverseFieldOrder'},
+    'RESTRouteMatching': {'AllowEmptyGreedy', 'BadRejectedScore', 'FirstDuplicateCaptureWins', 'IgnoreLiteral', 'LoseSpecificity', 'TruncateGreedy'},
+    'RESTProxyEventBoundary': {'AcceptMalformedQuery', 'DropBearerApplication', 'EmitRejectedEvent', 'FirstHeaderValueWins', 'FirstQueryValueWins', 'ForwardAWSSignature', 'ForwardLocalCredentials', 'IgnoreEncodedBudget', 'ReplaceBody', 'TemplateAsActualPath'},
     'AzurePropertiesTarget': {'BlobOmitsFields', 'ContainerGetsBlobFields', 'DropBlobParent', 'RequestGET', 'WrongKindRoute', 'WrongRenderedName'},
-    'AzurePropertiesEpoch': {'OpenKeepsPrevious', 'StaleFinallyClearsBusy', 'BypassCurrentPublication', 'CloseKeepsPrevious', 'AcceptFailedHEAD'},
-    'SecretsMutationRefresh': {'RetainDraftOnAck', 'ReplayWriteOnReadRetry', 'OmitAckFormExit', 'OmitFreshIntentToken'},
+    'AzurePropertiesEpoch': {'AcceptFailedHEAD', 'BypassCurrentPublication', 'CloseKeepsPrevious', 'OpenKeepsPrevious', 'StaleFinallyClearsBusy'},
+    'SecretsMutationRefresh': {'OmitAckFormExit', 'OmitFreshIntentToken', 'ReplayWriteOnReadRetry', 'RetainDraftOnAck'},
     'AzureBlobState': {'ContainerDeleteErasesPeer', 'ContainerDeleteLeavesBlobs', 'FailedPutCommits', 'IgnoreAccountOwner', 'IgnoreCreateOnly', 'IgnoreStaleETag', 'MissingTrustedActor', 'OmitByteBudget', 'OmitRowBudget', 'ReadNeighbor', 'ReuseETag'},
     'BlobRange': {'BypassAuthorization', 'DiscloseFullMD5OnPartial', 'IgnoreConditionDecision', 'IgnoreEndClamp', 'PermitExcessChecksum', 'ReadMutatesStoredBody', 'UncheckedBounds', 'WrongSliceStart'},
     'BrowserSessions': {'IgnoreParentValidity', 'LogoutClearsOthers', 'LogoutKeepsSession', 'LogoutRevokesSDK', 'RawOperatorCookie'},
@@ -67,7 +67,7 @@ REQUIRED_MUTANTS = {
     'GCPStorageState': {'DeleteNonemptyBucket', 'DeniedBucketCreate', 'IgnoreActualOwner', 'IgnoreGenerationMatch', 'IgnoreStateBudget', 'ReadWrongEnvironment', 'ResetSequenceAfterDelete', 'ReuseGeneration'},
     'KMSKeyState': {'MissingContextGuard', 'MissingEnabledDecryptGuard', 'MissingEnabledEncryptGuard', 'MissingEncryptionCeiling', 'MissingKeyBinding', 'MissingPermissionGuard', 'MissingRegionGuard', 'MissingTeamGuard'},
     'KMSProtocolAdmission': {'DropSigningIntent', 'IgnoreRequiredTarget', 'MaskIdentityOutage', 'ReadLivePolicyInsteadOfSnapshot'},
-    'IAMManagedPolicies': {'PartialDefaultRoleRefresh', 'ReuseDeletedVersionID', 'DropManagedDeny', 'SkipVersionCap', 'IgnorePolicyDeleteDependencies', 'DeleteDefaultVersion', 'IgnoreRoleDeleteAttachments', 'DetachWithoutViewRefresh', 'AttachWithoutViewRefresh', 'CommitFailedCandidate', 'IgnoreAggregateLimit'},
+    'IAMManagedPolicies': {'AttachWithoutViewRefresh', 'CommitFailedCandidate', 'DeleteDefaultVersion', 'DetachWithoutViewRefresh', 'DropManagedDeny', 'IgnoreAggregateLimit', 'IgnorePolicyDeleteDependencies', 'IgnoreRoleDeleteAttachments', 'PartialDefaultRoleRefresh', 'ReuseDeletedVersionID', 'SkipVersionCap'},
     'NativeIAMOwnership': {'LegacyAdoptsNativeRole'},
     'ObjectStore': {'MissingDeletionGuard'},
     'ProjectAuthority': {'AdoptUnboundResource', 'AllowOwnerRebinding', 'DefaultAllowUnknownPermission', 'PartialCommitOnRefusal', 'TrustClaimedProject', 'WriteDespiteDenial'},
@@ -84,8 +84,11 @@ REQUIRED_MUTANTS = {
     'SecretsVersionLifecycle': {'OmitCreatePermission', 'OmitReadGenerationBinding', 'OmitReadTeamBinding', 'OverwriteConflictingVersion', 'RetainDeletedVersions', 'RetainPreviousLabelOnPromote'},
     'StackOwnership': {'ReclaimDriftedResource'},
     'StartupTokenVisibility': {'OmittedCIGuard', 'OmittedTTYGuard', 'OverwriteExistingToken'},
+    'KMSAliasCrypto': {'AllowMidTransactionRetarget', 'AuthorizeAliasResource', 'BypassConcreteKeyDenial', 'ChargeNeighborCounter', 'DecryptChangesCounter', 'IgnoreCiphertextMismatch', 'IgnoreCounterAcknowledgement', 'MismatchBeforeAuthorization', 'OmittedDecryptUsesLiveAlias', 'PersistOnFailedCommit', 'PublishBeforeCommit', 'PublishOnFailedCommit', 'UseStaleAliasTarget'},
+    'KMSAliasesViewEpoch': {'BypassRetiredListLife', 'DeleteWithoutExactConfirmation', 'IgnoreSameLifeListRevision', 'IgnoreSelectedTargetRevision', 'KeepDraftAfterAcknowledgedWrite', 'KeepFormAfterAcknowledgedWrite', 'LocaleClearsUnsavedDraft', 'ReplayWriteOnReadRetry', 'RetainRowsOnCurrentReadFailure', 'RetainTargetMetadataOnCancel', 'SubmitWithoutVerifiedTarget'},
 }
 REQUIRED_SOURCE_SCOPES = {
+    'SecretVersionListing': {'internal/aws/secrets_manager_versions_http_test.go', 'internal/aws/secret_http.go', 'internal/aws/secrets_manager_versions.go', 'internal/aws/secrets_manager_versions_test.go'},
     'NativeWireProjection': {'internal/aws/wire_json_projection.go'},
     'RESTRouteMatching': {'internal/aws/apirouting/path.go'},
     'RESTProxyEventBoundary': {'internal/aws/apirouting/event.go'},

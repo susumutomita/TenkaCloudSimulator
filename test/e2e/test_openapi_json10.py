@@ -115,8 +115,9 @@ class SharedJSON10Schemas(unittest.TestCase):
             'CreateSecret', 'DescribeSecret', 'ListSecrets', 'PutSecretValue',
             'GetSecretValue', 'UpdateSecretVersionStage', 'DeleteSecret',
             'KMSCreateAlias', 'KMSListAliases', 'KMSUpdateAlias', 'KMSDeleteAlias',
+            'ListSecretVersionIds',
         })
-        self.assertEqual(len(media['examples']), 27)
+        self.assertEqual(len(media['examples']), 28)
         for example in media['examples'].values():
             shared.validate(example['value'])
 
@@ -168,6 +169,29 @@ class SharedJSON10Schemas(unittest.TestCase):
                         {'KeyId': 'alias/other'}):
             with self.subTest(invalid=invalid), self.assertRaises(ValidationError):
                 schema.validate(invalid)
+
+    def test_version_list_template_has_its_strict_native_target_schema(self):
+        regional = self.spec['paths']['/']['post']
+        template = regional['requestBody']['content']['application/x-amz-json-1.1']['examples']['ListSecretVersionIds']
+        self.assertEqual(template['summary'], 'X-Amz-Target: secretsmanager.ListSecretVersionIds')
+        operation = regional['x-simulator-secrets-operation-schemas']['secretsmanager.ListSecretVersionIds']
+        self.assertEqual(operation['request'], '#/components/schemas/SecretsListSecretVersionIdsInput')
+        strict = validator(self.spec, {'$ref': operation['request']})
+        strict.validate(template['value'])
+        original = template['value']
+        missing = copy.deepcopy(original)
+        del missing['SecretId']
+        invalid_inputs = [missing, {**original, 'SecretId': None},
+                          {**original, 'MaxResults': 0}, {**original, 'MaxResults': 101},
+                          {**original, 'MaxResults': True},
+                          {**original, 'IncludeDeprecated': None},
+                          {**original, 'IncludeDeprecated': 'true'},
+                          {**original, 'NextToken': ''},
+                          {**original, 'UnsupportedSetting': True}]
+        for index, invalid in enumerate(invalid_inputs):
+            with self.subTest(index=index), self.assertRaises(ValidationError):
+                strict.validate(invalid)
+
 
 
 if __name__ == '__main__':
