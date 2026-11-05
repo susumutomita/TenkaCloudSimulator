@@ -1,8 +1,9 @@
-// Copyright (c) 2025 sivchari
 // SPDX-License-Identifier: MIT
-// IAMRole wire fields adapted from Kumo ce37a8fb406ecb96b5619204f645c26302b651a5.
-// Original permission notice: third_party/KUMO-LICENSE.txt.
-// SQLite storage, trust checks, ownership and aggregate-policy behavior are local.
+// Native IAM role state and independently authored AWS Query/XML projection.
+// Historical notice retained for earlier, replaced Kumo adaptations:
+// Copyright (c) 2025 sivchari
+// Original permission and historical provenance: third_party/KUMO-LICENSE.txt
+// and the corresponding third_party/kumo-*.json record.
 package aws
 
 import (

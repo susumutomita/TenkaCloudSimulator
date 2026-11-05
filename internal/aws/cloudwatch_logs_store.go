@@ -1,8 +1,9 @@
-// Copyright (c) 2025 sivchari
 // SPDX-License-Identifier: MIT
-// Wire event shapes and group/stream lifecycle adapted from Kumo ce37a8fb406ecb96b5619204f645c26302b651a5,
-// internal/service/cloudwatchlogs/{types,storage}.go; see third_party/KUMO-LICENSE.txt.
-// SQLite transactions, ingest validation and authenticated pagination are local.
+// Provider-owned Logs state, native projections and transactional admission.
+// Historical notice retained for earlier, replaced Kumo adaptations:
+// Copyright (c) 2025 sivchari
+// Original permission and historical provenance: third_party/KUMO-LICENSE.txt
+// and the corresponding third_party/kumo-*.json record.
 package aws
 
 import (

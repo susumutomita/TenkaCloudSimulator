@@ -1,8 +1,9 @@
-// Copyright (c) 2025 sivchari
 // SPDX-License-Identifier: MIT
-// Selected REST wire fields adapted from Kumo ce37a8fb406ecb96b5619204f645c26302b651a5,
-// internal/service/apigateway/types.go. Original notice: third_party/KUMO-LICENSE.txt.
-// SQLite storage, quotas, ownership and deployment snapshots are local adapters.
+// Provider-owned REST state and independently authored AWS JSON projections.
+// Historical notice retained for earlier, replaced Kumo adaptations:
+// Copyright (c) 2025 sivchari
+// Original permission and historical provenance: third_party/KUMO-LICENSE.txt
+// and the corresponding third_party/kumo-*.json record.
 package aws
 
 import (
