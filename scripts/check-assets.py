@@ -46,19 +46,7 @@ print('Cloudscape bundle, original notices and regional API description verified
 import runpy
 runpy.run_path('tools/python/check.py',run_name='__main__')
 
-kumo=json.loads(Path('third_party/kumo-iam.json').read_text())
-kumo_license=Path('third_party/KUMO-LICENSE.txt').read_bytes()
-assert hashlib.sha256(kumo_license).hexdigest()==kumo['licenseSha256']
-assert kumo_license==Path('internal/legal/assets/KUMO-LICENSE.txt').read_bytes()
-assert kumo['copyright'] in kumo_license.decode() and 'Permission is hereby granted' in kumo_license.decode()
-assert kumo['commit'] in Path('internal/aws/iam_roles.go').read_text()
-print('Adapted Kumo IAM model provenance and original MIT permission notice verified.')
-
-rest=json.loads(Path('third_party/kumo-apigateway.json').read_text())
-assert rest['commit']==kumo['commit'] and rest['licenseSha256']==kumo['licenseSha256']
-assert rest['copyright'] in kumo_license.decode()
-for relative in ('internal/aws/apirouting/path.go','internal/aws/apirouting/event.go','internal/aws/apigateway_store.go'):
- source=Path(relative).read_text()
- assert rest['commit'] in source and rest['copyright'] in source and 'MIT' in source
-assert len(rest['sourceFiles'])==3 and all(len(sha)==64 for sha in rest['sourceFiles'].values())
-print('Adapted Kumo REST path/event/model provenance and original MIT permission notice verified.')
+# Retain exact historical rights and require reviewed current source identities.
+# Pending replacement review is a hard failure, never an adapted-comment check.
+native_provenance=runpy.run_path('scripts/check-native-provenance.py')
+assert native_provenance['main']()==0, 'Native provenance gate did not pass.'

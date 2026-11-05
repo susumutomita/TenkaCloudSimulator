@@ -1,24 +1,54 @@
 {
-  "upstream": "https://github.com/sivchari/kumo",
-  "commit": "ce37a8fb406ecb96b5619204f645c26302b651a5",
-  "license": "MIT",
-  "copyright": "Copyright (c) 2025 sivchari",
-  "sourceFiles": {
-    "internal/service/execapi/path.go": "0c800b9e8b0c6fe525a4c07b76e9f7241d31abd9bad681cbae79ff980f8f3f7b",
-    "internal/service/execapi/event.go": "cc26fe2f9a046487ab1a954150b4fade86fbcdc910eaf3c56322f90ec06f2f79",
-    "internal/service/apigateway/types.go": "29d2228a8ed50349df185ec5e1ea862eb09ef6002693ee2575d5eff58297c352"
+  "provenanceSchemaVersion": 2,
+  "historicalAdaptation": {
+    "upstream": "https://github.com/sivchari/kumo",
+    "commit": "ce37a8fb406ecb96b5619204f645c26302b651a5",
+    "license": "MIT",
+    "copyright": "Copyright (c) 2025 sivchari",
+    "sourceFiles": {
+      "internal/service/execapi/path.go": "0c800b9e8b0c6fe525a4c07b76e9f7241d31abd9bad681cbae79ff980f8f3f7b",
+      "internal/service/execapi/event.go": "cc26fe2f9a046487ab1a954150b4fade86fbcdc910eaf3c56322f90ec06f2f79",
+      "internal/service/apigateway/types.go": "29d2228a8ed50349df185ec5e1ea862eb09ef6002693ee2575d5eff58297c352"
+    },
+    "licenseSha256": "02f8d83277fea29291727639f45ddafcbcbf7cbc2d92ea1297eb84f0b8ee9fe2",
+    "status": "Local bounded REST adapter under validation; no catalog problem is enabled by this alone",
+    "modifications": [
+      "Strict bounded greedy-path matching",
+      "REST v1 event shape only; actual path distinct from resource template",
+      "No UUID dependency; trusted provider request id",
+      "Simulator header/cookie/session credential redaction; application Bearer data retained",
+      "Reject malformed query/binary bodies/encoded event overflow; no arbitrary HTTP dispatch copied",
+      "SQLite regional resource tree, immutable deployment snapshots and stage references",
+      "Native management and in-process saved-role invocation with SourceArn service permission",
+      "Non-executing downloaded responses; no upstream HTTP dispatcher or guest network client",
+      "Drop all Cookie headers, including unrelated local app sessions shared across ports; host authentication remains outside the guest"
+    ]
   },
-  "licenseSha256": "02f8d83277fea29291727639f45ddafcbcbf7cbc2d92ea1297eb84f0b8ee9fe2",
-  "status": "Local bounded REST adapter under validation; no catalog problem is enabled by this alone",
-  "modifications": [
-    "Strict bounded greedy-path matching",
-    "REST v1 event shape only; actual path distinct from resource template",
-    "No UUID dependency; trusted provider request id",
-    "Simulator header/cookie/session credential redaction; application Bearer data retained",
-    "Reject malformed query/binary bodies/encoded event overflow; no arbitrary HTTP dispatch copied",
-    "SQLite regional resource tree, immutable deployment snapshots and stage references",
-    "Native management and in-process saved-role invocation with SourceArn service permission",
-    "Non-executing downloaded responses; no upstream HTTP dispatcher or guest network client",
-    "Drop all Cookie headers, including unrelated local app sessions shared across ports; host authentication remains outside the guest"
-  ]
+  "historicalRuntimeFiles": {
+    "internal/aws/apigateway_store.go": {
+      "sourceCommit": "1b34ed4e5fe7c9a314194c10bd2d0261ec7efb98",
+      "gitBlob": "2c7f35c9036966d8dc61755aad3f294cce941ec8",
+      "sha256": "c5d7b85e8ec9d7771a612548301bfd8c8904f9c66d3fc9a3da38557a6739e3d5"
+    },
+    "internal/aws/apirouting/path.go": {
+      "sourceCommit": "1b34ed4e5fe7c9a314194c10bd2d0261ec7efb98",
+      "gitBlob": "6d52855187cfa8ecde85bb098721fabe19202fc0",
+      "sha256": "eff3abb00d0f6b8973853dc187458dd483ca55a68670967b01a2027e81e91e68"
+    },
+    "internal/aws/apirouting/event.go": {
+      "sourceCommit": "1b34ed4e5fe7c9a314194c10bd2d0261ec7efb98",
+      "gitBlob": "4df5208109ff4163be2fbcb8803ccbbd8b14548d",
+      "sha256": "e857f63cbc603977f24fd038466493ab84cf715707691bb65ff06c0e966eca68"
+    }
+  },
+  "replacement": {
+    "currentKumoCode": false,
+    "status": "pending-review",
+    "reviewedReplacementIdentity": null,
+    "paths": [
+      "internal/aws/apigateway_store.go",
+      "internal/aws/apirouting/path.go",
+      "internal/aws/apirouting/event.go"
+    ]
+  }
 }
