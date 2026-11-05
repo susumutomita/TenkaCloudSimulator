@@ -344,3 +344,28 @@ func TestIAMManagedQueryAllRolePortsCarryPreauthorizedID(t *testing.T) {
 		}
 	}
 }
+
+func TestIAMManagedQueryDocumentEncodingLiteralCharacters(t *testing.T) {
+	p := newManagedQueryProbe(t)
+	document := `{"Version":"2012-10-17", "Statement":[{"Effect":"Allow","Action":"s3:GetObject","Resource":"arn:aws:s3:::managed-query/café+/%25"}]}`
+	policy := queryPolicy(t, p.call("CreatePolicy", "", url.Values{"PolicyName": {"EncodingLiteral"}, "PolicyDocument": {document}}, 200, "CreatePolicyResponse"))
+	body := p.call("GetPolicyVersion", "", url.Values{"PolicyArn": {policy.Arn}, "VersionId": {"v1"}}, 200, "GetPolicyVersionResponse")
+	var response struct {
+		Result struct {
+			Version IAMManagedPolicyVersion `xml:"PolicyVersion"`
+		} `xml:"GetPolicyVersionResult"`
+	}
+	if err := xml.Unmarshal([]byte(body), &response); err != nil {
+		t.Fatal(err)
+	}
+	encoded := response.Result.Version.Document
+	for _, literal := range []string{"%2B", "%2F", "%25", "%C3%A9", "%20"} {
+		if !strings.Contains(encoded, literal) {
+			t.Fatal("Document lost a literal encoded character", literal)
+		}
+	}
+	decoded, err := url.QueryUnescape(encoded)
+	if err != nil || decoded != document || strings.Contains(encoded, "+") {
+		t.Fatal("Document was not encoded once with RFC3986 spaces", err)
+	}
+}
