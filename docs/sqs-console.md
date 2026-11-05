@@ -44,6 +44,18 @@ have been executed. All 42 main acceptance bodies and the improved shared
 SQS/DynamoDB reference validator are preserved; the new locale case makes 43
 methods, not 43 observed passes.
 
+### Private PR408 dependency checkpoint
+
+This private continuation also normal-merges the unmerged PR408 source
+`df7b049`. It is a dependency preparation, not a claim that PR408 is on main.
+Its exact Secrets Enter/typed-error/acknowledgment/retry/motion fixes, login and
+DynamoDB recovery tests are preserved. The combined registry has 27 models and
+153 controls; all 42 main Conformance bodies plus the SQS locale case remain
+43 methods. A canonical same-lock build and 19 SQS/catalog/Secrets pure checks
+passed. Runtime acceptance and current-head formal/full-quality results must be
+reported separately. After PR408 merges, merge the actual new main normally and
+refresh this declaration; do not substitute this private dependency for main.
+
 ## Screens and operations
 
 | Flow | Native operation | Supported behavior |

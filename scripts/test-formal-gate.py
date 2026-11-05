@@ -1,4 +1,5 @@
 """Small real-filesystem tests of gate failure handling; these do not run TLC."""
+import ast
 import contextlib
 import io
 import hashlib
@@ -34,7 +35,7 @@ class FormalGateTests(unittest.TestCase):
 
     def test_complete_registry_and_exact_mutations(self):
         registry = load_registry(self.root)
-        self.assertEqual({model['id'] for model in registry['models']}, {'AzureBlobState', 'BlobRange', 'BrowserSessions', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'DynamoDBAdmission', 'DynamoDBLifecycle', 'GCPStorageState', 'KMSKeyState', 'KMSProtocolAdmission', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'SecretsDisclosureChannels', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'StackOwnership', 'StartupTokenVisibility'})
+        self.assertEqual({model['id'] for model in registry['models']}, {'AzureBlobState', 'BlobRange', 'BrowserSessions', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'DynamoDBAdmission', 'DynamoDBLifecycle', 'GCPStorageState', 'KMSKeyState', 'KMSProtocolAdmission', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'SecretsDisclosureChannels', 'SecretsMutationRefresh', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'StackOwnership', 'StartupTokenVisibility'})
         for model in registry['models']:
             source = (self.root / model['model']).read_text()
             for mutant in model['mutants']:
@@ -475,7 +476,7 @@ class FormalGateTests(unittest.TestCase):
         original = path.read_text()
         registry = json.loads(original)
         self.assertEqual(set(REQUIRED_MUTANTS), BASE_MODELS)
-        self.assertEqual(sum(map(len, REQUIRED_MUTANTS.values())), 149)
+        self.assertEqual(sum(map(len, REQUIRED_MUTANTS.values())), 153)
         self.assertEqual({m['id']: {c['id'] for c in m['mutants']} for m in registry['models']}, REQUIRED_MUTANTS)
         for model in registry['models']:
             for mutant in model['mutants']:
@@ -492,7 +493,7 @@ class FormalGateTests(unittest.TestCase):
     def test_every_required_control_is_protected_against_single_removal(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
-        self.assertEqual(sum(len(v) for v in REQUIRED_MUTANTS.values()), 149)
+        self.assertEqual(sum(len(v) for v in REQUIRED_MUTANTS.values()), 153)
         for model_id, controls in REQUIRED_MUTANTS.items():
             for control in controls:
                 with self.subTest(model=model_id, control=control):
@@ -617,6 +618,39 @@ class FormalGateTests(unittest.TestCase):
                     with self.assertRaisesRegex(GateError, 'required mutation control was removed'):
                         load_registry(self.root)
             path.write_text(original)
+
+    def test_test_methods_cannot_silently_shadow_each_other(self):
+        tree = ast.parse(Path(__file__).read_text())
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ClassDef):
+                names = [item.name for item in node.body
+                         if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef))
+                         and item.name.startswith('test_')]
+                self.assertEqual(len(names), len(set(names)),
+                                 'duplicate test methods in ' + node.name)
+
+    def test_mutation_refresh_model_and_each_property_are_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        registry = json.loads(original)
+        model = next(m for m in registry['models'] if m['id'] == 'SecretsMutationRefresh')
+        cfg = self.root / model['config']
+        original_cfg = cfg.read_text()
+        registry['models'] = [m for m in registry['models'] if m['id'] != model['id']]
+        path.write_text(json.dumps(registry))
+        with self.assertRaisesRegex(GateError, 'required existing model'):
+            load_registry(self.root)
+        for prop in model['properties']:
+            with self.subTest(property=prop):
+                candidate = json.loads(original)
+                target = next(m for m in candidate['models'] if m['id'] == model['id'])
+                target['properties'].remove(prop)
+                cfg.write_text('\n'.join(line for line in original_cfg.splitlines() if line != 'INVARIANT ' + prop) + '\n')
+                path.write_text(json.dumps(candidate))
+                with self.assertRaisesRegex(GateError, 'existing required invariant'):
+                    load_registry(self.root)
+        cfg.write_text(original_cfg)
+        path.write_text(original)
 
 if __name__ == '__main__':
     unittest.main()

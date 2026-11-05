@@ -452,7 +452,7 @@
       "id": "SQSStorageBudget",
       "model": "formal/SQSStorageBudget.tla",
       "config": "formal/SQSStorageBudget.cfg",
-      "bounds": "Two trusted queue scopes; three possible pre-existing row IDs plus one additional fresh ID; each row weight1–2 abstract payload units. MaxRows2/MaxBytes3. Initial unique-ID row sets include legacy states with3rows and up to6units, beyond either cap. Initial enumeration uses the exact729 unique-ID assignments, not a powerset filter. No time transition: expiry is a pre-existing Boolean classification.",
+      "bounds": "Two trusted queue scopes; three possible pre-existing row IDs plus one additional fresh ID; each row weight1\u20132 abstract payload units. MaxRows2/MaxBytes3. Initial unique-ID row sets include legacy states with3rows and up to6units, beyond either cap. Initial enumeration uses the exact729 unique-ID assignments, not a powerset filter. No time transition: expiry is a pre-existing Boolean classification.",
       "properties": [
         "TypeOK",
         "FailedSendPreservesRows",
@@ -644,7 +644,7 @@
       "id": "ProviderActor",
       "model": "formal/ProviderActor.tla",
       "config": "formal/ProviderActor.cfg",
-      "bounds": "64 request combinations: authentication2 × credential roles2 × exercise selections4 × spoofed wire roles2 × capabilities2; captured emission includes original request; uniform tagged records distinguish absent/attached actors without TLC heterogeneous equality;65 reachable emissions expected, to be verified",
+      "bounds": "64 request combinations: authentication2 \u00d7 credential roles2 \u00d7 exercise selections4 \u00d7 spoofed wire roles2 \u00d7 capabilities2; captured emission includes original request; uniform tagged records distinguish absent/attached actors without TLC heterogeneous equality;65 reachable emissions expected, to be verified",
       "properties": [
         "TypeOK",
         "NoActorOnRejected",
@@ -848,7 +848,7 @@
       "id": "AzureBlobState",
       "model": "formal/AzureBlobState.tla",
       "config": "formal/AzureBlobState.cfg",
-      "bounds": "Two account/environment scopes with one container each, two distinct abstract keys and payload values1–2, at most three accepted puts, rowcap2 and abstractbytecap3. Context trust and two fixed owner subjects modeled explicitly. Three-write frontier is an exploration bound, not an API quota.",
+      "bounds": "Two account/environment scopes with one container each, two distinct abstract keys and payload values1\u20132, at most three accepted puts, rowcap2 and abstractbytecap3. Context trust and two fixed owner subjects modeled explicitly. Three-write frontier is an exploration bound, not an API quota.",
       "properties": [
         "TypeOK",
         "NoUnauthorizedMutation",
@@ -2318,6 +2318,69 @@
             }
           ],
           "expect_invariant": "StatisticsExact"
+        }
+      ]
+    },
+    {
+      "id": "SecretsMutationRefresh",
+      "model": "formal/SecretsMutationRefresh.tla",
+      "config": "formal/SecretsMutationRefresh.cfg",
+      "bounds": "Two Create/Put initial kinds; one submitted/acknowledgedwrite, one metadataread plus atmostonereadretry, one fresh formgeneration (T1->None->T2); requestcounts0..2 admit negative replay, no second committedwrite.",
+      "properties": [
+        "TypeOK",
+        "AckClosesForm",
+        "NoWriteOnReadRetry",
+        "AckClearsDraft",
+        "FreshFormHasToken"
+      ],
+      "limits": "UI ACK-to-metadata/form-state abstraction assuming live current ACK; not epoch/auth/SQL/server idempotency/refinement/liveness or disclosure proof. Excludes unacknowledged network ambiguity/delete/stage-label/rollback/further writes. Corresponds to the reviewed live-ACK form exit in mutate; historical d9 source omitted that exit. Keyboard, React scheduling, concrete HTTP and fresh-token entropy require executable checks.",
+      "source_scope": [
+        "tools/console/src/secrets-manager.jsx"
+      ],
+      "mutants": [
+        {
+          "id": "OmitAckFormExit",
+          "edits": [
+            {
+              "old": "formOpen' = FALSE (* AckFormExit *)",
+              "new": "formOpen' = formOpen (* AckFormExit *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AckClosesForm"
+        },
+        {
+          "id": "ReplayWriteOnReadRetry",
+          "edits": [
+            {
+              "old": "requests' = requests (* RetryReadOnly *)",
+              "new": "requests' = requests + 1 (* RetryReadOnly *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoWriteOnReadRetry"
+        },
+        {
+          "id": "RetainDraftOnAck",
+          "edits": [
+            {
+              "old": "draftPresent' = FALSE (* AckDraftClear *)",
+              "new": "draftPresent' = draftPresent (* AckDraftClear *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AckClearsDraft"
+        },
+        {
+          "id": "OmitFreshIntentToken",
+          "edits": [
+            {
+              "old": "token' = \"T2\" (* FreshIntentToken *)",
+              "new": "token' = \"None\" (* FreshIntentToken *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FreshFormHasToken"
         }
       ]
     }

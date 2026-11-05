@@ -1,5 +1,10 @@
 # Finite state model
 
+Current candidate registry: 27 models / 153 literal-protected controls (180 planned
+executions). Main0a6 contributes26/149 unchanged; only SecretsMutationRefresh adds
+one model/four controls. No current merged-candidate full-run proof is inherited
+from earlier eac3 or main receipts.
+
 Current backlog integration registers **26 finite models and149 required sensitivity controls** (175 TLC executions). The registry in `formal/models.json` and immutable CI reports are authoritative. Counts and candidate statuses in dated receipts below describe historical inputs; they are not current integration results. These models do not prove Go/SQL/HTTP/UI refinement or complete cloud compatibility.
 
 
@@ -223,3 +228,13 @@ This source union has not run TLC; old99/base5c97 actual103 success is historica
 The SQS epoch model covers bounded accepted replies/private receipt custody,
 not native receipt validity, authentication, React/DOM/thread execution or
 Go/SQLite refinement. See [correspondence](../docs/formal-sqs-console.md).
+
+## Current Secrets mutation/read integration
+
+The current registry preserves those 26 main models and 149 controls and adds only
+SecretsMutationRefresh (five properties/four named controls): 27 models, 153
+controls, 180 planned executions. Every original model/config/property/control is
+retained. The new property mapping separates acknowledged writes from read-only
+metadata recovery; it does not prove React/HTTP/native idempotency or ambiguous
+write outcomes. [Contract](../docs/formal-secrets-mutation-refresh.md). Full new-HEAD
+immutable applicability/TLC and whole-quality/hosted CI remain required.

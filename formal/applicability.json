@@ -3,10 +3,104 @@
   "base_sha": "0a6bdce41c773f651a5bd9a8a128da4e45b8b2c2",
   "changes": [
     {
+      "path": "README.md",
+      "sha256": "e9bbaafa9ed5e3724c2c922c7191cb970433b175134642d4cad1f51c66e30670",
+      "disposition": "documentation",
+      "reason": "Keep revision-specific CI evidence separate from stable acceptance requirements; document unchanged coverage floors and meaningful native storage-recovery tests without claiming unexecuted whole-suite results or real-cloud parity.",
+      "models": []
+    },
+    {
+      "path": "docs/ci.md",
+      "disposition": "documentation",
+      "models": [],
+      "reason": "Keep revision-specific CI evidence separate from stable acceptance requirements; document unchanged coverage floors and meaningful native storage-recovery tests without claiming unexecuted whole-suite results or real-cloud parity.",
+      "sha256": "3c92e24045ae3edc2ec8d61db6abc47c89fe9ff96245b8a0abaff4922c792c9e"
+    },
+    {
+      "path": "docs/formal-secrets-mutation-refresh.md",
+      "disposition": "documentation",
+      "models": [],
+      "reason": "Current main0a6 plus ACK-only integration scope27/153/180, with explicit historical eac134 vs pending new-HEAD proof. Preserve service/API limits and rights; no claim of full refinement/cloud parity/current fullCI.",
+      "sha256": "fb525bf7f17b9a2a525bbc640b5e3bda9cf48d9258201cecde2f176894acadad"
+    },
+    {
+      "path": "docs/formal-validation.md",
+      "sha256": "0f91c46b491a12dc518314f78b4a7d567829e617d26ae83b99752b708e52c614",
+      "disposition": "documentation",
+      "reason": "Keep revision-specific CI evidence separate from stable acceptance requirements; document unchanged coverage floors and meaningful native storage-recovery tests without claiming unexecuted whole-suite results or real-cloud parity.",
+      "models": []
+    },
+    {
+      "path": "docs/secrets-manager.md",
+      "sha256": "624c3333d5d60f1ec590c41765df90a5a2df503f4bd80a9b9b26344ccf3b0bfd",
+      "disposition": "documentation",
+      "reason": "Keep revision-specific CI evidence separate from stable acceptance requirements; document unchanged coverage floors and meaningful native storage-recovery tests without claiming unexecuted whole-suite results or real-cloud parity.",
+      "models": []
+    },
+    {
       "path": "docs/sqs-console.md",
-      "sha256": "1de3d41f0c788e90d7cf4a9df9f74f44bcd72cd9905da38d7e71aa3af2979511",
+      "sha256": "e67a3f43ad2a315617f577f903831e591613e7803189c5a2ad4905406201d4bf",
       "disposition": "documentation",
       "reason": "Separate this source-only restack and pending canonical/runtime/formal checks from historical candidate receipts.",
+      "models": []
+    },
+    {
+      "path": "formal/README.md",
+      "sha256": "428ff92b758d6e8f202b551dd78d7c249aac02e69d89f816a44b4af33c148b4f",
+      "disposition": "documentation",
+      "reason": "Current main0a6 plus ACK-only integration scope27/153/180, with explicit historical eac134 vs pending new-HEAD proof. Preserve service/API limits and rights; no claim of full refinement/cloud parity/current fullCI.",
+      "models": []
+    },
+    {
+      "path": "formal/SecretsMutationRefresh.cfg",
+      "disposition": "modeled",
+      "models": [
+        {
+          "id": "SecretsMutationRefresh",
+          "properties": [
+            "TypeOK",
+            "AckClosesForm",
+            "NoWriteOnReadRetry",
+            "AckClearsDraft",
+            "FreshFormHasToken"
+          ],
+          "limits": "UI ACK-to-metadata/form-state abstraction assuming live current ACK; not epoch/auth/SQL/server idempotency/refinement/liveness or disclosure proof. Excludes unacknowledged network ambiguity/delete/stage-label/rollback/further writes. Corresponds to the reviewed live-ACK form exit in mutate; historical d9 source omitted that exit. Keyboard, React scheduling, concrete HTTP and fresh-token entropy require executable checks."
+        }
+      ],
+      "reason": "Only additive ACK/read model: 5 properties/4 literal controls; allmain26/149 retained. Finite current live-ACK form exit/draft clearing/read-only metadata retry/fresh-intent token, not React/Go/SQL/auth/ambiguous-write refinement. Oldeac134 is historical; current27/153 requires180 actual new-HEAD executions.",
+      "sha256": "7f970bd6d3d69844869feadf01b3f66d7c23cfc7cb6afa6d527612a6fca7f443"
+    },
+    {
+      "path": "formal/SecretsMutationRefresh.tla",
+      "disposition": "modeled",
+      "models": [
+        {
+          "id": "SecretsMutationRefresh",
+          "properties": [
+            "TypeOK",
+            "AckClosesForm",
+            "NoWriteOnReadRetry",
+            "AckClearsDraft",
+            "FreshFormHasToken"
+          ],
+          "limits": "UI ACK-to-metadata/form-state abstraction assuming live current ACK; not epoch/auth/SQL/server idempotency/refinement/liveness or disclosure proof. Excludes unacknowledged network ambiguity/delete/stage-label/rollback/further writes. Corresponds to the reviewed live-ACK form exit in mutate; historical d9 source omitted that exit. Keyboard, React scheduling, concrete HTTP and fresh-token entropy require executable checks."
+        }
+      ],
+      "reason": "Only additive ACK/read model: 5 properties/4 literal controls; allmain26/149 retained. Finite current live-ACK form exit/draft clearing/read-only metadata retry/fresh-intent token, not React/Go/SQL/auth/ambiguous-write refinement. Oldeac134 is historical; current27/153 requires180 actual new-HEAD executions.",
+      "sha256": "c376c2e0c0bfd5ed25a96ade77d05f4077419eb8a8bf09a811c39901b59910a7"
+    },
+    {
+      "path": "formal/models.json",
+      "sha256": "1359108b42d825d450b8733cb0829a8a96d0b2a08a63ffe89bcd8c8ed66a6524",
+      "disposition": "formal-infrastructure",
+      "reason": "Preserve all26 main registry entries/properties/bounds/149 controls and every main policy detector; add only ACK model/5properties/4controls plus strict valid-CFG omission and AST unique-test-name guard. Literal totals27/153 and all153 single removals retained. No runtime/timeout/domain/floor weakening. New exact-HEAD180 check required; not execution proof from registration.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/dynamodb_recovery_contracts_416_test.go",
+      "sha256": "6ee4937ae373a5c50f1741a9d022099caebbdeca57f75c3e7414ecce849f40e9",
+      "disposition": "test-support",
+      "reason": "Issue416 test-only native DynamoDB/real SQLite storage failure and repaired-retry contracts. Verify refusal retains complete stored frames and peer scope, followed by actual native recovery after repair. No production, threshold, exclusion, profile-union or model changes. These SQL/storage fault states are not claimed as TLA-modeled. Standalone focused normal/race results and diagnostic newly covered lines do not establish a whole-module90% result; one fresh full profile and hosted gates remain required.",
       "models": []
     },
     {
@@ -14,11 +108,25 @@
       "disposition": "presentation",
       "reason": "Canonical same-lock Cloudscape bundle of the SQS locale source; original22 package notices, native API/state contracts and dependencies unchanged. Generated assets do not prove runtime behavior.",
       "models": [],
-      "sha256": "ebc20dadc3e1f6c49b692172fa99aaddd5c65e91e87b2980cdd6b6adbd0a9dfe"
+      "sha256": "fb0fd0825375592189f95883ab6f1d754619a378de4476b31da138c2d3a73e84"
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "820165ab4eb9d2a079dee9251325e840fcd5ed9629af50a22ca3b0a4e4667334",
+      "disposition": "formal-infrastructure",
+      "reason": "Preserve all26 main registry entries/properties/bounds/149 controls and every main policy detector; add only ACK model/5properties/4controls plus strict valid-CFG omission and AST unique-test-name guard. Literal totals27/153 and all153 single removals retained. No runtime/timeout/domain/floor weakening. New exact-HEAD180 check required; not execution proof from registration.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "167c48004c54fc93005feb7664fe54abbe68f20613d0c1d49c8189e25d7ed763",
+      "disposition": "formal-infrastructure",
+      "reason": "Preserve all26 main registry entries/properties/bounds/149 controls and every main policy detector; add only ACK model/5properties/4controls plus strict valid-CFG omission and AST unique-test-name guard. Literal totals27/153 and all153 single removals retained. No runtime/timeout/domain/floor weakening. New exact-HEAD180 check required; not execution proof from registration.",
+      "models": []
     },
     {
       "path": "test/console/navigation.test.mjs",
-      "sha256": "dad00a1a54875415cc036a5ea7c30138c52f947f600cf9f71e4b565a147efd81",
+      "sha256": "86c2f7972c48e33ca94528283b435f51141bc5e5e0706ca1e693509fe6a17e77",
       "disposition": "test-support",
       "reason": "Preserve all main42 acceptance bodies and add mandatory actual two-CLI locale/receipt assertions; retain catalog controls and strict failure behavior.",
       "models": []
@@ -28,6 +136,20 @@
       "sha256": "33f668864de7169d53ab5f3d161cb1db5a3a67a678553acfc3154c6bf584833f",
       "disposition": "test-support",
       "reason": "Preserve all main42 acceptance bodies and add mandatory actual two-CLI locale/receipt assertions; retain catalog controls and strict failure behavior.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/login_token_file.py",
+      "disposition": "test-support",
+      "models": [],
+      "reason": "Test-only safe file-keyboard diagnostics and strict native chooser/POST/busy assertions. Original5s timeout, focus condition and auth/read/locale/negative oracles remain; artificial default cancellation is labelled and not a CI-cause claim. Diagnostics contain no token/input value/file name/arbitrary key/request URL. New exactHEAD execution and CI remain required.",
+      "sha256": "38044fe99a4055e049ca37214248188876730dac3ebff50252e2adfa02464291"
+    },
+    {
+      "path": "test/e2e/secrets_manager_console.py",
+      "sha256": "ff4caddcb528ba012b0b3608ca020236d149f7fccac49aae4f88990f062058aa",
+      "disposition": "test-support",
+      "reason": "Retain main native SDK/browser/context/privacy/retry/delete flows and add actual Create/Put ACK then explicitly aborted Describe; assert closed/cleared forms, read-only sameARN recovery without extra writes, exact versions and distinct nonempty new-intent tokens. Artificial read-fault is labelled, not actual CI-cause proof; no weakened assertions/skips/timeouts. Reviewed accessibility-only refresh disables Cloudscape motion within the Secrets view, with exact-English locale normalization and strengthened immediate-alert contrast regression checks. Existing finite state bindings are retained; animation/opacity/accessibility are outside these models and require executable browser evidence. New hosted exact-HEAD full gates remain required.",
       "models": []
     },
     {
@@ -42,21 +164,37 @@
       "disposition": "presentation",
       "reason": "Canonical same-lock Cloudscape bundle of the SQS locale source; original22 package notices, native API/state contracts and dependencies unchanged. Generated assets do not prove runtime behavior.",
       "models": [],
-      "sha256": "658e6d5fc6cec31c9f05da9c36d01e70a50ed350ab2fabae8b1704224e5e4ff8"
+      "sha256": "6dd9a3846be6784b75e8a941081671ee79d29ee7363613e5d8b4be2078062819"
     },
     {
       "path": "tools/console/bundle-inputs.json",
       "disposition": "presentation",
       "reason": "Canonical same-lock Cloudscape bundle of the SQS locale source; original22 package notices, native API/state contracts and dependencies unchanged. Generated assets do not prove runtime behavior.",
       "models": [],
-      "sha256": "697b6c13a1445770d5c0da00d0616c28317808e8aeb01b4f1dccaf1bd4848760"
+      "sha256": "1265ad8713f924766f40c6532c93b0fabc7bcc55aebe2caa63a64e5f7bfd9f38"
     },
     {
       "path": "tools/console/src/console-navigation.mjs",
-      "sha256": "d1315a9d5ceee1a1de5fc030d0ccf75229fde51630d9d1c9c5da9e6d4955e103",
+      "sha256": "582ceaf2418487ef7089356ac1fc649d94ee657a8615fa1239f00187492841b7",
       "disposition": "presentation",
       "reason": "SQS static label/notice presentation and existing-catalog Japanese alias controls only; native APIs, dependencies and authority remain unchanged.",
       "models": []
+    },
+    {
+      "path": "tools/console/src/login.jsx",
+      "sha256": "860da4232182a8682278290bfa8d439cee36196f9f12314ec984c4d9f8412e9f",
+      "disposition": "modeled",
+      "reason": "Existing Login credential-transport/session correspondence retains the registered BrowserSessions contract. The only product addition is trusted focused file-input Enter synchronous click/default suppression with busy/submitting/disabled/repeat guards. Token parsing, read-intent revision/cleanup, password/clipboard, exact native sign-in and server cookies are byte-identical after removing this handler/binding. The unchanged finite session model does NOT model or prove keyboard/native chooser/default-action/userActivation/React/browser-version behavior; actual focused browser and handler condition tests are separate required evidence, and the prior hosted chooser failure cause remains unproven.",
+      "models": [
+        {
+          "id": "BrowserSessions",
+          "properties": [
+            "RevokedCookiesDenied",
+            "NoBrowserSDKAuthority"
+          ],
+          "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them."
+        }
+      ]
     },
     {
       "path": "tools/console/src/main.jsx",
@@ -73,6 +211,34 @@
             "RawReceiptsPrivate"
           ],
           "limits": "Finite view acceptance/custody abstraction only, not React/AbortController/DOM/thread execution, token authentication, IAM, native receipt validity/freshness, Go/SQL, cryptography or AWS visual parity. Native requests may finish after cancellation; only current replies enter the view. Accepted history captures its original mounted/context/epoch, so later changes cannot relabel an old acceptance. Unmount epoch advance is redundant with the alive guard and the combined mutant deliberately removes both. Receipt values abstract one response identity per context/epoch; native freshness and release require actual browser/SDK tests. main.jsx source scope is only added SQS keyed-remount/navigation seam, not all other services or authentication."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/secrets-manager.jsx",
+      "sha256": "29c88fca5539f897a8954ce0b14371a2fd637abb5039aed0a4695a9dd532dee0",
+      "disposition": "modeled",
+      "reason": "Preserve main metadata-read retry/error/detail-delete clearing and typed opaque data/error boundaries. Live acknowledged Create/Put closes and clears its form before independent refresh, whose retry cannot replay a write; new explicit intent has a fresh token. Bind existing finite reveal/epoch and bounded ACK/read properties, not all React/HTTP/server idempotency/network ambiguity/auth or erasure. Full new-HEAD native/browser/SDK and model gates remain required. Reviewed accessibility-only refresh disables Cloudscape motion within the Secrets view, with exact-English locale normalization and strengthened immediate-alert contrast regression checks. Existing finite state bindings are retained; animation/opacity/accessibility are outside these models and require executable browser evidence. New hosted exact-HEAD full gates remain required.",
+      "models": [
+        {
+          "id": "SecretsRevealEpoch",
+          "properties": [
+            "NoUnmountedDisplay",
+            "FreshEmissionHistory",
+            "ReturnedARNMatches",
+            "VisibleContextMatches"
+          ],
+          "limits": "Finite explicit-retrieve/display model, not React, DOM, AbortController, memory zeroization or implementation refinement. Only the successful response path is modeled; native store/IAM must authorize before returning any secret. A returned ARN can differ and must be rejected. Retrieve, Hide and navigation invalidate epochs; unmount also clears visible state. Parent must remount on region/principal changes. Emission history captures the context at each acceptance so later Hide/navigation cannot relabel an earlier stale acceptance. Draft entry, mutation atomicity and form layout are outside this model. Parent main.jsx scope binds only Secrets routing/remount key (region/principal/navigation); the generated app.js binding is the canonical compiled artifact of those source inputs, independently checked by bundle/asset hashes. It does not model unrelated existing console services or prove JavaScript compilation."
+        },
+        {
+          "id": "SecretsMutationRefresh",
+          "properties": [
+            "AckClosesForm",
+            "NoWriteOnReadRetry",
+            "AckClearsDraft",
+            "FreshFormHasToken"
+          ],
+          "limits": "UI ACK-to-metadata/form-state abstraction assuming live current ACK; not epoch/auth/SQL/server idempotency/refinement/liveness or disclosure proof. Excludes unacknowledged network ambiguity/delete/stage-label/rollback/further writes. Corresponds to the reviewed live-ACK form exit in mutate; historical d9 source omitted that exit. Keyboard, React scheduling, concrete HTTP and fresh-token entropy require executable checks."
         }
       ]
     },
@@ -99,6 +265,13 @@
       "sha256": "3d40be53e9f85177e88837b7b33cd71f96b69c988cc8c8d8c0516efa65e07fef",
       "disposition": "presentation",
       "reason": "SQS static label/notice presentation and existing-catalog Japanese alias controls only; native APIs, dependencies and authority remain unchanged.",
+      "models": []
+    },
+    {
+      "path": "tools/console/tests/secrets-manager-locale.test.mjs",
+      "sha256": "5e5bd684237c68fa300761f19bce5cf06fcb1e00314e45d21c253aca30eef189",
+      "disposition": "presentation",
+      "reason": "Provider-scoped catalogue/alias/static locale or canonical same-lock inputs, or pure presentation/source-contract tests. Native API values/resource data/credentials remain opaque. Strict English baseline and reviewed ACK normalization retain negative controls; no actual new-HEAD browser/native/fullgate inference. Reviewed accessibility-only refresh disables Cloudscape motion within the Secrets view, with exact-English locale normalization and strengthened immediate-alert contrast regression checks. Existing finite state bindings are retained; animation/opacity/accessibility are outside these models and require executable browser evidence. New hosted exact-HEAD full gates remain required.",
       "models": []
     }
   ]

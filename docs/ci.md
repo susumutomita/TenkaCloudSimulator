@@ -14,7 +14,7 @@ Every push, pull request and manual run checks out the exact tested head and run
 4. Locked npm dependency audit (high/critical fail) and canonical Go govulncheck.
 5. Required real-binary/SDK/console/Scalar regression, including the new two-provider
    PC/mobile acceptance, plus the existing accessibility audit. The current source
-   registers42 Conformance cases and26 finite TLC baselines/149 named sensitivity
+   registers42 Conformance cases and27 finite TLC baselines/153 named sensitivity
    counterexamples; only completed exact-head runs count as verified.
    Official Google/Azure storage SDK acceptance runs against local CLIs with pinned development dependencies and documented transport limits;
    native HTTP and browser proof must not be labelled official SDK compatibility.
@@ -39,6 +39,15 @@ A pinned `actions/upload-artifact` stores the raw Go profile, unfiltered XML, HT
 source view and Markdown summary for 14 days. Evidence is retained even after a
 failed threshold check; uploading an artifact does not change the failed result.
 Missing evidence cannot make generation or validation succeed.
+
+A later near-floor pass does not repair an earlier below-floor result. Add
+meaningful native contract tests for uncovered behavior and verify a new single
+full-module profile without exclusions or a lower floor. The DynamoDB storage
+recovery tests exercise sanitized failures, unchanged owner/peer-region state,
+authorization before corrupted-state access, and repaired native operations.
+These injected SQLite faults test local persistence contracts, not behavior
+observed on real AWS. Focused coverage differences are diagnostic evidence;
+never merge them into a profile presented as a whole-suite result.
 
 ## Why Code Quality upload was replaced
 
