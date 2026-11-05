@@ -3,6 +3,7 @@ export const PROVIDERS = Object.freeze([
   {id: 'aws', label: 'AWS', defaultService: 's3'},
   {id: 'gcp', label: 'Google Cloud', defaultService: 'gcp-storage'},
   {id: 'azure', label: 'Azure', defaultService: 'azure-blob'},
+  {id: 'sakura', label: 'Sakura Cloud', defaultService: 'sakura-disks'},
 ]);
 export const SERVICES = Object.freeze([
   {id: 's3', provider: 'aws', label: 'S3', capability: 's3', route: '/s3', keywords: 'bucket object バケット オブジェクト ストレージ'},
@@ -17,13 +18,30 @@ export const SERVICES = Object.freeze([
   {id: 'secretsmanager', provider: 'aws', label: 'Secrets Manager', capability: 'secretsmanager', route: '/secretsmanager', keywords: 'secret version credential credentials シークレット バージョン 秘密 認証情報'},
   {id: 'gcp-storage', provider: 'gcp', label: 'Cloud Storage', route: '/gcp-storage', keywords: 'google bucket object バケット オブジェクト ストレージ クラウドストレージ'},
   {id: 'azure-blob', provider: 'azure', label: 'Blob Storage', route: '/azure-blob', keywords: 'container blob コンテナー コンテナ ブロブ ストレージ ブロブストレージ'},
+  {id: 'sakura-disks', provider: 'sakura', label: 'Disks', route: '/sakura-disks', keywords: 'sakura cloud disk configuration storage さくらのクラウド さくら ディスク 構成 ストレージ'},
 ]);
 export function serviceDescriptor(id) { return SERVICES.find(service => service.id === id); }
 export function providerForService(id) { return serviceDescriptor(id)?.provider ?? null; }
+// Discovery only; server-side trusted Actor/owner checks remain authoritative.
+// No environment/project/owner is inferred from client headers or AWS regions.
+export function sakuraConfiguration(capabilities) {
+  const scope = capabilities?.sakura;
+  if (!Array.isArray(capabilities?.providers) || !capabilities.providers.includes('sakura')
+      || scope?.console !== true || scope.apiVersion !== '1.1'
+      || scope.service !== 'IaaS Disk configuration' || scope.availabilityReported !== false
+      || typeof scope.endpoint !== 'string') return null;
+  const match = /^\/_simulator\/providers\/sakura\/cloud\/zone\/([a-z0-9][a-z0-9-]{0,31})\/api\/cloud\/1\.1\/disk$/.exec(scope.endpoint);
+  const expected = ['GET /disk','POST /disk','GET /disk/{id}','PUT /disk/{id}','DELETE /disk/{id}'];
+  if (!match || !Array.isArray(scope.operations) || scope.operations.length !== expected.length
+      || new Set(scope.operations).size !== expected.length
+      || !expected.every(operation => scope.operations.includes(operation))) return null;
+  return {endpoint: scope.endpoint, zone: match[1]};
+}
 export function serviceAvailable(id, capabilities) {
   const service = serviceDescriptor(id);
   if (!service || !capabilities) return false;
   if (service.provider === 'aws') return !!capabilities.services?.[service.capability];
+  if (service.provider === 'sakura') return sakuraConfiguration(capabilities) !== null;
   const scope = capabilities.cloudStorage?.[service.provider];
   return service.provider === 'gcp' ? typeof scope?.project === 'string' && scope.project.length > 0
     : typeof scope?.account === 'string' && scope.account.length > 0;

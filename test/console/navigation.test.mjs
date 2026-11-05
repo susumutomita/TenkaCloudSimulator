@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {PROVIDERS, SERVICES, serviceAvailable, servicesForProvider, serviceFromHash, hashForService, providerForService} from '../../tools/console/src/console-navigation.mjs';
+import {PROVIDERS, SERVICES, serviceAvailable, servicesForProvider, serviceFromHash, hashForService, providerForService, sakuraConfiguration} from '../../tools/console/src/console-navigation.mjs';
 const capabilities={services:{s3:{},ssm:{},iam:{},lambda:{},apigateway:{},cloudformation:{},kms:{},sqs:{},logs:{},secretsmanager:{},dynamodb:{}},cloudStorage:{gcp:{project:'dummy-project'},azure:{account:'dummyaccount'}}};
 test('each provider is the same catalog level and contains only real console routes',()=>{
-  assert.deepEqual(PROVIDERS.map(p=>p.id),['aws','gcp','azure']);
+  assert.deepEqual(PROVIDERS.map(p=>p.id),['aws','gcp','azure','sakura']);
   assert.equal(servicesForProvider('aws',capabilities).length,10);
   assert.deepEqual(servicesForProvider('gcp',capabilities).map(s=>s.id),['gcp-storage']);
   assert.deepEqual(servicesForProvider('azure',capabilities).map(s=>s.id),['azure-blob']);
@@ -76,4 +76,33 @@ test('Secrets is an AWS-only capability-gated route with an exact legacy alias',
   assert.equal(serviceFromHash('#/secretsmanager'),'secretsmanager');
   assert.equal(serviceFromHash('#/secretsmanager-fake'),null);
   assert.equal(hashForService('secretsmanager'),'/secretsmanager');
+});
+
+
+test('Sakura discovery requires explicit provider console capability and fixed native endpoint',()=>{
+  const native={service:'IaaS Disk configuration',apiVersion:'1.1',console:true,availabilityReported:false,
+    endpoint:'/_simulator/providers/sakura/cloud/zone/is1a/api/cloud/1.1/disk',
+    operations:['GET /disk','POST /disk','GET /disk/{id}','PUT /disk/{id}','DELETE /disk/{id}']};
+  const enabled={...capabilities,providers:['aws','gcp','azure','sakura'],sakura:native};
+  const before=JSON.stringify(enabled);
+  assert.deepEqual(sakuraConfiguration(enabled),{endpoint:native.endpoint,zone:'is1a'});
+  assert.equal(serviceAvailable('sakura-disks',enabled),true);
+  for(const query of ['disk','さくら','ディスク','ｓａｋｕｒａ'])
+    assert.deepEqual(servicesForProvider('sakura',enabled,query).map(s=>s.id),['sakura-disks']);
+  for(const provider of ['aws','gcp','azure'])
+    assert.deepEqual(servicesForProvider(provider,enabled,'sakura'),[]);
+  assert.equal(serviceFromHash('#/sakura-disks'),'sakura-disks');
+  assert.equal(providerForService('sakura-disks'),'sakura');
+  assert.equal(hashForService('sakura-disks'),'/sakura-disks');
+  for(const scope of [undefined,{...native,console:false},{...native,apiVersion:'2'},
+      {...native,availabilityReported:true},{...native,operations:['GET /disk']},
+      {...native,operations:[...native.operations.slice(0,4),'GET /disk']},
+      {...native,endpoint:'https://example.invalid/disk'},
+      {...native,endpoint:native.endpoint+'?owner=other'},
+      {...native,endpoint:native.endpoint.replace('/is1a/','/is1a%2Fother/')},
+      {...native,endpoint:native.endpoint.replace('/is1a/','/../')}])
+    assert.equal(serviceAvailable('sakura-disks',{...enabled,sakura:scope}),false);
+  assert.equal(serviceAvailable('sakura-disks',{...enabled,providers:['aws']}),false);
+  assert.equal(serviceAvailable('sakura-disks',capabilities),false);
+  assert.equal(JSON.stringify(enabled),before);
 });
