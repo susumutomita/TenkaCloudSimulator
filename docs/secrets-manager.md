@@ -6,8 +6,9 @@
 Eight native Secrets Manager operations, the Cloudscape console, SDK clients and
 the embedded API reference use the same SQLite state. This is an independent,
 bounded training implementation, not a complete AWS service or a hosted release.
-Version listing is available through the native API/SDK/reference; the console
-retains its existing labeled-version view without a separate full-history pager.
+Version listing is available through the native API/SDK/reference and the
+console’s separate **Version metadata** tab. The original Secrets tab retains its
+labeled-version and explicit-retrieval flow.
 
 **Use dummy values only. SecretString is plaintext in the private database.**
 There is no KMS/envelope encryption, HSM, secure-erasure or production-vault
@@ -96,7 +97,39 @@ The separate [listing model](../formal/SecretVersionListing.tla) checks a bounde
 read/continuation projection: four ordered keys, one changing primary catalog,
 static peer targets, two incarnations and four steps. HMAC/SQL/JSON/IAM parsing,
 actual quotas, full concurrency and implementation refinement are not proved.
-Model registration and global acceptance gates remain separate integration work.
+The listing model is registered. Its finite checks do not replace the complete
+exact-revision acceptance gates.
+
+## Version metadata console
+
+Open **Version metadata** and enter a known full physical secret ARN. This tab
+works with `secretsmanager:ListSecretVersionIds` on that ARN without ListSecrets,
+DescribeSecret or GetSecretValue permission. It does not retrieve a secret value
+or automatically discover ARNs for a caller lacking list permission.
+
+**List versions** / **Refresh versions** starts at the first page. The console
+requests at most **20** rows and shows only the current page; **Next page** uses
+the opaque returned cursor without accumulating previous rows. Include deprecated
+includes retained unlabeled versions. This is live keyset pagination: refresh is
+a new read, not a snapshot or a guarantee of complete historical membership.
+**Cancel version request**, scope changes, tab changes and unmount clear displayed
+metadata and invalidate pending replies. Read failures clear rows and offer a
+read-only first-page retry. Only ARN/name, version IDs, dates and stages appear;
+no value or GetSecretValue request is part of this view.
+
+English/Japanese changes static labels without resetting the mounted query,
+ARN, Include deprecated selection or current page. The dedicated helper includes
+a same-DOM-node language round trip; that newly added assertion still requires
+execution at the integrated revision. Earlier Japanese-after-reload evidence is
+a separate check and does not establish same-mount retention.
+
+The registered [metadata-view model](../formal/SecretMetadataViewEpoch.tla)
+checks thirteen finite properties and fourteen named controls. Its scoped
+baseline/controls were executed separately; the combined 35-model/224-control
+inventory and 52 mandatory acceptance cases require their own exact-head run.
+Its parent projection covers tab invalidation of prior revealed state, not old
+pending retrievals, secret-byte erasure, backend authorization or whole React.
+The existing reveal/disclosure models remain separate and unchanged.
 
 ## Values, identity, versions and limits
 
@@ -196,7 +229,7 @@ ARNs, recovery windows/RestoreSecret, asynchronous deletion, version garbage
 collection and CloudFormation. Reads/listing are immediately consistent locally;
 AWS listing/deletion timing differs.
 
-## Verification and formal scope
+## Historical verification and formal scope
 
 The following are actual local results, separate from hosted GitHub CI:
 
@@ -217,7 +250,7 @@ TLC execution; earlier receipts never serve as an unexecuted new-head pass.
 Hosted exact-HEAD CI and independent publication review are separate checks;
 no hosted CI result, public release or merge is asserted here.
 
-The registered Secrets models are `SecretsVersionLifecycle` (six controls),
+At that historical checkpoint, the registered Secrets models were `SecretsVersionLifecycle` (six controls),
 `SecretsRevealEpoch` (three) and `SecretsDisclosureChannels` (five), alongside the
 ten existing models. All50 control identities are required; removing each one is
 a negative fixture. Every mutant must exit12 with its named invariant violation.

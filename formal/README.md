@@ -1,23 +1,19 @@
 # Finite state model
 
-Current registry: 34 models / 210 literal-protected controls
-(244 required executions). All previous30 model entries, TLA/CFG bytes,
-properties and175 controls are preserved. RESTRouteMatching adds six properties
-and six semantic controls; RESTProxyEventBoundary adds eight properties and ten
-controls. NativeWireProjection adds eight properties and six controls for the
-shared explicit ordered JSON writer. Independent scoped checks passed all three
-baselines and22 controls. Integration requires a complete230-case run against the
-exact immutable revision; scoped results and registration do not replace that gate.
-IAMManagedPolicies retains its four API-reachable seeds and two-request suffixes;
-the earlier four-request exploration timed out and is not claimed.
-Registration is source evidence, not itself evidence of successful execution. Dated receipts below
-refer to their recorded inputs; later revisions require their own checks. These
-finite models do not prove Go/SQL/HTTP/UI refinement or complete cloud compatibility.
+Current registry: **35 models / 224 literal-protected controls**
+(**259 required executions**). All incoming 34 model objects, their TLA/CFG bytes,
+properties and 210 controls are preserved. `SecretMetadataViewEpoch` adds thirteen
+properties and fourteen semantic controls for the metadata child and parent tab
+invalidation. Its standalone baseline and all fourteen named counterexamples
+passed at the recorded scoped model revision; the complete combined 259-case run
+against this integrated source is still required. Registration is not execution.
 
-Legacy integration sections below retain historical counts and status statements
-for traceability. Their word “current” refers to the recorded integration, not
-today's registry. The authoritative current inventory is the 34/210 registry
-above; proof claims always require evidence for the exact revision.
+IAMManagedPolicies retains its four API-reachable seeds and two-request suffixes;
+the earlier four-request exploration timed out and is not claimed. Dated receipts
+below refer to their recorded inputs; later revisions require their own checks.
+These finite models do not prove Go/SQL/HTTP/UI refinement or complete cloud
+compatibility. Historical sections retain their original counts for traceability;
+their word “current” refers to that recorded integration, not today's inventory.
 
 `ObjectStore.tla` models two buckets and two keys, shared object ownership, create/put/delete transitions, and an abstract identity decision `allow /\ ~deny`. `ObjectStore.cfg` checks type correctness, no orphan objects, no unauthorized mutation, and explicit-deny precedence.
 
@@ -345,9 +341,9 @@ and control IDs are protected by the loader and failure tests.
 
 SecretVersionListing adds nine invariants and thirteen literal-protected semantic
 controls, preserving all prior33 registry objects and197 controls and their
-TLA/CFG bytes. The combined inventory is34 baselines +210 controls =244 required
-executions. Registration and earlier independent scoped results are not a
-successful immutable244-case integration gate or hosted-CI result.
+TLA/CFG bytes. At the listing-only registration checkpoint the inventory was34 baselines
++210 controls =244 required executions. That historical registration and scoped
+results do not establish a complete integration or hosted-CI result.
 
 Four-transition suffixes cover four ordered symbolic version keys, two database
 authorities/regions, two physical generations and page size one. List permission
@@ -359,7 +355,7 @@ precedes the page limit, resume positions advance strictly, and reads preserve
 version/stage state. Add/promote/delete/recreate/reopen expose live keyset changes;
 this is not a stable snapshot or a proof of eventual termination.
 
-Correspondence is limited to ListSecretVersionIDs metadata enumeration/cursor
+Correspondence is limited to ListSecretVersionIds metadata enumeration/cursor
 logic in `secrets_manager_versions.go` and the exact added operation dispatch in
 `secret_http.go`; the other seven operations do not acquire new guarantees. Native
 store and HTTP tests named in source_scope separately exercise denied frames,
@@ -374,3 +370,40 @@ parsing, actual timestamp/UUID order, variable page sizes, secret-value redactio
 retention, UI and Go refinement remain native/integration obligations. All thirteen
 controls must fail their exact named semantic invariant with a behavioral trace;
 syntax/type/config failures or timeouts are not accepted counterexamples.
+
+
+## Secret metadata view epoch
+
+`SecretMetadataViewEpoch` checks six transitions, at most two reads and five
+separate seeds for overlap, scope changes, paging, locale and parent tab entry.
+A valid page has one symbolic row; a second row exposes accidental accumulation.
+Render and committed scopes are distinct. Old callbacks remain schedulable after
+Abort so the finite epoch/identity guards are checked independently of transport
+cancellation. Concrete browser cancellation may prevent JavaScript delivery and
+is not evidence that every post-Abort callback branch executed.
+
+Thirteen properties cover metadata-only requests, cursor provenance, stale
+acceptance/render/error refusal, loading ownership, clearing on new reads/errors,
+validated current-page rows, same-mount locale retention and clearing a prior
+parent reveal on metadata-tab entry. Fourteen named controls must each produce
+its specified invariant violation, not a parser/type/runtime error or timeout.
+The source projection includes `secret_versions.jsx`, the parent's tab-invalidate
+call and the derived bundle. It excludes old asyncRetrieve behavior, secret-byte
+zeroization, SQL, host authentication and whole React scheduling/refinement.
+Cursor provenance and response validation are abstract predicates, not HMAC or
+JSON parser proofs; the live pager is not a stable complete history snapshot.
+
+
+| Finite action / carrier | Concrete scope |
+| --- | --- |
+| Begin / current callback / Settle | Child `load`, captured scope/ticket/controller, `current()` success/catch/finally guard |
+| Cancel / Unmount / scope commit | `clear` and layout-effect cleanup; render result/error scope checks |
+| Next / cursor provenance | Next uses only the displayed page cursor, unchanged ARN/filter; current rows replace prior page |
+| Payload validity | `metadataPage` validation abstracted as a Boolean; malformed-payload implementation remains a test obligation |
+| LocaleFlip | `useLocale` static rendering; locale absent from the query-scope memo dependencies |
+| EnterMetadata | Parent tab-change `invalidate()`; prior visible-reveal Boolean only |
+
+The actual helper exercises 23 native versions as20+3 rows, list-only authority,
+metadata-read failure/repair, scope transitions, cancellation and peer frames.
+The newly added no-reload language round trip still awaits an execution lease at
+this source revision. Earlier Japanese-after-reload checks are not that oracle.
