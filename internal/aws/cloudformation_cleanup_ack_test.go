@@ -137,8 +137,8 @@ func TestCFNFinalCleanupACKExistingSSMAndS3(t *testing.T) {
 				if w = cleanupACKQuery(g, "DeleteStack", "ack-owned", ""); w.Code != 200 {
 					t.Fatal("retry", w.Code)
 				}
-				owned, err := stacks.Records("us-east-1", "ack-owned")
-				if err != nil || len(owned) != 0 {
+				var ownedStacks int
+				if err = stacks.db.QueryRow("SELECT count(*) FROM aws_cfn_stacks WHERE id=?", ownedID).Scan(&ownedStacks); err != nil || ownedStacks != 0 {
 					t.Fatal("stack retained after successful retry", err)
 				}
 				var claims int
