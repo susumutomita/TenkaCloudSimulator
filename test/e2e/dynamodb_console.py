@@ -60,10 +60,11 @@ def _run():
                 contexts=[]
                 try:
                     for width,kind,sort in [(1440,'S',False),(390,'S',True),(1440,'N',True),(390,'B',True)]:
+                        pk='constructor' if kind=='N' else '__proto__' if kind=='B' else 'id'
                         name='console-ddb-'+kind.lower()+'-'+str(width);value={'S':'learner-日本語','N':'2.0','B':'AQI='}[kind]
-                        key={'id':{kind:base64.b64decode(value) if kind=='B' else value},**({'sort':{'S':'entry'}} if sort else {})}
+                        key={pk:{kind:base64.b64decode(value) if kind=='B' else value},**({'sort':{'S':'entry'}} if sort else {})}
                         raw={**wire(key),'payload':{'S':'dummy JSON日本語 GetItem'},'flags':{'M':{'valid':{'BOOL':True},'nothing':{'NULL':True}}}}
-                        schema={'TableName':name,'KeySchema':[{'AttributeName':'id','KeyType':'HASH'}]+([{'AttributeName':'sort','KeyType':'RANGE'}] if sort else []),'AttributeDefinitions':[{'AttributeName':'id','AttributeType':kind}]+([{'AttributeName':'sort','AttributeType':'S'}] if sort else []),'BillingMode':'PAY_PER_REQUEST'}
+                        schema={'TableName':name,'KeySchema':[{'AttributeName':pk,'KeyType':'HASH'}]+([{'AttributeName':'sort','KeyType':'RANGE'}] if sort else []),'AttributeDefinitions':[{'AttributeName':pk,'AttributeType':kind}]+([{'AttributeName':'sort','AttributeType':'S'}] if sort else []),'BillingMode':'PAY_PER_REQUEST'}
                         peer.create_table(**schema);peer.put_item(TableName=name,Item={**key,'payload':{'S':'peer must survive'}})
                         context=browser.new_context(viewport={'width':width,'height':1000});contexts.append(context);page=context.new_page();page.set_default_timeout(10000)
                         calls,responses,failed=[],[],[];intercept=[None]
@@ -96,7 +97,7 @@ def _run():
                         def locale(target):
                             page.get_by_role('combobox',name='Language' if target=='ja' else '言語',exact=True).select_option(target);expect(page.locator('html')).to_have_attribute('lang',target)
                         def keys():
-                            page.get_by_label('id ('+kind+')',exact=True).fill(value)
+                            page.get_by_label(pk+' ('+kind+')',exact=True).fill(value)
                             if sort:page.get_by_label('sort (S)',exact=True).fill('entry')
                         login(page,a.token);expect(page.get_by_role('button',name='Refresh tables',exact=True)).to_be_enabled()
                         # Cancel while a real list request is pending: no stuck loading or write.
@@ -110,7 +111,7 @@ def _run():
                         page.get_by_role('button',name='Create table',exact=True).click();page.get_by_role('button',name='Cancel',exact=True).click()
                         with page.expect_response(lambda response:operation(response.request)=='ListTables') as released:held.pop().continue_()
                         assert released.value.status==200;intercept[0]=None;expect(page.get_by_role('button',name='Refresh tables',exact=True)).to_be_enabled();assert calls.count('CreateTable')==0
-                        page.get_by_role('button',name='Create table',exact=True).click();page.get_by_label('Table name',exact=True).fill(name)
+                        page.get_by_role('button',name='Create table',exact=True).click();page.get_by_label('Table name',exact=True).fill(name);page.get_by_label('Partition key',exact=True).fill(pk)
                         if kind!='S':page.get_by_label('Partition key type',exact=True).click();page.get_by_role('option',name='Number (N)' if kind=='N' else 'Binary (B)',exact=True).click()
                         if sort:page.get_by_role('checkbox',name='Sort key (optional)',exact=True).check()
                         before=list(calls);locale('ja');expect(page.get_by_label('テーブル名',exact=True)).to_have_value(name);assert calls==before;locale('en')
@@ -135,7 +136,7 @@ def _run():
                         page.get_by_role('button',name='Create item',exact=True).click();duplicate=json.dumps(raw)[:-1]+',"payload":{"S":"duplicate must fail"}}';page.get_by_label('Item JSON',exact=True).fill(duplicate);duplicate_error=native('Create item','PutItem',status=400);assert duplicate_error['__type'].endswith('#ValidationException')
                         assert wire(own.get_item(TableName=name,Key=key)['Item'])==raw;page.get_by_role('button',name='Cancel',exact=True).click()
                         keys();native('Get item','GetItem');expect(page.get_by_label('Returned item JSON',exact=True)).not_to_have_value('');assert json.loads(page.get_by_label('Returned item JSON',exact=True).input_value())==wire(own.get_item(TableName=name,Key=key)['Item']);audit('item-returned')
-                        page.get_by_label('id ('+kind+')',exact=True).fill('different' if kind=='S' else '3' if kind=='N' else 'Aw==');expect(page.get_by_label('Returned item JSON',exact=True)).to_have_count(0);expect(page.get_by_role('button',name='Delete item',exact=True)).to_have_count(0)
+                        page.get_by_label(pk+' ('+kind+')',exact=True).fill('different' if kind=='S' else '3' if kind=='N' else 'Aw==');expect(page.get_by_label('Returned item JSON',exact=True)).to_have_count(0);expect(page.get_by_role('button',name='Delete item',exact=True)).to_have_count(0)
                         keys();native('Get item','GetItem');page.get_by_role('button',name='Delete item',exact=True).click();page.get_by_role('dialog').get_by_role('button',name='Cancel',exact=True).click();assert calls.count('DeleteItem')==0
                         page.get_by_role('button',name='Delete item',exact=True).click();page.get_by_label('Type delete to confirm',exact=True).fill('delete');native('Delete','DeleteItem',page.get_by_role('dialog'))
                         assert own.get_item(TableName=name,Key=key).get('Item') is None;own.delete_item(TableName=name,Key=key);assert own.get_item(TableName=name,Key=key).get('Item') is None;assert own.describe_table(TableName=name)['Table']['ItemCount']==0
@@ -155,7 +156,7 @@ def _run():
                         assert name not in own.list_tables()['TableNames'];assert peer.get_item(TableName=name,Key=key)['Item']['payload']=={'S':'peer must survive'}
                         assert set(calls)==OPS;assert failed==['DescribeTable'];assert len(responses)+1==len(calls);assert calls.count('CreateTable')==1 and calls.count('DeleteTable')==1 and calls.count('DeleteItem')==1 and calls.count('PutItem')==3
                         assert all(status==200 or op=='PutItem' and status==400 for op,status in responses);assert not errors and not outside
-                        flows.append({'width':width,'keyType':kind,'sortKey':sort,'operations':sorted(set(calls)),'postACKReadAbort':1,'readRetryDidNotRepeatPut':True,'conditionalAndDuplicateRefused':True,'cancelNoMutation':True,'reader403NoMutation':True,'keyChangeClearsOldResult':True})
+                        flows.append({'width':width,'keyType':kind,'sortKey':sort,'partitionKeyName':pk,'operations':sorted(set(calls)),'postACKReadAbort':1,'readRetryDidNotRepeatPut':True,'conditionalAndDuplicateRefused':True,'cancelNoMutation':True,'reader403NoMutation':True,'keyChangeClearsOldResult':True})
                         context.close();contexts.remove(context);peer.delete_table(TableName=name)
                     assert own.list_tables()['TableNames']==[] and peer.list_tables()['TableNames']==[];assert SEEN==OPS;assert COUNTS['calls']>0 and COUNTS['calls']==COUNTS['sends']==COUNTS['responses']
                     report={'actualEmbeddedUI':True,'twoCLIsDBTokens':True,'flows':flows,'SDKCounts':COUNTS,'axeStates':audits,'foreignToken401':True,'peerPreserved':True,'outsideRequests':0,'pageErrors':0,'cleanup':'DELETED','actualAWS':False};(REPORTS/'dynamodb-console.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report))
