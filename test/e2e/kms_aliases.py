@@ -1,5 +1,7 @@
 """Actual normal CLI customer-alias SDK/crypto/IAM/two-team/region/restart acceptance; no AWS calls."""
 import ipaddress
+import hashlib
+import sqlite3
 import json
 from pathlib import Path
 import sys
@@ -75,10 +77,45 @@ def policy(iam, resources, deny=None):
     iam.put_role_policy(RoleName='alias-learner', PolicyName='AliasUse',
         PolicyDocument=json.dumps({'Version': '2012-10-17', 'Statement': statements}))
 
+def database_frame(path):
+    # Read only the owned temporary fixture; never report private rows/material.
+    with sqlite3.connect('file:' + str(path) + '?mode=ro', uri=True) as db:
+        schema = db.execute('SELECT type,name,tbl_name,sql FROM sqlite_master ORDER BY type,name').fetchall()
+        frame = {'schema': schema}
+        for kind, name, _, _ in schema:
+            if kind != 'table':
+                continue
+            quoted = '"' + name.replace('"', '""') + '"'
+            cursor = db.execute('SELECT * FROM ' + quoted)
+            count = len(cursor.description)
+            frame[name] = db.execute('SELECT * FROM ' + quoted + ' ORDER BY ' + ','.join(str(i + 1) for i in range(count))).fetchall()
+        encoded = json.dumps(frame, sort_keys=True, default=lambda value: {'fixtureBytes': bytes(value).hex()}).encode()
+        return hashlib.sha256(encoded).hexdigest()
+
 def main():
     with tempfile.TemporaryDirectory(prefix='kms-alias-sdk-') as directory:
         path = Path(directory) / 'team-a.db'
         with running(path, authenticated=True) as (endpoint, operator), running(authenticated=True) as (peer_url, peer_operator):
+            # A known saved policy must reach native authorization, unlike a
+            # missing aggregate that is denied earlier by the common dispatcher.
+            cold_iam, _ = client('iam', endpoint, operator)
+            cold_iam.create_role(RoleName='alias-cold-denied', AssumeRolePolicyDocument=json.dumps({'Version': '2012-10-17', 'Statement': [{'Effect': 'Allow', 'Action': 'sts:AssumeRole', 'Principal': {'Service': 'lambda.amazonaws.com'}}]}))
+            cold_iam.put_role_policy(RoleName='alias-cold-denied', PolicyName='ColdDeny', PolicyDocument=json.dumps({'Version': '2012-10-17', 'Statement': [{'Effect': 'Deny', 'Action': 'kms:ListAliases', 'Resource': '*'}]}))
+            cold_token = participant(endpoint, operator, 'alias-cold-denied')
+            frame = database_frame(path)
+            for cold_region in ('us-west-2', 'ap-northeast-1'):
+                denied_client, _ = client('kms', endpoint, cold_token, cold_region)
+                try:
+                    denied_client.list_aliases()
+                except ClientError as denied:
+                    assert denied.response['Error']['Code'] == 'AccessDeniedException'
+                    assert denied.response['ResponseMetadata']['HTTPStatusCode'] == 403
+                    assert denied.response['ResponseMetadata']['HTTPHeaders']['x-simulator-iam-decision'] == 'explicitDeny'
+                else:
+                    raise AssertionError('Known explicit-deny policy did not refuse first-region alias request')
+                assert database_frame(path) == frame, 'Denied first-region request persisted schema or cursor authority'
+            cold_iam.delete_role_policy(RoleName='alias-cold-denied', PolicyName='ColdDeny')
+            cold_iam.delete_role(RoleName='alias-cold-denied')
             a, _ = client('kms', endpoint, operator)
             b, _ = client('kms', peer_url, peer_operator)
             west, _ = client('kms', endpoint, operator, 'us-west-2')
@@ -165,6 +202,7 @@ def main():
     print(json.dumps({'nativeSDKExecuted': True, 'nativeAliases': 4,
         'sameDBActualCrypto': True, 'twoProcessesTwoRegionsRestart': True,
         'crossTokenObservedBeforeParse': 401,
+        'knownPolicyColdRegion403PreservesSchemaAndAuthority': True,
         'calls': sum(i['calls'] for i in stats), 'sends': sum(i['sends'] for i in stats),
         'responses': sum(i['responses'] for i in stats),
         'keyDeletion': 'unsupported; alias-only cleanup and temporary fixture DB removal'}))
