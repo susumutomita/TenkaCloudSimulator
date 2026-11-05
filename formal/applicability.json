@@ -18,17 +18,71 @@
     },
     {
       "path": "docs/secrets-manager.md",
-      "sha256": "94c100dca4611d41912a338e3b571d3bdbe4332cb814fa6aafc221c1cc82a2c3",
+      "sha256": "2ebe1c1ec679def149dc482cd4f2ac754699e1f5b7d1c56bcdf230169b44cfb9",
       "disposition": "documentation",
-      "reason": "Document the eighth metadata-only operation, its exact native request, limits and bounded evidence without claiming complete cloud compatibility.",
+      "reason": "Describe the eighth metadata-only operation, known-ARN current-page console flow, scoped model limits and current source inventory; distinguish historical execution from pending integrated gates and same-mount language execution.",
       "models": []
     },
     {
       "path": "formal/README.md",
-      "sha256": "8d8d24c7bdf899dfa1950ba63f2bec28dda6ba59a3691ff91cdae5ec706cf275",
+      "sha256": "2f997dac9918f193976beada1b97afc889acd0d7e6f636d9d643269511ff1ee1",
       "disposition": "documentation",
-      "reason": "Document the eighth metadata-only operation, its exact native request, limits and bounded evidence without claiming complete cloud compatibility.",
+      "reason": "Describe the eighth metadata-only operation, known-ARN current-page console flow, scoped model limits and current source inventory; distinguish historical execution from pending integrated gates and same-mount language execution.",
       "models": []
+    },
+    {
+      "path": "formal/SecretMetadataViewEpoch.cfg",
+      "sha256": "36e3f08c0c9aa2040694e0cc4b5de9e21970fad6dc9ac740b953ac262bf90fd0",
+      "disposition": "modeled",
+      "reason": "Add the finite metadata-child epoch/page/locale contract and parent tab invalidation projection only; callbacks remain possible after Abort. Excludes old asyncRetrieve, zeroization, SQL, authentication and whole React refinement.",
+      "models": [
+        {
+          "id": "SecretMetadataViewEpoch",
+          "properties": [
+            "TypeOK",
+            "MetadataRequestsOnly",
+            "CursorRequestBound",
+            "NoStaleCallbackAcceptance",
+            "NoStaleRenderedMetadata",
+            "NoStaleRenderedError",
+            "LoadingTracksLatest",
+            "PendingClearsMetadata",
+            "NoRowsOnError",
+            "ValidatedMetadataOnly",
+            "CurrentPageOnly",
+            "LocalePreservesQuery",
+            "ParentRevealClearedForMetadata"
+          ],
+          "limits": "Scoped metadata-child contract and the parent tab-change invalidate call only. A prior-parent-reveal Boolean models clearing visible state on entry, not pending GetSecretValue replies, byte erasure, old asyncRetrieve, disclosure channels or SQL. Opaque cursor provenance is an annotation, not decoding or HMAC validation. A valid-response Boolean abstracts the concrete metadata parser. Host callback identity/remount and active scope are assumptions, not main navigation/authentication proofs. Abort leaves callbacks schedulable to check guards; actual browser Abort may prevent JavaScript delivery. Locale transitions preserve query state, not arbitrary React scheduling. Finite safety projection only: no stable history snapshot, page completeness, backend/JSON/IAM refinement, whole React proof or liveness. Source scope on the parent and bundle is limited to this tab and child projection; unrelated retrieval/mutation code is excluded."
+        }
+      ]
+    },
+    {
+      "path": "formal/SecretMetadataViewEpoch.tla",
+      "sha256": "12819b1dc64f7381f8c511305e3b5c7144f6ad5c03ccacff8b10c5bd4c53631f",
+      "disposition": "modeled",
+      "reason": "Add the finite metadata-child epoch/page/locale contract and parent tab invalidation projection only; callbacks remain possible after Abort. Excludes old asyncRetrieve, zeroization, SQL, authentication and whole React refinement.",
+      "models": [
+        {
+          "id": "SecretMetadataViewEpoch",
+          "properties": [
+            "TypeOK",
+            "MetadataRequestsOnly",
+            "CursorRequestBound",
+            "NoStaleCallbackAcceptance",
+            "NoStaleRenderedMetadata",
+            "NoStaleRenderedError",
+            "LoadingTracksLatest",
+            "PendingClearsMetadata",
+            "NoRowsOnError",
+            "ValidatedMetadataOnly",
+            "CurrentPageOnly",
+            "LocalePreservesQuery",
+            "ParentRevealClearedForMetadata"
+          ],
+          "limits": "Scoped metadata-child contract and the parent tab-change invalidate call only. A prior-parent-reveal Boolean models clearing visible state on entry, not pending GetSecretValue replies, byte erasure, old asyncRetrieve, disclosure channels or SQL. Opaque cursor provenance is an annotation, not decoding or HMAC validation. A valid-response Boolean abstracts the concrete metadata parser. Host callback identity/remount and active scope are assumptions, not main navigation/authentication proofs. Abort leaves callbacks schedulable to check guards; actual browser Abort may prevent JavaScript delivery. Locale transitions preserve query state, not arbitrary React scheduling. Finite safety projection only: no stable history snapshot, page completeness, backend/JSON/IAM refinement, whole React proof or liveness. Source scope on the parent and bundle is limited to this tab and child projection; unrelated retrieval/mutation code is excluded."
+        }
+      ]
     },
     {
       "path": "formal/SecretVersionListing.cfg",
@@ -78,9 +132,9 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "919e7e0a2bf322ce31d0c7bb65bfc2679c090980765014b7d72ba61dd5229de0",
+      "sha256": "a8974fdd467e3b992df26c2ff00cfe3f15520eb52889c6707d2efb89dd3b9daf",
       "disposition": "formal-infrastructure",
-      "reason": "Require the added model, its nine properties and thirteen real semantic negative controls; preserve every existing model/control, strict parser, pins and deadlines.",
+      "reason": "Add the metadata-child model, thirteen exact required properties and fourteen literal-protected controls/removal fixtures, preserving all incoming thirty-four model objects, 210 controls and parser/configuration/result requirements. No model guarantee is inferred merely from registration.",
       "models": []
     },
     {
@@ -223,6 +277,44 @@
       ]
     },
     {
+      "path": "internal/server/web/app.js",
+      "sha256": "16af275324f4401af345b9aa94e488781f1113937f9c187b31bd2992a59be519",
+      "disposition": "modeled",
+      "reason": "Add the manually supplied known-ARN metadata tab/child and its canonical compiled projection. Preserve original explicit-retrieve/mutation bodies; parent tab invalidation clears prior reveal state. Existing reveal model binding is frame-limited to unchanged retrieval/navigation behavior. New binding covers only child epoch/scope/page/locale and tab-entry invalidation, not old pending retrievals, byte erasure, backend SQL/IAM or unrelated console code.",
+      "models": [
+        {
+          "id": "SecretsRevealEpoch",
+          "properties": [
+            "TypeOK",
+            "NoUnmountedDisplay",
+            "FreshEmissionHistory",
+            "ReturnedARNMatches",
+            "VisibleContextMatches"
+          ],
+          "limits": "Finite explicit-retrieve/display model, not React, DOM, AbortController, memory zeroization or implementation refinement. Only the successful response path is modeled; native store/IAM must authorize before returning any secret. A returned ARN can differ and must be rejected. Retrieve, Hide and navigation invalidate epochs; unmount also clears visible state. Parent must remount on region/principal changes. Emission history captures the context at each acceptance so later Hide/navigation cannot relabel an earlier stale acceptance. Draft entry, mutation atomicity and form layout are outside this model. Parent main.jsx scope binds only Secrets routing/remount key (region/principal/navigation); the generated app.js binding is the canonical compiled artifact of those source inputs, independently checked by bundle/asset hashes. It does not model unrelated existing console services or prove JavaScript compilation."
+        },
+        {
+          "id": "SecretMetadataViewEpoch",
+          "properties": [
+            "TypeOK",
+            "MetadataRequestsOnly",
+            "CursorRequestBound",
+            "NoStaleCallbackAcceptance",
+            "NoStaleRenderedMetadata",
+            "NoStaleRenderedError",
+            "LoadingTracksLatest",
+            "PendingClearsMetadata",
+            "NoRowsOnError",
+            "ValidatedMetadataOnly",
+            "CurrentPageOnly",
+            "LocalePreservesQuery",
+            "ParentRevealClearedForMetadata"
+          ],
+          "limits": "Scoped metadata-child contract and the parent tab-change invalidate call only. A prior-parent-reveal Boolean models clearing visible state on entry, not pending GetSecretValue replies, byte erasure, old asyncRetrieve, disclosure channels or SQL. Opaque cursor provenance is an annotation, not decoding or HMAC validation. A valid-response Boolean abstracts the concrete metadata parser. Host callback identity/remount and active scope are assumptions, not main navigation/authentication proofs. Abort leaves callbacks schedulable to check guards; actual browser Abort may prevent JavaScript delivery. Locale transitions preserve query state, not arbitrary React scheduling. Finite safety projection only: no stable history snapshot, page completeness, backend/JSON/IAM refinement, whole React proof or liveness. Source scope on the parent and bundle is limited to this tab and child projection; unrelated retrieval/mutation code is excluded."
+        }
+      ]
+    },
+    {
       "path": "scripts/check-assets.py",
       "sha256": "cf907d68ece80ff00cd13ab830abf091edacfd8e975f30d1c6ccb255109f23d4",
       "disposition": "validation-tooling",
@@ -231,23 +323,30 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "093de3bf31d01ddef994c119008d6d378563584f78647f283565823931d6d993",
+      "sha256": "4328d2850aad4959565603f2c95e91a027e59e88e2ca8891396894a8ab11235f",
       "disposition": "formal-infrastructure",
-      "reason": "Require the added model, its nine properties and thirteen real semantic negative controls; preserve every existing model/control, strict parser, pins and deadlines.",
+      "reason": "Add the metadata-child model, thirteen exact required properties and fourteen literal-protected controls/removal fixtures, preserving all incoming thirty-four model objects, 210 controls and parser/configuration/result requirements. No model guarantee is inferred merely from registration.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "55fa7e39d4dfb81d1a6581fb3cb04994409472ac3cd2db438f29f4faf41e9fbf",
+      "sha256": "c4a8cfe052cc094badb93b4c40b44a299aa03c27cb1f93f3bcaa73b482936a10",
       "disposition": "formal-infrastructure",
-      "reason": "Require the added model, its nine properties and thirteen real semantic negative controls; preserve every existing model/control, strict parser, pins and deadlines.",
+      "reason": "Add the metadata-child model, thirteen exact required properties and fourteen literal-protected controls/removal fixtures, preserving all incoming thirty-four model objects, 210 controls and parser/configuration/result requirements. No model guarantee is inferred merely from registration.",
       "models": []
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "db51de551bcc2832a2efec8ccdb246a92cf12942cf6b344eba64c13c2f25aa1b",
+      "sha256": "cede7fa9012238d74098e73d76cad2fb8b231c9fa6ee575dd35b9edba1bc7a60",
       "disposition": "test-support",
-      "reason": "Register and exercise actual local CLI/official SDK and served-example acceptance; preserve all existing tests and negative cases.",
+      "reason": "Require the metadata SDK and separate metadata console helper without skips: preserve all fifty incoming base methods, the native-listing fifty-first method and their bodies; add only the fifty-second mandatory console wrapper.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/secret_versions_console.py",
+      "sha256": "551e910ad9cf62614cd56c9def5bc1e2b1899076e246b310cbb1da6ad3f8ebe1",
+      "disposition": "test-support",
+      "reason": "Require actual native metadata pages, list-only authority/no Get, read fault/repair, held callback boundaries, peer frame, PC/mobile and same-mount locale oracles. Newly added language round-trip execution remains pending; no historical receipt is relabeled.",
       "models": []
     },
     {
@@ -263,6 +362,85 @@
       "disposition": "test-support",
       "reason": "Preserve the exact original 23 JSON1.1 template names, require the added version-list template, and validate its strict per-target schema with missing/null/type/limit/unknown-field refusals. All prior JSON1.0 union and negative-control methods remain intact.",
       "models": []
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "2977a336750894a1dc9d9bbd5b71c7e07b61674354e6a5fd5f1877a09e83c34c",
+      "disposition": "presentation",
+      "reason": "Bind canonical console source/dependency inputs and generated artifact digests; same pinned dependencies and existing rights, no install or new runtime authority.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "5ed75362dee209c85c5dfe5d97e3ccb151ef07f437ccddee79f51e2d2332ac64",
+      "disposition": "presentation",
+      "reason": "Bind canonical console source/dependency inputs and generated artifact digests; same pinned dependencies and existing rights, no install or new runtime authority.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/secret_versions.jsx",
+      "sha256": "c07f2e2088e71b4331be016ae5d2e4d21d493b07811e394376a50d39f7f9ef51",
+      "disposition": "modeled",
+      "reason": "Add the manually supplied known-ARN metadata tab/child and its canonical compiled projection. Preserve original explicit-retrieve/mutation bodies; parent tab invalidation clears prior reveal state. Existing reveal model binding is frame-limited to unchanged retrieval/navigation behavior. New binding covers only child epoch/scope/page/locale and tab-entry invalidation, not old pending retrievals, byte erasure, backend SQL/IAM or unrelated console code.",
+      "models": [
+        {
+          "id": "SecretMetadataViewEpoch",
+          "properties": [
+            "TypeOK",
+            "MetadataRequestsOnly",
+            "CursorRequestBound",
+            "NoStaleCallbackAcceptance",
+            "NoStaleRenderedMetadata",
+            "NoStaleRenderedError",
+            "LoadingTracksLatest",
+            "PendingClearsMetadata",
+            "NoRowsOnError",
+            "ValidatedMetadataOnly",
+            "CurrentPageOnly",
+            "LocalePreservesQuery",
+            "ParentRevealClearedForMetadata"
+          ],
+          "limits": "Scoped metadata-child contract and the parent tab-change invalidate call only. A prior-parent-reveal Boolean models clearing visible state on entry, not pending GetSecretValue replies, byte erasure, old asyncRetrieve, disclosure channels or SQL. Opaque cursor provenance is an annotation, not decoding or HMAC validation. A valid-response Boolean abstracts the concrete metadata parser. Host callback identity/remount and active scope are assumptions, not main navigation/authentication proofs. Abort leaves callbacks schedulable to check guards; actual browser Abort may prevent JavaScript delivery. Locale transitions preserve query state, not arbitrary React scheduling. Finite safety projection only: no stable history snapshot, page completeness, backend/JSON/IAM refinement, whole React proof or liveness. Source scope on the parent and bundle is limited to this tab and child projection; unrelated retrieval/mutation code is excluded."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/secrets-manager.jsx",
+      "sha256": "2876a2b76b88bc9777fc435dd057d094cdb4fbbf690f4a55480b7be9d45edd32",
+      "disposition": "modeled",
+      "reason": "Add the manually supplied known-ARN metadata tab/child and its canonical compiled projection. Preserve original explicit-retrieve/mutation bodies; parent tab invalidation clears prior reveal state. Existing reveal model binding is frame-limited to unchanged retrieval/navigation behavior. New binding covers only child epoch/scope/page/locale and tab-entry invalidation, not old pending retrievals, byte erasure, backend SQL/IAM or unrelated console code.",
+      "models": [
+        {
+          "id": "SecretsRevealEpoch",
+          "properties": [
+            "TypeOK",
+            "NoUnmountedDisplay",
+            "FreshEmissionHistory",
+            "ReturnedARNMatches",
+            "VisibleContextMatches"
+          ],
+          "limits": "Finite explicit-retrieve/display model, not React, DOM, AbortController, memory zeroization or implementation refinement. Only the successful response path is modeled; native store/IAM must authorize before returning any secret. A returned ARN can differ and must be rejected. Retrieve, Hide and navigation invalidate epochs; unmount also clears visible state. Parent must remount on region/principal changes. Emission history captures the context at each acceptance so later Hide/navigation cannot relabel an earlier stale acceptance. Draft entry, mutation atomicity and form layout are outside this model. Parent main.jsx scope binds only Secrets routing/remount key (region/principal/navigation); the generated app.js binding is the canonical compiled artifact of those source inputs, independently checked by bundle/asset hashes. It does not model unrelated existing console services or prove JavaScript compilation."
+        },
+        {
+          "id": "SecretMetadataViewEpoch",
+          "properties": [
+            "TypeOK",
+            "MetadataRequestsOnly",
+            "CursorRequestBound",
+            "NoStaleCallbackAcceptance",
+            "NoStaleRenderedMetadata",
+            "NoStaleRenderedError",
+            "LoadingTracksLatest",
+            "PendingClearsMetadata",
+            "NoRowsOnError",
+            "ValidatedMetadataOnly",
+            "CurrentPageOnly",
+            "LocalePreservesQuery",
+            "ParentRevealClearedForMetadata"
+          ],
+          "limits": "Scoped metadata-child contract and the parent tab-change invalidate call only. A prior-parent-reveal Boolean models clearing visible state on entry, not pending GetSecretValue replies, byte erasure, old asyncRetrieve, disclosure channels or SQL. Opaque cursor provenance is an annotation, not decoding or HMAC validation. A valid-response Boolean abstracts the concrete metadata parser. Host callback identity/remount and active scope are assumptions, not main navigation/authentication proofs. Abort leaves callbacks schedulable to check guards; actual browser Abort may prevent JavaScript delivery. Locale transitions preserve query state, not arbitrary React scheduling. Finite safety projection only: no stable history snapshot, page completeness, backend/JSON/IAM refinement, whole React proof or liveness. Source scope on the parent and bundle is limited to this tab and child projection; unrelated retrieval/mutation code is excluded."
+        }
+      ]
     }
   ]
 }
