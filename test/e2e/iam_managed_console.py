@@ -67,7 +67,9 @@ def _run():
                 region_name='us-east-1', aws_access_key_id='TCSIMIAMMANAGED',
                 aws_secret_access_key='dummy-local-only',
                 config=Config(retries={'max_attempts': 0}, connect_timeout=2,
-                              read_timeout=5, s3={'addressing_style': 'path'}))
+                              read_timeout=5, s3={'addressing_style': 'path'},
+                              request_checksum_calculation='when_required',
+                              response_checksum_validation='when_required'))
             def signed(request, **_):
                 request.headers.add_header('X-Simulator-Token', token or team.token)
                 if principal:
