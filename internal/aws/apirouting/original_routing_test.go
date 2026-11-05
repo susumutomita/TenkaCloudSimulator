@@ -97,9 +97,19 @@ func TestOriginalEventProjectionFieldSetAndInputFrame(t *testing.T) {
 	if len(fields) != 12 {
 		t.Fatal("unsupported event fields added", fields)
 	}
+	for _, key := range []string{"resource", "path", "httpMethod", "headers", "multiValueHeaders", "queryStringParameters", "multiValueQueryStringParameters", "pathParameters", "stageVariables", "body", "isBase64Encoded", "requestContext"} {
+		if _, exists := fields[key]; !exists {
+			t.Fatal("required event field omitted", key)
+		}
+	}
 	var context map[string]json.RawMessage
 	if err := json.Unmarshal(fields["requestContext"], &context); err != nil || len(context) != 7 {
 		t.Fatal("unsupported context fields added", context, err)
+	}
+	for _, key := range []string{"accountId", "apiId", "stage", "requestId", "resourcePath", "httpMethod", "path"} {
+		if _, exists := context[key]; !exists {
+			t.Fatal("required context field omitted", key)
+		}
 	}
 }
 
