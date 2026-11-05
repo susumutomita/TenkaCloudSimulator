@@ -1,13 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {PROVIDERS, SERVICES, serviceAvailable, servicesForProvider, serviceFromHash, hashForService, providerForService} from '../../tools/console/src/console-navigation.mjs';
-const capabilities={services:{s3:{},ssm:{},iam:{},lambda:{},apigateway:{},cloudformation:{},kms:{},sqs:{}},cloudStorage:{gcp:{project:'dummy-project'},azure:{account:'dummyaccount'}}};
+const capabilities={services:{s3:{},ssm:{},iam:{},lambda:{},apigateway:{},cloudformation:{},kms:{},sqs:{},logs:{},secretsmanager:{},dynamodb:{}},cloudStorage:{gcp:{project:'dummy-project'},azure:{account:'dummyaccount'}}};
 test('each provider is the same catalog level and contains only real console routes',()=>{
   assert.deepEqual(PROVIDERS.map(p=>p.id),['aws','gcp','azure']);
-  assert.equal(servicesForProvider('aws',capabilities).length,7);
+  assert.equal(servicesForProvider('aws',capabilities).length,10);
   assert.deepEqual(servicesForProvider('gcp',capabilities).map(s=>s.id),['gcp-storage']);
   assert.deepEqual(servicesForProvider('azure',capabilities).map(s=>s.id),['azure-blob']);
-  assert.equal(serviceAvailable('sqs',capabilities),false);
+  for (const id of ['sqs','logs','secretsmanager']) assert.equal(serviceAvailable(id,capabilities),true);
+  assert.equal(serviceAvailable('dynamodb',capabilities),false); // API-only: never advertise a nonexistent console.
   assert.equal(serviceAvailable('unknown',capabilities),false);
   assert.deepEqual(servicesForProvider('unknown',capabilities),[]);
 });
@@ -16,6 +17,7 @@ test('missing capabilities cannot invent provider scopes or enabled services',()
     assert.deepEqual(servicesForProvider('gcp',c),[]);assert.deepEqual(servicesForProvider('azure',c),[]);
   }
   assert.equal(serviceAvailable('s3',{}),false);
+  for (const id of ['sqs','logs','secretsmanager']) assert.equal(serviceAvailable(id,{services:{}}),false);
   assert.equal(serviceAvailable('gcp-storage',{cloudStorage:{gcp:{project:''}}}),false);
 });
 test('English/Japanese filtering is provider scoped and never mutates capabilities',()=>{
@@ -42,6 +44,9 @@ test('natural Japanese aliases find canonical services within the selected cloud
     ['aws','APIゲートウェイ',['apigateway']],
     ['aws','クラウドフォーメーション',['cfn']],
     ['aws','ストレージ',['s3']],
+    ['aws','キュー',['sqs']],
+    ['aws','ログ',['logs']],
+    ['aws','シークレット',['secretsmanager']],
     ['gcp','ストレージ',['gcp-storage']],
     ['gcp','クラウドストレージ',['gcp-storage']],
     ['azure','ストレージ',['azure-blob']],

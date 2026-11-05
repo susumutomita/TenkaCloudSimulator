@@ -3,7 +3,7 @@
   "info": {
     "title": "TenkaCloud Simulator API",
     "version": "0.1.0",
-    "description": "Sign in through the local console first. The browser sends its same-origin session cookie; Test Request uses that session. For curl or SDKs add the host-issued `X-Simulator-Token` header. Dummy TCSIM signature credentials identify the AWS wire format; they are not host authentication. `x-simulator-principal` selects an exercise identity only. Participant sessions are already bound to an identity and cannot select simulator-admin. Never enter real AWS credentials here. \n\n**Examples are static documentation, not saved state.** Use Test Request → Send to query your environment. S3 responses remain native XML/bytes; expand typed schemas below to understand fields.\n\nIndependent local cloud simulator. AWS is the first provider, with documented S3, Systems Manager Parameter Store, SQS, Lambda, CloudFormation and IAM role subsets. No real infrastructure is created. This document describes only implemented operations. S3 wire APIs retain their XML formats; Native IAM roles use Query/XML; legacy identity control remains a separate JSON API. Native role ownership blocks legacy PUT/DELETE with HTTP409. Use unsigned requests or dummy TCSIM SDK credentials. Default principal simulator-admin has full sandbox access. IAM Query routing uses X-Simulator-Service: iam (or the dummy SDK signature scope), root POST and Version2010-05-08. Nine bounded role/inline-policy operations are implemented; no STS, managed policies, Conditions or non-root paths. Native Lambda roles must trust lambda.amazonaws.com. Legacy CFN/local identity roles retain their prior metadata-only trust semantics. For IAM exercises send x-simulator-principal. SQLite is ephemeral by default; --state persists it. See /_simulator/v1/capabilities for limits and deviations. Lambda supports a bounded Python 3.12 ZIP subset through the native REST paths below. Host Python is not required. A limited saved-role local SSM/S3 function SDK is supported; arbitrary network/HTTP and Function URLs remain unsupported. CloudFormation supports inline Python AWS::Lambda::Function with index.handler, existing local role, Ref/Arn and explicit DependsOn. Caller requires Lambda Create/DeleteFunction and iam:PassRole; tagged creation also requires lambda:TagResource. Only the declared saved-role SSM/S3 capability bridge is available, with no arbitrary network or managed-policy grants. Function SDK limits: S3 object body32KiB, native response48KiB before capability encoding, message64KiB,128calls and1MiB request/response aggregate. Oversized native SSM or S3 responses return EntityTooLarge without a partial successful result. API Gateway REST APIs support an explicit REGIONAL/NONE/Lambda AWS_PROXY subset. Deployments freeze resources and integrations; stages refer to a deployment. No public endpoint or real AWS is created. Local invocation requires the host access token/session and a bounded Lambda apigateway.amazonaws.com resource permission with a matching local execute-api SourceArn. Responses are non-executing downloads, with protected cookie/navigation/CORS/CSP headers removed. Active browser app hosting, WAF, custom domains, authorizers, binary media, API keys, caching, stage editing and full WP grading remain unsupported. CloudFormation also provisions the bounded RestApi/Resource/Method/Deployment/Stage and Lambda::Permission subset in the same native SQLite transaction. Deployment DependsOn methods is explicit; API children are same-stack, snapshots immutable, and native drift blocks destructive cleanup. No WAF or custom resources are supported.\n\nGoogle Cloud Storage JSON API and Azure Blob Storage REST are bounded independently implemented local providers. Synthetic project/account scope and owner bindings are host configured; Google IAM/Azure RBAC, cloud account provisioning, OAuth/Entra/SharedKey/SAS are not implemented. See the provider-specific operations below and capabilities; SDK compatibility is separately tested and must not be inferred from API existence.",
+    "description": "Sign in through the local console first. The browser sends its same-origin session cookie; Test Request uses that session. For curl or SDKs add the host-issued `X-Simulator-Token` header. Dummy TCSIM signature credentials identify the AWS wire format; they are not host authentication. `x-simulator-principal` selects an exercise identity only. Participant sessions are already bound to an identity and cannot select simulator-admin. Never enter real AWS credentials here. \n\n**Examples are static documentation, not saved state.** Use Test Request → Send to query your environment. S3 responses remain native XML/bytes; expand typed schemas below to understand fields.\n\nIndependent local cloud simulator. AWS is the first provider, with documented S3, Systems Manager Parameter Store, SQS, Lambda, CloudFormation and IAM role subsets. No real infrastructure is created. This document describes only implemented operations. S3 wire APIs retain their XML formats; Native IAM roles use Query/XML; legacy identity control remains a separate JSON API. Native role ownership blocks legacy PUT/DELETE with HTTP409. Use unsigned requests or dummy TCSIM SDK credentials. Default principal simulator-admin has full sandbox access. IAM Query routing uses X-Simulator-Service: iam (or the dummy SDK signature scope), root POST and Version2010-05-08. Nine bounded role/inline-policy operations are implemented; no STS, managed policies, Conditions or non-root paths. Native Lambda roles must trust lambda.amazonaws.com. Legacy CFN/local identity roles retain their prior metadata-only trust semantics. For IAM exercises send x-simulator-principal. SQLite is ephemeral by default; --state persists it. See /_simulator/v1/capabilities for limits and deviations. Lambda supports a bounded Python 3.12 ZIP subset through the native REST paths below. Host Python is not required. A limited saved-role local SSM/S3 function SDK is supported; arbitrary network/HTTP and Function URLs remain unsupported. CloudFormation supports inline Python AWS::Lambda::Function with index.handler, existing local role, Ref/Arn and explicit DependsOn. Caller requires Lambda Create/DeleteFunction and iam:PassRole; tagged creation also requires lambda:TagResource. Only the declared saved-role SSM/S3 capability bridge is available, with no arbitrary network or managed-policy grants. Function SDK limits: S3 object body32KiB, native response48KiB before capability encoding, message64KiB,128calls and1MiB request/response aggregate. Oversized native SSM or S3 responses return EntityTooLarge without a partial successful result. API Gateway REST APIs support an explicit REGIONAL/NONE/Lambda AWS_PROXY subset. Deployments freeze resources and integrations; stages refer to a deployment. No public endpoint or real AWS is created. Local invocation requires the host access token/session and a bounded Lambda apigateway.amazonaws.com resource permission with a matching local execute-api SourceArn. Responses are non-executing downloads, with protected cookie/navigation/CORS/CSP headers removed. Active browser app hosting, WAF, custom domains, authorizers, binary media, API keys, caching, stage editing and full WP grading remain unsupported. CloudFormation also provisions the bounded RestApi/Resource/Method/Deployment/Stage and Lambda::Permission subset in the same native SQLite transaction. Deployment DependsOn methods is explicit; API children are same-stack, snapshots immutable, and native drift blocks destructive cleanup. No WAF or custom resources are supported.\n\nGoogle Cloud Storage JSON API and Azure Blob Storage REST are bounded independently implemented local providers. Synthetic project/account scope and owner bindings are host configured; Google IAM/Azure RBAC, cloud account provisioning, OAuth/Entra/SharedKey/SAS are not implemented. See the provider-specific operations below and capabilities; SDK compatibility is separately tested and must not be inferred from API existence. DynamoDB supports seven basic JSON 1.0 operations at the shared regional root; no console, Query/Scan, indexes or CFN.",
     "license": {
       "name": "MIT"
     }
@@ -77,8 +77,8 @@
         }
       },
       "post": {
-        "summary": "SSM/SQS/KMS JSON, CloudFormation Query, or IAM Query operation",
-        "description": "**Static request templates:** choose the correct Content-Type and routing headers before Test Request → Send. SSM/SQS send JSON with X-Amz-Target (JSON 1.1 for SSM, JSON 1.0 for SQS); CloudFormation/IAM send URL-encoded Query fields. The 200 response is JSON for SSM/SQS and XML for Query protocols. A successful DeleteStack has no result payload beyond Query response metadata.\n\nNative regional root endpoint. SQS: X-Amz-Target AmazonSQS.CreateQueue, ListQueues, GetQueueUrl, DeleteQueue, SendMessage, ReceiveMessage, DeleteMessage, ChangeMessageVisibility, GetQueueAttributes (JSON 1.0, Standard queues only; local body limit 256 KiB, aggregate physical storage 10000 messages/64 MiB across queues/regions including expired foreign rows until scoped cleanup; bytes count body UTF-8 plus stored attribute JSON. Over-budget SendMessage returns local SimulatorQuotaExceeded without mutation; existing over-cap data remains readable/deletable; FIFO, Query protocol, batch operations and dead-letter redrive are unsupported). SSM: X-Amz-Target AmazonSSM.PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter. CloudFormation: CreateStack, DescribeStacks, DeleteStack; S3 buckets, SSM parameters, inline Python Lambda functions, one inline IAM identity policy per role, five Regional REST API Gateway resource types, and bounded Lambda::Permission. Unsupported options fail. Real credentials and session tokens are rejected. Create/DeleteStack also require the caller to allow the underlying S3/SSM/IAM/Lambda actions; CAPABILITY_IAM grants no permissions. API resources use NONE/POST AWS_PROXY local Lambda, same-stack API children, explicit deployment DependsOn methods and reverse guarded cleanup. Lambda permission uses only apigateway.amazonaws.com and local execute-api SourceArn. No service RoleArn or general CloudFormation lifecycle is supported. IAM is global: send X-Simulator-Service: iam, Version2010-05-08 and one of CreateRole/GetRole/ListRoles/DeleteRole/PutRolePolicy/GetRolePolicy/DeleteRolePolicy/ListRolePolicies/UpdateAssumeRolePolicy. Policy documents are JSON strings; successful IAM XML returns them RFC3986 URL-encoded. Native role names use the local alphanumeric/underscore/hyphen subset,1–64; inline policy names1–128 AWS characters. Trust and aggregate policies32KiB, at most10 inline policies/100 statements,1000 active+retired name claims. Deleted role names cannot be adopted by legacy identity writes. No managed grants or session issuance.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.\n\nUse X-Amz-Target TrentService.<operation> matching the selected body example; example choice does not change routing headers automatically. CreateKey first, copy returned KeyId into later requests, and copy an actual local Encrypt CiphertextBlob into Decrypt (the valid-base64 documentation placeholder is deliberately not decryptable). All calls require host X-Simulator-Token or signed-in local session. Dummy TCSIM SigV4 scope is not authentication.\n\nCreateKey/ListKeys require their exact kms action on *. DescribeKey/EnableKey/DisableKey/GetKeyPolicy/Encrypt/Decrypt require the actual key ARN. Decrypt without KeyId resolves the local blob key. Explicit Deny wins. Programmatic default policy only enables local identity-policy delegation; no grant for all participants.\n\nEnabled/Disabled only; disabled blocks Encrypt/Decrypt, metadata/default policy remain readable. Local request64KiB,1000keys,plaintext1–4096bytes,context100entries/8192canonicalbytes,counter2^32 ceiling. Ciphertext/material are simulator-local; SQLite stores raw material, not an at-rest security boundary. Unsupported aliases/tags/grants/custom policies/asymmetric/data keys/rotation/deletion/multi-region/CFN/other-service encryption fail; no problem availability is implied. Actual AWS eventual consistency and ciphertext portability are not reproduced.\n\nKMS JSON1.1 targets TrentService.CreateKey/DescribeKey/ListKeys/EnableKey/DisableKey/GetKeyPolicy/Encrypt/Decrypt are also accepted here. This root JSON1.1 section includes all eight bounded KMS body templates and limitations.",
+        "summary": "AWS native JSON or Query operation",
+        "description": "**Static request templates:** choose the correct Content-Type and routing headers before Test Request → Send. SSM/SQS send JSON with X-Amz-Target (JSON 1.1 for SSM, JSON 1.0 for SQS); CloudFormation/IAM send URL-encoded Query fields. The 200 response is JSON for SSM/SQS and XML for Query protocols. A successful DeleteStack has no result payload beyond Query response metadata.\n\nNative regional root endpoint. SQS: X-Amz-Target AmazonSQS.CreateQueue, ListQueues, GetQueueUrl, DeleteQueue, SendMessage, ReceiveMessage, DeleteMessage, ChangeMessageVisibility, GetQueueAttributes (JSON 1.0, Standard queues only; local body limit 256 KiB, aggregate physical storage 10000 messages/64 MiB across queues/regions including expired foreign rows until scoped cleanup; bytes count body UTF-8 plus stored attribute JSON. Over-budget SendMessage returns local SimulatorQuotaExceeded without mutation; existing over-cap data remains readable/deletable; FIFO, Query protocol, batch operations and dead-letter redrive are unsupported). SSM: X-Amz-Target AmazonSSM.PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter. CloudFormation: CreateStack, DescribeStacks, DeleteStack; S3 buckets, SSM parameters, inline Python Lambda functions, one inline IAM identity policy per role, five Regional REST API Gateway resource types, and bounded Lambda::Permission. Unsupported options fail. Real credentials and session tokens are rejected. Create/DeleteStack also require the caller to allow the underlying S3/SSM/IAM/Lambda actions; CAPABILITY_IAM grants no permissions. API resources use NONE/POST AWS_PROXY local Lambda, same-stack API children, explicit deployment DependsOn methods and reverse guarded cleanup. Lambda permission uses only apigateway.amazonaws.com and local execute-api SourceArn. No service RoleArn or general CloudFormation lifecycle is supported. IAM is global: send X-Simulator-Service: iam, Version2010-05-08 and one of CreateRole/GetRole/ListRoles/DeleteRole/PutRolePolicy/GetRolePolicy/DeleteRolePolicy/ListRolePolicies/UpdateAssumeRolePolicy. Policy documents are JSON strings; successful IAM XML returns them RFC3986 URL-encoded. Native role names use the local alphanumeric/underscore/hyphen subset,1–64; inline policy names1–128 AWS characters. Trust and aggregate policies32KiB, at most10 inline policies/100 statements,1000 active+retired name claims. Deleted role names cannot be adopted by legacy identity writes. No managed grants or session issuance.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.\n\nUse X-Amz-Target TrentService.<operation> matching the selected body example; example choice does not change routing headers automatically. CreateKey first, copy returned KeyId into later requests, and copy an actual local Encrypt CiphertextBlob into Decrypt (the valid-base64 documentation placeholder is deliberately not decryptable). All calls require host X-Simulator-Token or signed-in local session. Dummy TCSIM SigV4 scope is not authentication.\n\nCreateKey/ListKeys require their exact kms action on *. DescribeKey/EnableKey/DisableKey/GetKeyPolicy/Encrypt/Decrypt require the actual key ARN. Decrypt without KeyId resolves the local blob key. Explicit Deny wins. Programmatic default policy only enables local identity-policy delegation; no grant for all participants.\n\nEnabled/Disabled only; disabled blocks Encrypt/Decrypt, metadata/default policy remain readable. Local request64KiB,1000keys,plaintext1–4096bytes,context100entries/8192canonicalbytes,counter2^32 ceiling. Ciphertext/material are simulator-local; SQLite stores raw material, not an at-rest security boundary. Unsupported aliases/tags/grants/custom policies/asymmetric/data keys/rotation/deletion/multi-region/CFN/other-service encryption fail; no problem availability is implied. Actual AWS eventual consistency and ciphertext portability are not reproduced.\n\nKMS JSON1.1 targets TrentService.CreateKey/DescribeKey/ListKeys/EnableKey/DisableKey/GetKeyPolicy/Encrypt/Decrypt are also accepted here. This root JSON1.1 section includes all eight bounded KMS body templates and limitations.\n\nSQS static templates use application/x-amz-json-1.0 with X-Amz-Target: AmazonSQS.<operation> and X-Simulator-Service: sqs. Replace QueueUrl and ReceiptHandle fixtures with current native values; static examples are not live saved state. CloudWatch Logs JSON1.1 uses Logs_20140328.<operation> and service=logs; only the seven declared operations are implemented. Choose the matching headers separately from the body example. Secrets Manager adds seven bounded JSON1.1 operations over this same root; practice values are plaintext, not KMS-encrypted. No recovery window or rotation.\n\n**DynamoDB JSON 1.0 static templates:** select application/x-amz-json-1.0 and set X-Amz-Target to the exact DynamoDB_20120810.<operation> shown by the selected example. X-Simulator-Service may be dynamodb. Use a private practice table name; samples are not current state and selecting a body does not automatically change the target header. Seven basic operations only; immediate local lifecycle, no indexes/Query/Scan/console/CFN. DeleteItem of an absent key is idempotent; unsupported options fail. Item bytes use UTF-8 and decoded binary rather than JSON transfer length; numeric sizing is approximate. Failed conditional, oversized and IAM-refused writes leave saved state unchanged. DeleteTable permanently removes that practice table and all its items.",
         "operationId": "awsRegionalOperation",
         "parameters": [
           {
@@ -87,7 +87,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "AmazonSSM.<operation>, AmazonSQS.<operation> or TrentService.<operation>; use matching Content-Type and body."
+            "description": "Use the exact native target and matching body: AmazonSSM.<operation>, AmazonSQS.<operation>, TrentService.<operation>, Logs_20140328.<operation>, secretsmanager.<operation>, or DynamoDB_20120810.<operation>. SQS and DynamoDB require JSON 1.0; SSM, KMS, Logs and Secrets Manager require JSON 1.1. Selecting a body example does not select routing headers automatically."
           },
           {
             "name": "X-Simulator-Region",
@@ -112,10 +112,14 @@
                 "ssm",
                 "cloudformation",
                 "iam",
-                "kms"
+                "kms",
+                "sqs",
+                "logs",
+                "secretsmanager",
+                "dynamodb"
               ]
             },
-            "description": "iam selects IAM Query; omit or use cloudformation for CloudFormation, and omit or use ssm for SSM JSON. Do not select iam for CreateStack/DescribeStacks/DeleteStack. kms selects the bounded KMS JSON1.1 handler."
+            "description": "Optional native service hint; when supplied it must match the selected service target. iam selects IAM Query; cloudformation selects CloudFormation Query. SSM/Logs/KMS/Secrets Manager use JSON 1.1; SQS/DynamoDB use JSON 1.0. This routing hint grants no access."
           },
           {
             "$ref": "#/components/parameters/SimulatorToken"
@@ -147,9 +151,30 @@
                   },
                   {
                     "$ref": "#/components/schemas/KMSDecryptInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LogsCreateLogGroupRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LogsDescribeLogGroupsRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LogsDeleteLogGroupRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LogsCreateLogStreamRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LogsDescribeLogStreamsRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LogsPutLogEventsRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LogsGetLogEventsRequest"
                   }
                 ],
-                "description": "SSM or KMS JSON1.1 as selected by X-Amz-Target; generic SSM remains documented independently. Exact KMS per-target schemas are in x-simulator-kms-operation-schemas; body alone cannot discriminate routing."
+                "description": "SSM, KMS, CloudWatch Logs or Secrets Manager JSON 1.1 as selected by X-Amz-Target. The generic object alternative preserves SSM and Secrets Manager templates; named KMS and Logs schemas document their bounded shapes. Exact KMS per-target schemas are in x-simulator-kms-operation-schemas; body alone cannot discriminate routing."
               },
               "examples": {
                 "SSMGetParameter": {
@@ -220,6 +245,154 @@
                     "EncryptionContext": {
                       "purpose": "demo"
                     }
+                  }
+                },
+                "LogsCreateLogGroup": {
+                  "summary": "CreateLogGroup — X-Amz-Target: Logs_20140328.CreateLogGroup; service=logs",
+                  "description": "Static template, not saved state. Create group then stream before ingest/read, and delete the group to cascade cleanup.",
+                  "value": {
+                    "logGroupName": "/aws/reference-example",
+                    "logGroupClass": "STANDARD"
+                  },
+                  "x-request-schema": {
+                    "$ref": "#/components/schemas/LogsCreateLogGroupRequest"
+                  }
+                },
+                "LogsDescribeLogGroups": {
+                  "summary": "DescribeLogGroups — X-Amz-Target: Logs_20140328.DescribeLogGroups; service=logs",
+                  "description": "Static template, not saved state. Create group then stream before ingest/read, and delete the group to cascade cleanup.",
+                  "value": {
+                    "logGroupNamePrefix": "/aws/",
+                    "limit": 50
+                  },
+                  "x-request-schema": {
+                    "$ref": "#/components/schemas/LogsDescribeLogGroupsRequest"
+                  }
+                },
+                "LogsDeleteLogGroup": {
+                  "summary": "DeleteLogGroup — X-Amz-Target: Logs_20140328.DeleteLogGroup; service=logs",
+                  "description": "Static template, not saved state. Create group then stream before ingest/read, and delete the group to cascade cleanup.",
+                  "value": {
+                    "logGroupName": "/aws/reference-example"
+                  },
+                  "x-request-schema": {
+                    "$ref": "#/components/schemas/LogsDeleteLogGroupRequest"
+                  }
+                },
+                "LogsCreateLogStream": {
+                  "summary": "CreateLogStream — X-Amz-Target: Logs_20140328.CreateLogStream; service=logs",
+                  "description": "Static template, not saved state. Create group then stream before ingest/read, and delete the group to cascade cleanup.",
+                  "value": {
+                    "logGroupName": "/aws/reference-example",
+                    "logStreamName": "application"
+                  },
+                  "x-request-schema": {
+                    "$ref": "#/components/schemas/LogsCreateLogStreamRequest"
+                  }
+                },
+                "LogsDescribeLogStreams": {
+                  "summary": "DescribeLogStreams — X-Amz-Target: Logs_20140328.DescribeLogStreams; service=logs",
+                  "description": "Static template, not saved state. Create group then stream before ingest/read, and delete the group to cascade cleanup.",
+                  "value": {
+                    "logGroupName": "/aws/reference-example",
+                    "orderBy": "LogStreamName",
+                    "limit": 50
+                  },
+                  "x-request-schema": {
+                    "$ref": "#/components/schemas/LogsDescribeLogStreamsRequest"
+                  }
+                },
+                "LogsPutLogEvents": {
+                  "summary": "PutLogEvents — X-Amz-Target: Logs_20140328.PutLogEvents; service=logs",
+                  "description": "Static template, not saved state. Create group then stream before ingest/read, and delete the group to cascade cleanup. Replace timestamp=0 with current epoch milliseconds; otherwise it is correctly rejected as too old.",
+                  "value": {
+                    "logGroupName": "/aws/reference-example",
+                    "logStreamName": "application",
+                    "logEvents": [
+                      {
+                        "timestamp": 0,
+                        "message": "Static template: replace timestamp with current epoch milliseconds."
+                      }
+                    ]
+                  },
+                  "x-request-schema": {
+                    "$ref": "#/components/schemas/LogsPutLogEventsRequest"
+                  }
+                },
+                "LogsGetLogEvents": {
+                  "summary": "GetLogEvents — X-Amz-Target: Logs_20140328.GetLogEvents; service=logs",
+                  "description": "Static template, not saved state. Create group then stream before ingest/read, and delete the group to cascade cleanup.",
+                  "value": {
+                    "logGroupName": "/aws/reference-example",
+                    "logStreamName": "application",
+                    "startFromHead": true,
+                    "limit": 100
+                  },
+                  "x-request-schema": {
+                    "$ref": "#/components/schemas/LogsGetLogEventsRequest"
+                  }
+                },
+                "CreateSecret": {
+                  "summary": "X-Amz-Target: secretsmanager.CreateSecret",
+                  "description": "Static request example using dummy values and a placeholder ARN. Run CreateSecret first and replace ARN/version IDs with live returned identifiers. Changing this body does not select its header.",
+                  "value": {
+                    "Name": "training/example",
+                    "Description": "Dummy local practice value",
+                    "ClientRequestToken": "00000000-0000-0000-0000-000000000001",
+                    "SecretString": "DUMMY-secret-example"
+                  }
+                },
+                "DescribeSecret": {
+                  "summary": "X-Amz-Target: secretsmanager.DescribeSecret",
+                  "description": "Static request example using dummy values and a placeholder ARN. Run CreateSecret first and replace ARN/version IDs with live returned identifiers. Changing this body does not select its header.",
+                  "value": {
+                    "SecretId": "arn:aws:secretsmanager:us-east-1:000000000000:secret:training/example-ABC123"
+                  }
+                },
+                "ListSecrets": {
+                  "summary": "X-Amz-Target: secretsmanager.ListSecrets",
+                  "description": "Static request example using dummy values and a placeholder ARN. Run CreateSecret first and replace ARN/version IDs with live returned identifiers. Changing this body does not select its header.",
+                  "value": {
+                    "MaxResults": 10,
+                    "SortOrder": "asc"
+                  }
+                },
+                "PutSecretValue": {
+                  "summary": "X-Amz-Target: secretsmanager.PutSecretValue",
+                  "description": "Static request example using dummy values and a placeholder ARN. Run CreateSecret first and replace ARN/version IDs with live returned identifiers. Changing this body does not select its header.",
+                  "value": {
+                    "SecretId": "arn:aws:secretsmanager:us-east-1:000000000000:secret:training/example-ABC123",
+                    "ClientRequestToken": "00000000-0000-0000-0000-000000000002",
+                    "SecretString": "DUMMY-secret-example-updated",
+                    "VersionStages": [
+                      "AWSCURRENT"
+                    ]
+                  }
+                },
+                "GetSecretValue": {
+                  "summary": "X-Amz-Target: secretsmanager.GetSecretValue",
+                  "description": "Static request example using dummy values and a placeholder ARN. Run CreateSecret first and replace ARN/version IDs with live returned identifiers. Changing this body does not select its header.",
+                  "value": {
+                    "SecretId": "arn:aws:secretsmanager:us-east-1:000000000000:secret:training/example-ABC123",
+                    "VersionStage": "AWSCURRENT"
+                  }
+                },
+                "UpdateSecretVersionStage": {
+                  "summary": "X-Amz-Target: secretsmanager.UpdateSecretVersionStage",
+                  "description": "Static request example using dummy values and a placeholder ARN. Run CreateSecret first and replace ARN/version IDs with live returned identifiers. Changing this body does not select its header.",
+                  "value": {
+                    "SecretId": "arn:aws:secretsmanager:us-east-1:000000000000:secret:training/example-ABC123",
+                    "VersionStage": "AWSCURRENT",
+                    "MoveToVersionId": "00000000-0000-0000-0000-000000000001",
+                    "RemoveFromVersionId": "00000000-0000-0000-0000-000000000002"
+                  }
+                },
+                "DeleteSecret": {
+                  "summary": "X-Amz-Target: secretsmanager.DeleteSecret",
+                  "description": "Static request example using dummy values and a placeholder ARN. Run CreateSecret first and replace ARN/version IDs with live returned identifiers. Changing this body does not select its header.",
+                  "value": {
+                    "SecretId": "arn:aws:secretsmanager:us-east-1:000000000000:secret:training/example-ABC123",
+                    "ForceDeleteWithoutRecovery": true
                   }
                 }
               }
@@ -407,21 +580,376 @@
                   }
                 }
               }
+            },
+            "application/x-amz-json-1.0": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/SQSCreateQueueRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SQSListQueuesRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SQSGetQueueUrlRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SQSGetQueueAttributesRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SQSSendMessageRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SQSReceiveMessageRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SQSChangeMessageVisibilityRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SQSDeleteMessageRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SQSDeleteQueueRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DynamoDBCreateTableRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DynamoDBListTablesRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DynamoDBDescribeTableRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DynamoDBPutItemRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DynamoDBGetItemRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DynamoDBDeleteItemRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DynamoDBDeleteTableRequest"
+                  }
+                ],
+                "description": "SQS and DynamoDB share JSON 1.0. X-Amz-Target selects the native operation; body shapes overlap, so all nine SQS and seven bounded DynamoDB request schemas are retained in anyOf. Static templates require live substitutions. Saved-table key relationships and native byte limits are checked by the API.",
+                "type": "object"
+              },
+              "examples": {
+                "CreateQueue": {
+                  "summary": "SQS CreateQueue",
+                  "description": "STATIC TEMPLATE, not live state. Use X-Amz-Target: AmazonSQS.CreateQueue, X-Simulator-Service:sqs, selected region and JSON1.0. Create/Get actual QueueUrl first; Receive supplies current MessageId/ReceiptHandle. Replace all __...__ placeholders with actual responses. Never use MessageId as a receipt or send real AWS credentials.",
+                  "value": {
+                    "QueueName": "api-reference-queue",
+                    "Attributes": {
+                      "VisibilityTimeout": "30",
+                      "DelaySeconds": "0",
+                      "MessageRetentionPeriod": "60"
+                    }
+                  },
+                  "x-simulator-operation": "CreateQueue",
+                  "x-simulator-static-template": true
+                },
+                "ListQueues": {
+                  "summary": "SQS ListQueues",
+                  "description": "STATIC TEMPLATE, not live state. Use X-Amz-Target: AmazonSQS.ListQueues, X-Simulator-Service:sqs, selected region and JSON1.0. Create/Get actual QueueUrl first; Receive supplies current MessageId/ReceiptHandle. Replace all __...__ placeholders with actual responses. Never use MessageId as a receipt or send real AWS credentials.",
+                  "value": {
+                    "QueueNamePrefix": "api-reference-queue",
+                    "MaxResults": 25
+                  },
+                  "x-simulator-operation": "ListQueues",
+                  "x-simulator-static-template": true
+                },
+                "GetQueueUrl": {
+                  "summary": "SQS GetQueueUrl",
+                  "description": "STATIC TEMPLATE, not live state. Use X-Amz-Target: AmazonSQS.GetQueueUrl, X-Simulator-Service:sqs, selected region and JSON1.0. Create/Get actual QueueUrl first; Receive supplies current MessageId/ReceiptHandle. Replace all __...__ placeholders with actual responses. Never use MessageId as a receipt or send real AWS credentials.",
+                  "value": {
+                    "QueueName": "api-reference-queue"
+                  },
+                  "x-simulator-operation": "GetQueueUrl",
+                  "x-simulator-static-template": true
+                },
+                "GetQueueAttributes": {
+                  "summary": "SQS GetQueueAttributes",
+                  "description": "STATIC TEMPLATE, not live state. Use X-Amz-Target: AmazonSQS.GetQueueAttributes, X-Simulator-Service:sqs, selected region and JSON1.0. Create/Get actual QueueUrl first; Receive supplies current MessageId/ReceiptHandle. Replace all __...__ placeholders with actual responses. Never use MessageId as a receipt or send real AWS credentials.",
+                  "value": {
+                    "QueueUrl": "__QUEUE_URL__",
+                    "AttributeNames": [
+                      "All"
+                    ]
+                  },
+                  "x-simulator-operation": "GetQueueAttributes",
+                  "x-simulator-static-template": true
+                },
+                "SendMessage": {
+                  "summary": "SQS SendMessage",
+                  "description": "STATIC TEMPLATE, not live state. Use X-Amz-Target: AmazonSQS.SendMessage, X-Simulator-Service:sqs, selected region and JSON1.0. Create/Get actual QueueUrl first; Receive supplies current MessageId/ReceiptHandle. Replace all __...__ placeholders with actual responses. Never use MessageId as a receipt or send real AWS credentials.",
+                  "value": {
+                    "QueueUrl": "__QUEUE_URL__",
+                    "MessageBody": "Actual API reference message",
+                    "DelaySeconds": 0
+                  },
+                  "x-simulator-operation": "SendMessage",
+                  "x-simulator-static-template": true
+                },
+                "ReceiveMessage": {
+                  "summary": "SQS ReceiveMessage",
+                  "description": "STATIC TEMPLATE, not live state. Use X-Amz-Target: AmazonSQS.ReceiveMessage, X-Simulator-Service:sqs, selected region and JSON1.0. Create/Get actual QueueUrl first; Receive supplies current MessageId/ReceiptHandle. Replace all __...__ placeholders with actual responses. Never use MessageId as a receipt or send real AWS credentials.",
+                  "value": {
+                    "QueueUrl": "__QUEUE_URL__",
+                    "MaxNumberOfMessages": 1,
+                    "VisibilityTimeout": 30,
+                    "WaitTimeSeconds": 0,
+                    "MessageSystemAttributeNames": [
+                      "All"
+                    ],
+                    "MessageAttributeNames": [
+                      "All"
+                    ]
+                  },
+                  "x-simulator-operation": "ReceiveMessage",
+                  "x-simulator-static-template": true
+                },
+                "ChangeMessageVisibility": {
+                  "summary": "SQS ChangeMessageVisibility",
+                  "description": "STATIC TEMPLATE, not live state. Use X-Amz-Target: AmazonSQS.ChangeMessageVisibility, X-Simulator-Service:sqs, selected region and JSON1.0. Create/Get actual QueueUrl first; Receive supplies current MessageId/ReceiptHandle. Replace all __...__ placeholders with actual responses. Never use MessageId as a receipt or send real AWS credentials.",
+                  "value": {
+                    "QueueUrl": "__QUEUE_URL__",
+                    "ReceiptHandle": "__RECEIPT_HANDLE__",
+                    "VisibilityTimeout": 30
+                  },
+                  "x-simulator-operation": "ChangeMessageVisibility",
+                  "x-simulator-static-template": true
+                },
+                "DeleteMessage": {
+                  "summary": "SQS DeleteMessage",
+                  "description": "STATIC TEMPLATE, not live state. Use X-Amz-Target: AmazonSQS.DeleteMessage, X-Simulator-Service:sqs, selected region and JSON1.0. Create/Get actual QueueUrl first; Receive supplies current MessageId/ReceiptHandle. Replace all __...__ placeholders with actual responses. Never use MessageId as a receipt or send real AWS credentials.",
+                  "value": {
+                    "QueueUrl": "__QUEUE_URL__",
+                    "ReceiptHandle": "__RECEIPT_HANDLE__"
+                  },
+                  "x-simulator-operation": "DeleteMessage",
+                  "x-simulator-static-template": true
+                },
+                "DeleteQueue": {
+                  "summary": "SQS DeleteQueue",
+                  "description": "STATIC TEMPLATE, not live state. Use X-Amz-Target: AmazonSQS.DeleteQueue, X-Simulator-Service:sqs, selected region and JSON1.0. Create/Get actual QueueUrl first; Receive supplies current MessageId/ReceiptHandle. Replace all __...__ placeholders with actual responses. Never use MessageId as a receipt or send real AWS credentials.",
+                  "value": {
+                    "QueueUrl": "__QUEUE_URL__"
+                  },
+                  "x-simulator-operation": "DeleteQueue",
+                  "x-simulator-static-template": true
+                },
+                "DynamoDBCreateTable": {
+                  "summary": "CreateTable — set X-Amz-Target: DynamoDB_20120810.CreateTable",
+                  "description": "Static private-table request template. Execute operations in documented order; no real AWS or automatic header selection.",
+                  "x-simulator-target": "DynamoDB_20120810.CreateTable",
+                  "value": {
+                    "TableName": "ddb-reference",
+                    "AttributeDefinitions": [
+                      {
+                        "AttributeName": "id",
+                        "AttributeType": "S"
+                      }
+                    ],
+                    "KeySchema": [
+                      {
+                        "AttributeName": "id",
+                        "KeyType": "HASH"
+                      }
+                    ],
+                    "BillingMode": "PAY_PER_REQUEST"
+                  },
+                  "x-request-schema": {
+                    "$ref": "#/components/schemas/DynamoDBCreateTableRequest"
+                  }
+                },
+                "DynamoDBListTables": {
+                  "summary": "ListTables — set X-Amz-Target: DynamoDB_20120810.ListTables",
+                  "description": "Static private-table request template. Execute operations in documented order; no real AWS or automatic header selection.",
+                  "x-simulator-target": "DynamoDB_20120810.ListTables",
+                  "value": {
+                    "Limit": 10
+                  },
+                  "x-request-schema": {
+                    "$ref": "#/components/schemas/DynamoDBListTablesRequest"
+                  }
+                },
+                "DynamoDBDescribeTable": {
+                  "summary": "DescribeTable — set X-Amz-Target: DynamoDB_20120810.DescribeTable",
+                  "description": "Static private-table request template. Execute operations in documented order; no real AWS or automatic header selection.",
+                  "x-simulator-target": "DynamoDB_20120810.DescribeTable",
+                  "value": {
+                    "TableName": "ddb-reference"
+                  },
+                  "x-request-schema": {
+                    "$ref": "#/components/schemas/DynamoDBDescribeTableRequest"
+                  }
+                },
+                "DynamoDBPutItem": {
+                  "summary": "PutItem — set X-Amz-Target: DynamoDB_20120810.PutItem",
+                  "description": "Static private-table request template. Execute operations in documented order; no real AWS or automatic header selection.",
+                  "x-simulator-target": "DynamoDB_20120810.PutItem",
+                  "value": {
+                    "TableName": "ddb-reference",
+                    "Item": {
+                      "id": {
+                        "S": "documented"
+                      },
+                      "payload": {
+                        "S": "sample <value> 日本語"
+                      }
+                    },
+                    "ConditionExpression": "attribute_not_exists(id)"
+                  },
+                  "x-request-schema": {
+                    "$ref": "#/components/schemas/DynamoDBPutItemRequest"
+                  }
+                },
+                "DynamoDBGetItem": {
+                  "summary": "GetItem — set X-Amz-Target: DynamoDB_20120810.GetItem",
+                  "description": "Static private-table request template. Execute operations in documented order; no real AWS or automatic header selection.",
+                  "x-simulator-target": "DynamoDB_20120810.GetItem",
+                  "value": {
+                    "TableName": "ddb-reference",
+                    "Key": {
+                      "id": {
+                        "S": "documented"
+                      }
+                    },
+                    "ConsistentRead": true
+                  },
+                  "x-request-schema": {
+                    "$ref": "#/components/schemas/DynamoDBGetItemRequest"
+                  }
+                },
+                "DynamoDBDeleteItem": {
+                  "summary": "DeleteItem — set X-Amz-Target: DynamoDB_20120810.DeleteItem",
+                  "description": "Static private-table request template. Execute operations in documented order; no real AWS or automatic header selection.",
+                  "x-simulator-target": "DynamoDB_20120810.DeleteItem",
+                  "value": {
+                    "TableName": "ddb-reference",
+                    "Key": {
+                      "id": {
+                        "S": "documented"
+                      }
+                    }
+                  },
+                  "x-request-schema": {
+                    "$ref": "#/components/schemas/DynamoDBDeleteItemRequest"
+                  }
+                },
+                "DynamoDBDeleteTable": {
+                  "summary": "DeleteTable — set X-Amz-Target: DynamoDB_20120810.DeleteTable",
+                  "description": "Static private-table request template. Execute operations in documented order; no real AWS or automatic header selection.",
+                  "x-simulator-target": "DynamoDB_20120810.DeleteTable",
+                  "value": {
+                    "TableName": "ddb-reference"
+                  },
+                  "x-request-schema": {
+                    "$ref": "#/components/schemas/DynamoDBDeleteTableRequest"
+                  }
+                }
+              }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Native JSON 1.1 SSM or XML Query response KMS returns target-specific JSON metadata/list/policy/crypto; EnableKey/DisableKey return an EMPTY body. Use returned local key/ciphertext values in subsequent requests."
+            "description": "Native JSON 1.1 SSM or XML Query response KMS returns target-specific JSON metadata/list/policy/crypto; EnableKey/DisableKey return an EMPTY body. Use returned local key/ciphertext values in subsequent requests. SQS returns native JSON1.0; choose the matching response media/schema, not an XML or JSON1.1 projection. DynamoDB responses use JSON 1.0; examples are static, not current state.",
+            "content": {
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/SQSQueueURLResult"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SQSQueueListResult"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SQSSendResult"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SQSReceiveResult"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SQSAttributesResult"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SQSEmptyResult"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DynamoDBTableDescriptionResult"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DynamoDBListTablesResult"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DynamoDBDescribeTableResult"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DynamoDBEmptyResult"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DynamoDBGetItemResult"
+                    }
+                  ]
+                }
+              }
+            }
           },
           "400": {
-            "description": "Validation/unsupported field/state conflict IAM ValidationError/MalformedPolicyDocument reject unknown trust or permissions semantics."
+            "description": "Validation/unsupported field/state conflict IAM ValidationError/MalformedPolicyDocument reject unknown trust or permissions semantics. SQS native400 covers invalid input and queue/message/receipt state; it is not a successful partial operation.",
+            "content": {
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/SQSAPIError"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DynamoDBAPIError"
+                    }
+                  ]
+                }
+              }
+            }
           },
           "403": {
-            "description": "Exercise IAM denied"
+            "description": "Exercise IAM denied",
+            "content": {
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/SQSAPIError"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DynamoDBAPIError"
+                    }
+                  ]
+                }
+              }
+            }
           },
           "501": {
-            "description": "Unsupported operation"
+            "description": "Unsupported operation",
+            "content": {
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/SQSAPIError"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DynamoDBAPIError"
+                    }
+                  ]
+                }
+              }
+            }
           },
           "404": {
             "description": "IAM NoSuchEntity: role or inline policy does not exist."
@@ -434,6 +962,23 @@
           },
           "401": {
             "$ref": "#/components/responses/HostAccessRequired"
+          },
+          "500": {
+            "description": "Sanitized native service infrastructure failure (SQS InternalError, Logs ServiceUnavailableException or DynamoDB InternalServerError), not an IAM denial. No success acknowledgement for a failed required write; no SQL or stored-value details are disclosed.",
+            "content": {
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/SQSAPIError"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DynamoDBAPIError"
+                    }
+                  ]
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -510,6 +1055,64 @@
             },
             "response": {
               "$ref": "#/components/schemas/KMSDecryptResponse"
+            }
+          }
+        },
+        "x-simulator-dynamodb-operation-schemas": {
+          "CreateTable": {
+            "request": {
+              "$ref": "#/components/schemas/DynamoDBCreateTableRequest"
+            },
+            "response": {
+              "$ref": "#/components/schemas/DynamoDBTableDescriptionResult"
+            }
+          },
+          "ListTables": {
+            "request": {
+              "$ref": "#/components/schemas/DynamoDBListTablesRequest"
+            },
+            "response": {
+              "$ref": "#/components/schemas/DynamoDBListTablesResult"
+            }
+          },
+          "DescribeTable": {
+            "request": {
+              "$ref": "#/components/schemas/DynamoDBDescribeTableRequest"
+            },
+            "response": {
+              "$ref": "#/components/schemas/DynamoDBDescribeTableResult"
+            }
+          },
+          "PutItem": {
+            "request": {
+              "$ref": "#/components/schemas/DynamoDBPutItemRequest"
+            },
+            "response": {
+              "$ref": "#/components/schemas/DynamoDBEmptyResult"
+            }
+          },
+          "GetItem": {
+            "request": {
+              "$ref": "#/components/schemas/DynamoDBGetItemRequest"
+            },
+            "response": {
+              "$ref": "#/components/schemas/DynamoDBGetItemResult"
+            }
+          },
+          "DeleteItem": {
+            "request": {
+              "$ref": "#/components/schemas/DynamoDBDeleteItemRequest"
+            },
+            "response": {
+              "$ref": "#/components/schemas/DynamoDBEmptyResult"
+            }
+          },
+          "DeleteTable": {
+            "request": {
+              "$ref": "#/components/schemas/DynamoDBDeleteTableRequest"
+            },
+            "response": {
+              "$ref": "#/components/schemas/DynamoDBTableDescriptionResult"
             }
           }
         }
@@ -11147,6 +11750,1372 @@
           "message"
         ],
         "additionalProperties": false
+      },
+      "SQSQueueConfiguration": {
+        "type": "object",
+        "properties": {
+          "VisibilityTimeout": {
+            "type": "string",
+            "description": "Integer string0–43200 seconds; default30."
+          },
+          "DelaySeconds": {
+            "type": "string",
+            "description": "Integer string0–900 seconds; default0."
+          },
+          "MessageRetentionPeriod": {
+            "type": "string",
+            "description": "Integer string60–1209600 seconds; default345600."
+          }
+        },
+        "additionalProperties": false,
+        "description": "Exactly these three optional attributes. No SetQueueAttributes, SSE/KMS, policy, redrive, maximum-size or tags. No encryption claim."
+      },
+      "SQSMessageAttribute": {
+        "type": "object",
+        "properties": {
+          "DataType": {
+            "type": "string",
+            "description": "String, Number or Binary, optionally followed by a custom .suffix. Local Number/name validation is not complete AWS semantics."
+          },
+          "StringValue": {
+            "type": "string",
+            "description": "Required for String/Number; cannot be combined with BinaryValue."
+          },
+          "BinaryValue": {
+            "type": "string",
+            "contentEncoding": "base64",
+            "description": "Required for Binary; cannot be combined with StringValue."
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "DataType"
+        ]
+      },
+      "SQSCreateQueueRequest": {
+        "type": "object",
+        "properties": {
+          "QueueName": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]{1,80}$",
+            "description": "Standard name only; FIFO suffix/dots unsupported."
+          },
+          "Attributes": {
+            "$ref": "#/components/schemas/SQSQueueConfiguration"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "QueueName"
+        ],
+        "description": "Native CreateQueue request subset. Choose header AmazonSQS.CreateQueue. Unknown fields, explicit top-level nulls, wrong types and unsupported options fail; do not infer full AWS compatibility."
+      },
+      "SQSListQueuesRequest": {
+        "type": "object",
+        "properties": {
+          "QueueNamePrefix": {
+            "type": "string"
+          },
+          "MaxResults": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000,
+            "default": 1000
+          },
+          "NextToken": {
+            "type": "string",
+            "description": "Use the actual previous page token for the same region/prefix; static templates contain no live continuation."
+          }
+        },
+        "additionalProperties": false,
+        "description": "Native ListQueues request subset. Choose header AmazonSQS.ListQueues. Unknown fields, explicit top-level nulls, wrong types and unsupported options fail; do not infer full AWS compatibility."
+      },
+      "SQSGetQueueUrlRequest": {
+        "type": "object",
+        "properties": {
+          "QueueName": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]{1,80}$",
+            "description": "Standard name only; FIFO suffix/dots unsupported."
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "QueueName"
+        ],
+        "description": "Native GetQueueUrl request subset. Choose header AmazonSQS.GetQueueUrl. Unknown fields, explicit top-level nulls, wrong types and unsupported options fail; do not infer full AWS compatibility."
+      },
+      "SQSGetQueueAttributesRequest": {
+        "type": "object",
+        "properties": {
+          "QueueUrl": {
+            "type": "string",
+            "description": "Actual QueueUrl returned by CreateQueue/GetQueueUrl. Replace __QUEUE_URL__; never fetch this URL as an external endpoint. The local API also accepts a bare name/final name segment, a documented deviation."
+          },
+          "AttributeNames": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "enum": [
+                "All",
+                "QueueArn",
+                "CreatedTimestamp",
+                "VisibilityTimeout",
+                "DelaySeconds",
+                "MessageRetentionPeriod",
+                "ApproximateNumberOfMessages",
+                "ApproximateNumberOfMessagesNotVisible"
+              ]
+            }
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "QueueUrl",
+          "AttributeNames"
+        ],
+        "description": "Native GetQueueAttributes request subset. Choose header AmazonSQS.GetQueueAttributes. Unknown fields, explicit top-level nulls, wrong types and unsupported options fail; do not infer full AWS compatibility."
+      },
+      "SQSSendMessageRequest": {
+        "type": "object",
+        "properties": {
+          "QueueUrl": {
+            "type": "string",
+            "description": "Actual QueueUrl returned by CreateQueue/GetQueueUrl. Replace __QUEUE_URL__; never fetch this URL as an external endpoint. The local API also accepts a bare name/final name segment, a documented deviation."
+          },
+          "MessageBody": {
+            "type": "string",
+            "description": "1–262144 UTF-8 bytes, a fixed local limit versus current AWS1MiB; SQS-compatible characters only. JSON request <=320KiB including encoding/attributes."
+          },
+          "DelaySeconds": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 900
+          },
+          "MessageAttributes": {
+            "type": "object",
+            "maxProperties": 10,
+            "additionalProperties": {
+              "$ref": "#/components/schemas/SQSMessageAttribute"
+            }
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "QueueUrl",
+          "MessageBody"
+        ],
+        "description": "Native SendMessage request subset. Choose header AmazonSQS.SendMessage. Unknown fields, explicit top-level nulls, wrong types and unsupported options fail; do not infer full AWS compatibility."
+      },
+      "SQSReceiveMessageRequest": {
+        "type": "object",
+        "properties": {
+          "QueueUrl": {
+            "type": "string",
+            "description": "Actual QueueUrl returned by CreateQueue/GetQueueUrl. Replace __QUEUE_URL__; never fetch this URL as an external endpoint. The local API also accepts a bare name/final name segment, a documented deviation."
+          },
+          "MaxNumberOfMessages": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10,
+            "default": 1
+          },
+          "VisibilityTimeout": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 43200
+          },
+          "WaitTimeSeconds": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 20,
+            "default": 0
+          },
+          "MessageAttributeNames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Exact names, All or .* only; no prefix wildcard semantics."
+          },
+          "MessageSystemAttributeNames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The local response always returns its fixed four system fields; complete AWS system selection is not implemented."
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "QueueUrl"
+        ],
+        "description": "Native ReceiveMessage request subset. Choose header AmazonSQS.ReceiveMessage. Unknown fields, explicit top-level nulls, wrong types and unsupported options fail; do not infer full AWS compatibility."
+      },
+      "SQSChangeMessageVisibilityRequest": {
+        "type": "object",
+        "properties": {
+          "QueueUrl": {
+            "type": "string",
+            "description": "Actual QueueUrl returned by CreateQueue/GetQueueUrl. Replace __QUEUE_URL__; never fetch this URL as an external endpoint. The local API also accepts a bare name/final name segment, a documented deviation."
+          },
+          "ReceiptHandle": {
+            "type": "string",
+            "description": "Replace __RECEIPT_HANDLE__ with the latest actual ReceiveMessage receipt. MessageId is not a receipt. Do not log or expose receipt values."
+          },
+          "VisibilityTimeout": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 43200
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "QueueUrl",
+          "ReceiptHandle",
+          "VisibilityTimeout"
+        ],
+        "description": "Native ChangeMessageVisibility request subset. Choose header AmazonSQS.ChangeMessageVisibility. Unknown fields, explicit top-level nulls, wrong types and unsupported options fail; do not infer full AWS compatibility."
+      },
+      "SQSDeleteMessageRequest": {
+        "type": "object",
+        "properties": {
+          "QueueUrl": {
+            "type": "string",
+            "description": "Actual QueueUrl returned by CreateQueue/GetQueueUrl. Replace __QUEUE_URL__; never fetch this URL as an external endpoint. The local API also accepts a bare name/final name segment, a documented deviation."
+          },
+          "ReceiptHandle": {
+            "type": "string",
+            "description": "Replace __RECEIPT_HANDLE__ with the latest actual ReceiveMessage receipt. MessageId is not a receipt. Do not log or expose receipt values."
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "QueueUrl",
+          "ReceiptHandle"
+        ],
+        "description": "Native DeleteMessage request subset. Choose header AmazonSQS.DeleteMessage. Unknown fields, explicit top-level nulls, wrong types and unsupported options fail; do not infer full AWS compatibility."
+      },
+      "SQSDeleteQueueRequest": {
+        "type": "object",
+        "properties": {
+          "QueueUrl": {
+            "type": "string",
+            "description": "Actual QueueUrl returned by CreateQueue/GetQueueUrl. Replace __QUEUE_URL__; never fetch this URL as an external endpoint. The local API also accepts a bare name/final name segment, a documented deviation."
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "QueueUrl"
+        ],
+        "description": "Native DeleteQueue request subset. Choose header AmazonSQS.DeleteQueue. Unknown fields, explicit top-level nulls, wrong types and unsupported options fail; do not infer full AWS compatibility."
+      },
+      "SQSQueueURLResult": {
+        "type": "object",
+        "properties": {
+          "QueueUrl": {
+            "type": "string",
+            "description": "Actual local queue identifier, not a remote endpoint."
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "QueueUrl"
+        ]
+      },
+      "SQSQueueListResult": {
+        "type": "object",
+        "properties": {
+          "QueueUrls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "NextToken": {
+            "type": "string",
+            "description": "Actual continuation, omitted at end."
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "QueueUrls"
+        ]
+      },
+      "SQSSendResult": {
+        "type": "object",
+        "properties": {
+          "MessageId": {
+            "type": "string",
+            "description": "Actual native ID, not a receipt."
+          },
+          "MD5OfMessageBody": {
+            "type": "string"
+          },
+          "MD5OfMessageAttributes": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "MessageId",
+          "MD5OfMessageBody"
+        ]
+      },
+      "SQSReceivedMessage": {
+        "type": "object",
+        "properties": {
+          "MessageId": {
+            "type": "string"
+          },
+          "ReceiptHandle": {
+            "type": "string",
+            "description": "Actual opaque authority from this ReceiveMessage delivery, not MessageId. A later delivery rotates it; keep transient and never log raw values. The native API response legitimately returns it to its authorized caller."
+          },
+          "MD5OfBody": {
+            "type": "string"
+          },
+          "Body": {
+            "type": "string"
+          },
+          "Attributes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Fixed local subset: SenderId,SentTimestamp,ApproximateReceiveCount,ApproximateFirstReceiveTimestamp. First receive currently uses stored send timestamp."
+          },
+          "MessageAttributes": {
+            "type": "object",
+            "maxProperties": 10,
+            "additionalProperties": {
+              "$ref": "#/components/schemas/SQSMessageAttribute"
+            }
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "MessageId",
+          "ReceiptHandle",
+          "MD5OfBody",
+          "Body",
+          "Attributes"
+        ]
+      },
+      "SQSReceiveResult": {
+        "type": "object",
+        "properties": {
+          "Messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SQSReceivedMessage"
+            }
+          }
+        },
+        "additionalProperties": false,
+        "description": "No Messages field when no eligible message is delivered; {} is a valid empty result. Receive changes visibility and receipt authority; not automatic deletion."
+      },
+      "SQSAttributesResult": {
+        "type": "object",
+        "properties": {
+          "Attributes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Only the seven supported queue attributes; local read-time counts, not eventual AWS approximations."
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "Attributes"
+        ]
+      },
+      "SQSEmptyResult": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false,
+        "description": "Actual successful DeleteQueue/DeleteMessage/ChangeMessageVisibility returns {}. It is an acknowledgment, not a manufactured message/value."
+      },
+      "SQSAPIError": {
+        "type": "object",
+        "properties": {
+          "__type": {
+            "type": "string",
+            "description": "Native code, e.g. InvalidParameterValue, InvalidMessageContents, InvalidAttributeName, QueueNameExists, AWS.SimpleQueueService.NonExistentQueue, ReceiptHandleIsInvalid, SimulatorQuotaExceeded, AccessDenied, InternalError, UnknownOperationException."
+          },
+          "Message": {
+            "type": "string",
+            "description": "Sanitized native message. Internal errors do not expose driver/payload/receipt data."
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "__type",
+          "Message"
+        ]
+      },
+      "LogsCreateLogGroupRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "logGroupName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[.\\-_/#A-Za-z0-9]+$",
+            "description": "Creation rejects reserved aws/ prefix (leading /aws/ is valid)."
+          },
+          "logGroupClass": {
+            "type": "string",
+            "enum": [
+              "STANDARD"
+            ]
+          }
+        },
+        "description": "Bounded CreateLogGroup JSON1.1 payload. Nulls/duplicate keys are rejected; complete byte/time/cross-field semantics are enforced by the native handler.",
+        "required": [
+          "logGroupName"
+        ]
+      },
+      "LogsDescribeLogGroupsRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "logGroupNamePrefix": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[.\\-_/#A-Za-z0-9]+$",
+            "description": "Creation rejects reserved aws/ prefix (leading /aws/ is valid)."
+          },
+          "logGroupClass": {
+            "type": "string",
+            "enum": [
+              "STANDARD"
+            ]
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "nextToken": {
+            "type": "string",
+            "description": "Opaque HMAC cursor, scoped to region/query/resource incarnation;24-hour expiry. Reauthorize on every request."
+          }
+        },
+        "description": "Bounded DescribeLogGroups JSON1.1 payload. Nulls/duplicate keys are rejected; complete byte/time/cross-field semantics are enforced by the native handler."
+      },
+      "LogsDeleteLogGroupRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "logGroupName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[.\\-_/#A-Za-z0-9]+$",
+            "description": "Creation rejects reserved aws/ prefix (leading /aws/ is valid)."
+          }
+        },
+        "description": "Bounded DeleteLogGroup JSON1.1 payload. Nulls/duplicate keys are rejected; complete byte/time/cross-field semantics are enforced by the native handler.",
+        "required": [
+          "logGroupName"
+        ]
+      },
+      "LogsCreateLogStreamRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "logGroupName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[.\\-_/#A-Za-z0-9]+$",
+            "description": "Creation rejects reserved aws/ prefix (leading /aws/ is valid)."
+          },
+          "logStreamName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "UTF8 stream name; excludes colon, asterisk and NUL."
+          }
+        },
+        "description": "Bounded CreateLogStream JSON1.1 payload. Nulls/duplicate keys are rejected; complete byte/time/cross-field semantics are enforced by the native handler.",
+        "required": [
+          "logGroupName",
+          "logStreamName"
+        ]
+      },
+      "LogsDescribeLogStreamsRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "logGroupName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[.\\-_/#A-Za-z0-9]+$",
+            "description": "Creation rejects reserved aws/ prefix (leading /aws/ is valid)."
+          },
+          "logStreamNamePrefix": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "UTF8 stream name; excludes colon, asterisk and NUL."
+          },
+          "orderBy": {
+            "type": "string",
+            "enum": [
+              "LogStreamName",
+              "LastEventTime"
+            ],
+            "description": "LastEventTime cannot be combined with a stream-name prefix."
+          },
+          "descending": {
+            "type": "boolean"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "nextToken": {
+            "type": "string",
+            "description": "Opaque HMAC cursor, scoped to region/query/resource incarnation;24-hour expiry. Reauthorize on every request."
+          }
+        },
+        "description": "Bounded DescribeLogStreams JSON1.1 payload. Nulls/duplicate keys are rejected; complete byte/time/cross-field semantics are enforced by the native handler.",
+        "required": [
+          "logGroupName"
+        ]
+      },
+      "LogsPutLogEventsRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "logGroupName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[.\\-_/#A-Za-z0-9]+$",
+            "description": "Creation rejects reserved aws/ prefix (leading /aws/ is valid)."
+          },
+          "logStreamName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "UTF8 stream name; excludes colon, asterisk and NUL."
+          },
+          "sequenceToken": {
+            "type": "string",
+            "description": "Ignored under current PutLogEvents contract."
+          },
+          "logEvents": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 10000,
+            "items": {
+              "type": "object",
+              "required": [
+                "timestamp",
+                "message"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "timestamp": {
+                  "type": "integer",
+                  "format": "int64",
+                  "minimum": 0
+                },
+                "message": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "UTF8 message; batch accounting includes26bytes/event."
+                }
+              }
+            }
+          }
+        },
+        "description": "Bounded PutLogEvents JSON1.1 payload. Nulls/duplicate keys are rejected; complete byte/time/cross-field semantics are enforced by the native handler.",
+        "required": [
+          "logGroupName",
+          "logStreamName",
+          "logEvents"
+        ]
+      },
+      "LogsGetLogEventsRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "logGroupName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[.\\-_/#A-Za-z0-9]+$",
+            "description": "Creation rejects reserved aws/ prefix (leading /aws/ is valid)."
+          },
+          "logStreamName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "UTF8 stream name; excludes colon, asterisk and NUL."
+          },
+          "startTime": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "endTime": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "description": "Exclusive upper timestamp bound."
+          },
+          "startFromHead": {
+            "type": "boolean",
+            "description": "Set true when continuing with nextForwardToken."
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000
+          },
+          "nextToken": {
+            "type": "string",
+            "description": "Opaque HMAC cursor, scoped to region/query/resource incarnation;24-hour expiry. Reauthorize on every request."
+          },
+          "unmask": {
+            "type": "boolean",
+            "enum": [
+              false
+            ],
+            "description": "Data-protection/unmask is unsupported."
+          }
+        },
+        "description": "Bounded GetLogEvents JSON1.1 payload. Nulls/duplicate keys are rejected; complete byte/time/cross-field semantics are enforced by the native handler.",
+        "required": [
+          "logGroupName",
+          "logStreamName"
+        ]
+      },
+      "LogsEvent": {
+        "type": "object",
+        "required": [
+          "timestamp",
+          "message",
+          "ingestionTime"
+        ],
+        "properties": {
+          "timestamp": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "message": {
+            "type": "string"
+          },
+          "ingestionTime": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          }
+        }
+      },
+      "LogsGetLogEventsResult": {
+        "type": "object",
+        "required": [
+          "events",
+          "nextForwardToken",
+          "nextBackwardToken"
+        ],
+        "properties": {
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LogsEvent"
+            }
+          },
+          "nextForwardToken": {
+            "type": "string",
+            "description": "Opaque HMAC cursor, scoped to region/query/resource incarnation;24-hour expiry. Reauthorize on every request."
+          },
+          "nextBackwardToken": {
+            "type": "string",
+            "description": "Opaque HMAC cursor, scoped to region/query/resource incarnation;24-hour expiry. Reauthorize on every request."
+          }
+        }
+      },
+      "LogsRejectedLogEventsInfo": {
+        "type": "object",
+        "properties": {
+          "tooOldLogEventEndIndex": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "tooNewLogEventStartIndex": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "LogsError": {
+        "type": "object",
+        "required": [
+          "__type",
+          "message"
+        ],
+        "properties": {
+          "__type": {
+            "type": "string",
+            "enum": [
+              "InvalidParameterException",
+              "ResourceNotFoundException",
+              "ResourceAlreadyExistsException",
+              "AccessDeniedException",
+              "UnknownOperationException",
+              "ServiceUnavailableException",
+              "LimitExceededException"
+            ]
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "DynamoDBTableName": {
+        "type": "string",
+        "pattern": "^[a-zA-Z0-9_.-]{3,255}$"
+      },
+      "DynamoDBAttributeDefinition": {
+        "type": "object",
+        "properties": {
+          "AttributeName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "AttributeType": {
+            "type": "string",
+            "enum": [
+              "S",
+              "N",
+              "B"
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "AttributeName",
+          "AttributeType"
+        ]
+      },
+      "DynamoDBKeyElement": {
+        "type": "object",
+        "properties": {
+          "AttributeName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "KeyType": {
+            "type": "string",
+            "enum": [
+              "HASH",
+              "RANGE"
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "AttributeName",
+          "KeyType"
+        ]
+      },
+      "DynamoDBProvisionedThroughput": {
+        "type": "object",
+        "properties": {
+          "ReadCapacityUnits": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9223372036854775807
+          },
+          "WriteCapacityUnits": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9223372036854775807
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "ReadCapacityUnits",
+          "WriteCapacityUnits"
+        ]
+      },
+      "DynamoDBKeyAttributeValue": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "S": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "S"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "N": {
+                "type": "string",
+                "pattern": "^[+-]?([0-9]+(\\.[0-9]*)?|\\.[0-9]+)([eE][+-]?[0-9]+)?$",
+                "description": "Decimal string. The native API additionally enforces 38 significant digits and its documented exponent range."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "N"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "B": {
+                "type": "string",
+                "contentEncoding": "base64",
+                "description": "Standard base64; decoded-byte validity and size are checked by the native API.",
+                "minLength": 1
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "B"
+            ]
+          }
+        ],
+        "description": "Exactly one S, N or B tag. Key names and declared types must also match the selected table; that saved-state constraint is checked by the native API."
+      },
+      "DynamoDBAttributeValue": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "S": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "S"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "N": {
+                "type": "string",
+                "pattern": "^[+-]?([0-9]+(\\.[0-9]*)?|\\.[0-9]+)([eE][+-]?[0-9]+)?$",
+                "description": "Decimal string. The native API additionally enforces 38 significant digits and its documented exponent range."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "N"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "B": {
+                "type": "string",
+                "contentEncoding": "base64",
+                "description": "Standard base64; decoded-byte validity and size are checked by the native API."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "B"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "BOOL": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "BOOL"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "NULL": {
+                "const": true
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "NULL"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "SS": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "SS"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "NS": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[+-]?([0-9]+(\\.[0-9]*)?|\\.[0-9]+)([eE][+-]?[0-9]+)?$",
+                  "description": "Decimal string. The native API additionally enforces 38 significant digits and its documented exponent range."
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "NS"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "BS": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "contentEncoding": "base64",
+                  "description": "Standard base64; decoded-byte validity and size are checked by the native API."
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "BS"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "L": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/DynamoDBAttributeValue"
+                }
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "L"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "M": {
+                "type": "object",
+                "additionalProperties": {
+                  "$ref": "#/components/schemas/DynamoDBAttributeValue"
+                }
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "M"
+            ]
+          }
+        ],
+        "description": "Exactly one native AttributeValue tag. The API additionally enforces nesting, decimal/base64 semantics and a 400 KiB semantic item budget; JSON transfer length is not item size."
+      },
+      "DynamoDBItem": {
+        "type": "object",
+        "minProperties": 1,
+        "additionalProperties": {
+          "$ref": "#/components/schemas/DynamoDBAttributeValue"
+        }
+      },
+      "DynamoDBKey": {
+        "type": "object",
+        "minProperties": 1,
+        "maxProperties": 2,
+        "additionalProperties": {
+          "$ref": "#/components/schemas/DynamoDBKeyAttributeValue"
+        },
+        "description": "Exactly the selected table partition key and, when declared, sort key. Arbitrary extra key attributes are rejected by the native API."
+      },
+      "DynamoDBCreateTableRequest": {
+        "type": "object",
+        "properties": {
+          "TableName": {
+            "$ref": "#/components/schemas/DynamoDBTableName"
+          },
+          "AttributeDefinitions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DynamoDBAttributeDefinition"
+            },
+            "minItems": 1,
+            "maxItems": 2
+          },
+          "KeySchema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DynamoDBKeyElement"
+            },
+            "minItems": 1,
+            "maxItems": 2
+          },
+          "BillingMode": {
+            "type": "string",
+            "enum": [
+              "PAY_PER_REQUEST",
+              "PROVISIONED"
+            ]
+          },
+          "ProvisionedThroughput": {
+            "$ref": "#/components/schemas/DynamoDBProvisionedThroughput"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "TableName",
+          "AttributeDefinitions",
+          "KeySchema"
+        ],
+        "oneOf": [
+          {
+            "properties": {
+              "BillingMode": {
+                "const": "PAY_PER_REQUEST"
+              }
+            },
+            "required": [
+              "BillingMode"
+            ],
+            "not": {
+              "required": [
+                "ProvisionedThroughput"
+              ]
+            }
+          },
+          {
+            "properties": {
+              "BillingMode": {
+                "const": "PROVISIONED"
+              }
+            },
+            "required": [
+              "ProvisionedThroughput"
+            ]
+          }
+        ],
+        "description": "Bounded native CreateTable body; set X-Amz-Target: DynamoDB_20120810.CreateTable. Unknown fields and JSON null are rejected. Runtime state, IAM, byte limits and key-schema relationships remain native API checks."
+      },
+      "DynamoDBListTablesRequest": {
+        "type": "object",
+        "properties": {
+          "Limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "ExclusiveStartTableName": {
+            "$ref": "#/components/schemas/DynamoDBTableName"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Bounded native ListTables body; set X-Amz-Target: DynamoDB_20120810.ListTables. Unknown fields and JSON null are rejected. Runtime state, IAM, byte limits and key-schema relationships remain native API checks."
+      },
+      "DynamoDBDescribeTableRequest": {
+        "type": "object",
+        "properties": {
+          "TableName": {
+            "$ref": "#/components/schemas/DynamoDBTableName"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "TableName"
+        ],
+        "description": "Bounded native DescribeTable body; set X-Amz-Target: DynamoDB_20120810.DescribeTable. Unknown fields and JSON null are rejected. Runtime state, IAM, byte limits and key-schema relationships remain native API checks."
+      },
+      "DynamoDBPutItemRequest": {
+        "type": "object",
+        "properties": {
+          "TableName": {
+            "$ref": "#/components/schemas/DynamoDBTableName"
+          },
+          "Item": {
+            "$ref": "#/components/schemas/DynamoDBItem"
+          },
+          "ConditionExpression": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Only attribute_exists(partitionKey) or attribute_not_exists(partitionKey), with the actual partition-key name. The native API checks saved-table binding and rejects every other condition."
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "TableName",
+          "Item"
+        ],
+        "description": "Bounded native PutItem body; set X-Amz-Target: DynamoDB_20120810.PutItem. Unknown fields and JSON null are rejected. Runtime state, IAM, byte limits and key-schema relationships remain native API checks."
+      },
+      "DynamoDBGetItemRequest": {
+        "type": "object",
+        "properties": {
+          "TableName": {
+            "$ref": "#/components/schemas/DynamoDBTableName"
+          },
+          "Key": {
+            "$ref": "#/components/schemas/DynamoDBKey"
+          },
+          "ConsistentRead": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "TableName",
+          "Key"
+        ],
+        "description": "Bounded native GetItem body; set X-Amz-Target: DynamoDB_20120810.GetItem. Unknown fields and JSON null are rejected. Runtime state, IAM, byte limits and key-schema relationships remain native API checks."
+      },
+      "DynamoDBDeleteItemRequest": {
+        "type": "object",
+        "properties": {
+          "TableName": {
+            "$ref": "#/components/schemas/DynamoDBTableName"
+          },
+          "Key": {
+            "$ref": "#/components/schemas/DynamoDBKey"
+          },
+          "ConditionExpression": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Only attribute_exists(partitionKey) or attribute_not_exists(partitionKey), with the actual partition-key name. The native API checks saved-table binding and rejects every other condition."
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "TableName",
+          "Key"
+        ],
+        "description": "Bounded native DeleteItem body; set X-Amz-Target: DynamoDB_20120810.DeleteItem. Unknown fields and JSON null are rejected. Runtime state, IAM, byte limits and key-schema relationships remain native API checks."
+      },
+      "DynamoDBDeleteTableRequest": {
+        "type": "object",
+        "properties": {
+          "TableName": {
+            "$ref": "#/components/schemas/DynamoDBTableName"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "TableName"
+        ],
+        "description": "Bounded native DeleteTable body; set X-Amz-Target: DynamoDB_20120810.DeleteTable. Unknown fields and JSON null are rejected. Runtime state, IAM, byte limits and key-schema relationships remain native API checks."
+      },
+      "DynamoDBTableDescription": {
+        "type": "object",
+        "properties": {
+          "TableName": {
+            "$ref": "#/components/schemas/DynamoDBTableName"
+          },
+          "TableStatus": {
+            "enum": [
+              "ACTIVE",
+              "DELETING"
+            ]
+          },
+          "CreationDateTime": {
+            "type": "number"
+          },
+          "TableArn": {
+            "type": "string"
+          },
+          "TableId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "KeySchema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DynamoDBKeyElement"
+            },
+            "minItems": 1,
+            "maxItems": 2
+          },
+          "AttributeDefinitions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DynamoDBAttributeDefinition"
+            },
+            "minItems": 1,
+            "maxItems": 2
+          },
+          "BillingModeSummary": {
+            "type": "object",
+            "properties": {
+              "BillingMode": {
+                "enum": [
+                  "PAY_PER_REQUEST",
+                  "PROVISIONED"
+                ]
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "BillingMode"
+            ]
+          },
+          "ItemCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "TableSizeBytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "ProvisionedThroughput": {
+            "type": "object",
+            "properties": {
+              "ReadCapacityUnits": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9223372036854775807
+              },
+              "WriteCapacityUnits": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9223372036854775807
+              },
+              "NumberOfDecreasesToday": {
+                "const": 0
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "ReadCapacityUnits",
+              "WriteCapacityUnits",
+              "NumberOfDecreasesToday"
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "TableName",
+          "TableStatus",
+          "CreationDateTime",
+          "TableArn",
+          "TableId",
+          "KeySchema",
+          "AttributeDefinitions",
+          "BillingModeSummary",
+          "ItemCount",
+          "TableSizeBytes"
+        ]
+      },
+      "DynamoDBTableDescriptionResult": {
+        "type": "object",
+        "properties": {
+          "TableDescription": {
+            "$ref": "#/components/schemas/DynamoDBTableDescription"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "TableDescription"
+        ]
+      },
+      "DynamoDBDescribeTableResult": {
+        "type": "object",
+        "properties": {
+          "Table": {
+            "$ref": "#/components/schemas/DynamoDBTableDescription"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "Table"
+        ]
+      },
+      "DynamoDBListTablesResult": {
+        "type": "object",
+        "properties": {
+          "TableNames": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DynamoDBTableName"
+            },
+            "maxItems": 100
+          },
+          "LastEvaluatedTableName": {
+            "$ref": "#/components/schemas/DynamoDBTableName"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "TableNames"
+        ]
+      },
+      "DynamoDBGetItemResult": {
+        "type": "object",
+        "properties": {
+          "Item": {
+            "$ref": "#/components/schemas/DynamoDBItem"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DynamoDBEmptyResult": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "DynamoDBAPIError": {
+        "type": "object",
+        "properties": {
+          "__type": {
+            "type": "string",
+            "pattern": "^com\\.amazonaws\\.dynamodb\\.v20120810#[A-Za-z]+$"
+          },
+          "message": {
+            "type": "string",
+            "description": "Sanitized native error message; lowercase member name is intentional."
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "__type",
+          "message"
+        ]
       }
     },
     "responses": {

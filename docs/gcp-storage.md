@@ -1,6 +1,6 @@
-# Cloud Storage JSON API: local integration candidate
+# Cloud Storage JSON API: local subset
 
-This branch registers the bounded JSON API v1 leaf at `/_simulator/providers/gcp`.
+The bounded JSON API v1 leaf is registered at `/_simulator/providers/gcp`.
 A trusted authenticated Actor is mapped to immutable configured project owners;
 this is not Google IAM or OAuth. Twenty-seven isolated native tests passed normal,
 race and vet, and the integrated server tests passed normal/race/vet. Actual
@@ -10,9 +10,14 @@ baseline and8 intended counterexamples passed. The additional empty-legacy adopt
 model baseline and6 intended counterexamples also passed. Native package-only
 unfiltered source coverage is90.76%; this is not the whole-module figure.
 
-Official SDK packages are absent; their real acceptance has not run. Full
-repository regression/coverage, immutable formal applicability, hosted CI and
-merge remain pending. No real Google credentials/resources are required or used.
+The pinned official Python SDK acceptance passed on 2026-11-05: twelve exact-key
+cases in each of two authenticated CLI processes, restart, checksums, generation
+conditions, denial and cleanup. Its explicit local-authentication configuration
+and unverified SDK defaults are described under
+[official Python SDK acceptance](#official-python-sdk-acceptance).
+This focused result does not establish final backlog-integration regression,
+formal applicability or hosted CI success. No real Google credentials/resources
+are required or used.
 See [integration boundaries](multicloud-storage.md) and
 [browser evidence](acceptance/crossprovider-console.md). Source presence alone is
 not a Google Cloud parity or catalog-problem completion claim.
@@ -49,8 +54,8 @@ forged-header/reader/peer/missing-context refusal, reopen, immutable bindings,
 failed-initialization rollback and refusal to adopt unbound resources. The
 fixture is not production Access/provider-registry integration. The existing
 finite Storage model does not prove factory initialization or actor extraction.
-The new `formal/ProjectAuthority.tla` is a separate **unexecuted source model**
-of this GCP factory: two projects, two extracted subjects, all four fixed owner
+At that factory checkpoint, `formal/ProjectAuthority.tla` was a separate
+**unexecuted source model** of this GCP factory: two projects, two extracted subjects, all four fixed owner
 mappings (including one subject owning both projects), one optional bucket and
 unit-valued object. It models atomic constructor acceptance/refusal, immutable
 persisted owners, refusal to adopt unbound resources, actual-project decisions,
@@ -58,7 +63,8 @@ denied-write frames and the exact finite permission set. Six intended mutants
 cover rebinding, adoption, partial refused writes, claimed-project trust,
 unknown permissions and denied writes. It does not prove extractor/credential
 authentication, Azure semantics, HTTP/SQLite/Go implementation, growing project
-rosters or real SDK execution. Its outside entry awaits registry integration.
+rosters or real SDK execution. Its outside entry then awaited registry integration;
+the later native/model results in this document are separate evidence.
 
 `storage.New(*sql.DB, Config)` requires a non-nil `AuthorizeTx` callback, one
 trusted environment and 1–100 explicitly configured synthetic project IDs and
@@ -252,7 +258,7 @@ verified**, even though raw media/multipart JSON routes exist. A later bounded
 SDK slice must implement truthful representations/upload sessions with their
 own authorization, persistence, TTL and budgets, then execute actual SDK tests.
 
-### Official Python SDK draft (not executed)
+### Official Python SDK acceptance
 
 The official Python source moved from `googleapis/python-storage` to
 `googleapis/google-cloud-python`; inspected monorepo commit
@@ -264,15 +270,29 @@ known generation. Those source observations motivated the new alias and
 current-only selector; `download_test.go` passed their raw native contract
 normally and under race. URL routing/selection is outside the finite model.
 
-The consolidated `test/e2e/crossprovider_official_storage.py` acceptance uses the
-real official package and fails closed before sockets/processes if it is absent.
-The earlier isolated unexecuted draft was superseded instead of keeping duplicate
-unused probes in the production package tree. See
-[official SDK acceptance](acceptance/crossprovider-official-storage.md) for the
-bounded two-CLI lifecycle, local-only transport and unverified default behaviors.
-No SDK/dependency was installed or executed. Root Actor/registry/native/browser
-integration now passes, but that is not Python SDK compatibility. Full projection,
-large/resumable flows, PATCH/ACL and forced bucket deletion remain outside this subset.
+The earlier source-only draft is superseded by actual execution of
+`test/e2e/crossprovider_official_storage.py` with `google-cloud-storage==3.17.1`,
+`google-auth==2.62.1` and `requests==2.34.2`. It passed all twelve original exact
+names, generation/CAS conditions, MD5 and exact bytes, pagination, missing/foreign
+token and nonowner denials, restart and cleanup in two actual local CLIs. The
+same run also exercised Azure's separately disclosed ten-key subset. Missing
+packages still fail before processes or network; native/browser success is not
+substituted for SDK execution.
+
+The Google client receives an official `AuthorizedSession` with
+`refresh_status_codes=()` and `max_refresh_attempts=0`. Anonymous credentials
+cannot refresh after a simulator-token 401; disabling that OAuth retry exposes
+the actual official HTTP error instead. The documented Client `_http` constructor
+injection is considered private upstream and is explicitly pinned/tested here.
+The server's GCP denial uses a native nested error object. No serializer or
+status rewriting is performed. This configuration does not verify all default
+Python clients, future versions, or the Go SDK defaults discussed above.
+
+See [official SDK acceptance](acceptance/crossprovider-official-storage.md) for
+the executed versions, local-only transport and evidence boundary. The successful
+combined run used the integration working binary; final committed integration
+CI remains separate. Full projection, large/resumable flows, PATCH/ACL and forced
+bucket deletion remain outside this subset.
 
 ## Primary references
 
@@ -299,5 +319,7 @@ of real-cloud comparison. No authenticated Cloud Console screen was inspected.
 - [Pinned Python SDK blob transport](https://github.com/googleapis/google-cloud-python/blob/2b4575f36f1441792e51efb9394b636940ed539d/packages/google-cloud-storage/google/cloud/storage/blob.py),
   [metadata projection](https://github.com/googleapis/google-cloud-python/blob/2b4575f36f1441792e51efb9394b636940ed539d/packages/google-cloud-storage/google/cloud/storage/_helpers.py)
 
-No source was copied from the SDK, Kumo or LocalStack into this leaf. No new
-third-party dependency, runtime executable or outbound connection is added.
+No source was copied from the SDK, Kumo or LocalStack into this native leaf.
+Official SDK packages are pinned development dependencies for acceptance; the
+simulator adds no SDK runtime dependency, runtime executable or outbound cloud
+connection.
