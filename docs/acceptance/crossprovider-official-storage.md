@@ -1,128 +1,172 @@
-# Official storage SDK acceptance — source candidate
+# Official storage SDK acceptance
 
-Owner: grader_http, delegated cross-provider acceptance scope. Base: public main
-`b61d0299a2139661f01ef29ae5826e4c070cc7bf`; isolated branch
-`test/crossprovider-official-sdk-20261104`. Only this document, new unique
-`test/e2e/crossprovider_official_storage.py`, and a metadata receipt are owned.
-Existing provider/auth/root server/README/registry files remain untouched.
-All new merges are held. This is not runtime acceptance or provider support.
+The executable acceptance uses real official Python clients against two
+authenticated local simulator processes. Development packages and their resolved
+HTTP/transport dependencies are pinned in
+[`scripts/requirements-test.txt`](../../scripts/requirements-test.txt). They are
+not Go single-binary runtime dependencies. No Google/Azure account, cloud
+credential discovery, real cloud request, or third-party emulator is used.
 
-## Planned invocation and failure contract
-
-After a separately granted execution window, an already built integration binary
-and already approved official Python dependencies are required:
+## Run and fail-closed behavior
 
 ```sh
-python test/e2e/crossprovider_official_storage.py --binary /absolute/path/simulator --provider both
+python3 -m venv /tmp/tcsim-tests
+/tmp/tcsim-tests/bin/pip install -r scripts/requirements-test.txt
+make build
+/tmp/tcsim-tests/bin/python test/e2e/test_crossprovider_official_storage.py
+/tmp/tcsim-tests/bin/python test/e2e/crossprovider_official_storage.py \
+  --binary "$PWD/dist/tenkacloud-simulator" --provider both
 ```
 
-`--provider gcp` or `azure` independently selects one SDK. Missing selected
+`--provider gcp` or `azure` selects one SDK independently. Missing selected
 packages produces `FAIL/NOT-RUN`, names the missing packages and exits 2 before
-creating a process or making a request. A runtime/assertion error exits 1 and
-reports only its type; exception text and CLI output are withheld because they
-can include sensitive request headers. There is no skip, fake SDK, install,
-network bootstrap, dependency fallback or pass on infrastructure failure.
-No command above has been executed for this candidate.
+creating a process or making a request. API, state, serialization, assertion,
+startup and cleanup failures exit 1 with `FAIL/NOT-ACCEPTED`. Safe failure reports
+include the phase, exception class, harness source location, and bounded SDK
+frame names. Denial failures include only numeric HTTP statuses and the SDK
+exception class. Exception text, request headers, CLI logs and tokens are never
+printed. Optimized Python (`-O`) is refused so it cannot disable assertions.
+There are no skips, fake clients, raw-HTTP substitutions for SDK operations, or
+passes on missing infrastructure.
+
+Six focused harness checks cover absent-SDK failure, refusal of optimized
+execution, finite list bounds, rejection of unrelated errors as HTTP denial,
+safe failure diagnostics, and real Azure path preparation. They are harness
+checks, not substitutes for the actual two-process runtime acceptance.
+
+## Pinned clients and local authentication
+
+| Client/transport | Dependency pin | Configuration |
+|---|---|---|
+| Google Cloud Storage | `google-cloud-storage==3.17.1` | Explicit project, endpoint, anonymous credentials and token header |
+| Google authentication | `google-auth==2.62.1` | Official `AuthorizedSession`; OAuth refresh disabled |
+| Azure Blob Storage | `azure-storage-blob==12.31.1` | Explicit account URL, anonymous credential, API version `2023-11-03` and token hook |
+| Azure core | `azure-core==1.41.0` | Normal SDK HTTP/error handling, retries disabled |
+| HTTP transport | `requests==2.34.2` | Real Requests preparation/transfer; no URL or serializer rewriting |
+
+GCP endpoint is `/_simulator/providers/gcp`, with project `tenkacloud-local`.
+Azure account URL is `/_simulator/providers/azure/tenkacloudlocal`. These are the
+existing provider prefixes. The token uses public SDK header/hook configuration.
+Raw HTTP is used only for CLI readiness and the participant-token control API;
+all object operations use the official SDKs.
+
+Google's default `AuthorizedSession` tries to refresh credentials after 401.
+`AnonymousCredentials.refresh` raises `InvalidOperation`, hiding the HTTP denial.
+Local simulator tokens are not Google OAuth credentials, so this fixture uses
+the official session with `refresh_status_codes=()` and
+`max_refresh_attempts=0`, injected through the storage Client constructor's
+`_http` argument. Upstream documents that argument but considers it private;
+this is a pinned, tested local configuration, not a claim about default-client
+behavior or future versions. The original HTTP/error handling remains intact.
+The server must return GCP's nested `error` object for a denied GCP request,
+allowing the official parser to expose the real 401. Parsing failures are never
+accepted as substitute authentication failures.
+
+GCP metadata/list requests use `projection='noAcl'`. Small
+`upload_from_string` uses real multipart transfer, MD5 and generation conditions.
+Fresh `bucket.blob(name)` references select the live object; a loaded Blob can
+add a generation selector. Only the current generation is supported. Older
+history, resumable uploads, general ACL projections, and other SDK defaults are
+outside this acceptance.
+
+Azure uploads use `ContentSettings` with body-derived MD5. Downloads retain
+`download_blob().readall()` and its real range requests. No Range header is
+removed and no download is replaced with raw GET. Staged blocks, large uploads,
+SAS/SharedKey/Entra authentication and newer default API versions remain outside
+this bounded slice.
+
+## Exact names and explicit Azure exclusions
+
+GCP requires all twelve original names without collisions:
+
+`a/b`, `a%2Fb`, `a//b`, `a/./b`, `a/../b`, `a+b`, `a b`, `日本語/雪`,
+`a%252Fb`, `/leading`, `tail/`, and `a/acl/entity`.
+
+The official Azure client exposes slash-separated names to Requests. Real
+`PreparedRequest` processing normalizes two names before HTTP transfer:
+
+| Requested Azure SDK key | Prepared key | Disposition |
+|---|---|---|
+| `a/./b` | `a/b` | Explicitly measured exclusion from positive SDK exact-name lifecycle |
+| `a/../b` | `b` | Explicitly measured exclusion from positive SDK exact-name lifecycle |
+
+The other ten names retain all exact-key/byte assertions. Before runtime tests,
+the harness constructs real Azure Blob clients and prepares their requests using
+real Requests without opening a connection. It asserts these exact two known
+normalizations and that all other names are unchanged. Unexpected normalization
+or an altered exclusion fails; it cannot silently shrink the accepted set.
+Success JSON always includes `excluded_sdk_key_cases` with the original key,
+prepared key, provider and concrete cause, plus `exact_key_cases_per_team`.
+
+This corrects the scope of a previously unexecuted source candidate. It does not
+change native provider path behavior, the full GCP oracle, or existing native
+exact-path regressions. The server cannot reconstruct names collapsed before
+it receives them. No transport patch manufactures parity, and full Azure
+exact-key compatibility is not claimed.
+
+## Required runtime assertions
 
 Two authenticated numeric-loopback CLI processes use separate temporary SQLite
-files, persistent operator-token files and the exact same resource names. The
-binary must be the forthcoming registered candidate; public b61 alone has no
-GCP/Azure leaves and must fail these tests. Health wait is 25s, shutdown 8s,
-per-call SDK timeouts 3s, whole script deadline 300s, retries disabled, list
-results capped at 100. Network connections and name resolution are restricted
-to the two explicitly allocated numeric-loopback ports; proxy environment
-variables are temporarily removed. This test harness restriction is not an
-OS-level simulator sandbox. A raced port allocation fails acceptance rather than
-weakening assertions. Startup and cleanup errors are failures.
+files and persistent operator-token files, with identical resource names and
+distinct team contents. Their `PATH` contains no runtime executables. Health wait
+is 25 seconds, shutdown 8 seconds, per-call SDK timeouts 3 seconds and the whole
+script deadline 300 seconds. Retries are disabled and list results capped at 100.
 
-The actual existing provider prefix is `/_simulator/providers/`, not a new
-`/providers/` alias: GCP endpoint `/_simulator/providers/gcp`; Azure account URL
-`/_simulator/providers/azure/tenkacloudlocal`. Configured GCP project is
-`tenkacloud-local`. Never change the server wire path to accommodate a mistaken
-harness. SDK serialization, HTTP transfer and error parsing are real official
-implementations; no object calls are replaced by raw HTTP. Raw requests are
-limited to CLI health and the existing participant-token control API.
+Connections and name resolution are restricted to the two allocated numeric
+loopback ports. Temporary proxy-environment removal applies only inside this
+local harness; nonlocal requests remain forbidden. This is a harness boundary,
+not an OS sandbox claim. Port-allocation races and cleanup errors fail acceptance.
 
-## Assertions and precise limits
+Required assertions include:
 
-- Two teams create identical bucket/container/key sets with distinct contents.
-  Each team persists through SIGTERM/restart with the same SQLite/token files,
-  then exact reads/checksums/list pagination and conditional deletes clean up.
-- Simultaneous names include slash, percent-text, encoded-neighbor text,
-  repeated slash, dot segments, leading/trailing slash, plus/space and Unicode.
-  Exact bytes and the complete key set must survive SDK transport and routing.
-- Missing access token is 401; the other process's operator token is 401.
-  A participant bound to `storage-reader` must receive 403 on a write, with the
-  final complete key set/bytes unchanged. This does **not** establish a working
-  reader role: the current owner-only factories deny every nonowner, even reads.
-  Authorized-reader GET plus denied mutation requires a real provider policy
-  extension and additional tests, not an AWS IAM grant or invented RBAC claim.
-- GCP metadata MD5 is compared to a local exact-body oracle and download asks
-  the real SDK to verify MD5. CAS checks failed create-only overwrite, unchanged
-  generation, successful matching-generation overwrite with a fresh generation,
-  and stale-generation deletion refusal. Azure uses MD5 ContentSettings, failed
-  If-Match overwrite, unchanged ETag, successful matching overwrite with fresh
-  ETag, stale delete refusal, then checks persisted checksum and bytes.
-- GCP US/EU bucket location metadata is checked. These are location attributes,
-  not physical regional deployment or cross-region replication. Azure location
-  is not exposed by this data-plane account fixture; no region-isolation claim.
-- Restart and cleanup read actual object APIs, not SQLite internals. Error
-  assertions inspect official SDK HTTP status (401/403/404/412). An unsupported
-  wire option, transport failure, state failure or serializer incompatibility is
-  a failing acceptance result, never an expected substitute for a positive read.
+- Identical names retain distinct team bytes through process restart with the
+  same persistent operator tokens.
+- Complete exact-name sets, pagination, per-object bytes and MD5 survive SDK
+  transport and native persistence.
+- GCP create-only/matching/stale-generation and Azure matching/stale-ETag
+  operations preserve state on failure and advance versions on success.
+- Missing and other-team tokens produce SDK-visible 401. A participant fixed
+  to `storage-reader` gets 403 on a write, leaving the full set/bytes unchanged.
+- GCP US/EU location metadata is correct. This is location metadata, not physical
+  regional isolation; Azure's data-plane fixture exposes no region assertion.
+- SDK deletion and not-found checks remove all objects and buckets/containers;
+  processes stop and temporary DB/token files are removed.
 
-## Explicit public SDK subset and known blockers
+`storage-reader` does not imply a functioning read role. Current provider
+factories deny nonowners, including reads. This acceptance proves denied
+nonowner writes, not Google IAM, Azure RBAC or an AWS-policy grant.
 
-Google Python Client uses public `client_options.api_endpoint`,
-`AnonymousCredentials` (no ADC discovery) and public `extra_headers` for the
-local simulator token. No real Google OAuth credential is used. `projection=noAcl`
-is explicit for metadata/list. Small `upload_from_string` uses the SDK multipart
-path, with MD5 and generation conditions. Fresh `bucket.blob(name)` references
-are used when selecting the current live object: a loaded SDK Blob adds its
-`generation` as a version selector. The native leaf now accepts an explicitly
-addressed current generation; older generations return404 and history remains
-unsupported. Generation preconditions are separate from version history. This is a disclosed public usage constraint, not a hidden
-serializer rewrite. Large/resumable uploads and full ACL projection remain
-unsupported; **default official Go storage SDK compatibility is not established**.
-No claims about every Python default or a particular installed SDK version are
-possible until actual versioned execution.
+## Recorded execution and limits
 
-Azure uses public account URL, `api_version='2023-11-03'`, anonymous credential
-(no SharedKey/SAS/Entra lookup), and public `raw_request_hook` for the simulator
-token. A hook also verifies the intended numeric host/port. SDK account-in-path
-handling with the prefixed emulator URL must be verified by actual execution.
-The actual `download_blob().readall()` is deliberately retained. Official Azure
-SDK sends range headers; the native leaf now supports the documented bounded
-single-range forms, with auth/ETag preflight and native MD5/length tests. The real
-SDK download remains unexecuted, so native support must not be called SDK
-compatibility. This script must not strip Range or substitute raw GET.
-The official API-version override is explicit; newer default versions are not
-accepted implicitly. Staged blocks/large uploads and advanced Azure features
-remain outside this small-object slice.
+On 2026-11-05, Azure's ten-key lifecycle passed against clean main
+`f5dba056da9bf69df047b391a45d06a3aff3dc66`, built with Go 1.26.10 and the normal
+Makefile flags (`CGO_ENABLED=0`, intact VCS stamp, `vcs.modified=false`).
 
-Dependencies are currently absent in the inspected Python interpreter (receipt
-alongside this document). The official SDK candidate has only source/metadata checks and a fail-closed
-dependency preflight. Separate native/browser acceptance ran two real CLIs and
-passed; that is not an SDK lifecycle pass. Whole Go/race/build and the same-profile
-94.95% statement/90.46% source floors passed. Final immutable formal applicability
-and hosted CI remain pending. Reader-positive cloud roles are outside the
-owner-only policy. Root owns final integration/test scheduling.
-Kumo was not used as source or runtime dependency.
+After adding the local Google session configuration and the integration owner's
+native GCP 401 envelope fix, **both providers passed** against the root integration
+working binary. GCP exercised all twelve keys and Azure all ten disclosed keys
+in each of two processes, including restart/CAS/checksum/range/pagination,
+missing/cross-team/nonowner rejection, and cleanup. All six focused harness
+checks and dependency consistency (`pip check`) also passed.
 
-## Primary references inspected 2026-11-04
+That combined result is a focused working-tree execution, not immutable full-HEAD
+CI evidence. The integration owner must rerun the mandatory acceptance and full
+Go/race/coverage, browser/accessibility, formal and hosted CI gates after composing
+and committing all changes. The PR records the final tested commit and merge.
+No authenticated cloud visual comparison, real-cloud comparison, Go refinement
+proof, all-version SDK support, or full provider conformance is claimed.
 
-These are upstream reference contracts, not evidence of local conformance.
-No upstream implementation was copied.
+## Primary references
 
-- [Google Python Client: endpoint, credentials, extra_headers](https://docs.cloud.google.com/python/docs/reference/storage/latest/google.cloud.storage.client.Client)
-- [Google Blob: upload, download, conditions, checksums](https://docs.cloud.google.com/python/docs/reference/storage/latest/google.cloud.storage.blob.Blob)
-- [Google Bucket: public noAcl projection](https://github.com/googleapis/google-cloud-python/blob/2b4575f36f1441792e51efb9394b636940ed539d/packages/google-cloud-storage/google/cloud/storage/bucket.py)
-- [Google Blob generation-bound requests](https://github.com/googleapis/google-cloud-python/blob/2b4575f36f1441792e51efb9394b636940ed539d/packages/google-cloud-storage/google/cloud/storage/blob.py)
-- [Azure BlobServiceClient: endpoint/API version](https://learn.microsoft.com/en-us/python/api/azure-storage-blob/azure.storage.blob.blobserviceclient?view=azure-python)
-- [Azure BlobClient: public condition/download options](https://learn.microsoft.com/en-us/python/api/azure-storage-blob/azure.storage.blob.blobclient?view=azure-python)
-- [Azure public request/response hooks](https://learn.microsoft.com/en-us/python/api/overview/azure/storage-blob-readme?view=azure-python#optional-configuration)
-- [Azure local endpoint construction](https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/storage/azure-storage-blob/azure/storage/blob/_shared/base_client.py)
+- [Google Client configuration](https://docs.cloud.google.com/python/docs/reference/storage/latest/google.cloud.storage.client.Client)
+- [Google official AuthorizedSession](https://google-auth.readthedocs.io/en/latest/reference/google.auth.transport.requests.html#google.auth.transport.requests.AuthorizedSession)
+- [Google Blob upload/download/conditions](https://docs.cloud.google.com/python/docs/reference/storage/latest/google.cloud.storage.blob.Blob)
+- [Google pinned distribution](https://pypi.org/project/google-cloud-storage/3.17.1/)
+- [Azure BlobServiceClient](https://learn.microsoft.com/en-us/python/api/azure-storage-blob/azure.storage.blob.blobserviceclient?view=azure-python)
+- [Azure BlobClient conditions/download](https://learn.microsoft.com/en-us/python/api/azure-storage-blob/azure.storage.blob.blobclient?view=azure-python)
+- [Azure pinned distribution](https://pypi.org/project/azure-storage-blob/12.31.1/)
+- [Requests pinned distribution](https://pypi.org/project/requests/2.34.2/)
 
-Current local contracts are [Cloud Storage](../gcp-storage.md),
-[Blob Storage](../azure-blob.md), [trusted Actor](../provider-auth-context.md)
-and [native/browser acceptance](crossprovider-console.md).
+Native contracts: [Cloud Storage](../gcp-storage.md), [Blob Storage](../azure-blob.md),
+[trusted Actor](../provider-auth-context.md) and
+[native/browser acceptance](crossprovider-console.md).

@@ -1,8 +1,12 @@
 # Finite state model
 
-Current registered input: **22 models / 112 required controls (134 planned runs)**.
-The earlier inventories and run receipts below are historical increments; only
-a completed exact-HEAD run establishes current verification.
+Current candidate registry: 27 models / 153 literal-protected controls (180 planned
+executions). Main0a6 contributes26/149 unchanged; only SecretsMutationRefresh adds
+one model/four controls. No current merged-candidate full-run proof is inherited
+from earlier eac3 or main receipts.
+
+Current backlog integration registers **26 finite models and149 required sensitivity controls** (175 TLC executions). The registry in `formal/models.json` and immutable CI reports are authoritative. Counts and candidate statuses in dated receipts below describe historical inputs; they are not current integration results. These models do not prove Go/SQL/HTTP/UI refinement or complete cloud compatibility.
+
 
 `ObjectStore.tla` models two buckets and two keys, shared object ownership, create/put/delete transitions, and an abstract identity decision `allow /\ ~deny`. `ObjectStore.cfg` checks type correctness, no orphan objects, no unauthorized mutation, and explicit-deny precedence.
 
@@ -127,8 +131,8 @@ BrowserSessions, SQSLifecycle and SQSStorageBudget remain mandatory in the large
 
 The registry adds ProviderActor (7 properties/6 sensitivity controls),
 GCPStorageState (10 properties/8 controls), and AzureBlobState (10 properties/11
-controls), plus ProjectAuthority (10 properties/6 controls), BlobRange (11 properties/8 controls), and ProviderPath (finite carrier properties/7 controls), retaining all existing models/controls. That historical source registry
-had16 models/82 controls before the KMS restack. Individual finite runs and the final immutable integrated
+controls), plus ProjectAuthority (10 properties/6 controls), BlobRange (11 properties/8 controls), and ProviderPath (finite carrier properties/7 controls), retaining all existing models/controls. The current source registry
+has19 models/98 controls in main before this KMS restack. Individual finite runs and the final immutable integrated
 run are recorded separately; registration alone is not a successful TLC run.
 
 ProviderActor abstracts post-authentication emission, selected identity and
@@ -166,7 +170,7 @@ XML order, escaping, disclosure, actual SDK parsing and SQL initialization are n
 proved by this association. Independent serializer byte-goldens and native HTTP
 checks cover the wire format separately.
 
-All112 current sensitivity-control IDs (retaining those82 and36 earlier baseline controls) have literal per-model minimum sets. Real-filesystem tests remove each control individually and require rejection. This protects the checked inventory, not semantic completeness or a Go implementation proof.
+All98 established sensitivity-control IDs (including36 earlier baseline controls) have literal per-model minimum sets. Real-filesystem tests remove each control individually and require rejection. This protects the checked inventory, not semantic completeness or a Go implementation proof.
 
 
 ## Bounded KMS key-state registration
@@ -212,26 +216,24 @@ Documentation-only children do not change model bytes; each final HEAD still
 requires its own immutable input/applicability gate before publication.
 
 
-The KMS increment now belongs to public main0a4:18 baselines/94 controls. Its source was checked before merge; old911/8ccc receipts remain historical inputs. This new Secrets restack retains those entries and needs its own exact-head validation; no previous KMS or Secrets proof is promoted to the new union.
+Current main-preserving KMS restack:18 baselines/94 controls, retaining every main16/82 entry and adding only the two owned KMS models. The current merged source has not run TLC, native/browser or whole-profile acceptance. Earlier911/8ccc receipts do not establish current-head success.
 
-## Historical provider-aware Secrets registration (21/108)
+## Current SQS console main integration
 
-This union retains main18models/94controls and adds exactSecretsVersionLifecycle, SecretsRevealEpoch and SecretsDisclosureChannels (3/14):21models/108controls,129plannedTLCcases. No new integrated execution claimed; old62ba,9b,7a results remain historical inputs. The finite models do not prove Go/SQL/React refinement or KMS encryption ofSecrets. See [Secrets limits](../docs/secrets-manager.md).
-
-
-Provider-aware Secrets restack: the normal merge of mainf5dba056 preserves all
-18 Core entries/94 controls including the extracted Login source binding for
-BrowserSessions, then retains the three Secrets entries/14 controls:21/108,129
-cases. No TLA/CFG or control is changed by locale/catalog integration. Existing
-finite state/source contracts do not prove translations, bundling, React lifetimes,
-Google/Azure parity or actual secret erasure. Fresh immutable checks remain
-required on the final union.
+Mainfcf contributes18 baselines/94 mandatory controls, including the two
+merged KMS models. SQSConsoleEpoch adds one baseline/four literal-protected
+controls:19 baselines/98 controls,117 planned executions. Every existing
+main model/property/bound/control/config and removal fixture is retained.
+This source union has not run TLC; old99/base5c97 actual103 success is historical.
+The SQS epoch model covers bounded accepted replies/private receipt custody,
+not native receipt validity, authentication, React/DOM/thread execution or
+Go/SQLite refinement. See [correspondence](../docs/formal-sqs-console.md).
 
 ## Current Secrets mutation/read integration
 
-The current registry preserves those 21 models and 108 controls and adds only
-SecretsMutationRefresh (five properties/four named controls): 22 models, 112
-controls, 134 planned executions. Every original model/config/property/control is
+The current registry preserves those 26 main models and 149 controls and adds only
+SecretsMutationRefresh (five properties/four named controls): 27 models, 153
+controls, 180 planned executions. Every original model/config/property/control is
 retained. The new property mapping separates acknowledged writes from read-only
 metadata recovery; it does not prove React/HTTP/native idempotency or ambiguous
 write outcomes. [Contract](../docs/formal-secrets-mutation-refresh.md). Full new-HEAD

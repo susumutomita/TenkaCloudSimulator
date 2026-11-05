@@ -22,13 +22,27 @@ test('uses the existing locked compiler, not a new dependency version', () => {
 });
 
 const ackOriginal = "const result=await call(operation,input);if(!alive.current||ticket!==epoch.current)return;setDraft(freshDraft());";
-const ackFixed = ackOriginal.replace('setDraft', "setMode('');setDraft");
+const ackFixed = ackOriginal.replace('setDraft', "setMode('');setDetail(null);setDraft");
+// Exact incoming main415 recovery deltas, independently reviewed; no general erasure.
+const incomingMetadataAlert = "header={metadataError?t(\"Metadata refresh failed\",\"メタデータの取得に失敗しました\"):undefined} action={metadataError?<Button formAction=\"none\" disabled={busy||loading} onClick={()=>browse(error.arn)}>{t(\"Retry metadata refresh\",\"メタデータを再取得\")}</Button>:undefined}>{metadataError?<SpaceBetween size=\"xs\"><Box>{error.message}</Box><Box>{t(\"Retrying only reloads metadata.\",\"再試行ではメタデータの読み取りだけを行います。\")}</Box></SpaceBetween>:presentError(error,t)}";
+const incomingDeleteFence = "if(operation==='DeleteSecret')setSecrets(items=>items.filter(secret=>secret.ARN!==result.ARN));";
+const incomingMetadataCatch = "setError({kind:'metadata',message:e.message,arn})}finally{if(alive.current&&ticket===epoch.current)setLoading(false)}";
+function replaceExactlyOne(candidate, before, after) {
+  assert.equal(candidate.split(before).length-1,1,'Reviewed incoming recovery block must occur exactly once');
+  return candidate.replace(before,after);
+}
+function normalizeIncomingRecovery(candidate) {
+  candidate=replaceExactlyOne(candidate,incomingDeleteFence,'');
+  candidate=replaceExactlyOne(candidate,incomingMetadataCatch,"setError(captureError(e))}finally{if(alive.current&&ticket===epoch.current)setLoading(false)}");
+  candidate=replaceExactlyOne(candidate," const metadataError=error?.kind==='metadata';\n",'');
+  return replaceExactlyOne(candidate,"onDismiss={()=>setError('')} "+incomingMetadataAlert,"onDismiss={()=>setError('')}>{presentError(error,t)}");
+}
 function normalizeACK(candidate) {
   assert.equal(candidate.split(ackFixed).length-1, 1, 'Exactly one ACK-bound form close is required');
   return candidate.replace(ackFixed, ackOriginal);
 }
 function assertEnglishContract(candidate) {
-  let erased = normalizeACK(candidate).replace("import {useLocale} from './i18n.jsx';\n", '').replace(' const {t}=useLocale();\n', '');
+  let erased = normalizeACK(normalizeIncomingRecovery(candidate)).replace("import {useLocale} from './i18n.jsx';\n", '').replace(' const {t}=useLocale();\n', '');
   const a = erased.indexOf('// Canonical presentation state only.');
   const b = erased.indexOf('// Parent remounts');
   erased = erased.slice(0, a) + erased.slice(b);
@@ -49,7 +63,7 @@ function assertEnglishContract(candidate) {
   // Independently compiled from the preserved external-owner leaf, not candidate output.
   assert.equal(hash, 'b702c583d5fc09250ad3d219284367a32715f7337e2e1d33fd0da33c01fafa83');
 }
-test('English erasure preserves ffdf except the exact reviewed ACK-bound form close', () => {
+test('English erasure preserves ffdf except exact reviewed ACK/main415 recovery blocks', () => {
   assertEnglishContract(source);
 });
 test('ACK normalization rejects missing, moved, wrong, duplicated and unrelated mutations', () => {
@@ -61,6 +75,16 @@ test('ACK normalization rejects missing, moved, wrong, duplicated and unrelated 
     assert.throws(()=>assertEnglishContract(candidate));
   }
   assert.throws(()=>assertEnglishContract(source.replace("setNotice(message)","setNotice('changed')")));
+});
+
+test('incoming metadata recovery normalization rejects missing or changed fences', () => {
+  for (const candidate of [source.replace(incomingDeleteFence,''),
+    source.replace(incomingDeleteFence,incomingDeleteFence.replace('!==','===')),
+    source.replace('setDetail(null);setDraft','setDetail(detail);setDraft'),
+    source.replace(incomingMetadataCatch,incomingMetadataCatch.replace('arn})','arn:null})')),
+    source.replace(incomingMetadataAlert,incomingMetadataAlert.replace('browse(error.arn)','mutate(error.arn)'))]) {
+    assert.throws(()=>assertEnglishContract(candidate));
+  }
 });
 
 test('all seven internal errors keep canonical English and render current Japanese', () => {

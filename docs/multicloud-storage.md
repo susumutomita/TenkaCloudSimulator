@@ -1,6 +1,8 @@
 # Local multi-cloud storage
 
-Google Cloud Storage JSON API and Azure Blob Storage REST handlers share the existing local access boundary. They were merged through PR406; current main `fcf8e702` passed the complete 26-case E2E suite, both coverage thresholds and 18-model/94-control immutable formal gate. This is a bounded storage implementation, not all cloud services or catalog problems. Official SDK execution remains unverified. The provider-specific navigation and language refresh in this branch is under integration verification; the old main results do not certify this new UI.
+Google Cloud Storage JSON API and Azure Blob Storage REST handlers share the existing local access boundary. They were merged through PR406, and provider-specific navigation/language controls followed in PR412. The pinned official Python SDK acceptance executed successfully on 2026-11-05; its precise configuration and limits are recorded below. This is a bounded storage implementation, not all cloud services or catalog problems.
+
+Historical main `fcf8e702` passed the complete 26-case E2E suite, both coverage thresholds and 18-model/94-control immutable formal gate. Those historical results and the new focused SDK execution do not certify the current backlog integration's final HEAD or hosted CI.
 
 ## Access and fixed scopes
 
@@ -31,6 +33,8 @@ Scalar includes provider-specific native request/response documentation. Samples
 
 ## Verification boundaries
 
-[Official SDK acceptance](acceptance/crossprovider-official-storage.md) requires real official packages and refuses to pass when dependencies are missing. They are currently absent in this executor; no SDK execution or compatibility success is claimed. Existing same-lock Cloudscape/React build dependencies were reused without installing anything, and the unchanged main console reproduced byte-for-byte before adding the views.
+[Official SDK acceptance](acceptance/crossprovider-official-storage.md) passed with real `google-cloud-storage==3.17.1`, `google-auth==2.62.1`, `azure-storage-blob==12.31.1`, `azure-core==1.41.0` and `requests==2.34.2`. Two authenticated CLI processes exercised restart, independent state, conditional writes/deletes, checksums, pagination, denial and cleanup. GCP preserved all twelve exact-key cases; Azure preserved ten and explicitly reports Requests' two literal dot-segment normalizations (`a/./b` and `a/../b`). GCP uses the official `AuthorizedSession` with OAuth refresh disabled through the pinned Client `_http` injection so local-token 401 remains visible. This does not establish default-client or all-version compatibility.
+
+The harness fails when dependencies are missing or a required operation fails; the prior source candidate's missing-dependency status is superseded by actual execution. The SDK packages are development-only. At the original console integration, the existing same-lock Cloudscape/React dependencies reproduced unchanged main assets byte-for-byte before the new views were added; that separate historical build result is not SDK evidence. Fresh fixed-HEAD regression, formal applicability and hosted CI remain the integration owner's gates.
 
 Registry models are finite safety abstractions, not mathematical implementation proofs. ProviderActor covers trusted actor emission; GCPStorageState and AzureBlobState cover their explicitly documented state/authorization/atomicity abstractions. New HTTP routing, SDK serializers, UI and host composition require their own executable tests. The new factory/range/URI behavior is not proved merely by registering leaf models. Every new public merge requires its exact HEAD checks and review under the current owner authorization. A denied Ready/publication action remains stopped until specifically authorized. No real cloud changes or deployment is performed.

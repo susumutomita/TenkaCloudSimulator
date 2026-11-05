@@ -1,6 +1,6 @@
 # Secrets Manager: local training subset
 
-> Provider-aware normal merge candidate: main `f5dba056da9bf69df047b391a45d06a3aff3dc66` plus preserved PR408 `ffdf1e29` native source. All18 Core model entries (including Login/BrowserSessions binding) and three earlier Secrets models remain; SecretsMutationRefresh adds one model/four controls:22 models/112 controls,134 finite cases. All28 main Conformance method bodies are retained plus three mandatory Secrets cases:31 total. The localized Secrets child preserves its native protocol, mutation and explicit-disclosure guards; source/pure checks do not replace fresh integrated formal/race/E2E/CI execution.
+> Normal-merge source candidate: public PR408 `eac3a1d` plus main `0a6bdce41c773f651a5bd9a8a128da4e45b8b2c2`. All42 main Conformance method bodies and all26 main models/149 controls are preserved; the ACK observation model adds one model/four controls (27/153,180 finite cases). Integrated runtime, browser, model and hosted-CI results remain pending at this new union. Historical receipts below are not fresh combined proof.
 
 
 Seven native Secrets Manager operations, the Cloudscape console, SDK clients and
@@ -238,11 +238,11 @@ messages are never translated. Four canonical success kinds render in the curren
 language; seven locally typed validation errors use a finite dictionary.
 
 On the local source slice, default-English translation erasure compiled to exactly
-the independently preserved ffdf1e29 child output; six pure checks passed. The
+the independently preserved ffdf1e29 child output; six pure checks passed at the historical source slice. The
 new provider catalog adds six tests including capability gating, both routes and
 AWS-only Japanese discovery, for12 pure checks total. The canonical console was
 built from the existing same-lock dependencies without any install. These checks
-are not real browser/reveal/SDK or full model-134 acceptance at this new union.
+are not real browser/reveal/SDK or full 180-case model acceptance at this new union.
 Fresh integrated gates are still required; old62ba/ffdf/main receipts remain
 separate historical inputs. No blocked public operation is retried by this local
 source preparation.
@@ -257,13 +257,19 @@ Opening a new user form is a new intent with a fresh nonempty request token.
 This does not claim rollback or certainty for an unacknowledged network failure.
 
 The new [finite contract](formal-secrets-mutation-refresh.md) registers five
-properties and four targeted controls while preserving all prior 21/108 entries.
+properties and four targeted controls while preserving all26 main models/149 controls unchanged.
 The old-source real-binary regression failed both Create/Put form-closure
-assertions. A focused overlay pass is retained separately. The new canonical
+assertions. A focused overlay pass is retained separately. At historical eac3a1d, the canonical
 embedded binary (no overlay) passed the full Secrets helper and new regression:
 both actual native ACKs close their forms, raw drafts disappear, read-only
 refresh preserves ARN/current version without another write, and a separately
 opened form uses a distinct nonempty token. Pure7 checks and canonical assets
-passed. Policy/app checks and final 134-case immutable/whole-quality/hosted gates
+passed. Policy/app checks and final integrated180-case immutable/whole-quality/hosted gates
 remain separately required. The explicit aborted-read fixture is not a claim
 about the cause of an earlier hosted CI failure.
+
+The new main0a6 union also preserves cleared detail state immediately after ACK,
+removes an acknowledged deleted resource from the visible list, and provides an
+explicit read-only Retry metadata refresh action. Main Japanese service-locale
+assertions and all42 Conformance methods are preserved. Current source-only
+locale8/navigation6 checks pass; fresh embedded/browser/full gates are pending.

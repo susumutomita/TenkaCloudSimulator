@@ -1,6 +1,7 @@
-"""SOURCE CANDIDATE: real official Python SDKs against two authenticated local CLIs.
+"""Real official Python storage SDKs against two authenticated local CLIs.
 No SDK install, skip, mocked client, cloud credential discovery, or cloud endpoint.
-Run manually only after the integration owner grants an execution window.
+Azure's two literal dot-segment exclusions are explicitly measured and reported;
+the full exact-key oracle remains required for Google Cloud Storage.
 """
 import argparse
 import base64
@@ -15,14 +16,61 @@ import socket
 import subprocess
 import tempfile
 import time
+import traceback
 import urllib.error
 import urllib.request
-from urllib.parse import urlsplit
+from urllib.parse import unquote, urlsplit
 
 KEYS = ('a/b', 'a%2Fb', 'a//b', 'a/./b', 'a/../b', 'a+b', 'a b',
         '日本語/雪', 'a%252Fb', '/leading', 'tail/', 'a/acl/entity')
 PROJECT = 'tenkacloud-local'
 ACCOUNT = 'tenkacloudlocal'
+# The official synchronous Azure SDK uses Requests, which normalizes these paths
+# before HTTP transfer. Do not rewrite that transport or pretend the server saw
+# the original keys. This explicit, independently asserted subset is not full
+# native exact-key parity; all other KEYS must still survive without alteration.
+AZURE_NORMALIZED_KEYS = {'a/./b': 'a/b', 'a/../b': 'b'}
+AZURE_KEYS = tuple(key for key in KEYS if key not in AZURE_NORMALIZED_KEYS)
+
+
+class AcceptanceFailure(RuntimeError):
+    """Bounded diagnostics without exception text, tokens, headers, or bodies."""
+
+    def __init__(self, phase, error):
+        self.phase = phase
+        self.error_type = type(error).__name__
+        self.status_failure = error.diagnostic if isinstance(error, UnexpectedHTTPStatus) else None
+        self.source = next(
+            ({'file': Path(frame.filename).name, 'line': frame.lineno,
+              'function': frame.name}
+             for frame in reversed(traceback.extract_tb(error.__traceback__))
+             if Path(frame.filename).resolve() == Path(__file__).resolve()), None)
+        super().__init__('Official SDK acceptance failed')
+
+
+class UnexpectedHTTPStatus(AssertionError):
+    def __init__(self, expected, actual, error):
+        # An exception's arbitrary text/attributes may include request secrets.
+        # Only retain known numeric HTTP status values and the exception class.
+        self.diagnostic = {'expected_http_status': expected,
+                           'actual_http_status': actual if isinstance(actual, int) else None,
+                           'sdk_error_type': type(error).__name__,
+                           'sdk_frames': [
+                               {'file': Path(frame.filename).name, 'line': frame.lineno,
+                                'function': frame.name}
+                               for frame in traceback.extract_tb(error.__traceback__)[-8:]
+                           ]}
+        super().__init__('Official SDK did not report the expected HTTP status')
+
+
+@contextlib.contextmanager
+def acceptance_phase(name):
+    try:
+        yield
+    except AcceptanceFailure:
+        raise
+    except Exception as error:
+        raise AcceptanceFailure(name, error) from None
 
 
 class MissingSDK(RuntimeError):
@@ -151,15 +199,25 @@ def expect_status(status, operation):
             actual = getattr(error, 'code', None)
             if callable(actual):
                 actual = actual()
-        assert actual == status, f'Expected HTTP {status}; got {actual} ({type(error).__name__})'
+        if actual != status:
+            raise UnexpectedHTTPStatus(status, actual, error) from None
     else:
         raise AssertionError(f'Expected HTTP {status}; request succeeded')
 
 
 def gcp_client(team, token):
     from google.auth.credentials import AnonymousCredentials
+    from google.auth.transport.requests import AuthorizedSession
     from google.cloud import storage
-    return storage.Client(project=PROJECT, credentials=AnonymousCredentials(),
+
+    credentials = AnonymousCredentials()
+    # These are local simulator tokens, not refreshable Google OAuth credentials.
+    # The default AuthorizedSession refreshes on 401 and AnonymousCredentials
+    # then raises InvalidOperation, hiding the original HTTP denial. Use the
+    # official transport with refresh disabled; its serialization/error parsing
+    # stay unchanged. Client's documented _http injection is version-pinned here.
+    session = AuthorizedSession(credentials, refresh_status_codes=(), max_refresh_attempts=0)
+    return storage.Client(project=PROJECT, credentials=credentials, _http=session,
                           client_options={'api_endpoint': team.url + '/_simulator/providers/gcp'},
                           extra_headers={'X-Simulator-Token': token} if token else {})
 
@@ -175,6 +233,40 @@ def azure_client(team, token):
         account_url=team.url + '/_simulator/providers/azure/' + ACCOUNT,
         credential=None, api_version='2023-11-03', raw_request_hook=hook,
         retry_total=0, connection_timeout=3, read_timeout=3)
+
+
+def azure_sdk_key_contract():
+    """Inspect real SDK + Requests preparation without sending any request.
+
+    Unexpected normalization fails acceptance; exclusions are not discovered and
+    silently applied. If the pinned SDK changes, review this contract explicitly.
+    """
+    from azure.storage.blob import BlobServiceClient
+    from requests import Request
+
+    prefix = f'/_simulator/providers/azure/{ACCOUNT}/sdk-exact/'
+    excluded = []
+    with local_network_only(set()), BlobServiceClient(
+            account_url=f'http://127.0.0.1:1/_simulator/providers/azure/{ACCOUNT}',
+            credential=None, api_version='2023-11-03') as service:
+        for key in KEYS:
+            client = service.get_blob_client('sdk-exact', key)
+            prepared = Request('PUT', client.url).prepare()
+            parsed = urlsplit(prepared.url)
+            assert parsed.hostname == '127.0.0.1' and parsed.port == 1
+            path = unquote(parsed.path)
+            assert path.startswith(prefix), 'SDK changed the provider/container route'
+            actual_key = path[len(prefix):]
+            expected_key = AZURE_NORMALIZED_KEYS.get(key, key)
+            assert actual_key == expected_key, 'Unexpected SDK key normalization'
+            if key in AZURE_NORMALIZED_KEYS:
+                assert actual_key != key
+                excluded.append({
+                    'provider': 'azure', 'key': key, 'prepared_key': actual_key,
+                    'reason': 'Requests PreparedRequest normalizes literal dot path segments before HTTP transfer',
+                })
+    assert len(excluded) == 2 and len(AZURE_KEYS) + len(excluded) == len(KEYS)
+    return excluded
 
 
 def gcp_create(team, label):
@@ -228,7 +320,7 @@ def azure_create(team, label):
     from azure.storage.blob import ContentSettings
     with azure_client(team, team.token) as service:
         container = service.create_container('sdk-exact')
-        for key in KEYS:
+        for key in AZURE_KEYS:
             value = (label + ':' + key).encode()
             container.get_blob_client(key).upload_blob(
                 value, overwrite=False, content_settings=ContentSettings(
@@ -254,8 +346,8 @@ def azure_verify_delete(team, label):
     from azure.core import MatchConditions
     with azure_client(team, team.token) as service:
         container = service.get_container_client('sdk-exact')
-        assert set(x.name for x in bounded_items(container.list_blobs(results_per_page=2))) == set(KEYS)
-        for key in KEYS:
+        assert set(x.name for x in bounded_items(container.list_blobs(results_per_page=2))) == set(AZURE_KEYS)
+        for key in AZURE_KEYS:
             blob = container.get_blob_client(key); properties = blob.get_blob_properties()
             # Keep the real SDK Range request on the native bounded-range path.
             # Any compatibility failure must fail this test, without stripping
@@ -271,6 +363,10 @@ def azure_verify_delete(team, label):
 
 def run(binary, selected):
     versions = require_sdks(selected)  # before processes, sockets, or network
+    excluded = []
+    if 'azure' in selected:
+        with acceptance_phase('azure:official-sdk-key-preparation'):
+            excluded = azure_sdk_key_contract()
     with tempfile.TemporaryDirectory(prefix='sdk-two-teams-') as directory:
         ports = []
         for _ in range(2):
@@ -283,32 +379,51 @@ def run(binary, selected):
             teams.append(Team(binary, path, port))
         with local_network_only(set(ports)):
             try:
-                for team in teams: team.start()
+                for index, team in enumerate(teams):
+                    with acceptance_phase(f'cli:start:team-{index}'):
+                        team.start()
                 for provider in selected:
                     factory = gcp_client if provider == 'gcp' else azure_client
-                    for own, other in ((teams[0], teams[1]), (teams[1], teams[0])):
-                        client = factory(other, own.token)
-                        if provider == 'gcp':
-                            expect_status(401, lambda: bounded_items(client.list_buckets(timeout=3, retry=None)))
-                        else:
-                            expect_status(401, lambda: bounded_items(client.list_containers()))
-                        client.close()
+                    for index, (own, other) in enumerate(((teams[0], teams[1]), (teams[1], teams[0]))):
+                        with acceptance_phase(f'{provider}:cross-team-token:team-{index}'):
+                            client = factory(other, own.token)
+                            try:
+                                if provider == 'gcp':
+                                    expect_status(401, lambda: bounded_items(client.list_buckets(timeout=3, retry=None)))
+                                else:
+                                    expect_status(401, lambda: bounded_items(client.list_containers()))
+                            finally:
+                                client.close()
                     create = gcp_create if provider == 'gcp' else azure_create
-                    for index, team in enumerate(teams): create(team, f'team-{index}')
+                    for index, team in enumerate(teams):
+                        with acceptance_phase(f'{provider}:create-and-conditions:team-{index}'):
+                            create(team, f'team-{index}')
                 tokens = [team.token for team in teams]
-                for team in teams: team.stop()
                 for index, team in enumerate(teams):
-                    team.start(); assert team.token == tokens[index]
+                    with acceptance_phase(f'cli:stop:team-{index}'):
+                        team.stop()
+                for index, team in enumerate(teams):
+                    with acceptance_phase(f'cli:restart:team-{index}'):
+                        team.start()
+                        assert team.token == tokens[index]
                 for provider in selected:
                     verify = gcp_verify_delete if provider == 'gcp' else azure_verify_delete
-                    for index, team in enumerate(teams): verify(team, f'team-{index}')
+                    for index, team in enumerate(teams):
+                        with acceptance_phase(f'{provider}:persisted-read-and-cleanup:team-{index}'):
+                            verify(team, f'team-{index}')
             finally:
                 failures = []
                 for team in teams:
                     try: team.stop()
                     except Exception as error: failures.append(type(error).__name__)
                 if failures: raise AssertionError('Process cleanup failed: ' + ','.join(failures))
-    return {'providers': selected, 'sdkVersions': versions, 'result': 'PASS'}
+    return {'providers': selected, 'sdkVersions': versions, 'result': 'PASS',
+            'exact_key_cases_per_team': {provider: len(KEYS if provider == 'gcp' else AZURE_KEYS)
+                                         for provider in selected},
+            'excluded_sdk_key_cases': excluded,
+            'two_cli_processes': True, 'restart_persistence': True,
+            'conditional_writes_and_deletes': True, 'checksums_and_exact_bytes': True,
+            'missing_cross_team_and_nonowner_denial': True, 'cleanup': 'DELETED'}
 
 
 if __name__ == '__main__':
@@ -328,6 +443,11 @@ if __name__ == '__main__':
     except MissingSDK as error:
         print(json.dumps({'result': 'FAIL/NOT-RUN', 'missingOfficialSDKs': error.packages}))
         raise SystemExit(2) from None
+    except AcceptanceFailure as error:
+        print(json.dumps({'result': 'FAIL/NOT-ACCEPTED', 'phase': error.phase,
+                          'errorType': error.error_type, 'source': error.source,
+                          'http_status_failure': error.status_failure}))
+        raise SystemExit(1) from None
     except Exception as error:
         # SDK exception strings may contain request headers or response data.
         # Keep failure visible while withholding potentially sensitive details.

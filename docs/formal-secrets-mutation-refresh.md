@@ -5,7 +5,7 @@ PutSecretValue submission. It does not modify or replace SecretsRevealEpoch or
 SecretsDisclosureChannels, which cover different reveal/context boundaries.
 It is registered additively in the repository gate with five required properties
 and four literal-protected sensitivity controls. The combined registry has
-22 models and 112 controls: 134 planned executions. Registration is not a
+27 models and 153 controls: 180 planned executions. Registration is not a
 successful full integrated TLC run.
 
 ## Source correspondence and defect
@@ -62,5 +62,5 @@ Each control must produce exit 12, the named invariant and a real counterexample
 Syntax/runtime/type failures and timeouts are failures of validation, not accepted
 controls. Execution receipts belong outside the source tree and identify exact
 model/config/tool hashes. No old PR or other model success establishes this
-model's result. All 21 earlier models and 108 protected controls are retained
+model's result. All26 main models and149 protected controls are retained
 unchanged. The full immutable integrated run remains a separate required gate.

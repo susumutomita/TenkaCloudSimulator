@@ -17,16 +17,6 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class FormalGateTests(unittest.TestCase):
-    def test_test_methods_cannot_silently_shadow_each_other(self):
-        tree = ast.parse(Path(__file__).read_text())
-        for node in ast.walk(tree):
-            if isinstance(node, ast.ClassDef):
-                names = [item.name for item in node.body
-                         if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef))
-                         and item.name.startswith('test_')]
-                self.assertEqual(len(names), len(set(names)),
-                                 'duplicate test methods in ' + node.name)
-
     def setUp(self):
         self.output_capture = contextlib.redirect_stdout(io.StringIO())
         self.output_capture.__enter__()
@@ -45,7 +35,7 @@ class FormalGateTests(unittest.TestCase):
 
     def test_complete_registry_and_exact_mutations(self):
         registry = load_registry(self.root)
-        self.assertEqual({model['id'] for model in registry['models']}, {'SecretsMutationRefresh', 'SecretsVersionLifecycle', 'SecretsRevealEpoch', 'SecretsDisclosureChannels', 'ObjectStore', 'StackOwnership', 'S3Versions', 'NativeIAMOwnership', 'RESTDeploymentSnapshot', 'SSMParameterState', 'StartupTokenVisibility', 'SQSLifecycle', 'SQSStorageBudget', 'BrowserSessions', 'ProviderActor', 'GCPStorageState', 'AzureBlobState', 'ProjectAuthority', 'BlobRange', 'ProviderPath', 'KMSKeyState', 'KMSProtocolAdmission'})
+        self.assertEqual({model['id'] for model in registry['models']}, {'AzureBlobState', 'BlobRange', 'BrowserSessions', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'DynamoDBAdmission', 'DynamoDBLifecycle', 'GCPStorageState', 'KMSKeyState', 'KMSProtocolAdmission', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'SecretsDisclosureChannels', 'SecretsMutationRefresh', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'StackOwnership', 'StartupTokenVisibility'})
         for model in registry['models']:
             source = (self.root / model['model']).read_text()
             for mutant in model['mutants']:
@@ -77,48 +67,6 @@ class FormalGateTests(unittest.TestCase):
         path.write_text(json.dumps(registry))
         with self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
             load_registry(self.root)
-
-    def test_secrets_required_models_and_properties_cannot_disappear(self):
-        path = self.root / 'formal/models.json'
-        original = path.read_text()
-        for mid in ('SecretsVersionLifecycle', 'SecretsRevealEpoch', 'SecretsDisclosureChannels'):
-            with self.subTest(model=mid):
-                registry = json.loads(original)
-                registry['models'] = [m for m in registry['models'] if m['id'] != mid]
-                path.write_text(json.dumps(registry))
-                with self.assertRaises(GateError):
-                    load_registry(self.root)
-                registry = json.loads(original)
-                model = next(m for m in registry['models'] if m['id'] == mid)
-                model['properties'].remove(next(p for p in model['properties'] if p != 'TypeOK'))
-                path.write_text(json.dumps(registry))
-                with self.assertRaises(GateError):
-                    load_registry(self.root)
-        path.write_text(original)
-
-    def test_mutation_refresh_model_and_each_property_are_required(self):
-        path = self.root / 'formal/models.json'
-        original = path.read_text()
-        registry = json.loads(original)
-        model = next(m for m in registry['models'] if m['id'] == 'SecretsMutationRefresh')
-        cfg = self.root / model['config']
-        original_cfg = cfg.read_text()
-        registry['models'] = [m for m in registry['models'] if m['id'] != model['id']]
-        path.write_text(json.dumps(registry))
-        with self.assertRaisesRegex(GateError, 'required existing model'):
-            load_registry(self.root)
-        for prop in model['properties']:
-            with self.subTest(property=prop):
-                candidate = json.loads(original)
-                target = next(m for m in candidate['models'] if m['id'] == model['id'])
-                target['properties'].remove(prop)
-                cfg.write_text('\n'.join(line for line in original_cfg.splitlines() if line != 'INVARIANT ' + prop) + '\n')
-                path.write_text(json.dumps(candidate))
-                with self.assertRaisesRegex(GateError, 'existing required invariant'):
-                    load_registry(self.root)
-        cfg.write_text(original_cfg)
-        path.write_text(original)
-
 
     def test_missing_model_config_checksum_each_fail(self):
         for path in ('formal/ObjectStore.tla', 'formal/ObjectStore.cfg',
@@ -523,13 +471,12 @@ class FormalGateTests(unittest.TestCase):
                         load_registry(self.root)
         path.write_text(original)
 
-
     def test_each_required_mutation_control_cannot_disappear(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
         registry = json.loads(original)
         self.assertEqual(set(REQUIRED_MUTANTS), BASE_MODELS)
-        self.assertEqual(sum(map(len, REQUIRED_MUTANTS.values())), 112)
+        self.assertEqual(sum(map(len, REQUIRED_MUTANTS.values())), 153)
         self.assertEqual({m['id']: {c['id'] for c in m['mutants']} for m in registry['models']}, REQUIRED_MUTANTS)
         for model in registry['models']:
             for mutant in model['mutants']:
@@ -541,6 +488,168 @@ class FormalGateTests(unittest.TestCase):
                     expected = 'required mutation control was removed' if target['mutants'] else 'model needs a sensitivity control'
                     with self.assertRaisesRegex(GateError, expected):
                         load_registry(self.root)
+        path.write_text(original)
+
+    def test_every_required_control_is_protected_against_single_removal(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        self.assertEqual(sum(len(v) for v in REQUIRED_MUTANTS.values()), 153)
+        for model_id, controls in REQUIRED_MUTANTS.items():
+            for control in controls:
+                with self.subTest(model=model_id, control=control):
+                    registry = json.loads(original)
+                    model = next(m for m in registry['models'] if m['id'] == model_id)
+                    model['mutants'] = [m for m in model['mutants'] if m['id'] != control]
+                    path.write_text(json.dumps(registry))
+                    with self.assertRaises(GateError):
+                        load_registry(self.root)
+        path.write_text(original)
+
+    def test_sqs_view_required_model_and_each_property_are_protected(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        registry = json.loads(original)
+        registry['models'] = [m for m in registry['models'] if m['id'] != 'SQSConsoleEpoch']
+        path.write_text(json.dumps(registry))
+        with self.assertRaises(GateError):
+            load_registry(self.root)
+        path.write_text(original)
+        source = json.loads(original)
+        model = next(m for m in source['models'] if m['id'] == 'SQSConsoleEpoch')
+        cfg_path = self.root / model['config']
+        cfg_original = cfg_path.read_text()
+        for prop in model['properties']:
+            with self.subTest(property=prop):
+                registry = json.loads(original)
+                candidate = next(m for m in registry['models'] if m['id'] == 'SQSConsoleEpoch')
+                candidate['properties'].remove(prop)
+                # Remove both declarations to test the literal minimum invariant
+                # guard, rather than only registry/CFG mismatch detection.
+                cfg_path.write_text(cfg_original.replace(' ' + prop, ''))
+                path.write_text(json.dumps(registry))
+                with self.assertRaises(GateError):
+                    load_registry(self.root)
+        cfg_path.write_text(cfg_original)
+        path.write_text(original)
+
+    def test_logs_required_models_properties_and_all_seven_controls(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        for model_id in ('CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch'):
+            registry = json.loads(original)
+            model = next(m for m in registry['models'] if m['id'] == model_id)
+            tla, cfg = self.root / model['model'], self.root / model['config']
+            tla_bytes, cfg_bytes = tla.read_bytes(), cfg.read_bytes()
+            registry['models'] = [m for m in registry['models'] if m['id'] != model_id]
+            path.write_text(json.dumps(registry))
+            tla.unlink(); cfg.unlink()
+            with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+                load_registry(self.root)
+            tla.write_bytes(tla_bytes); cfg.write_bytes(cfg_bytes)
+            for prop in model['properties']:
+                registry = json.loads(original)
+                target = next(m for m in registry['models'] if m['id'] == model_id)
+                target['properties'].remove(prop)
+                cfg.write_text('\n'.join(line for line in cfg_bytes.decode().splitlines() if line != 'INVARIANT ' + prop) + '\n')
+                path.write_text(json.dumps(registry))
+                with self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                    load_registry(self.root)
+            cfg.write_bytes(cfg_bytes)
+            for control in [m['id'] for m in model['mutants']]:
+                registry = json.loads(original)
+                target = next(m for m in registry['models'] if m['id'] == model_id)
+                target['mutants'] = [m for m in target['mutants'] if m['id'] != control]
+                path.write_text(json.dumps(registry))
+                with self.assertRaisesRegex(GateError, 'required mutation control was removed'):
+                    load_registry(self.root)
+            path.write_text(original)
+
+    def test_secrets_required_models_and_properties_cannot_disappear(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        for mid in ('SecretsVersionLifecycle', 'SecretsRevealEpoch', 'SecretsDisclosureChannels'):
+            with self.subTest(model=mid):
+                registry = json.loads(original)
+                registry['models'] = [m for m in registry['models'] if m['id'] != mid]
+                path.write_text(json.dumps(registry))
+                with self.assertRaises(GateError):
+                    load_registry(self.root)
+                registry = json.loads(original)
+                model = next(m for m in registry['models'] if m['id'] == mid)
+                model['properties'].remove(next(p for p in model['properties'] if p != 'TypeOK'))
+                path.write_text(json.dumps(registry))
+                with self.assertRaises(GateError):
+                    load_registry(self.root)
+        path.write_text(original)
+
+    def test_dynamodb_models_properties_and_all_controls_are_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        for name in ('DynamoDBLifecycle', 'DynamoDBAdmission'):
+            entry = next(m for m in json.loads(original)['models'] if m['id'] == name)
+            model = self.root / entry['model']
+            config = self.root / entry['config']
+            saved_model, saved_config = model.read_bytes(), config.read_bytes()
+            with self.subTest(model=name, omission='model-and-artifacts'):
+                registry = json.loads(original)
+                registry['models'] = [m for m in registry['models'] if m['id'] != name]
+                path.write_text(json.dumps(registry))
+                model.unlink(); config.unlink()
+                with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+                    load_registry(self.root)
+            model.write_bytes(saved_model); config.write_bytes(saved_config)
+            for prop in entry['properties']:
+                with self.subTest(model=name, property=prop):
+                    registry = json.loads(original)
+                    changed = next(m for m in registry['models'] if m['id'] == name)
+                    changed['properties'].remove(prop)
+                    changed['mutants'] = [m for m in changed['mutants'] if m['expect_invariant'] != prop]
+                    config.write_text(saved_config.decode().replace('INVARIANT ' + prop + '\n', ''))
+                    path.write_text(json.dumps(registry))
+                    with self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                        load_registry(self.root)
+            config.write_bytes(saved_config)
+            for mutant in entry['mutants']:
+                with self.subTest(model=name, control=mutant['id']):
+                    registry = json.loads(original)
+                    changed = next(m for m in registry['models'] if m['id'] == name)
+                    changed['mutants'] = [m for m in changed['mutants'] if m['id'] != mutant['id']]
+                    path.write_text(json.dumps(registry))
+                    with self.assertRaisesRegex(GateError, 'required mutation control was removed'):
+                        load_registry(self.root)
+            path.write_text(original)
+
+    def test_test_methods_cannot_silently_shadow_each_other(self):
+        tree = ast.parse(Path(__file__).read_text())
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ClassDef):
+                names = [item.name for item in node.body
+                         if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef))
+                         and item.name.startswith('test_')]
+                self.assertEqual(len(names), len(set(names)),
+                                 'duplicate test methods in ' + node.name)
+
+    def test_mutation_refresh_model_and_each_property_are_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        registry = json.loads(original)
+        model = next(m for m in registry['models'] if m['id'] == 'SecretsMutationRefresh')
+        cfg = self.root / model['config']
+        original_cfg = cfg.read_text()
+        registry['models'] = [m for m in registry['models'] if m['id'] != model['id']]
+        path.write_text(json.dumps(registry))
+        with self.assertRaisesRegex(GateError, 'required existing model'):
+            load_registry(self.root)
+        for prop in model['properties']:
+            with self.subTest(property=prop):
+                candidate = json.loads(original)
+                target = next(m for m in candidate['models'] if m['id'] == model['id'])
+                target['properties'].remove(prop)
+                cfg.write_text('\n'.join(line for line in original_cfg.splitlines() if line != 'INVARIANT ' + prop) + '\n')
+                path.write_text(json.dumps(candidate))
+                with self.assertRaisesRegex(GateError, 'existing required invariant'):
+                    load_registry(self.root)
+        cfg.write_text(original_cfg)
         path.write_text(original)
 
 if __name__ == '__main__':

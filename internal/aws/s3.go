@@ -36,6 +36,7 @@ var Regions = []string{"us-east-1", "us-west-2", "ap-northeast-1", "eu-west-1"}
 
 type Gateway struct {
 	Secrets           *SecretStore
+	CloudWatchLogs    *CloudWatchLogsStore
 	KMS               *KMSStore
 	APIGateway        *APIGatewayStore
 	LambdaPermissions *LambdaPermissionStore
@@ -47,6 +48,7 @@ type Gateway struct {
 	Stacks            *StackStore
 	Lambdas           *LambdaStore
 	Roles             *IAMRoleStore
+	DynamoDB          *DynamoDBStore
 }
 type failure struct {
 	XMLName   xml.Name `xml:"Error"`

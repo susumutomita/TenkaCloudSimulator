@@ -29,10 +29,12 @@ make build
 | サービス | 実装済みの操作・状態 | 主な未対応 |
 | --- | --- | --- |
 | [S3](docs/s3.md) | bucket作成・一覧・存在確認・region取得・削除、object PUT/GET/HEAD/DELETE・ListObjectsV2、bucket versioning・ListObjectVersions、public access block・tags | multipart、ACL、一般bucket policy、暗号化設定。path-styleのみ |
-| [SQS](docs/sqs.md) | Standard queue JSON 1.0 API 9操作：CreateQueue、GetQueueUrl、ListQueues、GetQueueAttributes、DeleteQueue、SendMessage、ReceiveMessage、DeleteMessage、ChangeMessageVisibility | UI、CloudFormation、function SDK bridge、Challenge連携、FIFO、batch、DLQ、SNS連携 |
-| [Secrets Manager](docs/secrets-manager.md) | native JSON 1.1 API 7操作、Cloudscape作成・明示取得・更新・current/previous版切替・force削除。SDKと同じSQLite状態・不変version・ARN単位IAM評価 | **練習用値は平文**。KMS暗号化、binary、tags、resource policy、rotation、replication、recovery window、CloudFormation |
+| [SQS](docs/sqs.md) | Cloudscape操作画面とStandard queue JSON 1.0 API 9操作：CreateQueue、GetQueueUrl、ListQueues、GetQueueAttributes、DeleteQueue、SendMessage、ReceiveMessage、DeleteMessage、ChangeMessageVisibility | CloudFormation、function SDK bridge、Challenge連携、FIFO、batch、DLQ、SNS連携 |
+| [CloudWatch Logs](docs/cloudwatch-logs.md) | ロググループ／ストリームの作成・一覧、グループ削除、PutLogEvents・GetLogEvents。7 APIと同一状態の操作画面 | メトリクス、アラーム、保持期間、Lambda自動配送、CFN、Insights |
+| [Secrets Manager](docs/secrets-manager.md) | Create/Describe/ListSecret、Put/GetSecretValue、UpdateSecretVersionStage、即時DeleteSecret。7 APIとバージョン／明示表示付き操作画面 | KMS暗号化、実秘密情報の保管、rotation、replica、SecretBinary、scheduled deletion、CFN。ダミー値はSQLiteに平文保存 |
 | [KMS](docs/kms.md) | CreateKey、DescribeKey、ListKeys、EnableKey、DisableKey、GetKeyPolicy、Encrypt、Decrypt。対称鍵・実ローカルAES-GCM、同一SQLiteのSDK/Cloudscape | alias、tags、grants、custom policy、rotation、scheduled deletion、CFN・他サービス暗号化。raw keyはSQLite保存でHSM/保存時暗号化保証ではない |
 | [Systems Manager Parameter Store](docs/console.md) | PutParameter、GetParameter、GetParameters、GetParametersByPath、DescribeParameters、DeleteParameter。最新値・version・overwrite判定 | SecureString/KMS、履歴・labels。StandardのString/StringList/textのみ |
+| [DynamoDB](docs/dynamodb.md) | CreateTable/ListTables/DescribeTable/DeleteTable、PutItem/GetItem/DeleteItem | Native JSON 1.0 API only; S/N/B keys, optional sort key; only partition-key attribute_(not_)exists conditions. No Query/Scan/indexes/Streams/console/CFN/Challenge integration |
 | [IAM](docs/iam.md) | Create/Get/List/DeleteRole、Put/Get/Delete/ListRolePolicy、UpdateAssumeRolePolicy。Lambda service trust、inline policy評価 | STS、managed policyの権限付与、一般Condition・permissions boundary・SCP |
 | [Lambda](docs/lambda.md) | CreateFunction、ListFunctions、GetFunctionConfiguration、UpdateFunctionCode、Invoke、DeleteFunction、AddPermission/GetPolicy/RemovePermission。固定CPython 3.12.16/WASIによるPython ZIP実行、限定S3/SSM SDK bridge | 他言語、非同期実行、Function URL、任意network。128 MiB・timeout 1–30秒 |
 | [CloudFormation](docs/cloudformation-rest.md) | CreateStack、DescribeStacks、DeleteStack。S3 Bucket、SSM Parameter、inline Python Lambda、限定IAM Role、API Gateway 5 resource types・Lambda Permission、限定Ref/Sub/GetAtt/DependsOn | UpdateStack、一般resource types、実AWS相当の非同期lifecycle、CFN専用service role |
@@ -42,11 +44,11 @@ make build
 
 S3のCloudFormationはBucketName/Versioning/PublicAccessBlock/ユーザーTagsとRef/Arnに対応し、空でない履歴は削除しません。呼出者にはStack ARNと各リソース操作の両方の権限が必要で、CAPABILITY_IAMは権限を付与しません。
 
-SQSはnative JSON 1.0 APIのみ対応します。保持中・期限切れ未回収を含む物理message rowはプロセス全体10000件、UTF-8 bodyとserialized attribute JSONの合計64 MiBまでです。これはSQLiteファイル全体・プロセスメモリ・AWS課金サイズの上限ではありません。下記の限定GCP Storage・Azure Blob実装がありますが、両クラウドの他サービスとSakuraは未対応です。Issueや計画は実装完了を意味しません。[開発状況](docs/development-status.md)を参照してください。Cloudscapeを使用していますが、本物のAWSコンソールとの全画面・全挙動の一致や実AWSとの差分検証完了は主張していません。
+SQSの操作画面とAPI referenceはnative JSON 1.0 APIを使用し、SDKと同じ状態を操作します。保持中・期限切れ未回収を含む物理message rowはプロセス全体10000件、UTF-8 bodyとserialized attribute JSONの合計64 MiBまでです。これはSQLiteファイル全体・プロセスメモリ・AWS課金サイズの上限ではありません。下記の限定GCP Storage・Azure Blob実装がありますが、両クラウドの他サービスとSakuraは未対応です。Issueや計画は実装完了を意味しません。[開発状況](docs/development-status.md)を参照してください。Cloudscapeを使用していますが、本物のAWSコンソールとの全画面・全挙動の一致や実AWSとの差分検証完了は主張していません。
 
 ## Google Cloud Storage・Azure Blob Storageのローカル接続
 
-クラウド選択で AWS／Google Cloud／Azure を切り替え、サービス一覧から対象を検索して開きます。Google Cloud の Cloud Storage と Azure の Blob Storage は別のナビゲーションを持ちます。日本語／英語は画面の言語設定で切り替えられ、サービス名・リソース名・API識別子は変更しません。固定のsynthetic project/accountで、作成→upload→実ファイルdownload→削除を操作できます。既存の2 CLI・別DB/tokenとPC/390pxの実操作とmainのCIは検証済みです。今回のナビゲーション／言語／各クラウドの画面刷新は統合検証中で、公式SDK・認証済み実クラウド画面との一致は未検証です。[対応・制限](docs/multicloud-storage.md)。
+クラウド選択で AWS／Google Cloud／Azure を切り替え、サービス一覧から対象を検索して開きます。Google Cloud の Cloud Storage と Azure の Blob Storage は別のナビゲーションを持ちます。日本語／英語は画面の言語設定で切り替えられ、サービス名・リソース名・API識別子は変更しません。固定のsynthetic project/accountで、作成→upload→実ファイルdownload→削除を操作できます。既存の2 CLI・別DB/tokenとPC/390pxの実操作とmainのCIは検証済みです。ナビゲーション／言語は各クラウド共通の操作で、サービス固有のAPI識別子と利用者データは翻訳しません。公式SDKの対応範囲は[専用の受入検証](docs/acceptance/crossprovider-official-storage.md)を参照してください。認証済み実クラウド画面との一致は未検証です。[対応・制限](docs/multicloud-storage.md)。
 
 既定所有者はsimulator-adminです。参加者に使わせる新規環境は、ホストが`--cloud-storage-owner=learner`を指定し、learnerへ固定したparticipant tokenを発行します。この所有者設定はGoogle IAMやAzure RBACではなく、AWSの権限も付与しません。同じDBの所有者変更は拒否します。CLIフラグは実CLIの再起動・所有者変更拒否・AWS権限非付与までGo/raceで検証しています。
 
@@ -96,11 +98,11 @@ AXE_SCRIPT=/tmp/tcsim-audit/axe.min.js make e2e PYTHON=/tmp/tcsim-tests/bin/pyth
 TLA_JAR=/path/to/tla2tools.jar make formal
 ```
 
-KMSはPR409でマージ済みで、main `fcf8e702`ではSDK・ブラウザを含む全26 E2E、両90%閾値と18モデル＋94制御のCIが成功しています。この画面刷新は別の変更です。新しい固定HEADの全体検証・CI結果を、過去の成功から引き継いで扱いません。
+SDK、操作画面、再起動、チーム分離の受入検証は `make e2e` で実行します。日本語画面でのKMS暗号化／復号も実APIで検証します。統合範囲と既知の制限は[バックログ統合記録](docs/acceptance/backlog-services.md)、公開HEADの結果はGitHub Actionsを参照してください。
 
 CIはstatementと未フィルターsource-line coverageを両方90%以上に強制します。`make before-commit`単独のcoverage判定はstatementのみで、source-line判定はCIのCobertura生成後ステージと上記の2コマンドで行います。SDK/browser、license、依存security、埋込asset、形式検査も行います。cross compileは他OSでの実行成功を意味しません。開発用Python/Node/Javaはruntime依存ではありません。UI・Scalarの再生成は権利表記とlockを保持する[各build手順](tools/console/README.md)・[Scalar手順](tools/scalar/README.md)・[Python runtimeの権利・再生成手順](tools/python/README.md)に従います。
 
-形式検査にはObjectStore、StackOwnership、S3Versions、NativeIAMOwnership、RESTDeploymentSnapshot、SSMParameterState、StartupTokenVisibility、BrowserSessions、SQSLifecycle、SQSStorageBudget、ProviderActor、GCPStorageState、AzureBlobState、ProjectAuthority、BlobRange、ProviderPath、KMSKeyState、KMSProtocolAdmission、SecretsVersionLifecycle、SecretsRevealEpoch、SecretsDisclosureChannels、SecretsMutationRefreshの22有限モデルと112の意図した欠陥検出をregistryへ登録しています。追加モデルの有限検査結果と、統合後の固定HEAD検査は区別して記録します。TLCと意図したmutantの反例で限定した安全条件を検査しますが、Go実装のrefinement、暗号、全AWS仕様・実AWSとの一致を証明するものではありません。変更はregistryとsource対応を更新し、固定HEADのCI結果で判断します。[形式検査](formal/README.md)、[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)。
+形式検査にはObjectStore、StackOwnership、S3Versions、NativeIAMOwnership、RESTDeploymentSnapshot、SSMParameterState、StartupTokenVisibility、BrowserSessions、SQSLifecycle、SQSStorageBudget、ProviderActor、GCPStorageState、AzureBlobState、ProjectAuthority、BlobRange、ProviderPath、KMSKeyState、KMSProtocolAdmission、SQSConsoleEpoch、CloudWatchLogsLifecycle、CloudWatchLogsViewEpoch、SecretsVersionLifecycle、SecretsRevealEpoch、SecretsDisclosureChannels、DynamoDBLifecycle、DynamoDBAdmission、SecretsMutationRefreshの27有限モデルと153の意図した欠陥検出をregistryへ登録しています。追加モデルの有限検査結果と、統合後の固定HEAD検査は区別して記録します。TLCと意図したmutantの反例で限定した安全条件を検査しますが、Go実装のrefinement、暗号、全AWS仕様・実AWSとの一致を証明するものではありません。変更はregistryとsource対応を更新し、固定HEADのCI結果で判断します。[形式検査](formal/README.md)、[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)。
 
 ## ライセンス
 
@@ -111,12 +113,12 @@ CIはstatementと未フィルターsource-line coverageを両方90%以上に強�
 
 ## Secrets Manager integration candidate
 
-The normal merge of mainf5dba056 preserves its provider-specific consoles, token-file
+The normal merge of main0a6bdce preserves its provider-specific consoles, token-file
 Login and locale behavior. Secrets Manager is discoverable only inside AWS when
 its actual capability is present; /secretsmanager and the /secrets alias select the
 same child. Seven native APIs and dummy plaintext values remain the documented
 limit; no KMS/rotation/recovery/CFN behavior is added. Earlier Secrets/native/main
-receipts are separate inputs. This provider-aware child and all22 models/112
+receipts are separate inputs. This provider-aware child and all27 models/153
 controls require new exact-HEAD verification before any publication/merge claim.
 
 An acknowledged Secrets create/update now closes and clears its form before the

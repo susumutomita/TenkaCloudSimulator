@@ -9,12 +9,16 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-BASE_MODELS = {'AzureBlobState', 'BlobRange', 'BrowserSessions', 'GCPStorageState', 'KMSKeyState', 'KMSProtocolAdmission', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'SecretsDisclosureChannels', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'SecretsMutationRefresh', 'StackOwnership', 'StartupTokenVisibility'}
+BASE_MODELS = {'AzureBlobState', 'BlobRange', 'BrowserSessions', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'DynamoDBAdmission', 'DynamoDBLifecycle', 'GCPStorageState', 'KMSKeyState', 'KMSProtocolAdmission', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'SecretsDisclosureChannels', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'SecretsMutationRefresh', 'StackOwnership', 'StartupTokenVisibility'}
 BASE_INVARIANTS = {
     'SecretsMutationRefresh': {'TypeOK', 'AckClosesForm', 'AckClearsDraft', 'FreshFormHasToken', 'NoWriteOnReadRetry'},
     'AzureBlobState': {'BudgetBounded', 'ConditionEnforced', 'FailureAtomic', 'FreshWriteIdentity', 'NoDeniedRead', 'NoOrphans', 'NoUnauthorizedMutation', 'PeerStatePreserved', 'ReadExact', 'TypeOK'},
     'BlobRange': {'ChecksumBound', 'ConditionBeforeRange', 'DeniedNoDisclosure', 'ExactNormalRead', 'ExactSelectedBytes', 'Frame', 'InvalidRefused', 'MissingRangeChecksumRefused', 'NoFullMD5OnPartial', 'OutOfBoundsRefused', 'TypeOK'},
     'BrowserSessions': {'AcceptedOnlyLiveParent', 'NoBrowserSDKAuthority', 'NoRawSDKCookie', 'ParentLifetimeBound', 'RevokedCookiesDenied', 'SDKAuthorityPreserved', 'TypeOK', 'UnrelatedSessionsPreserved'},
+    'CloudWatchLogsLifecycle': {'NoOrphans', 'OnlyAcceptedWrites', 'TokenAuthority', 'TypeOK'},
+    'CloudWatchLogsViewEpoch': {'FreshResults', 'NoUnmountedResults', 'TypeOK'},
+    'DynamoDBAdmission': {'AcknowledgedRemoval', 'ActiveTableRequired', 'AdmissionExact', 'CanonicalKeys', 'CommittedBytes', 'CreateCommitted', 'DeniedFrame', 'InitializedBeforeMutation', 'ItemBudget', 'ItemCountBudget', 'NoOrphans', 'PeerFrame', 'RefusalFrame', 'RemovalAdmissionExact', 'SemanticBytes', 'StartupAdmission', 'StartupRefusedFrame', 'StatisticsExact', 'TableAdmissionExact', 'TableBudget', 'TypeOK', 'ValidKeysOnly'},
+    'DynamoDBLifecycle': {'ConditionalAtomicity', 'FailedUnchanged', 'GenerationChecked', 'NoForeignMutation', 'NoOrphans', 'NoStaleItems', 'NoUnauthorizedMutation', 'TypeOK'},
     'GCPStorageState': {'Budget', 'DeniedFrame', 'GenerationFreshness', 'GenerationRefusal', 'NoOrphans', 'NonemptyDeleteRefused', 'OtherEnvironmentUnchanged', 'OtherProjectUnchanged', 'ReadIsolation', 'TypeOK'},
     'KMSKeyState': {'AuthorizedEvents', 'BoundContextAndKey', 'EnabledCrypto', 'TypeOK'},
     'KMSProtocolAdmission': {'InfraNotDeny', 'MissingIdentityDenied', 'NoAuthorityFromWireMetadata', 'NoCrossServiceFallback', 'NoSuccessWithoutKMSTarget', 'TypeOK'},
@@ -25,6 +29,7 @@ BASE_INVARIANTS = {
     'ProviderPath': {'ActorPreserved', 'ContextPreserved', 'DistinctCarriersRemainDistinct', 'EncodedProviderRejected', 'EscapedTailPreserved', 'ProviderSelectedCorrectly', 'SourcePathImmutable', 'TailPreserved', 'TypeOK', 'UnregisteredRejected'},
     'RESTDeploymentSnapshot': {'NoStageOrphans', 'SnapshotsFrozen', 'TypeOK'},
     'S3Versions': {'CurrentMatchesLatest', 'NoHistoryOrphans', 'TypeOK'},
+    'SQSConsoleEpoch': {'NoUnmountedAcceptance', 'OnlyCurrentReplies', 'RawReceiptsPrivate', 'ReceiptCustodyBound', 'TypeOK'},
     'SQSLifecycle': {'AuthorizedMutations', 'ChangeOnlyInflight', 'FailedMutationAtomic', 'FreshReceipt', 'IdempotentCreateUnchanged', 'NoOrphans', 'ReceiptMutationCurrent', 'ReceiveOnlyEligible', 'ScopedMutation', 'TypeOK'},
     'SQSStorageBudget': {'BudgetAccountsPhysical', 'DeleteScopeExact', 'FailedSendPreservesRows', 'ForeignRowsPreserved', 'LiveRowsPreserved', 'MaintenanceNotBudgetBlocked', 'PayloadByteCap', 'PhysicalRowCap', 'ReadRemovesOwnExpired', 'TypeOK'},
     'SSMParameterState': {'DeleteEffect', 'DeniedPreservesState', 'OtherKeysUnchanged', 'OverwriteRefusal', 'PutVersion', 'ReadIsolation', 'TypeOK'},
@@ -40,6 +45,10 @@ REQUIRED_MUTANTS = {
     'AzureBlobState': {'ContainerDeleteErasesPeer', 'ContainerDeleteLeavesBlobs', 'FailedPutCommits', 'IgnoreAccountOwner', 'IgnoreCreateOnly', 'IgnoreStaleETag', 'MissingTrustedActor', 'OmitByteBudget', 'OmitRowBudget', 'ReadNeighbor', 'ReuseETag'},
     'BlobRange': {'BypassAuthorization', 'DiscloseFullMD5OnPartial', 'IgnoreConditionDecision', 'IgnoreEndClamp', 'PermitExcessChecksum', 'ReadMutatesStoredBody', 'UncheckedBounds', 'WrongSliceStart'},
     'BrowserSessions': {'IgnoreParentValidity', 'LogoutClearsOthers', 'LogoutKeepsSession', 'LogoutRevokesSDK', 'RawOperatorCookie'},
+    'CloudWatchLogsLifecycle': {'AcceptInvalidBatch', 'OmitDeleteEventCascade', 'OmitPutAuthority', 'OmitTokenGeneration', 'OmitTokenTeam'},
+    'CloudWatchLogsViewEpoch': {'AcceptUnmountedReply', 'OmitResponseEpoch'},
+    'DynamoDBAdmission': {'AcknowledgeIgnoredChildDelete', 'AcknowledgeIgnoredCreate', 'AcknowledgeIgnoredItemDelete', 'AcknowledgeIgnoredTableDelete', 'AcknowledgeIgnoredWrite', 'AdmitInvalidKey', 'BypassStartupValidation', 'ChargeWireEncoding', 'DirtyOversizeRefusal', 'EraseKeyType', 'IgnoreAllow', 'IgnoreDeny', 'IgnoreItemByteCap', 'IgnoreItemCountCap', 'IgnoreTableCountCap', 'OmitNestedOverhead', 'RestartLosesStatistics', 'SplitNumericAlias', 'WriteBeforeInitialization', 'WritePeerScope', 'WriteWithoutTable', 'WrongTableStatistics'},
+    'DynamoDBLifecycle': {'AcceptRecreatedGeneration', 'CachedCondition', 'DirtyRollback', 'ForeignPut', 'IgnoreAllow', 'IgnoreDeny', 'MissingDropChildCleanup', 'MissingPutGenerationGuard'},
     'GCPStorageState': {'DeleteNonemptyBucket', 'DeniedBucketCreate', 'IgnoreActualOwner', 'IgnoreGenerationMatch', 'IgnoreStateBudget', 'ReadWrongEnvironment', 'ResetSequenceAfterDelete', 'ReuseGeneration'},
     'KMSKeyState': {'MissingContextGuard', 'MissingEnabledDecryptGuard', 'MissingEnabledEncryptGuard', 'MissingEncryptionCeiling', 'MissingKeyBinding', 'MissingPermissionGuard', 'MissingRegionGuard', 'MissingTeamGuard'},
     'KMSProtocolAdmission': {'DropSigningIntent', 'IgnoreRequiredTarget', 'MaskIdentityOutage', 'ReadLivePolicyInsteadOfSnapshot'},
@@ -50,6 +59,7 @@ REQUIRED_MUTANTS = {
     'ProviderPath': {'CleanTail', 'DecodeAgain', 'DropActor', 'DropRawTail', 'EncodedProviderAllowed', 'MutateOriginalPath', 'UnknownFallsBack'},
     'RESTDeploymentSnapshot': {'MutableSnapshot'},
     'S3Versions': {'CurrentOnlyDeletion'},
+    'SQSConsoleEpoch': {'OmitReplyEpochGuard', 'OmitUnmountGuardAndEpochAdvance', 'RenderRawReceiptInRows', 'RetainReceiptsAcrossContextSwitch'},
     'SQSLifecycle': {'AcceptStaleReceipt', 'ChangeWithoutInflight', 'CrossScopeQueueDelete', 'DeleteWithoutCascade', 'FailedWriteChangesState', 'IdempotentCreateChangesState', 'ReceiptNotRotated', 'ReceiveAfterRetention', 'ReceiveBeforeDelay', 'SendWithoutParentCheck', 'UnauthorizedSend'},
     'SQSStorageBudget': {'BlockLegacyMaintenance', 'CommitPurgeOnFailedSend', 'DiscardOwnedLiveRows', 'IgnoreExpiredForeignCharge', 'OmitPayloadByteCap', 'OmitPhysicalRowCap', 'PurgeExpiredForeignRows'},
     'SSMParameterState': {'DoNotAdvanceVersion', 'IgnoreExplicitDeny', 'IgnoreOverwriteGuard', 'ReadWrongName', 'ReadWrongRegion'},
