@@ -562,3 +562,110 @@ func TestManagedIAMReopenAndTwoDatabases(t *testing.T) {
 	managedDecision(t, peer, pr.RoleName, "allowed")
 	managedDecision(t, db, r.RoleName, "explicitDeny")
 }
+
+func TestManagedIAMPreauthorizedRoleIncarnationIsTransactionBound(t *testing.T) {
+	ctx := context.Background()
+	db, s := managedStore(t)
+	old := managedRole(t, s, "CaseRole")
+	peer := managedRole(t, s, "peer")
+	policy := managedPolicy(t, s, "Policy", managedAllow)
+	// Query has already authorized this exact incarnation. A separate completed
+	// transaction then retires it and reuses its case-insensitive name.
+	if e := s.Delete(ctx, old.RoleName); e != nil {
+		t.Fatal(e)
+	}
+	fresh := managedRole(t, s, "caserole")
+	if fresh.RoleID == old.RoleID || fresh.Arn == old.Arn {
+		t.Fatal("fixture did not replace canonical incarnation")
+	}
+	before := managedFrame(t, db.Database())
+	if e := s.AttachRolePolicy(ctx, old.RoleName, policy.Arn, old.RoleID); iamCode(e) != "NoSuchEntity" {
+		t.Fatal("stale authorization attached to replacement", e)
+	}
+	parent, list, e := s.AttachedRolePolicies(ctx, old.RoleName, "", 1001, old.RoleID)
+	if iamCode(e) != "NoSuchEntity" || parent.RoleID != "" || list != nil {
+		t.Fatal("stale authorization exposed replacement metadata", parent, list, e)
+	}
+	if managedFrame(t, db.Database()) != before {
+		t.Fatal("stale authorization mutated frame")
+	}
+	// A new authorization can attach to the new incarnation, but the stale one
+	// must not be able to detach its permission or retrieve its attachment list.
+	if e = s.AttachRolePolicy(ctx, fresh.RoleName, policy.Arn, fresh.RoleID); e != nil {
+		t.Fatal(e)
+	}
+	before = managedFrame(t, db.Database())
+	if e = s.DetachRolePolicy(ctx, old.RoleName, policy.Arn, old.RoleID); iamCode(e) != "NoSuchEntity" {
+		t.Fatal("stale authorization detached replacement", e)
+	}
+	if managedFrame(t, db.Database()) != before {
+		t.Fatal("stale detach changed replacement or peer")
+	}
+	managedDecision(t, db, fresh.RoleName, "allowed")
+	managedDecision(t, db, peer.RoleName, "implicitDeny")
+	for _, expected := range [][]string{{""}, {fresh.RoleID, fresh.RoleID}} {
+		if e = s.AttachRolePolicy(ctx, fresh.RoleName, policy.Arn, expected...); iamCode(e) != "InvalidInput" {
+			t.Fatal(e)
+		}
+		if e = s.DetachRolePolicy(ctx, fresh.RoleName, policy.Arn, expected...); iamCode(e) != "InvalidInput" {
+			t.Fatal(e)
+		}
+		if _, _, e = s.AttachedRolePolicies(ctx, fresh.RoleName, "", 1001, expected...); iamCode(e) != "InvalidInput" {
+			t.Fatal(e)
+		}
+	}
+	if managedFrame(t, db.Database()) != before {
+		t.Fatal("invalid expected incarnation changed frame")
+	}
+	if e = s.DetachRolePolicy(ctx, fresh.RoleName, policy.Arn, fresh.RoleID); e != nil {
+		t.Fatal(e)
+	}
+	managedDecision(t, db, fresh.RoleName, "implicitDeny")
+}
+func TestManagedIAMSelectorAndPersistedReferenceFailuresDiffer(t *testing.T) {
+	ctx := context.Background()
+	db, s := managedStore(t)
+	role := managedRole(t, s, "role")
+	policy := managedPolicy(t, s, "CasePolicy", managedAllow)
+	alias := iamManagedPrefix + "casepolicy"
+	before := managedFrame(t, db.Database())
+	if _, e := s.ManagedPolicy(ctx, alias); iamCode(e) != "NoSuchEntity" {
+		t.Fatal("ordinary case mismatch was not404", e)
+	}
+	if e := s.SetDefaultManagedPolicyVersion(ctx, alias, "v1"); iamCode(e) != "NoSuchEntity" {
+		t.Fatal(e)
+	}
+	if e := s.AttachRolePolicy(ctx, role.RoleName, alias, role.RoleID); iamCode(e) != "NoSuchEntity" {
+		t.Fatal(e)
+	}
+	if managedFrame(t, db.Database()) != before {
+		t.Fatal("alias selector changed state")
+	}
+	if e := s.AttachRolePolicy(ctx, role.RoleName, policy.Arn, role.RoleID); e != nil {
+		t.Fatal(e)
+	}
+	// Actual valid SQL can retire metadata behind a saved edge even with FKs on;
+	// it is corrupted persisted authority, not an ordinary missing API selector.
+	if _, e := db.Database().Exec(`UPDATE aws_iam_managed_policies SET deleted=1 WHERE name=?`, policy.PolicyName); e != nil {
+		t.Fatal(e)
+	}
+	before = managedFrame(t, db.Database())
+	_, _, e := s.AttachedRolePolicies(ctx, role.RoleName, "", 1001, role.RoleID)
+	var failure ssmFailure
+	if e == nil || errors.As(e, &failure) {
+		t.Fatal("saved deleted-policy reference did not report infrastructure failure", e)
+	}
+	if e = s.PutPolicy(ctx, role.RoleName, "new-inline", managedAllow); e == nil || errors.As(e, &failure) {
+		t.Fatal("inline sync accepted corrupted reference", e)
+	}
+	if managedFrame(t, db.Database()) != before {
+		t.Fatal("corrupt reference error partially changed role")
+	}
+	if _, e = db.Database().Exec(`UPDATE aws_iam_managed_policies SET deleted=0 WHERE name=?`, policy.PolicyName); e != nil {
+		t.Fatal(e)
+	}
+	if e = s.PutPolicy(ctx, role.RoleName, "new-inline", managedDeny); e != nil {
+		t.Fatal("repair retry", e)
+	}
+	managedDecision(t, db, role.RoleName, "explicitDeny")
+}
