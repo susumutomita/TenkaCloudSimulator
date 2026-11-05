@@ -81,7 +81,7 @@ def run():
         if status == 200:
             expect(page.get_by_role("table", name="Secret version metadata", exact=True)).to_be_visible()
         else:
-            expect(page.get_by_role("alert").filter(has=page.get_by_text("Version metadata unavailable", exact=True))).to_be_visible()
+            expect(page.get_by_text("Version metadata unavailable", exact=True)).to_be_visible()
         no_values(page)
 
     def choose_identity(page, identity):
@@ -267,8 +267,10 @@ def run():
                 list_versions(page)
                 expect(table.get_by_text(token(98), exact=True)).to_be_visible()
                 page.unroute(endpoint + "/", native_hold)
-                page.get_by_role("button", name="Account menu", exact=True).click()
-                page.keyboard.press("End")
+                page.get_by_role("button", name="Account menu", exact=True).focus()
+                page.keyboard.press("Enter")
+                page.keyboard.press("ArrowDown")
+                expect(page.get_by_role("menuitem", name="Sign out", exact=True)).to_be_focused()
                 page.keyboard.press("Enter")
                 expect(page.get_by_label("Access token", exact=True)).to_be_visible()
                 login(page, endpoint, operator)
