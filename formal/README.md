@@ -339,3 +339,34 @@ results are independent model evidence, not the full230-case/current-HEAD gate
 or a refinement proof. The entire original30/175 inventory, timeouts and tool pin
 remain unchanged. All three exact native source scopes and all new properties
 and control IDs are protected by the loader and failure tests.
+
+## Customer-alias crypto and aliases UI
+
+KMSAliasCrypto adds fourteen mandatory properties and thirteen sensitivity
+controls for one same-region crypto transaction over two preexisting keys and
+one customer alias. It represents alias resolution, concrete-key permission
+before crypto/mismatch, omitted-KeyId decrypt, checked counter acknowledgment,
+transaction failure frames and publication after commit. It does **not** model
+alias Create/List/Update/Delete admission, paging, quotas or name parsing. Its
+file-level source declaration references only the crypto orchestration portions
+of kms_aliases.go and kms_store.go; it is not proof of every operation in those
+files, AES, IAM parsing, SQLite or Go refinement.
+
+KMSAliasesViewEpoch adds eleven mandatory properties and eleven controls for two
+context incarnations, two known keys, one alias, at most two list and selected
+metadata requests, one form intent per context and one acknowledged write/read
+retry. Explicit UI state captures stale list/target rejection, cleared failure
+rows and cancelled targets, verified submission, exact delete confirmation,
+ACK closing/clearing before refresh, read-only retry and locale preservation.
+Initial picker completion is abstracted; retired-life defenses are modeled as a
+paired bypass, not separate necessary guards. This is not React/HTTP/IAM/SQL
+refinement, backend admission coverage or liveness.
+
+The scoped model executions are separate evidence: the UI baseline visited
+431,932 distinct states and all eleven controls produced their named invariant
+violations; the crypto author's scoped evidence records its fourteen cases.
+Registration now requires 35 baselines and 221 controls (256 executions), with
+all previous 33 models and 197 controls retained. A fresh immutable combined gate
+must actually execute before reporting this inventory as current-HEAD passed.
+Catalog/CRUD/paging correspondence remains a separate integration obligation;
+these two entries do not supply that missing proof.

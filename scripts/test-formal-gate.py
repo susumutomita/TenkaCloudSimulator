@@ -35,7 +35,7 @@ class FormalGateTests(unittest.TestCase):
 
     def test_complete_registry_and_exact_mutations(self):
         registry = load_registry(self.root)
-        self.assertEqual({model['id'] for model in registry['models']}, {'NativeWireProjection', 'RESTRouteMatching', 'RESTProxyEventBoundary', 'AzurePropertiesTarget', 'AzurePropertiesEpoch', 'AzureBlobState', 'BlobRange', 'BrowserSessions', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'DynamoDBAdmission', 'DynamoDBLifecycle', 'GCPStorageState', 'KMSKeyState', 'KMSProtocolAdmission', 'IAMManagedPolicies', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'SecretsDisclosureChannels', 'SecretsMutationRefresh', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'StackOwnership', 'StartupTokenVisibility'})
+        self.assertEqual({model['id'] for model in registry['models']}, {'KMSAliasCrypto', 'KMSAliasesViewEpoch', 'NativeWireProjection', 'RESTRouteMatching', 'RESTProxyEventBoundary', 'AzurePropertiesTarget', 'AzurePropertiesEpoch', 'AzureBlobState', 'BlobRange', 'BrowserSessions', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'DynamoDBAdmission', 'DynamoDBLifecycle', 'GCPStorageState', 'KMSKeyState', 'KMSProtocolAdmission', 'IAMManagedPolicies', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'SecretsDisclosureChannels', 'SecretsMutationRefresh', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'StackOwnership', 'StartupTokenVisibility'})
         for model in registry['models']:
             source = (self.root / model['model']).read_text()
             for mutant in model['mutants']:
@@ -471,12 +471,36 @@ class FormalGateTests(unittest.TestCase):
                         load_registry(self.root)
         path.write_text(original)
 
+    def test_alias_models_and_each_required_property_cannot_disappear(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        for name in ('KMSAliasCrypto', 'KMSAliasesViewEpoch'):
+            registry = json.loads(original)
+            model = next(m for m in registry['models'] if m['id'] == name)
+            config_path = self.root / model['config']
+            original_config = config_path.read_text()
+            for property_name in model['properties']:
+                with self.subTest(model=name, property=property_name):
+                    changed = json.loads(original)
+                    target = next(m for m in changed['models'] if m['id'] == name)
+                    target['properties'].remove(property_name)
+                    path.write_text(json.dumps(changed))
+                    config_path.write_text(original_config.replace('INVARIANT ' + property_name + '\n', ''))
+                    with self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                        load_registry(self.root)
+                    config_path.write_text(original_config)
+            registry['models'] = [m for m in registry['models'] if m['id'] != name]
+            path.write_text(json.dumps(registry))
+            with self.assertRaises(GateError):
+                load_registry(self.root)
+        path.write_text(original)
+
     def test_each_required_mutation_control_cannot_disappear(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
         registry = json.loads(original)
         self.assertEqual(set(REQUIRED_MUTANTS), BASE_MODELS)
-        self.assertEqual(sum(map(len, REQUIRED_MUTANTS.values())), 197)
+        self.assertEqual(sum(map(len, REQUIRED_MUTANTS.values())), 221)
         self.assertEqual({m['id']: {c['id'] for c in m['mutants']} for m in registry['models']}, REQUIRED_MUTANTS)
         for model in registry['models']:
             for mutant in model['mutants']:
@@ -493,7 +517,7 @@ class FormalGateTests(unittest.TestCase):
     def test_every_required_control_is_protected_against_single_removal(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
-        self.assertEqual(sum(len(v) for v in REQUIRED_MUTANTS.values()), 197)
+        self.assertEqual(sum(len(v) for v in REQUIRED_MUTANTS.values()), 221)
         for model_id, controls in REQUIRED_MUTANTS.items():
             for control in controls:
                 with self.subTest(model=model_id, control=control):

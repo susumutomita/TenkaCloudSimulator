@@ -9,8 +9,10 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-BASE_MODELS = {'NativeWireProjection', 'RESTRouteMatching', 'RESTProxyEventBoundary', 'AzurePropertiesTarget', 'AzurePropertiesEpoch', 'AzureBlobState', 'BlobRange', 'BrowserSessions', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'DynamoDBAdmission', 'DynamoDBLifecycle', 'GCPStorageState', 'KMSKeyState', 'KMSProtocolAdmission', 'IAMManagedPolicies', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'SecretsDisclosureChannels', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'SecretsMutationRefresh', 'StackOwnership', 'StartupTokenVisibility'}
+BASE_MODELS = {'KMSAliasCrypto', 'KMSAliasesViewEpoch', 'NativeWireProjection', 'RESTRouteMatching', 'RESTProxyEventBoundary', 'AzurePropertiesTarget', 'AzurePropertiesEpoch', 'AzureBlobState', 'BlobRange', 'BrowserSessions', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'DynamoDBAdmission', 'DynamoDBLifecycle', 'GCPStorageState', 'KMSKeyState', 'KMSProtocolAdmission', 'IAMManagedPolicies', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'SecretsDisclosureChannels', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'SecretsMutationRefresh', 'StackOwnership', 'StartupTokenVisibility'}
 BASE_INVARIANTS = {
+    'KMSAliasCrypto': {'TypeOK', 'TransactionSnapshotStable', 'AliasResolutionCurrent', 'OmittedDecryptUsesBlob', 'ConcreteKeyAuthorization', 'AuthorizedCryptoStages', 'AuthorizationBeforeMismatch', 'NoPublicationBeforeCommit', 'FailureCounterFrame', 'FailureNoPublication', 'WriteFailureRefused', 'PublishedKeyBound', 'EncryptCounterExact', 'DecryptCounterFrame'},
+    'KMSAliasesViewEpoch': {'TypeOK', 'CurrentListOutcome', 'NoCachedRowsOnFailure', 'CurrentTargetMetadata', 'ClosedFormHasNoTarget', 'AckClosesForm', 'AckClearsDraft', 'ReadRetryNeverWrites', 'OnlyVerifiedTargetSubmitted', 'DeleteRequiresExactConfirmation', 'LocalePreservesIntent'},
     'NativeWireProjection': {'BadValueRefused', 'ValueKindsPreserved', 'FailureNoPartial', 'OmissionExact', 'OrderExact', 'TypeOK', 'SkippedBadDoesNotFail', 'CompleteProjection'},
     'RESTRouteMatching': {'MatchOracle', 'CaptureFidelity', 'InvalidTemplateRejected', 'Specificity', 'TypeOK', 'RejectedShape'},
     'RESTProxyEventBoundary': {'QueryProjection', 'ActualRoute', 'Admission', 'BodyPreserved', 'TypeOK', 'FailureNoEvent', 'ApplicationData', 'CredentialSealed'},
@@ -47,6 +49,8 @@ BASE_INVARIANTS = {
 }
 # Established controls require an explicit gate-policy change before retirement.
 REQUIRED_MUTANTS = {
+    'KMSAliasCrypto': {'UseStaleAliasTarget', 'OmittedDecryptUsesLiveAlias', 'AuthorizeAliasResource', 'MismatchBeforeAuthorization', 'IgnoreCiphertextMismatch', 'AllowMidTransactionRetarget', 'IgnoreCounterAcknowledgement', 'PublishBeforeCommit', 'PublishOnFailedCommit', 'PersistOnFailedCommit', 'ChargeNeighborCounter', 'DecryptChangesCounter', 'BypassConcreteKeyDenial'},
+    'KMSAliasesViewEpoch': {'IgnoreSameLifeListRevision', 'BypassRetiredListLife', 'RetainRowsOnCurrentReadFailure', 'IgnoreSelectedTargetRevision', 'RetainTargetMetadataOnCancel', 'KeepFormAfterAcknowledgedWrite', 'KeepDraftAfterAcknowledgedWrite', 'ReplayWriteOnReadRetry', 'SubmitWithoutVerifiedTarget', 'DeleteWithoutExactConfirmation', 'LocaleClearsUnsavedDraft'},
     'NativeWireProjection': {'AcceptBadValue', 'IgnoreOmission', 'PublishErrorPrefix', 'ReverseFieldOrder', 'EncodeOmittedBad', 'CollapseNullToZero'},
     'RESTRouteMatching': {'BadRejectedScore', 'AllowEmptyGreedy', 'FirstDuplicateCaptureWins', 'LoseSpecificity', 'IgnoreLiteral', 'TruncateGreedy'},
     'RESTProxyEventBoundary': {'AcceptMalformedQuery', 'FirstHeaderValueWins', 'IgnoreEncodedBudget', 'EmitRejectedEvent', 'ReplaceBody', 'TemplateAsActualPath', 'FirstQueryValueWins', 'ForwardAWSSignature', 'ForwardLocalCredentials', 'DropBearerApplication'},
