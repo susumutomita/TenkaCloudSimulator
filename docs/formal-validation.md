@@ -15,7 +15,8 @@ machine-discovered semantic coverage. A newly added implementation file is not
 covered merely because an existing model passes: its exact path must have an
 appropriate reviewed scope mapping and property argument.
 
-The current source registry has16 baselines/82 required named mutation controls.
+The current source candidate registry has 28 baselines/158 required named mutation controls
+(186 required executions), preserving maince1 27/153 and adding AzurePropertiesEpoch 1/5.
 Registration and Python guards are not a successful immutable TLC execution.
 
 | Model | Finite contract | Important exclusions |
@@ -138,3 +139,53 @@ settings are not performed by this gate. Actual protection inspection through th
 available GitHub integration returned HTTP403 `Resource not accessible by
 integration`, so required-check/ruleset enforcement is **unknown**, not claimed
 configured. No security-sensitive repository settings were changed.
+
+
+## Secrets Manager registration and executed evidence
+
+The registry includes main's ten models/thirty-six controls plus
+SecretsVersionLifecycle (six), SecretsRevealEpoch (three), and
+SecretsDisclosureChannels (five): thirteen baselines and fifty controls.
+All required models/invariants and each reviewed control identity are protected;
+unit fixtures reject every individual control removal.
+
+At immutable `c97bdde`, the complete63 TLC cases,19 gate units,21 applicability
+units and42 exact changed blobs passed. Forty-eight controls have behavior
+traces; BrowserSessions_RawOperatorCookie and
+SQSStorageBudget_BlockLegacyMaintenance contain explicit violating initial-state
+valuations. Runtime/parser/type errors and timeouts are not counterexamples.
+Named local receipts remain distinct from subsequent commits and hosted CI.
+Documentation-only changes still require fresh immutable-head applicability/TLC
+checks; the declaration itself never grants a new-head execution result.
+
+The bindings cover named finite state/channel properties, not Go/SQL refinement,
+cryptography or full AWS equivalence. Separate concrete results at `0888924`
+cover full Go/race/build, one-profile94.78% statement/90.12% unfiltered source,
+24 E2E and actual start checks; baseline50 and separate Secrets5 automated screen
+checks also passed. SQL rollback/ignored-write faults, policy matching, storage
+budgets, persistence, raw routing and browser behavior are exercised independently.
+Hosted exact-HEAD CI and publication review remain separate from local results.
+
+## Current Secrets ACK / metadata-read union
+
+All26 main models/149 literal controls remain byte-semantically unchanged.
+SecretsMutationRefresh adds five properties/four named controls:27/153,180
+required finite executions. It covers only live-ACK form exit/draft clearing/read-only
+retry/fresh form intent. It excludes ambiguous unacknowledged writes, React/Go/SQL
+refinement and auth. Earlier eac3/f5d134 success is a historical input, not current
+union verification. [Mapping](formal-secrets-mutation-refresh.md).
+
+
+## Azure properties lifecycle candidate
+
+The current source candidate preserves all 27 main models and 153 named controls,
+and adds the existing AzurePropertiesEpoch model (nine invariants, five controls):
+28 baselines + 158 controls = 186 required executions. Its exact original finite
+bounds, configuration and mutation edits are retained. This source registration
+is not a current-HEAD execution result. Historical standalone six-case and earlier
+whole-candidate results do not establish the new merged candidate.
+
+The model abstracts component lifecycle/request epochs, successful HEAD publication,
+close/open clearing and locale-stable state; it does not prove JavaScript, native
+HTTP parsing, Go/SQLite authorization, SDK compatibility or full Azure parity.
+New immutable formal/application checks and hosted gates remain required.

@@ -42,6 +42,15 @@ export default function Login(){
     const value=input.value.slice(0,start)+plain.replace(/[\r\n]/g,'')+input.value.slice(end);
     pendingPaste.current={input,value,revision};pasteTimer.current=setTimeout(flushPendingPaste,0);
   }
+  function fileKeyDown(event){
+    const input=event.target;
+    if(event.key!=='Enter'||!event.isTrusted||!(input instanceof HTMLInputElement)||input.type!=='file'||document.activeElement!==input)return;
+    // Keep activation synchronous in the trusted keyboard gesture. Suppress the
+    // native Enter default to avoid a second chooser or implicit form submit.
+    event.preventDefault();
+    if(event.repeat||busy||submitting.current||input.matches(':disabled'))return;
+    input.click();
+  }
   async function chooseTokenFile(files){
     if(submitting.current)return;
     const revision=newIntent();setError(null);
@@ -99,7 +108,7 @@ export default function Login(){
           <div onPasteCapture={capturePaste}><Input value={token} type="password" onChange={({detail})=>changeToken(detail.value)} autoComplete="off"/></div>
         </FormField>
         <FormField label={t('Token file – optional','トークンファイル（任意）')} description={t('If paste does not work, explicitly choose the token file supplied by your host. Only one UTF-8 token line, at most 512 bytes. The file is read locally, not uploaded.','貼り付けできない場合は、主催者から受け取ったトークンファイルを選べます。512バイト以下のUTF-8テキスト1行だけを使います。ファイルはブラウザー内で読み取り、アップロードしません。')}>
-          <fieldset disabled={busy} aria-label={t('Choose a local token file','ローカルのトークンファイルを選択')} style={{border:0,padding:0,margin:0}}><FileInput value={[]} multiple={false} onChange={({detail})=>chooseTokenFile(detail.value)}>{t('Choose token file','トークンファイルを選択')}</FileInput></fieldset>
+          <fieldset disabled={busy} onKeyDown={fileKeyDown} aria-label={t('Choose a local token file','ローカルのトークンファイルを選択')} style={{border:0,padding:0,margin:0}}><FileInput value={[]} multiple={false} onChange={({detail})=>chooseTokenFile(detail.value)}>{t('Choose token file','トークンファイルを選択')}</FileInput></fieldset>
           <div role="status" aria-live="polite">{fileState==='loading'?t('Reading token file…','トークンファイルを読み取り中…'):fileState==='loaded'?t('Token loaded. Choose Open sandbox to verify it.','トークンを読み込みました。「サンドボックスを開く」で確認してください。'):''}</div>
         </FormField>
       </SpaceBetween>

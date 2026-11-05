@@ -233,7 +233,14 @@ func (a *Access) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(401)
-		_, _ = fmt.Fprint(w, `{"error":"A valid simulator access token is required"}`)
+		// Google clients parse a native error object before exposing the HTTP
+		// status. Keep authentication identical while preserving their wire
+		// contract; the legacy control/AWS response remains unchanged.
+		if strings.HasPrefix(r.URL.Path, provider.Prefix+"gcp/") {
+			_, _ = fmt.Fprint(w, `{"error":{"code":401,"message":"A valid simulator access token is required","status":"UNAUTHENTICATED"}}`)
+		} else {
+			_, _ = fmt.Fprint(w, `{"error":"A valid simulator access token is required"}`)
+		}
 		return
 	}
 	r.Header.Set("X-Simulator-Access-Role", "operator")

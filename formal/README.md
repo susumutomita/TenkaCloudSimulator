@@ -1,5 +1,12 @@
 # Finite state model
 
+Current source candidate registry: 28 models / 158 literal-protected controls
+(186 required executions). Maince1 contributes 27 models/153 controls unchanged;
+AzurePropertiesEpoch adds one model/five controls. Registration is source evidence,
+not successful execution of this new immutable candidate. Dated receipts below
+refer to their recorded historical inputs, not this current integration. These
+finite models do not prove Go/SQL/HTTP/UI refinement or complete cloud compatibility.
+
 `ObjectStore.tla` models two buckets and two keys, shared object ownership, create/put/delete transitions, and an abstract identity decision `allow /\ ~deny`. `ObjectStore.cfg` checks type correctness, no orphan objects, no unauthorized mutation, and explicit-deny precedence.
 
 Run `TLA_JAR=/path/to/tla2tools.jar make formal`. The jar is TLC 1.7.4 from the official tlaplus/tlaplus release and checked against `tla2tools.sha256`. The script also removes the nonempty-delete guard in a temporary mutant and requires TLC to detect a NoOrphans violation. No Java/TLC dependency is needed at application runtime.
@@ -124,7 +131,7 @@ BrowserSessions, SQSLifecycle and SQSStorageBudget remain mandatory in the large
 The registry adds ProviderActor (7 properties/6 sensitivity controls),
 GCPStorageState (10 properties/8 controls), and AzureBlobState (10 properties/11
 controls), plus ProjectAuthority (10 properties/6 controls), BlobRange (11 properties/8 controls), and ProviderPath (finite carrier properties/7 controls), retaining all existing models/controls. The current source registry
-has16 models/82 controls in main before this KMS restack. Individual finite runs and the final immutable integrated
+has19 models/98 controls in main before this KMS restack. Individual finite runs and the final immutable integrated
 run are recorded separately; registration alone is not a successful TLC run.
 
 ProviderActor abstracts post-authentication emission, selected identity and
@@ -162,7 +169,7 @@ XML order, escaping, disclosure, actual SDK parsing and SQL initialization are n
 proved by this association. Independent serializer byte-goldens and native HTTP
 checks cover the wire format separately.
 
-All82 established sensitivity-control IDs (including36 earlier baseline controls) have literal per-model minimum sets. Real-filesystem tests remove each control individually and require rejection. This protects the checked inventory, not semantic completeness or a Go implementation proof.
+All98 established sensitivity-control IDs (including36 earlier baseline controls) have literal per-model minimum sets. Real-filesystem tests remove each control individually and require rejection. This protects the checked inventory, not semantic completeness or a Go implementation proof.
 
 
 ## Bounded KMS key-state registration
@@ -209,3 +216,39 @@ requires its own immutable input/applicability gate before publication.
 
 
 Current main-preserving KMS restack:18 baselines/94 controls, retaining every main16/82 entry and adding only the two owned KMS models. The current merged source has not run TLC, native/browser or whole-profile acceptance. Earlier911/8ccc receipts do not establish current-head success.
+
+## Current SQS console main integration
+
+Mainfcf contributes18 baselines/94 mandatory controls, including the two
+merged KMS models. SQSConsoleEpoch adds one baseline/four literal-protected
+controls:19 baselines/98 controls,117 planned executions. Every existing
+main model/property/bound/control/config and removal fixture is retained.
+This source union has not run TLC; old99/base5c97 actual103 success is historical.
+The SQS epoch model covers bounded accepted replies/private receipt custody,
+not native receipt validity, authentication, React/DOM/thread execution or
+Go/SQLite refinement. See [correspondence](../docs/formal-sqs-console.md).
+
+## Current Secrets mutation/read integration
+
+The current registry preserves those 26 main models and 149 controls and adds only
+SecretsMutationRefresh (five properties/four named controls): 27 models, 153
+controls, 180 planned executions. Every original model/config/property/control is
+retained. The new property mapping separates acknowledged writes from read-only
+metadata recovery; it does not prove React/HTTP/native idempotency or ambiguous
+write outcomes. [Contract](../docs/formal-secrets-mutation-refresh.md). Full new-HEAD
+immutable applicability/TLC and whole-quality/hosted CI remain required.
+
+
+## Azure properties lifecycle candidate
+
+The current source candidate preserves all 27 main models and 153 named controls,
+and adds the existing AzurePropertiesEpoch model (nine invariants, five controls):
+28 baselines + 158 controls = 186 required executions. Its exact original finite
+bounds, configuration and mutation edits are retained. This source registration
+is not a current-HEAD execution result. Historical standalone six-case and earlier
+whole-candidate results do not establish the new merged candidate.
+
+The model abstracts component lifecycle/request epochs, successful HEAD publication,
+close/open clearing and locale-stable state; it does not prove JavaScript, native
+HTTP parsing, Go/SQLite authorization, SDK compatibility or full Azure parity.
+New immutable formal/application checks and hosted gates remain required.

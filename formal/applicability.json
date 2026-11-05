@@ -1,13 +1,48 @@
 {
   "version": 1,
-  "base_sha": "f5dba056da9bf69df047b391a45d06a3aff3dc66",
+  "base_sha": "ce1ddd1fb5d05ef37acd1ae6b2c8c94d43136b18",
   "changes": [
+    {
+      "path": "README.md",
+      "disposition": "documentation",
+      "models": [],
+      "reason": "Update current merged-source acceptance/counts and distinguish historical receipts from unexecuted exact-HEAD checks; preserve protocol, authorization and rights limitations.",
+      "sha256": "401e54960d1351c2149c0927f8be47d93a3463541b30d2559ab72897cea8a456"
+    },
+    {
+      "path": "docs/acceptance/crossprovider-console.md",
+      "disposition": "documentation",
+      "models": [],
+      "reason": "Update current merged-source acceptance/counts and distinguish historical receipts from unexecuted exact-HEAD checks; preserve protocol, authorization and rights limitations.",
+      "sha256": "e7a8a7c34357b1a5dfc230e9692345aec60464ad34a89b0e6014ace207a253d7"
+    },
+    {
+      "path": "docs/azure-console.md",
+      "disposition": "documentation",
+      "models": [],
+      "reason": "Update current merged-source acceptance/counts and distinguish historical receipts from unexecuted exact-HEAD checks; preserve protocol, authorization and rights limitations.",
+      "sha256": "27fc2afd79ae2dd0f3423556f7b137f005f7f5f93ed83ad9c799f26c85208776"
+    },
+    {
+      "path": "docs/ci.md",
+      "disposition": "documentation",
+      "models": [],
+      "reason": "Update current merged-source acceptance/counts and distinguish historical receipts from unexecuted exact-HEAD checks; preserve protocol, authorization and rights limitations.",
+      "sha256": "2304ffffa3284552f34aa0a0eee5c16915ff6befc7502ea2a05653b4e913338d"
+    },
     {
       "path": "docs/formal-azure-properties.md",
       "sha256": "96bb1fc0038ca95d45344cf9bb062ca05a2ba0a4915a6d3bb277a9dc3cdbe040",
       "disposition": "documentation",
       "reason": "Describe bounded Azure Properties callback model correspondence and explicitly unmodeled transport/header/authorization/liveness boundaries.",
       "models": []
+    },
+    {
+      "path": "docs/formal-validation.md",
+      "disposition": "documentation",
+      "models": [],
+      "reason": "Update current merged-source acceptance/counts and distinguish historical receipts from unexecuted exact-HEAD checks; preserve protocol, authorization and rights limitations.",
+      "sha256": "a59033832066c22b2ebd1eed7992830b7d11ff026244a3493e451057cb0235a3"
     },
     {
       "path": "formal/AzurePropertiesEpoch.cfg",
@@ -56,31 +91,38 @@
       ]
     },
     {
+      "path": "formal/README.md",
+      "disposition": "documentation",
+      "models": [],
+      "reason": "Update current merged-source acceptance/counts and distinguish historical receipts from unexecuted exact-HEAD checks; preserve protocol, authorization and rights limitations.",
+      "sha256": "384f0c8a45118e18d136ea2bb937f506dd10d2eecc865519ffb0f1b967730ff0"
+    },
+    {
       "path": "formal/models.json",
-      "sha256": "886755ab5276f21d95e4902aa39cd7363bfaa418ab281036b8507d99bbce1402",
+      "sha256": "815550ff07641c00dd12483cc6cc9b480e0baf3514d09ddaee72fbd8ed7d0cce",
       "disposition": "formal-infrastructure",
-      "reason": "Add required AzurePropertiesEpoch model, properties and five negative controls while retaining all existing18models/94 literal controls and strict CFG grammar. New omission detectors fail closed; no semantic proof from this registry binding.",
+      "reason": "Preserve every current main27 model/config/property and153 literal controls; append exact existing AzurePropertiesEpoch with nine invariants/five controls. Extend main strict valid-CFG property/model and every-control omission tests; retain all31 unique test methods/AST uniqueness guards. Source declaration, not full implementation refinement or new immutable execution proof.",
       "models": []
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "d19389ef67555e4ced2415bc88ffe9fc6b118ffbaf338c60060168708fe0ca80",
+      "sha256": "a613d269aff36d7366dff0700982fdb1fe0e2d7c47237377daf59ae2fa712d34",
       "disposition": "presentation",
       "reason": "Canonical Cloudscape bundle/digests/source receipt regenerated from unchanged pinned dependencies and original rights; generated JavaScript is integration evidence, not separate transport or authorization proof.",
       "models": []
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "b44eca184eda3cad065f4d78b492cbe35629c3b97ccb68b4820113b8586d23fe",
+      "sha256": "15da1e8cb1ab66958bf825fca0610058f07ab9e2f1cca4ee526ca0ab2560a334",
       "disposition": "formal-infrastructure",
-      "reason": "Add required AzurePropertiesEpoch model, properties and five negative controls while retaining all existing18models/94 literal controls and strict CFG grammar. New omission detectors fail closed; no semantic proof from this registry binding.",
+      "reason": "Preserve every current main27 model/config/property and153 literal controls; append exact existing AzurePropertiesEpoch with nine invariants/five controls. Extend main strict valid-CFG property/model and every-control omission tests; retain all31 unique test methods/AST uniqueness guards. Source declaration, not full implementation refinement or new immutable execution proof.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "a51054e61a1b456606974f6a849fb6de85109a0c382dd7e376ceea3dd062a2eb",
+      "sha256": "835b5e12c7630988cb6632422b7ce688e9a200a5d77b2e9464e380403a9c3b07",
       "disposition": "formal-infrastructure",
-      "reason": "Add required AzurePropertiesEpoch model, properties and five negative controls while retaining all existing18models/94 literal controls and strict CFG grammar. New omission detectors fail closed; no semantic proof from this registry binding.",
+      "reason": "Preserve every current main27 model/config/property and153 literal controls; append exact existing AzurePropertiesEpoch with nine invariants/five controls. Extend main strict valid-CFG property/model and every-control omission tests; retain all31 unique test methods/AST uniqueness guards. Source declaration, not full implementation refinement or new immutable execution proof.",
       "models": []
     },
     {
@@ -92,7 +134,7 @@
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "dbe296ecaa8dc6fe1c329c9ad0fe1c677f29ed545e40626170db38d5984e43c9",
+      "sha256": "7ddd006c45d37d761bbdc2c2da12a4fb12becd48394c7029e8d12d42b9ae4bb5",
       "disposition": "test-support",
       "reason": "Mandatory actual embedded native HEAD/browser lifecycle acceptance and old provider helper text synchronized to live native properties; no official Azure SDK claim.",
       "models": []
@@ -106,14 +148,14 @@
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "e4abd66eee540408361b9d942f31b9dd7b34fa203249fd3b78b33ba1238b9fa8",
+      "sha256": "55f9029aab72334fe4cc92222848479fdc66079563d9ad998201952456416330",
       "disposition": "presentation",
       "reason": "Canonical Cloudscape bundle/digests/source receipt regenerated from unchanged pinned dependencies and original rights; generated JavaScript is integration evidence, not separate transport or authorization proof.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "2bbb4afcc9f2c219e91216a6c90423331159de1d66b378f9aa0bdb3a5a8d9220",
+      "sha256": "6cc52ac6a60b8de3ee112372cdb1bb14a6cd34dfd6aa36f803a938162697904e",
       "disposition": "presentation",
       "reason": "Canonical Cloudscape bundle/digests/source receipt regenerated from unchanged pinned dependencies and original rights; generated JavaScript is integration evidence, not separate transport or authorization proof.",
       "models": []
