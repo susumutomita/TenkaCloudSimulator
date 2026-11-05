@@ -335,7 +335,9 @@ func (s *KMSAliasStore) ListAliases(ctx context.Context, keyID string, limit int
 	if limit < 1 || limit > 100 || len(marker) > 1024 {
 		return result, kmsInvalid()
 	}
-	tx, err := s.db.BeginTx(ctx, &sql.TxOptions{ReadOnly: true})
+	// The embedded SQLite driver does not support sql.TxOptions.ReadOnly.
+	// This transaction issues only SELECTs; use the established provider BeginTx.
+	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return result, err
 	}
