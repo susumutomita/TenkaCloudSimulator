@@ -43,7 +43,7 @@ ConstructProvider == /\ phase="provider" /\ decision="accepted"
                      /\ UNCHANGED <<enabled,present,valid,unsafe,decision,
                                      listener,database,token>>
 TokenSetup == /\ phase="token" /\ decision="accepted"
-              /\ token'=~unsafe /\ phase'="done"
+              /\ token' = ~unsafe /\ phase'="done"
               /\ UNCHANGED <<enabled,present,valid,unsafe,decision,
                               listener,database,schema,registered>>
 Next == Check \/ OpenListener \/ OpenDatabase \/ ConstructProvider \/ TokenSetup
@@ -67,6 +67,6 @@ SchemaRequiresDatabase == schema => database
 RegistrationRequiresSchema == registered => schema
 TokenOnlyAuthenticated == token => ~unsafe
 StartupComplete == phase="done" =>
-    listener /\ database /\ (token=~unsafe) /\ (schema=enabled)
+    listener /\ database /\ (token = ~unsafe) /\ (schema=enabled)
     /\ (registered=enabled)
 =============================================================================
