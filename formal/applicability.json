@@ -1,33 +1,33 @@
 {
   "version": 1,
-  "base_sha": "4f4d0f9bdb5cf76e3b5f4e9e9d9dbc247c22750c",
+  "base_sha": "4a649814bee73b06ee82aecc6ca952dfe6bc8137",
   "changes": [
     {
-      "path": ".github/workflows/ci.yml",
-      "sha256": "a65bfc68a83b06874829bd83e4fd80750e2e745b00d87923a9285e135d1e6634",
-      "disposition": "formal-infrastructure",
-      "reason": "Bound retry for transient official pinned TLC transport while preserving URL/output/hash-before-Java, model deadlines, workflow actions/permissions and all gates. Mandatory real loopback fixtures execute first; no retry-all-errors/403 or digest retry and no success on exhaustion.",
-      "models": []
-    },
-    {
-      "path": ".github/workflows/formal.yml",
-      "sha256": "863ae60de63a13c1285c75bc5f858143750ba46c8ecb4fb51d3984bca7bc43d6",
-      "disposition": "formal-infrastructure",
-      "reason": "Bound retry for transient official pinned TLC transport while preserving URL/output/hash-before-Java, model deadlines, workflow actions/permissions and all gates. Mandatory real loopback fixtures execute first; no retry-all-errors/403 or digest retry and no success on exhaustion.",
-      "models": []
-    },
-    {
-      "path": "test/ci/tla_download.py",
-      "sha256": "339c3cb707a1e1b0abfea5814582344f7f0218cd029e7f9981fc7443ca163f88",
-      "disposition": "test-support",
-      "reason": "Exercise actual shlex-parsed workflow commands with owned loopback responses:504 recovery/403single/exhaustion/fixture-only shortened outertimeout/canonical checksum refusal beforeJava. No production URL override, real cloud/artifact access, credentials or Java execution.",
-      "models": []
-    },
-    {
-      "path": "docs/ci.md",
-      "sha256": "bed1c3c3665fa92ae567ea3bf0177076e40a24f4748a1873be8e4733c17e5684",
+      "path": "README.ja.md",
+      "sha256": "6768432a35752c96f6dfb1bc77abd393881a912bb5f181321b5676bed0a67361",
       "disposition": "documentation",
-      "reason": "Describe exact network retry/time bounds and unchanged pinned checksum/model deadlines, actual fixture coverage and unverified full95s/SIGKILL/CDN boundaries.",
+      "reason": "English entry point and preserved Japanese documentation describe the verified current Go main subset; commands and safety/compatibility limits retained. No runtime, state or model change.",
+      "models": []
+    },
+    {
+      "path": "README.md",
+      "sha256": "f248259a5b16a46de6113d63f310938411cb8279e2c509ae9eaf216dac8237e9",
+      "disposition": "documentation",
+      "reason": "English entry point and preserved Japanese documentation describe the verified current Go main subset; commands and safety/compatibility limits retained. No runtime, state or model change.",
+      "models": []
+    },
+    {
+      "path": "scripts/formal_applicability.py",
+      "sha256": "ee84ec28ca7b97d1520f11d762e29f28c2c3af2a8024be6227cf691b80faaf0f",
+      "disposition": "formal-infrastructure",
+      "reason": "Recognize exactly README.ja.md as documentation so the preserved Japanese entry can receive immutable blob coverage. Real Git fixture validates Japanese README acceptance and rejects a Go lookalike; unknown runtime and all existing model/control checks remain unchanged.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-applicability.py",
+      "sha256": "bcaf2dc7aa1afc0f9e13da33b25c910bc7dbf1eb3279c623898f11956c47e7c2",
+      "disposition": "formal-infrastructure",
+      "reason": "Recognize exactly README.ja.md as documentation so the preserved Japanese entry can receive immutable blob coverage. Real Git fixture validates Japanese README acceptance and rejects a Go lookalike; unknown runtime and all existing model/control checks remain unchanged.",
       "models": []
     }
   ]
