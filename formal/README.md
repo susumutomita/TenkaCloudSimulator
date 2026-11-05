@@ -1,15 +1,17 @@
 # Finite state model
 
-Current registry: 29 models / 164 literal-protected controls
-(193 required executions). Maince622 contributes 28 models/158 controls unchanged;
-AzurePropertiesTarget adds one model/six controls. Registration is source evidence,
+Current registry: 30 models / 175 literal-protected controls
+(205 required executions). The previous29/164 inventory is preserved;
+IAMManagedPolicies adds one model/11 controls. Its four API-reachable seeds
+and two-request suffixes cover bounded managed-policy transitions. The earlier
+four-request exploration timed out and is not claimed. Registration is source evidence,
 not itself evidence of successful execution. Dated receipts below
 refer to their recorded inputs; later revisions require their own checks. These
 finite models do not prove Go/SQL/HTTP/UI refinement or complete cloud compatibility.
 
 Legacy integration sections below retain historical counts and status statements
 for traceability. Their word “current” refers to the recorded integration, not
-today's registry. The authoritative current inventory is the 29/164 registry
+today's registry. The authoritative current inventory is the 30/175 registry
 above; proof claims always require evidence for the exact revision.
 
 `ObjectStore.tla` models two buckets and two keys, shared object ownership, create/put/delete transitions, and an abstract identity decision `allow /\ ~deny`. `ObjectStore.cfg` checks type correctness, no orphan objects, no unauthorized mutation, and explicit-deny precedence.

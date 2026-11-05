@@ -15,8 +15,10 @@ machine-discovered semantic coverage. A newly added implementation file is not
 covered merely because an existing model passes: its exact path must have an
 appropriate reviewed scope mapping and property argument.
 
-The current registry has 29 baselines/164 required named mutation controls
-(193 required executions), preserving maince622 28/158 and adding AzurePropertiesTarget 1/6.
+The current registry has 30 baselines/175 required named mutation controls
+(205 required executions), preserving the previous29/164 and adding IAMManagedPolicies 1/11.
+The new IAM scope is four API-reachable seeds and at most two subsequent requests;
+the broader four-request exploratory candidate timed out and is not claimed.
 Registration and Python guards are not a successful immutable TLC execution.
 
 | Model | Finite contract | Important exclusions |
@@ -25,6 +27,7 @@ Registration and Python guards are not a successful immutable TLC execution.
 | StackOwnership | two owners/two names; retained drift reservations | authentication, callback recovery, full CFN |
 | S3Versions | one bucket/two keys; at most three history entries per key | suspended versions, byte quotas, SQL |
 | NativeIAMOwnership | two case-folded names; native/legacy exclusivity | trust parsing, full IAM, process isolation |
+| [IAMManagedPolicies](formal-iam-managed-policies.md) | four reachable seeds, two-request suffixes; stored aggregates, default/version/deletion/edge invariants | unsuccessful four-request exploration, Go/SQL refinement, concrete auth race, wire parsing/UI, actual five-version/twenty-attachment quotas |
 | RESTDeploymentSnapshot | one API/two deployments/two handlers/one stage | path matching, Lambda execution/permissions |
 
 All registered models run even for documentation-only changes. The supported CFG
