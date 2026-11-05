@@ -1,6 +1,7 @@
 # Secrets Manager: local training subset
 
-> Historical isolated-branch receipt: current mainfcf8 (KMS, S3 regression and login improvements merged) plus Secrets18aa retains21 models/108 controls and29 mandatory cases. Historical validation receipts below describe the original isolated62ba/runtime source. Current local focused checks and exact-HEAD whole hosted CI are separate evidence; old results never establish the new union automatically.
+> This bounded native implementation preserves the 42 acceptance cases and 26 models/149 controls from baseline `0a6bdce41c773f651a5bd9a8a128da4e45b8b2c2`. The ACK observation contract adds one model/four controls (27/153,180 finite cases). Combined runtime, browser and model results are revision-specific: consult the exact commit in [CI](https://github.com/susumutomita/TenkaCloudSimulator/actions/workflows/ci.yml) and [Formal validation](https://github.com/susumutomita/TenkaCloudSimulator/actions/workflows/formal.yml). Historical receipts below do not establish a different revision’s success.
+
 
 Seven native Secrets Manager operations, the Cloudscape console, SDK clients and
 the embedded API reference use the same SQLite state. This is an independent,
@@ -14,7 +15,7 @@ are ordinary metadata, not protected value fields; do not put secrets in them.
 ## Connect and use the API
 
 Start the normal authenticated local binary as described in [startup](start.md),
-sign in with its local access token, then choose **Services → Secrets Manager**.
+sign in with its local access token, then choose **AWS → Services → Secrets Manager**. The provider-scoped catalog requires the actual Secrets capability; `#/secretsmanager` and the legacy `#/secrets` alias select the same view. No Google/Azure catalog advertises it.
 Hosts allocate a separate process, SQLite file and token authority for each team.
 A selected IAM principal is exercise context, not authentication or tenant
 isolation. Participant tokens cannot select the administrator.
@@ -226,3 +227,51 @@ SQLite immutable versions and retired physical identities.
 Pinned source references:
 [Kumo store](https://github.com/sivchari/kumo/blob/ce37a8fb406ecb96b5619204f645c26302b651a5/internal/service/secretsmanager/storage.go),
 [LocalStack provider](https://github.com/localstack/localstack/blob/8b9a79f05846835cf4dff63ab7eefdde9df83783/localstack-core/localstack/services/secretsmanager/provider.py).
+
+
+## Provider-aware localization source slice
+
+The child retains `{region, request, onSaving}` and remounts on region, principal
+and navigationVersion, never locale. English/Japanese change static labels only.
+SecretString, names, ARNs, version IDs, JSON, API enum values and raw server error
+messages are never translated. Four canonical success kinds render in the current
+language; seven locally typed validation errors use a finite dictionary.
+
+On the local source slice, default-English translation erasure compiled to exactly
+the independently preserved ffdf1e29 child output; six pure checks passed at the historical source slice. The
+new provider catalog adds six tests including capability gating, both routes and
+AWS-only Japanese discovery, for12 pure checks total. The canonical console was
+built from the existing same-lock dependencies without any install. These checks
+are not real browser/reveal/SDK or full 180-case model acceptance at this new union.
+Fresh integrated gates are still required; old62ba/ffdf/main receipts remain
+separate historical inputs. No blocked public operation is retried by this local
+source preparation.
+
+## Acknowledged writes and metadata-read failures
+
+A live/current CreateSecret or PutSecretValue acknowledgement closes the form and
+clears the draft and its request token before the independent Describe/List read.
+If that read fails, the error is shown in a metadata/list view with read-only
+refresh; Save/Store cannot replay the acknowledged write from a cleared form.
+Opening a new user form is a new intent with a fresh nonempty request token.
+This does not claim rollback or certainty for an unacknowledged network failure.
+
+The new [finite contract](formal-secrets-mutation-refresh.md) registers five
+properties and four targeted controls while preserving all26 main models/149 controls unchanged.
+The old-source real-binary regression failed both Create/Put form-closure
+assertions. A focused overlay pass is retained separately. At historical eac3a1d, the canonical
+embedded binary (no overlay) passed the full Secrets helper and new regression:
+both actual native ACKs close their forms, raw drafts disappear, read-only
+refresh preserves ARN/current version without another write, and a separately
+opened form uses a distinct nonempty token. Pure7 checks and canonical assets
+passed. Policy/app checks and final integrated180-case immutable/whole-quality/hosted gates
+remain separately required. The explicit aborted-read fixture is not a claim
+about the cause of an earlier hosted CI failure.
+
+The new main0a6 union also preserves cleared detail state immediately after ACK,
+removes an acknowledged deleted resource from the visible list, and provides an
+explicit read-only Retry metadata refresh action. Main Japanese service-locale
+assertions and all42 Conformance methods are preserved. The acceptance suite includes
+locale/navigation checks and actual embedded browser flows. A particular revision
+requires its own exact-HEAD full gates; pure/source checks and historical receipts
+do not substitute for that execution.

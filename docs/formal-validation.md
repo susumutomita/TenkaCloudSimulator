@@ -15,7 +15,7 @@ machine-discovered semantic coverage. A newly added implementation file is not
 covered merely because an existing model passes: its exact path must have an
 appropriate reviewed scope mapping and property argument.
 
-The current source registry has26 baselines/149 required named mutation controls.
+The current candidate registry has27 baselines/153 required named mutation controls.
 Registration and Python guards are not a successful immutable TLC execution.
 
 | Model | Finite contract | Important exclusions |
@@ -164,3 +164,12 @@ cover full Go/race/build, one-profile94.78% statement/90.12% unfiltered source,
 checks also passed. SQL rollback/ignored-write faults, policy matching, storage
 budgets, persistence, raw routing and browser behavior are exercised independently.
 Hosted exact-HEAD CI and publication review remain separate from local results.
+
+## Current Secrets ACK / metadata-read union
+
+All26 main models/149 literal controls remain byte-semantically unchanged.
+SecretsMutationRefresh adds five properties/four named controls:27/153,180
+required finite executions. It covers only live-ACK form exit/draft clearing/read-only
+retry/fresh form intent. It excludes ambiguous unacknowledged writes, React/Go/SQL
+refinement and auth. Earlier eac3/f5d134 success is a historical input, not current
+union verification. [Mapping](formal-secrets-mutation-refresh.md).

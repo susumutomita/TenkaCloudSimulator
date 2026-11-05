@@ -1,1351 +1,106 @@
 {
   "version": 1,
-  "base_sha": "f5dba056da9bf69df047b391a45d06a3aff3dc66",
+  "base_sha": "0a6bdce41c773f651a5bd9a8a128da4e45b8b2c2",
   "changes": [
     {
-      "path": ".github/workflows/ci.yml",
-      "sha256": "5c1e7159a3a6ab630951687baafdbd9c86564a1c01e8a322ba4b739d50d77703",
-      "disposition": "formal-infrastructure",
-      "reason": "Preserve the prior fail-closed model/applicability inventory and add the required service obligations or CI evidence retention. This is validation infrastructure, not modeled product state; registry/applicability negative controls and immutable-head execution remain mandatory.",
-      "models": []
-    },
-    {
       "path": "README.md",
-      "sha256": "80a5cbe744f9a0423ad83f7f96f9c3960e717f8ac1ae80304b0006c35701a921",
+      "sha256": "e9bbaafa9ed5e3724c2c922c7191cb970433b175134642d4cad1f51c66e30670",
       "disposition": "documentation",
-      "reason": "Document the bounded service/SDK integration, provenance, compatibility limits or separately identified historical acceptance; this file is not a simulator state transition or executable model.",
-      "models": []
-    },
-    {
-      "path": "docs/acceptance/backlog-services.md",
-      "sha256": "e2d2f5d5e815d3fde99869036ff8ea77e60587364866b69a0531b705b60dd648",
-      "disposition": "documentation",
-      "reason": "Document the bounded service/SDK integration, provenance, compatibility limits or separately identified historical acceptance; this file is not a simulator state transition or executable model.",
-      "models": []
-    },
-    {
-      "path": "docs/acceptance/crossprovider-console.md",
-      "sha256": "9035d35c50412e17a39a4c077686b5b05a1d5bdbeadf1332bc974b36e8c38a99",
-      "disposition": "documentation",
-      "reason": "Document the bounded service/SDK integration, provenance, compatibility limits or separately identified historical acceptance; this file is not a simulator state transition or executable model.",
-      "models": []
-    },
-    {
-      "path": "docs/acceptance/crossprovider-official-storage.md",
-      "sha256": "a6eb9233093c4eade53523157a2d8f960a4f4613014f4f62830d50cf669ca2e6",
-      "disposition": "documentation",
-      "reason": "Document the bounded service/SDK integration, provenance, compatibility limits or separately identified historical acceptance; this file is not a simulator state transition or executable model.",
-      "models": []
-    },
-    {
-      "path": "docs/azure-blob.md",
-      "sha256": "02bd42055f12c7818d69fb67461a384c48029ac80b41abc6e61e476384617ffd",
-      "disposition": "documentation",
-      "reason": "Document the bounded service/SDK integration, provenance, compatibility limits or separately identified historical acceptance; this file is not a simulator state transition or executable model.",
+      "reason": "Keep revision-specific CI evidence separate from stable acceptance requirements; document unchanged coverage floors and meaningful native storage-recovery tests without claiming unexecuted whole-suite results or real-cloud parity.",
       "models": []
     },
     {
       "path": "docs/ci.md",
-      "sha256": "2e9a3c62ca9cb337425bfa28a48f8511b84910acbc46cc3e1e9019919c81823c",
       "disposition": "documentation",
-      "reason": "Document the bounded service/SDK integration, provenance, compatibility limits or separately identified historical acceptance; this file is not a simulator state transition or executable model.",
-      "models": []
+      "models": [],
+      "reason": "Keep revision-specific CI evidence separate from stable acceptance requirements; document unchanged coverage floors and meaningful native storage-recovery tests without claiming unexecuted whole-suite results or real-cloud parity.",
+      "sha256": "3c92e24045ae3edc2ec8d61db6abc47c89fe9ff96245b8a0abaff4922c792c9e"
     },
     {
-      "path": "docs/cloudwatch-logs.md",
-      "sha256": "35f3cbc7d64f0ba39cc544ff382d7c75ef2c1870084113d578c350102f9d3f9f",
+      "path": "docs/formal-secrets-mutation-refresh.md",
       "disposition": "documentation",
-      "reason": "Document the bounded service/SDK integration, provenance, compatibility limits or separately identified historical acceptance; this file is not a simulator state transition or executable model.",
-      "models": []
-    },
-    {
-      "path": "docs/development-status.md",
-      "sha256": "be3ce85fdf7111fb09c032134e01728c3bf6dc7de05128eba9de60fea80caf52",
-      "disposition": "documentation",
-      "reason": "Document the bounded service/SDK integration, provenance, compatibility limits or separately identified historical acceptance; this file is not a simulator state transition or executable model.",
-      "models": []
-    },
-    {
-      "path": "docs/dynamodb-formal-scope.md",
-      "sha256": "ce7828f48331be50d66462ccfd3983de726ba593b38178319225f7e8d80e81a4",
-      "disposition": "documentation",
-      "reason": "Document the bounded service/SDK integration, provenance, compatibility limits or separately identified historical acceptance; this file is not a simulator state transition or executable model.",
-      "models": []
-    },
-    {
-      "path": "docs/dynamodb-integration.md",
-      "sha256": "fa9f00010d3b02d46025c252d52afd69d6e9de78f244e7a75866e9a42f435b2c",
-      "disposition": "documentation",
-      "reason": "Document the bounded service/SDK integration, provenance, compatibility limits or separately identified historical acceptance; this file is not a simulator state transition or executable model.",
-      "models": []
-    },
-    {
-      "path": "docs/dynamodb-quality-plan.md",
-      "sha256": "693e80a12dd6ac433d3ba5f48e20e2a9e992084e1c7badeca7a84076c276bf55",
-      "disposition": "documentation",
-      "reason": "Document the bounded service/SDK integration, provenance, compatibility limits or separately identified historical acceptance; this file is not a simulator state transition or executable model.",
-      "models": []
-    },
-    {
-      "path": "docs/dynamodb.md",
-      "sha256": "d7669aa92aec0d35c9af7e96da33dc61b7baefa5922f56a83cd9049be123faab",
-      "disposition": "documentation",
-      "reason": "Document the bounded service/SDK integration, provenance, compatibility limits or separately identified historical acceptance; this file is not a simulator state transition or executable model.",
-      "models": []
-    },
-    {
-      "path": "docs/formal-sqs-console.md",
-      "sha256": "f3fdcedd0084ac55c1f2e3ae24e630b1d1622e8080cce094f4d47cbd497e9a9e",
-      "disposition": "documentation",
-      "reason": "Document the bounded service/SDK integration, provenance, compatibility limits or separately identified historical acceptance; this file is not a simulator state transition or executable model.",
-      "models": []
+      "models": [],
+      "reason": "Current main0a6 plus ACK-only integration scope27/153/180, with explicit historical eac134 vs pending new-HEAD proof. Preserve service/API limits and rights; no claim of full refinement/cloud parity/current fullCI.",
+      "sha256": "fb525bf7f17b9a2a525bbc640b5e3bda9cf48d9258201cecde2f176894acadad"
     },
     {
       "path": "docs/formal-validation.md",
-      "sha256": "8658d17f9feeeeb95b14cc00cb5ddae879f80f4e4609aa7b02d0bb3a393c2841",
+      "sha256": "0f91c46b491a12dc518314f78b4a7d567829e617d26ae83b99752b708e52c614",
       "disposition": "documentation",
-      "reason": "Document the bounded service/SDK integration, provenance, compatibility limits or separately identified historical acceptance; this file is not a simulator state transition or executable model.",
-      "models": []
-    },
-    {
-      "path": "docs/gcp-storage.md",
-      "sha256": "4a669eaff14ca5fdd04f0434b0f65bd63eb424c383e5271606767a6980e66710",
-      "disposition": "documentation",
-      "reason": "Document the bounded service/SDK integration, provenance, compatibility limits or separately identified historical acceptance; this file is not a simulator state transition or executable model.",
-      "models": []
-    },
-    {
-      "path": "docs/multicloud-storage.md",
-      "sha256": "fb93a656e0e90e7d16e42a71f6929f912303c6ac0ce06774d439d2932657e64f",
-      "disposition": "documentation",
-      "reason": "Document the bounded service/SDK integration, provenance, compatibility limits or separately identified historical acceptance; this file is not a simulator state transition or executable model.",
+      "reason": "Keep revision-specific CI evidence separate from stable acceptance requirements; document unchanged coverage floors and meaningful native storage-recovery tests without claiming unexecuted whole-suite results or real-cloud parity.",
       "models": []
     },
     {
       "path": "docs/secrets-manager.md",
-      "sha256": "d972a8cc30e696954b2ab9775a8f2d737cc7bb48c639483762f6b79c6318033c",
+      "sha256": "624c3333d5d60f1ec590c41765df90a5a2df503f4bd80a9b9b26344ccf3b0bfd",
       "disposition": "documentation",
-      "reason": "Document the bounded service/SDK integration, provenance, compatibility limits or separately identified historical acceptance; this file is not a simulator state transition or executable model.",
+      "reason": "Keep revision-specific CI evidence separate from stable acceptance requirements; document unchanged coverage floors and meaningful native storage-recovery tests without claiming unexecuted whole-suite results or real-cloud parity.",
       "models": []
-    },
-    {
-      "path": "docs/sqs-console.md",
-      "sha256": "ee73b09637e07da3fd255529b06d2775795584944db9889d44618baaeb336749",
-      "disposition": "documentation",
-      "reason": "Document the bounded service/SDK integration, provenance, compatibility limits or separately identified historical acceptance; this file is not a simulator state transition or executable model.",
-      "models": []
-    },
-    {
-      "path": "docs/sqs.md",
-      "sha256": "816a78820b1d4d56a0aed975bb1a7c64dea7f2c39a0a2935e7179fd82aeaf17e",
-      "disposition": "documentation",
-      "reason": "Document the bounded service/SDK integration, provenance, compatibility limits or separately identified historical acceptance; this file is not a simulator state transition or executable model.",
-      "models": []
-    },
-    {
-      "path": "formal/CloudWatchLogsLifecycle.cfg",
-      "sha256": "9d00c17eeb71e24d9a313552c6c91f0fccce149d391c824aca5461726b040880",
-      "disposition": "modeled",
-      "reason": "Define or configure the named finite abstraction with its declared bounds and all required invariant sensitivity controls. Bind log group/stream/event state, authorization, cursor authority and fail-closed composition to the finite Logs lifecycle.",
-      "models": [
-        {
-          "id": "CloudWatchLogsLifecycle",
-          "properties": [
-            "NoOrphans",
-            "OnlyAcceptedWrites",
-            "TokenAuthority"
-          ],
-          "limits": "Finite names/events/cursors do not model UTF-8, byte quotas, real timestamps, cryptographic cursors, SQL transactions or HTTP/SDK refinement."
-        }
-      ]
-    },
-    {
-      "path": "formal/CloudWatchLogsLifecycle.tla",
-      "sha256": "8ee10ce8c198091491f0b525c5adffc71761165adb7348f3d369145bf07f8d99",
-      "disposition": "modeled",
-      "reason": "Define or configure the named finite abstraction with its declared bounds and all required invariant sensitivity controls. Bind log group/stream/event state, authorization, cursor authority and fail-closed composition to the finite Logs lifecycle.",
-      "models": [
-        {
-          "id": "CloudWatchLogsLifecycle",
-          "properties": [
-            "NoOrphans",
-            "OnlyAcceptedWrites",
-            "TokenAuthority"
-          ],
-          "limits": "Finite names/events/cursors do not model UTF-8, byte quotas, real timestamps, cryptographic cursors, SQL transactions or HTTP/SDK refinement."
-        }
-      ]
-    },
-    {
-      "path": "formal/CloudWatchLogsViewEpoch.cfg",
-      "sha256": "3af22fcf227114b07a7b0d66adda8fc0c9c54f0b43cd5bc549f1b27a89d520a9",
-      "disposition": "modeled",
-      "reason": "Define or configure the named finite abstraction with its declared bounds and all required invariant sensitivity controls. Bind Logs result acceptance and the shared keyed mount to current context and mounted state.",
-      "models": [
-        {
-          "id": "CloudWatchLogsViewEpoch",
-          "properties": [
-            "FreshResults",
-            "NoUnmountedResults"
-          ],
-          "limits": "Finite epochs do not execute React, network cancellation, pagination, localization, layout or the native Logs implementation."
-        }
-      ]
-    },
-    {
-      "path": "formal/CloudWatchLogsViewEpoch.tla",
-      "sha256": "20daf40e43955b108c3c832399039810ad605192775636dafbf6a5c9c5c444d0",
-      "disposition": "modeled",
-      "reason": "Define or configure the named finite abstraction with its declared bounds and all required invariant sensitivity controls. Bind Logs result acceptance and the shared keyed mount to current context and mounted state.",
-      "models": [
-        {
-          "id": "CloudWatchLogsViewEpoch",
-          "properties": [
-            "FreshResults",
-            "NoUnmountedResults"
-          ],
-          "limits": "Finite epochs do not execute React, network cancellation, pagination, localization, layout or the native Logs implementation."
-        }
-      ]
-    },
-    {
-      "path": "formal/DynamoDBAdmission.cfg",
-      "sha256": "d50ce8e0541451e9e81eaf965c5ba61f43fe0a4f5509b961916e1ce6e8ede8c4",
-      "disposition": "modeled",
-      "reason": "Define or configure the named finite abstraction with its declared bounds and all required invariant sensitivity controls. Bind table/item admission, canonical keys, semantic sizes, transaction acknowledgements, quotas and exact statistics to the bounded DynamoDB state machine.",
-      "models": [
-        {
-          "id": "DynamoDBAdmission",
-          "properties": [
-            "InitializedBeforeMutation",
-            "DeniedFrame",
-            "ValidKeysOnly",
-            "CanonicalKeys",
-            "SemanticBytes",
-            "CommittedBytes",
-            "CreateCommitted",
-            "AcknowledgedRemoval",
-            "ActiveTableRequired",
-            "TableBudget",
-            "ItemBudget",
-            "ItemCountBudget",
-            "StatisticsExact",
-            "PeerFrame",
-            "NoOrphans",
-            "RefusalFrame",
-            "AdmissionExact",
-            "TableAdmissionExact",
-            "RemovalAdmissionExact",
-            "StartupAdmission",
-            "StartupRefusedFrame"
-          ],
-          "limits": "Finite key tokens and size fixtures do not prove decimal/set equality, Unicode/base64 decoding, 2048/1024-byte key boundaries, duplicate JSON detection, recursive grammar or SQL refinement; HTTP/native boundary and rollback tests are separate."
-        }
-      ]
-    },
-    {
-      "path": "formal/DynamoDBAdmission.tla",
-      "sha256": "fa9805aa57933d999c4b58376b9f72d0ff00a77b09e1f90a6da34e6e7a93b49d",
-      "disposition": "modeled",
-      "reason": "Define or configure the named finite abstraction with its declared bounds and all required invariant sensitivity controls. Bind table/item admission, canonical keys, semantic sizes, transaction acknowledgements, quotas and exact statistics to the bounded DynamoDB state machine.",
-      "models": [
-        {
-          "id": "DynamoDBAdmission",
-          "properties": [
-            "InitializedBeforeMutation",
-            "DeniedFrame",
-            "ValidKeysOnly",
-            "CanonicalKeys",
-            "SemanticBytes",
-            "CommittedBytes",
-            "CreateCommitted",
-            "AcknowledgedRemoval",
-            "ActiveTableRequired",
-            "TableBudget",
-            "ItemBudget",
-            "ItemCountBudget",
-            "StatisticsExact",
-            "PeerFrame",
-            "NoOrphans",
-            "RefusalFrame",
-            "AdmissionExact",
-            "TableAdmissionExact",
-            "RemovalAdmissionExact",
-            "StartupAdmission",
-            "StartupRefusedFrame"
-          ],
-          "limits": "Finite key tokens and size fixtures do not prove decimal/set equality, Unicode/base64 decoding, 2048/1024-byte key boundaries, duplicate JSON detection, recursive grammar or SQL refinement; HTTP/native boundary and rollback tests are separate."
-        }
-      ]
-    },
-    {
-      "path": "formal/DynamoDBLifecycle.cfg",
-      "sha256": "1c8d8dbac03183080178e51a983bc386aacc7466e97b87a4ed2a61e2230bc15c",
-      "disposition": "modeled",
-      "reason": "Define or configure the named finite abstraction with its declared bounds and all required invariant sensitivity controls. Bind table generation, transactional item lifecycle, authorization and narrow conditional writes to no stale/orphan items and refused-operation state preservation.",
-      "models": [
-        {
-          "id": "DynamoDBLifecycle",
-          "properties": [
-            "NoOrphans",
-            "GenerationChecked",
-            "NoStaleItems",
-            "ConditionalAtomicity",
-            "NoUnauthorizedMutation",
-            "NoForeignMutation",
-            "FailedUnchanged"
-          ],
-          "limits": "Finite authority/key/generation labels do not execute SQL, IAM/JSON parsing, concurrent processes, durability or the full DynamoDB expression language."
-        }
-      ]
-    },
-    {
-      "path": "formal/DynamoDBLifecycle.tla",
-      "sha256": "34016384f030fa5a1fad347da16b237365972ee76c33b7d77c30d1362f9ad9e0",
-      "disposition": "modeled",
-      "reason": "Define or configure the named finite abstraction with its declared bounds and all required invariant sensitivity controls. Bind table generation, transactional item lifecycle, authorization and narrow conditional writes to no stale/orphan items and refused-operation state preservation.",
-      "models": [
-        {
-          "id": "DynamoDBLifecycle",
-          "properties": [
-            "NoOrphans",
-            "GenerationChecked",
-            "NoStaleItems",
-            "ConditionalAtomicity",
-            "NoUnauthorizedMutation",
-            "NoForeignMutation",
-            "FailedUnchanged"
-          ],
-          "limits": "Finite authority/key/generation labels do not execute SQL, IAM/JSON parsing, concurrent processes, durability or the full DynamoDB expression language."
-        }
-      ]
     },
     {
       "path": "formal/README.md",
-      "sha256": "b0e2bd250f18813e912d40b2cf1429447fa8def3ef792caf5b9d18f0b5478614",
+      "sha256": "428ff92b758d6e8f202b551dd78d7c249aac02e69d89f816a44b4af33c148b4f",
       "disposition": "documentation",
-      "reason": "Document the bounded service/SDK integration, provenance, compatibility limits or separately identified historical acceptance; this file is not a simulator state transition or executable model.",
+      "reason": "Current main0a6 plus ACK-only integration scope27/153/180, with explicit historical eac134 vs pending new-HEAD proof. Preserve service/API limits and rights; no claim of full refinement/cloud parity/current fullCI.",
       "models": []
     },
     {
-      "path": "formal/SQSConsoleEpoch.cfg",
-      "sha256": "6f5bc4cabf9b9fc5202c8c827256bd85870f6788978365219171845770b174a7",
+      "path": "formal/SecretsMutationRefresh.cfg",
       "disposition": "modeled",
-      "reason": "Define or configure the named finite abstraction with its declared bounds and all required invariant sensitivity controls. Bind the SQS view and keyed mount seam to current-context result admission, unmount rejection and private receipt custody.",
       "models": [
         {
-          "id": "SQSConsoleEpoch",
+          "id": "SecretsMutationRefresh",
           "properties": [
-            "OnlyCurrentReplies",
-            "NoUnmountedAcceptance",
-            "ReceiptCustodyBound",
-            "RawReceiptsPrivate"
+            "TypeOK",
+            "AckClosesForm",
+            "NoWriteOnReadRetry",
+            "AckClearsDraft",
+            "FreshFormHasToken"
           ],
-          "limits": "Two abstract contexts and bounded epochs do not execute React promises, actual native receipts, locale controls, layout, authentication or SQLite; real browser/native checks remain required."
+          "limits": "UI ACK-to-metadata/form-state abstraction assuming live current ACK; not epoch/auth/SQL/server idempotency/refinement/liveness or disclosure proof. Excludes unacknowledged network ambiguity/delete/stage-label/rollback/further writes. Corresponds to the reviewed live-ACK form exit in mutate; historical d9 source omitted that exit. Keyboard, React scheduling, concrete HTTP and fresh-token entropy require executable checks."
         }
-      ]
+      ],
+      "reason": "Only additive ACK/read model: 5 properties/4 literal controls; allmain26/149 retained. Finite current live-ACK form exit/draft clearing/read-only metadata retry/fresh-intent token, not React/Go/SQL/auth/ambiguous-write refinement. Oldeac134 is historical; current27/153 requires180 actual new-HEAD executions.",
+      "sha256": "7f970bd6d3d69844869feadf01b3f66d7c23cfc7cb6afa6d527612a6fca7f443"
     },
     {
-      "path": "formal/SQSConsoleEpoch.tla",
-      "sha256": "13dbd97a806390384372a3bdc38a0cdd5b2a05fec5f923f92e57259d83a3a37e",
+      "path": "formal/SecretsMutationRefresh.tla",
       "disposition": "modeled",
-      "reason": "Define or configure the named finite abstraction with its declared bounds and all required invariant sensitivity controls. Bind the SQS view and keyed mount seam to current-context result admission, unmount rejection and private receipt custody.",
       "models": [
         {
-          "id": "SQSConsoleEpoch",
+          "id": "SecretsMutationRefresh",
           "properties": [
-            "OnlyCurrentReplies",
-            "NoUnmountedAcceptance",
-            "ReceiptCustodyBound",
-            "RawReceiptsPrivate"
+            "TypeOK",
+            "AckClosesForm",
+            "NoWriteOnReadRetry",
+            "AckClearsDraft",
+            "FreshFormHasToken"
           ],
-          "limits": "Two abstract contexts and bounded epochs do not execute React promises, actual native receipts, locale controls, layout, authentication or SQLite; real browser/native checks remain required."
+          "limits": "UI ACK-to-metadata/form-state abstraction assuming live current ACK; not epoch/auth/SQL/server idempotency/refinement/liveness or disclosure proof. Excludes unacknowledged network ambiguity/delete/stage-label/rollback/further writes. Corresponds to the reviewed live-ACK form exit in mutate; historical d9 source omitted that exit. Keyboard, React scheduling, concrete HTTP and fresh-token entropy require executable checks."
         }
-      ]
-    },
-    {
-      "path": "formal/SecretsDisclosureChannels.cfg",
-      "sha256": "04e27e9b31fef776f86a14c83692076d1104340328ca34267d3526023efe7e76",
-      "disposition": "modeled",
-      "reason": "Define or configure the named finite abstraction with its declared bounds and all required invariant sensitivity controls. Bind secret material/HTTP output boundaries to authorized explicit GetSecretValue disclosure and redacted metadata/error channels.",
-      "models": [
-        {
-          "id": "SecretsDisclosureChannels",
-          "properties": [
-            "RawRequiresAuthorizedGet",
-            "MetadataLogErrorRedacted",
-            "DeniedNoRaw",
-            "RawEmissionRequiresGet"
-          ],
-          "limits": "Abstract raw/metadata/error labels do not inspect actual bytes, SQL storage, log sinks, exception strings or arbitrary JavaScript/browser channels; native and browser negative tests remain required."
-        }
-      ]
-    },
-    {
-      "path": "formal/SecretsDisclosureChannels.tla",
-      "sha256": "c8edc5aabc1553e4dbb8a884da24fb76cb8eb37509817a48b1997ab64d94e731",
-      "disposition": "modeled",
-      "reason": "Define or configure the named finite abstraction with its declared bounds and all required invariant sensitivity controls. Bind secret material/HTTP output boundaries to authorized explicit GetSecretValue disclosure and redacted metadata/error channels.",
-      "models": [
-        {
-          "id": "SecretsDisclosureChannels",
-          "properties": [
-            "RawRequiresAuthorizedGet",
-            "MetadataLogErrorRedacted",
-            "DeniedNoRaw",
-            "RawEmissionRequiresGet"
-          ],
-          "limits": "Abstract raw/metadata/error labels do not inspect actual bytes, SQL storage, log sinks, exception strings or arbitrary JavaScript/browser channels; native and browser negative tests remain required."
-        }
-      ]
-    },
-    {
-      "path": "formal/SecretsRevealEpoch.cfg",
-      "sha256": "85f6ff6ef3a25e5eaf284b5cb844af18623ed4527ff14f917707090a275c2898",
-      "disposition": "modeled",
-      "reason": "Define or configure the named finite abstraction with its declared bounds and all required invariant sensitivity controls. Bind explicit secret reveal/hide, context changes and the compiled console to fresh authorized result emission and matching ARN/context.",
-      "models": [
-        {
-          "id": "SecretsRevealEpoch",
-          "properties": [
-            "NoUnmountedDisplay",
-            "FreshEmissionHistory",
-            "ReturnedARNMatches",
-            "VisibleContextMatches"
-          ],
-          "limits": "Finite contexts and epochs do not execute React, compiled JavaScript, DOM, localization, HTTP, real ARNs or authentication, and do not model mutation-form completion or metadata-only retry after an acknowledged write; bundle reproducibility and real browser/SDK fault regressions are separate."
-        }
-      ]
-    },
-    {
-      "path": "formal/SecretsRevealEpoch.tla",
-      "sha256": "3cde329f4cb1e7feff528ec3bee76e834214c5c6da48ff78a829b5366f8c2f4b",
-      "disposition": "modeled",
-      "reason": "Define or configure the named finite abstraction with its declared bounds and all required invariant sensitivity controls. Bind explicit secret reveal/hide, context changes and the compiled console to fresh authorized result emission and matching ARN/context.",
-      "models": [
-        {
-          "id": "SecretsRevealEpoch",
-          "properties": [
-            "NoUnmountedDisplay",
-            "FreshEmissionHistory",
-            "ReturnedARNMatches",
-            "VisibleContextMatches"
-          ],
-          "limits": "Finite contexts and epochs do not execute React, compiled JavaScript, DOM, localization, HTTP, real ARNs or authentication, and do not model mutation-form completion or metadata-only retry after an acknowledged write; bundle reproducibility and real browser/SDK fault regressions are separate."
-        }
-      ]
-    },
-    {
-      "path": "formal/SecretsVersionLifecycle.cfg",
-      "sha256": "2a743a944b8bf9c376f74e84a3f45e00be1d0fc27f0ad179b1c9eb649292ae0b",
-      "disposition": "modeled",
-      "reason": "Define or configure the named finite abstraction with its declared bounds and all required invariant sensitivity controls. Bind secret metadata/version transactions and initialized dispatch to immutable versions, label separation, no orphans and authorized reads/writes.",
-      "models": [
-        {
-          "id": "SecretsVersionLifecycle",
-          "properties": [
-            "ImmutableVersions",
-            "NoOrphans",
-            "UniqueLabels",
-            "SeparateCurrentPrevious",
-            "ActiveHasCurrent",
-            "AuthorizedVersions",
-            "AuthorizedDisclosure"
-          ],
-          "limits": "Finite secret/version/label identities do not model actual plaintext bytes, ARN parsing, SQL, UUIDs, IAM grammar, cryptography or real AWS Secrets Manager."
-        }
-      ]
-    },
-    {
-      "path": "formal/SecretsVersionLifecycle.tla",
-      "sha256": "de4b9666671e3e3a8c9b69434b494c46f034eff5a243e312ea40e3b5aa412642",
-      "disposition": "modeled",
-      "reason": "Define or configure the named finite abstraction with its declared bounds and all required invariant sensitivity controls. Bind secret metadata/version transactions and initialized dispatch to immutable versions, label separation, no orphans and authorized reads/writes.",
-      "models": [
-        {
-          "id": "SecretsVersionLifecycle",
-          "properties": [
-            "ImmutableVersions",
-            "NoOrphans",
-            "UniqueLabels",
-            "SeparateCurrentPrevious",
-            "ActiveHasCurrent",
-            "AuthorizedVersions",
-            "AuthorizedDisclosure"
-          ],
-          "limits": "Finite secret/version/label identities do not model actual plaintext bytes, ARN parsing, SQL, UUIDs, IAM grammar, cryptography or real AWS Secrets Manager."
-        }
-      ]
+      ],
+      "reason": "Only additive ACK/read model: 5 properties/4 literal controls; allmain26/149 retained. Finite current live-ACK form exit/draft clearing/read-only metadata retry/fresh-intent token, not React/Go/SQL/auth/ambiguous-write refinement. Oldeac134 is historical; current27/153 requires180 actual new-HEAD executions.",
+      "sha256": "c376c2e0c0bfd5ed25a96ade77d05f4077419eb8a8bf09a811c39901b59910a7"
     },
     {
       "path": "formal/models.json",
-      "sha256": "23b51f535b5804af416017807d17a80399a13513897762e746f8dbbc1b0e6909",
+      "sha256": "1359108b42d825d450b8733cb0829a8a96d0b2a08a63ffe89bcd8c8ed66a6524",
       "disposition": "formal-infrastructure",
-      "reason": "Preserve the prior fail-closed model/applicability inventory and add the required service obligations or CI evidence retention. This is validation infrastructure, not modeled product state; registry/applicability negative controls and immutable-head execution remain mandatory.",
+      "reason": "Preserve all26 main registry entries/properties/bounds/149 controls and every main policy detector; add only ACK model/5properties/4controls plus strict valid-CFG omission and AST unique-test-name guard. Literal totals27/153 and all153 single removals retained. No runtime/timeout/domain/floor weakening. New exact-HEAD180 check required; not execution proof from registration.",
       "models": []
     },
     {
-      "path": "internal/aws/cloudwatch_logs_boundaries_test.go",
-      "sha256": "22f35f97996e689575211cabea19517d10370ef92c1b11053b90a1c086d0bb4e",
+      "path": "internal/aws/dynamodb_recovery_contracts_416_test.go",
+      "sha256": "6ee4937ae373a5c50f1741a9d022099caebbdeca57f75c3e7414ecce849f40e9",
       "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
+      "reason": "Issue416 test-only native DynamoDB/real SQLite storage failure and repaired-retry contracts. Verify refusal retains complete stored frames and peer scope, followed by actual native recovery after repair. No production, threshold, exclusion, profile-union or model changes. These SQL/storage fault states are not claimed as TLA-modeled. Standalone focused normal/race results and diagnostic newly covered lines do not establish a whole-module90% result; one fresh full profile and hosted gates remain required.",
       "models": []
-    },
-    {
-      "path": "internal/aws/cloudwatch_logs_dispatch.go",
-      "sha256": "a1612b889e9c4ab9cdf52c53f7f09a0b341fbbc73f9251cd982be4d991c6618f",
-      "disposition": "modeled",
-      "reason": "Bind log group/stream/event state, authorization, cursor authority and fail-closed composition to the finite Logs lifecycle.",
-      "models": [
-        {
-          "id": "CloudWatchLogsLifecycle",
-          "properties": [
-            "NoOrphans",
-            "OnlyAcceptedWrites",
-            "TokenAuthority"
-          ],
-          "limits": "Finite names/events/cursors do not model UTF-8, byte quotas, real timestamps, cryptographic cursors, SQL transactions or HTTP/SDK refinement."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/cloudwatch_logs_dispatch_test.go",
-      "sha256": "c059181d4c0b2563c576a0da7e9e34d28ed7208e0e08b942e02f7f02104b43b9",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/cloudwatch_logs_http.go",
-      "sha256": "179fef303d65086c42e22e59e8ffc3bae1bd0ef699ba0494ed21005d176d3188",
-      "disposition": "modeled",
-      "reason": "Bind log group/stream/event state, authorization, cursor authority and fail-closed composition to the finite Logs lifecycle.",
-      "models": [
-        {
-          "id": "CloudWatchLogsLifecycle",
-          "properties": [
-            "NoOrphans",
-            "OnlyAcceptedWrites",
-            "TokenAuthority"
-          ],
-          "limits": "Finite names/events/cursors do not model UTF-8, byte quotas, real timestamps, cryptographic cursors, SQL transactions or HTTP/SDK refinement."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/cloudwatch_logs_http_test.go",
-      "sha256": "bb5071d883945658b1e7ad7bfddfa4c46a32ec2b02fdb57f747e23275892b3cd",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/cloudwatch_logs_query.go",
-      "sha256": "e542c7cfcc7538f05a92649a57895b60e29df28f962f8e74b2b58e72b14c11c9",
-      "disposition": "modeled",
-      "reason": "Bind log group/stream/event state, authorization, cursor authority and fail-closed composition to the finite Logs lifecycle.",
-      "models": [
-        {
-          "id": "CloudWatchLogsLifecycle",
-          "properties": [
-            "NoOrphans",
-            "OnlyAcceptedWrites",
-            "TokenAuthority"
-          ],
-          "limits": "Finite names/events/cursors do not model UTF-8, byte quotas, real timestamps, cryptographic cursors, SQL transactions or HTTP/SDK refinement."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/cloudwatch_logs_recovery_test.go",
-      "sha256": "13f3ad5a133dfee6de877e42469fbe77f79d8d3420e345ca5863b9f6711538d6",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/cloudwatch_logs_store.go",
-      "sha256": "e51fa3089657926a0af14a00a18681e36a66ff2cb1d819afb7ef314f25080846",
-      "disposition": "modeled",
-      "reason": "Bind log group/stream/event state, authorization, cursor authority and fail-closed composition to the finite Logs lifecycle.",
-      "models": [
-        {
-          "id": "CloudWatchLogsLifecycle",
-          "properties": [
-            "NoOrphans",
-            "OnlyAcceptedWrites",
-            "TokenAuthority"
-          ],
-          "limits": "Finite names/events/cursors do not model UTF-8, byte quotas, real timestamps, cryptographic cursors, SQL transactions or HTTP/SDK refinement."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/cloudwatch_logs_test.go",
-      "sha256": "638672bd2b0e47a318cefc8da04fce28e62587a6deeb4acd392ab819a93f7770",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/cloudwatch_logs_write_ack_test.go",
-      "sha256": "e0b9e1eb12ba217f7e4e9c4381245d4d552cfc1460a26ff945af35c4027b801d",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/dynamodb.go",
-      "sha256": "0325bfcfe9cc57c6a823ed09f1ff91452aa1e13c7a5f28b8f31c1cd9e34bbaeb",
-      "disposition": "modeled",
-      "reason": "Bind table generation, transactional item lifecycle, authorization and narrow conditional writes to no stale/orphan items and refused-operation state preservation. Bind table/item admission, canonical keys, semantic sizes, transaction acknowledgements, quotas and exact statistics to the bounded DynamoDB state machine.",
-      "models": [
-        {
-          "id": "DynamoDBLifecycle",
-          "properties": [
-            "NoOrphans",
-            "GenerationChecked",
-            "NoStaleItems",
-            "ConditionalAtomicity",
-            "NoUnauthorizedMutation",
-            "NoForeignMutation",
-            "FailedUnchanged"
-          ],
-          "limits": "Finite authority/key/generation labels do not execute SQL, IAM/JSON parsing, concurrent processes, durability or the full DynamoDB expression language."
-        },
-        {
-          "id": "DynamoDBAdmission",
-          "properties": [
-            "InitializedBeforeMutation",
-            "DeniedFrame",
-            "ValidKeysOnly",
-            "CanonicalKeys",
-            "SemanticBytes",
-            "CommittedBytes",
-            "CreateCommitted",
-            "AcknowledgedRemoval",
-            "ActiveTableRequired",
-            "TableBudget",
-            "ItemBudget",
-            "ItemCountBudget",
-            "StatisticsExact",
-            "PeerFrame",
-            "NoOrphans",
-            "RefusalFrame",
-            "AdmissionExact",
-            "TableAdmissionExact",
-            "RemovalAdmissionExact",
-            "StartupAdmission",
-            "StartupRefusedFrame"
-          ],
-          "limits": "Finite key tokens and size fixtures do not prove decimal/set equality, Unicode/base64 decoding, 2048/1024-byte key boundaries, duplicate JSON detection, recursive grammar or SQL refinement; HTTP/native boundary and rollback tests are separate."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/dynamodb_admission_test.go",
-      "sha256": "30e316bbaae8fa44f6c3e571f771e29950d8df96dc03a06319f0742925b8f58b",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/dynamodb_ci_validation_test.go",
-      "sha256": "1d42d67809e6d119f64383ffe56cd310d1cb045e2a52dcb92a356d5af7131af1",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/dynamodb_generation.go",
-      "sha256": "79c7f8a83a295ba490f4db6cb9cd69499704ede99389c8660e187eafa38bffcb",
-      "disposition": "modeled",
-      "reason": "Bind table generation, transactional item lifecycle, authorization and narrow conditional writes to no stale/orphan items and refused-operation state preservation.",
-      "models": [
-        {
-          "id": "DynamoDBLifecycle",
-          "properties": [
-            "NoOrphans",
-            "GenerationChecked",
-            "NoStaleItems",
-            "ConditionalAtomicity",
-            "NoUnauthorizedMutation",
-            "NoForeignMutation",
-            "FailedUnchanged"
-          ],
-          "limits": "Finite authority/key/generation labels do not execute SQL, IAM/JSON parsing, concurrent processes, durability or the full DynamoDB expression language."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/dynamodb_generation_test.go",
-      "sha256": "239fbe256771c06c57ebf208fd03c48b28a44ecfe92d8c7dea88e7e9773912d2",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/dynamodb_ignored_write_test.go",
-      "sha256": "7860a96a7fcc4accb0f068c6094335c0ff7198c465ffd55d2a35212912c80469",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/dynamodb_number.go",
-      "sha256": "47b82e2b6b8c54b41309e65e593aa0414d2f34d5f717231f9bbf22eb0178e1f8",
-      "disposition": "modeled",
-      "reason": "Bind table/item admission, canonical keys, semantic sizes, transaction acknowledgements, quotas and exact statistics to the bounded DynamoDB state machine.",
-      "models": [
-        {
-          "id": "DynamoDBAdmission",
-          "properties": [
-            "InitializedBeforeMutation",
-            "DeniedFrame",
-            "ValidKeysOnly",
-            "CanonicalKeys",
-            "SemanticBytes",
-            "CommittedBytes",
-            "CreateCommitted",
-            "AcknowledgedRemoval",
-            "ActiveTableRequired",
-            "TableBudget",
-            "ItemBudget",
-            "ItemCountBudget",
-            "StatisticsExact",
-            "PeerFrame",
-            "NoOrphans",
-            "RefusalFrame",
-            "AdmissionExact",
-            "TableAdmissionExact",
-            "RemovalAdmissionExact",
-            "StartupAdmission",
-            "StartupRefusedFrame"
-          ],
-          "limits": "Finite key tokens and size fixtures do not prove decimal/set equality, Unicode/base64 decoding, 2048/1024-byte key boundaries, duplicate JSON detection, recursive grammar or SQL refinement; HTTP/native boundary and rollback tests are separate."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/dynamodb_number_test.go",
-      "sha256": "1842d21f17d55860e2d32c604eb7f6820e1bf2917d9182c25a95d49a5d4edee9",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/dynamodb_protocol_test.go",
-      "sha256": "6e663db003a4128b37d4344c5dc2152d0c2f362c89f4548e9c1a709e166da188",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/dynamodb_quota_test.go",
-      "sha256": "649ef3440be4a9d51c4c148e5335b835d7615d631ac49171a2da1634305236ee",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/dynamodb_size.go",
-      "sha256": "c489dbb526f82416f2b76ecf88723c6b1182a37b9c7ccc212b0129fca422a515",
-      "disposition": "modeled",
-      "reason": "Bind table/item admission, canonical keys, semantic sizes, transaction acknowledgements, quotas and exact statistics to the bounded DynamoDB state machine.",
-      "models": [
-        {
-          "id": "DynamoDBAdmission",
-          "properties": [
-            "InitializedBeforeMutation",
-            "DeniedFrame",
-            "ValidKeysOnly",
-            "CanonicalKeys",
-            "SemanticBytes",
-            "CommittedBytes",
-            "CreateCommitted",
-            "AcknowledgedRemoval",
-            "ActiveTableRequired",
-            "TableBudget",
-            "ItemBudget",
-            "ItemCountBudget",
-            "StatisticsExact",
-            "PeerFrame",
-            "NoOrphans",
-            "RefusalFrame",
-            "AdmissionExact",
-            "TableAdmissionExact",
-            "RemovalAdmissionExact",
-            "StartupAdmission",
-            "StartupRefusedFrame"
-          ],
-          "limits": "Finite key tokens and size fixtures do not prove decimal/set equality, Unicode/base64 decoding, 2048/1024-byte key boundaries, duplicate JSON detection, recursive grammar or SQL refinement; HTTP/native boundary and rollback tests are separate."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/dynamodb_size_test.go",
-      "sha256": "8c1aee5a494695b5b28c2b5199fd39927484e49f3c2d640c4f21c928508bf17f",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/dynamodb_store.go",
-      "sha256": "ae86201a205dbfa99e5c039d147a5a1097064d7dde794eff6e8e55f818afdd21",
-      "disposition": "modeled",
-      "reason": "Bind table generation, transactional item lifecycle, authorization and narrow conditional writes to no stale/orphan items and refused-operation state preservation. Bind table/item admission, canonical keys, semantic sizes, transaction acknowledgements, quotas and exact statistics to the bounded DynamoDB state machine.",
-      "models": [
-        {
-          "id": "DynamoDBLifecycle",
-          "properties": [
-            "NoOrphans",
-            "GenerationChecked",
-            "NoStaleItems",
-            "ConditionalAtomicity",
-            "NoUnauthorizedMutation",
-            "NoForeignMutation",
-            "FailedUnchanged"
-          ],
-          "limits": "Finite authority/key/generation labels do not execute SQL, IAM/JSON parsing, concurrent processes, durability or the full DynamoDB expression language."
-        },
-        {
-          "id": "DynamoDBAdmission",
-          "properties": [
-            "InitializedBeforeMutation",
-            "DeniedFrame",
-            "ValidKeysOnly",
-            "CanonicalKeys",
-            "SemanticBytes",
-            "CommittedBytes",
-            "CreateCommitted",
-            "AcknowledgedRemoval",
-            "ActiveTableRequired",
-            "TableBudget",
-            "ItemBudget",
-            "ItemCountBudget",
-            "StatisticsExact",
-            "PeerFrame",
-            "NoOrphans",
-            "RefusalFrame",
-            "AdmissionExact",
-            "TableAdmissionExact",
-            "RemovalAdmissionExact",
-            "StartupAdmission",
-            "StartupRefusedFrame"
-          ],
-          "limits": "Finite key tokens and size fixtures do not prove decimal/set equality, Unicode/base64 decoding, 2048/1024-byte key boundaries, duplicate JSON detection, recursive grammar or SQL refinement; HTTP/native boundary and rollback tests are separate."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/dynamodb_test.go",
-      "sha256": "6a5746ed43c87ed6c9bd3246b7cafc5abbd347be9146a85acb16aa523eae1aeb",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/dynamodb_value_boundaries_test.go",
-      "sha256": "448c31407fcbe5f3c66f306e0d4dc8fb51f511ab6bb4c85276e35f63ef812070",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/dynamodb_write.go",
-      "sha256": "2999308799506564a1104cbcca94b53d63fe1d935eb6a8a183dc662c6735d73d",
-      "disposition": "modeled",
-      "reason": "Bind table/item admission, canonical keys, semantic sizes, transaction acknowledgements, quotas and exact statistics to the bounded DynamoDB state machine.",
-      "models": [
-        {
-          "id": "DynamoDBAdmission",
-          "properties": [
-            "InitializedBeforeMutation",
-            "DeniedFrame",
-            "ValidKeysOnly",
-            "CanonicalKeys",
-            "SemanticBytes",
-            "CommittedBytes",
-            "CreateCommitted",
-            "AcknowledgedRemoval",
-            "ActiveTableRequired",
-            "TableBudget",
-            "ItemBudget",
-            "ItemCountBudget",
-            "StatisticsExact",
-            "PeerFrame",
-            "NoOrphans",
-            "RefusalFrame",
-            "AdmissionExact",
-            "TableAdmissionExact",
-            "RemovalAdmissionExact",
-            "StartupAdmission",
-            "StartupRefusedFrame"
-          ],
-          "limits": "Finite key tokens and size fixtures do not prove decimal/set equality, Unicode/base64 decoding, 2048/1024-byte key boundaries, duplicate JSON detection, recursive grammar or SQL refinement; HTTP/native boundary and rollback tests are separate."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/s3.go",
-      "sha256": "609a80a8226d9e0e2f8d18cd4f0978d61c0a7679c156245ea1145bea77e64d0a",
-      "disposition": "modeled",
-      "reason": "Bind log group/stream/event state, authorization, cursor authority and fail-closed composition to the finite Logs lifecycle. Bind secret metadata/version transactions and initialized dispatch to immutable versions, label separation, no orphans and authorized reads/writes. Bind table/item admission, canonical keys, semantic sizes, transaction acknowledgements, quotas and exact statistics to the bounded DynamoDB state machine.",
-      "models": [
-        {
-          "id": "CloudWatchLogsLifecycle",
-          "properties": [
-            "NoOrphans",
-            "OnlyAcceptedWrites",
-            "TokenAuthority"
-          ],
-          "limits": "Finite names/events/cursors do not model UTF-8, byte quotas, real timestamps, cryptographic cursors, SQL transactions or HTTP/SDK refinement."
-        },
-        {
-          "id": "SecretsVersionLifecycle",
-          "properties": [
-            "ImmutableVersions",
-            "NoOrphans",
-            "UniqueLabels",
-            "SeparateCurrentPrevious",
-            "ActiveHasCurrent",
-            "AuthorizedVersions",
-            "AuthorizedDisclosure"
-          ],
-          "limits": "Finite secret/version/label identities do not model actual plaintext bytes, ARN parsing, SQL, UUIDs, IAM grammar, cryptography or real AWS Secrets Manager."
-        },
-        {
-          "id": "DynamoDBAdmission",
-          "properties": [
-            "InitializedBeforeMutation",
-            "DeniedFrame",
-            "ValidKeysOnly",
-            "CanonicalKeys",
-            "SemanticBytes",
-            "CommittedBytes",
-            "CreateCommitted",
-            "AcknowledgedRemoval",
-            "ActiveTableRequired",
-            "TableBudget",
-            "ItemBudget",
-            "ItemCountBudget",
-            "StatisticsExact",
-            "PeerFrame",
-            "NoOrphans",
-            "RefusalFrame",
-            "AdmissionExact",
-            "TableAdmissionExact",
-            "RemovalAdmissionExact",
-            "StartupAdmission",
-            "StartupRefusedFrame"
-          ],
-          "limits": "Finite key tokens and size fixtures do not prove decimal/set equality, Unicode/base64 decoding, 2048/1024-byte key boundaries, duplicate JSON detection, recursive grammar or SQL refinement; HTTP/native boundary and rollback tests are separate."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/secret_boundaries_test.go",
-      "sha256": "048d1e09e144a639b204a8d22723ab861ed325028abf241130d421ac8fa19fce",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/secret_gateway.go",
-      "sha256": "652e89dc5a59e06677389996ff2899e3d35ea55abc4e2d659ab3feb8951d0ab4",
-      "disposition": "modeled",
-      "reason": "Bind secret metadata/version transactions and initialized dispatch to immutable versions, label separation, no orphans and authorized reads/writes.",
-      "models": [
-        {
-          "id": "SecretsVersionLifecycle",
-          "properties": [
-            "ImmutableVersions",
-            "NoOrphans",
-            "UniqueLabels",
-            "SeparateCurrentPrevious",
-            "ActiveHasCurrent",
-            "AuthorizedVersions",
-            "AuthorizedDisclosure"
-          ],
-          "limits": "Finite secret/version/label identities do not model actual plaintext bytes, ARN parsing, SQL, UUIDs, IAM grammar, cryptography or real AWS Secrets Manager."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/secret_gateway_boundaries_test.go",
-      "sha256": "76eff33d78485204b7e30b3d382398c7858a625dced79dd1f276f096bae91f97",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/secret_http.go",
-      "sha256": "b831eec16a9faccfd8887e98cc05c6cc14fff9399e7ad43d167e5fe871795025",
-      "disposition": "modeled",
-      "reason": "Bind secret material/HTTP output boundaries to authorized explicit GetSecretValue disclosure and redacted metadata/error channels.",
-      "models": [
-        {
-          "id": "SecretsDisclosureChannels",
-          "properties": [
-            "RawRequiresAuthorizedGet",
-            "MetadataLogErrorRedacted",
-            "DeniedNoRaw",
-            "RawEmissionRequiresGet"
-          ],
-          "limits": "Abstract raw/metadata/error labels do not inspect actual bytes, SQL storage, log sinks, exception strings or arbitrary JavaScript/browser channels; native and browser negative tests remain required."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/secret_http_contract_matrix_test.go",
-      "sha256": "f9a6d9cbd98e69aa8c4a0b1eb88ae1ba79883d87076e78e6e2e92799a1a108c5",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/secret_http_test.go",
-      "sha256": "c0d39b1504bb852dac64e22984d6e07deef3fb0891633246dedcff892f235f16",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/secret_material.go",
-      "sha256": "d47afc112fa7168015168a6ec7ef3964cf48f48ad89692d65f78c4b2769b9147",
-      "disposition": "modeled",
-      "reason": "Bind secret material/HTTP output boundaries to authorized explicit GetSecretValue disclosure and redacted metadata/error channels.",
-      "models": [
-        {
-          "id": "SecretsDisclosureChannels",
-          "properties": [
-            "RawRequiresAuthorizedGet",
-            "MetadataLogErrorRedacted",
-            "DeniedNoRaw",
-            "RawEmissionRequiresGet"
-          ],
-          "limits": "Abstract raw/metadata/error labels do not inspect actual bytes, SQL storage, log sinks, exception strings or arbitrary JavaScript/browser channels; native and browser negative tests remain required."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/secret_material_test.go",
-      "sha256": "0f96796bea7649a94276829bbd66390812fe5deb0d49f79625ac735154bb3052",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/secret_query.go",
-      "sha256": "fd4ffb0bdef52b7a914f0fc543cca8be1dc1d2763e650b50f813c11ac8e03de1",
-      "disposition": "modeled",
-      "reason": "Bind secret metadata/version transactions and initialized dispatch to immutable versions, label separation, no orphans and authorized reads/writes.",
-      "models": [
-        {
-          "id": "SecretsVersionLifecycle",
-          "properties": [
-            "ImmutableVersions",
-            "NoOrphans",
-            "UniqueLabels",
-            "SeparateCurrentPrevious",
-            "ActiveHasCurrent",
-            "AuthorizedVersions",
-            "AuthorizedDisclosure"
-          ],
-          "limits": "Finite secret/version/label identities do not model actual plaintext bytes, ARN parsing, SQL, UUIDs, IAM grammar, cryptography or real AWS Secrets Manager."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/secret_query_test.go",
-      "sha256": "3517e5a11becb058f3f9ae4abf22ae4afd6477dd35b9f8ea08efa30f030420c1",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/secret_storage_contracts_test.go",
-      "sha256": "32ab58d981ab486b78e5e431560db49ad41ab1133243ff5378bc2a5662950b7b",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/secret_store.go",
-      "sha256": "096b9dd5cf5e825662c039f653179cd2102476a5cdfb80730422f3952736e25b",
-      "disposition": "modeled",
-      "reason": "Bind secret metadata/version transactions and initialized dispatch to immutable versions, label separation, no orphans and authorized reads/writes.",
-      "models": [
-        {
-          "id": "SecretsVersionLifecycle",
-          "properties": [
-            "ImmutableVersions",
-            "NoOrphans",
-            "UniqueLabels",
-            "SeparateCurrentPrevious",
-            "ActiveHasCurrent",
-            "AuthorizedVersions",
-            "AuthorizedDisclosure"
-          ],
-          "limits": "Finite secret/version/label identities do not model actual plaintext bytes, ARN parsing, SQL, UUIDs, IAM grammar, cryptography or real AWS Secrets Manager."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/secret_store_test.go",
-      "sha256": "745730071a481c5197816e875bf736282048c6c724a9370b4d9c619b1b9d6f41",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/secret_values.go",
-      "sha256": "a605b613fcf9a1547af12fb77d429db31f2be938c83df98355c3a0833cb72d01",
-      "disposition": "modeled",
-      "reason": "Bind secret metadata/version transactions and initialized dispatch to immutable versions, label separation, no orphans and authorized reads/writes.",
-      "models": [
-        {
-          "id": "SecretsVersionLifecycle",
-          "properties": [
-            "ImmutableVersions",
-            "NoOrphans",
-            "UniqueLabels",
-            "SeparateCurrentPrevious",
-            "ActiveHasCurrent",
-            "AuthorizedVersions",
-            "AuthorizedDisclosure"
-          ],
-          "limits": "Finite secret/version/label identities do not model actual plaintext bytes, ARN parsing, SQL, UUIDs, IAM grammar, cryptography or real AWS Secrets Manager."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/secret_values_test.go",
-      "sha256": "f89bf04c92c0f9010cfc0e782a915fa4c41ca642d942196cbd0f17625a013f77",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/ssm.go",
-      "sha256": "5640e3d070425bc4b87e7ac7ef4c96923027a0f64a613e070cef4e0e211e94f8",
-      "disposition": "modeled",
-      "reason": "Bind log group/stream/event state, authorization, cursor authority and fail-closed composition to the finite Logs lifecycle. Bind secret metadata/version transactions and initialized dispatch to immutable versions, label separation, no orphans and authorized reads/writes. Bind table/item admission, canonical keys, semantic sizes, transaction acknowledgements, quotas and exact statistics to the bounded DynamoDB state machine. Preserve exact service dispatch and trusted identity admission in the shared native request composition.",
-      "models": [
-        {
-          "id": "CloudWatchLogsLifecycle",
-          "properties": [
-            "NoOrphans",
-            "OnlyAcceptedWrites",
-            "TokenAuthority"
-          ],
-          "limits": "Finite names/events/cursors do not model UTF-8, byte quotas, real timestamps, cryptographic cursors, SQL transactions or HTTP/SDK refinement."
-        },
-        {
-          "id": "SecretsVersionLifecycle",
-          "properties": [
-            "ImmutableVersions",
-            "NoOrphans",
-            "UniqueLabels",
-            "SeparateCurrentPrevious",
-            "ActiveHasCurrent",
-            "AuthorizedVersions",
-            "AuthorizedDisclosure"
-          ],
-          "limits": "Finite secret/version/label identities do not model actual plaintext bytes, ARN parsing, SQL, UUIDs, IAM grammar, cryptography or real AWS Secrets Manager."
-        },
-        {
-          "id": "DynamoDBAdmission",
-          "properties": [
-            "InitializedBeforeMutation",
-            "DeniedFrame",
-            "ValidKeysOnly",
-            "CanonicalKeys",
-            "SemanticBytes",
-            "CommittedBytes",
-            "CreateCommitted",
-            "AcknowledgedRemoval",
-            "ActiveTableRequired",
-            "TableBudget",
-            "ItemBudget",
-            "ItemCountBudget",
-            "StatisticsExact",
-            "PeerFrame",
-            "NoOrphans",
-            "RefusalFrame",
-            "AdmissionExact",
-            "TableAdmissionExact",
-            "RemovalAdmissionExact",
-            "StartupAdmission",
-            "StartupRefusedFrame"
-          ],
-          "limits": "Finite key tokens and size fixtures do not prove decimal/set equality, Unicode/base64 decoding, 2048/1024-byte key boundaries, duplicate JSON detection, recursive grammar or SQL refinement; HTTP/native boundary and rollback tests are separate."
-        },
-        {
-          "id": "KMSProtocolAdmission",
-          "properties": [
-            "NoCrossServiceFallback",
-            "InfraNotDeny",
-            "MissingIdentityDenied",
-            "NoSuccessWithoutKMSTarget",
-            "NoAuthorityFromWireMetadata"
-          ],
-          "limits": "The finite model does not execute headers, SDK serializers, localized button handlers or Go routing; canonical-operation browser/SDK tests are separate."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/testdata/dynamodb_size_sdk.py",
-      "sha256": "54c71034f7798c7558405adbd9870d95aab63ade62566f83132ea73bd462338f",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "internal/server/access.go",
-      "sha256": "87f75751da51daed0a65dd888d83c938fcd28ca3f1c6252f140d771aa522a277",
-      "disposition": "modeled",
-      "reason": "Preserve token admission, trusted actor identity and participant binding while using the native Google error envelope on rejected GCP-prefixed requests. Preserve session authority while the shared console waits for actual capabilities before mounting service views.",
-      "models": [
-        {
-          "id": "ProviderActor",
-          "properties": [
-            "NoActorOnRejected",
-            "AuthenticatedRequestsAttach",
-            "CredentialIdentityPreserved",
-            "CredentialRoleNotWireRole",
-            "ParticipantBound",
-            "OperatorExerciseSelection"
-          ],
-          "limits": "The finite actor model covers acceptance/rejection authority, not JSON error serialization, URL-prefix parsing or Google SDK error parsing; HTTP and actual SDK tests cover those details."
-        },
-        {
-          "id": "BrowserSessions",
-          "properties": [
-            "RevokedCookiesDenied",
-            "AcceptedOnlyLiveParent",
-            "SDKAuthorityPreserved",
-            "UnrelatedSessionsPreserved",
-            "NoRawSDKCookie",
-            "NoBrowserSDKAuthority",
-            "ParentLifetimeBound"
-          ],
-          "limits": "The finite session model does not execute React, discovery timing, layout, localization, HTTP or browser storage; actual browser regressions remain required."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/access_provider_errors_test.go",
-      "sha256": "86ea527a21fd1b877907888fffe1212f82df9c113f975010c4b9aef9cf7fbefb",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/openapi.json",
-      "sha256": "bff155a7ceec6b363ab14ecd42cae526a81c819d0fb7cd830804fcd9c3b29f24",
-      "disposition": "presentation",
-      "reason": "Describe or build the served API-reference/console presentation. Operation dispatch, native response schemas and locale behavior require the corresponding executable source/served-example/browser tests; this unregistered presentation file does not establish a finite state proof.",
-      "models": []
-    },
-    {
-      "path": "internal/server/cloudwatch_logs_composition_test.go",
-      "sha256": "d74725a4fc5a29e983d1fe8b89b206a327c7b93cc1aff7d15ce7d73cb29b76f8",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "internal/server/dynamodb_test.go",
-      "sha256": "f31dfc88d2fdf15c72f81327166a23c2faca3e6511e4fa05f809eac432796893",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "internal/server/secrets_composition_test.go",
-      "sha256": "55aa5549e5a69941553cc34aeeb48b460b208d506394d668c58d6616f4642f95",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "internal/server/server.go",
-      "sha256": "cdbdba14b3bc4393277b0b6acbaa32d3ff089881caeb164416baea6320c5dd72",
-      "disposition": "modeled",
-      "reason": "Bind log group/stream/event state, authorization, cursor authority and fail-closed composition to the finite Logs lifecycle. Bind secret metadata/version transactions and initialized dispatch to immutable versions, label separation, no orphans and authorized reads/writes. Bind table/item admission, canonical keys, semantic sizes, transaction acknowledgements, quotas and exact statistics to the bounded DynamoDB state machine. Retain fixed GCP project authority and constructor-refusal behavior while composing additional AWS stores.",
-      "models": [
-        {
-          "id": "CloudWatchLogsLifecycle",
-          "properties": [
-            "NoOrphans",
-            "OnlyAcceptedWrites",
-            "TokenAuthority"
-          ],
-          "limits": "Finite names/events/cursors do not model UTF-8, byte quotas, real timestamps, cryptographic cursors, SQL transactions or HTTP/SDK refinement."
-        },
-        {
-          "id": "SecretsVersionLifecycle",
-          "properties": [
-            "ImmutableVersions",
-            "NoOrphans",
-            "UniqueLabels",
-            "SeparateCurrentPrevious",
-            "ActiveHasCurrent",
-            "AuthorizedVersions",
-            "AuthorizedDisclosure"
-          ],
-          "limits": "Finite secret/version/label identities do not model actual plaintext bytes, ARN parsing, SQL, UUIDs, IAM grammar, cryptography or real AWS Secrets Manager."
-        },
-        {
-          "id": "DynamoDBAdmission",
-          "properties": [
-            "InitializedBeforeMutation",
-            "DeniedFrame",
-            "ValidKeysOnly",
-            "CanonicalKeys",
-            "SemanticBytes",
-            "CommittedBytes",
-            "CreateCommitted",
-            "AcknowledgedRemoval",
-            "ActiveTableRequired",
-            "TableBudget",
-            "ItemBudget",
-            "ItemCountBudget",
-            "StatisticsExact",
-            "PeerFrame",
-            "NoOrphans",
-            "RefusalFrame",
-            "AdmissionExact",
-            "TableAdmissionExact",
-            "RemovalAdmissionExact",
-            "StartupAdmission",
-            "StartupRefusedFrame"
-          ],
-          "limits": "Finite key tokens and size fixtures do not prove decimal/set equality, Unicode/base64 decoding, 2048/1024-byte key boundaries, duplicate JSON detection, recursive grammar or SQL refinement; HTTP/native boundary and rollback tests are separate."
-        },
-        {
-          "id": "ProjectAuthority",
-          "properties": [
-            "FixedHostConfiguration",
-            "OwnerBindingFrozen",
-            "ConstructorRefusalFrame",
-            "NoUnboundAdoption",
-            "InitializationBindsConfigured",
-            "DeniedFrame",
-            "FinitePermissions",
-            "ActorUsesPersistedProject",
-            "OnlyActualOwnerAuthorized"
-          ],
-          "limits": "Finite project/owner labels do not execute constructors, SQLite, cloud identity or multi-process isolation."
-        }
-      ]
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "030994c6add235a8c659c84d154a2147bb8374c3940bd2265caab11b9a1b1ffc",
+      "sha256": "7ff9b565737dd4c66e39bebfc3e31d8c1a2f474e21d1bfefe539218f58850d5d",
       "disposition": "modeled",
-      "reason": "Bind explicit secret reveal/hide, context changes and the compiled console to fresh authorized result emission and matching ARN/context.",
+      "reason": "Canonical same-lock embedded bundle preserves main service views plus reviewed Secrets ACK/read and Login keyboard changes. Existing reveal/epoch binding covers only its finite correspondence, not minification, keyboard chooser, all JavaScript or erasure. New source/build/browser and immutable gates are independent evidence. Reviewed accessibility-only refresh disables Cloudscape motion within the Secrets view, with exact-English locale normalization and strengthened immediate-alert contrast regression checks. Existing finite state bindings are retained; animation/opacity/accessibility are outside these models and require executable browser evidence. New hosted exact-HEAD full gates remain required.",
       "models": [
         {
           "id": "SecretsRevealEpoch",
@@ -1355,269 +110,87 @@
             "ReturnedARNMatches",
             "VisibleContextMatches"
           ],
-          "limits": "Finite contexts and epochs do not execute React, compiled JavaScript, DOM, localization, HTTP, real ARNs or authentication, and do not model mutation-form completion or metadata-only retry after an acknowledged write; bundle reproducibility and real browser/SDK fault regressions are separate."
+          "limits": "Finite explicit-retrieve/display model, not React, DOM, AbortController, memory zeroization or implementation refinement. Only the successful response path is modeled; native store/IAM must authorize before returning any secret. A returned ARN can differ and must be rejected. Retrieve, Hide and navigation invalidate epochs; unmount also clears visible state. Parent must remount on region/principal changes. Emission history captures the context at each acceptance so later Hide/navigation cannot relabel an earlier stale acceptance. Draft entry, mutation atomicity and form layout are outside this model. Parent main.jsx scope binds only Secrets routing/remount key (region/principal/navigation); the generated app.js binding is the canonical compiled artifact of those source inputs, independently checked by bundle/asset hashes. It does not model unrelated existing console services or prove JavaScript compilation."
         }
       ]
     },
     {
-      "path": "scripts/formal_applicability.py",
-      "sha256": "72fe4b13dc018eb2e45a10eeeb6d968458404d7703f6ff8c4fca115a73c391a5",
-      "disposition": "formal-infrastructure",
-      "reason": "Preserve the prior fail-closed model/applicability inventory and add the required service obligations or CI evidence retention. This is validation infrastructure, not modeled product state; registry/applicability negative controls and immutable-head execution remain mandatory.",
-      "models": []
-    },
-    {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "7c2dbf03e8f97de6a67c9d10222135b608a8d66904540efca120da00d9fa4f2e",
+      "sha256": "820165ab4eb9d2a079dee9251325e840fcd5ed9629af50a22ca3b0a4e4667334",
       "disposition": "formal-infrastructure",
-      "reason": "Preserve the prior fail-closed model/applicability inventory and add the required service obligations or CI evidence retention. This is validation infrastructure, not modeled product state; registry/applicability negative controls and immutable-head execution remain mandatory.",
-      "models": []
-    },
-    {
-      "path": "scripts/requirements-test.txt",
-      "sha256": "c80ce5fa3cf9e3721b1d2569ef8ceb2ab69d66d01fcbd6bbd942efc5568d814d",
-      "disposition": "validation-tooling",
-      "reason": "Pin or execute development-only acceptance dependencies and quality checks. These packages are not embedded simulator runtime dependencies and do not replace native/model/browser acceptance.",
-      "models": []
-    },
-    {
-      "path": "scripts/test-formal-applicability.py",
-      "sha256": "1814db364c85381b81c91d3096cc5a52b94a960b1d29cd1ee666a125c4cf50f7",
-      "disposition": "formal-infrastructure",
-      "reason": "Preserve the prior fail-closed model/applicability inventory and add the required service obligations or CI evidence retention. This is validation infrastructure, not modeled product state; registry/applicability negative controls and immutable-head execution remain mandatory.",
+      "reason": "Preserve all26 main registry entries/properties/bounds/149 controls and every main policy detector; add only ACK model/5properties/4controls plus strict valid-CFG omission and AST unique-test-name guard. Literal totals27/153 and all153 single removals retained. No runtime/timeout/domain/floor weakening. New exact-HEAD180 check required; not execution proof from registration.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "29383642919f20f67a24dd25e101b4da395303e99eb4d65c2506a7f2ab48fb61",
+      "sha256": "167c48004c54fc93005feb7664fe54abbe68f20613d0c1d49c8189e25d7ed763",
       "disposition": "formal-infrastructure",
-      "reason": "Preserve the prior fail-closed model/applicability inventory and add the required service obligations or CI evidence retention. This is validation infrastructure, not modeled product state; registry/applicability negative controls and immutable-head execution remain mandatory.",
+      "reason": "Preserve all26 main registry entries/properties/bounds/149 controls and every main policy detector; add only ACK model/5properties/4controls plus strict valid-CFG omission and AST unique-test-name guard. Literal totals27/153 and all153 single removals retained. No runtime/timeout/domain/floor weakening. New exact-HEAD180 check required; not execution proof from registration.",
       "models": []
     },
     {
       "path": "test/console/navigation.test.mjs",
-      "sha256": "362fb7b3dadb617dc31922476a8daedcfe586c5e114f61433891da578e0a85e8",
+      "sha256": "19c5c665df661e5298ef4fba29a1b777aa2c6c56217988d56da167f029173aa6",
       "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
+      "reason": "Retain all28 main Conformance method bodies and three actual Secrets process/browser/served-example methods; add provider catalog discovery/alias checks. No assertions/skips/limits weakened. New test execution results must be recorded separately; pure checks are not HTTP/SDK/browser proof.",
       "models": []
     },
     {
-      "path": "test/e2e/check.py",
-      "sha256": "67e5017c4a93c099bbd25e9d33469d9485d0adc41d1492bfe76853018e12e169",
+      "path": "test/e2e/login_token_file.py",
       "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/cloudwatch_logs.py",
-      "sha256": "18b77fc1d1e33ae00d63203a618f773dd1624ba6a94026f30477dd4df23ab138",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/cloudwatch_logs_console.py",
-      "sha256": "d74e4f84be1b2d90d8932a973fc63384a61351d370e9f3f62587a7b2bf24aa02",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/crossprovider_official_storage.py",
-      "sha256": "f0f3d1ee22868122fe7f40293e5047beec8ed9b5cdb476c1ab164bf68c527817",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/dynamodb.py",
-      "sha256": "7d424849bf12bcc64be75a047a4e4848fe15f0500c2bc777e135cf31bcf44544",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/dynamodb_docs.py",
-      "sha256": "96afba2f3e238071b48954e710066cc14cc98d3d4954c386b743e35d744806c7",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/kms_locale.py",
-      "sha256": "a01d94fe0b57dc9310e181dab276fd51b28a9665961024a9fc57c23db2b2db06",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/openapi_json10.py",
-      "sha256": "a11f36526c6f5e9cad784bf7fdb5a13a99ab665263454f9f7e9dc82f1b89e278",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/secrets_manager.py",
-      "sha256": "0325c9a8b024c1ab43882af8e418cc2140e65d94a43002a6e3310ebc2775634d",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
+      "models": [],
+      "reason": "Test-only safe file-keyboard diagnostics and strict native chooser/POST/busy assertions. Original5s timeout, focus condition and auth/read/locale/negative oracles remain; artificial default cancellation is labelled and not a CI-cause claim. Diagnostics contain no token/input value/file name/arbitrary key/request URL. New exactHEAD execution and CI remain required.",
+      "sha256": "38044fe99a4055e049ca37214248188876730dac3ebff50252e2adfa02464291"
     },
     {
       "path": "test/e2e/secrets_manager_console.py",
-      "sha256": "4bbe86f3c4086d8e85b878a2e9dcbcf9bef044af43e751cf9a6b795501af3bd5",
+      "sha256": "b00445684020865d477ba1545eb6b5ebe5550edd78c4ade96c609165e9869790",
       "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/secrets_manager_docs.py",
-      "sha256": "b768a1c41308c0a524b0ad83a789d65888654949bcd6371e53f715ce222b4c3b",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/service_locale.py",
-      "sha256": "86c420317c67546e864c631ba23c844ebd738ef33adb36dba385a13b4cc4fe5c",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/sqs_console.py",
-      "sha256": "b0f5fed77271086881f4831afefa5a5abd8735635e6ea6f146d3b90c2b4adc79",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/sqs_docs.py",
-      "sha256": "89526512fbe19d36e9229e547f1a03d5f757ce6e9f9afb1e6b99f9334e1ecbda",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/test_crossprovider_official_storage.py",
-      "sha256": "6f9210c50dd853cd45192ca8f7fe2e6d81a6f6ffdea1cd4c6c181ff1d464b4ac",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/test_openapi_json10.py",
-      "sha256": "521d02b57721f6bb83cf7b33bb58c6a77e9bf1fe8816ba39b7a68e9abf64b818",
-      "disposition": "test-support",
-      "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
-      "models": []
-    },
-    {
-      "path": "third_party/kumo-cloudwatch-logs.json",
-      "sha256": "45cfcec6a50eab2b71c1e7c9be4e91fefeb372ebce8db35389343580207d1945",
-      "disposition": "documentation",
-      "reason": "Document the bounded service/SDK integration, provenance, compatibility limits or separately identified historical acceptance; this file is not a simulator state transition or executable model.",
+      "reason": "Preserve strict Secrets native/P2/motion/axe assertions and wait for actual authenticated console readiness before DOM inspection; exercise one real held login303 with bounded async diagnostics, always drain the pending task and close both browser scopes. No auth fabrication, secret logging, timing relaxation or product/model change.",
       "models": []
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "0a283f36c4dc0bbe687e17ee637dcead0823b3e7777380ee54d79e5c9a724962",
+      "sha256": "2e439721b28319ba1b123d485d9af191d89350612e92303252703dd566ba9234",
       "disposition": "presentation",
-      "reason": "Describe or build the served API-reference/console presentation. Operation dispatch, native response schemas and locale behavior require the corresponding executable source/served-example/browser tests; this unregistered presentation file does not establish a finite state proof.",
+      "reason": "Provider-scoped catalogue/alias/static locale or canonical same-lock inputs, or pure presentation/source-contract tests. Native API values/resource data/credentials remain opaque. Strict English baseline and reviewed ACK normalization retain negative controls; no actual new-HEAD browser/native/fullgate inference. Reviewed accessibility-only refresh disables Cloudscape motion within the Secrets view, with exact-English locale normalization and strengthened immediate-alert contrast regression checks. Existing finite state bindings are retained; animation/opacity/accessibility are outside these models and require executable browser evidence. New hosted exact-HEAD full gates remain required.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "a8bdba2507ef1d547570724347df631509161f9ff622052169caf652fa6923d4",
+      "sha256": "89259baa3a605c2bc0472dff6ec02a095432b17dcae5e0d6f2abd6a0946702fb",
       "disposition": "presentation",
-      "reason": "Describe or build the served API-reference/console presentation. Operation dispatch, native response schemas and locale behavior require the corresponding executable source/served-example/browser tests; this unregistered presentation file does not establish a finite state proof.",
+      "reason": "Provider-scoped catalogue/alias/static locale or canonical same-lock inputs, or pure presentation/source-contract tests. Native API values/resource data/credentials remain opaque. Strict English baseline and reviewed ACK normalization retain negative controls; no actual new-HEAD browser/native/fullgate inference. Reviewed accessibility-only refresh disables Cloudscape motion within the Secrets view, with exact-English locale normalization and strengthened immediate-alert contrast regression checks. Existing finite state bindings are retained; animation/opacity/accessibility are outside these models and require executable browser evidence. New hosted exact-HEAD full gates remain required.",
       "models": []
-    },
-    {
-      "path": "tools/console/src/cloudwatch-logs.jsx",
-      "sha256": "095d7b8ca41af45e7cd0b6caddc1c23e0a4a76893024fd786099bac0a39043a8",
-      "disposition": "modeled",
-      "reason": "Bind Logs result acceptance and the shared keyed mount to current context and mounted state.",
-      "models": [
-        {
-          "id": "CloudWatchLogsViewEpoch",
-          "properties": [
-            "FreshResults",
-            "NoUnmountedResults"
-          ],
-          "limits": "Finite epochs do not execute React, network cancellation, pagination, localization, layout or the native Logs implementation."
-        }
-      ]
     },
     {
       "path": "tools/console/src/console-navigation.mjs",
-      "sha256": "88da7f1e027bbc612ac8c1b2caa0c49e514fef52404f118f2ac36b7c0fbb3418",
+      "sha256": "b4852775bad22544511d0a7f11cb2a627fdd8ab721e7edeb078f14c886fad6d1",
       "disposition": "presentation",
-      "reason": "Describe or build the served API-reference/console presentation. Operation dispatch, native response schemas and locale behavior require the corresponding executable source/served-example/browser tests; this unregistered presentation file does not establish a finite state proof.",
+      "reason": "Provider-scoped catalogue/alias/static locale or canonical same-lock inputs, or pure presentation/source-contract tests. Native API values/resource data/credentials remain opaque. Strict English baseline and reviewed ACK normalization retain negative controls; no actual new-HEAD browser/native/fullgate inference.",
       "models": []
     },
     {
-      "path": "tools/console/src/kms.jsx",
-      "sha256": "a99f54ea07b8e44b2cba58a03be6118c1adc1c1f0be7a3545e0746ec668be0db",
-      "disposition": "presentation",
-      "reason": "Describe or build the served API-reference/console presentation. Operation dispatch, native response schemas and locale behavior require the corresponding executable source/served-example/browser tests; this unregistered presentation file does not establish a finite state proof.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/main.jsx",
-      "sha256": "bc5b82e2e1e30d997b3d00273da06e39f7359f3e28ed56c25a6c1dfecd93ea37",
+      "path": "tools/console/src/login.jsx",
+      "sha256": "860da4232182a8682278290bfa8d439cee36196f9f12314ec984c4d9f8412e9f",
       "disposition": "modeled",
-      "reason": "Bind the SQS view and keyed mount seam to current-context result admission, unmount rejection and private receipt custody. Bind Logs result acceptance and the shared keyed mount to current context and mounted state. Bind explicit secret reveal/hide, context changes and the compiled console to fresh authorized result emission and matching ARN/context. Preserve session authority while the shared console waits for actual capabilities before mounting service views.",
+      "reason": "Existing Login credential-transport/session correspondence retains the registered BrowserSessions contract. The only product addition is trusted focused file-input Enter synchronous click/default suppression with busy/submitting/disabled/repeat guards. Token parsing, read-intent revision/cleanup, password/clipboard, exact native sign-in and server cookies are byte-identical after removing this handler/binding. The unchanged finite session model does NOT model or prove keyboard/native chooser/default-action/userActivation/React/browser-version behavior; actual focused browser and handler condition tests are separate required evidence, and the prior hosted chooser failure cause remains unproven.",
       "models": [
-        {
-          "id": "SQSConsoleEpoch",
-          "properties": [
-            "OnlyCurrentReplies",
-            "NoUnmountedAcceptance",
-            "ReceiptCustodyBound",
-            "RawReceiptsPrivate"
-          ],
-          "limits": "Two abstract contexts and bounded epochs do not execute React promises, actual native receipts, locale controls, layout, authentication or SQLite; real browser/native checks remain required."
-        },
-        {
-          "id": "CloudWatchLogsViewEpoch",
-          "properties": [
-            "FreshResults",
-            "NoUnmountedResults"
-          ],
-          "limits": "Finite epochs do not execute React, network cancellation, pagination, localization, layout or the native Logs implementation."
-        },
-        {
-          "id": "SecretsRevealEpoch",
-          "properties": [
-            "NoUnmountedDisplay",
-            "FreshEmissionHistory",
-            "ReturnedARNMatches",
-            "VisibleContextMatches"
-          ],
-          "limits": "Finite contexts and epochs do not execute React, compiled JavaScript, DOM, localization, HTTP, real ARNs or authentication, and do not model mutation-form completion or metadata-only retry after an acknowledged write; bundle reproducibility and real browser/SDK fault regressions are separate."
-        },
         {
           "id": "BrowserSessions",
           "properties": [
             "RevokedCookiesDenied",
-            "AcceptedOnlyLiveParent",
-            "SDKAuthorityPreserved",
-            "UnrelatedSessionsPreserved",
-            "NoRawSDKCookie",
-            "NoBrowserSDKAuthority",
-            "ParentLifetimeBound"
+            "NoBrowserSDKAuthority"
           ],
-          "limits": "The finite session model does not execute React, discovery timing, layout, localization, HTTP or browser storage; actual browser regressions remain required."
+          "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them."
         }
       ]
     },
     {
       "path": "tools/console/src/secrets-manager.jsx",
-      "sha256": "4d581a22f6d180bf1fcd29e7340a9044035419ca26c40a2e9a19840e364f916b",
+      "sha256": "29c88fca5539f897a8954ce0b14371a2fd637abb5039aed0a4695a9dd532dee0",
       "disposition": "modeled",
-      "reason": "Bind explicit secret reveal/hide, context changes and the compiled console to fresh authorized result emission and matching ARN/context.",
+      "reason": "Preserve main metadata-read retry/error/detail-delete clearing and typed opaque data/error boundaries. Live acknowledged Create/Put closes and clears its form before independent refresh, whose retry cannot replay a write; new explicit intent has a fresh token. Bind existing finite reveal/epoch and bounded ACK/read properties, not all React/HTTP/server idempotency/network ambiguity/auth or erasure. Full new-HEAD native/browser/SDK and model gates remain required. Reviewed accessibility-only refresh disables Cloudscape motion within the Secrets view, with exact-English locale normalization and strengthened immediate-alert contrast regression checks. Existing finite state bindings are retained; animation/opacity/accessibility are outside these models and require executable browser evidence. New hosted exact-HEAD full gates remain required.",
       "models": [
         {
           "id": "SecretsRevealEpoch",
@@ -1627,27 +200,26 @@
             "ReturnedARNMatches",
             "VisibleContextMatches"
           ],
-          "limits": "Finite contexts and epochs do not execute React, compiled JavaScript, DOM, localization, HTTP, real ARNs or authentication, and do not model mutation-form completion or metadata-only retry after an acknowledged write; bundle reproducibility and real browser/SDK fault regressions are separate."
+          "limits": "Finite explicit-retrieve/display model, not React, DOM, AbortController, memory zeroization or implementation refinement. Only the successful response path is modeled; native store/IAM must authorize before returning any secret. A returned ARN can differ and must be rejected. Retrieve, Hide and navigation invalidate epochs; unmount also clears visible state. Parent must remount on region/principal changes. Emission history captures the context at each acceptance so later Hide/navigation cannot relabel an earlier stale acceptance. Draft entry, mutation atomicity and form layout are outside this model. Parent main.jsx scope binds only Secrets routing/remount key (region/principal/navigation); the generated app.js binding is the canonical compiled artifact of those source inputs, independently checked by bundle/asset hashes. It does not model unrelated existing console services or prove JavaScript compilation."
+        },
+        {
+          "id": "SecretsMutationRefresh",
+          "properties": [
+            "AckClosesForm",
+            "NoWriteOnReadRetry",
+            "AckClearsDraft",
+            "FreshFormHasToken"
+          ],
+          "limits": "UI ACK-to-metadata/form-state abstraction assuming live current ACK; not epoch/auth/SQL/server idempotency/refinement/liveness or disclosure proof. Excludes unacknowledged network ambiguity/delete/stage-label/rollback/further writes. Corresponds to the reviewed live-ACK form exit in mutate; historical d9 source omitted that exit. Keyboard, React scheduling, concrete HTTP and fresh-token entropy require executable checks."
         }
       ]
     },
     {
-      "path": "tools/console/src/sqs.jsx",
-      "sha256": "759393a541eeb5407075a116aeb1e254ee99ebe052e6c6303d4a3bbe2d43fa2e",
-      "disposition": "modeled",
-      "reason": "Bind the SQS view and keyed mount seam to current-context result admission, unmount rejection and private receipt custody.",
-      "models": [
-        {
-          "id": "SQSConsoleEpoch",
-          "properties": [
-            "OnlyCurrentReplies",
-            "NoUnmountedAcceptance",
-            "ReceiptCustodyBound",
-            "RawReceiptsPrivate"
-          ],
-          "limits": "Two abstract contexts and bounded epochs do not execute React promises, actual native receipts, locale controls, layout, authentication or SQLite; real browser/native checks remain required."
-        }
-      ]
+      "path": "tools/console/tests/secrets-manager-locale.test.mjs",
+      "sha256": "5e5bd684237c68fa300761f19bce5cf06fcb1e00314e45d21c253aca30eef189",
+      "disposition": "presentation",
+      "reason": "Provider-scoped catalogue/alias/static locale or canonical same-lock inputs, or pure presentation/source-contract tests. Native API values/resource data/credentials remain opaque. Strict English baseline and reviewed ACK normalization retain negative controls; no actual new-HEAD browser/native/fullgate inference. Reviewed accessibility-only refresh disables Cloudscape motion within the Secrets view, with exact-English locale normalization and strengthened immediate-alert contrast regression checks. Existing finite state bindings are retained; animation/opacity/accessibility are outside these models and require executable browser evidence. New hosted exact-HEAD full gates remain required.",
+      "models": []
     }
   ]
 }

@@ -15,7 +15,7 @@ bundle=Path(os.environ['LOGIN_TEST_BUNDLE']) if os.environ.get('LOGIN_TEST_BUNDL
 if bundle:assert bundle.is_file()and bundle.with_suffix('.css').is_file(),'Selected private bundle missing; no fake fallback'
 with tempfile.TemporaryDirectory(prefix='login-file-dummy-') as folder,running(authenticated=True) as (endpoint,token),sync_playwright() as p:
  files=Path(folder);browser=p.chromium.launch(executable_path=shutil.which('chromium'),args=['--no-sandbox','--renderer-process-limit=1']);contexts=[];errors=[];outside=[];login_posts=[]
- report={'realUserSelectedDummyFiles':True,'privateLoginAssetOverlay':bool(bundle),'TESTcontextPermissionsOverridden':False,'MacDiaVerified':False,'tokenValuesReported':False}
+ report={'browserVersion':browser.version,'realUserSelectedDummyFiles':True,'privateLoginAssetOverlay':bool(bundle),'TESTcontextPermissionsOverridden':False,'MacDiaVerified':False,'tokenValuesReported':False}
  def fixture(name,data):
   path=files/name;path.write_bytes(data);return path
  valid=fixture('simulator-token',(token+'\n').encode());valid_crlf=fixture('token.txt',(token+'\r\n').encode())
@@ -34,6 +34,8 @@ with tempfile.TemporaryDirectory(prefix='login-file-dummy-') as folder,running(a
     fields=parse_qs(req.post_data or '');assert set(fields)=={'token'};assert req.headers.get('content-type','').startswith('application/x-www-form-urlencoded');login_posts.append(True)
    else:assert token not in (req.post_data or ''),'Credential sent outside sign-in (redacted)'
   page.on('request',requested)
+  page.on('filechooser',lambda event:page.evaluate('window.__fileKeyboard.choosers++'))
+  page.add_init_script("""window.__fileKeyboard={events:[],choosers:0,submits:0};for(const kind of ['keydown','click'])document.addEventListener(kind,e=>{if(e.target instanceof HTMLInputElement&&e.target.type==='file'&&window.__fileKeyboard.events.length<32)window.__fileKeyboard.events.push({kind,trusted:e.isTrusted,enter:e.key==='Enter',space:e.key===' ',focused:document.activeElement===e.target,type:e.target.type,defaultPrevented:e.defaultPrevented,userActivation:navigator.userActivation.isActive})},true);document.addEventListener('keydown',e=>{if(e.target instanceof HTMLInputElement&&e.target.type==='file'&&window.__fileKeyboard.events.length<32)window.__fileKeyboard.events.push({kind:'keydown-bubble',trusted:e.isTrusted,enter:e.key==='Enter',space:e.key===' ',focused:document.activeElement===e.target,type:e.target.type,defaultPrevented:e.defaultPrevented,userActivation:navigator.userActivation.isActive})});document.addEventListener('submit',()=>window.__fileKeyboard.submits++,true);""")
   page.add_init_script("""(()=>{const read=File.prototype.arrayBuffer;window.__fileReads=0;window.__pendingFiles=[];File.prototype.arrayBuffer=function(){window.__fileReads++;const promise=read.call(this);if(this.name.startsWith('late-'))return promise.then(bytes=>new Promise((resolve,reject)=>window.__pendingFiles.push({resolve:()=>resolve(bytes),reject:()=>reject(Error('DO_NOT_REFLECT_FILE_ERROR'))})));return promise}})();""")
   page.goto(endpoint+'/_simulator/login');expect(page.get_by_role('heading',name='Open your local sandbox',exact=True)).to_be_visible();return page
  def field(page):return page.locator('input[type=password]')
@@ -45,16 +47,34 @@ with tempfile.TemporaryDirectory(prefix='login-file-dummy-') as folder,running(a
  def choose(page,path):
   with page.expect_file_chooser() as pending:page.locator('button').filter(has_text='Choose token file').click()
   pending.value.set_files(str(path)if path is not None else [])
- def choose_keyboard(page,path):
-  field(page).focus();page.keyboard.press('Tab');assert page.evaluate('document.activeElement.type==="file"'),'File chooser missing from keyboard order'
-  with page.expect_file_chooser() as pending:page.keyboard.press('Enter')
-  pending.value.set_files(str(path))
+ def keyboard_diagnostic(page,stage,failure):
+  try:
+   state=page.evaluate('({focusType:document.activeElement?.type||null,focusTag:document.activeElement?.tagName||null,documentFocused:document.hasFocus(),keyboard:window.__fileKeyboard})')
+  except Exception:state={'pageUnavailable':True}
+  # No token, input value, file name/path, arbitrary key or request URL is read.
+  (REPORTS/'login-token-file-keyboard-failure.json').write_text(json.dumps({'browserVersion':browser.version,'stage':stage,'failureType':type(failure).__name__,'state':state},indent=2)+'\n')
+ def choose_keyboard(page,path,key='Enter'):
+  try:
+   before=page.evaluate('({choosers:window.__fileKeyboard.choosers,submits:window.__fileKeyboard.submits})')
+   field(page).focus();page.keyboard.press('Tab');assert page.evaluate('document.activeElement.type==="file"'),'File chooser missing from keyboard order'
+   with page.expect_file_chooser(timeout=5000) as pending:page.keyboard.press(key)
+   pending.value.set_files(str(path))
+   page.evaluate('()=>new Promise(resolve=>setTimeout(resolve,0))')
+   after=page.evaluate('window.__fileKeyboard')
+   assert after['choosers']==before['choosers']+1,'One keyboard activation must open exactly one chooser'
+   assert after['submits']==before['submits'],'File activation must not submit the login form'
+  except Exception as failure:
+   keyboard_diagnostic(page,key,failure)
+   raise AssertionError('Keyboard file chooser failed; safe focus/event diagnostics saved') from None
  def loaded(page):expect(page.get_by_role('status').filter(has_text='Token loaded. Choose Open sandbox to verify it.')).to_be_visible()
  def released(page,kind='resolve'):
   page.evaluate('(kind)=>window.__pendingFiles.shift()[kind]()',kind)
  def submit(page,want):
   with page.expect_response(lambda r:r.request.method=='POST'and r.url==endpoint+'/_simulator/login')as post:page.get_by_role('button',name='Open sandbox',exact=True).click()
   assert post.value.status==want,'Unexpected strict server authentication status'
+ page=fresh();page.locator('input[type=file]').evaluate("input=>input.addEventListener('keydown',e=>{if(e.key==='Enter')e.preventDefault()},{once:true})");before=len(login_posts);choose_keyboard(page,valid);loaded(page);check_value(page,token);assert len(login_posts)==before;report['ArtificialCanceledNativeEnterStillOpensOneChooserWithoutSubmit']=True
+ page=fresh();before=len(login_posts);choose_keyboard(page,valid,key='Space');loaded(page);check_value(page,token);assert len(login_posts)==before;report['NativeSpaceFileActivationUnchanged']=True
+ page=fresh();field(page).focus();page.keyboard.press('Tab');page.locator('input[type=file]').evaluate("input=>input.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true,cancelable:true}))");page.evaluate('()=>new Promise(resolve=>setTimeout(resolve,0))');assert page.evaluate('window.__fileKeyboard.choosers===0&&window.__fileKeyboard.submits===0');report['UntrustedSyntheticEnterCannotOpenChooser']=True
  page=fresh();before=len(login_posts);choose_keyboard(page,valid);loaded(page);check_value(page,token);assert len(login_posts)==before;assert page.request.get(endpoint+'/_simulator/v1/capabilities').status==401;expect(field(page)).to_have_attribute('type','password');assert page.evaluate('document.activeElement!==document.querySelector("input[type=password]")');report['ImportDoesNotAuthenticateUploadOrFocusPassword']=True
  page.get_by_role('button',name='日本語',exact=True).click();expect(page.get_by_role('heading',name='ローカルサンドボックスにサインイン',exact=True)).to_be_visible();check_value(page,token);page.reload();expect(page.get_by_role('heading',name='ローカルサンドボックスにサインイン',exact=True)).to_be_visible();check_value(page,'');page.get_by_role('button',name='English',exact=True).click();choose(page,valid_crlf);loaded(page);check_value(page,token);report['EnglishJapanesePreferenceAndNoCredentialPersistence']=True
  assert page.evaluate('(value)=>!JSON.stringify(localStorage).includes(value)&&!JSON.stringify(sessionStorage).includes(value)',token)
@@ -67,6 +87,23 @@ with tempfile.TemporaryDirectory(prefix='login-file-dummy-') as folder,running(a
   page=fresh();choose(page,fixture('bound.txt',b'x'*length));loaded(page);submit(page,401)
  report['ServerAlphabetLengthBoundsDoNotGrantAuthority']=True
  page=fresh();choose(page,fixture('other.txt',secrets.token_hex(32).encode()));loaded(page);submit(page,401);expect(page.get_by_text('Invalid or expired access token',exact=True)).to_be_visible();report['WrongWellFormedTokenRemains401']=True
+ # Delay the genuine POST; do not replace authentication or grant permissions.
+ page=fresh();choose(page,valid);loaded(page);held=[];before=len(login_posts)
+ page.route(endpoint+'/_simulator/login',lambda route:held.append(route))
+ try:
+  page.get_by_role('button',name='Open sandbox',exact=True).click()
+  for _ in range(200):
+   if held:break
+   page.wait_for_timeout(10)
+  assert len(held)==1 and len(login_posts)==before+1
+  expect(page.locator('input[type=file]')).to_be_disabled()
+  page.locator('input[type=file]').evaluate('input=>input.click()')
+  page.keyboard.press('Enter')
+  assert page.evaluate('window.__fileKeyboard.choosers')==1,'Disabled file control opened another chooser'
+  assert len(login_posts)==before+1 and page.request.get(endpoint+'/_simulator/v1/capabilities').status==401
+ finally:
+  for route in held:route.continue_()
+ expect(page.get_by_role('button',name='Account menu',exact=True)).to_be_visible();report['BusyRealSubmissionBlocksAdditionalChooserAndEarlyAuthentication']=True
  page=fresh();choose(page,valid);loaded(page);choose(page,None);check_value(page,token);report['EmptySelectionPreservesInput']=True
  late=fixture('late-old.txt',secrets.token_hex(32).encode())
  page=fresh();choose(page,late);page.wait_for_function('window.__pendingFiles.length===1');expect(page.get_by_role('button',name='Open sandbox',exact=True)).to_be_disabled();choose(page,valid);loaded(page);released(page);check_value(page,token);report['NewFileWinsLateOldRead']=True

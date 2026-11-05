@@ -48,7 +48,7 @@ SQSの操作画面とAPI referenceはnative JSON 1.0 APIを使用し、SDKと同
 
 ## Google Cloud Storage・Azure Blob Storageのローカル接続
 
-クラウド選択で AWS／Google Cloud／Azure を切り替え、サービス一覧から対象を検索して開きます。Google Cloud の Cloud Storage と Azure の Blob Storage は別のナビゲーションを持ちます。日本語／英語は画面の言語設定で切り替えられ、サービス名・リソース名・API識別子は変更しません。固定のsynthetic project/accountで、作成→upload→実ファイルdownload→削除を操作できます。既存の2 CLI・別DB/tokenとPC/390pxの実操作とmainのCIは検証済みです。ナビゲーション／言語は各クラウド共通の操作で、サービス固有のAPI識別子と利用者データは翻訳しません。公式SDKの対応範囲は[専用の受入検証](docs/acceptance/crossprovider-official-storage.md)を参照してください。認証済み実クラウド画面との一致は未検証です。[対応・制限](docs/multicloud-storage.md)。
+クラウド選択で AWS／Google Cloud／Azure を切り替え、サービス一覧から対象を検索して開きます。Google Cloud の Cloud Storage と Azure の Blob Storage は別のナビゲーションを持ちます。日本語／英語は画面の言語設定で切り替えられ、サービス名・リソース名・API識別子は変更しません。固定のsynthetic project/accountで、作成→upload→実ファイルdownload→削除を操作できます。2 CLI・別DB/tokenとPC/390pxの実操作は受入テストの対象です。最新リビジョンの成否は[CI結果](https://github.com/susumutomita/TenkaCloudSimulator/actions/workflows/ci.yml)で確認してください。ナビゲーション／言語は各クラウド共通の操作で、サービス固有のAPI識別子と利用者データは翻訳しません。公式SDKの対応範囲は[専用の受入検証](docs/acceptance/crossprovider-official-storage.md)を参照してください。認証済み実クラウド画面との一致は未検証です。[対応・制限](docs/multicloud-storage.md)。
 
 既定所有者はsimulator-adminです。参加者に使わせる新規環境は、ホストが`--cloud-storage-owner=learner`を指定し、learnerへ固定したparticipant tokenを発行します。この所有者設定はGoogle IAMやAzure RBACではなく、AWSの権限も付与しません。同じDBの所有者変更は拒否します。CLIフラグは実CLIの再起動・所有者変更拒否・AWS権限非付与までGo/raceで検証しています。
 
@@ -102,10 +102,27 @@ SDK、操作画面、再起動、チーム分離の受入検証は `make e2e` �
 
 CIはstatementと未フィルターsource-line coverageを両方90%以上に強制します。`make before-commit`単独のcoverage判定はstatementのみで、source-line判定はCIのCobertura生成後ステージと上記の2コマンドで行います。SDK/browser、license、依存security、埋込asset、形式検査も行います。cross compileは他OSでの実行成功を意味しません。開発用Python/Node/Javaはruntime依存ではありません。UI・Scalarの再生成は権利表記とlockを保持する[各build手順](tools/console/README.md)・[Scalar手順](tools/scalar/README.md)・[Python runtimeの権利・再生成手順](tools/python/README.md)に従います。
 
-形式検査にはObjectStore、StackOwnership、S3Versions、NativeIAMOwnership、RESTDeploymentSnapshot、SSMParameterState、StartupTokenVisibility、BrowserSessions、SQSLifecycle、SQSStorageBudget、ProviderActor、GCPStorageState、AzureBlobState、ProjectAuthority、BlobRange、ProviderPath、KMSKeyState、KMSProtocolAdmission、SQSConsoleEpoch、CloudWatchLogsLifecycle、CloudWatchLogsViewEpoch、SecretsVersionLifecycle、SecretsRevealEpoch、SecretsDisclosureChannels、DynamoDBLifecycle、DynamoDBAdmissionの26有限モデルと149の意図した欠陥検出をregistryへ登録しています。追加モデルの有限検査結果と、統合後の固定HEAD検査は区別して記録します。TLCと意図したmutantの反例で限定した安全条件を検査しますが、Go実装のrefinement、暗号、全AWS仕様・実AWSとの一致を証明するものではありません。変更はregistryとsource対応を更新し、固定HEADのCI結果で判断します。[形式検査](formal/README.md)、[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)。
+形式検査にはObjectStore、StackOwnership、S3Versions、NativeIAMOwnership、RESTDeploymentSnapshot、SSMParameterState、StartupTokenVisibility、BrowserSessions、SQSLifecycle、SQSStorageBudget、ProviderActor、GCPStorageState、AzureBlobState、ProjectAuthority、BlobRange、ProviderPath、KMSKeyState、KMSProtocolAdmission、SQSConsoleEpoch、CloudWatchLogsLifecycle、CloudWatchLogsViewEpoch、SecretsVersionLifecycle、SecretsRevealEpoch、SecretsDisclosureChannels、DynamoDBLifecycle、DynamoDBAdmission、SecretsMutationRefreshの27有限モデルと153の意図した欠陥検出をregistryへ登録しています。追加モデルの有限検査結果と、統合後の固定HEAD検査は区別して記録します。TLCと意図したmutantの反例で限定した安全条件を検査しますが、Go実装のrefinement、暗号、全AWS仕様・実AWSとの一致を証明するものではありません。変更はregistryとsource対応を更新し、固定HEADのCI結果で判断します。[形式検査](formal/README.md)、[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)。
 
 ## ライセンス
 
 本体は[MIT](LICENSE)。`/_simulator/licenses/`にGo・Cloudscape・Scalar・CPython/WASI等の原文LICENSE/NOTICEを同梱しています。再配布時も保持してください。AWS公式サービスではなく、AWSロゴは使用しません。[設計・引継ぎ資料](docs/handoff/README.md)。
 
 貼り付けが動かない場合はログイン画面の「トークンファイルを選択」で、主催者から受け取った小さなファイルを明示選択できます。値は隠したまま読み込み、サインイン操作時にサーバーが認証します。[形式・制限とDia未確認の境界](docs/login-token-file.md)。
+
+
+## Secrets Manager integration candidate
+
+The normal merge of main0a6bdce preserves its provider-specific consoles, token-file
+Login and locale behavior. Secrets Manager is discoverable only inside AWS when
+its actual capability is present; /secretsmanager and the /secrets alias select the
+same child. Seven native APIs and dummy plaintext values remain the documented
+limit; no KMS/rotation/recovery/CFN behavior is added. Earlier Secrets/native/main
+receipts are separate inputs. This provider-aware child and all27 models/153
+controls require new exact-HEAD verification before any publication/merge claim.
+
+An acknowledged Secrets create/update now closes and clears its form before the
+independent metadata read. Read failure permits read-only refresh, not a replayed
+write. A new form intent obtains a fresh request token. The new bounded
+[ACK/read contract](docs/formal-secrets-mutation-refresh.md) does not cover
+unacknowledged network ambiguity or prove JavaScript refinement.

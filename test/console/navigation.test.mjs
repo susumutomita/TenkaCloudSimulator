@@ -57,3 +57,21 @@ test('natural Japanese aliases find canonical services within the selected cloud
   assert.deepEqual(servicesForProvider('gcp',{cloudStorage:{gcp:{project:''}}},'ストレージ'),[]);
   assert.deepEqual(servicesForProvider('aws',{services:{}},'ラムダ'),[]);
 });
+
+
+test('Secrets is an AWS-only capability-gated route with an exact legacy alias',()=>{
+  const enabled={...capabilities,services:{...capabilities.services,secretsmanager:{}}};
+  assert.equal(serviceAvailable('secretsmanager',{...capabilities,services:{...capabilities.services,secretsmanager:undefined}}),false);
+  assert.equal(serviceAvailable('secretsmanager',enabled),true);
+  assert.deepEqual(servicesForProvider('aws',enabled,'シークレット').map(s=>s.id),['secretsmanager']);
+  assert.deepEqual(servicesForProvider('aws',enabled,'credentials').map(s=>s.id),['secretsmanager']);
+  assert.deepEqual(servicesForProvider('gcp',enabled,'secret'),[]);
+  assert.deepEqual(servicesForProvider('azure',enabled,'secret'),[]);
+  assert.equal(servicesForProvider('aws',enabled).length,10);
+  assert.equal(new Set(servicesForProvider('aws',enabled).map(service=>service.id)).size,servicesForProvider('aws',enabled).length);
+  assert.equal(providerForService('secretsmanager'),'aws');
+  assert.equal(serviceFromHash('#/secrets'),'secretsmanager');
+  assert.equal(serviceFromHash('#/secretsmanager'),'secretsmanager');
+  assert.equal(serviceFromHash('#/secretsmanager-fake'),null);
+  assert.equal(hashForService('secretsmanager'),'/secretsmanager');
+});
