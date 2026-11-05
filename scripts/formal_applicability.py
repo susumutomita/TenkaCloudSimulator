@@ -27,7 +27,7 @@ KNOWN_VALIDATION = {
     'scripts/requirements-test.txt',
 }
 NONFORMAL = {
-    'documentation': ['README.md', 'SECURITY.md', 'AGENTS.md', 'docs/**', 'formal/README.md',
+    'documentation': ['README.md', 'README.ja.md', 'SECURITY.md', 'AGENTS.md', 'docs/**', 'formal/README.md',
                       'LICENSE', 'NOTICE', 'third_party/**', 'internal/legal/assets/**'],
     'presentation': ['tools/console/**', 'tools/scalar/**', 'internal/server/web/**',
                      'internal/server/apidocs/**'],

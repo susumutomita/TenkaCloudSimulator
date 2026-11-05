@@ -9,7 +9,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-BASE_MODELS = {'AzurePropertiesTarget', 'AzurePropertiesEpoch', 'AzureBlobState', 'BlobRange', 'BrowserSessions', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'DynamoDBAdmission', 'DynamoDBLifecycle', 'GCPStorageState', 'KMSKeyState', 'KMSProtocolAdmission', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'SecretsDisclosureChannels', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'SecretsMutationRefresh', 'StackOwnership', 'StartupTokenVisibility'}
+BASE_MODELS = {'AzurePropertiesTarget', 'AzurePropertiesEpoch', 'AzureBlobState', 'BlobRange', 'BrowserSessions', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'DynamoDBAdmission', 'DynamoDBLifecycle', 'GCPStorageState', 'KMSKeyState', 'KMSProtocolAdmission', 'IAMManagedPolicies', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'SecretsDisclosureChannels', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'SecretsMutationRefresh', 'StackOwnership', 'StartupTokenVisibility'}
 BASE_INVARIANTS = {
     'AzurePropertiesTarget': {'DetailCapturedIdentity', 'DistinctTargetCarriers', 'FieldShapeExact', 'NativeHeadOnly', 'RequestIdentityExact', 'RouteMatchesTarget', 'TypeOK'},
     'AzurePropertiesEpoch': {'CurrentProperties', 'SuccessfulOnly', 'ClearedWhenClosed', 'FailureNoDisclosure', 'CurrentRequestLoading', 'TypeOK', 'LocaleStable', 'AcceptedOnlyCurrent', 'LoadingClearsPrevious'},
@@ -24,6 +24,7 @@ BASE_INVARIANTS = {
     'GCPStorageState': {'Budget', 'DeniedFrame', 'GenerationFreshness', 'GenerationRefusal', 'NoOrphans', 'NonemptyDeleteRefused', 'OtherEnvironmentUnchanged', 'OtherProjectUnchanged', 'ReadIsolation', 'TypeOK'},
     'KMSKeyState': {'AuthorizedEvents', 'BoundContextAndKey', 'EnabledCrypto', 'TypeOK'},
     'KMSProtocolAdmission': {'InfraNotDeny', 'MissingIdentityDenied', 'NoAuthorityFromWireMetadata', 'NoCrossServiceFallback', 'NoSuccessWithoutKMSTarget', 'TypeOK'},
+    'IAMManagedPolicies': {'FailureFrame', 'AttachmentAuthority', 'PeerFrame', 'FreshIncarnations', 'ExplicitDenyWins', 'ImmutableVersions', 'AggregateBudget', 'VersionCap', 'DefaultExists', 'RoleViewsExact', 'DeleteDependencies', 'VersionIDsMonotonic', 'TypeOK'},
     'NativeIAMOwnership': {'OwnershipExclusive', 'TypeOK'},
     'ObjectStore': {'DenyWins', 'NoOrphans', 'NoUnauthorizedMutation', 'TypeOK'},
     'ProjectAuthority': {'ActorUsesPersistedProject', 'ConstructorRefusalFrame', 'DeniedFrame', 'FinitePermissions', 'FixedHostConfiguration', 'InitializationBindsConfigured', 'NoUnboundAdoption', 'OnlyActualOwnerAuthorized', 'OwnerBindingFrozen', 'TypeOK'},
@@ -56,6 +57,7 @@ REQUIRED_MUTANTS = {
     'GCPStorageState': {'DeleteNonemptyBucket', 'DeniedBucketCreate', 'IgnoreActualOwner', 'IgnoreGenerationMatch', 'IgnoreStateBudget', 'ReadWrongEnvironment', 'ResetSequenceAfterDelete', 'ReuseGeneration'},
     'KMSKeyState': {'MissingContextGuard', 'MissingEnabledDecryptGuard', 'MissingEnabledEncryptGuard', 'MissingEncryptionCeiling', 'MissingKeyBinding', 'MissingPermissionGuard', 'MissingRegionGuard', 'MissingTeamGuard'},
     'KMSProtocolAdmission': {'DropSigningIntent', 'IgnoreRequiredTarget', 'MaskIdentityOutage', 'ReadLivePolicyInsteadOfSnapshot'},
+    'IAMManagedPolicies': {'PartialDefaultRoleRefresh', 'ReuseDeletedVersionID', 'DropManagedDeny', 'SkipVersionCap', 'IgnorePolicyDeleteDependencies', 'DeleteDefaultVersion', 'IgnoreRoleDeleteAttachments', 'DetachWithoutViewRefresh', 'AttachWithoutViewRefresh', 'CommitFailedCandidate', 'IgnoreAggregateLimit'},
     'NativeIAMOwnership': {'LegacyAdoptsNativeRole'},
     'ObjectStore': {'MissingDeletionGuard'},
     'ProjectAuthority': {'AdoptUnboundResource', 'AllowOwnerRebinding', 'DefaultAllowUnknownPermission', 'PartialCommitOnRefusal', 'TrustClaimedProject', 'WriteDespiteDenial'},

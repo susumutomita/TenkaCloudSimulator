@@ -1,5 +1,44 @@
 # Development roster
 
+## Current integration snapshot: IAM53, 2026-11-05
+
+Root integrates `feat/iam-managed-policy-53-20261105` from main
+`4a649814bee73b06ee82aecc6ca952dfe6bc8137`. The public claim and contract decisions
+are recorded in [Issue53](https://github.com/susumutomita/TenkaCloudSimulator/issues/53).
+This is local integration in progress, not a merged feature or a claim that all
+cloud services work. S3 multipart51 belongs to another owner and is excluded.
+
+| IAM handoff | Actual status and evidence boundary |
+|---|---|
+| grader_http — store handoff | Native customer-policy/version/attachment implementation, transaction/aggregate/generation and corruption/quota tests; focused normal/race/vet passed |
+| team_host — Query/SDK handoff | Twelve new Query operations; actual two-process SDK permission/default/restart/isolation/cleanup passed; existing six role operations also receive the authorized-generation guard |
+| waf_console — console handoff | Cloudscape customer policy/version/role attachment flows; actual1440/390 browser, fourteen axe/reflow states and92 SDK round trips passed; full regression remains separate |
+| cfn_adapters/waf_service — model handoff | New two-request/four-seed scope:13 invariants/11 sensitivity controls locally passed. Earlier four-request exploration timed out and remains unverified |
+| cfn_callback — role guard/admission handoff | Existing six role paths generation-bound, strict cursor/identity/error/refusal tests; focused normal/race/vet passed |
+| Root | Shared capabilities,21 served IAM templates, required test registration,30-model/175-control registry, English and Japanese entry points, immutable applicability and final gates |
+
+The configured ceiling is seven local agents including root, with a four-CPU
+cgroup quota. A slot or completed handoff is not an active worker. Heavy tests
+are scheduled explicitly; current exact-HEAD full validation/CI/review and
+publication remain integration gates. Do not infer final success from these
+focused receipts. Existing main420 passed its own seven hosted checks.
+
+API navigation has a separate [Issue421](https://github.com/susumutomita/TenkaCloudSimulator/issues/421).
+Its source groups existing operations by cloud and labels Sakura unavailable;
+strict browser validation identified a contrast problem that is being repaired.
+The attempted Issue progress comment was denied and remains unposted. Sakura
+catalog research adds no native service support; its new Issue creation was
+denied and remains unexecuted. English documentation is integrated locally;
+repository description update returned Forbidden and is unchanged. These held
+publication actions must not be retried through another route.
+
+The sections below are historical snapshots. Their “current”, agent counts,
+branches, open PR states and test totals describe those recorded revisions,
+not this integration or present assignments.
+
+---
+
+
 ## Backlog integration: 2026-11-05
 
 The user authorized backlog implementation and merging. Integration owner: `root`.

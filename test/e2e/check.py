@@ -307,6 +307,17 @@ def handler(event,context):
   subprocess.run([sys.executable,str(Path(__file__).with_name('apigateway.py'))],check=True)
  def test_apigateway_console_and_actual_scalar_requests(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('apigateway_console.py'))],check=True)
+ def test_iam_managed_console_native_policy_versions_and_attachments(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('iam_managed_console.py'))],check=True,timeout=240)
+ def test_iam_managed_served_reference_templates_execute(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('iam_managed_reference.py'))],check=True,timeout=180)
+ def test_api_reference_cloud_sections_and_live_native_results(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('api_cloud_sections_contract.py')),'--self-test'],check=True)
+  subprocess.run([sys.executable,str(Path(__file__).with_name('api_cloud_sections.py'))],check=True,timeout=180)
+ def test_iam_managed_policy_reaches_saved_lambda_role_sdk(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('iam_managed_lambda.py'))],check=True,timeout=180)
+ def test_iam_managed_policy_sdk_isolation_restart_and_cleanup(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('iam_managed.py'))],check=True)
  def test_native_iam_query_and_console_to_lambda(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('native_iam.py'))],check=True)
  def test_iam_role_console_to_lambda_deploy_without_host_setup(self):
@@ -373,9 +384,16 @@ def handler(event,context):
    page.set_viewport_size({'width':390,'height':844});expect(page.get_by_role('button',name='Create bucket',exact=True).first).to_be_visible();page.screenshot(path=str(REPORTS/'console-mobile.png'),full_page=True);assert_reflow(page)
    self.assertEqual(page.evaluate('window.__policyViolations'),[]);page.set_viewport_size({'width':1440,'height':1000});page.goto(endpoint+'/_simulator/docs/');expect(page.get_by_role('heading',name='TenkaCloud Simulator API',exact=True)).to_be_visible(timeout=15000)
    expect(page.get_by_role('button',name='Ask AI',exact=True)).to_have_count(0)
-   # The expanded API introduction can fill the initial viewport. Select the
-   # documented operation before expecting Scalar's lazily rendered control.
-   page.get_by_role('link',name=re.compile('^List all buckets')).click()
+   # Cloud groups now start at Introduction. Expand the actual AWS/S3 sidebar
+   # before selecting the operation; do not replace Scalar Send with a fetch.
+   def select_s3_operation(title):
+    sidebar=page.get_by_role('complementary',name='Sidebar for TenkaCloud Simulator API',exact=True)
+    for group_name in ['AWS','S3 basic object storage']:
+     group=sidebar.get_by_role('button',name=re.compile(r'^(Open|Close) Group - '+re.escape(group_name)+r'$'))
+     expect(group).to_be_visible()
+     if group.get_attribute('aria-expanded')=='false':group.click()
+    sidebar.get_by_role('link',name=re.compile('^'+re.escape(title))).click()
+   select_s3_operation('List all buckets')
    page.get_by_role('button',name='Test Request (get /)',exact=True).click()
    # Use the request client Send button, not a parallel fetch injected by the test.
    send=page.get_by_role('button',name=re.compile('^Send.*get request'))
@@ -386,7 +404,7 @@ def handler(event,context):
    expect(page.get_by_text('ui-practice',exact=False).last).to_be_visible(timeout=10000)
    page.get_by_role('button',name='Close Client',exact=True).click()
    c.create_bucket(Bucket='practice-bucket')
-   page.get_by_role('link',name=re.compile('^Upload or replace an object')).click()
+   select_s3_operation('Upload or replace an object')
    page.get_by_role('button',name='Test Request (put /{bucket}/{key})',exact=True).click()
    put_send=page.get_by_role('button',name=re.compile('^Send.*put request'))
    expect(put_send).to_be_visible()
@@ -404,7 +422,7 @@ def handler(event,context):
    self.assertEqual(body,b'Hello from the API reference.')
    page.screenshot(path=str(REPORTS/'api-reference-put.png'),full_page=False,animations='disabled')
    page.get_by_role('button',name='Close Client',exact=True).click()
-   page.get_by_role('link',name=re.compile('^List all buckets')).click()
+   select_s3_operation('List all buckets')
    page.get_by_role('button',name='Test Request (get /)',exact=True).click()
    send=page.get_by_role('button',name=re.compile('^Send.*get request'))
    with page.expect_response(lambda response:response.request.method=='GET' and response.url.rstrip('/')==endpoint) as listed:

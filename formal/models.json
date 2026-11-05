@@ -452,7 +452,7 @@
       "id": "SQSStorageBudget",
       "model": "formal/SQSStorageBudget.tla",
       "config": "formal/SQSStorageBudget.cfg",
-      "bounds": "Two trusted queue scopes; three possible pre-existing row IDs plus one additional fresh ID; each row weight1–2 abstract payload units. MaxRows2/MaxBytes3. Initial unique-ID row sets include legacy states with3rows and up to6units, beyond either cap. Initial enumeration uses the exact729 unique-ID assignments, not a powerset filter. No time transition: expiry is a pre-existing Boolean classification.",
+      "bounds": "Two trusted queue scopes; three possible pre-existing row IDs plus one additional fresh ID; each row weight1\u20132 abstract payload units. MaxRows2/MaxBytes3. Initial unique-ID row sets include legacy states with3rows and up to6units, beyond either cap. Initial enumeration uses the exact729 unique-ID assignments, not a powerset filter. No time transition: expiry is a pre-existing Boolean classification.",
       "properties": [
         "TypeOK",
         "FailedSendPreservesRows",
@@ -644,7 +644,7 @@
       "id": "ProviderActor",
       "model": "formal/ProviderActor.tla",
       "config": "formal/ProviderActor.cfg",
-      "bounds": "64 request combinations: authentication2 × credential roles2 × exercise selections4 × spoofed wire roles2 × capabilities2; captured emission includes original request; uniform tagged records distinguish absent/attached actors without TLC heterogeneous equality;65 reachable emissions expected, to be verified",
+      "bounds": "64 request combinations: authentication2 \u00d7 credential roles2 \u00d7 exercise selections4 \u00d7 spoofed wire roles2 \u00d7 capabilities2; captured emission includes original request; uniform tagged records distinguish absent/attached actors without TLC heterogeneous equality;65 reachable emissions expected, to be verified",
       "properties": [
         "TypeOK",
         "NoActorOnRejected",
@@ -848,7 +848,7 @@
       "id": "AzureBlobState",
       "model": "formal/AzureBlobState.tla",
       "config": "formal/AzureBlobState.cfg",
-      "bounds": "Two account/environment scopes with one container each, two distinct abstract keys and payload values1–2, at most three accepted puts, rowcap2 and abstractbytecap3. Context trust and two fixed owner subjects modeled explicitly. Three-write frontier is an exploration bound, not an API quota.",
+      "bounds": "Two account/environment scopes with one container each, two distinct abstract keys and payload values1\u20132, at most three accepted puts, rowcap2 and abstractbytecap3. Context trust and two fixed owner subjects modeled explicitly. Three-write frontier is an exploration bound, not an API quota.",
       "properties": [
         "TypeOK",
         "NoUnauthorizedMutation",
@@ -2546,6 +2546,158 @@
             }
           ],
           "expect_invariant": "FieldShapeExact"
+        }
+      ]
+    },
+    {
+      "id": "IAMManagedPolicies",
+      "model": "formal/IAMManagedPolicies.tla",
+      "config": "formal/IAMManagedPolicies.cfg",
+      "bounds": "Two policies/two roles; two incarnations; versions1..3; retained cap2; aggregate3; four API-reachable seeds(Empty,Shared,Peer,Budget); at most two further arbitrary requests perseed. NOT coverage of old arbitraryfour-requestsuffix.",
+      "properties": [
+        "TypeOK",
+        "FailureFrame",
+        "DeleteDependencies",
+        "VersionIDsMonotonic",
+        "FreshIncarnations",
+        "VersionCap",
+        "DefaultExists",
+        "AttachmentAuthority",
+        "ExplicitDenyWins",
+        "AggregateBudget",
+        "RoleViewsExact",
+        "PeerFrame",
+        "ImmutableVersions"
+      ],
+      "limits": "New boundedscenario scope, not bisimilar/equivalent to original4requestcandidate which remainsUNPASSED. No Go/SQL/parser/trust/crypto/HTTP/refinement/liveness or unboundedhistory proof. Fixedaction/resource; concretequotas/hostisolation testedseparately; failedrequestidentitydiagnosticnormalized. Existing29models/gates unchanged. Native Query routing/validation, caller snapshot and RoleID admission, concrete SQL rollback/quotas and server capability metadata require real-code tests. This model abstracts authorized/storage outcomes and persisted role/policy generations, not the HTTP authorization race or UI. Two-request/four-seed scope is narrower than the unsuccessful four-request exploratory candidate.",
+      "source_scope": [
+        "internal/aws/iam_managed.go",
+        "internal/aws/iam_roles.go",
+        "internal/aws/iam_managed_query.go",
+        "internal/aws/iam_query.go",
+        "internal/server/server.go"
+      ],
+      "mutants": [
+        {
+          "id": "PartialDefaultRoleRefresh",
+          "edits": [
+            {
+              "old": "views == IF Flip(q) THEN BuildViews(raw)",
+              "new": "views == IF Flip(q) THEN IF DefaultDoc(raw,q.p) = 1 THEN [r \\in Roles |-> IF r = R THEN BuildView(raw,r) ELSE s.views[r]] ELSE BuildViews(raw)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RoleViewsExact"
+        },
+        {
+          "id": "AttachWithoutViewRefresh",
+          "edits": [
+            {
+              "old": "ELSE IF q.op = \"Attach\" THEN BuildViews(raw)",
+              "new": "ELSE IF q.op = \"Attach\" THEN IF DefaultDoc(raw,q.p) = 1 THEN s.views ELSE BuildViews(raw)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RoleViewsExact"
+        },
+        {
+          "id": "DetachWithoutViewRefresh",
+          "edits": [
+            {
+              "old": "ELSE IF q.op = \"Detach\" THEN BuildViews(raw)",
+              "new": "ELSE IF q.op = \"Detach\" THEN IF DefaultDoc(s,q.p) = 1 THEN s.views ELSE BuildViews(raw)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RoleViewsExact"
+        },
+        {
+          "id": "DropManagedDeny",
+          "edits": [
+            {
+              "old": "BuildView(s, r) ==\n  IF ~s.roles[r].live THEN ZeroView\n  ELSE [allow |-> Allow(s.roles[r].inline) + ManagedAllow(s,r,P) + ManagedAllow(s,r,Q),\n        deny |-> Deny(s.roles[r].inline) + ManagedDeny(s,r,P) + ManagedDeny(s,r,Q)]\n",
+              "new": "BuildView(s, r) ==\n  IF ~s.roles[r].live THEN ZeroView\n  ELSE [allow |-> Allow(s.roles[r].inline) + ManagedAllow(s,r,P) + ManagedAllow(s,r,Q),\n        deny |-> Deny(s.roles[r].inline)]\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExplicitDenyWins"
+        },
+        {
+          "id": "DeleteDefaultVersion",
+          "edits": [
+            {
+              "old": "(q.op = \"DeleteVersion\" /\\ q.v = s.policies[q.p].default)",
+              "new": "(q.op = \"DeleteVersion\" /\\ FALSE)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DeleteDependencies"
+        },
+        {
+          "id": "IgnorePolicyDeleteDependencies",
+          "edits": [
+            {
+              "old": "(q.op = \"DeletePolicy\" /\\ (PolicyRoles(s,q.p) # {} \\/ Cardinality(Retained(s,q.p)) # 1))",
+              "new": "(q.op = \"DeletePolicy\" /\\ FALSE)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DeleteDependencies"
+        },
+        {
+          "id": "IgnoreRoleDeleteAttachments",
+          "edits": [
+            {
+              "old": "(q.op = \"DeleteRole\" /\\ (RoleAttachments(s,q.r) # {} \\/ s.roles[q.r].inline # 0))",
+              "new": "(q.op = \"DeleteRole\" /\\ s.roles[q.r].inline # 0)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DeleteDependencies"
+        },
+        {
+          "id": "ReuseDeletedVersionID",
+          "edits": [
+            {
+              "old": "NewVersion(s,p) == s.policies[p].next",
+              "new": "NewVersion(s,p) == CHOOSE v \\in VersionIDs \\ Retained(s,p) : \\A w \\in VersionIDs \\ Retained(s,p) : v <= w",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VersionIDsMonotonic"
+        },
+        {
+          "id": "SkipVersionCap",
+          "edits": [
+            {
+              "old": "ELSE IF VersionFull(s,q) THEN \"Limit\"",
+              "new": "ELSE IF FALSE THEN \"Limit\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VersionCap"
+        },
+        {
+          "id": "IgnoreAggregateLimit",
+          "edits": [
+            {
+              "old": "ELSE IF ~AggregateFits(Raw(s,q)) THEN \"Limit\"",
+              "new": "ELSE IF FALSE THEN \"Limit\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AggregateBudget"
+        },
+        {
+          "id": "CommitFailedCandidate",
+          "edits": [
+            {
+              "old": "IF result = \"Accepted\" THEN Candidate(s,q) ELSE s",
+              "new": "IF result \\in {\"Accepted\",\"StorageError\"} THEN Candidate(s,q) ELSE s",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FailureFrame"
         }
       ]
     }
