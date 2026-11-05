@@ -197,14 +197,17 @@ Content-Type, so those blob-only fields are not required or invented. Container
 metadata editing, GET compatibility expansion, SAS, leases, Azure RBAC, account
 management, public-access settings and legal holds are outside this follow-up.
 
-`test/e2e/azure_container_properties.py` will exercise actual local responses,
+`test/e2e/azure_container_properties.py` exercises actual local responses,
 empty and bounded metadata, explicit dummy delete/recreate after listing,
 denied/missing/error cases, Close/reopen, same-name blob versus container, locale,
-peer preservation, keyboard and desktop/mobile accessibility. Source preparation
-is not a successful runtime or formal result. The existing Blob Properties
-regression must also pass unchanged. The integration owner must review model
-target-kind correspondence and register mandatory tests/assets/applicability
-before any completion claim.
+peer preservation, keyboard and desktop/mobile accessibility. Focused candidate
+execution passed at 1440px and 390px, alongside the unchanged Blob Properties
+helper. Its initial table-readiness fixture failure was retained and corrected
+by waiting for the real Containers table and enabled Refresh before selection.
+The candidate registers both helpers as mandatory cases; full 45-case integration,
+193 finite model/control executions, applicability and hosted CI remain pending.
+The [typed-target model](formal-azure-properties-target.md) complements lifecycle
+checks; it does not prove HTTP parsing, authorization or JavaScript refinement.
 
 References: [Portal container properties](https://learn.microsoft.com/en-us/azure/storage/blobs/blob-containers-portal)
 and [Get Container Properties](https://learn.microsoft.com/en-us/rest/api/storageservices/get-container-properties).

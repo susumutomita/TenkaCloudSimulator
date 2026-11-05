@@ -1,114 +1,110 @@
 {
   "version": 1,
-  "base_sha": "cba0a29a0397ab01ca106bbc5374b85b50d736b2",
+  "base_sha": "ce622018cb84fa81fd857da563ddd7d9dc87d427",
   "changes": [
     {
       "path": "README.md",
+      "sha256": "aa8c6fc2041eddbc9da04fd88612dbcfd3329584b9180b5c8a41e99be0799499",
       "disposition": "documentation",
-      "models": [],
-      "reason": "Update current merged-source acceptance/counts and distinguish historical receipts from unexecuted exact-HEAD checks; preserve protocol, authorization and rights limitations.",
-      "sha256": "0193de3e1171b465c7e83a852d06a179fb4b00f8e9e9427d7258c13430944ceb"
-    },
-    {
-      "path": "docs/acceptance/crossprovider-console.md",
-      "disposition": "documentation",
-      "models": [],
-      "reason": "Update current merged-source acceptance/counts and distinguish historical receipts from unexecuted exact-HEAD checks; preserve protocol, authorization and rights limitations.",
-      "sha256": "e7a8a7c34357b1a5dfc230e9692345aec60464ad34a89b0e6014ace207a253d7"
+      "reason": "Synchronize supported Container Properties behavior, bounded model/source correspondence and current candidate45/193 required gates; distinguish observed focused/scoped receipts from pending whole immutable CI and authenticated Portal parity.",
+      "models": []
     },
     {
       "path": "docs/azure-console.md",
+      "sha256": "4a83013758be4d93d6a8c0f2a4055ee75421d687c484778e80c1e6ba774220ff",
       "disposition": "documentation",
-      "models": [],
-      "reason": "Update current merged-source acceptance/counts and distinguish historical receipts from unexecuted exact-HEAD checks; preserve protocol, authorization and rights limitations.",
-      "sha256": "21a740d2d1709803f632e32c6705aefe0ca2eefe01129a5a25e7eb371c40d1ba"
+      "reason": "Synchronize supported Container Properties behavior, bounded model/source correspondence and current candidate45/193 required gates; distinguish observed focused/scoped receipts from pending whole immutable CI and authenticated Portal parity.",
+      "models": []
     },
     {
       "path": "docs/ci.md",
+      "sha256": "f23547b0dfa6ecbc248a3099bb066b0260a1c39daba5c67a4b02fb5172e2983e",
       "disposition": "documentation",
-      "models": [],
-      "reason": "Update current merged-source acceptance/counts and distinguish historical receipts from unexecuted exact-HEAD checks; preserve protocol, authorization and rights limitations.",
-      "sha256": "cbf6d77ea09719f156f82c6a4cd5a07ee088d08acc1f7cb65af1739c292c0b1a"
+      "reason": "Synchronize supported Container Properties behavior, bounded model/source correspondence and current candidate45/193 required gates; distinguish observed focused/scoped receipts from pending whole immutable CI and authenticated Portal parity.",
+      "models": []
     },
     {
-      "path": "docs/formal-azure-properties.md",
-      "sha256": "2d96d4ffabe60fd80015c990917f830a9c186515dba36f48c9d7bf6479c4886d",
+      "path": "docs/formal-azure-properties-target.md",
+      "sha256": "26f13e045036d73f755441421ca028de4c58f7b68a8aaaf086527a2fefdf2a5e",
       "disposition": "documentation",
-      "reason": "Describe bounded Azure Properties callback model correspondence and explicitly unmodeled transport/header/authorization/liveness boundaries.",
+      "reason": "Synchronize supported Container Properties behavior, bounded model/source correspondence and current candidate45/193 required gates; distinguish observed focused/scoped receipts from pending whole immutable CI and authenticated Portal parity.",
       "models": []
     },
     {
       "path": "docs/formal-validation.md",
+      "sha256": "84bbdc9b76d68dfbf80d9aaf0bf6c30ee76de2962c046de84fd59ad44f3f9ff2",
       "disposition": "documentation",
-      "models": [],
-      "reason": "Update current merged-source acceptance/counts and distinguish historical receipts from unexecuted exact-HEAD checks; preserve protocol, authorization and rights limitations.",
-      "sha256": "bf98b20f9d027809a8d7d76a558e592b548d9e4fe00b2fe784489e89189e9077"
+      "reason": "Synchronize supported Container Properties behavior, bounded model/source correspondence and current candidate45/193 required gates; distinguish observed focused/scoped receipts from pending whole immutable CI and authenticated Portal parity.",
+      "models": []
     },
     {
-      "path": "formal/AzurePropertiesEpoch.cfg",
-      "sha256": "ae53676eed97338e67a645d8a04f9b3b45da047ef81534282145b2b398920dc3",
+      "path": "formal/AzurePropertiesTarget.cfg",
+      "sha256": "2c8d957a0b530dc8f84889770cb2a62eaeed0ee17acc1b86d82d621b02df5bcb",
       "disposition": "modeled",
-      "reason": "Live HEAD Properties lifecycle publishes only a successful current request; clears old values on Open/Close and ignores stale completion/finalization. Bound component abstraction; actual header parsing, transport and authorization need separate native browser checks.",
+      "reason": "Typed complete target and read-only HEAD route/field-shape correspondence. Scoped baseline/six semantic controls passed; combined immutable193 remains required. Ghost URL/closure provenance does not invent runtime parent fields or equality checks.",
       "models": [
         {
-          "id": "AzurePropertiesEpoch",
+          "id": "AzurePropertiesTarget",
           "properties": [
             "TypeOK",
-            "SuccessfulOnly",
-            "AcceptedOnlyCurrent",
-            "ClearedWhenClosed",
-            "LoadingClearsPrevious",
-            "FailureNoDisclosure",
-            "CurrentProperties",
-            "CurrentRequestLoading",
-            "LocaleStable"
+            "NativeHeadOnly",
+            "RequestIdentityExact",
+            "DistinctTargetCarriers",
+            "RouteMatchesTarget",
+            "DetailCapturedIdentity",
+            "FieldShapeExact"
           ],
-          "limits": "Bounded component-callback/state abstraction, not JS/Go/SQL refinement or full Azure authorization. Context is captured lifecycle identity, not invented scope equality check. Root remount and component destruction abstracted; no epoch reuse/unbounded wraparound, header parsing/UTF8/arithmetic/HTML proof, cryptographic/transport proof or liveness. Callable Open can be programmatically invoked on completed pane; not claim background controls clickable through native dialog. Native helper raw HTTP != official SDK; container properties deferred."
+          "limits": "Finite typed-target/route/field-set abstraction; captured URL/closure provenance is ghost state, not a real detail.parent or equality guard. Assumes current-response eligibility and successful native header parsing. No URL decoder/header parser/auth/SQL/Go/React refinement, body/content, lifecycle freshness, liveness or full Azure parity. Existing AzurePropertiesEpoch separately handles lifecycle/epochs."
         }
       ]
     },
     {
-      "path": "formal/AzurePropertiesEpoch.tla",
-      "sha256": "5c77f24b0d735da6414ab495caa8d503c231a24bb15399deb60447732449d567",
+      "path": "formal/AzurePropertiesTarget.tla",
+      "sha256": "930838baf67b7d31638ae8236588e5766c1843f242e9f145b2b99f5f06183639",
       "disposition": "modeled",
-      "reason": "Live HEAD Properties lifecycle publishes only a successful current request; clears old values on Open/Close and ignores stale completion/finalization. Bound component abstraction; actual header parsing, transport and authorization need separate native browser checks.",
+      "reason": "Typed complete target and read-only HEAD route/field-shape correspondence. Scoped baseline/six semantic controls passed; combined immutable193 remains required. Ghost URL/closure provenance does not invent runtime parent fields or equality checks.",
       "models": [
         {
-          "id": "AzurePropertiesEpoch",
+          "id": "AzurePropertiesTarget",
           "properties": [
             "TypeOK",
-            "SuccessfulOnly",
-            "AcceptedOnlyCurrent",
-            "ClearedWhenClosed",
-            "LoadingClearsPrevious",
-            "FailureNoDisclosure",
-            "CurrentProperties",
-            "CurrentRequestLoading",
-            "LocaleStable"
+            "NativeHeadOnly",
+            "RequestIdentityExact",
+            "DistinctTargetCarriers",
+            "RouteMatchesTarget",
+            "DetailCapturedIdentity",
+            "FieldShapeExact"
           ],
-          "limits": "Bounded component-callback/state abstraction, not JS/Go/SQL refinement or full Azure authorization. Context is captured lifecycle identity, not invented scope equality check. Root remount and component destruction abstracted; no epoch reuse/unbounded wraparound, header parsing/UTF8/arithmetic/HTML proof, cryptographic/transport proof or liveness. Callable Open can be programmatically invoked on completed pane; not claim background controls clickable through native dialog. Native helper raw HTTP != official SDK; container properties deferred."
+          "limits": "Finite typed-target/route/field-set abstraction; captured URL/closure provenance is ghost state, not a real detail.parent or equality guard. Assumes current-response eligibility and successful native header parsing. No URL decoder/header parser/auth/SQL/Go/React refinement, body/content, lifecycle freshness, liveness or full Azure parity. Existing AzurePropertiesEpoch separately handles lifecycle/epochs."
         }
       ]
     },
     {
       "path": "formal/README.md",
+      "sha256": "9a6f56b8a86027b4ee029b750ac02241606cfc8b0a1c186eea5c082bca8148d1",
       "disposition": "documentation",
-      "models": [],
-      "reason": "Update current merged-source acceptance/counts and distinguish historical receipts from unexecuted exact-HEAD checks; preserve protocol, authorization and rights limitations.",
-      "sha256": "698787a761c7b042907afcdf91159e72434aa7995babc886cfe13cd22183ab80"
+      "reason": "Synchronize supported Container Properties behavior, bounded model/source correspondence and current candidate45/193 required gates; distinguish observed focused/scoped receipts from pending whole immutable CI and authenticated Portal parity.",
+      "models": []
     },
     {
       "path": "formal/models.json",
-      "sha256": "815550ff07641c00dd12483cc6cc9b480e0baf3514d09ddaee72fbd8ed7d0cce",
+      "sha256": "d809f222219adf7ae43ed0025a1e645f741a665046670448da892ba9065b7034",
       "disposition": "formal-infrastructure",
-      "reason": "Preserve every current main27 model/config/property and153 literal controls; append exact existing AzurePropertiesEpoch with nine invariants/five controls. Extend main strict valid-CFG property/model and every-control omission tests; retain all31 unique test methods/AST uniqueness guards. Source declaration, not full implementation refinement or new immutable execution proof.",
+      "reason": "Preserve every maince62228 model/158 controls and append AzurePropertiesTarget seven invariants/six meaningful controls. Extend exact-model/property/control omission guards to164 controls without weakening CFG/parser/hash/deadline/trace checks; all31 unique policy tests retained.",
+      "models": []
+    },
+    {
+      "path": "internal/server/web/app.css",
+      "sha256": "03a4f066ef59a3c81bffd29ce7909f5c9745ee66a91d249d4f5ccde255026b80",
+      "disposition": "presentation",
+      "reason": "Scoped Azure More disclosure positioning/focus/disabled styles and canonical CSS output only. No API/authority/state-handler changes; keyboard/reflow/contrast require actual browser checks.",
       "models": []
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "043dff1cbc645522d0575920326eed510e1060dfa19d8cf59a232919267624df",
+      "sha256": "ffb799e57e1cc51599df0a0af7b484cc5a22876a12f54dbafad324a8b61ee80f",
       "disposition": "modeled",
-      "reason": "Canonical same-lock generated bundle preserves maincba Secrets source and routing byte-for-byte while adding Azure live properties. Retain the existing finite SecretsRevealEpoch correspondence as an unchanged/frame-limited compiled projection only; it does not cover Azure HEAD/header parsing, all JavaScript, animation, minification or compiler correctness. Azure source has its separate AzurePropertiesEpoch binding. Independent build/browser and exact-new-HEAD formal gates remain required.",
+      "reason": "Canonical single-module Container Properties bundle refresh; all other console source inputs preserved. Retain required SecretsRevealEpoch compiled frame projection only; Azure lifecycle/target correspondence binds its direct JSX separately. No claim of all-JS/minifier/compiler proof.",
       "models": [
         {
           "id": "SecretsRevealEpoch",
@@ -124,58 +120,58 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "15da1e8cb1ab66958bf825fca0610058f07ab9e2f1cca4ee526ca0ab2560a334",
+      "sha256": "dac8ee80ace1296a9ef2108c3598dc391f640c6086b72dd0d0ddfba1014a1f2c",
       "disposition": "formal-infrastructure",
-      "reason": "Preserve every current main27 model/config/property and153 literal controls; append exact existing AzurePropertiesEpoch with nine invariants/five controls. Extend main strict valid-CFG property/model and every-control omission tests; retain all31 unique test methods/AST uniqueness guards. Source declaration, not full implementation refinement or new immutable execution proof.",
+      "reason": "Preserve every maince62228 model/158 controls and append AzurePropertiesTarget seven invariants/six meaningful controls. Extend exact-model/property/control omission guards to164 controls without weakening CFG/parser/hash/deadline/trace checks; all31 unique policy tests retained.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "835b5e12c7630988cb6632422b7ce688e9a200a5d77b2e9464e380403a9c3b07",
+      "sha256": "213087fdbb9dfaeb3c129b1191fde0c508dce851d3cf5805d171b8740bdded09",
       "disposition": "formal-infrastructure",
-      "reason": "Preserve every current main27 model/config/property and153 literal controls; append exact existing AzurePropertiesEpoch with nine invariants/five controls. Extend main strict valid-CFG property/model and every-control omission tests; retain all31 unique test methods/AST uniqueness guards. Source declaration, not full implementation refinement or new immutable execution proof.",
+      "reason": "Preserve every maince62228 model/158 controls and append AzurePropertiesTarget seven invariants/six meaningful controls. Extend exact-model/property/control omission guards to164 controls without weakening CFG/parser/hash/deadline/trace checks; all31 unique policy tests retained.",
       "models": []
     },
     {
-      "path": "test/e2e/azure_live_properties.py",
-      "sha256": "bcadc586dcf684ce83b66e669d1695f50f92c120aff1d1d869d89e77f17b3a83",
+      "path": "test/e2e/azure_container_properties.py",
+      "sha256": "86c78ca3da2abe856d0d3828b0d0f71996d7f2566fd2f0252332f038229f6748",
       "disposition": "test-support",
-      "reason": "Mandatory actual embedded native HEAD/browser lifecycle acceptance and old provider helper text synchronized to live native properties; no official Azure SDK claim.",
+      "reason": "Mandatory real embedded Container Properties nativeHEAD/browser helper plus wrapper. Preserve all44 main Conformance bodies; add one required case with actual403/404/SQLite500 recovery, typed same-name resources, locale and peer frame. No official SDK or authenticated Portal claim.",
       "models": []
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "541c2e08ccee39cfea0675d9c3a2f3881c98b079b30ed1e562ded8ca67fe187f",
+      "sha256": "0796f5e86ce00846fe8194e1d9ffb6600cd370de7d79ef2146093f0d96175140",
       "disposition": "test-support",
-      "reason": "Mandatory actual embedded native HEAD/browser lifecycle acceptance and old provider helper text synchronized to live native properties; no official Azure SDK claim.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/crossprovider_console.py",
-      "sha256": "89ae722883c612a4b7c0e540e2036921bb4f6254c2f1945d42b9beaa65bfb82b",
-      "disposition": "test-support",
-      "reason": "Mandatory actual embedded native HEAD/browser lifecycle acceptance and old provider helper text synchronized to live native properties; no official Azure SDK claim.",
+      "reason": "Mandatory real embedded Container Properties nativeHEAD/browser helper plus wrapper. Preserve all44 main Conformance bodies; add one required case with actual403/404/SQLite500 recovery, typed same-name resources, locale and peer frame. No official SDK or authenticated Portal claim.",
       "models": []
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "5c467b34e757fcec45689061b921c732df8333bfb3316a794bda03ff65281440",
-      "disposition": "presentation",
-      "reason": "Canonical Cloudscape bundle/digests/source receipt regenerated from unchanged pinned dependencies and original rights; generated JavaScript is integration evidence, not separate transport or authorization proof.",
+      "sha256": "2ff6b1708e173954b9597cb8a9fd9e11f90b4699858d0cac679e7e83ce43a16b",
+      "disposition": "build-metadata",
+      "reason": "Canonical existing locked dependency inventory/build inputs and digest refresh for Azure-only leaf/CSS changes; all16050 dependency entries/22originalrights/Scalar assets unchanged, no install.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "89f8d89e77fcdd3c62c1409e412e51002b4e5012f1c5d3166d81bc134616a16f",
+      "sha256": "3bd084f153a83a93acdbd26d0dc9b7af6b8e1a576d12563b657d4725359b56f1",
+      "disposition": "build-metadata",
+      "reason": "Canonical existing locked dependency inventory/build inputs and digest refresh for Azure-only leaf/CSS changes; all16050 dependency entries/22originalrights/Scalar assets unchanged, no install.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/azure-blob.css",
+      "sha256": "0637ec9a64826d221399cc6683157d826a63f06be2386ee54a0657c6c0e51914",
       "disposition": "presentation",
-      "reason": "Canonical Cloudscape bundle/digests/source receipt regenerated from unchanged pinned dependencies and original rights; generated JavaScript is integration evidence, not separate transport or authorization proof.",
+      "reason": "Scoped Azure More disclosure positioning/focus/disabled styles and canonical CSS output only. No API/authority/state-handler changes; keyboard/reflow/contrast require actual browser checks.",
       "models": []
     },
     {
       "path": "tools/console/src/azure-blob.jsx",
-      "sha256": "ffa780b89eb4ce8e6017d6ffa29605770af2c35b15b5e0221677954a1a8d08de",
+      "sha256": "3b4079dbc0c42a0d778579c77fdddde28c04016e49e23e48d2fa5454d3bce558",
       "disposition": "modeled",
-      "reason": "Live HEAD Properties lifecycle publishes only a successful current request; clears old values on Open/Close and ignores stale completion/finalization. Bound component abstraction; actual header parsing, transport and authorization need separate native browser checks.",
+      "reason": "Container and Blob Properties share existing captured-life/epoch request guards; explicit kind/path/header-shape/render separation uses complete kind/parent/name targets. Parser/HTTP/auth/browser/SQLite behavior remains concrete acceptance, not refinement proof.",
       "models": [
         {
           "id": "AzurePropertiesEpoch",
@@ -191,6 +187,19 @@
             "LocaleStable"
           ],
           "limits": "Bounded component-callback/state abstraction, not JS/Go/SQL refinement or full Azure authorization. Context is captured lifecycle identity, not invented scope equality check. Root remount and component destruction abstracted; no epoch reuse/unbounded wraparound, header parsing/UTF8/arithmetic/HTML proof, cryptographic/transport proof or liveness. Callable Open can be programmatically invoked on completed pane; not claim background controls clickable through native dialog. Native helper raw HTTP != official SDK; container properties deferred."
+        },
+        {
+          "id": "AzurePropertiesTarget",
+          "properties": [
+            "TypeOK",
+            "NativeHeadOnly",
+            "RequestIdentityExact",
+            "DistinctTargetCarriers",
+            "RouteMatchesTarget",
+            "DetailCapturedIdentity",
+            "FieldShapeExact"
+          ],
+          "limits": "Finite typed-target/route/field-set abstraction; captured URL/closure provenance is ghost state, not a real detail.parent or equality guard. Assumes current-response eligibility and successful native header parsing. No URL decoder/header parser/auth/SQL/Go/React refinement, body/content, lifecycle freshness, liveness or full Azure parity. Existing AzurePropertiesEpoch separately handles lifecycle/epochs."
         }
       ]
     }

@@ -15,8 +15,8 @@ machine-discovered semantic coverage. A newly added implementation file is not
 covered merely because an existing model passes: its exact path must have an
 appropriate reviewed scope mapping and property argument.
 
-The current source candidate registry has 28 baselines/158 required named mutation controls
-(186 required executions), preserving maincba 27/153 and adding AzurePropertiesEpoch 1/5.
+The current source candidate registry has 29 baselines/164 required named mutation controls
+(193 required executions), preserving maince622 28/158 and adding AzurePropertiesTarget 1/6.
 Registration and Python guards are not a successful immutable TLC execution.
 
 | Model | Finite contract | Important exclusions |
@@ -189,3 +189,18 @@ The model abstracts component lifecycle/request epochs, successful HEAD publicat
 close/open clearing and locale-stable state; it does not prove JavaScript, native
 HTTP parsing, Go/SQLite authorization, SDK compatibility or full Azure parity.
 New immutable formal/application checks and hosted gates remain required.
+
+
+## Azure Properties typed targets
+
+The Container Properties candidate preserves every maince622 model/config/control
+and adds `AzurePropertiesTarget`: complete kind/parent/name target identity,
+read-only HEAD route carriers and exact container/blob displayed field sets.
+All seven invariants and six literal controls are mandatory. A pinned scoped run
+passed the baseline (85 generated / 20 distinct states) and all six expected
+semantic counterexamples. Registration plus this scoped result is not a full
+193-execution or implementation/refinement proof.
+
+[Source correspondence and limits](formal-azure-properties-target.md) explain
+ghost capture provenance, the separately checked lifecycle/epoch assumptions and
+concrete native/browser obligations.

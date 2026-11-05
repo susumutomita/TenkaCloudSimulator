@@ -70,7 +70,7 @@ TypeOK == /\ phase \in {"Idle","Selected","Waiting","Done"}
 NativeHeadOnly == request.present => request.method="HEAD"
 RequestIdentityExact == request.present =>
  /\ request.target=selected
- /\ request.identity=<<selected.kind,selected.parent,selected.name>>
+ /\ request.identity = <<selected.kind,selected.parent,selected.name>>
 RouteMatchesTarget == request.present => request.route=ExpectedRoute(selected)
 DistinctTargetCarriers == request.present =>
  \A a,b \in Targets : Route(a)=Route(b) => a=b

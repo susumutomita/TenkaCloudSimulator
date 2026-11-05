@@ -1,8 +1,8 @@
 # Finite state model
 
-Current source candidate registry: 28 models / 158 literal-protected controls
-(186 required executions). Maincba contributes 27 models/153 controls unchanged;
-AzurePropertiesEpoch adds one model/five controls. Registration is source evidence,
+Current source candidate registry: 29 models / 164 literal-protected controls
+(193 required executions). Maince622 contributes 28 models/158 controls unchanged;
+AzurePropertiesTarget adds one model/six controls. Registration is source evidence,
 not successful execution of this new immutable candidate. Dated receipts below
 refer to their recorded historical inputs, not this current integration. These
 finite models do not prove Go/SQL/HTTP/UI refinement or complete cloud compatibility.
@@ -252,3 +252,18 @@ The model abstracts component lifecycle/request epochs, successful HEAD publicat
 close/open clearing and locale-stable state; it does not prove JavaScript, native
 HTTP parsing, Go/SQLite authorization, SDK compatibility or full Azure parity.
 New immutable formal/application checks and hosted gates remain required.
+
+
+## Azure Properties typed targets
+
+The Container Properties candidate preserves every maince622 model/config/control
+and adds `AzurePropertiesTarget`: complete kind/parent/name target identity,
+read-only HEAD route carriers and exact container/blob displayed field sets.
+All seven invariants and six literal controls are mandatory. A pinned scoped run
+passed the baseline (85 generated / 20 distinct states) and all six expected
+semantic counterexamples. Registration plus this scoped result is not a full
+193-execution or implementation/refinement proof.
+
+[Source correspondence and limits](../docs/formal-azure-properties-target.md) explain
+ghost capture provenance, the separately checked lifecycle/epoch assumptions and
+concrete native/browser obligations.

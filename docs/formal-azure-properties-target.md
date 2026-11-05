@@ -1,14 +1,14 @@
 # Azure Properties typed-target source model
 
-`AzurePropertiesTarget.tla` is a proposed, **unregistered and unexecuted** finite
-model of the Container/Blob Properties leaf. Source-only preparation does not
-establish TLC success, implementation refinement, native API success or Azure
-portal parity. No registry, gate, shared wrapper or application-record changes
-are part of this proposal.
+`AzurePropertiesTarget.tla` is registered in the candidate's formal gate, with
+seven required invariants and six behavioral controls. A pinned scoped execution
+passed SANY, the baseline and all six expected counterexamples; full combined
+immutable 193-case validation and hosted CI remain separate requirements. This
+is not implementation refinement, native API success or Azure portal parity.
 
 ## Concrete correspondence
 
-Frozen source: `tools/console/src/azure-blob.jsx`, leaf baseline `99adad29`,
+Candidate source: `tools/console/src/azure-blob.jsx`, derived from main `ce622018`,
 SHA-256 `3b4079dbc0c42a0d778579c77fdddde28c04016e49e23e48d2fa5454d3bce558`.
 
 - `showProperties` lines84–89 accepts only `container` or `blob`, refuses the
@@ -61,7 +61,7 @@ blob tail and `restype`, without pretending to parse real URLs/percent encodings
 | DetailCapturedIdentity | displayed detail's kind/name and ghost provenance belong to the captured request |
 | FieldShapeExact | container has common fields only; blob adds exactly its three blob fields |
 
-The outside proposed entry contains six literal, count-one edits: `RequestGET`,
+The registry requires six literal, count-one edits: `RequestGET`,
 `WrongKindRoute`, `DropBlobParent`, `WrongRenderedName`,
 `ContainerGetsBlobFields`, `BlobOmitsFields`. Each must reach a named semantic
 invariant with exit12 and a real behavior trace. Type errors, parse failures,
@@ -76,7 +76,15 @@ The CFG checks `DistinctTargetCarriers` before `RouteMatchesTarget` so this
 expected oracle does not depend on TLC successor enumeration order. Both
 properties remain checked; `WrongKindRoute` stays injective and must instead
 violate `RouteMatchesTarget`.
-Actual results remain pending until separately granted TLC execution.
+The scoped run used pinned TLC 1.7.4, model SHA-256
+`930838baf67b7d31638ae8236588e5766c1843f242e9f145b2b99f5f06183639`
+and CFG SHA-256
+`2c8d957a0b530dc8f84889770cb2a62eaeed0ee17acc1b86d82d621b02df5bcb`.
+The baseline generated 85 states / 20 distinct states and exited 0. All six
+controls exited 12 with the declared invariant and a real behavior trace. An
+earlier SANY attempt failed on an ambiguous adjacent `=<<` token before TLC;
+only spacing was corrected, and that failed attempt is not counted as a pass.
+This is seven scoped executions, not the full candidate's 193 executions.
 
 ## Exclusions and evidence status
 

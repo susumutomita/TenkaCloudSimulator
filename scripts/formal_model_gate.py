@@ -9,8 +9,9 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-BASE_MODELS = {'AzurePropertiesEpoch', 'AzureBlobState', 'BlobRange', 'BrowserSessions', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'DynamoDBAdmission', 'DynamoDBLifecycle', 'GCPStorageState', 'KMSKeyState', 'KMSProtocolAdmission', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'SecretsDisclosureChannels', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'SecretsMutationRefresh', 'StackOwnership', 'StartupTokenVisibility'}
+BASE_MODELS = {'AzurePropertiesTarget', 'AzurePropertiesEpoch', 'AzureBlobState', 'BlobRange', 'BrowserSessions', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'DynamoDBAdmission', 'DynamoDBLifecycle', 'GCPStorageState', 'KMSKeyState', 'KMSProtocolAdmission', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'SecretsDisclosureChannels', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'SecretsMutationRefresh', 'StackOwnership', 'StartupTokenVisibility'}
 BASE_INVARIANTS = {
+    'AzurePropertiesTarget': {'DetailCapturedIdentity', 'DistinctTargetCarriers', 'FieldShapeExact', 'NativeHeadOnly', 'RequestIdentityExact', 'RouteMatchesTarget', 'TypeOK'},
     'AzurePropertiesEpoch': {'CurrentProperties', 'SuccessfulOnly', 'ClearedWhenClosed', 'FailureNoDisclosure', 'CurrentRequestLoading', 'TypeOK', 'LocaleStable', 'AcceptedOnlyCurrent', 'LoadingClearsPrevious'},
     'SecretsMutationRefresh': {'TypeOK', 'AckClosesForm', 'AckClearsDraft', 'FreshFormHasToken', 'NoWriteOnReadRetry'},
     'AzureBlobState': {'BudgetBounded', 'ConditionEnforced', 'FailureAtomic', 'FreshWriteIdentity', 'NoDeniedRead', 'NoOrphans', 'NoUnauthorizedMutation', 'PeerStatePreserved', 'ReadExact', 'TypeOK'},
@@ -42,6 +43,7 @@ BASE_INVARIANTS = {
 }
 # Established controls require an explicit gate-policy change before retirement.
 REQUIRED_MUTANTS = {
+    'AzurePropertiesTarget': {'BlobOmitsFields', 'ContainerGetsBlobFields', 'DropBlobParent', 'RequestGET', 'WrongKindRoute', 'WrongRenderedName'},
     'AzurePropertiesEpoch': {'OpenKeepsPrevious', 'StaleFinallyClearsBusy', 'BypassCurrentPublication', 'CloseKeepsPrevious', 'AcceptFailedHEAD'},
     'SecretsMutationRefresh': {'RetainDraftOnAck', 'ReplayWriteOnReadRetry', 'OmitAckFormExit', 'OmitFreshIntentToken'},
     'AzureBlobState': {'ContainerDeleteErasesPeer', 'ContainerDeleteLeavesBlobs', 'FailedPutCommits', 'IgnoreAccountOwner', 'IgnoreCreateOnly', 'IgnoreStaleETag', 'MissingTrustedActor', 'OmitByteBudget', 'OmitRowBudget', 'ReadNeighbor', 'ReuseETag'},
