@@ -413,7 +413,7 @@
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "b5864f83ffd9c305b9a47305aea114071c494ef7b4ea582de3b3dd3d76ff2917",
+      "sha256": "51c088d9418744142e9c91c5f713bd32e976c7cbc790bcf76a2239ff081eb136",
       "disposition": "modeled",
       "reason": "Canonical locally built console carries the unchanged normalized Secrets disclosure/epoch contract and preserved current Core source. Binding is to the selected Secret child behavior, not a proof of minification, bundler, all embedded JavaScript or cryptographic erasure. Real browser/session/reveal acceptance and license/asset checks remain separately required.",
       "models": [
@@ -458,6 +458,13 @@
       "models": []
     },
     {
+      "path": "test/e2e/login_token_file.py",
+      "disposition": "test-support",
+      "models": [],
+      "reason": "Test-only safe file-keyboard diagnostics and strict native chooser/POST/busy assertions. Original5s timeout, focus condition and auth/read/locale/negative oracles remain; artificial default cancellation is labelled and not a CI-cause claim. Diagnostics contain no token/input value/file name/arbitrary key/request URL. New exactHEAD execution and CI remain required.",
+      "sha256": "38044fe99a4055e049ca37214248188876730dac3ebff50252e2adfa02464291"
+    },
+    {
       "path": "test/e2e/secrets_manager.py",
       "sha256": "0325c9a8b024c1ab43882af8e418cc2140e65d94a43002a6e3310ebc2775634d",
       "disposition": "test-support",
@@ -480,14 +487,14 @@
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "3277073f31e842c0778256a44bd22fd22073ce9f230159eb2e6fa99f96116267",
+      "sha256": "7cb269e0b0af110a9ed763357b3734ecfd6d77f00412cd2bfc2480e0c2ec6276",
       "disposition": "presentation",
       "reason": "Provider-scoped AWS catalog/alias/static localized child or canonical embedded assets only. Same native fields/data/credentials and safe disclosure guards are preserved; capability checks are discovery, not authority. Same-lock existing dependencies reused without install, and original notices retained. Syntax/pure/source checks do not establish real browser/SDK/localization/asset or fullCI acceptance.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "22b1705f8ae36173625382d8bf46274e1de59f0d24643c7c7b7936e66db73e66",
+      "sha256": "378854af3172b936a877de0a244edc18b994541742393bb11fe74bb1478f23f6",
       "disposition": "presentation",
       "reason": "Provider-scoped AWS catalog/alias/static localized child or canonical embedded assets only. Same native fields/data/credentials and safe disclosure guards are preserved; capability checks are discovery, not authority. Same-lock existing dependencies reused without install, and original notices retained. Syntax/pure/source checks do not establish real browser/SDK/localization/asset or fullCI acceptance.",
       "models": []
@@ -498,6 +505,22 @@
       "disposition": "presentation",
       "reason": "Provider-scoped AWS catalog/alias/static localized child or canonical embedded assets only. Same native fields/data/credentials and safe disclosure guards are preserved; capability checks are discovery, not authority. Same-lock existing dependencies reused without install, and original notices retained. Syntax/pure/source checks do not establish real browser/SDK/localization/asset or fullCI acceptance.",
       "models": []
+    },
+    {
+      "path": "tools/console/src/login.jsx",
+      "sha256": "860da4232182a8682278290bfa8d439cee36196f9f12314ec984c4d9f8412e9f",
+      "disposition": "modeled",
+      "reason": "Existing Login credential-transport/session correspondence retains the registered BrowserSessions contract. The only product addition is trusted focused file-input Enter synchronous click/default suppression with busy/submitting/disabled/repeat guards. Token parsing, read-intent revision/cleanup, password/clipboard, exact native sign-in and server cookies are byte-identical after removing this handler/binding. The unchanged finite session model does NOT model or prove keyboard/native chooser/default-action/userActivation/React/browser-version behavior; actual focused browser and handler condition tests are separate required evidence, and the prior hosted chooser failure cause remains unproven.",
+      "models": [
+        {
+          "id": "BrowserSessions",
+          "properties": [
+            "RevokedCookiesDenied",
+            "NoBrowserSDKAuthority"
+          ],
+          "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them."
+        }
+      ]
     },
     {
       "path": "tools/console/src/main.jsx",
