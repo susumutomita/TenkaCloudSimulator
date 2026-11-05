@@ -3,12 +3,74 @@ package apirouting
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
 	"strings"
 	"testing"
 )
+
+// Test observations are intentionally separate from runtime serialization. Each
+// expected wire field is decoded by name from raw JSON; there is no production
+// event DTO or reused wire-tag struct behind these assertions.
+type proxyObservation struct {
+	Resource, Path, HTTPMethod, Body string
+	Headers                          map[string]string
+	MultiValueHeaders                map[string][]string
+	QueryStringParameters            map[string]string
+	MultiValueQueryStringParameters  map[string][]string
+	StageVariables                   map[string]string
+	IsBase64Encoded                  bool
+	RequestContext                   struct{ Path, ResourcePath, AccountID, RequestID string }
+}
+
+func observeProxyJSON(data []byte) (proxyObservation, error) {
+	var observed proxyObservation
+	var wire map[string]json.RawMessage
+	if err := json.Unmarshal(data, &wire); err != nil {
+		return observed, err
+	}
+	read := func(fields map[string]json.RawMessage, name string, target any) error {
+		raw, exists := fields[name]
+		if !exists {
+			return fmt.Errorf("missing observed field %s", name)
+		}
+		return json.Unmarshal(raw, target)
+	}
+	targets := []struct {
+		name   string
+		target any
+	}{
+		{"resource", &observed.Resource}, {"path", &observed.Path},
+		{"httpMethod", &observed.HTTPMethod}, {"body", &observed.Body},
+		{"headers", &observed.Headers}, {"multiValueHeaders", &observed.MultiValueHeaders},
+		{"queryStringParameters", &observed.QueryStringParameters},
+		{"multiValueQueryStringParameters", &observed.MultiValueQueryStringParameters},
+		{"stageVariables", &observed.StageVariables}, {"isBase64Encoded", &observed.IsBase64Encoded},
+	}
+	for _, field := range targets {
+		if err := read(wire, field.name, field.target); err != nil {
+			return observed, err
+		}
+	}
+	var context map[string]json.RawMessage
+	if err := read(wire, "requestContext", &context); err != nil {
+		return observed, err
+	}
+	for _, field := range []struct {
+		name   string
+		target any
+	}{
+		{"path", &observed.RequestContext.Path}, {"resourcePath", &observed.RequestContext.ResourcePath},
+		{"accountId", &observed.RequestContext.AccountID}, {"requestId", &observed.RequestContext.RequestID},
+	} {
+		if err := read(context, field.name, field.target); err != nil {
+			return observed, err
+		}
+	}
+	return observed, nil
+}
 
 func proxyRoute() ProxyRequest {
 	return ProxyRequest{APIID: "local-api", Stage: "prod", ResourcePath: "/{proxy+}", Path: "/wp-json/batch/v1", RequestID: "local-request", PathParameters: map[string]string{"proxy": "wp-json/batch/v1"}}
@@ -33,8 +95,8 @@ func TestRESTProxyEventPreservesActualRouteAndApplicationData(t *testing.T) {
 	if bytes.Contains(encoded, []byte("private-")) || bytes.Contains(encoded, []byte("simulator-admin")) {
 		t.Fatal("transport authority leaked to the function")
 	}
-	var event ProxyEventV1
-	if err = json.Unmarshal(encoded, &event); err != nil {
+	event, err := observeProxyJSON(encoded)
+	if err != nil {
 		t.Fatal(err)
 	}
 	if event.Resource != "/{proxy+}" || event.Path != "/wp-json/batch/v1" || event.RequestContext.Path != "/prod/wp-json/batch/v1" || event.RequestContext.ResourcePath != event.Resource || event.HTTPMethod != "POST" {
@@ -82,8 +144,8 @@ func TestRESTProxyEventRejectsMalformedOrOversizedData(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	var event ProxyEventV1
-	if err = json.Unmarshal(encoded, &event); err != nil {
+	event, err := observeProxyJSON(encoded)
+	if err != nil {
 		t.Fatal(err)
 	}
 	if len(event.Headers) != 0 || event.QueryStringParameters != nil || event.MultiValueQueryStringParameters != nil || event.StageVariables != nil || strings.Contains(string(encoded), "private-value") {

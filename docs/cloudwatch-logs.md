@@ -150,8 +150,15 @@ Current AWS references: [PutLogEvents](https://docs.aws.amazon.com/AmazonCloudWa
 [DeleteLogGroup](https://docs.aws.amazon.com/AmazonCloudWatchLogs/latest/APIReference/API_DeleteLogGroup.html),
 [service authorization](https://docs.aws.amazon.com/service-authorization/latest/reference/list_logs.html).
 
-Selected wire shapes/lifecycle are adapted from pinned MIT Kumo, with its full
-existing license retained. Kumo's retrieval-time ingestion timestamps, random
+The former selected wire-shape/lifecycle adaptation is historical / superseded
+(`metadataHistorical`), with its pinned MIT source and full existing license retained.
+Current code explicitly projects protocol values, including optional zero indices
+and timestamps, admits group/stream creation from one transactional catalog snapshot,
+and plans a chronological accepted event window without mutating the input batch.
+Existing schema, checked SQL writes, ingestion timestamps, HMAC/cursors and read SQL
+remain provider-owned and unchanged by this replacement. Kumo is a useful
+registry/protocol/SDK-endpoint/service-wiring design reference, not an adopted engine;
+this is not clean-room, authorship, legal or whole-CI certification. Kumo's retrieval-time ingestion timestamps, random
 nonconverging page tokens and inclusive endTime were not copied. LocalStack's
 archived Apache source was reviewed; its moto-backed Python implementation was
 not imported. Exact paths, revisions and changes are recorded in

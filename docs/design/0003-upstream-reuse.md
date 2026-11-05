@@ -1,6 +1,6 @@
-# LocalStack / Kumoの再利用判断
+# LocalStack / Kumoの歴史的調査と現在の実装方針
 
-調査日2026-11-03。既存Simulatorの旧版ではなく、[sivchari/kumo](https://github.com/sivchari/kumo)と[localstack/localstack](https://github.com/localstack/localstack)の公開sourceを対象とする。自分の未公開SDK作業と既存PRを保全し、参照checkoutは別directoryに取得した。upstreamのプログラム・テスト・Docker imageは実行していない。
+以下は2026-11-03の歴史的調査（historical）。当時の部分移植候補という判断は、現在の独自runtime方針により置き換えられた（superseded）。固定source・license・元の権利記録は維持する。既存Simulatorの旧版ではなく、[sivchari/kumo](https://github.com/sivchari/kumo)と[localstack/localstack](https://github.com/localstack/localstack)の公開sourceを対象とする。当時の参照checkoutは別directoryで調査した。upstreamのプログラム・テスト・Docker imageは実行していない。
 
 | 対象 | 固定commit・ライセンス | 実装と単一バイナリへの適合 |
 | --- | --- | --- |
@@ -9,11 +9,11 @@
 
 LocalStack公開repoはarchive済み。[公式移行説明](https://blog.localstack.cloud/the-road-ahead-for-localstack/)では2026年3月以降の配布image/account方式と旧Community sourceを区別している。公開snapshotのApache表記を現行商用image・非公開機能への利用許可と扱わない。[現行WAF公式資料](https://docs.localstack.cloud/aws/services/waf/)はUltimate plan表記で、公開sourceからのWAF実装再利用権を確認できたという意味ではない。
 
-## 次の既存WP問題に使う範囲
+## 当時の既存WP問題向け候補（historical / superseded）
 
 | 必要範囲 | 調査したsourceと判断 |
 | --- | --- |
-| API Gatewayのpath/method解決とproxy event | Kumo `internal/service/execapi/path.go`、`event.go`、`apigateway/executeapi.go`を最初の移植候補とする。literal/parameter/greedy/ANYの導線とevent fieldを再利用し、empty greedy・曖昧な優先度・body/query/header境界はAWS一次資料とローカルregressionで確認する |
+| API Gatewayのpath/method解決とproxy event | Kumo `internal/service/execapi/path.go`、`event.go`、`apigateway/executeapi.go`を当時の最初の移植候補とした。literal/parameter/greedy/ANYの導線とevent fieldを再利用する案を調べ、empty greedy・曖昧な優先度・body/query/header境界はAWS一次資料とローカルregressionで確認する |
 | APIからLambdaの実行 | Kumoの`execapi.InvokeFunctionSync`はHTTP clientを使い、自身のLambda endpointへ送る。ここは現在の宣言済みtargetと実WASI invocationへ結び、任意URL/token/identityのproxyを作らない |
 | Lambda workload | Kumo `lambda/handlers.go`のInvokeはRuntime API handlerまたはInvokeEndpointへ配送する。同期実行backendが無ければ502を返し、code自体を単独で実行するものではない。現在の固定CPython/WASIを維持し、error/timeoutなど適合するprotocol/testを再利用する |
 | CloudFormation | Kumo `cloudformation/storage.go`の`parseTemplateResources`はJSONからresource記録/ID/CreateCompleteを作る。この記録生成だけではS3/SSM/Lambdaの実共有状態、YAML intrinsic、所有権、custom callbackを満たさない。現在のnative transaction/lifecycleに必要resource providerを移植・接続する |
@@ -22,8 +22,16 @@ LocalStack公開repoはarchive済み。[公式移行説明](https://blog.localst
 
 Kumo READMEのサービス数は、各問題を採点まで通せることの証明ではない。移植する単位ごとに同じSQLite state、region/account、保存roleのIAM、2チームのauthority分離、作成→操作→採点→削除を検証する。Cloudscapeと埋込Go単一バイナリを保持する。先に完了した実装を別backendへ二重化しない。
 
-## sourceを取り込むときの条件
+## 当時の取り込み条件と権利記録（historical）
 
-この調査commitにはupstream実装code・実行dependencyを追加していない。次のAPI Gateway incrementで再利用するfileを固定し、original SHA256、commit/source URL、変更内容を記録する。MIT部分を移植する場合、元のcopyrightと完全なpermission noticeをsource/third_partyと埋込license表示へ保持する。Apache部分は元のcopyright/適用NOTICE、完全なlicense、変更した旨と関連dependencyの権利を確認する。これらが欠けるcodeは配布対象にしない。
+当初の調査commit自体にはupstream実装code・実行dependencyを追加していなかった。当時の計画はAPI Gatewayで再利用するfileを固定し、original SHA256、commit/source URL、変更内容を記録するものだった。現在は下記の独自runtime方針を適用する。MIT部分を移植する場合、元のcopyrightと完全なpermission noticeをsource/third_partyと埋込license表示へ保持する。Apache部分は元のcopyright/適用NOTICE、完全なlicense、変更した旨と関連dependencyの権利を確認する。これらが欠けるcodeは配布対象にしない。
 
-既存のbounded function SDK incrementは、既存問題のPython sourceをそのまま実行してSSM/S3へ接続する検証を完了させる。次のAPI Gateway実装には上記KumoのGo sourceを適合し、全てをゼロから設計し直す方法にはしない。WP全体はHTTP/WAF/custom lifecycle/7採点が揃うまで選択不可のままとする。
+## 現在のruntime方針と置換範囲
+
+Kumoには、service registry、protocol境界、SDK endpoint、service wiringの設計を理解する参考として敬意を払う。現在はKumo/LocalStackのengineを土台にせず、公式protocol仕様とこのSimulatorのSQLite・認可・実行境界に沿う処理を維持する。上の候補一覧は新たなsource移植の指示ではない。
+
+歴史的なselected type/lifecycleの適合記録は `metadataHistorical` として扱い、固定source URL/hashと元のMIT permissionを消さない。[IAM](../../third_party/kumo-iam.json)、[API Gateway](../../third_party/kumo-apigateway.json)、[KMS](../../third_party/kumo-kms.json)、[Logs](../../third_party/kumo-cloudwatch-logs.json) のprovenanceは履歴の参照先であり、現在のruntime全体が上流由来という意味ではない。
+
+置換対象は、IAMの明示XML投影、REST/KMSの明示JSON投影、API Gatewayのroute programとnative requestからの閉じたevent投影、Logsの明示JSON投影・同一transactionでのcatalog admission・batch window計画である。標準wire field名は互換性のため保持する。既存DB文書の読取、SQLite/SQL、trust、managed-policy合成、KMS crypto/AAD、Logs HMAC/cursor/read SQLなど本来のローカル処理は、この置換のために別engineへ移さない。
+
+この記述はclean-room、著作者、法的適法性の認定でも、新旧全体CIが成功したという主張でもない。有限モデルは各モデルが列挙する範囲だけを検査し、runtime実装全体や権利関係を証明しない。WP全体はHTTP/WAF/custom lifecycleと全採点の受入条件が揃うまで選択不可のままとする。

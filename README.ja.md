@@ -4,6 +4,22 @@
 
 非公式のクラウド学習用シミュレーター。AWSを中心に開発し、Google Cloud Storage・Azure Blob Storageの限定的なローカル接続を備えています（[範囲と検証状況](docs/multicloud-storage.md)）。Go単一バイナリにAWS向けCloudscapeコンソールとGoogle Cloud／Azureのローカルコンソール、Scalar API reference、SQLite、Python Lambda用の固定CPython/WASIを埋め込みます。実行時にGo・Node・ホストPython・Docker・外部DB・実AWSは不要です。実AWSの資格情報は入力しないでください。
 
+## 謝辞：Kumo
+
+[Kumo](https://github.com/sivchari/kumo) のメンテナーとコントリビューターの皆さまに感謝します。
+MIT ライセンスで公開された取り組みを、サービス登録、プロトコルの振り分け、SDK に対応した
+エンドポイント、サービス接続の設計で参考にしました。TenkaCloud Simulator は独自の実装で動作し、
+Kumo を実行時のバックエンドとして利用するものではありません。
+
+過去の版では [IAM](third_party/kumo-iam.json)、
+[REST/API Gateway](third_party/kumo-apigateway.json)、
+[CloudWatch Logs](third_party/kumo-cloudwatch-logs.json)、[KMS](third_party/kumo-kms.json) の
+一部の wire 表現やライフサイクル処理を適合して利用しました。特定できた実行コードは、
+AWS の公開仕様に基づく独自実装へ置き換えています。歴史的な出典と
+[元の MIT 著作権・許諾表記](third_party/KUMO-LICENSE.txt)は保持しています。
+[置換ソースの記録](third_party/independent-native-source.json)はレビューした範囲を示し、
+クリーンルーム開発や法的適合性の証明ではありません。
+
 ## 起動する
 
 ソースからの起動にはGo 1.26が必要です（CIは1.26.10）。
@@ -145,4 +161,4 @@ combined 29-model/164-control formal gate (193 executions). These receipts apply
 to that revision. Every later change still requires its exact-HEAD CI, including
 the 45-case E2E suite; focused results do not replace whole-suite verification.
 
-現在の形式検査の登録は30モデル・175制御（205実行）です。IAMの追加モデルは4つの到達可能な初期状態から各2要求の範囲で、4要求の試案はタイムアウトし未成功です。上の過去の受領証とは区別し、最新HEADで全ゲートを実行してください。API資料はAWS・Google Cloud・Azureを分け、Sakura Cloudは未実装表示です。[ナビゲーション](docs/api-reference.md)を参照してください。
+現在の形式検査の登録は33モデル・197制御（230実行）です。IAMの追加モデルは4つの到達可能な初期状態から各2要求の範囲で、4要求の試案はタイムアウトし未成功です。上の過去の受領証とは区別し、最新HEADで全ゲートを実行してください。API資料はAWS・Google Cloud・Azureを分け、Sakura Cloudは未実装表示です。[ナビゲーション](docs/api-reference.md)を参照してください。

@@ -2700,6 +2700,312 @@
           "expect_invariant": "FailureFrame"
         }
       ]
+    },
+    {
+      "id": "RESTRouteMatching",
+      "bounds": "one evaluation transition; all finite cases enumerated",
+      "properties": [
+        "TypeOK",
+        "MatchOracle",
+        "Specificity",
+        "CaptureFidelity",
+        "RejectedShape",
+        "InvalidTemplateRejected"
+      ],
+      "limits": "Nine pre-tokenized templates and eleven request segment carriers only. No raw template lexer/SplitPath byte parsing, URL percent decoding, method/ANY precedence, provider-prefix dispatch, deployment selection, Go refinement or unbounded languages. Greedy values represented as sequences before slash joining; duplicate capture names final-slot wins. This helper does not choose globally highest score.",
+      "model": "formal/RESTRouteMatching.tla",
+      "config": "formal/RESTRouteMatching.cfg",
+      "source_scope": [
+        "internal/aws/apirouting/path.go"
+      ],
+      "mutants": [
+        {
+          "id": "IgnoreLiteral",
+          "edits": [
+            {
+              "old": "THEN ps[i] = ts[i].value ELSE FALSE",
+              "new": "THEN TRUE ELSE FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MatchOracle"
+        },
+        {
+          "id": "AllowEmptyGreedy",
+          "edits": [
+            {
+              "old": "THEN Len(ps) >= Len(ts) ELSE",
+              "new": "THEN Len(ps) >= Len(ts) - 1 ELSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MatchOracle"
+        },
+        {
+          "id": "LoseSpecificity",
+          "edits": [
+            {
+              "old": "score' = IF accepted THEN Score(ts) ELSE -1",
+              "new": "score' = IF accepted THEN 0 ELSE -1",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Specificity"
+        },
+        {
+          "id": "TruncateGreedy",
+          "edits": [
+            {
+              "old": "THEN SubSeq(ps,i,Len(ps)) ELSE",
+              "new": "THEN <<ps[i]>> ELSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CaptureFidelity"
+        },
+        {
+          "id": "FirstDuplicateCaptureWins",
+          "edits": [
+            {
+              "old": "ts[j].name = n => j <= i",
+              "new": "ts[j].name = n => i <= j",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CaptureFidelity"
+        },
+        {
+          "id": "BadRejectedScore",
+          "edits": [
+            {
+              "old": "score' = IF accepted THEN Score(ts) ELSE -1",
+              "new": "score' = IF accepted THEN Score(ts) ELSE 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RejectedShape"
+        }
+      ]
+    },
+    {
+      "id": "RESTProxyEventBoundary",
+      "bounds": "one evaluation transition; all finite cases enumerated",
+      "properties": [
+        "TypeOK",
+        "Admission",
+        "FailureNoEvent",
+        "CredentialSealed",
+        "ApplicationData",
+        "ActualRoute",
+        "QueryProjection",
+        "BodyPreserved"
+      ],
+      "limits": "Canonicalized finite header/query carriers, abstract valid-text/context and symbolic raw/final encoded budgets only. No Go JSON encoder/memory-allocation bound, UTF8/percent/MIME/header parser or case-fold/sort proof, nil-pointer behavior, host token auth, cryptography, SQL, guest execution, Go refinement or arbitrary inputs. Limit2 is a threshold abstraction, not concrete256KiB exploration. No byte-level injection/external network claims.",
+      "model": "formal/RESTProxyEventBoundary.tla",
+      "config": "formal/RESTProxyEventBoundary.cfg",
+      "source_scope": [
+        "internal/aws/apirouting/event.go"
+      ],
+      "mutants": [
+        {
+          "id": "ForwardLocalCredentials",
+          "edits": [
+            {
+              "old": "Allowed(k,v) == k \\notin BlockedNames /\\",
+              "new": "Allowed(k,v) == TRUE /\\",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CredentialSealed"
+        },
+        {
+          "id": "ForwardAWSSignature",
+          "edits": [
+            {
+              "old": "~(k = \"authorization\" /\\ v = \"aws-signature\")",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CredentialSealed"
+        },
+        {
+          "id": "DropBearerApplication",
+          "edits": [
+            {
+              "old": "k = \"authorization\" /\\ v = \"aws-signature\"",
+              "new": "k = \"authorization\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ApplicationData"
+        },
+        {
+          "id": "FirstHeaderValueWins",
+          "edits": [
+            {
+              "old": "LastValues(m) == [k \\in DOMAIN m |-> m[k][Len(m[k])]]",
+              "new": "LastValues(m) == [k \\in DOMAIN m |-> m[k][1]]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ApplicationData"
+        },
+        {
+          "id": "TemplateAsActualPath",
+          "edits": [
+            {
+              "old": "result == [path |-> ActualPath, resource",
+              "new": "result == [path |-> ResourceTemplate, resource",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ActualRoute"
+        },
+        {
+          "id": "FirstQueryValueWins",
+          "edits": [
+            {
+              "old": "THEN None ELSE LastValues(queryValues),",
+              "new": "THEN None ELSE [k \\in DOMAIN queryValues |-> queryValues[k][1]],",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "QueryProjection"
+        },
+        {
+          "id": "IgnoreEncodedBudget",
+          "edits": [
+            {
+              "old": "RawSize(s) <= Limit /\\ EncodedSize(s) <= Limit",
+              "new": "RawSize(s) <= Limit",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admission"
+        },
+        {
+          "id": "AcceptMalformedQuery",
+          "edits": [
+            {
+              "old": "contextOK /\\ q # \"malformed\" /\\",
+              "new": "contextOK /\\ TRUE /\\",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admission"
+        },
+        {
+          "id": "EmitRejectedEvent",
+          "edits": [
+            {
+              "old": "event' = IF admit THEN result ELSE EmptyEvent",
+              "new": "event' = result",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FailureNoEvent"
+        },
+        {
+          "id": "ReplaceBody",
+          "edits": [
+            {
+              "old": "body |-> \"application-body\", isBase64Encoded |-> FALSE]",
+              "new": "body |-> \"replacement-body\", isBase64Encoded |-> FALSE]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BodyPreserved"
+        }
+      ]
+    },
+    {
+      "id": "NativeWireProjection",
+      "model": "formal/NativeWireProjection.tla",
+      "config": "formal/NativeWireProjection.cfg",
+      "bounds": "One finite object projection; three fixed ordered source-literal field positions; six abstract value kinds zero/false/nil/empty/scalar/bad and three independent provider omission flags.",
+      "properties": [
+        "TypeOK",
+        "BadValueRefused",
+        "FailureNoPartial",
+        "OmissionExact",
+        "OrderExact",
+        "ValueKindsPreserved",
+        "CompleteProjection",
+        "SkippedBadDoesNotFail"
+      ],
+      "limits": "Abstract field order, omission, kind identity and value-error publication only. Not JSON escaping/Go encoder semantics, actual numeric/string/collection values, reflection/decode/XML/IAM/cloud protocol semantics, memory allocation, SQLite or Go refinement. FirstBad is diagnostic for the partial-prefix mutation only; omission decisions are trusted caller inputs.",
+      "source_scope": [
+        "internal/aws/wire_json_projection.go"
+      ],
+      "mutants": [
+        {
+          "id": "IgnoreOmission",
+          "edits": [
+            {
+              "old": "ELSE IF omitted[i] THEN BuildParts(values,omitted,i+1)",
+              "new": "ELSE IF FALSE THEN BuildParts(values,omitted,i+1)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OmissionExact"
+        },
+        {
+          "id": "ReverseFieldOrder",
+          "edits": [
+            {
+              "old": "<<Field(i,EmitKind(values[i]))>> \\o BuildParts(values,omitted,i+1)",
+              "new": "BuildParts(values,omitted,i+1) \\o <<Field(i,EmitKind(values[i]))>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OrderExact"
+        },
+        {
+          "id": "CollapseNullToZero",
+          "edits": [
+            {
+              "old": "EmitKind(kind) == kind",
+              "new": "EmitKind(kind) == IF kind = \"nil\" THEN \"zero\" ELSE kind",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ValueKindsPreserved"
+        },
+        {
+          "id": "AcceptBadValue",
+          "edits": [
+            {
+              "old": "BadIncluded(values,omitted) == \\E i \\in Positions : ~omitted[i] /\\ values[i] = \"bad\"",
+              "new": "BadIncluded(values,omitted) == FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BadValueRefused"
+        },
+        {
+          "id": "EncodeOmittedBad",
+          "edits": [
+            {
+              "old": "BadIncluded(values,omitted) == \\E i \\in Positions : ~omitted[i] /\\ values[i] = \"bad\"",
+              "new": "BadIncluded(values,omitted) == \\E i \\in Positions : values[i] = \"bad\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BadValueRefused"
+        },
+        {
+          "id": "PublishErrorPrefix",
+          "edits": [
+            {
+              "old": "published' = IF error THEN None ELSE parts",
+              "new": "published' = IF error THEN SubSeq(parts,1,Cardinality({i \\in Positions : i < FirstBad(v,o) /\\ ~o[i]})) ELSE parts",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FailureNoPartial"
+        }
+      ]
     }
   ]
 }

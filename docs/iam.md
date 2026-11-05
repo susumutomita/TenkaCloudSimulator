@@ -78,6 +78,6 @@ DeleteRoleはinline policyまたはmanaged attachmentが残るとDeleteConflict�
 
 ## 上流再利用と権利
 
-Role wire fieldsはKumoのMIT実装の選択部分を適合した。固定commit/source SHAと改変範囲は[provenance](../third_party/kumo-iam.json)、原文copyright/permissionは[Kumo license](../third_party/KUMO-LICENSE.txt)。SQLite、認可、trust判定、ownership、consoleはこの実装で追加した。Kumo serverやLocalStack/Pythonを実行時依存にせず、上流の対応サービス数をこのSimulatorの対応数とは扱わない。
+以前のRole selected wire type適合はhistorical / superseded（`metadataHistorical`）。固定commit/source SHAと当時の改変範囲は[provenance](../third_party/kumo-iam.json)、原文copyright/permissionは[Kumo license](../third_party/KUMO-LICENSE.txt)に保持する。現在は明示XML投影がRoleId・要素順・Description省略・一度encodeしたtrust文書のXML escape・呼出側wrapperを定義する。既存role JSONの読取、SQLite、認可、trust判定、managed aggregate、ownership、consoleはこの投影変更で置き換えない。Kumoはregistry/protocol/SDK endpoint/service wiringの設計参照として扱い、著作者・clean-room・法的適法性を認定するものではない。Kumo serverやLocalStack/Pythonを実行時依存にせず、上流の対応サービス数をこのSimulatorの対応数とは扱わない。
 
 Descriptionの文字制約は[CreateRole API](https://docs.aws.amazon.com/IAM/latest/APIReference/API_CreateRole.html)に合わせ、XMLで置換されるNUL等を保存前に拒否する。
