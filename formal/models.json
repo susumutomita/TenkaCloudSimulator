@@ -3371,9 +3371,12 @@
         "DeleteRequiresExactConfirmation",
         "LocalePreservesIntent"
       ],
-      "limits": "Finite UI protocol abstraction, not JS/React/Cloudscape/HTTP/SQL/IAM/crypto refinement or liveness. Initial key-list/Describe lookup completion is abstracted because actual source disables selection until it finishes; later target reads may overlap. Target/list revisions normalized after these reads. Excludes all parser/format/pagination/permission semantics, arbitrary key sets, repeated forms beyond bound, network ambiguity without ACK and full AWS console parity. Current list outcome and target metadata are stored fields, not derived tautologies. Retired-list mutation jointly bypasses redundant captured-object/active/abort checks; submit-target mutation abstracts both button and handler defenses. Retry mutant creates actual second pending write plus request counter, not a ghost-only edit. Root parent context key/principal binding is assumed; locale frame is only this model state, not the locale provider.",
+      "limits": "Finite UI protocol abstraction, not JS/React/Cloudscape/HTTP/SQL/IAM/crypto refinement or liveness. Initial key-list/Describe lookup completion is abstracted because actual source disables selection until it finishes; later target reads may overlap. Target/list revisions normalized after these reads. Excludes all parser/format/pagination/permission semantics, arbitrary key sets, repeated forms beyond bound, network ambiguity without ACK and full AWS console parity. Current list outcome and target metadata are stored fields, not derived tautologies. Retired-list mutation jointly bypasses redundant captured-object/active/abort checks; submit-target mutation abstracts both button and handler defenses. Retry mutant creates actual second pending write plus request counter, not a ghost-only edit. Root parent context key/principal binding is assumed; locale frame is only this model state, not the locale provider. Parent kms.jsx/main.jsx declarations bind only the Aliases mount and supplied region/principal/key identity; other KMS/general services remain outside. app.js is the canonical compiled correspondence artifact of that component/mount, independently checked by bundle hashes, not a proof of compilation or unrelated UI.",
       "source_scope": [
-        "tools/console/src/kms_aliases.jsx"
+        "tools/console/src/kms_aliases.jsx",
+        "tools/console/src/kms.jsx",
+        "tools/console/src/main.jsx",
+        "internal/server/web/app.js"
       ],
       "mutants": [
         {

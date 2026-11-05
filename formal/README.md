@@ -1,23 +1,22 @@
-# Finite state model
+# Finite state models
 
-Current registry: 34 models / 210 literal-protected controls
-(244 required executions). All previous30 model entries, TLA/CFG bytes,
-properties and175 controls are preserved. RESTRouteMatching adds six properties
-and six semantic controls; RESTProxyEventBoundary adds eight properties and ten
-controls. NativeWireProjection adds eight properties and six controls for the
-shared explicit ordered JSON writer. Independent scoped checks passed all three
-baselines and22 controls. Integration requires a complete230-case run against the
-exact immutable revision; scoped results and registration do not replace that gate.
-IAMManagedPolicies retains its four API-reachable seeds and two-request suffixes;
-the earlier four-request exploration timed out and is not claimed.
-Registration is source evidence, not itself evidence of successful execution. Dated receipts below
-refer to their recorded inputs; later revisions require their own checks. These
-finite models do not prove Go/SQL/HTTP/UI refinement or complete cloud compatibility.
+Current registry: **37 models / 258 literal-protected controls**
+(**295 required executions**). All actual-main 34 model entries and 210 controls
+are retained. The three customer-alias models separately describe catalog
+admission/paging, concrete-key crypto transactions and UI epochs/mutation refresh.
+Their scoped evidence and limits are described below. Native wire/route models
+and SecretVersionListing retain their existing source scopes and properties.
 
-Legacy integration sections below retain historical counts and status statements
-for traceability. Their word “current” refers to the recorded integration, not
-today's registry. The authoritative current inventory is the 34/210 registry
-above; proof claims always require evidence for the exact revision.
+Registration is source evidence, not a successful current-HEAD execution claim.
+The complete immutable 295-case gate must run for this combined revision;
+historical scoped or integration receipts do not replace it. IAMManagedPolicies
+keeps its four API-reachable seeds and two-request suffixes; its earlier broader
+four-request trial timed out and is not claimed. These finite checks do not prove
+Go/SQL/HTTP/UI refinement, cryptography or complete cloud compatibility.
+
+Legacy sections retain dated counts/status for traceability; their “current”
+refers to that recorded integration. Today's authoritative inventory is 37/258
+above, and every execution claim must identify its exact revision.
 
 `ObjectStore.tla` models two buckets and two keys, shared object ownership, create/put/delete transitions, and an abstract identity decision `allow /\ ~deny`. `ObjectStore.cfg` checks type correctness, no orphan objects, no unauthorized mutation, and explicit-deny precedence.
 

@@ -1,268 +1,526 @@
 {
   "version": 1,
-  "base_sha": "c563215b9fb3042364b7145ab4515fc387c66ef9",
+  "base_sha": "a8b920b264cf8060c6a49f7c4cd421a317ba94d2",
   "changes": [
     {
       "path": "README.ja.md",
-      "sha256": "e096e48148045876f1c6089a47b5b152f1d831eb162b7b580083c57269aeeeef",
+      "sha256": "5cb1ebc006d583e754b3842f5af273c1d5dd284d5be5cacf755edae9a0b1560c",
       "disposition": "documentation",
-      "reason": "Document the eighth metadata-only operation, its exact native request, limits and bounded evidence without claiming complete cloud compatibility.",
+      "reason": "Document the current twelve-operation KMS subset, local customer aliases, separate bounded model scopes and exact-revision acceptance requirements; preserve rights/history and unsupported limits.",
       "models": []
     },
     {
       "path": "README.md",
-      "sha256": "374e8f63a5b995931eb049d436a64474e44877131a070e10521872e92b5f9fbf",
+      "sha256": "e359caa21cca1bc8c5b9f3fd790f6e86e5b770d55123e1b42c1479711117f01b",
       "disposition": "documentation",
-      "reason": "Document the eighth metadata-only operation, its exact native request, limits and bounded evidence without claiming complete cloud compatibility.",
+      "reason": "Document the current twelve-operation KMS subset, local customer aliases, separate bounded model scopes and exact-revision acceptance requirements; preserve rights/history and unsupported limits.",
       "models": []
     },
     {
-      "path": "docs/secrets-manager.md",
-      "sha256": "94c100dca4611d41912a338e3b571d3bdbe4332cb814fa6aafc221c1cc82a2c3",
+      "path": "docs/kms.md",
+      "sha256": "18cd54a435eca0a370b6137bad9a5b42f53131c37f6b22be85298efe9db38d64",
       "disposition": "documentation",
-      "reason": "Document the eighth metadata-only operation, its exact native request, limits and bounded evidence without claiming complete cloud compatibility.",
+      "reason": "Document the current twelve-operation KMS subset, local customer aliases, separate bounded model scopes and exact-revision acceptance requirements; preserve rights/history and unsupported limits.",
       "models": []
+    },
+    {
+      "path": "formal/KMSAliasCatalog.cfg",
+      "sha256": "ddb1aaa22dd90ee4726c1453bc5d9a949139764cb98e4763986f4cb73a187faa",
+      "disposition": "modeled",
+      "reason": "Register the exact independently checked bounded specification/configuration; named properties and semantic sensitivity controls are mandatory. Scoped execution evidence is not a fresh combined295-case result or native refinement proof.",
+      "models": [
+        {
+          "id": "KMSAliasCatalog",
+          "properties": [
+            "TypeOK",
+            "AcknowledgedSuccess",
+            "MutationAuthority",
+            "ConcreteTarget",
+            "FailureFrame",
+            "PeerRegionFrame",
+            "MutationEffect",
+            "CreationIdentity",
+            "AdmissionBudgets",
+            "RevisionFresh",
+            "ListAuthorized",
+            "CursorBound",
+            "ListPageExact",
+            "ListMoreExact",
+            "ContinuationAfterLast",
+            "ReadFrame",
+            "NoPartialRead"
+          ],
+          "limits": "Independent bounded alias catalog CRUD/pagination abstraction, not cryptography/crypto orchestration or Go/SQLite/HTTP refinement. Fixed same-type/usage concrete keyparents; no DeleteKey/keyrecreation/aliases-as-target/managedaliases/grants/ABAC. MAC authority/integrity are abstract predicates; marker has NO expiry. Atomic write/cursor/read transitions assume sameDB Tx and pure immutable policy; no actual SQL scan/locking/RowsAffected/commit implementation proof. Four reachable seeds plus three requests are not unbounded quotas1000/50 or complete workflows. Failed request identity is intentionally canonicalized; only operation category/outcome/before-frame retained, and checked successful-input properties are success-guarded. Timestamps/birthlabels only model update identity preservation, not physicalclock/UUID entropy. Public JSON projection/wireparser/UI/hostauthentication independent."
+        }
+      ]
+    },
+    {
+      "path": "formal/KMSAliasCatalog.tla",
+      "sha256": "31cc7675ba200cac03c61a2b93a4d45c335ab2b8737d7de23df83c7f05a44a08",
+      "disposition": "modeled",
+      "reason": "Register the exact independently checked bounded specification/configuration; named properties and semantic sensitivity controls are mandatory. Scoped execution evidence is not a fresh combined295-case result or native refinement proof.",
+      "models": [
+        {
+          "id": "KMSAliasCatalog",
+          "properties": [
+            "TypeOK",
+            "AcknowledgedSuccess",
+            "MutationAuthority",
+            "ConcreteTarget",
+            "FailureFrame",
+            "PeerRegionFrame",
+            "MutationEffect",
+            "CreationIdentity",
+            "AdmissionBudgets",
+            "RevisionFresh",
+            "ListAuthorized",
+            "CursorBound",
+            "ListPageExact",
+            "ListMoreExact",
+            "ContinuationAfterLast",
+            "ReadFrame",
+            "NoPartialRead"
+          ],
+          "limits": "Independent bounded alias catalog CRUD/pagination abstraction, not cryptography/crypto orchestration or Go/SQLite/HTTP refinement. Fixed same-type/usage concrete keyparents; no DeleteKey/keyrecreation/aliases-as-target/managedaliases/grants/ABAC. MAC authority/integrity are abstract predicates; marker has NO expiry. Atomic write/cursor/read transitions assume sameDB Tx and pure immutable policy; no actual SQL scan/locking/RowsAffected/commit implementation proof. Four reachable seeds plus three requests are not unbounded quotas1000/50 or complete workflows. Failed request identity is intentionally canonicalized; only operation category/outcome/before-frame retained, and checked successful-input properties are success-guarded. Timestamps/birthlabels only model update identity preservation, not physicalclock/UUID entropy. Public JSON projection/wireparser/UI/hostauthentication independent."
+        }
+      ]
+    },
+    {
+      "path": "formal/KMSAliasCrypto.cfg",
+      "sha256": "baceb597f2a967cb5784a74beb127ff60800bdde8f7a7f432b274edd6c2d10c5",
+      "disposition": "modeled",
+      "reason": "Register the exact independently checked bounded specification/configuration; named properties and semantic sensitivity controls are mandatory. Scoped execution evidence is not a fresh combined295-case result or native refinement proof.",
+      "models": [
+        {
+          "id": "KMSAliasCrypto",
+          "properties": [
+            "TypeOK",
+            "TransactionSnapshotStable",
+            "AliasResolutionCurrent",
+            "OmittedDecryptUsesBlob",
+            "ConcreteKeyAuthorization",
+            "AuthorizedCryptoStages",
+            "AuthorizationBeforeMismatch",
+            "NoPublicationBeforeCommit",
+            "FailureCounterFrame",
+            "FailureNoPublication",
+            "WriteFailureRefused",
+            "PublishedKeyBound",
+            "EncryptCounterExact",
+            "DecryptCounterFrame"
+          ],
+          "limits": "New alias selection/concrete authorization/ciphertext match/commit publication finite projection. Not AES/nonce/HMAC, raw ARN/JSON/SigV4/IAM parsing, host authority, arbitrary policies, actualSQLite locking/commit/Go refinement, retries/unbounded history, alias CRUD/capacity/pagination or full lifecycle proof. Trusted authorizer is pure captured policy or SELECT on provided transaction; immediate transaction serialization is an assumption grounded in current core store, not proved. Native crypto/error classes abstract existing KMS helper behavior. Choose phase guard is factored outside its binder by exact logical equivalence, not a state-space reduction."
+        }
+      ]
+    },
+    {
+      "path": "formal/KMSAliasCrypto.tla",
+      "sha256": "a1c944d072aa298a5e891a79d4acbf3e866352f16465e91a1fe343508988b38e",
+      "disposition": "modeled",
+      "reason": "Register the exact independently checked bounded specification/configuration; named properties and semantic sensitivity controls are mandatory. Scoped execution evidence is not a fresh combined295-case result or native refinement proof.",
+      "models": [
+        {
+          "id": "KMSAliasCrypto",
+          "properties": [
+            "TypeOK",
+            "TransactionSnapshotStable",
+            "AliasResolutionCurrent",
+            "OmittedDecryptUsesBlob",
+            "ConcreteKeyAuthorization",
+            "AuthorizedCryptoStages",
+            "AuthorizationBeforeMismatch",
+            "NoPublicationBeforeCommit",
+            "FailureCounterFrame",
+            "FailureNoPublication",
+            "WriteFailureRefused",
+            "PublishedKeyBound",
+            "EncryptCounterExact",
+            "DecryptCounterFrame"
+          ],
+          "limits": "New alias selection/concrete authorization/ciphertext match/commit publication finite projection. Not AES/nonce/HMAC, raw ARN/JSON/SigV4/IAM parsing, host authority, arbitrary policies, actualSQLite locking/commit/Go refinement, retries/unbounded history, alias CRUD/capacity/pagination or full lifecycle proof. Trusted authorizer is pure captured policy or SELECT on provided transaction; immediate transaction serialization is an assumption grounded in current core store, not proved. Native crypto/error classes abstract existing KMS helper behavior. Choose phase guard is factored outside its binder by exact logical equivalence, not a state-space reduction."
+        }
+      ]
+    },
+    {
+      "path": "formal/KMSAliasesViewEpoch.cfg",
+      "sha256": "c59e76d2ed57685f7230a9da345ac5e8e8739421a7a5851c4ef631b73b091cf3",
+      "disposition": "modeled",
+      "reason": "Register the exact independently checked bounded specification/configuration; named properties and semantic sensitivity controls are mandatory. Scoped execution evidence is not a fresh combined295-case result or native refinement proof.",
+      "models": [
+        {
+          "id": "KMSAliasesViewEpoch",
+          "properties": [
+            "TypeOK",
+            "CurrentListOutcome",
+            "NoCachedRowsOnFailure",
+            "CurrentTargetMetadata",
+            "ClosedFormHasNoTarget",
+            "AckClosesForm",
+            "AckClearsDraft",
+            "ReadRetryNeverWrites",
+            "OnlyVerifiedTargetSubmitted",
+            "DeleteRequiresExactConfirmation",
+            "LocalePreservesIntent"
+          ],
+          "limits": "Finite UI protocol abstraction, not JS/React/Cloudscape/HTTP/SQL/IAM/crypto refinement or liveness. Initial key-list/Describe lookup completion is abstracted because actual source disables selection until it finishes; later target reads may overlap. Target/list revisions normalized after these reads. Excludes all parser/format/pagination/permission semantics, arbitrary key sets, repeated forms beyond bound, network ambiguity without ACK and full AWS console parity. Current list outcome and target metadata are stored fields, not derived tautologies. Retired-list mutation jointly bypasses redundant captured-object/active/abort checks; submit-target mutation abstracts both button and handler defenses. Retry mutant creates actual second pending write plus request counter, not a ghost-only edit. Root parent context key/principal binding is assumed; locale frame is only this model state, not the locale provider. Parent kms.jsx/main.jsx declarations bind only the Aliases mount and supplied region/principal/key identity; other KMS/general services remain outside. app.js is the canonical compiled correspondence artifact of that component/mount, independently checked by bundle hashes, not a proof of compilation or unrelated UI."
+        }
+      ]
+    },
+    {
+      "path": "formal/KMSAliasesViewEpoch.tla",
+      "sha256": "aa1a6994e460abee3a1ccc68a6f4e255d9ec8f25d2985bb5949dbe60191f87db",
+      "disposition": "modeled",
+      "reason": "Register the exact independently checked bounded specification/configuration; named properties and semantic sensitivity controls are mandatory. Scoped execution evidence is not a fresh combined295-case result or native refinement proof.",
+      "models": [
+        {
+          "id": "KMSAliasesViewEpoch",
+          "properties": [
+            "TypeOK",
+            "CurrentListOutcome",
+            "NoCachedRowsOnFailure",
+            "CurrentTargetMetadata",
+            "ClosedFormHasNoTarget",
+            "AckClosesForm",
+            "AckClearsDraft",
+            "ReadRetryNeverWrites",
+            "OnlyVerifiedTargetSubmitted",
+            "DeleteRequiresExactConfirmation",
+            "LocalePreservesIntent"
+          ],
+          "limits": "Finite UI protocol abstraction, not JS/React/Cloudscape/HTTP/SQL/IAM/crypto refinement or liveness. Initial key-list/Describe lookup completion is abstracted because actual source disables selection until it finishes; later target reads may overlap. Target/list revisions normalized after these reads. Excludes all parser/format/pagination/permission semantics, arbitrary key sets, repeated forms beyond bound, network ambiguity without ACK and full AWS console parity. Current list outcome and target metadata are stored fields, not derived tautologies. Retired-list mutation jointly bypasses redundant captured-object/active/abort checks; submit-target mutation abstracts both button and handler defenses. Retry mutant creates actual second pending write plus request counter, not a ghost-only edit. Root parent context key/principal binding is assumed; locale frame is only this model state, not the locale provider. Parent kms.jsx/main.jsx declarations bind only the Aliases mount and supplied region/principal/key identity; other KMS/general services remain outside. app.js is the canonical compiled correspondence artifact of that component/mount, independently checked by bundle hashes, not a proof of compilation or unrelated UI."
+        }
+      ]
     },
     {
       "path": "formal/README.md",
-      "sha256": "8d8d24c7bdf899dfa1950ba63f2bec28dda6ba59a3691ff91cdae5ec706cf275",
+      "sha256": "61c3133638dbcd5a4fee487109fefa25010489e2448d8a2dbc8a9252ab9a7968",
       "disposition": "documentation",
-      "reason": "Document the eighth metadata-only operation, its exact native request, limits and bounded evidence without claiming complete cloud compatibility.",
+      "reason": "Document the current twelve-operation KMS subset, local customer aliases, separate bounded model scopes and exact-revision acceptance requirements; preserve rights/history and unsupported limits.",
       "models": []
-    },
-    {
-      "path": "formal/SecretVersionListing.cfg",
-      "sha256": "f9a3ecca0c6c8fc74c49e4b625b01719d70c877cc627a94ca807bae151c9aa73",
-      "disposition": "modeled",
-      "reason": "Add bounded metadata-only version listing over the existing saved-ARN authority and native HTTP composition; concrete Go/SDK tests independently verify SQL, strict wire inputs and refusal. Server change only advertises the added operation and does not alter authority.",
-      "models": [
-        {
-          "id": "SecretVersionListing",
-          "properties": [
-            "TypeOK",
-            "ReadAfterAuthorization",
-            "NoDeniedEmission",
-            "TokenScopeBound",
-            "StrictForwardKeyset",
-            "FilterBeforePageLimit",
-            "ContinuationPosition",
-            "TerminalConverges",
-            "ReadFramePreserved"
-          ],
-          "limits": "Metadata-only live keyset projection of ListSecretVersionIds, not a stable snapshot. Parent resolution may precede saved-ARN authorization; version/stage scans and cursor validation follow it. Token signature, database key, region, domain, physical generation, filter and expiry are abstract predicates, not cryptography/byte parsing/time proofs. Does not prove SQL transaction/driver/commit failure, actual IAM/host token authority, HTTP/JSON/UTF8/ARN parsing, secret-value redaction implementation, timestamp ordering/UUIDs, variable page sizes, retention, UI or Go refinement. TerminalConverges is a finite page-shape safety equality, not liveness. Public contract: https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_ListSecretVersionIds.html (reviewed 2026-11-05)."
-        }
-      ]
-    },
-    {
-      "path": "formal/SecretVersionListing.tla",
-      "sha256": "cb7c8a31f20a3bfca7d0129b478cd8c41c62b541fc69973bd94613040a2e14d7",
-      "disposition": "modeled",
-      "reason": "Add bounded metadata-only version listing over the existing saved-ARN authority and native HTTP composition; concrete Go/SDK tests independently verify SQL, strict wire inputs and refusal. Server change only advertises the added operation and does not alter authority.",
-      "models": [
-        {
-          "id": "SecretVersionListing",
-          "properties": [
-            "TypeOK",
-            "ReadAfterAuthorization",
-            "NoDeniedEmission",
-            "TokenScopeBound",
-            "StrictForwardKeyset",
-            "FilterBeforePageLimit",
-            "ContinuationPosition",
-            "TerminalConverges",
-            "ReadFramePreserved"
-          ],
-          "limits": "Metadata-only live keyset projection of ListSecretVersionIds, not a stable snapshot. Parent resolution may precede saved-ARN authorization; version/stage scans and cursor validation follow it. Token signature, database key, region, domain, physical generation, filter and expiry are abstract predicates, not cryptography/byte parsing/time proofs. Does not prove SQL transaction/driver/commit failure, actual IAM/host token authority, HTTP/JSON/UTF8/ARN parsing, secret-value redaction implementation, timestamp ordering/UUIDs, variable page sizes, retention, UI or Go refinement. TerminalConverges is a finite page-shape safety equality, not liveness. Public contract: https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_ListSecretVersionIds.html (reviewed 2026-11-05)."
-        }
-      ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "919e7e0a2bf322ce31d0c7bb65bfc2679c090980765014b7d72ba61dd5229de0",
+      "sha256": "c862384f2775148ee7cf20674501ab66730a3852da286a3d8ce8877ed3f1c552",
       "disposition": "formal-infrastructure",
-      "reason": "Require the added model, its nine properties and thirteen real semantic negative controls; preserve every existing model/control, strict parser, pins and deadlines.",
+      "reason": "Add mandatory registry/model/property/control inventories and individual-removal negatives without changing existing checker semantics, tool pins, bounds, timeouts or prior models.",
       "models": []
     },
     {
-      "path": "internal/aws/secret_http.go",
-      "sha256": "4980179095c0897bec1a64517276bfbf44610a32c35b59280a123b3530844c6b",
+      "path": "internal/aws/kms_alias_name_errors_test.go",
+      "sha256": "dd0b930c0822a2116542308763976bbcf014e1c6b1818066fea0e4e760d6d106",
+      "disposition": "test-support",
+      "reason": "Preserve all existing acceptance assertions and add literal alias schemas, actual native SDK/shared-state and mounted UI regressions; tests support concrete contracts without substituting for formal or whole-quality evidence.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/kms_aliases.go",
+      "sha256": "2778bc1e48106cd110b736734bec4f2c9d5f0a8970cf3700d54a9ff4bfb7e750",
       "disposition": "modeled",
-      "reason": "Add bounded metadata-only version listing over the existing saved-ARN authority and native HTTP composition; concrete Go/SDK tests independently verify SQL, strict wire inputs and refusal. Server change only advertises the added operation and does not alter authority.",
+      "reason": "Catalog CRUD authorization/admission, atomic acknowledgment/revision/cursor frames and separately alias-resolved concrete-key crypto stages. Native tests/SDK separately exercise SQLite/codec/actual policy; models are bounded projections, not complete file/refinement proof.",
       "models": [
         {
-          "id": "SecretsDisclosureChannels",
+          "id": "KMSAliasCatalog",
           "properties": [
             "TypeOK",
-            "RawRequiresAuthorizedGet",
-            "MetadataLogErrorRedacted",
-            "DeniedNoRaw",
-            "RawEmissionRequiresGet"
+            "AcknowledgedSuccess",
+            "MutationAuthority",
+            "ConcreteTarget",
+            "FailureFrame",
+            "PeerRegionFrame",
+            "MutationEffect",
+            "CreationIdentity",
+            "AdmissionBudgets",
+            "RevisionFresh",
+            "ListAuthorized",
+            "CursorBound",
+            "ListPageExact",
+            "ListMoreExact",
+            "ContinuationAfterLast",
+            "ReadFrame",
+            "NoPartialRead"
           ],
-          "limits": "Finite classification of plaintext acquisition/output call sites, not Go fmt/JSON/slog, SQL, encryption, memory secrecy or implementation refinement. The private plaintext() accessor itself has no authorization: its only production writer call site must follow successful native Get authorization. Actual private-holder formatting/JSON/slog sentinel tests and native denied-Get/error/metadata tests verify the Go mechanisms independently."
+          "limits": "Independent bounded alias catalog CRUD/pagination abstraction, not cryptography/crypto orchestration or Go/SQLite/HTTP refinement. Fixed same-type/usage concrete keyparents; no DeleteKey/keyrecreation/aliases-as-target/managedaliases/grants/ABAC. MAC authority/integrity are abstract predicates; marker has NO expiry. Atomic write/cursor/read transitions assume sameDB Tx and pure immutable policy; no actual SQL scan/locking/RowsAffected/commit implementation proof. Four reachable seeds plus three requests are not unbounded quotas1000/50 or complete workflows. Failed request identity is intentionally canonicalized; only operation category/outcome/before-frame retained, and checked successful-input properties are success-guarded. Timestamps/birthlabels only model update identity preservation, not physicalclock/UUID entropy. Public JSON projection/wireparser/UI/hostauthentication independent."
         },
         {
-          "id": "SecretVersionListing",
+          "id": "KMSAliasCrypto",
           "properties": [
             "TypeOK",
-            "ReadAfterAuthorization",
-            "NoDeniedEmission",
-            "TokenScopeBound",
-            "StrictForwardKeyset",
-            "FilterBeforePageLimit",
-            "ContinuationPosition",
-            "TerminalConverges",
-            "ReadFramePreserved"
+            "TransactionSnapshotStable",
+            "AliasResolutionCurrent",
+            "OmittedDecryptUsesBlob",
+            "ConcreteKeyAuthorization",
+            "AuthorizedCryptoStages",
+            "AuthorizationBeforeMismatch",
+            "NoPublicationBeforeCommit",
+            "FailureCounterFrame",
+            "FailureNoPublication",
+            "WriteFailureRefused",
+            "PublishedKeyBound",
+            "EncryptCounterExact",
+            "DecryptCounterFrame"
           ],
-          "limits": "Metadata-only live keyset projection of ListSecretVersionIds, not a stable snapshot. Parent resolution may precede saved-ARN authorization; version/stage scans and cursor validation follow it. Token signature, database key, region, domain, physical generation, filter and expiry are abstract predicates, not cryptography/byte parsing/time proofs. Does not prove SQL transaction/driver/commit failure, actual IAM/host token authority, HTTP/JSON/UTF8/ARN parsing, secret-value redaction implementation, timestamp ordering/UUIDs, variable page sizes, retention, UI or Go refinement. TerminalConverges is a finite page-shape safety equality, not liveness. Public contract: https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_ListSecretVersionIds.html (reviewed 2026-11-05)."
+          "limits": "New alias selection/concrete authorization/ciphertext match/commit publication finite projection. Not AES/nonce/HMAC, raw ARN/JSON/SigV4/IAM parsing, host authority, arbitrary policies, actualSQLite locking/commit/Go refinement, retries/unbounded history, alias CRUD/capacity/pagination or full lifecycle proof. Trusted authorizer is pure captured policy or SELECT on provided transaction; immediate transaction serialization is an assumption grounded in current core store, not proved. Native crypto/error classes abstract existing KMS helper behavior. Choose phase guard is factored outside its binder by exact logical equivalence, not a state-space reduction."
         }
       ]
     },
     {
-      "path": "internal/aws/secrets_manager_versions.go",
-      "sha256": "3b442596afa7ab6017320c7ec8194d2a97cfc47cc3c415f914459424ef168f78",
+      "path": "internal/aws/kms_aliases_test.go",
+      "sha256": "871b45379481ac110822f84e1522d9961febfac1e296c8bf2edd243843c987d3",
+      "disposition": "test-support",
+      "reason": "Preserve all existing acceptance assertions and add literal alias schemas, actual native SDK/shared-state and mounted UI regressions; tests support concrete contracts without substituting for formal or whole-quality evidence.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/kms_http.go",
+      "sha256": "e1816d9d19f5a1d7f225f61aae5774d8a36b5cb8fc33909884a3a8d50b31ec3d",
       "disposition": "modeled",
-      "reason": "Add bounded metadata-only version listing over the existing saved-ARN authority and native HTTP composition; concrete Go/SDK tests independently verify SQL, strict wire inputs and refusal. Server change only advertises the added operation and does not alter authority.",
+      "reason": "Retain normalized KMS routing/identity-policy admission while adding four strict alias codecs and delegation to the independently modeled native alias leaf. This binding covers normalized protocol admission only, NOT raw JSON/Unicode/header decoding, operation-specific CRUD/paging state or response serialization; native schema/HTTP/SDK tests independently verify those boundaries.",
       "models": [
         {
-          "id": "SecretVersionListing",
+          "id": "KMSProtocolAdmission",
           "properties": [
             "TypeOK",
-            "ReadAfterAuthorization",
-            "NoDeniedEmission",
-            "TokenScopeBound",
-            "StrictForwardKeyset",
-            "FilterBeforePageLimit",
-            "ContinuationPosition",
-            "TerminalConverges",
-            "ReadFramePreserved"
+            "NoCrossServiceFallback",
+            "InfraNotDeny",
+            "MissingIdentityDenied",
+            "NoSuccessWithoutKMSTarget",
+            "NoAuthorityFromWireMetadata"
           ],
-          "limits": "Metadata-only live keyset projection of ListSecretVersionIds, not a stable snapshot. Parent resolution may precede saved-ARN authorization; version/stage scans and cursor validation follow it. Token signature, database key, region, domain, physical generation, filter and expiry are abstract predicates, not cryptography/byte parsing/time proofs. Does not prove SQL transaction/driver/commit failure, actual IAM/host token authority, HTTP/JSON/UTF8/ARN parsing, secret-value redaction implementation, timestamp ordering/UUIDs, variable page sizes, retention, UI or Go refinement. TerminalConverges is a finite page-shape safety equality, not liveness. Public contract: https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_ListSecretVersionIds.html (reviewed 2026-11-05)."
+          "limits": "Normalized protocol/identity-policy admission abstraction after trusted outer exercise identity selection; not raw HTTP/SigV4 parsing or signature authentication, local token/Access or tenant-isolation proof, full IAM semantics, byte bodies/AES, real DB faults/transactions, Go refinement, timing/concurrency/crash proof or other-service authorization. Other route is only handoff, not modeled S3 success. Body-read-barrier native tests and nine actual Gateway metadata cases independently exercise the intended bridge; new tests and this model are initially UNRUN. Shared Gateway/server/SSM applicability is ONLY the new configured KMS route/module declaration, not unchanged AWS branches, nil-module/constructor behavior or whole provider wiring. Native tests are separate and initially unrun."
         }
       ]
     },
     {
-      "path": "internal/aws/secrets_manager_versions_http_test.go",
-      "sha256": "485436c9d22e2a95f4fd479d07e08cecc7139f10750ebcb1eef58e29e716cd67",
+      "path": "internal/aws/kms_store.go",
+      "sha256": "0a6a2adb695fa375c744157cd38df5a833a9d4cb51407bd55358c2fb5dfeaf74",
       "disposition": "modeled",
-      "reason": "Add bounded metadata-only version listing over the existing saved-ARN authority and native HTTP composition; concrete Go/SDK tests independently verify SQL, strict wire inputs and refusal. Server change only advertises the added operation and does not alter authority.",
+      "reason": "Extract unchanged concrete Encrypt/Decrypt bodies into caller-owned transaction helpers, used by alias resolution and concrete-target authorization before commit/publication. Existing concrete-key/AES/counter behavior is protected by native regressions; this is not a cryptographic or SQL proof.",
       "models": [
         {
-          "id": "SecretVersionListing",
+          "id": "KMSAliasCrypto",
           "properties": [
             "TypeOK",
-            "ReadAfterAuthorization",
-            "NoDeniedEmission",
-            "TokenScopeBound",
-            "StrictForwardKeyset",
-            "FilterBeforePageLimit",
-            "ContinuationPosition",
-            "TerminalConverges",
-            "ReadFramePreserved"
+            "TransactionSnapshotStable",
+            "AliasResolutionCurrent",
+            "OmittedDecryptUsesBlob",
+            "ConcreteKeyAuthorization",
+            "AuthorizedCryptoStages",
+            "AuthorizationBeforeMismatch",
+            "NoPublicationBeforeCommit",
+            "FailureCounterFrame",
+            "FailureNoPublication",
+            "WriteFailureRefused",
+            "PublishedKeyBound",
+            "EncryptCounterExact",
+            "DecryptCounterFrame"
           ],
-          "limits": "Metadata-only live keyset projection of ListSecretVersionIds, not a stable snapshot. Parent resolution may precede saved-ARN authorization; version/stage scans and cursor validation follow it. Token signature, database key, region, domain, physical generation, filter and expiry are abstract predicates, not cryptography/byte parsing/time proofs. Does not prove SQL transaction/driver/commit failure, actual IAM/host token authority, HTTP/JSON/UTF8/ARN parsing, secret-value redaction implementation, timestamp ordering/UUIDs, variable page sizes, retention, UI or Go refinement. TerminalConverges is a finite page-shape safety equality, not liveness. Public contract: https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_ListSecretVersionIds.html (reviewed 2026-11-05)."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/secrets_manager_versions_test.go",
-      "sha256": "eb4a81b72ab07f48b832c8a48cfe9295a579f3119dd24f299e6c1d356dfa6d8e",
-      "disposition": "modeled",
-      "reason": "Add bounded metadata-only version listing over the existing saved-ARN authority and native HTTP composition; concrete Go/SDK tests independently verify SQL, strict wire inputs and refusal. Server change only advertises the added operation and does not alter authority.",
-      "models": [
-        {
-          "id": "SecretVersionListing",
-          "properties": [
-            "TypeOK",
-            "ReadAfterAuthorization",
-            "NoDeniedEmission",
-            "TokenScopeBound",
-            "StrictForwardKeyset",
-            "FilterBeforePageLimit",
-            "ContinuationPosition",
-            "TerminalConverges",
-            "ReadFramePreserved"
-          ],
-          "limits": "Metadata-only live keyset projection of ListSecretVersionIds, not a stable snapshot. Parent resolution may precede saved-ARN authorization; version/stage scans and cursor validation follow it. Token signature, database key, region, domain, physical generation, filter and expiry are abstract predicates, not cryptography/byte parsing/time proofs. Does not prove SQL transaction/driver/commit failure, actual IAM/host token authority, HTTP/JSON/UTF8/ARN parsing, secret-value redaction implementation, timestamp ordering/UUIDs, variable page sizes, retention, UI or Go refinement. TerminalConverges is a finite page-shape safety equality, not liveness. Public contract: https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_ListSecretVersionIds.html (reviewed 2026-11-05)."
+          "limits": "New alias selection/concrete authorization/ciphertext match/commit publication finite projection. Not AES/nonce/HMAC, raw ARN/JSON/SigV4/IAM parsing, host authority, arbitrary policies, actualSQLite locking/commit/Go refinement, retries/unbounded history, alias CRUD/capacity/pagination or full lifecycle proof. Trusted authorizer is pure captured policy or SELECT on provided transaction; immediate transaction serialization is an assumption grounded in current core store, not proved. Native crypto/error classes abstract existing KMS helper behavior. Choose phase guard is factored outside its binder by exact logical equivalence, not a state-space reduction."
         }
       ]
     },
     {
       "path": "internal/server/apidocs/openapi.json",
-      "sha256": "73023e90ccd911feb5acf48d6ecd1cd5cb0dbcc3e34ee63a6a8f2a1f6d30aabd",
+      "sha256": "4b76ed58fd41796a4e1fe9dd106bf677b9c98c9dc427031e579876a56a5770a2",
       "disposition": "presentation",
-      "reason": "Add a native target template and bounded metadata schemas while preserving all previous API identifiers, examples and media; static examples are not live saved state.",
+      "reason": "Static API/schema/example or canonical console build-input/digest declaration. Preserve existing operation IDs, all main examples/media and original dependency rights; this metadata is not an API/state implementation proof.",
       "models": []
     },
     {
-      "path": "internal/server/secrets_composition_test.go",
-      "sha256": "6eff95c7c4879109c99957d45a9c0e89766c37469a2a1a6492c127481ac684e0",
+      "path": "internal/server/kms_integration_test.go",
+      "sha256": "dbc658e592e8b210b08af7129c033b3cefac30bc00ff1c232f8776000db07be2",
       "disposition": "test-support",
-      "reason": "Strengthen the stale seven-operation capability assertion to require all eight distinct supported operation names; preserve native composition and S3 literal-neighbor regression checks.",
+      "reason": "Preserve all existing acceptance assertions and add literal alias schemas, actual native SDK/shared-state and mounted UI regressions; tests support concrete contracts without substituting for formal or whole-quality evidence.",
       "models": []
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "0938f0b53af289e17728eeadfd0a728398ef8379e646581156e5308df1c3bd36",
+      "sha256": "136e84e93dc5d874e9102cf20583fa7b83bd0dc0b6b80f9ed03972177c0e814a",
       "disposition": "modeled",
-      "reason": "Add bounded metadata-only version listing over the existing saved-ARN authority and native HTTP composition; concrete Go/SDK tests independently verify SQL, strict wire inputs and refusal. Server change only advertises the added operation and does not alter authority.",
+      "reason": "Stateless KMS capability-map declaration of twelve native operations and bounded customer-alias limits on existing configured KMS composition. The normalized configured-module protocol contract is the referenced seam; capability JSON serialization, constructor failure/whole wiring and every other service are NOT modeled and are independently asserted by native/default-server/SDK tests.",
       "models": [
         {
-          "id": "SecretsVersionLifecycle",
+          "id": "KMSProtocolAdmission",
           "properties": [
             "TypeOK",
-            "ImmutableVersions",
-            "NoOrphans",
-            "UniqueLabels",
-            "SeparateCurrentPrevious",
-            "ActiveHasCurrent",
-            "AuthorizedVersions",
-            "AuthorizedDisclosure"
+            "NoCrossServiceFallback",
+            "InfraNotDeny",
+            "MissingIdentityDenied",
+            "NoSuccessWithoutKMSTarget",
+            "NoAuthorityFromWireMetadata"
           ],
-          "limits": "Finite lifecycle/authority abstraction, not SQL transaction, cryptography, OS authentication, formatter redaction or Go implementation refinement. A team models one secret name and two never-reused ARN incarnations; process/token isolation and cursor bindings require actual native SDK tests. History contains abstract dummy values solely to detect an attempted immutable-version overwrite; runtime force deletion does not retain secret values. IAM is represented by a pure Boolean decision for the resolved resource; policy loading/error ordering and actual IAM rules require concrete Go tests. Shared Gateway/dispatch/server paths bind only Secrets composition into the native SQLite/immutable-policy authority path, not unrelated S3/SSM behavior or a proof of HTTP routing. Cursor signatures, quotas and restart persistence require concrete tests."
+          "limits": "Normalized protocol/identity-policy admission abstraction after trusted outer exercise identity selection; not raw HTTP/SigV4 parsing or signature authentication, local token/Access or tenant-isolation proof, full IAM semantics, byte bodies/AES, real DB faults/transactions, Go refinement, timing/concurrency/crash proof or other-service authorization. Other route is only handoff, not modeled S3 success. Body-read-barrier native tests and nine actual Gateway metadata cases independently exercise the intended bridge; new tests and this model are initially UNRUN. Shared Gateway/server/SSM applicability is ONLY the new configured KMS route/module declaration, not unchanged AWS branches, nil-module/constructor behavior or whole provider wiring. Native tests are separate and initially unrun."
         }
       ]
     },
     {
-      "path": "scripts/check-assets.py",
-      "sha256": "cf907d68ece80ff00cd13ab830abf091edacfd8e975f30d1c6ccb255109f23d4",
-      "disposition": "validation-tooling",
-      "reason": "Append reference completeness assertions after all immutable historical asset checks; preserve provenance and rights guards.",
-      "models": []
+      "path": "internal/server/web/app.js",
+      "sha256": "78849432a86c5d9ce9fdfe1aed038b8b1fb1866962b20d2eeface647fde7fc94",
+      "disposition": "modeled",
+      "reason": "Canonical compiled output of the added aliases component/mount; verified build-input/asset hashes establish correspondence. The finite model does not execute/prove minified JavaScript, compiler correctness, CSS or unrelated bundled services.",
+      "models": [
+        {
+          "id": "KMSAliasesViewEpoch",
+          "properties": [
+            "TypeOK",
+            "CurrentListOutcome",
+            "NoCachedRowsOnFailure",
+            "CurrentTargetMetadata",
+            "ClosedFormHasNoTarget",
+            "AckClosesForm",
+            "AckClearsDraft",
+            "ReadRetryNeverWrites",
+            "OnlyVerifiedTargetSubmitted",
+            "DeleteRequiresExactConfirmation",
+            "LocalePreservesIntent"
+          ],
+          "limits": "Finite UI protocol abstraction, not JS/React/Cloudscape/HTTP/SQL/IAM/crypto refinement or liveness. Initial key-list/Describe lookup completion is abstracted because actual source disables selection until it finishes; later target reads may overlap. Target/list revisions normalized after these reads. Excludes all parser/format/pagination/permission semantics, arbitrary key sets, repeated forms beyond bound, network ambiguity without ACK and full AWS console parity. Current list outcome and target metadata are stored fields, not derived tautologies. Retired-list mutation jointly bypasses redundant captured-object/active/abort checks; submit-target mutation abstracts both button and handler defenses. Retry mutant creates actual second pending write plus request counter, not a ghost-only edit. Root parent context key/principal binding is assumed; locale frame is only this model state, not the locale provider. Parent kms.jsx/main.jsx declarations bind only the Aliases mount and supplied region/principal/key identity; other KMS/general services remain outside. app.js is the canonical compiled correspondence artifact of that component/mount, independently checked by bundle hashes, not a proof of compilation or unrelated UI."
+        }
+      ]
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "093de3bf31d01ddef994c119008d6d378563584f78647f283565823931d6d993",
+      "sha256": "c356aaafe1ba7cd7045ad886be54f9e2e30d95c2869801b43876b7ff32b84895",
       "disposition": "formal-infrastructure",
-      "reason": "Require the added model, its nine properties and thirteen real semantic negative controls; preserve every existing model/control, strict parser, pins and deadlines.",
+      "reason": "Add mandatory registry/model/property/control inventories and individual-removal negatives without changing existing checker semantics, tool pins, bounds, timeouts or prior models.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "55fa7e39d4dfb81d1a6581fb3cb04994409472ac3cd2db438f29f4faf41e9fbf",
+      "sha256": "5af95b491db7b6586afcaed7cd78dba00f9ec1702f48b2b421cf406e395c7fce",
       "disposition": "formal-infrastructure",
-      "reason": "Require the added model, its nine properties and thirteen real semantic negative controls; preserve every existing model/control, strict parser, pins and deadlines.",
+      "reason": "Add mandatory registry/model/property/control inventories and individual-removal negatives without changing existing checker semantics, tool pins, bounds, timeouts or prior models.",
       "models": []
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "db51de551bcc2832a2efec8ccdb246a92cf12942cf6b344eba64c13c2f25aa1b",
+      "sha256": "5a2daf99a7ea25fc022c3a5dc299b102149af213978a927135341fddf096ccc6",
       "disposition": "test-support",
-      "reason": "Register and exercise actual local CLI/official SDK and served-example acceptance; preserve all existing tests and negative cases.",
+      "reason": "Preserve all existing acceptance assertions and add literal alias schemas, actual native SDK/shared-state and mounted UI regressions; tests support concrete contracts without substituting for formal or whole-quality evidence.",
       "models": []
     },
     {
-      "path": "test/e2e/secrets_versions.py",
-      "sha256": "23df06d78646d9e74bb3526973a4d451039d530a790a2fc3e2373737c69a1c3d",
+      "path": "test/e2e/kms.py",
+      "sha256": "adb3a0302ccf5b2e92c608d36973d40ca5bcf1eb605d4701ce64c8bffe708035",
       "disposition": "test-support",
-      "reason": "Register and exercise actual local CLI/official SDK and served-example acceptance; preserve all existing tests and negative cases.",
+      "reason": "Preserve all existing acceptance assertions and add literal alias schemas, actual native SDK/shared-state and mounted UI regressions; tests support concrete contracts without substituting for formal or whole-quality evidence.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/kms_alias_docs.py",
+      "sha256": "a37b294fb94537721d77297937ecd1fb1b56c7ad4aee8b96abd3cef35834a812",
+      "disposition": "test-support",
+      "reason": "Preserve all existing acceptance assertions and add literal alias schemas, actual native SDK/shared-state and mounted UI regressions; tests support concrete contracts without substituting for formal or whole-quality evidence.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/kms_aliases.py",
+      "sha256": "938e7b0c98c15062f7811fa0f2c9685c915c0d3cc9a2bd4ffe228682f993dcf0",
+      "disposition": "test-support",
+      "reason": "Preserve all existing acceptance assertions and add literal alias schemas, actual native SDK/shared-state and mounted UI regressions; tests support concrete contracts without substituting for formal or whole-quality evidence.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/kms_aliases_console.py",
+      "sha256": "d42176768657ae5d560003f0d49bbfcf38b05f8ff8213f16a9a06066bfa26737",
+      "disposition": "test-support",
+      "reason": "Preserve all existing acceptance assertions and add literal alias schemas, actual native SDK/shared-state and mounted UI regressions; tests support concrete contracts without substituting for formal or whole-quality evidence.",
       "models": []
     },
     {
       "path": "test/e2e/test_openapi_json10.py",
-      "sha256": "78585515041aa0183743c3907246217e0132f66b966eb5ed926de5ad2103aba9",
+      "sha256": "b9e568562d0979f037fa194d435fd58eb924ff2f6216f42f179326aa5e077d35",
       "disposition": "test-support",
-      "reason": "Preserve the exact original 23 JSON1.1 template names, require the added version-list template, and validate its strict per-target schema with missing/null/type/limit/unknown-field refusals. All prior JSON1.0 union and negative-control methods remain intact.",
+      "reason": "Preserve all existing acceptance assertions and add literal alias schemas, actual native SDK/shared-state and mounted UI regressions; tests support concrete contracts without substituting for formal or whole-quality evidence.",
       "models": []
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "adde59aca2c5f86170357519e130677afdafab0a087a1743b716de6a7c2df9c5",
+      "disposition": "presentation",
+      "reason": "Static API/schema/example or canonical console build-input/digest declaration. Preserve existing operation IDs, all main examples/media and original dependency rights; this metadata is not an API/state implementation proof.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "95f729df93ff4cbe24aff2f2af1a136a50d2d59db3e1425ce32079da2c315095",
+      "disposition": "presentation",
+      "reason": "Static API/schema/example or canonical console build-input/digest declaration. Preserve existing operation IDs, all main examples/media and original dependency rights; this metadata is not an API/state implementation proof.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/kms.jsx",
+      "sha256": "1cfa8031bb46ddc0f4567fe95f7eddb7d36e438deb6e30a8aba8530d176ffd84",
+      "disposition": "modeled",
+      "reason": "Only the added Aliases tab mounts the actual component and supplies concrete key/region/principal identity. Existing key-list/crypto UI is unchanged and not modeled by this entry.",
+      "models": [
+        {
+          "id": "KMSAliasesViewEpoch",
+          "properties": [
+            "TypeOK",
+            "CurrentListOutcome",
+            "NoCachedRowsOnFailure",
+            "CurrentTargetMetadata",
+            "ClosedFormHasNoTarget",
+            "AckClosesForm",
+            "AckClearsDraft",
+            "ReadRetryNeverWrites",
+            "OnlyVerifiedTargetSubmitted",
+            "DeleteRequiresExactConfirmation",
+            "LocalePreservesIntent"
+          ],
+          "limits": "Finite UI protocol abstraction, not JS/React/Cloudscape/HTTP/SQL/IAM/crypto refinement or liveness. Initial key-list/Describe lookup completion is abstracted because actual source disables selection until it finishes; later target reads may overlap. Target/list revisions normalized after these reads. Excludes all parser/format/pagination/permission semantics, arbitrary key sets, repeated forms beyond bound, network ambiguity without ACK and full AWS console parity. Current list outcome and target metadata are stored fields, not derived tautologies. Retired-list mutation jointly bypasses redundant captured-object/active/abort checks; submit-target mutation abstracts both button and handler defenses. Retry mutant creates actual second pending write plus request counter, not a ghost-only edit. Root parent context key/principal binding is assumed; locale frame is only this model state, not the locale provider. Parent kms.jsx/main.jsx declarations bind only the Aliases mount and supplied region/principal/key identity; other KMS/general services remain outside. app.js is the canonical compiled correspondence artifact of that component/mount, independently checked by bundle hashes, not a proof of compilation or unrelated UI."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/kms_aliases.jsx",
+      "sha256": "f7eb517b334f89b007c662308057a8b3d63b70598282e78764b3074c0b47715c",
+      "disposition": "modeled",
+      "reason": "Actual aliases component lifecycle, list/target reply epochs, ACK closing/clearing before read refresh, read-only retry, exact typed deletion and locale-preserved draft.",
+      "models": [
+        {
+          "id": "KMSAliasesViewEpoch",
+          "properties": [
+            "TypeOK",
+            "CurrentListOutcome",
+            "NoCachedRowsOnFailure",
+            "CurrentTargetMetadata",
+            "ClosedFormHasNoTarget",
+            "AckClosesForm",
+            "AckClearsDraft",
+            "ReadRetryNeverWrites",
+            "OnlyVerifiedTargetSubmitted",
+            "DeleteRequiresExactConfirmation",
+            "LocalePreservesIntent"
+          ],
+          "limits": "Finite UI protocol abstraction, not JS/React/Cloudscape/HTTP/SQL/IAM/crypto refinement or liveness. Initial key-list/Describe lookup completion is abstracted because actual source disables selection until it finishes; later target reads may overlap. Target/list revisions normalized after these reads. Excludes all parser/format/pagination/permission semantics, arbitrary key sets, repeated forms beyond bound, network ambiguity without ACK and full AWS console parity. Current list outcome and target metadata are stored fields, not derived tautologies. Retired-list mutation jointly bypasses redundant captured-object/active/abort checks; submit-target mutation abstracts both button and handler defenses. Retry mutant creates actual second pending write plus request counter, not a ghost-only edit. Root parent context key/principal binding is assumed; locale frame is only this model state, not the locale provider. Parent kms.jsx/main.jsx declarations bind only the Aliases mount and supplied region/principal/key identity; other KMS/general services remain outside. app.js is the canonical compiled correspondence artifact of that component/mount, independently checked by bundle hashes, not a proof of compilation or unrelated UI."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/main.jsx",
+      "sha256": "9258b9891cb66567028cc1eecc4c599e13a688ede7a157437503f8f52866c767",
+      "disposition": "modeled",
+      "reason": "Only passes the actual selected principal to the KMS view, whose existing parent key retires context on region/principal/navigation. This binding covers the aliases mount identity seam, not other services, login, request transport or all navigation.",
+      "models": [
+        {
+          "id": "KMSAliasesViewEpoch",
+          "properties": [
+            "TypeOK",
+            "CurrentListOutcome",
+            "NoCachedRowsOnFailure",
+            "CurrentTargetMetadata",
+            "ClosedFormHasNoTarget",
+            "AckClosesForm",
+            "AckClearsDraft",
+            "ReadRetryNeverWrites",
+            "OnlyVerifiedTargetSubmitted",
+            "DeleteRequiresExactConfirmation",
+            "LocalePreservesIntent"
+          ],
+          "limits": "Finite UI protocol abstraction, not JS/React/Cloudscape/HTTP/SQL/IAM/crypto refinement or liveness. Initial key-list/Describe lookup completion is abstracted because actual source disables selection until it finishes; later target reads may overlap. Target/list revisions normalized after these reads. Excludes all parser/format/pagination/permission semantics, arbitrary key sets, repeated forms beyond bound, network ambiguity without ACK and full AWS console parity. Current list outcome and target metadata are stored fields, not derived tautologies. Retired-list mutation jointly bypasses redundant captured-object/active/abort checks; submit-target mutation abstracts both button and handler defenses. Retry mutant creates actual second pending write plus request counter, not a ghost-only edit. Root parent context key/principal binding is assumed; locale frame is only this model state, not the locale provider. Parent kms.jsx/main.jsx declarations bind only the Aliases mount and supplied region/principal/key identity; other KMS/general services remain outside. app.js is the canonical compiled correspondence artifact of that component/mount, independently checked by bundle hashes, not a proof of compilation or unrelated UI."
+        }
+      ]
     }
   ]
 }
