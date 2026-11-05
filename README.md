@@ -15,6 +15,23 @@ or Azure replacement. Service issues and roadmap entries are plans, not working
 features. See the [development status](docs/development-status.md) and each
 service's limitations below.
 
+## Acknowledgments: Kumo
+
+We thank [Kumo](https://github.com/sivchari/kumo)'s maintainers and contributors
+for sharing their work under the MIT license. Kumo informed our approach to
+service registration, protocol routing, SDK-compatible endpoints, and service
+wiring. TenkaCloud Simulator runs its own implementation rather than using Kumo
+as a runtime backend.
+
+Design credit is distinct from the rights notices for adapted code. Limited
+adaptations have been used in [IAM](third_party/kumo-iam.json),
+[REST/API Gateway](third_party/kumo-apigateway.json),
+[CloudWatch Logs](third_party/kumo-cloudwatch-logs.json), and
+[KMS](third_party/kumo-kms.json). Their provenance and
+[original MIT copyright and permission notice](third_party/KUMO-LICENSE.txt)
+are preserved, including for historical adaptations. This acknowledgment does
+not claim that all prior adaptations have been replaced.
+
 ## Start locally
 
 Building from source requires Go 1.26; CI pins Go 1.26.10.

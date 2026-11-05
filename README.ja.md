@@ -4,6 +4,20 @@
 
 非公式のクラウド学習用シミュレーター。AWSを中心に開発し、Google Cloud Storage・Azure Blob Storageの限定的なローカル接続を備えています（[範囲と検証状況](docs/multicloud-storage.md)）。Go単一バイナリにAWS向けCloudscapeコンソールとGoogle Cloud／Azureのローカルコンソール、Scalar API reference、SQLite、Python Lambda用の固定CPython/WASIを埋め込みます。実行時にGo・Node・ホストPython・Docker・外部DB・実AWSは不要です。実AWSの資格情報は入力しないでください。
 
+## 謝辞：Kumo
+
+[Kumo](https://github.com/sivchari/kumo) のメンテナーとコントリビューターの皆さまに感謝します。
+MIT ライセンスで公開された取り組みを、サービス登録、プロトコルの振り分け、SDK に対応した
+エンドポイント、サービス接続の設計で参考にしました。TenkaCloud Simulator は独自の実装で動作し、
+Kumo を実行時のバックエンドとして利用するものではありません。
+
+設計上の参考への謝意と、コードを利用した際の権利表記は区別しています。
+[IAM](third_party/kumo-iam.json)、[REST/API Gateway](third_party/kumo-apigateway.json)、
+[CloudWatch Logs](third_party/kumo-cloudwatch-logs.json)、[KMS](third_party/kumo-kms.json) では
+一部を適合して利用した経緯があり、過去の利用も含めて出典と
+[元の MIT 著作権・許諾表記](third_party/KUMO-LICENSE.txt)を保持しています。
+この謝辞は、由来コードの全置換が完了したことを示すものではありません。
+
 ## 起動する
 
 ソースからの起動にはGo 1.26が必要です（CIは1.26.10）。
