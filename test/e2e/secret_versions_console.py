@@ -230,6 +230,52 @@ def run():
                         assert aborted, "Unexpected route delivery failure"
                     return {"actualNativeResponse": True, "transportWasAborted": aborted, "postAbortJSDeliveryProved": False}
 
+                # Actual continuation cancellation on the SAME metadata instance.
+                # Existing overlap below holds Refresh; this one holds NextToken.
+                list_versions(page)
+                for item in expected[:20]:
+                    expect(table.get_by_text(item["VersionId"], exact=True)).to_be_visible()
+                page.evaluate("window.__versionPagingLeaf=document.querySelector('[data-secret-versions]')")
+                hold["next"] = True
+                page.get_by_role("button", name="Next page", exact=True).click()
+                old_page = wait_hold()
+                old_request = old_page[0].request.post_data_json
+                assert old_request["SecretId"] == arn and old_request["IncludeDeprecated"] is True
+                assert old_request["MaxResults"] == 20 and isinstance(old_request.get("NextToken"), str) and old_request["NextToken"]
+                old_body = old_page[1].json()
+                assert [item["VersionId"] for item in old_body["Versions"]] == [item["VersionId"] for item in expected[20:]]
+                page.get_by_role("button", name="Cancel version request", exact=True).click()
+                page.get_by_role("checkbox", name="Include deprecated versions", exact=True).uncheck()
+                for item in expected:
+                    expect(table.get_by_text(item["VersionId"], exact=True)).to_have_count(0)
+                hold["next"] = True
+                page.get_by_role("button", name="List versions", exact=True).click()
+                fresh_page = wait_hold()
+                fresh_request = fresh_page[0].request.post_data_json
+                assert fresh_request["SecretId"] == arn and fresh_request["IncludeDeprecated"] is False
+                assert fresh_request["MaxResults"] == 20 and "NextToken" not in fresh_request
+                assert {item["VersionId"] for item in fresh_page[1].json()["Versions"]} == {token(21), token(22)}
+                assert page.evaluate("window.__versionPagingLeaf===document.querySelector('[data-secret-versions]')")
+                old_delivery = release(old_page)
+                page.evaluate("()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))")
+                expect(page.get_by_role("button", name="Cancel version request", exact=True)).to_be_visible()
+                expect(page.get_by_role("heading", name="Versions — Page 2", exact=True)).to_have_count(0)
+                for item in expected:
+                    expect(table.get_by_text(item["VersionId"], exact=True)).to_have_count(0)
+                fresh_delivery = release(fresh_page)
+                for version in (token(21), token(22)):
+                    expect(table.get_by_text(version, exact=True)).to_be_visible()
+                expect(table.get_by_text(token(20), exact=True)).to_have_count(0)
+                expect(page.get_by_role("heading", name="Versions — Page 1", exact=True)).to_be_visible()
+                expect(page.get_by_role("button", name="Next page", exact=True)).to_be_disabled()
+                assert page.evaluate("window.__versionPagingLeaf===document.querySelector('[data-secret-versions]')")
+                boundaries.append({"heldContinuationCanceledBeforeFreshPage": True,
+                    "sameMetadataInstance": True, "oldContinuation": old_delivery,
+                    "freshFirstPage": fresh_delivery, "opaqueCursorLogged": False})
+                no_values(page)
+                # Restore the original overlap fixture's IncludeDeprecated state.
+                page.get_by_role("checkbox", name="Include deprecated versions", exact=True).check()
+
                 hold["next"] = True
                 page.get_by_role("button", name="Refresh versions", exact=True).click()
                 old = wait_hold()
