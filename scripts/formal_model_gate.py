@@ -9,8 +9,9 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-BASE_MODELS = {'NativeWireProjection', 'RESTRouteMatching', 'RESTProxyEventBoundary', 'AzurePropertiesTarget', 'AzurePropertiesEpoch', 'AzureBlobState', 'BlobRange', 'BrowserSessions', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'DynamoDBAdmission', 'DynamoDBLifecycle', 'GCPStorageState', 'KMSKeyState', 'KMSProtocolAdmission', 'IAMManagedPolicies', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'SecretsDisclosureChannels', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'SecretsMutationRefresh', 'StackOwnership', 'StartupTokenVisibility'}
+BASE_MODELS = {'SecretVersionListing', 'NativeWireProjection', 'RESTRouteMatching', 'RESTProxyEventBoundary', 'AzurePropertiesTarget', 'AzurePropertiesEpoch', 'AzureBlobState', 'BlobRange', 'BrowserSessions', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'DynamoDBAdmission', 'DynamoDBLifecycle', 'GCPStorageState', 'KMSKeyState', 'KMSProtocolAdmission', 'IAMManagedPolicies', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'SecretsDisclosureChannels', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'SecretsMutationRefresh', 'StackOwnership', 'StartupTokenVisibility'}
 BASE_INVARIANTS = {
+    'SecretVersionListing': {'NoDeniedEmission', 'ReadAfterAuthorization', 'TerminalConverges', 'StrictForwardKeyset', 'ContinuationPosition', 'TypeOK', 'FilterBeforePageLimit', 'TokenScopeBound', 'ReadFramePreserved'},
     'NativeWireProjection': {'BadValueRefused', 'ValueKindsPreserved', 'FailureNoPartial', 'OmissionExact', 'OrderExact', 'TypeOK', 'SkippedBadDoesNotFail', 'CompleteProjection'},
     'RESTRouteMatching': {'MatchOracle', 'CaptureFidelity', 'InvalidTemplateRejected', 'Specificity', 'TypeOK', 'RejectedShape'},
     'RESTProxyEventBoundary': {'QueryProjection', 'ActualRoute', 'Admission', 'BodyPreserved', 'TypeOK', 'FailureNoEvent', 'ApplicationData', 'CredentialSealed'},
@@ -47,6 +48,7 @@ BASE_INVARIANTS = {
 }
 # Established controls require an explicit gate-policy change before retirement.
 REQUIRED_MUTANTS = {
+    'SecretVersionListing': {'GenerationBindingBypass', 'DomainBypass', 'FilterBindingBypass', 'MissingNextToken', 'AuthorityKeyBypass', 'ExpiryBypass', 'InclusiveResume', 'ReadWritesVersionState', 'FilterAfterLimit', 'RegionBindingBypass', 'AuthorizationBypass', 'SignatureBypass', 'StaleNextPosition'},
     'NativeWireProjection': {'AcceptBadValue', 'IgnoreOmission', 'PublishErrorPrefix', 'ReverseFieldOrder', 'EncodeOmittedBad', 'CollapseNullToZero'},
     'RESTRouteMatching': {'BadRejectedScore', 'AllowEmptyGreedy', 'FirstDuplicateCaptureWins', 'LoseSpecificity', 'IgnoreLiteral', 'TruncateGreedy'},
     'RESTProxyEventBoundary': {'AcceptMalformedQuery', 'FirstHeaderValueWins', 'IgnoreEncodedBudget', 'EmitRejectedEvent', 'ReplaceBody', 'TemplateAsActualPath', 'FirstQueryValueWins', 'ForwardAWSSignature', 'ForwardLocalCredentials', 'DropBearerApplication'},
@@ -82,6 +84,7 @@ REQUIRED_MUTANTS = {
     'StartupTokenVisibility': {'OmittedCIGuard', 'OmittedTTYGuard', 'OverwriteExistingToken'},
 }
 REQUIRED_SOURCE_SCOPES = {
+    'SecretVersionListing': {'internal/aws/secrets_manager_versions_http_test.go', 'internal/aws/secret_http.go', 'internal/aws/secrets_manager_versions.go', 'internal/aws/secrets_manager_versions_test.go'},
     'NativeWireProjection': {'internal/aws/wire_json_projection.go'},
     'RESTRouteMatching': {'internal/aws/apirouting/path.go'},
     'RESTProxyEventBoundary': {'internal/aws/apirouting/event.go'},
