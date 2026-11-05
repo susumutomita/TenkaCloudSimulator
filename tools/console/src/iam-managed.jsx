@@ -33,7 +33,7 @@ function useContext(onSaving){
  useEffect(()=>{onSaving(busy)},[busy]);
  async function read(task,clear){const current=++epoch.current;setLoading(true);setError('');setReadError(false);clear();try{const publish=await task();if(valid(current))publish()}catch(e){if(valid(current)){setError(e.message);setReadError(true)}}finally{if(valid(current))setLoading(false)}}
  async function write(task,ack,refresh){if(lock.current)return;lock.current=true;const current=epoch.current;setBusy(true);setError('');setReadError(false);setNotice('');try{await task();if(!valid(current))return;ack();await refresh()}catch(e){if(valid(current))setError(e.message)}finally{lock.current=false;if(alive.current)setBusy(false)}}
- return {alive,epoch,controller,valid,busy,loading,error,readError,notice,setError,setNotice,read,write,invalidate:()=>{epoch.current++;setError('');setReadError(false);setNotice('')}};
+ return {alive,epoch,controller,valid,busy,loading,error,readError,notice,setError,setNotice,read,write,invalidate:()=>{epoch.current++;setLoading(false);setError('');setReadError(false);setNotice('')}};
 }
 export default function IAMManagedView({request,onSaving,onBack}){
  const {t}=useLocale(),c=useContext(onSaving),retry=useRef(null);
