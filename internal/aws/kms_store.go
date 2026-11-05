@@ -183,6 +183,20 @@ func (s *KMSStore) Encrypt(ctx context.Context, region, id string, contextMap ma
 		return nil, "", err
 	}
 	defer tx.Rollback()
+	blob, arn, err := kmsEncryptTx(ctx, tx, region, parsed, contextMap, plaintext)
+	if err != nil {
+		return nil, "", err
+	}
+	if err = tx.Commit(); err != nil {
+		return nil, "", err
+	}
+	return blob, arn, nil
+}
+
+// kmsEncryptTx uses an already validated concrete key ID and payload. The trusted
+// caller owns the transaction and must not publish this prospective result until
+// its commit succeeds. Alias resolution and permission checks can share this tx.
+func kmsEncryptTx(ctx context.Context, tx *sql.Tx, region, parsed string, contextMap map[string]string, plaintext []byte) ([]byte, string, error) {
 	row, err := kmsRead(ctx, tx, region, parsed)
 	if err != nil {
 		return nil, "", err
@@ -198,9 +212,6 @@ func (s *KMSStore) Encrypt(ctx context.Context, region, id string, contextMap ma
 		return nil, "", err
 	}
 	if err = kmsRequireOne(tx.ExecContext(ctx, "UPDATE aws_kms_keys SET encryptions=encryptions+1 WHERE region=? AND key_id=?", region, parsed)); err != nil {
-		return nil, "", err
-	}
-	if err = tx.Commit(); err != nil {
 		return nil, "", err
 	}
 	return blob, row.metadata.Arn, nil
@@ -230,6 +241,19 @@ func (s *KMSStore) Decrypt(ctx context.Context, region, requestedID string, cont
 		return nil, "", err
 	}
 	defer tx.Rollback()
+	plaintext, arn, err := kmsDecryptTx(ctx, tx, region, id, contextMap, encrypted)
+	if err != nil {
+		return nil, "", err
+	}
+	if err = tx.Commit(); err != nil {
+		return nil, "", err
+	}
+	return plaintext, arn, nil
+}
+
+// kmsDecryptTx takes the concrete UUID from a validated local ciphertext header.
+// It never changes transaction ownership or grants permission to key material.
+func kmsDecryptTx(ctx context.Context, tx *sql.Tx, region, id string, contextMap map[string]string, encrypted []byte) ([]byte, string, error) {
 	row, err := kmsRead(ctx, tx, region, id)
 	if err != nil {
 		return nil, "", err
@@ -239,9 +263,6 @@ func (s *KMSStore) Decrypt(ctx context.Context, region, requestedID string, cont
 	}
 	plaintext, err := kmsOpen(row.material, region, id, contextMap, encrypted)
 	if err != nil {
-		return nil, "", err
-	}
-	if err = tx.Commit(); err != nil {
 		return nil, "", err
 	}
 	return plaintext, row.metadata.Arn, nil
