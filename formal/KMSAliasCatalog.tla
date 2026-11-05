@@ -8,11 +8,11 @@ Names == 1..3
 Keys == 1..2
 Slots == Regions \X Names
 Outcomes == {"ok","ignored","commitfail"}
-Permissions == {[alias |-> TRUE,old |-> TRUE,new |-> TRUE],
-                [alias |-> FALSE,old |-> TRUE,new |-> TRUE],
-                [alias |-> TRUE,old |-> FALSE,new |-> TRUE],
-                [alias |-> TRUE,old |-> TRUE,new |-> FALSE]}
-AllPermit == [alias |-> TRUE,old |-> TRUE,new |-> TRUE]
+(* The native authorizer is a captured pure decision on action+resource.
+   Old/new names referring to one concrete key MUST share one decision. All four
+   two-key maps are retained; alias-resource permission is independent. *)
+Permissions == {[alias |-> a,keys |-> keyMap] : a \in BOOLEAN,keyMap \in [Keys -> BOOLEAN]}
+AllPermit == [alias |-> TRUE,keys |-> [k \in Keys |-> TRUE]]
 Empty == [s \in Slots |-> 0]
 SeedOne == [s \in Slots |-> IF s = <<1,1>> THEN 1 ELSE 0]
 SeedTwo == [s \in Slots |-> CASE s = <<1,1>> -> 1 [] s = <<1,2>> -> 2 [] OTHER -> 0]
@@ -29,19 +29,20 @@ Init == /\ step=0 /\ catalog \in Seeds
         /\ revisions=[r \in Regions |-> Cardinality({n \in Names : catalog[<<r,n>>]#0})]
         /\ marker=EmptyMarker /\ last=[attempted |-> FALSE] /\ reply=EmptyReply
 
-Allowed(op,p) == CASE op="create" -> p.alias /\ p.new
-                  [] op="update" -> p.alias /\ p.old /\ p.new
-                  [] OTHER -> p.alias /\ p.old
-ExpectedPermit(op,p) == CASE op="create" -> p.alias /\ p.new
-                         [] op="update" -> p.alias /\ p.old /\ p.new
-                         [] OTHER -> p.alias /\ p.old
+KeyPermit(p,k) == IF k \in Keys THEN p.keys[k] ELSE FALSE
+Allowed(op,p,old,k) == CASE op="create" -> p.alias /\ KeyPermit(p,k)
+                        [] op="update" -> p.alias /\ KeyPermit(p,old) /\ KeyPermit(p,k)
+                        [] OTHER -> p.alias /\ KeyPermit(p,old)
+ExpectedPermit(op,p,old,k) == CASE op="create" -> p.alias /\ KeyPermit(p,k)
+                               [] op="update" -> p.alias /\ KeyPermit(p,old) /\ KeyPermit(p,k)
+                               [] OTHER -> p.alias /\ KeyPermit(p,old)
 Concrete(kind) == kind="concrete"
 GlobalRoom(op,c) == Count(c)+(IF op="create" THEN 1 ELSE 0)<=2
 KeyRoom(c,r,k) == KeyCount(c,r,k)+1<=1
 Capacity(op,c,r,n,k) == IF op="delete" \/ (op="update" /\ c[<<r,n>>]=k)
                        THEN TRUE ELSE GlobalRoom(op,c) /\ KeyRoom(c,r,k)
 ValidMutation(op,r,n,k,kind,p) ==
-    Allowed(op,p) /\ (IF op="create" THEN catalog[<<r,n>>]=0 ELSE catalog[<<r,n>>]#0)
+    Allowed(op,p,catalog[<<r,n>>],k) /\ (IF op="create" THEN catalog[<<r,n>>]=0 ELSE catalog[<<r,n>>]#0)
     /\ (op="delete" \/ Concrete(kind)) /\ Capacity(op,catalog,r,n,k)
 WriteRegion(r) == r
 NextCatalog(op,r,n,k) == [catalog EXCEPT ![<<WriteRegion(r),n>>]=IF op="delete" THEN 0 ELSE k]
@@ -128,7 +129,7 @@ TypeOK == /\ step \in 0..MaxRequests /\ catalog \in [Slots -> 0..2]
           /\ reply.success \in BOOLEAN /\ reply.page \in Seq(Names) /\ reply.more \in BOOLEAN
 AcknowledgedSuccess == IF last.attempted THEN reply.success => last.outcome="ok" ELSE TRUE
 MutationAuthority == IF last.attempted THEN
-    ~last.read /\ reply.success => ExpectedPermit(last.op,last.permit) ELSE TRUE
+    ~last.read /\ reply.success => ExpectedPermit(last.op,last.permit,last.before.catalog[<<last.region,last.name>>],last.target) ELSE TRUE
 ConcreteTarget == IF last.attempted THEN
     ~last.read /\ reply.success /\ last.op#"delete" => last.kind="concrete" ELSE TRUE
 FailureFrame == IF last.attempted THEN ~reply.success => Frame=last.before ELSE TRUE
