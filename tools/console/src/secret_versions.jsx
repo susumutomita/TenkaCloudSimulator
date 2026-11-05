@@ -43,12 +43,12 @@ function metadataPage(data,arn,name){
 export default function SecretVersions({region,request,secretARN='',active=true}){
  const {t}=useLocale();
  const scope=useMemo(()=>({region,request,secretARN,active}),[region,request,secretARN,active]);
- const scopeNow=useRef(scope);scopeNow.current=scope;
+ const scopeNow=useRef(scope);
  const epoch=useRef(0),alive=useRef(false),pending=useRef(null);
  const [arn,setARN]=useState(secretARN),[include,setInclude]=useState(false),[result,setResult]=useState(null),[loading,setLoading]=useState(false),[problem,setError]=useState(null);
  const clear=()=>{epoch.current++;pending.current?.abort();pending.current=null;setLoading(false);setResult(null);setError(null)};
  useLayoutEffect(()=>{
-  alive.current=true;clear();setARN(secretARN);setInclude(false);
+  scopeNow.current=scope;alive.current=true;clear();setARN(secretARN);setInclude(false);
   return()=>{alive.current=false;epoch.current++;pending.current?.abort();pending.current=null};
  },[scope]);
  const error=problem?.scope===scope?problem:null;
