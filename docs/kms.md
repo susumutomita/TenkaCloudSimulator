@@ -125,11 +125,15 @@ Protocol and limits follow the bounded portions of the official
 and [default policy](https://docs.aws.amazon.com/kms/latest/developerguide/key-policy-default.html)
 documentation. The cryptographic primitive is Go's
 [NewGCMWithRandomNonce](https://pkg.go.dev/crypto/cipher#NewGCMWithRandomNonce).
-The preserved historical candidate selected metadata DTO fields from MIT-licensed
+The historical / superseded candidate (`metadataHistorical`) selected metadata DTO fields from MIT-licensed
 Kumo at the pinned commit in
 [provenance](../third_party/kumo-kms.json); original rights are retained in
 [KUMO-LICENSE](../third_party/KUMO-LICENSE.txt) and the embedded legal mirror.
-New development treats Kumo as a design reference only; no Kumo engine/codebase,
+Current KeyMetadata output uses an explicit JSON projection preserving established
+field names, null/empty algorithm lists, false/zero values and standard escaping.
+The existing SQLite state, key material, crypto and ciphertext/AAD format are unchanged
+by this projection. This is not a clean-room, authorship or legal certification.
+Kumo is a registry/protocol/SDK-endpoint/service-wiring design reference; no Kumo engine/codebase,
 submodule or new dependency is introduced. Existing notices are retained, not
 removed based on assumptions. Kumo storage/cryptography and LocalStack's Python
 runtime are not used. Authenticated AWS console visual equivalence is unverified.

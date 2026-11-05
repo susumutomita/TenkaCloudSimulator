@@ -23,6 +23,7 @@ FORMAL_INFRA = {'formal/models.json', 'formal/tla2tools.sha256',
 KNOWN_VALIDATION = {
     'scripts/build-vulndb-snapshot.py', 'scripts/catalog-matrix.py',
     'scripts/check-assets.py', 'scripts/check-coverage.py', 'scripts/check-cross-build.py',
+    'scripts/check-native-provenance.py',
     'scripts/get-audit-tools.py', 'scripts/test-coverage-gate.py', 'scripts/update-go-notices.py',
     'scripts/requirements-test.txt',
 }

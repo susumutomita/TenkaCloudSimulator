@@ -1,8 +1,9 @@
-// Copyright (c) 2025 sivchari
 // SPDX-License-Identifier: MIT
-// Selected metadata wire fields adapted from Kumo ce37a8fb406ecb96b5619204f645c26302b651a5,
-// internal/service/kms/types.go. Original notice: third_party/KUMO-LICENSE.txt.
-// Strict validation, private SQLite storage and authenticated local blob format are local adapters.
+// Bounded KMS domain data and independently authored AWS metadata projection.
+// Historical notice retained for earlier, replaced Kumo adaptations:
+// Copyright (c) 2025 sivchari
+// Original permission and historical provenance: third_party/KUMO-LICENSE.txt
+// and the corresponding third_party/kumo-*.json record.
 package aws
 
 import (
@@ -20,20 +21,43 @@ const kmsMaxEncryptions int64 = 1 << 32
 
 var kmsUUID = regexp.MustCompile(`^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`)
 
+// KMSKeyMetadata is reconstructed from provider-owned SQLite columns. The local
+// symmetric-key subset is explicitly projected into the AWS KeyMetadata shape;
+// unsupported AWS fields and states are not fabricated.
 type KMSKeyMetadata struct {
-	AWSAccountID         string   `json:"AWSAccountId"`
-	KeyID                string   `json:"KeyId"`
-	Arn                  string   `json:"Arn"`
-	CreationDate         float64  `json:"CreationDate"`
-	Enabled              bool     `json:"Enabled"`
-	Description          string   `json:"Description"`
-	KeyUsage             string   `json:"KeyUsage"`
-	KeyState             string   `json:"KeyState"`
-	Origin               string   `json:"Origin"`
-	KeyManager           string   `json:"KeyManager"`
-	KeySpec              string   `json:"KeySpec"`
-	EncryptionAlgorithms []string `json:"EncryptionAlgorithms"`
-	MultiRegion          bool     `json:"MultiRegion"`
+	AWSAccountID         string
+	KeyID                string
+	Arn                  string
+	CreationDate         float64
+	Enabled              bool
+	Description          string
+	KeyUsage             string
+	KeyState             string
+	Origin               string
+	KeyManager           string
+	KeySpec              string
+	EncryptionAlgorithms []string
+	MultiRegion          bool
+}
+
+// https://docs.aws.amazon.com/kms/latest/APIReference/API_KeyMetadata.html
+// Emit the established local subset, including false/zero/empty fields and a
+// null algorithm list when nil. The numeric timestamp remains JSON seconds.
+func (key KMSKeyMetadata) MarshalJSON() ([]byte, error) {
+	return marshalAWSOwnedWireObject(
+		awsOwnedWireField{"AWSAccountId", key.AWSAccountID, false},
+		awsOwnedWireField{"KeyId", key.KeyID, false},
+		awsOwnedWireField{"Arn", key.Arn, false},
+		awsOwnedWireField{"CreationDate", key.CreationDate, false},
+		awsOwnedWireField{"Enabled", key.Enabled, false},
+		awsOwnedWireField{"Description", key.Description, false},
+		awsOwnedWireField{"KeyUsage", key.KeyUsage, false},
+		awsOwnedWireField{"KeyState", key.KeyState, false},
+		awsOwnedWireField{"Origin", key.Origin, false},
+		awsOwnedWireField{"KeyManager", key.KeyManager, false},
+		awsOwnedWireField{"KeySpec", key.KeySpec, false},
+		awsOwnedWireField{"EncryptionAlgorithms", key.EncryptionAlgorithms, false},
+		awsOwnedWireField{"MultiRegion", key.MultiRegion, false})
 }
 
 type kmsError struct{ code, message string }

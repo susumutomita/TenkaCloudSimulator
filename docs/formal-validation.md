@@ -15,8 +15,10 @@ machine-discovered semantic coverage. A newly added implementation file is not
 covered merely because an existing model passes: its exact path must have an
 appropriate reviewed scope mapping and property argument.
 
-The current registry has 30 baselines/175 required named mutation controls
-(205 required executions), preserving the previous29/164 and adding IAMManagedPolicies 1/11.
+The current registry has 33 baselines/197 required named mutation controls
+(230 required executions). The previous30/175 entries and controls are preserved;
+RESTRouteMatching, RESTProxyEventBoundary and NativeWireProjection add three
+bounded contracts and22 semantic defect controls.
 The new IAM scope is four API-reachable seeds and at most two subsequent requests;
 the broader four-request exploratory candidate timed out and is not claimed.
 Registration and Python guards are not a successful immutable TLC execution.
@@ -29,6 +31,9 @@ Registration and Python guards are not a successful immutable TLC execution.
 | NativeIAMOwnership | two case-folded names; native/legacy exclusivity | trust parsing, full IAM, process isolation |
 | [IAMManagedPolicies](formal-iam-managed-policies.md) | four reachable seeds, two-request suffixes; stored aggregates, default/version/deletion/edge invariants | unsuccessful four-request exploration, Go/SQL refinement, concrete auth race, wire parsing/UI, actual five-version/twenty-attachment quotas |
 | RESTDeploymentSnapshot | one API/two deployments/two handlers/one stage | path matching, Lambda execution/permissions |
+| RESTRouteMatching | finite template/carrier choices; arity, captures and literal specificity | concrete byte scanner, general paths, method selection, Go refinement |
+| RESTProxyEventBoundary | fixed input samples, projected application data, excluded transport authority and abstract event budget | concrete HTTP authentication, UTF-8/JSON parser, case-fold implementation, real memory bounds |
+| NativeWireProjection | three ordered fields, six value kinds and provider-selected omission; complete output or error | JSON escaping/parser, XML, exact AWS schemas, Go refinement |
 
 All registered models run even for documentation-only changes. The supported CFG
 grammar is deliberately restricted to named invariants, init/next/specification,

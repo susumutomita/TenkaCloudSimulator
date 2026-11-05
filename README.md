@@ -15,6 +15,23 @@ or Azure replacement. Service issues and roadmap entries are plans, not working
 features. See the [development status](docs/development-status.md) and each
 service's limitations below.
 
+## Acknowledgments: Kumo
+
+We thank [Kumo](https://github.com/sivchari/kumo)'s maintainers and contributors
+for sharing their work under the MIT license. Kumo informed our approach to
+service registration, protocol routing, SDK-compatible endpoints, and service
+wiring. TenkaCloud Simulator runs its own implementation rather than using Kumo
+as a runtime backend.
+
+Earlier revisions adapted limited native wire and lifecycle code in
+[IAM](third_party/kumo-iam.json), [REST/API Gateway](third_party/kumo-apigateway.json),
+[CloudWatch Logs](third_party/kumo-cloudwatch-logs.json), and
+[KMS](third_party/kumo-kms.json). Those identified runtime portions have been
+independently reimplemented against public AWS contracts. Historical provenance
+and the [original MIT copyright and permission notice](third_party/KUMO-LICENSE.txt)
+remain intact. The [replacement source record](third_party/independent-native-source.json)
+describes the reviewed scope; it is not a clean-room or legal certification.
+
 ## Start locally
 
 Building from source requires Go 1.26; CI pins Go 1.26.10.
@@ -224,8 +241,8 @@ not binary runtime dependencies. Regeneration must preserve locks and original
 rights: [console](tools/console/README.md), [Scalar](tools/scalar/README.md),
 [Python/WASI runtime](tools/python/README.md).
 
-The registry contains 30 finite models and 175 deliberate defect controls
-(205 required model/check executions). The new IAM scenario checks two requests
+The registry contains 33 finite models and 197 deliberate defect controls
+(230 required model/check executions). The new IAM scenario checks two requests
 from each of four reachable seeds. A broader four-request trial timed out and
 is not claimed as verified. TLC examines bounded safety properties and checks
 that targeted mutants produce real counterexamples. It does not prove Go/JS

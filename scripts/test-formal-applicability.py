@@ -88,6 +88,15 @@ class ApplicabilityTests(unittest.TestCase):
         with self.assertRaisesRegex(GateError, 'unclassified implementation/state path'):
             validate_record(self.root, self.base)
 
+    def test_native_provenance_validator_classification_is_exact(self):
+        self.prepare('scripts/check-native-provenance.py')
+        evidence = validate_record(self.root, self.base)
+        self.assertEqual(evidence['changes'][0]['disposition'], 'validation-tooling')
+        self.assertIsNone(disposition('scripts/check-native-provenance-wrapper.py'))
+        self.prepare('internal/aws/check-native-provenance.go')
+        with self.assertRaisesRegex(GateError, 'unclassified implementation/state path'):
+            validate_record(self.root, self.base)
+
     def test_exact_modeled_change_and_known_documentation(self):
         self.prepare()
         evidence = validate_record(self.root, self.base)
