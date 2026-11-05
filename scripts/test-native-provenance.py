@@ -230,9 +230,41 @@ class NativeProvenanceTests(unittest.TestCase):
         source = (REPO / "scripts/check-assets.py").read_text()
         self.assertIn("native_provenance=runpy.run_path('scripts/check-native-provenance.py')", source)
         self.assertIn("assert native_provenance['main']()==0", source)
-        # The exact pre-Kumo prefix independently frozen from baseline1b34.
+        self._assert_original_asset_prefix(source)
+
+    def _assert_original_asset_prefix(self, source):
+        # Root-reviewed API-only extension: remove exactly this five-ID literal
+        # and this union operand, then require the ORIGINAL baseline1b34 bytes.
+        # No generic regex, changing hash, or tolerance for other check edits.
+        extension = "expected_sakura={'SakuraListDisks', 'SakuraCreateDisk', 'SakuraGetDisk', 'SakuraUpdateDisk', 'SakuraDeleteDisk'}\n"
+        original_assert = "assert len(operations)==len(set(operations)) and set(operations)==expected_legacy|expected_rest|expected_multicloud"
+        extended_assert = original_assert + "|expected_sakura"
         prefix = source.split("# Retain exact historical rights", 1)[0]
+        self.assertEqual(prefix.count(extension), 1, "Exact approved five-ID extension is required once")
+        self.assertEqual(prefix.count(extended_assert), 1, "Exact approved closed union is required once")
+        prefix = prefix.replace(extension, "", 1).replace(extended_assert, original_assert, 1)
         self.assertEqual(hashlib.sha256(prefix.encode()).hexdigest(), "331cc7e21fd3a30aa72b690846cf60c04f06ea19c0035ac73ea13f629334d685")
+
+    def test_asset_prefix_rejects_unrelated_strict_check_weakening(self):
+        source = (REPO / "scripts/check-assets.py").read_text()
+        self.assertEqual(source.count("assert lambda_operations=="), 1)
+        weakened = source.replace("assert lambda_operations==", "assert lambda_operations<=", 1)
+        with self.assertRaises(AssertionError):
+            self._assert_original_asset_prefix(weakened)
+
+    def test_asset_prefix_rejects_changed_duplicate_or_missing_five_id_extension(self):
+        source = (REPO / "scripts/check-assets.py").read_text()
+        extension = "expected_sakura={'SakuraListDisks', 'SakuraCreateDisk', 'SakuraGetDisk', 'SakuraUpdateDisk', 'SakuraDeleteDisk'}\n"
+        self.assertEqual(source.count(extension), 1)
+        for modified in (
+            source.replace(extension, extension.replace("'SakuraDeleteDisk'", "'SakuraDeleteEverything'"), 1),
+            source.replace(extension, extension + extension, 1),
+            source.replace(extension, "", 1),
+            source.replace("|expected_sakura", "", 1),
+        ):
+            with self.subTest(modified_sha256=hashlib.sha256(modified.encode()).hexdigest()):
+                with self.assertRaises(AssertionError):
+                    self._assert_original_asset_prefix(modified)
 
 
 if __name__ == "__main__":

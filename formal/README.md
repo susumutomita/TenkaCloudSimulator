@@ -1,16 +1,30 @@
 # Finite state models
 
-Current registry: **43 models / 322 literal-protected controls**
-(**365 required executions**). All actual-main 40 model entries and 295 controls
-are retained. Four separate customer-alias models describe catalog admission,
-concrete-key crypto, UI epochs/refresh and first-use transaction bootstrap.
-Their finite scopes and evidence are distinct from native/SDK/whole-quality proof.
+Current registry: 48 models / 381 literal-protected controls
+(429 required executions). All incoming main44 model objects, TLA/CFG bytes, properties
+and347 controls are preserved. Sakura metadata/admission/startup add35 controls;
+SakuraDisksViewEpoch adds17 more for request scope/sequence, stale frames,
+ACK/form exit, read-only retry and locale continuity. These four scoped baselines
+and52 controls passed separately. The combined current immutable429-case gate remains
+pending; registrations and independent source review do not substitute for it.
+The initial Startup enumeration failure and UI wrong-first-invariant attempt
+remain recorded. The UI retains its original15 faults and adds two targeted
+publication controls; all14 UI properties and bounds remain unchanged.
+No concrete parser/regex, DB lease, constructor atomicity, physical VM/storage,
+React/compiler/SQLite/Go refinement or authenticated console parity is implied.
+See [Sakura scope](../docs/sakura.md). Four preserved customer-alias models cover catalog admission, concrete-key crypto, UI epochs/refresh and first-use transaction bootstrap; their finite scopes remain separate from native/SDK/whole-quality results.
+The prior native projection/routing model bounds and properties remain intact.
+IAMManagedPolicies retains its four API-reachable seeds and two-request suffixes;
+the earlier four-request exploration timed out and is not claimed.
+Registration is source evidence, not itself evidence of successful execution. Dated receipts below
+refer to their recorded inputs; later revisions require their own checks. These
+finite models do not prove Go/SQL/HTTP/UI refinement or complete cloud compatibility.
 
 CFNConditionAdmission adds fourteen invariants and fourteen semantic controls over
 234 immutable inputs. Its isolated `f69fb46` SANY/baseline/control run passed
 (792 reachable states); the initial ungrouped IF assignment produced exit75,
 was corrected without changing bounds/properties, and that failure is retained.
-This is historical scoped evidence, not the combined 365-case candidate gate.
+This is historical scoped evidence, not the combined historical 365-case candidate gate.
 
 The CFN binding covers only named pure parameter/condition/selection and
 compile-plan admission contracts in `cloudformation_conditions.go`,
@@ -32,18 +46,31 @@ Its exact `cca79267` source passed scoped SANY, baseline and nine named-invarian
 counterexamples (10,608 states, 4,116 initial configurations); the old-cache
 mutation has a concrete over-depth witness. This finite three-name/bound2-or3
 check is not a Go/unbounded-depth/SQL/parser proof. The native32/33 regressions
-remain separate; the full current 365-case registered gate is still pending.
+remain separate; the historical 365-case registered gate is still pending.
 
-Registration is source evidence, not a successful current-HEAD execution claim.
-The complete immutable 365-case gate must actually run for this combined revision.
-Historical scoped/integration receipts do not replace it. IAMManagedPolicies
-retains four reachable seeds and two-request suffixes; its broader four-request
-trial timed out and is not claimed. There is no Go/SQL/HTTP/UI refinement,
-cryptographic or complete cloud-compatibility proof.
 
-Legacy sections retain dated counts/status for traceability; “current” in those
-sections refers to that integration, not this authoritative 43/322 inventory.
-Every execution claim must identify its exact revision.
+CFNPhysicalResourceACK adds five properties and seven controls for selected SSM/S3 SQLite-row absence after all cleanup writes, rollback and peer frames. Its 196 scoped source run passed 8 SANY and 8 TLC phases; canonical CFG formatting in this integration requires a fresh scoped run. It does not prove native S3 deletion, other resource handlers, cloud hardware, SQL/Go refinement or host scoring. The combined current 429-execution gate and 61-case E2E are unexecuted.
+
+## Aggregate CI execution capacity
+
+The required `Formal validation` job reserves 30 minutes for checkout, the gate
+negative controls, exact-blob applicability and the complete serial registry.
+Each TLC case retains its 60-second default deadline and existing per-model
+settings; all 429 baseline/counterexample runs and failure requirements
+remain mandatory. This is an aggregate execution budget, not a model-bound,
+acceptance, permission or per-case timeout change.
+
+The earlier 15-minute job on `8bb8a3d` ended cancelled after roughly 15 minutes;
+the returned log did not identify its cancellation actor or definitive reason.
+That incomplete run is not evidence of successful 391-case execution. GitHub
+[documents automatic cancellation when a job exceeds its configured timeout](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idtimeout-minutes).
+A fresh exact-HEAD named-job success remains required; a different CI job or a
+historical scoped receipt does not replace it.
+
+Legacy integration sections below retain historical counts and status statements
+for traceability. Their word “current” refers to the recorded integration, not
+today's registry. The authoritative current inventory is the 48/381 registry
+above; proof claims always require evidence for the exact revision.
 
 `ObjectStore.tla` models two buckets and two keys, shared object ownership, create/put/delete transitions, and an abstract identity decision `allow /\ ~deny`. `ObjectStore.cfg` checks type correctness, no orphan objects, no unauthorized mutation, and explicit-deny precedence.
 
@@ -361,45 +388,10 @@ models do not thereby acquire serialization guarantees.
 The baseline completed1,729 distinct states; six semantic controls each exited12
 with the named expected invariant and a real transition trace. FirstBad identifies
 the partial-prefix negative only, not a new native implementation. These scoped
-results are independent model evidence, not the full230-case/current-HEAD gate
+results are independent model evidence, not the historical230-case gate or the current282-case gate
 or a refinement proof. The entire original30/175 inventory, timeouts and tool pin
 remain unchanged. All three exact native source scopes and all new properties
 and control IDs are protected by the loader and failure tests.
-
-## DynamoDB console request epochs and acknowledged writes
-
-DynamoDBConsoleEpoch binds tools/console/src/dynamodb.jsx, the narrow DynamoDB
-route/mount-key caller in main.jsx, and canonical embedded app.js as its derived
-artifact. It does not prove other shell/components or compiler/bundler correctness.
-Separate read
-and write scenarios cover two combined authority/region labels, one remount,
-epochs0..2 without wrap, two one-use pending-read slots, two exact keys, two
-symbolic TableIds with one recreation, one form/write intent and en/ja.
-Acceptance snapshots reject old request epochs/instances and failed post-read
-TableId verification. Key edits clear displayed item/delete bindings;
-invalidation clears loading even when an older finally is discarded. A
-synchronous owner ticket refuses repeated submission. An accepted write ACK
-closes the form and clears its draft before independent metadata refresh;
-read-only Retry does not resend a write. Locale presentation preserves the draft.
-
-The scoped baseline completed3,832 distinct states (16,950 generated), and each
-of ten semantic mutants exited12 with its exact expected invariant and a real
-transition trace. An earlier string-versus-record sentinel type error exited75
-and is retained as a failed attempt; replacing it with one configured model-value
-sentinel changed no transition, property, control or finite bound. This result
-is leaf evidence for those model bytes, not the registered241-case suite.
-
-This is not a JavaScript/React/AbortController/HTTP/IAM/SQLite refinement proof.
-It does not prove concrete AttributeValue parsing, sizes, numbers, credentials,
-missing-item/delete-confirmation behavior, arbitrary pagination or the full
-read/write interleaving. TableId agreement is checked at item-read acceptance;
-it does not promise freshness after a later native change or an atomic TableId
-compare-and-swap on official TableName-only mutations. A server may commit a
-write before a client aborts it. Stutter observation admits no liveness claim.
-Native DynamoDBAdmission/Lifecycle and concrete tests remain separate evidence.
-The root mount key (region|principal|navigation) and actual UI state changes are
-independently exercised by the mandatory dynamodb_console.py helper, not proved
-by a complete shell/React refinement.
 
 
 ## Secret version metadata listing
@@ -420,7 +412,7 @@ precedes the page limit, resume positions advance strictly, and reads preserve
 version/stage state. Add/promote/delete/recreate/reopen expose live keyset changes;
 this is not a stable snapshot or a proof of eventual termination.
 
-Correspondence is limited to ListSecretVersionIds metadata enumeration/cursor
+Correspondence is limited to ListSecretVersionIDs metadata enumeration/cursor
 logic in `secrets_manager_versions.go` and the exact added operation dispatch in
 `secret_http.go`; the other seven operations do not acquire new guarantees. Native
 store and HTTP tests named in source_scope separately exercise denied frames,
@@ -500,7 +492,7 @@ refinement, backend admission coverage or liveness.
 The scoped model executions are separate evidence: the UI baseline visited
 431,932 distinct states and all eleven controls produced their named invariant
 violations; the crypto author's scoped evidence records its fourteen cases.
-Registration now requires 40 baselines and 295 controls (335 executions), with
+At the customer-alias registration checkpoint, 40 baselines and 295 controls (335 executions) were required, with
 all main 36 models and 234 controls retained. A fresh immutable combined gate
 must actually execute before reporting this inventory as current-HEAD passed.
 Catalog/CRUD/paging is represented separately below; neither of these two

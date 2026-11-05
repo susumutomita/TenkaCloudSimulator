@@ -3177,6 +3177,703 @@
       ]
     },
     {
+      "id": "SakuraDiskMetadata",
+      "model": "formal/SakuraDiskMetadata.tla",
+      "config": "formal/SakuraDiskMetadata.cfg",
+      "bounds": "Two fixed realm/DB binding slots and owners; IDs1..3,next1..4,two names,active quota2,three operation suffix from empty valid bound stores.",
+      "properties": [
+        "TypeOK",
+        "BindingFrozen",
+        "FailureFrame",
+        "PeerFrame",
+        "FreshCommittedID",
+        "AllocatorOnlyCreate",
+        "CreateExact",
+        "UpdateExact",
+        "DeleteExact",
+        "StoredIDsBound",
+        "ActiveQuota",
+        "QuotaRefusal",
+        "ReadSnapshot"
+      ],
+      "limits": "Atomic metadata state projection only: fixed binding/reopen, committed ID history, selected create/update/delete failure outcomes, peer and read snapshot frames. Not actual100 quota, Generation randomness/CAS, timestamp/description/size/plan parsing, SQL/locking/crash/Go refinement, full tuple-field parsing or authentication. Caller authorization is deliberately separated into Admission, not invented in DiskStore. Three-step cutoff not an API cap.",
+      "source_scope": [
+        "internal/sakura/iaas/disk_store.go"
+      ],
+      "mutants": [
+        {
+          "id": "AdoptReopenedOwner",
+          "edits": [
+            {
+              "old": "IF candidateOwner = before.binding THEN \"Accepted\" ELSE \"Scope\"",
+              "new": "IF TRUE THEN \"Accepted\" ELSE \"Scope\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BindingFrozen"
+        },
+        {
+          "id": "ReuseDeletedID",
+          "edits": [
+            {
+              "old": "NewID(r) == db[r].next",
+              "new": "NewID(r) == IF db[r].next > 1 /\\ Live(db[r].rows) = {} THEN 1 ELSE db[r].next",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FreshCommittedID"
+        },
+        {
+          "id": "CommitFailedCandidate",
+          "edits": [
+            {
+              "old": "committed == IF status = \"Accepted\" THEN candidate ELSE before",
+              "new": "committed == IF status \\in {\"Accepted\", \"Fault\"} THEN candidate ELSE before",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FailureFrame"
+        },
+        {
+          "id": "ModifyPeerRows",
+          "edits": [
+            {
+              "old": "db' = [db EXCEPT ![r] = committed]",
+              "new": "db' = [x \\in Realms |-> IF x = r THEN committed ELSE [db[x] EXCEPT !.rows = committed.rows]]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PeerFrame"
+        },
+        {
+          "id": "IgnoreQuotaBoundary",
+          "edits": [
+            {
+              "old": "Cardinality(Live(before.rows)) < Quota",
+              "new": "Cardinality(Live(before.rows)) <= Quota",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ActiveQuota"
+        },
+        {
+          "id": "DeleteWrongID",
+          "edits": [
+            {
+              "old": "[before EXCEPT !.rows[id] = None]",
+              "new": "[before EXCEPT !.rows[IF id = 1 THEN 2 ELSE 1] = None]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DeleteExact"
+        },
+        {
+          "id": "ReturnPeerList",
+          "edits": [
+            {
+              "old": "THEN before.rows\n              ELSE IF status",
+              "new": "THEN db[IF r = RealmA THEN RealmB ELSE RealmA].rows\n              ELSE IF status",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadSnapshot"
+        },
+        {
+          "id": "UpdateNeighbor",
+          "edits": [
+            {
+              "old": "[before EXCEPT !.rows[id] = name]",
+              "new": "[before EXCEPT !.rows[IF id = 1 THEN 2 ELSE 1] = name]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "UpdateExact"
+        },
+        {
+          "id": "MissingCreatedRow",
+          "edits": [
+            {
+              "old": "!.rows[NewID(r)] = name",
+              "new": "!.rows[NewID(r)] = None",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CreateExact"
+        },
+        {
+          "id": "UpdateAdvancesAllocator",
+          "edits": [
+            {
+              "old": "[before EXCEPT !.rows[id] = name]",
+              "new": "[before EXCEPT !.rows[id] = name, !.next = @ + 1]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AllocatorOnlyCreate"
+        }
+      ]
+    },
+    {
+      "id": "SakuraDiskAdmission",
+      "model": "formal/SakuraDiskAdmission.tla",
+      "config": "formal/SakuraDiskAdmission.cfg",
+      "bounds": "One staged request, including explicit commonActor-to-leaf mapping: eight finite common Actor cases, copied fixed realm, two ignored raw header claims, plus eight direct-trusted-leaf classes; four marker/six request classes and found/storage booleans.",
+      "properties": [
+        "TypeOK",
+        "MappedSubjectUsesExerciseIdentity",
+        "MappedRealmUsesCopiedHostConfig",
+        "NoDefaultActorOnExtractionFailure",
+        "WireHeadersDoNotMapAuthority",
+        "ActorBeforeDispatch",
+        "MarkerBeforeDispatch",
+        "NoUnauthorizedLookup",
+        "DeniedFrame",
+        "AdmissionBeforeLookup",
+        "UnsupportedNoMutation",
+        "FailureNoDisclosure",
+        "ActorFailureStatus",
+        "MarkerFailureStatus",
+        "ConcreteResult"
+      ],
+      "limits": "Finite validated commonActor-class mapping and HTTP admission ordering only. Realm comes from copied host Config, never a commonActor realm field. Direct mode represents valid/invalid trusted leaf embeddings, not public request-selectable modes. Not private context keys/token/session/UTF8/parser validation, DB lease/SQL/locking, all Config syntax, CLI/SDK or Go refinement.",
+      "source_scope": [
+        "internal/sakura/iaas/disk_http.go",
+        "internal/sakura/provider.go"
+      ],
+      "mutants": [
+        {
+          "id": "OperatorRoleBypass",
+          "edits": [
+            {
+              "old": "ActorAllowed(kind) == kind = \"owner\"",
+              "new": "ActorAllowed(kind) == kind \\in {\"owner\",\"operatorPeer\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ActorBeforeDispatch"
+        },
+        {
+          "id": "DummyMarkerAsAuthority",
+          "edits": [
+            {
+              "old": "ActorAllowed(kind) == kind = \"owner\"",
+              "new": "ActorAllowed(kind) == kind = \"owner\" \\/ marker = \"singleDummy\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ActorBeforeDispatch"
+        },
+        {
+          "id": "IgnoreFixedRealm",
+          "edits": [
+            {
+              "old": "ActorAllowed(kind) == kind = \"owner\"",
+              "new": "ActorAllowed(kind) == kind \\in {\"owner\",\"wrongEnvironment\",\"wrongProject\",\"wrongZone\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ActorBeforeDispatch"
+        },
+        {
+          "id": "AcceptWrongMarker",
+          "edits": [
+            {
+              "old": "MarkerAllowed(kind) == kind = \"singleDummy\"",
+              "new": "MarkerAllowed(kind) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MarkerBeforeDispatch"
+        },
+        {
+          "id": "EarlyLookupFault",
+          "edits": [
+            {
+              "old": "phase' = IF md = \"factory\" THEN \"mapping\" ELSE \"actor\"",
+              "new": "phase' = \"done\"",
+              "count": 1
+            },
+            {
+              "old": "/\\ UNCHANGED <<status,lookups,dbValue,returned,mappedSubject,mappedRealm,mappingDone>>",
+              "new": "/\\ lookups' = 1\n /\\ status' = IF ~ok THEN \"internal\" ELSE IF ~f THEN \"notFound\" ELSE \"success\"\n /\\ returned' = IF ok /\\ f THEN \"private-metadata\" ELSE None\n /\\ UNCHANGED <<dbValue,mappedSubject,mappedRealm,mappingDone>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoUnauthorizedLookup"
+        },
+        {
+          "id": "UnsupportedReachesStore",
+          "edits": [
+            {
+              "old": "admitted == request \\in {\"read\",\"write\"}",
+              "new": "admitted == request # \"canceled\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionBeforeLookup"
+        },
+        {
+          "id": "FaultCommitsWrite",
+          "edits": [
+            {
+              "old": "success == storageOK /\\ found",
+              "new": "success == found",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FailureNoDisclosure"
+        },
+        {
+          "id": "DeniedMetadataDisclosure",
+          "edits": [
+            {
+              "old": "/\\ UNCHANGED <<actor,marker,request,found,storageOK,lookups,dbValue,returned,\n                mode,commonCase,rawSubject,rawRealm,mappedSubject,mappedRealm,mappingDone>>\nMarkerCheck",
+              "new": "/\\ returned' = IF ActorAllowed(actor) THEN None ELSE \"private-metadata\"\n /\\ UNCHANGED <<actor,marker,request,found,storageOK,lookups,dbValue,\n                mode,commonCase,rawSubject,rawRealm,mappedSubject,mappedRealm,mappingDone>>\nMarkerCheck",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DeniedFrame"
+        },
+        {
+          "id": "CredentialInsteadOfExercise",
+          "edits": [
+            {
+              "old": "leafSubject == IF valid THEN Exercise(commonCase) ELSE None",
+              "new": "leafSubject == IF valid THEN Credential(commonCase) ELSE None",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MappedSubjectUsesExerciseIdentity"
+        },
+        {
+          "id": "RealmFromHeader",
+          "edits": [
+            {
+              "old": "leafRealm == IF valid THEN \"configured\" ELSE None",
+              "new": "leafRealm == IF valid THEN rawRealm ELSE None",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MappedRealmUsesCopiedHostConfig"
+        },
+        {
+          "id": "DefaultOwnerMissing",
+          "edits": [
+            {
+              "old": "leafSubject == IF valid THEN Exercise(commonCase) ELSE None",
+              "new": "leafSubject == IF valid THEN Exercise(commonCase) ELSE \"owner\"",
+              "count": 1
+            },
+            {
+              "old": "leafRealm == IF valid THEN \"configured\" ELSE None",
+              "new": "leafRealm == \"configured\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoDefaultActorOnExtractionFailure"
+        },
+        {
+          "id": "OperatorForcesOwner",
+          "edits": [
+            {
+              "old": "leafSubject == IF valid THEN Exercise(commonCase) ELSE None",
+              "new": "leafSubject == IF valid THEN IF Role(commonCase) = \"operator\" THEN \"owner\" ELSE Exercise(commonCase) ELSE None",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MappedSubjectUsesExerciseIdentity"
+        }
+      ]
+    },
+    {
+      "id": "SakuraStartupAdmission",
+      "model": "formal/SakuraStartupAdmission.tla",
+      "config": "formal/SakuraStartupAdmission.cfg",
+      "bounds": "One startup, four immutable named scope-presence/validity slots (valid subset of present), enabled/unsafe Boolean modes; parsed validation followed by listener/database/provider/token success stages. No loops beyond stuttering.",
+      "properties": [
+        "TypeOK",
+        "NoEffectsOnRefusal",
+        "ValidationPrecedesEffects",
+        "AcceptedConfigExact",
+        "ValidAdmissionAvailable",
+        "DisabledNoSakura",
+        "EnabledOnlyAuthenticated",
+        "SchemaRequiresDatabase",
+        "RegistrationRequiresSchema",
+        "TokenOnlyAuthenticated",
+        "StartupComplete"
+      ],
+      "limits": "Pure parsed-flag admission and startup order abstraction only. Absent fields have empty invalid defaults; explicit empty values count as supplied. Default disabled may create general host DB/listener/token (token skipped when unsafe) but no Sakura schema/provider. Assumes later infrastructure steps succeed; does not prove full constructor atomicity, listener/database/token syscalls, failures/cleanup, flag parser or regex/UTF8 refinement, host authentication, token cryptography, DB lease, SDK/HTTP/UI or Go implementation refinement. Shared server.go scope covers only optional provider setup/registration under validated scope; other providers/auth/routing and all failure rollback are excluded.",
+      "source_scope": [
+        "cmd/simulator/sakura_flags.go",
+        "cmd/simulator/main.go",
+        "internal/server/server.go",
+        "internal/server/sakura_provider.go"
+      ],
+      "mutants": [
+        {
+          "id": "IgnoreOrphanScope",
+          "edits": [
+            {
+              "old": "Ready == IF enabled THEN ~unsafe /\\ valid=Fields\n         ELSE present={}",
+              "new": "Ready == IF enabled THEN ~unsafe /\\ valid=Fields\n         ELSE TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AcceptedConfigExact"
+        },
+        {
+          "id": "PermitUnsafeEnabled",
+          "edits": [
+            {
+              "old": "Ready == IF enabled THEN ~unsafe /\\ valid=Fields",
+              "new": "Ready == IF enabled THEN valid=Fields",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AcceptedConfigExact"
+        },
+        {
+          "id": "DefaultMissingScope",
+          "edits": [
+            {
+              "old": "Ready == IF enabled THEN ~unsafe /\\ valid=Fields",
+              "new": "Ready == IF enabled THEN ~unsafe /\\ (valid \\cup (Fields \\ present))=Fields",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AcceptedConfigExact"
+        },
+        {
+          "id": "IgnoreInvalidScopeValue",
+          "edits": [
+            {
+              "old": "Ready == IF enabled THEN ~unsafe /\\ valid=Fields",
+              "new": "Ready == IF enabled THEN ~unsafe",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AcceptedConfigExact"
+        },
+        {
+          "id": "RejectValidEnabled",
+          "edits": [
+            {
+              "old": "Ready == IF enabled THEN ~unsafe /\\ valid=Fields",
+              "new": "Ready == IF enabled THEN FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ValidAdmissionAvailable"
+        },
+        {
+          "id": "OpenListenerBeforeCheck",
+          "edits": [
+            {
+              "old": "UNCHANGED <<listener,database,schema,registered,token>>",
+              "new": "listener'=TRUE /\\ UNCHANGED <<database,schema,registered,token>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoEffectsOnRefusal"
+        },
+        {
+          "id": "OpenDatabaseBeforeCheck",
+          "edits": [
+            {
+              "old": "UNCHANGED <<listener,database,schema,registered,token>>",
+              "new": "database'=TRUE /\\ UNCHANGED <<listener,schema,registered,token>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoEffectsOnRefusal"
+        },
+        {
+          "id": "CreateTokenBeforeCheck",
+          "edits": [
+            {
+              "old": "UNCHANGED <<listener,database,schema,registered,token>>",
+              "new": "token'=TRUE /\\ UNCHANGED <<listener,database,schema,registered>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoEffectsOnRefusal"
+        },
+        {
+          "id": "ConstructBeforeDatabase",
+          "edits": [
+            {
+              "old": "/\\ phase'=(IF Ready THEN \"listener\" ELSE \"refused\")",
+              "new": "/\\ phase'=(IF Ready THEN \"provider\" ELSE \"refused\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SchemaRequiresDatabase"
+        },
+        {
+          "id": "RegisterDisabled",
+          "edits": [
+            {
+              "old": "/\\ schema'=enabled /\\ registered'=enabled",
+              "new": "/\\ schema'=TRUE /\\ registered'=TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DisabledNoSakura"
+        },
+        {
+          "id": "SkipEnabledSchema",
+          "edits": [
+            {
+              "old": "/\\ schema'=enabled /\\ registered'=enabled",
+              "new": "/\\ schema'=FALSE /\\ registered'=enabled",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RegistrationRequiresSchema"
+        },
+        {
+          "id": "SkipEnabledRegistration",
+          "edits": [
+            {
+              "old": "/\\ schema'=enabled /\\ registered'=enabled",
+              "new": "/\\ schema'=enabled /\\ registered'=FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StartupComplete"
+        },
+        {
+          "id": "CreateTokenWhenUnsafe",
+          "edits": [
+            {
+              "old": "/\\ token' = ~unsafe /\\ phase'=\"done\"",
+              "new": "/\\ token'=TRUE /\\ phase'=\"done\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TokenOnlyAuthenticated"
+        }
+      ]
+    },
+    {
+      "id": "SakuraDisksViewEpoch",
+      "model": "formal/SakuraDisksViewEpoch.tla",
+      "config": "formal/SakuraDisksViewEpoch.cfg",
+      "bounds": "Two opaque trusted scope/lifetime labels with one remount, two immutable read slots used once, readseq0..3/no wrap, internalnav0..2, fixedsavedresources1/2 andlist0, read/write scenarios, two form opens but one global writeintent/send, create/edit/delete symbolicACK/body/read outcomes; en/ja locale.",
+      "properties": [
+        "TypeOK",
+        "AcceptedReadScope",
+        "SuccessfulReadOnly",
+        "RenderedScopeBound",
+        "RenderedResourceBound",
+        "StaleReadFrame",
+        "StaleWriteFrame",
+        "NavigationACKFrame",
+        "AckClosesForm",
+        "AckClearsDraft",
+        "ReadRetryOnly",
+        "SingleWriteSend",
+        "LocaleFrame",
+        "CancelDraftClear"
+      ],
+      "limits": "Original bounded UI safety projection only, not React/JS/AbortController scheduling or server/SQL/IAM/token authority proof. Opaque scope combines trusted principal/session/globalnavigation/endpoint; actualcredential/contextKey production remainstrustedcaller. Read responses may complete afterabort/headers, no zero-network/body-cancel guarantee. No orphan-loading/liveness/hungread promise. ACK is actual2xxresponse beforeCreatebody/metadata, not serverrollback/idempotency underunknownnetworkoutcome. Two opens/onewriteintent excludearbitrarynew-sessionwrite concurrency. Independent request/frame snapshots monitoractualpublishedview changes, not ghost-only mutations. Nativepayloadbytes/schema/confirmation/keyentropy/quota/APIwire/SDK andauthenticatedcloudvisualparity areoutside. Shared main scope is ONLY Sakura fixedcapabilityconfiguration/contextKey+request mount, notAWS/GCP/Azure behavior; shell/CSS/neutralcatalogstate not proved. The generated app.js scope binds only the canonical compiled artifact of this separately declared Sakura child/mount projection; it does not prove bundler/compiler correctness or unrelated AWS/GCP/Azure behavior.",
+      "source_scope": [
+        "tools/console/src/sakura-disks.jsx",
+        "tools/console/src/main.jsx",
+        "internal/server/web/app.js"
+      ],
+      "mutants": [
+        {
+          "id": "DropPublicationContextGuard",
+          "edits": [
+            {
+              "old": "publish == live /\\ ok",
+              "new": "publish == (r.seq=s.seq) /\\ ok",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AcceptedReadScope"
+        },
+        {
+          "id": "DropPublicationSequenceGuard",
+          "edits": [
+            {
+              "old": "publish == live /\\ ok",
+              "new": "publish == (r.life=s.life /\\ r.scope=s.scope) /\\ ok",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AcceptedReadScope"
+        },
+        {
+          "id": "DropReadContextGuard",
+          "edits": [
+            {
+              "old": "\nReadCurrent(r) == r.life=s.life /\\ r.scope=s.scope /\\ r.seq=s.seq",
+              "new": "\nReadCurrent(r) == r.seq=s.seq",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StaleReadFrame"
+        },
+        {
+          "id": "DropReadSequenceGuard",
+          "edits": [
+            {
+              "old": "\nReadCurrent(r) == r.life=s.life /\\ r.scope=s.scope /\\ r.seq=s.seq",
+              "new": "\nReadCurrent(r) == r.life=s.life /\\ r.scope=s.scope",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StaleReadFrame"
+        },
+        {
+          "id": "StaleFinallyClearsLoading",
+          "edits": [
+            {
+              "old": "!.loading=IF live THEN FALSE ELSE @",
+              "new": "!.loading=FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StaleReadFrame"
+        },
+        {
+          "id": "KeepDisplayOnNavigation",
+          "edits": [
+            {
+              "old": "!.panel=\"none\",!.draft=0,!.display=None,!.error=FALSE,!.notice=\"none\"]",
+              "new": "!.panel=\"none\",!.draft=0,!.display=@,!.error=FALSE,!.notice=\"none\"]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RenderedResourceBound"
+        },
+        {
+          "id": "KeepDisplayOnScopeChange",
+          "edits": [
+            {
+              "old": "!.panel=\"none\",!.draft=0,!.display=None,!.error=FALSE,\n         !.loading=FALSE",
+              "new": "!.panel=\"none\",!.draft=0,!.display=@,!.error=FALSE,\n         !.loading=FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RenderedScopeBound"
+        },
+        {
+          "id": "KeepFormOnACK",
+          "edits": [
+            {
+              "old": "!.panel=IF live /\\ sameNav THEN \"none\" ELSE @",
+              "new": "!.panel=@",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AckClosesForm"
+        },
+        {
+          "id": "KeepDraftOnACK",
+          "edits": [
+            {
+              "old": "!.draft=IF live /\\ sameNav THEN 0 ELSE @",
+              "new": "!.draft=@",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AckClearsDraft"
+        },
+        {
+          "id": "DropWriteContextGuard",
+          "edits": [
+            {
+              "old": "\nWriteCurrent(r) == r.life=s.life /\\ r.scope=s.scope",
+              "new": "\nWriteCurrent(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StaleWriteFrame"
+        },
+        {
+          "id": "ACKStealsNavigation",
+          "edits": [
+            {
+              "old": "!.phase=IF live /\\ sameNav THEN \"body\" ELSE \"obsolete\",",
+              "new": "!.phase=IF live /\\ sameNav THEN \"body\" ELSE \"obsolete\",\n           !.resource=IF live /\\ ~sameNav THEN r.resource ELSE @,",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NavigationACKFrame"
+        },
+        {
+          "id": "ReadRetryResendsWrite",
+          "edits": [
+            {
+              "old": "nextSends == s.sends (* RetryOnlyGET *)",
+              "new": "nextSends == s.sends+1 (* RetryOnlyGET *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadRetryOnly"
+        },
+        {
+          "id": "DropSynchronousTicket",
+          "edits": [
+            {
+              "old": "!.sends=@] (* SynchronousTicket *)",
+              "new": "!.sends=@+1] (* SynchronousTicket *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SingleWriteSend"
+        },
+        {
+          "id": "LocaleClearsDraft",
+          "edits": [
+            {
+              "old": "nextDraft == s.draft (* LocaleDraftPreserved *)",
+              "new": "nextDraft == 0 (* LocaleDraftPreserved *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "LocaleFrame"
+        },
+        {
+          "id": "CancelRetainsDraft",
+          "edits": [
+            {
+              "old": "candidate == [s EXCEPT !.panel=\"none\",!.draft=0,",
+              "new": "candidate == [s EXCEPT !.panel=\"none\",!.draft=@,",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CancelDraftClear"
+        },
+        {
+          "id": "WrongDisplayedDisk",
+          "edits": [
+            {
+              "old": "Published(r) == [life |-> r.life,scope |-> r.scope,resource |-> r.resource]",
+              "new": "Published(r) == [life |-> r.life,scope |-> r.scope,resource |-> IF r.resource=0 THEN 0 ELSE 3-r.resource]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RenderedResourceBound"
+        },
+        {
+          "id": "FailedReadPublishesMetadata",
+          "edits": [
+            {
+              "old": "publish == live /\\ ok",
+              "new": "publish == live",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SuccessfulReadOnly"
+        }
+      ]
+    },
+    {
       "id": "DynamoDBConsoleEpoch",
       "model": "formal/DynamoDBConsoleEpoch.tla",
       "config": "formal/DynamoDBConsoleEpoch.cfg",

@@ -126,7 +126,7 @@ defaults and enabled mode, actual SSM permissions/refusals, invalid-input and la
 name-conflict rollback, restart and cleanup. At `2d76646` the helper passed against a regular embedded CLI: 73 SDK logical
 calls/sends/raw HTTP responses/parsed responses, plus nine auxiliary HTTP pairs,
 across four CLI process incarnations. This dated result is not the new combined
-57-case E2E or 365-case formal gate after the normal main merge; those are pending.
+61-case E2E or 429-case formal gate after the normal main139eb merge; those are pending.
 It is not a game or grading acceptance. The standalone final DeleteStack ACK
 correction from `7d56d9d` is now integrated as source: exactly one selected stack
 row must be deleted and both selected stack and owned-claim records must be
@@ -153,3 +153,5 @@ so native IAM GetRole/ListRoles do not expose them. Trust and allowed
 ManagedPolicyArns metadata do not grant AWS sign-in, federation, managed-policy
 or external-account authority. Host coordination, private-output filtering and
 actual crypto-battle scoring remain outside this simulator acceptance.
+
+A separate candidate check now verifies every selected SSM parameter (region/name) and S3 bucket (global name) is absent at the very end of the same deletion transaction, after all resource, ownership and stack cleanup writes. It detects ignored physical DELETEs and late reinsertion, rolling back on failure. Existing missing-resource and nonempty-bucket behavior is preserved. This does not change the standalone native S3 DeleteBucket API or promise acknowledgement checks for other resource types. The 196 native/scoped model receipts are historical inputs; the current combined 61/429 suites require fresh execution.

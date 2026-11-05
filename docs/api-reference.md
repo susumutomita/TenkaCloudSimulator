@@ -43,34 +43,29 @@ subset, not Google IAM or Azure RBAC. Read the provider limits; a visible
 reference entry does not establish full official SDK or authenticated console
 parity.
 
-Sakura is an explicit **Not implemented** status section. It has no simulator
-operations, endpoints, authorization adapter or claimed SDK compatibility, and
-provides no Test Request operation. Do not treat discoverability as availability.
+Sakura exposes only the opt-in **Disk configuration** subset: five native API1.1
+operations on the configured zone, with no VM or block-storage effects. The
+reference remains visible when the provider is disabled; actual requests then
+fail rather than create a provider. Local host token/cookie authority and the
+configured trusted owner are separate from the required dummy Basic protocol
+marker. Never enter a real Sakura key. See [the exact supported fields, query
+format and authentication boundaries](sakura.md).
 
 ## Verification scope
 
 Issue [#421](https://github.com/susumutomita/TenkaCloudSimulator/issues/421)
-tracks this navigation increment. The static detector validates exact cloud
-assignment, known61 operation IDs/34 paths, documentation-only tags and the
-absence of Sakura operations. Its `--baseline` option compares the entire native
-OpenAPI projection while excluding only top-level tag/group metadata; it must
-be supplied to claim preservation against a particular revision. Negative
-fixtures exercise missing/duplicate/wrong-cloud groups and modified native
-schema/example/operation tags.
+tracks the original navigation increment. The current detector requires66
+operation IDs and36 paths, preserving the original61 operation IDs/34 paths and
+adding only the five Sakura operations/two paths. Static tests preserve all old
+schemas, examples and operation assignments. The original `--baseline` comparison
+still rejects a native-surface change; the approved Sakura addition has its own
+strict original-projection preservation checks, not an ignored difference.
+Negative fixtures exercise missing/duplicate/wrong-cloud groups and changed
+native fields. The preexisting asset-validation prefix remains byte-exact after
+normalizing only the reviewed five-ID closed-set extension.
 
-The new browser helper is intended to check the actual embedded renderer on
-desktop1440/mobile390, keyboard/focus, strict axe, visible cloud/service/status
-sections and real Scalar AWS/GCP/Azure list responses after native writes to the
-same isolated CLI. It does not claim SDK compatibility by itself. Existing
-official SDK and live S3 helpers remain separate acceptance cases.
-
-At this source checkpoint, the new browser helper and empty documentation-tag
-rendering are **unexecuted**. Pinned bundle inspection confirms the x-tagGroups
-navigation code, but browser behavior is not inferred from source existence.
-Full quality/E2E/formal gates and current-HEAD hosted CI remain integration
-requirements. No CSP relaxation, dependency update or remote asset is required.
-
-Primary Scalar references:
-
-- [OpenAPI extensions](https://scalar.com/products/api-references/openapi): x-tagGroups for3.0/3.1; native parent nesting requires3.2 and is not used here.
-- [Runtime configuration](https://scalar.com/products/api-references/configuration): document sources and renderer configuration.
+Existing browser helpers exercise real Scalar AWS/GCP/Azure responses after
+native writes to the same local state, separately from static examples. Current
+Sakura live Send and full combined acceptance are integration checks; source
+presence or a passing schema test is not an executed-request result. Neither the
+renderer nor the tests claim full SDK or authenticated cloud-console parity.

@@ -35,13 +35,40 @@ class FormalGateTests(unittest.TestCase):
 
     def test_complete_registry_and_exact_mutations(self):
         registry = load_registry(self.root)
-        self.assertEqual({model['id'] for model in registry['models']}, {'CFNPhysicalResourceACK', 'CFNConditionMemoDepth', 'CFNFinalCleanupACK', 'CFNConditionAdmission', 'SecretMetadataViewEpoch', 'DynamoDBConsoleEpoch', 'KMSBootstrapTransaction', 'KMSAliasCatalog', 'SecretVersionListing', 'KMSAliasCrypto', 'KMSAliasesViewEpoch', 'NativeWireProjection', 'RESTRouteMatching', 'RESTProxyEventBoundary', 'AzurePropertiesTarget', 'AzurePropertiesEpoch', 'AzureBlobState', 'BlobRange', 'BrowserSessions', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'DynamoDBAdmission', 'DynamoDBLifecycle', 'GCPStorageState', 'KMSKeyState', 'KMSProtocolAdmission', 'IAMManagedPolicies', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'SecretsDisclosureChannels', 'SecretsMutationRefresh', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'StackOwnership', 'StartupTokenVisibility'})
+        self.assertEqual({model['id'] for model in registry['models']}, {'CFNPhysicalResourceACK', 'CFNConditionAdmission', 'CFNConditionMemoDepth', 'CFNFinalCleanupACK', 'SQSStorageBudget', 'SecretsRevealEpoch', 'AzureBlobState', 'ProjectAuthority', 'RESTRouteMatching', 'KMSAliasCatalog', 'SakuraDiskMetadata', 'SQSConsoleEpoch', 'ProviderActor', 'DynamoDBAdmission', 'IAMManagedPolicies', 'AzurePropertiesTarget', 'StartupTokenVisibility', 'RESTDeploymentSnapshot', 'KMSProtocolAdmission', 'KMSAliasesViewEpoch', 'NativeIAMOwnership', 'DynamoDBConsoleEpoch', 'SSMParameterState', 'AzurePropertiesEpoch', 'SecretMetadataViewEpoch', 'DynamoDBLifecycle', 'SakuraDiskAdmission', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'BrowserSessions', 'SecretVersionListing', 'SakuraDisksViewEpoch', 'KMSAliasCrypto', 'StackOwnership', 'SecretsDisclosureChannels', 'RESTProxyEventBoundary', 'NativeWireProjection', 'SQSLifecycle', 'BlobRange', 'KMSBootstrapTransaction', 'SecretsVersionLifecycle', 'ObjectStore', 'GCPStorageState', 'KMSKeyState', 'SakuraStartupAdmission', 'S3Versions', 'ProviderPath', 'SecretsMutationRefresh'})
         for model in registry['models']:
             source = (self.root / model['model']).read_text()
             for mutant in model['mutants']:
                 name, mutated = apply_mutant(source, model['id'], mutant)
                 self.assertNotEqual(mutated, source)
                 self.assertIn('MODULE ' + name, mutated)
+
+    def test_sakura_metadata_admission_and_startup_inventory_and_properties_are_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        for name in ('SakuraDiskMetadata', 'SakuraDiskAdmission', 'SakuraStartupAdmission'):
+            registry = json.loads(original)
+            entry = next(m for m in registry['models'] if m['id'] == name)
+            model_path, config_path = self.root / entry['model'], self.root / entry['config']
+            model_bytes, config_bytes = model_path.read_bytes(), config_path.read_bytes()
+            registry['models'] = [m for m in registry['models'] if m['id'] != name]
+            path.write_text(json.dumps(registry))
+            model_path.unlink(); config_path.unlink()
+            with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+                load_registry(self.root)
+            model_path.write_bytes(model_bytes); config_path.write_bytes(config_bytes)
+            for property_name in entry['properties']:
+                registry = json.loads(original)
+                changed = next(m for m in registry['models'] if m['id'] == name)
+                changed['properties'].remove(property_name)
+                changed['mutants'] = [m for m in changed['mutants'] if m['expect_invariant'] != property_name]
+                path.write_text(json.dumps(registry))
+                config_path.write_text(config_bytes.decode().replace('INVARIANT '+property_name+'\n', ''))
+                with self.subTest(model=name, invariant=property_name):
+                    with self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                        load_registry(self.root)
+                config_path.write_bytes(config_bytes)
+            path.write_text(original)
 
     def test_startup_required_model_and_properties_cannot_disappear(self):
         path = self.root / 'formal/models.json'
@@ -471,36 +498,12 @@ class FormalGateTests(unittest.TestCase):
                         load_registry(self.root)
         path.write_text(original)
 
-    def test_alias_models_and_each_required_property_cannot_disappear(self):
-        path = self.root / 'formal/models.json'
-        original = path.read_text()
-        for name in ('KMSAliasCatalog', 'KMSAliasCrypto', 'KMSAliasesViewEpoch'):
-            registry = json.loads(original)
-            model = next(m for m in registry['models'] if m['id'] == name)
-            config_path = self.root / model['config']
-            original_config = config_path.read_text()
-            for property_name in model['properties']:
-                with self.subTest(model=name, property=property_name):
-                    changed = json.loads(original)
-                    target = next(m for m in changed['models'] if m['id'] == name)
-                    target['properties'].remove(property_name)
-                    path.write_text(json.dumps(changed))
-                    config_path.write_text(original_config.replace('INVARIANT ' + property_name + '\n', ''))
-                    with self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
-                        load_registry(self.root)
-                    config_path.write_text(original_config)
-            registry['models'] = [m for m in registry['models'] if m['id'] != name]
-            path.write_text(json.dumps(registry))
-            with self.assertRaises(GateError):
-                load_registry(self.root)
-        path.write_text(original)
-
     def test_each_required_mutation_control_cannot_disappear(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
         registry = json.loads(original)
         self.assertEqual(set(REQUIRED_MUTANTS), BASE_MODELS)
-        self.assertEqual(sum(map(len, REQUIRED_MUTANTS.values())), 329)
+        self.assertEqual(sum(map(len, REQUIRED_MUTANTS.values())), 381)
         self.assertEqual({m['id']: {c['id'] for c in m['mutants']} for m in registry['models']}, REQUIRED_MUTANTS)
         for model in registry['models']:
             for mutant in model['mutants']:
@@ -517,7 +520,7 @@ class FormalGateTests(unittest.TestCase):
     def test_every_required_control_is_protected_against_single_removal(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
-        self.assertEqual(sum(len(v) for v in REQUIRED_MUTANTS.values()), 329)
+        self.assertEqual(sum(len(v) for v in REQUIRED_MUTANTS.values()), 381)
         for model_id, controls in REQUIRED_MUTANTS.items():
             for control in controls:
                 with self.subTest(model=model_id, control=control):
@@ -737,6 +740,7 @@ class FormalGateTests(unittest.TestCase):
                                          (1, 'Semantic errors: fixture')):
                         with self.assertRaisesRegex(GateError, 'required invariant counterexample'):
                             validate_result(code, output, expected)
+
     def test_secret_version_listing_model_and_every_property_are_required(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
@@ -761,7 +765,6 @@ class FormalGateTests(unittest.TestCase):
                 with self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
                     load_registry(self.root)
         cfg.write_bytes(config); path.write_text(original)
-
 
     def test_secret_version_listing_each_control_rejects_removal_and_placeholder(self):
         path = self.root / 'formal/models.json'
@@ -790,7 +793,6 @@ class FormalGateTests(unittest.TestCase):
                         load_registry(self.root)
         path.write_text(original)
 
-
     def test_secret_version_listing_exact_scope_and_semantic_oracles_are_required(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
@@ -813,12 +815,10 @@ class FormalGateTests(unittest.TestCase):
                 with self.subTest(control=control['id'], code=code):
                     with self.assertRaisesRegex(GateError, 'required invariant counterexample'):
                         validate_result(code, text, expected)
-
-
-    def test_kms_bootstrap_model_and_every_property_are_required(self):
+    def test_sakura_disks_view_epoch_model_and_every_property_are_required(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
-        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'KMSBootstrapTransaction')
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'SakuraDisksViewEpoch')
         tla, cfg = self.root / entry['model'], self.root / entry['config']
         source, config = tla.read_bytes(), cfg.read_bytes()
         removed = json.loads(original)
@@ -840,11 +840,10 @@ class FormalGateTests(unittest.TestCase):
                     load_registry(self.root)
         cfg.write_bytes(config); path.write_text(original)
 
-
-    def test_kms_bootstrap_each_control_rejects_removal_and_placeholder(self):
+    def test_sakura_disks_view_epoch_each_control_rejects_removal_and_placeholder(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
-        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'KMSBootstrapTransaction')
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'SakuraDisksViewEpoch')
         for control in entry['mutants']:
             for fault in ('remove', 'noop', 'stale', 'wrong-invariant'):
                 changed = json.loads(original)
@@ -868,12 +867,11 @@ class FormalGateTests(unittest.TestCase):
                         load_registry(self.root)
         path.write_text(original)
 
-
-    def test_kms_bootstrap_exact_scope_and_semantic_oracles_are_required(self):
+    def test_sakura_disks_view_epoch_exact_scope_and_semantic_oracles_are_required(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
-        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'KMSBootstrapTransaction')
-        for scope in ([], ['internal/aws/kms_aliases.go'], ['internal/server/server.go']):
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'SakuraDisksViewEpoch')
+        for scope in ([], ['tools/console/src/main.jsx'], ['tools/console/src/sakura-disks.jsx', 'tools/console/src/main.jsx'], ['internal/server/server.go']):
             changed = json.loads(original)
             target = next(m for m in changed['models'] if m['id'] == entry['id'])
             target['source_scope'] = scope
@@ -891,7 +889,6 @@ class FormalGateTests(unittest.TestCase):
                 with self.subTest(control=control['id'], code=code):
                     with self.assertRaisesRegex(GateError, 'required invariant counterexample'):
                         validate_result(code, text, expected)
-
 
     def test_dynamodb_console_inventory_and_artifacts_are_required(self):
         path = self.root / 'formal/models.json'
@@ -965,32 +962,6 @@ class FormalGateTests(unittest.TestCase):
         path.write_text(original)
 
 
-    def test_secret_metadata_view_epoch_model_and_every_property_are_required(self):
-        path = self.root / 'formal/models.json'
-        original = path.read_text()
-        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'SecretMetadataViewEpoch')
-        tla, cfg = self.root / entry['model'], self.root / entry['config']
-        source, config = tla.read_bytes(), cfg.read_bytes()
-        removed = json.loads(original)
-        removed['models'] = [m for m in removed['models'] if m['id'] != entry['id']]
-        path.write_text(json.dumps(removed)); tla.unlink(); cfg.unlink()
-        with self.assertRaisesRegex(GateError, 'required existing model was removed'):
-            load_registry(self.root)
-        tla.write_bytes(source); cfg.write_bytes(config)
-        for prop in entry['properties']:
-            changed = json.loads(original)
-            target = next(m for m in changed['models'] if m['id'] == entry['id'])
-            target['properties'].remove(prop)
-            target['mutants'] = [m for m in target['mutants'] if m['expect_invariant'] != prop]
-            cfg.write_text('\n'.join(line for line in config.decode().splitlines()
-                                     if line != 'INVARIANT '+prop)+'\n')
-            path.write_text(json.dumps(changed))
-            with self.subTest(property=prop):
-                with self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
-                    load_registry(self.root)
-        cfg.write_bytes(config); path.write_text(original)
-
-
     def test_secret_metadata_view_epoch_each_control_rejects_removal_and_placeholder(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
@@ -1018,7 +989,6 @@ class FormalGateTests(unittest.TestCase):
                         load_registry(self.root)
         path.write_text(original)
 
-
     def test_secret_metadata_view_epoch_exact_scope_and_semantic_oracles_are_required(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
@@ -1042,8 +1012,130 @@ class FormalGateTests(unittest.TestCase):
                     with self.assertRaisesRegex(GateError, 'required invariant counterexample'):
                         validate_result(code, text, expected)
 
+    def test_secret_metadata_view_epoch_model_and_every_property_are_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'SecretMetadataViewEpoch')
+        tla, cfg = self.root / entry['model'], self.root / entry['config']
+        source, config = tla.read_bytes(), cfg.read_bytes()
+        removed = json.loads(original)
+        removed['models'] = [m for m in removed['models'] if m['id'] != entry['id']]
+        path.write_text(json.dumps(removed)); tla.unlink(); cfg.unlink()
+        with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+            load_registry(self.root)
+        tla.write_bytes(source); cfg.write_bytes(config)
+        for prop in entry['properties']:
+            changed = json.loads(original)
+            target = next(m for m in changed['models'] if m['id'] == entry['id'])
+            target['properties'].remove(prop)
+            target['mutants'] = [m for m in target['mutants'] if m['expect_invariant'] != prop]
+            cfg.write_text('\n'.join(line for line in config.decode().splitlines()
+                                     if line != 'INVARIANT '+prop)+'\n')
+            path.write_text(json.dumps(changed))
+            with self.subTest(property=prop):
+                with self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                    load_registry(self.root)
+        cfg.write_bytes(config); path.write_text(original)
 
 
+    def test_alias_models_and_each_required_property_cannot_disappear(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        for name in ('KMSAliasCatalog', 'KMSAliasCrypto', 'KMSAliasesViewEpoch'):
+            registry = json.loads(original)
+            model = next(m for m in registry['models'] if m['id'] == name)
+            config_path = self.root / model['config']
+            original_config = config_path.read_text()
+            for property_name in model['properties']:
+                with self.subTest(model=name, property=property_name):
+                    changed = json.loads(original)
+                    target = next(m for m in changed['models'] if m['id'] == name)
+                    target['properties'].remove(property_name)
+                    path.write_text(json.dumps(changed))
+                    config_path.write_text(original_config.replace('INVARIANT ' + property_name + '\n', ''))
+                    with self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                        load_registry(self.root)
+                    config_path.write_text(original_config)
+            registry['models'] = [m for m in registry['models'] if m['id'] != name]
+            path.write_text(json.dumps(registry))
+            with self.assertRaises(GateError):
+                load_registry(self.root)
+        path.write_text(original)
+
+    def test_kms_bootstrap_each_control_rejects_removal_and_placeholder(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'KMSBootstrapTransaction')
+        for control in entry['mutants']:
+            for fault in ('remove', 'noop', 'stale', 'wrong-invariant'):
+                changed = json.loads(original)
+                target = next(m for m in changed['models'] if m['id'] == entry['id'])
+                candidate = next(m for m in target['mutants'] if m['id'] == control['id'])
+                if fault == 'remove':
+                    target['mutants'].remove(candidate)
+                    error = 'required mutation control was removed'
+                elif fault == 'noop':
+                    candidate['edits'][0]['new'] = candidate['edits'][0]['old']
+                    error = 'mutation must change a nonempty exact anchor'
+                elif fault == 'stale':
+                    candidate['edits'][0]['old'] += ' absent anchor'
+                    error = 'mutation anchor count mismatch'
+                else:
+                    candidate['expect_invariant'] = 'UncheckedPlaceholder'
+                    error = 'mutant expects unchecked invariant'
+                path.write_text(json.dumps(changed))
+                with self.subTest(control=control['id'], fault=fault):
+                    with self.assertRaisesRegex(GateError, error):
+                        load_registry(self.root)
+        path.write_text(original)
+
+    def test_kms_bootstrap_exact_scope_and_semantic_oracles_are_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'KMSBootstrapTransaction')
+        for scope in ([], ['internal/aws/kms_aliases.go'], ['internal/server/server.go']):
+            changed = json.loads(original)
+            target = next(m for m in changed['models'] if m['id'] == entry['id'])
+            target['source_scope'] = scope
+            path.write_text(json.dumps(changed))
+            with self.subTest(scope=scope):
+                with self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+                    load_registry(self.root)
+        path.write_text(original)
+        for control in entry['mutants']:
+            expected = control['expect_invariant']
+            validate_result(12, 'Invariant '+expected+' is violated.', expected)
+            for code, text in ((12, 'Invariant TypeOK is violated.'),
+                               (0, 'No error has been found.'),
+                               (1, 'Semantic errors: placeholder')):
+                with self.subTest(control=control['id'], code=code):
+                    with self.assertRaisesRegex(GateError, 'required invariant counterexample'):
+                        validate_result(code, text, expected)
+
+    def test_kms_bootstrap_model_and_every_property_are_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'KMSBootstrapTransaction')
+        tla, cfg = self.root / entry['model'], self.root / entry['config']
+        source, config = tla.read_bytes(), cfg.read_bytes()
+        removed = json.loads(original)
+        removed['models'] = [m for m in removed['models'] if m['id'] != entry['id']]
+        path.write_text(json.dumps(removed)); tla.unlink(); cfg.unlink()
+        with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+            load_registry(self.root)
+        tla.write_bytes(source); cfg.write_bytes(config)
+        for prop in entry['properties']:
+            changed = json.loads(original)
+            target = next(m for m in changed['models'] if m['id'] == entry['id'])
+            target['properties'].remove(prop)
+            target['mutants'] = [m for m in target['mutants'] if m['expect_invariant'] != prop]
+            cfg.write_text('\n'.join(line for line in config.decode().splitlines()
+                                     if line != 'INVARIANT '+prop)+'\n')
+            path.write_text(json.dumps(changed))
+            with self.subTest(property=prop):
+                with self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                    load_registry(self.root)
+        cfg.write_bytes(config); path.write_text(original)
 
     def test_cfn_condition_admission_model_and_every_property_are_required(self):
         path = self.root / 'formal/models.json'
@@ -1069,6 +1161,7 @@ class FormalGateTests(unittest.TestCase):
                 with self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
                     load_registry(self.root)
         cfg.write_bytes(config); path.write_text(original)
+
 
     def test_cfn_condition_admission_each_control_rejects_removal_and_placeholder(self):
         path = self.root / 'formal/models.json'
@@ -1096,6 +1189,7 @@ class FormalGateTests(unittest.TestCase):
                     with self.assertRaisesRegex(GateError, error):
                         load_registry(self.root)
         path.write_text(original)
+
 
     def test_cfn_condition_admission_exact_scope_and_semantic_oracles_are_required(self):
         path = self.root / 'formal/models.json'
@@ -1146,6 +1240,7 @@ class FormalGateTests(unittest.TestCase):
                     load_registry(self.root)
         cfg.write_bytes(config); path.write_text(original)
 
+
     def test_cfn_final_cleanup_ack_each_control_rejects_removal_and_placeholder(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
@@ -1172,6 +1267,7 @@ class FormalGateTests(unittest.TestCase):
                     with self.assertRaisesRegex(GateError, error):
                         load_registry(self.root)
         path.write_text(original)
+
 
     def test_cfn_final_cleanup_ack_exact_scope_and_semantic_oracles_are_required(self):
         path = self.root / 'formal/models.json'
@@ -1222,6 +1318,7 @@ class FormalGateTests(unittest.TestCase):
                     load_registry(self.root)
         cfg.write_bytes(config); path.write_text(original)
 
+
     def test_cfn_physical_resource_ack_each_control_rejects_removal_and_placeholder(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
@@ -1248,6 +1345,7 @@ class FormalGateTests(unittest.TestCase):
                     with self.assertRaisesRegex(GateError, error):
                         load_registry(self.root)
         path.write_text(original)
+
 
     def test_cfn_physical_resource_ack_exact_scope_and_semantic_oracles_are_required(self):
         path = self.root / 'formal/models.json'
@@ -1298,6 +1396,7 @@ class FormalGateTests(unittest.TestCase):
                     load_registry(self.root)
         cfg.write_bytes(config); path.write_text(original)
 
+
     def test_cfn_condition_memo_depth_each_control_rejects_removal_and_placeholder(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
@@ -1325,6 +1424,7 @@ class FormalGateTests(unittest.TestCase):
                         load_registry(self.root)
         path.write_text(original)
 
+
     def test_cfn_condition_memo_depth_exact_scope_and_semantic_oracles_are_required(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
@@ -1347,6 +1447,9 @@ class FormalGateTests(unittest.TestCase):
                 with self.subTest(control=control['id'], code=code):
                     with self.assertRaisesRegex(GateError, 'required invariant counterexample'):
                         validate_result(code, text, expected)
+
+
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -10,6 +10,7 @@ import urllib.request
 
 from check import running
 from secrets_manager import client
+from test_sakura_openapi import NEW_IDS, COLLECTION, ITEM
 
 
 # Independent literal inventory from immutable main5c97dc5916fa39fd43d80ae79532d5892fcb30ea.
@@ -126,9 +127,9 @@ def run():
         assert root["operationId"] == "awsRegionalOperation"
         ids = [entry["operationId"] for path in spec["paths"].values()
                for entry in path.values() if isinstance(entry, dict) and "operationId" in entry]
-        assert len(ids) == len(set(ids)) == 61, "Document duplicated or omitted a native operation"
-        assert set(ids) == EXPECTED_OPERATION_IDS, "Served operation inventory differs from immutable main contract"
-        assert len(spec["paths"]) == 34 and set(spec["paths"]) == EXPECTED_PATHS, "Served path inventory differs from immutable main contract"
+        assert len(ids) == len(set(ids)) == 66, "Document duplicated or omitted a native operation"
+        assert set(ids) == EXPECTED_OPERATION_IDS | NEW_IDS, "Served operation inventory differs from immutable main contract"
+        assert len(spec["paths"]) == 36 and set(spec["paths"]) == EXPECTED_PATHS | {COLLECTION, ITEM}, "Served path inventory differs from immutable main contract"
         assert not any("secretsmanager" in path.lower() for path in spec["paths"]), "Secrets native API uses the actual shared root"
         names = ["CreateSecret", "DescribeSecret", "ListSecrets", "PutSecretValue",
                  "GetSecretValue", "UpdateSecretVersionStage", "DeleteSecret"]

@@ -62,7 +62,7 @@ make build
 
 S3のCloudFormationはBucketName/Versioning/PublicAccessBlock/ユーザーTagsとRef/Arnに対応し、空でない履歴は削除しません。呼出者にはStack ARNと各リソース操作の両方の権限が必要で、CAPABILITY_IAMは権限を付与しません。
 
-SQSの操作画面とAPI referenceはnative JSON 1.0 APIを使用し、SDKと同じ状態を操作します。保持中・期限切れ未回収を含む物理message rowはプロセス全体10000件、UTF-8 bodyとserialized attribute JSONの合計64 MiBまでです。これはSQLiteファイル全体・プロセスメモリ・AWS課金サイズの上限ではありません。下記の限定GCP Storage・Azure Blob実装がありますが、両クラウドの他サービスとSakuraは未対応です。Issueや計画は実装完了を意味しません。[開発状況](docs/development-status.md)を参照してください。Cloudscapeを使用していますが、本物のAWSコンソールとの全画面・全挙動の一致や実AWSとの差分検証完了は主張していません。
+SQSの操作画面とAPI referenceはnative JSON 1.0 APIを使用し、SDKと同じ状態を操作します。保持中・期限切れ未回収を含む物理message rowはプロセス全体10000件、UTF-8 bodyとserialized attribute JSONの合計64 MiBまでです。これはSQLiteファイル全体・プロセスメモリ・AWS課金サイズの上限ではありません。下記の限定GCP Storage・Azure Blob実装がありますが、両クラウドの他サービスは未対応です。[Sakura Disk構成メタデータAPI](docs/sakura.md)は明示的な有効化で使用できますが、既定は無効です。有効化したローカルscopeではSakura Cloud → Disksから構成を作成・参照・名前変更・削除できます。VM・実ストレージは作成しません。Issueや計画は実装完了を意味しません。[開発状況](docs/development-status.md)を参照してください。Cloudscapeを使用していますが、本物のAWSコンソールとの全画面・全挙動の一致や実AWSとの差分検証完了は主張していません。
 
 ## Google Cloud Storage・Azure Blob Storageのローカル接続
 
@@ -120,7 +120,7 @@ SDK、操作画面、再起動、チーム分離の受入検証は `make e2e` �
 
 CIはstatementと未フィルターsource-line coverageを両方90%以上に強制します。`make before-commit`単独のcoverage判定はstatementのみで、source-line判定はCIのCobertura生成後ステージと上記の2コマンドで行います。SDK/browser、license、依存security、埋込asset、形式検査も行います。cross compileは他OSでの実行成功を意味しません。開発用Python/Node/Javaはruntime依存ではありません。UI・Scalarの再生成は権利表記とlockを保持する[各build手順](tools/console/README.md)・[Scalar手順](tools/scalar/README.md)・[Python runtimeの権利・再生成手順](tools/python/README.md)に従います。
 
-形式検査の現在の登録は43有限モデル・322個の意図した欠陥検出（全365実行）です。DynamoDB画面のepoch・ACK後の読み取り再試行と、保存済みARN認可後のSecretsバージョンメタデータ一覧・限定cursor境界をモデル化します。値の読取許可や履歴画面を自動的に追加するものではありません。正確な一覧・境界・未モデル化部分は[形式検査](formal/README.md)とregistryを参照してください。過去の受領証と、現在の固定HEADの全体検査は分けて判断します。TLCはGo/JS実装のrefinement、暗号、全AWS仕様・実AWSとの一致を証明しません。[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)。
+形式検査はregistryに48有限モデル・381の意図した欠陥検出を登録しています（基準モデルと陰性検査で429ケース）。Sakuraの4つの限定モデル、DynamoDB画面、Secretsメタデータ画面の登録を保持します。SecretVersionListingは保存済みARNの認可後に行うメタデータ一覧と限定的なcursor境界を対象とし、値の読取許可や完全な履歴画面を追加しません。追加モデルの有限検査結果と統合後の固定HEAD検査は区別します。TLCは限定した状態空間の安全条件と意図したmutantの反例を検査し、Go実装のrefinement、暗号、全AWS仕様・実AWSとの一致を証明するものではありません。[形式検査](formal/README.md)、[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)。
 
 ## ライセンス
 
@@ -131,7 +131,7 @@ CIはstatementと未フィルターsource-line coverageを両方90%以上に強�
 
 ## Secrets Manager contract
 
-Historical receipt: main `ce1ddd1` contains the provider-aware Secrets Manager integration and
+Main `ce1ddd1` contains the provider-aware Secrets Manager integration and
 preserves its token-file Login, native services and locale behavior. Secrets Manager is discoverable only inside AWS when
 its actual capability is present; /secretsmanager and the /secrets alias select the
 same child. That historical revision had seven native APIs and dummy plaintext values;
@@ -161,6 +161,6 @@ combined 29-model/164-control formal gate (193 executions). These receipts apply
 to that revision. Every later change still requires its exact-HEAD CI, including
 the 45-case E2E suite; focused results do not replace whole-suite verification.
 
-現在の形式検査の登録は43モデル・322制御（365実行）です。IAMの追加モデルは4つの到達可能な初期状態から各2要求の範囲で、4要求の試案はタイムアウトし未成功です。上の過去の受領証とは区別し、最新HEADで全ゲートを実行してください。API資料はAWS・Google Cloud・Azureを分け、Sakura Cloudは未実装表示です。[ナビゲーション](docs/api-reference.md)を参照してください。
+現在の形式検査の登録は48モデル・381制御（429実行）です。IAMの追加モデルは4つの到達可能な初期状態から各2要求の範囲で、4要求の試案はタイムアウトし未成功です。上の過去の受領証とは区別し、最新HEADで全ゲートを実行してください。API資料はAWS・Google Cloud・Azureを分け、Sakura Cloudでは任意有効化するDisk構成の画面と5つのnative APIを扱います。他のSakuraサービスや実ストレージに対応したという意味ではありません。[ナビゲーション](docs/api-reference.md)を参照してください。
 
-CFN条件モデルの単体検査は`f69fb46`で成功し、元cryptoテンプレートの実CLI/SDK検証は`2d76646`で成功しました（4回のCLI起動、SDK 73要求・73応答、補助HTTP 9組）。今回の登録済み365ケース全体は未実行です。これはローカルな作成・権限・再起動・削除の検証であり、ホストの協調処理・採点やNoEcho秘匿を証明しません。[CFNの制限](docs/cloudformation-rest.md#parameters-and-conditions)。
+現在のCFN候補は条件の受理、メモ化したグラフ高さ、最終スタック・所有権行ACK、および選択したSSM/S3物理行ACKの限定モデルを追加し、mainの44モデルを保持します。統合後48モデル・381制御（429実行）と61 E2Eの最新HEAD検証は未実施です。過去の単体結果で代用せず、ホスト採点・SQL/Go refinement・秘匿出力・全リソース物理削除の証明とは扱いません。
