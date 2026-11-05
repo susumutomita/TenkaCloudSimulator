@@ -96,20 +96,7 @@ export default function SQSView({region,request,onSaving}){
   event.preventDefault();
   try{
    if(!/^[A-Za-z0-9_-]{1,80}$/.test(form.name))throw Error('Name must contain 1–80 letters, digits, hyphens or underscores. FIFO queues are unsupported.');
-   // Translate only canonical notices created by this view; API errors and data remain untouched.
- const noticeLabels=new Map([
-  ["Queue created.",t("Queue created.","キューを作成しました。")],
-  ["Message sent.",t("Message sent.","メッセージを送信しました。")],
-  ["No messages returned by this poll.",t("No messages returned by this poll.","今回のポーリングではメッセージを受信しませんでした。")],
-  ["Polling stopped locally. A server claim may already have completed; refresh queue details before retrying.",t("Polling stopped locally. A server claim may already have completed; refresh queue details before retrying.","ローカルでポーリングを停止しました。サーバーでの受信処理が完了している場合があります。再試行前にキューの詳細を更新してください。")],
-  ["Queue deleted.",t("Queue deleted.","キューを削除しました。")],
-  ["Message deleted.",t("Message deleted.","メッセージを削除しました。")],
-  ["Message released. Poll again for a new receipt.",t("Message released. Poll again for a new receipt.","メッセージを解放しました。再度ポーリングして新しい受信ハンドルを取得してください。")],
-  ["Message visibility changed.",t("Message visibility changed.","メッセージの可視性を変更しました。")]
- ]);
- const receivedNotice=/^(\d+) message\(s\) received\.$/.exec(notice);
- const renderedNotice=receivedNotice?receivedNotice[1]+t(' message(s) received.',' 件のメッセージを受信しました。'):(noticeLabels.get(notice)??notice);
- const attrs={VisibilityTimeout:String(number(form.visibility,0,43200,t("Visibility timeout","可視性タイムアウト"))),DelaySeconds:String(number(form.delay,0,900,t("Delivery delay","配信遅延"))),MessageRetentionPeriod:String(number(form.retention,60,1209600,t("Message retention period","メッセージ保持期間")))};
+   const attrs={VisibilityTimeout:String(number(form.visibility,0,43200,t("Visibility timeout","可視性タイムアウト"))),DelaySeconds:String(number(form.delay,0,900,t("Delivery delay","配信遅延"))),MessageRetentionPeriod:String(number(form.retention,60,1209600,t("Message retention period","メッセージ保持期間")))};
    mutate('CreateQueue',{QueueName:form.name,Attributes:attrs},result=>{setNotice('Queue created.');inspect({name:form.name,url:result.QueueUrl},true)});
   }catch(e){setError(e.message)}
  }
@@ -161,6 +148,19 @@ export default function SQSView({region,request,onSaving}){
    setNotice(operation==='DeleteMessage'?'Message deleted.':timeout===0?'Message released. Poll again for a new receipt.':'Message visibility changed.');
   });
  }
+ // Translate only canonical notices created by this view; API errors and data remain untouched.
+ const noticeLabels=new Map([
+  ["Queue created.",t("Queue created.","キューを作成しました。")],
+  ["Message sent.",t("Message sent.","メッセージを送信しました。")],
+  ["No messages returned by this poll.",t("No messages returned by this poll.","今回のポーリングではメッセージを受信しませんでした。")],
+  ["Polling stopped locally. A server claim may already have completed; refresh queue details before retrying.",t("Polling stopped locally. A server claim may already have completed; refresh queue details before retrying.","ローカルでポーリングを停止しました。サーバーでの受信処理が完了している場合があります。再試行前にキューの詳細を更新してください。")],
+  ["Queue deleted.",t("Queue deleted.","キューを削除しました。")],
+  ["Message deleted.",t("Message deleted.","メッセージを削除しました。")],
+  ["Message released. Poll again for a new receipt.",t("Message released. Poll again for a new receipt.","メッセージを解放しました。再度ポーリングして新しい受信ハンドルを取得してください。")],
+  ["Message visibility changed.",t("Message visibility changed.","メッセージの可視性を変更しました。")]
+ ]);
+ const receivedNotice=/^(\d+) message\(s\) received\.$/.exec(notice);
+ const renderedNotice=receivedNotice?receivedNotice[1]+t(' message(s) received.',' 件のメッセージを受信しました。'):(noticeLabels.get(notice)??notice);
  const attrs=queue?.attributes||{};
  const alerts=<>{error&&<Alert type="error" header={t("Request could not be completed","リクエストを完了できませんでした")}>{error}</Alert>}{notice&&<Alert type="success">{renderedNotice}</Alert>}</>;
  const back=<Button formAction="none" disabled={busy} onClick={()=>loadQueues()}>{t("Queues","キュー")}</Button>;

@@ -40,8 +40,10 @@ def run():
             executable_path=os.environ.get('CHROMIUM_EXECUTABLE') or shutil.which('chromium'),
             args=['--no-sandbox'])
         operations, errors, outside = [], [], []
+        context = None
         try:
-            page = browser.new_page(viewport={'width': 1440, 'height': 1000})
+            context = browser.new_context(viewport={'width': 1440, 'height': 1000})
+            page = context.new_page()
             page.set_default_timeout(10000)
             page.on('pageerror', lambda _: errors.append(True))
             page.on('request', lambda request: operations.append(request.headers['x-amz-target'])
@@ -91,7 +93,7 @@ def run():
                         ('sqs', 'AmazonSQS.ListQueues', 'Queues'),
                         ('logs', 'Logs_20140328.DescribeLogGroups', 'Log groups'),
                         ('secretsmanager', 'secretsmanager.ListSecrets', 'Secrets')):
-                    probe = page.context.new_page()
+                    probe = context.new_page()
                     probe.set_default_timeout(10000)
                     held, native_requests = [], []
                     probe.on('pageerror', lambda _: errors.append(True))
@@ -215,6 +217,8 @@ def run():
             assert secrets.list_secrets()['SecretList'] == []
             assert logs.describe_log_groups()['logGroups'] == []
         finally:
+            if context is not None:
+                context.close()
             browser.close()
             for sdk in clients:
                 sdk.close()
