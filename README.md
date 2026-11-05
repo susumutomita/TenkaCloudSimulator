@@ -1,6 +1,6 @@
 # TenkaCloud Simulator
 
-非公式のクラウド学習用シミュレーター。AWSを中心に開発し、Google Cloud Storage・Azure Blob Storageの限定的なローカル接続候補を追加しています（[範囲と検証状況](docs/multicloud-storage.md)）。Go単一バイナリにCloudscapeコンソール、Scalar API reference、SQLite、Python Lambda用の固定CPython/WASIを埋め込みます。実行時にGo・Node・ホストPython・Docker・外部DB・実AWSは不要です。実AWSの資格情報は入力しないでください。
+非公式のクラウド学習用シミュレーター。AWSを中心に開発し、Google Cloud Storage・Azure Blob Storageの限定的なローカル接続を備えています（[範囲と検証状況](docs/multicloud-storage.md)）。Go単一バイナリにAWS向けCloudscapeコンソールとGoogle Cloud／Azureのローカルコンソール、Scalar API reference、SQLite、Python Lambda用の固定CPython/WASIを埋め込みます。実行時にGo・Node・ホストPython・Docker・外部DB・実AWSは不要です。実AWSの資格情報は入力しないでください。
 
 ## 起動する
 
@@ -42,15 +42,13 @@ make build
 
 S3のCloudFormationはBucketName/Versioning/PublicAccessBlock/ユーザーTagsとRef/Arnに対応し、空でない履歴は削除しません。呼出者にはStack ARNと各リソース操作の両方の権限が必要で、CAPABILITY_IAMは権限を付与しません。
 
-SQSはnative JSON 1.0 APIのみ対応します。保持中・期限切れ未回収を含む物理message rowはプロセス全体10000件、UTF-8 bodyとserialized attribute JSONの合計64 MiBまでです。これはSQLiteファイル全体・プロセスメモリ・AWS課金サイズの上限ではありません。この開発候補には下記の限定GCP Storage・Azure Blob実装がありますが、両クラウドの他サービスとSakuraは未対応です。Issueや計画は実装完了を意味しません。[開発状況](docs/development-status.md)を参照してください。Cloudscapeを使用していますが、本物のAWSコンソールとの全画面・全挙動の一致や実AWSとの差分検証完了は主張していません。
+SQSはnative JSON 1.0 APIのみ対応します。保持中・期限切れ未回収を含む物理message rowはプロセス全体10000件、UTF-8 bodyとserialized attribute JSONの合計64 MiBまでです。これはSQLiteファイル全体・プロセスメモリ・AWS課金サイズの上限ではありません。下記の限定GCP Storage・Azure Blob実装がありますが、両クラウドの他サービスとSakuraは未対応です。Issueや計画は実装完了を意味しません。[開発状況](docs/development-status.md)を参照してください。Cloudscapeを使用していますが、本物のAWSコンソールとの全画面・全挙動の一致や実AWSとの差分検証完了は主張していません。
 
-## Google Cloud Storage・Azure Blob Storageのローカル接続候補
+## Google Cloud Storage・Azure Blob Storageのローカル接続
 
-ServicesからGoogle Cloud · Cloud Storage／Azure · Blob Storageを開きます。固定のsynthetic project/accountで、作成→upload→実ファイルdownload→削除を操作できます。2 CLI・別DB/tokenとPC/390pxの実操作は検証済みですが、公式SDK・全体CI・実クラウド画面との一致は未検証です。[対応・制限](docs/multicloud-storage.md)。
+クラウド選択で AWS／Google Cloud／Azure を切り替え、サービス一覧から対象を検索して開きます。Google Cloud の Cloud Storage と Azure の Blob Storage は別のナビゲーションを持ちます。日本語／英語は画面の言語設定で切り替えられ、サービス名・リソース名・API識別子は変更しません。固定のsynthetic project/accountで、作成→upload→実ファイルdownload→削除を操作できます。既存の2 CLI・別DB/tokenとPC/390pxの実操作とmainのCIは検証済みです。今回のナビゲーション／言語／各クラウドの画面刷新は統合検証中で、公式SDK・認証済み実クラウド画面との一致は未検証です。[対応・制限](docs/multicloud-storage.md)。
 
 既定所有者はsimulator-adminです。参加者に使わせる新規環境は、ホストが`--cloud-storage-owner=learner`を指定し、learnerへ固定したparticipant tokenを発行します。この所有者設定はGoogle IAMやAzure RBACではなく、AWSの権限も付与しません。同じDBの所有者変更は拒否します。CLIフラグは実CLIの再起動・所有者変更拒否・AWS権限非付与までGo/raceで検証しています。
-
-Secrets Managerのローカル候補はnative/SDK/browser・全24 E2E・実起動を検証済みです。`0888924`の同一全体profileでstatement94.78%、無除外source90.12%を確認しました。SecretStringはSQLite内の平文で、実AWSのKMS暗号化やAWSコンソールの全機能は再現しません。13モデル/50欠陥検出の実TLC・50画面監査もローカルで確認済みです。変更後は固定HEADを再検証し、公開後CI・review・release・mergeとは区別します。
 
 ## IAMロールからLambdaを作る
 
@@ -98,7 +96,7 @@ AXE_SCRIPT=/tmp/tcsim-audit/axe.min.js make e2e PYTHON=/tmp/tcsim-tests/bin/pyth
 TLA_JAR=/path/to/tla2tools.jar make formal
 ```
 
-KMS・S3回帰・Login改善を含むmainfcf8の証拠と、Secrets旧HEADの証拠は別入力です。統合候補ではローカルfocused検査と全体の固定HEAD CIを区別し、後者の成功を確認するまで完了扱いにしません。
+KMSはPR409でマージ済みで、main `fcf8e702`ではSDK・ブラウザを含む全26 E2E、両90%閾値と18モデル＋94制御のCIが成功しています。この画面刷新は別の変更です。新しい固定HEADの全体検証・CI結果を、過去の成功から引き継いで扱いません。
 
 CIはstatementと未フィルターsource-line coverageを両方90%以上に強制します。`make before-commit`単独のcoverage判定はstatementのみで、source-line判定はCIのCobertura生成後ステージと上記の2コマンドで行います。SDK/browser、license、依存security、埋込asset、形式検査も行います。cross compileは他OSでの実行成功を意味しません。開発用Python/Node/Javaはruntime依存ではありません。UI・Scalarの再生成は権利表記とlockを保持する[各build手順](tools/console/README.md)・[Scalar手順](tools/scalar/README.md)・[Python runtimeの権利・再生成手順](tools/python/README.md)に従います。
 
@@ -107,3 +105,16 @@ CIはstatementと未フィルターsource-line coverageを両方90%以上に強�
 ## ライセンス
 
 本体は[MIT](LICENSE)。`/_simulator/licenses/`にGo・Cloudscape・Scalar・CPython/WASI等の原文LICENSE/NOTICEを同梱しています。再配布時も保持してください。AWS公式サービスではなく、AWSロゴは使用しません。[設計・引継ぎ資料](docs/handoff/README.md)。
+
+貼り付けが動かない場合はログイン画面の「トークンファイルを選択」で、主催者から受け取った小さなファイルを明示選択できます。値は隠したまま読み込み、サインイン操作時にサーバーが認証します。[形式・制限とDia未確認の境界](docs/login-token-file.md)。
+
+
+## Secrets Manager integration candidate
+
+The normal merge of mainf5dba056 preserves its provider-specific consoles, token-file
+Login and locale behavior. Secrets Manager is discoverable only inside AWS when
+its actual capability is present; /secretsmanager and the /secrets alias select the
+same child. Seven native APIs and dummy plaintext values remain the documented
+limit; no KMS/rotation/recovery/CFN behavior is added. Earlier Secrets/native/main
+receipts are separate inputs. This provider-aware child and all21 models/108
+controls require new exact-HEAD verification before any publication/merge claim.

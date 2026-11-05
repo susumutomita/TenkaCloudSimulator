@@ -94,41 +94,43 @@ def run_crossprovider_console():
                     assert path and Path(path).read_bytes() == wanted, 'Actual download bytes differ from uploaded fixture'
 
                 def fixed_scope_menu(page, kind, value):
-                    # Open the actual utility, including Cloudscape's compact More view.
-                    # A configured provider scope must never offer AWS region choices.
-                    trigger = page.get_by_role('button', name=kind+' menu', exact=True)
-                    compact = not trigger.is_visible()
-                    if compact:
-                        page.get_by_role('button', name='More', exact=True).click()
-                        scope = page.get_by_role('button', name=value, exact=True)
-                        expect(scope).to_be_visible()
-                        scope.click()
+                    # Provider-owned chrome displays a fixed local scope, never an
+                    # editable AWS region/scope menu (including the compact viewport).
+                    if kind == 'Project':
+                        scope = page.locator('.gcp-console-scope')
+                        expect(scope).to_contain_text('Project: '+value)
+                        expect(scope).to_contain_text('Configured locally · project switching unavailable')
+                        expect(scope.locator('input,select,[contenteditable="true"]')).to_have_count(0)
                     else:
-                        expect(trigger).to_contain_text(value)
-                        trigger.click()
-                    label = 'Configured '+kind.lower()+': '+value+' (read only)'
+                        expect(page.locator('.azure-resource-heading').get_by_role('heading', level=1)).to_contain_text(value)
+                        expect(page.locator('.azure-local-banner')).to_contain_text('This account is host-configured')
+                        expect(page.get_by_role('combobox', name='Storage account', exact=True)).to_have_count(0)
+                    expect(page.get_by_role('combobox', name='Region', exact=True)).to_have_count(0)
                     for region in ('us-east-1', 'ap-northeast-1', 'us-west-2', 'eu-west-1'):
                         expect(page.get_by_role('menuitem', name=region, exact=True)).to_have_count(0)
                         expect(page.get_by_role('button', name=region, exact=True)).to_have_count(0)
-                    if compact:
-                        # The pinned compact renderer does not propagate item.disabled.
-                        # Clicking its descriptive row must still be a no-op, never changeRegion.
-                        page.get_by_role('button', name=label, exact=True).click()
-                        page.get_by_role('button', name='More', exact=True).click()
-                        expect(page.get_by_role('button', name=value, exact=True)).to_be_visible()
-                        page.get_by_role('button', name='Close', exact=True).click()
-                    else:
-                        expect(page.get_by_role('menuitem', name=label, exact=True)).to_be_disabled()
-                        page.keyboard.press('Escape')
-                        expect(trigger).to_contain_text(value)
+
+                def provider_catalog(page, provider, service):
+                    # Real global provider controls and provider-filtered catalog.
+                    choice = page.get_by_role('navigation', name='Cloud provider', exact=True).get_by_role('button', name=provider, exact=True)
+                    choice.click(); expect(choice).to_have_attribute('aria-pressed', 'true')
+                    services = page.get_by_role('button', name='Services', exact=True)
+                    services.click()
+                    search = page.get_by_role('searchbox', name='Search services in '+provider, exact=True)
+                    expect(search).to_be_focused(); search.fill(service)
+                    item = page.get_by_role('menuitem', name=service, exact=True)
+                    expect(item).to_be_visible()
+                    # Use the catalog's actual keyboard roving behavior, not DOM focus
+                    # that could disagree with a component's active selection.
+                    search.press('ArrowDown'); expect(item).to_be_focused(); item.press('Enter')
+                    expect(services).to_have_attribute('aria-expanded', 'false')
 
                 owner = page_for(a); first_cookie = login(owner, a, operator)
                 peer = page_for(b); login(peer, b, other)
-                # Services entries are real controls; the actual flows below also exercise bookmark routes.
-                owner.get_by_role('button', name='Services', exact=True).click()
-                expect(owner.get_by_role('menuitem', name='Google Cloud · Cloud Storage', exact=True)).to_be_visible()
-                expect(owner.get_by_role('menuitem', name='Azure · Blob Storage', exact=True)).to_be_visible()
-                owner.keyboard.press('Escape')
+                # Exercise both provider-specific catalogs; bookmark routes below
+                # independently exercise direct navigation without catalog state.
+                provider_catalog(owner, 'Google Cloud', 'Cloud Storage')
+                provider_catalog(owner, 'Azure', 'Blob Storage')
                 for width in (1440, 390):
                     owner.set_viewport_size({'width': width, 'height': 1000})
                     bucket = f'browser-gcp-{width}'
@@ -148,17 +150,22 @@ def run_crossprovider_console():
                     fixed_scope_menu(owner, 'Project', 'tenkacloud-local')
                     await_cancel = view.get_by_role('button', name='Create bucket', exact=True)
                     await_cancel.focus(); owner.keyboard.press('Enter')
-                    expect(view.get_by_label('Bucket name', exact=True)).to_be_focused()
+                    expect(view.get_by_role('heading', name='Get started', exact=True)).to_be_focused()
                     audit(owner, 'gcp-create', width)
                     view.get_by_role('button', name='Cancel', exact=True).click()
                     data, _ = native(a, operator, 'GET', GCP+'/b?project=tenkacloud-local')
                     assert not json.loads(data)['items'], 'Cancel must not create a bucket'
                     view.get_by_role('button', name='Create bucket', exact=True).click()
                     view.get_by_label('Bucket name', exact=True).fill(bucket)
+                    for heading in ('Choose where to store your data', 'Choose how to store your data', 'Choose how to control access to objects', 'Choose how to protect object data'):
+                        view.get_by_role('button', name='Continue', exact=True).click()
+                        expect(view.get_by_role('heading', name=heading, exact=True)).to_be_focused()
+                        assert not json.loads(native(a,operator,'GET',GCP+'/b?project=tenkacloud-local')[0])['items'], 'Wizard navigation must not create a bucket'
                     view.get_by_role('button', name='Create', exact=True).click()
                     expect(view.get_by_role('button', name=bucket, exact=True)).to_be_visible()
                     assert [item['name'] for item in json.loads(native(a,operator,'GET',GCP+'/b?project=tenkacloud-local')[0])['items']] == [bucket]
                     view.get_by_role('button', name=bucket, exact=True).click()
+                    view.locator('summary').filter(has_text=re.compile('^Upload$')).click()
                     expect(view.get_by_role('button', name='Upload files', exact=True)).to_be_enabled()
                     view.get_by_role('button', name='Upload files', exact=True).click()
                     view.get_by_label('Text file', exact=True).set_input_files({'name':'notes.txt','mimeType':'text/plain','buffer':payload})
@@ -169,6 +176,37 @@ def run_crossprovider_console():
                     assert gcp_media(a,operator,bucket,object_name) == payload
                     assert gcp_media(b,other,bucket,object_name) == b'peer-gcp'
                     audit(owner, 'gcp-objects', width)
+                    metadata_path = f'{GCP}/b/{bucket}/o/'+urllib.parse.quote(object_name, safe='')
+                    old_metadata = json.loads(native(a,operator,'GET',metadata_path)[0])
+                    object_row = view.get_by_role('button', name=object_name, exact=True).locator('xpath=ancestor::tr')
+                    expect(object_row.locator('td').nth(2)).to_have_text(old_metadata['generation'])
+                    # Same bytes/type, new real generation: the visible old row is
+                    # deliberately stale, not a fabricated HTTP or UI response.
+                    advanced = json.loads(native(a,operator,'POST',f'{GCP_UPLOAD}/b/{bucket}/o?'+urllib.parse.urlencode({'uploadType':'media','name':object_name}),payload,{'Content-Type':old_metadata['contentType']})[0])
+                    assert int(advanced['generation']) > int(old_metadata['generation'])
+                    assert advanced['size'] == old_metadata['size'] and advanced['contentType'] == old_metadata['contentType']
+                    with owner.expect_response(lambda response: response.request.method=='GET' and response.url.split('?',1)[0]==a+metadata_path) as stale:
+                        view.get_by_role('button', name=object_name, exact=True).click()
+                    assert stale.value.status == 412
+                    assert urllib.parse.parse_qs(urllib.parse.urlsplit(stale.value.url).query) == {'ifGenerationMatch':[old_metadata['generation']]}
+                    expect(view.get_by_role('heading', name='Object details', exact=True)).to_have_count(0)
+                    expect(view.get_by_role('alert')).to_be_visible()
+                    assert gcp_media(a,operator,bucket,object_name) == payload
+                    assert gcp_media(b,other,bucket,object_name) == b'peer-gcp'
+                    view.get_by_role('button', name='Refresh', exact=True).click()
+                    expect(view.get_by_role('button', name=object_name, exact=True).locator('xpath=ancestor::tr').locator('td').nth(2)).to_have_text(advanced['generation'])
+                    fresh_metadata = json.loads(native(a,operator,'GET',metadata_path)[0])
+                    with owner.expect_response(lambda response: response.request.method=='GET' and response.url.split('?',1)[0]==a+metadata_path) as fresh:
+                        view.get_by_role('button', name=object_name, exact=True).click()
+                    assert fresh.value.status == 200
+                    assert urllib.parse.parse_qs(urllib.parse.urlsplit(fresh.value.url).query) == {'ifGenerationMatch':[fresh_metadata['generation']]}
+                    expect(view.get_by_role('heading', name='Object details', exact=True)).to_be_visible()
+                    details = view.locator('dl.gcp-storage-metadata')
+                    for label, wanted in [('Name',fresh_metadata['name']),('Bucket',fresh_metadata['bucket']),('Generation',fresh_metadata['generation']),('Size',f"{int(fresh_metadata['size']):,} B"),('Content type',fresh_metadata['contentType'])]:
+                        expect(details.locator('dt').filter(has_text=re.compile('^'+re.escape(label)+'$')).locator('xpath=following-sibling::dd[1]')).to_have_text(wanted)
+                    audit(owner, 'gcp-object-details', width)
+                    view.get_by_role('button', name='Back to objects', exact=True).click()
+                    expect(view.get_by_role('heading', name='Object details', exact=True)).to_have_count(0)
                     downloaded(owner, view.get_by_role('button', name='Download '+object_name, exact=True), payload)
                     native(a,operator,'DELETE',GCP+'/b/'+bucket,expected=409)  # Empty-only server contract.
                     view.get_by_role('button', name='Delete object '+object_name, exact=True).click()
@@ -192,7 +230,8 @@ def run_crossprovider_console():
                     fixed_scope_menu(owner, 'Storage account', 'tenkacloudlocal')
                     azure_view.get_by_role('button', name='+ Container', exact=True).click()
                     modal = owner.get_by_role('dialog', name='New container', exact=True)
-                    modal.get_by_label('Name', exact=True).fill(container)
+                    expect(modal.get_by_role('textbox', name='Name', exact=True)).to_be_focused()
+                    modal.get_by_role('textbox', name='Name', exact=True).fill(container)
                     audit(owner, 'azure-create', width)
                     modal.get_by_role('button', name='Create', exact=True).click()
                     expect(azure_view.get_by_role('link', name=container, exact=True)).to_be_visible()
@@ -201,7 +240,7 @@ def run_crossprovider_console():
                     expect(azure_view.get_by_role('button', name='Upload', exact=True)).to_be_enabled()
                     azure_view.get_by_role('button', name='Upload', exact=True).click()
                     modal = owner.get_by_role('dialog', name='Upload blob', exact=True)
-                    modal.locator('input[type=file]').set_input_files({'name':'notes.txt','mimeType':'text/plain','buffer':payload})
+                    modal.get_by_label('Files',exact=True).set_input_files({'name':'notes.txt','mimeType':'text/plain','buffer':payload})
                     modal.get_by_label('Blob name', exact=True).fill(object_name)
                     audit(owner, 'azure-upload', width)
                     modal.get_by_role('button', name='Upload', exact=True).click()
@@ -209,9 +248,20 @@ def run_crossprovider_console():
                     tail = '/'+container+'/'+urllib.parse.quote(object_name,safe='/')
                     assert azure(a,operator,'GET',tail)[0] == payload
                     assert azure(b,other,'GET',tail)[0] == b'peer-azure'
-                    azure_view.get_by_role('radio', name='Select '+object_name, exact=True).check()
+                    azure_view.get_by_role('checkbox', name='Select '+object_name, exact=True).check()
                     audit(owner, 'azure-blobs', width)
-                    downloaded(owner,azure_view.get_by_role('button',name='Download',exact=True),payload)
+                    _, native_properties = azure(a,operator,'HEAD',tail)
+                    azure_view.get_by_role('button', name='Properties', exact=True).click()
+                    properties = owner.get_by_role('dialog', name='Blob properties', exact=True)
+                    for label, wanted in [('Name',object_name),('Size (bytes)',native_properties.get('Content-Length')),('Blob type',native_properties.get('x-ms-blob-type')),('ETag',native_properties.get('ETag'))]:
+                        assert wanted is not None, 'Native HEAD omitted required '+label+' property'
+                        expect(properties.locator('dt').filter(has_text=re.compile('^'+re.escape(label)+'$')).locator('xpath=following-sibling::dd[1]')).to_have_text(wanted)
+                    expect(properties).to_contain_text('Properties are from the last list response. Refresh to see changes. Content is not previewed.')
+                    audit(owner, 'azure-properties', width)
+                    properties.get_by_role('button', name='Close', exact=True).click()
+                    expect(owner.get_by_role('dialog', name='Blob properties', exact=True)).to_have_count(0)
+                    expect(azure_view.get_by_role('checkbox', name='Select '+object_name, exact=True)).to_be_checked()
+                    downloaded(owner,azure_view.get_by_role('button',name='↓ Download',exact=True),payload)
                     azure_view.get_by_role('button',name='Delete',exact=True).click()
                     modal=owner.get_by_role('dialog',name='Delete blob',exact=True)
                     modal.get_by_label('Type '+object_name+' to confirm deletion',exact=True).fill(object_name)
@@ -220,7 +270,7 @@ def run_crossprovider_console():
                     expect(azure_view.get_by_text(object_name,exact=True)).to_have_count(0)
                     azure(a,operator,'GET',tail,expected=404)
                     azure_view.get_by_role('link',name='Containers',exact=True).click()
-                    azure_view.get_by_role('radio',name='Select '+container,exact=True).check()
+                    azure_view.get_by_role('checkbox',name='Select '+container,exact=True).check()
                     azure_view.get_by_role('button',name='Delete',exact=True).click()
                     modal=owner.get_by_role('dialog',name='Delete container',exact=True)
                     modal.get_by_label('Type '+container+' to confirm deletion',exact=True).fill(container)
@@ -257,9 +307,9 @@ def run_crossprovider_console():
                 native(a,other,'GET',GCP+'/b?project=tenkacloud-local',expected=401)
                 azure(a,other,'GET','?comp=list',expected=401)
                 # Real Account menu sign-out revokes this browser, while SDK header auth survives.
-                trigger=limited.get_by_role('button',name='Account menu',exact=True)
+                trigger=limited.locator('.cloud-session summary[aria-label="Account menu"]')
                 trigger.focus();limited.keyboard.press('Enter')
-                signout=limited.get_by_role('menuitem',name='Sign out',exact=True)
+                signout=limited.get_by_role('button',name='Sign out',exact=True)
                 expect(signout).to_be_visible();signout.focus();limited.keyboard.press('Enter')
                 expect(limited.get_by_role('heading',name='Open your local sandbox',exact=True)).to_be_visible()
                 wire=p.request.new_context()
@@ -286,8 +336,8 @@ def run_crossprovider_console():
                 assert not errors,'Browser page errors (see evidence counts; no secret-bearing error text emitted)'
                 assert not outside,'Unexpected network request outside the selected local CLI'
                 report={'actualBinaryTwoCLIs':True,'twoSQLiteDBs':True,'browserSessionsMinted':True,
-                        'gcpAndAzureActualUILifecycle':[1440,390],'configuredProviderScopeMenu':[1440,390],'nativeHTTPStateOracle':True,
-                        'downloadExactBytes':True,'peerSameNameStatePreserved':True,'readerNative403FramesUnchanged':True,
+                        'gcpAndAzureActualUILifecycle':[1440,390],'configuredProviderScopeReadOnly':[1440,390],'nativeHTTPStateOracle':True,
+                        'downloadExactBytes':True,'gcpStaleGeneration412ThenLiveMetadata':True,'azureLastListPropertiesMatchNativeHEAD':True,'peerSameNameStatePreserved':True,'readerNative403FramesUnchanged':True,
                         'readerUI403':True,'crossTeamTokensAndCookie401':True,'logoutReplay401Relogin':True,
                         'scalarStaticThenActualSend':True,'axeStates':audits,'outsideRequests':0,'pageErrors':0,
                         'officialSDKExecuted':False,'actualCloud':False,'cleanup':'DELETED'}

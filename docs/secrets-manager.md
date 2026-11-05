@@ -1,6 +1,7 @@
 # Secrets Manager: local training subset
 
-> Main refresh: current mainfcf8 (KMS, S3 regression and login improvements merged) plus Secrets18aa retains21 models/108 controls and29 mandatory cases. Historical validation receipts below describe the original isolated62ba/runtime source. Current local focused checks and exact-HEAD whole hosted CI are separate evidence; old results never establish the new union automatically.
+> Provider-aware normal merge candidate: main `f5dba056da9bf69df047b391a45d06a3aff3dc66` plus preserved PR408 `ffdf1e29` native source. All18 Core model entries (including Login/BrowserSessions binding) and three Secrets models remain:21 models/108 controls,129 finite cases. All28 main Conformance method bodies are retained plus three mandatory Secrets cases:31 total. The localized Secrets child preserves its native protocol, mutation and explicit-disclosure guards; source/pure checks do not replace fresh integrated formal/race/E2E/CI execution.
+
 
 Seven native Secrets Manager operations, the Cloudscape console, SDK clients and
 the embedded API reference use the same SQLite state. This is an independent,
@@ -14,7 +15,7 @@ are ordinary metadata, not protected value fields; do not put secrets in them.
 ## Connect and use the API
 
 Start the normal authenticated local binary as described in [startup](start.md),
-sign in with its local access token, then choose **Services → Secrets Manager**.
+sign in with its local access token, then choose **AWS → Services → Secrets Manager**. The provider-scoped catalog requires the actual Secrets capability; `#/secretsmanager` and the legacy `#/secrets` alias select the same view. No Google/Azure catalog advertises it.
 Hosts allocate a separate process, SQLite file and token authority for each team.
 A selected IAM principal is exercise context, not authentication or tenant
 isolation. Participant tokens cannot select the administrator.
@@ -226,3 +227,22 @@ SQLite immutable versions and retired physical identities.
 Pinned source references:
 [Kumo store](https://github.com/sivchari/kumo/blob/ce37a8fb406ecb96b5619204f645c26302b651a5/internal/service/secretsmanager/storage.go),
 [LocalStack provider](https://github.com/localstack/localstack/blob/8b9a79f05846835cf4dff63ab7eefdde9df83783/localstack-core/localstack/services/secretsmanager/provider.py).
+
+
+## Provider-aware localization source slice
+
+The child retains `{region, request, onSaving}` and remounts on region, principal
+and navigationVersion, never locale. English/Japanese change static labels only.
+SecretString, names, ARNs, version IDs, JSON, API enum values and raw server error
+messages are never translated. Four canonical success kinds render in the current
+language; seven locally typed validation errors use a finite dictionary.
+
+On the local source slice, default-English translation erasure compiled to exactly
+the independently preserved ffdf1e29 child output; six pure checks passed. The
+new provider catalog adds six tests including capability gating, both routes and
+AWS-only Japanese discovery, for12 pure checks total. The canonical console was
+built from the existing same-lock dependencies without any install. These checks
+are not real browser/reveal/SDK or full model-129 acceptance at this new union.
+Fresh integrated gates are still required; old62ba/ffdf/main receipts remain
+separate historical inputs. No blocked public operation is retried by this local
+source preparation.

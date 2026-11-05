@@ -1,5 +1,50 @@
 # Development roster
 
+Current integration snapshot: 2026-11-05. Integration owner: `root`.
+
+Verified public main: `fcf8e702b45953cdeeba49883a238e638af725e8` (PR411 merged).
+All six main checks / three workflows succeeded, including CI41941140492 and
+Formal41941140471. This does not establish Dia-specific compatibility.
+
+## Current console assignments and integration
+
+All five source scopes are privately integrated on
+`integrate/cloud-console-contract-20261105`; no new UI PR is published yet.
+Each author used a dedicated worktree from the shared `c334f4f` baseline.
+
+| Owner | Delivered scope | Verified / remaining |
+|---|---|---|
+| root | shared locale, Login extraction, integration/assets, focus and final gates | Canonical 22-package embed/build, actual clipboard and file login, language and provider focused tests PASS; whole gates/CI pending |
+| cfn_adapters | provider catalog/search, AWS-only Cloudscape shell, S3/SSM/CFN translation | Five catalog unit checks PASS; root fixed keyboard focus recovery and provider-owned control styling |
+| team_host | GCP shell, staged create, live generation-conditional object metadata, docs | Syntax/11 presentation checks and root actual metadata412→200/browser lifecycle PASS; authenticated Google pixels unverified |
+| waf_service | Azure resource menu/table/action pane, pane locale, docs | Root actual lifecycle/properties/native frames PASS; three public official images inspected, authenticated Portal unverified |
+| grader_http | masked explicit token-file fallback and bounded read revision tests | Actual embedded chooser/login/logout/clipboard/races PASS; Mac/Dia real device remains unverified |
+| cfn_callback | seven AWS child modules and success notices; independent integration review | 435 presentation translations; default-English erasure exactly matches seven base modules. Found menu-focus issue; root fixed and browser checked it |
+| waf_console | provider/language acceptance and latest PR CI observation | Existing HTTP/data/auth/peer/download oracles retained; 22 provider and12 language audit states PASS, no external requests/page errors |
+
+Focused checks do not certify the full integration HEAD. Full Go/race, both
+coverage floors, 28-case E2E, audit, immutable formal and hosted CI are the
+remaining gates. GCP/Azure official SDK execution and authenticated cloud visual
+parity are unverified. See [common contract](design/0006-console-provider-contract.md).
+There are seven local slots including root, not 200 executing agents. Heavy
+checks are explicitly reserved within four available CPUs. Library screenshot
+saving failed at the helper's tools-list network request; candidate images are
+preserved locally and no alternate write was attempted.
+
+## Other work boundaries
+
+Other open PRs retain their existing public descriptions and review state.
+Their metadata and Ready transitions are outside this console change. The
+previously denied PR408 Ready transition and WAF50 security reproduction remain
+stopped. No Composio, real cloud mutation or protection-setting change is part
+of this work.
+
+---
+
+# Historical roster: 2026-11-04 integration snapshot
+
+# Development roster
+
 Current integration snapshot: 2026-11-04. Integration owner: `root`.
 This section is the single current assignment roster. The previous snapshot is
 retained below as history. Follow the [parallel rules](contributing/parallel-development.md)

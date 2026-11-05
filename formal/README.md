@@ -213,3 +213,12 @@ The KMS increment now belongs to public main0a4:18 baselines/94 controls. Its so
 ## Secrets candidate on current main (new-head verification pending)
 
 This union retains main18models/94controls and adds exactSecretsVersionLifecycle, SecretsRevealEpoch and SecretsDisclosureChannels (3/14):21models/108controls,129plannedTLCcases. No new integrated execution claimed; old62ba,9b,7a results remain historical inputs. The finite models do not prove Go/SQL/React refinement or KMS encryption ofSecrets. See [Secrets limits](../docs/secrets-manager.md).
+
+
+Provider-aware Secrets restack: the normal merge of mainf5dba056 preserves all
+18 Core entries/94 controls including the extracted Login source binding for
+BrowserSessions, then retains the three Secrets entries/14 controls:21/108,129
+cases. No TLA/CFG or control is changed by locale/catalog integration. Existing
+finite state/source contracts do not prove translations, bundling, React lifetimes,
+Google/Azure parity or actual secret erasure. Fresh immutable checks remain
+required on the final union.
