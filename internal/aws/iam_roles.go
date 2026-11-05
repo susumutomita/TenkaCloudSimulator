@@ -43,6 +43,9 @@ var iamInlineName = regexp.MustCompile(`^[a-zA-Z0-9_+=,.@-]{1,128}$`)
 var iamServicePrincipal = regexp.MustCompile(`^[a-z0-9.-]+\.amazonaws\.com$`)
 
 func NewIAMRoleStore(db *sql.DB) (*IAMRoleStore, error) {
+	if db == nil {
+		return nil, fmt.Errorf("local IAM database is required")
+	}
 	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS aws_iam_roles (
  name TEXT PRIMARY KEY COLLATE NOCASE, role_id TEXT NOT NULL, trust TEXT NOT NULL,
  created TEXT NOT NULL, description TEXT NOT NULL, duration INTEGER NOT NULL,
@@ -50,6 +53,9 @@ func NewIAMRoleStore(db *sql.DB) (*IAMRoleStore, error) {
  CREATE TABLE IF NOT EXISTS aws_iam_role_policies (
  role_name TEXT NOT NULL REFERENCES aws_iam_roles(name), name TEXT NOT NULL,
  document TEXT NOT NULL, PRIMARY KEY(role_name,name));`)
+	if err == nil {
+		err = iamManagedSchema(db)
+	}
 	return &IAMRoleStore{db}, err
 }
 
@@ -351,12 +357,57 @@ func iamSyncPolicy(ctx context.Context, tx *sql.Tx, name string) error {
 	if err != nil {
 		return err
 	}
-	if count > 10 || len(p.Statement) > 100 {
-		return ssmFailure{"LimitExceeded", "Local roles support10inline policies and100aggregate statements."}
+	if count > 10 {
+		return ssmFailure{"LimitExceeded", "Local roles support10inline policies."}
+	}
+	role, err := iamManagedRole(ctx, tx, name)
+	if err != nil {
+		return err
+	}
+	managed, err := iamManagedRolePolicies(ctx, tx, role)
+	if err != nil {
+		return err
+	}
+	for _, policy := range managed {
+		for _, version := range policy.versions {
+			if version.IsDefaultVersion {
+				part, e := core.ParsePolicy([]byte(version.Document))
+				if e != nil {
+					return e
+				}
+				p.Statement = append(p.Statement, part.Statement...)
+			}
+		}
+	}
+	if len(p.Statement) > 100 {
+		return ssmFailure{"LimitExceeded", "Local role aggregates support100 statements."}
+	}
+	var previous string
+	lookup := tx.QueryRowContext(ctx, "SELECT document FROM identity_policies WHERE name=?", name).Scan(&previous)
+	if lookup != nil && lookup != sql.ErrNoRows {
+		return lookup
+	}
+	if lookup == nil {
+		if _, e := core.ParsePolicy([]byte(previous)); e != nil {
+			return e
+		}
 	}
 	if len(p.Statement) == 0 {
-		_, err = tx.ExecContext(ctx, "DELETE FROM identity_policies WHERE name=?", name)
-		return err
+		result, e := tx.ExecContext(ctx, "DELETE FROM identity_policies WHERE name=?", name)
+		if lookup == sql.ErrNoRows {
+			if e != nil {
+				return e
+			}
+			n, e := result.RowsAffected()
+			if e != nil {
+				return e
+			}
+			if n != 0 {
+				return iamManagedBad()
+			}
+			return nil
+		}
+		return iamExactlyOne(result, e)
 	}
 	var identities, existing int
 	if err = tx.QueryRowContext(ctx, "SELECT count(*) FROM identity_policies").Scan(&identities); err != nil {
@@ -375,8 +426,17 @@ func iamSyncPolicy(ctx context.Context, tx *sql.Tx, name string) error {
 	if len(data) > 32<<10 {
 		return ssmFailure{"LimitExceeded", "Local aggregate role policy exceeds32KiB."}
 	}
-	_, err = tx.ExecContext(ctx, "INSERT INTO identity_policies(name,document) VALUES(?,?) ON CONFLICT(name) DO UPDATE SET document=excluded.document", name, string(data))
-	return err
+	if err = iamExactlyOne(tx.ExecContext(ctx, "INSERT INTO identity_policies(name,document) VALUES(?,?) ON CONFLICT(name) DO UPDATE SET document=excluded.document", name, string(data))); err != nil {
+		return err
+	}
+	var saved string
+	if err = tx.QueryRowContext(ctx, "SELECT document FROM identity_policies WHERE name=?", name).Scan(&saved); err != nil {
+		return err
+	}
+	if saved != string(data) {
+		return iamManagedBad()
+	}
+	return nil
 }
 func (s *IAMRoleStore) PutPolicy(ctx context.Context, name, policyName, document string) error {
 	if !iamInlineName.MatchString(policyName) || len(document) > 32<<10 {
@@ -397,7 +457,7 @@ func (s *IAMRoleStore) PutPolicy(ctx context.Context, name, policyName, document
 	if err != nil {
 		return err
 	}
-	_, err = tx.ExecContext(ctx, "INSERT INTO aws_iam_role_policies(role_name,name,document) VALUES(?,?,?) ON CONFLICT(role_name,name) DO UPDATE SET document=excluded.document", role.RoleName, policyName, string(data))
+	err = iamExactlyOne(tx.ExecContext(ctx, "INSERT INTO aws_iam_role_policies(role_name,name,document) VALUES(?,?,?) ON CONFLICT(role_name,name) DO UPDATE SET document=excluded.document", role.RoleName, policyName, string(data)))
 	if err != nil {
 		return err
 	}
@@ -428,6 +488,13 @@ func (s *IAMRoleStore) DeletePolicy(ctx context.Context, name, policyName string
 	if err != nil {
 		return err
 	}
+	var present int
+	if err = tx.QueryRowContext(ctx, "SELECT count(*) FROM aws_iam_role_policies WHERE role_name=? AND name=?", role.RoleName, policyName).Scan(&present); err != nil {
+		return err
+	}
+	if present == 0 {
+		return ssmFailure{"NoSuchEntity", "Inline policy does not exist."}
+	}
 	result, err := tx.ExecContext(ctx, "DELETE FROM aws_iam_role_policies WHERE role_name=? AND name=?", role.RoleName, policyName)
 	if err != nil {
 		return err
@@ -436,8 +503,8 @@ func (s *IAMRoleStore) DeletePolicy(ctx context.Context, name, policyName string
 	if err != nil {
 		return err
 	}
-	if n == 0 {
-		return ssmFailure{"NoSuchEntity", "Inline policy does not exist."}
+	if n != 1 {
+		return fmt.Errorf("local IAM inline policy delete was not acknowledged")
 	}
 	if err = iamSyncPolicy(ctx, tx, role.RoleName); err != nil {
 		return err
@@ -472,16 +539,28 @@ func (s *IAMRoleStore) Delete(ctx context.Context, name string) error {
 		return err
 	}
 	var count int
-	if err = tx.QueryRowContext(ctx, "SELECT count(*) FROM aws_iam_role_policies WHERE role_name=?", role.RoleName).Scan(&count); err != nil {
+	if err = tx.QueryRowContext(ctx, "SELECT (SELECT count(*) FROM aws_iam_role_policies WHERE role_name=?)+(SELECT count(*) FROM aws_iam_role_managed_policies WHERE role_name=?)", role.RoleName, role.RoleName).Scan(&count); err != nil {
 		return err
 	}
 	if count != 0 {
-		return ssmFailure{"DeleteConflict", "Remove the role's inline policies before deleting it."}
+		return ssmFailure{"DeleteConflict", "Remove the role's inline and attached policies before deleting it."}
 	}
-	if _, err = tx.ExecContext(ctx, "DELETE FROM identity_policies WHERE name=?", role.RoleName); err != nil {
+	var aggregate int
+	if err = tx.QueryRowContext(ctx, "SELECT count(*) FROM identity_policies WHERE name=?", role.RoleName).Scan(&aggregate); err != nil {
 		return err
 	}
-	if _, err = tx.ExecContext(ctx, "UPDATE aws_iam_roles SET deleted=1 WHERE name=?", role.RoleName); err != nil {
+	result, err := tx.ExecContext(ctx, "DELETE FROM identity_policies WHERE name=?", role.RoleName)
+	if err != nil {
+		return err
+	}
+	n, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if n != int64(aggregate) {
+		return iamManagedBad()
+	}
+	if err = iamExactlyOne(tx.ExecContext(ctx, "UPDATE aws_iam_roles SET deleted=1 WHERE name=? AND role_id=? AND deleted=0", role.RoleName, role.RoleID)); err != nil {
 		return err
 	}
 	return tx.Commit()
