@@ -80,3 +80,13 @@ executed [official SDK acceptance](crossprovider-official-storage.md) supplies
 SDK evidence for its pinned subset, not a reinterpretation of those browser
 reports. Scalar static-versus-actual Send passed at390px;
 Scalar open-client axe conformance is not asserted.
+
+### Live Azure Properties increment
+
+The Azure properties pane now makes an authenticated native HEAD rather than
+reusing its list row. The cross-provider helper retains its existing native
+header/state oracle and updates only the pane explanation/result name for that
+behavior. The separate mandatory `azure_live_properties.py` helper covers live
+replacement after listing and read/cancel/scope failure boundaries. Historical
+browser or official-SDK receipts above do not certify the combined new HEAD;
+rerun the required focused and full integration gates.

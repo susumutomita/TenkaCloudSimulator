@@ -1,19 +1,114 @@
 {
   "version": 1,
-  "base_sha": "ce1ddd1fb5d05ef37acd1ae6b2c8c94d43136b18",
+  "base_sha": "cba0a29a0397ab01ca106bbc5374b85b50d736b2",
   "changes": [
     {
-      "path": "docs/sqs-console.md",
-      "sha256": "208c0b509cf9d84fa7c8aef905b51520d733f5ce088f57c876ff6961b6634acf",
+      "path": "README.md",
       "disposition": "documentation",
-      "reason": "Separate this source-only restack and pending canonical/runtime/formal checks from historical candidate receipts.",
+      "models": [],
+      "reason": "Update current merged-source acceptance/counts and distinguish historical receipts from unexecuted exact-HEAD checks; preserve protocol, authorization and rights limitations.",
+      "sha256": "0193de3e1171b465c7e83a852d06a179fb4b00f8e9e9427d7258c13430944ceb"
+    },
+    {
+      "path": "docs/acceptance/crossprovider-console.md",
+      "disposition": "documentation",
+      "models": [],
+      "reason": "Update current merged-source acceptance/counts and distinguish historical receipts from unexecuted exact-HEAD checks; preserve protocol, authorization and rights limitations.",
+      "sha256": "e7a8a7c34357b1a5dfc230e9692345aec60464ad34a89b0e6014ace207a253d7"
+    },
+    {
+      "path": "docs/azure-console.md",
+      "disposition": "documentation",
+      "models": [],
+      "reason": "Update current merged-source acceptance/counts and distinguish historical receipts from unexecuted exact-HEAD checks; preserve protocol, authorization and rights limitations.",
+      "sha256": "21a740d2d1709803f632e32c6705aefe0ca2eefe01129a5a25e7eb371c40d1ba"
+    },
+    {
+      "path": "docs/ci.md",
+      "disposition": "documentation",
+      "models": [],
+      "reason": "Update current merged-source acceptance/counts and distinguish historical receipts from unexecuted exact-HEAD checks; preserve protocol, authorization and rights limitations.",
+      "sha256": "cbf6d77ea09719f156f82c6a4cd5a07ee088d08acc1f7cb65af1739c292c0b1a"
+    },
+    {
+      "path": "docs/formal-azure-properties.md",
+      "sha256": "2d96d4ffabe60fd80015c990917f830a9c186515dba36f48c9d7bf6479c4886d",
+      "disposition": "documentation",
+      "reason": "Describe bounded Azure Properties callback model correspondence and explicitly unmodeled transport/header/authorization/liveness boundaries.",
+      "models": []
+    },
+    {
+      "path": "docs/formal-validation.md",
+      "disposition": "documentation",
+      "models": [],
+      "reason": "Update current merged-source acceptance/counts and distinguish historical receipts from unexecuted exact-HEAD checks; preserve protocol, authorization and rights limitations.",
+      "sha256": "bf98b20f9d027809a8d7d76a558e592b548d9e4fe00b2fe784489e89189e9077"
+    },
+    {
+      "path": "formal/AzurePropertiesEpoch.cfg",
+      "sha256": "ae53676eed97338e67a645d8a04f9b3b45da047ef81534282145b2b398920dc3",
+      "disposition": "modeled",
+      "reason": "Live HEAD Properties lifecycle publishes only a successful current request; clears old values on Open/Close and ignores stale completion/finalization. Bound component abstraction; actual header parsing, transport and authorization need separate native browser checks.",
+      "models": [
+        {
+          "id": "AzurePropertiesEpoch",
+          "properties": [
+            "TypeOK",
+            "SuccessfulOnly",
+            "AcceptedOnlyCurrent",
+            "ClearedWhenClosed",
+            "LoadingClearsPrevious",
+            "FailureNoDisclosure",
+            "CurrentProperties",
+            "CurrentRequestLoading",
+            "LocaleStable"
+          ],
+          "limits": "Bounded component-callback/state abstraction, not JS/Go/SQL refinement or full Azure authorization. Context is captured lifecycle identity, not invented scope equality check. Root remount and component destruction abstracted; no epoch reuse/unbounded wraparound, header parsing/UTF8/arithmetic/HTML proof, cryptographic/transport proof or liveness. Callable Open can be programmatically invoked on completed pane; not claim background controls clickable through native dialog. Native helper raw HTTP != official SDK; container properties deferred."
+        }
+      ]
+    },
+    {
+      "path": "formal/AzurePropertiesEpoch.tla",
+      "sha256": "5c77f24b0d735da6414ab495caa8d503c231a24bb15399deb60447732449d567",
+      "disposition": "modeled",
+      "reason": "Live HEAD Properties lifecycle publishes only a successful current request; clears old values on Open/Close and ignores stale completion/finalization. Bound component abstraction; actual header parsing, transport and authorization need separate native browser checks.",
+      "models": [
+        {
+          "id": "AzurePropertiesEpoch",
+          "properties": [
+            "TypeOK",
+            "SuccessfulOnly",
+            "AcceptedOnlyCurrent",
+            "ClearedWhenClosed",
+            "LoadingClearsPrevious",
+            "FailureNoDisclosure",
+            "CurrentProperties",
+            "CurrentRequestLoading",
+            "LocaleStable"
+          ],
+          "limits": "Bounded component-callback/state abstraction, not JS/Go/SQL refinement or full Azure authorization. Context is captured lifecycle identity, not invented scope equality check. Root remount and component destruction abstracted; no epoch reuse/unbounded wraparound, header parsing/UTF8/arithmetic/HTML proof, cryptographic/transport proof or liveness. Callable Open can be programmatically invoked on completed pane; not claim background controls clickable through native dialog. Native helper raw HTTP != official SDK; container properties deferred."
+        }
+      ]
+    },
+    {
+      "path": "formal/README.md",
+      "disposition": "documentation",
+      "models": [],
+      "reason": "Update current merged-source acceptance/counts and distinguish historical receipts from unexecuted exact-HEAD checks; preserve protocol, authorization and rights limitations.",
+      "sha256": "698787a761c7b042907afcdf91159e72434aa7995babc886cfe13cd22183ab80"
+    },
+    {
+      "path": "formal/models.json",
+      "sha256": "815550ff07641c00dd12483cc6cc9b480e0baf3514d09ddaee72fbd8ed7d0cce",
+      "disposition": "formal-infrastructure",
+      "reason": "Preserve every current main27 model/config/property and153 literal controls; append exact existing AzurePropertiesEpoch with nine invariants/five controls. Extend main strict valid-CFG property/model and every-control omission tests; retain all31 unique test methods/AST uniqueness guards. Source declaration, not full implementation refinement or new immutable execution proof.",
       "models": []
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "fb0fd0825375592189f95883ab6f1d754619a378de4476b31da138c2d3a73e84",
+      "sha256": "043dff1cbc645522d0575920326eed510e1060dfa19d8cf59a232919267624df",
       "disposition": "modeled",
-      "reason": "Canonical same-lock embedded bundle preserves main service views plus reviewed Secrets ACK/read and Login keyboard changes. Existing reveal/epoch binding covers only its finite correspondence, not minification, keyboard chooser, all JavaScript or erasure. New source/build/browser and immutable gates are independent evidence. Reviewed accessibility-only refresh disables Cloudscape motion within the Secrets view, with exact-English locale normalization and strengthened immediate-alert contrast regression checks. Existing finite state bindings are retained; animation/opacity/accessibility are outside these models and require executable browser evidence. New hosted exact-HEAD full gates remain required.",
+      "reason": "Canonical same-lock generated bundle preserves maincba Secrets source and routing byte-for-byte while adding Azure live properties. Retain the existing finite SecretsRevealEpoch correspondence as an unchanged/frame-limited compiled projection only; it does not cover Azure HEAD/header parsing, all JavaScript, animation, minification or compiler correctness. Azure source has its separate AzurePropertiesEpoch binding. Independent build/browser and exact-new-HEAD formal gates remain required.",
       "models": [
         {
           "id": "SecretsRevealEpoch",
@@ -28,96 +123,76 @@
       ]
     },
     {
-      "path": "test/console/navigation.test.mjs",
-      "sha256": "86c2f7972c48e33ca94528283b435f51141bc5e5e0706ca1e693509fe6a17e77",
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "15da1e8cb1ab66958bf825fca0610058f07ab9e2f1cca4ee526ca0ab2560a334",
+      "disposition": "formal-infrastructure",
+      "reason": "Preserve every current main27 model/config/property and153 literal controls; append exact existing AzurePropertiesEpoch with nine invariants/five controls. Extend main strict valid-CFG property/model and every-control omission tests; retain all31 unique test methods/AST uniqueness guards. Source declaration, not full implementation refinement or new immutable execution proof.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "835b5e12c7630988cb6632422b7ce688e9a200a5d77b2e9464e380403a9c3b07",
+      "disposition": "formal-infrastructure",
+      "reason": "Preserve every current main27 model/config/property and153 literal controls; append exact existing AzurePropertiesEpoch with nine invariants/five controls. Extend main strict valid-CFG property/model and every-control omission tests; retain all31 unique test methods/AST uniqueness guards. Source declaration, not full implementation refinement or new immutable execution proof.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/azure_live_properties.py",
+      "sha256": "bcadc586dcf684ce83b66e669d1695f50f92c120aff1d1d869d89e77f17b3a83",
       "disposition": "test-support",
-      "reason": "Preserve all main42 acceptance bodies and add mandatory actual two-CLI locale/receipt assertions; retain catalog controls and strict failure behavior.",
+      "reason": "Mandatory actual embedded native HEAD/browser lifecycle acceptance and old provider helper text synchronized to live native properties; no official Azure SDK claim.",
       "models": []
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "33f668864de7169d53ab5f3d161cb1db5a3a67a678553acfc3154c6bf584833f",
+      "sha256": "541c2e08ccee39cfea0675d9c3a2f3881c98b079b30ed1e562ded8ca67fe187f",
       "disposition": "test-support",
-      "reason": "Preserve all main42 acceptance bodies and add mandatory actual two-CLI locale/receipt assertions; retain catalog controls and strict failure behavior.",
+      "reason": "Mandatory actual embedded native HEAD/browser lifecycle acceptance and old provider helper text synchronized to live native properties; no official Azure SDK claim.",
       "models": []
     },
     {
-      "path": "test/e2e/service_locale.py",
+      "path": "test/e2e/crossprovider_console.py",
+      "sha256": "89ae722883c612a4b7c0e540e2036921bb4f6254c2f1945d42b9beaa65bfb82b",
       "disposition": "test-support",
-      "reason": "Adapt only two stale Japanese SQS accessible-name selectors to the integrated translated leaf; preserve actual native operation/data/ACK/retry/cleanup assertions and all Secrets/Logs flows. Initial mismatch failure retained separately.",
-      "models": [],
-      "sha256": "0be3ff88aac6b760761a7c9d1e1614925f2329770c7f10ee8cda2ede224a2d4d"
-    },
-    {
-      "path": "test/e2e/sqs_locale.py",
-      "sha256": "276d4fc7005a8e44c9dd4c821f7586068caec0db15d861e0ec898ea7f0159ea6",
-      "disposition": "test-support",
-      "reason": "Preserve all main42 acceptance bodies and add mandatory actual two-CLI locale/receipt assertions; retain catalog controls and strict failure behavior.",
+      "reason": "Mandatory actual embedded native HEAD/browser lifecycle acceptance and old provider helper text synchronized to live native properties; no official Azure SDK claim.",
       "models": []
     },
     {
       "path": "tools/console/bundle-digests.json",
+      "sha256": "5c467b34e757fcec45689061b921c732df8333bfb3316a794bda03ff65281440",
       "disposition": "presentation",
-      "reason": "Canonical same-lock Cloudscape bundle of the SQS locale source; original22 package notices, native API/state contracts and dependencies unchanged. Generated assets do not prove runtime behavior.",
-      "models": [],
-      "sha256": "6dd9a3846be6784b75e8a941081671ee79d29ee7363613e5d8b4be2078062819"
+      "reason": "Canonical Cloudscape bundle/digests/source receipt regenerated from unchanged pinned dependencies and original rights; generated JavaScript is integration evidence, not separate transport or authorization proof.",
+      "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
+      "sha256": "89f8d89e77fcdd3c62c1409e412e51002b4e5012f1c5d3166d81bc134616a16f",
       "disposition": "presentation",
-      "reason": "Canonical same-lock Cloudscape bundle of the SQS locale source; original22 package notices, native API/state contracts and dependencies unchanged. Generated assets do not prove runtime behavior.",
-      "models": [],
-      "sha256": "1265ad8713f924766f40c6532c93b0fabc7bcc55aebe2caa63a64e5f7bfd9f38"
-    },
-    {
-      "path": "tools/console/src/console-navigation.mjs",
-      "sha256": "582ceaf2418487ef7089356ac1fc649d94ee657a8615fa1239f00187492841b7",
-      "disposition": "presentation",
-      "reason": "SQS static label/notice presentation and existing-catalog Japanese alias controls only; native APIs, dependencies and authority remain unchanged.",
+      "reason": "Canonical Cloudscape bundle/digests/source receipt regenerated from unchanged pinned dependencies and original rights; generated JavaScript is integration evidence, not separate transport or authorization proof.",
       "models": []
     },
     {
-      "path": "tools/console/src/main.jsx",
-      "sha256": "96882cd6ac61d3132c71071206ffc975cb984573bfcd8d7d668f7d62ef403e7c",
+      "path": "tools/console/src/azure-blob.jsx",
+      "sha256": "ffa780b89eb4ce8e6017d6ffa29605770af2c35b15b5e0221677954a1a8d08de",
       "disposition": "modeled",
-      "reason": "Presentation-only SQS localization continuation and explicit SQS keyed-remount separators. All main service mounts and native state contracts are preserved; finite epoch/custody correspondence is not a proof of React, translation, native receipt validity or authorization.",
+      "reason": "Live HEAD Properties lifecycle publishes only a successful current request; clears old values on Open/Close and ignores stale completion/finalization. Bound component abstraction; actual header parsing, transport and authorization need separate native browser checks.",
       "models": [
         {
-          "id": "SQSConsoleEpoch",
+          "id": "AzurePropertiesEpoch",
           "properties": [
-            "OnlyCurrentReplies",
-            "NoUnmountedAcceptance",
-            "ReceiptCustodyBound",
-            "RawReceiptsPrivate"
+            "TypeOK",
+            "SuccessfulOnly",
+            "AcceptedOnlyCurrent",
+            "ClearedWhenClosed",
+            "LoadingClearsPrevious",
+            "FailureNoDisclosure",
+            "CurrentProperties",
+            "CurrentRequestLoading",
+            "LocaleStable"
           ],
-          "limits": "Finite view acceptance/custody abstraction only, not React/AbortController/DOM/thread execution, token authentication, IAM, native receipt validity/freshness, Go/SQL, cryptography or AWS visual parity. Native requests may finish after cancellation; only current replies enter the view. Accepted history captures its original mounted/context/epoch, so later changes cannot relabel an old acceptance. Unmount epoch advance is redundant with the alive guard and the combined mutant deliberately removes both. Receipt values abstract one response identity per context/epoch; native freshness and release require actual browser/SDK tests. main.jsx source scope is only added SQS keyed-remount/navigation seam, not all other services or authentication."
+          "limits": "Bounded component-callback/state abstraction, not JS/Go/SQL refinement or full Azure authorization. Context is captured lifecycle identity, not invented scope equality check. Root remount and component destruction abstracted; no epoch reuse/unbounded wraparound, header parsing/UTF8/arithmetic/HTML proof, cryptographic/transport proof or liveness. Callable Open can be programmatically invoked on completed pane; not claim background controls clickable through native dialog. Native helper raw HTTP != official SDK; container properties deferred."
         }
       ]
-    },
-    {
-      "path": "tools/console/src/sqs.jsx",
-      "sha256": "4c5f4ae871195caabe0172d2c8d4fbc7cbbcbe700587f83f104f579d7aa07d1d",
-      "disposition": "modeled",
-      "reason": "Presentation-only SQS localization continuation and explicit SQS keyed-remount separators. All main service mounts and native state contracts are preserved; finite epoch/custody correspondence is not a proof of React, translation, native receipt validity or authorization.",
-      "models": [
-        {
-          "id": "SQSConsoleEpoch",
-          "properties": [
-            "OnlyCurrentReplies",
-            "NoUnmountedAcceptance",
-            "ReceiptCustodyBound",
-            "RawReceiptsPrivate"
-          ],
-          "limits": "Finite view acceptance/custody abstraction only, not React/AbortController/DOM/thread execution, token authentication, IAM, native receipt validity/freshness, Go/SQL, cryptography or AWS visual parity. Native requests may finish after cancellation; only current replies enter the view. Accepted history captures its original mounted/context/epoch, so later changes cannot relabel an old acceptance. Unmount epoch advance is redundant with the alive guard and the combined mutant deliberately removes both. Receipt values abstract one response identity per context/epoch; native freshness and release require actual browser/SDK tests. main.jsx source scope is only added SQS keyed-remount/navigation seam, not all other services or authentication."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/test/sqs-locale.test.mjs",
-      "sha256": "3d40be53e9f85177e88837b7b33cd71f96b69c988cc8c8d8c0516efa65e07fef",
-      "disposition": "presentation",
-      "reason": "SQS static label/notice presentation and existing-catalog Japanese alias controls only; native APIs, dependencies and authority remain unchanged.",
-      "models": []
     }
   ]
 }

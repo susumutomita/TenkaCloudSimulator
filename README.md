@@ -102,7 +102,7 @@ SDK、操作画面、再起動、チーム分離の受入検証は `make e2e` �
 
 CIはstatementと未フィルターsource-line coverageを両方90%以上に強制します。`make before-commit`単独のcoverage判定はstatementのみで、source-line判定はCIのCobertura生成後ステージと上記の2コマンドで行います。SDK/browser、license、依存security、埋込asset、形式検査も行います。cross compileは他OSでの実行成功を意味しません。開発用Python/Node/Javaはruntime依存ではありません。UI・Scalarの再生成は権利表記とlockを保持する[各build手順](tools/console/README.md)・[Scalar手順](tools/scalar/README.md)・[Python runtimeの権利・再生成手順](tools/python/README.md)に従います。
 
-形式検査にはObjectStore、StackOwnership、S3Versions、NativeIAMOwnership、RESTDeploymentSnapshot、SSMParameterState、StartupTokenVisibility、BrowserSessions、SQSLifecycle、SQSStorageBudget、ProviderActor、GCPStorageState、AzureBlobState、ProjectAuthority、BlobRange、ProviderPath、KMSKeyState、KMSProtocolAdmission、SQSConsoleEpoch、CloudWatchLogsLifecycle、CloudWatchLogsViewEpoch、SecretsVersionLifecycle、SecretsRevealEpoch、SecretsDisclosureChannels、DynamoDBLifecycle、DynamoDBAdmission、SecretsMutationRefreshの27有限モデルと153の意図した欠陥検出をregistryへ登録しています。追加モデルの有限検査結果と、統合後の固定HEAD検査は区別して記録します。TLCと意図したmutantの反例で限定した安全条件を検査しますが、Go実装のrefinement、暗号、全AWS仕様・実AWSとの一致を証明するものではありません。変更はregistryとsource対応を更新し、固定HEADのCI結果で判断します。[形式検査](formal/README.md)、[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)。
+形式検査にはObjectStore、StackOwnership、S3Versions、NativeIAMOwnership、RESTDeploymentSnapshot、SSMParameterState、StartupTokenVisibility、BrowserSessions、SQSLifecycle、SQSStorageBudget、ProviderActor、GCPStorageState、AzureBlobState、ProjectAuthority、BlobRange、ProviderPath、KMSKeyState、KMSProtocolAdmission、SQSConsoleEpoch、CloudWatchLogsLifecycle、CloudWatchLogsViewEpoch、SecretsVersionLifecycle、SecretsRevealEpoch、SecretsDisclosureChannels、DynamoDBLifecycle、DynamoDBAdmission、SecretsMutationRefresh、AzurePropertiesEpochの28有限モデルと158の意図した欠陥検出をregistryへ登録しています。追加モデルの有限検査結果と、統合後の固定HEAD検査は区別して記録します。TLCと意図したmutantの反例で限定した安全条件を検査しますが、Go実装のrefinement、暗号、全AWS仕様・実AWSとの一致を証明するものではありません。変更はregistryとsource対応を更新し、固定HEADのCI結果で判断します。[形式検査](formal/README.md)、[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)。
 
 ## ライセンス
 
@@ -111,18 +111,28 @@ CIはstatementと未フィルターsource-line coverageを両方90%以上に強�
 貼り付けが動かない場合はログイン画面の「トークンファイルを選択」で、主催者から受け取った小さなファイルを明示選択できます。値は隠したまま読み込み、サインイン操作時にサーバーが認証します。[形式・制限とDia未確認の境界](docs/login-token-file.md)。
 
 
-## Secrets Manager integration candidate
+## Secrets Manager contract
 
-The normal merge of main0a6bdce preserves its provider-specific consoles, token-file
-Login and locale behavior. Secrets Manager is discoverable only inside AWS when
+Main `ce1ddd1` contains the provider-aware Secrets Manager integration and
+preserves its token-file Login, native services and locale behavior. Secrets Manager is discoverable only inside AWS when
 its actual capability is present; /secretsmanager and the /secrets alias select the
 same child. Seven native APIs and dummy plaintext values remain the documented
 limit; no KMS/rotation/recovery/CFN behavior is added. Earlier Secrets/native/main
-receipts are separate inputs. This provider-aware child and all27 models/153
-controls require new exact-HEAD verification before any publication/merge claim.
+receipts remain separate from the current Azure live-Properties candidate; its
+combined28 models/158 controls require fresh exact-HEAD verification.
 
 An acknowledged Secrets create/update now closes and clears its form before the
 independent metadata read. Read failure permits read-only refresh, not a replayed
 write. A new form intent obtains a fresh request token. The new bounded
 [ACK/read contract](docs/formal-secrets-mutation-refresh.md) does not cover
 unacknowledged network ambiguity or prove JavaScript refinement.
+
+
+## Azure live Blob Properties candidate
+
+The local candidate opens Blob Properties with an authenticated native HEAD,
+showing supported live headers and metadata without fetching blob content. It
+clears previous values on loading/failure and rejects late replies after Close
+or scope remount. See [the console contract](docs/azure-console.md). The current
+main-preserving normal merge requires fresh44-case integration and186 finite
+model/control executions; older focused results are not combined-head evidence.

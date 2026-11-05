@@ -2,9 +2,10 @@
 
 The simulator provides a bounded, independent Azure Blob Storage console over
 its local Azure HTTP API and SQLite state. It does not connect to Azure. The
-provider-specific redesign is a private integration candidate. Its canonical
-22-package build and actual embedded CLI passed focused browser acceptance;
-whole new-head regression gates and hosted CI remain separate obligations.
+provider-specific console is present in main. The live Blob Properties change
+is a new local integration candidate rebased by normal merge onto main
+`cba0a29a0397ab01ca106bbc5374b85b50d736b2`. Earlier focused browser evidence
+does not certify this combined source, rebuilt assets or hosted CI.
 This is not authenticated Azure Portal parity or official SDK compatibility.
 
 ## Screen and operation sequence
@@ -28,9 +29,12 @@ created by the user. Only implemented storage operations are actionable.
    default. To replace an existing target and its metadata, enter the literal
    API-independent confirmation word `replace`; the target must already exist.
 4. Select a blob's checkbox to download or delete it. Selecting its name or
-   **Properties** opens the last-list metadata: name, modification time, ETag,
-   type and size. This pane does not issue a new HEAD request or preview content;
-   use **Refresh** to obtain a new list snapshot.
+   **Properties** issues an authenticated native HEAD for that exact selected
+   blob. The pane displays the returned modification time, ETag, blob type,
+   content type, size and supported user metadata; it never requests the blob
+   body. Old properties are cleared while loading or after a failed read.
+   Closing the pane cancels the request; a late response cannot populate a newer
+   pane or a component remounted for another local subject/account.
 5. Deleting a blob requires its exact name and sends the selected ETag. A changed
    blob produces a conflict message rather than an unconditional deletion.
    Return through the **Containers** breadcrumb to select a container for
@@ -69,7 +73,7 @@ Microsoft Entra ID, Azure RBAC, SAS or an account-key implementation.
 | Blobs | GET `.../{container}?restype=container&comp=list&maxresults=100` |
 | Upload | PUT blob with `x-ms-blob-type: BlockBlob` and the selected File |
 | Create-only / replace | `If-None-Match: *` / explicit `If-Match: *` |
-| Properties pane | Last successful list metadata; no extra request |
+| Properties pane | HEAD exact blob URI; bounded supported headers and metadata, no body |
 | Download | GET blob, bounded bytes saved as an octet-stream attachment |
 | Delete blob | DELETE blob with the selected ETag in `If-Match` |
 | Delete container | DELETE with `restype=container`; atomic cascade |
@@ -120,7 +124,8 @@ No ARM account/subscription management, Entra sign-in, Azure RBAC editing,
 anonymous-access changes, SAS generation, leases, tiers, snapshots, versions,
 soft delete, staged blocks or recovery is simulated by these controls. The
 resource menu does not present other storage services as working. Blob Properties
-is an actual list snapshot, not a claim of every property available in Azure.
+shows only supported native HEAD response fields, not every Azure system
+property. Container Properties remains outside this console increment.
 
 ## Redesign verification status
 
@@ -128,18 +133,18 @@ This table separates source checks from runtime acceptance. The integration owne
 can replace pending entries with exact new-head receipts after running the gates;
 older API or browser evidence alone does not validate the redesigned screen.
 
-| Check | Current redesign evidence |
+| Check | Historical base-console evidence; new live-HEAD union is pending |
 | --- | --- |
 | JSX for view/shell and CSS parsing | PASS at `8e199c4`: existing esbuild transform; zero warnings; no asset output or dependency installation |
-| API/read/error helpers and lifetime/native CRUD | Byte-identical to `c334f4f`; this is source comparison, not a new API execution |
+| Original API/error/native CRUD paths | Existing base evidence; live HEAD adds a new bounded read and cancel handling, requiring fresh combined-head execution |
 | Diff whitespace check | PASS at `8e199c4` |
 | Canonical bundle, embedded CLI and license/digests | PASS: canonical 22-package bundle and actual embedded CLI; existing original notices retained |
 | Real browser lifecycle, keyboard, pane focus/Cancel and axe | PASS: actual two-CLI native HTTP lifecycle; 22 cross-provider audit states, not an SDK claim |
 | Desktop 1440 / mobile 390, layout and no horizontal overflow | PASS in focused embedded provider/language tests; authenticated Azure mobile parity unverified |
 | Same-SQLite native HTTP, cross-team/auth denial | PASS: exact download bytes, peer isolation, native/UI403, cross-token/cookie401 and logout replay refusal |
-| Official Azure SDK / restart persistence | Not certified by the browser helper; separate native/SDK gates remain necessary |
+| Official Azure SDK / restart persistence | Separate main SDK acceptance covers ten disclosed exact-key cases; it does not certify the new Properties UI |
 | Locale switching/persistence without losing entered data | PASS: real in-pane selector, draft/file/confirmation and native412 error retained; 12 combined language audit states |
-| Whole Go, E2E, formal applicability and hosted CI | Pending for the integrated head |
+| Live HEAD pane, whole Go/E2E/formal and hosted CI | Pending for the new main-preserving integrated head |
 
 Runtime acceptance must use real authenticated local HTTP/SQLite, not mocked
 responses: container create, binary/slash/percent/UTF-8 upload, native SDK and
@@ -150,3 +155,26 @@ scope change, no external calls or page errors occur, and only the owned pane
 handles its dismissal. The native checkbox selection replaces the earlier radio
 selection; browser tests must exercise that real selection without weakening the
 state or deletion assertions. No runtime acceptance is inferred from CSS alone.
+
+## Live Properties acceptance boundary
+
+The local HEAD view uses the existing native version `2023-11-03`, local
+authenticated request helper and component epoch/abort lifetime. A successful
+HEAD is required before any fetched values appear; a denied, missing, malformed
+or canceled response never falls back to the cached list row. Header parsing
+retains the native 8 MiB size ceiling and 32-field / 8 KiB metadata bound.
+Changing English/Japanese presentation does not refetch or modify resource data.
+
+`test/e2e/azure_live_properties.py` is a required integration helper. It uses
+actual local HEAD responses and native HTTP as its oracle, not an official Azure
+SDK: replace a blob after listing, open properties, compare fresh headers and
+metadata, verify no body GET, and exercise403/404, recovery, two isolated local
+environments and PC/mobile accessibility. It separately tests real Close, direct
+provider hash navigation while a response is held, and a deliberately synthetic
+existing-root-control principal transition while the modal is open. The latter
+is a state-lifetime fixture, not a claim that users can click through a native
+modal. Combined-head execution remains pending after this normal merge.
+
+Primary API reference: [Get Blob Properties](https://learn.microsoft.com/en-us/rest/api/storageservices/get-blob-properties).
+Authenticated Azure Portal pixels, broader Azure RBAC/ARM and unsupported system
+properties remain unverified or unavailable; no actual cloud resource is used.

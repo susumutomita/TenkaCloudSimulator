@@ -1,12 +1,11 @@
 # Finite state model
 
-Current candidate registry: 27 models / 153 literal-protected controls (180 planned
-executions). Main0a6 contributes26/149 unchanged; only SecretsMutationRefresh adds
-one model/four controls. No current merged-candidate full-run proof is inherited
-from earlier eac3 or main receipts.
-
-Current backlog integration registers **26 finite models and149 required sensitivity controls** (175 TLC executions). The registry in `formal/models.json` and immutable CI reports are authoritative. Counts and candidate statuses in dated receipts below describe historical inputs; they are not current integration results. These models do not prove Go/SQL/HTTP/UI refinement or complete cloud compatibility.
-
+Current source candidate registry: 28 models / 158 literal-protected controls
+(186 required executions). Maincba contributes 27 models/153 controls unchanged;
+AzurePropertiesEpoch adds one model/five controls. Registration is source evidence,
+not successful execution of this new immutable candidate. Dated receipts below
+refer to their recorded historical inputs, not this current integration. These
+finite models do not prove Go/SQL/HTTP/UI refinement or complete cloud compatibility.
 
 `ObjectStore.tla` models two buckets and two keys, shared object ownership, create/put/delete transitions, and an abstract identity decision `allow /\ ~deny`. `ObjectStore.cfg` checks type correctness, no orphan objects, no unauthorized mutation, and explicit-deny precedence.
 
@@ -238,3 +237,18 @@ retained. The new property mapping separates acknowledged writes from read-only
 metadata recovery; it does not prove React/HTTP/native idempotency or ambiguous
 write outcomes. [Contract](../docs/formal-secrets-mutation-refresh.md). Full new-HEAD
 immutable applicability/TLC and whole-quality/hosted CI remain required.
+
+
+## Azure properties lifecycle candidate
+
+The current source candidate preserves all 27 main models and 153 named controls,
+and adds the existing AzurePropertiesEpoch model (nine invariants, five controls):
+28 baselines + 158 controls = 186 required executions. Its exact original finite
+bounds, configuration and mutation edits are retained. This source registration
+is not a current-HEAD execution result. Historical standalone six-case and earlier
+whole-candidate results do not establish the new merged candidate.
+
+The model abstracts component lifecycle/request epochs, successful HEAD publication,
+close/open clearing and locale-stable state; it does not prove JavaScript, native
+HTTP parsing, Go/SQLite authorization, SDK compatibility or full Azure parity.
+New immutable formal/application checks and hosted gates remain required.

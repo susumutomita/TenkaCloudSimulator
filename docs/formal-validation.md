@@ -15,7 +15,8 @@ machine-discovered semantic coverage. A newly added implementation file is not
 covered merely because an existing model passes: its exact path must have an
 appropriate reviewed scope mapping and property argument.
 
-The current candidate registry has27 baselines/153 required named mutation controls.
+The current source candidate registry has 28 baselines/158 required named mutation controls
+(186 required executions), preserving maincba 27/153 and adding AzurePropertiesEpoch 1/5.
 Registration and Python guards are not a successful immutable TLC execution.
 
 | Model | Finite contract | Important exclusions |
@@ -173,3 +174,18 @@ required finite executions. It covers only live-ACK form exit/draft clearing/rea
 retry/fresh form intent. It excludes ambiguous unacknowledged writes, React/Go/SQL
 refinement and auth. Earlier eac3/f5d134 success is a historical input, not current
 union verification. [Mapping](formal-secrets-mutation-refresh.md).
+
+
+## Azure properties lifecycle candidate
+
+The current source candidate preserves all 27 main models and 153 named controls,
+and adds the existing AzurePropertiesEpoch model (nine invariants, five controls):
+28 baselines + 158 controls = 186 required executions. Its exact original finite
+bounds, configuration and mutation edits are retained. This source registration
+is not a current-HEAD execution result. Historical standalone six-case and earlier
+whole-candidate results do not establish the new merged candidate.
+
+The model abstracts component lifecycle/request epochs, successful HEAD publication,
+close/open clearing and locale-stable state; it does not prove JavaScript, native
+HTTP parsing, Go/SQLite authorization, SDK compatibility or full Azure parity.
+New immutable formal/application checks and hosted gates remain required.
