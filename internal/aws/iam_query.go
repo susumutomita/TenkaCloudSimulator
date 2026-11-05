@@ -116,6 +116,9 @@ func (g *Gateway) serveIAM(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fields := map[string][]string{"CreateRole": {"RoleName", "AssumeRolePolicyDocument", "Description", "Path", "MaxSessionDuration"}, "GetRole": {"RoleName"}, "ListRoles": {"PathPrefix", "Marker", "MaxItems"}, "DeleteRole": {"RoleName"}, "PutRolePolicy": {"RoleName", "PolicyName", "PolicyDocument"}, "GetRolePolicy": {"RoleName", "PolicyName"}, "DeleteRolePolicy": {"RoleName", "PolicyName"}, "ListRolePolicies": {"RoleName", "Marker", "MaxItems"}, "UpdateAssumeRolePolicy": {"RoleName", "PolicyDocument"}}
+	for operation, operationFields := range iamManagedQueryFields {
+		fields[operation] = operationFields
+	}
 	allowed, ok := fields[action]
 	if !ok {
 		iamError(w, ssmFailure{"NotImplemented", "Only the declared native role and inline-policy Query operations are implemented."})
@@ -134,6 +137,10 @@ func (g *Gateway) serveIAM(w http.ResponseWriter, r *http.Request) {
 			iamError(w, ssmFailure{"NotImplemented", "Unsupported IAM field: " + name})
 			return
 		}
+	}
+	if _, managed := iamManagedQueryFields[action]; managed {
+		g.serveIAMManaged(w, r, action, input)
+		return
 	}
 	name := input.Get("RoleName")
 	if action != "ListRoles" && (!iamRoleName.MatchString(name) || strings.EqualFold(name, core.Administrator)) {
