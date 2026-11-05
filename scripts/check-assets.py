@@ -55,3 +55,19 @@ assert native_provenance['main']()==0, 'Native provenance gate did not pass.'
 # historical notices and unreviewed or modified current-source identities.
 import subprocess,sys
 subprocess.run([sys.executable,'scripts/test-native-provenance.py'],check=True)
+
+# The eighth Secrets operation must stay discoverable without dropping the
+# original request templates or narrowing the shared JSON1.1 response to one API.
+regional = spec['paths']['/']['post']
+secret_operations = {'CreateSecret', 'DescribeSecret', 'ListSecrets',
+                     'ListSecretVersionIds', 'PutSecretValue', 'GetSecretValue',
+                     'UpdateSecretVersionStage', 'DeleteSecret'}
+secret_examples = regional['requestBody']['content']['application/x-amz-json-1.1']['examples']
+for operation in secret_operations:
+ assert secret_examples[operation]['summary'] == 'X-Amz-Target: secretsmanager.' + operation, operation
+ assert isinstance(secret_examples[operation]['value'], dict), operation
+version_example = secret_examples['ListSecretVersionIds']['value']
+assert version_example == {'SecretId': 'training/version-list', 'IncludeDeprecated': True, 'MaxResults': 2}
+assert 'SecretsListSecretVersionIdsInput' in spec['components']['schemas']
+assert 'SecretsListSecretVersionIdsOutput' in spec['components']['schemas']
+assert 'application/x-amz-json-1.1' in regional['responses']['200']['content']

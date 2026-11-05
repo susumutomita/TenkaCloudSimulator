@@ -200,6 +200,7 @@ func (s *SecretStore) ServeHTTP(w http.ResponseWriter, r *http.Request, region s
 		"CreateSecret":             {"Name", "Description", "ClientRequestToken", "SecretString"},
 		"DescribeSecret":           {"SecretId"},
 		"ListSecrets":              {"MaxResults", "NextToken", "SortBy", "SortOrder"},
+		"ListSecretVersionIds":     {"SecretId", "IncludeDeprecated", "MaxResults", "NextToken"},
 		"PutSecretValue":           {"SecretId", "ClientRequestToken", "SecretString", "VersionStages"},
 		"GetSecretValue":           {"SecretId", "VersionId", "VersionStage"},
 		"UpdateSecretVersionStage": {"SecretId", "VersionStage", "MoveToVersionId", "RemoveFromVersionId"},
@@ -312,6 +313,13 @@ func (s *SecretStore) ServeHTTP(w http.ResponseWriter, r *http.Request, region s
 			result["NextToken"] = next
 		}
 		output = result
+	case "ListSecretVersionIds":
+		var id string
+		var query SecretVersionListQuery
+		id, query, err = decodeSecretVersionListRequest(data)
+		if err == nil {
+			output, err = s.ListSecretVersionIds(ctx, region, id, query, authorize)
+		}
 	case "GetSecretValue":
 		var result SecretValueResult
 		result, err = s.Get(ctx, region, input.SecretId, input.VersionId, input.VersionStage, authorize)

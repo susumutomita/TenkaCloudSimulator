@@ -77,7 +77,7 @@ adapter, or Challenge integration.
 | [S3](docs/s3.md) | Bucket create/list/head/location/delete; object PUT/GET/HEAD/DELETE and ListObjectsV2; versioning and ListObjectVersions; public access block and tags | Multipart uploads, ACLs, general bucket policies, encryption settings; path-style addressing only |
 | [SQS](docs/sqs.md) | Standard queues, a Cloudscape console, and 9 JSON 1.0 operations: CreateQueue, GetQueueUrl, ListQueues, GetQueueAttributes, DeleteQueue, SendMessage, ReceiveMessage, DeleteMessage, ChangeMessageVisibility | FIFO, batches, DLQ, SNS integration, CloudFormation, function SDK bridge, Challenge integration |
 | [CloudWatch Logs](docs/cloudwatch-logs.md) | Log groups/streams, group deletion, PutLogEvents/GetLogEvents; 7 APIs and a console sharing their state | Metrics, alarms, retention settings, automatic Lambda delivery, CloudFormation, Logs Insights |
-| [Secrets Manager](docs/secrets-manager.md) | CreateSecret, DescribeSecret, ListSecrets, PutSecretValue, GetSecretValue, UpdateSecretVersionStage, immediate DeleteSecret; versions and explicit reveal in the console | Real-secret storage, KMS encryption, rotation, replicas, SecretBinary, scheduled deletion, CloudFormation; dummy values are plaintext in SQLite |
+| [Secrets Manager](docs/secrets-manager.md) | CreateSecret, DescribeSecret, ListSecrets, ListSecretVersionIds (metadata only), PutSecretValue, GetSecretValue, UpdateSecretVersionStage, immediate DeleteSecret; versions and explicit reveal in the console | Real-secret storage, KMS encryption, rotation, replicas, SecretBinary, scheduled deletion, CloudFormation; dummy values are plaintext in SQLite |
 | [KMS](docs/kms.md) | CreateKey, DescribeKey, ListKeys, EnableKey, DisableKey, GetKeyPolicy, Encrypt, Decrypt; local symmetric AES-GCM, SDK and Cloudscape console | Aliases, tags, grants, custom policies, rotation, scheduled deletion, CloudFormation, other-service encryption; raw SQLite keys are not an HSM or an at-rest encryption guarantee |
 | [Systems Manager Parameter Store](docs/console.md) | PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter; current values, versions and overwrite checks | SecureString/KMS, history, labels; Standard String/StringList with text data only |
 | [DynamoDB](docs/dynamodb.md) | CreateTable, ListTables, DescribeTable, DeleteTable, PutItem, GetItem, DeleteItem; JSON 1.0, S/N/B keys, optional sort key, partition-key attribute_exists/attribute_not_exists conditions | Query, Scan, indexes, Streams, console, CloudFormation, Challenge integration |
@@ -245,8 +245,8 @@ not binary runtime dependencies. Regeneration must preserve locks and original
 rights: [console](tools/console/README.md), [Scalar](tools/scalar/README.md),
 [Python/WASI runtime](tools/python/README.md).
 
-The registry contains 36 finite models and 232 deliberate defect controls
-(268 required model/check executions), including three Sakura metadata/admission/startup
+The registry contains 37 finite models and 245 deliberate defect controls
+(282 required model/check executions), including three Sakura metadata/admission/startup
 models. Registration is not an integrated-revision execution receipt. The new IAM scenario checks two requests
 from each of four reachable seeds. A broader four-request trial timed out and
 is not claimed as verified. TLC examines bounded safety properties and checks

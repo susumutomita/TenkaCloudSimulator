@@ -3008,6 +3008,175 @@
       ]
     },
     {
+      "id": "SecretVersionListing",
+      "model": "formal/SecretVersionListing.tla",
+      "config": "formal/SecretVersionListing.cfg",
+      "bounds": "Four transition suffixes; four ordered symbolic version keys; two database authorities and two regions; two physical secret generations; page size one; Boolean List permission and IncludeDeprecated; fixed live stage membership with Add/Promote/Delete/Recreate/Reopen transitions.",
+      "properties": [
+        "TypeOK",
+        "ReadAfterAuthorization",
+        "NoDeniedEmission",
+        "TokenScopeBound",
+        "StrictForwardKeyset",
+        "FilterBeforePageLimit",
+        "ContinuationPosition",
+        "TerminalConverges",
+        "ReadFramePreserved"
+      ],
+      "limits": "Metadata-only live keyset projection of ListSecretVersionIds, not a stable snapshot. Parent resolution may precede saved-ARN authorization; version/stage scans and cursor validation follow it. Token signature, database key, region, domain, physical generation, filter and expiry are abstract predicates, not cryptography/byte parsing/time proofs. Does not prove SQL transaction/driver/commit failure, actual IAM/host token authority, HTTP/JSON/UTF8/ARN parsing, secret-value redaction implementation, timestamp ordering/UUIDs, variable page sizes, retention, UI or Go refinement. TerminalConverges is a finite page-shape safety equality, not liveness. Public contract: https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_ListSecretVersionIds.html (reviewed 2026-11-05).",
+      "source_scope": [
+        "internal/aws/secrets_manager_versions.go",
+        "internal/aws/secrets_manager_versions_test.go",
+        "internal/aws/secrets_manager_versions_http_test.go",
+        "internal/aws/secret_http.go"
+      ],
+      "mutants": [
+        {
+          "id": "AuthorizationBypass",
+          "edits": [
+            {
+              "old": "admitted == resolved /\\ allowed /\\ binding",
+              "new": "admitted == resolved /\\ binding",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadAfterAuthorization"
+        },
+        {
+          "id": "DomainBypass",
+          "edits": [
+            {
+              "old": "t.valid /\\ ~t.expired /\\ t.domain=\"versions-v1\"",
+              "new": "t.valid /\\ ~t.expired",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TokenScopeBound"
+        },
+        {
+          "id": "AuthorityKeyBypass",
+          "edits": [
+            {
+              "old": "t.db=db /\\ t.region=region",
+              "new": "t.region=region",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TokenScopeBound"
+        },
+        {
+          "id": "RegionBindingBypass",
+          "edits": [
+            {
+              "old": "t.db=db /\\ t.region=region",
+              "new": "t.db=db",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TokenScopeBound"
+        },
+        {
+          "id": "GenerationBindingBypass",
+          "edits": [
+            {
+              "old": "/\\ t.gen=actualGen",
+              "new": "",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TokenScopeBound"
+        },
+        {
+          "id": "FilterBindingBypass",
+          "edits": [
+            {
+              "old": "/\\ t.include=requestedFilter",
+              "new": "",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TokenScopeBound"
+        },
+        {
+          "id": "SignatureBypass",
+          "edits": [
+            {
+              "old": "t.valid /\\ ~t.expired",
+              "new": "~t.expired",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TokenScopeBound"
+        },
+        {
+          "id": "ExpiryBypass",
+          "edits": [
+            {
+              "old": "t.valid /\\ ~t.expired",
+              "new": "t.valid",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TokenScopeBound"
+        },
+        {
+          "id": "InclusiveResume",
+          "edits": [
+            {
+              "old": "k>position\n",
+              "new": "k>=position\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StrictForwardKeyset"
+        },
+        {
+          "id": "FilterAfterLimit",
+          "edits": [
+            {
+              "old": "page == IF admitted THEN FirstKey(qualified) ELSE {}",
+              "new": "page == IF admitted THEN {k \\in FirstKey({v \\in TargetVersions(db,region) : v>position}) : requestedFilter \\/ k \\in TargetLabels(db,region)} ELSE {}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FilterBeforePageLimit"
+        },
+        {
+          "id": "StaleNextPosition",
+          "edits": [
+            {
+              "old": "include |-> requestedFilter,pos |-> newPosition",
+              "new": "include |-> requestedFilter,pos |-> position",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ContinuationPosition"
+        },
+        {
+          "id": "MissingNextToken",
+          "edits": [
+            {
+              "old": "more == admitted /\\ Cardinality(qualified)>1",
+              "new": "more == FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TerminalConverges"
+        },
+        {
+          "id": "ReadWritesVersionState",
+          "edits": [
+            {
+              "old": "UNCHANGED <<active,generation,versions,current,previous>>",
+              "new": "versions'= {} /\\ UNCHANGED <<active,generation,current,previous>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadFramePreserved"
+        }
+      ]
+    },
+    {
       "id": "SakuraDiskMetadata",
       "model": "formal/SakuraDiskMetadata.tla",
       "config": "formal/SakuraDiskMetadata.cfg",

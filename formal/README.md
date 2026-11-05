@@ -1,24 +1,16 @@
 # Finite state model
 
-Current registry: 36 models / 232 literal-protected controls
-(268 required executions). All main33 entries, TLA/CFG bytes, properties
-and197 controls are preserved, as are the two prior Sakura entries/22 controls. SakuraDiskMetadata adds13 safety properties and10
-controls for bounded metadata/allocator/binding/peer frames. SakuraDiskAdmission
-adds15 properties and12 controls for validated Actor-to-fixed-config mapping and
-HTTP admission/lookup ordering. The author previously ran these two baselines and
-22 controls; current integrated immutable268-case execution is still pending.
-SakuraStartupAdmission separately adds11 properties/13 controls for parsed flag
-admission before host effects and the successful optional provider startup path.
-Its initial baseline stopped before states with a TLC enumeration error; an
-equivalent finite membership correction preserves324 input valuations. The
-corrected source then passed independent SANY, baseline and all13 named controls;
-that scoped result is not the integrated268-case gate. This is not an infrastructure-failure/cleanup or constructor-atomicity model.
-See [Sakura boundaries and native correspondence](../docs/sakura.md). These models
-do not prove Go flag-parser/string validation refinement, DB leases, Icon resources, SQL/locking, VM/storage
-reality or Go refinement. Existing native/SDK evidence and current global gates
-must be reported separately; registration itself is not an execution pass.
-The prior RESTRouteMatching, RESTProxyEventBoundary and NativeWireProjection
-models retain their exact registered bounds, safety properties and22 controls.
+Current registry: 37 models / 245 literal-protected controls
+(282 required executions). All main34 model objects, TLA/CFG bytes, properties
+and210 controls are preserved. SakuraDiskMetadata/SakuraDiskAdmission retain
+22 controls; SakuraStartupAdmission adds13 more. They cover bounded metadata,
+fixed binding/issued-ID/peer frames, validated Actor mapping/admission and parsed
+opt-in startup order. All three scoped baselines and35 controls passed separately;
+the current integrated immutable282-case gate is still pending. Startup's first
+TLC enumeration failure and its equivalent324-valuation correction are preserved.
+No CLI string/regex refinement, DB lease, Icon resource, constructor atomicity,
+physical storage/VM or Go implementation proof is implied. See [Sakura scope](../docs/sakura.md).
+The prior native projection/routing model bounds and properties remain intact.
 IAMManagedPolicies retains its four API-reachable seeds and two-request suffixes;
 the earlier four-request exploration timed out and is not claimed.
 Registration is source evidence, not itself evidence of successful execution. Dated receipts below
@@ -27,7 +19,7 @@ finite models do not prove Go/SQL/HTTP/UI refinement or complete cloud compatibi
 
 Legacy integration sections below retain historical counts and status statements
 for traceability. Their word “current” refers to the recorded integration, not
-today's registry. The authoritative current inventory is the 36/232 registry
+today's registry. The authoritative current inventory is the 37/245 registry
 above; proof claims always require evidence for the exact revision.
 
 `ObjectStore.tla` models two buckets and two keys, shared object ownership, create/put/delete transitions, and an abstract identity decision `allow /\ ~deny`. `ObjectStore.cfg` checks type correctness, no orphan objects, no unauthorized mutation, and explicit-deny precedence.
@@ -346,7 +338,42 @@ models do not thereby acquire serialization guarantees.
 The baseline completed1,729 distinct states; six semantic controls each exited12
 with the named expected invariant and a real transition trace. FirstBad identifies
 the partial-prefix negative only, not a new native implementation. These scoped
-results are independent model evidence, not the prior full230-case gate, the new268-case exact-HEAD gate,
+results are independent model evidence, not the historical230-case gate or the current282-case gate
 or a refinement proof. The entire original30/175 inventory, timeouts and tool pin
 remain unchanged. All three exact native source scopes and all new properties
 and control IDs are protected by the loader and failure tests.
+
+
+## Secret version metadata listing
+
+SecretVersionListing adds nine invariants and thirteen literal-protected semantic
+controls, preserving all prior33 registry objects and197 controls and their
+TLA/CFG bytes. The combined inventory is34 baselines +210 controls =244 required
+executions. Registration and earlier independent scoped results are not a
+successful immutable244-case integration gate or hosted-CI result.
+
+Four-transition suffixes cover four ordered symbolic version keys, two database
+authorities/regions, two physical generations and page size one. List permission
+is independent of value-read permission. The finite query resolves the parent
+before saved-ARN authorization; only an admitted request scans version/stage
+metadata and validates its continuation. Cursor predicates bind database key,
+region, domain, physical generation, IncludeDeprecated and expiry. Filtering
+precedes the page limit, resume positions advance strictly, and reads preserve
+version/stage state. Add/promote/delete/recreate/reopen expose live keyset changes;
+this is not a stable snapshot or a proof of eventual termination.
+
+Correspondence is limited to ListSecretVersionIDs metadata enumeration/cursor
+logic in `secrets_manager_versions.go` and the exact added operation dispatch in
+`secret_http.go`; the other seven operations do not acquire new guarantees. Native
+store and HTTP tests named in source_scope separately exercise denied frames,
+physical recreation, database reopen, malformed requests and fault recovery.
+The public reference is [AWS ListSecretVersionIds](https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_ListSecretVersionIds.html),
+reviewed2026-11-05. No server capability or generic Gateway parsing guarantee is
+inferred from this state projection.
+
+The token validity/key/expiry fields are abstractions, not HMAC, time or encoding
+proofs. SQL isolation/commit faults, concrete IAM/host authentication, JSON/UTF8/ARN
+parsing, actual timestamp/UUID order, variable page sizes, secret-value redaction,
+retention, UI and Go refinement remain native/integration obligations. All thirteen
+controls must fail their exact named semantic invariant with a behavioral trace;
+syntax/type/config failures or timeouts are not accepted counterexamples.
