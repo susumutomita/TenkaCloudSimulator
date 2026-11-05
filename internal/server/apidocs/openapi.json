@@ -78,7 +78,7 @@
       },
       "post": {
         "summary": "AWS native JSON or Query operation",
-        "description": "**Static request templates:** choose the correct Content-Type and routing headers before Test Request → Send. SSM/SQS send JSON with X-Amz-Target (JSON 1.1 for SSM, JSON 1.0 for SQS); CloudFormation/IAM send URL-encoded Query fields. The 200 response is JSON for SSM/SQS and XML for Query protocols. A successful DeleteStack has no result payload beyond Query response metadata.\n\nNative regional root endpoint. SQS: X-Amz-Target AmazonSQS.CreateQueue, ListQueues, GetQueueUrl, DeleteQueue, SendMessage, ReceiveMessage, DeleteMessage, ChangeMessageVisibility, GetQueueAttributes (JSON 1.0, Standard queues only; local body limit 256 KiB, aggregate physical storage 10000 messages/64 MiB across queues/regions including expired foreign rows until scoped cleanup; bytes count body UTF-8 plus stored attribute JSON. Over-budget SendMessage returns local SimulatorQuotaExceeded without mutation; existing over-cap data remains readable/deletable; FIFO, Query protocol, batch operations and dead-letter redrive are unsupported). SSM: X-Amz-Target AmazonSSM.PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter. CloudFormation: CreateStack, DescribeStacks, DeleteStack; S3 buckets, SSM parameters, inline Python Lambda functions, one inline IAM identity policy per role, five Regional REST API Gateway resource types, and bounded Lambda::Permission. Unsupported options fail. Real credentials and session tokens are rejected. Create/DeleteStack also require the caller to allow the underlying S3/SSM/IAM/Lambda actions; CAPABILITY_IAM grants no permissions. API resources use NONE/POST AWS_PROXY local Lambda, same-stack API children, explicit deployment DependsOn methods and reverse guarded cleanup. Lambda permission uses only apigateway.amazonaws.com and local execute-api SourceArn. No service RoleArn or general CloudFormation lifecycle is supported. IAM customer-managed policies and role attachments are also available through the dedicated IAM provider template, with explicit ListPolicies Scope=Local. IAM is global: send X-Simulator-Service: iam, Version2010-05-08 and one of CreateRole/GetRole/ListRoles/DeleteRole/PutRolePolicy/GetRolePolicy/DeleteRolePolicy/ListRolePolicies/UpdateAssumeRolePolicy. Policy documents are JSON strings; successful IAM XML returns them RFC3986 URL-encoded. Native role names use the local alphanumeric/underscore/hyphen subset,1–64; inline policy names1–128 AWS characters. Trust and aggregate policies32KiB, at most10 inline policies/100 statements,1000 active+retired name claims. Deleted role names cannot be adopted by legacy identity writes. No managed grants or session issuance.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.\n\nUse X-Amz-Target TrentService.<operation> matching the selected body example; example choice does not change routing headers automatically. CreateKey first, copy returned KeyId into later requests, and copy an actual local Encrypt CiphertextBlob into Decrypt (the valid-base64 documentation placeholder is deliberately not decryptable). All calls require host X-Simulator-Token or signed-in local session. Dummy TCSIM SigV4 scope is not authentication.\n\nCreateKey/ListKeys require their exact kms action on *. DescribeKey/EnableKey/DisableKey/GetKeyPolicy/Encrypt/Decrypt require the actual key ARN. Decrypt without KeyId resolves the local blob key. Explicit Deny wins. Programmatic default policy only enables local identity-policy delegation; no grant for all participants.\n\nEnabled/Disabled only; disabled blocks Encrypt/Decrypt, metadata/default policy remain readable. Local request64KiB,1000keys,plaintext1–4096bytes,context100entries/8192canonicalbytes,counter2^32 ceiling. Ciphertext/material are simulator-local; SQLite stores raw material, not an at-rest security boundary. Unsupported aliases/tags/grants/custom policies/asymmetric/data keys/rotation/deletion/multi-region/CFN/other-service encryption fail; no problem availability is implied. Actual AWS eventual consistency and ciphertext portability are not reproduced.\n\nKMS JSON1.1 targets TrentService.CreateKey/DescribeKey/ListKeys/EnableKey/DisableKey/GetKeyPolicy/Encrypt/Decrypt are also accepted here. This root JSON1.1 section includes all eight bounded KMS body templates and limitations.\n\nSQS static templates use application/x-amz-json-1.0 with X-Amz-Target: AmazonSQS.<operation> and X-Simulator-Service: sqs. Replace QueueUrl and ReceiptHandle fixtures with current native values; static examples are not live saved state. CloudWatch Logs JSON1.1 uses Logs_20140328.<operation> and service=logs; only the seven declared operations are implemented. Choose the matching headers separately from the body example. Secrets Manager adds seven bounded JSON1.1 operations over this same root; practice values are plaintext, not KMS-encrypted. No recovery window or rotation.\n\n**DynamoDB JSON 1.0 static templates:** select application/x-amz-json-1.0 and set X-Amz-Target to the exact DynamoDB_20120810.<operation> shown by the selected example. X-Simulator-Service may be dynamodb. Use a private practice table name; samples are not current state and selecting a body does not automatically change the target header. Seven basic operations only; immediate local lifecycle, no indexes/Query/Scan/console/CFN. DeleteItem of an absent key is idempotent; unsupported options fail. Item bytes use UTF-8 and decoded binary rather than JSON transfer length; numeric sizing is approximate. Failed conditional, oversized and IAM-refused writes leave saved state unchanged. DeleteTable permanently removes that practice table and all its items.",
+        "description": "**Static request templates:** choose the correct Content-Type and routing headers before Test Request → Send. SSM/SQS send JSON with X-Amz-Target (JSON 1.1 for SSM, JSON 1.0 for SQS); CloudFormation/IAM send URL-encoded Query fields. The 200 response is JSON for SSM/SQS and XML for Query protocols. A successful DeleteStack has no result payload beyond Query response metadata.\n\nNative regional root endpoint. SQS: X-Amz-Target AmazonSQS.CreateQueue, ListQueues, GetQueueUrl, DeleteQueue, SendMessage, ReceiveMessage, DeleteMessage, ChangeMessageVisibility, GetQueueAttributes (JSON 1.0, Standard queues only; local body limit 256 KiB, aggregate physical storage 10000 messages/64 MiB across queues/regions including expired foreign rows until scoped cleanup; bytes count body UTF-8 plus stored attribute JSON. Over-budget SendMessage returns local SimulatorQuotaExceeded without mutation; existing over-cap data remains readable/deletable; FIFO, Query protocol, batch operations and dead-letter redrive are unsupported). SSM: X-Amz-Target AmazonSSM.PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter. CloudFormation: CreateStack, DescribeStacks, DeleteStack; S3 buckets, SSM parameters, inline Python Lambda functions, one inline IAM identity policy per role, five Regional REST API Gateway resource types, and bounded Lambda::Permission. Unsupported options fail. Real credentials and session tokens are rejected. Create/DeleteStack also require the caller to allow the underlying S3/SSM/IAM/Lambda actions; CAPABILITY_IAM grants no permissions. API resources use NONE/POST AWS_PROXY local Lambda, same-stack API children, explicit deployment DependsOn methods and reverse guarded cleanup. Lambda permission uses only apigateway.amazonaws.com and local execute-api SourceArn. No service RoleArn or general CloudFormation lifecycle is supported. IAM customer-managed policies and role attachments are also available through the dedicated IAM provider template, with explicit ListPolicies Scope=Local. IAM is global: send X-Simulator-Service: iam, Version2010-05-08 and one of CreateRole/GetRole/ListRoles/DeleteRole/PutRolePolicy/GetRolePolicy/DeleteRolePolicy/ListRolePolicies/UpdateAssumeRolePolicy. Policy documents are JSON strings; successful IAM XML returns them RFC3986 URL-encoded. Native role names use the local alphanumeric/underscore/hyphen subset,1–64; inline policy names1–128 AWS characters. Trust and aggregate policies32KiB, at most10 inline policies/100 statements,1000 active+retired name claims. Deleted role names cannot be adopted by legacy identity writes. No managed grants or session issuance.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.\n\nUse X-Amz-Target TrentService.<operation> matching the selected body example; example choice does not change routing headers automatically. CreateKey first, copy returned KeyId into later requests, and copy an actual local Encrypt CiphertextBlob into Decrypt (the valid-base64 documentation placeholder is deliberately not decryptable). All calls require host X-Simulator-Token or signed-in local session. Dummy TCSIM SigV4 scope is not authentication.\n\nCreateKey/ListKeys require their exact kms action on *. DescribeKey/EnableKey/DisableKey/GetKeyPolicy/Encrypt/Decrypt require the actual key ARN. Decrypt without KeyId resolves the local blob key. Explicit Deny wins. Programmatic default policy only enables local identity-policy delegation; no grant for all participants.\n\nEnabled/Disabled only; disabled blocks Encrypt/Decrypt, metadata/default policy remain readable. Local request64KiB,1000keys,plaintext1–4096bytes,context100entries/8192canonicalbytes,counter2^32 ceiling. Ciphertext/material are simulator-local; SQLite stores raw material, not an at-rest security boundary. Unsupported aliases/tags/grants/custom policies/asymmetric/data keys/rotation/deletion/multi-region/CFN/other-service encryption fail; no problem availability is implied. Actual AWS eventual consistency and ciphertext portability are not reproduced.\n\nKMS JSON1.1 targets TrentService.CreateKey/DescribeKey/ListKeys/EnableKey/DisableKey/GetKeyPolicy/Encrypt/Decrypt are also accepted here. This root JSON1.1 section includes all eight bounded KMS body templates and limitations.\n\nSQS static templates use application/x-amz-json-1.0 with X-Amz-Target: AmazonSQS.<operation> and X-Simulator-Service: sqs. Replace QueueUrl and ReceiptHandle fixtures with current native values; static examples are not live saved state. CloudWatch Logs JSON1.1 uses Logs_20140328.<operation> and service=logs; only the seven declared operations are implemented. Choose the matching headers separately from the body example. Secrets Manager adds seven bounded JSON1.1 operations over this same root; practice values are plaintext, not KMS-encrypted. No recovery window or rotation.\n\n**DynamoDB JSON 1.0 static templates:** select application/x-amz-json-1.0 and set X-Amz-Target to the exact DynamoDB_20120810.<operation> shown by the selected example. X-Simulator-Service may be dynamodb. Use a private practice table name; samples are not current state and selecting a body does not automatically change the target header. Seven basic operations only; immediate local lifecycle, no indexes/Query/Scan/console/CFN. DeleteItem of an absent key is idempotent; unsupported options fail. Item bytes use UTF-8 and decoded binary rather than JSON transfer length; numeric sizing is approximate. Failed conditional, oversized and IAM-refused writes leave saved state unchanged. DeleteTable permanently removes that practice table and all its items.\n\nKMS aliases: TrentService.CreateAlias, ListAliases, UpdateAlias, DeleteAlias. Customer alias names include alias/ and are case-sensitive; alias/aws/ is reserved. Alias targets are concrete local key IDs/ARNs in the same account/Region. Create requires kms:CreateAlias on alias+target, Update kms:UpdateAlias on alias+old+new, Delete kms:DeleteAlias on alias+target, List kms:ListAliases on *. Local aliases are capped at1000 total/50 per key; ListAliases defaults50 and accepts1–100. Create/Update/Delete return empty200. Encrypt/Decrypt accept aliases, resolving and authorizing the concrete key in the same transaction. No alias identifiers for DescribeKey/EnableKey/DisableKey/GetKeyPolicy, AWS-managed aliases, alias ABAC, key deletion lifecycle, grants or CFN KMS resources.",
         "operationId": "awsRegionalOperation",
         "parameters": [
           {
@@ -87,7 +87,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "Use the exact native target and matching body: AmazonSSM.<operation>, AmazonSQS.<operation>, TrentService.<operation>, Logs_20140328.<operation>, secretsmanager.<operation>, or DynamoDB_20120810.<operation>. SQS and DynamoDB require JSON 1.0; SSM, KMS, Logs and Secrets Manager require JSON 1.1. Selecting a body example does not select routing headers automatically."
+            "description": "Use the exact native target and matching body: AmazonSSM.<operation>, AmazonSQS.<operation>, TrentService.<operation>, Logs_20140328.<operation>, secretsmanager.<operation>, or DynamoDB_20120810.<operation>. SQS and DynamoDB require JSON 1.0; SSM, KMS, Logs and Secrets Manager require JSON 1.1. Selecting a body example does not select routing headers automatically. KMS customer aliases use TrentService.CreateAlias, TrentService.ListAliases, TrentService.UpdateAlias or TrentService.DeleteAlias; do not send an alias body with a different target."
           },
           {
             "name": "X-Simulator-Region",
@@ -172,6 +172,18 @@
                   },
                   {
                     "$ref": "#/components/schemas/LogsGetLogEventsRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/KMSCreateAliasInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/KMSListAliasesInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/KMSUpdateAliasInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/KMSDeleteAliasInput"
                   }
                 ],
                 "description": "SSM, KMS, CloudWatch Logs or Secrets Manager JSON 1.1 as selected by X-Amz-Target. The generic object alternative preserves SSM and Secrets Manager templates; named KMS and Logs schemas document their bounded shapes. Exact KMS per-target schemas are in x-simulator-kms-operation-schemas; body alone cannot discriminate routing."
@@ -393,6 +405,36 @@
                   "value": {
                     "SecretId": "arn:aws:secretsmanager:us-east-1:000000000000:secret:training/example-ABC123",
                     "ForceDeleteWithoutRecovery": true
+                  }
+                },
+                "KMSCreateAlias": {
+                  "summary": "X-Amz-Target: TrentService.CreateAlias",
+                  "description": "Customer aliases only. Replace TargetKeyId with an actual same-region key ID from CreateKey; UpdateAlias needs a second real key. These templates are static and do not select routing headers. CreateAlias/UpdateAlias/DeleteAlias return an empty HTTP200 body.",
+                  "value": {
+                    "AliasName": "alias/practice",
+                    "TargetKeyId": "11111111-1111-4111-8111-111111111111"
+                  }
+                },
+                "KMSListAliases": {
+                  "summary": "X-Amz-Target: TrentService.ListAliases",
+                  "description": "Customer aliases only. Replace TargetKeyId with an actual same-region key ID from CreateKey; UpdateAlias needs a second real key. These templates are static and do not select routing headers. CreateAlias/UpdateAlias/DeleteAlias return an empty HTTP200 body.",
+                  "value": {
+                    "Limit": 1
+                  }
+                },
+                "KMSUpdateAlias": {
+                  "summary": "X-Amz-Target: TrentService.UpdateAlias",
+                  "description": "Customer aliases only. Replace TargetKeyId with an actual same-region key ID from CreateKey; UpdateAlias needs a second real key. These templates are static and do not select routing headers. CreateAlias/UpdateAlias/DeleteAlias return an empty HTTP200 body.",
+                  "value": {
+                    "AliasName": "alias/practice",
+                    "TargetKeyId": "22222222-2222-4222-8222-222222222222"
+                  }
+                },
+                "KMSDeleteAlias": {
+                  "summary": "X-Amz-Target: TrentService.DeleteAlias",
+                  "description": "Customer aliases only. Replace TargetKeyId with an actual same-region key ID from CreateKey; UpdateAlias needs a second real key. These templates are static and do not select routing headers. CreateAlias/UpdateAlias/DeleteAlias return an empty HTTP200 body.",
+                  "value": {
+                    "AliasName": "alias/practice"
                   }
                 }
               }
@@ -964,7 +1006,7 @@
         },
         "responses": {
           "200": {
-            "description": "Native JSON 1.1 SSM or XML Query response KMS returns target-specific JSON metadata/list/policy/crypto; EnableKey/DisableKey return an EMPTY body. Use returned local key/ciphertext values in subsequent requests. SQS returns native JSON1.0; choose the matching response media/schema, not an XML or JSON1.1 projection. DynamoDB responses use JSON 1.0; examples are static, not current state.",
+            "description": "Native JSON 1.1 SSM or XML Query response KMS returns target-specific JSON metadata/list/policy/crypto; EnableKey/DisableKey return an EMPTY body. Use returned local key/ciphertext values in subsequent requests. SQS returns native JSON1.0; choose the matching response media/schema, not an XML or JSON1.1 projection. DynamoDB responses use JSON 1.0; examples are static, not current state. Customer alias CreateAlias/UpdateAlias/DeleteAlias also return an EMPTY HTTP200 body; ListAliases returns the JSON1.1 KMSAliasPage shape.",
             "content": {
               "application/x-amz-json-1.0": {
                 "schema": {
@@ -1003,6 +1045,51 @@
                       "$ref": "#/components/schemas/DynamoDBGetItemResult"
                     }
                   ]
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "description": "Other shared-root SSM/Logs/Secrets Manager JSON1.1 responses retain their existing native shapes."
+                    },
+                    {
+                      "$ref": "#/components/schemas/KMSKeyResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/KMSKeyPage"
+                    },
+                    {
+                      "$ref": "#/components/schemas/KMSPolicyResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/KMSEncryptResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/KMSDecryptResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/KMSAliasPage"
+                    }
+                  ]
+                },
+                "examples": {
+                  "KMSListAliases": {
+                    "summary": "Static customer-alias list, not current saved state",
+                    "value": {
+                      "Aliases": [
+                        {
+                          "AliasArn": "arn:aws:kms:us-east-1:000000000000:alias/practice",
+                          "AliasName": "alias/practice",
+                          "CreationDate": 1700000000,
+                          "LastUpdatedDate": 1700000001,
+                          "TargetKeyId": "11111111-1111-4111-8111-111111111111"
+                        }
+                      ],
+                      "Truncated": false
+                    }
+                  }
                 }
               }
             }
@@ -1162,6 +1249,42 @@
             },
             "response": {
               "$ref": "#/components/schemas/KMSDecryptResponse"
+            }
+          },
+          "CreateAlias": {
+            "target": "TrentService.CreateAlias",
+            "request": {
+              "$ref": "#/components/schemas/KMSCreateAliasInput"
+            },
+            "response": {
+              "description": "empty HTTP200 body"
+            }
+          },
+          "ListAliases": {
+            "target": "TrentService.ListAliases",
+            "request": {
+              "$ref": "#/components/schemas/KMSListAliasesInput"
+            },
+            "response": {
+              "$ref": "#/components/schemas/KMSAliasPage"
+            }
+          },
+          "UpdateAlias": {
+            "target": "TrentService.UpdateAlias",
+            "request": {
+              "$ref": "#/components/schemas/KMSUpdateAliasInput"
+            },
+            "response": {
+              "description": "empty HTTP200 body"
+            }
+          },
+          "DeleteAlias": {
+            "target": "TrentService.DeleteAlias",
+            "request": {
+              "$ref": "#/components/schemas/KMSDeleteAliasInput"
+            },
+            "response": {
+              "description": "empty HTTP200 body"
             }
           }
         },
@@ -12114,7 +12237,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 2048,
-            "description": "Local UUID key ID or full same-region/account ARN. Replace example IDs with CreateKey output. Aliases and cross-account keys are unsupported."
+            "description": "Local UUID, full same-region/account key ARN, customer alias name or same-region/account alias ARN. Alias resolution and concrete-key authorization share the crypto transaction. Decrypt with omitted KeyId uses the ciphertext UUID; a retargeted explicit alias must still match. Cross-account identifiers are unsupported."
           },
           "Plaintext": {
             "type": "string",
@@ -12163,7 +12286,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 2048,
-            "description": "Local UUID key ID or full same-region/account ARN. Replace example IDs with CreateKey output. Aliases and cross-account keys are unsupported."
+            "description": "Local UUID, full same-region/account key ARN, customer alias name or same-region/account alias ARN. Alias resolution and concrete-key authorization share the crypto transaction. Decrypt with omitted KeyId uses the ciphertext UUID; a retargeted explicit alias must still match. Cross-account identifiers are unsupported."
           },
           "EncryptionContext": {
             "type": "object",
@@ -13758,6 +13881,170 @@
           "__type",
           "message"
         ]
+      },
+      "KMSCustomerAliasName": {
+        "type": "string",
+        "minLength": 7,
+        "maxLength": 256,
+        "pattern": "^alias/[a-zA-Z0-9/_-]+$",
+        "not": {
+          "pattern": "^alias/aws/"
+        },
+        "description": "Case-sensitive customer alias name, including alias/ prefix. Names beginning alias/aws/ are reserved. Native CreateAlias invalid names return InvalidAliasNameException; malformed request fields and invalid Update/Delete names use ValidationException."
+      },
+      "KMSAliasTargetKeyId": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 2048,
+        "description": "Actual local UUID key ID or full same-region/account key ARN. Target aliases, cross-account and cross-region keys are rejected. Customer SYMMETRIC_DEFAULT ENCRYPT_DECRYPT keys may be Enabled or Disabled for alias management.",
+        "pattern": "^(?:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|arn:aws:kms:(?:us-east-1|us-west-2|ap-northeast-1|eu-west-1):000000000000:key/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$"
+      },
+      "KMSCreateAliasInput": {
+        "type": "object",
+        "properties": {
+          "AliasName": {
+            "$ref": "#/components/schemas/KMSCustomerAliasName"
+          },
+          "TargetKeyId": {
+            "$ref": "#/components/schemas/KMSAliasTargetKeyId"
+          }
+        },
+        "required": [
+          "AliasName",
+          "TargetKeyId"
+        ],
+        "additionalProperties": false
+      },
+      "KMSUpdateAliasInput": {
+        "type": "object",
+        "description": "Retarget an existing alias without renaming it or changing key material. Authorization requires the alias ARN, current key ARN and new key ARN. This local API tool is not an AWS-console action.",
+        "properties": {
+          "AliasName": {
+            "$ref": "#/components/schemas/KMSCustomerAliasName"
+          },
+          "TargetKeyId": {
+            "$ref": "#/components/schemas/KMSAliasTargetKeyId"
+          }
+        },
+        "required": [
+          "AliasName",
+          "TargetKeyId"
+        ],
+        "additionalProperties": false
+      },
+      "KMSDeleteAliasInput": {
+        "type": "object",
+        "description": "Delete only the alias; the target key and ciphertexts remain. Authorization requires alias and target key.",
+        "properties": {
+          "AliasName": {
+            "$ref": "#/components/schemas/KMSCustomerAliasName"
+          }
+        },
+        "required": [
+          "AliasName"
+        ],
+        "additionalProperties": false
+      },
+      "KMSListAliasesInput": {
+        "type": "object",
+        "properties": {
+          "KeyId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048,
+            "description": "Actual local UUID key ID or full same-region/account key ARN. Target aliases, cross-account and cross-region keys are rejected. Customer SYMMETRIC_DEFAULT ENCRYPT_DECRYPT keys may be Enabled or Disabled for alias management.",
+            "pattern": "^(?:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|arn:aws:kms:(?:us-east-1|us-west-2|ap-northeast-1|eu-west-1):000000000000:key/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$"
+          },
+          "Limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 50
+          },
+          "Marker": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024,
+            "description": "Opaque local continuation from this region/filter/limit/revision. A mutation invalidates previously issued markers."
+          }
+        },
+        "additionalProperties": false
+      },
+      "KMSAliasEntry": {
+        "type": "object",
+        "properties": {
+          "AliasArn": {
+            "type": "string",
+            "description": "arn:aws:kms:<region>:000000000000:alias/<name>"
+          },
+          "AliasName": {
+            "$ref": "#/components/schemas/KMSCustomerAliasName"
+          },
+          "CreationDate": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "description": "Unix seconds when this alias was created."
+          },
+          "LastUpdatedDate": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "description": "Unix seconds of latest target association; native value is not before CreationDate."
+          },
+          "TargetKeyId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Concrete local target UUID, never an alias identifier."
+          }
+        },
+        "required": [
+          "AliasArn",
+          "AliasName",
+          "CreationDate",
+          "LastUpdatedDate",
+          "TargetKeyId"
+        ],
+        "additionalProperties": false
+      },
+      "KMSAliasPage": {
+        "type": "object",
+        "properties": {
+          "Aliases": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "$ref": "#/components/schemas/KMSAliasEntry"
+            }
+          },
+          "Truncated": {
+            "type": "boolean"
+          },
+          "NextMarker": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          }
+        },
+        "required": [
+          "Aliases",
+          "Truncated"
+        ],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "Truncated": {
+                  "const": true
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "NextMarker"
+              ]
+            }
+          }
+        ]
       }
     },
     "responses": {
@@ -13819,7 +14106,7 @@
     },
     {
       "name": "KMS local symmetric keys",
-      "description": "One real root POST is shared by Systems Manager, CloudFormation, KMS, SQS, CloudWatch Logs, Secrets Manager and DynamoDB. The service guides explain routing; the request/response templates and schemas below remain their native wire contracts. Independent bounded symmetric encryption simulator. Raw key material in SQLite; local ciphertext is incompatible with AWS KMS. No aliases/grants/deletion/rotation or HSM guarantee.",
+      "description": "One real root POST is shared by Systems Manager, CloudFormation, KMS, SQS, CloudWatch Logs, Secrets Manager and DynamoDB. The service guides explain routing; the request/response templates and schemas below remain their native wire contracts. Independent bounded symmetric encryption simulator. Raw key material in SQLite; local ciphertext is incompatible with AWS KMS. Customer aliases and alias Encrypt/Decrypt are available. No AWS-managed aliases, alias ABAC, grants, key deletion/rotation or HSM guarantee.",
       "x-displayName": "Shared AWS JSON/Query endpoint"
     },
     {
@@ -13832,7 +14119,7 @@
     },
     {
       "name": "KMS service guide",
-      "description": "Use JSON 1.1 with `X-Amz-Target: TrentService.<operation>`. Eight `KMS...` templates cover the local symmetric-key subset; local ciphertext is not compatible with real AWS KMS.\n\nThese are static documentation instructions, not saved state. This service uses the existing shared AWS root POST (`awsRegionalOperation`), shown under **Shared AWS JSON/Query endpoint**. Choose the matching Content-Type, routing header and named body example manually; selecting an example does not automatically change headers. Use Test Request → Send for a real local response. No real cloud is contacted."
+      "description": "Use JSON 1.1 with `X-Amz-Target: TrentService.<operation>`. Twelve `KMS...` templates cover the bounded local symmetric-key and customer-alias APIs; local ciphertext is not compatible with real AWS KMS.\n\nThese are static documentation instructions, not saved state. This service uses the existing shared AWS root POST (`awsRegionalOperation`), shown under **Shared AWS JSON/Query endpoint**. Choose the matching Content-Type, routing header and named body example manually; selecting an example does not automatically change headers. Use Test Request → Send for a real local response. No real cloud is contacted."
     },
     {
       "name": "SQS queues",
