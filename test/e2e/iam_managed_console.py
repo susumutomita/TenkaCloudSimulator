@@ -171,8 +171,43 @@ def _run():
                         expect(page.get_by_role('button', name='Services', exact=True)).to_be_enabled()
                         page.get_by_role('button', name='Services', exact=True).click()
                         page.get_by_role('menuitem', name='IAM', exact=True).click()
+                        # Preserve a real pending initial list across Create/Cancel.
+                        # Cancel must clear loading while rejecting its old response.
+                        sentinel_name = 'cancelled-read-sentinel-' + str(width)
+                        sentinel_policy = iam.create_policy(PolicyName=sentinel_name,
+                            PolicyDocument=json.dumps(deny))['Policy']
+                        held_initial = []
+                        def initial_list(route):
+                            if action(route.request) == 'ListPolicies': held_initial.append(route)
+                            else: route.continue_()
+                        page.route(a.endpoint + '/', initial_list)
                         page.get_by_role('button', name='Policies', exact=True).click()
+                        deadline = time.monotonic() + 5
+                        while not held_initial:
+                            assert time.monotonic() < deadline
+                            page.wait_for_timeout(10)
+                        assert len(held_initial) == 1
+                        page.get_by_role('button', name='Create policy', exact=True).click()
+                        page.get_by_label('Permissions policy JSON', exact=True).fill('DUMMY-cancelled-draft')
+                        page.get_by_role('button', name='Cancel', exact=True).click()
+                        with page.expect_response(lambda response: action(response.request) == 'ListPolicies') as cancelled_list:
+                            held_initial.pop().continue_()
+                        assert cancelled_list.value.status == 200
+                        page.unroute(a.endpoint + '/', initial_list)
+                        expect(page.get_by_role('button', name='Refresh', exact=True)).to_be_enabled()
+                        assert operations.count('CreatePolicy') == 0
+                        # The held native result contains a real row, so rejecting
+                        # stale publication is observable rather than an empty fixture.
+                        expect(page.get_by_role('link', name=sentinel_name, exact=True)).to_have_count(0)
+                        assert [p['PolicyName'] for p in iam.list_policies(Scope='Local')['Policies']] == [sentinel_name]
+                        native('Refresh', 'ListPolicies')
+                        expect(page.get_by_role('link', name=sentinel_name, exact=True)).to_be_visible()
+                        iam.delete_policy(PolicyArn=sentinel_policy['Arn'])
+                        native('Refresh', 'ListPolicies')
+                        expect(page.get_by_role('link', name=sentinel_name, exact=True)).to_have_count(0)
+                        assert iam.list_policies(Scope='Local')['Policies'] == []
                         expect(page.get_by_role('heading', name='Customer managed policies', exact=True)).to_be_visible()
+                        audit('policy-list-cancelled-read')
                         page.get_by_role('button', name='Create policy', exact=True).click()
                         page.get_by_label('Permissions policy JSON', exact=True).fill(json.dumps(allow, ensure_ascii=False))
                         before = list(operations); language('ja')
@@ -191,6 +226,31 @@ def _run():
                         page.get_by_role('button', name='Roles', exact=True).click()
                         page.get_by_role('link', name=role_name, exact=True).click()
                         expect(page.get_by_role('button', name='Create inline policy', exact=True)).to_be_visible()
+                        # The attachment catalog is a separate real read/epoch.
+                        # Its late response must not leave role metadata loading.
+                        held_catalog = []
+                        def attachment_catalog(route):
+                            if action(route.request) == 'ListPolicies': held_catalog.append(route)
+                            else: route.continue_()
+                        page.route(a.endpoint + '/', attachment_catalog)
+                        page.get_by_role('button', name='Add permissions', exact=True).click()
+                        page.get_by_role('menuitem', name='Attach policies', exact=True).click()
+                        deadline = time.monotonic() + 5
+                        while not held_catalog:
+                            assert time.monotonic() < deadline
+                            page.wait_for_timeout(10)
+                        assert len(held_catalog) == 1
+                        page.get_by_role('dialog').get_by_role('button', name='Cancel', exact=True).click()
+                        with page.expect_response(lambda response: action(response.request) == 'ListPolicies') as cancelled_catalog:
+                            held_catalog.pop().continue_()
+                        assert cancelled_catalog.value.status == 200
+                        page.unroute(a.endpoint + '/', attachment_catalog)
+                        expect(page.get_by_role('dialog')).to_have_count(0)
+                        expect(page.get_by_role('button', name='Refresh', exact=True)).to_be_enabled()
+                        assert operations.count('AttachRolePolicy') == 0
+                        assert iam.list_attached_role_policies(RoleName=role_name)['AttachedPolicies'] == []
+                        native('Refresh', 'ListAttachedRolePolicies')
+                        audit('role-cancelled-catalog')
                         page.get_by_role('button', name='Add permissions', exact=True).click()
                         page.get_by_role('menuitem', name='Attach policies', exact=True).click()
                         dialog = page.get_by_role('dialog')
@@ -300,6 +360,7 @@ def _run():
                         assert not errors and not outside
                         completed.append({'width': width, 'operations': sorted(set(operations)),
                                           'postACKReadAbort': fixture['aborts'], 'versionCreateCalls': 1,
+                                          'initialListCancelAndAttachCatalogCancel': True,
                                           'inlineAndManagedUnionDeny': True, 'staleReadDidNotPublish': True})
                         context.close(); context = None
                         iam.delete_role(RoleName=role_name); peer.delete_policy(PolicyArn=peer_policy['Arn']); peer.delete_role(RoleName=role_name)
