@@ -302,7 +302,11 @@ def _run():
                         context.close()
                     browser.close()
         finally:
-            a.stop(); b.stop()
+            # Stop both owned CLIs even if the first shutdown assertion fails.
+            try:
+                a.stop()
+            finally:
+                b.stop()
 
 
 if __name__ == '__main__':

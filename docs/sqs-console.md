@@ -29,8 +29,11 @@ Conformance methods. English/Japanese switching preserves queue and message
 drafts and private receipt custody; fixed notices translate at render time,
 while API values, resource names and raw errors stay opaque. The new helper
 reads completed JSON bodies without redundant Playwright `Response.finished()`
-waiters. Earlier two clean focused runs belong to candidate `2902fc0`, not this
-restack.
+waiters. The helper is exact candidate `2902fc0` except for nested shutdown
+cleanup: both owned CLIs are stopped even if the first shutdown assertion
+raises. Both shutdown checks and all product assertions remain enabled. Earlier
+two clean focused runs belong to candidate `2902fc0`, not this restack or the
+new cleanup path.
 
 The translated source has now been canonically bundled with the existing
 same-lock dependencies and all 22 original package notices retained. The four
