@@ -1,20 +1,20 @@
 # Finite state models
 
-Current registry: **39 models / 281 literal-protected controls**
-(**320 required executions**). All actual-main 35 model entries and 220 controls
+Current registry: **40 models / 295 literal-protected controls**
+(**335 required executions**). All actual-main 36 model entries and 234 controls
 are retained. Four separate customer-alias models describe catalog admission,
 concrete-key crypto, UI epochs/refresh and first-use transaction bootstrap.
 Their finite scopes and evidence are distinct from native/SDK/whole-quality proof.
 
 Registration is source evidence, not a successful current-HEAD execution claim.
-The complete immutable 320-case gate must actually run for this combined revision.
+The complete immutable 335-case gate must actually run for this combined revision.
 Historical scoped/integration receipts do not replace it. IAMManagedPolicies
 retains four reachable seeds and two-request suffixes; its broader four-request
 trial timed out and is not claimed. There is no Go/SQL/HTTP/UI refinement,
 cryptographic or complete cloud-compatibility proof.
 
 Legacy sections retain dated counts/status for traceability; “current” in those
-sections refers to that integration, not this authoritative 39/281 inventory.
+sections refers to that integration, not this authoritative 40/295 inventory.
 Every execution claim must identify its exact revision.
 
 `ObjectStore.tla` models two buckets and two keys, shared object ownership, create/put/delete transitions, and an abstract identity decision `allow /\ ~deny`. `ObjectStore.cfg` checks type correctness, no orphan objects, no unauthorized mutation, and explicit-deny precedence.
@@ -378,9 +378,9 @@ by a complete shell/React refinement.
 
 SecretVersionListing adds nine invariants and thirteen literal-protected semantic
 controls, preserving all prior33 registry objects and197 controls and their
-TLA/CFG bytes. The Secrets-only addition had34 baselines +210 controls =244 required
-executions. The current combined inventory above also includes DynamoDBConsoleEpoch. Registration and earlier independent scoped results are not a
-successful immutable244-case integration gate or hosted-CI result.
+TLA/CFG bytes. At the listing-only registration checkpoint the inventory was34 baselines
++210 controls =244 required executions. That historical registration and scoped
+results do not establish a complete integration or hosted-CI result.
 
 Four-transition suffixes cover four ordered symbolic version keys, two database
 authorities/regions, two physical generations and page size one. List permission
@@ -392,7 +392,7 @@ precedes the page limit, resume positions advance strictly, and reads preserve
 version/stage state. Add/promote/delete/recreate/reopen expose live keyset changes;
 this is not a stable snapshot or a proof of eventual termination.
 
-Correspondence is limited to ListSecretVersionIDs metadata enumeration/cursor
+Correspondence is limited to ListSecretVersionIds metadata enumeration/cursor
 logic in `secrets_manager_versions.go` and the exact added operation dispatch in
 `secret_http.go`; the other seven operations do not acquire new guarantees. Native
 store and HTTP tests named in source_scope separately exercise denied frames,
@@ -407,6 +407,45 @@ parsing, actual timestamp/UUID order, variable page sizes, secret-value redactio
 retention, UI and Go refinement remain native/integration obligations. All thirteen
 controls must fail their exact named semantic invariant with a behavioral trace;
 syntax/type/config failures or timeouts are not accepted counterexamples.
+
+
+## Secret metadata view epoch
+
+`SecretMetadataViewEpoch` checks six transitions, at most two reads and five
+separate seeds for overlap, scope changes, paging, locale and parent tab entry.
+A valid page has one symbolic row; a second row exposes accidental accumulation.
+Render and committed scopes are distinct. Old callbacks remain schedulable after
+Abort so the finite epoch/identity guards are checked independently of transport
+cancellation. Concrete browser cancellation may prevent JavaScript delivery and
+is not evidence that every post-Abort callback branch executed.
+
+Thirteen properties cover metadata-only requests, cursor provenance, stale
+acceptance/render/error refusal, loading ownership, clearing on new reads/errors,
+validated current-page rows, same-mount locale retention and clearing a prior
+parent reveal on metadata-tab entry. Fourteen named controls must each produce
+its specified invariant violation, not a parser/type/runtime error or timeout.
+The source projection includes `secret_versions.jsx`, the parent's tab-invalidate
+call and the derived bundle. It excludes old asyncRetrieve behavior, secret-byte
+zeroization, SQL, host authentication and whole React scheduling/refinement.
+Cursor provenance and response validation are abstract predicates, not HMAC or
+JSON parser proofs; the live pager is not a stable complete history snapshot.
+
+
+| Finite action / carrier | Concrete scope |
+| --- | --- |
+| Begin / current callback / Settle | Child `load`, captured scope/ticket/controller, `current()` success/catch/finally guard |
+| Cancel / Unmount / scope commit | `clear` and layout-effect cleanup; render result/error scope checks |
+| Next / cursor provenance | Next uses only the displayed page cursor, unchanged ARN/filter; current rows replace prior page |
+| Payload validity | `metadataPage` validation abstracted as a Boolean; malformed-payload implementation remains a test obligation |
+| LocaleFlip | `useLocale` static rendering; locale absent from the query-scope memo dependencies |
+| EnterMetadata | Parent tab-change `invalidate()`; prior visible-reveal Boolean only |
+
+The actual helper exercises 23 native versions as20+3 rows, list-only authority,
+metadata-read failure/repair, scope transitions, cancellation and peer frames.
+The no-reload language round trip passed on the unchanged canonical embedded
+product: same metadata DOM node, ARN/filter/page IDs and host scope, no additional
+reads or value requests. Earlier Japanese-after-reload checks are a distinct
+oracle; neither focused result replaces the complete immutable integration gate.
 
 ## Customer-alias crypto and aliases UI
 
@@ -433,8 +472,8 @@ refinement, backend admission coverage or liveness.
 The scoped model executions are separate evidence: the UI baseline visited
 431,932 distinct states and all eleven controls produced their named invariant
 violations; the crypto author's scoped evidence records its fourteen cases.
-Registration now requires 39 baselines and 281 controls (320 executions), with
-all main 35 models and 220 controls retained. A fresh immutable combined gate
+Registration now requires 40 baselines and 295 controls (335 executions), with
+all main 36 models and 234 controls retained. A fresh immutable combined gate
 must actually execute before reporting this inventory as current-HEAD passed.
 Catalog/CRUD/paging is represented separately below; neither of these two
 entries supplies catalog behavior or native implementation proof.

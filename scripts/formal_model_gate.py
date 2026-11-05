@@ -9,9 +9,10 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-BASE_MODELS = {'AzureBlobState', 'AzurePropertiesEpoch', 'AzurePropertiesTarget', 'BlobRange', 'BrowserSessions', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'DynamoDBAdmission', 'DynamoDBConsoleEpoch', 'DynamoDBLifecycle', 'GCPStorageState', 'IAMManagedPolicies', 'KMSAliasCatalog', 'KMSAliasCrypto', 'KMSAliasesViewEpoch', 'KMSBootstrapTransaction', 'KMSKeyState', 'KMSProtocolAdmission', 'NativeIAMOwnership', 'NativeWireProjection', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'RESTProxyEventBoundary', 'RESTRouteMatching', 'S3Versions', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'SecretVersionListing', 'SecretsDisclosureChannels', 'SecretsMutationRefresh', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'StackOwnership', 'StartupTokenVisibility'}
+BASE_MODELS = {'AzureBlobState', 'AzurePropertiesEpoch', 'AzurePropertiesTarget', 'BlobRange', 'BrowserSessions', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'DynamoDBAdmission', 'DynamoDBConsoleEpoch', 'DynamoDBLifecycle', 'GCPStorageState', 'IAMManagedPolicies', 'KMSAliasCatalog', 'KMSAliasCrypto', 'KMSAliasesViewEpoch', 'KMSBootstrapTransaction', 'KMSKeyState', 'KMSProtocolAdmission', 'NativeIAMOwnership', 'NativeWireProjection', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'RESTProxyEventBoundary', 'RESTRouteMatching', 'S3Versions', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'SecretMetadataViewEpoch', 'SecretVersionListing', 'SecretsDisclosureChannels', 'SecretsMutationRefresh', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'StackOwnership', 'StartupTokenVisibility'}
 BASE_INVARIANTS = {
     'DynamoDBConsoleEpoch': {'AckBelongsToCurrentView', 'AckClosesDraft', 'CancelNoOrphanLoading', 'DisplayedKeyBound', 'LocalePreservesDraft', 'NoStalePublication', 'ReadGenerationVerified', 'ReadRetryNeverWrites', 'SingleSendBeforeACK', 'TypeOK'},
+    'SecretMetadataViewEpoch': {'CurrentPageOnly', 'CursorRequestBound', 'LoadingTracksLatest', 'LocalePreservesQuery', 'MetadataRequestsOnly', 'NoRowsOnError', 'NoStaleCallbackAcceptance', 'NoStaleRenderedError', 'NoStaleRenderedMetadata', 'ParentRevealClearedForMetadata', 'PendingClearsMetadata', 'TypeOK', 'ValidatedMetadataOnly'},
     'SecretVersionListing': {'ContinuationPosition', 'FilterBeforePageLimit', 'NoDeniedEmission', 'ReadAfterAuthorization', 'ReadFramePreserved', 'StrictForwardKeyset', 'TerminalConverges', 'TokenScopeBound', 'TypeOK'},
     'NativeWireProjection': {'BadValueRefused', 'CompleteProjection', 'FailureNoPartial', 'OmissionExact', 'OrderExact', 'SkippedBadDoesNotFail', 'TypeOK', 'ValueKindsPreserved'},
     'RESTRouteMatching': {'CaptureFidelity', 'InvalidTemplateRejected', 'MatchOracle', 'RejectedShape', 'Specificity', 'TypeOK'},
@@ -53,6 +54,7 @@ BASE_INVARIANTS = {
 }
 # Established controls require an explicit gate-policy change before retirement.
 REQUIRED_MUTANTS = {
+    'SecretMetadataViewEpoch': {'AppendPreviousPage', 'ChildRequestsValue', 'ErrorFabricatesRows', 'LateCallbackAccepted', 'LocaleResetsQuery', 'NewReadKeepsOldRows', 'NextFilterContext', 'OldFinallyClearsNewLoading', 'ParentKeepsPriorReveal', 'RenderOldMetadata', 'RenderOldNativeError', 'ScopeCommitKeepsLoading', 'SkipPayloadValidation', 'UnmountWithoutCleanup'},
     'DynamoDBConsoleEpoch': {'ACKKeepsDraft', 'ACKKeepsForm', 'CancelKeepsLoading', 'IgnorePostReadGeneration', 'IgnoreReadViewGuard', 'IgnoreWriteViewGuard', 'KeepDisplayedItemOnKeyEdit', 'LocaleClearsDirtyDraft', 'RemoveSynchronousOwnerLock', 'RetryRepeatsWrite'},
     'SecretVersionListing': {'AuthorityKeyBypass', 'AuthorizationBypass', 'DomainBypass', 'ExpiryBypass', 'FilterAfterLimit', 'FilterBindingBypass', 'GenerationBindingBypass', 'InclusiveResume', 'MissingNextToken', 'ReadWritesVersionState', 'RegionBindingBypass', 'SignatureBypass', 'StaleNextPosition'},
     'NativeWireProjection': {'AcceptBadValue', 'CollapseNullToZero', 'EncodeOmittedBad', 'IgnoreOmission', 'PublishErrorPrefix', 'ReverseFieldOrder'},
@@ -94,6 +96,7 @@ REQUIRED_MUTANTS = {
     'KMSAliasesViewEpoch': {'BypassRetiredListLife', 'DeleteWithoutExactConfirmation', 'IgnoreSameLifeListRevision', 'IgnoreSelectedTargetRevision', 'KeepDraftAfterAcknowledgedWrite', 'KeepFormAfterAcknowledgedWrite', 'LocaleClearsUnsavedDraft', 'ReplayWriteOnReadRetry', 'RetainRowsOnCurrentReadFailure', 'RetainTargetMetadataOnCancel', 'SubmitWithoutVerifiedTarget'},
 }
 REQUIRED_SOURCE_SCOPES = {
+    'SecretMetadataViewEpoch': {'internal/server/web/app.js', 'tools/console/src/secret_versions.jsx', 'tools/console/src/secrets-manager.jsx'},
     'DynamoDBConsoleEpoch': {'internal/server/web/app.js', 'tools/console/src/dynamodb.jsx', 'tools/console/src/main.jsx'},
     'SecretVersionListing': {'internal/aws/secret_http.go', 'internal/aws/secrets_manager_versions.go', 'internal/aws/secrets_manager_versions_http_test.go', 'internal/aws/secrets_manager_versions_test.go'},
     'NativeWireProjection': {'internal/aws/wire_json_projection.go'},
