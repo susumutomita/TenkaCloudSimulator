@@ -4536,6 +4536,131 @@
           ]
         }
       ]
+    },
+    {
+      "id": "CFNConditionMemoDepth",
+      "model": "formal/CFNConditionMemoDepth.tla",
+      "config": "formal/CFNConditionMemoDepth.cfg",
+      "bounds": "3nameddefinitions;7choices/name(leafTRUE/FALSE,alias0unknown/1..3,malformed);343graphs;all6definitionorders;depthbound2or3;4116initialcombinations;three root evaluations maximum;single-childaliases and normalized Fn::Equals truthvalues. Native32/33 boundarytests separate.",
+      "properties": [
+        "TypeOK",
+        "RejectedPublishesNoValues",
+        "AllDefinitionsValidated",
+        "NoInvalidGraphAccepted",
+        "NoOverDepthAccepted",
+        "NoCycleMemoized",
+        "NoUnknownMemoized",
+        "NoMalformedMemoized",
+        "MemoHeightsExact",
+        "MemoValuesExact",
+        "PublishedValuesExact",
+        "AdmissionExact"
+      ],
+      "limits": "Independent finite source-correspondence abstraction, not Go/JSON/parser/parameterRefs/SQLite/CFNresource/IAM/refinement/liveness or unbounded32depth proof. All-or-nil public return only; private scratch maps on error are not claimed restored. One-expression malformed class represents native refusal, not all malformed syntax. Every node is defined; unknown0 only referenced. All6orders represent renamed sorted native order, not runtime nondeterministic map iteration. Visiting-as-completed is a semantic false-ACK change, not an isolated missing-visiting-guard detector; depth refusal alone remains redundant cycle defense. Scoped SANY/baseline/nine named-invariant controls actually passed at cca79267; the combined registered suite remains pending. This dated scoped run is not Go refinement or unbounded-depth proof.",
+      "source_scope": [
+        "internal/aws/cloudformation_conditions.go"
+      ],
+      "mutants": [
+        {
+          "id": "CachedReturnIgnoresStructuralHeight",
+          "edits": [
+            {
+              "old": "depth+h[n]-1<=bound (* CachedDepthAdmission *)",
+              "new": "TRUE (* CachedDepthAdmission *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoOverDepthAccepted"
+        },
+        {
+          "id": "CachedDepthOffByOne",
+          "edits": [
+            {
+              "old": "depth+h[n]-1<=bound (* CachedDepthAdmission *)",
+              "new": "depth+h[n]-1<=bound+1 (* CachedDepthAdmission *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoOverDepthAccepted"
+        },
+        {
+          "id": "SkipUnusedDefinitions",
+          "edits": [
+            {
+              "old": "state.index+1=3 (* ValidateEveryDefinition *)",
+              "new": "state.index+1=1 (* ValidateEveryDefinition *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AllDefinitionsValidated"
+        },
+        {
+          "id": "CacheAliasHeightAsLeaf",
+          "edits": [
+            {
+              "old": "height==1+child.height (* AliasStructuralHeight *)",
+              "new": "height==1 (* AliasStructuralHeight *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MemoHeightsExact"
+        },
+        {
+          "id": "TreatVisitingAsCompleted",
+          "edits": [
+            {
+              "old": "n \\in visiting THEN Failure(h,v) (* VisitingRefusal *)",
+              "new": "n \\in visiting THEN Outcome(TRUE,h,v,1,FALSE) (* VisitingRefusal *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoCycleMemoized"
+        },
+        {
+          "id": "TreatUnknownAsFalse",
+          "edits": [
+            {
+              "old": "n \\notin Nodes THEN Failure(h,v) (* UnknownRefusal *)",
+              "new": "n \\notin Nodes THEN Outcome(TRUE,h,v,1,FALSE) (* UnknownRefusal *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoUnknownMemoized"
+        },
+        {
+          "id": "TreatMalformedAsFalse",
+          "edits": [
+            {
+              "old": "g[n].kind=\"Malformed\" THEN Failure(h,v) (* MalformedRefusal *)",
+              "new": "g[n].kind=\"Malformed\" THEN Outcome(TRUE,[h EXCEPT ![n]=1],v,1,FALSE) (* MalformedRefusal *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoMalformedMemoized"
+        },
+        {
+          "id": "InvertMemoizedValue",
+          "edits": [
+            {
+              "old": "Outcome(TRUE,h,v,h[n],v[n]) (* CachedValue *)",
+              "new": "Outcome(TRUE,h,v,h[n],~v[n]) (* CachedValue *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MemoValuesExact"
+        },
+        {
+          "id": "PublishPartialValuesOnFailure",
+          "edits": [
+            {
+              "old": "IF finished /\\ result.ok THEN result.values ELSE AbsentCondition",
+              "new": "IF finished THEN result.values ELSE AbsentCondition",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RejectedPublishesNoValues"
+        }
+      ]
     }
   ]
 }

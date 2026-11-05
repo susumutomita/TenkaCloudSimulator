@@ -120,7 +120,7 @@ SDK、操作画面、再起動、チーム分離の受入検証は `make e2e` �
 
 CIはstatementと未フィルターsource-line coverageを両方90%以上に強制します。`make before-commit`単独のcoverage判定はstatementのみで、source-line判定はCIのCobertura生成後ステージと上記の2コマンドで行います。SDK/browser、license、依存security、埋込asset、形式検査も行います。cross compileは他OSでの実行成功を意味しません。開発用Python/Node/Javaはruntime依存ではありません。UI・Scalarの再生成は権利表記とlockを保持する[各build手順](tools/console/README.md)・[Scalar手順](tools/scalar/README.md)・[Python runtimeの権利・再生成手順](tools/python/README.md)に従います。
 
-形式検査の現在の登録は42有限モデル・313個の意図した欠陥検出（全355実行）です。DynamoDB画面のepoch・ACK後の読み取り再試行と、保存済みARN認可後のSecretsバージョンメタデータ一覧・限定cursor境界をモデル化します。値の読取許可や履歴画面を自動的に追加するものではありません。正確な一覧・境界・未モデル化部分は[形式検査](formal/README.md)とregistryを参照してください。過去の受領証と、現在の固定HEADの全体検査は分けて判断します。TLCはGo/JS実装のrefinement、暗号、全AWS仕様・実AWSとの一致を証明しません。[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)。
+形式検査の現在の登録は43有限モデル・322個の意図した欠陥検出（全365実行）です。DynamoDB画面のepoch・ACK後の読み取り再試行と、保存済みARN認可後のSecretsバージョンメタデータ一覧・限定cursor境界をモデル化します。値の読取許可や履歴画面を自動的に追加するものではありません。正確な一覧・境界・未モデル化部分は[形式検査](formal/README.md)とregistryを参照してください。過去の受領証と、現在の固定HEADの全体検査は分けて判断します。TLCはGo/JS実装のrefinement、暗号、全AWS仕様・実AWSとの一致を証明しません。[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)。
 
 ## ライセンス
 
@@ -161,6 +161,6 @@ combined 29-model/164-control formal gate (193 executions). These receipts apply
 to that revision. Every later change still requires its exact-HEAD CI, including
 the 45-case E2E suite; focused results do not replace whole-suite verification.
 
-現在の形式検査の登録は42モデル・313制御（355実行）です。IAMの追加モデルは4つの到達可能な初期状態から各2要求の範囲で、4要求の試案はタイムアウトし未成功です。上の過去の受領証とは区別し、最新HEADで全ゲートを実行してください。API資料はAWS・Google Cloud・Azureを分け、Sakura Cloudは未実装表示です。[ナビゲーション](docs/api-reference.md)を参照してください。
+現在の形式検査の登録は43モデル・322制御（365実行）です。IAMの追加モデルは4つの到達可能な初期状態から各2要求の範囲で、4要求の試案はタイムアウトし未成功です。上の過去の受領証とは区別し、最新HEADで全ゲートを実行してください。API資料はAWS・Google Cloud・Azureを分け、Sakura Cloudは未実装表示です。[ナビゲーション](docs/api-reference.md)を参照してください。
 
-CFN条件モデルの単体検査は`f69fb46`で成功し、元cryptoテンプレートの実CLI/SDK検証は`2d76646`で成功しました（4回のCLI起動、SDK 73要求・73応答、補助HTTP 9組）。今回の登録済み355ケース全体は未実行です。これはローカルな作成・権限・再起動・削除の検証であり、ホストの協調処理・採点やNoEcho秘匿を証明しません。[CFNの制限](docs/cloudformation-rest.md#parameters-and-conditions)。
+CFN条件モデルの単体検査は`f69fb46`で成功し、元cryptoテンプレートの実CLI/SDK検証は`2d76646`で成功しました（4回のCLI起動、SDK 73要求・73応答、補助HTTP 9組）。今回の登録済み365ケース全体は未実行です。これはローカルな作成・権限・再起動・削除の検証であり、ホストの協調処理・採点やNoEcho秘匿を証明しません。[CFNの制限](docs/cloudformation-rest.md#parameters-and-conditions)。
