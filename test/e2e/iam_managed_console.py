@@ -145,12 +145,17 @@ def _run():
                         page = context.new_page(); page.set_default_timeout(10000)
                         page.on('pageerror', lambda _: errors.append(True))
                         operations, responses, failed_reads = [], [], []
+                        intercept = [None]
                         def guard(route):
                             target = urlsplit(route.request.url)
-                            if target.scheme == 'http' and target.netloc == urlsplit(a.endpoint).netloc:
-                                route.continue_()
-                            else:
-                                outside.append(True); route.abort()
+                            if target.scheme != 'http' or target.netloc != urlsplit(a.endpoint).netloc:
+                                outside.append(True); route.abort(); return
+                            # One owner handles every route, including the explicit
+                            # hold/abort fixtures. Mixing page/context route stacks
+                            # can hand an already-handled request to another owner.
+                            if intercept[0] is not None and intercept[0](route):
+                                return
+                            route.continue_()
                         context.route('**/*', guard)
                         page.on('request', lambda request: operations.append(action(request))
                             if action(request) in OPERATIONS else None)
@@ -195,9 +200,10 @@ def _run():
                             PolicyDocument=json.dumps(deny))['Policy']
                         held_initial = []
                         def initial_list(route):
-                            if action(route.request) == 'ListPolicies': held_initial.append(route)
-                            else: route.continue_()
-                        page.route(a.endpoint + '/', initial_list)
+                            if action(route.request) == 'ListPolicies':
+                                held_initial.append(route); return True
+                            return False
+                        intercept[0] = initial_list
                         page.get_by_role('button', name='Policies', exact=True).click()
                         deadline = time.monotonic() + 5
                         while not held_initial:
@@ -210,7 +216,7 @@ def _run():
                         with page.expect_response(lambda response: action(response.request) == 'ListPolicies') as cancelled_list:
                             held_initial.pop().continue_()
                         assert cancelled_list.value.status == 200
-                        page.unroute(a.endpoint + '/', initial_list)
+                        intercept[0] = None
                         expect(page.get_by_role('button', name='Refresh', exact=True)).to_be_enabled()
                         assert operations.count('CreatePolicy') == 0
                         # The held native result contains a real row, so rejecting
@@ -247,9 +253,10 @@ def _run():
                         # Its late response must not leave role metadata loading.
                         held_catalog = []
                         def attachment_catalog(route):
-                            if action(route.request) == 'ListPolicies': held_catalog.append(route)
-                            else: route.continue_()
-                        page.route(a.endpoint + '/', attachment_catalog)
+                            if action(route.request) == 'ListPolicies':
+                                held_catalog.append(route); return True
+                            return False
+                        intercept[0] = attachment_catalog
                         page.get_by_role('button', name='Add permissions', exact=True).click()
                         page.get_by_role('menuitem', name='Attach policies', exact=True).click()
                         deadline = time.monotonic() + 5
@@ -261,7 +268,7 @@ def _run():
                         with page.expect_response(lambda response: action(response.request) == 'ListPolicies') as cancelled_catalog:
                             held_catalog.pop().continue_()
                         assert cancelled_catalog.value.status == 200
-                        page.unroute(a.endpoint + '/', attachment_catalog)
+                        intercept[0] = None
                         expect(page.get_by_role('dialog')).to_have_count(0)
                         expect(page.get_by_role('button', name='Refresh', exact=True)).to_be_enabled()
                         assert operations.count('AttachRolePolicy') == 0
@@ -293,10 +300,9 @@ def _run():
                                 fixture['armed'] = True
                         def metadata_failure(route):
                             if action(route.request) == 'GetPolicy' and fixture['armed']:
-                                fixture['armed'] = False; fixture['aborts'] += 1; route.abort('failed')
-                            else:
-                                route.continue_()
-                        page.on('response', ack_seen); page.route(a.endpoint + '/', metadata_failure)
+                                fixture['armed'] = False; fixture['aborts'] += 1; route.abort('failed'); return True
+                            return False
+                        page.on('response', ack_seen); intercept[0] = metadata_failure
                         count = operations.count('CreatePolicyVersion')
                         native('Create version', 'CreatePolicyVersion')
                         expect(page.get_by_role('button', name='Retry read', exact=True)).to_be_visible()
@@ -307,7 +313,7 @@ def _run():
                         native('Retry read', 'GetPolicy')
                         expect(page.get_by_role('radio', name='Select version v2', exact=True)).to_be_visible()
                         assert operations.count('CreatePolicyVersion') == count + 1, 'Read retry replayed non-idempotent version create'
-                        page.unroute(a.endpoint + '/', metadata_failure); page.remove_listener('response', ack_seen)
+                        intercept[0] = None; page.remove_listener('response', ack_seen)
                         assert as_role.get_object(Bucket=bucket, Key='object')['Body'].read() == payload
                         page.get_by_role('radio', name='Select version v2', exact=True).check()
                         page.get_by_role('button', name='Set as default', exact=True).click()
@@ -333,9 +339,10 @@ def _run():
                         # Release a real late version read after leaving its policy; it must not repopulate.
                         held = []
                         def hold_version(route):
-                            if action(route.request) == 'GetPolicyVersion': held.append(route)
-                            else: route.continue_()
-                        page.route(a.endpoint + '/', hold_version)
+                            if action(route.request) == 'GetPolicyVersion':
+                                held.append(route); return True
+                            return False
+                        intercept[0] = hold_version
                         page.get_by_role('link', name='v1', exact=True).click()
                         deadline = time.monotonic() + 5
                         while not held:
@@ -345,7 +352,7 @@ def _run():
                         with page.expect_response(lambda response: action(response.request) == 'GetPolicyVersion') as late:
                             held.pop().continue_()
                         assert late.value.status == 200
-                        page.unroute(a.endpoint + '/', hold_version)
+                        intercept[0] = None
                         expect(page.get_by_role('heading', name='Customer managed policies', exact=True)).to_be_visible()
                         expect(page.get_by_label('Version JSON', exact=True)).to_have_count(0)
                         audit('policy-list-after-stale-read')
