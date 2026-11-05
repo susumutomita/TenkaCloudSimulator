@@ -169,7 +169,7 @@ Hosted exact-HEAD CI and publication review remain separate from local results.
 
 All26 main models/149 literal controls remain byte-semantically unchanged.
 SecretsMutationRefresh adds five properties/four named controls:27/153,180
-planned executions. It covers only live-ACK form exit/draft clearing/read-only
+required finite executions. It covers only live-ACK form exit/draft clearing/read-only
 retry/fresh form intent. It excludes ambiguous unacknowledged writes, React/Go/SQL
 refinement and auth. Earlier eac3/f5d134 success is a historical input, not current
 union verification. [Mapping](formal-secrets-mutation-refresh.md).

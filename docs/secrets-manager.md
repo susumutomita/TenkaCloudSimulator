@@ -1,6 +1,6 @@
 # Secrets Manager: local training subset
 
-> Normal-merge source candidate: public PR408 `eac3a1d` plus main `0a6bdce41c773f651a5bd9a8a128da4e45b8b2c2`. All42 main Conformance method bodies and all26 main models/149 controls are preserved; the ACK observation model adds one model/four controls (27/153,180 finite cases). Integrated runtime, browser, model and hosted-CI results remain pending at this new union. Historical receipts below are not fresh combined proof.
+> This bounded native implementation preserves the 42 acceptance cases and 26 models/149 controls from baseline `0a6bdce41c773f651a5bd9a8a128da4e45b8b2c2`. The ACK observation contract adds one model/four controls (27/153,180 finite cases). Combined runtime, browser and model results are revision-specific: consult the exact commit in [CI](https://github.com/susumutomita/TenkaCloudSimulator/actions/workflows/ci.yml) and [Formal validation](https://github.com/susumutomita/TenkaCloudSimulator/actions/workflows/formal.yml). Historical receipts below do not establish a different revision’s success.
 
 
 Seven native Secrets Manager operations, the Cloudscape console, SDK clients and
@@ -271,5 +271,7 @@ about the cause of an earlier hosted CI failure.
 The new main0a6 union also preserves cleared detail state immediately after ACK,
 removes an acknowledged deleted resource from the visible list, and provides an
 explicit read-only Retry metadata refresh action. Main Japanese service-locale
-assertions and all42 Conformance methods are preserved. Current source-only
-locale8/navigation6 checks pass; fresh embedded/browser/full gates are pending.
+assertions and all42 Conformance methods are preserved. The acceptance suite includes
+locale/navigation checks and actual embedded browser flows. A particular revision
+requires its own exact-HEAD full gates; pure/source checks and historical receipts
+do not substitute for that execution.

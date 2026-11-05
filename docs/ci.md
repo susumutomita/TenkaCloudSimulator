@@ -40,6 +40,15 @@ source view and Markdown summary for 14 days. Evidence is retained even after a
 failed threshold check; uploading an artifact does not change the failed result.
 Missing evidence cannot make generation or validation succeed.
 
+A later near-floor pass does not repair an earlier below-floor result. Add
+meaningful native contract tests for uncovered behavior and verify a new single
+full-module profile without exclusions or a lower floor. The DynamoDB storage
+recovery tests exercise sanitized failures, unchanged owner/peer-region state,
+authorization before corrupted-state access, and repaired native operations.
+These injected SQLite faults test local persistence contracts, not behavior
+observed on real AWS. Focused coverage differences are diagnostic evidence;
+never merge them into a profile presented as a whole-suite result.
+
 ## Why Code Quality upload was replaced
 
 At head 7dfc3c8000be9abe047ce07156e0f8d929795fb6, both the PR and push runs
