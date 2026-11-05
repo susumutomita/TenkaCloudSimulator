@@ -507,3 +507,172 @@ func TestKMSAliasesGlobalBudgetAndMissingStateRefuseSuccess(t *testing.T) {
 		t.Fatal("repair/retry", err)
 	}
 }
+
+func TestKMSAliasesCryptoUsesConcreteKeyAndRetargetedCiphertextGuard(t *testing.T) {
+	keys, s, first, second := kmsAliasFixture(t)
+	ctx := context.Background()
+	name := "alias/Crypto"
+	if err := s.CreateAlias(ctx, name, first.KeyID, kmsAliasAllow); err != nil {
+		t.Fatal(err)
+	}
+	plaintext := []byte{0, 1, 2, 255, 17}
+	contextMap := map[string]string{"exercise": "local"}
+	authorize := func(wantAction, wantID string) KMSAliasAuthorizer {
+		return func(ctx context.Context, tx *sql.Tx, action, resource string) (bool, error) {
+			if action != wantAction || resource != "arn:aws:kms:us-east-1:000000000000:key/"+wantID {
+				t.Fatal("crypto authorization did not use concrete key/action")
+			}
+			// This real read on the supplied tx is safe with the one-connection provider
+			// DB; nested public methods/another transaction would deadlock instead.
+			var count int
+			if err := tx.QueryRowContext(ctx, `SELECT count(*) FROM aws_kms_aliases WHERE region='us-east-1' AND name='alias/Crypto'`).Scan(&count); err != nil || count != 1 {
+				t.Fatal("not the caller alias transaction", err)
+			}
+			return true, nil
+		}
+	}
+	blob, arn, err := s.Encrypt(ctx, name, contextMap, plaintext, authorize("kms:Encrypt", first.KeyID))
+	if err != nil || arn != first.Arn {
+		t.Fatal("alias encrypt", err)
+	}
+	blobRegion, blobID, _, err := kmsBlob(blob)
+	if err != nil || blobRegion != "us-east-1" || blobID != first.KeyID {
+		t.Fatal("alias changed native ciphertext identity", err)
+	}
+	got, arn, err := s.Decrypt(ctx, "arn:aws:kms:us-east-1:000000000000:alias/Crypto", contextMap, blob, authorize("kms:Decrypt", first.KeyID))
+	if err != nil || arn != first.Arn || !bytes.Equal(got, plaintext) {
+		t.Fatal("alias decrypt", err)
+	}
+	if err = s.UpdateAlias(ctx, name, second.KeyID, kmsAliasAllow); err != nil {
+		t.Fatal(err)
+	}
+	before := kmsAliasFrame(t, keys)
+	called := false
+	got, arn, err = s.Decrypt(ctx, name, contextMap, blob, func(context.Context, *sql.Tx, string, string) (bool, error) { called = true; return true, nil })
+	kmsWantCode(t, err, "IncorrectKeyException")
+	if len(got) != 0 || arn != "" || called {
+		t.Fatal("retargeted alias selected old ciphertext or authorized wrong key")
+	}
+	kmsAliasUnchanged(t, keys, before)
+	got, arn, err = s.Decrypt(ctx, "", contextMap, blob, authorize("kms:Decrypt", first.KeyID))
+	if err != nil || arn != first.Arn || !bytes.Equal(got, plaintext) {
+		t.Fatal("omitted KeyId no longer follows ciphertext UUID", err)
+	}
+	newBlob, arn, err := s.Encrypt(ctx, name, contextMap, plaintext, authorize("kms:Encrypt", second.KeyID))
+	if err != nil || arn != second.Arn {
+		t.Fatal("retarget new encryption", err)
+	}
+	_, id, _, err := kmsBlob(newBlob)
+	if err != nil || id != second.KeyID {
+		t.Fatal("new alias did not select retarget", err)
+	}
+	// Direct concrete wrappers remain interoperable with alias-generated blobs.
+	got, arn, err = keys.Decrypt(ctx, "us-east-1", second.KeyID, contextMap, newBlob)
+	if err != nil || arn != second.Arn || !bytes.Equal(got, plaintext) {
+		t.Fatal("legacy concrete wrapper changed", err)
+	}
+}
+func TestKMSAliasesCryptoDenialsAndIgnoredCounterPreserveFullFrame(t *testing.T) {
+	keys, s, key, _ := kmsAliasFixture(t)
+	ctx := context.Background()
+	if err := s.CreateAlias(ctx, "alias/Bound", key.KeyID, kmsAliasAllow); err != nil {
+		t.Fatal(err)
+	}
+	blob, _, err := keys.Encrypt(ctx, "us-east-1", key.KeyID, nil, []byte("dummy"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	before := kmsAliasFrame(t, keys)
+	for _, authorize := range []KMSAliasAuthorizer{nil, func(context.Context, *sql.Tx, string, string) (bool, error) { return false, nil }} {
+		out, arn, err := s.Encrypt(ctx, "alias/Bound", nil, []byte("dummy"), authorize)
+		kmsWantCode(t, err, "AccessDeniedException")
+		if len(out) != 0 || arn != "" {
+			t.Fatal("denied encryption leaked success")
+		}
+		kmsAliasUnchanged(t, keys, before)
+		out, arn, err = s.Decrypt(ctx, "", nil, blob, authorize)
+		kmsWantCode(t, err, "AccessDeniedException")
+		if len(out) != 0 || arn != "" {
+			t.Fatal("denied decrypt leaked plaintext")
+		}
+		kmsAliasUnchanged(t, keys, before)
+	}
+	if _, err = keys.db.Exec(`CREATE TRIGGER ignore_alias_crypto BEFORE UPDATE OF encryptions ON aws_kms_keys BEGIN SELECT RAISE(IGNORE); END;`); err != nil {
+		t.Fatal(err)
+	}
+	out, arn, err := s.Encrypt(ctx, "alias/Bound", nil, []byte("dummy"), kmsAliasAllow)
+	if err == nil || len(out) != 0 || arn != "" {
+		t.Fatal("ignored counter returned alias ciphertext")
+	}
+	kmsAliasUnchanged(t, keys, before)
+	if _, err = keys.db.Exec(`DROP TRIGGER ignore_alias_crypto`); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err = s.Encrypt(ctx, "alias/Bound", nil, []byte("dummy"), kmsAliasAllow); err != nil {
+		t.Fatal("retry", err)
+	}
+	row, err := kmsRead(ctx, keys.db, "us-east-1", key.KeyID)
+	if err != nil || row.encryptions != 2 {
+		t.Fatal("failed admission consumed a counter", err)
+	}
+}
+func TestKMSCallerTxCryptoHelpersNeverCommitOrRollbackCaller(t *testing.T) {
+	keys, _, key, _ := kmsAliasFixture(t)
+	ctx := context.Background()
+	before := kmsAliasFrame(t, keys)
+	tx, err := keys.db.BeginTx(ctx, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	blob, arn, err := kmsEncryptTx(ctx, tx, "us-east-1", key.KeyID, nil, []byte("transaction fixture"))
+	if err != nil || arn != key.Arn {
+		tx.Rollback()
+		t.Fatal(err)
+	}
+	_, id, encrypted, err := kmsBlob(blob)
+	if err != nil {
+		tx.Rollback()
+		t.Fatal(err)
+	}
+	plaintext, arn, err := kmsDecryptTx(ctx, tx, "us-east-1", id, nil, encrypted)
+	if err != nil || arn != key.Arn || string(plaintext) != "transaction fixture" {
+		tx.Rollback()
+		t.Fatal("same uncommitted key transaction", err)
+	}
+	if _, err = tx.Exec(`UPDATE aws_kms_keys SET description='caller mutation' WHERE region='us-east-1' AND key_id=?`, key.KeyID); err != nil {
+		tx.Rollback()
+		t.Fatal("helper closed caller transaction", err)
+	}
+	if err = tx.Rollback(); err != nil {
+		t.Fatal(err)
+	}
+	kmsAliasUnchanged(t, keys, before)
+}
+func TestKMSAliasesCryptoCommitFailurePublishesNoCiphertext(t *testing.T) {
+	keys, s, key, _ := kmsAliasFixture(t)
+	ctx := context.Background()
+	if err := s.CreateAlias(ctx, "alias/Commit", key.KeyID, kmsAliasAllow); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := keys.db.Exec(`CREATE TABLE alias_crypto_parent(id INTEGER PRIMARY KEY);
+ CREATE TABLE alias_crypto_child(parent INTEGER REFERENCES alias_crypto_parent(id) DEFERRABLE INITIALLY DEFERRED);
+ CREATE TRIGGER fail_alias_crypto_commit AFTER UPDATE OF encryptions ON aws_kms_keys BEGIN INSERT INTO alias_crypto_child VALUES(1); END;`); err != nil {
+		t.Fatal(err)
+	}
+	before := kmsAliasFrame(t, keys)
+	blob, arn, err := s.Encrypt(ctx, "alias/Commit", nil, []byte("dummy"), kmsAliasAllow)
+	if err == nil || len(blob) != 0 || arn != "" {
+		t.Fatal("failed COMMIT published ciphertext")
+	}
+	kmsAliasUnchanged(t, keys, before)
+	var rows int
+	if err = keys.db.QueryRow(`SELECT count(*) FROM alias_crypto_child`).Scan(&rows); err != nil || rows != 0 {
+		t.Fatal("failed commit retained deferred child", err)
+	}
+	if _, err = keys.db.Exec(`DROP TRIGGER fail_alias_crypto_commit`); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err = s.Encrypt(ctx, "alias/Commit", nil, []byte("dummy"), kmsAliasAllow); err != nil {
+		t.Fatal("commit-failure retry", err)
+	}
+}

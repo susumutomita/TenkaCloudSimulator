@@ -18,6 +18,8 @@ import (
 
 // KMSAliasAuthorizer must be supplied by trusted request composition. The
 // transaction belongs to this operation; callbacks must not commit or close it.
+// Callbacks are read-only policy decisions: use their captured immutable policy
+// or reads on this tx; do not mutate state or call nested public store methods.
 // Wire credentials and alias names cannot choose this authority.
 type KMSAliasAuthorizer func(context.Context, *sql.Tx, string, string) (bool, error)
 
@@ -409,4 +411,86 @@ func (s *KMSAliasStore) ListAliases(ctx context.Context, keyID string, limit int
 		return KMSAliasList{Aliases: []KMSAlias{}}, err
 	}
 	return result, nil
+}
+
+// cryptoKeyTx resolves only customer aliases or concrete key IDs/ARNs. This is
+// identifier selection, not an authorization grant or a separate DescribeKey API.
+func (s *KMSAliasStore) cryptoKeyTx(ctx context.Context, tx *sql.Tx, selected string) (string, error) {
+	if strings.HasPrefix(selected, "alias/") || strings.Contains(selected, ":alias/") {
+		return s.ResolveAliasTx(ctx, tx, selected)
+	}
+	return kmsID(s.region, selected)
+}
+
+// Encrypt keeps alias selection, concrete-key permission, material read, counter
+// acknowledgement and final publication in one transaction. The authorizer must
+// use its immutable caller policy or the provided tx, never start another DB tx.
+func (s *KMSAliasStore) Encrypt(ctx context.Context, selected string, contextMap map[string]string, plaintext []byte, authorize KMSAliasAuthorizer) ([]byte, string, error) {
+	if len(plaintext) < 1 || len(plaintext) > 4096 {
+		return nil, "", kmsInvalid()
+	}
+	if _, err := kmsContext(contextMap); err != nil {
+		return nil, "", err
+	}
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, "", err
+	}
+	defer tx.Rollback()
+	id, err := s.cryptoKeyTx(ctx, tx, selected)
+	if err != nil {
+		return nil, "", err
+	}
+	if err = kmsAliasAuthorize(ctx, tx, authorize, "kms:Encrypt", kmsARN(s.region, id)); err != nil {
+		return nil, "", err
+	}
+	blob, arn, err := kmsEncryptTx(ctx, tx, s.region, id, contextMap, plaintext)
+	if err != nil {
+		return nil, "", err
+	}
+	if err = tx.Commit(); err != nil {
+		return nil, "", err
+	}
+	return blob, arn, nil
+}
+
+// Decrypt's omitted KeyId selects the ciphertext UUID, never the alias's current
+// target. An explicit alias must still point to that UUID after resolution; old
+// ciphertext does not silently switch keys when an alias is retargeted.
+func (s *KMSAliasStore) Decrypt(ctx context.Context, selected string, contextMap map[string]string, blob []byte, authorize KMSAliasAuthorizer) ([]byte, string, error) {
+	region, id, encrypted, err := kmsBlob(blob)
+	if err != nil {
+		return nil, "", err
+	}
+	if region != s.region {
+		return nil, "", kmsFailure("InvalidCiphertextException", "The local ciphertext is invalid for this request.")
+	}
+	if _, err = kmsContext(contextMap); err != nil {
+		return nil, "", err
+	}
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, "", err
+	}
+	defer tx.Rollback()
+	if selected != "" {
+		requested, err := s.cryptoKeyTx(ctx, tx, selected)
+		if err != nil {
+			return nil, "", err
+		}
+		if requested != id {
+			return nil, "", kmsFailure("IncorrectKeyException", "The specified key does not match this ciphertext.")
+		}
+	}
+	if err = kmsAliasAuthorize(ctx, tx, authorize, "kms:Decrypt", kmsARN(s.region, id)); err != nil {
+		return nil, "", err
+	}
+	plaintext, arn, err := kmsDecryptTx(ctx, tx, s.region, id, contextMap, encrypted)
+	if err != nil {
+		return nil, "", err
+	}
+	if err = tx.Commit(); err != nil {
+		return nil, "", err
+	}
+	return plaintext, arn, nil
 }
