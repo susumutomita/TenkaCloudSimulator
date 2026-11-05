@@ -105,10 +105,21 @@
     },
     {
       "path": "internal/server/web/app.js",
-      "disposition": "presentation",
-      "reason": "Canonical same-lock Cloudscape bundle of the SQS locale source; original22 package notices, native API/state contracts and dependencies unchanged. Generated assets do not prove runtime behavior.",
-      "models": [],
-      "sha256": "fb0fd0825375592189f95883ab6f1d754619a378de4476b31da138c2d3a73e84"
+      "sha256": "fb0fd0825375592189f95883ab6f1d754619a378de4476b31da138c2d3a73e84",
+      "disposition": "modeled",
+      "reason": "Canonical same-lock embedded bundle preserves main service views plus reviewed Secrets ACK/read and Login keyboard changes. Existing reveal/epoch binding covers only its finite correspondence, not minification, keyboard chooser, all JavaScript or erasure. New source/build/browser and immutable gates are independent evidence. Reviewed accessibility-only refresh disables Cloudscape motion within the Secrets view, with exact-English locale normalization and strengthened immediate-alert contrast regression checks. Existing finite state bindings are retained; animation/opacity/accessibility are outside these models and require executable browser evidence. New hosted exact-HEAD full gates remain required.",
+      "models": [
+        {
+          "id": "SecretsRevealEpoch",
+          "properties": [
+            "NoUnmountedDisplay",
+            "FreshEmissionHistory",
+            "ReturnedARNMatches",
+            "VisibleContextMatches"
+          ],
+          "limits": "Finite explicit-retrieve/display model, not React, DOM, AbortController, memory zeroization or implementation refinement. Only the successful response path is modeled; native store/IAM must authorize before returning any secret. A returned ARN can differ and must be rejected. Retrieve, Hide and navigation invalidate epochs; unmount also clears visible state. Parent must remount on region/principal changes. Emission history captures the context at each acceptance so later Hide/navigation cannot relabel an earlier stale acceptance. Draft entry, mutation atomicity and form layout are outside this model. Parent main.jsx scope binds only Secrets routing/remount key (region/principal/navigation); the generated app.js binding is the canonical compiled artifact of those source inputs, independently checked by bundle/asset hashes. It does not model unrelated existing console services or prove JavaScript compilation."
+        }
+      ]
     },
     {
       "path": "scripts/formal_model_gate.py",
@@ -151,6 +162,13 @@
       "disposition": "test-support",
       "reason": "Retain main native SDK/browser/context/privacy/retry/delete flows and add actual Create/Put ACK then explicitly aborted Describe; assert closed/cleared forms, read-only sameARN recovery without extra writes, exact versions and distinct nonempty new-intent tokens. Artificial read-fault is labelled, not actual CI-cause proof; no weakened assertions/skips/timeouts. Reviewed accessibility-only refresh disables Cloudscape motion within the Secrets view, with exact-English locale normalization and strengthened immediate-alert contrast regression checks. Existing finite state bindings are retained; animation/opacity/accessibility are outside these models and require executable browser evidence. New hosted exact-HEAD full gates remain required.",
       "models": []
+    },
+    {
+      "path": "test/e2e/service_locale.py",
+      "disposition": "test-support",
+      "reason": "Adapt only two stale Japanese SQS accessible-name selectors to the integrated translated leaf; preserve actual native operation/data/ACK/retry/cleanup assertions and all Secrets/Logs flows. Initial mismatch failure retained separately.",
+      "models": [],
+      "sha256": "0be3ff88aac6b760761a7c9d1e1614925f2329770c7f10ee8cda2ede224a2d4d"
     },
     {
       "path": "test/e2e/sqs_locale.py",
