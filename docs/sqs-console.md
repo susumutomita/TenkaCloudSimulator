@@ -32,12 +32,14 @@ reads completed JSON bodies without redundant Playwright `Response.finished()`
 waiters. Earlier two clean focused runs belong to candidate `2902fc0`, not this
 restack.
 
-This is source preparation only: generated assets are retained exactly from
-main until an authorized canonical rebuild. The translated source is therefore
-not yet represented by those assets. No build, browser, full Go, immutable
-formal run or hosted checks for this checkpoint have been executed. All 42 main
-acceptance bodies and the improved shared SQS/DynamoDB reference validator are
-preserved; the new locale case makes 43 methods, not 43 observed passes.
+The translated source has now been canonically bundled with the existing
+same-lock dependencies and all 22 original package notices retained. The four
+SQS pure locale checks and five catalog checks passed without skipped cases.
+These are compilation/presentation checks, not browser acceptance. No Go build,
+browser, full Go, immutable formal run or hosted checks for this checkpoint
+have been executed. All 42 main acceptance bodies and the improved shared
+SQS/DynamoDB reference validator are preserved; the new locale case makes 43
+methods, not 43 observed passes.
 
 ## Screens and operations
 
