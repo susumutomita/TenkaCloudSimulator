@@ -50,7 +50,7 @@ make build
 | [SQS](docs/sqs.md) | Cloudscape操作画面とStandard queue JSON 1.0 API 9操作：CreateQueue、GetQueueUrl、ListQueues、GetQueueAttributes、DeleteQueue、SendMessage、ReceiveMessage、DeleteMessage、ChangeMessageVisibility | CloudFormation、function SDK bridge、Challenge連携、FIFO、batch、DLQ、SNS連携 |
 | [CloudWatch Logs](docs/cloudwatch-logs.md) | ロググループ／ストリームの作成・一覧、グループ削除、PutLogEvents・GetLogEvents。7 APIと同一状態の操作画面 | メトリクス、アラーム、保持期間、Lambda自動配送、CFN、Insights |
 | [Secrets Manager](docs/secrets-manager.md) | Create/Describe/ListSecret、値を返さないListSecretVersionIds、Put/GetSecretValue、UpdateSecretVersionStage、即時DeleteSecret。8 APIとバージョン／明示表示付き操作画面 | KMS暗号化、実秘密情報の保管、rotation、replica、SecretBinary、scheduled deletion、CFN。ダミー値はSQLiteに平文保存 |
-| [KMS](docs/kms.md) | CreateKey、DescribeKey、ListKeys、EnableKey、DisableKey、GetKeyPolicy、Encrypt、Decrypt。対称鍵・実ローカルAES-GCM、同一SQLiteのSDK/Cloudscape | alias、tags、grants、custom policy、rotation、scheduled deletion、CFN・他サービス暗号化。raw keyはSQLite保存でHSM/保存時暗号化保証ではない |
+| [KMS](docs/kms.md) |12 API。対称キー・ローカルAES-GCM、Create/List/Update/DeleteAlias、同一Txのalias暗号操作。SDK／Cloudscapeのキー詳細「エイリアス」タブ | AWSマネージドalias／alias ABAC、tags、grants、custom policy、rotation、キー削除、CFN・他サービス暗号化。raw keyはSQLite保存でHSM／保存時暗号化保証ではない |
 | [Systems Manager Parameter Store](docs/console.md) | PutParameter、GetParameter、GetParameters、GetParametersByPath、DescribeParameters、DeleteParameter。最新値・version・overwrite判定 | SecureString/KMS、履歴・labels。StandardのString/StringList/textのみ |
 | [DynamoDB](docs/dynamodb.md) | JSON 1.0 の7操作: CreateTable/ListTables/DescribeTable/DeleteTable、PutItem/GetItem/DeleteItem。Cloudscapeでテーブル一覧・作成・詳細・削除、完全キーによる項目の書き込み・取得・削除 | S/N/Bキーと任意sort key、条件はpartition-key attribute_(not_)existsのみ。Query/Scan・項目一覧・indexes・Streams・CFN・Challenge連携は未対応 |
 | [IAM](docs/iam.md) | Create/Get/List/DeleteRole、inline/trust、customer policy CRUD・version/default・ロールへのAttach/Detach。inlineと既定managed policyを合成、Deny優先 | AWS-managed catalog、STS、user/group attachments、一般Condition・permissions boundary・SCP |
@@ -120,7 +120,7 @@ SDK、操作画面、再起動、チーム分離の受入検証は `make e2e` �
 
 CIはstatementと未フィルターsource-line coverageを両方90%以上に強制します。`make before-commit`単独のcoverage判定はstatementのみで、source-line判定はCIのCobertura生成後ステージと上記の2コマンドで行います。SDK/browser、license、依存security、埋込asset、形式検査も行います。cross compileは他OSでの実行成功を意味しません。開発用Python/Node/Javaはruntime依存ではありません。UI・Scalarの再生成は権利表記とlockを保持する[各build手順](tools/console/README.md)・[Scalar手順](tools/scalar/README.md)・[Python runtimeの権利・再生成手順](tools/python/README.md)に従います。
 
-形式検査の現在の登録は36有限モデル・234個の意図した欠陥検出（全270実行）です。DynamoDB画面のepoch・ACK後の読み取り再試行と、保存済みARN認可後のSecretsバージョンメタデータ一覧・限定cursor境界をモデル化します。値の読取許可や履歴画面を自動的に追加するものではありません。正確な一覧・境界・未モデル化部分は[形式検査](formal/README.md)とregistryを参照してください。過去の受領証と、現在の固定HEADの全体検査は分けて判断します。TLCはGo/JS実装のrefinement、暗号、全AWS仕様・実AWSとの一致を証明しません。[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)。
+形式検査の現在の登録は40有限モデル・295個の意図した欠陥検出（全335実行）です。DynamoDB画面のepoch・ACK後の読み取り再試行と、保存済みARN認可後のSecretsバージョンメタデータ一覧・限定cursor境界をモデル化します。値の読取許可や履歴画面を自動的に追加するものではありません。正確な一覧・境界・未モデル化部分は[形式検査](formal/README.md)とregistryを参照してください。過去の受領証と、現在の固定HEADの全体検査は分けて判断します。TLCはGo/JS実装のrefinement、暗号、全AWS仕様・実AWSとの一致を証明しません。[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)。
 
 ## ライセンス
 
@@ -161,4 +161,4 @@ combined 29-model/164-control formal gate (193 executions). These receipts apply
 to that revision. Every later change still requires its exact-HEAD CI, including
 the 45-case E2E suite; focused results do not replace whole-suite verification.
 
-現在の形式検査の登録は36モデル・234制御（270実行）です。IAMの追加モデルは4つの到達可能な初期状態から各2要求の範囲で、4要求の試案はタイムアウトし未成功です。上の過去の受領証とは区別し、最新HEADで全ゲートを実行してください。API資料はAWS・Google Cloud・Azureを分け、Sakura Cloudは未実装表示です。[ナビゲーション](docs/api-reference.md)を参照してください。
+現在の形式検査の登録は40モデル・295制御（335実行）です。IAMの追加モデルは4つの到達可能な初期状態から各2要求の範囲で、4要求の試案はタイムアウトし未成功です。上の過去の受領証とは区別し、最新HEADで全ゲートを実行してください。API資料はAWS・Google Cloud・Azureを分け、Sakura Cloudは未実装表示です。[ナビゲーション](docs/api-reference.md)を参照してください。

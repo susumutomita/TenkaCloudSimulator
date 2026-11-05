@@ -77,7 +77,7 @@ adapter, or Challenge integration.
 | [SQS](docs/sqs.md) | Standard queues, a Cloudscape console, and 9 JSON 1.0 operations: CreateQueue, GetQueueUrl, ListQueues, GetQueueAttributes, DeleteQueue, SendMessage, ReceiveMessage, DeleteMessage, ChangeMessageVisibility | FIFO, batches, DLQ, SNS integration, CloudFormation, function SDK bridge, Challenge integration |
 | [CloudWatch Logs](docs/cloudwatch-logs.md) | Log groups/streams, group deletion, PutLogEvents/GetLogEvents; 7 APIs and a console sharing their state | Metrics, alarms, retention settings, automatic Lambda delivery, CloudFormation, Logs Insights |
 | [Secrets Manager](docs/secrets-manager.md) | CreateSecret, DescribeSecret, ListSecrets, ListSecretVersionIds (metadata only), PutSecretValue, GetSecretValue, UpdateSecretVersionStage, immediate DeleteSecret; versions and explicit reveal in the console | Real-secret storage, KMS encryption, rotation, replicas, SecretBinary, scheduled deletion, CloudFormation; dummy values are plaintext in SQLite |
-| [KMS](docs/kms.md) | CreateKey, DescribeKey, ListKeys, EnableKey, DisableKey, GetKeyPolicy, Encrypt, Decrypt; local symmetric AES-GCM, SDK and Cloudscape console | Aliases, tags, grants, custom policies, rotation, scheduled deletion, CloudFormation, other-service encryption; raw SQLite keys are not an HSM or an at-rest encryption guarantee |
+| [KMS](docs/kms.md) |12 APIs: symmetric keys, local AES-GCM, Create/List/Update/DeleteAlias, same-Tx alias crypto; SDK and Cloudscape key-detail Aliases | AWS-managed aliases/alias ABAC, tags, grants, custom policies, rotation, key deletion, CloudFormation, other-service encryption; raw SQLite keys are not an HSM or at-rest guarantee |
 | [Systems Manager Parameter Store](docs/console.md) | PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter; current values, versions and overwrite checks | SecureString/KMS, history, labels; Standard String/StringList with text data only |
 | [DynamoDB](docs/dynamodb.md) | Seven JSON 1.0 APIs: CreateTable, ListTables, DescribeTable, DeleteTable, PutItem, GetItem, DeleteItem; Cloudscape table list/create/details/delete and exact-key item writes/reads/deletes. S/N/B keys, optional sort key, partition-key attribute_exists/attribute_not_exists conditions | Query, Scan, item listing, indexes, Streams, CloudFormation, Challenge integration |
 | [IAM](docs/iam.md) | 21 role/inline/trust and customer-managed policy/version/role-attachment Query operations; shared permission union with Deny priority | AWS-managed catalog, user/group attachments, STS, general Conditions, permissions boundaries, SCPs |
@@ -241,8 +241,8 @@ not binary runtime dependencies. Regeneration must preserve locks and original
 rights: [console](tools/console/README.md), [Scalar](tools/scalar/README.md),
 [Python/WASI runtime](tools/python/README.md).
 
-The registry contains 36 finite models and 234 deliberate defect controls
-(270 required model/check executions), including bounded DynamoDB console
+The registry contains 40 finite models and 295 deliberate defect controls
+(335 required model/check executions), including bounded DynamoDB console
 epoch/ACK/read-retry and Secrets version-metadata listing contracts. The new IAM scenario checks two requests
 from each of four reachable seeds. A broader four-request trial timed out and
 is not claimed as verified. TLC examines bounded safety properties and checks

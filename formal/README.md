@@ -1,17 +1,21 @@
-# Finite state model
+# Finite state models
 
-Current branch registry: **36 models / 234 literal-protected controls**
-(**270 required executions**). All 35 main model entries and 220 controls are
-preserved. SecretMetadataViewEpoch adds thirteen properties and fourteen semantic
-controls for the metadata child and parent tab invalidation. DynamoDBConsoleEpoch
-and SecretVersionListing remain registered without changes. Earlier scoped and
-combined receipts apply only to their recorded inputs; the complete immutable
-270-case gate for this integration remains required. Registration is not execution.
+Current registry: **40 models / 295 literal-protected controls**
+(**335 required executions**). All actual-main 36 model entries and 234 controls
+are retained. Four separate customer-alias models describe catalog admission,
+concrete-key crypto, UI epochs/refresh and first-use transaction bootstrap.
+Their finite scopes and evidence are distinct from native/SDK/whole-quality proof.
 
-IAMManagedPolicies retains its four API-reachable seeds and two-request suffixes;
-the earlier four-request exploration timed out and is not claimed. These finite
-models do not prove Go/SQL/HTTP/UI refinement or complete cloud compatibility.
-Historical sections retain their recorded counts; current inventory is 36/234.
+Registration is source evidence, not a successful current-HEAD execution claim.
+The complete immutable 335-case gate must actually run for this combined revision.
+Historical scoped/integration receipts do not replace it. IAMManagedPolicies
+retains four reachable seeds and two-request suffixes; its broader four-request
+trial timed out and is not claimed. There is no Go/SQL/HTTP/UI refinement,
+cryptographic or complete cloud-compatibility proof.
+
+Legacy sections retain dated counts/status for traceability; “current” in those
+sections refers to that integration, not this authoritative 40/295 inventory.
+Every execution claim must identify its exact revision.
 
 `ObjectStore.tla` models two buckets and two keys, shared object ownership, create/put/delete transitions, and an abstract identity decision `allow /\ ~deny`. `ObjectStore.cfg` checks type correctness, no orphan objects, no unauthorized mutation, and explicit-deny precedence.
 
@@ -442,3 +446,78 @@ The no-reload language round trip passed on the unchanged canonical embedded
 product: same metadata DOM node, ARN/filter/page IDs and host scope, no additional
 reads or value requests. Earlier Japanese-after-reload checks are a distinct
 oracle; neither focused result replaces the complete immutable integration gate.
+
+## Customer-alias crypto and aliases UI
+
+KMSAliasCrypto adds fourteen mandatory properties and thirteen sensitivity
+controls for one same-region crypto transaction over two preexisting keys and
+one customer alias. It represents alias resolution, concrete-key permission
+before crypto/mismatch, omitted-KeyId decrypt, checked counter acknowledgment,
+transaction failure frames and publication after commit. It does **not** model
+alias Create/List/Update/Delete admission, paging, quotas or name parsing. Its
+file-level source declaration references only the crypto orchestration portions
+of kms_aliases.go and kms_store.go; it is not proof of every operation in those
+files, AES, IAM parsing, SQLite or Go refinement.
+
+KMSAliasesViewEpoch adds eleven mandatory properties and eleven controls for two
+context incarnations, two known keys, one alias, at most two list and selected
+metadata requests, one form intent per context and one acknowledged write/read
+retry. Explicit UI state captures stale list/target rejection, cleared failure
+rows and cancelled targets, verified submission, exact delete confirmation,
+ACK closing/clearing before refresh, read-only retry and locale preservation.
+Initial picker completion is abstracted; retired-life defenses are modeled as a
+paired bypass, not separate necessary guards. This is not React/HTTP/IAM/SQL
+refinement, backend admission coverage or liveness.
+
+The scoped model executions are separate evidence: the UI baseline visited
+431,932 distinct states and all eleven controls produced their named invariant
+violations; the crypto author's scoped evidence records its fourteen cases.
+Registration now requires 40 baselines and 295 controls (335 executions), with
+all main 36 models and 234 controls retained. A fresh immutable combined gate
+must actually execute before reporting this inventory as current-HEAD passed.
+Catalog/CRUD/paging is represented separately below; neither of these two
+entries supplies catalog behavior or native implementation proof.
+
+## Customer-alias catalog admission and paging
+
+KMSAliasCatalog adds seventeen required properties and twenty-four protected
+behavioral controls. Its four API-reachable seeds and three-request suffix bound
+two regions, two concrete keys, three names, a global row cap two, per-key cap one
+and page sizes one/two. Stored aliases, creation identities and regional revision
+are explicit. A single per-request key-permission map ensures same-key old/new
+checks agree while distinct-key retarget denials remain independent. Failed
+mutations preserve the frame; successful mutations require checked acknowledgment
+and advance revision. Listing authenticates before publication, filters before
+limit, binds cursor revision/authority/integrity/filter/limit, resumes strictly
+after its position and refuses partial read failure.
+
+The corrected scoped baseline completed13,025 distinct states in47.395 seconds;
+all twenty-four controls exited12 with their exact named invariant and a
+transition trace. The earlier same-key contradictory-permission witnesses are
+not reused. Source review and existing scoped logs were independently checked;
+registration is not a fresh320-case current-HEAD gate or Go/SQL refinement proof.
+
+Only catalog portions of kms_aliases.go correspond to this model; crypto and UI
+remain separate entries. MAC integrity/authority are abstract predicates, not
+HMAC/JSON/wire parsing or entropy proofs. Markers have no expiry. Fixed concrete
+key parents exclude DeleteKey/recreation, AWS-managed aliases, alias targets,
+grants and alias ABAC. Limits two/one are abstractions of native1000/50, not
+unbounded-quota proofs. Public JSON projection, authentication, physical clock,
+locking, SQL acknowledgments and commit behavior require native/SDK evidence.
+
+## First-use alias transaction bootstrap
+
+KMSBootstrapTransaction adds ten properties and thirteen semantic controls over
+two regions and one finite request. Tentative schema, regional cursor authority
+and operation data are explicit; failed/missing authorization, operation or
+commit cannot publish or persist that tentative frame. A successful operation
+is applied once and publication follows commit. Trusted explicit initializing
+NewKMSAliasStore calls are excluded from the denied-HTTP no-write promise.
+
+The corrected scoped baseline visited15,860 distinct states; all thirteen
+controls produced their specific named invariant and a transition trace. This
+scoped evidence is not the fresh320-case integration gate. Operation predicates
+and SQLite transactions/DDL/commit are abstract; actual cold known-policy403,
+real SQLite failure/rollback and SDK tests independently check the native seam.
+Catalog/crypto/UI remain separate; no raw JSON/IAM/HMAC/SQL or Go refinement,
+unbounded concurrency, liveness or full AWS behavior is inferred.

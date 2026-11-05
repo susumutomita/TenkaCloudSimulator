@@ -1,247 +1,602 @@
 {
   "version": 1,
-  "base_sha": "74c93ea9b00818b83ea87d78a7946600ad823680",
+  "base_sha": "6abcbca4bf6612e36470f7e69f29ea090566b8ea",
   "changes": [
     {
       "path": "README.ja.md",
-      "sha256": "1e3b9a591e2492a0fd034bb9b97a34a83ed71d367b1d3af6ef1e262dfefef114",
+      "sha256": "ed0ceb610f4aa8274c35c54142298f7de874dcbfd4791c276bbb17607da8d9ca",
       "disposition": "documentation",
-      "reason": "Normal main integration and source inventory refresh; no authority, runtime, or model semantics changed by this nonformal artifact.",
+      "reason": "Document the current twelve-operation KMS subset, local customer aliases, separate bounded model scopes and exact-revision acceptance requirements; preserve rights/history and unsupported limits.",
       "models": []
     },
     {
       "path": "README.md",
-      "sha256": "d82e8a117416bcdbe78ef3287d6db4e51fd3ed340fffc6be073b78a3daa81581",
+      "sha256": "0b3ad838b8804ff470df6fbed34c76abb3fc8f39b4a2b88877be1e3652fdd462",
       "disposition": "documentation",
-      "reason": "Normal main integration and source inventory refresh; no authority, runtime, or model semantics changed by this nonformal artifact.",
+      "reason": "Document the current twelve-operation KMS subset, local customer aliases, separate bounded model scopes and exact-revision acceptance requirements; preserve rights/history and unsupported limits.",
       "models": []
     },
     {
-      "path": "docs/secrets-manager.md",
-      "sha256": "349af3888bdbe2752a56dc3025df038d952ba08f3980be097fd432208dce14ed",
+      "path": "docs/kms.md",
+      "sha256": "18cd54a435eca0a370b6137bad9a5b42f53131c37f6b22be85298efe9db38d64",
       "disposition": "documentation",
-      "reason": "Normal main integration and source inventory refresh; no authority, runtime, or model semantics changed by this nonformal artifact.",
+      "reason": "Document the current twelve-operation KMS subset, local customer aliases, separate bounded model scopes and exact-revision acceptance requirements; preserve rights/history and unsupported limits.",
       "models": []
+    },
+    {
+      "path": "formal/KMSAliasCatalog.cfg",
+      "sha256": "ddb1aaa22dd90ee4726c1453bc5d9a949139764cb98e4763986f4cb73a187faa",
+      "disposition": "modeled",
+      "reason": "Register exact finite specification/configuration with mandatory properties and semantic control IDs. Scoped author traces and independent source review are separate from the required new335-case immutable combined run and native implementation evidence.",
+      "models": [
+        {
+          "id": "KMSAliasCatalog",
+          "properties": [
+            "TypeOK",
+            "AcknowledgedSuccess",
+            "MutationAuthority",
+            "ConcreteTarget",
+            "FailureFrame",
+            "PeerRegionFrame",
+            "MutationEffect",
+            "CreationIdentity",
+            "AdmissionBudgets",
+            "RevisionFresh",
+            "ListAuthorized",
+            "CursorBound",
+            "ListPageExact",
+            "ListMoreExact",
+            "ContinuationAfterLast",
+            "ReadFrame",
+            "NoPartialRead"
+          ],
+          "limits": "Independent bounded alias catalog CRUD/pagination abstraction, not cryptography/crypto orchestration or Go/SQLite/HTTP refinement. Fixed same-type/usage concrete keyparents; no DeleteKey/keyrecreation/aliases-as-target/managedaliases/grants/ABAC. MAC authority/integrity are abstract predicates; marker has NO expiry. Atomic write/cursor/read transitions assume sameDB Tx and pure immutable policy; no actual SQL scan/locking/RowsAffected/commit implementation proof. Four reachable seeds plus three requests are not unbounded quotas1000/50 or complete workflows. Failed request identity is intentionally canonicalized; only operation category/outcome/before-frame retained, and checked successful-input properties are success-guarded. Timestamps/birthlabels only model update identity preservation, not physicalclock/UUID entropy. Public JSON projection/wireparser/UI/hostauthentication independent."
+        }
+      ]
+    },
+    {
+      "path": "formal/KMSAliasCatalog.tla",
+      "sha256": "31cc7675ba200cac03c61a2b93a4d45c335ab2b8737d7de23df83c7f05a44a08",
+      "disposition": "modeled",
+      "reason": "Register exact finite specification/configuration with mandatory properties and semantic control IDs. Scoped author traces and independent source review are separate from the required new335-case immutable combined run and native implementation evidence.",
+      "models": [
+        {
+          "id": "KMSAliasCatalog",
+          "properties": [
+            "TypeOK",
+            "AcknowledgedSuccess",
+            "MutationAuthority",
+            "ConcreteTarget",
+            "FailureFrame",
+            "PeerRegionFrame",
+            "MutationEffect",
+            "CreationIdentity",
+            "AdmissionBudgets",
+            "RevisionFresh",
+            "ListAuthorized",
+            "CursorBound",
+            "ListPageExact",
+            "ListMoreExact",
+            "ContinuationAfterLast",
+            "ReadFrame",
+            "NoPartialRead"
+          ],
+          "limits": "Independent bounded alias catalog CRUD/pagination abstraction, not cryptography/crypto orchestration or Go/SQLite/HTTP refinement. Fixed same-type/usage concrete keyparents; no DeleteKey/keyrecreation/aliases-as-target/managedaliases/grants/ABAC. MAC authority/integrity are abstract predicates; marker has NO expiry. Atomic write/cursor/read transitions assume sameDB Tx and pure immutable policy; no actual SQL scan/locking/RowsAffected/commit implementation proof. Four reachable seeds plus three requests are not unbounded quotas1000/50 or complete workflows. Failed request identity is intentionally canonicalized; only operation category/outcome/before-frame retained, and checked successful-input properties are success-guarded. Timestamps/birthlabels only model update identity preservation, not physicalclock/UUID entropy. Public JSON projection/wireparser/UI/hostauthentication independent."
+        }
+      ]
+    },
+    {
+      "path": "formal/KMSAliasCrypto.cfg",
+      "sha256": "baceb597f2a967cb5784a74beb127ff60800bdde8f7a7f432b274edd6c2d10c5",
+      "disposition": "modeled",
+      "reason": "Register exact finite specification/configuration with mandatory properties and semantic control IDs. Scoped author traces and independent source review are separate from the required new335-case immutable combined run and native implementation evidence.",
+      "models": [
+        {
+          "id": "KMSAliasCrypto",
+          "properties": [
+            "TypeOK",
+            "TransactionSnapshotStable",
+            "AliasResolutionCurrent",
+            "OmittedDecryptUsesBlob",
+            "ConcreteKeyAuthorization",
+            "AuthorizedCryptoStages",
+            "AuthorizationBeforeMismatch",
+            "NoPublicationBeforeCommit",
+            "FailureCounterFrame",
+            "FailureNoPublication",
+            "WriteFailureRefused",
+            "PublishedKeyBound",
+            "EncryptCounterExact",
+            "DecryptCounterFrame"
+          ],
+          "limits": "New alias selection/concrete authorization/ciphertext match/commit publication finite projection. Not AES/nonce/HMAC, raw ARN/JSON/SigV4/IAM parsing, host authority, arbitrary policies, actualSQLite locking/commit/Go refinement, retries/unbounded history, alias CRUD/capacity/pagination or full lifecycle proof. Trusted authorizer is pure captured policy or SELECT on provided transaction; immediate transaction serialization is an assumption grounded in current core store, not proved. Native crypto/error classes abstract existing KMS helper behavior. Choose phase guard is factored outside its binder by exact logical equivalence, not a state-space reduction."
+        }
+      ]
+    },
+    {
+      "path": "formal/KMSAliasCrypto.tla",
+      "sha256": "a1c944d072aa298a5e891a79d4acbf3e866352f16465e91a1fe343508988b38e",
+      "disposition": "modeled",
+      "reason": "Register exact finite specification/configuration with mandatory properties and semantic control IDs. Scoped author traces and independent source review are separate from the required new335-case immutable combined run and native implementation evidence.",
+      "models": [
+        {
+          "id": "KMSAliasCrypto",
+          "properties": [
+            "TypeOK",
+            "TransactionSnapshotStable",
+            "AliasResolutionCurrent",
+            "OmittedDecryptUsesBlob",
+            "ConcreteKeyAuthorization",
+            "AuthorizedCryptoStages",
+            "AuthorizationBeforeMismatch",
+            "NoPublicationBeforeCommit",
+            "FailureCounterFrame",
+            "FailureNoPublication",
+            "WriteFailureRefused",
+            "PublishedKeyBound",
+            "EncryptCounterExact",
+            "DecryptCounterFrame"
+          ],
+          "limits": "New alias selection/concrete authorization/ciphertext match/commit publication finite projection. Not AES/nonce/HMAC, raw ARN/JSON/SigV4/IAM parsing, host authority, arbitrary policies, actualSQLite locking/commit/Go refinement, retries/unbounded history, alias CRUD/capacity/pagination or full lifecycle proof. Trusted authorizer is pure captured policy or SELECT on provided transaction; immediate transaction serialization is an assumption grounded in current core store, not proved. Native crypto/error classes abstract existing KMS helper behavior. Choose phase guard is factored outside its binder by exact logical equivalence, not a state-space reduction."
+        }
+      ]
+    },
+    {
+      "path": "formal/KMSAliasesViewEpoch.cfg",
+      "sha256": "c59e76d2ed57685f7230a9da345ac5e8e8739421a7a5851c4ef631b73b091cf3",
+      "disposition": "modeled",
+      "reason": "Register exact finite specification/configuration with mandatory properties and semantic control IDs. Scoped author traces and independent source review are separate from the required new335-case immutable combined run and native implementation evidence.",
+      "models": [
+        {
+          "id": "KMSAliasesViewEpoch",
+          "properties": [
+            "TypeOK",
+            "CurrentListOutcome",
+            "NoCachedRowsOnFailure",
+            "CurrentTargetMetadata",
+            "ClosedFormHasNoTarget",
+            "AckClosesForm",
+            "AckClearsDraft",
+            "ReadRetryNeverWrites",
+            "OnlyVerifiedTargetSubmitted",
+            "DeleteRequiresExactConfirmation",
+            "LocalePreservesIntent"
+          ],
+          "limits": "Finite UI protocol abstraction, not JS/React/Cloudscape/HTTP/SQL/IAM/crypto refinement or liveness. Initial key-list/Describe lookup completion is abstracted because actual source disables selection until it finishes; later target reads may overlap. Target/list revisions normalized after these reads. Excludes all parser/format/pagination/permission semantics, arbitrary key sets, repeated forms beyond bound, network ambiguity without ACK and full AWS console parity. Current list outcome and target metadata are stored fields, not derived tautologies. Retired-list mutation jointly bypasses redundant captured-object/active/abort checks; submit-target mutation abstracts both button and handler defenses. Retry mutant creates actual second pending write plus request counter, not a ghost-only edit. Root parent context key/principal binding is assumed; locale frame is only this model state, not the locale provider. Parent kms.jsx/main.jsx declarations bind only the Aliases mount and supplied region/principal/key identity; other KMS/general services remain outside. app.js is the canonical compiled correspondence artifact of that component/mount, independently checked by bundle hashes, not a proof of compilation or unrelated UI."
+        }
+      ]
+    },
+    {
+      "path": "formal/KMSAliasesViewEpoch.tla",
+      "sha256": "aa1a6994e460abee3a1ccc68a6f4e255d9ec8f25d2985bb5949dbe60191f87db",
+      "disposition": "modeled",
+      "reason": "Register exact finite specification/configuration with mandatory properties and semantic control IDs. Scoped author traces and independent source review are separate from the required new335-case immutable combined run and native implementation evidence.",
+      "models": [
+        {
+          "id": "KMSAliasesViewEpoch",
+          "properties": [
+            "TypeOK",
+            "CurrentListOutcome",
+            "NoCachedRowsOnFailure",
+            "CurrentTargetMetadata",
+            "ClosedFormHasNoTarget",
+            "AckClosesForm",
+            "AckClearsDraft",
+            "ReadRetryNeverWrites",
+            "OnlyVerifiedTargetSubmitted",
+            "DeleteRequiresExactConfirmation",
+            "LocalePreservesIntent"
+          ],
+          "limits": "Finite UI protocol abstraction, not JS/React/Cloudscape/HTTP/SQL/IAM/crypto refinement or liveness. Initial key-list/Describe lookup completion is abstracted because actual source disables selection until it finishes; later target reads may overlap. Target/list revisions normalized after these reads. Excludes all parser/format/pagination/permission semantics, arbitrary key sets, repeated forms beyond bound, network ambiguity without ACK and full AWS console parity. Current list outcome and target metadata are stored fields, not derived tautologies. Retired-list mutation jointly bypasses redundant captured-object/active/abort checks; submit-target mutation abstracts both button and handler defenses. Retry mutant creates actual second pending write plus request counter, not a ghost-only edit. Root parent context key/principal binding is assumed; locale frame is only this model state, not the locale provider. Parent kms.jsx/main.jsx declarations bind only the Aliases mount and supplied region/principal/key identity; other KMS/general services remain outside. app.js is the canonical compiled correspondence artifact of that component/mount, independently checked by bundle hashes, not a proof of compilation or unrelated UI."
+        }
+      ]
+    },
+    {
+      "path": "formal/KMSBootstrapTransaction.cfg",
+      "sha256": "19bb43a88c9fc58fae50d2e85278ff5c954e2ef5402396f2ac1d97667ef745b2",
+      "disposition": "modeled",
+      "reason": "Register exact finite specification/configuration with mandatory properties and semantic control IDs. Scoped author traces and independent source review are separate from the required new335-case immutable combined run and native implementation evidence.",
+      "models": [
+        {
+          "id": "KMSBootstrapTransaction",
+          "properties": [
+            "TypeOK",
+            "PreCommitFrame",
+            "RejectedDurableFrame",
+            "AdmissionRequired",
+            "OperationAuthorized",
+            "CommitAuthorized",
+            "PublishedAfterCommit",
+            "SuccessfulScope",
+            "PeerFrame",
+            "SuccessComplete"
+          ],
+          "limits": "Intended HTTP transaction seam; base eb03 has confirmed constructor persistence bug; repaired c4d412f source inspected separately, not refinement-proven. Trusted host public NewKMSAliasStore explicitly initializes state and is EXCLUDED from denied HTTP no-write contract. Two regions, one request, optional global logical schema and per-region cursor-row membership; region data is one abstract operation effect bit, not alias CRUD/crypto correctness. Action/alias/key Boolean requirements model bounded operations requiring all three; ListAliases only-action projection is represented by other permissions TRUE, not assertion all operations require alias and key authorization. valid is early wire admission; lateValid is separate target/marker admission after tentative initialization and authorization; no byte/JSON/marker-MAC/SQLite/DDL/Go/HTTP-auth refinement. Captured immutable pure policy, single transaction; no adversarial policy mutation or authorization-before-target-lookup promise. Schema frame is logical table/row state, not WAL/page-byte identity or zero SQL syscall guarantee. Scoped SANY+baseline+13 controls passed at6278443; native Go validation belongs to independent author receipts, not model refinement. Native repair c4d412f source seam independently reviewed; early/late validation order is abstract, not native error-precedence refinement. Scoped627 proof is independent, not canonical current registry proof."
+        }
+      ]
+    },
+    {
+      "path": "formal/KMSBootstrapTransaction.tla",
+      "sha256": "de6d8132c0a4fa623e0734fa7d9fbcd337b058ea1892f741001bf38eb0971d15",
+      "disposition": "modeled",
+      "reason": "Register exact finite specification/configuration with mandatory properties and semantic control IDs. Scoped author traces and independent source review are separate from the required new335-case immutable combined run and native implementation evidence.",
+      "models": [
+        {
+          "id": "KMSBootstrapTransaction",
+          "properties": [
+            "TypeOK",
+            "PreCommitFrame",
+            "RejectedDurableFrame",
+            "AdmissionRequired",
+            "OperationAuthorized",
+            "CommitAuthorized",
+            "PublishedAfterCommit",
+            "SuccessfulScope",
+            "PeerFrame",
+            "SuccessComplete"
+          ],
+          "limits": "Intended HTTP transaction seam; base eb03 has confirmed constructor persistence bug; repaired c4d412f source inspected separately, not refinement-proven. Trusted host public NewKMSAliasStore explicitly initializes state and is EXCLUDED from denied HTTP no-write contract. Two regions, one request, optional global logical schema and per-region cursor-row membership; region data is one abstract operation effect bit, not alias CRUD/crypto correctness. Action/alias/key Boolean requirements model bounded operations requiring all three; ListAliases only-action projection is represented by other permissions TRUE, not assertion all operations require alias and key authorization. valid is early wire admission; lateValid is separate target/marker admission after tentative initialization and authorization; no byte/JSON/marker-MAC/SQLite/DDL/Go/HTTP-auth refinement. Captured immutable pure policy, single transaction; no adversarial policy mutation or authorization-before-target-lookup promise. Schema frame is logical table/row state, not WAL/page-byte identity or zero SQL syscall guarantee. Scoped SANY+baseline+13 controls passed at6278443; native Go validation belongs to independent author receipts, not model refinement. Native repair c4d412f source seam independently reviewed; early/late validation order is abstract, not native error-precedence refinement. Scoped627 proof is independent, not canonical current registry proof."
+        }
+      ]
     },
     {
       "path": "formal/README.md",
-      "sha256": "3db4c46330ae68c3565efa155ea7ff238b67acca5307afcb61444945ecd57f07",
+      "sha256": "63e812370a3561c23bec4be1ba0a68993fd723dd7641230b2bb314938290c3c1",
       "disposition": "documentation",
-      "reason": "Normal main integration and source inventory refresh; no authority, runtime, or model semantics changed by this nonformal artifact.",
+      "reason": "Document the current twelve-operation KMS subset, local customer aliases, separate bounded model scopes and exact-revision acceptance requirements; preserve rights/history and unsupported limits.",
       "models": []
-    },
-    {
-      "path": "formal/SecretMetadataViewEpoch.cfg",
-      "sha256": "36e3f08c0c9aa2040694e0cc4b5de9e21970fad6dc9ac740b953ac262bf90fd0",
-      "disposition": "modeled",
-      "reason": "Preserve exact declared finite scopes from both normal-merge parents; source integration does not establish execution/refinement.",
-      "models": [
-        {
-          "id": "SecretMetadataViewEpoch",
-          "properties": [
-            "TypeOK",
-            "MetadataRequestsOnly",
-            "CursorRequestBound",
-            "NoStaleCallbackAcceptance",
-            "NoStaleRenderedMetadata",
-            "NoStaleRenderedError",
-            "LoadingTracksLatest",
-            "PendingClearsMetadata",
-            "NoRowsOnError",
-            "ValidatedMetadataOnly",
-            "CurrentPageOnly",
-            "LocalePreservesQuery",
-            "ParentRevealClearedForMetadata"
-          ],
-          "limits": "Scoped metadata-child contract and the parent tab-change invalidate call only. A prior-parent-reveal Boolean models clearing visible state on entry, not pending GetSecretValue replies, byte erasure, old asyncRetrieve, disclosure channels or SQL. Opaque cursor provenance is an annotation, not decoding or HMAC validation. A valid-response Boolean abstracts the concrete metadata parser. Host callback identity/remount and active scope are assumptions, not main navigation/authentication proofs. Abort leaves callbacks schedulable to check guards; actual browser Abort may prevent JavaScript delivery. Locale transitions preserve query state, not arbitrary React scheduling. Finite safety projection only: no stable history snapshot, page completeness, backend/JSON/IAM refinement, whole React proof or liveness. Source scope on the parent and bundle is limited to this tab and child projection; unrelated retrieval/mutation code is excluded."
-        }
-      ]
-    },
-    {
-      "path": "formal/SecretMetadataViewEpoch.tla",
-      "sha256": "12819b1dc64f7381f8c511305e3b5c7144f6ad5c03ccacff8b10c5bd4c53631f",
-      "disposition": "modeled",
-      "reason": "Preserve exact declared finite scopes from both normal-merge parents; source integration does not establish execution/refinement.",
-      "models": [
-        {
-          "id": "SecretMetadataViewEpoch",
-          "properties": [
-            "TypeOK",
-            "MetadataRequestsOnly",
-            "CursorRequestBound",
-            "NoStaleCallbackAcceptance",
-            "NoStaleRenderedMetadata",
-            "NoStaleRenderedError",
-            "LoadingTracksLatest",
-            "PendingClearsMetadata",
-            "NoRowsOnError",
-            "ValidatedMetadataOnly",
-            "CurrentPageOnly",
-            "LocalePreservesQuery",
-            "ParentRevealClearedForMetadata"
-          ],
-          "limits": "Scoped metadata-child contract and the parent tab-change invalidate call only. A prior-parent-reveal Boolean models clearing visible state on entry, not pending GetSecretValue replies, byte erasure, old asyncRetrieve, disclosure channels or SQL. Opaque cursor provenance is an annotation, not decoding or HMAC validation. A valid-response Boolean abstracts the concrete metadata parser. Host callback identity/remount and active scope are assumptions, not main navigation/authentication proofs. Abort leaves callbacks schedulable to check guards; actual browser Abort may prevent JavaScript delivery. Locale transitions preserve query state, not arbitrary React scheduling. Finite safety projection only: no stable history snapshot, page completeness, backend/JSON/IAM refinement, whole React proof or liveness. Source scope on the parent and bundle is limited to this tab and child projection; unrelated retrieval/mutation code is excluded."
-        }
-      ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "9a2d9e33c0231218acb8772bc5fd32c747d0811945213b9d82cebcf6be511ad1",
+      "sha256": "1d25fab63c198315c12a4e42b5bcdeabe543853e8417705c92f9ab471fb88cac",
       "disposition": "formal-infrastructure",
-      "reason": "Normal main integration and source inventory refresh; no authority, runtime, or model semantics changed by this nonformal artifact.",
+      "reason": "Add mandatory registry/model/property/control inventories and individual-removal negatives without changing existing checker semantics, tool pins, bounds, timeouts or prior models.",
       "models": []
     },
     {
-      "path": "internal/server/web/app.js",
-      "sha256": "38a2cd6fa3b89c35e5aa4e37d29e366f1462594f431c06729eeefa8b134e96b3",
+      "path": "internal/aws/kms_alias_failure_frames_test.go",
+      "sha256": "9a258e737ee4ad62f25057394ce03d007bbcc0f5032e82c9041a555c387bbed7",
+      "disposition": "test-support",
+      "reason": "Add real known-policy cold native/SDK denial frames including schema and cursor authority, borrowed transaction ownership, query/metadata/commit faults and repair. Preserve old assertions; no mocks, credential output, lowered floors, timeout changes or proof-by-test-count.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/kms_alias_name_errors_test.go",
+      "sha256": "dd0b930c0822a2116542308763976bbcf014e1c6b1818066fea0e4e760d6d106",
+      "disposition": "test-support",
+      "reason": "Preserve all existing acceptance assertions and add literal alias schemas, actual native SDK/shared-state and mounted UI regressions; tests support concrete contracts without substituting for formal or whole-quality evidence.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/kms_aliases.go",
+      "sha256": "f956e50ba6d4adb25b2838dc4e169ac4d72b735466d338512ebe9342c8c4ff93",
       "disposition": "modeled",
-      "reason": "Preserve exact declared finite scopes from both normal-merge parents; source integration does not establish execution/refinement.",
+      "reason": "Three separate finite contracts: native alias catalog admission/cursor/failure frames; concrete-key crypto authorization/commit; and first-use HTTP bootstrap, authorization, operation and publication in one caller-owned transaction. Trusted public initializing constructor is excluded from denied-HTTP no-write scope. Real cold known-policy403/schema+allrows, real SQLite faults and SDK independently exercise the concrete bridge; not Go/SQL refinement.",
       "models": [
         {
-          "id": "SecretsRevealEpoch",
+          "id": "KMSAliasCatalog",
           "properties": [
             "TypeOK",
-            "NoUnmountedDisplay",
-            "FreshEmissionHistory",
-            "ReturnedARNMatches",
-            "VisibleContextMatches"
+            "AcknowledgedSuccess",
+            "MutationAuthority",
+            "ConcreteTarget",
+            "FailureFrame",
+            "PeerRegionFrame",
+            "MutationEffect",
+            "CreationIdentity",
+            "AdmissionBudgets",
+            "RevisionFresh",
+            "ListAuthorized",
+            "CursorBound",
+            "ListPageExact",
+            "ListMoreExact",
+            "ContinuationAfterLast",
+            "ReadFrame",
+            "NoPartialRead"
           ],
-          "limits": "Finite explicit-retrieve/display model, not React, DOM, AbortController, memory zeroization or implementation refinement. Only the successful response path is modeled; native store/IAM must authorize before returning any secret. A returned ARN can differ and must be rejected. Retrieve, Hide and navigation invalidate epochs; unmount also clears visible state. Parent must remount on region/principal changes. Emission history captures the context at each acceptance so later Hide/navigation cannot relabel an earlier stale acceptance. Draft entry, mutation atomicity and form layout are outside this model. Parent main.jsx scope binds only Secrets routing/remount key (region/principal/navigation); the generated app.js binding is the canonical compiled artifact of those source inputs, independently checked by bundle/asset hashes. It does not model unrelated existing console services or prove JavaScript compilation."
+          "limits": "Independent bounded alias catalog CRUD/pagination abstraction, not cryptography/crypto orchestration or Go/SQLite/HTTP refinement. Fixed same-type/usage concrete keyparents; no DeleteKey/keyrecreation/aliases-as-target/managedaliases/grants/ABAC. MAC authority/integrity are abstract predicates; marker has NO expiry. Atomic write/cursor/read transitions assume sameDB Tx and pure immutable policy; no actual SQL scan/locking/RowsAffected/commit implementation proof. Four reachable seeds plus three requests are not unbounded quotas1000/50 or complete workflows. Failed request identity is intentionally canonicalized; only operation category/outcome/before-frame retained, and checked successful-input properties are success-guarded. Timestamps/birthlabels only model update identity preservation, not physicalclock/UUID entropy. Public JSON projection/wireparser/UI/hostauthentication independent."
         },
         {
-          "id": "SecretMetadataViewEpoch",
+          "id": "KMSAliasCrypto",
           "properties": [
             "TypeOK",
-            "MetadataRequestsOnly",
-            "CursorRequestBound",
-            "NoStaleCallbackAcceptance",
-            "NoStaleRenderedMetadata",
-            "NoStaleRenderedError",
-            "LoadingTracksLatest",
-            "PendingClearsMetadata",
-            "NoRowsOnError",
-            "ValidatedMetadataOnly",
-            "CurrentPageOnly",
-            "LocalePreservesQuery",
-            "ParentRevealClearedForMetadata"
+            "TransactionSnapshotStable",
+            "AliasResolutionCurrent",
+            "OmittedDecryptUsesBlob",
+            "ConcreteKeyAuthorization",
+            "AuthorizedCryptoStages",
+            "AuthorizationBeforeMismatch",
+            "NoPublicationBeforeCommit",
+            "FailureCounterFrame",
+            "FailureNoPublication",
+            "WriteFailureRefused",
+            "PublishedKeyBound",
+            "EncryptCounterExact",
+            "DecryptCounterFrame"
           ],
-          "limits": "Scoped metadata-child contract and the parent tab-change invalidate call only. A prior-parent-reveal Boolean models clearing visible state on entry, not pending GetSecretValue replies, byte erasure, old asyncRetrieve, disclosure channels or SQL. Opaque cursor provenance is an annotation, not decoding or HMAC validation. A valid-response Boolean abstracts the concrete metadata parser. Host callback identity/remount and active scope are assumptions, not main navigation/authentication proofs. Abort leaves callbacks schedulable to check guards; actual browser Abort may prevent JavaScript delivery. Locale transitions preserve query state, not arbitrary React scheduling. Finite safety projection only: no stable history snapshot, page completeness, backend/JSON/IAM refinement, whole React proof or liveness. Source scope on the parent and bundle is limited to this tab and child projection; unrelated retrieval/mutation code is excluded."
+          "limits": "New alias selection/concrete authorization/ciphertext match/commit publication finite projection. Not AES/nonce/HMAC, raw ARN/JSON/SigV4/IAM parsing, host authority, arbitrary policies, actualSQLite locking/commit/Go refinement, retries/unbounded history, alias CRUD/capacity/pagination or full lifecycle proof. Trusted authorizer is pure captured policy or SELECT on provided transaction; immediate transaction serialization is an assumption grounded in current core store, not proved. Native crypto/error classes abstract existing KMS helper behavior. Choose phase guard is factored outside its binder by exact logical equivalence, not a state-space reduction."
         },
         {
-          "id": "DynamoDBConsoleEpoch",
+          "id": "KMSBootstrapTransaction",
           "properties": [
-            "NoStalePublication",
-            "AckBelongsToCurrentView",
-            "DisplayedKeyBound"
+            "TypeOK",
+            "PreCommitFrame",
+            "RejectedDurableFrame",
+            "AdmissionRequired",
+            "OperationAuthorized",
+            "CommitAuthorized",
+            "PublishedAfterCommit",
+            "SuccessfulScope",
+            "PeerFrame",
+            "SuccessComplete"
           ],
-          "limits": "UI finite safety abstraction only, not JS/React/AbortController scheduling refinement, native protocol/JSON/IAM/auth/SQLite state/number/binary/size/capacity proof. TableId checks establish agreement at item-read acceptance only, not freshness after later native changes or atomic TableId-CAS on mutation; official TableName writes remain subject to recreation between preflight and send. Combined context labels abstract principal/region/remount, not credentials/tenant isolation. Stutter observation admits no liveness/hung-read progress claim. One write intent only; symbolic ACK/no automatic replay, not server rollback when an aborted request already committed. No concrete item values, missing-item/delete-confirmation semantics or arbitrary pagination. Main caller scope is limited to the DynamoDB route and its region|principal|navigation mount key/reset; embedded app.js is the canonical derived component/caller artifact. Neither binding proves other shell/components, compiler/bundler correctness or JavaScript refinement."
+          "limits": "Intended HTTP transaction seam; base eb03 has confirmed constructor persistence bug; repaired c4d412f source inspected separately, not refinement-proven. Trusted host public NewKMSAliasStore explicitly initializes state and is EXCLUDED from denied HTTP no-write contract. Two regions, one request, optional global logical schema and per-region cursor-row membership; region data is one abstract operation effect bit, not alias CRUD/crypto correctness. Action/alias/key Boolean requirements model bounded operations requiring all three; ListAliases only-action projection is represented by other permissions TRUE, not assertion all operations require alias and key authorization. valid is early wire admission; lateValid is separate target/marker admission after tentative initialization and authorization; no byte/JSON/marker-MAC/SQLite/DDL/Go/HTTP-auth refinement. Captured immutable pure policy, single transaction; no adversarial policy mutation or authorization-before-target-lookup promise. Schema frame is logical table/row state, not WAL/page-byte identity or zero SQL syscall guarantee. Scoped SANY+baseline+13 controls passed at6278443; native Go validation belongs to independent author receipts, not model refinement. Native repair c4d412f source seam independently reviewed; early/late validation order is abstract, not native error-precedence refinement. Scoped627 proof is independent, not canonical current registry proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/kms_aliases_test.go",
+      "sha256": "871b45379481ac110822f84e1522d9961febfac1e296c8bf2edd243843c987d3",
+      "disposition": "test-support",
+      "reason": "Preserve all existing acceptance assertions and add literal alias schemas, actual native SDK/shared-state and mounted UI regressions; tests support concrete contracts without substituting for formal or whole-quality evidence.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/kms_http.go",
+      "sha256": "e1816d9d19f5a1d7f225f61aae5774d8a36b5cb8fc33909884a3a8d50b31ec3d",
+      "disposition": "modeled",
+      "reason": "Retain normalized KMS routing/identity-policy admission while adding four strict alias codecs and delegation to the independently modeled native alias leaf. This binding covers normalized protocol admission only, NOT raw JSON/Unicode/header decoding, operation-specific CRUD/paging state or response serialization; native schema/HTTP/SDK tests independently verify those boundaries.",
+      "models": [
+        {
+          "id": "KMSProtocolAdmission",
+          "properties": [
+            "TypeOK",
+            "NoCrossServiceFallback",
+            "InfraNotDeny",
+            "MissingIdentityDenied",
+            "NoSuccessWithoutKMSTarget",
+            "NoAuthorityFromWireMetadata"
+          ],
+          "limits": "Normalized protocol/identity-policy admission abstraction after trusted outer exercise identity selection; not raw HTTP/SigV4 parsing or signature authentication, local token/Access or tenant-isolation proof, full IAM semantics, byte bodies/AES, real DB faults/transactions, Go refinement, timing/concurrency/crash proof or other-service authorization. Other route is only handoff, not modeled S3 success. Body-read-barrier native tests and nine actual Gateway metadata cases independently exercise the intended bridge; new tests and this model are initially UNRUN. Shared Gateway/server/SSM applicability is ONLY the new configured KMS route/module declaration, not unchanged AWS branches, nil-module/constructor behavior or whole provider wiring. Native tests are separate and initially unrun."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/kms_store.go",
+      "sha256": "0a6a2adb695fa375c744157cd38df5a833a9d4cb51407bd55358c2fb5dfeaf74",
+      "disposition": "modeled",
+      "reason": "Extract unchanged concrete Encrypt/Decrypt bodies into caller-owned transaction helpers, used by alias resolution and concrete-target authorization before commit/publication. Existing concrete-key/AES/counter behavior is protected by native regressions; this is not a cryptographic or SQL proof.",
+      "models": [
+        {
+          "id": "KMSAliasCrypto",
+          "properties": [
+            "TypeOK",
+            "TransactionSnapshotStable",
+            "AliasResolutionCurrent",
+            "OmittedDecryptUsesBlob",
+            "ConcreteKeyAuthorization",
+            "AuthorizedCryptoStages",
+            "AuthorizationBeforeMismatch",
+            "NoPublicationBeforeCommit",
+            "FailureCounterFrame",
+            "FailureNoPublication",
+            "WriteFailureRefused",
+            "PublishedKeyBound",
+            "EncryptCounterExact",
+            "DecryptCounterFrame"
+          ],
+          "limits": "New alias selection/concrete authorization/ciphertext match/commit publication finite projection. Not AES/nonce/HMAC, raw ARN/JSON/SigV4/IAM parsing, host authority, arbitrary policies, actualSQLite locking/commit/Go refinement, retries/unbounded history, alias CRUD/capacity/pagination or full lifecycle proof. Trusted authorizer is pure captured policy or SELECT on provided transaction; immediate transaction serialization is an assumption grounded in current core store, not proved. Native crypto/error classes abstract existing KMS helper behavior. Choose phase guard is factored outside its binder by exact logical equivalence, not a state-space reduction."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/apidocs/openapi.json",
+      "sha256": "4b76ed58fd41796a4e1fe9dd106bf677b9c98c9dc427031e579876a56a5770a2",
+      "disposition": "presentation",
+      "reason": "Static API/schema/example or canonical console build-input/digest declaration. Preserve existing operation IDs, all main examples/media and original dependency rights; this metadata is not an API/state implementation proof.",
+      "models": []
+    },
+    {
+      "path": "internal/server/kms_integration_test.go",
+      "sha256": "dbc658e592e8b210b08af7129c033b3cefac30bc00ff1c232f8776000db07be2",
+      "disposition": "test-support",
+      "reason": "Preserve all existing acceptance assertions and add literal alias schemas, actual native SDK/shared-state and mounted UI regressions; tests support concrete contracts without substituting for formal or whole-quality evidence.",
+      "models": []
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "136e84e93dc5d874e9102cf20583fa7b83bd0dc0b6b80f9ed03972177c0e814a",
+      "disposition": "modeled",
+      "reason": "Stateless KMS capability-map declaration of twelve native operations and bounded customer-alias limits on existing configured KMS composition. The normalized configured-module protocol contract is the referenced seam; capability JSON serialization, constructor failure/whole wiring and every other service are NOT modeled and are independently asserted by native/default-server/SDK tests.",
+      "models": [
+        {
+          "id": "KMSProtocolAdmission",
+          "properties": [
+            "TypeOK",
+            "NoCrossServiceFallback",
+            "InfraNotDeny",
+            "MissingIdentityDenied",
+            "NoSuccessWithoutKMSTarget",
+            "NoAuthorityFromWireMetadata"
+          ],
+          "limits": "Normalized protocol/identity-policy admission abstraction after trusted outer exercise identity selection; not raw HTTP/SigV4 parsing or signature authentication, local token/Access or tenant-isolation proof, full IAM semantics, byte bodies/AES, real DB faults/transactions, Go refinement, timing/concurrency/crash proof or other-service authorization. Other route is only handoff, not modeled S3 success. Body-read-barrier native tests and nine actual Gateway metadata cases independently exercise the intended bridge; new tests and this model are initially UNRUN. Shared Gateway/server/SSM applicability is ONLY the new configured KMS route/module declaration, not unchanged AWS branches, nil-module/constructor behavior or whole provider wiring. Native tests are separate and initially unrun."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/web/app.js",
+      "sha256": "b11d36f0d7b75f1cfda8238dbdfb8fee187cb36262eaf317f5c3671379bf6527",
+      "disposition": "modeled",
+      "reason": "Canonical compiled output of the added aliases component/mount; verified build-input/asset hashes establish correspondence. The finite model does not execute/prove minified JavaScript, compiler correctness, CSS or unrelated bundled services.",
+      "models": [
+        {
+          "id": "KMSAliasesViewEpoch",
+          "properties": [
+            "TypeOK",
+            "CurrentListOutcome",
+            "NoCachedRowsOnFailure",
+            "CurrentTargetMetadata",
+            "ClosedFormHasNoTarget",
+            "AckClosesForm",
+            "AckClearsDraft",
+            "ReadRetryNeverWrites",
+            "OnlyVerifiedTargetSubmitted",
+            "DeleteRequiresExactConfirmation",
+            "LocalePreservesIntent"
+          ],
+          "limits": "Finite UI protocol abstraction, not JS/React/Cloudscape/HTTP/SQL/IAM/crypto refinement or liveness. Initial key-list/Describe lookup completion is abstracted because actual source disables selection until it finishes; later target reads may overlap. Target/list revisions normalized after these reads. Excludes all parser/format/pagination/permission semantics, arbitrary key sets, repeated forms beyond bound, network ambiguity without ACK and full AWS console parity. Current list outcome and target metadata are stored fields, not derived tautologies. Retired-list mutation jointly bypasses redundant captured-object/active/abort checks; submit-target mutation abstracts both button and handler defenses. Retry mutant creates actual second pending write plus request counter, not a ghost-only edit. Root parent context key/principal binding is assumed; locale frame is only this model state, not the locale provider. Parent kms.jsx/main.jsx declarations bind only the Aliases mount and supplied region/principal/key identity; other KMS/general services remain outside. app.js is the canonical compiled correspondence artifact of that component/mount, independently checked by bundle hashes, not a proof of compilation or unrelated UI."
         }
       ]
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "114e00c9d2cd5188acd0d66fd98f5f75d5dfa612d61e8c46bda1358880112abf",
+      "sha256": "b46d09b3be3b5af5612f1f3250007215be9fd64a69d509fd8091ed411db6422d",
       "disposition": "formal-infrastructure",
-      "reason": "Normal main integration and source inventory refresh; no authority, runtime, or model semantics changed by this nonformal artifact.",
+      "reason": "Add mandatory registry/model/property/control inventories and individual-removal negatives without changing existing checker semantics, tool pins, bounds, timeouts or prior models.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "112b114039e592b270d3d98154e069f29673d73bc1987100e594136ce6916f6a",
+      "sha256": "1cda00e29dbf092643e50be8311cde44d6bf946159f980514781d2e3efae3428",
       "disposition": "formal-infrastructure",
-      "reason": "Normal main integration and source inventory refresh; no authority, runtime, or model semantics changed by this nonformal artifact.",
+      "reason": "Add mandatory registry/model/property/control inventories and individual-removal negatives without changing existing checker semantics, tool pins, bounds, timeouts or prior models.",
       "models": []
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "05850955625d37b71eb678569894afd6ced1e21e2db404682d2f7eece4015521",
+      "sha256": "c4602f7f7796ec54f8d129658d0a3ac4f7eca65b25c8919aa3ff230af371141e",
       "disposition": "test-support",
-      "reason": "Normal main integration and source inventory refresh; no authority, runtime, or model semantics changed by this nonformal artifact.",
+      "reason": "Preserve all existing acceptance assertions and add literal alias schemas, actual native SDK/shared-state and mounted UI regressions; tests support concrete contracts without substituting for formal or whole-quality evidence.",
       "models": []
     },
     {
-      "path": "test/e2e/secret_versions_console.py",
-      "sha256": "6107fd4e7bba2e057f67c676f1f46997011f5428c553dc7806f4288df1cc4fcf",
+      "path": "test/e2e/dynamodb_console.py",
+      "sha256": "c33bfaf458f9b82c8bc3ee1f512b99fff277354b53cd9f79d878d68983bbc4a2",
       "disposition": "test-support",
-      "reason": "Normal main integration and source inventory refresh; no authority, runtime, or model semantics changed by this nonformal artifact.",
+      "reason": "Bound the actual replaced-startup ListTables abort oracle to the first request, startup phases, native AbortSignal controller replacement and a later successful replacement read. Account exactly for pre-header versus post-header abort responses. Pure positive/negative classifier fixtures are separate from real four-flow SDK/browser evidence; all native operation, write-count, IAM, frame, accessibility and context assertions remain required.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/kms.py",
+      "sha256": "adb3a0302ccf5b2e92c608d36973d40ca5bcf1eb605d4701ce64c8bffe708035",
+      "disposition": "test-support",
+      "reason": "Preserve all existing acceptance assertions and add literal alias schemas, actual native SDK/shared-state and mounted UI regressions; tests support concrete contracts without substituting for formal or whole-quality evidence.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/kms_alias_docs.py",
+      "sha256": "a37b294fb94537721d77297937ecd1fb1b56c7ad4aee8b96abd3cef35834a812",
+      "disposition": "test-support",
+      "reason": "Preserve all existing acceptance assertions and add literal alias schemas, actual native SDK/shared-state and mounted UI regressions; tests support concrete contracts without substituting for formal or whole-quality evidence.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/kms_aliases.py",
+      "sha256": "fc68148cdf07b56f7bdc676b105b27f0edd4dc481a1a66c2969aca9952c19782",
+      "disposition": "test-support",
+      "reason": "Preserve all existing acceptance assertions and add literal alias schemas, actual native SDK/shared-state and mounted UI regressions; tests support concrete contracts without substituting for formal or whole-quality evidence.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/kms_aliases_console.py",
+      "sha256": "d42176768657ae5d560003f0d49bbfcf38b05f8ff8213f16a9a06066bfa26737",
+      "disposition": "test-support",
+      "reason": "Preserve all existing acceptance assertions and add literal alias schemas, actual native SDK/shared-state and mounted UI regressions; tests support concrete contracts without substituting for formal or whole-quality evidence.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_openapi_json10.py",
+      "sha256": "b9e568562d0979f037fa194d435fd58eb924ff2f6216f42f179326aa5e077d35",
+      "disposition": "test-support",
+      "reason": "Preserve all existing acceptance assertions and add literal alias schemas, actual native SDK/shared-state and mounted UI regressions; tests support concrete contracts without substituting for formal or whole-quality evidence.",
       "models": []
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "dd105d72d56352794b50edcda6cca250bb9fff1a8dd3baf47e8e66eb61b8af1a",
+      "sha256": "ad942aceb8c9d47c9fc9e381c739a2c8647f995d9a247d89999c6d52547ff902",
       "disposition": "presentation",
-      "reason": "Normal main integration and source inventory refresh; no authority, runtime, or model semantics changed by this nonformal artifact.",
+      "reason": "Static API/schema/example or canonical console build-input/digest declaration. Preserve existing operation IDs, all main examples/media and original dependency rights; this metadata is not an API/state implementation proof.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "fef7396f47bbd621e8cdcff31dac4d3b1a0f7045fc032af809f6d91d2bbfca6e",
+      "sha256": "818eb6a15e2f22bd6d3f3276a8c44a352b759b7b069cd258487b9f0600941b2f",
       "disposition": "presentation",
-      "reason": "Normal main integration and source inventory refresh; no authority, runtime, or model semantics changed by this nonformal artifact.",
+      "reason": "Static API/schema/example or canonical console build-input/digest declaration. Preserve existing operation IDs, all main examples/media and original dependency rights; this metadata is not an API/state implementation proof.",
       "models": []
     },
     {
-      "path": "tools/console/src/secret_versions.jsx",
-      "sha256": "c07f2e2088e71b4331be016ae5d2e4d21d493b07811e394376a50d39f7f9ef51",
+      "path": "tools/console/src/kms.jsx",
+      "sha256": "1cfa8031bb46ddc0f4567fe95f7eddb7d36e438deb6e30a8aba8530d176ffd84",
       "disposition": "modeled",
-      "reason": "Preserve exact declared finite scopes from both normal-merge parents; source integration does not establish execution/refinement.",
+      "reason": "Only the added Aliases tab mounts the actual component and supplies concrete key/region/principal identity. Existing key-list/crypto UI is unchanged and not modeled by this entry.",
       "models": [
         {
-          "id": "SecretMetadataViewEpoch",
+          "id": "KMSAliasesViewEpoch",
           "properties": [
             "TypeOK",
-            "MetadataRequestsOnly",
-            "CursorRequestBound",
-            "NoStaleCallbackAcceptance",
-            "NoStaleRenderedMetadata",
-            "NoStaleRenderedError",
-            "LoadingTracksLatest",
-            "PendingClearsMetadata",
-            "NoRowsOnError",
-            "ValidatedMetadataOnly",
-            "CurrentPageOnly",
-            "LocalePreservesQuery",
-            "ParentRevealClearedForMetadata"
+            "CurrentListOutcome",
+            "NoCachedRowsOnFailure",
+            "CurrentTargetMetadata",
+            "ClosedFormHasNoTarget",
+            "AckClosesForm",
+            "AckClearsDraft",
+            "ReadRetryNeverWrites",
+            "OnlyVerifiedTargetSubmitted",
+            "DeleteRequiresExactConfirmation",
+            "LocalePreservesIntent"
           ],
-          "limits": "Scoped metadata-child contract and the parent tab-change invalidate call only. A prior-parent-reveal Boolean models clearing visible state on entry, not pending GetSecretValue replies, byte erasure, old asyncRetrieve, disclosure channels or SQL. Opaque cursor provenance is an annotation, not decoding or HMAC validation. A valid-response Boolean abstracts the concrete metadata parser. Host callback identity/remount and active scope are assumptions, not main navigation/authentication proofs. Abort leaves callbacks schedulable to check guards; actual browser Abort may prevent JavaScript delivery. Locale transitions preserve query state, not arbitrary React scheduling. Finite safety projection only: no stable history snapshot, page completeness, backend/JSON/IAM refinement, whole React proof or liveness. Source scope on the parent and bundle is limited to this tab and child projection; unrelated retrieval/mutation code is excluded."
+          "limits": "Finite UI protocol abstraction, not JS/React/Cloudscape/HTTP/SQL/IAM/crypto refinement or liveness. Initial key-list/Describe lookup completion is abstracted because actual source disables selection until it finishes; later target reads may overlap. Target/list revisions normalized after these reads. Excludes all parser/format/pagination/permission semantics, arbitrary key sets, repeated forms beyond bound, network ambiguity without ACK and full AWS console parity. Current list outcome and target metadata are stored fields, not derived tautologies. Retired-list mutation jointly bypasses redundant captured-object/active/abort checks; submit-target mutation abstracts both button and handler defenses. Retry mutant creates actual second pending write plus request counter, not a ghost-only edit. Root parent context key/principal binding is assumed; locale frame is only this model state, not the locale provider. Parent kms.jsx/main.jsx declarations bind only the Aliases mount and supplied region/principal/key identity; other KMS/general services remain outside. app.js is the canonical compiled correspondence artifact of that component/mount, independently checked by bundle hashes, not a proof of compilation or unrelated UI."
         }
       ]
     },
     {
-      "path": "tools/console/src/secrets-manager.jsx",
-      "sha256": "2876a2b76b88bc9777fc435dd057d094cdb4fbbf690f4a55480b7be9d45edd32",
+      "path": "tools/console/src/kms_aliases.jsx",
+      "sha256": "f7eb517b334f89b007c662308057a8b3d63b70598282e78764b3074c0b47715c",
       "disposition": "modeled",
-      "reason": "Preserve exact declared finite scopes from both normal-merge parents; source integration does not establish execution/refinement.",
+      "reason": "Actual aliases component lifecycle, list/target reply epochs, ACK closing/clearing before read refresh, read-only retry, exact typed deletion and locale-preserved draft.",
       "models": [
         {
-          "id": "SecretsRevealEpoch",
+          "id": "KMSAliasesViewEpoch",
           "properties": [
             "TypeOK",
-            "NoUnmountedDisplay",
-            "FreshEmissionHistory",
-            "ReturnedARNMatches",
-            "VisibleContextMatches"
+            "CurrentListOutcome",
+            "NoCachedRowsOnFailure",
+            "CurrentTargetMetadata",
+            "ClosedFormHasNoTarget",
+            "AckClosesForm",
+            "AckClearsDraft",
+            "ReadRetryNeverWrites",
+            "OnlyVerifiedTargetSubmitted",
+            "DeleteRequiresExactConfirmation",
+            "LocalePreservesIntent"
           ],
-          "limits": "Finite explicit-retrieve/display model, not React, DOM, AbortController, memory zeroization or implementation refinement. Only the successful response path is modeled; native store/IAM must authorize before returning any secret. A returned ARN can differ and must be rejected. Retrieve, Hide and navigation invalidate epochs; unmount also clears visible state. Parent must remount on region/principal changes. Emission history captures the context at each acceptance so later Hide/navigation cannot relabel an earlier stale acceptance. Draft entry, mutation atomicity and form layout are outside this model. Parent main.jsx scope binds only Secrets routing/remount key (region/principal/navigation); the generated app.js binding is the canonical compiled artifact of those source inputs, independently checked by bundle/asset hashes. It does not model unrelated existing console services or prove JavaScript compilation."
-        },
+          "limits": "Finite UI protocol abstraction, not JS/React/Cloudscape/HTTP/SQL/IAM/crypto refinement or liveness. Initial key-list/Describe lookup completion is abstracted because actual source disables selection until it finishes; later target reads may overlap. Target/list revisions normalized after these reads. Excludes all parser/format/pagination/permission semantics, arbitrary key sets, repeated forms beyond bound, network ambiguity without ACK and full AWS console parity. Current list outcome and target metadata are stored fields, not derived tautologies. Retired-list mutation jointly bypasses redundant captured-object/active/abort checks; submit-target mutation abstracts both button and handler defenses. Retry mutant creates actual second pending write plus request counter, not a ghost-only edit. Root parent context key/principal binding is assumed; locale frame is only this model state, not the locale provider. Parent kms.jsx/main.jsx declarations bind only the Aliases mount and supplied region/principal/key identity; other KMS/general services remain outside. app.js is the canonical compiled correspondence artifact of that component/mount, independently checked by bundle hashes, not a proof of compilation or unrelated UI."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/main.jsx",
+      "sha256": "398113fc766beb1f536efa61277f5aeab8b75a38f35c688747d1ea9062668c89",
+      "disposition": "modeled",
+      "reason": "Only passes the actual selected principal to the KMS view, whose existing parent key retires context on region/principal/navigation. This binding covers the aliases mount identity seam, not other services, login, request transport or all navigation.",
+      "models": [
         {
-          "id": "SecretMetadataViewEpoch",
+          "id": "KMSAliasesViewEpoch",
           "properties": [
             "TypeOK",
-            "MetadataRequestsOnly",
-            "CursorRequestBound",
-            "NoStaleCallbackAcceptance",
-            "NoStaleRenderedMetadata",
-            "NoStaleRenderedError",
-            "LoadingTracksLatest",
-            "PendingClearsMetadata",
-            "NoRowsOnError",
-            "ValidatedMetadataOnly",
-            "CurrentPageOnly",
-            "LocalePreservesQuery",
-            "ParentRevealClearedForMetadata"
+            "CurrentListOutcome",
+            "NoCachedRowsOnFailure",
+            "CurrentTargetMetadata",
+            "ClosedFormHasNoTarget",
+            "AckClosesForm",
+            "AckClearsDraft",
+            "ReadRetryNeverWrites",
+            "OnlyVerifiedTargetSubmitted",
+            "DeleteRequiresExactConfirmation",
+            "LocalePreservesIntent"
           ],
-          "limits": "Scoped metadata-child contract and the parent tab-change invalidate call only. A prior-parent-reveal Boolean models clearing visible state on entry, not pending GetSecretValue replies, byte erasure, old asyncRetrieve, disclosure channels or SQL. Opaque cursor provenance is an annotation, not decoding or HMAC validation. A valid-response Boolean abstracts the concrete metadata parser. Host callback identity/remount and active scope are assumptions, not main navigation/authentication proofs. Abort leaves callbacks schedulable to check guards; actual browser Abort may prevent JavaScript delivery. Locale transitions preserve query state, not arbitrary React scheduling. Finite safety projection only: no stable history snapshot, page completeness, backend/JSON/IAM refinement, whole React proof or liveness. Source scope on the parent and bundle is limited to this tab and child projection; unrelated retrieval/mutation code is excluded."
+          "limits": "Finite UI protocol abstraction, not JS/React/Cloudscape/HTTP/SQL/IAM/crypto refinement or liveness. Initial key-list/Describe lookup completion is abstracted because actual source disables selection until it finishes; later target reads may overlap. Target/list revisions normalized after these reads. Excludes all parser/format/pagination/permission semantics, arbitrary key sets, repeated forms beyond bound, network ambiguity without ACK and full AWS console parity. Current list outcome and target metadata are stored fields, not derived tautologies. Retired-list mutation jointly bypasses redundant captured-object/active/abort checks; submit-target mutation abstracts both button and handler defenses. Retry mutant creates actual second pending write plus request counter, not a ghost-only edit. Root parent context key/principal binding is assumed; locale frame is only this model state, not the locale provider. Parent kms.jsx/main.jsx declarations bind only the Aliases mount and supplied region/principal/key identity; other KMS/general services remain outside. app.js is the canonical compiled correspondence artifact of that component/mount, independently checked by bundle hashes, not a proof of compilation or unrelated UI."
         }
       ]
     }

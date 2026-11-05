@@ -3494,6 +3494,800 @@
           "expect_invariant": "LoadingTracksLatest"
         }
       ]
+    },
+    {
+      "id": "KMSAliasCrypto",
+      "model": "formal/KMSAliasCrypto.tla",
+      "config": "formal/KMSAliasCrypto.cfg",
+      "bounds": "Two preexisting same-region concrete keys and one customer alias; prior ciphertext under either key with reachable counter1 seed; two enabled flags; alias/direct/omitted selector; per-key and alias-only permission flags; missing/error/policy authorizer; four storage outcomes. One crypto operation and at most one retarget before transaction. Abstract counter cap2, not real2^32.",
+      "properties": [
+        "TypeOK",
+        "TransactionSnapshotStable",
+        "AliasResolutionCurrent",
+        "OmittedDecryptUsesBlob",
+        "ConcreteKeyAuthorization",
+        "AuthorizedCryptoStages",
+        "AuthorizationBeforeMismatch",
+        "NoPublicationBeforeCommit",
+        "FailureCounterFrame",
+        "FailureNoPublication",
+        "WriteFailureRefused",
+        "PublishedKeyBound",
+        "EncryptCounterExact",
+        "DecryptCounterFrame"
+      ],
+      "limits": "New alias selection/concrete authorization/ciphertext match/commit publication finite projection. Not AES/nonce/HMAC, raw ARN/JSON/SigV4/IAM parsing, host authority, arbitrary policies, actualSQLite locking/commit/Go refinement, retries/unbounded history, alias CRUD/capacity/pagination or full lifecycle proof. Trusted authorizer is pure captured policy or SELECT on provided transaction; immediate transaction serialization is an assumption grounded in current core store, not proved. Native crypto/error classes abstract existing KMS helper behavior. Choose phase guard is factored outside its binder by exact logical equivalence, not a state-space reduction.",
+      "source_scope": [
+        "internal/aws/kms_aliases.go",
+        "internal/aws/kms_store.go"
+      ],
+      "mutants": [
+        {
+          "id": "UseStaleAliasTarget",
+          "edits": [
+            {
+              "old": "IF selector = Alias THEN snapshotAlias",
+              "new": "IF selector = Alias THEN KeyA",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AliasResolutionCurrent"
+        },
+        {
+          "id": "OmittedDecryptUsesLiveAlias",
+          "edits": [
+            {
+              "old": "IF op = \"Decrypt\" THEN blobKey ELSE None",
+              "new": "IF op = \"Decrypt\" THEN snapshotAlias ELSE None",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OmittedDecryptUsesBlob"
+        },
+        {
+          "id": "AuthorizeAliasResource",
+          "edits": [
+            {
+              "old": "LET resource == resolved",
+              "new": "LET resource == Alias",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ConcreteKeyAuthorization"
+        },
+        {
+          "id": "MismatchBeforeAuthorization",
+          "edits": [
+            {
+              "old": "phase' = IF key = None THEN \"done\" ELSE \"authorize\"",
+              "new": "phase' = IF key = None \\/ (op = \"Decrypt\" /\\ key # blobKey) THEN \"done\" ELSE \"authorize\"",
+              "count": 1
+            },
+            {
+              "old": "status' = IF key = None THEN \"invalid\" ELSE \"pending\"",
+              "new": "status' = IF key = None THEN \"invalid\" ELSE IF op = \"Decrypt\" /\\ key # blobKey THEN \"incorrectKey\" ELSE \"pending\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AuthorizationBeforeMismatch"
+        },
+        {
+          "id": "IgnoreCiphertextMismatch",
+          "edits": [
+            {
+              "old": "mismatch == op = \"Decrypt\" /\\ resolved # blobKey",
+              "new": "mismatch == FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PublishedKeyBound"
+        },
+        {
+          "id": "AllowMidTransactionRetarget",
+          "edits": [
+            {
+              "old": "phase = \"prepared\" /\\ ~retargeted",
+              "new": "phase \\in {\"prepared\",\"authorize\",\"check\",\"crypto\"} /\\ ~retargeted",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TransactionSnapshotStable"
+        },
+        {
+          "id": "IgnoreCounterAcknowledgement",
+          "edits": [
+            {
+              "old": "writeFailure == op = \"Encrypt\" /\\ outcome = \"writeFail\"",
+              "new": "writeFailure == FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WriteFailureRefused"
+        },
+        {
+          "id": "PublishBeforeCommit",
+          "edits": [
+            {
+              "old": "authorized,published>>\nCommit",
+              "new": "authorized>>\n    /\\ published' = IF nativeFailure \\/ writeFailure THEN None ELSE result\nCommit",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoPublicationBeforeCommit"
+        },
+        {
+          "id": "PublishOnFailedCommit",
+          "edits": [
+            {
+              "old": "published' = IF success THEN temporary ELSE None",
+              "new": "published' = temporary",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FailureNoPublication"
+        },
+        {
+          "id": "PersistOnFailedCommit",
+          "edits": [
+            {
+              "old": "counts' = IF success THEN stagedCounts ELSE snapshotCounts",
+              "new": "counts' = stagedCounts",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FailureCounterFrame"
+        },
+        {
+          "id": "ChargeNeighborCounter",
+          "edits": [
+            {
+              "old": "[snapshotCounts EXCEPT ![resolved] = @ + 1] ELSE snapshotCounts",
+              "new": "[snapshotCounts EXCEPT ![Other(resolved)] = @ + 1] ELSE snapshotCounts",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EncryptCounterExact"
+        },
+        {
+          "id": "DecryptChangesCounter",
+          "edits": [
+            {
+              "old": "IF op = \"Encrypt\" /\\ outcome # \"writeFail\"",
+              "new": "IF op \\in Ops /\\ outcome # \"writeFail\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DecryptCounterFrame"
+        },
+        {
+          "id": "BypassConcreteKeyDenial",
+          "edits": [
+            {
+              "old": "allowed == authMode = \"policy\" /\\ PolicyAllows(resource)",
+              "new": "allowed == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AuthorizedCryptoStages"
+        }
+      ]
+    },
+    {
+      "id": "KMSAliasesViewEpoch",
+      "model": "formal/KMSAliasesViewEpoch.tla",
+      "config": "formal/KMSAliasesViewEpoch.cfg",
+      "bounds": "Two context incarnations A\u2192B/unmount; two known customer keys per context; one alias; initial successful list and initial picker lookup normalized as reachable seed/completion. At most two subsequent ListAliases requests and two selected-target metadata requests, one form intent per context, one submitted write, one acknowledged read-only retry. Native backend outcomes abstract Success/Failure. No second normal write; request count0..2 admits replay mutant.",
+      "properties": [
+        "TypeOK",
+        "CurrentListOutcome",
+        "NoCachedRowsOnFailure",
+        "CurrentTargetMetadata",
+        "ClosedFormHasNoTarget",
+        "AckClosesForm",
+        "AckClearsDraft",
+        "ReadRetryNeverWrites",
+        "OnlyVerifiedTargetSubmitted",
+        "DeleteRequiresExactConfirmation",
+        "LocalePreservesIntent"
+      ],
+      "limits": "Finite UI protocol abstraction, not JS/React/Cloudscape/HTTP/SQL/IAM/crypto refinement or liveness. Initial key-list/Describe lookup completion is abstracted because actual source disables selection until it finishes; later target reads may overlap. Target/list revisions normalized after these reads. Excludes all parser/format/pagination/permission semantics, arbitrary key sets, repeated forms beyond bound, network ambiguity without ACK and full AWS console parity. Current list outcome and target metadata are stored fields, not derived tautologies. Retired-list mutation jointly bypasses redundant captured-object/active/abort checks; submit-target mutation abstracts both button and handler defenses. Retry mutant creates actual second pending write plus request counter, not a ghost-only edit. Root parent context key/principal binding is assumed; locale frame is only this model state, not the locale provider. Parent kms.jsx/main.jsx declarations bind only the Aliases mount and supplied region/principal/key identity; other KMS/general services remain outside. app.js is the canonical compiled correspondence artifact of that component/mount, independently checked by bundle hashes, not a proof of compilation or unrelated UI.",
+      "source_scope": [
+        "tools/console/src/kms_aliases.jsx",
+        "tools/console/src/kms.jsx",
+        "tools/console/src/main.jsx",
+        "internal/server/web/app.js"
+      ],
+      "mutants": [
+        {
+          "id": "IgnoreSameLifeListRevision",
+          "expect_invariant": "CurrentListOutcome",
+          "edits": [
+            {
+              "old": "r.rev = ui.listRev (* ListRevisionGuard *)",
+              "new": "TRUE (* ListRevisionGuard *)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "BypassRetiredListLife",
+          "expect_invariant": "CurrentListOutcome",
+          "edits": [
+            {
+              "old": "LifeCurrent(r.scope) (* ListLifeGuard *)",
+              "new": "TRUE (* ListLifeGuard *)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "RetainRowsOnCurrentReadFailure",
+          "expect_invariant": "NoCachedRowsOnFailure",
+          "edits": [
+            {
+              "old": "!.rows = IF outcome = \"Success\" THEN r.rows ELSE FALSE, (* ClearFailedRows *)",
+              "new": "!.rows = IF outcome = \"Success\" THEN r.rows ELSE ui.rows, (* ClearFailedRows *)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "IgnoreSelectedTargetRevision",
+          "expect_invariant": "CurrentTargetMetadata",
+          "edits": [
+            {
+              "old": "r.rev = ui.targetRev (* TargetRevisionGuard *)",
+              "new": "TRUE (* TargetRevisionGuard *)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "RetainTargetMetadataOnCancel",
+          "expect_invariant": "ClosedFormHasNoTarget",
+          "edits": [
+            {
+              "old": "!.target = None,!.targetInfo = EmptyTarget, (* CancelTargetClear *)",
+              "new": "!.target = None,!.targetInfo = ui.targetInfo, (* CancelTargetClear *)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "KeepFormAfterAcknowledgedWrite",
+          "expect_invariant": "AckClosesForm",
+          "edits": [
+            {
+              "old": "!.mode = \"List\", (* AckFormExit *)",
+              "new": "!.mode = ui.mode, (* AckFormExit *)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "KeepDraftAfterAcknowledgedWrite",
+          "expect_invariant": "AckClearsDraft",
+          "edits": [
+            {
+              "old": "!.draft = FALSE, (* AckDraftClear *)",
+              "new": "!.draft = ui.draft, (* AckDraftClear *)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "ReplayWriteOnReadRetry",
+          "expect_invariant": "ReadRetryNeverWrites",
+          "edits": [
+            {
+              "old": "writes' = writes (* RetryNoWriteRequest *)",
+              "new": "writes' = writes + 1 (* RetryNoWriteRequest *)",
+              "count": 1
+            },
+            {
+              "old": "write' = write (* RetryNoWritePending *)",
+              "new": "write' = [write EXCEPT !.pending = TRUE] (* RetryNoWritePending *)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "SubmitWithoutVerifiedTarget",
+          "expect_invariant": "OnlyVerifiedTargetSubmitted",
+          "edits": [
+            {
+              "old": "VerifiedTarget (* SubmitTargetVerified *)",
+              "new": "TRUE (* SubmitTargetVerified *)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "DeleteWithoutExactConfirmation",
+          "expect_invariant": "DeleteRequiresExactConfirmation",
+          "edits": [
+            {
+              "old": "ui.typed = AliasName (* ExactDeleteConfirmation *)",
+              "new": "TRUE (* ExactDeleteConfirmation *)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "LocaleClearsUnsavedDraft",
+          "expect_invariant": "LocalePreservesIntent",
+          "edits": [
+            {
+              "old": "  /\\ UNCHANGED <<current,active,aborted,ui,server,pendingList,pendingTarget,\n                 listIssued,targetIssued,opened,write,writes,retryDone,retryCounts>> (* LocaleIntentFrame *)",
+              "new": "  /\\ ui' = [ui EXCEPT !.draft = FALSE]\n  /\\ UNCHANGED <<current,active,aborted,server,pendingList,pendingTarget,\n                 listIssued,targetIssued,opened,write,writes,retryDone,retryCounts>> (* LocaleIntentFrame *)",
+              "count": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "KMSAliasCatalog",
+      "model": "formal/KMSAliasCatalog.tla",
+      "config": "formal/KMSAliasCatalog.cfg",
+      "bounds": "Two regions, two fixed existing concrete keys per region, three alias names; four API-reachable catalog seeds, abstract globalcap2/perregionalkeycap1, page1..2, three request suffixes, catalog revision0..5. Pure captured aliasBoolean plus allfour two-key permissionmaps; same-key old/new decisions identical; write outcomes ok/ignored/commitfail, list ok/readfail.",
+      "properties": [
+        "TypeOK",
+        "AcknowledgedSuccess",
+        "MutationAuthority",
+        "ConcreteTarget",
+        "FailureFrame",
+        "PeerRegionFrame",
+        "MutationEffect",
+        "CreationIdentity",
+        "AdmissionBudgets",
+        "RevisionFresh",
+        "ListAuthorized",
+        "CursorBound",
+        "ListPageExact",
+        "ListMoreExact",
+        "ContinuationAfterLast",
+        "ReadFrame",
+        "NoPartialRead"
+      ],
+      "limits": "Independent bounded alias catalog CRUD/pagination abstraction, not cryptography/crypto orchestration or Go/SQLite/HTTP refinement. Fixed same-type/usage concrete keyparents; no DeleteKey/keyrecreation/aliases-as-target/managedaliases/grants/ABAC. MAC authority/integrity are abstract predicates; marker has NO expiry. Atomic write/cursor/read transitions assume sameDB Tx and pure immutable policy; no actual SQL scan/locking/RowsAffected/commit implementation proof. Four reachable seeds plus three requests are not unbounded quotas1000/50 or complete workflows. Failed request identity is intentionally canonicalized; only operation category/outcome/before-frame retained, and checked successful-input properties are success-guarded. Timestamps/birthlabels only model update identity preservation, not physicalclock/UUID entropy. Public JSON projection/wireparser/UI/hostauthentication independent.",
+      "source_scope": [
+        "internal/aws/kms_aliases.go"
+      ],
+      "mutants": [
+        {
+          "id": "OmitAliasCreatePermission",
+          "edits": [
+            {
+              "old": "Allowed(op,p,old,k) == CASE op=\"create\" -> p.alias /\\ KeyPermit(p,k)\n                        [] op=\"update\" -> p.alias /\\ KeyPermit(p,old) /\\ KeyPermit(p,k)\n                        [] OTHER -> p.alias /\\ KeyPermit(p,old)\n",
+              "new": "Allowed(op,p,old,k) == CASE op=\"create\" -> KeyPermit(p,k)\n                        [] op=\"update\" -> p.alias /\\ KeyPermit(p,old) /\\ KeyPermit(p,k)\n                        [] OTHER -> p.alias /\\ KeyPermit(p,old)\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MutationAuthority"
+        },
+        {
+          "id": "OmitNewKeyCreatePermission",
+          "edits": [
+            {
+              "old": "Allowed(op,p,old,k) == CASE op=\"create\" -> p.alias /\\ KeyPermit(p,k)\n                        [] op=\"update\" -> p.alias /\\ KeyPermit(p,old) /\\ KeyPermit(p,k)\n                        [] OTHER -> p.alias /\\ KeyPermit(p,old)\n",
+              "new": "Allowed(op,p,old,k) == CASE op=\"create\" -> p.alias\n                        [] op=\"update\" -> p.alias /\\ KeyPermit(p,old) /\\ KeyPermit(p,k)\n                        [] OTHER -> p.alias /\\ KeyPermit(p,old)\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MutationAuthority"
+        },
+        {
+          "id": "OmitOldKeyUpdatePermission",
+          "edits": [
+            {
+              "old": "Allowed(op,p,old,k) == CASE op=\"create\" -> p.alias /\\ KeyPermit(p,k)\n                        [] op=\"update\" -> p.alias /\\ KeyPermit(p,old) /\\ KeyPermit(p,k)\n                        [] OTHER -> p.alias /\\ KeyPermit(p,old)\n",
+              "new": "Allowed(op,p,old,k) == CASE op=\"create\" -> p.alias /\\ KeyPermit(p,k)\n                        [] op=\"update\" -> p.alias /\\ KeyPermit(p,k)\n                        [] OTHER -> p.alias /\\ KeyPermit(p,old)\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MutationAuthority"
+        },
+        {
+          "id": "OmitNewKeyUpdatePermission",
+          "edits": [
+            {
+              "old": "Allowed(op,p,old,k) == CASE op=\"create\" -> p.alias /\\ KeyPermit(p,k)\n                        [] op=\"update\" -> p.alias /\\ KeyPermit(p,old) /\\ KeyPermit(p,k)\n                        [] OTHER -> p.alias /\\ KeyPermit(p,old)\n",
+              "new": "Allowed(op,p,old,k) == CASE op=\"create\" -> p.alias /\\ KeyPermit(p,k)\n                        [] op=\"update\" -> p.alias /\\ KeyPermit(p,old)\n                        [] OTHER -> p.alias /\\ KeyPermit(p,old)\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MutationAuthority"
+        },
+        {
+          "id": "OmitDeleteTargetPermission",
+          "edits": [
+            {
+              "old": "Allowed(op,p,old,k) == CASE op=\"create\" -> p.alias /\\ KeyPermit(p,k)\n                        [] op=\"update\" -> p.alias /\\ KeyPermit(p,old) /\\ KeyPermit(p,k)\n                        [] OTHER -> p.alias /\\ KeyPermit(p,old)\n",
+              "new": "Allowed(op,p,old,k) == CASE op=\"create\" -> p.alias /\\ KeyPermit(p,k)\n                        [] op=\"update\" -> p.alias /\\ KeyPermit(p,old) /\\ KeyPermit(p,k)\n                        [] OTHER -> p.alias\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MutationAuthority"
+        },
+        {
+          "id": "AliasAsTarget",
+          "edits": [
+            {
+              "old": "Concrete(kind) == kind=\"concrete\"",
+              "new": "Concrete(kind) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ConcreteTarget"
+        },
+        {
+          "id": "CrossRegionMutation",
+          "edits": [
+            {
+              "old": "WriteRegion(r) == r",
+              "new": "WriteRegion(r) == IF r=1 THEN 2 ELSE 1",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PeerRegionFrame"
+        },
+        {
+          "id": "ReplaceCreationOnUpdate",
+          "edits": [
+            {
+              "old": "[] OTHER -> @",
+              "new": "[] OTHER -> step+3",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CreationIdentity"
+        },
+        {
+          "id": "IgnoreGlobalCap",
+          "edits": [
+            {
+              "old": "GlobalRoom(op,c) == Count(c)+(IF op=\"create\" THEN 1 ELSE 0)<=2",
+              "new": "GlobalRoom(op,c) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionBudgets"
+        },
+        {
+          "id": "IgnorePerKeyCap",
+          "edits": [
+            {
+              "old": "KeyRoom(c,r,k) == KeyCount(c,r,k)+1<=1",
+              "new": "KeyRoom(c,r,k) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionBudgets"
+        },
+        {
+          "id": "DirtyFailedCommit",
+          "edits": [
+            {
+              "old": "nextCatalog == IF committed THEN NextCatalog(op,r,n,k) ELSE catalog",
+              "new": "nextCatalog == IF committed \\/ (admitted /\\ outcome=\"commitfail\") THEN NextCatalog(op,r,n,k) ELSE catalog",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FailureFrame"
+        },
+        {
+          "id": "IgnoreWriteAcknowledgement",
+          "edits": [
+            {
+              "old": "Committed(admitted,outcome) == admitted /\\ outcome=\"ok\"",
+              "new": "Committed(admitted,outcome) == admitted",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AcknowledgedSuccess"
+        },
+        {
+          "id": "OmitRevisionAdvance",
+          "edits": [
+            {
+              "old": "IF committed THEN [revisions EXCEPT ![r]=@+1] ELSE revisions",
+              "new": "IF committed THEN revisions ELSE revisions",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RevisionFresh"
+        },
+        {
+          "id": "IgnoreCursorRevision",
+          "edits": [
+            {
+              "old": "BoundRevision(t,r) == t.revision=revisions[r]",
+              "new": "BoundRevision(t,r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CursorBound"
+        },
+        {
+          "id": "IgnoreCursorAuthority",
+          "edits": [
+            {
+              "old": "ValidMAC(t) == t.authority=1 /\\ t.integrity",
+              "new": "ValidMAC(t) == t.integrity",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CursorBound"
+        },
+        {
+          "id": "BypassMACIntegrity",
+          "edits": [
+            {
+              "old": "ValidMAC(t) == t.authority=1 /\\ t.integrity",
+              "new": "ValidMAC(t) == t.authority=1",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CursorBound"
+        },
+        {
+          "id": "IgnoreCursorFilter",
+          "edits": [
+            {
+              "old": "BoundFilter(t,f) == t.filter=f",
+              "new": "BoundFilter(t,f) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CursorBound"
+        },
+        {
+          "id": "IgnoreCursorLimit",
+          "edits": [
+            {
+              "old": "BoundLimit(t,l) == t.limit=l",
+              "new": "BoundLimit(t,l) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CursorBound"
+        },
+        {
+          "id": "InclusiveResume",
+          "edits": [
+            {
+              "old": "c[<<r,n>>]#0 /\\ n>after /\\ (f=0 \\/ c[<<r,n>>]=f))",
+              "new": "c[<<r,n>>]#0 /\\ n>=after /\\ (f=0 \\/ c[<<r,n>>]=f))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListPageExact"
+        },
+        {
+          "id": "PublishPartialReadFailure",
+          "edits": [
+            {
+              "old": "ReadPage(admitted,outcome,page) == IF admitted /\\ outcome=\"ok\" THEN page ELSE <<>>",
+              "new": "ReadPage(admitted,outcome,page) == IF admitted THEN page ELSE <<>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoPartialRead"
+        },
+        {
+          "id": "FilterAfterLimit",
+          "edits": [
+            {
+              "old": "IN SubSeq(names,1,IF Len(names)<l THEN Len(names) ELSE l)",
+              "new": "IN SelectSeq(SubSeq(CandidateNames(c,r,0,after),1,IF Len(CandidateNames(c,r,0,after))<l THEN Len(CandidateNames(c,r,0,after)) ELSE l),LAMBDA n : f=0 \\/ c[<<r,n>>]=f)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListPageExact"
+        },
+        {
+          "id": "OmitListPermission",
+          "edits": [
+            {
+              "old": "admitted == allowed /\\ Usable(t,r,f,l)",
+              "new": "admitted == Usable(t,r,f,l)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListAuthorized"
+        },
+        {
+          "id": "MissingContinuation",
+          "edits": [
+            {
+              "old": "more == success /\\ Len(CandidateNames(catalog,r,f,after))>l",
+              "new": "more == FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListMoreExact"
+        },
+        {
+          "id": "StaleContinuationPosition",
+          "edits": [
+            {
+              "old": "after |-> page[Len(page)]] ELSE marker",
+              "new": "after |-> after] ELSE marker",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ContinuationAfterLast"
+        }
+      ]
+    },
+    {
+      "id": "KMSBootstrapTransaction",
+      "model": "formal/KMSBootstrapTransaction.tla",
+      "config": "formal/KMSBootstrapTransaction.cfg",
+      "bounds": "Two regions, one request, five logical schema/cursor membership seeds, independent early wire validity and late target/marker validity; immutable three-resource permissions, read/write effect bit, one staged fault or success.",
+      "properties": [
+        "TypeOK",
+        "PreCommitFrame",
+        "RejectedDurableFrame",
+        "AdmissionRequired",
+        "OperationAuthorized",
+        "CommitAuthorized",
+        "PublishedAfterCommit",
+        "SuccessfulScope",
+        "PeerFrame",
+        "SuccessComplete"
+      ],
+      "source_scope": [
+        "internal/aws/kms_aliases.go",
+        "internal/aws/kms_http.go"
+      ],
+      "mutants": [
+        {
+          "id": "PersistSchemaAtBootstrap",
+          "expect_invariant": "PreCommitFrame",
+          "edits": [
+            {
+              "old": "!.working = Boot(s.working,s.region), !.phase = \"authorize\"",
+              "new": "!.working = Boot(s.working,s.region), !.durable.schema = TRUE, !.phase = \"authorize\"",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "PersistCursorAtBootstrap",
+          "expect_invariant": "PreCommitFrame",
+          "edits": [
+            {
+              "old": "!.working = Boot(s.working,s.region), !.phase = \"authorize\"",
+              "new": "!.working = Boot(s.working,s.region), !.durable = Boot(s.durable,s.region), !.phase = \"authorize\"",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "PersistDeniedBootstrap",
+          "expect_invariant": "PreCommitFrame",
+          "edits": [
+            {
+              "old": "ELSE Abort(\"denied\")",
+              "new": "ELSE [s EXCEPT !.phase = \"done\", !.status = \"denied\", !.durable = s.working]",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "BypassInvalidAdmission",
+          "expect_invariant": "AdmissionRequired",
+          "edits": [
+            {
+              "old": "IF s.valid /\\ s.policy THEN",
+              "new": "IF s.policy THEN",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "BypassMissingPolicy",
+          "expect_invariant": "AdmissionRequired",
+          "edits": [
+            {
+              "old": "IF s.valid /\\ s.policy THEN",
+              "new": "IF s.valid THEN",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "BypassActionPermission",
+          "expect_invariant": "OperationAuthorized",
+          "edits": [
+            {
+              "old": "ELSE IF Allowed THEN",
+              "new": "ELSE IF s.policy /\\ s.alias /\\ s.key THEN",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "BypassAliasPermission",
+          "expect_invariant": "OperationAuthorized",
+          "edits": [
+            {
+              "old": "ELSE IF Allowed THEN",
+              "new": "ELSE IF s.policy /\\ s.action /\\ s.key THEN",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "BypassKeyPermission",
+          "expect_invariant": "OperationAuthorized",
+          "edits": [
+            {
+              "old": "ELSE IF Allowed THEN",
+              "new": "ELSE IF s.policy /\\ s.action /\\ s.alias THEN",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "CommitAfterFailure",
+          "expect_invariant": "CommitAuthorized",
+          "edits": [
+            {
+              "old": "IF s.fault = \"commit\" THEN Abort(\"fault\")",
+              "new": "IF FALSE THEN Abort(\"fault\")",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "PublishBeforeCommit",
+          "expect_invariant": "PublishedAfterCommit",
+          "edits": [
+            {
+              "old": "!.working = Boot(s.working,s.region), !.phase = \"authorize\"",
+              "new": "!.working = Boot(s.working,s.region), !.published = TRUE, !.phase = \"authorize\"",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "CommitWrongRegion",
+          "expect_invariant": "SuccessfulScope",
+          "edits": [
+            {
+              "old": "!.durable = s.working, !.committed = TRUE",
+              "new": "!.durable = Operate(Boot(s.before,Other(s.region)),Other(s.region),s.write), !.committed = TRUE",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "DiscardPeerCursor",
+          "expect_invariant": "SuccessfulScope",
+          "edits": [
+            {
+              "old": "!.working = Boot(s.working,s.region), !.phase = \"authorize\"",
+              "new": "!.working = [Boot(s.working,s.region) EXCEPT !.rows = {s.region}], !.phase = \"authorize\"",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "OperationNoEffect",
+          "edits": [
+            {
+              "old": "Operate(d,r,w) == IF w THEN",
+              "new": "Operate(d,r,w) == IF FALSE THEN",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SuccessfulScope"
+        }
+      ],
+      "limits": "Intended HTTP transaction seam; base eb03 has confirmed constructor persistence bug; repaired c4d412f source inspected separately, not refinement-proven. Trusted host public NewKMSAliasStore explicitly initializes state and is EXCLUDED from denied HTTP no-write contract. Two regions, one request, optional global logical schema and per-region cursor-row membership; region data is one abstract operation effect bit, not alias CRUD/crypto correctness. Action/alias/key Boolean requirements model bounded operations requiring all three; ListAliases only-action projection is represented by other permissions TRUE, not assertion all operations require alias and key authorization. valid is early wire admission; lateValid is separate target/marker admission after tentative initialization and authorization; no byte/JSON/marker-MAC/SQLite/DDL/Go/HTTP-auth refinement. Captured immutable pure policy, single transaction; no adversarial policy mutation or authorization-before-target-lookup promise. Schema frame is logical table/row state, not WAL/page-byte identity or zero SQL syscall guarantee. Scoped SANY+baseline+13 controls passed at6278443; native Go validation belongs to independent author receipts, not model refinement. Native repair c4d412f source seam independently reviewed; early/late validation order is abstract, not native error-precedence refinement. Scoped627 proof is independent, not canonical current registry proof."
     }
   ]
 }

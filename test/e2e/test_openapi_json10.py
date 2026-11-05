@@ -107,19 +107,68 @@ class SharedJSON10Schemas(unittest.TestCase):
     def test_json11_templates_remain_admitted_by_shared_schema(self):
         media = self.spec['paths']['/']['post']['requestBody']['content']['application/x-amz-json-1.1']
         shared = validator(self.spec, media['schema'])
-        expected = {
+        self.assertEqual(set(media['examples']), {
             'SSMGetParameter', 'KMSCreateKey', 'KMSDescribeKey', 'KMSListKeys',
-            'KMSEnableKey', 'KMSDisableKey', 'KMSGetKeyPolicy', 'KMSEncrypt',
-            'KMSDecrypt', 'LogsCreateLogGroup', 'LogsDescribeLogGroups',
-            'LogsDeleteLogGroup', 'LogsCreateLogStream', 'LogsDescribeLogStreams',
-            'LogsPutLogEvents', 'LogsGetLogEvents', 'CreateSecret', 'DescribeSecret',
-            'ListSecrets', 'PutSecretValue', 'GetSecretValue',
-            'UpdateSecretVersionStage', 'DeleteSecret', 'ListSecretVersionIds',
-        }
-        self.assertEqual(set(media['examples']), expected)
+            'KMSEnableKey', 'KMSDisableKey', 'KMSGetKeyPolicy', 'KMSEncrypt', 'KMSDecrypt',
+            'LogsCreateLogGroup', 'LogsDescribeLogGroups', 'LogsDeleteLogGroup',
+            'LogsCreateLogStream', 'LogsDescribeLogStreams', 'LogsPutLogEvents', 'LogsGetLogEvents',
+            'CreateSecret', 'DescribeSecret', 'ListSecrets', 'PutSecretValue',
+            'GetSecretValue', 'UpdateSecretVersionStage', 'DeleteSecret',
+            'KMSCreateAlias', 'KMSListAliases', 'KMSUpdateAlias', 'KMSDeleteAlias',
+            'ListSecretVersionIds',
+        })
+        self.assertEqual(len(media['examples']), 28)
         for example in media['examples'].values():
             shared.validate(example['value'])
 
+
+    def test_alias_templates_match_each_literal_target_schema(self):
+        media = self.spec['paths']['/']['post']['requestBody']['content']['application/x-amz-json-1.1']
+        for name, schema_name, target in (
+                ('KMSCreateAlias', 'KMSCreateAliasInput', 'TrentService.CreateAlias'),
+                ('KMSListAliases', 'KMSListAliasesInput', 'TrentService.ListAliases'),
+                ('KMSUpdateAlias', 'KMSUpdateAliasInput', 'TrentService.UpdateAlias'),
+                ('KMSDeleteAlias', 'KMSDeleteAliasInput', 'TrentService.DeleteAlias')):
+            with self.subTest(name=name):
+                example = media['examples'][name]
+                self.assertEqual(example['summary'], 'X-Amz-Target: ' + target)
+                schema = validator(self.spec, {'$ref': '#/components/schemas/' + schema_name})
+                schema.validate(example['value'])
+                for invalid in (None, [], {**example['value'], 'UnknownSetting': True}):
+                    with self.assertRaises(ValidationError):
+                        schema.validate(invalid)
+                for required in self.spec['components']['schemas'][schema_name].get('required', []):
+                    missing = copy.deepcopy(example['value'])
+                    del missing[required]
+                    with self.assertRaises(ValidationError):
+                        schema.validate(missing)
+
+    def test_alias_target_name_and_paging_boundaries_are_not_weakened(self):
+        key = '11111111-1111-4111-8111-111111111111'
+        for name in ('KMSCreateAliasInput', 'KMSUpdateAliasInput'):
+            schema = validator(self.spec, {'$ref': '#/components/schemas/' + name})
+            schema.validate({'AliasName': 'alias/Practice_1', 'TargetKeyId': key})
+            schema.validate({'AliasName': 'alias/practice',
+                             'TargetKeyId': 'arn:aws:kms:us-east-1:000000000000:key/' + key})
+            for alias in (None, '', 'practice', 'alias/', 'alias/aws/reserved', 'alias/' + 'x' * 251):
+                with self.subTest(schema=name, alias=alias), self.assertRaises(ValidationError):
+                    schema.validate({'AliasName': alias, 'TargetKeyId': key})
+            for target in (None, 1, '', 'alias/other', 'not-a-key'):
+                with self.subTest(schema=name, target=target), self.assertRaises(ValidationError):
+                    schema.validate({'AliasName': 'alias/practice', 'TargetKeyId': target})
+        schema = validator(self.spec, {'$ref': '#/components/schemas/KMSDeleteAliasInput'})
+        schema.validate({'AliasName': 'alias/practice'})
+        for alias in (None, '', 'alias/aws/reserved', 'practice'):
+            with self.subTest(alias=alias), self.assertRaises(ValidationError):
+                schema.validate({'AliasName': alias})
+        schema = validator(self.spec, {'$ref': '#/components/schemas/KMSListAliasesInput'})
+        for valid in ({}, {'Limit': 1}, {'Limit': 100}, {'KeyId': key}, {'Marker': 'opaque'}):
+            schema.validate(valid)
+        for invalid in ({'Limit': 0}, {'Limit': 101}, {'Limit': True}, {'Limit': '1'},
+                        {'Marker': ''}, {'Marker': None}, {'Marker': 'x' * 1025},
+                        {'KeyId': 'alias/other'}):
+            with self.subTest(invalid=invalid), self.assertRaises(ValidationError):
+                schema.validate(invalid)
 
     def test_version_list_template_has_its_strict_native_target_schema(self):
         regional = self.spec['paths']['/']['post']
@@ -142,6 +191,7 @@ class SharedJSON10Schemas(unittest.TestCase):
         for index, invalid in enumerate(invalid_inputs):
             with self.subTest(index=index), self.assertRaises(ValidationError):
                 strict.validate(invalid)
+
 
 
 if __name__ == '__main__':
