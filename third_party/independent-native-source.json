@@ -1,56 +1,76 @@
 {
   "provenanceSchemaVersion": 1,
-  "status": "pending-review",
-  "reviewedReplacementIdentity": null,
+  "status": "accepted",
+  "reviewedReplacementIdentity": {
+    "sourceCommit": "01679251d937ca29e1248af66c082e4d619a1611",
+    "receiptSha256": "1fd689d88b05a566fb491b8a6a87d3d30b59f8112387bd80cde48f0671cc714f"
+  },
   "sources": [
     {
       "path": "internal/aws/apigateway_store.go",
-      "sha256": null,
-      "status": "pending-review",
+      "sha256": "8f99475dc04016bf54af4bcd1672770a3aa1b6de867c3f2e00772f2144538396",
+      "status": "accepted",
       "historicalManifest": "third_party/kumo-apigateway.json",
-      "publicReferences": []
+      "publicReferences": [
+        "https://docs.aws.amazon.com/apigateway/latest/api/API_CreateRestApi.html",
+        "https://docs.aws.amazon.com/apigateway/latest/api/API_GetRestApi.html"
+      ]
     },
     {
       "path": "internal/aws/apirouting/event.go",
-      "sha256": null,
-      "status": "pending-review",
+      "sha256": "2fd9ae519f1db83dd1f61f0f52f794ecf2f40c98e1e900d985b0a9b7dbd41b64",
+      "status": "accepted",
       "historicalManifest": "third_party/kumo-apigateway.json",
-      "publicReferences": []
+      "publicReferences": [
+        "https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html"
+      ]
     },
     {
       "path": "internal/aws/apirouting/path.go",
-      "sha256": null,
-      "status": "pending-review",
+      "sha256": "5d7a1d732b89dde297081518758f2d7769420f6701fcb6ae8282eb15cc530f8e",
+      "status": "accepted",
       "historicalManifest": "third_party/kumo-apigateway.json",
-      "publicReferences": []
+      "publicReferences": [
+        "https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-set-up-simple-proxy.html"
+      ]
     },
     {
       "path": "internal/aws/cloudwatch_logs_store.go",
-      "sha256": null,
-      "status": "pending-review",
+      "sha256": "c2188bfef80da92c655b1da175e4d2187ee359863cde09e339f0535fab23cf02",
+      "status": "accepted",
       "historicalManifest": "third_party/kumo-cloudwatch-logs.json",
-      "publicReferences": []
+      "publicReferences": [
+        "https://docs.aws.amazon.com/AmazonCloudWatchLogs/latest/APIReference/API_PutLogEvents.html",
+        "https://docs.aws.amazon.com/AmazonCloudWatchLogs/latest/APIReference/Welcome.html"
+      ]
     },
     {
       "path": "internal/aws/iam_roles.go",
-      "sha256": null,
-      "status": "pending-review",
+      "sha256": "3a2d8a28925b4104b3cddcc4a9178fc791abc392f22cb216dd05681097acd75a",
+      "status": "accepted",
       "historicalManifest": "third_party/kumo-iam.json",
-      "publicReferences": []
+      "publicReferences": [
+        "https://docs.aws.amazon.com/IAM/latest/APIReference/API_Role.html",
+        "https://pkg.go.dev/encoding/xml"
+      ]
     },
     {
       "path": "internal/aws/kms_types.go",
-      "sha256": null,
-      "status": "pending-review",
+      "sha256": "3d0575bfea1a668c131d991d428aad1a46595436ae89688007e4688518691955",
+      "status": "accepted",
       "historicalManifest": "third_party/kumo-kms.json",
-      "publicReferences": []
+      "publicReferences": [
+        "https://docs.aws.amazon.com/kms/latest/APIReference/API_KeyMetadata.html"
+      ]
     },
     {
       "path": "internal/aws/wire_json_projection.go",
-      "sha256": null,
-      "status": "pending-review",
+      "sha256": "490bb3cc681f86d4c27d8638a628006d37be1eedceee6f1b32675c54d456b786",
+      "status": "accepted",
       "historicalManifest": null,
-      "publicReferences": []
+      "publicReferences": [
+        "https://pkg.go.dev/encoding/json"
+      ]
     }
   ]
 }
