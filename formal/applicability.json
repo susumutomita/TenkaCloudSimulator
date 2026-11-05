@@ -256,6 +256,13 @@
       "disposition": "test-support",
       "reason": "Register and exercise actual local CLI/official SDK and served-example acceptance; preserve all existing tests and negative cases.",
       "models": []
+    },
+    {
+      "path": "test/e2e/test_openapi_json10.py",
+      "sha256": "78585515041aa0183743c3907246217e0132f66b966eb5ed926de5ad2103aba9",
+      "disposition": "test-support",
+      "reason": "Preserve the exact original 23 JSON1.1 template names, require the added version-list template, and validate its strict per-target schema with missing/null/type/limit/unknown-field refusals. All prior JSON1.0 union and negative-control methods remain intact.",
+      "models": []
     }
   ]
 }
