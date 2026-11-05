@@ -241,8 +241,8 @@ not binary runtime dependencies. Regeneration must preserve locks and original
 rights: [console](tools/console/README.md), [Scalar](tools/scalar/README.md),
 [Python/WASI runtime](tools/python/README.md).
 
-The registry contains 30 finite models and 175 deliberate defect controls
-(205 required model/check executions). The new IAM scenario checks two requests
+The registry contains 33 finite models and 197 deliberate defect controls
+(230 required model/check executions). The new IAM scenario checks two requests
 from each of four reachable seeds. A broader four-request trial timed out and
 is not claimed as verified. TLC examines bounded safety properties and checks
 that targeted mutants produce real counterexamples. It does not prove Go/JS

@@ -50,3 +50,8 @@ runpy.run_path('tools/python/check.py',run_name='__main__')
 # Pending replacement review is a hard failure, never an adapted-comment check.
 native_provenance=runpy.run_path('scripts/check-native-provenance.py')
 assert native_provenance['main']()==0, 'Native provenance gate did not pass.'
+
+# Exercise refusal cases in the same required asset check, including missing
+# historical notices and unreviewed or modified current-source identities.
+import subprocess,sys
+subprocess.run([sys.executable,'scripts/test-native-provenance.py'],check=True)
