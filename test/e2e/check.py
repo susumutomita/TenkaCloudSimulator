@@ -563,4 +563,8 @@ def handler(event,context):
 
  def test_dynamodb_served_seven_templates_native_shared_state(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('dynamodb_docs.py'))],check=True,timeout=120)
+ def test_sqs_console_locale_preserves_drafts_and_native_receipts(self):
+  from sqs_locale import run_sqs_locale
+  run_sqs_locale()
+
 if __name__=='__main__':unittest.main(verbosity=2)

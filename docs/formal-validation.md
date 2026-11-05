@@ -16,7 +16,7 @@ covered merely because an existing model passes: its exact path must have an
 appropriate reviewed scope mapping and property argument.
 
 The current source candidate registry has 28 baselines/158 required named mutation controls
-(186 required executions), preserving maince1 27/153 and adding AzurePropertiesEpoch 1/5.
+(186 required executions), preserving maincba 27/153 and adding AzurePropertiesEpoch 1/5.
 Registration and Python guards are not a successful immutable TLC execution.
 
 | Model | Finite contract | Important exclusions |

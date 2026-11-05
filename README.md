@@ -134,5 +134,5 @@ The local candidate opens Blob Properties with an authenticated native HEAD,
 showing supported live headers and metadata without fetching blob content. It
 clears previous values on loading/failure and rejects late replies after Close
 or scope remount. See [the console contract](docs/azure-console.md). The current
-main-preserving normal merge requires fresh43-case integration and186 finite
+main-preserving normal merge requires fresh44-case integration and186 finite
 model/control executions; older focused results are not combined-head evidence.

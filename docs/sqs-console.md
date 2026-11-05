@@ -20,6 +20,30 @@ native SQS HTTP operations and SQLite state as SDK clients. No separate browser
 queue/message store, native API change, actual AWS connection or host runtime is
 needed. The simulator remains independent and implements a limited local subset.
 
+## Locale continuation and acceptance requirements
+
+The PR410 continuation normal-merges actual main `ce1ddd1`, which includes
+PR408. Its native services, shared JSON1.0 reference checks, Secrets readiness,
+mutation acknowledgment and motion fixes, 27 finite models and 153 controls are
+preserved. SQS English/Japanese switching preserves drafts and private receipt
+custody; fixed notices translate at render time while API values, resource names
+and raw errors remain opaque. Both owned helper CLIs are stopped even if one
+shutdown assertion fails. Two Japanese selectors in the shared service helper
+match the current SQS labels without changing native-operation assertions.
+
+A canonical same-lock bundle with 22 original notices and 19 pure SQS/catalog/
+Secrets checks passed on the identical product inputs before this main restack.
+Actual focused SQS English/Japanese, shared Japanese services and the repaired
+Secrets readiness/ACK/motion checks also passed on those exact product/helper
+inputs. These are historical, byte-bound focused receipts, not new-HEAD full CI.
+The 42 main Conformance method bodies are preserved and one SQS locale case
+makes 43 mandatory cases. Publication requires exact-HEAD hosted acceptance,
+whole-module statement and source coverage of at least 90% from one profile,
+and all 27 baselines plus 153 specific finite-model controls. Bounded models do
+not establish React/Go/SQL refinement or actual AWS fidelity. No full local43
+claim is made: this environment lacks some canonical development SDK/schema
+dependencies, and no dependency installation or alternative feed was used.
+
 ## Screens and operations
 
 | Flow | Native operation | Supported behavior |

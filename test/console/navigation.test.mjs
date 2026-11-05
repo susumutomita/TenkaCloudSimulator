@@ -45,6 +45,8 @@ test('natural Japanese aliases find canonical services within the selected cloud
     ['aws','クラウドフォーメーション',['cfn']],
     ['aws','ストレージ',['s3']],
     ['aws','キュー',['sqs']],
+    ['aws','シンプルキューサービス',['sqs']],
+    ['gcp','キュー',[]],
     ['aws','ログ',['logs']],
     ['aws','シークレット',['secretsmanager']],
     ['gcp','ストレージ',['gcp-storage']],

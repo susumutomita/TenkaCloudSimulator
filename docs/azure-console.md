@@ -4,7 +4,7 @@ The simulator provides a bounded, independent Azure Blob Storage console over
 its local Azure HTTP API and SQLite state. It does not connect to Azure. The
 provider-specific console is present in main. The live Blob Properties change
 is a new local integration candidate rebased by normal merge onto main
-`ce1ddd1fb5d05ef37acd1ae6b2c8c94d43136b18`. Earlier focused browser evidence
+`cba0a29a0397ab01ca106bbc5374b85b50d736b2`. Earlier focused browser evidence
 does not certify this combined source, rebuilt assets or hosted CI.
 This is not authenticated Azure Portal parity or official SDK compatibility.
 

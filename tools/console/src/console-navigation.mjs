@@ -12,7 +12,7 @@ export const SERVICES = Object.freeze([
   {id: 'apigateway', provider: 'aws', label: 'API Gateway', capability: 'apigateway', route: '/apigateway', keywords: 'rest api エーピーアイ APIゲートウェイ ゲートウェイ'},
   {id: 'cfn', provider: 'aws', label: 'CloudFormation', capability: 'cloudformation', route: '/stacks', keywords: 'stack template スタック テンプレート クラウドフォーメーション'},
   {id: 'kms', provider: 'aws', label: 'Key Management Service', capability: 'kms', route: '/kms', keywords: 'kms encryption key 暗号 キー 暗号化 キー管理'},
-  {id: 'sqs', provider: 'aws', label: 'SQS', capability: 'sqs', route: '/sqs', keywords: 'queue message messaging キュー メッセージ メッセージング'},
+  {id: 'sqs', provider: 'aws', label: 'SQS', capability: 'sqs', route: '/sqs', keywords: 'queue message messaging キュー メッセージ メッセージング シンプルキューサービス'},
   {id: 'logs', provider: 'aws', label: 'CloudWatch Logs', capability: 'logs', route: '/logs', keywords: 'log group stream monitoring ログ グループ ストリーム 監視'},
   {id: 'secretsmanager', provider: 'aws', label: 'Secrets Manager', capability: 'secretsmanager', route: '/secretsmanager', keywords: 'secret version credential credentials シークレット バージョン 秘密 認証情報'},
   {id: 'gcp-storage', provider: 'gcp', label: 'Cloud Storage', route: '/gcp-storage', keywords: 'google bucket object バケット オブジェクト ストレージ クラウドストレージ'},

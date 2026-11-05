@@ -1,7 +1,7 @@
 # Finite state model
 
 Current source candidate registry: 28 models / 158 literal-protected controls
-(186 required executions). Maince1 contributes 27 models/153 controls unchanged;
+(186 required executions). Maincba contributes 27 models/153 controls unchanged;
 AzurePropertiesEpoch adds one model/five controls. Registration is source evidence,
 not successful execution of this new immutable candidate. Dated receipts below
 refer to their recorded historical inputs, not this current integration. These
