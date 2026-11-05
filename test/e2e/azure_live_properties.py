@@ -214,7 +214,7 @@ def run_azure_live_properties():
                     expect(chooser.get_by_label('Principal name', exact=True)).to_have_value('properties-reader')
                     chooser.get_by_role('button', name='Choose identity', exact=True, include_hidden=True).dispatch_event('click')
                     expect(page.locator('.cloud-session summary[aria-label="Account menu"]')).to_have_text('properties-reader')
-                    expect(view.get_by_text('Access denied. This Azure exercise subject does not have permission for this operation.', exact=True)).to_be_visible()
+                    expect(view.get_by_text('Access denied. This Azure exercise subject does not have permission for this operation.', exact=True).filter(visible=True)).to_be_visible()
                     route, response = held.pop()
                     try:
                         route.fulfill(response=response)
