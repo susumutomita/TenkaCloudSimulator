@@ -32,9 +32,9 @@ func addSakuraCapabilities(base map[string]any, scope *sakura.Config) map[string
 		"operations":           []string{"GET /disk", "POST /disk", "GET /disk/{id}", "PUT /disk/{id}", "DELETE /disk/{id}"},
 		"authorization":        "Explicit local configured owner through authenticated typed context; not Sakura IAM",
 		"storage":              "SQLite configuration metadata only; no block device or VM",
-		"availabilityReported": false, "console": false, "sdkVerified": false,
+		"availabilityReported": false, "console": true, "sdkVerified": false,
 		"limits":      map[string]any{"activeDisks": 100, "sizeMB": 20480, "planID": 4, "connection": "virtio", "requestBytes": 65536, "queryBytes": 8192},
-		"unsupported": []string{"VM/boot/block I/O", "copies/snapshots/archives", "encryption/KMS", "tags/icons/placement except neutral empty markers", "disk attachment/resize/config/monitor", "Sakura IAM/real credentials", "AppRun", "Object Storage control or S3 compatibility", "console and SDK verification"},
+		"unsupported": []string{"VM/boot/block I/O", "copies/snapshots/archives", "encryption/KMS", "tags/icons/placement except neutral empty markers", "disk attachment/resize/config/monitor", "Sakura IAM/real credentials", "AppRun", "Object Storage control or S3 compatibility", "SDK verification"},
 	}
 	return base
 }

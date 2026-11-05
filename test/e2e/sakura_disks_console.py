@@ -1,8 +1,9 @@
 """SOURCE acceptance for root-integrated Sakura navigation and embedded assets.
 
 Actual native HTTP + two CLI processes + SQLite, not SDK or real cloud parity.
-No fake successful API responses. Requires a root-mounted #sakura-disks view.
+No fake successful API responses. Requires a root-mounted #/sakura-disks view.
 """
+from contextlib import ExitStack
 import json
 import os
 from pathlib import Path
@@ -174,10 +175,12 @@ def run():
                 b.call('DELETE',BASE+'/'+peer_id)
                 REPORTS.joinpath('sakura-disks-console.json').write_text(json.dumps({'success':True,'actualNativeHTTP':True,'SDK':False,'desktop390':audits,'localeDraftPreserved':True,'readAfterAckReadonlyRetry':True,'olderRealBodyRejected':stale,'peerFrame':True,'outside':0,'pageerrors':0,'noCloudConsoleAssets':True},indent=2)+'\n')
         finally:
-            for context in contexts:context.close()
-            if browser:browser.close()
-            if b:b.close()
-            if a:a.close()
+            # Attempt every cleanup even if an earlier resource close fails.
+            with ExitStack() as cleanup:
+                if a:cleanup.callback(a.close)
+                if b:cleanup.callback(b.close)
+                if browser:cleanup.callback(browser.close)
+                for context in reversed(contexts):cleanup.callback(context.close)
 
 
 if __name__=='__main__':run()

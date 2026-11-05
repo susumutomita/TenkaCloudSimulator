@@ -175,7 +175,7 @@ func TestSakuraServerOptInUsesRegistryAuthenticationAndCopiedScope(t *testing.T)
 		t.Fatal("optional registry missing provider")
 	}
 	capability := caps["sakura"].(map[string]any)
-	if capability["endpoint"] != sakuraServerPath || capability["availabilityReported"] != false || capability["console"] != false || capability["sdkVerified"] != false {
+	if capability["endpoint"] != sakuraServerPath || capability["availabilityReported"] != false || capability["console"] != true || capability["sdkVerified"] != false {
 		t.Fatal("misleading optional capability")
 	}
 	if !reflect.DeepEqual(capability["operations"], []any{"GET /disk", "POST /disk", "GET /disk/{id}", "PUT /disk/{id}", "DELETE /disk/{id}"}) {
