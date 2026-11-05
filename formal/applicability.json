@@ -1,12 +1,414 @@
 {
   "version": 1,
-  "base_sha": "36ebfd4808d539d22579181a59ce4db3c768420d",
+  "base_sha": "c563215b9fb3042364b7145ab4515fc387c66ef9",
   "changes": [
     {
-      "path": "docs/contributing/parallel-development.md",
-      "sha256": "6bea29ec42f9ef1aabe18e8648eb9ee1dfc905165fc03551863227a3c4c5f875",
+      "path": "README.ja.md",
+      "sha256": "48f315e0449cb8ec21599e59997d6f3c4aed226d35ca5722ef04d00c43b6efac",
       "disposition": "documentation",
-      "reason": "Operating guidance for observed agent capacity, independent ownership and resource reservations; no runtime, model, CI or permission behavior changes.",
+      "reason": "Documents explicit disabled-by-default Sakura Disk metadata subset, safe configured scope, exact limits and historical versus integrated verification, preserving all original rights. No fake VM/UI/S3 ObjectStorage or whole-constructor/refinement claim.",
+      "models": []
+    },
+    {
+      "path": "README.md",
+      "sha256": "3a993a2517bb10bdaf01b19b5365a364c4d1f95dce6d6174399458cc7611e680",
+      "disposition": "documentation",
+      "reason": "Documents explicit disabled-by-default Sakura Disk metadata subset, safe configured scope, exact limits and historical versus integrated verification, preserving all original rights. No fake VM/UI/S3 ObjectStorage or whole-constructor/refinement claim.",
+      "models": []
+    },
+    {
+      "path": "cmd/simulator/main.go",
+      "sha256": "a28d789bbdaf2f9071eac20b44aa259e3d35902c0a32cb6771db9af2ab022676",
+      "disposition": "modeled",
+      "reason": "Only register/pure-validation/constructor hooks changed; Sakura validation precedes listen/state/token. Existing auth and other providers remain intact; the model is not misrepresented as old Actor or Admission coverage of flags.",
+      "models": [
+        {
+          "id": "SakuraStartupAdmission",
+          "properties": [
+            "ValidationPrecedesEffects",
+            "AcceptedConfigExact",
+            "DisabledNoSakura",
+            "EnabledOnlyAuthenticated",
+            "TokenOnlyAuthenticated",
+            "StartupComplete"
+          ],
+          "limits": "Parsed presence/validity admission and successful conditional provider startup only: invalid Sakura flags before listener/DB/token; default disabled may start general host. Assumes later infrastructure succeeds; not Go flag/regex parser, syscall/resource cleanup, full constructor atomicity, generic embedding authentication, token cryptography, Registry routing or DB lease proof."
+        }
+      ]
+    },
+    {
+      "path": "cmd/simulator/sakura_flags.go",
+      "sha256": "b468cc0ffca2ad6d8e8a68672d72dd0cbce89ed124b1c27c594d8f41b86198c7",
+      "disposition": "modeled",
+      "reason": "Pure new opt-in parser-value holder and validation reject orphan/missing/invalid values and unsafe enabled mode without effects. Actual text syntax is abstracted as supplied/valid, not assumed formally parsed.",
+      "models": [
+        {
+          "id": "SakuraStartupAdmission",
+          "properties": [
+            "AcceptedConfigExact",
+            "ValidAdmissionAvailable",
+            "NoEffectsOnRefusal",
+            "EnabledOnlyAuthenticated"
+          ],
+          "limits": "Parsed presence/validity admission and successful conditional provider startup only: invalid Sakura flags before listener/DB/token; default disabled may start general host. Assumes later infrastructure succeeds; not Go flag/regex parser, syscall/resource cleanup, full constructor atomicity, generic embedding authentication, token cryptography, Registry routing or DB lease proof."
+        }
+      ]
+    },
+    {
+      "path": "cmd/simulator/sakura_flags_test.go",
+      "sha256": "1402d39986fb9bf9c267172fb6540f06cb4923fcace1820edd3d38af272fbc13",
+      "disposition": "test-support",
+      "reason": "Real native SQLite/HTTP/flag/CLI acceptance and failure/repair counterpart only, not modeled implementation. New mandatory native two-CLI wrapper preserves all50 existing Conformance method AST bodies; private generated fixture credentials never become provider authority or SDK success claims.",
+      "models": []
+    },
+    {
+      "path": "cmd/simulator/sakura_integration_test.go",
+      "sha256": "e8619053eec42d34aae36d2988a8055a5be6a775f1a339482f82ebcc1d9d5830",
+      "disposition": "test-support",
+      "reason": "Real native SQLite/HTTP/flag/CLI acceptance and failure/repair counterpart only, not modeled implementation. New mandatory native two-CLI wrapper preserves all50 existing Conformance method AST bodies; private generated fixture credentials never become provider authority or SDK success claims.",
+      "models": []
+    },
+    {
+      "path": "docs/sakura-sdk-compatibility.md",
+      "sha256": "853d342ed9764d80730eab0ab146ac52d22067457921da88eef53539008f489a",
+      "disposition": "documentation",
+      "reason": "Documents explicit disabled-by-default Sakura Disk metadata subset, safe configured scope, exact limits and historical versus integrated verification, preserving all original rights. No fake VM/UI/S3 ObjectStorage or whole-constructor/refinement claim.",
+      "models": []
+    },
+    {
+      "path": "docs/sakura.md",
+      "sha256": "32db7f398eae923801cfee8ae26f623615e2af77657f4cde0e0f674bb54586c7",
+      "disposition": "documentation",
+      "reason": "Documents explicit disabled-by-default Sakura Disk metadata subset, safe configured scope, exact limits and historical versus integrated verification, preserving all original rights. No fake VM/UI/S3 ObjectStorage or whole-constructor/refinement claim.",
+      "models": []
+    },
+    {
+      "path": "formal/README.md",
+      "sha256": "17c53345916c6f0d49a81218924cfc09a54a1eff1172129654f7b89be7d2ac68",
+      "disposition": "documentation",
+      "reason": "Documents explicit disabled-by-default Sakura Disk metadata subset, safe configured scope, exact limits and historical versus integrated verification, preserving all original rights. No fake VM/UI/S3 ObjectStorage or whole-constructor/refinement claim.",
+      "models": []
+    },
+    {
+      "path": "formal/SakuraDiskAdmission.cfg",
+      "sha256": "57c55706f2f372771dc89e183982628e54ad417df487c24e5294c44fca66c2f7",
+      "disposition": "modeled",
+      "reason": "Registers the exact separately authored finite model/config, required invariants, unchanged finite domains and semantic negative controls. Scoped model execution is historical evidence, not a current integrated gate or implementation refinement.",
+      "models": [
+        {
+          "id": "SakuraDiskAdmission",
+          "properties": [
+            "MappedSubjectUsesExerciseIdentity",
+            "MappedRealmUsesCopiedHostConfig",
+            "NoDefaultActorOnExtractionFailure",
+            "WireHeadersDoNotMapAuthority",
+            "ActorBeforeDispatch",
+            "MarkerBeforeDispatch",
+            "NoUnauthorizedLookup",
+            "DeniedFrame",
+            "AdmissionBeforeLookup",
+            "UnsupportedNoMutation",
+            "FailureNoDisclosure",
+            "ActorFailureStatus",
+            "MarkerFailureStatus",
+            "ConcreteResult"
+          ],
+          "limits": "Validated common Actor maps ExerciseIdentity plus copied host Config before marker and lookup. Not token/context-key implementation, policy/regex/UTF8/JSON parsing (including exact no-icon sentinel), SQL/locking/DB lease, CLI startup or UI/SDK refinement."
+        }
+      ]
+    },
+    {
+      "path": "formal/SakuraDiskAdmission.tla",
+      "sha256": "fdd4b5bc9f22c58c6665fc6e1d44fe01d39e8506328bb0d39eae1bd640bbf9e2",
+      "disposition": "modeled",
+      "reason": "Registers the exact separately authored finite model/config, required invariants, unchanged finite domains and semantic negative controls. Scoped model execution is historical evidence, not a current integrated gate or implementation refinement.",
+      "models": [
+        {
+          "id": "SakuraDiskAdmission",
+          "properties": [
+            "MappedSubjectUsesExerciseIdentity",
+            "MappedRealmUsesCopiedHostConfig",
+            "NoDefaultActorOnExtractionFailure",
+            "WireHeadersDoNotMapAuthority",
+            "ActorBeforeDispatch",
+            "MarkerBeforeDispatch",
+            "NoUnauthorizedLookup",
+            "DeniedFrame",
+            "AdmissionBeforeLookup",
+            "UnsupportedNoMutation",
+            "FailureNoDisclosure",
+            "ActorFailureStatus",
+            "MarkerFailureStatus",
+            "ConcreteResult"
+          ],
+          "limits": "Validated common Actor maps ExerciseIdentity plus copied host Config before marker and lookup. Not token/context-key implementation, policy/regex/UTF8/JSON parsing (including exact no-icon sentinel), SQL/locking/DB lease, CLI startup or UI/SDK refinement."
+        }
+      ]
+    },
+    {
+      "path": "formal/SakuraDiskMetadata.cfg",
+      "sha256": "5b8dfc0d6c00e11d47b50321f28790081ca74e506cc4309ecf6b12a707e582d9",
+      "disposition": "modeled",
+      "reason": "Registers the exact separately authored finite model/config, required invariants, unchanged finite domains and semantic negative controls. Scoped model execution is historical evidence, not a current integrated gate or implementation refinement.",
+      "models": [
+        {
+          "id": "SakuraDiskMetadata",
+          "properties": [
+            "BindingFrozen",
+            "FailureFrame",
+            "PeerFrame",
+            "FreshCommittedID",
+            "AllocatorOnlyCreate",
+            "CreateExact",
+            "UpdateExact",
+            "DeleteExact",
+            "StoredIDsBound",
+            "ActiveQuota",
+            "QuotaRefusal",
+            "ReadSnapshot"
+          ],
+          "limits": "Abstract atomic metadata, immutable binding, issued-ID history, read and peer frames only. Not SQL/locking/crash/DB lease, concrete100 quota, timestamp/description/plan validation or physical storage/VM behavior; real native DB failure/refusal/restart tests are separate."
+        }
+      ]
+    },
+    {
+      "path": "formal/SakuraDiskMetadata.tla",
+      "sha256": "7bf2730f6b9db35ec50fc26622b8388ce0ceff8f84843faf554def85818a76a5",
+      "disposition": "modeled",
+      "reason": "Registers the exact separately authored finite model/config, required invariants, unchanged finite domains and semantic negative controls. Scoped model execution is historical evidence, not a current integrated gate or implementation refinement.",
+      "models": [
+        {
+          "id": "SakuraDiskMetadata",
+          "properties": [
+            "BindingFrozen",
+            "FailureFrame",
+            "PeerFrame",
+            "FreshCommittedID",
+            "AllocatorOnlyCreate",
+            "CreateExact",
+            "UpdateExact",
+            "DeleteExact",
+            "StoredIDsBound",
+            "ActiveQuota",
+            "QuotaRefusal",
+            "ReadSnapshot"
+          ],
+          "limits": "Abstract atomic metadata, immutable binding, issued-ID history, read and peer frames only. Not SQL/locking/crash/DB lease, concrete100 quota, timestamp/description/plan validation or physical storage/VM behavior; real native DB failure/refusal/restart tests are separate."
+        }
+      ]
+    },
+    {
+      "path": "formal/SakuraStartupAdmission.cfg",
+      "sha256": "224322c1848f30bfa8f66e03bffa21bfbe96157e2a8f326b0f4fccf149a73902",
+      "disposition": "modeled",
+      "reason": "Registers the exact separately authored finite model/config, required invariants, unchanged finite domains and semantic negative controls. Scoped model execution is historical evidence, not a current integrated gate or implementation refinement.",
+      "models": [
+        {
+          "id": "SakuraStartupAdmission",
+          "properties": [
+            "NoEffectsOnRefusal",
+            "ValidationPrecedesEffects",
+            "AcceptedConfigExact",
+            "ValidAdmissionAvailable",
+            "DisabledNoSakura",
+            "EnabledOnlyAuthenticated",
+            "SchemaRequiresDatabase",
+            "RegistrationRequiresSchema",
+            "TokenOnlyAuthenticated",
+            "StartupComplete"
+          ],
+          "limits": "Parsed presence/validity admission and successful conditional provider startup only: invalid Sakura flags before listener/DB/token; default disabled may start general host. Assumes later infrastructure succeeds; not Go flag/regex parser, syscall/resource cleanup, full constructor atomicity, generic embedding authentication, token cryptography, Registry routing or DB lease proof."
+        }
+      ]
+    },
+    {
+      "path": "formal/SakuraStartupAdmission.tla",
+      "sha256": "a8b62c2c7da6f72a1c8096b8ae774e51a9fa5d3df67ce1c6735b5392352f8fa7",
+      "disposition": "modeled",
+      "reason": "Registers the exact separately authored finite model/config, required invariants, unchanged finite domains and semantic negative controls. Scoped model execution is historical evidence, not a current integrated gate or implementation refinement.",
+      "models": [
+        {
+          "id": "SakuraStartupAdmission",
+          "properties": [
+            "NoEffectsOnRefusal",
+            "ValidationPrecedesEffects",
+            "AcceptedConfigExact",
+            "ValidAdmissionAvailable",
+            "DisabledNoSakura",
+            "EnabledOnlyAuthenticated",
+            "SchemaRequiresDatabase",
+            "RegistrationRequiresSchema",
+            "TokenOnlyAuthenticated",
+            "StartupComplete"
+          ],
+          "limits": "Parsed presence/validity admission and successful conditional provider startup only: invalid Sakura flags before listener/DB/token; default disabled may start general host. Assumes later infrastructure succeeds; not Go flag/regex parser, syscall/resource cleanup, full constructor atomicity, generic embedding authentication, token cryptography, Registry routing or DB lease proof."
+        }
+      ]
+    },
+    {
+      "path": "formal/models.json",
+      "sha256": "bdf7fe7755637cecd232cd47f2227da1f358b93be8b5a7f0a7d2472ecf47152a",
+      "disposition": "formal-infrastructure",
+      "reason": "Adds three Sakura models with literal required IDs/properties and all35 added control IDs. Preserves all main33 model objects, established197 controls, CFG grammar, tool pins, timeouts and single-removal rejection tests; no runtime exemption or weakened guard.",
+      "models": []
+    },
+    {
+      "path": "internal/sakura/iaas/disk_http.go",
+      "sha256": "a9982a64904c8f859562ae8a9383ab847edc456cccfd7d321e643a9ef0f78428",
+      "disposition": "modeled",
+      "reason": "Own native HTTP admission checks trusted actor before public dummy marker, route/body and saved-resource lookup. JSON/body/query/ID/neutral-marker validation remains explicitly native-tested rather than falsely proven by the admission abstraction.",
+      "models": [
+        {
+          "id": "SakuraDiskAdmission",
+          "properties": [
+            "ActorBeforeDispatch",
+            "MarkerBeforeDispatch",
+            "AdmissionBeforeLookup",
+            "NoUnauthorizedLookup",
+            "DeniedFrame",
+            "FailureNoDisclosure",
+            "ConcreteResult"
+          ],
+          "limits": "Validated common Actor maps ExerciseIdentity plus copied host Config before marker and lookup. Not token/context-key implementation, policy/regex/UTF8/JSON parsing (including exact no-icon sentinel), SQL/locking/DB lease, CLI startup or UI/SDK refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/sakura/iaas/disk_http_test.go",
+      "sha256": "1cf21b4e4ec3bd3a23b169f6e8e8f8fbb4b017ef9ebcd2b0a6b5ada3d5f04196",
+      "disposition": "test-support",
+      "reason": "Real native SQLite/HTTP/flag/CLI acceptance and failure/repair counterpart only, not modeled implementation. New mandatory native two-CLI wrapper preserves all50 existing Conformance method AST bodies; private generated fixture credentials never become provider authority or SDK success claims.",
+      "models": []
+    },
+    {
+      "path": "internal/sakura/iaas/disk_sdk_neutral_icon_test.go",
+      "sha256": "bf079d676f4bd835c41cc1794193999c764f1cc19ea8a197ddb495c4fc8ce367",
+      "disposition": "test-support",
+      "reason": "Real native SQLite/HTTP/flag/CLI acceptance and failure/repair counterpart only, not modeled implementation. New mandatory native two-CLI wrapper preserves all50 existing Conformance method AST bodies; private generated fixture credentials never become provider authority or SDK success claims.",
+      "models": []
+    },
+    {
+      "path": "internal/sakura/iaas/disk_store.go",
+      "sha256": "f09139d416b4b055c589f0a35675591a337890d9349e86d3912df0544348706f",
+      "disposition": "modeled",
+      "reason": "Own fixed-scope Disk metadata state persists actual rows, monotonic issued IDs and atomic create/update/delete refusal. Native tests cover real SQL ACK/rollback/corruption/reopen independently of the bounded model.",
+      "models": [
+        {
+          "id": "SakuraDiskMetadata",
+          "properties": [
+            "BindingFrozen",
+            "FailureFrame",
+            "PeerFrame",
+            "FreshCommittedID",
+            "AllocatorOnlyCreate",
+            "CreateExact",
+            "UpdateExact",
+            "DeleteExact",
+            "ReadSnapshot"
+          ],
+          "limits": "Abstract atomic metadata, immutable binding, issued-ID history, read and peer frames only. Not SQL/locking/crash/DB lease, concrete100 quota, timestamp/description/plan validation or physical storage/VM behavior; real native DB failure/refusal/restart tests are separate."
+        }
+      ]
+    },
+    {
+      "path": "internal/sakura/iaas/disk_store_test.go",
+      "sha256": "c9800576fe32d1898428da617c66758bfa66214f97bacc65ca66f48991873fc5",
+      "disposition": "test-support",
+      "reason": "Real native SQLite/HTTP/flag/CLI acceptance and failure/repair counterpart only, not modeled implementation. New mandatory native two-CLI wrapper preserves all50 existing Conformance method AST bodies; private generated fixture credentials never become provider authority or SDK success claims.",
+      "models": []
+    },
+    {
+      "path": "internal/sakura/provider.go",
+      "sha256": "bdacc58d074d0889e351a7d01d32e27928ae803260d8462731cbdf9daea1bf9c",
+      "disposition": "modeled",
+      "reason": "Own borrowed-DB factory uses actual private typed Actor getter; copies fixed Config labels and maps ExerciseIdentity, not credential role/header claims, to leaf owner. Store constructor binding/refusal and generic source validation are separate native evidence.",
+      "models": [
+        {
+          "id": "SakuraDiskAdmission",
+          "properties": [
+            "MappedSubjectUsesExerciseIdentity",
+            "MappedRealmUsesCopiedHostConfig",
+            "NoDefaultActorOnExtractionFailure",
+            "WireHeadersDoNotMapAuthority",
+            "ActorBeforeDispatch"
+          ],
+          "limits": "Validated common Actor maps ExerciseIdentity plus copied host Config before marker and lookup. Not token/context-key implementation, policy/regex/UTF8/JSON parsing (including exact no-icon sentinel), SQL/locking/DB lease, CLI startup or UI/SDK refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/sakura/provider_test.go",
+      "sha256": "f1d5cd66ff347d71e774bb44be3a4e2de700c00230cb4a2e2e3c36bb9b366a6e",
+      "disposition": "test-support",
+      "reason": "Real native SQLite/HTTP/flag/CLI acceptance and failure/repair counterpart only, not modeled implementation. New mandatory native two-CLI wrapper preserves all50 existing Conformance method AST bodies; private generated fixture credentials never become provider authority or SDK success claims.",
+      "models": []
+    },
+    {
+      "path": "internal/server/sakura_provider.go",
+      "sha256": "28840bcb55df1e5d5fd916692068d724c78f9bacb1ae13ca9a394f130f1febb4",
+      "disposition": "modeled",
+      "reason": "Validated copied optional configuration enables only the declared metadata subset. Default nil scope leaves Sakura capabilities absent; no implicit owner, credential, UI/SDK completeness or physical readiness is advertised. Conditional configuration corresponds to startup admission; strings/capability projection and exact bounds are native checks.",
+      "models": [
+        {
+          "id": "SakuraStartupAdmission",
+          "properties": [
+            "DisabledNoSakura",
+            "AcceptedConfigExact"
+          ],
+          "limits": "Parsed presence/validity admission and successful conditional provider startup only: invalid Sakura flags before listener/DB/token; default disabled may start general host. Assumes later infrastructure succeeds; not Go flag/regex parser, syscall/resource cleanup, full constructor atomicity, generic embedding authentication, token cryptography, Registry routing or DB lease proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/sakura_provider_test.go",
+      "sha256": "200ae93ff011c021fb81c5ee118e53d429bdbe23f103e0ee8a73e7b8aae87001",
+      "disposition": "test-support",
+      "reason": "Real native SQLite/HTTP/flag/CLI acceptance and failure/repair counterpart only, not modeled implementation. New mandatory native two-CLI wrapper preserves all50 existing Conformance method AST bodies; private generated fixture credentials never become provider authority or SDK success claims.",
+      "models": []
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "3f4618995bcc5edcb49518b8fbcb31086503d2d793c94fc97bb54d05c0e51945",
+      "disposition": "modeled",
+      "reason": "Only optional constructor and Registry hook plus truthful capability wrapper changed. NewWithProviders opens core DB before optional Sakura construction; nil scope does not construct/register Sakura. Shared composition binding is success-path only and does not claim all-provider atomic rollback or authentication of raw trusted embeddings.",
+      "models": [
+        {
+          "id": "SakuraStartupAdmission",
+          "properties": [
+            "DisabledNoSakura",
+            "SchemaRequiresDatabase",
+            "RegistrationRequiresSchema"
+          ],
+          "limits": "Parsed presence/validity admission and successful conditional provider startup only: invalid Sakura flags before listener/DB/token; default disabled may start general host. Assumes later infrastructure succeeds; not Go flag/regex parser, syscall/resource cleanup, full constructor atomicity, generic embedding authentication, token cryptography, Registry routing or DB lease proof."
+        }
+      ]
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "1d163b3d80d304983ad1c88f666b37c29b2631c7b9a5f7ad99f89ff5d18ab51a",
+      "disposition": "formal-infrastructure",
+      "reason": "Adds three Sakura models with literal required IDs/properties and all35 added control IDs. Preserves all main33 model objects, established197 controls, CFG grammar, tool pins, timeouts and single-removal rejection tests; no runtime exemption or weakened guard.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "1d9c8ca1db063a8b85261cac7a054798e0d0a3686cee287fca92341083b01b8e",
+      "disposition": "formal-infrastructure",
+      "reason": "Adds three Sakura models with literal required IDs/properties and all35 added control IDs. Preserves all main33 model objects, established197 controls, CFG grammar, tool pins, timeouts and single-removal rejection tests; no runtime exemption or weakened guard.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/check.py",
+      "sha256": "202ffa3a26831aae31f240a6f4563c9f6dc1c4cc497c42c7167a6fa6a3a0d041",
+      "disposition": "test-support",
+      "reason": "Real native SQLite/HTTP/flag/CLI acceptance and failure/repair counterpart only, not modeled implementation. New mandatory native two-CLI wrapper preserves all50 existing Conformance method AST bodies; private generated fixture credentials never become provider authority or SDK success claims.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/sakura_cli.py",
+      "sha256": "2378c6c6b716546f2902771da808c0f5ae860c540649b7455e76025fffe3ff43",
+      "disposition": "test-support",
+      "reason": "Real native SQLite/HTTP/flag/CLI acceptance and failure/repair counterpart only, not modeled implementation. New mandatory native two-CLI wrapper preserves all50 existing Conformance method AST bodies; private generated fixture credentials never become provider authority or SDK success claims.",
       "models": []
     }
   ]

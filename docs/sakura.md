@@ -97,16 +97,23 @@ credentials, default endpoint rewriting, retries, waiters or real-cloud behavior
 The initial real SDK501 for its no-icon default was preserved before the narrow
 compatibility fix. No console materials or real cloud resources were used.
 
-The registered `SakuraDiskMetadata` and `SakuraDiskAdmission` finite models add
-22 intended controls to the prior197 (35 baselines +219 controls =254 executions).
+The registered `SakuraDiskMetadata` and `SakuraDiskAdmission` add22 controls;
+`SakuraStartupAdmission` adds13 more (36 baselines +232 controls =268 executions).
+All main33 models/197 controls and both earlier Sakura model objects are retained.
 The author previously ran the two scoped baselines and22 controls. A complete
-immutable254-case execution on the integrated revision is still required.
+immutable268-case execution on the integrated revision is still required.
 Metadata models abstract atomic resource/allocator/binding/peer frames. Admission
 models validated common Actor mapping, fixed configured realm, dummy-marker and
-request/lookup ordering. They do not prove private context keys, host token
-cryptography, CLI flag parsing/enablement, exact JSON neutral markers, Registry
-composition, SQLite/locking/crashes, DB leases, VM/storage reality, actual100 quota
-or Go refinement. Native tests separately cover those implemented boundaries;
+request/lookup ordering. The Startup model separately checks abstract parsed presence/validity, explicit
+opt-in/authenticated-mode admission before effects, and the successful optional
+construction/registration sequence. Its initial TLC baseline stopped with an
+enumeration error before states; the same324-input finite domain was rewritten
+as explicit membership. Corrected source passed independent SANY, baseline and
+all13 named controls; integrated268-case execution is still required. The models do
+not prove private context keys, host token cryptography, concrete Go flag/regex/
+UTF8 parsing, exact JSON neutral markers, full Registry composition, later startup
+failures or cleanup, constructor atomicity, SQLite/locking/crashes, DB leases,
+VM/storage reality, actual100 quota or Go refinement. Native tests separately cover those implemented boundaries;
 unimplemented behavior does not become supported through a model registration.
 
 Public primary API references: [Disk API1.1](https://manual.sakura.ad.jp/cloud-api/1.1/disk/)

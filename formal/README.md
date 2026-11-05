@@ -1,14 +1,20 @@
 # Finite state model
 
-Current registry: 35 models / 219 literal-protected controls
-(254 required executions). All previous33 entries, TLA/CFG bytes, properties
-and197 controls are preserved. SakuraDiskMetadata adds13 safety properties and10
+Current registry: 36 models / 232 literal-protected controls
+(268 required executions). All main33 entries, TLA/CFG bytes, properties
+and197 controls are preserved, as are the two prior Sakura entries/22 controls. SakuraDiskMetadata adds13 safety properties and10
 controls for bounded metadata/allocator/binding/peer frames. SakuraDiskAdmission
 adds15 properties and12 controls for validated Actor-to-fixed-config mapping and
 HTTP admission/lookup ordering. The author previously ran these two baselines and
-22 controls; current integrated immutable254-case execution is still pending.
+22 controls; current integrated immutable268-case execution is still pending.
+SakuraStartupAdmission separately adds11 properties/13 controls for parsed flag
+admission before host effects and the successful optional provider startup path.
+Its initial baseline stopped before states with a TLC enumeration error; an
+equivalent finite membership correction preserves324 input valuations. The
+corrected source then passed independent SANY, baseline and all13 named controls;
+that scoped result is not the integrated268-case gate. This is not an infrastructure-failure/cleanup or constructor-atomicity model.
 See [Sakura boundaries and native correspondence](../docs/sakura.md). These models
-do not prove CLI flag parsing, DB leases, Icon resources, SQL/locking, VM/storage
+do not prove Go flag-parser/string validation refinement, DB leases, Icon resources, SQL/locking, VM/storage
 reality or Go refinement. Existing native/SDK evidence and current global gates
 must be reported separately; registration itself is not an execution pass.
 The prior RESTRouteMatching, RESTProxyEventBoundary and NativeWireProjection
@@ -21,7 +27,7 @@ finite models do not prove Go/SQL/HTTP/UI refinement or complete cloud compatibi
 
 Legacy integration sections below retain historical counts and status statements
 for traceability. Their word “current” refers to the recorded integration, not
-today's registry. The authoritative current inventory is the 35/219 registry
+today's registry. The authoritative current inventory is the 36/232 registry
 above; proof claims always require evidence for the exact revision.
 
 `ObjectStore.tla` models two buckets and two keys, shared object ownership, create/put/delete transitions, and an abstract identity decision `allow /\ ~deny`. `ObjectStore.cfg` checks type correctness, no orphan objects, no unauthorized mutation, and explicit-deny precedence.
@@ -340,7 +346,7 @@ models do not thereby acquire serialization guarantees.
 The baseline completed1,729 distinct states; six semantic controls each exited12
 with the named expected invariant and a real transition trace. FirstBad identifies
 the partial-prefix negative only, not a new native implementation. These scoped
-results are independent model evidence, not the full230-case/current-HEAD gate
+results are independent model evidence, not the prior full230-case gate, the new268-case exact-HEAD gate,
 or a refinement proof. The entire original30/175 inventory, timeouts and tool pin
 remain unchanged. All three exact native source scopes and all new properties
 and control IDs are protected by the loader and failure tests.

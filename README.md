@@ -245,8 +245,8 @@ not binary runtime dependencies. Regeneration must preserve locks and original
 rights: [console](tools/console/README.md), [Scalar](tools/scalar/README.md),
 [Python/WASI runtime](tools/python/README.md).
 
-The registry contains 35 finite models and 219 deliberate defect controls
-(254 required model/check executions), including two Sakura metadata/admission
+The registry contains 36 finite models and 232 deliberate defect controls
+(268 required model/check executions), including three Sakura metadata/admission/startup
 models. Registration is not an integrated-revision execution receipt. The new IAM scenario checks two requests
 from each of four reachable seeds. A broader four-request trial timed out and
 is not claimed as verified. TLC examines bounded safety properties and checks

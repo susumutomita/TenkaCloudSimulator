@@ -3315,6 +3315,177 @@
           "expect_invariant": "MappedSubjectUsesExerciseIdentity"
         }
       ]
+    },
+    {
+      "id": "SakuraStartupAdmission",
+      "model": "formal/SakuraStartupAdmission.tla",
+      "config": "formal/SakuraStartupAdmission.cfg",
+      "bounds": "One startup, four immutable named scope-presence/validity slots (valid subset of present), enabled/unsafe Boolean modes; parsed validation followed by listener/database/provider/token success stages. No loops beyond stuttering.",
+      "properties": [
+        "TypeOK",
+        "NoEffectsOnRefusal",
+        "ValidationPrecedesEffects",
+        "AcceptedConfigExact",
+        "ValidAdmissionAvailable",
+        "DisabledNoSakura",
+        "EnabledOnlyAuthenticated",
+        "SchemaRequiresDatabase",
+        "RegistrationRequiresSchema",
+        "TokenOnlyAuthenticated",
+        "StartupComplete"
+      ],
+      "limits": "Pure parsed-flag admission and startup order abstraction only. Absent fields have empty invalid defaults; explicit empty values count as supplied. Default disabled may create general host DB/listener/token (token skipped when unsafe) but no Sakura schema/provider. Assumes later infrastructure steps succeed; does not prove full constructor atomicity, listener/database/token syscalls, failures/cleanup, flag parser or regex/UTF8 refinement, host authentication, token cryptography, DB lease, SDK/HTTP/UI or Go implementation refinement. Shared server.go scope covers only optional provider setup/registration under validated scope; other providers/auth/routing and all failure rollback are excluded.",
+      "source_scope": [
+        "cmd/simulator/sakura_flags.go",
+        "cmd/simulator/main.go",
+        "internal/server/server.go",
+        "internal/server/sakura_provider.go"
+      ],
+      "mutants": [
+        {
+          "id": "IgnoreOrphanScope",
+          "edits": [
+            {
+              "old": "Ready == IF enabled THEN ~unsafe /\\ valid=Fields\n         ELSE present={}",
+              "new": "Ready == IF enabled THEN ~unsafe /\\ valid=Fields\n         ELSE TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AcceptedConfigExact"
+        },
+        {
+          "id": "PermitUnsafeEnabled",
+          "edits": [
+            {
+              "old": "Ready == IF enabled THEN ~unsafe /\\ valid=Fields",
+              "new": "Ready == IF enabled THEN valid=Fields",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AcceptedConfigExact"
+        },
+        {
+          "id": "DefaultMissingScope",
+          "edits": [
+            {
+              "old": "Ready == IF enabled THEN ~unsafe /\\ valid=Fields",
+              "new": "Ready == IF enabled THEN ~unsafe /\\ (valid \\cup (Fields \\ present))=Fields",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AcceptedConfigExact"
+        },
+        {
+          "id": "IgnoreInvalidScopeValue",
+          "edits": [
+            {
+              "old": "Ready == IF enabled THEN ~unsafe /\\ valid=Fields",
+              "new": "Ready == IF enabled THEN ~unsafe",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AcceptedConfigExact"
+        },
+        {
+          "id": "RejectValidEnabled",
+          "edits": [
+            {
+              "old": "Ready == IF enabled THEN ~unsafe /\\ valid=Fields",
+              "new": "Ready == IF enabled THEN FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ValidAdmissionAvailable"
+        },
+        {
+          "id": "OpenListenerBeforeCheck",
+          "edits": [
+            {
+              "old": "UNCHANGED <<listener,database,schema,registered,token>>",
+              "new": "listener'=TRUE /\\ UNCHANGED <<database,schema,registered,token>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoEffectsOnRefusal"
+        },
+        {
+          "id": "OpenDatabaseBeforeCheck",
+          "edits": [
+            {
+              "old": "UNCHANGED <<listener,database,schema,registered,token>>",
+              "new": "database'=TRUE /\\ UNCHANGED <<listener,schema,registered,token>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoEffectsOnRefusal"
+        },
+        {
+          "id": "CreateTokenBeforeCheck",
+          "edits": [
+            {
+              "old": "UNCHANGED <<listener,database,schema,registered,token>>",
+              "new": "token'=TRUE /\\ UNCHANGED <<listener,database,schema,registered>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoEffectsOnRefusal"
+        },
+        {
+          "id": "ConstructBeforeDatabase",
+          "edits": [
+            {
+              "old": "/\\ phase'=(IF Ready THEN \"listener\" ELSE \"refused\")",
+              "new": "/\\ phase'=(IF Ready THEN \"provider\" ELSE \"refused\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SchemaRequiresDatabase"
+        },
+        {
+          "id": "RegisterDisabled",
+          "edits": [
+            {
+              "old": "/\\ schema'=enabled /\\ registered'=enabled",
+              "new": "/\\ schema'=TRUE /\\ registered'=TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DisabledNoSakura"
+        },
+        {
+          "id": "SkipEnabledSchema",
+          "edits": [
+            {
+              "old": "/\\ schema'=enabled /\\ registered'=enabled",
+              "new": "/\\ schema'=FALSE /\\ registered'=enabled",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RegistrationRequiresSchema"
+        },
+        {
+          "id": "SkipEnabledRegistration",
+          "edits": [
+            {
+              "old": "/\\ schema'=enabled /\\ registered'=enabled",
+              "new": "/\\ schema'=enabled /\\ registered'=FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StartupComplete"
+        },
+        {
+          "id": "CreateTokenWhenUnsafe",
+          "edits": [
+            {
+              "old": "/\\ token' = ~unsafe /\\ phase'=\"done\"",
+              "new": "/\\ token'=TRUE /\\ phase'=\"done\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TokenOnlyAuthenticated"
+        }
+      ]
     }
   ]
 }
