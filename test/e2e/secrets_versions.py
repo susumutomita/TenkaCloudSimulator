@@ -139,6 +139,49 @@ def run():
                     next_token = response.get("NextToken", "")
                     assert len(ids) <= 3
                 assert ids == [a, b, c] and len(set(ids)) == 3
+                # Use the actual served static request unchanged. It deliberately
+                # names this fixture, not a replaced/forged live template.
+                docs_request = urllib.request.Request(endpoint + "/_simulator/docs/openapi.json",
+                    headers={"X-Simulator-Token": token})
+                with HTTP.open(docs_request, timeout=5) as response:
+                    assert response.status == 200
+                    spec = json.load(response)
+                root = spec["paths"]["/"]["post"]
+                template = root["requestBody"]["content"]["application/x-amz-json-1.1"]["examples"]["ListSecretVersionIds"]["value"]
+                assert template == {"SecretId": name, "IncludeDeprecated": True, "MaxResults": 2}
+                schema = spec["components"]["schemas"]["SecretsListSecretVersionIdsInput"]
+                assert schema["required"] == ["SecretId"] and schema["additionalProperties"] is False
+                assert set(schema["properties"]) == {"SecretId", "IncludeDeprecated", "MaxResults", "NextToken"}
+                reference_request = urllib.request.Request(endpoint + "/", method="POST",
+                    data=json.dumps(template, separators=(",", ":")).encode(),
+                    headers={"X-Simulator-Token": token, "Content-Type": "application/x-amz-json-1.1",
+                             "X-Amz-Target": "secretsmanager.ListSecretVersionIds"})
+                with HTTP.open(reference_request, timeout=5) as response:
+                    assert response.status == 200
+                    assert response.headers.get_content_type() == "application/x-amz-json-1.1"
+                    reference = json.load(response)
+                assert reference["ARN"] == arn and reference["Name"] == name
+                assert [v["VersionId"] for v in reference["Versions"]] == [a, b]
+                assert "VersionStages" not in reference["Versions"][0]
+                assert reference["Versions"][1]["VersionStages"] == ["AWSPREVIOUS"]
+                assert reference["NextToken"] and "DUMMY-version-value" not in str(reference)
+                sdk_by_id = {v["VersionId"]: v for v in default["Versions"] + first_page["Versions"]}
+                for item in reference["Versions"]:
+                    assert set(item) <= {"VersionId", "VersionStages", "CreatedDate"}
+                    assert item["CreatedDate"] == sdk_by_id[item["VersionId"]]["CreatedDate"].timestamp()
+                bad_reference = dict(template, SecretId="NOT_CREATED_STATIC_PLACEHOLDER")
+                bad_request = urllib.request.Request(endpoint + "/", method="POST",
+                    data=json.dumps(bad_reference).encode(),
+                    headers={"X-Simulator-Token": token, "Content-Type": "application/x-amz-json-1.1",
+                             "X-Amz-Target": "secretsmanager.ListSecretVersionIds"})
+                try:
+                    HTTP.open(bad_request, timeout=5)
+                except urllib.error.HTTPError as exc:
+                    assert exc.code == 400 and json.load(exc)["__type"] == "ResourceNotFoundException"
+                else:
+                    raise AssertionError("Unsubstituted nonexistent selector unexpectedly succeeded")
+                # An actual served response example remains explanatory only;
+                # no response example is accepted as a native request or live data.
                 expect_error("InvalidNextTokenException", lambda: first.list_secret_version_ids(SecretId=arn, NextToken=cursor))
                 expect_error("InvalidNextTokenException", lambda: peer.list_secret_version_ids(SecretId=name, IncludeDeprecated=True, NextToken=cursor))
                 expect_error("InvalidNextTokenException", lambda: west.list_secret_version_ids(SecretId=name, IncludeDeprecated=True, NextToken=cursor))
@@ -196,7 +239,7 @@ def run():
                 sdk.close()
     for _, counts in tracked:
         assert counts["calls"] > 0 and counts["calls"] == counts["sends"] == counts["responses"], "Unbalanced actual SDK transport"
-    report = {"clients": [counts for _, counts in tracked], "calls": sum(x["calls"] for _, x in tracked), "sends": sum(x["sends"] for _, x in tracked), "responses": sum(x["responses"] for _, x in tracked), "officialSDK": "boto3", "scope": "2localCLI/DB/token authorities, metadata-only version listing, IAM role Allow/Deny, region/cursor/restart/recreation/cleanup"}
+    report = {"clients": [counts for _, counts in tracked], "calls": sum(x["calls"] for _, x in tracked), "sends": sum(x["sends"] for _, x in tracked), "responses": sum(x["responses"] for _, x in tracked), "officialSDK": "boto3", "servedStaticExampleHTTP": 1, "servedPlaceholderRefusalHTTP": 1, "scope": "2localCLI/DB/token authorities, metadata-only version listing, IAM role Allow/Deny, region/cursor/restart/recreation/cleanup"}
     (REPORTS / "secrets-versions-sdk.json").write_text(json.dumps(report, indent=2) + "\n")
     print("Secrets versions real official SDK/2CLI/metadata/IAM/cursor/restart/cleanup PASS")
 
