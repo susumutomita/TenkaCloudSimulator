@@ -1,6 +1,6 @@
 # Secrets Manager: local training subset
 
-> Main refresh candidate: current mainfcf8 (KMS, S3 regression and login improvements merged) plus Secrets18aa is source-prepared only. Every validation receipt below describes the original isolated62ba/runtime source; this new21-model/108-control,29-case integrated candidate has not yet run Go, SDK, UI, formal, coverage or hosted CI.
+> Main refresh: current mainfcf8 (KMS, S3 regression and login improvements merged) plus Secrets18aa retains21 models/108 controls and29 mandatory cases. Historical validation receipts below describe the original isolated62ba/runtime source. Current local focused checks and exact-HEAD whole hosted CI are separate evidence; old results never establish the new union automatically.
 
 Seven native Secrets Manager operations, the Cloudscape console, SDK clients and
 the embedded API reference use the same SQLite state. This is an independent,
