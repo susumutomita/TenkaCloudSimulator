@@ -121,6 +121,14 @@ def _run():
                         expect(page.get_by_role('button',name='Refresh tables',exact=True)).to_be_enabled()
                         expect(page.get_by_text('DynamoDB request failed',exact=True)).to_have_count(0)
 
+                        # Language and provider-scoped service search are presentation only.
+                        before_search=list(calls);page.get_by_role('button',name='Services',exact=True).click()
+                        page.get_by_role('searchbox',name='Search services in AWS',exact=True).fill('dynamo')
+                        locale('ja');expect(page.get_by_role('searchbox',name='サービスを検索: AWS',exact=True)).to_have_value('dynamo')
+                        page.get_by_role('searchbox',name='サービスを検索: AWS',exact=True).fill('ダイナモDB')
+                        expect(page.get_by_role('menuitem',name='DynamoDB',exact=True)).to_be_visible();expect(page.get_by_role('menuitem')).to_have_count(1)
+                        page.get_by_role('searchbox',name='サービスを検索: AWS',exact=True).press('Escape');expect(page.get_by_role('button',name='サービス',exact=True)).to_be_focused()
+                        locale('en');assert calls==before_search,'Language/search changed native request authority or data';audit('language-service-search')
                         # Cancel while a real list request is pending: no stuck loading or write.
                         held=[]
                         def hold_list(route):
@@ -163,6 +171,21 @@ def _run():
                         page.get_by_role('button',name='Create item',exact=True).click();duplicate=json.dumps(raw)[:-1]+',"payload":{"S":"duplicate must fail"}}';page.get_by_label('Item JSON',exact=True).fill(duplicate);duplicate_error=native('Create item','PutItem',status=400);assert duplicate_error['__type'].endswith('#ValidationException')
                         assert wire(own.get_item(TableName=name,Key=key)['Item'])==raw;page.get_by_role('button',name='Cancel',exact=True).click()
                         keys();native('Get item','GetItem');expect(page.get_by_label('Returned item JSON',exact=True)).not_to_have_value('');assert json.loads(page.get_by_label('Returned item JSON',exact=True).input_value())==wire(own.get_item(TableName=name,Key=key)['Item']);audit('item-returned')
+                        # Real region and principal transitions must discard displayed
+                        # items and dirty drafts without discarding native stored data.
+                        page.get_by_role('button',name='us-east-1',exact=True).click();page.get_by_role('menuitem',name='us-west-2',exact=True).click()
+                        expect(page.get_by_role('button',name='Refresh tables',exact=True)).to_be_enabled();expect(page.get_by_role('link',name=name,exact=True)).to_have_count(0);expect(page.get_by_label('Returned item JSON',exact=True)).to_have_count(0)
+                        west=client(a,region='us-west-2');assert name not in west.list_tables()['TableNames'];assert wire(own.get_item(TableName=name,Key=key)['Item'])==raw
+                        page.get_by_role('button',name='us-west-2',exact=True).click();page.get_by_role('menuitem',name='us-east-1',exact=True).click();expect(page.get_by_role('button',name='Refresh tables',exact=True)).to_be_enabled()
+                        page.get_by_role('link',name=name,exact=True).click();page.get_by_role('tab',name='Explore table items',exact=True).click();expect(page.get_by_label(pk+' ('+kind+')',exact=True)).to_have_value('');keys();native('Get item','GetItem')
+                        page.get_by_role('button',name='Create item',exact=True).click();page.get_by_label('Item JSON',exact=True).fill(json.dumps({**raw,'payload':{'S':'must reset after principal change'}}))
+                        before_scope_writes=calls.count('PutItem')
+                        def identity(principal):
+                            page.get_by_role('button',name='Account menu',exact=True).click();page.get_by_role('menuitem',name='Choose identity',exact=True).click()
+                            dialog=page.get_by_role('dialog');dialog.get_by_label('Principal name',exact=True).fill(principal);dialog.get_by_role('button',name='Choose identity',exact=True).click()
+                            expect(page.get_by_role('button',name='Refresh tables',exact=True)).to_be_enabled();expect(page.get_by_label('Item JSON',exact=True)).to_have_count(0);expect(page.get_by_label('Returned item JSON',exact=True)).to_have_count(0)
+                        identity('ddb-console-reader');page.get_by_role('link',name=name,exact=True).click();page.get_by_role('tab',name='Explore table items',exact=True).click();expect(page.get_by_label(pk+' ('+kind+')',exact=True)).to_have_value('');keys();native('Get item','GetItem');assert json.loads(page.get_by_label('Returned item JSON',exact=True).input_value())==raw
+                        identity('simulator-admin');page.get_by_role('link',name=name,exact=True).click();page.get_by_role('tab',name='Explore table items',exact=True).click();expect(page.get_by_label(pk+' ('+kind+')',exact=True)).to_have_value('');keys();native('Get item','GetItem');assert calls.count('PutItem')==before_scope_writes;assert wire(own.get_item(TableName=name,Key=key)['Item'])==raw;audit('scope-restored')
                         page.get_by_label(pk+' ('+kind+')',exact=True).fill('different' if kind=='S' else '3' if kind=='N' else 'Aw==');expect(page.get_by_label('Returned item JSON',exact=True)).to_have_count(0);expect(page.get_by_role('button',name='Delete item',exact=True)).to_have_count(0)
                         keys();native('Get item','GetItem');page.get_by_role('button',name='Delete item',exact=True).click();expect(page.get_by_role('dialog')).to_be_visible();page.keyboard.press('Escape');expect(page.get_by_role('dialog')).to_have_count(0);expect(page.get_by_role('button',name='Delete item',exact=True)).to_be_focused();assert calls.count('DeleteItem')==0
                         page.get_by_role('button',name='Delete item',exact=True).click();page.get_by_label('Type delete to confirm',exact=True).fill('delete');native('Delete','DeleteItem',page.get_by_role('dialog'))
@@ -194,7 +217,7 @@ def _run():
                         assert len(request_records)==len(calls) and len(responses)+1==len(calls)
                         assert calls.count('CreateTable')==1 and calls.count('DeleteTable')==1 and calls.count('DeleteItem')==1 and calls.count('PutItem')==3
                         assert all(status==200 or op=='PutItem' and status==400 for op,status in responses);assert not errors and not outside
-                        flows.append({'width':width,'keyType':kind,'sortKey':sort,'partitionKeyName':pk,'operations':sorted(set(calls)),'postACKReadAbort':1,'readRetryDidNotRepeatPut':True,'conditionalAndDuplicateRefused':True,'cancelNoMutation':True,'reader403NoMutation':True,'keyChangeClearsOldResult':True,'keyboardEnterAndEscapeFocus':True,'expectedOldViewStartupAbort':len(startup),'signalObservations':observed})
+                        flows.append({'width':width,'keyType':kind,'sortKey':sort,'partitionKeyName':pk,'operations':sorted(set(calls)),'postACKReadAbort':1,'readRetryDidNotRepeatPut':True,'conditionalAndDuplicateRefused':True,'cancelNoMutation':True,'reader403NoMutation':True,'keyChangeClearsOldResult':True,'keyboardEnterAndEscapeFocus':True,'regionAndPrincipalReset':True,'localizedServiceSearchNoNativeCalls':True,'expectedOldViewStartupAbort':len(startup),'signalObservations':observed})
                         context.close();contexts.remove(context);peer.delete_table(TableName=name)
                     assert own.list_tables()['TableNames']==[] and peer.list_tables()['TableNames']==[];assert SEEN==OPS;assert COUNTS['calls']>0 and COUNTS['calls']==COUNTS['sends']==COUNTS['responses']
                     report={'actualEmbeddedUI':True,'twoCLIsDBTokens':True,'flows':flows,'SDKCounts':COUNTS,'axeStates':audits,'foreignToken401':True,'peerPreserved':True,'outsideRequests':0,'pageErrors':0,'cleanup':'DELETED','actualAWS':False};(REPORTS/'dynamodb-console.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report))
