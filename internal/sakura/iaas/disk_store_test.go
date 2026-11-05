@@ -5,9 +5,11 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"math"
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/susumutomita/TenkaCloudSimulator/internal/core"
 )
@@ -420,5 +422,181 @@ func TestDiskConcurrentLastSlot(t *testing.T) {
 	var next int64
 	if e = db.QueryRow("SELECT next_id FROM sakura_disk_scope").Scan(&next); e != nil || next != 101 {
 		t.Fatal(next, e)
+	}
+}
+
+func TestDiskScopeSchemaCounterAndForeignKeyRefusals(t *testing.T) {
+	s, db, _ := fixture(t)
+	d := mustCreate(t, s, "retained")
+	before := frame(t, db)
+	for _, cfg := range []Config{{}, {" practice", testConfig.Project, testConfig.Zone, testConfig.Owner}, {testConfig.Environment, testConfig.Project, testConfig.Zone, "bad\nowner"}} {
+		if _, e := NewDiskStore(db, cfg); !errors.Is(e, ErrInvalid) {
+			t.Fatal(e)
+		}
+		if frame(t, db) != before {
+			t.Fatal("invalid constructor adopted state")
+		}
+	}
+	exec(t, db, "PRAGMA foreign_keys=OFF")
+	if _, e := NewDiskStore(db, testConfig); !errors.Is(e, ErrScope) {
+		t.Fatal(e)
+	}
+	exec(t, db, "PRAGMA foreign_keys=ON")
+	if frame(t, db) != before {
+		t.Fatal("foreign key refusal changed state")
+	}
+	// Missing binding columns are infrastructure faults, not caller denial or adoption.
+	exec(t, db, "ALTER TABLE sakura_disk_scope RENAME COLUMN owner TO missing_owner")
+	if _, e := NewDiskStore(db, testConfig); e == nil || errors.Is(e, ErrNotFound) || errors.Is(e, ErrScope) {
+		t.Fatal("schema fault misclassified", e)
+	}
+	if _, e := s.Get(context.Background(), d.ID); e == nil {
+		t.Fatal("missing binding schema accepted")
+	}
+	exec(t, db, "ALTER TABLE sakura_disk_scope RENAME COLUMN missing_owner TO owner")
+	if frame(t, db) != before {
+		t.Fatal("binding fault changed retained state")
+	}
+	exec(t, db, "UPDATE sakura_disk_scope SET version=2")
+	bad := frame(t, db)
+	if _, e := NewDiskStore(db, testConfig); !errors.Is(e, ErrScope) {
+		t.Fatal(e)
+	}
+	if frame(t, db) != bad {
+		t.Fatal("unknown version silently migrated")
+	}
+	exec(t, db, "UPDATE sakura_disk_scope SET version=1")
+	for _, next := range []int64{0, d.ID} {
+		if _, e := db.Exec("UPDATE sakura_disk_scope SET next_id=?", next); e != nil {
+			t.Fatal(e)
+		}
+		bad = frame(t, db)
+		if _, e := s.Create(context.Background(), input("forbidden")); !errors.Is(e, ErrCorrupt) {
+			t.Fatal(e)
+		}
+		if _, e := NewDiskStore(db, testConfig); !errors.Is(e, ErrCorrupt) {
+			t.Fatal(e)
+		}
+		if frame(t, db) != bad {
+			t.Fatal("allocator corruption repaired by adoption")
+		}
+	}
+	if _, e := db.Exec("UPDATE sakura_disk_scope SET next_id=?", int64(math.MaxInt64)); e != nil {
+		t.Fatal(e)
+	}
+	bad = frame(t, db)
+	if _, e := s.Create(context.Background(), input("overflow")); !errors.Is(e, ErrQuota) {
+		t.Fatal(e)
+	}
+	if frame(t, db) != bad {
+		t.Fatal("exhausted ID counter changed")
+	}
+	exec(t, db, "UPDATE sakura_disk_scope SET next_id=2")
+	exec(t, db, "ALTER TABLE sakura_disks RENAME COLUMN id TO absent_id")
+	if _, e := s.Get(context.Background(), d.ID); e == nil || errors.Is(e, ErrNotFound) {
+		t.Fatal("allocator read fault masked", e)
+	}
+	exec(t, db, "ALTER TABLE sakura_disks RENAME COLUMN absent_id TO id")
+	if frame(t, db) != before {
+		t.Fatal("failed allocator read changed frame")
+	}
+	if _, e := NewDiskStore(db, testConfig); e != nil {
+		t.Fatal(e)
+	}
+	if got, e := s.Get(context.Background(), d.ID); e != nil || got != d {
+		t.Fatal("repair did not recover exact saved disk", e)
+	}
+}
+func TestDiskPersistedProjectionFailuresRollbackAndRepair(t *testing.T) {
+	// These are explicit SQLite integrity-fault fixtures, not claims that remote
+	// callers can create triggers or that arbitrary host DB tampering is contained.
+	for _, kind := range []string{"create-rewrite", "create-corrupt-time", "create-scope-drift", "allocator-rewrite", "update-rewrite", "update-corrupt-time", "delete-reinsert"} {
+		t.Run(kind, func(t *testing.T) {
+			s, db, _ := fixture(t)
+			d := mustCreate(t, s, "retained")
+			before := frame(t, db)
+			trigger := map[string]string{
+				"create-rewrite":      `AFTER INSERT ON sakura_disks BEGIN UPDATE sakura_disks SET description='unexpected' WHERE id=NEW.id; END`,
+				"create-corrupt-time": `AFTER INSERT ON sakura_disks BEGIN UPDATE sakura_disks SET created='bad-time' WHERE id=NEW.id; END`,
+				"create-scope-drift":  `AFTER INSERT ON sakura_disks BEGIN UPDATE sakura_disk_scope SET owner='unexpected'; END`,
+				"allocator-rewrite":   `AFTER UPDATE ON sakura_disk_scope BEGIN UPDATE sakura_disk_scope SET next_id=NEW.next_id+1; END`,
+				"update-rewrite":      `AFTER UPDATE ON sakura_disks BEGIN UPDATE sakura_disks SET description='unexpected' WHERE id=NEW.id; END`,
+				"update-corrupt-time": `AFTER UPDATE ON sakura_disks BEGIN UPDATE sakura_disks SET modified='bad-time' WHERE id=NEW.id; END`,
+				"delete-reinsert":     `AFTER DELETE ON sakura_disks BEGIN INSERT INTO sakura_disks VALUES(OLD.id,OLD.generation,OLD.name,OLD.description,OLD.size_mb,OLD.plan_id,OLD.connection,OLD.created,OLD.modified); END`,
+			}[kind]
+			exec(t, db, "CREATE TRIGGER projection_fault "+trigger)
+			var e error
+			name := "revised"
+			switch {
+			case strings.HasPrefix(kind, "update"):
+				_, e = s.UpdateNameDesc(context.Background(), d.ID, DiskPatch{Name: &name})
+			case kind == "delete-reinsert":
+				e = s.Delete(context.Background(), d.ID)
+			default:
+				_, e = s.Create(context.Background(), input("new"))
+			}
+			if !errors.Is(e, ErrCorrupt) && !(kind == "create-scope-drift" && errors.Is(e, ErrScope)) {
+				t.Fatal("inconsistent saved projection acknowledged", e)
+			}
+			if frame(t, db) != before {
+				t.Fatal("post-write failure partially committed resource or allocator")
+			}
+			exec(t, db, "DROP TRIGGER projection_fault")
+			switch {
+			case strings.HasPrefix(kind, "update"):
+				if _, e = s.UpdateNameDesc(context.Background(), d.ID, DiskPatch{Name: &name}); e != nil {
+					t.Fatal(e)
+				}
+			case kind == "delete-reinsert":
+				if e = s.Delete(context.Background(), d.ID); e != nil {
+					t.Fatal(e)
+				}
+			default:
+				newDisk := mustCreate(t, s, "repaired")
+				if newDisk.ID != d.ID+1 {
+					t.Fatal("failed transaction issued an ID")
+				}
+			}
+		})
+	}
+}
+func TestDiskSQLProjectionReadFailuresAndMonotonicModified(t *testing.T) {
+	s, db, _ := fixture(t)
+	d := mustCreate(t, s, "retained")
+	before := frame(t, db)
+	exec(t, db, "ALTER TABLE sakura_disks RENAME COLUMN description TO missing_description")
+	// A schema failure during Create must leave disk data and the allocator intact;
+	// failed list/read operations must not produce empty successes. The separate
+	// trigger fixtures above verify post-write projection rollback explicitly.
+	for _, operation := range []func() error{
+		func() error { _, e := s.Create(context.Background(), input("must rollback")); return e },
+		func() error { _, e := s.ListFromCount(context.Background(), 0, 100); return e },
+		func() error { _, e := s.Get(context.Background(), d.ID); return e },
+		func() error {
+			v := "changed"
+			_, e := s.UpdateNameDesc(context.Background(), d.ID, DiskPatch{Name: &v})
+			return e
+		},
+		func() error { return s.Delete(context.Background(), d.ID) },
+	} {
+		if e := operation(); e == nil || errors.Is(e, ErrNotFound) {
+			t.Fatal("SQL schema failure masked", e)
+		}
+		if frame(t, db) != before {
+			t.Fatal("schema read failure changed data/allocator")
+		}
+	}
+	exec(t, db, "ALTER TABLE sakura_disks RENAME COLUMN missing_description TO description")
+	if got, e := s.Get(context.Background(), d.ID); e != nil || got != d {
+		t.Fatal(e)
+	}
+	future := d.Modified.Add(24 * time.Hour)
+	if _, e := db.Exec("UPDATE sakura_disks SET modified=? WHERE id=?", future.Format(time.RFC3339Nano), d.ID); e != nil {
+		t.Fatal(e)
+	}
+	name := "revised"
+	updated, e := s.UpdateNameDesc(context.Background(), d.ID, DiskPatch{Name: &name})
+	if e != nil || !updated.Modified.Equal(future) || updated.Name != name {
+		t.Fatal("modified time regressed", updated, e)
 	}
 }
