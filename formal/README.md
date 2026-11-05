@@ -219,7 +219,10 @@ DynamoDBLifecycle (eight controls) and DynamoDBAdmission (22 controls):
 and eight named counterexamples with unchanged current model/config bytes.
 Admission at a2253f5 actually passed its baseline (16,730 distinct states,49.900s)
 and all22 named controls with exit12 and real traces. These targeted receipts
-do not replace the still-pending whole144-case immutable-HEAD gate.
+are historical inputs. The full canonical --merge-gate actually passed all144
+cases at303f5b496233e06bd2df76e72d8f4c64513dc582, including immutable
+before/after source checks. The later one-field E2E fixture/documentation child
+retains identical model/config/control bytes; its newer commit is not the303 run.
 
 Admission uses independent normalized key/semantic-size/pre-admission oracles
 and measured actual PRE/POST frames; its observation projection preserves

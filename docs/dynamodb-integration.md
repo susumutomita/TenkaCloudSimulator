@@ -12,7 +12,7 @@ Main GCP/Azure handlers, Actor/access context, raw path preservation, fixed prov
 scope menu, assets/dependencies/notices, all25 existing mandatory E2E methods and
 all18 existing model entries/94 literal controls remain intact. Four conflicts
 were resolved additively: README, Gateway field, server initialization/capability
-metadata and two OpenAPI descriptions. OpenAPI paths and all61 operation IDs are retained, along with all main schema and example objects. Seven new DynamoDB JSON1.0 templates and two mandatory actual-process/served-template E2E sources are prepared; their current execution is UNRUN.
+metadata and two OpenAPI descriptions. OpenAPI paths and all61 operation IDs are retained, along with all main schema and example objects. Seven new DynamoDB JSON1.0 templates and two mandatory actual-process/served-template E2E sources are prepared; their isolated real-process/served-template execution passed on the input-equivalent native snapshot; the unified27-case run remains pending.
 
 Owned earlier fixes are separate commits: validation tests `cedc2f3`, decimal
 compatibility `edd8743`, semantic400KiB/statistics `67d45c6`, generation preparation
@@ -42,7 +42,7 @@ key tokens and six size fixtures. Its22 properties/22 controls cover constructor
 readiness, typed canonical aliases, normalized validation and semantic-byte
 admission, table/item quotas, replacement/statistics, acknowledged SQL effects,
 removal and refusal/peer frames. Main18/94 remains byte-identical in the registry;
-candidate inventory is20 baselines/124 controls (144 total cases). The unified immutable-HEAD suite remains pending; the targeted results below are not a substitute.
+candidate inventory is20 baselines/124 controls (144 total cases). The canonical immutable-HEAD suite actually passed all144 cases at303f5b496233e06bd2df76e72d8f4c64513dc582. It is a bounded model gate, not a Go implementation proof. The targeted results below remain separate historical inputs.
 
 This is bounded normalized admission, not a full decimal grammar, arbitrary
 UTF8/base64/JSON, exact400KiB private AWS encoding, SQL/driver, Go refinement,
@@ -55,7 +55,7 @@ local100/10000/409600 limits, not the actual runtime quota values.
 Admission scopes are two region/table namespaces inside ONE already-selected
 DB; Lifecycle owners abstract separately selected DB/table authorities. Neither
 is two authenticated CLI processes; the mandatory real-process acceptance is
-separate and remains incomplete. Constructor startupValid is the normalized success/
+separate; isolated acceptance is recorded below, while the complete27-case run remains pending. Constructor startupValid is the normalized success/
 orphan-refusal result, not a proof of arbitrary SQL discovery or imported data.
 Shared constructor/Gateway/dispatch files bind only to initialized-store and
 preflight-denial call contracts. Existing routes and actor authority retain their
@@ -78,7 +78,7 @@ exit12, their required named invariant and a transition trace. Bounds remain
 one table/one item/four abstract bytes with all eight key tokens/six fixtures.
 The earlier unchanged DynamoDBLifecycle baseline (56,180 distinct states) and
 eight controls passed separately; exact model/config hashes match. These are
-32 owned cases across two snapshots, not a unified144-case merge-gate receipt.
+32 owned cases across two snapshots. Subsequently the unchanged models at303f5b4 passed the full canonical144-case immutable-HEAD merge gate (all20 baselines/124 named controls), with before/after input verification and no timeout/domain reduction. The following test-only/documentation child preserves every model/config/control and requires its own exact applicability; its commit is not falsely labeled as the303f5b4 formal run.
 
 The earlier IF type evaluation failure, declaration-order semantic failures and
 two60-second timeouts are retained as failed diagnostics. They were never accepted
@@ -98,11 +98,16 @@ escaped-string70000-character/oversize-refusal test ran. That input predates the
 whole-suite or hosted-CI result. No profile union, exclusions or lower floors.
 
 The current mandatory E2E inventory is25 main plus two DynamoDB methods (27).
-Independent actual two-CLI verification is incomplete: its first attempt reached
-the token API but the test read `token` instead of the actual `AccessToken` field.
-That fixture failure is not a production authentication failure or a successful
-isolation proof. Seven served-example execution and the complete unified27-case
-run also require their own receipts. No helper is silently skipped.
+The independent two-CLI helper initially reached the token API but read `token`
+instead of the actual `AccessToken` field; the failure is retained. The one-field
+test-only correction4cda2ad was selectively cherry-picked after the immutable
+formal run. On the native input-equivalent detached snapshot, actual two-CLI
+acceptance passed6.052s:51 SDK calls, distinct DB/token authorities, same table
+name/different data, mutual401, IAM403 and refusal frames, region/prefix/restart
+and cleanup. All seven served templates also passed2.314s (seven actual HTTP
+operations and four shared-state SDK operations). Neither process remained
+running. This is actual isolated acceptance, not the complete unified27-case
+run or a current child-HEAD hosted CI claim; no helper is silently skipped.
 
 ## Verification queue
 
@@ -123,7 +128,7 @@ run also require their own receipts. No helper is silently skipped.
    CLI/processes, distinct DB/token, same-name keys, cross-token rejection,
    participant IAM refusal, restart and cleanup. Existing two-database native
    fixtures are not two authenticated processes. The optional SDK size test is
-   not a mandatory whole E2E replacement. The seven served templates are the second mandatory case; both cases remain UNRUN until an actual current binary is supplied.
+   not a mandatory whole E2E replacement. The seven served templates are the second mandatory case; both isolated cases have executed against the verified input-equivalent real binary; the full27-case current composition must still run.
 6. Full before-commit/build/cross/E2E/start/audit/rights and hosted canonical
    security checks, independent review, fresh exact-HEAD CI. Known denied feed
    and old ed877 check-run reads are stopped; no retry or alternate route.
