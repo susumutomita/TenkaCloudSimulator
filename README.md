@@ -95,7 +95,7 @@ AXE_SCRIPT=/tmp/tcsim-audit/axe.min.js make e2e PYTHON=/tmp/tcsim-tests/bin/pyth
 TLA_JAR=/path/to/tla2tools.jar make formal
 ```
 
-mainfcfとSQSの統合候補はmainの26件とSQSの2件を合わせて28件E2Eを要求します。runtime/UI/モデル入力はmain0a4取り込み後のdeeb92eと同一で、以前の限定native/race・実SQSコンソール・9配信例の証拠はその入力に紐づけて保持しています。今回の全体28件E2E・同一profileの両90%・19モデル98変異検査・最終hosted CIは別途必要です。
+mainfcfとSQSの統合候補はmainの26件とSQSの2件を合わせて28件E2Eを要求します。Loginはmainの貼り付け・失敗表示修正をそのまま保持し、SQS/KMS画面とnative Goを保全しています。旧73の成功は旧Login入力の履歴であり、新しい埋込UIの実clipboard・ログイン・SQS検証と、最終28件E2E・両90%・117件TLC・hosted CIを区別して記録します。
 
 CIはstatementと未フィルターsource-line coverageを両方90%以上に強制します。`make before-commit`単独のcoverage判定はstatementのみで、source-line判定はCIのCobertura生成後ステージと上記の2コマンドで行います。SDK/browser、license、依存security、埋込asset、形式検査も行います。cross compileは他OSでの実行成功を意味しません。開発用Python/Node/Javaはruntime依存ではありません。UI・Scalarの再生成は権利表記とlockを保持する[各build手順](tools/console/README.md)・[Scalar手順](tools/scalar/README.md)・[Python runtimeの権利・再生成手順](tools/python/README.md)に従います。
 
