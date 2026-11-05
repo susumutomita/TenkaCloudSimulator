@@ -26,6 +26,14 @@ func validParameterName(name string) bool {
 	return len(name) <= 1011 && parameterName.MatchString(name) && strings.Count(name, "/") <= 15 && !strings.HasPrefix(strings.ToLower(trimParameterSlash(name)), "aws") && !strings.HasPrefix(strings.ToLower(trimParameterSlash(name)), "ssm")
 }
 func (g *Gateway) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if isSecretRequest(r) {
+		serveSecretGateway(w, r, g.Secrets, g.Identities)
+		return
+	}
+	if isCloudWatchLogs(r) {
+		g.serveCloudWatchLogs(w, r)
+		return
+	}
 	if isKMS(r) {
 		g.serveKMS(w, r)
 		return
@@ -52,6 +60,10 @@ func (g *Gateway) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	if strings.HasPrefix(r.Header.Get("X-Amz-Target"), "AmazonSSM.") {
 		g.serveSSM(w, r)
+		return
+	}
+	if strings.HasPrefix(r.Header.Get("X-Amz-Target"), "DynamoDB_20120810.") {
+		g.serveDynamoDB(w, r)
 		return
 	}
 	g.serveS3(w, r)

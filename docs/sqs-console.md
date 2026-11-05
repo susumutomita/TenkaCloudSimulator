@@ -1,15 +1,43 @@
 # SQS console: bounded Standard queues
 
-The SQS view is integrated into the AWS provider's searchable catalog. The
-English/Japanese control changes presentation without remounting the view:
-queue/message drafts and private receipt custody remain in their current
-context. Native resource names, message bodies and service errors stay opaque.
-Region, principal and navigation changes still clear the view and its receipts.
+> Integration status (2026-11-05): See the
+> [service backlog acceptance record](acceptance/backlog-services.md) for the
+> integrated scope and required gates. Branch-specific status, receipts,
+> model/control counts and E2E totals below are historical records of their
+> named inputs. They do not establish the current integration's final CI
+> or merge status.
+
+> Historical PR410 source snapshot: this branch normal-merges mainfcf's login paste/error repair into public73.
+> Login is exact main, with SQS/KMS content mounts and fixed GCP/Azure scope
+> utilities preserved. Main26 E2E method bodies plus two SQS helpers require28.
+> The19-model/98-control inventory remains117 planned executions. Earlier73
+> results stay bound to the old login input; fresh canonical/login/SQS browser,
+> applicability and final whole28/dual90/117TLC/hosted checks are separate gates.
+
 
 The embedded console uses official Cloudscape components and the same nine
 native SQS HTTP operations and SQLite state as SDK clients. No separate browser
 queue/message store, native API change, actual AWS connection or host runtime is
 needed. The simulator remains independent and implements a limited local subset.
+
+## Pending locale integration (source checkpoint)
+
+The PR410 continuation normal-merges main `0a6bdce` and retains its native
+services, shared JSON1.0 reference checks, 26 registered finite models and 149
+controls. It adds one mandatory locale acceptance case to the 42 main
+Conformance methods. English/Japanese switching preserves queue and message
+drafts and private receipt custody; fixed notices translate at render time,
+while API values, resource names and raw errors stay opaque. The new helper
+reads completed JSON bodies without redundant Playwright `Response.finished()`
+waiters. Earlier two clean focused runs belong to candidate `2902fc0`, not this
+restack.
+
+This is source preparation only: generated assets are retained exactly from
+main until an authorized canonical rebuild. The translated source is therefore
+not yet represented by those assets. No build, browser, full Go, immutable
+formal run or hosted checks for this checkpoint have been executed. All 42 main
+acceptance bodies and the improved shared SQS/DynamoDB reference validator are
+preserved; the new locale case makes 43 methods, not 43 observed passes.
 
 ## Screens and operations
 
@@ -63,25 +91,38 @@ service hint and region. Create/Get actual QueueUrl first; replace receipt
 placeholders only with a current ReceiveMessage response. Static templates are
 not live saved state or evidence of a prior success.
 
-The mandatory `test/e2e/sqs_docs.py` fetches the actual embedded spec, executes
-all nine templates with live substitutions and verifies the same body and
-attributes through the SDK. It checks refused unsubstituted placeholders,
-receipt rotation/stale rejection and cleanup without reporting secret values.
+The mandatory `test/e2e/sqs_docs.py` fetches the actual embedded spec, executes all
+nine templates with live substitutions and verifies the same body/attributes via
+the SDK. HTTP13/13 and SDK10/10/10 passed, including refused unsubstituted fixture
+placeholders, receipt rotation/stale rejection and cleanup. Raw credential and
+receipt values are omitted from reports.
 
 ## Verification and remaining gates
 
-The current integration adds provider-scoped SQS search and English/Japanese
-labels to the original native console. Static component equivalence and catalog
-tests pass; canonical assets retain all 22 original package notices. New actual
-browser/native tests, the complete 31-case suite, both unchanged 90% coverage
-floors, exact-HEAD applicability, all 117 model runs and hosted CI are required
-before merge. Individual focused results do not imply whole-gate completion.
+- Canonical pinned Cloudscape build,22 original package notices and asset checks
+  passed. Existing cached dependencies were byte-verified; no new install.
+- Native SDK335calls/sends/responses passed across two persistent team DBs,
+  two regions, restart, real60second retention and cleanup.
+- Actual focused embedded UI passed all nine operations with SDK25/25/25:
+  three creation attributes, Enter/Cancel, current receipt/release/redelivery,
+  stale refusal, peer/token separation, participant403 without mutation,
+  a held actual west response rejected after east navigation and restart/relogin.
+  Four pinned-axe states cover Details/Messages at1440/390pixels with zero
+  violations, no outside requests and no browser errors. This is not a full
+  accessibility certification or every mobile interaction.
+- Full Go/race/vet/assets/module verification/build passed at code inpute039c50.
+  One fresh full-module profile:5650/5960statements (94.80%) and unfiltered
+  source7388/8190 (90.21%). Neither floor, exclusions nor profile unions changed.
+- The last immutable finite run at341dec2 passed11baselines/40required controls;
+  policy19/applicability21 units and20exact blob declarations also passed.
+  [Model correspondence and limitations](formal-sqs-console.md) remain explicit.
 
-The locale helper switches languages with an unsent queue name/message body,
-then changes visibility and deletes a message using the same privately held
-native receipt. It checks exact wire operations, unchanged body bytes, separate
-team state, no external requests, and PC/mobile layout. Source names and errors
-are never translated as UI labels. See [model correspondence and limits](formal-sqs-console.md).
+At code inputebb3ba5, all23 Conformance cases passed in374.264seconds, plus
+responsive layout, actual built/unbuilt make-start/TTY/auth/signals and the
+50-screen global audit (zero automated violations). All21previous cases and both
+new mandatory helpers remain enabled. Final documentation-HEAD immutable
+formal/applicability receipts are recorded separately; older results are not
+current CI. Current hosted CI/security/public merge have not been performed.
 
 ## AWS reference boundary
 

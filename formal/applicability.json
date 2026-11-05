@@ -1,216 +1,48 @@
 {
   "version": 1,
-  "base_sha": "f5dba056da9bf69df047b391a45d06a3aff3dc66",
+  "base_sha": "0a6bdce41c773f651a5bd9a8a128da4e45b8b2c2",
   "changes": [
     {
-      "path": "README.md",
-      "sha256": "cacac99a587d176b0ee6ce987d9520cd89f2cc5d9163f4fa40b143b8c5bc9173",
-      "disposition": "documentation",
-      "reason": "Document the bounded SQS console/current integration, supported native operations and pending exact-HEAD acceptance; preserve unsupported and official-reference boundaries.",
-      "models": []
-    },
-    {
-      "path": "docs/ci.md",
-      "sha256": "180dc38cf621de3b1a41c97c3e54ee411fc725065bf996100acc9c729db1d6a7",
-      "disposition": "documentation",
-      "reason": "Document the bounded SQS console/current integration, supported native operations and pending exact-HEAD acceptance; preserve unsupported and official-reference boundaries.",
-      "models": []
-    },
-    {
-      "path": "docs/development-status.md",
-      "sha256": "110178949201ef4fc96cfc527c01ca340f18537577397f87fb9b0506f652b0e1",
-      "disposition": "documentation",
-      "reason": "Document the bounded SQS console/current integration, supported native operations and pending exact-HEAD acceptance; preserve unsupported and official-reference boundaries.",
-      "models": []
-    },
-    {
-      "path": "docs/formal-sqs-console.md",
-      "sha256": "d2705e9053032d3e0c24d3db16f9d381588dbaec4c64374ad4e94346391b41eb",
-      "disposition": "documentation",
-      "reason": "Document the bounded SQS console/current integration, supported native operations and pending exact-HEAD acceptance; preserve unsupported and official-reference boundaries.",
-      "models": []
-    },
-    {
-      "path": "docs/formal-validation.md",
-      "sha256": "313ebed31fe5766d724055c6aae138af9c87484083ee344a3a26fdaba7b33b56",
-      "disposition": "documentation",
-      "reason": "Document the bounded SQS console/current integration, supported native operations and pending exact-HEAD acceptance; preserve unsupported and official-reference boundaries.",
-      "models": []
-    },
-    {
       "path": "docs/sqs-console.md",
-      "sha256": "d467972f5a67d449e27a9963be4fb34316db6896afdf73a3a537bc5552b7d693",
+      "sha256": "0a2f3a2134c9fb405a63b5475cbb701e260d6ef8203330bdb0de14e5454c5c0d",
       "disposition": "documentation",
-      "reason": "Document the bounded SQS console/current integration, supported native operations and pending exact-HEAD acceptance; preserve unsupported and official-reference boundaries.",
-      "models": []
-    },
-    {
-      "path": "docs/sqs.md",
-      "sha256": "816a78820b1d4d56a0aed975bb1a7c64dea7f2c39a0a2935e7179fd82aeaf17e",
-      "disposition": "documentation",
-      "reason": "Document the bounded SQS console/current integration, supported native operations and pending exact-HEAD acceptance; preserve unsupported and official-reference boundaries.",
-      "models": []
-    },
-    {
-      "path": "formal/README.md",
-      "sha256": "efcdc22d9a6d19a3ae350d3c2f5299e89352d6b82c5258502c3b087b7f0a7868",
-      "disposition": "documentation",
-      "reason": "Document the bounded SQS console/current integration, supported native operations and pending exact-HEAD acceptance; preserve unsupported and official-reference boundaries.",
-      "models": []
-    },
-    {
-      "path": "formal/SQSConsoleEpoch.cfg",
-      "sha256": "6f5bc4cabf9b9fc5202c8c827256bd85870f6788978365219171845770b174a7",
-      "disposition": "modeled",
-      "reason": "SQS adds keyed navigation, bounded view epochs and private receipt custody; existing browser session caller seam is retained. Actual React/native SDK tests remain separate from finite model exploration.",
-      "models": [
-        {
-          "id": "SQSConsoleEpoch",
-          "properties": [
-            "OnlyCurrentReplies",
-            "NoUnmountedAcceptance",
-            "ReceiptCustodyBound",
-            "RawReceiptsPrivate"
-          ],
-          "limits": "Finite view acceptance/custody abstraction only, not React/AbortController/DOM/thread execution, token authentication, IAM, native receipt validity/freshness, Go/SQL, cryptography or AWS visual parity. Native requests may finish after cancellation; only current replies enter the view. Accepted history captures its original mounted/context/epoch, so later changes cannot relabel an old acceptance. Unmount epoch advance is redundant with the alive guard and the combined mutant deliberately removes both. Receipt values abstract one response identity per context/epoch; native freshness and release require actual browser/SDK tests. main.jsx source scope is only added SQS keyed-remount/navigation seam, not all other services or authentication."
-        }
-      ]
-    },
-    {
-      "path": "formal/SQSConsoleEpoch.tla",
-      "sha256": "13dbd97a806390384372a3bdc38a0cdd5b2a05fec5f923f92e57259d83a3a37e",
-      "disposition": "modeled",
-      "reason": "SQS adds keyed navigation, bounded view epochs and private receipt custody; existing browser session caller seam is retained. Actual React/native SDK tests remain separate from finite model exploration.",
-      "models": [
-        {
-          "id": "SQSConsoleEpoch",
-          "properties": [
-            "OnlyCurrentReplies",
-            "NoUnmountedAcceptance",
-            "ReceiptCustodyBound",
-            "RawReceiptsPrivate"
-          ],
-          "limits": "Finite view acceptance/custody abstraction only, not React/AbortController/DOM/thread execution, token authentication, IAM, native receipt validity/freshness, Go/SQL, cryptography or AWS visual parity. Native requests may finish after cancellation; only current replies enter the view. Accepted history captures its original mounted/context/epoch, so later changes cannot relabel an old acceptance. Unmount epoch advance is redundant with the alive guard and the combined mutant deliberately removes both. Receipt values abstract one response identity per context/epoch; native freshness and release require actual browser/SDK tests. main.jsx source scope is only added SQS keyed-remount/navigation seam, not all other services or authentication."
-        }
-      ]
-    },
-    {
-      "path": "formal/models.json",
-      "sha256": "0f75571dfd7a3749ea925ba2772534669a83be2537ce0da2f2eef1d33654c73a",
-      "disposition": "formal-infrastructure",
-      "reason": "Add mandatory SQSConsoleEpoch baseline, all5properties and4specific required negative controls while retaining all18 prior model entries and94 controls. Detector tests remove each of98controls independently.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/openapi.json",
-      "sha256": "8aa8b11bf1cd1b32be238f8bb3729a63420ce35cb07f50ce97b5596d2b240751",
-      "disposition": "presentation",
-      "reason": "Provider-scoped SQS catalog and en/ja presentation with unchanged native API payloads; canonical bundle preserves original22 package notices and dependencies.",
-      "models": []
-    },
-    {
-      "path": "internal/server/web/app.css",
-      "sha256": "4f45d143c1890373eae2bed0008d5cc46759a109ab46b708ea9fa97df0a0026f",
-      "disposition": "presentation",
-      "reason": "Provider-scoped SQS catalog and en/ja presentation with unchanged native API payloads; canonical bundle preserves original22 package notices and dependencies.",
-      "models": []
-    },
-    {
-      "path": "internal/server/web/app.js",
-      "sha256": "9b163c13061457cab640e1141fd6f380cddd1578858372bf9f9e43f880edd125",
-      "disposition": "presentation",
-      "reason": "Provider-scoped SQS catalog and en/ja presentation with unchanged native API payloads; canonical bundle preserves original22 package notices and dependencies.",
-      "models": []
-    },
-    {
-      "path": "scripts/formal_model_gate.py",
-      "sha256": "329b34117eb8b73b42260d43e1f7861b7ef491fc50ccc162b4625d329bfaa4af",
-      "disposition": "formal-infrastructure",
-      "reason": "Add mandatory SQSConsoleEpoch baseline, all5properties and4specific required negative controls while retaining all18 prior model entries and94 controls. Detector tests remove each of98controls independently.",
-      "models": []
-    },
-    {
-      "path": "scripts/test-formal-gate.py",
-      "sha256": "4351f1c9516ef6b3f068711adcda7234e28d59bcb4073bfb237dbffe9f5316e8",
-      "disposition": "formal-infrastructure",
-      "reason": "Add mandatory SQSConsoleEpoch baseline, all5properties and4specific required negative controls while retaining all18 prior model entries and94 controls. Detector tests remove each of98controls independently.",
+      "reason": "Separate this source-only restack and pending canonical/runtime/formal checks from historical candidate receipts.",
       "models": []
     },
     {
       "path": "test/console/navigation.test.mjs",
-      "sha256": "54a61d24852519aec7f398e8cd07999ec39b9725387051d6e7ff0819dc373df3",
+      "sha256": "dad00a1a54875415cc036a5ea7c30138c52f947f600cf9f71e4b565a147efd81",
       "disposition": "test-support",
-      "reason": "Keep all main28 Conformance bodies and add actual SQS SDK/served-template/locale-receipt checks; no mocks, skips or relaxed coverage floors.",
+      "reason": "Preserve all main42 acceptance bodies and add mandatory actual two-CLI locale/receipt assertions; retain catalog controls and strict failure behavior.",
       "models": []
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "e6cecfd809b96f29ac6a472c7574711be5dadcbb72888334d4284abeb4242c6c",
+      "sha256": "33f668864de7169d53ab5f3d161cb1db5a3a67a678553acfc3154c6bf584833f",
       "disposition": "test-support",
-      "reason": "Keep all main28 Conformance bodies and add actual SQS SDK/served-template/locale-receipt checks; no mocks, skips or relaxed coverage floors.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/sqs_console.py",
-      "sha256": "b0f5fed77271086881f4831afefa5a5abd8735635e6ea6f146d3b90c2b4adc79",
-      "disposition": "test-support",
-      "reason": "Keep all main28 Conformance bodies and add actual SQS SDK/served-template/locale-receipt checks; no mocks, skips or relaxed coverage floors.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/sqs_docs.py",
-      "sha256": "9f348a47eccd1dd6267b69856ec55c98510dac19a1185bc953ea18aee3888bd9",
-      "disposition": "test-support",
-      "reason": "Keep all main28 Conformance bodies and add actual SQS SDK/served-template/locale-receipt checks; no mocks, skips or relaxed coverage floors.",
+      "reason": "Preserve all main42 acceptance bodies and add mandatory actual two-CLI locale/receipt assertions; retain catalog controls and strict failure behavior.",
       "models": []
     },
     {
       "path": "test/e2e/sqs_locale.py",
       "sha256": "b7377831a9eed9dfed92c87e1a8be1e5ea1a374b70aa24a4fe62acfb14723b5a",
       "disposition": "test-support",
-      "reason": "Keep all main28 Conformance bodies and add actual SQS SDK/served-template/locale-receipt checks; no mocks, skips or relaxed coverage floors.",
-      "models": []
-    },
-    {
-      "path": "tools/console/bundle-digests.json",
-      "sha256": "3a8af1d83690e769e65cf25af0ebcc5c5a352925ebe0d76accdfd3737cafc177",
-      "disposition": "presentation",
-      "reason": "Provider-scoped SQS catalog and en/ja presentation with unchanged native API payloads; canonical bundle preserves original22 package notices and dependencies.",
-      "models": []
-    },
-    {
-      "path": "tools/console/bundle-inputs.json",
-      "sha256": "e86caadea88dcc93cde3c54334817dae7d6ffa8dd7716fbafe8012413cf260db",
-      "disposition": "presentation",
-      "reason": "Provider-scoped SQS catalog and en/ja presentation with unchanged native API payloads; canonical bundle preserves original22 package notices and dependencies.",
+      "reason": "Preserve all main42 acceptance bodies and add mandatory actual two-CLI locale/receipt assertions; retain catalog controls and strict failure behavior.",
       "models": []
     },
     {
       "path": "tools/console/src/console-navigation.mjs",
-      "sha256": "fa3e02db5e4a869931e5d26854dd1cea309c92b30bfde180c709783f1403aee5",
+      "sha256": "d1315a9d5ceee1a1de5fc030d0ccf75229fde51630d9d1c9c5da9e6d4955e103",
       "disposition": "presentation",
-      "reason": "Provider-scoped SQS catalog and en/ja presentation with unchanged native API payloads; canonical bundle preserves original22 package notices and dependencies.",
+      "reason": "SQS static label/notice presentation and existing-catalog Japanese alias controls only; native APIs, dependencies and authority remain unchanged.",
       "models": []
     },
     {
       "path": "tools/console/src/main.jsx",
-      "sha256": "9af064affe1a0bdee899252ec2e8e5d87e7c24c25f9285f38c2b8d8968038186",
+      "sha256": "96882cd6ac61d3132c71071206ffc975cb984573bfcd8d7d668f7d62ef403e7c",
       "disposition": "modeled",
-      "reason": "SQS adds keyed navigation, bounded view epochs and private receipt custody; existing browser session caller seam is retained. Actual React/native SDK tests remain separate from finite model exploration.",
+      "reason": "Presentation-only SQS localization continuation and explicit SQS keyed-remount separators. All main service mounts and native state contracts are preserved; finite epoch/custody correspondence is not a proof of React, translation, native receipt validity or authorization.",
       "models": [
-        {
-          "id": "BrowserSessions",
-          "properties": [
-            "RevokedCookiesDenied",
-            "AcceptedOnlyLiveParent",
-            "SDKAuthorityPreserved",
-            "UnrelatedSessionsPreserved",
-            "NoRawSDKCookie",
-            "NoBrowserSDKAuthority",
-            "ParentLifetimeBound"
-          ],
-          "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them."
-        },
         {
           "id": "SQSConsoleEpoch",
           "properties": [
@@ -227,7 +59,7 @@
       "path": "tools/console/src/sqs.jsx",
       "sha256": "4c5f4ae871195caabe0172d2c8d4fbc7cbbcbe700587f83f104f579d7aa07d1d",
       "disposition": "modeled",
-      "reason": "SQS adds keyed navigation, bounded view epochs and private receipt custody; existing browser session caller seam is retained. Actual React/native SDK tests remain separate from finite model exploration.",
+      "reason": "Presentation-only SQS localization continuation and explicit SQS keyed-remount separators. All main service mounts and native state contracts are preserved; finite epoch/custody correspondence is not a proof of React, translation, native receipt validity or authorization.",
       "models": [
         {
           "id": "SQSConsoleEpoch",
@@ -245,7 +77,7 @@
       "path": "tools/console/test/sqs-locale.test.mjs",
       "sha256": "3d40be53e9f85177e88837b7b33cd71f96b69c988cc8c8d8c0516efa65e07fef",
       "disposition": "presentation",
-      "reason": "Provider-scoped SQS catalog and en/ja presentation with unchanged native API payloads; canonical bundle preserves original22 package notices and dependencies.",
+      "reason": "SQS static label/notice presentation and existing-catalog Japanese alias controls only; native APIs, dependencies and authority remain unchanged.",
       "models": []
     }
   ]

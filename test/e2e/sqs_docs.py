@@ -13,6 +13,7 @@ import urllib.error
 from urllib.parse import urlsplit
 
 from sqs import Team, NoRedirect
+from openapi_json10 import validate_json10_examples, validate_json10_response
 import boto3
 from botocore.config import Config
 from botocore.exceptions import ClientError
@@ -45,15 +46,26 @@ def run():
     with response:
      http_counts['responses']+=1;assert response.status==expected_status,'Unexpected native HTTP status'
      if operation:assert response.headers['Content-Type'].startswith('application/x-amz-json-1.0')
-     return json.load(response)
+     result=json.load(response)
+     if operation:validate_json10_response(spec,response.status,result)
+     return result
    spec=wire('/_simulator/docs/openapi.json');caps=wire('/_simulator/v1/capabilities')
    source=json.loads(Path('internal/server/apidocs/openapi.json').read_text());assert spec==source,'Embedded served spec differs from source'
+   validate_json10_examples(spec)
    ids=[value['operationId'] for path in spec['paths'].values() for method,value in path.items() if method in ('get','post','put','head','delete')]
    assert len(ids)==61 and len(set(ids))==61 and set(ids)==set(MAIN_OPERATION_IDS)
    assert set(spec['paths'])==set(MAIN_PATHS) and len(spec['paths'])==34
    root=spec['paths']['/']['post'];assert root['operationId']=='awsRegionalOperation'
    assert {'application/x-amz-json-1.0','application/x-amz-json-1.1','application/x-www-form-urlencoded'}<=set(root['requestBody']['content'])
-   examples=root['requestBody']['content']['application/x-amz-json-1.0']['examples'];assert set(examples)==set(OPERATIONS)
+   # JSON 1.0 is shared with DynamoDB. Keep the complete SQS contract while
+   # requiring every additional service template to carry its own native target.
+   all_examples=root['requestBody']['content']['application/x-amz-json-1.0']['examples']
+   assert set(OPERATIONS)<=set(all_examples)
+   examples={operation:all_examples[operation] for operation in OPERATIONS}
+   for name,example in all_examples.items():
+    if name not in OPERATIONS:
+     assert name.startswith('DynamoDB')
+     assert example['x-simulator-target']=='DynamoDB_20120810.'+name.removeprefix('DynamoDB')
    assert set(caps['services']['sqs']['operations'])==set(OPERATIONS)
    sdk=boto3.client('sqs',endpoint_url=team.endpoint,region_name='us-east-1',aws_access_key_id='TCSIMDOCS',aws_secret_access_key='dummy-local-only',config=Config(retries={'max_attempts':0},connect_timeout=2,read_timeout=5));team.clients.append(sdk)
    sdk.meta.events.register('before-sign.sqs',lambda request,**_:request.headers.add_header('X-Simulator-Token',team.token))

@@ -1,11 +1,26 @@
 # SQS console epoch and receipt-custody model
 
-`SQSConsoleEpoch` adds one baseline and four expected-invariant negative
-controls to the existing registry. The combined candidate requires 19 baselines
-and 98 controls (117 actual executions). Every registered property, domain and
-control is preserved; current immutable-HEAD execution remains a separate gate.
-The policy test removes each required control independently to detect missing
-coverage. This is finite model checking, not a proof of React/Go refinement.
+> Integration status (2026-11-05): See the
+> [service backlog acceptance record](acceptance/backlog-services.md) for the
+> integrated scope and required gates. Branch-specific status, receipts,
+> model/control counts and E2E totals below are historical records of their
+> named inputs. They do not establish the current integration's final CI
+> or merge status.
+
+> Historical PR410 source snapshot: this branch normal-merges mainfcf's login paste/error repair into public73.
+> Login is exact main, with SQS/KMS content mounts and fixed GCP/Azure scope
+> utilities preserved. Main26 E2E method bodies plus two SQS helpers require28.
+> The19-model/98-control inventory remains117 planned executions. Earlier73
+> results stay bound to the old login input; fresh canonical/login/SQS browser,
+> applicability and final whole28/dual90/117TLC/hosted checks are separate gates.
+
+
+`SQSConsoleEpoch` has a bounded SANY/TLC result at immutable341dec2. It adds one finite
+baseline/four exact expected-invariant controls to recorded mainb61's unchanged
+ten baselines/thirty-six controls: eleven/forty total. All forty IDs are literal
+minimum requirements in `scripts/formal_model_gate.py`; the prepared policy unit
+removes each individual control. No old model, property, CFG or mutation is
+removed or weakened.
 
 ## Abstraction and bounds
 
@@ -49,13 +64,22 @@ the added SQS navigation/remount seam; it is not a proof of the full console or
 its existing BrowserSessions authentication implementation. Actual token
 binding/403/401 and scoped persistence are separate native acceptance tests.
 
-The mandatory `test/e2e/sqs_console.py` checks two authenticated CLI processes,
-separate databases, cross-token rejection, participant denial without mutation,
-regional state, held replies, receipts, restart and cleanup against the actual
-embedded console. `test/e2e/sqs_locale.py` additionally checks English/Japanese
-switches with live drafts and receipt custody, unchanged native payloads and
-PC/mobile reflow. `test/e2e/sqs_docs.py` executes the served static templates with
-live identifiers. These are independent implementation checks: TLC does not run
-their code. The updated candidate must pass all original main cases and these
-three helpers, current coverage gates, model/applicability checks and hosted CI.
-Results from earlier SQS branches are historical evidence only.
+The mandatory `test/e2e/sqs_console.py` passed actual embedded browser/native
+checks: two authenticated CLI processes/DBs, cross-token401, participant403
+without mutation, same-name regional data, a held actual response rejected in a
+new region, current receipts/visibility/deletion, restart/relogin and cleanup.
+Details/Messages at1440/390pixels passed four pinned-axe states. Native/server/
+core code for this SQS slice is unchanged from main26d; receipt values are not emitted.
+
+At341dec2, SANY semantic processing and all11baselines/40exact expected
+counterexamples passed with one Java worker/512MiB/default60seconds and the
+original bounds. The new baseline explored86distinct states (252generated,
+depth9). Policy19/applicability21 units passed, including every one of40controls
+removed individually. These are finite checks, not the implementation proofs
+excluded above. Test-only heading disambiguation afterward did not change
+runtime/model/assets; final documentation-HEAD immutable receipts remain required.
+At code inputebb3ba5 all23E2E/start and50screen audit passed. The final
+documentationHEAD needs its own immutable51/applicability receipts, recorded
+separately; this does not change bounds or turn the model into an implementation
+proof. Current hostedCI/security remain separate. Official screenshot GET403
+prevents image/authenticated-screen equivalence claims.

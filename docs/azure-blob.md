@@ -1,6 +1,6 @@
-# Azure Blob basic local integration candidate
+# Azure Blob basic local subset
 
-This branch registers the bounded REST leaf at `/_simulator/providers/azure`.
+The bounded REST leaf is registered at `/_simulator/providers/azure`.
 Its31 isolated HTTP/SQLite tests passed normal/race/vet, including owner-only
 composition and single-range GET. Integrated server tests passed normal/race/vet;
 actual 2-CLI/2-DB PC1440/390 browser create/upload/download/delete, peer-state,
@@ -10,9 +10,14 @@ root wiring and XML serialization are not proved by those models. Typed XML
 serialization preserves288 legacy byte-exact payload cases and2 oversized refusals;
 one fresh package profile has91.60% unfiltered source coverage, not the whole-module figure.
 
-Official SDK execution, full repository regression/coverage, immutable formal
-applicability, hosted CI and merge remain pending. This is not Azure RBAC/Entra,
-a full portal clone, ARM/Bicep, real-cloud parity or Challenge grading completion.
+The pinned official Python SDK acceptance passed on 2026-11-05 for ten disclosed
+exact-key cases per team, actual range downloads, ETag conditions, checksums,
+pagination, denial, restart and cleanup in two authenticated CLIs. Requests'
+literal `/./` and `/../` normalization is explicitly excluded and asserted, not
+hidden by transport rewriting. See the current SDK section below. This focused
+execution does not establish final backlog-integration regression, formal
+applicability or hosted CI success. It is not Azure RBAC/Entra, a full portal
+clone, ARM/Bicep, real-cloud parity or Challenge grading completion.
 See [integration boundaries](multicloud-storage.md) and
 [browser acceptance](acceptance/crossprovider-console.md).
 
@@ -112,14 +117,16 @@ account/environment/operation/container/prefix and survive restart using the sav
 account secret. They do not grant authority. Listings are live, not immutable
 snapshots; changing the dataset between pages can change results. Metadata-heavy
 pages may require a smaller maxresults. Delimiter/hierarchical listing is unsupported.
-ServiceEndpoint in list XML is a local relative account path; SDK handling is unverified.
+ServiceEndpoint in list XML is a local relative account path. The pinned Python
+SDK acceptance successfully parsed the actual list/pagination responses; this
+does not establish handling by other clients or versions.
 
 HTML/SVG blob bodies are returned as attachments with CSP sandbox/nosniff.
 Response sizes and XML encoding are checked before a successful listing is written;
 HEAD never writes an object body. Local download presentation differs intentionally
 from public Azure static website hosting, which is unsupported.
 
-## Prepared verification and remaining integration
+## Historical component and model verification
 
 Source tests cover required authorization/missing actor, actual transaction owner,
 all nine operations, same-name accounts, persistence, thirteen literal neighbors,
@@ -134,10 +141,11 @@ package vet passed with the same bounds. This includes nine independent literal
 permission names/kinds and the conditional GET/DELETE authorization/refusal
 state assertions described below. The permission port now carries explicit
 `Permission{Name, Kind}` rather than an ambiguous action string. These are native
-httptest/SQLite results, not a running CLI/provider integration. Whole-module coverage,
-SDK compatibility, actual prefixed server routing, multi-process Access tests,
-license/security integration and hosted CI remain separate gates. No new SDK or
-dependency is installed. Public PR/Issue/release operations remain held independently.
+httptest/SQLite results, not a running CLI/provider integration. At those
+checkpoints, whole-module coverage, SDK execution, actual prefixed routing,
+multi-process Access, license/security and hosted CI remained separate gates;
+no SDK was installed and publication was held. Those historical states are not
+the current SDK execution status or a replacement for current authorization.
 
 The prepared AzureBlobState model bounds two account scopes, one container per
 scope, two abstract keys/values, three accepted writes and small abstract row/byte
@@ -175,8 +183,9 @@ Primary Microsoft references inspected without sign-in or real resource creation
 - [Supported prior API versions](https://learn.microsoft.com/en-us/rest/api/storageservices/previous-azure-storage-service-versions)
 - [Python BlobServiceClient constructor/API-version override](https://learn.microsoft.com/en-us/python/api/azure-storage-blob/azure.storage.blob.blobserviceclient?view=azure-python)
 
-Microsoft documentation describes the service/SDK contracts; it is not evidence
-that this unregistered local leaf is Azure SDK-compatible. Kumo's pinned architecture
+Microsoft documentation describes the service/SDK contracts; it is not execution
+evidence. The bounded SDK result comes from the actual acceptance recorded below,
+not those references. Kumo's pinned architecture
 was consulted as design reference only; it contains AWS implementations rather than
 an Azure backend. No upstream service code or credential-discovery logic was copied.
 
@@ -184,7 +193,7 @@ an Azure backend. No upstream service code or credential-discovery logic was cop
 
 `NewOwnedHandler(db, cfg, extractor)` fixes one synthetic account, environment and
 owner in trusted host configuration. The required extractor receives only a Go
-context and returns an authenticated exercise identity; a future common-provider
+context and returns an authenticated exercise identity; the common-provider
 adapter maps `provider.Actor.ExerciseIdentity`, never credential role. The factory
 replaces any previous leaf actor. Missing/invalid identity refuses with403. Its
 required transaction-aware policy grants only the configured owner, actual saved
@@ -199,22 +208,37 @@ offline dependency resolution, timeout60s). The real-loopback HTTP tests mount t
 trusted context fixture middleware, check provider-prefixed lifecycle, fixed
 same-named account/key separation across environments, nonowner/missing-context
 refusal with unchanged saved state, SQLite reopen/ETag persistence and attachment
-download. This is not actual server Access authentication. The current base
-registry clears RawPath; escaped-delimiter/percent collision fidelity must be
-verified after root integrates its separate registry fix. No shared server,
-registry, UI or authentication code is changed by this leaf factory.
+download. That checkpoint was not actual server Access authentication. Its base
+registry cleared RawPath, so escaped-delimiter/percent fidelity then awaited
+the root registry fix. The subsequent native/browser and official SDK checks
+are separate evidence; the leaf factory itself did not edit shared server,
+registry, UI or authentication code.
 
-Actual `azure-storage-blob` SDK acceptance remains pending: the environment has no
-installed SDK, and this change does not install dependencies. The planned driver
-uses a real root-composed loopback endpoint including the provider/account prefix,
-`api_version="2023-11-03"`, no cloud credentials, and the host's supported local
-token transport. It must test actual SDK endpoint construction, all implemented
-container/blob lifecycle operations, exact literal keys, two authenticated owners
-and a rejected nonowner, metadata/checksum/ETag conditions, listing continuations,
-restart and cascade cleanup. SDK-generated unsupported headers/options and the
-relative list ServiceEndpoint must be observed; compatibility fixes or explicit
-rejection must precede any SDK-supported claim. No SDK success is inferred from
-native HTTP tests or this plan.
+### Executed official Python SDK subset
+
+The previous missing-dependency/source-only plan is superseded by actual
+`azure-storage-blob==12.31.1`, `azure-core==1.41.0` and `requests==2.34.2`
+execution. The acceptance uses the real provider/account-prefixed endpoint,
+`api_version="2023-11-03"`, anonymous credentials and the supported local-token
+hook. It passed actual create/upload/list/download/delete, ten exact names per
+team, two independently authenticated processes, denied nonowner writes,
+MD5/ETag conditions, pagination, restart and cleanup. The real range-request
+download and relative list ServiceEndpoint are retained, not replaced with raw
+HTTP. Staged uploads, other API versions and all SDK defaults are not claimed.
+
+The original twelve-name source candidate had not accounted for Requests
+normalizing `a/./b` to `a/b` and `a/../b` to `b` before transmission. These two
+cases are explicitly excluded from the positive SDK lifecycle and reported in
+`excluded_sdk_key_cases`. An independent real-SDK/PreparedRequest check requires
+exactly those two transformations and unchanged preparation of every other key.
+The native thirteen-neighbor tests and full GCP twelve-key oracle are unchanged;
+no client path rewriting manufactures exact-name parity.
+
+See [official SDK acceptance](acceptance/crossprovider-official-storage.md) for
+the complete configuration and commands. Azure-only execution passed against
+clean main `f5dba05`; the subsequent combined GCP/Azure run passed against the
+root integration working binary. These focused results do not establish the
+final committed integration's full regression/formal/hosted CI status.
 
 ## Single-range download subset
 
@@ -237,7 +261,9 @@ checksums or these response headers; native boundary tests are separate evidence
 
 References: [Get Blob response and range checksum rules](https://learn.microsoft.com/en-us/rest/api/storageservices/get-blob)
 and [Azure's two documented range formats](https://learn.microsoft.com/en-us/rest/api/storageservices/specifying-the-range-header-for-blob-service-operations).
-No actual Azure differential result or actual SDK success is inferred.
+These specifications and native range checks alone do not establish actual
+Azure differential or SDK success; the separate executed Python acceptance
+provides the bounded SDK download evidence described above.
 
 At native checkpoint `e6cb13d`, all16 package tests including the owner-only
 factory and range boundaries passed normally (2.258s), under race (11.688s),
@@ -246,5 +272,7 @@ and package vet passed. GOMAXPROCS1, -p1, offline dependency resolution and the
 ranges, x-ms-range precedence, clamping,416, unsupported suffix/multiple ranges,
 repeated headers, empty objects, conditional304/412, exact4MiB range MD5, rejected
 oversize checksum and denied caller responses with unchanged full persisted
-state. This is native httptest/SQLite and fixture-loopback evidence only; actual
-SDK, authenticated server composition and whole-repository CI are still pending.
+state. This is historical native httptest/SQLite and fixture-loopback evidence
+only; SDK, authenticated server composition and whole-repository CI were still
+pending at `e6cb13d`. Later SDK execution is recorded separately above, without
+claiming fresh final integration CI success.

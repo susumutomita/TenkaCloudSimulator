@@ -1,5 +1,8 @@
 # Finite state model
 
+Current backlog integration registers **26 finite models and149 required sensitivity controls** (175 TLC executions). The registry in `formal/models.json` and immutable CI reports are authoritative. Counts and candidate statuses in dated receipts below describe historical inputs; they are not current integration results. These models do not prove Go/SQL/HTTP/UI refinement or complete cloud compatibility.
+
+
 `ObjectStore.tla` models two buckets and two keys, shared object ownership, create/put/delete transitions, and an abstract identity decision `allow /\ ~deny`. `ObjectStore.cfg` checks type correctness, no orphan objects, no unauthorized mutation, and explicit-deny precedence.
 
 Run `TLA_JAR=/path/to/tla2tools.jar make formal`. The jar is TLC 1.7.4 from the official tlaplus/tlaplus release and checked against `tla2tools.sha256`. The script also removes the nonempty-delete guard in a temporary mutant and requires TLC to detect a NoOrphans violation. No Java/TLC dependency is needed at application runtime.
@@ -124,7 +127,7 @@ BrowserSessions, SQSLifecycle and SQSStorageBudget remain mandatory in the large
 The registry adds ProviderActor (7 properties/6 sensitivity controls),
 GCPStorageState (10 properties/8 controls), and AzureBlobState (10 properties/11
 controls), plus ProjectAuthority (10 properties/6 controls), BlobRange (11 properties/8 controls), and ProviderPath (finite carrier properties/7 controls), retaining all existing models/controls. The current source registry
-has19 models/98 controls in the current SQS candidate (main has18/94). Individual finite runs and the final immutable integrated
+has19 models/98 controls in main before this KMS restack. Individual finite runs and the final immutable integrated
 run are recorded separately; registration alone is not a successful TLC run.
 
 ProviderActor abstracts post-authentication emission, selected identity and
@@ -208,7 +211,7 @@ Documentation-only children do not change model bytes; each final HEAD still
 requires its own immutable input/applicability gate before publication.
 
 
-Historical KMS restack contributed two models to main18/94. The current SQS candidate preserves all of them and adds SQSConsoleEpoch. Earlier branch receipts do not establish current-head success.
+Current main-preserving KMS restack:18 baselines/94 controls, retaining every main16/82 entry and adding only the two owned KMS models. The current merged source has not run TLC, native/browser or whole-profile acceptance. Earlier911/8ccc receipts do not establish current-head success.
 
 ## Current SQS console main integration
 
