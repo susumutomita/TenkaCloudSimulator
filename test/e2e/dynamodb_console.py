@@ -8,6 +8,7 @@ import re
 import shutil
 import tempfile
 import time
+import traceback
 import urllib.error
 import urllib.request
 from urllib.parse import urlsplit
@@ -34,7 +35,8 @@ def run():
         text=str(failure)
         for secret in PRIVATE:
             if secret:text=text.replace(secret,'[redacted]')
-        raise RuntimeError(type(failure).__name__+': '+text) from None
+        locations=' > '.join(Path(frame.filename).name+':'+str(frame.lineno) for frame in traceback.extract_tb(failure.__traceback__))
+        raise RuntimeError(type(failure).__name__+': '+text+' ['+locations+']') from None
     finally:PRIVATE.clear()
 
 
@@ -154,6 +156,7 @@ def _run():
                         page.get_by_role('button',name='Delete table',exact=True).click();page.get_by_role('dialog').get_by_role('button',name='Cancel',exact=True).click();assert own.describe_table(TableName=name)['Table']['TableId']==meta['TableId']
                         page.get_by_role('button',name='Delete table',exact=True).click();page.get_by_label('Confirm table name',exact=True).fill(name);native('Delete','DeleteTable',page.get_by_role('dialog'));expect(page.get_by_role('button',name='Refresh tables',exact=True)).to_be_enabled()
                         assert name not in own.list_tables()['TableNames'];assert peer.get_item(TableName=name,Key=key)['Item']['payload']=={'S':'peer must survive'}
+                        (REPORTS/('transport-'+kind+'-'+str(width)+'.json')).write_text(json.dumps({'calls':calls,'responses':responses,'failed':failed,'pageErrors':len(errors),'outside':len(outside)},indent=2)+'\n')
                         assert set(calls)==OPS;assert failed==['DescribeTable'];assert len(responses)+1==len(calls);assert calls.count('CreateTable')==1 and calls.count('DeleteTable')==1 and calls.count('DeleteItem')==1 and calls.count('PutItem')==3
                         assert all(status==200 or op=='PutItem' and status==400 for op,status in responses);assert not errors and not outside
                         flows.append({'width':width,'keyType':kind,'sortKey':sort,'partitionKeyName':pk,'operations':sorted(set(calls)),'postACKReadAbort':1,'readRetryDidNotRepeatPut':True,'conditionalAndDuplicateRefused':True,'cancelNoMutation':True,'reader403NoMutation':True,'keyChangeClearsOldResult':True})
