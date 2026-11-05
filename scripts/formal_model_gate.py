@@ -9,10 +9,11 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-BASE_MODELS = {'CFNConditionAdmission', 'DynamoDBConsoleEpoch', 'SecretVersionListing', 'NativeWireProjection', 'RESTRouteMatching', 'RESTProxyEventBoundary', 'AzurePropertiesTarget', 'AzurePropertiesEpoch', 'AzureBlobState', 'BlobRange', 'BrowserSessions', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'DynamoDBAdmission', 'DynamoDBLifecycle', 'GCPStorageState', 'KMSKeyState', 'KMSProtocolAdmission', 'IAMManagedPolicies', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'SecretsDisclosureChannels', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'SecretsMutationRefresh', 'StackOwnership', 'StartupTokenVisibility'}
+BASE_MODELS = {'CFNConditionAdmission', 'SecretMetadataViewEpoch', 'DynamoDBConsoleEpoch', 'SecretVersionListing', 'NativeWireProjection', 'RESTRouteMatching', 'RESTProxyEventBoundary', 'AzurePropertiesTarget', 'AzurePropertiesEpoch', 'AzureBlobState', 'BlobRange', 'BrowserSessions', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'DynamoDBAdmission', 'DynamoDBLifecycle', 'GCPStorageState', 'KMSKeyState', 'KMSProtocolAdmission', 'IAMManagedPolicies', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'SecretsDisclosureChannels', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'SecretsMutationRefresh', 'StackOwnership', 'StartupTokenVisibility'}
 BASE_INVARIANTS = {
-    'CFNConditionAdmission': {'BothBranchesValidated', 'DisabledResourcesAbsent', 'SelectedLinkValidated', 'PlanExact', 'TypeOK', 'DisabledDeclarationsValidated', 'ConditionalOutputsAbsent', 'ListNoValuePruned', 'SelectedBranchExact', 'AllConditionsValidated', 'ParameterAdmission', 'MapNoValuePruned', 'NoEarlyPublication', 'NoResultOnInvalid'},
+    'CFNConditionAdmission': {'ListNoValuePruned', 'SelectedBranchExact', 'NoEarlyPublication', 'NoResultOnInvalid', 'PlanExact', 'BothBranchesValidated', 'ConditionalOutputsAbsent', 'AllConditionsValidated', 'DisabledDeclarationsValidated', 'MapNoValuePruned', 'ParameterAdmission', 'TypeOK', 'DisabledResourcesAbsent', 'SelectedLinkValidated'},
     'DynamoDBConsoleEpoch': {'AckBelongsToCurrentView', 'ReadRetryNeverWrites', 'SingleSendBeforeACK', 'ReadGenerationVerified', 'AckClosesDraft', 'DisplayedKeyBound', 'TypeOK', 'CancelNoOrphanLoading', 'NoStalePublication', 'LocalePreservesDraft'},
+    'SecretMetadataViewEpoch': {'ParentRevealClearedForMetadata', 'PendingClearsMetadata', 'NoStaleCallbackAcceptance', 'NoStaleRenderedError', 'CursorRequestBound', 'TypeOK', 'MetadataRequestsOnly', 'LocalePreservesQuery', 'CurrentPageOnly', 'NoRowsOnError', 'LoadingTracksLatest', 'ValidatedMetadataOnly', 'NoStaleRenderedMetadata'},
     'SecretVersionListing': {'NoDeniedEmission', 'ReadAfterAuthorization', 'TerminalConverges', 'StrictForwardKeyset', 'ContinuationPosition', 'TypeOK', 'FilterBeforePageLimit', 'TokenScopeBound', 'ReadFramePreserved'},
     'NativeWireProjection': {'BadValueRefused', 'ValueKindsPreserved', 'FailureNoPartial', 'OmissionExact', 'OrderExact', 'TypeOK', 'SkippedBadDoesNotFail', 'CompleteProjection'},
     'RESTRouteMatching': {'MatchOracle', 'CaptureFidelity', 'InvalidTemplateRejected', 'Specificity', 'TypeOK', 'RejectedShape'},
@@ -50,7 +51,8 @@ BASE_INVARIANTS = {
 }
 # Established controls require an explicit gate-policy change before retirement.
 REQUIRED_MUTANTS = {
-    'CFNConditionAdmission': {'DisabledDeclarationBypass', 'FailedResultPublished', 'UnusedElseSyntaxBypass', 'DefaultOverrideBypass', 'WrongSelectedArm', 'ListNoValueRetained', 'EarlyResultPublished', 'MapNoValueRetained', 'InvalidSuppliedAccepted', 'CycleAccepted', 'DisabledOutputIncluded', 'UnknownParameterAccepted', 'SelectedLinkBypass', 'DisabledResourceIncluded'},
+    'CFNConditionAdmission': {'CycleAccepted', 'DisabledDeclarationBypass', 'MapNoValueRetained', 'DisabledResourceIncluded', 'WrongSelectedArm', 'DefaultOverrideBypass', 'InvalidSuppliedAccepted', 'DisabledOutputIncluded', 'FailedResultPublished', 'EarlyResultPublished', 'UnusedElseSyntaxBypass', 'UnknownParameterAccepted', 'SelectedLinkBypass', 'ListNoValueRetained'},
+    'SecretMetadataViewEpoch': {'AppendPreviousPage', 'LateCallbackAccepted', 'OldFinallyClearsNewLoading', 'NextFilterContext', 'ChildRequestsValue', 'ErrorFabricatesRows', 'ParentKeepsPriorReveal', 'RenderOldMetadata', 'UnmountWithoutCleanup', 'ScopeCommitKeepsLoading', 'SkipPayloadValidation', 'NewReadKeepsOldRows', 'RenderOldNativeError', 'LocaleResetsQuery'},
     'DynamoDBConsoleEpoch': {'RetryRepeatsWrite', 'RemoveSynchronousOwnerLock', 'KeepDisplayedItemOnKeyEdit', 'IgnoreReadViewGuard', 'ACKKeepsDraft', 'CancelKeepsLoading', 'IgnoreWriteViewGuard', 'IgnorePostReadGeneration', 'ACKKeepsForm', 'LocaleClearsDirtyDraft'},
     'SecretVersionListing': {'GenerationBindingBypass', 'DomainBypass', 'FilterBindingBypass', 'MissingNextToken', 'AuthorityKeyBypass', 'ExpiryBypass', 'InclusiveResume', 'ReadWritesVersionState', 'FilterAfterLimit', 'RegionBindingBypass', 'AuthorizationBypass', 'SignatureBypass', 'StaleNextPosition'},
     'NativeWireProjection': {'AcceptBadValue', 'IgnoreOmission', 'PublishErrorPrefix', 'ReverseFieldOrder', 'EncodeOmittedBad', 'CollapseNullToZero'},
@@ -88,7 +90,8 @@ REQUIRED_MUTANTS = {
     'StartupTokenVisibility': {'OmittedCIGuard', 'OmittedTTYGuard', 'OverwriteExistingToken'},
 }
 REQUIRED_SOURCE_SCOPES = {
-    'CFNConditionAdmission': {'internal/aws/cloudformation_conditions_link.go', 'internal/aws/cloudformation_conditions.go', 'internal/aws/cloudformation.go'},
+    'CFNConditionAdmission': {'internal/aws/cloudformation.go', 'internal/aws/cloudformation_conditions.go', 'internal/aws/cloudformation_conditions_link.go'},
+    'SecretMetadataViewEpoch': {'tools/console/src/secrets-manager.jsx', 'internal/server/web/app.js', 'tools/console/src/secret_versions.jsx'},
     'DynamoDBConsoleEpoch': {'internal/server/web/app.js', 'tools/console/src/main.jsx', 'tools/console/src/dynamodb.jsx'},
     'SecretVersionListing': {'internal/aws/secrets_manager_versions_http_test.go', 'internal/aws/secret_http.go', 'internal/aws/secrets_manager_versions.go', 'internal/aws/secrets_manager_versions_test.go'},
     'NativeWireProjection': {'internal/aws/wire_json_projection.go'},

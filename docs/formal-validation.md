@@ -15,11 +15,11 @@ machine-discovered semantic coverage. A newly added implementation file is not
 covered merely because an existing model passes: its exact path must have an
 appropriate reviewed scope mapping and property argument.
 
-The current registry has 36 baselines/234 required named mutation controls
-(270 required executions). The 35 main74 model entries and 220 controls are
+The current registry has 37 baselines/248 required named mutation controls
+(285 required executions). The 36 main `6abcbca4` model entries and 234 controls are
 preserved. CFNConditionAdmission adds a finite compile-plan projection with 14
-controls, scoped at `f69fb46`; the complete 270-case registered gate of this
-candidate is still pending. Numeric/regex/parser correctness, actual resource
+controls, scoped at `f69fb46`; the complete 285-case registered gate of this
+candidate is still pending. SecretMetadataViewEpoch from main is preserved byte-for-byte. Numeric/regex/parser correctness, actual resource
 provisioning and NoEcho/output secrecy are not proved by this model.
 The new IAM scope is four API-reachable seeds and at most two subsequent requests;
 the broader four-request exploratory candidate timed out and is not claimed.

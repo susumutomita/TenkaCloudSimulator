@@ -3,12 +3,12 @@ package aws
 import (
 	"crypto/sha256"
 	"database/sql"
-	_ "embed"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"sort"
 	"strings"
 	"testing"
@@ -20,9 +20,16 @@ import (
 // susumutomita/TenkaCloudChallenge a749b142416770abee3f173673702c55df3856aa,
 // battles/crypto-battle/template.yaml. License retained beside this fixture.
 // No problem code executes, and this is not a coordination/scoring substitute.
-//
-//go:embed testdata/crypto-battle-a749.yaml
-var stackCryptoOriginal string
+// Go test runs this package from internal/aws. The fixture is test-only; it is
+// not embedded into the regular simulator binary or executed as problem code.
+func stackCryptoTemplate(t *testing.T) string {
+	t.Helper()
+	raw, err := os.ReadFile("../../test/fixtures/crypto-battle-a749/template.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	return string(raw)
+}
 
 func stackCryptoParameters(enabled bool) map[string]string {
 	p := map[string]string{"NamePrefix": "tc-crypto-team", "TenkaCloudAccountId": "000000000000", "ExternalId": strings.Repeat("L", 16), "ScoreStealSeed": strings.Repeat("D", 32)}
@@ -92,6 +99,7 @@ func stackConditionalDBFrame(t *testing.T, db *sql.DB) string {
 }
 
 func TestStackConditionalOriginalCryptoNativeLifecycle(t *testing.T) {
+	stackCryptoOriginal := stackCryptoTemplate(t)
 	digest := sha256.Sum256([]byte(stackCryptoOriginal))
 	if hex.EncodeToString(digest[:]) != "fb2af9be3ba67619b80de0ad8f00dc102aaade740742aea5861c9039d8bd09e6" {
 		t.Fatal("original catalog fixture changed")
@@ -209,6 +217,7 @@ func TestStackConditionalOriginalCryptoNativeLifecycle(t *testing.T) {
 }
 
 func TestStackConditionalInvalidDefinitionsPreserveNativeFrame(t *testing.T) {
+	stackCryptoOriginal := stackCryptoTemplate(t)
 	db, _, _, _ := s3StackState(t)
 	before := stackConditionalDBFrame(t, db.Database())
 	for _, change := range []func(map[string]string){func(p map[string]string) { p["ScoreStealKey"] = "10" }, func(p map[string]string) { p["ScoreStealEnabled"] = "TRUE" }, func(p map[string]string) { p["ScoreStealSeed"] = strings.Repeat("-", 32) }, func(p map[string]string) { p["Unknown"] = "dummy" }} {
@@ -281,6 +290,7 @@ func TestStackConditionalInactiveDeclarationsAndLinksFailClosed(t *testing.T) {
 }
 
 func TestStackConditionalSelectedNativeFailureRollsBack(t *testing.T) {
+	stackCryptoOriginal := stackCryptoTemplate(t)
 	db, _, stacks, parameters := s3StackState(t)
 	name := "/tc-crypto-team/score-item"
 	if _, err := parameters.Put("ap-northeast-1", name, "String", "existing-dummy", nil, false); err != nil {

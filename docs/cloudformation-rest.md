@@ -116,15 +116,21 @@ is a pure compile step before native state mutation; it adds no UpdateStack,
 custom resources, new resource types or host problem-specific behavior.
 
 The exact original catalog fixture is retained at
-`internal/aws/testdata/crypto-battle-a749.yaml` with its Apache-2.0 license and
+`test/fixtures/crypto-battle-a749/template.yaml` with its Apache-2.0 license and
 SHA-256 `fb2af9be3ba67619b80de0ad8f00dc102aaade740742aea5861c9039d8bd09e6`.
 Its default-disabled ScoreSteal condition omits the optional SSM item/permissions
 and conditioned outputs. A new enabled stack adds the SSM item and matching
 inline permissions. `test/e2e/cloudformation_crypto.py` is the mandatory proposed
 real-CLI/boto3 acceptance: unchanged fixture, two separate DB/token environments,
 defaults and enabled mode, actual SSM permissions/refusals, invalid-input and late
-name-conflict rollback, restart and cleanup. The helper is source-prepared and
-has not yet run in this candidate; it is not a game or grading acceptance.
+name-conflict rollback, restart and cleanup. At `2d76646` the helper passed against a regular embedded CLI: 73 SDK logical
+calls/sends/raw HTTP responses/parsed responses, plus nine auxiliary HTTP pairs,
+across four CLI process incarnations. This dated result is not the new combined
+54-case E2E or 285-case formal gate after the normal main merge; those are pending.
+It is not a game or grading acceptance. The separate SQLite ignored-write
+DeleteStack ACK correction remains an integration dependency before this
+candidate can be called merge-ready; happy-path cleanup does not prove every
+SQL/fault branch.
 
 `NoEcho` is accepted only as Boolean metadata. It does **not** guarantee secret
 storage or redaction: dummy parameter values persist in SQLite and are visible

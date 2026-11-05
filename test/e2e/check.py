@@ -577,6 +577,9 @@ def handler(event,context):
  def test_secrets_manager_version_metadata_native_sdk_and_cursor_scope(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('secrets_versions.py'))],check=True,timeout=180)
 
+ def test_secrets_manager_version_metadata_console_scope_and_paging(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('secret_versions_console.py'))],check=True,timeout=180)
+
  def test_secrets_manager_console_reveal_context_and_hide(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('secrets_manager_console.py'))],check=True)
 

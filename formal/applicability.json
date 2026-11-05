@@ -1,203 +1,251 @@
 {
   "version": 1,
-  "base_sha": "a8b920b264cf8060c6a49f7c4cd421a317ba94d2",
+  "base_sha": "6abcbca4bf6612e36470f7e69f29ea090566b8ea",
   "changes": [
     {
       "path": "README.ja.md",
-      "sha256": "25f514c14818a398d2102f8115f69ec636f25a80d8cfe521523cbebfe711ceec",
+      "sha256": "bcdc1848e6978af0a41d250a401de05e5462b4d8015ff4f0271353f85dfd6746",
       "disposition": "documentation",
-      "reason": "Documents actual bounded native/UI behavior, scoped receipts and unrun combined gates; no runtime execution or AWS parity claim.",
+      "reason": "Update bounded supported interfaces/limitations and dated73SDK/9HTTP evidence; registered285/full54/exact-head quality gates remain pending. No runtime logic in documentation.",
       "models": []
     },
     {
       "path": "README.md",
-      "sha256": "23021fad860d857f0b2235d409a966eae664109b0402b6a1fa47dcac0fe62938",
+      "sha256": "e5b67ac79f2185154f0d7f22194119ffb8c6c416f80b3b78b20b6d64dee42bdc",
       "disposition": "documentation",
-      "reason": "Documents actual bounded native/UI behavior, scoped receipts and unrun combined gates; no runtime execution or AWS parity claim.",
+      "reason": "Update bounded supported interfaces/limitations and dated73SDK/9HTTP evidence; registered285/full54/exact-head quality gates remain pending. No runtime logic in documentation.",
       "models": []
     },
     {
-      "path": "docs/dynamodb.md",
-      "sha256": "277523a977bba19465baa572b9dc765ecd4d594222253d4275b66c8319c4633f",
+      "path": "docs/cloudformation-rest.md",
+      "sha256": "74dec4d9e9ebcd17b9f0ece7c04590830b0774a186657e235aadc8fc401410c4",
       "disposition": "documentation",
-      "reason": "Documents actual bounded native/UI behavior, scoped receipts and unrun combined gates; no runtime execution or AWS parity claim.",
+      "reason": "Update bounded supported interfaces/limitations and dated73SDK/9HTTP evidence; registered285/full54/exact-head quality gates remain pending. No runtime logic in documentation.",
       "models": []
     },
     {
-      "path": "formal/DynamoDBConsoleEpoch.cfg",
-      "sha256": "fe29c57429b02e9e0a44e8e11a60e1427019256fd9ead3a40b2e060c9fb26b9a",
+      "path": "docs/formal-validation.md",
+      "sha256": "2ba04c472c31d5afd383e788b3a6ae4d827cca8af12e94b57610f78f7afe0a8f",
+      "disposition": "documentation",
+      "reason": "Update bounded supported interfaces/limitations and dated73SDK/9HTTP evidence; registered285/full54/exact-head quality gates remain pending. No runtime logic in documentation.",
+      "models": []
+    },
+    {
+      "path": "formal/CFNConditionAdmission.cfg",
+      "sha256": "621e6016581706020fa8ba8e0feb9e366d18c893e8a1613746ea27ff66bb183c",
       "disposition": "modeled",
-      "reason": "Independent bounded console context/read epoch/key/TableId-at-acceptance/form cancellation/synchronous owner/ACK-before-refresh/read-only retry model; not native storage, protocol/IAM/SQL correctness or unbounded JavaScript/React refinement. Concrete browser and native tests are separate evidence.",
+      "reason": "Bounded CFN pure compile-plan admission/selection projection only. Native parameter/condition/branch checking and selected plan filtering are mapped to the finite model; scope does not establish every behavior in this file, exact error precedence, SQL state mutation, IAM, NoEcho/private outputs or host grading. The original-fixture SDK proof is dated2d76646 and remains separate from this combined immutable revision.",
       "models": [
         {
-          "id": "DynamoDBConsoleEpoch",
+          "id": "CFNConditionAdmission",
           "properties": [
             "TypeOK",
-            "NoStalePublication",
-            "ReadGenerationVerified",
-            "DisplayedKeyBound",
-            "CancelNoOrphanLoading",
-            "AckClosesDraft",
-            "AckBelongsToCurrentView",
-            "ReadRetryNeverWrites",
-            "SingleSendBeforeACK",
-            "LocalePreservesDraft"
+            "ParameterAdmission",
+            "AllConditionsValidated",
+            "DisabledDeclarationsValidated",
+            "BothBranchesValidated",
+            "SelectedLinkValidated",
+            "NoResultOnInvalid",
+            "NoEarlyPublication",
+            "SelectedBranchExact",
+            "MapNoValuePruned",
+            "ListNoValuePruned",
+            "DisabledResourcesAbsent",
+            "ConditionalOutputsAbsent",
+            "PlanExact"
           ],
-          "limits": "UI finite safety abstraction only, not JS/React/AbortController scheduling refinement, native protocol/JSON/IAM/auth/SQLite state/number/binary/size/capacity proof. TableId checks establish agreement at item-read acceptance only, not freshness after later native changes or atomic TableId-CAS on mutation; official TableName writes remain subject to recreation between preflight and send. Combined context labels abstract principal/region/remount, not credentials/tenant isolation. Stutter observation admits no liveness/hung-read progress claim. One write intent only; symbolic ACK/no automatic replay, not server rollback when an aborted request already committed. No concrete item values, missing-item/delete-confirmation semantics or arbitrary pagination. Main caller scope is limited to the DynamoDB route and its region|principal|navigation mount key/reset; embedded app.js is the canonical derived component/caller artifact. Neither binding proves other shell/components, compiler/bundler correctness or JavaScript refinement."
+          "limits": "Finite validation witnesses, not real Go constraint evaluation, rational arithmetic, regex, UTF8/byte limits, YAML/JSON parser or graph recursion refinement. Condition equality is an immutable Boolean input; alias/cycle/unknown graphs are abstract witnesses, not evaluated graph nodes. Chosen symbol-link validity is abstract and integration binding remains pending actual compiler freeze. Unused branch syntax is validated; resource linking is distinct. No SQL, transaction, runtime provisioning, policy grant, output privacy/NoEcho, grader execution, VM or host authority proof. selectedLink witness is an unconditional BaseRole link, independent of the optional map/list arm; NoValue can prune that optional arm while BaseRole linking still fails. Exact compiler4177 correspondence is a bounded plan-admission projection only: outer declaration validation actually precedes parameters, unlike the model phase order. Both-arm raw Ref/GetAtt/Sub validation, active-disabled dependency graph, resource schema allowlists/copies/ordering are separate native obligations, not modeled individually. Resource/output sets represent a pure StackRecord plan, not SQL/resource allocation, rollback, grant, NoEcho/private-output filtering or host grading. File scope covers only these named compile preparation contracts, not every behavior in cloudformation.go."
         }
       ]
     },
     {
-      "path": "formal/DynamoDBConsoleEpoch.tla",
-      "sha256": "da131cfbaa28709430cc4de67ca16f9674f33d6cd8f87e21475d592f9a13a4ed",
+      "path": "formal/CFNConditionAdmission.tla",
+      "sha256": "b78dd541278c9f807cbc0caf775ee6650250a0d2e9b8da9e9ceed2d594104703",
       "disposition": "modeled",
-      "reason": "Independent bounded console context/read epoch/key/TableId-at-acceptance/form cancellation/synchronous owner/ACK-before-refresh/read-only retry model; not native storage, protocol/IAM/SQL correctness or unbounded JavaScript/React refinement. Concrete browser and native tests are separate evidence.",
+      "reason": "Bounded CFN pure compile-plan admission/selection projection only. Native parameter/condition/branch checking and selected plan filtering are mapped to the finite model; scope does not establish every behavior in this file, exact error precedence, SQL state mutation, IAM, NoEcho/private outputs or host grading. The original-fixture SDK proof is dated2d76646 and remains separate from this combined immutable revision.",
       "models": [
         {
-          "id": "DynamoDBConsoleEpoch",
+          "id": "CFNConditionAdmission",
           "properties": [
             "TypeOK",
-            "NoStalePublication",
-            "ReadGenerationVerified",
-            "DisplayedKeyBound",
-            "CancelNoOrphanLoading",
-            "AckClosesDraft",
-            "AckBelongsToCurrentView",
-            "ReadRetryNeverWrites",
-            "SingleSendBeforeACK",
-            "LocalePreservesDraft"
+            "ParameterAdmission",
+            "AllConditionsValidated",
+            "DisabledDeclarationsValidated",
+            "BothBranchesValidated",
+            "SelectedLinkValidated",
+            "NoResultOnInvalid",
+            "NoEarlyPublication",
+            "SelectedBranchExact",
+            "MapNoValuePruned",
+            "ListNoValuePruned",
+            "DisabledResourcesAbsent",
+            "ConditionalOutputsAbsent",
+            "PlanExact"
           ],
-          "limits": "UI finite safety abstraction only, not JS/React/AbortController scheduling refinement, native protocol/JSON/IAM/auth/SQLite state/number/binary/size/capacity proof. TableId checks establish agreement at item-read acceptance only, not freshness after later native changes or atomic TableId-CAS on mutation; official TableName writes remain subject to recreation between preflight and send. Combined context labels abstract principal/region/remount, not credentials/tenant isolation. Stutter observation admits no liveness/hung-read progress claim. One write intent only; symbolic ACK/no automatic replay, not server rollback when an aborted request already committed. No concrete item values, missing-item/delete-confirmation semantics or arbitrary pagination. Main caller scope is limited to the DynamoDB route and its region|principal|navigation mount key/reset; embedded app.js is the canonical derived component/caller artifact. Neither binding proves other shell/components, compiler/bundler correctness or JavaScript refinement."
+          "limits": "Finite validation witnesses, not real Go constraint evaluation, rational arithmetic, regex, UTF8/byte limits, YAML/JSON parser or graph recursion refinement. Condition equality is an immutable Boolean input; alias/cycle/unknown graphs are abstract witnesses, not evaluated graph nodes. Chosen symbol-link validity is abstract and integration binding remains pending actual compiler freeze. Unused branch syntax is validated; resource linking is distinct. No SQL, transaction, runtime provisioning, policy grant, output privacy/NoEcho, grader execution, VM or host authority proof. selectedLink witness is an unconditional BaseRole link, independent of the optional map/list arm; NoValue can prune that optional arm while BaseRole linking still fails. Exact compiler4177 correspondence is a bounded plan-admission projection only: outer declaration validation actually precedes parameters, unlike the model phase order. Both-arm raw Ref/GetAtt/Sub validation, active-disabled dependency graph, resource schema allowlists/copies/ordering are separate native obligations, not modeled individually. Resource/output sets represent a pure StackRecord plan, not SQL/resource allocation, rollback, grant, NoEcho/private-output filtering or host grading. File scope covers only these named compile preparation contracts, not every behavior in cloudformation.go."
         }
       ]
     },
     {
       "path": "formal/README.md",
-      "sha256": "67b2256ad8e0c7420e9a04b1690d6b6250511b2d71306770cfac080d41c2b930",
+      "sha256": "50e05a3c19c8806be2f1fe34622c52ebfb60a9937558eb4c99a22f99c6799af4",
       "disposition": "documentation",
-      "reason": "Documents actual bounded native/UI behavior, scoped receipts and unrun combined gates; no runtime execution or AWS parity claim.",
+      "reason": "Update bounded supported interfaces/limitations and dated73SDK/9HTTP evidence; registered285/full54/exact-head quality gates remain pending. No runtime logic in documentation.",
       "models": []
     },
     {
       "path": "formal/models.json",
-      "sha256": "8496f209ce144dbea0f898e20736db1f0baf908fc8328d781fbdb250ef1f83fc",
+      "sha256": "d2b99c6e5e58c81d6603e903a2d3239b720bdb17af0c41e4b3de53c45c3d8032",
       "disposition": "formal-infrastructure",
-      "reason": "Adds literal-required DynamoDB console model/property/control/source inventory without changing checker functions, CFG grammar, old33 models or197 controls; negative removal tests protect the additive obligations.",
+      "reason": "Preserve main36models/234controls and add CFN1/14, retaining all prior required obligations. Exact inventory literals expand to37/248; each-property/control/scope/invalid-placeholder negative fixtures reject de-scoping without changing validator grammar or tool pins.",
       "models": []
     },
     {
-      "path": "internal/server/web/app.js",
-      "sha256": "50c7631e2b6eaf11d113fb1db8c3477ffdb3cf0e8d1a124e456ae90a6fedbc31",
+      "path": "internal/aws/cloudformation.go",
+      "sha256": "9320e98809343942616cd737f53bddc59fdecf0e4fd1c91035214e517b5f8f8d",
       "disposition": "modeled",
-      "reason": "Only the added DynamoDB route/component and region|principal|navigation mount key are related to finite old-view publication/ACK/key binding. Embedded app.js is the canonical same-lock derived artifact. Actual native browser tests separately exercise scope transitions. No claim about other bundled components, compiler/React refinement, IAM/SQL/native behavior or atomic TableId-CAS.",
+      "reason": "Bounded CFN pure compile-plan admission/selection projection only. Native parameter/condition/branch checking and selected plan filtering are mapped to the finite model; scope does not establish every behavior in this file, exact error precedence, SQL state mutation, IAM, NoEcho/private outputs or host grading. The original-fixture SDK proof is dated2d76646 and remains separate from this combined immutable revision.",
       "models": [
         {
-          "id": "DynamoDBConsoleEpoch",
+          "id": "CFNConditionAdmission",
           "properties": [
-            "NoStalePublication",
-            "AckBelongsToCurrentView",
-            "DisplayedKeyBound"
+            "TypeOK",
+            "ParameterAdmission",
+            "AllConditionsValidated",
+            "DisabledDeclarationsValidated",
+            "BothBranchesValidated",
+            "SelectedLinkValidated",
+            "NoResultOnInvalid",
+            "NoEarlyPublication",
+            "SelectedBranchExact",
+            "MapNoValuePruned",
+            "ListNoValuePruned",
+            "DisabledResourcesAbsent",
+            "ConditionalOutputsAbsent",
+            "PlanExact"
           ],
-          "limits": "UI finite safety abstraction only, not JS/React/AbortController scheduling refinement, native protocol/JSON/IAM/auth/SQLite state/number/binary/size/capacity proof. TableId checks establish agreement at item-read acceptance only, not freshness after later native changes or atomic TableId-CAS on mutation; official TableName writes remain subject to recreation between preflight and send. Combined context labels abstract principal/region/remount, not credentials/tenant isolation. Stutter observation admits no liveness/hung-read progress claim. One write intent only; symbolic ACK/no automatic replay, not server rollback when an aborted request already committed. No concrete item values, missing-item/delete-confirmation semantics or arbitrary pagination. Main caller scope is limited to the DynamoDB route and its region|principal|navigation mount key/reset; embedded app.js is the canonical derived component/caller artifact. Neither binding proves other shell/components, compiler/bundler correctness or JavaScript refinement."
+          "limits": "Finite validation witnesses, not real Go constraint evaluation, rational arithmetic, regex, UTF8/byte limits, YAML/JSON parser or graph recursion refinement. Condition equality is an immutable Boolean input; alias/cycle/unknown graphs are abstract witnesses, not evaluated graph nodes. Chosen symbol-link validity is abstract and integration binding remains pending actual compiler freeze. Unused branch syntax is validated; resource linking is distinct. No SQL, transaction, runtime provisioning, policy grant, output privacy/NoEcho, grader execution, VM or host authority proof. selectedLink witness is an unconditional BaseRole link, independent of the optional map/list arm; NoValue can prune that optional arm while BaseRole linking still fails. Exact compiler4177 correspondence is a bounded plan-admission projection only: outer declaration validation actually precedes parameters, unlike the model phase order. Both-arm raw Ref/GetAtt/Sub validation, active-disabled dependency graph, resource schema allowlists/copies/ordering are separate native obligations, not modeled individually. Resource/output sets represent a pure StackRecord plan, not SQL/resource allocation, rollback, grant, NoEcho/private-output filtering or host grading. File scope covers only these named compile preparation contracts, not every behavior in cloudformation.go."
         }
       ]
     },
     {
+      "path": "internal/aws/cloudformation_conditions.go",
+      "sha256": "7272a7d54964cf699a873a733279abc03be643da35be7bbb32b40103c9f5cfde",
+      "disposition": "modeled",
+      "reason": "Bounded CFN pure compile-plan admission/selection projection only. Native parameter/condition/branch checking and selected plan filtering are mapped to the finite model; scope does not establish every behavior in this file, exact error precedence, SQL state mutation, IAM, NoEcho/private outputs or host grading. The original-fixture SDK proof is dated2d76646 and remains separate from this combined immutable revision.",
+      "models": [
+        {
+          "id": "CFNConditionAdmission",
+          "properties": [
+            "TypeOK",
+            "ParameterAdmission",
+            "AllConditionsValidated",
+            "DisabledDeclarationsValidated",
+            "BothBranchesValidated",
+            "SelectedLinkValidated",
+            "NoResultOnInvalid",
+            "NoEarlyPublication",
+            "SelectedBranchExact",
+            "MapNoValuePruned",
+            "ListNoValuePruned",
+            "DisabledResourcesAbsent",
+            "ConditionalOutputsAbsent",
+            "PlanExact"
+          ],
+          "limits": "Finite validation witnesses, not real Go constraint evaluation, rational arithmetic, regex, UTF8/byte limits, YAML/JSON parser or graph recursion refinement. Condition equality is an immutable Boolean input; alias/cycle/unknown graphs are abstract witnesses, not evaluated graph nodes. Chosen symbol-link validity is abstract and integration binding remains pending actual compiler freeze. Unused branch syntax is validated; resource linking is distinct. No SQL, transaction, runtime provisioning, policy grant, output privacy/NoEcho, grader execution, VM or host authority proof. selectedLink witness is an unconditional BaseRole link, independent of the optional map/list arm; NoValue can prune that optional arm while BaseRole linking still fails. Exact compiler4177 correspondence is a bounded plan-admission projection only: outer declaration validation actually precedes parameters, unlike the model phase order. Both-arm raw Ref/GetAtt/Sub validation, active-disabled dependency graph, resource schema allowlists/copies/ordering are separate native obligations, not modeled individually. Resource/output sets represent a pure StackRecord plan, not SQL/resource allocation, rollback, grant, NoEcho/private-output filtering or host grading. File scope covers only these named compile preparation contracts, not every behavior in cloudformation.go."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cloudformation_conditions_integration_test.go",
+      "sha256": "638f5e2472fadb1f886acf14a66737c462860f931e9694211464640da94bbfc9",
+      "disposition": "test-support",
+      "reason": "Original exact Apache-2.0 crypto template/license relocated under test/fixtures, new pure/native boundary tests and mandatory realCLI/SDK helper. Test data is not a runtime provider or host grader and is never executed as problem code.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/cloudformation_conditions_link.go",
+      "sha256": "70f5602ea707c6e3e112b83aa2b8c69ca9573869d4f6e5133764fe37a70376ad",
+      "disposition": "modeled",
+      "reason": "Bounded CFN pure compile-plan admission/selection projection only. Native parameter/condition/branch checking and selected plan filtering are mapped to the finite model; scope does not establish every behavior in this file, exact error precedence, SQL state mutation, IAM, NoEcho/private outputs or host grading. The original-fixture SDK proof is dated2d76646 and remains separate from this combined immutable revision.",
+      "models": [
+        {
+          "id": "CFNConditionAdmission",
+          "properties": [
+            "TypeOK",
+            "ParameterAdmission",
+            "AllConditionsValidated",
+            "DisabledDeclarationsValidated",
+            "BothBranchesValidated",
+            "SelectedLinkValidated",
+            "NoResultOnInvalid",
+            "NoEarlyPublication",
+            "SelectedBranchExact",
+            "MapNoValuePruned",
+            "ListNoValuePruned",
+            "DisabledResourcesAbsent",
+            "ConditionalOutputsAbsent",
+            "PlanExact"
+          ],
+          "limits": "Finite validation witnesses, not real Go constraint evaluation, rational arithmetic, regex, UTF8/byte limits, YAML/JSON parser or graph recursion refinement. Condition equality is an immutable Boolean input; alias/cycle/unknown graphs are abstract witnesses, not evaluated graph nodes. Chosen symbol-link validity is abstract and integration binding remains pending actual compiler freeze. Unused branch syntax is validated; resource linking is distinct. No SQL, transaction, runtime provisioning, policy grant, output privacy/NoEcho, grader execution, VM or host authority proof. selectedLink witness is an unconditional BaseRole link, independent of the optional map/list arm; NoValue can prune that optional arm while BaseRole linking still fails. Exact compiler4177 correspondence is a bounded plan-admission projection only: outer declaration validation actually precedes parameters, unlike the model phase order. Both-arm raw Ref/GetAtt/Sub validation, active-disabled dependency graph, resource schema allowlists/copies/ordering are separate native obligations, not modeled individually. Resource/output sets represent a pure StackRecord plan, not SQL/resource allocation, rollback, grant, NoEcho/private-output filtering or host grading. File scope covers only these named compile preparation contracts, not every behavior in cloudformation.go."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cloudformation_conditions_test.go",
+      "sha256": "4f73e6930a9df8f6fec95ef9141655bd15c0458586e0ac035e491565410d2b61",
+      "disposition": "test-support",
+      "reason": "Original exact Apache-2.0 crypto template/license relocated under test/fixtures, new pure/native boundary tests and mandatory realCLI/SDK helper. Test data is not a runtime provider or host grader and is never executed as problem code.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/cloudformation_test.go",
+      "sha256": "795c0f06c79d799e9479f696f7202c7ed098b2104d81cbc477c32280e3fe5297",
+      "disposition": "test-support",
+      "reason": "Original exact Apache-2.0 crypto template/license relocated under test/fixtures, new pure/native boundary tests and mandatory realCLI/SDK helper. Test data is not a runtime provider or host grader and is never executed as problem code.",
+      "models": []
+    },
+    {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "2df98ef8cdb238c7e9a7a4134b0c415ffb4cfd1f2d881048006d992afde48e3e",
+      "sha256": "d975ffd34a046087d5e520737e2a9787bbb3feb8bbba14cdecb6dbd33eb7eb64",
       "disposition": "formal-infrastructure",
-      "reason": "Adds literal-required DynamoDB console model/property/control/source inventory without changing checker functions, CFG grammar, old33 models or197 controls; negative removal tests protect the additive obligations.",
+      "reason": "Preserve main36models/234controls and add CFN1/14, retaining all prior required obligations. Exact inventory literals expand to37/248; each-property/control/scope/invalid-placeholder negative fixtures reject de-scoping without changing validator grammar or tool pins.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "6fc3fbf586ddfda801592d5e42de79aa570fffeb6d6b071c9a29f47e0e9f2161",
+      "sha256": "847a66d366bdf4330c1028ddbc3500a971024ba747e59ebd9e4f41a152241084",
       "disposition": "formal-infrastructure",
-      "reason": "Adds literal-required DynamoDB console model/property/control/source inventory without changing checker functions, CFG grammar, old33 models or197 controls; negative removal tests protect the additive obligations.",
-      "models": []
-    },
-    {
-      "path": "test/console/navigation.test.mjs",
-      "sha256": "19dc49a8e14765bac407a3dc692139c674952604659542ff856e75699848fdae",
-      "disposition": "test-support",
-      "reason": "Adds actual two-CLI/native DynamoDB browser lifecycle oracles or additive mandatory wrapper/gate removal tests. Old50 wrappers and all old native assertions are preserved; tests do not grant runtime authority.",
+      "reason": "Preserve main36models/234controls and add CFN1/14, retaining all prior required obligations. Exact inventory literals expand to37/248; each-property/control/scope/invalid-placeholder negative fixtures reject de-scoping without changing validator grammar or tool pins.",
       "models": []
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "fe6c3f17ba33f77399e1e7d38ff186523ac951b991275c560fdcc530ab826359",
+      "sha256": "01b955a665bfd734394ad805bccaace2bdb7632b7bdc698cc7908d49c151eed6",
       "disposition": "test-support",
-      "reason": "Adds actual two-CLI/native DynamoDB browser lifecycle oracles or additive mandatory wrapper/gate removal tests. Old50 wrappers and all old native assertions are preserved; tests do not grant runtime authority.",
+      "reason": "Original exact Apache-2.0 crypto template/license relocated under test/fixtures, new pure/native boundary tests and mandatory realCLI/SDK helper. Test data is not a runtime provider or host grader and is never executed as problem code.",
       "models": []
     },
     {
-      "path": "test/e2e/dynamodb_console.py",
-      "sha256": "23147109716c2a02e2bed70e86cacbac781feedfbd7d75d9a32d688c8d6d7489",
+      "path": "test/e2e/cloudformation_crypto.py",
+      "sha256": "0aeb55f996e5c8ca7f8baf8ada4c3df01280922cfefd03af7bb89828889e7ec1",
       "disposition": "test-support",
-      "reason": "Adds actual two-CLI/native DynamoDB browser lifecycle oracles or additive mandatory wrapper/gate removal tests. Old50 wrappers and all old native assertions are preserved; tests do not grant runtime authority.",
+      "reason": "Original exact Apache-2.0 crypto template/license relocated under test/fixtures, new pure/native boundary tests and mandatory realCLI/SDK helper. Test data is not a runtime provider or host grader and is never executed as problem code.",
       "models": []
     },
     {
-      "path": "tools/console/bundle-digests.json",
-      "sha256": "03f23ca2c6e6bb23756ac5a1dedb677e486e5049bb59bf440e0ffcc32412a70d",
-      "disposition": "presentation",
-      "reason": "Adds capability-gated DynamoDB discovery or canonical sourcegraph/digest metadata. This artifact alone changes no native API/auth/storage; component/caller/runtime bundle are independently modeled with explicit limits.",
+      "path": "test/fixtures/crypto-battle-a749/LICENSE",
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "disposition": "test-support",
+      "reason": "Original exact Apache-2.0 crypto template/license relocated under test/fixtures, new pure/native boundary tests and mandatory realCLI/SDK helper. Test data is not a runtime provider or host grader and is never executed as problem code.",
       "models": []
     },
     {
-      "path": "tools/console/bundle-inputs.json",
-      "sha256": "a2362487bdd3cb7413ad2caf5a900e224c42b56ecd77d2da2ec006cfd378969a",
-      "disposition": "presentation",
-      "reason": "Adds capability-gated DynamoDB discovery or canonical sourcegraph/digest metadata. This artifact alone changes no native API/auth/storage; component/caller/runtime bundle are independently modeled with explicit limits.",
+      "path": "test/fixtures/crypto-battle-a749/template.yaml",
+      "sha256": "fb2af9be3ba67619b80de0ad8f00dc102aaade740742aea5861c9039d8bd09e6",
+      "disposition": "test-support",
+      "reason": "Original exact Apache-2.0 crypto template/license relocated under test/fixtures, new pure/native boundary tests and mandatory realCLI/SDK helper. Test data is not a runtime provider or host grader and is never executed as problem code.",
       "models": []
-    },
-    {
-      "path": "tools/console/src/console-navigation.mjs",
-      "sha256": "ee8fe6958cc3202f4f6e69dab93e55554c78a1e8e7aa47275dfbfed740692a3d",
-      "disposition": "presentation",
-      "reason": "Adds capability-gated DynamoDB discovery or canonical sourcegraph/digest metadata. This artifact alone changes no native API/auth/storage; component/caller/runtime bundle are independently modeled with explicit limits.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/dynamodb.jsx",
-      "sha256": "56e826044dc8300561cf21d068f2582735d4800fb4171b47b2e998ce75a4ebe4",
-      "disposition": "modeled",
-      "reason": "Independent bounded console context/read epoch/key/TableId-at-acceptance/form cancellation/synchronous owner/ACK-before-refresh/read-only retry model; not native storage, protocol/IAM/SQL correctness or unbounded JavaScript/React refinement. Concrete browser and native tests are separate evidence.",
-      "models": [
-        {
-          "id": "DynamoDBConsoleEpoch",
-          "properties": [
-            "TypeOK",
-            "NoStalePublication",
-            "ReadGenerationVerified",
-            "DisplayedKeyBound",
-            "CancelNoOrphanLoading",
-            "AckClosesDraft",
-            "AckBelongsToCurrentView",
-            "ReadRetryNeverWrites",
-            "SingleSendBeforeACK",
-            "LocalePreservesDraft"
-          ],
-          "limits": "UI finite safety abstraction only, not JS/React/AbortController scheduling refinement, native protocol/JSON/IAM/auth/SQLite state/number/binary/size/capacity proof. TableId checks establish agreement at item-read acceptance only, not freshness after later native changes or atomic TableId-CAS on mutation; official TableName writes remain subject to recreation between preflight and send. Combined context labels abstract principal/region/remount, not credentials/tenant isolation. Stutter observation admits no liveness/hung-read progress claim. One write intent only; symbolic ACK/no automatic replay, not server rollback when an aborted request already committed. No concrete item values, missing-item/delete-confirmation semantics or arbitrary pagination. Main caller scope is limited to the DynamoDB route and its region|principal|navigation mount key/reset; embedded app.js is the canonical derived component/caller artifact. Neither binding proves other shell/components, compiler/bundler correctness or JavaScript refinement."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/main.jsx",
-      "sha256": "863627e558a1041d559f74e790a5a3adcabbff98e87aed12cd2b448edda0754c",
-      "disposition": "modeled",
-      "reason": "Only the added DynamoDB route/component and region|principal|navigation mount key are related to finite old-view publication/ACK/key binding. Embedded app.js is the canonical same-lock derived artifact. Actual native browser tests separately exercise scope transitions. No claim about other bundled components, compiler/React refinement, IAM/SQL/native behavior or atomic TableId-CAS.",
-      "models": [
-        {
-          "id": "DynamoDBConsoleEpoch",
-          "properties": [
-            "NoStalePublication",
-            "AckBelongsToCurrentView",
-            "DisplayedKeyBound"
-          ],
-          "limits": "UI finite safety abstraction only, not JS/React/AbortController scheduling refinement, native protocol/JSON/IAM/auth/SQLite state/number/binary/size/capacity proof. TableId checks establish agreement at item-read acceptance only, not freshness after later native changes or atomic TableId-CAS on mutation; official TableName writes remain subject to recreation between preflight and send. Combined context labels abstract principal/region/remount, not credentials/tenant isolation. Stutter observation admits no liveness/hung-read progress claim. One write intent only; symbolic ACK/no automatic replay, not server rollback when an aborted request already committed. No concrete item values, missing-item/delete-confirmation semantics or arbitrary pagination. Main caller scope is limited to the DynamoDB route and its region|principal|navigation mount key/reset; embedded app.js is the canonical derived component/caller artifact. Neither binding proves other shell/components, compiler/bundler correctness or JavaScript refinement."
-        }
-      ]
     }
   ]
 }

@@ -21,7 +21,7 @@ os.environ.setdefault('SIMULATOR_REPORTS', str(ROOT / 'reports'))
 from botocore.exceptions import ClientError
 from check import running, boto3, Config, REPORTS, BINARY
 
-FIXTURE = ROOT / 'internal/aws/testdata/crypto-battle-a749.yaml'
+FIXTURE = ROOT / 'test/fixtures/crypto-battle-a749/template.yaml'
 FIXTURE_SHA = 'fb2af9be3ba67619b80de0ad8f00dc102aaade740742aea5861c9039d8bd09e6'
 REGION = 'ap-northeast-1'
 PREFIX = 'tc-crypto-team'
