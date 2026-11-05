@@ -256,7 +256,7 @@ def run_crossprovider_console():
                     for label, wanted in [('Name',object_name),('Size (bytes)',native_properties.get('Content-Length')),('Blob type',native_properties.get('x-ms-blob-type')),('ETag',native_properties.get('ETag'))]:
                         assert wanted is not None, 'Native HEAD omitted required '+label+' property'
                         expect(properties.locator('dt').filter(has_text=re.compile('^'+re.escape(label)+'$')).locator('xpath=following-sibling::dd[1]')).to_have_text(wanted)
-                    expect(properties).to_contain_text('Properties are from the last list response. Refresh to see changes. Content is not previewed.')
+                    expect(properties).to_contain_text('Properties were fetched from the native HEAD response when this pane opened. Content is not previewed.')
                     audit(owner, 'azure-properties', width)
                     properties.get_by_role('button', name='Close', exact=True).click()
                     expect(owner.get_by_role('dialog', name='Blob properties', exact=True)).to_have_count(0)
@@ -337,7 +337,7 @@ def run_crossprovider_console():
                 assert not outside,'Unexpected network request outside the selected local CLI'
                 report={'actualBinaryTwoCLIs':True,'twoSQLiteDBs':True,'browserSessionsMinted':True,
                         'gcpAndAzureActualUILifecycle':[1440,390],'configuredProviderScopeReadOnly':[1440,390],'nativeHTTPStateOracle':True,
-                        'downloadExactBytes':True,'gcpStaleGeneration412ThenLiveMetadata':True,'azureLastListPropertiesMatchNativeHEAD':True,'peerSameNameStatePreserved':True,'readerNative403FramesUnchanged':True,
+                        'downloadExactBytes':True,'gcpStaleGeneration412ThenLiveMetadata':True,'azureLivePropertiesMatchNativeHEAD':True,'peerSameNameStatePreserved':True,'readerNative403FramesUnchanged':True,
                         'readerUI403':True,'crossTeamTokensAndCookie401':True,'logoutReplay401Relogin':True,
                         'scalarStaticThenActualSend':True,'axeStates':audits,'outsideRequests':0,'pageErrors':0,
                         'officialSDKExecuted':False,'actualCloud':False,'cleanup':'DELETED'}

@@ -1492,6 +1492,84 @@
           "expect_invariant": "NoAuthorityFromWireMetadata"
         }
       ]
+    },
+    {
+      "id": "AzurePropertiesEpoch",
+      "model": "formal/AzurePropertiesEpoch.tla",
+      "config": "formal/AzurePropertiesEpoch.cfg",
+      "bounds": "2 component/lifecycle incarnations (A->B only),2 fresh request epoch tokens per incarnation,2 selected literal resources,3 normalized native HEAD outcomes,2 locales; replies can finish after abort/Close/unmount.",
+      "properties": [
+        "TypeOK",
+        "SuccessfulOnly",
+        "AcceptedOnlyCurrent",
+        "ClearedWhenClosed",
+        "LoadingClearsPrevious",
+        "FailureNoDisclosure",
+        "CurrentProperties",
+        "CurrentRequestLoading",
+        "LocaleStable"
+      ],
+      "limits": "Bounded component-callback/state abstraction, not JS/Go/SQL refinement or full Azure authorization. Context is captured lifecycle identity, not invented scope equality check. Root remount and component destruction abstracted; no epoch reuse/unbounded wraparound, header parsing/UTF8/arithmetic/HTML proof, cryptographic/transport proof or liveness. Callable Open can be programmatically invoked on completed pane; not claim background controls clickable through native dialog. Native helper raw HTTP != official SDK; container properties deferred.",
+      "source_scope": [
+        "tools/console/src/azure-blob.jsx"
+      ],
+      "mutants": [
+        {
+          "id": "BypassCurrentPublication",
+          "edits": [
+            {
+              "old": "eligible == Eligible(r)",
+              "new": "eligible == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AcceptedOnlyCurrent"
+        },
+        {
+          "id": "AcceptFailedHEAD",
+          "edits": [
+            {
+              "old": "publish == eligible /\\ outcome = \"Success\"",
+              "new": "publish == eligible",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SuccessfulOnly"
+        },
+        {
+          "id": "OpenKeepsPrevious",
+          "edits": [
+            {
+              "old": "properties' = [properties EXCEPT ![current] = Empty] (* ClearOnOpen *)",
+              "new": "UNCHANGED properties (* ClearOnOpen *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "LoadingClearsPrevious"
+        },
+        {
+          "id": "CloseKeepsPrevious",
+          "edits": [
+            {
+              "old": "properties' = [properties EXCEPT ![current] = Empty] (* ClearOnClose *)",
+              "new": "UNCHANGED properties (* ClearOnClose *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ClearedWhenClosed"
+        },
+        {
+          "id": "StaleFinallyClearsBusy",
+          "edits": [
+            {
+              "old": "finalize == FinalizeEligible(r)",
+              "new": "finalize == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CurrentRequestLoading"
+        }
+      ]
     }
   ]
 }

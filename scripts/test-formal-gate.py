@@ -34,7 +34,7 @@ class FormalGateTests(unittest.TestCase):
 
     def test_complete_registry_and_exact_mutations(self):
         registry = load_registry(self.root)
-        self.assertEqual({model['id'] for model in registry['models']}, {'ObjectStore', 'StackOwnership', 'S3Versions', 'NativeIAMOwnership', 'RESTDeploymentSnapshot', 'SSMParameterState', 'StartupTokenVisibility', 'SQSLifecycle', 'SQSStorageBudget', 'BrowserSessions', 'ProviderActor', 'GCPStorageState', 'AzureBlobState', 'ProjectAuthority', 'BlobRange', 'ProviderPath', 'KMSKeyState', 'KMSProtocolAdmission'})
+        self.assertEqual({model['id'] for model in registry['models']}, {'AzurePropertiesEpoch', 'ObjectStore', 'StackOwnership', 'S3Versions', 'NativeIAMOwnership', 'RESTDeploymentSnapshot', 'SSMParameterState', 'StartupTokenVisibility', 'SQSLifecycle', 'SQSStorageBudget', 'BrowserSessions', 'ProviderActor', 'GCPStorageState', 'AzureBlobState', 'ProjectAuthority', 'BlobRange', 'ProviderPath', 'KMSKeyState', 'KMSProtocolAdmission'})
         for model in registry['models']:
             source = (self.root / model['model']).read_text()
             for mutant in model['mutants']:
@@ -421,7 +421,7 @@ class FormalGateTests(unittest.TestCase):
     def test_blob_range_provider_path_models_properties_and_controls_are_required(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
-        for name in ('BlobRange', 'ProviderPath'):
+        for name in ('BlobRange', 'ProviderPath', 'AzurePropertiesEpoch'):
             entry = next(m for m in json.loads(original)['models'] if m['id'] == name)
             model = self.root / entry['model']
             config = self.root / entry['config']
@@ -475,7 +475,7 @@ class FormalGateTests(unittest.TestCase):
         original = path.read_text()
         registry = json.loads(original)
         self.assertEqual(set(REQUIRED_MUTANTS), BASE_MODELS)
-        self.assertEqual(sum(map(len, REQUIRED_MUTANTS.values())), 94)
+        self.assertEqual(sum(map(len, REQUIRED_MUTANTS.values())), 99)
         self.assertEqual({m['id']: {c['id'] for c in m['mutants']} for m in registry['models']}, REQUIRED_MUTANTS)
         for model in registry['models']:
             for mutant in model['mutants']:
