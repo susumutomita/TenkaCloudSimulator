@@ -119,6 +119,8 @@ TransactionSnapshotStable == phase \in Active => aliasTarget = snapshotAlias /\ 
 AliasResolutionCurrent == (selector = Alias /\ resolved # None) => resolved = snapshotAlias
 OmittedDecryptUsesBlob == (op = "Decrypt" /\ selector = None /\ resolved # None) => resolved = blobKey
 ConcreteKeyAuthorization == authorized # None => authorized = resolved
+AuthorizedCryptoStages == phase \in {"check","crypto","commit"} =>
+ authorized = resolved /\ authMode = "policy" /\ permit[resolved]
 AuthorizationBeforeMismatch == (phase = "done" /\ status = "incorrectKey") =>
  authorized = resolved /\ authMode = "policy" /\ permit[resolved]
 NoPublicationBeforeCommit == phase # "done" => published = None
