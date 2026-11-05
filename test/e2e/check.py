@@ -593,4 +593,7 @@ def handler(event,context):
   from sqs_locale import run_sqs_locale
   run_sqs_locale()
 
+ def test_dynamodb_console_native_state_keys_context_locale_and_cancellation(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('dynamodb_console.py'))],check=True,timeout=240)
+
 if __name__=='__main__':unittest.main(verbosity=2)

@@ -3177,6 +3177,142 @@
       ]
     },
     {
+      "id": "DynamoDBConsoleEpoch",
+      "model": "formal/DynamoDBConsoleEpoch.tla",
+      "config": "formal/DynamoDBConsoleEpoch.cfg",
+      "bounds": "Two initial scenario alternatives read/write; two combined authority-region context labels and one remount (instances0..1); epochs0..2 without wrap; two request slots each used once; two exact keys; two symbolic native TableIds and one recreation; one form/write intent, at most two sends solely to expose mutants; en/ja. Separate read and write scenarios intentionally exclude their full interleaving.",
+      "properties": [
+        "TypeOK",
+        "NoStalePublication",
+        "ReadGenerationVerified",
+        "DisplayedKeyBound",
+        "CancelNoOrphanLoading",
+        "AckClosesDraft",
+        "AckBelongsToCurrentView",
+        "ReadRetryNeverWrites",
+        "SingleSendBeforeACK",
+        "LocalePreservesDraft"
+      ],
+      "limits": "UI finite safety abstraction only, not JS/React/AbortController scheduling refinement, native protocol/JSON/IAM/auth/SQLite state/number/binary/size/capacity proof. TableId checks establish agreement at item-read acceptance only, not freshness after later native changes or atomic TableId-CAS on mutation; official TableName writes remain subject to recreation between preflight and send. Combined context labels abstract principal/region/remount, not credentials/tenant isolation. Stutter observation admits no liveness/hung-read progress claim. One write intent only; symbolic ACK/no automatic replay, not server rollback when an aborted request already committed. No concrete item values, missing-item/delete-confirmation semantics or arbitrary pagination. Main caller scope is limited to the DynamoDB route and its region|principal|navigation mount key/reset; embedded app.js is the canonical derived component/caller artifact. Neither binding proves other shell/components, compiler/bundler correctness or JavaScript refinement.",
+      "source_scope": [
+        "tools/console/src/dynamodb.jsx",
+        "tools/console/src/main.jsx",
+        "internal/server/web/app.js"
+      ],
+      "mutants": [
+        {
+          "id": "IgnoreReadViewGuard",
+          "edits": [
+            {
+              "old": "live == Current(r) (* ReadEpochGuard *)",
+              "new": "live == TRUE (* ReadEpochGuard *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoStalePublication"
+        },
+        {
+          "id": "IgnorePostReadGeneration",
+          "edits": [
+            {
+              "old": "sameTable == r.table = s.table (* PostReadGenerationGuard *)",
+              "new": "sameTable == TRUE (* PostReadGenerationGuard *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadGenerationVerified"
+        },
+        {
+          "id": "KeepDisplayedItemOnKeyEdit",
+          "edits": [
+            {
+              "old": "!.shown = None, (* KeyEditClear *)",
+              "new": "!.shown = @, (* KeyEditClear *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DisplayedKeyBound"
+        },
+        {
+          "id": "CancelKeepsLoading",
+          "edits": [
+            {
+              "old": "!.loading = FALSE] (* CancelClearLoading *)",
+              "new": "!.loading = @] (* CancelClearLoading *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CancelNoOrphanLoading"
+        },
+        {
+          "id": "RetryRepeatsWrite",
+          "edits": [
+            {
+              "old": "nextSends == s.sends (* RetryReadOnly *)",
+              "new": "nextSends == s.sends+1 (* RetryReadOnly *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadRetryNeverWrites"
+        },
+        {
+          "id": "ACKKeepsForm",
+          "edits": [
+            {
+              "old": "!.form = IF live THEN FALSE ELSE @, (* ACKCloseForm *)",
+              "new": "!.form = @, (* ACKCloseForm *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AckClosesDraft"
+        },
+        {
+          "id": "ACKKeepsDraft",
+          "edits": [
+            {
+              "old": "!.draft = IF live THEN FALSE ELSE @] (* ACKClearDraft *)",
+              "new": "!.draft = @] (* ACKClearDraft *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AckClosesDraft"
+        },
+        {
+          "id": "RemoveSynchronousOwnerLock",
+          "edits": [
+            {
+              "old": "!.sends = @] (* SynchronousOwnerLock *)",
+              "new": "!.sends = @+1] (* SynchronousOwnerLock *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SingleSendBeforeACK"
+        },
+        {
+          "id": "LocaleClearsDirtyDraft",
+          "edits": [
+            {
+              "old": "nextDraft == s.draft (* LocaleDraftFrame *)",
+              "new": "nextDraft == FALSE (* LocaleDraftFrame *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "LocalePreservesDraft"
+        },
+        {
+          "id": "IgnoreWriteViewGuard",
+          "edits": [
+            {
+              "old": "live == Current(s.writeCapture) (* WriteEpochGuard *)",
+              "new": "live == TRUE (* WriteEpochGuard *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AckBelongsToCurrentView"
+        }
+      ]
+    },
+    {
       "id": "SecretMetadataViewEpoch",
       "model": "formal/SecretMetadataViewEpoch.tla",
       "config": "formal/SecretMetadataViewEpoch.cfg",

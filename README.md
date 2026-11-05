@@ -79,7 +79,7 @@ adapter, or Challenge integration.
 | [Secrets Manager](docs/secrets-manager.md) | CreateSecret, DescribeSecret, ListSecrets, ListSecretVersionIds (metadata only), PutSecretValue, GetSecretValue, UpdateSecretVersionStage, immediate DeleteSecret; versions and explicit reveal in the console | Real-secret storage, KMS encryption, rotation, replicas, SecretBinary, scheduled deletion, CloudFormation; dummy values are plaintext in SQLite |
 | [KMS](docs/kms.md) | CreateKey, DescribeKey, ListKeys, EnableKey, DisableKey, GetKeyPolicy, Encrypt, Decrypt; local symmetric AES-GCM, SDK and Cloudscape console | Aliases, tags, grants, custom policies, rotation, scheduled deletion, CloudFormation, other-service encryption; raw SQLite keys are not an HSM or an at-rest encryption guarantee |
 | [Systems Manager Parameter Store](docs/console.md) | PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter; current values, versions and overwrite checks | SecureString/KMS, history, labels; Standard String/StringList with text data only |
-| [DynamoDB](docs/dynamodb.md) | CreateTable, ListTables, DescribeTable, DeleteTable, PutItem, GetItem, DeleteItem; JSON 1.0, S/N/B keys, optional sort key, partition-key attribute_exists/attribute_not_exists conditions | Query, Scan, indexes, Streams, console, CloudFormation, Challenge integration |
+| [DynamoDB](docs/dynamodb.md) | Seven JSON 1.0 APIs: CreateTable, ListTables, DescribeTable, DeleteTable, PutItem, GetItem, DeleteItem; Cloudscape table list/create/details/delete and exact-key item writes/reads/deletes. S/N/B keys, optional sort key, partition-key attribute_exists/attribute_not_exists conditions | Query, Scan, item listing, indexes, Streams, CloudFormation, Challenge integration |
 | [IAM](docs/iam.md) | 21 role/inline/trust and customer-managed policy/version/role-attachment Query operations; shared permission union with Deny priority | AWS-managed catalog, user/group attachments, STS, general Conditions, permissions boundaries, SCPs |
 | [Lambda](docs/lambda.md) | CreateFunction, ListFunctions, GetFunctionConfiguration, UpdateFunctionCode, Invoke, DeleteFunction, AddPermission/GetPolicy/RemovePermission; Python ZIP execution through CPython 3.12.16/WASI and a bounded S3/SSM SDK bridge | Other languages, asynchronous invocation, Function URLs, arbitrary networking; 128 MiB and 1–30 second timeout |
 | [CloudFormation](docs/cloudformation-rest.md) | CreateStack, DescribeStacks, DeleteStack; S3 Bucket, SSM Parameter, inline Python Lambda, bounded IAM Role, 5 API Gateway resource types and Lambda Permission; bounded Ref/Sub/GetAtt/DependsOn | UpdateStack, general resource types, full AWS asynchronous lifecycle, dedicated CloudFormation service roles |
@@ -241,8 +241,9 @@ not binary runtime dependencies. Regeneration must preserve locks and original
 rights: [console](tools/console/README.md), [Scalar](tools/scalar/README.md),
 [Python/WASI runtime](tools/python/README.md).
 
-The registry contains 34 finite models and 210 deliberate defect controls
-(244 required model/check executions). The new IAM scenario checks two requests
+The registry contains 36 finite models and 234 deliberate defect controls
+(270 required model/check executions), including bounded DynamoDB console
+epoch/ACK/read-retry and Secrets version-metadata listing contracts. The new IAM scenario checks two requests
 from each of four reachable seeds. A broader four-request trial timed out and
 is not claimed as verified. TLC examines bounded safety properties and checks
 that targeted mutants produce real counterexamples. It does not prove Go/JS

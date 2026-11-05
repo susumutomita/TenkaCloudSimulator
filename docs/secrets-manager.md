@@ -127,8 +127,8 @@ whole-suite and hosted results are still revision-specific.
 
 The registered [metadata-view model](../formal/SecretMetadataViewEpoch.tla)
 checks thirteen finite properties and fourteen named controls. Its scoped
-baseline/controls were executed separately; the combined 35-model/224-control
-inventory and 52 mandatory acceptance cases require their own exact-head run.
+baseline/controls were executed separately; the combined 36-model/234-control
+inventory and 53 mandatory acceptance cases require their own exact-head run.
 Its parent projection covers tab invalidation of prior revealed state, not old
 pending retrievals, secret-byte erasure, backend authorization or whole React.
 The existing reveal/disclosure models remain separate and unchanged.

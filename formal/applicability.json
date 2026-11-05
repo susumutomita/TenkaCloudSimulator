@@ -1,26 +1,40 @@
 {
   "version": 1,
-  "base_sha": "a8b920b264cf8060c6a49f7c4cd421a317ba94d2",
+  "base_sha": "74c93ea9b00818b83ea87d78a7946600ad823680",
   "changes": [
     {
-      "path": "docs/secrets-manager.md",
-      "sha256": "a961fb0542d07c09defa7be0d84d33f8e98495cec76054d1e4c0ce13f7fef048",
+      "path": "README.ja.md",
+      "sha256": "1e3b9a591e2492a0fd034bb9b97a34a83ed71d367b1d3af6ef1e262dfefef114",
       "disposition": "documentation",
-      "reason": "Describe actual known-ARN current-page metadata flow, scoped model limits and source inventory; separate focused no-reload locale execution from historical evidence and pending combined exact-head gates.",
+      "reason": "Normal main integration and source inventory refresh; no authority, runtime, or model semantics changed by this nonformal artifact.",
+      "models": []
+    },
+    {
+      "path": "README.md",
+      "sha256": "d82e8a117416bcdbe78ef3287d6db4e51fd3ed340fffc6be073b78a3daa81581",
+      "disposition": "documentation",
+      "reason": "Normal main integration and source inventory refresh; no authority, runtime, or model semantics changed by this nonformal artifact.",
+      "models": []
+    },
+    {
+      "path": "docs/secrets-manager.md",
+      "sha256": "349af3888bdbe2752a56dc3025df038d952ba08f3980be097fd432208dce14ed",
+      "disposition": "documentation",
+      "reason": "Normal main integration and source inventory refresh; no authority, runtime, or model semantics changed by this nonformal artifact.",
       "models": []
     },
     {
       "path": "formal/README.md",
-      "sha256": "6ef6e846d00ba83797faba32713ddfa699f6e03097cf9c64bf650c873c6500ee",
+      "sha256": "3db4c46330ae68c3565efa155ea7ff238b67acca5307afcb61444945ecd57f07",
       "disposition": "documentation",
-      "reason": "Describe actual known-ARN current-page metadata flow, scoped model limits and source inventory; separate focused no-reload locale execution from historical evidence and pending combined exact-head gates.",
+      "reason": "Normal main integration and source inventory refresh; no authority, runtime, or model semantics changed by this nonformal artifact.",
       "models": []
     },
     {
       "path": "formal/SecretMetadataViewEpoch.cfg",
       "sha256": "36e3f08c0c9aa2040694e0cc4b5de9e21970fad6dc9ac740b953ac262bf90fd0",
       "disposition": "modeled",
-      "reason": "Add the finite metadata-child epoch/page/locale contract and parent tab invalidation projection only; callbacks remain possible after Abort. Excludes old asyncRetrieve, zeroization, SQL, authentication and whole React refinement.",
+      "reason": "Preserve exact declared finite scopes from both normal-merge parents; source integration does not establish execution/refinement.",
       "models": [
         {
           "id": "SecretMetadataViewEpoch",
@@ -47,7 +61,7 @@
       "path": "formal/SecretMetadataViewEpoch.tla",
       "sha256": "12819b1dc64f7381f8c511305e3b5c7144f6ad5c03ccacff8b10c5bd4c53631f",
       "disposition": "modeled",
-      "reason": "Add the finite metadata-child epoch/page/locale contract and parent tab invalidation projection only; callbacks remain possible after Abort. Excludes old asyncRetrieve, zeroization, SQL, authentication and whole React refinement.",
+      "reason": "Preserve exact declared finite scopes from both normal-merge parents; source integration does not establish execution/refinement.",
       "models": [
         {
           "id": "SecretMetadataViewEpoch",
@@ -72,16 +86,16 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "a8974fdd467e3b992df26c2ff00cfe3f15520eb52889c6707d2efb89dd3b9daf",
+      "sha256": "9a2d9e33c0231218acb8772bc5fd32c747d0811945213b9d82cebcf6be511ad1",
       "disposition": "formal-infrastructure",
-      "reason": "Add the metadata-child model, thirteen exact required properties and fourteen literal-protected controls/removal fixtures, preserving all incoming thirty-four model objects, 210 controls and parser/configuration/result requirements. No model guarantee is inferred merely from registration.",
+      "reason": "Normal main integration and source inventory refresh; no authority, runtime, or model semantics changed by this nonformal artifact.",
       "models": []
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "16af275324f4401af345b9aa94e488781f1113937f9c187b31bd2992a59be519",
+      "sha256": "38a2cd6fa3b89c35e5aa4e37d29e366f1462594f431c06729eeefa8b134e96b3",
       "disposition": "modeled",
-      "reason": "Add the manually supplied known-ARN metadata tab/child and its canonical compiled projection. Preserve original explicit-retrieve/mutation bodies; parent tab invalidation clears prior reveal state. Existing reveal model binding is frame-limited to unchanged retrieval/navigation behavior. New binding covers only child epoch/scope/page/locale and tab-entry invalidation, not old pending retrievals, byte erasure, backend SQL/IAM or unrelated console code.",
+      "reason": "Preserve exact declared finite scopes from both normal-merge parents; source integration does not establish execution/refinement.",
       "models": [
         {
           "id": "SecretsRevealEpoch",
@@ -112,56 +126,65 @@
             "ParentRevealClearedForMetadata"
           ],
           "limits": "Scoped metadata-child contract and the parent tab-change invalidate call only. A prior-parent-reveal Boolean models clearing visible state on entry, not pending GetSecretValue replies, byte erasure, old asyncRetrieve, disclosure channels or SQL. Opaque cursor provenance is an annotation, not decoding or HMAC validation. A valid-response Boolean abstracts the concrete metadata parser. Host callback identity/remount and active scope are assumptions, not main navigation/authentication proofs. Abort leaves callbacks schedulable to check guards; actual browser Abort may prevent JavaScript delivery. Locale transitions preserve query state, not arbitrary React scheduling. Finite safety projection only: no stable history snapshot, page completeness, backend/JSON/IAM refinement, whole React proof or liveness. Source scope on the parent and bundle is limited to this tab and child projection; unrelated retrieval/mutation code is excluded."
+        },
+        {
+          "id": "DynamoDBConsoleEpoch",
+          "properties": [
+            "NoStalePublication",
+            "AckBelongsToCurrentView",
+            "DisplayedKeyBound"
+          ],
+          "limits": "UI finite safety abstraction only, not JS/React/AbortController scheduling refinement, native protocol/JSON/IAM/auth/SQLite state/number/binary/size/capacity proof. TableId checks establish agreement at item-read acceptance only, not freshness after later native changes or atomic TableId-CAS on mutation; official TableName writes remain subject to recreation between preflight and send. Combined context labels abstract principal/region/remount, not credentials/tenant isolation. Stutter observation admits no liveness/hung-read progress claim. One write intent only; symbolic ACK/no automatic replay, not server rollback when an aborted request already committed. No concrete item values, missing-item/delete-confirmation semantics or arbitrary pagination. Main caller scope is limited to the DynamoDB route and its region|principal|navigation mount key/reset; embedded app.js is the canonical derived component/caller artifact. Neither binding proves other shell/components, compiler/bundler correctness or JavaScript refinement."
         }
       ]
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "4328d2850aad4959565603f2c95e91a027e59e88e2ca8891396894a8ab11235f",
+      "sha256": "114e00c9d2cd5188acd0d66fd98f5f75d5dfa612d61e8c46bda1358880112abf",
       "disposition": "formal-infrastructure",
-      "reason": "Add the metadata-child model, thirteen exact required properties and fourteen literal-protected controls/removal fixtures, preserving all incoming thirty-four model objects, 210 controls and parser/configuration/result requirements. No model guarantee is inferred merely from registration.",
+      "reason": "Normal main integration and source inventory refresh; no authority, runtime, or model semantics changed by this nonformal artifact.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "c4a8cfe052cc094badb93b4c40b44a299aa03c27cb1f93f3bcaa73b482936a10",
+      "sha256": "112b114039e592b270d3d98154e069f29673d73bc1987100e594136ce6916f6a",
       "disposition": "formal-infrastructure",
-      "reason": "Add the metadata-child model, thirteen exact required properties and fourteen literal-protected controls/removal fixtures, preserving all incoming thirty-four model objects, 210 controls and parser/configuration/result requirements. No model guarantee is inferred merely from registration.",
+      "reason": "Normal main integration and source inventory refresh; no authority, runtime, or model semantics changed by this nonformal artifact.",
       "models": []
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "cede7fa9012238d74098e73d76cad2fb8b231c9fa6ee575dd35b9edba1bc7a60",
+      "sha256": "05850955625d37b71eb678569894afd6ced1e21e2db404682d2f7eece4015521",
       "disposition": "test-support",
-      "reason": "Require the metadata SDK and separate metadata console helper without skips: preserve all fifty incoming base methods, the native-listing fifty-first method and their bodies; add only the fifty-second mandatory console wrapper.",
+      "reason": "Normal main integration and source inventory refresh; no authority, runtime, or model semantics changed by this nonformal artifact.",
       "models": []
     },
     {
       "path": "test/e2e/secret_versions_console.py",
       "sha256": "6107fd4e7bba2e057f67c676f1f46997011f5428c553dc7806f4288df1cc4fcf",
       "disposition": "test-support",
-      "reason": "Require actual native metadata pages, list-only authority/no Get, real read fault/repair, same-mount locale and held response boundaries. Add a source-only held NextToken continuation/cancel/filter-change/fresh-first-page oracle; its runtime execution is pending. Existing five-screen canonical browser evidence stays bound to its earlier helper. No product/model/timeout relaxation; transport Abort may prevent stale JavaScript callback delivery.",
+      "reason": "Normal main integration and source inventory refresh; no authority, runtime, or model semantics changed by this nonformal artifact.",
       "models": []
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "2977a336750894a1dc9d9bbd5b71c7e07b61674354e6a5fd5f1877a09e83c34c",
+      "sha256": "dd105d72d56352794b50edcda6cca250bb9fff1a8dd3baf47e8e66eb61b8af1a",
       "disposition": "presentation",
-      "reason": "Bind canonical console source/dependency inputs and generated artifact digests; same pinned dependencies and existing rights, no install or new runtime authority.",
+      "reason": "Normal main integration and source inventory refresh; no authority, runtime, or model semantics changed by this nonformal artifact.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "5ed75362dee209c85c5dfe5d97e3ccb151ef07f437ccddee79f51e2d2332ac64",
+      "sha256": "fef7396f47bbd621e8cdcff31dac4d3b1a0f7045fc032af809f6d91d2bbfca6e",
       "disposition": "presentation",
-      "reason": "Bind canonical console source/dependency inputs and generated artifact digests; same pinned dependencies and existing rights, no install or new runtime authority.",
+      "reason": "Normal main integration and source inventory refresh; no authority, runtime, or model semantics changed by this nonformal artifact.",
       "models": []
     },
     {
       "path": "tools/console/src/secret_versions.jsx",
       "sha256": "c07f2e2088e71b4331be016ae5d2e4d21d493b07811e394376a50d39f7f9ef51",
       "disposition": "modeled",
-      "reason": "Add the manually supplied known-ARN metadata tab/child and its canonical compiled projection. Preserve original explicit-retrieve/mutation bodies; parent tab invalidation clears prior reveal state. Existing reveal model binding is frame-limited to unchanged retrieval/navigation behavior. New binding covers only child epoch/scope/page/locale and tab-entry invalidation, not old pending retrievals, byte erasure, backend SQL/IAM or unrelated console code.",
+      "reason": "Preserve exact declared finite scopes from both normal-merge parents; source integration does not establish execution/refinement.",
       "models": [
         {
           "id": "SecretMetadataViewEpoch",
@@ -188,7 +211,7 @@
       "path": "tools/console/src/secrets-manager.jsx",
       "sha256": "2876a2b76b88bc9777fc435dd057d094cdb4fbbf690f4a55480b7be9d45edd32",
       "disposition": "modeled",
-      "reason": "Add the manually supplied known-ARN metadata tab/child and its canonical compiled projection. Preserve original explicit-retrieve/mutation bodies; parent tab invalidation clears prior reveal state. Existing reveal model binding is frame-limited to unchanged retrieval/navigation behavior. New binding covers only child epoch/scope/page/locale and tab-entry invalidation, not old pending retrievals, byte erasure, backend SQL/IAM or unrelated console code.",
+      "reason": "Preserve exact declared finite scopes from both normal-merge parents; source integration does not establish execution/refinement.",
       "models": [
         {
           "id": "SecretsRevealEpoch",
