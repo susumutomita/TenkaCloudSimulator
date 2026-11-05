@@ -473,17 +473,20 @@ func (s *KMSAliasStore) Decrypt(ctx context.Context, selected string, contextMap
 		return nil, "", err
 	}
 	defer tx.Rollback()
+	requested := id
 	if selected != "" {
-		requested, err := s.cryptoKeyTx(ctx, tx, selected)
+		requested, err = s.cryptoKeyTx(ctx, tx, selected)
 		if err != nil {
 			return nil, "", err
 		}
-		if requested != id {
-			return nil, "", kmsFailure("IncorrectKeyException", "The specified key does not match this ciphertext.")
-		}
 	}
-	if err = kmsAliasAuthorize(ctx, tx, authorize, "kms:Decrypt", kmsARN(s.region, id)); err != nil {
+	// Match native selected-key authorization before a mismatch response. An
+	// unauthorized caller must not learn whether an alias matches ciphertext.
+	if err = kmsAliasAuthorize(ctx, tx, authorize, "kms:Decrypt", kmsARN(s.region, requested)); err != nil {
 		return nil, "", err
+	}
+	if requested != id {
+		return nil, "", kmsFailure("IncorrectKeyException", "The specified key does not match this ciphertext.")
 	}
 	plaintext, arn, err := kmsDecryptTx(ctx, tx, s.region, id, contextMap, encrypted)
 	if err != nil {

@@ -547,11 +547,21 @@ func TestKMSAliasesCryptoUsesConcreteKeyAndRetargetedCiphertextGuard(t *testing.
 		t.Fatal(err)
 	}
 	before := kmsAliasFrame(t, keys)
-	called := false
-	got, arn, err = s.Decrypt(ctx, name, contextMap, blob, func(context.Context, *sql.Tx, string, string) (bool, error) { called = true; return true, nil })
+	got, arn, err = s.Decrypt(ctx, name, contextMap, blob, authorize("kms:Decrypt", second.KeyID))
 	kmsWantCode(t, err, "IncorrectKeyException")
-	if len(got) != 0 || arn != "" || called {
-		t.Fatal("retargeted alias selected old ciphertext or authorized wrong key")
+	if len(got) != 0 || arn != "" {
+		t.Fatal("retargeted alias selected old ciphertext")
+	}
+	kmsAliasUnchanged(t, keys, before)
+	got, arn, err = s.Decrypt(ctx, name, contextMap, blob, func(_ context.Context, _ *sql.Tx, action, resource string) (bool, error) {
+		if action != "kms:Decrypt" || resource != "arn:aws:kms:us-east-1:000000000000:key/"+second.KeyID {
+			t.Fatal("mismatch did not authorize the actual selected alias target")
+		}
+		return false, nil
+	})
+	kmsWantCode(t, err, "AccessDeniedException")
+	if len(got) != 0 || arn != "" {
+		t.Fatal("denied mismatch disclosed plaintext")
 	}
 	kmsAliasUnchanged(t, keys, before)
 	got, arn, err = s.Decrypt(ctx, "", contextMap, blob, authorize("kms:Decrypt", first.KeyID))
