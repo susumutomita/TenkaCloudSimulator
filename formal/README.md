@@ -1,12 +1,12 @@
 # Finite state model
 
-Current branch registry: 34 models / 207 literal-protected controls
-(241 required executions). All previous33 model entries, TLA/CFG bytes,
-properties and197 controls are preserved. DynamoDBConsoleEpoch adds one bounded
-console model, ten properties (including TypeOK) and ten semantic controls.
-Its independent scoped baseline and ten controls passed; the complete241-case
-registered gate has not yet been run on this revision. Registration and previous
-model receipts do not substitute for that exact-revision gate.
+Current branch registry: 35 models / 220 literal-protected controls
+(255 required executions). Every34 model entry, TLA/CFG byte sequence,
+property and210 controls from maina8 are preserved. DynamoDBConsoleEpoch adds
+one bounded console model and ten semantic controls. SecretVersionListing's
+metadata-only listing contract is retained. Previous241-case DynamoDB and
+244-case Secrets receipts belong to their recorded inputs; neither substitutes
+for the complete255-case immutable check of this combined revision.
 IAMManagedPolicies retains its four API-reachable seeds and two-request suffixes;
 the earlier four-request exploration timed out and is not claimed.
 Registration is source evidence, not itself evidence of successful execution. Dated receipts below
@@ -15,7 +15,7 @@ finite models do not prove Go/SQL/HTTP/UI refinement or complete cloud compatibi
 
 Legacy integration sections below retain historical counts and status statements
 for traceability. Their word “current” refers to the recorded integration, not
-today's registry. The authoritative branch inventory is the 34/207 registry
+today's registry. The authoritative branch inventory is the 35/220 registry
 above; proof claims always require evidence for the exact revision.
 
 `ObjectStore.tla` models two buckets and two keys, shared object ownership, create/put/delete transitions, and an abstract identity decision `allow /\ ~deny`. `ObjectStore.cfg` checks type correctness, no orphan objects, no unauthorized mutation, and explicit-deny precedence.
@@ -373,3 +373,38 @@ Native DynamoDBAdmission/Lifecycle and concrete tests remain separate evidence.
 The root mount key (region|principal|navigation) and actual UI state changes are
 independently exercised by the mandatory dynamodb_console.py helper, not proved
 by a complete shell/React refinement.
+
+
+## Secret version metadata listing
+
+SecretVersionListing adds nine invariants and thirteen literal-protected semantic
+controls, preserving all prior33 registry objects and197 controls and their
+TLA/CFG bytes. The Secrets-only addition had34 baselines +210 controls =244 required
+executions. The current combined inventory above also includes DynamoDBConsoleEpoch. Registration and earlier independent scoped results are not a
+successful immutable244-case integration gate or hosted-CI result.
+
+Four-transition suffixes cover four ordered symbolic version keys, two database
+authorities/regions, two physical generations and page size one. List permission
+is independent of value-read permission. The finite query resolves the parent
+before saved-ARN authorization; only an admitted request scans version/stage
+metadata and validates its continuation. Cursor predicates bind database key,
+region, domain, physical generation, IncludeDeprecated and expiry. Filtering
+precedes the page limit, resume positions advance strictly, and reads preserve
+version/stage state. Add/promote/delete/recreate/reopen expose live keyset changes;
+this is not a stable snapshot or a proof of eventual termination.
+
+Correspondence is limited to ListSecretVersionIDs metadata enumeration/cursor
+logic in `secrets_manager_versions.go` and the exact added operation dispatch in
+`secret_http.go`; the other seven operations do not acquire new guarantees. Native
+store and HTTP tests named in source_scope separately exercise denied frames,
+physical recreation, database reopen, malformed requests and fault recovery.
+The public reference is [AWS ListSecretVersionIds](https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_ListSecretVersionIds.html),
+reviewed2026-11-05. No server capability or generic Gateway parsing guarantee is
+inferred from this state projection.
+
+The token validity/key/expiry fields are abstractions, not HMAC, time or encoding
+proofs. SQL isolation/commit faults, concrete IAM/host authentication, JSON/UTF8/ARN
+parsing, actual timestamp/UUID order, variable page sizes, secret-value redaction,
+retention, UI and Go refinement remain native/integration obligations. All thirteen
+controls must fail their exact named semantic invariant with a behavioral trace;
+syntax/type/config failures or timeouts are not accepted counterexamples.

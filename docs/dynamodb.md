@@ -123,6 +123,6 @@ S/N/B、PK/SK、PC1440px/390px、英日、権限拒否、リージョン・Princ
 
 DynamoDBConsoleEpoch は独立した有限 UI 状態モデルで、scoped baseline3,832状態と
 10個の意味的変異制御が成功した。JS/Go/SQL の refinement proof ではない。
-この branch では正式な34モデル/207制御の登録と必須ブラウザー E2E を追加したが、
-現 HEAD の全241形式ケース・51 E2E・全体両90%品質ゲート・hosted CI は別途必要であり、
+この branch では正式な35モデル/220制御の登録と必須ブラウザー E2E を追加したが、
+現 HEAD の全255形式ケース・52 E2E・全体両90%品質ゲート・hosted CI は別途必要であり、
 focused の成功をもって全体検証済みとはしない。

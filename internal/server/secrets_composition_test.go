@@ -41,7 +41,14 @@ func TestSecretsCompositionNativeRootAndS3LiteralNeighbors(t *testing.T) {
 	if err = json.Unmarshal(cap.Body.Bytes(), &caps); err != nil {
 		t.Fatal(err)
 	}
-	if len(caps.Services["secretsmanager"].Operations) != 7 {
+	wantOperations := map[string]bool{"CreateSecret": true, "DescribeSecret": true, "ListSecrets": true, "ListSecretVersionIds": true, "PutSecretValue": true, "GetSecretValue": true, "UpdateSecretVersionStage": true, "DeleteSecret": true}
+	for _, operation := range caps.Services["secretsmanager"].Operations {
+		if !wantOperations[operation] {
+			t.Fatal("canonical capabilities included an unexpected or duplicate Secrets operation")
+		}
+		delete(wantOperations, operation)
+	}
+	if len(wantOperations) != 0 {
 		t.Fatal("canonical capabilities omitted bounded Secrets operations")
 	}
 	require(call("PUT", "/protocol-neighbors", "", nil), 200)
