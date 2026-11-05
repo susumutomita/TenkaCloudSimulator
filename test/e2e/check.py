@@ -71,6 +71,8 @@ def submit(page):
  if dialog.is_visible():dialog.get_by_role('button').last.click()
  else:page.get_by_role('button',name=re.compile('^(Create bucket|Upload|Create parameter|Save changes)$')).last.click()
 class Conformance(unittest.TestCase):
+ def test_sakura_native_reference_schema_and_preservation_controls(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('test_sakura_openapi.py'))], check=True)
  def test_sakura_opt_in_native_two_cli_authority_and_persistence(self):
   # Native stdlib HTTP, not SDK verification; failure is mandatory and unskipped.
   subprocess.run([sys.executable, str(Path(__file__).with_name('sakura_cli.py')), '--binary', str(BINARY), '--report', str(REPORTS/'sakura-cli.json')], check=True, timeout=180)
