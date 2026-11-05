@@ -4,7 +4,9 @@ CONSTANTS Faults
 VARIABLES fault, phase, data, work, affected, outcome
 vars == <<fault,phase,data,work,affected,outcome>>
 InitialFrame == [stack |-> TRUE, claim |-> TRUE, resource |-> TRUE, peer |-> TRUE]
-EmptyOwned(frame) == ~frame.stack /\ ~frame.claim /\ ~frame.resource
+FinalRecordsAbsent(frame) == ~frame.stack /\ ~frame.claim
+\* Existing resource handlers are ASSUMED successful in DeleteResource.
+\* This model does not prove their physical DELETE acknowledgement.
 Init == /\ fault \in Faults
         /\ phase="Ready" /\ data=InitialFrame /\ work=InitialFrame
         /\ affected=0 /\ outcome="Pending"
@@ -21,11 +23,13 @@ DeleteStack == /\ phase="ClaimsDeleted"
                /\ affected'=IF work.claim \/ fault="IgnoreStack" THEN 0 ELSE 1
                /\ phase'="Deleted"
                /\ UNCHANGED <<fault,data,outcome>>
+\* FK/Exec refusal is independent of the mutable final acknowledgement checks.
+ExecSucceeded == ~work.claim
 CleanupAccepted == affected=1 /\ ~work.stack /\ ~work.claim (* FinalCleanupACK *)
-Commit == /\ phase="Deleted" /\ CleanupAccepted
+Commit == /\ phase="Deleted" /\ ExecSucceeded /\ CleanupAccepted
           /\ data'=work /\ outcome'="Success" /\ phase'="Done"
           /\ UNCHANGED <<fault,work,affected>>
-Refuse == /\ phase="Deleted" /\ ~CleanupAccepted
+Refuse == /\ phase="Deleted" /\ (~ExecSucceeded \/ ~CleanupAccepted)
           /\ data'=data (* RollbackFrame *)
           /\ outcome'="Refused" /\ phase'="Done"
           /\ UNCHANGED <<fault,work,affected>>
@@ -34,7 +38,7 @@ TypeOK == /\ fault \in Faults /\ phase \in {"Ready","ResourceDeleted","ClaimsDel
           /\ data \in [ {"stack","claim","resource","peer"} -> BOOLEAN]
           /\ work \in [ {"stack","claim","resource","peer"} -> BOOLEAN]
           /\ affected \in 0..1 /\ outcome \in {"Pending","Success","Refused"}
-NoFalseCleanupACK == outcome="Success" => EmptyOwned(data)
+NoFalseFinalRecordACK == outcome="Success" => FinalRecordsAbsent(data)
 FailureAtomic == outcome="Refused" => data=InitialFrame
 PeerFramePreserved == data.peer=InitialFrame.peer
 PendingFrameUnchanged == outcome="Pending" => data=InitialFrame

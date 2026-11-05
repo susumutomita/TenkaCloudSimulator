@@ -153,6 +153,14 @@ func TestCFNFinalCleanupACKExistingSSMAndS3(t *testing.T) {
 				if err = stacks.db.QueryRow(query).Scan(&resources); err != nil || resources != 0 {
 					t.Fatal("resource retained", err)
 				}
+				peerQuery := "SELECT count(*) FROM aws_ssm_parameters WHERE region='us-east-1' AND name='/cfn/ack-peer' AND value='dummy'"
+				if kind == "S3" {
+					peerQuery = "SELECT count(*) FROM buckets WHERE name='cfn-ack-peer'"
+				}
+				var peerResources int
+				if err = stacks.db.QueryRow(peerQuery).Scan(&peerResources); err != nil || peerResources != 1 {
+					t.Fatal("peer physical resource changed", err)
+				}
 				peerAfter, err := stacks.Records("us-east-1", "ack-peer")
 				if err != nil {
 					t.Fatal(err)
