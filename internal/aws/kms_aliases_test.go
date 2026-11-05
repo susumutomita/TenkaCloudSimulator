@@ -4,8 +4,11 @@ import (
 	"bytes"
 	"context"
 	"database/sql"
+	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http/httptest"
 	"path/filepath"
 	"reflect"
 	"strings"
@@ -685,4 +688,108 @@ func TestKMSAliasesCryptoCommitFailurePublishesNoCiphertext(t *testing.T) {
 	if _, _, err = s.Encrypt(ctx, "alias/Commit", nil, []byte("dummy"), kmsAliasAllow); err != nil {
 		t.Fatal("commit-failure retry", err)
 	}
+}
+
+func TestKMSAliasesNativeJSONControlsAndCrypto(t *testing.T) {
+	keys, s, first, second := kmsAliasFixture(t)
+	ctx := context.Background()
+	g := &Gateway{KMS: keys}
+	w, _ := kmsHTTP(t, g, "CreateAlias", `{"AliasName":"alias/Wire","TargetKeyId":"`+first.KeyID+`"}`, "")
+	if w.Code != 200 || w.Body.Len() != 0 {
+		t.Fatal("CreateAlias must return empty200", w.Code)
+	}
+	w, result := kmsHTTP(t, g, "ListAliases", `{}`, "")
+	var page KMSAliasList
+	if w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &page) != nil || len(page.Aliases) != 1 || page.Aliases[0].AliasName != "alias/Wire" || page.Aliases[0].TargetKeyId != first.KeyID {
+		t.Fatal("native alias list fields", w.Code)
+	}
+	if _, ok := result["Aliases"]; !ok {
+		t.Fatal("missing native Aliases field")
+	}
+	w, result = kmsHTTP(t, g, "Encrypt", `{"KeyId":"alias/Wire","Plaintext":"ZHVtbXk="}`, "")
+	var blob []byte
+	if w.Code != 200 || json.Unmarshal(result["CiphertextBlob"], &blob) != nil || len(blob) == 0 {
+		t.Fatal("native alias encryption", w.Code)
+	}
+	w, result = kmsHTTP(t, g, "Decrypt", `{"KeyId":"arn:aws:kms:us-east-1:000000000000:alias/Wire","CiphertextBlob":"`+base64.StdEncoding.EncodeToString(blob)+`"}`, "")
+	var plain []byte
+	if w.Code != 200 || json.Unmarshal(result["Plaintext"], &plain) != nil || string(plain) != "dummy" {
+		t.Fatal("native alias decryption", w.Code)
+	}
+	w, _ = kmsHTTP(t, g, "UpdateAlias", `{"AliasName":"alias/Wire","TargetKeyId":"`+second.KeyID+`"}`, "")
+	if w.Code != 200 || w.Body.Len() != 0 {
+		t.Fatal("UpdateAlias must return empty200", w.Code)
+	}
+	before := kmsAliasFrame(t, keys)
+	w, _ = kmsHTTP(t, g, "Decrypt", `{"KeyId":"alias/Wire","CiphertextBlob":"`+base64.StdEncoding.EncodeToString(blob)+`"}`, "")
+	if w.Code != 400 || w.Header().Get("X-Amzn-Errortype") != "IncorrectKeyException" {
+		t.Fatal("native retarget mismatch", w.Code)
+	}
+	kmsAliasUnchanged(t, keys, before)
+	w, result = kmsHTTP(t, g, "Decrypt", `{"CiphertextBlob":"`+base64.StdEncoding.EncodeToString(blob)+`"}`, "")
+	if w.Code != 200 || json.Unmarshal(result["Plaintext"], &plain) != nil || string(plain) != "dummy" {
+		t.Fatal("old omitted native decrypt changed", w.Code)
+	}
+	w, _ = kmsHTTP(t, g, "DeleteAlias", `{"AliasName":"alias/Wire"}`, "")
+	if w.Code != 200 || w.Body.Len() != 0 {
+		t.Fatal("DeleteAlias must return empty200", w.Code)
+	}
+	if _, err := s.ListAliases(ctx, "", 50, "", kmsAliasAllow); err != nil {
+		t.Fatal("same native/store DB", err)
+	}
+}
+func TestKMSAliasesNativeDefaultLimitAndStrictWireRefusals(t *testing.T) {
+	keys, s, first, second := kmsAliasFixture(t)
+	ctx := context.Background()
+	g := &Gateway{KMS: keys}
+	for i := 0; i < 51; i++ {
+		target := first.KeyID
+		if i == 50 {
+			target = second.KeyID
+		}
+		if err := s.CreateAlias(ctx, fmt.Sprintf("alias/default%02d", i), target, kmsAliasAllow); err != nil {
+			t.Fatal(err)
+		}
+	}
+	w, _ := kmsHTTP(t, g, "ListAliases", `{}`, "")
+	var page KMSAliasList
+	if w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &page) != nil || len(page.Aliases) != 50 || !page.Truncated || page.NextMarker == "" {
+		t.Fatal("official omitted Limit default50 not implemented", w.Code)
+	}
+	before := kmsAliasFrame(t, keys)
+	for _, bad := range []struct{ op, body string }{
+		{"ListAliases", `{"Limit":0}`}, {"ListAliases", `{"Limit":101}`}, {"ListAliases", `{"Limit":1.5}`}, {"ListAliases", `{"Marker":""}`}, {"ListAliases", `{"GrantTokens":[]}`},
+		{"CreateAlias", `{"AliasName":"alias/Missing"}`}, {"CreateAlias", `{"TargetKeyId":"` + first.KeyID + `"}`}, {"CreateAlias", `{"AliasName":null,"TargetKeyId":"` + first.KeyID + `"}`}, {"CreateAlias", `{"aliasname":"alias/WrongCase","TargetKeyId":"` + first.KeyID + `"}`},
+		{"UpdateAlias", `{"AliasName":"alias/default00","TargetKeyId":"` + first.KeyID + `","Description":"unsupported"}`}, {"DeleteAlias", `{}`}, {"DeleteAlias", `{"AliasName":"alias/default00","AliasName":"alias/default01"}`},
+	} {
+		w, _ = kmsHTTP(t, g, bad.op, bad.body, "")
+		if w.Code != 400 || w.Header().Get("X-Amzn-Errortype") != "ValidationException" {
+			t.Fatal("alias strict wire refusal", bad.op, w.Code)
+		}
+		kmsAliasUnchanged(t, keys, before)
+	}
+}
+func TestKMSAliasesNativeSnapshotAuthorizerUsesConcreteTarget(t *testing.T) {
+	keys, s, key, _ := kmsAliasFixture(t)
+	ctx := context.Background()
+	if err := s.CreateAlias(ctx, "alias/NativeAuth", key.KeyID, kmsAliasAllow); err != nil {
+		t.Fatal(err)
+	}
+	before := kmsAliasFrame(t, keys)
+	calls := 0
+	r := httptest.NewRequest("POST", "/", strings.NewReader(`{"KeyId":"alias/NativeAuth","Plaintext":"ZHVtbXk="}`))
+	r.Header.Set("Content-Type", "application/x-amz-json-1.1")
+	r.Header.Set("X-Amz-Target", "TrentService.Encrypt")
+	w := httptest.NewRecorder()
+	keys.ServeHTTP(w, r, "us-east-1", func(action, resource string) bool {
+		calls++
+		if action != "kms:Encrypt" || resource != "arn:aws:kms:us-east-1:000000000000:key/"+key.KeyID {
+			t.Fatal("wire alias auth used wrong action or alias ARN")
+		}
+		return false
+	})
+	if w.Code != 403 || calls != 1 || strings.Contains(w.Body.String(), "CiphertextBlob") {
+		t.Fatal("denied native alias crypto success", w.Code)
+	}
+	kmsAliasUnchanged(t, keys, before)
 }

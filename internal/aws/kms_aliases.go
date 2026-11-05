@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"errors"
 	"math"
+	"net/http"
 	"regexp"
 	"strings"
 	"time"
@@ -496,4 +497,58 @@ func (s *KMSAliasStore) Decrypt(ctx context.Context, selected string, contextMap
 		return nil, "", err
 	}
 	return plaintext, arn, nil
+}
+
+// serveAliasRequest is the bounded native JSON1.1 composition hook. Existing
+// concrete-key operations retain their old path. The authorizer is the native
+// request's already-captured immutable policy, never a fresh identities DB read.
+func (s *KMSStore) serveAliasRequest(w http.ResponseWriter, r *http.Request, region, op string, request kmsRequest, authorize func(string, string) bool) bool {
+	control := op == "CreateAlias" || op == "UpdateAlias" || op == "DeleteAlias" || op == "ListAliases"
+	aliasCrypto := (op == "Encrypt" || op == "Decrypt") && (strings.HasPrefix(request.KeyId, "alias/") || strings.Contains(request.KeyId, ":alias/"))
+	if !control && !aliasCrypto {
+		return false
+	}
+	if s == nil || s.db == nil {
+		kmsWriteError(w, kmsInternal())
+		return true
+	}
+	if authorize == nil {
+		kmsWriteError(w, kmsAliasDenied())
+		return true
+	}
+	aliases, err := NewKMSAliasStore(s, region)
+	if err != nil {
+		kmsWriteError(w, err)
+		return true
+	}
+	auth := func(_ context.Context, _ *sql.Tx, action, resource string) (bool, error) {
+		return authorize(action, resource), nil
+	}
+	var response any
+	switch op {
+	case "CreateAlias":
+		err = aliases.CreateAlias(r.Context(), request.AliasName, request.TargetKeyId, auth)
+	case "UpdateAlias":
+		err = aliases.UpdateAlias(r.Context(), request.AliasName, request.TargetKeyId, auth)
+	case "DeleteAlias":
+		err = aliases.DeleteAlias(r.Context(), request.AliasName, auth)
+	case "ListAliases":
+		response, err = aliases.ListAliases(r.Context(), request.KeyId, request.Limit, request.Marker, auth)
+	case "Encrypt":
+		var blob []byte
+		var arn string
+		blob, arn, err = aliases.Encrypt(r.Context(), request.KeyId, request.EncryptionContext, request.Plaintext, auth)
+		response = map[string]any{"CiphertextBlob": blob, "KeyId": arn, "EncryptionAlgorithm": "SYMMETRIC_DEFAULT"}
+	case "Decrypt":
+		var plaintext []byte
+		var arn string
+		plaintext, arn, err = aliases.Decrypt(r.Context(), request.KeyId, request.EncryptionContext, request.CiphertextBlob, auth)
+		response = map[string]any{"Plaintext": plaintext, "KeyId": arn, "EncryptionAlgorithm": "SYMMETRIC_DEFAULT"}
+	}
+	if err != nil {
+		kmsWriteError(w, err)
+		return true
+	}
+	kmsJSON(w, http.StatusOK, response)
+	return true
 }
