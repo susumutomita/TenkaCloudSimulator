@@ -4472,6 +4472,70 @@
         "internal/aws/cloudformation_conditions_link.go"
       ],
       "limits": "Finite validation witnesses, not real Go constraint evaluation, rational arithmetic, regex, UTF8/byte limits, YAML/JSON parser or graph recursion refinement. Condition equality is an immutable Boolean input; alias/cycle/unknown graphs are abstract witnesses, not evaluated graph nodes. Chosen symbol-link validity is abstract; frozen4177 compiler preparation now has a separately reviewed limited source correspondence, not a full linker/dependency refinement. Unused branch syntax is validated; resource linking is distinct. No SQL, transaction, runtime provisioning, policy grant, output privacy/NoEcho, grader execution, VM or host authority proof. selectedLink witness is an unconditional BaseRole link, independent of the optional map/list arm; NoValue can prune that optional arm while BaseRole linking still fails. Exact compiler4177 correspondence is a bounded plan-admission projection only: outer declaration validation actually precedes parameters, unlike the model phase order. Both-arm raw Ref/GetAtt/Sub validation, active-disabled dependency graph, resource schema allowlists/copies/ordering are separate native obligations, not modeled individually. Resource/output sets represent a pure StackRecord plan, not SQL/resource allocation, rollback, grant, NoEcho/private-output filtering or host grading. File scope covers only these named compile preparation contracts, not every behavior in cloudformation.go."
+    },
+    {
+      "id": "CFNFinalCleanupACK",
+      "model": "formal/CFNFinalCleanupACK.tla",
+      "config": "formal/CFNFinalCleanupACK.cfg",
+      "bounds": "1selectedstack/1ownedresource+claim/1abstractpeer;4faultmodes Normal/IgnoreStack/ReinsertStack/IgnoreClaims;5phases",
+      "properties": [
+        "TypeOK",
+        "NoFalseFinalRecordACK",
+        "FailureAtomic",
+        "PeerFramePreserved",
+        "PendingFrameUnchanged"
+      ],
+      "limits": "Final selectedstack/ownedclaim record cleanup only. Physicalresource handler success is ASSUMED, not independentlyACKchecked or proved bythismodel. RealretainedFKclaim makes ExecSucceeded false independentlyofmutableACK; IgnoreFinalCleanupACK canwitnessonlyIgnoreStack/ReinsertStack, notIgnoreClaims. Fullrollback/peerframe abstractions, no Go/SQL/auth/provisioning refinement.",
+      "source_scope": [
+        "internal/aws/cloudformation.go",
+        "internal/aws/cloudformation_cleanup_ack_test.go"
+      ],
+      "mutants": [
+        {
+          "id": "IgnoreFinalCleanupACK",
+          "expect_invariant": "NoFalseFinalRecordACK",
+          "edits": [
+            {
+              "old": "CleanupAccepted == affected=1 /\\ ~work.stack /\\ ~work.claim (* FinalCleanupACK *)",
+              "new": "CleanupAccepted == TRUE (* FinalCleanupACK *)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "CommitPartialAfterRefusal",
+          "expect_invariant": "FailureAtomic",
+          "edits": [
+            {
+              "old": "data'=data (* RollbackFrame *)",
+              "new": "data'=work (* RollbackFrame *)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "DeletePeerResource",
+          "expect_invariant": "PeerFramePreserved",
+          "edits": [
+            {
+              "old": "work'=[work EXCEPT !.resource=FALSE] (* DeleteOwnedResource *)",
+              "new": "work'=[work EXCEPT !.resource=FALSE, !.peer=FALSE] (* DeleteOwnedResource *)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "PublishBeforeCleanup",
+          "expect_invariant": "PendingFrameUnchanged",
+          "edits": [
+            {
+              "old": "/\\ phase'=\"ResourceDeleted\"\n                  /\\ UNCHANGED <<fault,data,affected,outcome>>",
+              "new": "/\\ phase'=\"ResourceDeleted\"\n                  /\\ data'=work' /\\ UNCHANGED <<fault,affected,outcome>>",
+              "count": 1
+            }
+          ]
+        }
+      ]
     }
   ]
 }

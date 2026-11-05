@@ -9,8 +9,9 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-BASE_MODELS = {'CFNConditionAdmission', 'AzureBlobState', 'AzurePropertiesEpoch', 'AzurePropertiesTarget', 'BlobRange', 'BrowserSessions', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'DynamoDBAdmission', 'DynamoDBConsoleEpoch', 'DynamoDBLifecycle', 'GCPStorageState', 'IAMManagedPolicies', 'KMSAliasCatalog', 'KMSAliasCrypto', 'KMSAliasesViewEpoch', 'KMSBootstrapTransaction', 'KMSKeyState', 'KMSProtocolAdmission', 'NativeIAMOwnership', 'NativeWireProjection', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'RESTProxyEventBoundary', 'RESTRouteMatching', 'S3Versions', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'SecretMetadataViewEpoch', 'SecretVersionListing', 'SecretsDisclosureChannels', 'SecretsMutationRefresh', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'StackOwnership', 'StartupTokenVisibility'}
+BASE_MODELS = {'CFNFinalCleanupACK', 'CFNConditionAdmission', 'AzureBlobState', 'AzurePropertiesEpoch', 'AzurePropertiesTarget', 'BlobRange', 'BrowserSessions', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'DynamoDBAdmission', 'DynamoDBConsoleEpoch', 'DynamoDBLifecycle', 'GCPStorageState', 'IAMManagedPolicies', 'KMSAliasCatalog', 'KMSAliasCrypto', 'KMSAliasesViewEpoch', 'KMSBootstrapTransaction', 'KMSKeyState', 'KMSProtocolAdmission', 'NativeIAMOwnership', 'NativeWireProjection', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'RESTProxyEventBoundary', 'RESTRouteMatching', 'S3Versions', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'SecretMetadataViewEpoch', 'SecretVersionListing', 'SecretsDisclosureChannels', 'SecretsMutationRefresh', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'StackOwnership', 'StartupTokenVisibility'}
 BASE_INVARIANTS = {
+    'CFNFinalCleanupACK': {'PeerFramePreserved', 'PendingFrameUnchanged', 'TypeOK', 'NoFalseFinalRecordACK', 'FailureAtomic'},
     'CFNConditionAdmission': {'NoResultOnInvalid', 'ConditionalOutputsAbsent', 'ParameterAdmission', 'TypeOK', 'AllConditionsValidated', 'MapNoValuePruned', 'PlanExact', 'NoEarlyPublication', 'DisabledDeclarationsValidated', 'BothBranchesValidated', 'SelectedBranchExact', 'DisabledResourcesAbsent', 'ListNoValuePruned', 'SelectedLinkValidated'},
     'DynamoDBConsoleEpoch': {'AckBelongsToCurrentView', 'AckClosesDraft', 'CancelNoOrphanLoading', 'DisplayedKeyBound', 'LocalePreservesDraft', 'NoStalePublication', 'ReadGenerationVerified', 'ReadRetryNeverWrites', 'SingleSendBeforeACK', 'TypeOK'},
     'SecretMetadataViewEpoch': {'CurrentPageOnly', 'CursorRequestBound', 'LoadingTracksLatest', 'LocalePreservesQuery', 'MetadataRequestsOnly', 'NoRowsOnError', 'NoStaleCallbackAcceptance', 'NoStaleRenderedError', 'NoStaleRenderedMetadata', 'ParentRevealClearedForMetadata', 'PendingClearsMetadata', 'TypeOK', 'ValidatedMetadataOnly'},
@@ -55,6 +56,7 @@ BASE_INVARIANTS = {
 }
 # Established controls require an explicit gate-policy change before retirement.
 REQUIRED_MUTANTS = {
+    'CFNFinalCleanupACK': {'CommitPartialAfterRefusal', 'DeletePeerResource', 'PublishBeforeCleanup', 'IgnoreFinalCleanupACK'},
     'CFNConditionAdmission': {'SelectedLinkBypass', 'WrongSelectedArm', 'MapNoValueRetained', 'CycleAccepted', 'FailedResultPublished', 'UnknownParameterAccepted', 'ListNoValueRetained', 'UnusedElseSyntaxBypass', 'DisabledResourceIncluded', 'DefaultOverrideBypass', 'DisabledOutputIncluded', 'DisabledDeclarationBypass', 'InvalidSuppliedAccepted', 'EarlyResultPublished'},
     'SecretMetadataViewEpoch': {'AppendPreviousPage', 'ChildRequestsValue', 'ErrorFabricatesRows', 'LateCallbackAccepted', 'LocaleResetsQuery', 'NewReadKeepsOldRows', 'NextFilterContext', 'OldFinallyClearsNewLoading', 'ParentKeepsPriorReveal', 'RenderOldMetadata', 'RenderOldNativeError', 'ScopeCommitKeepsLoading', 'SkipPayloadValidation', 'UnmountWithoutCleanup'},
     'DynamoDBConsoleEpoch': {'ACKKeepsDraft', 'ACKKeepsForm', 'CancelKeepsLoading', 'IgnorePostReadGeneration', 'IgnoreReadViewGuard', 'IgnoreWriteViewGuard', 'KeepDisplayedItemOnKeyEdit', 'LocaleClearsDirtyDraft', 'RemoveSynchronousOwnerLock', 'RetryRepeatsWrite'},
@@ -98,6 +100,7 @@ REQUIRED_MUTANTS = {
     'KMSAliasesViewEpoch': {'BypassRetiredListLife', 'DeleteWithoutExactConfirmation', 'IgnoreSameLifeListRevision', 'IgnoreSelectedTargetRevision', 'KeepDraftAfterAcknowledgedWrite', 'KeepFormAfterAcknowledgedWrite', 'LocaleClearsUnsavedDraft', 'ReplayWriteOnReadRetry', 'RetainRowsOnCurrentReadFailure', 'RetainTargetMetadataOnCancel', 'SubmitWithoutVerifiedTarget'},
 }
 REQUIRED_SOURCE_SCOPES = {
+    'CFNFinalCleanupACK': {'internal/aws/cloudformation_cleanup_ack_test.go', 'internal/aws/cloudformation.go'},
     'CFNConditionAdmission': {'internal/aws/cloudformation_conditions.go', 'internal/aws/cloudformation.go', 'internal/aws/cloudformation_conditions_link.go'},
     'SecretMetadataViewEpoch': {'internal/server/web/app.js', 'tools/console/src/secret_versions.jsx', 'tools/console/src/secrets-manager.jsx'},
     'DynamoDBConsoleEpoch': {'internal/server/web/app.js', 'tools/console/src/dynamodb.jsx', 'tools/console/src/main.jsx'},

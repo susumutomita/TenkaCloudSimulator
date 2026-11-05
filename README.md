@@ -241,8 +241,8 @@ not binary runtime dependencies. Regeneration must preserve locks and original
 rights: [console](tools/console/README.md), [Scalar](tools/scalar/README.md),
 [Python/WASI runtime](tools/python/README.md).
 
-The registry contains 41 finite models and 309 deliberate defect controls
-(350 required model/check executions), including bounded DynamoDB console
+The registry contains 42 finite models and 313 deliberate defect controls
+(355 required model/check executions), including bounded DynamoDB console
 epoch/ACK/read-retry and Secrets version-metadata listing contracts. The new IAM scenario checks two requests
 from each of four reachable seeds. A broader four-request trial timed out and
 is not claimed as verified. TLC examines bounded safety properties and checks
@@ -253,7 +253,7 @@ See [formal validation](formal/README.md), [CI](docs/ci.md),
 [backlog acceptance](docs/acceptance/backlog-services.md), and the
 [standalone architecture](docs/design/0001-go-standalone.md).
 
-The CFN condition model adds a bounded compile-plan projection. Its isolated SANY/baseline/fourteen controls passed at `f69fb46`; the combined 350-case gate of this candidate is pending. The original crypto fixture also passed the regular two-CLI SDK helper at `2d76646` (73 SDK calls/responses and 9 auxiliary HTTP pairs across four CLI incarnations). That verifies local provisioning and permissions, not host coordination, scoring or NoEcho secrecy.
+The CFN condition model adds a bounded compile-plan projection. Its isolated SANY/baseline/fourteen controls passed at `f69fb46`; the combined 355-case gate of this candidate is pending. The original crypto fixture also passed the regular two-CLI SDK helper at `2d76646` (73 SDK calls/responses and 9 auxiliary HTTP pairs across four CLI incarnations). That verifies local provisioning and permissions, not host coordination, scoring or NoEcho secrecy.
 
 ## License and attribution
 

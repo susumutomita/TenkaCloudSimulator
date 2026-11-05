@@ -126,11 +126,18 @@ defaults and enabled mode, actual SSM permissions/refusals, invalid-input and la
 name-conflict rollback, restart and cleanup. At `2d76646` the helper passed against a regular embedded CLI: 73 SDK logical
 calls/sends/raw HTTP responses/parsed responses, plus nine auxiliary HTTP pairs,
 across four CLI process incarnations. This dated result is not the new combined
-57-case E2E or 350-case formal gate after the normal main merge; those are pending.
-It is not a game or grading acceptance. The separate SQLite ignored-write
-DeleteStack ACK correction remains an integration dependency before this
-candidate can be called merge-ready; happy-path cleanup does not prove every
-SQL/fault branch.
+57-case E2E or 355-case formal gate after the normal main merge; those are pending.
+It is not a game or grading acceptance. The standalone final DeleteStack ACK
+correction from `7d56d9d` is now integrated as source: exactly one selected stack
+row must be deleted and both selected stack and owned-claim records must be
+absent before commit. A refusal rolls back the transaction. The new finite model
+covers only these final records; it assumes physical resource handlers succeed
+and does not prove their individual DELETE acknowledgement. Combined native,
+E2E, formal and coverage gates still remain pending for this changed candidate.
+The alias-depth cache correction additionally validates structural depth
+independently of sorted-name/memoization order; native regressions cover both
+naming directions, shared cached children and cycles. Its focused finite model
+is being prepared separately; the broad admission model is not its proof.
 
 `NoEcho` is accepted only as Boolean metadata. It does **not** guarantee secret
 storage or redaction: dummy parameter values persist in SQLite and are visible

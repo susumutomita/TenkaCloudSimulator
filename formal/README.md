@@ -1,7 +1,7 @@
 # Finite state models
 
-Current registry: **41 models / 309 literal-protected controls**
-(**350 required executions**). All actual-main 40 model entries and 295 controls
+Current registry: **42 models / 313 literal-protected controls**
+(**355 required executions**). All actual-main 40 model entries and 295 controls
 are retained. Four separate customer-alias models describe catalog admission,
 concrete-key crypto, UI epochs/refresh and first-use transaction bootstrap.
 Their finite scopes and evidence are distinct from native/SDK/whole-quality proof.
@@ -10,7 +10,7 @@ CFNConditionAdmission adds fourteen invariants and fourteen semantic controls ov
 234 immutable inputs. Its isolated `f69fb46` SANY/baseline/control run passed
 (792 reachable states); the initial ungrouped IF assignment produced exit75,
 was corrected without changing bounds/properties, and that failure is retained.
-This is historical scoped evidence, not the combined 350-case candidate gate.
+This is historical scoped evidence, not the combined 355-case candidate gate.
 
 The CFN binding covers only named pure parameter/condition/selection and
 compile-plan admission contracts in `cloudformation_conditions.go`,
@@ -21,15 +21,23 @@ SQL/lifecycle/grants and output privacy remain native test obligations. The
 compiler validates outer declarations before parameters; the abstract phase
 order makes no error-priority claim. See [CFN boundaries](../docs/cloudformation-rest.md#parameters-and-conditions).
 
+CFNFinalCleanupACK adds five properties and four controls for final selected
+stack/owned-claim acknowledgement and rollback/peer-frame abstraction. Its source
+and native regression are imported from standalone `7d56d9d`; this candidate has
+not yet executed the combined registered gate. Physical resource handler success
+is assumed, not proved: this is not an all-resource DELETE acknowledgement model.
+The condition-height cache fix also has dedicated native regressions; its separate
+memo-depth model is still being prepared, outside the current 355-case inventory.
+
 Registration is source evidence, not a successful current-HEAD execution claim.
-The complete immutable 350-case gate must actually run for this combined revision.
+The complete immutable 355-case gate must actually run for this combined revision.
 Historical scoped/integration receipts do not replace it. IAMManagedPolicies
 retains four reachable seeds and two-request suffixes; its broader four-request
 trial timed out and is not claimed. There is no Go/SQL/HTTP/UI refinement,
 cryptographic or complete cloud-compatibility proof.
 
 Legacy sections retain dated counts/status for traceability; “current” in those
-sections refers to that integration, not this authoritative 41/309 inventory.
+sections refers to that integration, not this authoritative 42/313 inventory.
 Every execution claim must identify its exact revision.
 
 `ObjectStore.tla` models two buckets and two keys, shared object ownership, create/put/delete transitions, and an abstract identity decision `allow /\ ~deny`. `ObjectStore.cfg` checks type correctness, no orphan objects, no unauthorized mutation, and explicit-deny precedence.
