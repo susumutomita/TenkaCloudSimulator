@@ -27,12 +27,19 @@ jobs:
           /tmp/simulator-tests/bin/playwright install --with-deps chromium
       - name: Check native discovery, Japanese operations and desktop/mobile layouts
         run: /tmp/simulator-tests/bin/python test/e2e/service_locale.py
-      - name: Retain focused Japanese console screenshots
+      - name: Check Secrets disclosure boundaries and actual metadata accessibility
+        run: |
+          /tmp/simulator-tests/bin/python scripts/get-audit-tools.py /tmp/simulator-console-audit
+          AXE_SCRIPT=/tmp/simulator-console-audit/axe.min.js /tmp/simulator-tests/bin/python test/e2e/secrets_manager_console.py
+      - name: Retain focused service console evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: service-console-focused-${{ github.event.pull_request.head.sha || github.sha }}
-          path: reports/service-locale-*.png
+          path: |
+            reports/service-locale-*.png
+            reports/secrets-metadata-*.png
+            reports/secrets-a11y-summary.json
           if-no-files-found: warn
           retention-days: 14
   ci:
@@ -89,12 +96,15 @@ jobs:
         run: /tmp/simulator-tests/bin/python scripts/get-audit-tools.py /tmp/simulator-audit
       - name: Verify real binary, SDK, console, and offline API reference
         run: AXE_SCRIPT=/tmp/simulator-audit/axe.min.js make e2e PYTHON=/tmp/simulator-tests/bin/python
-      - name: Retain Japanese service console screenshots
+      - name: Retain service console screenshots and safe audit evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: service-console-${{ github.event.pull_request.head.sha || github.sha }}
-          path: reports/service-locale-*.png
+          path: |
+            reports/service-locale-*.png
+            reports/secrets-metadata-*.png
+            reports/secrets-a11y-summary.json
           if-no-files-found: warn
           retention-days: 14
       - name: Run the actual platform hello-world lifecycle and participant browser

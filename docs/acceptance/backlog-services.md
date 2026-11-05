@@ -44,6 +44,9 @@ user input and service data, and keeps native operation identifiers canonical.
   and fail the read after a real committed write, then verify exact SDK state
   and that retry never repeats the mutation. Deleted details and cached list
   rows are removed as soon as deletion succeeds.
+  Metadata accessibility audits wait for the actual DescribeSecret response,
+  rendered version labels and enabled controls. Safe audit summaries retain the
+  phase, viewport, rule and color diagnostics without DOM HTML or secret values.
 - The common GCP-prefixed authentication denial now returns the native nested
   error object expected by Google's error parser. Authentication decisions,
   browser-session rules and legacy AWS/control error bodies are unchanged.

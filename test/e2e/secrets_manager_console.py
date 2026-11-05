@@ -15,16 +15,49 @@ from check import REPORTS, assert_reflow, expect, running, sync_playwright
 from secrets_manager import client, control
 
 
+def safe_audit_summary(name, viewport, result):
+    """Bound failure diagnostics to selectors and numeric/color check data."""
+    violations = []
+    for violation in result["violations"][:16]:
+        nodes = []
+        for node in violation["nodes"][:8]:
+            checks = []
+            for kind in ("any", "all", "none"):
+                for check in node.get(kind, [])[:4]:
+                    data, colors = check.get("data") or {}, {}
+                    if isinstance(data, dict):
+                        for key in ("fgColor", "bgColor", "contrastRatio",
+                                    "expectedContrastRatio", "fontSize", "fontWeight"):
+                            value = data.get(key)
+                            if type(value) in (int, float):
+                                colors[key] = value
+                            elif isinstance(value, str) and len(value) <= 64:
+                                if key in ("fgColor", "bgColor") and re.fullmatch(r"#[0-9a-fA-F]{3,8}", value):
+                                    colors[key] = value
+                                elif key not in ("fgColor", "bgColor") and re.fullmatch(r"[0-9 .:()pxpt]+", value):
+                                    colors[key] = value
+                    checks.append({"id": check["id"][:80], "data": colors})
+            # Axe selectors can contain attribute values. Apply the same fixture
+            # redaction as the exception sanitizer before persisting selectors.
+            nodes.append({"target": [re.sub(r"DUMMY-secret-[A-Za-z0-9_-]+", "[redacted dummy value]", target)[:512]
+                                     for target in node.get("target", [])[:4]
+                                     if isinstance(target, str)], "checks": checks})
+        violations.append({"id": violation["id"][:80], "nodeCount": len(violation["nodes"]),
+                           "nodes": nodes})
+    return {"screen": name, "viewport": viewport, "violationCount": len(result["violations"]),
+            "violations": violations, "passes": len(result["passes"])}
+
+
 def run():
     output_names = ["secrets-metadata-desktop.png", "secrets-metadata-mobile.png",
-                    "secrets-a11y.json"]
+                    "secrets-a11y.json", "secrets-a11y-summary.json"]
     for name in output_names:
         (REPORTS/name).unlink(missing_ok=True)
     axe_path = Path(os.environ["AXE_SCRIPT"])
     provenance = json.loads((axe_path.parent/"provenance.json").read_text())
     assert hashlib.sha256(axe_path.read_bytes()).hexdigest() == provenance["bundleSha256"]
     axe = axe_path.read_text()
-    audits = []
+    audits, summaries = [], []
     with running(authenticated=True) as (endpoint, token), sync_playwright() as playwright:
         sdk = client(endpoint, token)
         browser = playwright.chromium.launch(
@@ -50,7 +83,10 @@ def run():
                 audits.append({"screen": name, "violations": result["violations"],
                                "passes": len(result["passes"])})
                 (REPORTS/"secrets-a11y.json").write_text(json.dumps({"tool": provenance, "screens": audits}, indent=2)+"\n")
-                assert result["violations"] == [], [(v["id"], len(v["nodes"])) for v in result["violations"]]
+                summary = safe_audit_summary(name, page.viewport_size, result)
+                summaries.append(summary)
+                (REPORTS/"secrets-a11y-summary.json").write_text(json.dumps({"tool": provenance, "screens": summaries}, indent=2)+"\n")
+                assert result["violations"] == [], json.dumps(summary, ensure_ascii=True)
 
             page.route("**/*", local_only)
             page.goto(endpoint+"/_simulator/console/")
@@ -136,9 +172,24 @@ def run():
             expect(page.get_by_role("heading", name="Secret details", exact=True)).to_be_visible()
             current = sdk.get_secret_value(SecretId=arn)
             assert current["SecretString"] == "DUMMY-secret-console-B" and current["VersionId"] != first_version
-            page.get_by_role("button", name="Roll back to previous (simulator)", exact=True).click()
+            with page.expect_response(lambda response:
+                    response.request.headers.get("x-amz-target") == "secretsmanager.DescribeSecret"
+                    and response.request.post_data_json == {"SecretId": arn}) as rollback_metadata:
+                page.get_by_role("button", name="Roll back to previous (simulator)", exact=True).click()
+            assert rollback_metadata.value.status == 200, "Rollback metadata refresh failed"
+            assert rollback_metadata.value.json()["VersionIdsToStages"] == {
+                first_version: ["AWSCURRENT"], current["VersionId"]: ["AWSPREVIOUS"]}
             expect(page.get_by_text("Previous version is now current.", exact=False)).to_be_visible()
             assert sdk.get_secret_value(SecretId=arn)["VersionId"] == first_version
+            # The success notice precedes the follow-up read. Audit the returned
+            # detail state, not the intervening cached/loading list.
+            expect(page.get_by_role("heading", name="Secret details", exact=True)).to_be_visible()
+            expect(page.get_by_role("button", name="Refresh secret metadata", exact=True)).to_be_enabled()
+            expect(page.get_by_role("button", name="Roll back to previous (simulator)", exact=True)).to_be_enabled()
+            expect(page.get_by_role("row").filter(has_text=first_version).get_by_role(
+                "cell", name="AWSCURRENT", exact=True)).to_be_visible()
+            expect(page.get_by_role("row").filter(has_text=current["VersionId"]).get_by_role(
+                "cell", name="AWSPREVIOUS", exact=True)).to_be_visible()
             assert "DUMMY-secret-" not in page.locator("body").inner_text()
             expect(page.get_by_label("Retrieved secret value", exact=True)).to_have_count(0)
             audit("metadata-desktop")
