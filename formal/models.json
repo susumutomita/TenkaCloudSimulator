@@ -4661,6 +4661,103 @@
           "expect_invariant": "RejectedPublishesNoValues"
         }
       ]
+    },
+    {
+      "id": "CFNPhysicalResourceACK",
+      "model": "formal/CFNPhysicalResourceACK.tla",
+      "config": "formal/CFNPhysicalResourceACK.cfg",
+      "bounds": "2selectedphysicalresources(abstractSSM/S3),1peerframe,1stack/claimframe;9initialfaultmodes;6phases. MissingA preservesalreadymissingcleanup; AbortB occursafterfirstresourceeffect. No unboundedconcurrency.",
+      "properties": [
+        "TypeOK",
+        "SuccessPhysicalAbsent",
+        "FailureAtomic",
+        "PeerFramePreserved",
+        "PendingFrameUnchanged"
+      ],
+      "limits": "Onlyend-of-Tx selectedSSM/S3physicalabsence+rollback/peerframe contract. ActualSQLhandler effects abstracted bydeliveredrowbits withIGNORE/reinsert/lateclaim/latestack/crosscleanup faults. Independentfinalpredicate readsactualworkingrows, notackflag. earlyOK usedonlymutant torepresentwrongearlycheck. NoSQL/Go/auth/parser/fullCFNrefinement or otherresourceACKproof. Success doesnotimplyfinalstack/claimACK (separatemodel).",
+      "source_scope": [
+        "internal/aws/cloudformation.go",
+        "internal/aws/cloudformation_physical_delete_ack_test.go"
+      ],
+      "mutants": [
+        {
+          "id": "OmitFinalPhysicalCheck",
+          "expect_invariant": "SuccessPhysicalAbsent",
+          "edits": [
+            {
+              "old": "PhysicalAccepted == ~work.a /\\ ~work.b (* FinalPhysicalAbsence *)",
+              "new": "PhysicalAccepted == TRUE (* FinalPhysicalAbsence *)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "ReadBeforeLateCleanup",
+          "expect_invariant": "SuccessPhysicalAbsent",
+          "edits": [
+            {
+              "old": "PhysicalAccepted == ~work.a /\\ ~work.b (* FinalPhysicalAbsence *)",
+              "new": "PhysicalAccepted == earlyOK (* FinalPhysicalAbsence *)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "SkipSecondResource",
+          "expect_invariant": "SuccessPhysicalAbsent",
+          "edits": [
+            {
+              "old": "PhysicalAccepted == ~work.a /\\ ~work.b (* FinalPhysicalAbsence *)",
+              "new": "PhysicalAccepted == ~work.a (* FinalPhysicalAbsence *)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "CommitFailedPostcondition",
+          "expect_invariant": "FailureAtomic",
+          "edits": [
+            {
+              "old": "data'=data (* RollbackAfterPostcondition *)",
+              "new": "data'=work (* RollbackAfterPostcondition *)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "CommitSQLExecFailure",
+          "expect_invariant": "FailureAtomic",
+          "edits": [
+            {
+              "old": "data'=data (* RollbackAfterExecFailure *)",
+              "new": "data'=work (* RollbackAfterExecFailure *)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "DeletePeerPhysicalResource",
+          "expect_invariant": "PeerFramePreserved",
+          "edits": [
+            {
+              "old": "work'=[work EXCEPT !.a=(fault \\in {\"IgnoreA\",\"ReinsertA\"})] (* SelectedDeleteA *)",
+              "new": "work'=[work EXCEPT !.a=(fault \\in {\"IgnoreA\",\"ReinsertA\"}), !.peer=FALSE] (* SelectedDeleteA *)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "PublishBeforeFinalRead",
+          "expect_invariant": "PendingFrameUnchanged",
+          "edits": [
+            {
+              "old": "/\\ phase'=\"FinalRead\"\n               /\\ UNCHANGED <<fault,data,earlyOK,outcome>>",
+              "new": "/\\ phase'=\"FinalRead\"\n               /\\ data'=work' /\\ UNCHANGED <<fault,earlyOK,outcome>>",
+              "count": 1
+            }
+          ]
+        }
+      ]
     }
   ]
 }

@@ -801,6 +801,25 @@ func (s *StackStore) deleteChecked(region, name string, authorize func(StackReco
 	if remainingStack != 0 || remainingClaims != 0 {
 		return errors.New("stack cleanup postcondition failed")
 	}
+	// Verify physical effects after every cleanup write. A trigger on a later
+	// resource/claim/stack deletion must not resurrect an acknowledged resource.
+	for _, resource := range records[0].Resources {
+		var remaining int
+		switch resource.Type {
+		case "AWS::SSM::Parameter":
+			err = tx.QueryRow("SELECT count(*) FROM aws_ssm_parameters WHERE region=? AND name=?", region, resource.PhysicalID).Scan(&remaining)
+		case "AWS::S3::Bucket":
+			err = tx.QueryRow("SELECT count(*) FROM buckets WHERE name=?", resource.PhysicalID).Scan(&remaining)
+		default:
+			continue
+		}
+		if err != nil {
+			return err
+		}
+		if remaining != 0 {
+			return errors.New("stack physical resource cleanup postcondition failed")
+		}
+	}
 	return tx.Commit()
 }
 func xmlText(s string) string {

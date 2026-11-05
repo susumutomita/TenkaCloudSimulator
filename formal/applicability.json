@@ -177,6 +177,44 @@
       ]
     },
     {
+      "path": "formal/CFNPhysicalResourceACK.cfg",
+      "sha256": "fafc41acca1e3ed885b74b8eb8ca47d008cf0b5bf52c509fb827d4bdc4abeb15",
+      "disposition": "modeled",
+      "reason": "SelectedSSM/S3 physicalrowabsenceafterALLcleanupwrites beforecommit; actualSQLIGNORE/reinsert/ABORT/lateclaim/latestack/cross faults andpeerframes independentlynative-tested. Finiteprojection is not Go/SQL/refinement/auth/fullCFN or nativeS3DeleteBucketproof. CFGonlycanonicalINVARIANTlineformat changed; properties/constants retained and freshscopedproof pending.",
+      "models": [
+        {
+          "id": "CFNPhysicalResourceACK",
+          "properties": [
+            "TypeOK",
+            "SuccessPhysicalAbsent",
+            "FailureAtomic",
+            "PeerFramePreserved",
+            "PendingFrameUnchanged"
+          ],
+          "limits": "Onlyend-of-Tx selectedSSM/S3physicalabsence+rollback/peerframe contract. ActualSQLhandler effects abstracted bydeliveredrowbits withIGNORE/reinsert/lateclaim/latestack/crosscleanup faults. Independentfinalpredicate readsactualworkingrows, notackflag. earlyOK usedonlymutant torepresentwrongearlycheck. NoSQL/Go/auth/parser/fullCFNrefinement or otherresourceACKproof. Success doesnotimplyfinalstack/claimACK (separatemodel)."
+        }
+      ]
+    },
+    {
+      "path": "formal/CFNPhysicalResourceACK.tla",
+      "sha256": "058702ed5c6322851eedc532f6ca23eab914b492f09d493ebfdd7f05e81ee267",
+      "disposition": "modeled",
+      "reason": "SelectedSSM/S3 physicalrowabsenceafterALLcleanupwrites beforecommit; actualSQLIGNORE/reinsert/ABORT/lateclaim/latestack/cross faults andpeerframes independentlynative-tested. Finiteprojection is not Go/SQL/refinement/auth/fullCFN or nativeS3DeleteBucketproof. CFGonlycanonicalINVARIANTlineformat changed; properties/constants retained and freshscopedproof pending.",
+      "models": [
+        {
+          "id": "CFNPhysicalResourceACK",
+          "properties": [
+            "TypeOK",
+            "SuccessPhysicalAbsent",
+            "FailureAtomic",
+            "PeerFramePreserved",
+            "PendingFrameUnchanged"
+          ],
+          "limits": "Onlyend-of-Tx selectedSSM/S3physicalabsence+rollback/peerframe contract. ActualSQLhandler effects abstracted bydeliveredrowbits withIGNORE/reinsert/lateclaim/latestack/crosscleanup faults. Independentfinalpredicate readsactualworkingrows, notackflag. earlyOK usedonlymutant torepresentwrongearlycheck. NoSQL/Go/auth/parser/fullCFNrefinement or otherresourceACKproof. Success doesnotimplyfinalstack/claimACK (separatemodel)."
+        }
+      ]
+    },
+    {
       "path": "formal/README.md",
       "sha256": "fb08eece1e412433497f82edb3245c87675cb2bffd7700bbbd2ee65e26833ddb",
       "disposition": "documentation",
@@ -185,16 +223,16 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "1a7f4218e6cc59c8fe8ea6131cb5ec150b843c76cf258f9aac44666c9bde2968",
+      "sha256": "4a42723ab85131576d57432581af44629b14a67fe66e9b011d0cdab0765aeecf",
       "disposition": "formal-infrastructure",
-      "reason": "Preserve allmain40models/295controls and prioradmission/finalACK guards; add literalMemo12properties9controls. CanonicalFinalACKCFGsame5names/order/constants/bounds byformat-onlyexception; no parser/timeout/pin/floor/classification weakening. Everyrequiredmodel/property/control/scope/noop/stale guard remains mandatory.",
+      "reason": "Preserve allmain40models/295controls and prioradmission/finalACK guards; add literalMemo12properties9controls. CanonicalFinalACKCFGsame5names/order/constants/bounds byformat-onlyexception; no parser/timeout/pin/floor/classification weakening. Everyrequiredmodel/property/control/scope/noop/stale guard remains mandatory. Preserve all43 prior entries/322controls and add literalPhysicalResourceACK5properties7controls/exact2sourcescope and omission/noop/stale/wrongoracle controls; no parser/timeout/floor exceptions.",
       "models": []
     },
     {
       "path": "internal/aws/cloudformation.go",
-      "sha256": "2808a725ef526d984833340990c5d6269f4ee91a2907d0d62dbd5dc59e7d9ead",
+      "sha256": "3ec6ff2545324365206d742150ec1c1b755eee1d0f520efd429d571cb0349fba",
       "disposition": "modeled",
-      "reason": "Three separate limited projections: admission/selection witnesses; cached condition graph/height/order with only3names/bound2or3 and normalizedtruths; finalselectedstack/ownedclaim ACK assumingphysicalresource handler success. Native32/33 tests, actualSQLfault/retryframes and old-code redHTTP200 witnesses are separate Go evidence. No Go/SQL/parser/IAM/privacy/hostgrading or unbounded-depth refinement claim. Newcombined runtime/365model suite still requires execution.",
+      "reason": "Three separate limited projections: admission/selection witnesses; cached condition graph/height/order with only3names/bound2or3 and normalizedtruths; finalselectedstack/ownedclaim ACK assumingphysicalresource handler success. Native32/33 tests, actualSQLfault/retryframes and old-code redHTTP200 witnesses are separate Go evidence. No Go/SQL/parser/IAM/privacy/hostgrading or unbounded-depth refinement claim. Newcombined runtime/365model suite still requires execution. Added separate bounded selectedSSM/S3 finalphysicalrowabsence projection AFTERallcleanupwrites beforeCommit; current44/329/373 aggregate unexecuted. Native19IDs and scoped196modelreceipt are source-specific, not this combined runtime proof.",
       "models": [
         {
           "id": "CFNConditionAdmission",
@@ -226,6 +264,17 @@
             "PendingFrameUnchanged"
           ],
           "limits": "Final selectedstack/ownedclaim record cleanup only. Physicalresource handler success is ASSUMED, not independentlyACKchecked or proved bythismodel. RealretainedFKclaim makes ExecSucceeded false independentlyofmutableACK; IgnoreFinalCleanupACK canwitnessonlyIgnoreStack/ReinsertStack, notIgnoreClaims. Fullrollback/peerframe abstractions, no Go/SQL/auth/provisioning refinement."
+        },
+        {
+          "id": "CFNPhysicalResourceACK",
+          "properties": [
+            "TypeOK",
+            "SuccessPhysicalAbsent",
+            "FailureAtomic",
+            "PeerFramePreserved",
+            "PendingFrameUnchanged"
+          ],
+          "limits": "Onlyend-of-Tx selectedSSM/S3physicalabsence+rollback/peerframe contract. ActualSQLhandler effects abstracted bydeliveredrowbits withIGNORE/reinsert/lateclaim/latestack/crosscleanup faults. Independentfinalpredicate readsactualworkingrows, notackflag. earlyOK usedonlymutant torepresentwrongearlycheck. NoSQL/Go/auth/parser/fullCFNrefinement or otherresourceACKproof. Success doesnotimplyfinalstack/claimACK (separatemodel)."
         }
       ]
     },
@@ -344,6 +393,25 @@
       "models": []
     },
     {
+      "path": "internal/aws/cloudformation_physical_delete_ack_test.go",
+      "sha256": "81cc15cca7f59463a1783333807a99e530a6633943f7488bdc49a24d9b16649f",
+      "disposition": "modeled",
+      "reason": "SelectedSSM/S3 physicalrowabsenceafterALLcleanupwrites beforecommit; actualSQLIGNORE/reinsert/ABORT/lateclaim/latestack/cross faults andpeerframes independentlynative-tested. Finiteprojection is not Go/SQL/refinement/auth/fullCFN or nativeS3DeleteBucketproof. CFGonlycanonicalINVARIANTlineformat changed; properties/constants retained and freshscopedproof pending.",
+      "models": [
+        {
+          "id": "CFNPhysicalResourceACK",
+          "properties": [
+            "TypeOK",
+            "SuccessPhysicalAbsent",
+            "FailureAtomic",
+            "PeerFramePreserved",
+            "PendingFrameUnchanged"
+          ],
+          "limits": "Onlyend-of-Tx selectedSSM/S3physicalabsence+rollback/peerframe contract. ActualSQLhandler effects abstracted bydeliveredrowbits withIGNORE/reinsert/lateclaim/latestack/crosscleanup faults. Independentfinalpredicate readsactualworkingrows, notackflag. earlyOK usedonlymutant torepresentwrongearlycheck. NoSQL/Go/auth/parser/fullCFNrefinement or otherresourceACKproof. Success doesnotimplyfinalstack/claimACK (separatemodel)."
+        }
+      ]
+    },
+    {
       "path": "internal/aws/cloudformation_test.go",
       "sha256": "795c0f06c79d799e9479f696f7202c7ed098b2104d81cbc477c32280e3fe5297",
       "disposition": "test-support",
@@ -352,16 +420,16 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "3d20de5364b614e53ca3f947ca8f2b6aacfd495b869b8c6eb5ee4f5d6728f1a7",
+      "sha256": "e3075b79fec7157f97e1ee679f730930cd42a50c9db508edb1ecf2b9c42a10f6",
       "disposition": "formal-infrastructure",
-      "reason": "Preserve allmain40models/295controls and prioradmission/finalACK guards; add literalMemo12properties9controls. CanonicalFinalACKCFGsame5names/order/constants/bounds byformat-onlyexception; no parser/timeout/pin/floor/classification weakening. Everyrequiredmodel/property/control/scope/noop/stale guard remains mandatory.",
+      "reason": "Preserve allmain40models/295controls and prioradmission/finalACK guards; add literalMemo12properties9controls. CanonicalFinalACKCFGsame5names/order/constants/bounds byformat-onlyexception; no parser/timeout/pin/floor/classification weakening. Everyrequiredmodel/property/control/scope/noop/stale guard remains mandatory. Preserve all43 prior entries/322controls and add literalPhysicalResourceACK5properties7controls/exact2sourcescope and omission/noop/stale/wrongoracle controls; no parser/timeout/floor exceptions.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "6a547fe0b27f3fc72fe33b9828d0a6acae6ebf2e815a81c7d77188a0b5575776",
+      "sha256": "796b06e38daa141d80f5108aa8120ae74de72e62d2e59f2e672e90edffb9b268",
       "disposition": "formal-infrastructure",
-      "reason": "Preserve allmain40models/295controls and prioradmission/finalACK guards; add literalMemo12properties9controls. CanonicalFinalACKCFGsame5names/order/constants/bounds byformat-onlyexception; no parser/timeout/pin/floor/classification weakening. Everyrequiredmodel/property/control/scope/noop/stale guard remains mandatory.",
+      "reason": "Preserve allmain40models/295controls and prioradmission/finalACK guards; add literalMemo12properties9controls. CanonicalFinalACKCFGsame5names/order/constants/bounds byformat-onlyexception; no parser/timeout/pin/floor/classification weakening. Everyrequiredmodel/property/control/scope/noop/stale guard remains mandatory. Preserve all43 prior entries/322controls and add literalPhysicalResourceACK5properties7controls/exact2sourcescope and omission/noop/stale/wrongoracle controls; no parser/timeout/floor exceptions.",
       "models": []
     },
     {
