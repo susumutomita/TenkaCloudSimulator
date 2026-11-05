@@ -319,6 +319,35 @@ func neutralObject(v any) bool {
 	m, ok := v.(map[string]any)
 	return ok && len(m) == 0
 }
+
+// neutralIcon accepts the existing absent representation and the pinned
+// community SDK's no-icon default. It does not attach or persist an Icon.
+func neutralIcon(v any) bool {
+	if neutralObject(v) {
+		return true
+	}
+	m, ok := v.(map[string]any)
+	if !ok || len(m) > 2 {
+		return false
+	}
+	id, ok := m["ID"].(json.Number)
+	if !ok || string(id) != "0" {
+		return false
+	}
+	for key := range m {
+		if key != "ID" && key != "Tags" {
+			return false
+		}
+	}
+	if tags, exists := m["Tags"]; exists {
+		values, valid := tags.([]any)
+		if !valid || len(values) != 0 {
+			return false
+		}
+	}
+	return true
+}
+
 func diskFields(m map[string]any, create bool) (map[string]any, error) {
 	allowed := []string{"Disk"}
 	if create {
@@ -347,7 +376,7 @@ func diskFields(m map[string]any, create bool) (map[string]any, error) {
 	if v, ok := d["Tags"]; ok && !neutralArray(v) {
 		return nil, errUnsupported
 	}
-	if v, ok := d["Icon"]; ok && !neutralObject(v) {
+	if v, ok := d["Icon"]; ok && !neutralIcon(v) {
 		return nil, errUnsupported
 	}
 	if v, ok := d["Connection"]; ok {

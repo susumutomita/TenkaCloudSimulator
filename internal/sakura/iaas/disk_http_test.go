@@ -175,7 +175,7 @@ func TestDiskHTTPStrictAdmissionNoMutation(t *testing.T) {
 		{"unknown false", "POST", diskPath, `{"Disk":{"Name":"a"},"BootAtAvailable":false}`, 501},
 		{"unknown null", "PUT", id, `{"Disk":{"SourceDisk":null}}`, 501},
 		{"tags", "PUT", id, `{"Disk":{"Tags":["tag"]}}`, 501},
-		{"icon member zero", "PUT", id, `{"Disk":{"Icon":{"ID":0}}}`, 501},
+		{"real icon unsupported", "PUT", id, `{"Disk":{"Icon":{"ID":1}}}`, 501},
 		{"kms member zero", "POST", diskPath, `{"Disk":{},"KMSKey":{"ID":0}}`, 501},
 		{"placement", "POST", diskPath, `{"Disk":{},"DistantFrom":[1]}`, 501},
 		{"plan2", "POST", diskPath, `{"Disk":{"Name":"a","Plan":{"ID":2},"SizeMB":20480}}`, 501},
