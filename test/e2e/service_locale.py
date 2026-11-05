@@ -2,6 +2,7 @@
 
 All writes use the real embedded browser UI; independent official SDK clients
 check the same state. Only temporary local processes and dummy values are used.
+Metadata-read failures are injected only after a real native write succeeds.
 """
 import json
 import os
@@ -77,6 +78,53 @@ def run():
                         response.request.headers.get('x-amz-target') == target) as completed:
                     page.get_by_role('button', name=label, exact=True).click()
                 assert completed.value.status == 200, 'Localized control failed its native operation'
+
+            def commit_with_failed_metadata_read(label, write_target, read_target):
+                # Hold only the follow-up read. The native write still reaches
+                # the real server and must commit before its metadata read fails.
+                held = []
+
+                def hold_metadata(route):
+                    if route.request.headers.get('x-amz-target') == read_target:
+                        held.append(route)
+                    else:
+                        route.fallback()
+
+                before_commit = list(operations)
+                page.route(endpoint + '/', hold_metadata)
+                try:
+                    with page.expect_request(lambda request:
+                            request.headers.get('x-amz-target') == read_target):
+                        native_click(label, write_target)
+                    # A completed form and stale detail must disappear while
+                    # the read is still pending, not only after it succeeds.
+                    expect(page.get_by_role('button', name=label, exact=True)).to_have_count(0)
+                    expect(page.get_by_role('heading', name='シークレットの詳細',
+                                            exact=True)).to_have_count(0)
+                    assert len(held) == 1, 'Committed write did not issue exactly one metadata read'
+                    assert operations == before_commit + [write_target, read_target]
+                    held.pop().abort('failed')
+                    expect(page.get_by_text('メタデータの取得に失敗しました', exact=True)).to_be_visible()
+                    expect(page.get_by_role('button', name='メタデータを再取得',
+                                            exact=True)).to_be_enabled()
+                    expect(page.get_by_label('平文のシークレット値', exact=True)).to_have_count(0)
+                    expect(page.get_by_label('取得したシークレット値', exact=True)).to_have_count(0)
+                finally:
+                    for route in held:
+                        route.abort('failed')
+                    page.unroute(endpoint + '/', hold_metadata)
+
+            def retry_secret_metadata(target):
+                before_retry = list(operations)
+                native_click('メタデータを再取得', target)
+                if target == 'secretsmanager.DescribeSecret':
+                    expect(page.get_by_role('heading', name='シークレットの詳細',
+                                            exact=True)).to_be_visible()
+                else:
+                    expect(page.get_by_text('シークレットはありません。', exact=True)).to_be_visible()
+                expect(page.get_by_role('button', name='メタデータを再取得',
+                                        exact=True)).to_have_count(0)
+                assert operations == before_retry + [target], 'Metadata retry replayed a mutation'
 
             def check_reflow(label):
                 for width in (1440, 390):
@@ -165,23 +213,79 @@ def run():
             page.get_by_role('button', name='次へ', exact=True).click()
             page.get_by_role('button', name='次へ', exact=True).click()
             assert secret_value not in page.locator('body').inner_text(), 'Review exposed a draft value'
-            native_click('保存', 'secretsmanager.CreateSecret')
-            expect(page.get_by_role('heading', name='シークレットの詳細', exact=True)).to_be_visible()
+            commit_with_failed_metadata_read('保存', 'secretsmanager.CreateSecret',
+                                             'secretsmanager.DescribeSecret')
             saved = secrets.get_secret_value(SecretId=secret_name)
             assert saved['SecretString'] == secret_value
-            assert secrets.describe_secret(SecretId=saved['ARN'])['Description'] == description
+            created_metadata = secrets.describe_secret(SecretId=saved['ARN'])
+            assert created_metadata['Description'] == description
+            assert created_metadata['VersionIdsToStages'] == {saved['VersionId']: ['AWSCURRENT']}
             expect(page.get_by_text('シークレットをローカルの練習用データベースに保存しました。', exact=True)).to_be_visible()
             before_switch = list(operations)
             locale('en')
             expect(page.get_by_text('Secret stored in the local practice database.', exact=True)).to_be_visible()
+            expect(page.get_by_role('button', name='Retry metadata refresh', exact=True)).to_be_enabled()
             locale('ja')
             expect(page.get_by_text('シークレットをローカルの練習用データベースに保存しました。', exact=True)).to_be_visible()
+            expect(page.get_by_role('button', name='メタデータを再取得', exact=True)).to_be_enabled()
             assert operations == before_switch, 'Changing a notice language repeated a Secrets operation'
+            retry_secret_metadata('secretsmanager.DescribeSecret')
+            assert secrets.describe_secret(SecretId=saved['ARN'])['VersionIdsToStages'] == created_metadata['VersionIdsToStages']
+            assert secrets.get_secret_value(SecretId=saved['ARN'])['SecretString'] == secret_value
             native_click('シークレット値を取得', 'secretsmanager.GetSecretValue')
             expect(page.get_by_label('取得したシークレット値', exact=True)).to_have_value(secret_value)
             page.get_by_role('button', name='シークレット値を非表示', exact=True).click()
             expect(page.get_by_label('取得したシークレット値', exact=True)).to_have_count(0)
             check_reflow('secrets-hidden-ja')
+
+            native_click('シークレット値を取得', 'secretsmanager.GetSecretValue')
+            expect(page.get_by_label('取得したシークレット値', exact=True)).to_have_value(secret_value)
+            page.get_by_role('button', name='編集', exact=True).click()
+            page.get_by_role('tab', name='平文', exact=True).click()
+            expect(page.get_by_label('平文のシークレット値', exact=True)).to_have_value('')
+            updated_value = 'DUMMY-secret-locale-日本語-PutSecretValue'
+            page.get_by_label('平文のシークレット値', exact=True).fill(updated_value)
+            commit_with_failed_metadata_read('保存', 'secretsmanager.PutSecretValue',
+                                             'secretsmanager.DescribeSecret')
+            expect(page.get_by_text('新しいローカルシークレットのバージョンを保存しました。', exact=True)).to_be_visible()
+            updated = secrets.get_secret_value(SecretId=saved['ARN'])
+            assert updated['SecretString'] == updated_value and updated['VersionId'] != saved['VersionId']
+            expected_versions = {saved['VersionId']: ['AWSPREVIOUS'], updated['VersionId']: ['AWSCURRENT']}
+            assert secrets.describe_secret(SecretId=saved['ARN'])['VersionIdsToStages'] == expected_versions
+            assert secrets.get_secret_value(SecretId=saved['ARN'], VersionId=saved['VersionId'])['SecretString'] == secret_value
+            retry_secret_metadata('secretsmanager.DescribeSecret')
+            assert secrets.describe_secret(SecretId=saved['ARN'])['VersionIdsToStages'] == expected_versions
+            assert secrets.get_secret_value(SecretId=saved['ARN'])['SecretString'] == updated_value
+            native_click('シークレット値を取得', 'secretsmanager.GetSecretValue')
+            expect(page.get_by_label('取得したシークレット値', exact=True)).to_have_value(updated_value)
+
+            # Populate the real list before deletion so the failed list refresh
+            # also detects retaining a stale, actionable row for the deleted ARN.
+            native_click('シークレット', 'secretsmanager.ListSecrets')
+            expect(page.get_by_role('link', name=secret_name, exact=True)).to_be_visible()
+            page.get_by_role('link', name=secret_name, exact=True).click()
+            expect(page.get_by_role('heading', name=secret_name, exact=True)).to_be_visible()
+            page.get_by_role('button', name='シークレットを削除', exact=True).click()
+            page.get_by_role('checkbox', name='復元できない強制削除を実行する', exact=True).check()
+            page.get_by_label('確認のためシークレット名を入力', exact=True).fill(secret_name)
+            commit_with_failed_metadata_read('完全に削除', 'secretsmanager.DeleteSecret',
+                                             'secretsmanager.ListSecrets')
+            expect(page.get_by_text('シークレットと保存済みのすべてのバージョンを削除しました。', exact=True)).to_be_visible()
+            expect(page.get_by_role('heading', name=secret_name, exact=True)).to_have_count(0)
+            expect(page.get_by_role('link', name=secret_name, exact=True)).to_have_count(0)
+            expect(page.get_by_role('button', name='シークレットを削除', exact=True)).to_have_count(0)
+            expect(page.get_by_role('button', name='シークレット値を取得', exact=True)).to_have_count(0)
+            assert secrets.list_secrets()['SecretList'] == []
+            try:
+                secrets.get_secret_value(SecretId=saved['ARN'])
+            except secrets.exceptions.ResourceNotFoundException:
+                pass
+            else:
+                raise AssertionError('Committed delete left a secret value retrievable')
+            retry_secret_metadata('secretsmanager.ListSecrets')
+            assert secrets.list_secrets()['SecretList'] == []
+            for operation in ('CreateSecret', 'PutSecretValue', 'DeleteSecret'):
+                assert operations.count('secretsmanager.' + operation) == 1, 'A completed Secrets mutation was replayed'
 
             service('CloudWatch Logs')
             page.get_by_role('button', name='ロググループを作成', exact=True).click()
@@ -206,12 +310,12 @@ def run():
 
             required = {'AmazonSQS.CreateQueue', 'AmazonSQS.SendMessage', 'AmazonSQS.ReceiveMessage',
                         'secretsmanager.CreateSecret', 'secretsmanager.GetSecretValue',
+                        'secretsmanager.PutSecretValue', 'secretsmanager.DeleteSecret',
                         'Logs_20140328.CreateLogGroup', 'Logs_20140328.CreateLogStream',
                         'Logs_20140328.PutLogEvents', 'Logs_20140328.GetLogEvents'}
             assert required.issubset(operations), 'Localized flow omitted a required native operation'
             assert not outside and not errors, 'Unexpected browser error or external request'
             sqs.delete_queue(QueueUrl=queue_url)
-            secrets.delete_secret(SecretId=saved['ARN'], ForceDeleteWithoutRecovery=True)
             logs.delete_log_group(logGroupName=group)
             assert sqs.list_queues().get('QueueUrls', []) == []
             assert secrets.list_secrets()['SecretList'] == []
@@ -225,6 +329,8 @@ def run():
     print(json.dumps({'japaneseSQSSecretsLogs': True, 'canonicalNativeOperations': True,
                       'SDKExactUserData': True, 'draftAndNoticeLocaleSwitch': True,
                       'deepLinksWaitForRealCapabilities': True,
+                      'committedSecretWritesSurviveReadFailure': True,
+                      'metadataRetriesDoNotReplayWrites': True,
                       'desktopAnd390pxReflow': True, 'cleanup': 'DELETED',
                       'externalRequests': 0, 'pageErrors': 0}))
 

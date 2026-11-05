@@ -22,6 +22,11 @@ branches are preserved. WAF50 and unrelated historical candidates are excluded.
 No real cloud resource, release or repository protection change is authorized by
 this implementation record.
 
+PR408 and PR410 advanced during validation. This integration includes their
+reviewed `ffdf1e29` and `39fca989` revisions respectively; newer locale, alias,
+login and test deltas remain in those open PRs. Only unchanged PR309 and PR407
+can be reconciled as superseded after the integration actually merges.
+
 ### Integrated source and remaining acceptance
 
 All four service candidates are composed with PR412's provider/language shell.

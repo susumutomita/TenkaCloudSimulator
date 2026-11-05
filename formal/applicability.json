@@ -18,7 +18,7 @@
     },
     {
       "path": "docs/acceptance/backlog-services.md",
-      "sha256": "41d6bdea3098fec4e3c6f4f597022c5fa162ab9125b531c297bc4bf36a9a8c29",
+      "sha256": "057f052305661adaf687ba216065e185a28620d2eced8449d887831e0a06cde5",
       "disposition": "documentation",
       "reason": "Document the bounded service/SDK integration, provenance, compatibility limits or separately identified historical acceptance; this file is not a simulator state transition or executable model.",
       "models": []
@@ -60,7 +60,7 @@
     },
     {
       "path": "docs/development-status.md",
-      "sha256": "550d96c85ec234827f30e241d0838fe27e9f83e5db652c412f7835480732e7f4",
+      "sha256": "be3ce85fdf7111fb09c032134e01728c3bf6dc7de05128eba9de60fea80caf52",
       "disposition": "documentation",
       "reason": "Document the bounded service/SDK integration, provenance, compatibility limits or separately identified historical acceptance; this file is not a simulator state transition or executable model.",
       "models": []
@@ -413,7 +413,7 @@
             "ReturnedARNMatches",
             "VisibleContextMatches"
           ],
-          "limits": "Finite contexts and epochs do not execute React, compiled JavaScript, DOM, localization, HTTP, real ARNs or authentication; bundle reproducibility and real browser/SDK tests are separate."
+          "limits": "Finite contexts and epochs do not execute React, compiled JavaScript, DOM, localization, HTTP, real ARNs or authentication, and do not model mutation-form completion or metadata-only retry after an acknowledged write; bundle reproducibility and real browser/SDK fault regressions are separate."
         }
       ]
     },
@@ -431,7 +431,7 @@
             "ReturnedARNMatches",
             "VisibleContextMatches"
           ],
-          "limits": "Finite contexts and epochs do not execute React, compiled JavaScript, DOM, localization, HTTP, real ARNs or authentication; bundle reproducibility and real browser/SDK tests are separate."
+          "limits": "Finite contexts and epochs do not execute React, compiled JavaScript, DOM, localization, HTTP, real ARNs or authentication, and do not model mutation-form completion or metadata-only retry after an acknowledged write; bundle reproducibility and real browser/SDK fault regressions are separate."
         }
       ]
     },
@@ -1343,7 +1343,7 @@
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "34f004deabd910c0058e7fa78cdde8de5d1b573ce1e87180ab25430efff2d936",
+      "sha256": "030994c6add235a8c659c84d154a2147bb8374c3940bd2265caab11b9a1b1ffc",
       "disposition": "modeled",
       "reason": "Bind explicit secret reveal/hide, context changes and the compiled console to fresh authorized result emission and matching ARN/context.",
       "models": [
@@ -1355,7 +1355,7 @@
             "ReturnedARNMatches",
             "VisibleContextMatches"
           ],
-          "limits": "Finite contexts and epochs do not execute React, compiled JavaScript, DOM, localization, HTTP, real ARNs or authentication; bundle reproducibility and real browser/SDK tests are separate."
+          "limits": "Finite contexts and epochs do not execute React, compiled JavaScript, DOM, localization, HTTP, real ARNs or authentication, and do not model mutation-form completion or metadata-only retry after an acknowledged write; bundle reproducibility and real browser/SDK fault regressions are separate."
         }
       ]
     },
@@ -1480,7 +1480,7 @@
     },
     {
       "path": "test/e2e/service_locale.py",
-      "sha256": "4b6c62b1193b84ab15028727ff48757f3eb989ba78a962e1b0128dd91d09cfdf",
+      "sha256": "86c420317c67546e864c631ba23c844ebd738ef33adb36dba385a13b4cc4fe5c",
       "disposition": "test-support",
       "reason": "Add or compose executable regression evidence for actual native/service/SDK/UI behavior and refusal boundaries. Test code is not production state logic; no pre-existing test, assertion floor or model control is removed.",
       "models": []
@@ -1522,14 +1522,14 @@
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "9fb3e1b2d7d18bcb09def01e2f1feb9a87b8c81c5b13de71dc862373ede9f831",
+      "sha256": "0a283f36c4dc0bbe687e17ee637dcead0823b3e7777380ee54d79e5c9a724962",
       "disposition": "presentation",
       "reason": "Describe or build the served API-reference/console presentation. Operation dispatch, native response schemas and locale behavior require the corresponding executable source/served-example/browser tests; this unregistered presentation file does not establish a finite state proof.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "94f924cbb7ebb29b9736d1fb4d86e7306a5a86c462dcf4e621b6783a9e2dba73",
+      "sha256": "a8bdba2507ef1d547570724347df631509161f9ff622052169caf652fa6923d4",
       "disposition": "presentation",
       "reason": "Describe or build the served API-reference/console presentation. Operation dispatch, native response schemas and locale behavior require the corresponding executable source/served-example/browser tests; this unregistered presentation file does not establish a finite state proof.",
       "models": []
@@ -1596,7 +1596,7 @@
             "ReturnedARNMatches",
             "VisibleContextMatches"
           ],
-          "limits": "Finite contexts and epochs do not execute React, compiled JavaScript, DOM, localization, HTTP, real ARNs or authentication; bundle reproducibility and real browser/SDK tests are separate."
+          "limits": "Finite contexts and epochs do not execute React, compiled JavaScript, DOM, localization, HTTP, real ARNs or authentication, and do not model mutation-form completion or metadata-only retry after an acknowledged write; bundle reproducibility and real browser/SDK fault regressions are separate."
         },
         {
           "id": "BrowserSessions",
@@ -1615,7 +1615,7 @@
     },
     {
       "path": "tools/console/src/secrets-manager.jsx",
-      "sha256": "d9a7cc52cd18c93f9a1e8f8a2ac21e72f0f10b7e2fef43b4c6dd8478ea3d64be",
+      "sha256": "4d581a22f6d180bf1fcd29e7340a9044035419ca26c40a2e9a19840e364f916b",
       "disposition": "modeled",
       "reason": "Bind explicit secret reveal/hide, context changes and the compiled console to fresh authorized result emission and matching ARN/context.",
       "models": [
@@ -1627,7 +1627,7 @@
             "ReturnedARNMatches",
             "VisibleContextMatches"
           ],
-          "limits": "Finite contexts and epochs do not execute React, compiled JavaScript, DOM, localization, HTTP, real ARNs or authentication; bundle reproducibility and real browser/SDK tests are separate."
+          "limits": "Finite contexts and epochs do not execute React, compiled JavaScript, DOM, localization, HTTP, real ARNs or authentication, and do not model mutation-form completion or metadata-only retry after an acknowledged write; bundle reproducibility and real browser/SDK fault regressions are separate."
         }
       ]
     },

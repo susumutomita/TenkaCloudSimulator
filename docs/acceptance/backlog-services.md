@@ -6,6 +6,12 @@ provider-specific console and language controls merged in PR412. Their original
 branches are preserved. Historical passing runs on each isolated PR do not
 certify the composed source; use the resulting PR's exact-head Actions checks.
 
+The integrated source revisions are PR410 `39fca989`, PR407 `dfbf97ed`,
+PR408 `ffdf1e29`, and PR309 `734da3bf`. PR408 and PR410 received additional
+locale, navigation-alias, login and acceptance-test work while this integration
+was being validated. Those newer deltas remain separate; incorporating the
+reviewed service revisions does not close or claim to supersede those two PRs.
+
 ## Delivered scope
 
 | Area | Implemented behavior | Remaining scope |
@@ -32,6 +38,12 @@ user input and service data, and keeps native operation identifiers canonical.
   Refused item writes preserve existing bytes and statistics. Number/Binary Sets
   reject duplicate values across alternate encodings; partition/sort keys enforce
   2048/1024-byte limits after UTF-8/Base64 decoding.
+- The Secrets console closes a completed mutation form before refreshing
+  metadata. A failed follow-up read preserves the successful-write notice and
+  offers a metadata-only retry. Create/update/delete browser regressions hold
+  and fail the read after a real committed write, then verify exact SDK state
+  and that retry never repeats the mutation. Deleted details and cached list
+  rows are removed as soon as deletion succeeds.
 - The common GCP-prefixed authentication denial now returns the native nested
   error object expected by Google's error parser. Authentication decisions,
   browser-session rules and legacy AWS/control error bodies are unchanged.
