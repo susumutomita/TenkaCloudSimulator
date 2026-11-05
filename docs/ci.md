@@ -120,3 +120,22 @@ separate required `Formal validation` context. Adding that requirement remains o
 hold under the latest owner instruction; Composio and alternate settings routes
 are not used. No repository settings were changed. A green workflow is distinct
 from verified merge enforcement.
+
+
+## Pinned TLC download transport
+
+Both formal invocations keep the official `tlaplus/tlaplus` 1.7.4 release URL
+and the repository SHA-256 check before Java. A transient transfer can retry at
+most three times after the first request. Connection and per-transfer limits
+are 10s/30s with a 60s retry window; the outer Ubuntu `timeout` sends TERM at
+95s and KILL after a further 5s if required. These limits apply to download
+transport, separately from unchanged model bounds and TLC deadlines.
+
+The six required loopback tests run before either workflow downloads the tool.
+They read the actual configured commands and verify 504 recovery, 403 refusal
+without retry, exhausted retries, a shortened fixture-only outer deadline, and
+rejection of dummy bytes by the real checksum checker before any Java/model run.
+Checksum failure is outside the transport retry. Exhaustion or refusal remains
+a failed job; no model run is inferred from another job. The local fixture used
+a 0.2s outer deadline; full 95s expiry, SIGKILL fallback and real CDN availability
+are not established by that fixture. Hosted checks validate the actual runner.
