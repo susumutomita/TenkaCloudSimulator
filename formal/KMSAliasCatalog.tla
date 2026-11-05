@@ -69,6 +69,10 @@ Mutation(op,r,n,k,kind,p,outcome) ==
            permit |-> IF committed THEN p ELSE AllPermit]
  /\ step'=step+1 /\ UNCHANGED marker
 
+(* Selected-key MAC validity is abstract. Native secrets are per-region.
+   Under these four reachable seeds a foreign region also mismatches revision,
+   so dropping only BoundRegion is not an independent sensitivity control.
+   BypassMACIntegrity instead accepts a same-body/current-revision tamper. *)
 ValidMAC(t) == t.authority=1 /\ t.integrity
 BoundRevision(t,r) == t.revision=revisions[r]
 BoundRegion(t,r) == t.region=r
