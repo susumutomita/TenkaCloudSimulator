@@ -10,6 +10,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"encoding/xml"
 	"errors"
 	"fmt"
 	"io"
@@ -25,17 +26,96 @@ import (
 // retained after deletion so a local-identity write cannot adopt a deleted role.
 type IAMRoleStore struct{ db *sql.DB }
 
-// IAMRole adapts Kumo's MIT IAM Role wire model; see third_party/kumo-iam.json.
-// SQLite ownership, trust evaluation and policy aggregation are local adapters.
+// IAMRole is provider-owned role data. Its Query/XML representation is projected
+// explicitly from the supported AWS Role fields rather than struct-tag coupling.
+// Source contract: https://docs.aws.amazon.com/IAM/latest/APIReference/API_Role.html
 type IAMRole struct {
-	RoleName                 string    `xml:"RoleName"`
-	RoleID                   string    `xml:"RoleId"`
-	Arn                      string    `xml:"Arn"`
-	Path                     string    `xml:"Path"`
-	CreateDate               time.Time `xml:"CreateDate"`
-	AssumeRolePolicyDocument string    `xml:"AssumeRolePolicyDocument"`
-	Description              string    `xml:"Description,omitempty"`
-	MaxSessionDuration       int       `xml:"MaxSessionDuration"`
+	RoleName                 string
+	RoleID                   string
+	Arn                      string
+	Path                     string
+	CreateDate               time.Time
+	AssumeRolePolicyDocument string
+	Description              string
+	MaxSessionDuration       int
+}
+
+// MarshalXML leaves the caller's Role/member element and namespace intact. The
+// Query adapter already URL-encodes trust documents once; this layer only applies
+// XML escaping. Unsupported AWS Role fields are not fabricated here.
+func (role IAMRole) MarshalXML(encoder *xml.Encoder, start xml.StartElement) error {
+	if err := encoder.EncodeToken(start); err != nil {
+		return err
+	}
+	fields := []struct {
+		name  string
+		value any
+	}{
+		{"RoleName", role.RoleName}, {"RoleId", role.RoleID},
+		{"Arn", role.Arn}, {"Path", role.Path}, {"CreateDate", role.CreateDate},
+		{"AssumeRolePolicyDocument", role.AssumeRolePolicyDocument},
+	}
+	if role.Description != "" {
+		fields = append(fields, struct {
+			name  string
+			value any
+		}{"Description", role.Description})
+	}
+	fields = append(fields, struct {
+		name  string
+		value any
+	}{"MaxSessionDuration", role.MaxSessionDuration})
+	for _, field := range fields {
+		if err := encoder.EncodeElement(field.value, xml.StartElement{Name: xml.Name{Local: field.name}}); err != nil {
+			return err
+		}
+	}
+	return encoder.EncodeToken(start.End())
+}
+
+// UnmarshalXML preserves the existing RoleId spelling, absent-field behavior and
+// unknown-element skipping for Go consumers of the bounded native XML subset.
+func (role *IAMRole) UnmarshalXML(decoder *xml.Decoder, start xml.StartElement) error {
+	for {
+		token, err := decoder.Token()
+		if err != nil {
+			return err
+		}
+		switch element := token.(type) {
+		case xml.StartElement:
+			var target any
+			switch element.Name.Local {
+			case "RoleName":
+				target = &role.RoleName
+			case "RoleId":
+				target = &role.RoleID
+			case "Arn":
+				target = &role.Arn
+			case "Path":
+				target = &role.Path
+			case "CreateDate":
+				target = &role.CreateDate
+			case "AssumeRolePolicyDocument":
+				target = &role.AssumeRolePolicyDocument
+			case "Description":
+				target = &role.Description
+			case "MaxSessionDuration":
+				target = &role.MaxSessionDuration
+			}
+			if target == nil {
+				err = decoder.Skip()
+			} else {
+				err = decoder.DecodeElement(target, &element)
+			}
+			if err != nil {
+				return err
+			}
+		case xml.EndElement:
+			if element.Name == start.Name {
+				return nil
+			}
+		}
+	}
 }
 
 var iamRoleName = regexp.MustCompile(`^[a-zA-Z0-9_-]{1,64}$`)

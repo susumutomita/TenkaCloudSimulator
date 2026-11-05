@@ -17,51 +17,115 @@ import (
 	"unicode/utf8"
 )
 
-// Provider-owned state retains the native REST wire field names.
+// Provider-owned models hold the bounded local REST state. Explicit projections
+// below define the public and persisted JSON representation from the AWS REST
+// resource contracts; storage and admission do not depend on reflection tags.
 type APIGatewayStore struct{ db *sql.DB }
 type RESTAPI struct {
-	ID                    string            `json:"id"`
-	Name                  string            `json:"name"`
-	Description           string            `json:"description,omitempty"`
-	CreatedDate           float64           `json:"createdDate"`
-	RootResourceID        string            `json:"rootResourceId"`
-	Tags                  map[string]string `json:"tags,omitempty"`
-	EndpointConfiguration RESTEndpoint      `json:"endpointConfiguration"`
+	ID                    string
+	Name                  string
+	Description           string
+	CreatedDate           float64
+	RootResourceID        string
+	Tags                  map[string]string
+	EndpointConfiguration RESTEndpoint
 }
 type RESTEndpoint struct {
-	Types []string `json:"types"`
+	Types []string
 }
 type RESTResource struct {
-	ID              string                `json:"id"`
-	ParentID        string                `json:"parentId,omitempty"`
-	PathPart        string                `json:"pathPart,omitempty"`
-	Path            string                `json:"path"`
-	ResourceMethods map[string]RESTMethod `json:"resourceMethods,omitempty"`
+	ID              string
+	ParentID        string
+	PathPart        string
+	Path            string
+	ResourceMethods map[string]RESTMethod
 }
 type RESTMethod struct {
-	RequestParameters map[string]bool  `json:"requestParameters,omitempty"`
-	HTTPMethod        string           `json:"httpMethod"`
-	AuthorizationType string           `json:"authorizationType"`
-	APIKeyRequired    bool             `json:"apiKeyRequired"`
-	MethodIntegration *RESTIntegration `json:"methodIntegration,omitempty"`
+	RequestParameters map[string]bool
+	HTTPMethod        string
+	AuthorizationType string
+	APIKeyRequired    bool
+	MethodIntegration *RESTIntegration
 }
 type RESTIntegration struct {
-	Type            string `json:"type"`
-	HTTPMethod      string `json:"httpMethod"`
-	URI             string `json:"uri"`
-	TimeoutInMillis int    `json:"timeoutInMillis"`
+	Type            string
+	HTTPMethod      string
+	URI             string
+	TimeoutInMillis int
 }
 type RESTDeployment struct {
-	ID          string  `json:"id"`
-	CreatedDate float64 `json:"createdDate"`
-	Description string  `json:"description,omitempty"`
+	ID          string
+	CreatedDate float64
+	Description string
 }
 type RESTStage struct {
-	StageName       string            `json:"stageName"`
-	DeploymentID    string            `json:"deploymentId"`
-	CreatedDate     float64           `json:"createdDate"`
-	LastUpdatedDate float64           `json:"lastUpdatedDate"`
-	Variables       map[string]string `json:"variables,omitempty"`
+	StageName       string
+	DeploymentID    string
+	CreatedDate     float64
+	LastUpdatedDate float64
+	Variables       map[string]string
+}
+
+// All supported spellings also fold to the provider field names, so the standard
+// JSON decoder still reads existing SQLite documents without migration. It keeps
+// unknown-field handling under the caller's control, including strict requests.
+// https://docs.aws.amazon.com/apigateway/latest/api/API_GetRestApi.html
+func (api RESTAPI) MarshalJSON() ([]byte, error) {
+	return marshalAWSOwnedWireObject(
+		awsOwnedWireField{"id", api.ID, false}, awsOwnedWireField{"name", api.Name, false},
+		awsOwnedWireField{"description", api.Description, api.Description == ""},
+		awsOwnedWireField{"createdDate", api.CreatedDate, false},
+		awsOwnedWireField{"rootResourceId", api.RootResourceID, false},
+		awsOwnedWireField{"tags", api.Tags, len(api.Tags) == 0},
+		awsOwnedWireField{"endpointConfiguration", api.EndpointConfiguration, false})
+}
+func (endpoint RESTEndpoint) MarshalJSON() ([]byte, error) {
+	return marshalAWSOwnedWireObject(awsOwnedWireField{"types", endpoint.Types, false})
+}
+
+// https://docs.aws.amazon.com/apigateway/latest/api/API_GetResource.html
+func (resource RESTResource) MarshalJSON() ([]byte, error) {
+	return marshalAWSOwnedWireObject(
+		awsOwnedWireField{"id", resource.ID, false},
+		awsOwnedWireField{"parentId", resource.ParentID, resource.ParentID == ""},
+		awsOwnedWireField{"pathPart", resource.PathPart, resource.PathPart == ""},
+		awsOwnedWireField{"path", resource.Path, false},
+		awsOwnedWireField{"resourceMethods", resource.ResourceMethods, len(resource.ResourceMethods) == 0})
+}
+
+// https://docs.aws.amazon.com/apigateway/latest/api/API_GetMethod.html
+func (method RESTMethod) MarshalJSON() ([]byte, error) {
+	return marshalAWSOwnedWireObject(
+		awsOwnedWireField{"requestParameters", method.RequestParameters, len(method.RequestParameters) == 0},
+		awsOwnedWireField{"httpMethod", method.HTTPMethod, false},
+		awsOwnedWireField{"authorizationType", method.AuthorizationType, false},
+		awsOwnedWireField{"apiKeyRequired", method.APIKeyRequired, false},
+		awsOwnedWireField{"methodIntegration", method.MethodIntegration, method.MethodIntegration == nil})
+}
+func (integration RESTIntegration) MarshalJSON() ([]byte, error) {
+	return marshalAWSOwnedWireObject(
+		awsOwnedWireField{"type", integration.Type, false},
+		awsOwnedWireField{"httpMethod", integration.HTTPMethod, false},
+		awsOwnedWireField{"uri", integration.URI, false},
+		awsOwnedWireField{"timeoutInMillis", integration.TimeoutInMillis, false})
+}
+
+// https://docs.aws.amazon.com/apigateway/latest/api/API_GetDeployment.html
+func (deployment RESTDeployment) MarshalJSON() ([]byte, error) {
+	return marshalAWSOwnedWireObject(
+		awsOwnedWireField{"id", deployment.ID, false},
+		awsOwnedWireField{"createdDate", deployment.CreatedDate, false},
+		awsOwnedWireField{"description", deployment.Description, deployment.Description == ""})
+}
+
+// https://docs.aws.amazon.com/apigateway/latest/api/API_GetStage.html
+func (stage RESTStage) MarshalJSON() ([]byte, error) {
+	return marshalAWSOwnedWireObject(
+		awsOwnedWireField{"stageName", stage.StageName, false},
+		awsOwnedWireField{"deploymentId", stage.DeploymentID, false},
+		awsOwnedWireField{"createdDate", stage.CreatedDate, false},
+		awsOwnedWireField{"lastUpdatedDate", stage.LastUpdatedDate, false},
+		awsOwnedWireField{"variables", stage.Variables, len(stage.Variables) == 0})
 }
 
 func NewAPIGatewayStore(db *sql.DB) (*APIGatewayStore, error) {
