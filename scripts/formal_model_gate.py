@@ -9,8 +9,11 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-BASE_MODELS = {'AzurePropertiesTarget', 'AzurePropertiesEpoch', 'AzureBlobState', 'BlobRange', 'BrowserSessions', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'DynamoDBAdmission', 'DynamoDBLifecycle', 'GCPStorageState', 'KMSKeyState', 'KMSProtocolAdmission', 'IAMManagedPolicies', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'SecretsDisclosureChannels', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'SecretsMutationRefresh', 'StackOwnership', 'StartupTokenVisibility'}
+BASE_MODELS = {'NativeWireProjection', 'RESTRouteMatching', 'RESTProxyEventBoundary', 'AzurePropertiesTarget', 'AzurePropertiesEpoch', 'AzureBlobState', 'BlobRange', 'BrowserSessions', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'DynamoDBAdmission', 'DynamoDBLifecycle', 'GCPStorageState', 'KMSKeyState', 'KMSProtocolAdmission', 'IAMManagedPolicies', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'SecretsDisclosureChannels', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'SecretsMutationRefresh', 'StackOwnership', 'StartupTokenVisibility'}
 BASE_INVARIANTS = {
+    'NativeWireProjection': {'BadValueRefused', 'ValueKindsPreserved', 'FailureNoPartial', 'OmissionExact', 'OrderExact', 'TypeOK', 'SkippedBadDoesNotFail', 'CompleteProjection'},
+    'RESTRouteMatching': {'MatchOracle', 'CaptureFidelity', 'InvalidTemplateRejected', 'Specificity', 'TypeOK', 'RejectedShape'},
+    'RESTProxyEventBoundary': {'QueryProjection', 'ActualRoute', 'Admission', 'BodyPreserved', 'TypeOK', 'FailureNoEvent', 'ApplicationData', 'CredentialSealed'},
     'AzurePropertiesTarget': {'DetailCapturedIdentity', 'DistinctTargetCarriers', 'FieldShapeExact', 'NativeHeadOnly', 'RequestIdentityExact', 'RouteMatchesTarget', 'TypeOK'},
     'AzurePropertiesEpoch': {'CurrentProperties', 'SuccessfulOnly', 'ClearedWhenClosed', 'FailureNoDisclosure', 'CurrentRequestLoading', 'TypeOK', 'LocaleStable', 'AcceptedOnlyCurrent', 'LoadingClearsPrevious'},
     'SecretsMutationRefresh': {'TypeOK', 'AckClosesForm', 'AckClearsDraft', 'FreshFormHasToken', 'NoWriteOnReadRetry'},
@@ -44,6 +47,9 @@ BASE_INVARIANTS = {
 }
 # Established controls require an explicit gate-policy change before retirement.
 REQUIRED_MUTANTS = {
+    'NativeWireProjection': {'AcceptBadValue', 'IgnoreOmission', 'PublishErrorPrefix', 'ReverseFieldOrder', 'EncodeOmittedBad', 'CollapseNullToZero'},
+    'RESTRouteMatching': {'BadRejectedScore', 'AllowEmptyGreedy', 'FirstDuplicateCaptureWins', 'LoseSpecificity', 'IgnoreLiteral', 'TruncateGreedy'},
+    'RESTProxyEventBoundary': {'AcceptMalformedQuery', 'FirstHeaderValueWins', 'IgnoreEncodedBudget', 'EmitRejectedEvent', 'ReplaceBody', 'TemplateAsActualPath', 'FirstQueryValueWins', 'ForwardAWSSignature', 'ForwardLocalCredentials', 'DropBearerApplication'},
     'AzurePropertiesTarget': {'BlobOmitsFields', 'ContainerGetsBlobFields', 'DropBlobParent', 'RequestGET', 'WrongKindRoute', 'WrongRenderedName'},
     'AzurePropertiesEpoch': {'OpenKeepsPrevious', 'StaleFinallyClearsBusy', 'BypassCurrentPublication', 'CloseKeepsPrevious', 'AcceptFailedHEAD'},
     'SecretsMutationRefresh': {'RetainDraftOnAck', 'ReplayWriteOnReadRetry', 'OmitAckFormExit', 'OmitFreshIntentToken'},
@@ -74,6 +80,11 @@ REQUIRED_MUTANTS = {
     'SecretsVersionLifecycle': {'OmitCreatePermission', 'OmitReadGenerationBinding', 'OmitReadTeamBinding', 'OverwriteConflictingVersion', 'RetainDeletedVersions', 'RetainPreviousLabelOnPromote'},
     'StackOwnership': {'ReclaimDriftedResource'},
     'StartupTokenVisibility': {'OmittedCIGuard', 'OmittedTTYGuard', 'OverwriteExistingToken'},
+}
+REQUIRED_SOURCE_SCOPES = {
+    'NativeWireProjection': {'internal/aws/wire_json_projection.go'},
+    'RESTRouteMatching': {'internal/aws/apirouting/path.go'},
+    'RESTProxyEventBoundary': {'internal/aws/apirouting/event.go'},
 }
 IDENTIFIER = re.compile(r'^[A-Za-z][A-Za-z0-9_]*$')
 
@@ -194,6 +205,8 @@ def load_registry(root, relative='formal/models.json'):
         require(BASE_INVARIANTS.get(name, set()) <= set(model['properties']), 'an existing required invariant was removed')
         require(isinstance(model['source_scope'], list) and all(isinstance(p, str) and p and not Path(p).is_absolute() and '..' not in Path(p).parts and not any(c in p for c in '*?[') for p in model['source_scope']), 'source scope must name exact reviewed paths')
         require(len(set(model['source_scope'])) == len(model['source_scope']), 'duplicate model source scope')
+        if name in REQUIRED_SOURCE_SCOPES:
+            require(set(model['source_scope']) == REQUIRED_SOURCE_SCOPES[name], 'required exact source scope changed')
         for path in model['source_scope']:
             asset(root, path)
         require(isinstance(model['mutants'], list) and model['mutants'], 'model needs a sensitivity control')

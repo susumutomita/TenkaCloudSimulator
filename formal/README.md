@@ -1,17 +1,22 @@
 # Finite state model
 
-Current registry: 30 models / 175 literal-protected controls
-(205 required executions). The previous29/164 inventory is preserved;
-IAMManagedPolicies adds one model/11 controls. Its four API-reachable seeds
-and two-request suffixes cover bounded managed-policy transitions. The earlier
-four-request exploration timed out and is not claimed. Registration is source evidence,
-not itself evidence of successful execution. Dated receipts below
+Current registry: 33 models / 197 literal-protected controls
+(230 required executions). All previous30 model entries, TLA/CFG bytes,
+properties and175 controls are preserved. RESTRouteMatching adds six properties
+and six semantic controls; RESTProxyEventBoundary adds eight properties and ten
+controls. NativeWireProjection adds eight properties and six controls for the
+shared explicit ordered JSON writer. Independent scoped checks passed all three
+baselines and22 controls; the full230-case immutable integration has not been run
+by this change.
+IAMManagedPolicies retains its four API-reachable seeds and two-request suffixes;
+the earlier four-request exploration timed out and is not claimed.
+Registration is source evidence, not itself evidence of successful execution. Dated receipts below
 refer to their recorded inputs; later revisions require their own checks. These
 finite models do not prove Go/SQL/HTTP/UI refinement or complete cloud compatibility.
 
 Legacy integration sections below retain historical counts and status statements
 for traceability. Their word “current” refers to the recorded integration, not
-today's registry. The authoritative current inventory is the 30/175 registry
+today's registry. The authoritative current inventory is the 33/197 registry
 above; proof claims always require evidence for the exact revision.
 
 `ObjectStore.tla` models two buckets and two keys, shared object ownership, create/put/delete transitions, and an abstract identity decision `allow /\ ~deny`. `ObjectStore.cfg` checks type correctness, no orphan objects, no unauthorized mutation, and explicit-deny precedence.
@@ -275,3 +280,62 @@ semantic counterexamples. Registration plus this scoped result is not a full
 [Source correspondence and limits](../docs/formal-azure-properties-target.md) explain
 ghost capture provenance, the separately checked lifecycle/epoch assumptions and
 concrete native/browser obligations.
+
+
+## Independent REST route and proxy-event boundaries
+
+RESTRouteMatching checks nine pre-tokenized template cases and eleven request
+segment carriers in one evaluation step: literal constraints, exact or nonempty
+greedy cardinality, literal score, actual captures (including final duplicate
+name wins), and rejected-result shape. Its independent accepted-pair/value oracle
+covers root, interior empty/dot/escaped data, invalid unnamed captures and
+nonterminal greedy templates. It does not parse raw template/path bytes or prove
+SplitPath, URL decoding, method/ANY selection, global best-route tie rules,
+provider dispatch, deployment routing or Go refinement.
+
+RESTProxyEventBoundary checks finite canonical header/query classes, representative
+local credential/signature suppression, accepted application Bearer/multi-value
+preservation, actual path versus resource template, read-only event results,
+malformed-query refusal and symbolic raw/final-encoded-size admission. The two-unit
+size bound is a threshold abstraction, not concrete256KiB enumeration. It does
+not prove Go JSON allocation, total memory bounds, raw UTF8/query/header parsing,
+case-fold/sorting, all prefix strings, host token authentication, snapshots of
+mutable native inputs or implementation refinement. Native tests independently
+cover those concrete contracts. The model emits no guest event on refusal.
+
+Both exact source scopes are protected: path.go for route matching and event.go
+for event projection. Generic RESTDeploymentSnapshot and ProviderPath properties
+are not substituted for these contracts. All fourteen properties and sixteen
+literal sensitivity IDs are mandatory. Each scoped negative actually exited12
+with its exact named semantic invariant and a transition trace; both baselines
+completed (100 and145 distinct states). These scoped results and unchanged
+model/CFG relocation bytes do not certify later rewritten Go files or the new
+full230-case/current-HEAD integration. CHECK_DEADLOCK FALSE permits the deliberate
+one-evaluation horizon; there are no liveness claims.
+
+The CFGs were normalized mechanically from the independently checked named-list
+continuation into canonical INVARIANT lines. Ordered properties, constants and
+behavior declarations remain identical; both TLA files remain byte-identical.
+The two baselines and all16 controls were rerun after this CFG-byte change and
+passed. The original strict CFG parser is unchanged; no named-continuation,
+view/constraint/substitution exception was added.
+
+## Explicit native wire-object projection
+
+NativeWireProjection binds only internal/aws/wire_json_projection.go. Three fixed
+ordered field positions, independent provider omission flags and abstract value
+kinds zero/false/nil/empty/scalar/bad exercise successful complete projection,
+exact omission/order/kind identity, omitted bad-value skipping and encoding-error
+return with no published partial prefix. The provider chooses omission; this
+model does not determine each caller's contract. It does not prove actual JSON
+escaping/bytes/types, map-key order, timestamps, Go encoder behavior, memory,
+XML/IAM, persistence or full cloud serialization. Existing IAM/API/KMS lifecycle
+models do not thereby acquire serialization guarantees.
+
+The baseline completed1,729 distinct states; six semantic controls each exited12
+with the named expected invariant and a real transition trace. FirstBad identifies
+the partial-prefix negative only, not a new native implementation. These scoped
+results are independent model evidence, not the full230-case/current-HEAD gate
+or a refinement proof. The entire original30/175 inventory, timeouts and tool pin
+remain unchanged. All three exact native source scopes and all new properties
+and control IDs are protected by the loader and failure tests.
