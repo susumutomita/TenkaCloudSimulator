@@ -9,7 +9,7 @@ from pathlib import Path
 import unittest
 
 METHODS = {'get', 'head', 'put', 'post', 'delete', 'patch', 'options'}
-GROUPS = ['AWS', 'GCP', 'Azure', 'Sakura', 'Simulator']
+GROUPS = ['AWS', 'Google Cloud', 'Azure', 'Sakura Cloud', 'Simulator']
 EXPECTED_IDS = set('''AddPermission AzureCreateContainer AzureDeleteBlob AzureDeleteContainer
 AzureGetBlob AzureGetBlobProperties AzureGetContainerProperties AzureListBlobs
 AzureListContainers AzurePutBlob Capabilities CreateBucket CreateDeployment
@@ -57,9 +57,9 @@ def validate_document(document):
         'Every tag must appear in exactly one cloud/control group')
     assert all(group['tags'] for group in groups), 'An empty group is not discoverable'
     group_for = {tag: group['name'] for group in groups for tag in group['tags']}
-    assert group_for['Google Cloud Storage'] == 'GCP'
+    assert group_for['Google Cloud Storage'] == 'Google Cloud'
     assert group_for['Azure Blob Storage'] == 'Azure'
-    assert group_for[SAKURA_TAG] == 'Sakura'
+    assert group_for[SAKURA_TAG] == 'Sakura Cloud'
     assert set(groups[3]['tags']) == {SAKURA_TAG}
     assert {'Simulator control', 'Simulator IAM state'} == set(groups[4]['tags'])
     assert GUIDES <= set(groups[0]['tags'])
@@ -77,7 +77,7 @@ def validate_document(document):
     assert len(ids) == len(set(ids)) and set(ids) == EXPECTED_IDS
     for path, _, operation in ops:
         assert operation.get('tags'), 'An operation must remain discoverable'
-        expected = ('GCP' if path.startswith('/_simulator/providers/gcp/') else
+        expected = ('Google Cloud' if path.startswith('/_simulator/providers/gcp/') else
                     'Azure' if path.startswith('/_simulator/providers/azure/') else
                     'Simulator' if path.startswith('/_simulator/v1/') else 'AWS')
         for tag in operation['tags']:

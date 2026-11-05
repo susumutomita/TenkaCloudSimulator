@@ -309,6 +309,11 @@ def handler(event,context):
   subprocess.run([sys.executable,str(Path(__file__).with_name('apigateway_console.py'))],check=True)
  def test_iam_managed_console_native_policy_versions_and_attachments(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('iam_managed_console.py'))],check=True,timeout=240)
+ def test_iam_managed_served_reference_templates_execute(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('iam_managed_reference.py'))],check=True,timeout=180)
+ def test_api_reference_cloud_sections_and_live_native_results(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('api_cloud_sections_contract.py')),'--self-test'],check=True)
+  subprocess.run([sys.executable,str(Path(__file__).with_name('api_cloud_sections.py'))],check=True,timeout=180)
  def test_iam_managed_policy_sdk_isolation_restart_and_cleanup(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('iam_managed.py'))],check=True)
  def test_native_iam_query_and_console_to_lambda(self):

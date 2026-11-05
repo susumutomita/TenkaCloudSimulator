@@ -578,6 +578,113 @@
                     "Capabilities.member.1": "CAPABILITY_IAM",
                     "TemplateBody": "{\n  \"Description\": \"Local simulator CFN REST/Lambda example; no real AWS use required.\",\n  \"Parameters\": {\n    \"Value\": {\n      \"Type\": \"String\",\n      \"Default\": \"safe-dummy\"\n    }\n  },\n  \"Resources\": {\n    \"Config\": {\n      \"Type\": \"AWS::SSM::Parameter\",\n      \"Properties\": {\n        \"Name\": \"/cfn-rest/public\",\n        \"Type\": \"String\",\n        \"Value\": {\n          \"Ref\": \"Value\"\n        }\n      }\n    },\n    \"Role\": {\n      \"Type\": \"AWS::IAM::Role\",\n      \"Properties\": {\n        \"AssumeRolePolicyDocument\": {\n          \"Version\": \"2012-10-17\",\n          \"Statement\": [\n            {\n              \"Effect\": \"Allow\",\n              \"Action\": \"sts:AssumeRole\",\n              \"Principal\": {\n                \"Service\": \"lambda.amazonaws.com\"\n              }\n            }\n          ]\n        },\n        \"Policies\": [\n          {\n            \"PolicyName\": \"ReadConfig\",\n            \"PolicyDocument\": {\n              \"Version\": \"2012-10-17\",\n              \"Statement\": [\n                {\n                  \"Effect\": \"Allow\",\n                  \"Action\": \"ssm:GetParameter\",\n                  \"Resource\": {\n                    \"Fn::Sub\": \"arn:aws:ssm:${AWS::Region}:000000000000:parameter/cfn-rest/public\"\n                  }\n                }\n              ]\n            }\n          }\n        ]\n      }\n    },\n    \"Function\": {\n      \"Type\": \"AWS::Lambda::Function\",\n      \"Properties\": {\n        \"FunctionName\": \"cfn-rest-app\",\n        \"Runtime\": \"python3.12\",\n        \"Handler\": \"index.handler\",\n        \"Role\": {\n          \"Fn::GetAtt\": \"Role.Arn\"\n        },\n        \"Timeout\": 20,\n        \"MemorySize\": 128,\n        \"Environment\": {\n          \"Variables\": {\n            \"PARAMETER\": {\n              \"Ref\": \"Config\"\n            }\n          }\n        },\n        \"Code\": {\n          \"ZipFile\": \"import json, os, boto3\\nfrom botocore.exceptions import ClientError\\nssm = boto3.client('ssm')\\ndef handler(event, context):\\n    name = (event.get('queryStringParameters') or {}).get('name', os.environ['PARAMETER'])\\n    try:\\n        value = ssm.get_parameter(Name=name)['Parameter']['Value']\\n        return {'statusCode': 200, 'body': json.dumps({'value': value, 'path': event['path']})}\\n    except ClientError as error:\\n        return {'statusCode': 403, 'body': json.dumps({'code': error.response['Error']['Code']})}\\n\"\n        }\n      }\n    },\n    \"Api\": {\n      \"Type\": \"AWS::ApiGateway::RestApi\",\n      \"Properties\": {\n        \"Name\": \"cfn-rest-example\",\n        \"EndpointConfiguration\": {\n          \"Types\": [\n            \"REGIONAL\"\n          ]\n        }\n      }\n    },\n    \"Resource\": {\n      \"Type\": \"AWS::ApiGateway::Resource\",\n      \"Properties\": {\n        \"RestApiId\": {\n          \"Ref\": \"Api\"\n        },\n        \"ParentId\": {\n          \"Fn::GetAtt\": \"Api.RootResourceId\"\n        },\n        \"PathPart\": \"config\"\n      }\n    },\n    \"Method\": {\n      \"Type\": \"AWS::ApiGateway::Method\",\n      \"Properties\": {\n        \"RestApiId\": {\n          \"Ref\": \"Api\"\n        },\n        \"ResourceId\": {\n          \"Ref\": \"Resource\"\n        },\n        \"HttpMethod\": \"GET\",\n        \"AuthorizationType\": \"NONE\",\n        \"Integration\": {\n          \"Type\": \"AWS_PROXY\",\n          \"IntegrationHttpMethod\": \"POST\",\n          \"Uri\": {\n            \"Fn::Sub\": \"arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${Function.Arn}/invocations\"\n          }\n        }\n      }\n    },\n    \"Deployment\": {\n      \"Type\": \"AWS::ApiGateway::Deployment\",\n      \"DependsOn\": [\n        \"Method\"\n      ],\n      \"Properties\": {\n        \"RestApiId\": {\n          \"Ref\": \"Api\"\n        }\n      }\n    },\n    \"Stage\": {\n      \"Type\": \"AWS::ApiGateway::Stage\",\n      \"Properties\": {\n        \"RestApiId\": {\n          \"Ref\": \"Api\"\n        },\n        \"DeploymentId\": {\n          \"Ref\": \"Deployment\"\n        },\n        \"StageName\": \"prod\"\n      }\n    },\n    \"Permission\": {\n      \"Type\": \"AWS::Lambda::Permission\",\n      \"Properties\": {\n        \"FunctionName\": {\n          \"Ref\": \"Function\"\n        },\n        \"Action\": \"lambda:InvokeFunction\",\n        \"Principal\": \"apigateway.amazonaws.com\",\n        \"SourceArn\": {\n          \"Fn::Sub\": \"arn:aws:execute-api:${AWS::Region}:000000000000:${Api}/prod/GET/config\"\n        }\n      }\n    }\n  },\n  \"Outputs\": {\n    \"ApiId\": {\n      \"Value\": {\n        \"Ref\": \"Api\"\n      }\n    },\n    \"Stage\": {\n      \"Value\": {\n        \"Ref\": \"Stage\"\n      }\n    },\n    \"Function\": {\n      \"Value\": {\n        \"Ref\": \"Function\"\n      }\n    },\n    \"Role\": {\n      \"Value\": {\n        \"Ref\": \"Role\"\n      }\n    },\n    \"LocalPath\": {\n      \"Value\": {\n        \"Fn::Sub\": \"/_simulator/providers/aws/_execute-api/${AWS::Region}/${Api}/prod/config\"\n      }\n    }\n  }\n}\n"
                   }
+                },
+                "CreatePolicy": {
+                  "summary": "CreatePolicy — static request template; send for live state",
+                  "value": {
+                    "Action": "CreatePolicy",
+                    "Version": "2010-05-08",
+                    "PolicyName": "ReadObjects",
+                    "PolicyDocument": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"s3:GetObject\",\"Resource\":\"arn:aws:s3:::practice-bucket/*\"}]}"
+                  }
+                },
+                "GetPolicy": {
+                  "summary": "GetPolicy — static request template; send for live state",
+                  "value": {
+                    "Action": "GetPolicy",
+                    "Version": "2010-05-08",
+                    "PolicyArn": "arn:aws:iam::000000000000:policy/ReadObjects"
+                  }
+                },
+                "ListPolicies": {
+                  "summary": "ListPolicies — static request template; send for live state",
+                  "value": {
+                    "Action": "ListPolicies",
+                    "Version": "2010-05-08",
+                    "Scope": "Local",
+                    "MaxItems": 100
+                  }
+                },
+                "DeletePolicy": {
+                  "summary": "DeletePolicy — static request template; send for live state",
+                  "value": {
+                    "Action": "DeletePolicy",
+                    "Version": "2010-05-08",
+                    "PolicyArn": "arn:aws:iam::000000000000:policy/ReadObjects"
+                  }
+                },
+                "CreatePolicyVersion": {
+                  "summary": "CreatePolicyVersion — static request template; send for live state",
+                  "value": {
+                    "Action": "CreatePolicyVersion",
+                    "Version": "2010-05-08",
+                    "PolicyArn": "arn:aws:iam::000000000000:policy/ReadObjects",
+                    "PolicyDocument": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"s3:GetObject\",\"Resource\":\"arn:aws:s3:::practice-bucket/*\"}]}",
+                    "SetAsDefault": true
+                  }
+                },
+                "GetPolicyVersion": {
+                  "summary": "GetPolicyVersion — static request template; send for live state",
+                  "value": {
+                    "Action": "GetPolicyVersion",
+                    "Version": "2010-05-08",
+                    "PolicyArn": "arn:aws:iam::000000000000:policy/ReadObjects",
+                    "VersionId": "v2"
+                  }
+                },
+                "ListPolicyVersions": {
+                  "summary": "ListPolicyVersions — static request template; send for live state",
+                  "value": {
+                    "Action": "ListPolicyVersions",
+                    "Version": "2010-05-08",
+                    "PolicyArn": "arn:aws:iam::000000000000:policy/ReadObjects",
+                    "MaxItems": 100
+                  }
+                },
+                "SetDefaultPolicyVersion": {
+                  "summary": "SetDefaultPolicyVersion — static request template; send for live state",
+                  "value": {
+                    "Action": "SetDefaultPolicyVersion",
+                    "Version": "2010-05-08",
+                    "PolicyArn": "arn:aws:iam::000000000000:policy/ReadObjects",
+                    "VersionId": "v2"
+                  }
+                },
+                "DeletePolicyVersion": {
+                  "summary": "DeletePolicyVersion — static request template; send for live state",
+                  "value": {
+                    "Action": "DeletePolicyVersion",
+                    "Version": "2010-05-08",
+                    "PolicyArn": "arn:aws:iam::000000000000:policy/ReadObjects",
+                    "VersionId": "v2"
+                  }
+                },
+                "AttachRolePolicy": {
+                  "summary": "AttachRolePolicy — static request template; send for live state",
+                  "value": {
+                    "Action": "AttachRolePolicy",
+                    "Version": "2010-05-08",
+                    "RoleName": "practice-executor",
+                    "PolicyArn": "arn:aws:iam::000000000000:policy/ReadObjects"
+                  }
+                },
+                "DetachRolePolicy": {
+                  "summary": "DetachRolePolicy — static request template; send for live state",
+                  "value": {
+                    "Action": "DetachRolePolicy",
+                    "Version": "2010-05-08",
+                    "RoleName": "practice-executor",
+                    "PolicyArn": "arn:aws:iam::000000000000:policy/ReadObjects"
+                  }
+                },
+                "ListAttachedRolePolicies": {
+                  "summary": "ListAttachedRolePolicies — static request template; send for live state",
+                  "value": {
+                    "Action": "ListAttachedRolePolicies",
+                    "Version": "2010-05-08",
+                    "RoleName": "practice-executor",
+                    "MaxItems": 100
+                  }
                 }
               }
             },
@@ -13767,7 +13874,7 @@
       ]
     },
     {
-      "name": "GCP",
+      "name": "Google Cloud",
       "tags": [
         "Google Cloud Storage"
       ]
@@ -13779,7 +13886,7 @@
       ]
     },
     {
-      "name": "Sakura",
+      "name": "Sakura Cloud",
       "tags": [
         "Sakura Cloud status"
       ]

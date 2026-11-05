@@ -7,8 +7,8 @@ same-origin, authentication persistence is disabled, and curl/SDK examples still
 require a host-issued simulator token. Dummy AWS wire credentials are not login
 credentials. Never enter real cloud credentials.
 
-The navigation groups reference material under **AWS**, **GCP**, **Azure**,
-**Sakura**, and a separate **Simulator** control section. These are OpenAPI
+The navigation groups reference material under **AWS**, **Google Cloud**, **Azure**,
+**Sakura Cloud**, and a separate **Simulator** control section. These are OpenAPI
 `x-tagGroups`; they do not register providers, grant permission, create endpoints
 or change SDK semantics. Existing paths, operation IDs, operation tags, headers,
 schemas, statuses and static request/response examples are preserved.
