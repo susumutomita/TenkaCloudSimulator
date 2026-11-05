@@ -179,8 +179,11 @@ func (s *KMSAliasStore) capacityTx(ctx context.Context, tx *sql.Tx, keyID string
 
 // CreateAlias uses only a concrete key ID/ARN: aliases cannot target aliases.
 func (s *KMSAliasStore) CreateAlias(ctx context.Context, name, target string, authorize KMSAliasAuthorizer) error {
-	if !kmsCustomerAlias(name) {
+	if name == "" {
 		return kmsInvalid()
+	}
+	if !kmsCustomerAlias(name) {
+		return kmsFailure("InvalidAliasNameException", "The customer alias name is invalid.")
 	}
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
