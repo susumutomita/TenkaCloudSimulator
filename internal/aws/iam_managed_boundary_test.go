@@ -600,3 +600,149 @@ func TestManagedIAMBoundaryAllRoleMetadataAndByteBudgetRollback(t *testing.T) {
 		})
 	}
 }
+
+func managedBoundaryRoleActions(s *IAMRoleStore, ctx context.Context, role IAMRole) map[string]func() error {
+	return map[string]func() error{
+		"put-inline":    func() error { return s.PutPolicy(ctx, role.RoleName, "inline", managedAllow, role.RoleID) },
+		"get-inline":    func() error { _, e := s.Policy(ctx, role.RoleName, "inline", role.RoleID); return e },
+		"delete-inline": func() error { return s.DeletePolicy(ctx, role.RoleName, "inline", role.RoleID) },
+		"list-inline":   func() error { _, e := s.PolicyNames(ctx, role.RoleName, role.RoleID); return e },
+		"update-trust":  func() error { return s.UpdateTrust(ctx, role.RoleName, lambdaServiceTrust, role.RoleID) },
+		"delete-role":   func() error { return s.Delete(ctx, role.RoleName, role.RoleID) },
+	}
+}
+func TestManagedIAMBoundaryCurrentRolePortsClosedDatabaseAndRepair(t *testing.T) {
+	ctx := context.Background()
+	path := filepath.Join(t.TempDir(), "role-ports.sqlite")
+	db, e := core.New(path)
+	if e != nil {
+		t.Fatal(e)
+	}
+	s, e := NewIAMRoleStore(db.Database())
+	if e != nil {
+		t.Fatal(e)
+	}
+	r := managedRole(t, s, "role")
+	peer := managedRole(t, s, "peer")
+	p := managedPolicy(t, s, "policy", managedAllow)
+	for _, role := range []IAMRole{r, peer} {
+		if e = s.AttachRolePolicy(ctx, role.RoleName, p.Arn, role.RoleID); e != nil {
+			t.Fatal(e)
+		}
+	}
+	if e = s.PutPolicy(ctx, r.RoleName, "inline", managedDeny, r.RoleID); e != nil {
+		t.Fatal(e)
+	}
+	frame := managedFrame(t, db.Database())
+	cancelled, cancel := context.WithCancel(ctx)
+	cancel()
+	for name, run := range managedBoundaryRoleActions(s, cancelled, r) {
+		t.Run("canceled-"+name, func(t *testing.T) {
+			if e := run(); !errors.Is(e, context.Canceled) {
+				t.Fatal("canceled role port", e)
+			}
+		})
+	}
+	if managedFrame(t, db.Database()) != frame {
+		t.Fatal("canceled current-role ports changed frame")
+	}
+	if e = db.Close(); e != nil {
+		t.Fatal(e)
+	}
+	for name, run := range managedBoundaryRoleActions(s, ctx, r) {
+		t.Run("closed-"+name, func(t *testing.T) { managedBoundaryInfrastructure(t, run()) })
+	}
+	db, e = core.New(path)
+	if e != nil {
+		t.Fatal(e)
+	}
+	defer db.Close()
+	s, e = NewIAMRoleStore(db.Database())
+	if e != nil {
+		t.Fatal(e)
+	}
+	if managedFrame(t, db.Database()) != frame {
+		t.Fatal("closed role ports changed persisted graph")
+	}
+	managedDecision(t, db, r.RoleName, "explicitDeny")
+	managedDecision(t, db, peer.RoleName, "allowed")
+	document, e := s.Policy(ctx, r.RoleName, "inline", r.RoleID)
+	if e != nil || document != managedDeny {
+		t.Fatal("reopen read lost inline", e)
+	}
+	if e = s.DeletePolicy(ctx, r.RoleName, "inline", r.RoleID); e != nil {
+		t.Fatal(e)
+	}
+	managedDecision(t, db, r.RoleName, "allowed")
+}
+func TestManagedIAMBoundaryCurrentRoleReadFailuresAreAtomic(t *testing.T) {
+	ctx := context.Background()
+	for _, kind := range []string{"schema-role-created", "role-date", "schema-inline-name"} {
+		t.Run(kind, func(t *testing.T) {
+			db, s := managedStore(t)
+			r := managedRole(t, s, "role")
+			peer := managedRole(t, s, "peer")
+			p := managedPolicy(t, s, "policy", managedAllow)
+			for _, role := range []IAMRole{r, peer} {
+				if e := s.AttachRolePolicy(ctx, role.RoleName, p.Arn, role.RoleID); e != nil {
+					t.Fatal(e)
+				}
+			}
+			if e := s.PutPolicy(ctx, r.RoleName, "inline", managedDeny, r.RoleID); e != nil {
+				t.Fatal(e)
+			}
+			var repair string
+			var args []any
+			switch kind {
+			case "schema-role-created":
+				if _, e := db.Database().Exec(`ALTER TABLE aws_iam_roles RENAME COLUMN created TO unavailable_created`); e != nil {
+					t.Fatal(e)
+				}
+				repair = `ALTER TABLE aws_iam_roles RENAME COLUMN unavailable_created TO created`
+			case "role-date":
+				var date string
+				if e := db.Database().QueryRow(`SELECT created FROM aws_iam_roles WHERE name='role'`).Scan(&date); e != nil {
+					t.Fatal(e)
+				}
+				if _, e := db.Database().Exec(`UPDATE aws_iam_roles SET created='boundary-private-fault' WHERE name='role'`); e != nil {
+					t.Fatal(e)
+				}
+				repair = `UPDATE aws_iam_roles SET created=? WHERE name='role'`
+				args = []any{date}
+			default:
+				if _, e := db.Database().Exec(`ALTER TABLE aws_iam_role_policies RENAME COLUMN name TO unavailable_name`); e != nil {
+					t.Fatal(e)
+				}
+				repair = `ALTER TABLE aws_iam_role_policies RENAME COLUMN unavailable_name TO name`
+			}
+			frame := managedFrame(t, db.Database())
+			for name, run := range managedBoundaryRoleActions(s, ctx, r) {
+				// Trust UPDATE does not consult inline policy storage. Role deletion in the
+				// inline-column fixture must refuse real attached dependencies, not claim an
+				// unrelated missing column is required for its COUNT(*) dependency check.
+				if kind == "schema-inline-name" && (name == "update-trust" || name == "delete-role") {
+					continue
+				}
+				managedBoundaryInfrastructure(t, run())
+				if managedFrame(t, db.Database()) != frame {
+					t.Fatal("role-port read failure partially changed graph", name)
+				}
+			}
+			if _, e := db.Database().Exec(repair, args...); e != nil {
+				t.Fatal(e)
+			}
+			names, e := s.PolicyNames(ctx, r.RoleName, r.RoleID)
+			if e != nil || len(names) != 1 || names[0] != "inline" {
+				t.Fatal("repair list", e)
+			}
+			if e = s.UpdateTrust(ctx, r.RoleName, lambdaServiceTrust, r.RoleID); e != nil {
+				t.Fatal("repair trust", e)
+			}
+			if e = s.PutPolicy(ctx, r.RoleName, "inline", managedAllow, r.RoleID); e != nil {
+				t.Fatal("repair inline", e)
+			}
+			managedDecision(t, db, r.RoleName, "allowed")
+			managedDecision(t, db, peer.RoleName, "allowed")
+		})
+	}
+}
