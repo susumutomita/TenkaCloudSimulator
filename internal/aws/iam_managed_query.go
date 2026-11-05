@@ -249,12 +249,12 @@ func (g *Gateway) serveIAMManaged(w http.ResponseWriter, r *http.Request, action
 			iamResponse(w, action, nil)
 		}
 	case "AttachRolePolicy":
-		err = g.Roles.AttachRolePolicy(r.Context(), role.RoleName, arn)
+		err = g.Roles.AttachRolePolicy(r.Context(), role.RoleName, arn, role.RoleID)
 		if err == nil {
 			iamResponse(w, action, nil)
 		}
 	case "DetachRolePolicy":
-		err = g.Roles.DetachRolePolicy(r.Context(), role.RoleName, arn)
+		err = g.Roles.DetachRolePolicy(r.Context(), role.RoleName, arn, role.RoleID)
 		if err == nil {
 			iamResponse(w, action, nil)
 		}
@@ -313,7 +313,7 @@ func (g *Gateway) serveIAMManaged(w http.ResponseWriter, r *http.Request, action
 	case "ListAttachedRolePolicies":
 		var parent IAMRole
 		var policies []IAMAttachedPolicy
-		parent, policies, err = g.Roles.AttachedRolePolicies(r.Context(), role.RoleName, marker.After, max+1)
+		parent, policies, err = g.Roles.AttachedRolePolicies(r.Context(), role.RoleName, marker.After, max+1, role.RoleID)
 		if err != nil {
 			break
 		}
