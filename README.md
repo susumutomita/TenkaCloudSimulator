@@ -118,8 +118,8 @@ preserves its token-file Login, native services and locale behavior. Secrets Man
 its actual capability is present; /secretsmanager and the /secrets alias select the
 same child. Seven native APIs and dummy plaintext values remain the documented
 limit; no KMS/rotation/recovery/CFN behavior is added. Earlier Secrets/native/main
-receipts remain separate from the current Azure live-Properties candidate; its
-combined29 models/164 controls require fresh exact-HEAD verification.
+receipts remain separate from later Azure Properties extensions. Their combined
+29 models/164 controls require verification at the exact revision being reviewed.
 
 An acknowledged Secrets create/update now closes and clears its form before the
 independent metadata read. Read failure permits read-only refresh, not a replayed

@@ -7,6 +7,11 @@ not itself evidence of successful execution. Dated receipts below
 refer to their recorded inputs; later revisions require their own checks. These
 finite models do not prove Go/SQL/HTTP/UI refinement or complete cloud compatibility.
 
+Legacy integration sections below retain historical counts and status statements
+for traceability. Their word “current” refers to the recorded integration, not
+today's registry. The authoritative current inventory is the 29/164 registry
+above; proof claims always require evidence for the exact revision.
+
 `ObjectStore.tla` models two buckets and two keys, shared object ownership, create/put/delete transitions, and an abstract identity decision `allow /\ ~deny`. `ObjectStore.cfg` checks type correctness, no orphan objects, no unauthorized mutation, and explicit-deny precedence.
 
 Run `TLA_JAR=/path/to/tla2tools.jar make formal`. The jar is TLC 1.7.4 from the official tlaplus/tlaplus release and checked against `tla2tools.sha256`. The script also removes the nonempty-delete guard in a temporary mutant and requires TLC to detect a NoOrphans violation. No Java/TLC dependency is needed at application runtime.
@@ -241,12 +246,13 @@ immutable applicability/TLC and whole-quality/hosted CI remain required.
 
 ## Azure properties lifecycle candidate
 
-The current source candidate preserves all 27 main models and 153 named controls,
-and adds the existing AzurePropertiesEpoch model (nine invariants, five controls):
-28 baselines + 158 controls = 186 required executions. Its exact original finite
-bounds, configuration and mutation edits are retained. This source registration
-is not a current-HEAD execution result. Historical standalone six-case and earlier
-whole-candidate results do not establish the new merged candidate.
+Historical registration at `8e656eb` preserved 27 prior models/153 controls
+and added AzurePropertiesEpoch (nine invariants/five controls), producing
+28 baselines + 158 controls = 186 executions. The merged `ce622018` subsequently
+passed the full 186-case gate and its main CI. Later Container Properties adds
+AzurePropertiesTarget without changing those TLA/CFG files, bounds, properties
+or controls. Use the current inventory above and exact-revision CI; older
+receipts do not certify later source changes.
 
 The model abstracts component lifecycle/request epochs, successful HEAD publication,
 close/open clearing and locale-stable state; it does not prove JavaScript, native
