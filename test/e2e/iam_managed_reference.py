@@ -218,6 +218,7 @@ def run():
                 assert text(created, 'DefaultVersionId') == 'v1'
                 policy = iam.get_policy(PolicyArn=arn)['Policy']
                 assert policy['Arn'] == arn and policy['AttachmentCount'] == 0
+                assert iam.get_policy_version(PolicyArn=arn, VersionId='v1')['PolicyVersion']['Document'] == document
                 got = result(template('GetPolicy'), 'GetPolicy').find('{'+NAMESPACE+'}Policy')
                 assert text(got, 'PolicyId') == policy['PolicyId']
                 listed = result(template('ListPolicies'), 'ListPolicies').find('{'+NAMESPACE+'}Policies')
