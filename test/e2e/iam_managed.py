@@ -20,6 +20,7 @@ ALLOW = {"Version": "2012-10-17", "Statement": [{"Effect": "Allow", "Action": "s
 DENY = {"Version": "2012-10-17", "Statement": [{"Effect": "Deny", "Action": "s3:GetObject", "Resource": RESOURCE}]}
 INLINE = {"Version": "2012-10-17", "Statement": [{"Effect": "Allow", "Action": "s3:GetObject", "Resource": "arn:aws:s3:::" + BUCKET + "/inline"}]}
 ROLES = ("ManagedFirst", "ManagedSecond")
+PHASE = "startup"
 
 
 def client(service, endpoint, token):
@@ -83,12 +84,14 @@ def read(s3, key="value"):
 
 
 def run():
+    global PHASE
     with tempfile.TemporaryDirectory(prefix="iam-managed-sdk-owned-") as directory:
         databases = [str(Path(directory) / ("team-" + str(i) + ".db")) for i in range(2)]
         saved = []
         with ExitStack() as stack:
             runtimes = [stack.enter_context(running(db=database, authenticated=True)) for database in databases]
             for index, (endpoint, operator) in enumerate(runtimes):
+                PHASE = "initial-native-role-and-authority"
                 iam, s3 = client("iam", endpoint, operator), client("s3", endpoint, operator)
                 value = ("dummy-managed-team-" + str(index)).encode()
                 s3.create_bucket(Bucket=BUCKET)
@@ -112,6 +115,7 @@ def run():
                     raise AssertionError("Participant spoofed operator identity")
                 for sdk in participants:
                     error("AccessDenied", lambda sdk=sdk: read(sdk))
+                PHASE = "create-policy-and-wire"
                 policy = iam.create_policy(PolicyName="SharedTraining", PolicyDocument=json.dumps(ALLOW), Description="dummy policy metadata")["Policy"]
                 arn = policy["Arn"]
                 assert policy["DefaultVersionId"] == "v1" and policy["IsAttachable"]
@@ -126,17 +130,20 @@ def run():
                 second = iam.list_policies(Scope="Local", Marker=first["Marker"], MaxItems=1)
                 assert not second["IsTruncated"] and {first["Policies"][0]["Arn"], second["Policies"][0]["Arn"]} == {arn, extra["Arn"]}
                 iam.delete_policy(PolicyArn=extra["Arn"])
+                PHASE = "attach-and-actual-S3"
                 for role, sdk in zip(ROLES, participants):
                     iam.attach_role_policy(RoleName=role, PolicyArn=arn)
                     assert read(sdk) == value
                     assert iam.list_attached_role_policies(RoleName=role)["AttachedPolicies"] == [{"PolicyName": "SharedTraining", "PolicyArn": arn}]
                 iam.attach_role_policy(RoleName=ROLES[0], PolicyArn=arn)  # Local verified-edge no-op.
                 assert iam.get_policy(PolicyArn=arn)["Policy"]["AttachmentCount"] == 2
+                PHASE = "inline-Deny-precedence"
                 iam.put_role_policy(RoleName=ROLES[0], PolicyName="ExplicitDeny", PolicyDocument=json.dumps(DENY))
                 error("AccessDenied", lambda: read(participants[0]))
                 assert read(participants[1]) == value
                 iam.delete_role_policy(RoleName=ROLES[0], PolicyName="ExplicitDeny")
                 iam.put_role_policy(RoleName=ROLES[0], PolicyName="PreservedInline", PolicyDocument=json.dumps(INLINE))
+                PHASE = "nondefault-and-default-fanout"
                 version = iam.create_policy_version(PolicyArn=arn, PolicyDocument=json.dumps(DENY))["PolicyVersion"]
                 assert version["VersionId"] == "v2" and not version["IsDefaultVersion"] and "Document" not in version
                 for sdk in participants:
@@ -151,6 +158,7 @@ def run():
                 iam.set_default_policy_version(PolicyArn=arn, VersionId="v1")
                 for _ in range(2):
                     iam.create_policy_version(PolicyArn=arn, PolicyDocument=json.dumps(ALLOW))
+                PHASE = "version-quota-and-nonreuse"
                 before = iam.get_policy(PolicyArn=arn)["Policy"]
                 error("LimitExceeded", lambda: iam.create_policy_version(PolicyArn=arn, PolicyDocument=json.dumps(DENY), SetAsDefault=True))
                 assert iam.get_policy(PolicyArn=arn)["Policy"] == before
@@ -166,6 +174,7 @@ def run():
                 error("DeleteConflict", lambda: iam.delete_policy(PolicyArn=arn))
                 error("DeleteConflict", lambda: iam.delete_role(RoleName=ROLES[0]))
                 saved.append({"arn": arn, "id": policy["PolicyId"], "value": value, "operator": operator, "participants": tokens})
+            PHASE = "cross-team-authority"
             assert saved[0]["arn"] == saved[1]["arn"] and saved[0]["id"] != saved[1]["id"]
             forbidden_host_token(runtimes[1][0], saved[0]["operator"])
             forbidden_host_token(runtimes[0][0], saved[1]["participants"][0])
@@ -174,7 +183,9 @@ def run():
         with ExitStack() as stack:
             runtimes = [stack.enter_context(running(db=database, authenticated=True)) for database in databases]
             for index, (endpoint, operator) in enumerate(runtimes):
+                PHASE = "initial-native-role-and-authority"
                 iam, s3 = client("iam", endpoint, operator), client("s3", endpoint, operator)
+                PHASE = "restart-persisted-authority"
                 previous = saved[index]
                 forbidden_host_token(endpoint, previous["participants"][0])
                 policy = iam.get_policy(PolicyArn=previous["arn"])["Policy"]
@@ -183,7 +194,9 @@ def run():
                 participants = [client("s3", endpoint, token) for token in tokens]
                 for sdk in participants:
                     assert read(sdk) == previous["value"]
+                PHASE = "detach-inline-preservation-and-cleanup"
                 iam.detach_role_policy(RoleName=ROLES[0], PolicyArn=previous["arn"])
+                PHASE = "detach-inline-preservation-and-cleanup"
                 iam.detach_role_policy(RoleName=ROLES[0], PolicyArn=previous["arn"])  # Local no-op, parents still valid.
                 error("AccessDenied", lambda: read(participants[0]))
                 assert read(participants[0], "inline") == b"dummy-inline"
@@ -211,4 +224,4 @@ if __name__ == "__main__":
         run()
     except Exception as failure:
         # SDK/network exceptions can contain headers: do not emit raw credentials.
-        raise RuntimeError("IAM managed SDK contract failed: " + type(failure).__name__) from None
+        raise RuntimeError("IAM managed SDK contract failed at " + PHASE + ": " + type(failure).__name__) from None
