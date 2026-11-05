@@ -7,6 +7,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math"
 	"regexp"
@@ -144,6 +145,9 @@ func iamManagedRead(ctx context.Context, tx *sql.Tx, arn string) (iamManagedReco
 		return p, e
 	}
 	p.Arn = iamManagedPrefix + p.PolicyName
+	if p.Arn != arn {
+		return p, ssmFailure{"NoSuchEntity", "The exact customer policy ARN does not exist."}
+	}
 	p.IsAttachable = true
 	p.DefaultVersionID = "v" + strconv.FormatInt(p.defaultNumber, 10)
 	p.CreateDate, e = time.Parse(time.RFC3339Nano, created)
@@ -151,7 +155,7 @@ func iamManagedRead(ctx context.Context, tx *sql.Tx, arn string) (iamManagedReco
 		return p, iamManagedBad()
 	}
 	p.UpdateDate, e = time.Parse(time.RFC3339Nano, updated)
-	if e != nil || deleted != 0 || !iamManagedName.MatchString(p.PolicyName) || !iamManagedID.MatchString(p.PolicyID) || p.Path != "/" || !iamManagedText(p.Description, 1000) || p.UpdateDate.Before(p.CreateDate) || p.Arn != arn || p.defaultNumber < 1 || p.next <= p.defaultNumber {
+	if e != nil || deleted != 0 || !iamManagedName.MatchString(p.PolicyName) || !iamManagedID.MatchString(p.PolicyID) || p.Path != "/" || !iamManagedText(p.Description, 1000) || p.UpdateDate.Before(p.CreateDate) || p.defaultNumber < 1 || p.next <= p.defaultNumber {
 		return p, iamManagedBad()
 	}
 	rows, e := tx.QueryContext(ctx, `SELECT version_number,document,created FROM aws_iam_managed_policy_versions WHERE policy_name=? AND policy_id=? ORDER BY version_number`, p.PolicyName, p.PolicyID)
@@ -547,6 +551,10 @@ func iamManagedRolePolicies(ctx context.Context, tx *sql.Tx, role IAMRole) ([]ia
 		}
 		p, e := iamManagedRead(ctx, tx, iamManagedPrefix+ref.name)
 		if e != nil {
+			var failure ssmFailure
+			if errors.As(e, &failure) {
+				return nil, iamManagedBad()
+			}
 			return nil, e
 		}
 		if p.PolicyID != ref.id || p.PolicyName != ref.name {
@@ -556,13 +564,28 @@ func iamManagedRolePolicies(ctx context.Context, tx *sql.Tx, role IAMRole) ([]ia
 	}
 	return result, nil
 }
-func (s *IAMRoleStore) AttachRolePolicy(ctx context.Context, roleName, arn string) error {
-	return s.iamManagedAttachment(ctx, roleName, arn, true)
+func (s *IAMRoleStore) AttachRolePolicy(ctx context.Context, roleName, arn string, expectedRoleID ...string) error {
+	return s.iamManagedAttachment(ctx, roleName, arn, true, expectedRoleID)
 }
-func (s *IAMRoleStore) DetachRolePolicy(ctx context.Context, roleName, arn string) error {
-	return s.iamManagedAttachment(ctx, roleName, arn, false)
+func (s *IAMRoleStore) DetachRolePolicy(ctx context.Context, roleName, arn string, expectedRoleID ...string) error {
+	return s.iamManagedAttachment(ctx, roleName, arn, false, expectedRoleID)
 }
-func (s *IAMRoleStore) iamManagedAttachment(ctx context.Context, roleName, arn string, attach bool) error {
+
+// Optional expectedRoleID is a trusted caller's preauthorized incarnation, not
+// wire authority. Query callers must supply it; direct host callers may omit it.
+func iamManagedExpectedRole(role IAMRole, expected []string) error {
+	if len(expected) == 0 {
+		return nil
+	}
+	if len(expected) != 1 || expected[0] == "" {
+		return ssmFailure{"InvalidInput", "Use one nonempty expected role incarnation."}
+	}
+	if expected[0] != role.RoleID {
+		return ssmFailure{"NoSuchEntity", "The preauthorized role incarnation no longer exists."}
+	}
+	return nil
+}
+func (s *IAMRoleStore) iamManagedAttachment(ctx context.Context, roleName, arn string, attach bool, expectedRoleID []string) error {
 	tx, e := s.db.BeginTx(ctx, nil)
 	if e != nil {
 		return e
@@ -570,6 +593,9 @@ func (s *IAMRoleStore) iamManagedAttachment(ctx context.Context, roleName, arn s
 	defer tx.Rollback()
 	role, e := iamManagedRole(ctx, tx, roleName)
 	if e != nil {
+		return e
+	}
+	if e = iamManagedExpectedRole(role, expectedRoleID); e != nil {
 		return e
 	}
 	p, e := iamManagedRead(ctx, tx, arn)
@@ -608,7 +634,7 @@ func (s *IAMRoleStore) iamManagedAttachment(ctx context.Context, roleName, arn s
 	}
 	return tx.Commit()
 }
-func (s *IAMRoleStore) AttachedRolePolicies(ctx context.Context, roleName, afterName string, limit int) (IAMRole, []IAMAttachedPolicy, error) {
+func (s *IAMRoleStore) AttachedRolePolicies(ctx context.Context, roleName, afterName string, limit int, expectedRoleID ...string) (IAMRole, []IAMAttachedPolicy, error) {
 	if limit < 1 || limit > 1001 || afterName != "" && !iamManagedName.MatchString(afterName) {
 		return IAMRole{}, nil, ssmFailure{"InvalidInput", "Use a bounded attached-policy page."}
 	}
@@ -619,6 +645,9 @@ func (s *IAMRoleStore) AttachedRolePolicies(ctx context.Context, roleName, after
 	defer tx.Rollback()
 	role, e := iamManagedRole(ctx, tx, roleName)
 	if e != nil {
+		return IAMRole{}, nil, e
+	}
+	if e = iamManagedExpectedRole(role, expectedRoleID); e != nil {
 		return IAMRole{}, nil, e
 	}
 	all, e := iamManagedRolePolicies(ctx, tx, role)
