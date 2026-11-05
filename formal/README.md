@@ -5,8 +5,7 @@ Current registry: 48 models / 381 literal-protected controls
 and347 controls are preserved. Sakura metadata/admission/startup add35 controls;
 SakuraDisksViewEpoch adds17 more for request scope/sequence, stale frames,
 ACK/form exit, read-only retry and locale continuity. These four scoped baselines
-and52 controls passed separately. The combined current immutable429-case gate remains
-pending; registrations and independent source review do not substitute for it.
+and52 controls passed separately. The combined immutable 429-case gate passed at `c298972` (48 baselines and 381 named controls). Current 61-case E2E/start and hosted CI remain pending. Registration alone and source review do not substitute for actual execution.
 The initial Startup enumeration failure and UI wrong-first-invariant attempt
 remain recorded. The UI retains its original15 faults and adds two targeted
 publication controls; all14 UI properties and bounds remain unchanged.
@@ -37,8 +36,7 @@ order makes no error-priority claim. See [CFN boundaries](../docs/cloudformation
 
 CFNFinalCleanupACK adds five properties and four controls for final selected
 stack/owned-claim acknowledgement and rollback/peer-frame abstraction. Its source
-and native regression are imported from standalone `7d56d9d`; this candidate has
-not yet executed the combined registered gate. Physical resource handler success
+and native regression are imported from standalone `7d56d9d`; the combined registered gate passed at `c298972`. Physical resource handler success
 is assumed, not proved: this is not an all-resource DELETE acknowledgement model.
 CFNConditionMemoDepth adds twelve properties and nine controls for the condition
 cache, independently bounded graph validity/height and root-order admission.
@@ -46,10 +44,10 @@ Its exact `cca79267` source passed scoped SANY, baseline and nine named-invarian
 counterexamples (10,608 states, 4,116 initial configurations); the old-cache
 mutation has a concrete over-depth witness. This finite three-name/bound2-or3
 check is not a Go/unbounded-depth/SQL/parser proof. The native32/33 regressions
-remain separate; the historical 365-case registered gate is still pending.
+remain separate; the earlier 365-case source preparation is historical; the current 429-case gate passed at `c298972`.
 
 
-CFNPhysicalResourceACK adds five properties and seven controls for selected SSM/S3 SQLite-row absence after all cleanup writes, rollback and peer frames. Its 196 scoped source run passed 8 SANY and 8 TLC phases; canonical CFG formatting in this integration requires a fresh scoped run. It does not prove native S3 deletion, other resource handlers, cloud hardware, SQL/Go refinement or host scoring. The combined current 429-execution gate and 61-case E2E are unexecuted.
+CFNPhysicalResourceACK adds five properties and seven controls for selected SSM/S3 SQLite-row absence after all cleanup writes, rollback and peer frames. Its 196 scoped source run passed 8 SANY and 8 TLC phases; the canonical CFG formatting passed a fresh 16-phase SANY/TLC run at `c298972`. It does not prove native S3 deletion, other resource handlers, cloud hardware, SQL/Go refinement or host scoring. The combined current 429-execution gate passed at `c298972`; its 61-case E2E/start and hosted CI remain pending.
 
 ## Aggregate CI execution capacity
 

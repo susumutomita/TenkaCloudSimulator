@@ -19,7 +19,7 @@ The current registry has 48 baselines/381 required named mutation controls
 (429 required executions). All 44 main `139eb82` model entries and 347 controls are
 preserved. CFNConditionAdmission adds a finite compile-plan projection with 14
 controls, scoped at `f69fb46`; the complete 429-case registered gate of this
-combined candidate is still pending. SecretMetadataViewEpoch from main is preserved byte-for-byte. Numeric/regex/parser correctness, actual resource
+combined candidate passed at `c298972`. Current 61-case E2E/start and hosted CI remain pending. SecretMetadataViewEpoch from main is preserved byte-for-byte. Numeric/regex/parser correctness, actual resource
 provisioning and NoEcho/output secrecy are not proved by this model.
 The new IAM scope is four API-reachable seeds and at most two subsequent requests;
 the broader four-request exploratory candidate timed out and is not claimed.
@@ -217,4 +217,4 @@ semantic counterexamples. Registration plus this scoped result is not a full
 ghost capture provenance, the separately checked lifecycle/epoch assumptions and
 concrete native/browser obligations.
 
-The physical-row model is limited to the selected SSM/S3 SQLite rows after all cleanup writes. It is distinct from the final stack/claim model, which assumes physical handler success. Canonical CFG formatting preserves its five properties and nine fault modes; current combined proof and fresh scoped execution remain required.
+The physical-row model is limited to the selected SSM/S3 SQLite rows after all cleanup writes. It is distinct from the final stack/claim model, which assumes physical handler success. Canonical CFG formatting preserves its five properties and nine fault modes; both combined 429-case and fresh scoped execution passed at `c298972`; later revisions require their own immutable checks.

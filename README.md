@@ -259,7 +259,9 @@ See [formal validation](formal/README.md), [CI](docs/ci.md),
 [backlog acceptance](docs/acceptance/backlog-services.md), and the
 [standalone architecture](docs/design/0001-go-standalone.md).
 
-The CFN condition model adds a bounded compile-plan projection. Its isolated SANY/baseline/fourteen controls passed at `f69fb46`; the combined 365-case gate of this candidate is pending. The original crypto fixture also passed the regular two-CLI SDK helper at `2d76646` (73 SDK calls/responses and 9 auxiliary HTTP pairs across four CLI incarnations). That verifies local provisioning and permissions, not host coordination, scoring or NoEcho secrecy.
+The CFN condition model adds a bounded compile-plan projection. Its isolated SANY/baseline/fourteen controls passed at `f69fb46`; that 365-case source preparation is historical. The full 429-case gate passed at `c298972`; its 61-case E2E/start and hosted CI remain pending. The original crypto fixture also passed the regular two-CLI SDK helper at `2d76646` (73 SDK calls/responses and 9 auxiliary HTTP pairs across four CLI incarnations). That verifies local provisioning and permissions, not host coordination, scoring or NoEcho secrecy.
+
+At `c298972`, all 48 finite models and 381 controls (429 executions) passed, as did fresh full-module Go race/build and one-profile statement/source coverage of 94.94%/90.32%. The 61-case E2E/start suite and exact-head hosted CI remain pending. This follow-up changes documentation and applicability hashes only; runtime, model and test bytes remain identical to `c298972`. Its exact-head hosted gates must still pass. Separate models cover final stack/claim acknowledgement and selected SSM/S3 SQLite-row absence after all cleanup writes. These checks do not prove host scoring, output secrecy, native S3 DeleteBucket, every resource type or Go/SQL refinement.
 
 ## License and attribution
 
@@ -269,4 +271,3 @@ modules, Cloudscape, Scalar, CPython/WASI and other bundled components ship at
 official AWS service and does not use AWS logos. See the
 [design and handoff guides](docs/handoff/README.md).
 
-The current CFN candidate additionally registers bounded condition admission, memoized graph-height, final stack/claim acknowledgement and selected SSM/S3 physical-row acknowledgement models. All 44 incoming main model entries are retained. The combined 48-model/381-control gate and 61-case E2E require fresh exact-head execution; older scoped receipts do not establish this merged revision. No host grading, SQL/Go refinement, output-secret protection or all-resource physical deletion proof is implied.

@@ -163,4 +163,4 @@ the 45-case E2E suite; focused results do not replace whole-suite verification.
 
 現在の形式検査の登録は48モデル・381制御（429実行）です。IAMの追加モデルは4つの到達可能な初期状態から各2要求の範囲で、4要求の試案はタイムアウトし未成功です。上の過去の受領証とは区別し、最新HEADで全ゲートを実行してください。API資料はAWS・Google Cloud・Azureを分け、Sakura Cloudでは任意有効化するDisk構成の画面と5つのnative APIを扱います。他のSakuraサービスや実ストレージに対応したという意味ではありません。[ナビゲーション](docs/api-reference.md)を参照してください。
 
-現在のCFN候補は条件の受理、メモ化したグラフ高さ、最終スタック・所有権行ACK、および選択したSSM/S3物理行ACKの限定モデルを追加し、mainの44モデルを保持します。統合後48モデル・381制御（429実行）と61 E2Eの最新HEAD検証は未実施です。過去の単体結果で代用せず、ホスト採点・SQL/Go refinement・秘匿出力・全リソース物理削除の証明とは扱いません。
+現在のCFN候補は条件の受理、メモ化したグラフ高さ、最終スタック・所有権行ACK、および選択したSSM/S3物理行ACKの限定モデルを追加し、mainの44モデルを保持します。`c298972`で全48モデル・381制御（429実行）、fresh全Go race/build、同一profileのstatement94.94%・未除外source90.32%を確認しました。現61 E2E/startとexact HEAD hosted CIは未実施です。 この追補は資料とapplicabilityハッシュのみの変更で、実行コード・モデル・テストは`c298972`と同一です。追補自身のexact HEAD hosted検査は別途必要です。過去の単体結果で代用せず、ホスト採点・SQL/Go refinement・秘匿出力・全リソース物理削除の証明とは扱いません。
