@@ -5,7 +5,7 @@ English | [日本語](README.ja.md)
 Practice cloud APIs and console workflows locally, without a cloud account.
 TenkaCloud Simulator is an independent, AWS-first learning simulator with bounded
 Google Cloud Storage and Azure Blob Storage support. One Go binary embeds the
-AWS Cloudscape console, provider-specific Google Cloud and Azure consoles, a
+AWS-style console built with Cloudscape, local Google Cloud and Azure consoles, a
 Scalar API reference, SQLite, and a pinned CPython/WASI runtime for Python Lambda.
 Running a built binary requires no Go, Node.js, host Python, Docker, external
 database, or real cloud connection. **Use dummy credentials and practice data.**
@@ -148,7 +148,7 @@ curl -H "X-Simulator-Token: $SIM_TOKEN" http://127.0.0.1:4566/
 unset SIM_TOKEN
 ```
 
-SDKs need an explicit local endpoint, region, dummy `TCSIM…` keys, and a request
+AWS SDK clients need an explicit local endpoint, region, dummy `TCSIM…` keys, and a request
 hook adding `X-Simulator-Token`. Dummy signatures select the wire protocol; they
 do not authenticate access. Real AWS-style keys, AWS session tokens and presigned
 URLs are rejected. See [connection examples](test/platform/README.md) and
