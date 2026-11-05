@@ -341,7 +341,10 @@ and control IDs are protected by the loader and failure tests.
 
 ## DynamoDB console request epochs and acknowledged writes
 
-DynamoDBConsoleEpoch binds only tools/console/src/dynamodb.jsx. Separate read
+DynamoDBConsoleEpoch binds tools/console/src/dynamodb.jsx, the narrow DynamoDB
+route/mount-key caller in main.jsx, and canonical embedded app.js as its derived
+artifact. It does not prove other shell/components or compiler/bundler correctness.
+Separate read
 and write scenarios cover two combined authority/region labels, one remount,
 epochs0..2 without wrap, two one-use pending-read slots, two exact keys, two
 symbolic TableIds with one recreation, one form/write intent and en/ja.
@@ -369,4 +372,4 @@ write before a client aborts it. Stutter observation admits no liveness claim.
 Native DynamoDBAdmission/Lifecycle and concrete tests remain separate evidence.
 The root mount key (region|principal|navigation) and actual UI state changes are
 independently exercised by the mandatory dynamodb_console.py helper, not proved
-by this component-only abstraction.
+by a complete shell/React refinement.

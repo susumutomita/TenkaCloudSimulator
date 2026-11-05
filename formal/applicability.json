@@ -1,496 +1,189 @@
 {
   "version": 1,
-  "base_sha": "1b34ed4e5fe7c9a314194c10bd2d0261ec7efb98",
+  "base_sha": "36ebfd4808d539d22579181a59ce4db3c768420d",
   "changes": [
     {
-      "path": "README.ja.md",
-      "sha256": "7d1dc1bd239d8047284de439ed01eb9220c8fd4e8d63b22edfee443abb1dc2fe",
+      "path": "docs/dynamodb.md",
+      "sha256": "59e0d4180450c2a0b59e16226136ea1c65f21f6320eb4ee74ed9559a59170d9d",
       "disposition": "documentation",
-      "reason": "Updates visible reference attribution, historical provenance and technical contract/verification scope. Original rights remain preserved; this artifact supplies documentation or checked static identities, not new cloud runtime behavior or an authorship/legal proof.",
+      "reason": "Documents actual bounded native/UI behavior, scoped receipts and unrun combined gates; no runtime execution or AWS parity claim.",
       "models": []
     },
     {
-      "path": "README.md",
-      "sha256": "0be6c24d11da8321f3bfc60f3b41bdd38d8f1ac2de56929a5bf207d30933024a",
-      "disposition": "documentation",
-      "reason": "Updates visible reference attribution, historical provenance and technical contract/verification scope. Original rights remain preserved; this artifact supplies documentation or checked static identities, not new cloud runtime behavior or an authorship/legal proof.",
-      "models": []
-    },
-    {
-      "path": "docs/apigateway.md",
-      "sha256": "df8404b6fcb8c8db20d1a1e87b805b93643f5e067ba169e4b1d27885a7ec01cd",
-      "disposition": "documentation",
-      "reason": "Updates visible reference attribution, historical provenance and technical contract/verification scope. Original rights remain preserved; this artifact supplies documentation or checked static identities, not new cloud runtime behavior or an authorship/legal proof.",
-      "models": []
-    },
-    {
-      "path": "docs/ci.md",
-      "sha256": "14f0be7d8986b636238b7ccecaacb9be91fae329816d89ecdbadef46fc39e8c8",
-      "disposition": "documentation",
-      "reason": "Updates visible reference attribution, historical provenance and technical contract/verification scope. Original rights remain preserved; this artifact supplies documentation or checked static identities, not new cloud runtime behavior or an authorship/legal proof.",
-      "models": []
-    },
-    {
-      "path": "docs/cloudwatch-logs.md",
-      "sha256": "c6c7fd7d26c77d4413b5bcc3d7974bd6706427ccbaede6782763752f183f32af",
-      "disposition": "documentation",
-      "reason": "Updates visible reference attribution, historical provenance and technical contract/verification scope. Original rights remain preserved; this artifact supplies documentation or checked static identities, not new cloud runtime behavior or an authorship/legal proof.",
-      "models": []
-    },
-    {
-      "path": "docs/design/0003-upstream-reuse.md",
-      "sha256": "6afa396c8b111b5df1b8cc57de4614451e753d90146fff54adfa0cb129e78e5f",
-      "disposition": "documentation",
-      "reason": "Updates visible reference attribution, historical provenance and technical contract/verification scope. Original rights remain preserved; this artifact supplies documentation or checked static identities, not new cloud runtime behavior or an authorship/legal proof.",
-      "models": []
-    },
-    {
-      "path": "docs/design/0004-rest-api-proxy.md",
-      "sha256": "351bb62c5b1688387b5f008b6979cccd9b60fb75f2976c3bfaa7fdae3abcc280",
-      "disposition": "documentation",
-      "reason": "Updates visible reference attribution, historical provenance and technical contract/verification scope. Original rights remain preserved; this artifact supplies documentation or checked static identities, not new cloud runtime behavior or an authorship/legal proof.",
-      "models": []
-    },
-    {
-      "path": "docs/design/0010-iam-managed-policy-contract.md",
-      "sha256": "06a6fc7d47aacf0f5ad588a4312b01c5f33474920b027558d4254ebc9c9ef44e",
-      "disposition": "documentation",
-      "reason": "Updates visible reference attribution, historical provenance and technical contract/verification scope. Original rights remain preserved; this artifact supplies documentation or checked static identities, not new cloud runtime behavior or an authorship/legal proof.",
-      "models": []
-    },
-    {
-      "path": "docs/formal-validation.md",
-      "sha256": "a386ba3dd9e1a8f4023b60fb233b8573357e63bb1f88f50b474ab2741fb685ef",
-      "disposition": "documentation",
-      "reason": "Updates visible reference attribution, historical provenance and technical contract/verification scope. Original rights remain preserved; this artifact supplies documentation or checked static identities, not new cloud runtime behavior or an authorship/legal proof.",
-      "models": []
-    },
-    {
-      "path": "docs/iam.md",
-      "sha256": "1d0bb952e7de01672df72324fabdcb59afad6dff81841f151635386024bf4237",
-      "disposition": "documentation",
-      "reason": "Updates visible reference attribution, historical provenance and technical contract/verification scope. Original rights remain preserved; this artifact supplies documentation or checked static identities, not new cloud runtime behavior or an authorship/legal proof.",
-      "models": []
-    },
-    {
-      "path": "docs/kms.md",
-      "sha256": "8f8d3c4338fc99fcfc81d9d7630f3c699b5dfc8d7b3bd1b1452fdbd5f96f949a",
-      "disposition": "documentation",
-      "reason": "Updates visible reference attribution, historical provenance and technical contract/verification scope. Original rights remain preserved; this artifact supplies documentation or checked static identities, not new cloud runtime behavior or an authorship/legal proof.",
-      "models": []
-    },
-    {
-      "path": "docs/services-roadmap.md",
-      "sha256": "6618968994dd5ecd701dd207333975addcf77463d04d93949606d2d9a06d4276",
-      "disposition": "documentation",
-      "reason": "Updates visible reference attribution, historical provenance and technical contract/verification scope. Original rights remain preserved; this artifact supplies documentation or checked static identities, not new cloud runtime behavior or an authorship/legal proof.",
-      "models": []
-    },
-    {
-      "path": "formal/NativeWireProjection.cfg",
-      "sha256": "97658b0020ceaf71e098fa96168efadbd630e70fcaca39d9319237543eaae208",
+      "path": "formal/DynamoDBConsoleEpoch.cfg",
+      "sha256": "fe29c57429b02e9e0a44e8e11a60e1427019256fd9ead3a40b2e060c9fb26b9a",
       "disposition": "modeled",
-      "reason": "Registers the exact finite specification/configuration and protected semantic controls for the stated source projection. Bounds and exclusions are explicit; registration is neither execution evidence nor an implementation/refinement proof.",
+      "reason": "Independent bounded console context/read epoch/key/TableId-at-acceptance/form cancellation/synchronous owner/ACK-before-refresh/read-only retry model; not native storage, protocol/IAM/SQL correctness or unbounded JavaScript/React refinement. Concrete browser and native tests are separate evidence.",
       "models": [
         {
-          "id": "NativeWireProjection",
+          "id": "DynamoDBConsoleEpoch",
           "properties": [
             "TypeOK",
-            "BadValueRefused",
-            "FailureNoPartial",
-            "OmissionExact",
-            "OrderExact",
-            "ValueKindsPreserved",
-            "CompleteProjection",
-            "SkippedBadDoesNotFail"
+            "NoStalePublication",
+            "ReadGenerationVerified",
+            "DisplayedKeyBound",
+            "CancelNoOrphanLoading",
+            "AckClosesDraft",
+            "AckBelongsToCurrentView",
+            "ReadRetryNeverWrites",
+            "SingleSendBeforeACK",
+            "LocalePreservesDraft"
           ],
-          "limits": "Abstract field order, omission, kind identity and value-error publication only. Not JSON escaping/Go encoder semantics, actual numeric/string/collection values, reflection/decode/XML/IAM/cloud protocol semantics, memory allocation, SQLite or Go refinement. FirstBad is diagnostic for the partial-prefix mutation only; omission decisions are trusted caller inputs."
+          "limits": "UI finite safety abstraction only, not JS/React/AbortController scheduling refinement, native protocol/JSON/IAM/auth/SQLite state/number/binary/size/capacity proof. TableId checks establish agreement at item-read acceptance only, not freshness after later native changes or atomic TableId-CAS on mutation; official TableName writes remain subject to recreation between preflight and send. Combined context labels abstract principal/region/remount, not credentials/tenant isolation. Stutter observation admits no liveness/hung-read progress claim. One write intent only; symbolic ACK/no automatic replay, not server rollback when an aborted request already committed. No concrete item values, missing-item/delete-confirmation semantics or arbitrary pagination. Main caller scope is limited to the DynamoDB route and its region|principal|navigation mount key/reset; embedded app.js is the canonical derived component/caller artifact. Neither binding proves other shell/components, compiler/bundler correctness or JavaScript refinement."
         }
       ]
     },
     {
-      "path": "formal/NativeWireProjection.tla",
-      "sha256": "eba4f79b429b32cd2735e3b23637741cc3626ee3634d7fbffff5399b3de62f18",
+      "path": "formal/DynamoDBConsoleEpoch.tla",
+      "sha256": "da131cfbaa28709430cc4de67ca16f9674f33d6cd8f87e21475d592f9a13a4ed",
       "disposition": "modeled",
-      "reason": "Registers the exact finite specification/configuration and protected semantic controls for the stated source projection. Bounds and exclusions are explicit; registration is neither execution evidence nor an implementation/refinement proof.",
+      "reason": "Independent bounded console context/read epoch/key/TableId-at-acceptance/form cancellation/synchronous owner/ACK-before-refresh/read-only retry model; not native storage, protocol/IAM/SQL correctness or unbounded JavaScript/React refinement. Concrete browser and native tests are separate evidence.",
       "models": [
         {
-          "id": "NativeWireProjection",
+          "id": "DynamoDBConsoleEpoch",
           "properties": [
             "TypeOK",
-            "BadValueRefused",
-            "FailureNoPartial",
-            "OmissionExact",
-            "OrderExact",
-            "ValueKindsPreserved",
-            "CompleteProjection",
-            "SkippedBadDoesNotFail"
+            "NoStalePublication",
+            "ReadGenerationVerified",
+            "DisplayedKeyBound",
+            "CancelNoOrphanLoading",
+            "AckClosesDraft",
+            "AckBelongsToCurrentView",
+            "ReadRetryNeverWrites",
+            "SingleSendBeforeACK",
+            "LocalePreservesDraft"
           ],
-          "limits": "Abstract field order, omission, kind identity and value-error publication only. Not JSON escaping/Go encoder semantics, actual numeric/string/collection values, reflection/decode/XML/IAM/cloud protocol semantics, memory allocation, SQLite or Go refinement. FirstBad is diagnostic for the partial-prefix mutation only; omission decisions are trusted caller inputs."
+          "limits": "UI finite safety abstraction only, not JS/React/AbortController scheduling refinement, native protocol/JSON/IAM/auth/SQLite state/number/binary/size/capacity proof. TableId checks establish agreement at item-read acceptance only, not freshness after later native changes or atomic TableId-CAS on mutation; official TableName writes remain subject to recreation between preflight and send. Combined context labels abstract principal/region/remount, not credentials/tenant isolation. Stutter observation admits no liveness/hung-read progress claim. One write intent only; symbolic ACK/no automatic replay, not server rollback when an aborted request already committed. No concrete item values, missing-item/delete-confirmation semantics or arbitrary pagination. Main caller scope is limited to the DynamoDB route and its region|principal|navigation mount key/reset; embedded app.js is the canonical derived component/caller artifact. Neither binding proves other shell/components, compiler/bundler correctness or JavaScript refinement."
         }
       ]
     },
     {
       "path": "formal/README.md",
-      "sha256": "9509c2abeae24136edc2a54294b131eaad997a6a56a19384b69533213f41bc4e",
+      "sha256": "9b2ff870c2a6dc3a157e709688c7c8aeba29aef2a679c9ede9283a8fad3e9bab",
       "disposition": "documentation",
-      "reason": "Updates visible reference attribution, historical provenance and technical contract/verification scope. Original rights remain preserved; this artifact supplies documentation or checked static identities, not new cloud runtime behavior or an authorship/legal proof.",
+      "reason": "Documents actual bounded native/UI behavior, scoped receipts and unrun combined gates; no runtime execution or AWS parity claim.",
       "models": []
-    },
-    {
-      "path": "formal/RESTProxyEventBoundary.cfg",
-      "sha256": "e4185d752a4b023e8daad947abd779379e459ed5243c22c489e011a29d513cd0",
-      "disposition": "modeled",
-      "reason": "Registers the exact finite specification/configuration and protected semantic controls for the stated source projection. Bounds and exclusions are explicit; registration is neither execution evidence nor an implementation/refinement proof.",
-      "models": [
-        {
-          "id": "RESTProxyEventBoundary",
-          "properties": [
-            "TypeOK",
-            "Admission",
-            "FailureNoEvent",
-            "CredentialSealed",
-            "ApplicationData",
-            "ActualRoute",
-            "QueryProjection",
-            "BodyPreserved"
-          ],
-          "limits": "Canonicalized finite header/query carriers, abstract valid-text/context and symbolic raw/final encoded budgets only. No Go JSON encoder/memory-allocation bound, UTF8/percent/MIME/header parser or case-fold/sort proof, nil-pointer behavior, host token auth, cryptography, SQL, guest execution, Go refinement or arbitrary inputs. Limit2 is a threshold abstraction, not concrete256KiB exploration. No byte-level injection/external network claims."
-        }
-      ]
-    },
-    {
-      "path": "formal/RESTProxyEventBoundary.tla",
-      "sha256": "3092188c3220bc9ab439cde88fbf0ad4f229f0efa0a568a8ddd26f3b960ac6bf",
-      "disposition": "modeled",
-      "reason": "Registers the exact finite specification/configuration and protected semantic controls for the stated source projection. Bounds and exclusions are explicit; registration is neither execution evidence nor an implementation/refinement proof.",
-      "models": [
-        {
-          "id": "RESTProxyEventBoundary",
-          "properties": [
-            "TypeOK",
-            "Admission",
-            "FailureNoEvent",
-            "CredentialSealed",
-            "ApplicationData",
-            "ActualRoute",
-            "QueryProjection",
-            "BodyPreserved"
-          ],
-          "limits": "Canonicalized finite header/query carriers, abstract valid-text/context and symbolic raw/final encoded budgets only. No Go JSON encoder/memory-allocation bound, UTF8/percent/MIME/header parser or case-fold/sort proof, nil-pointer behavior, host token auth, cryptography, SQL, guest execution, Go refinement or arbitrary inputs. Limit2 is a threshold abstraction, not concrete256KiB exploration. No byte-level injection/external network claims."
-        }
-      ]
-    },
-    {
-      "path": "formal/RESTRouteMatching.cfg",
-      "sha256": "838788f6bdfeaec0fc23f8d1cf1c34738b1bc6407923f60a2c093a82f01df22c",
-      "disposition": "modeled",
-      "reason": "Registers the exact finite specification/configuration and protected semantic controls for the stated source projection. Bounds and exclusions are explicit; registration is neither execution evidence nor an implementation/refinement proof.",
-      "models": [
-        {
-          "id": "RESTRouteMatching",
-          "properties": [
-            "TypeOK",
-            "MatchOracle",
-            "Specificity",
-            "CaptureFidelity",
-            "RejectedShape",
-            "InvalidTemplateRejected"
-          ],
-          "limits": "Nine pre-tokenized templates and eleven request segment carriers only. No raw template lexer/SplitPath byte parsing, URL percent decoding, method/ANY precedence, provider-prefix dispatch, deployment selection, Go refinement or unbounded languages. Greedy values represented as sequences before slash joining; duplicate capture names final-slot wins. This helper does not choose globally highest score."
-        }
-      ]
-    },
-    {
-      "path": "formal/RESTRouteMatching.tla",
-      "sha256": "ed99381570805087996a61b0189aef4aba84b2b90f89a0c96e5220cf4ec16de7",
-      "disposition": "modeled",
-      "reason": "Registers the exact finite specification/configuration and protected semantic controls for the stated source projection. Bounds and exclusions are explicit; registration is neither execution evidence nor an implementation/refinement proof.",
-      "models": [
-        {
-          "id": "RESTRouteMatching",
-          "properties": [
-            "TypeOK",
-            "MatchOracle",
-            "Specificity",
-            "CaptureFidelity",
-            "RejectedShape",
-            "InvalidTemplateRejected"
-          ],
-          "limits": "Nine pre-tokenized templates and eleven request segment carriers only. No raw template lexer/SplitPath byte parsing, URL percent decoding, method/ANY precedence, provider-prefix dispatch, deployment selection, Go refinement or unbounded languages. Greedy values represented as sequences before slash joining; duplicate capture names final-slot wins. This helper does not choose globally highest score."
-        }
-      ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "5292adaad1ad9bd6ca938cb78fcc19e92aba0f43c6117c2c3e51749345f5d73f",
+      "sha256": "f7f868759fd3505a177fde2fdb61627755ae9908cb2ab58b8d05be7736182a55",
       "disposition": "formal-infrastructure",
-      "reason": "Adds the reviewed three-model/22-control registration and exact validator classification. Existing30 entries/175 literal controls, strict CFG parser, tool pins, deadlines and fail-closed treatment of unknown runtime paths remain intact; integrity checks are not semantic/human-review authentication.",
+      "reason": "Adds literal-required DynamoDB console model/property/control/source inventory without changing checker functions, CFG grammar, old33 models or197 controls; negative removal tests protect the additive obligations.",
       "models": []
     },
     {
-      "path": "internal/aws/apigateway_store.go",
-      "sha256": "8f99475dc04016bf54af4bcd1672770a3aa1b6de867c3f2e00772f2144538396",
+      "path": "internal/server/web/app.js",
+      "sha256": "50c7631e2b6eaf11d113fb1db8c3477ffdb3cf0e8d1a124e456ae90a6fedbc31",
       "disposition": "modeled",
-      "reason": "Preserves relational API/resource/deployment/stage state and frozen snapshots while replacing native JSON projections. RESTDeploymentSnapshot covers snapshot/reference invariants only, not the JSON emitter or Lambda execution.",
+      "reason": "Only the added DynamoDB route/component and region|principal|navigation mount key are related to finite old-view publication/ACK/key binding. Embedded app.js is the canonical same-lock derived artifact. Actual native browser tests separately exercise scope transitions. No claim about other bundled components, compiler/React refinement, IAM/SQL/native behavior or atomic TableId-CAS.",
       "models": [
         {
-          "id": "RESTDeploymentSnapshot",
+          "id": "DynamoDBConsoleEpoch",
           "properties": [
-            "TypeOK",
-            "SnapshotsFrozen",
-            "NoStageOrphans"
+            "NoStalePublication",
+            "AckBelongsToCurrentView",
+            "DisplayedKeyBound"
           ],
-          "limits": "Frozen deployment references only; not path matcher correctness, Lambda permissions, HTTP execution, WASI, SQL recovery or WAF."
+          "limits": "UI finite safety abstraction only, not JS/React/AbortController scheduling refinement, native protocol/JSON/IAM/auth/SQLite state/number/binary/size/capacity proof. TableId checks establish agreement at item-read acceptance only, not freshness after later native changes or atomic TableId-CAS on mutation; official TableName writes remain subject to recreation between preflight and send. Combined context labels abstract principal/region/remount, not credentials/tenant isolation. Stutter observation admits no liveness/hung-read progress claim. One write intent only; symbolic ACK/no automatic replay, not server rollback when an aborted request already committed. No concrete item values, missing-item/delete-confirmation semantics or arbitrary pagination. Main caller scope is limited to the DynamoDB route and its region|principal|navigation mount key/reset; embedded app.js is the canonical derived component/caller artifact. Neither binding proves other shell/components, compiler/bundler correctness or JavaScript refinement."
         }
       ]
-    },
-    {
-      "path": "internal/aws/apirouting/event.go",
-      "sha256": "2fd9ae519f1db83dd1f61f0f52f794ecf2f40c98e1e900d985b0a9b7dbd41b64",
-      "disposition": "modeled",
-      "reason": "New exact scope maps owned request projection to bounded application-data/authority exclusion, path/context and abstract event-budget properties. HTTP authentication, JSON/UTF8 implementation, concrete case sorting and total process memory remain outside the model.",
-      "models": [
-        {
-          "id": "RESTProxyEventBoundary",
-          "properties": [
-            "TypeOK",
-            "Admission",
-            "FailureNoEvent",
-            "CredentialSealed",
-            "ApplicationData",
-            "ActualRoute",
-            "QueryProjection",
-            "BodyPreserved"
-          ],
-          "limits": "Canonicalized finite header/query carriers, abstract valid-text/context and symbolic raw/final encoded budgets only. No Go JSON encoder/memory-allocation bound, UTF8/percent/MIME/header parser or case-fold/sort proof, nil-pointer behavior, host token auth, cryptography, SQL, guest execution, Go refinement or arbitrary inputs. Limit2 is a threshold abstraction, not concrete256KiB exploration. No byte-level injection/external network claims."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/apirouting/event_test.go",
-      "sha256": "cc7fc7a3447c053a06e2d9c597b64d6b0b23bc3e3e913d46f3c395404e4c8d28",
-      "disposition": "test-support",
-      "reason": "Adds native protocol/failure/persistence/projection or validator-refusal witnesses and preserves existing assertions. Test execution is separate from bounded model checks and does not substitute for whole-suite/exact-HEAD CI.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/apirouting/original_routing_test.go",
-      "sha256": "dc41e7b171d948a1233bd4443f74da9a7bbd89b531dc3c0086b3a245ae17a42d",
-      "disposition": "test-support",
-      "reason": "Adds native protocol/failure/persistence/projection or validator-refusal witnesses and preserves existing assertions. Test execution is separate from bounded model checks and does not substitute for whole-suite/exact-HEAD CI.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/apirouting/path.go",
-      "sha256": "5d7a1d732b89dde297081518758f2d7769420f6701fcb6ae8282eb15cc530f8e",
-      "disposition": "modeled",
-      "reason": "New exact scope maps independently compiled route constraints to the finite template/carrier model: cardinality, captures and literal specificity. No general byte scanner, arbitrary path language or method-selection proof is claimed.",
-      "models": [
-        {
-          "id": "RESTRouteMatching",
-          "properties": [
-            "TypeOK",
-            "MatchOracle",
-            "Specificity",
-            "CaptureFidelity",
-            "RejectedShape",
-            "InvalidTemplateRejected"
-          ],
-          "limits": "Nine pre-tokenized templates and eleven request segment carriers only. No raw template lexer/SplitPath byte parsing, URL percent decoding, method/ANY precedence, provider-prefix dispatch, deployment selection, Go refinement or unbounded languages. Greedy values represented as sequences before slash joining; duplicate capture names final-slot wins. This helper does not choose globally highest score."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/cloudwatch_logs_original_contract_test.go",
-      "sha256": "6c3c21c808eb83aaaa38552bfce339065f735c66d5aac6b526a4b69107acf4bd",
-      "disposition": "test-support",
-      "reason": "Adds native protocol/failure/persistence/projection or validator-refusal witnesses and preserves existing assertions. Test execution is separate from bounded model checks and does not substitute for whole-suite/exact-HEAD CI.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/cloudwatch_logs_store.go",
-      "sha256": "c2188bfef80da92c655b1da175e4d2187ee359863cde09e339f0535fab23cf02",
-      "disposition": "modeled",
-      "reason": "Re-expresses local catalog admission and batch selection while preserving atomic lifecycle, cursor authority and region ownership. The registered abstract lifecycle excludes concrete SQL, HMAC, sorting and exact time/byte bounds; native boundary tests check those separately.",
-      "models": [
-        {
-          "id": "CloudWatchLogsLifecycle",
-          "properties": [
-            "TypeOK",
-            "NoOrphans",
-            "OnlyAcceptedWrites",
-            "TokenAuthority"
-          ],
-          "limits": "Finite safety only; no liveness or implementation refinement. Models transaction atomicity and database identity as abstract steps, not SQLite faults, HMAC cryptography or OS process isolation. Byte/time limits, sorting, page convergence, expiry and real IAM documents require native/SDK tests. Captured read receipts preserve the authorization context when later resource generations change. Shared source scope covers only the added Logs field/dispatch/construction seam; not all other service dispatch or server lifecycle/authentication."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/iam_roles.go",
-      "sha256": "3a2d8a28925b4104b3cddcc4a9178fc791abc392f22cb216dd05681097acd75a",
-      "disposition": "modeled",
-      "reason": "Preserves native role ownership and managed-policy/default aggregate state; replaces the wire projection only. Registered state abstractions do not prove XML encoding or Go/SQL refinement; literal native and saved-role tests remain separate.",
-      "models": [
-        {
-          "id": "NativeIAMOwnership",
-          "properties": [
-            "TypeOK",
-            "OwnershipExclusive"
-          ],
-          "limits": "Atomic name ownership abstraction only; not service trust parsing, complete IAM semantics, SQL isolation or HTTP authorization."
-        },
-        {
-          "id": "IAMManagedPolicies",
-          "properties": [
-            "TypeOK",
-            "FailureFrame",
-            "DeleteDependencies",
-            "VersionIDsMonotonic",
-            "FreshIncarnations",
-            "VersionCap",
-            "DefaultExists",
-            "AttachmentAuthority",
-            "ExplicitDenyWins",
-            "AggregateBudget",
-            "RoleViewsExact",
-            "PeerFrame",
-            "ImmutableVersions"
-          ],
-          "limits": "New boundedscenario scope, not bisimilar/equivalent to original4requestcandidate which remainsUNPASSED. No Go/SQL/parser/trust/crypto/HTTP/refinement/liveness or unboundedhistory proof. Fixedaction/resource; concretequotas/hostisolation testedseparately; failedrequestidentitydiagnosticnormalized. Existing29models/gates unchanged. Native Query routing/validation, caller snapshot and RoleID admission, concrete SQL rollback/quotas and server capability metadata require real-code tests. This model abstracts authorized/storage outcomes and persisted role/policy generations, not the HTTP authorization race or UI. Two-request/four-seed scope is narrower than the unsuccessful four-request exploratory candidate."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/kms_types.go",
-      "sha256": "3d0575bfea1a668c131d991d428aad1a46595436ae89688007e4688518691955",
-      "disposition": "modeled",
-      "reason": "Preserves key state/context/crypto contracts and replaces the native metadata projection. KMSKeyState covers its bounded abstract transitions, not concrete JSON, AES, stored bytes or Go refinement.",
-      "models": [
-        {
-          "id": "KMSKeyState",
-          "properties": [
-            "TypeOK",
-            "AuthorizedEvents",
-            "EnabledCrypto",
-            "BoundContextAndKey"
-          ],
-          "limits": "Atomic bounded successful Create/SetEnabled/Encrypt/Decrypt events only; key/region/context labels are abstract values. No AES/nonce probability, JSON/IAM/SigV4 parsing, routing/protocol selection, SQLite RowsAffected/commit/crash refinement, rejected/error response frames, read-only Describe/List/GetPolicy outputs, host authentication, time, growing key population or arbitrary key policies. Last event captures pre-operation conditions so later Disable does not invalidate an earlier legitimate output."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/wire_json_projection.go",
-      "sha256": "490bb3cc681f86d4c27d8638a628006d37be1eedceee6f1b32675c54d456b786",
-      "disposition": "modeled",
-      "reason": "New exact scope maps the ordered JSON helper to a finite field/value/omit/error projection contract. Actual string escaping, parser behavior, caller AWS schemas, XML and Go refinement are not proven; literal native serializer tests remain required.",
-      "models": [
-        {
-          "id": "NativeWireProjection",
-          "properties": [
-            "TypeOK",
-            "BadValueRefused",
-            "FailureNoPartial",
-            "OmissionExact",
-            "OrderExact",
-            "ValueKindsPreserved",
-            "CompleteProjection",
-            "SkippedBadDoesNotFail"
-          ],
-          "limits": "Abstract field order, omission, kind identity and value-error publication only. Not JSON escaping/Go encoder semantics, actual numeric/string/collection values, reflection/decode/XML/IAM/cloud protocol semantics, memory allocation, SQLite or Go refinement. FirstBad is diagnostic for the partial-prefix mutation only; omission decisions are trusted caller inputs."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/wire_projection_contract_test.go",
-      "sha256": "a1be6d577cdc050eae94b5ed6d0288eda2f87f6733a7f325c9330d1b30b70aed",
-      "disposition": "test-support",
-      "reason": "Adds native protocol/failure/persistence/projection or validator-refusal witnesses and preserves existing assertions. Test execution is separate from bounded model checks and does not substitute for whole-suite/exact-HEAD CI.",
-      "models": []
-    },
-    {
-      "path": "scripts/check-assets.py",
-      "sha256": "289a3144eaf828b5e71e71e2398716b4b185060ea8a8fe04c7ca8f35e34adb68",
-      "disposition": "validation-tooling",
-      "reason": "Validates original historical notices and exact current replacement input identities using local files only, with mandatory refusal fixtures. It neither serves requests nor changes cloud state; metadata/hashes do not certify authorship or legal independence.",
-      "models": []
-    },
-    {
-      "path": "scripts/check-native-provenance.py",
-      "sha256": "3e53c0dfb7b7ff38de6b4f1a1a30bede75a2c641950baa9d97cb6936340adb04",
-      "disposition": "validation-tooling",
-      "reason": "Validates original historical notices and exact current replacement input identities using local files only, with mandatory refusal fixtures. It neither serves requests nor changes cloud state; metadata/hashes do not certify authorship or legal independence.",
-      "models": []
-    },
-    {
-      "path": "scripts/formal_applicability.py",
-      "sha256": "f27dee5c66fe465daa5b1a13c89fb9502f43e05b7f06c90315a270f8e7aebda1",
-      "disposition": "formal-infrastructure",
-      "reason": "Adds the reviewed three-model/22-control registration and exact validator classification. Existing30 entries/175 literal controls, strict CFG parser, tool pins, deadlines and fail-closed treatment of unknown runtime paths remain intact; integrity checks are not semantic/human-review authentication.",
-      "models": []
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "4fbb5edc13c8fa83bb3f228acfe1e47320180edc6f3832c4c6cfbc39244fe0d5",
+      "sha256": "0401295506838e9f3fbd2d5095c7d5dda84d9b5dcb75ecd224abe0a837a86136",
       "disposition": "formal-infrastructure",
-      "reason": "Adds the reviewed three-model/22-control registration and exact validator classification. Existing30 entries/175 literal controls, strict CFG parser, tool pins, deadlines and fail-closed treatment of unknown runtime paths remain intact; integrity checks are not semantic/human-review authentication.",
-      "models": []
-    },
-    {
-      "path": "scripts/test-formal-applicability.py",
-      "sha256": "f357a32664e78021390b212500f7ccbb8b403c18b2f5d88d4bb8b5f1493c9316",
-      "disposition": "formal-infrastructure",
-      "reason": "Adds the reviewed three-model/22-control registration and exact validator classification. Existing30 entries/175 literal controls, strict CFG parser, tool pins, deadlines and fail-closed treatment of unknown runtime paths remain intact; integrity checks are not semantic/human-review authentication.",
+      "reason": "Adds literal-required DynamoDB console model/property/control/source inventory without changing checker functions, CFG grammar, old33 models or197 controls; negative removal tests protect the additive obligations.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "f0380a9367564789a41e621aedf35a79a191e6a1c3502b5f8b36d78b825962b7",
+      "sha256": "e6496b5484d4ad523d7cb19899d61ace9808afeb95408960344a17edd3a3041c",
       "disposition": "formal-infrastructure",
-      "reason": "Adds the reviewed three-model/22-control registration and exact validator classification. Existing30 entries/175 literal controls, strict CFG parser, tool pins, deadlines and fail-closed treatment of unknown runtime paths remain intact; integrity checks are not semantic/human-review authentication.",
+      "reason": "Adds literal-required DynamoDB console model/property/control/source inventory without changing checker functions, CFG grammar, old33 models or197 controls; negative removal tests protect the additive obligations.",
       "models": []
     },
     {
-      "path": "scripts/test-native-provenance.py",
-      "sha256": "1e2bb58a62b807a5d40db7e0cad7e11d57a0f730d33e8077cf14c75bb6cc7336",
+      "path": "test/console/navigation.test.mjs",
+      "sha256": "19dc49a8e14765bac407a3dc692139c674952604659542ff856e75699848fdae",
       "disposition": "test-support",
-      "reason": "Adds native protocol/failure/persistence/projection or validator-refusal witnesses and preserves existing assertions. Test execution is separate from bounded model checks and does not substitute for whole-suite/exact-HEAD CI.",
+      "reason": "Adds actual two-CLI/native DynamoDB browser lifecycle oracles or additive mandatory wrapper/gate removal tests. Old50 wrappers and all old native assertions are preserved; tests do not grant runtime authority.",
       "models": []
     },
     {
-      "path": "third_party/independent-native-source.json",
-      "sha256": "15a174df9e67ae6c17aadd47be5b07a2271018b43f8aead3c2b434c8bb47a8b9",
-      "disposition": "documentation",
-      "reason": "Updates visible reference attribution, historical provenance and technical contract/verification scope. Original rights remain preserved; this artifact supplies documentation or checked static identities, not new cloud runtime behavior or an authorship/legal proof.",
+      "path": "test/e2e/check.py",
+      "sha256": "692d99804bb6771646f6ea3d5f5b4090bb573750360c9d4e68fe640832c7b2d2",
+      "disposition": "test-support",
+      "reason": "Adds actual two-CLI/native DynamoDB browser lifecycle oracles or additive mandatory wrapper/gate removal tests. Old50 wrappers and all old native assertions are preserved; tests do not grant runtime authority.",
       "models": []
     },
     {
-      "path": "third_party/kumo-apigateway.json",
-      "sha256": "32d0e1b617dc1e7d1cc4dd44ce1b70f8a0307c50a0f7f0c00508af62761cb129",
-      "disposition": "documentation",
-      "reason": "Updates visible reference attribution, historical provenance and technical contract/verification scope. Original rights remain preserved; this artifact supplies documentation or checked static identities, not new cloud runtime behavior or an authorship/legal proof.",
+      "path": "test/e2e/dynamodb_console.py",
+      "sha256": "23147109716c2a02e2bed70e86cacbac781feedfbd7d75d9a32d688c8d6d7489",
+      "disposition": "test-support",
+      "reason": "Adds actual two-CLI/native DynamoDB browser lifecycle oracles or additive mandatory wrapper/gate removal tests. Old50 wrappers and all old native assertions are preserved; tests do not grant runtime authority.",
       "models": []
     },
     {
-      "path": "third_party/kumo-cloudwatch-logs.json",
-      "sha256": "c98943c178bb07bffb4a406fe7a411b74274ce6f75398bee6fd8de7ec4b24847",
-      "disposition": "documentation",
-      "reason": "Updates visible reference attribution, historical provenance and technical contract/verification scope. Original rights remain preserved; this artifact supplies documentation or checked static identities, not new cloud runtime behavior or an authorship/legal proof.",
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "03f23ca2c6e6bb23756ac5a1dedb677e486e5049bb59bf440e0ffcc32412a70d",
+      "disposition": "presentation",
+      "reason": "Adds capability-gated DynamoDB discovery or canonical sourcegraph/digest metadata. This artifact alone changes no native API/auth/storage; component/caller/runtime bundle are independently modeled with explicit limits.",
       "models": []
     },
     {
-      "path": "third_party/kumo-iam.json",
-      "sha256": "78530eabc932985b264c5ea4850dd4884d56535ef335678cdaa1fc0b80fa589b",
-      "disposition": "documentation",
-      "reason": "Updates visible reference attribution, historical provenance and technical contract/verification scope. Original rights remain preserved; this artifact supplies documentation or checked static identities, not new cloud runtime behavior or an authorship/legal proof.",
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "a2362487bdd3cb7413ad2caf5a900e224c42b56ecd77d2da2ec006cfd378969a",
+      "disposition": "presentation",
+      "reason": "Adds capability-gated DynamoDB discovery or canonical sourcegraph/digest metadata. This artifact alone changes no native API/auth/storage; component/caller/runtime bundle are independently modeled with explicit limits.",
       "models": []
     },
     {
-      "path": "third_party/kumo-kms.json",
-      "sha256": "4188230257c37c216753c86b14f4b572ea1e5dd912254c157399f68630e34eb9",
-      "disposition": "documentation",
-      "reason": "Updates visible reference attribution, historical provenance and technical contract/verification scope. Original rights remain preserved; this artifact supplies documentation or checked static identities, not new cloud runtime behavior or an authorship/legal proof.",
+      "path": "tools/console/src/console-navigation.mjs",
+      "sha256": "ee8fe6958cc3202f4f6e69dab93e55554c78a1e8e7aa47275dfbfed740692a3d",
+      "disposition": "presentation",
+      "reason": "Adds capability-gated DynamoDB discovery or canonical sourcegraph/digest metadata. This artifact alone changes no native API/auth/storage; component/caller/runtime bundle are independently modeled with explicit limits.",
       "models": []
+    },
+    {
+      "path": "tools/console/src/dynamodb.jsx",
+      "sha256": "56e826044dc8300561cf21d068f2582735d4800fb4171b47b2e998ce75a4ebe4",
+      "disposition": "modeled",
+      "reason": "Independent bounded console context/read epoch/key/TableId-at-acceptance/form cancellation/synchronous owner/ACK-before-refresh/read-only retry model; not native storage, protocol/IAM/SQL correctness or unbounded JavaScript/React refinement. Concrete browser and native tests are separate evidence.",
+      "models": [
+        {
+          "id": "DynamoDBConsoleEpoch",
+          "properties": [
+            "TypeOK",
+            "NoStalePublication",
+            "ReadGenerationVerified",
+            "DisplayedKeyBound",
+            "CancelNoOrphanLoading",
+            "AckClosesDraft",
+            "AckBelongsToCurrentView",
+            "ReadRetryNeverWrites",
+            "SingleSendBeforeACK",
+            "LocalePreservesDraft"
+          ],
+          "limits": "UI finite safety abstraction only, not JS/React/AbortController scheduling refinement, native protocol/JSON/IAM/auth/SQLite state/number/binary/size/capacity proof. TableId checks establish agreement at item-read acceptance only, not freshness after later native changes or atomic TableId-CAS on mutation; official TableName writes remain subject to recreation between preflight and send. Combined context labels abstract principal/region/remount, not credentials/tenant isolation. Stutter observation admits no liveness/hung-read progress claim. One write intent only; symbolic ACK/no automatic replay, not server rollback when an aborted request already committed. No concrete item values, missing-item/delete-confirmation semantics or arbitrary pagination. Main caller scope is limited to the DynamoDB route and its region|principal|navigation mount key/reset; embedded app.js is the canonical derived component/caller artifact. Neither binding proves other shell/components, compiler/bundler correctness or JavaScript refinement."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/main.jsx",
+      "sha256": "863627e558a1041d559f74e790a5a3adcabbff98e87aed12cd2b448edda0754c",
+      "disposition": "modeled",
+      "reason": "Only the added DynamoDB route/component and region|principal|navigation mount key are related to finite old-view publication/ACK/key binding. Embedded app.js is the canonical same-lock derived artifact. Actual native browser tests separately exercise scope transitions. No claim about other bundled components, compiler/React refinement, IAM/SQL/native behavior or atomic TableId-CAS.",
+      "models": [
+        {
+          "id": "DynamoDBConsoleEpoch",
+          "properties": [
+            "NoStalePublication",
+            "AckBelongsToCurrentView",
+            "DisplayedKeyBound"
+          ],
+          "limits": "UI finite safety abstraction only, not JS/React/AbortController scheduling refinement, native protocol/JSON/IAM/auth/SQLite state/number/binary/size/capacity proof. TableId checks establish agreement at item-read acceptance only, not freshness after later native changes or atomic TableId-CAS on mutation; official TableName writes remain subject to recreation between preflight and send. Combined context labels abstract principal/region/remount, not credentials/tenant isolation. Stutter observation admits no liveness/hung-read progress claim. One write intent only; symbolic ACK/no automatic replay, not server rollback when an aborted request already committed. No concrete item values, missing-item/delete-confirmation semantics or arbitrary pagination. Main caller scope is limited to the DynamoDB route and its region|principal|navigation mount key/reset; embedded app.js is the canonical derived component/caller artifact. Neither binding proves other shell/components, compiler/bundler correctness or JavaScript refinement."
+        }
+      ]
     }
   ]
 }

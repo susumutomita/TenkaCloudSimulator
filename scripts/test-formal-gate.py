@@ -96,15 +96,20 @@ class FormalGateTests(unittest.TestCase):
                 load_registry(self.root)
         path.write_text(original)
 
-    def test_dynamodb_console_source_binding_cannot_be_descope(self):
+    def test_dynamodb_console_source_bindings_cannot_be_descoped(self):
         path = self.root / 'formal/models.json'
-        registry = json.loads(path.read_text())
-        entry = next(m for m in registry['models'] if m['id'] == 'DynamoDBConsoleEpoch')
-        self.assertEqual(entry['source_scope'], ['tools/console/src/dynamodb.jsx'])
-        entry['source_scope'] = []
-        path.write_text(json.dumps(registry))
-        with self.assertRaisesRegex(GateError, 'required exact source scope changed'):
-            load_registry(self.root)
+        original = path.read_text()
+        scopes = {'tools/console/src/dynamodb.jsx', 'tools/console/src/main.jsx', 'internal/server/web/app.js'}
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'DynamoDBConsoleEpoch')
+        self.assertEqual(set(entry['source_scope']), scopes)
+        for omitted in scopes:
+            registry = json.loads(original)
+            target = next(m for m in registry['models'] if m['id'] == 'DynamoDBConsoleEpoch')
+            target['source_scope'].remove(omitted)
+            path.write_text(json.dumps(registry))
+            with self.subTest(scope=omitted), self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+                load_registry(self.root)
+        path.write_text(original)
 
     def test_startup_required_model_and_properties_cannot_disappear(self):
         path = self.root / 'formal/models.json'
