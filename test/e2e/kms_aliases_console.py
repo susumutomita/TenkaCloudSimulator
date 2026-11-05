@@ -111,13 +111,21 @@ def main():
                         expect(page.get_by_role('button', name='Change target', exact=True)).to_be_enabled()
                     def visible_alias(name):
                         return page.get_by_role('radio', name=name, exact=True)
+                    def audit(phase, width):
+                        assert_reflow(page)
+                        result = page.evaluate("async()=>await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}})")
+                        (REPORTS / f'kms-aliases-{phase}-{width}.axe.json').write_text(json.dumps(result, indent=2))
+                        assert not [v for v in result['violations'] if v['impact'] in ['serious', 'critical']], 'Serious/critical axe violation'
+                        page.screenshot(path=str(REPORTS / f'kms-aliases-{phase}-{width}.png'), full_page=True, animations='disabled')
                     open_key(first['KeyId'])
                     expect(page.get_by_text('No aliases', exact=True)).to_be_visible()
                     page.get_by_role('button', name='Create alias', exact=True).click()
                     expect(page.get_by_text(first['Arn'], exact=True)).to_be_visible()
                     page.get_by_label('Alias name', exact=True).fill('ui-draft')
+                    page.screenshot(path=str(REPORTS / 'kms-aliases-create-1440.png'), full_page=True, animations='disabled')
                     page.get_by_role('combobox', name='Language', exact=True).select_option('ja')
                     expect(page.get_by_label('エイリアス名', exact=True)).to_have_value('ui-draft')
+                    page.screenshot(path=str(REPORTS / 'kms-aliases-create-ja-1440.png'), full_page=True, animations='disabled')
                     expect(page.get_by_text(first['Arn'], exact=True)).to_be_visible()
                     page.get_by_role('combobox', name='言語', exact=True).select_option('en')
                     expect(page.get_by_label('Alias name', exact=True)).to_have_value('ui-draft')
@@ -208,20 +216,23 @@ def main():
                     page.get_by_role('button', name='Delete alias', exact=True).click()
                     dialog = page.get_by_role('dialog')
                     expect(dialog.get_by_role('button', name='Delete alias', exact=True)).to_be_disabled()
+                    audit('delete-confirm', 1440)
                     page.keyboard.press('Escape'); expect(dialog).to_have_count(0)
                     assert len(kms.list_aliases()['Aliases']) == 1
+                    page.set_viewport_size({'width': 390, 'height': 844})
                     page.get_by_role('button', name='Delete alias', exact=True).click()
-                    dialog.get_by_label('Type alias name to confirm', exact=True).fill('alias/ui-ack')
+                    confirmation = dialog.get_by_label('Type alias name to confirm', exact=True)
+                    confirmation.focus(); expect(confirmation).to_be_focused()
+                    page.keyboard.type('alias/ui-ack')
+                    expect(confirmation).to_have_value('alias/ui-ack')
+                    audit('delete-confirm', 390)
                     dialog.get_by_role('button', name='Delete alias', exact=True).focus(); page.keyboard.press('Enter')
                     expect(page.get_by_text('Alias deleted. The key is unchanged.', exact=True)).to_be_visible()
                     assert kms.list_aliases()['Aliases'] == []
                     assert kms.describe_key(KeyId=second['KeyId'])['KeyMetadata']['KeyState'] == 'Enabled'
                     for width, height in [(1440, 1000), (390, 844)]:
                         page.set_viewport_size({'width': width, 'height': height})
-                        assert_reflow(page)
-                        result = page.evaluate("async()=>await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}})")
-                        assert not [v for v in result['violations'] if v['impact'] in ['serious', 'critical']], 'Serious/critical axe violation'
-                        page.screenshot(path=str(REPORTS / f'kms-aliases-{width}.png'), full_page=True, animations='disabled')
+                        audit('list', width)
                     page.set_viewport_size({'width': 1440, 'height': 1000})
                     page.get_by_role('button', name='Create alias', exact=True).click()
                     page.get_by_label('Alias name', exact=True).fill('dummy-old-region-draft')
@@ -271,7 +282,8 @@ def main():
         assert all(s['calls'] > 0 and s['calls'] == s['sends'] == s['responses'] for s in stats)
         print(json.dumps({'nativeAliasesUI': True, 'readFailureAfterACKRetriesReadOnly': True, 'actualSDKSameSQLite': True,
             'localePreservesDraft': True, 'regionClearsDraft': True, 'identityClearsDraft': True, 'olderNative500CannotOverrideNewer200': True, 'nativeIAM403': True,
-            'keyboardTypedDelete': True, 'axe1440and390': True, 'outsideRequests': 0,
+            'keyboardTypedDelete': True, 'deleteModal1440and390': True, 'axe1440and390': True, 'outsideRequests': 0,
+            'guardedSDKCounts': {key: sum(s[key] for s in stats) for key in ['calls', 'sends', 'responses']}, 'nativeBrowserMutations': dict(writes),
             'keyDeletion': 'unsupported; aliases only, independent keys remain until temporary DB cleanup'}))
     finally:
         for c in clients: c.close()
