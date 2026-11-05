@@ -1,13 +1,12 @@
 # Finite state model
 
-Current registry: 33 models / 197 literal-protected controls
-(230 required executions). All previous30 model entries, TLA/CFG bytes,
-properties and175 controls are preserved. RESTRouteMatching adds six properties
-and six semantic controls; RESTProxyEventBoundary adds eight properties and ten
-controls. NativeWireProjection adds eight properties and six controls for the
-shared explicit ordered JSON writer. Independent scoped checks passed all three
-baselines and22 controls. Integration requires a complete230-case run against the
-exact immutable revision; scoped results and registration do not replace that gate.
+Current branch registry: 34 models / 207 literal-protected controls
+(241 required executions). All previous33 model entries, TLA/CFG bytes,
+properties and197 controls are preserved. DynamoDBConsoleEpoch adds one bounded
+console model, ten properties (including TypeOK) and ten semantic controls.
+Its independent scoped baseline and ten controls passed; the complete241-case
+registered gate has not yet been run on this revision. Registration and previous
+model receipts do not substitute for that exact-revision gate.
 IAMManagedPolicies retains its four API-reachable seeds and two-request suffixes;
 the earlier four-request exploration timed out and is not claimed.
 Registration is source evidence, not itself evidence of successful execution. Dated receipts below
@@ -16,7 +15,7 @@ finite models do not prove Go/SQL/HTTP/UI refinement or complete cloud compatibi
 
 Legacy integration sections below retain historical counts and status statements
 for traceability. Their word “current” refers to the recorded integration, not
-today's registry. The authoritative current inventory is the 33/197 registry
+today's registry. The authoritative branch inventory is the 34/207 registry
 above; proof claims always require evidence for the exact revision.
 
 `ObjectStore.tla` models two buckets and two keys, shared object ownership, create/put/delete transitions, and an abstract identity decision `allow /\ ~deny`. `ObjectStore.cfg` checks type correctness, no orphan objects, no unauthorized mutation, and explicit-deny precedence.
@@ -339,3 +338,35 @@ results are independent model evidence, not the full230-case/current-HEAD gate
 or a refinement proof. The entire original30/175 inventory, timeouts and tool pin
 remain unchanged. All three exact native source scopes and all new properties
 and control IDs are protected by the loader and failure tests.
+
+## DynamoDB console request epochs and acknowledged writes
+
+DynamoDBConsoleEpoch binds only tools/console/src/dynamodb.jsx. Separate read
+and write scenarios cover two combined authority/region labels, one remount,
+epochs0..2 without wrap, two one-use pending-read slots, two exact keys, two
+symbolic TableIds with one recreation, one form/write intent and en/ja.
+Acceptance snapshots reject old request epochs/instances and failed post-read
+TableId verification. Key edits clear displayed item/delete bindings;
+invalidation clears loading even when an older finally is discarded. A
+synchronous owner ticket refuses repeated submission. An accepted write ACK
+closes the form and clears its draft before independent metadata refresh;
+read-only Retry does not resend a write. Locale presentation preserves the draft.
+
+The scoped baseline completed3,832 distinct states (16,950 generated), and each
+of ten semantic mutants exited12 with its exact expected invariant and a real
+transition trace. An earlier string-versus-record sentinel type error exited75
+and is retained as a failed attempt; replacing it with one configured model-value
+sentinel changed no transition, property, control or finite bound. This result
+is leaf evidence for those model bytes, not the registered241-case suite.
+
+This is not a JavaScript/React/AbortController/HTTP/IAM/SQLite refinement proof.
+It does not prove concrete AttributeValue parsing, sizes, numbers, credentials,
+missing-item/delete-confirmation behavior, arbitrary pagination or the full
+read/write interleaving. TableId agreement is checked at item-read acceptance;
+it does not promise freshness after a later native change or an atomic TableId
+compare-and-swap on official TableName-only mutations. A server may commit a
+write before a client aborts it. Stutter observation admits no liveness claim.
+Native DynamoDBAdmission/Lifecycle and concrete tests remain separate evidence.
+The root mount key (region|principal|navigation) and actual UI state changes are
+independently exercised by the mandatory dynamodb_console.py helper, not proved
+by this component-only abstraction.

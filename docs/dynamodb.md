@@ -45,7 +45,7 @@ String/Binaryのパーティションキーは2048 bytes、ソートキーは102
 - ConditionExpression の上記2形式以外、ProjectionExpression、ReturnValues、ReturnConsumedCapacity、式属性名・値
 - ProvisionedThroughput の実スロットリング（数値は保存・表示のみ）、オートスケーリング、容量消費量の計算
 - 項目の順序保証、強整合性/結果整合性の区別（ConsistentRead は受付のみで常に保存済み状態を読む）
-- CloudFormation の `AWS::DynamoDB::Table`、Lambda 実行ロールSDKブリッジからの DynamoDB アクセス、Cloudscape コンソール画面
+- CloudFormation の `AWS::DynamoDB::Table`、Lambda 実行ロールSDKブリッジからの DynamoDB アクセス
 
 ## 数値の範囲と互換性（2026-11-04）
 
@@ -67,6 +67,62 @@ TableSizeBytes は上記の項目サイズの即時合計であり、SQLiteフ�
 
 開発者用の任意SDK検証は、既にboto3をインストール済みのPythonへのパスを `DYNAMODB_SIZE_SDK_PYTHON` に指定し、`go test ./internal/aws -run '^TestDynamoDBSemanticSizeSDKHTTP$' -v` で実行できる。実際のloopback HTTPとダミー資格情報を使用し、AWSへ接続しない。Python/boto3は製品バイナリの実行時依存ではない。通常のサイズ・永続化・境界テストにPythonは不要。
 
-## 世代・条件更新のローカル候補（native検証済み・統合未完了）
+## 世代と条件更新
 
-現在の専用branchには、同一トランザクションでTableIDとキーschemaを再照合する変更を準備した。旧snapshotで削除済み／再作成済みテーブルを操作しない。既存orphan項目は削除・修復せず起動時に拒否する。schema migrationや旧DBの自動修復はない。選択したDynamoDBのnative Go通常／race、実boto3サイズ検証は成功した。旧a6入力の全体raceと単一profile両90%閾値、a225入力のAdmission baselineと22制御、同一bytesのLifecycle baselineと8制御には実行証拠がある。さらに303f5b4入力では正式な全144形式ケースが成功した。修正済みテスト入力の独立2 CLI認証／状態分離・7参照例も実行成功したが、現child HEADの統合28 E2E・CIの完了を意味しない。入力と失敗を区別した[現在の検証状況](dynamodb-integration.md)を参照し、全体対応済みとは扱わない。
+ネイティブの項目操作は同一トランザクション内で TableId とキー schema を再照合する。
+古い snapshot による削除済み・再作成済みテーブルへの操作を拒否する。
+条件不一致・拒否・失敗時は既存項目と統計を維持し、テーブル削除は項目と同時に行う。
+既存 orphan 項目は起動時に拒否し、自動 migration・旧 DB の削除や修復は行わない。
+これらのネイティブ保証と、下記の画面側の非同期読み取り制御は別の検証範囲である。
+
+## Cloudscape コンソール（この開発 branch の追加機能）
+
+AWS の Services で DynamoDB を選ぶと Tables が開く。日本語では
+サービス検索に「ダイナモDB」「テーブル」「項目」も使える。
+デフォルト認証と既存のブラウザーセッションを利用し、SDK と同じ SQLite を操作する。
+参加者の IAM 拒否を画面操作で回避しない。チーム分離には既存の別プロセス・別 DB・別 token
+の境界が必要で、画面上の Principal 選択自体は認証・チーム分離ではない。
+
+- Tables: ページごとの一覧・検索、前後ページ、名前の完全一致による詳細表示。
+- Create table: 名前、partition key と任意の sort key、各 S/N/B 型。
+  画面では on-demand (PAY_PER_REQUEST) のみ作成する。容量課金・スロットリングを再現しない。
+- Table overview: 実際の TableId、schema、状態、項目数と論理サイズ。
+- Explore table items: 完全な partition/sort key による GetItem。
+  Query/Scan は未対応なので項目一覧や架空の検索結果を表示しない。
+- Create item: DynamoDB AttributeValue JSON。既定は attribute_not_exists、
+  exists 条件または無条件の全置換も明示して選択できる。
+  数値は文字列、バイナリは Base64。重複属性名は生の JSON をネイティブ検証へ渡して拒否する。
+- Delete item: 取得済みの正確なキーを表示し、delete の入力で確認する。
+  キー変更後に以前の結果や削除対象を再利用しない。
+- Delete table: 対象テーブル名を入力して確認する。ローカル項目も直ちに削除される。
+
+画面は TableId を読み取り前後で検証し、不一致時は表示を消して再選択を求める。
+ただし公式 API の変更要求は TableName を使うため、事前検証と送信の間の再作成を
+原子的に防ぐ UI 用 TableId-CAS を提供するものではない。
+リージョン・Principal・ナビゲーションが変わるとコンポーネントを再生成して旧表示・下書きを消す。
+言語変更では入力を保つ。書き込み ACK 後はフォームを閉じてから独立した再読み取りを行い、
+その失敗時の Retry read は読み取りだけを再試行する。書き込みの自動再送はない。
+Cancel は古い読み取りの公開と読み込み表示を無効にするが、既にサーバーへ到達した変更の
+ロールバックは保証しない。
+
+実装は公式 Cloudscape 部品を利用した独立したローカル画面であり、認証済み AWS コンソールを
+観測したものでも、完全な外観・全サービス互換や実 AWS との差分検証を示すものでもない。
+公開一次資料として [テーブル作成](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/getting-started-step-1.html)、
+[項目作成](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/getting-started-step-2.html)、
+[GetItem](https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_GetItem.html)
+を2026-11-05に確認した。資料の最終改訂日は未確認。
+
+### 検証範囲
+
+この画面の focused 検証では実バイナリ・2 CLI/DB/token と実 SDK を使用し、
+S/N/B、PK/SK、PC1440px/390px、英日、権限拒否、リージョン・Principal 切替、
+条件・重複属性拒否、Cancel、ACK 後の再読み取り失敗と無再送を確認した。
+4 フローで SDK90送受信、28画面の axe/reflow 検査違反0、外部通信0、ページ例外0。
+初回の390pxリージョン選択は Cloudscape More 内の実導線と異なるテスト selector で失敗し、
+失敗記録を保全して実際のメニュー操作へ修正した。PC結果をスマートフォン成功に流用していない。
+
+DynamoDBConsoleEpoch は独立した有限 UI 状態モデルで、scoped baseline3,832状態と
+10個の意味的変異制御が成功した。JS/Go/SQL の refinement proof ではない。
+この branch では正式な34モデル/207制御の登録と必須ブラウザー E2E を追加したが、
+現 HEAD の全241形式ケース・51 E2E・全体両90%品質ゲート・hosted CI は別途必要であり、
+focused の成功をもって全体検証済みとはしない。
