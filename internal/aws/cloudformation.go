@@ -783,8 +783,23 @@ func (s *StackStore) deleteChecked(region, name string, authorize func(StackReco
 	if _, err = tx.Exec("DELETE FROM aws_cfn_ownership WHERE stack_id=?", records[0].ID); err != nil {
 		return err
 	}
-	if _, err = tx.Exec("DELETE FROM aws_cfn_stacks WHERE id=?", records[0].ID); err != nil {
+	result, err := tx.Exec("DELETE FROM aws_cfn_stacks WHERE id=?", records[0].ID)
+	if err != nil {
 		return err
+	}
+	removed, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if removed != 1 {
+		return errors.New("stack cleanup did not remove exactly the selected stack")
+	}
+	var remainingStack, remainingClaims int
+	if err = tx.QueryRow("SELECT (SELECT count(*) FROM aws_cfn_stacks WHERE id=?),(SELECT count(*) FROM aws_cfn_ownership WHERE stack_id=?)", records[0].ID, records[0].ID).Scan(&remainingStack, &remainingClaims); err != nil {
+		return err
+	}
+	if remainingStack != 0 || remainingClaims != 0 {
+		return errors.New("stack cleanup postcondition failed")
 	}
 	return tx.Commit()
 }
