@@ -1,10 +1,10 @@
 # Finite state model
 
-Current source candidate registry: 29 models / 164 literal-protected controls
+Current registry: 29 models / 164 literal-protected controls
 (193 required executions). Maince622 contributes 28 models/158 controls unchanged;
 AzurePropertiesTarget adds one model/six controls. Registration is source evidence,
-not successful execution of this new immutable candidate. Dated receipts below
-refer to their recorded historical inputs, not this current integration. These
+not itself evidence of successful execution. Dated receipts below
+refer to their recorded inputs; later revisions require their own checks. These
 finite models do not prove Go/SQL/HTTP/UI refinement or complete cloud compatibility.
 
 `ObjectStore.tla` models two buckets and two keys, shared object ownership, create/put/delete transitions, and an abstract identity decision `allow /\ ~deny`. `ObjectStore.cfg` checks type correctness, no orphan objects, no unauthorized mutation, and explicit-deny precedence.
@@ -256,7 +256,7 @@ New immutable formal/application checks and hosted gates remain required.
 
 ## Azure Properties typed targets
 
-The Container Properties candidate preserves every maince622 model/config/control
+The Container Properties extension preserves every maince622 model/config/control
 and adds `AzurePropertiesTarget`: complete kind/parent/name target identity,
 read-only HEAD route carriers and exact container/blob displayed field sets.
 All seven invariants and six literal controls are mandatory. A pinned scoped run

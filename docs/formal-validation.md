@@ -15,7 +15,7 @@ machine-discovered semantic coverage. A newly added implementation file is not
 covered merely because an existing model passes: its exact path must have an
 appropriate reviewed scope mapping and property argument.
 
-The current source candidate registry has 29 baselines/164 required named mutation controls
+The current registry has 29 baselines/164 required named mutation controls
 (193 required executions), preserving maince622 28/158 and adding AzurePropertiesTarget 1/6.
 Registration and Python guards are not a successful immutable TLC execution.
 
@@ -193,7 +193,7 @@ New immutable formal/application checks and hosted gates remain required.
 
 ## Azure Properties typed targets
 
-The Container Properties candidate preserves every maince622 model/config/control
+The Container Properties extension preserves every maince622 model/config/control
 and adds `AzurePropertiesTarget`: complete kind/parent/name target identity,
 read-only HEAD route carriers and exact container/blob displayed field sets.
 All seven invariants and six literal controls are mandatory. A pinned scoped run

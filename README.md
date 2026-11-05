@@ -131,14 +131,14 @@ unacknowledged network ambiguity or prove JavaScript refinement.
 ## Azure Blob and Container Properties
 
 Main `ce622018` includes live Blob Properties from an authenticated native HEAD,
-with current-request guards and no blob-body fetch. The separate Container
-Properties candidate uses **More → Container properties** and displays only its
+with current-request guards and no blob-body fetch. Container
+Properties uses **More → Container properties** and displays only its
 real ETag, Last-Modified and metadata; Blob-only fields are not invented.
 See [the console contract](docs/azure-console.md) and
 [typed target model](docs/formal-azure-properties-target.md).
 
-The Container candidate passed focused native/browser checks at desktop/mobile
-widths. Its added target model passed a scoped baseline and six behavioral
-controls; those results do not establish the combined candidate. The registered
-45-case E2E suite and 29 models/164 controls (193 executions), both 90% coverage
-floors and exact-HEAD CI still require full verification before publication.
+At revision `4a586db`, Container Properties passed focused native/browser checks
+at desktop/mobile widths, full Go race and both 90% coverage floors, and the
+combined 29-model/164-control formal gate (193 executions). These receipts apply
+to that revision. Every later change still requires its exact-HEAD CI, including
+the 45-case E2E suite; focused results do not replace whole-suite verification.

@@ -179,9 +179,9 @@ Primary API reference: [Get Blob Properties](https://learn.microsoft.com/en-us/r
 Authenticated Azure Portal pixels, broader Azure RBAC/ARM and unsupported system
 properties remain unverified or unavailable; no actual cloud resource is used.
 
-## Local Container Properties follow-up (not yet integrated)
+## Container Properties
 
-The private follow-up adds a read-only **More → Container properties** action
+The Containers list provides a read-only **More → Container properties** action
 for a selected row in the Containers list. The container name link still opens
 its blobs; Blob Properties keeps its existing fields and heading. The new pane
 uses the existing native `HEAD .../{container}?restype=container`, with the
@@ -195,17 +195,18 @@ and explicit target kind keep container and blob data separate. Metadata remains
 text, not HTML or translation keys. Container HEAD does not supply BlobType or
 Content-Type, so those blob-only fields are not required or invented. Container
 metadata editing, GET compatibility expansion, SAS, leases, Azure RBAC, account
-management, public-access settings and legal holds are outside this follow-up.
+management, public-access settings and legal holds are unsupported.
 
 `test/e2e/azure_container_properties.py` exercises actual local responses,
 empty and bounded metadata, explicit dummy delete/recreate after listing,
 denied/missing/error cases, Close/reopen, same-name blob versus container, locale,
-peer preservation, keyboard and desktop/mobile accessibility. Focused candidate
-execution passed at 1440px and 390px, alongside the unchanged Blob Properties
-helper. Its initial table-readiness fixture failure was retained and corrected
+peer preservation, keyboard and desktop/mobile accessibility. Focused execution at revision `4a586db` passed at 1440px and 390px,
+alongside the unchanged Blob Properties helper. Its initial table-readiness fixture failure was retained and corrected
 by waiting for the real Containers table and enabled Refresh before selection.
-The candidate registers both helpers as mandatory cases; full 45-case integration,
-193 finite model/control executions, applicability and hosted CI remain pending.
+Both helpers are mandatory in the 45-case suite. Revision `4a586db` also passed
+the immutable 193-case formal gate and exact applicability checks. Whole-suite
+E2E and hosted checks must succeed for the revision being reviewed; the focused
+results do not substitute for those checks.
 The [typed-target model](formal-azure-properties-target.md) complements lifecycle
 checks; it does not prove HTTP parsing, authorization or JavaScript refinement.
 

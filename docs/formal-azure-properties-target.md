@@ -1,6 +1,6 @@
 # Azure Properties typed-target source model
 
-`AzurePropertiesTarget.tla` is registered in the candidate's formal gate, with
+`AzurePropertiesTarget.tla` is registered in the formal gate, with
 seven required invariants and six behavioral controls. A pinned scoped execution
 passed SANY, the baseline and all six expected counterexamples; full combined
 immutable 193-case validation and hosted CI remain separate requirements. This
