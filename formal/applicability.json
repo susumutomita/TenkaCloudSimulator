@@ -410,7 +410,7 @@
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "f14c1cc834aab8eec891c0c9453049d790bf0485e37d3fa6f3595945fe2c547d",
+      "sha256": "30ca8871bc5567b5b2df3d7ae587c238ea0a3074a578e9552b5d663ba646d681",
       "disposition": "test-support",
       "reason": "Require actual native, error/rollback, SDK, UI, scalar and saved-role Lambda scenarios without skips or simulated success. Coverage floors remain90 and existing tests remain required.",
       "models": []
@@ -442,6 +442,20 @@
       "disposition": "test-support",
       "reason": "Require actual native, error/rollback, SDK, UI, scalar and saved-role Lambda scenarios without skips or simulated success. Coverage floors remain90 and existing tests remain required.",
       "models": []
+    },
+    {
+      "path": "test/e2e/native_iam.py",
+      "disposition": "test-support",
+      "reason": "Preserve native IAM/Scalar regression under split inline/managed permissions and expanded heading: original assertions retained, both empty lists and real-object S3 denial added, actual Scalar requests and cleanup preserved; no API, timeout or skip relaxation.",
+      "models": [],
+      "sha256": "a7db71e81e889c6a471a70071bdff0f107ef007ebec66979ad31eff9172c244b"
+    },
+    {
+      "path": "test/e2e/native_iam_docs.py",
+      "disposition": "test-support",
+      "reason": "Preserve native IAM/Scalar regression under split inline/managed permissions and expanded heading: original assertions retained, both empty lists and real-object S3 denial added, actual Scalar requests and cleanup preserved; no API, timeout or skip relaxation.",
+      "models": [],
+      "sha256": "340a48766f531ce007bb74d8782957a6f8ff4b1a264af0e540b41a67c3ab4e72"
     },
     {
       "path": "tools/console/bundle-digests.json",
