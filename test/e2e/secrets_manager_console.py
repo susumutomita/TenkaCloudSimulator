@@ -1,6 +1,8 @@
 """Real native Secrets console contract against the canonical embedded UI.
 
 Dummy values only, no value screenshots/traces, no fabricated API responses.
+SECRETS_TEST_BUNDLE explicitly selects private focused asset-overlay evidence;
+leave it unset for the canonical embedded-asset merge gate.
 Source preparation is not evidence of a successful browser run.
 """
 import hashlib
@@ -13,6 +15,146 @@ from pathlib import Path
 
 from check import REPORTS, assert_reflow, expect, running, sync_playwright
 from secrets_manager import client, control
+
+
+def mutation_ack_refresh_regression(page, sdk, endpoint):
+    """Real writes, followed by one failed read per case; no fake API success."""
+    state = {"expected": None, "acked": False, "aborted": 0}
+    mutations, acknowledgements, failures = [], [], []
+    name, values = "training/ack-read-recovery", ["DUMMY-secret-refresh-A", "DUMMY-secret-refresh-B", "DUMMY-secret-refresh-C"]
+    arn = None
+
+    def requested(request):
+        operation = request.headers.get("x-amz-target", "").removeprefix("secretsmanager.")
+        if operation in ("CreateSecret", "PutSecretValue"):
+            body = json.loads(request.post_data)
+            # Keep tokens only in memory for equality checks; never emit them.
+            mutations.append((operation, body.get("ClientRequestToken")))
+
+    def responded(response):
+        operation = response.request.headers.get("x-amz-target", "").removeprefix("secretsmanager.")
+        if operation in ("CreateSecret", "PutSecretValue") and response.status == 200:
+            acknowledgements.append(operation)
+            if operation == state["expected"]:
+                state["acked"] = True
+
+    def fail_one_read(route):
+        if (route.request.headers.get("x-amz-target") == "secretsmanager.DescribeSecret"
+                and state["acked"] and state["aborted"] == 0):
+            state["aborted"] = 1
+            route.abort("failed")  # Explicit network-failure fixture, never a fabricated ACK.
+        else:
+            route.fallback()
+
+    def arm(operation):
+        state.update(expected=operation, acked=False, aborted=0)
+
+    def wait_failed_read():
+        deadline = time.monotonic() + 5
+        while not state["aborted"]:
+            assert time.monotonic() < deadline, "Post-ACK Describe failure was not injected"
+            page.wait_for_timeout(10)
+
+    def closed(label, absent):
+        try:
+            expect(absent).to_have_count(0)
+            result = True
+        except AssertionError:
+            failures.append(label + " retained the completed mutation form")
+            result = False
+        assert page.get_by_label("Retrieved secret value", exact=True).count() == 0
+        assert page.evaluate("value=>!document.body.textContent.includes(value)&&![...document.querySelectorAll('input,textarea')].some(node=>node.value.includes(value))", values[0])
+        assert page.evaluate("value=>!document.body.textContent.includes(value)&&![...document.querySelectorAll('input,textarea')].some(node=>node.value.includes(value))", values[1])
+        # Before-fix diagnostic cleanup lets the second independent case run;
+        # this is NOT the product recovery path or a successful form-close proof.
+        if not result:
+            page.get_by_role("button", name="Cancel", exact=True).click()
+        return result
+
+    page.on("request", requested)
+    page.on("response", responded)
+    page.route(endpoint + "/", fail_one_read)
+    try:
+        page.get_by_role("button", name="Store a new secret", exact=True).click()
+        page.get_by_role("tab", name="Plaintext", exact=True).click()
+        page.get_by_label("Plaintext secret value", exact=True).fill(values[0])
+        page.get_by_role("button", name="Next", exact=True).click()
+        page.get_by_label("Secret name", exact=True).fill(name)
+        page.get_by_role("button", name="Next", exact=True).click()
+        page.get_by_role("button", name="Next", exact=True).click()
+        arm("CreateSecret")
+        with page.expect_response(lambda response: response.request.headers.get("x-amz-target") == "secretsmanager.CreateSecret") as acknowledged:
+            page.get_by_role("button", name="Store", exact=True).click()
+        assert acknowledged.value.status == 200
+        wait_failed_read()
+        create_closed = closed("CreateSecret", page.get_by_role("button", name="Store", exact=True))
+        first = sdk.get_secret_value(SecretId=name)
+        arn = first["ARN"]
+        assert first["SecretString"] == values[0]
+        assert len(mutations) == 1 and acknowledgements == ["CreateSecret"]
+        assert mutations[0][1] and first["VersionId"] == mutations[0][1]
+        assert len(sdk.describe_secret(SecretId=arn)["VersionIdsToStages"]) == 1
+        page.get_by_role("button", name="Refresh secrets", exact=True).click()
+        page.get_by_role("link", name=name, exact=True).click()
+        expect(page.get_by_role("heading", name="Secret details", exact=True)).to_be_visible()
+        assert sdk.get_secret_value(SecretId=arn)["VersionId"] == first["VersionId"]
+        assert len(mutations) == 1, "Read-only recovery repeated CreateSecret"
+
+        page.get_by_role("button", name="Retrieve secret value", exact=True).click()
+        expect(page.get_by_label("Retrieved secret value", exact=True)).to_have_value(values[0])
+        page.get_by_role("button", name="Edit", exact=True).click()
+        page.get_by_role("tab", name="Plaintext", exact=True).click()
+        page.get_by_label("Plaintext secret value", exact=True).fill(values[1])
+        arm("PutSecretValue")
+        with page.expect_response(lambda response: response.request.headers.get("x-amz-target") == "secretsmanager.PutSecretValue") as acknowledged:
+            page.get_by_role("button", name="Save", exact=True).click()
+        assert acknowledged.value.status == 200
+        wait_failed_read()
+        put_closed = closed("PutSecretValue", page.get_by_role("heading", name="Edit secret value", exact=True))
+        second = sdk.get_secret_value(SecretId=arn)
+        assert second["ARN"] == arn and second["SecretString"] == values[1]
+        assert len(mutations) == 2 and acknowledgements == ["CreateSecret", "PutSecretValue"]
+        assert mutations[1][1] and mutations[1][1] != mutations[0][1] and second["VersionId"] == mutations[1][1]
+        assert len(sdk.describe_secret(SecretId=arn)["VersionIdsToStages"]) == 2
+        page.get_by_role("button", name="Refresh secret metadata", exact=True).click()
+        expect(page.get_by_role("heading", name="Secret details", exact=True)).to_be_visible()
+        deadline = time.monotonic() + 5
+        while second["VersionId"] not in page.locator("body").inner_text():
+            assert time.monotonic() < deadline, "Read-only refresh did not recover current metadata"
+            page.wait_for_timeout(10)
+        assert len(mutations) == 2, "Read-only recovery repeated PutSecretValue"
+
+        # A deliberately opened NEW mutation must get a fresh nonempty token;
+        # this third write is explicit test intent, never an automatic retry.
+        page.get_by_role("button", name="Retrieve secret value", exact=True).click()
+        expect(page.get_by_label("Retrieved secret value", exact=True)).to_have_value(values[1])
+        page.get_by_role("button", name="Edit", exact=True).click()
+        page.get_by_role("tab", name="Plaintext", exact=True).click()
+        page.get_by_label("Plaintext secret value", exact=True).fill(values[2])
+        state["expected"] = None
+        page.get_by_role("button", name="Save", exact=True).click()
+        expect(page.get_by_role("heading", name="Secret details", exact=True)).to_be_visible()
+        third = sdk.get_secret_value(SecretId=arn)
+        assert len(mutations) == 3 and acknowledgements == ["CreateSecret", "PutSecretValue", "PutSecretValue"]
+        tokens = [item[1] for item in mutations]
+        assert all(tokens) and len(set(tokens)) == 3 and third["VersionId"] == tokens[2]
+        assert third["ARN"] == arn and third["SecretString"] == values[2]
+        result = {"privateConsoleAssetOverlay": bool(os.environ.get("SECRETS_TEST_BUNDLE")), "actualNativeACKs": [1, 1], "singlePostACKReadAbortPerCase": True,
+                  "createFormClosed": create_closed, "editFormClosed": put_closed,
+                  "rawDraftAbsent": True, "readOnlyRefreshRecoveredSameARN": True,
+                  "noAutomaticMutationReplay": True, "freshIntentTokensNonemptyDistinct": True,
+                  "SDKExactValuesAndCurrentVersions": True, "tokensOrValuesReported": False,
+                  "fixture": "One explicitly aborted Describe after each actual native ACK"}
+        (REPORTS / "secrets-mutation-read-recovery.json").write_text(json.dumps(result, indent=2) + "\n")
+        assert not failures, "Mutation ACK recovery failed: " + "; ".join(failures)
+    finally:
+        page.unroute(endpoint + "/", fail_one_read)
+        page.remove_listener("request", requested)
+        page.remove_listener("response", responded)
+        if arn is not None:
+            sdk.delete_secret(SecretId=arn, ForceDeleteWithoutRecovery=True)
+        page.get_by_role("button", name="Secrets", exact=True).click()
+        expect(page.get_by_role("heading", name=re.compile(r"^Secrets"), level=1)).to_be_visible()
 
 
 def run():
@@ -38,7 +180,11 @@ def run():
                     if request.headers.get("x-amz-target") == "secretsmanager.GetSecretValue" else None)
 
             def local_only(route):
-                if route.request.url.startswith(endpoint+"/"):
+                overlay = os.environ.get("SECRETS_TEST_BUNDLE")
+                if overlay and route.request.url in (endpoint+"/_simulator/console/app.js", endpoint+"/_simulator/console/app.css"):
+                    asset = Path(overlay) / route.request.url.rsplit("/", 1)[1]
+                    route.fulfill(path=str(asset), content_type="text/javascript" if asset.suffix == ".js" else "text/css")
+                elif route.request.url.startswith(endpoint+"/"):
                     route.continue_()
                 else:
                     outside.append(route.request.url)
@@ -250,6 +396,8 @@ def run():
             page.get_by_label("Enter secret name to confirm", exact=True).press("Enter")
             expect(page.get_by_role("heading", name=re.compile(r"^Secrets"), level=1)).to_be_visible()
             assert sdk.list_secrets()["SecretList"] == [], "Enter did not perform native deletion"
+            mutation_ack_refresh_regression(page, sdk, endpoint)
+            assert sdk.list_secrets()["SecretList"] == [], "Regression cleanup left a secret"
             assert errors == [], "Browser raised a page error"
             assert outside == [], "Browser attempted an external request"
             (REPORTS/"secrets-a11y.json").write_text(json.dumps({"tool": provenance, "screens": audits, "contextChecks": ["region-clear", "principal-clear-IAM403", "keyboard-signout", "revoked-cookie401-SDK-still-valid", "hide-and-navigation-stale-response"]}, indent=2)+"\n")

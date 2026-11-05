@@ -113,7 +113,7 @@ export default function SecretsManagerView({region,request,onSaving}) {
  function validateName(){if(!/^[A-Za-z0-9/_+=.@-]{1,512}$/.test(draft.name))throw new SecretViewError('name');if(Array.from(draft.description).length>2048)throw new SecretViewError('description')}
  async function mutate(operation,input,message){
   if(busy)return;const ticket=invalidate();setBusy(true);onSaving?.(true);setError('');
-  try{const result=await call(operation,input);if(!alive.current||ticket!==epoch.current)return;setDraft(freshDraft());mutationToken.current='';setNotice(message);await browse(operation==='DeleteSecret'?null:result.ARN)}catch(e){if(alive.current&&ticket===epoch.current)setError(captureError(e))}finally{if(alive.current){setBusy(false);onSaving?.(false)}}
+  try{const result=await call(operation,input);if(!alive.current||ticket!==epoch.current)return;setMode('');setDraft(freshDraft());mutationToken.current='';setNotice(message);await browse(operation==='DeleteSecret'?null:result.ARN)}catch(e){if(alive.current&&ticket===epoch.current)setError(captureError(e))}finally{if(alive.current){setBusy(false);onSaving?.(false)}}
  }
  function store(){try{validateName();const value=material();mutate('CreateSecret',{Name:draft.name,Description:draft.description,ClientRequestToken:mutationToken.current,SecretString:value},{kind:'stored'})}catch(e){setError(captureError(e))}}
  async function retrieve(){

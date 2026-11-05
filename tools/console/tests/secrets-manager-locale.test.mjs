@@ -21,8 +21,14 @@ test('uses the existing locked compiler, not a new dependency version', () => {
   assert.equal(esbuild.version, lock.packages['node_modules/esbuild'].version);
 });
 
-test('default-English erasure reproduces the original ffdf1e29 compiled module', () => {
-  let erased = source.replace("import {useLocale} from './i18n.jsx';\n", '').replace(' const {t}=useLocale();\n', '');
+const ackOriginal = "const result=await call(operation,input);if(!alive.current||ticket!==epoch.current)return;setDraft(freshDraft());";
+const ackFixed = ackOriginal.replace('setDraft', "setMode('');setDraft");
+function normalizeACK(candidate) {
+  assert.equal(candidate.split(ackFixed).length-1, 1, 'Exactly one ACK-bound form close is required');
+  return candidate.replace(ackFixed, ackOriginal);
+}
+function assertEnglishContract(candidate) {
+  let erased = normalizeACK(candidate).replace("import {useLocale} from './i18n.jsx';\n", '').replace(' const {t}=useLocale();\n', '');
   const a = erased.indexOf('// Canonical presentation state only.');
   const b = erased.indexOf('// Parent remounts');
   erased = erased.slice(0, a) + erased.slice(b);
@@ -42,6 +48,19 @@ test('default-English erasure reproduces the original ffdf1e29 compiled module',
   const hash = crypto.createHash('sha256').update(compiled).digest('hex');
   // Independently compiled from the preserved external-owner leaf, not candidate output.
   assert.equal(hash, 'b702c583d5fc09250ad3d219284367a32715f7337e2e1d33fd0da33c01fafa83');
+}
+test('English erasure preserves ffdf except the exact reviewed ACK-bound form close', () => {
+  assertEnglishContract(source);
+});
+test('ACK normalization rejects missing, moved, wrong, duplicated and unrelated mutations', () => {
+  for (const candidate of [source.replace(ackFixed,ackOriginal),
+    source.replace(ackFixed,ackOriginal+"setMode('');"),
+    source.replace(ackFixed,ackFixed.replace("setMode('')","setMode('edit')")),
+    source.replace(ackFixed,ackFixed+ackFixed),
+    source.replace(ackFixed,ackFixed.replace('await call(operation,input)','await call(operation,{})'))]) {
+    assert.throws(()=>assertEnglishContract(candidate));
+  }
+  assert.throws(()=>assertEnglishContract(source.replace("setNotice(message)","setNotice('changed')")));
 });
 
 test('all seven internal errors keep canonical English and render current Japanese', () => {
