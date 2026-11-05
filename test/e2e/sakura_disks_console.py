@@ -37,8 +37,14 @@ def run():
             caps = a.call('GET', '/_simulator/v1/capabilities')
             assert 'sakura' in caps['providers'] and caps['sakura']['endpoint'] == BASE
             assert caps['sakura']['availabilityReported'] is False
-            with sync_playwright() as playwright:
+            with sync_playwright() as playwright, ExitStack() as browser_cleanup:
                 browser = playwright.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE') or shutil.which('chromium'), args=['--no-sandbox'])
+                browser_cleanup.callback(browser.close)
+                def close_contexts():
+                    with ExitStack() as context_cleanup:
+                        for context in reversed(contexts):context_cleanup.callback(context.close)
+                # Browser resources must close before sync_playwright stops its loop.
+                browser_cleanup.callback(close_contexts)
                 errors, outside = [], []
                 for width, height in [(1440,1000),(390,844)]:
                     context = browser.new_context(viewport={'width':width,'height':height})
@@ -179,8 +185,6 @@ def run():
             with ExitStack() as cleanup:
                 if a:cleanup.callback(a.close)
                 if b:cleanup.callback(b.close)
-                if browser:cleanup.callback(browser.close)
-                for context in reversed(contexts):cleanup.callback(context.close)
 
 
 if __name__=='__main__':run()
