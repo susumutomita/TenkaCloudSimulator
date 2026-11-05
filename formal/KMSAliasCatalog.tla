@@ -152,5 +152,5 @@ ListMoreExact == IF last.attempted THEN last.read /\ reply.success =>
 ContinuationAfterLast == IF last.attempted THEN last.read /\ reply.more =>
     marker.after=reply.page[Len(reply.page)] ELSE TRUE
 ReadFrame == IF last.attempted THEN last.read => Frame=last.before ELSE TRUE
-NoPartialRead == IF last.attempted THEN last.read /\ ~reply.success => reply.page=<<>> /\ ~reply.more ELSE TRUE
+NoPartialRead == IF last.attempted THEN last.read /\ ~reply.success => reply.page = <<>> /\ ~reply.more ELSE TRUE
 =============================================================================
