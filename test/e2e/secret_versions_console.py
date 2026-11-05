@@ -169,7 +169,8 @@ def run():
                 ja_table = page.get_by_role("table", name="シークレットのバージョンメタデータ", exact=True)
                 for item in expected[20:]:
                     expect(ja_table.get_by_text(item["VersionId"], exact=True)).to_be_visible()
-                expect(ja_table.get_by_text(token(0), exact=True)).to_have_count(0)
+                for item in expected[:20]:
+                    expect(ja_table.get_by_text(item["VersionId"], exact=True)).to_have_count(0)
                 expect(page.get_by_role("button", name="us-east-1", exact=True)).to_be_visible()
                 expect(page.get_by_role("button", name="アカウントメニュー", exact=True)).to_contain_text("simulator-admin")
                 assert page.evaluate("window.__versionLocaleNode===document.querySelector('[data-secret-versions]')"), "Language change remounted metadata view"
@@ -182,6 +183,8 @@ def run():
                 expect(page.get_by_role("heading", name="Versions — Page 2", exact=True)).to_be_visible()
                 for item in expected[20:]:
                     expect(table.get_by_text(item["VersionId"], exact=True)).to_be_visible()
+                for item in expected[:20]:
+                    expect(table.get_by_text(item["VersionId"], exact=True)).to_have_count(0)
                 expect(page.get_by_role("button", name="Account menu", exact=True)).to_contain_text("simulator-admin")
                 expect(page.get_by_role("button", name="us-east-1", exact=True)).to_be_visible()
                 assert page.evaluate("window.__versionLocaleNode===document.querySelector('[data-secret-versions]')")
