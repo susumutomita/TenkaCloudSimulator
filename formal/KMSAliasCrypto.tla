@@ -101,10 +101,11 @@ Commit ==
     /\ UNCHANGED <<aliasTarget,enabled,op,selector,blobKey,permit,aliasPermit,
                    authMode,outcome,retargeted,snapshotAlias,snapshotCounts,resolved,
                    authorized,temporary,stagedCounts>>
-Next == (\E a,b \in Keys, e \in SUBSET Keys, operation \in Ops, selection \in Selectors,
+Next == (phase = "choose" /\
+         (\E a,b \in Keys, e \in SUBSET Keys, operation \in Ops, selection \in Selectors,
             permissions \in [Keys -> BOOLEAN], aliasPermission \in BOOLEAN,
             authorization \in AuthModes, storage \in Outcomes :
-            Choose(a,b,e,operation,selection,permissions,aliasPermission,authorization,storage)) \/
+            Choose(a,b,e,operation,selection,permissions,aliasPermission,authorization,storage))) \/
         Retarget \/ Begin \/ Resolve \/ Authorize \/ CheckCiphertext \/ Crypto \/ Commit
 TypeOK ==
  /\ phase \in Phases /\ aliasTarget \in Keys /\ counts \in [Keys -> 0..2]
