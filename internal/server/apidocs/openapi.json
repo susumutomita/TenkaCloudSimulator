@@ -172,6 +172,9 @@
                   },
                   {
                     "$ref": "#/components/schemas/LogsGetLogEventsRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SecretsListSecretVersionIdsInput"
                   }
                 ],
                 "description": "SSM, KMS, CloudWatch Logs or Secrets Manager JSON 1.1 as selected by X-Amz-Target. The generic object alternative preserves SSM and Secrets Manager templates; named KMS and Logs schemas document their bounded shapes. Exact KMS per-target schemas are in x-simulator-kms-operation-schemas; body alone cannot discriminate routing."
@@ -393,6 +396,15 @@
                   "value": {
                     "SecretId": "arn:aws:secretsmanager:us-east-1:000000000000:secret:training/example-ABC123",
                     "ForceDeleteWithoutRecovery": true
+                  }
+                },
+                "ListSecretVersionIds": {
+                  "summary": "X-Amz-Target: secretsmanager.ListSecretVersionIds",
+                  "description": "Static metadata-only request. Create training/version-list first or replace SecretId with the exact saved name/full ARN. Set JSON1.1 and this target explicitly; changing a body example does not change Scalar headers. IncludeDeprecated includes retained unlabeled versions. Continuation is live and scoped, not a snapshot.",
+                  "value": {
+                    "SecretId": "training/version-list",
+                    "IncludeDeprecated": true,
+                    "MaxResults": 2
                   }
                 }
               }
@@ -1004,6 +1016,38 @@
                     }
                   ]
                 }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "type": "object"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SecretsListSecretVersionIdsOutput"
+                    }
+                  ],
+                  "description": "Shared JSON1.1 response envelope selected by native target; the generic object preserves other services. Exact ListSecretVersionIds output is documented by the supplementary operation-schema mapping, not a global discriminator."
+                },
+                "examples": {
+                  "ListSecretVersionIds": {
+                    "summary": "Illustrative value-free metadata, not live state",
+                    "description": "Static identifier/timestamp. Actual versions/labels/date and optional token come from current SQLite.",
+                    "value": {
+                      "ARN": "arn:aws:secretsmanager:us-east-1:000000000000:secret:training/version-list-ABC123",
+                      "Name": "training/version-list",
+                      "Versions": [
+                        {
+                          "VersionId": "00000000-0000-0000-0000-000000000001",
+                          "CreatedDate": 1800000000,
+                          "VersionStages": [
+                            "AWSCURRENT"
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
               }
             }
           },
@@ -1221,6 +1265,27 @@
             "response": {
               "$ref": "#/components/schemas/DynamoDBTableDescriptionResult"
             }
+          }
+        },
+        "x-simulator-secrets-operation-schemas": {
+          "secretsmanager.ListSecretVersionIds": {
+            "request": "#/components/schemas/SecretsListSecretVersionIdsInput",
+            "response": "#/components/schemas/SecretsListSecretVersionIdsOutput",
+            "permission": "secretsmanager:ListSecretVersionIds on the resolved saved ARN",
+            "errors": {
+              "400": [
+                "InvalidParameterException",
+                "InvalidNextTokenException",
+                "ResourceNotFoundException"
+              ],
+              "403": [
+                "AccessDeniedException"
+              ],
+              "500": [
+                "InternalServiceError sanitized"
+              ]
+            },
+            "note": "Supplemental per-target schema, not body-only routing. Existing seven operations retain their contracts."
           }
         }
       }
@@ -13758,6 +13823,102 @@
           "__type",
           "message"
         ]
+      },
+      "SecretsListSecretVersionIdsInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "SecretId"
+        ],
+        "properties": {
+          "SecretId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          },
+          "IncludeDeprecated": {
+            "type": "boolean",
+            "default": false
+          },
+          "MaxResults": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 100
+          },
+          "NextToken": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          }
+        },
+        "description": "Local exact name (up to512 supported ASCII characters) or full ARN only; no partial ARN/cross-region/account fallback. Null/duplicate/unknown fields fail. Local MaxResults default100."
+      },
+      "SecretsVersionMetadata": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "VersionId",
+          "CreatedDate"
+        ],
+        "description": "Saved metadata only; no value, KMS or last-access data. Deprecated entries omit VersionStages.",
+        "properties": {
+          "VersionId": {
+            "type": "string",
+            "minLength": 32,
+            "maxLength": 64
+          },
+          "CreatedDate": {
+            "type": "number",
+            "format": "double",
+            "minimum": 0,
+            "description": "Saved creation timestamp, epoch seconds."
+          },
+          "VersionStages": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 2,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "enum": [
+                "AWSCURRENT",
+                "AWSPREVIOUS"
+              ]
+            }
+          }
+        }
+      },
+      "SecretsListSecretVersionIdsOutput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "ARN",
+          "Name",
+          "Versions"
+        ],
+        "properties": {
+          "ARN": {
+            "type": "string",
+            "description": "Actual saved physical ARN."
+          },
+          "Name": {
+            "type": "string"
+          },
+          "Versions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SecretsVersionMetadata"
+            },
+            "description": "Empty array, not null, for an empty continuation."
+          },
+          "NextToken": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096,
+            "description": "Omitted at terminal. Scope binds DB authority, region, physical ARN and IncludeDeprecated, expires24h; live keyset not a snapshot or permission."
+          }
+        }
       }
     },
     "responses": {
@@ -13844,7 +14005,7 @@
     },
     {
       "name": "Secrets Manager",
-      "description": "Use JSON 1.1 with `X-Amz-Target: secretsmanager.<operation>`. Seven templates cover the bounded practice-only plaintext subset; no real KMS encryption, rotation or recovery window.\n\nThese are static documentation instructions, not saved state. This service uses the existing shared AWS root POST (`awsRegionalOperation`), shown under **Shared AWS JSON/Query endpoint**. Choose the matching Content-Type, routing header and named body example manually; selecting an example does not automatically change headers. Use Test Request → Send for a real local response. No real cloud is contacted."
+      "description": "Use JSON 1.1 with `X-Amz-Target: secretsmanager.<operation>`. Eight templates cover the bounded practice-only plaintext subset; no real KMS encryption, rotation or recovery window.\n\nThese are static documentation instructions, not saved state. This service uses the existing shared AWS root POST (`awsRegionalOperation`), shown under **Shared AWS JSON/Query endpoint**. Choose the matching Content-Type, routing header and named body example manually; selecting an example does not automatically change headers. Use Test Request → Send for a real local response. No real cloud is contacted. ListSecretVersionIds returns version IDs/stages/creation time only, with its own ARN permission and live DB/region/physical-identity/filter-scoped continuation. No values, KMS or last-access metadata."
     },
     {
       "name": "DynamoDB tables and items",

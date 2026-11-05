@@ -1,12 +1,267 @@
 {
   "version": 1,
-  "base_sha": "36ebfd4808d539d22579181a59ce4db3c768420d",
+  "base_sha": "c563215b9fb3042364b7145ab4515fc387c66ef9",
   "changes": [
     {
-      "path": "docs/contributing/parallel-development.md",
-      "sha256": "6bea29ec42f9ef1aabe18e8648eb9ee1dfc905165fc03551863227a3c4c5f875",
+      "path": "README.ja.md",
+      "sha256": "e096e48148045876f1c6089a47b5b152f1d831eb162b7b580083c57269aeeeef",
       "disposition": "documentation",
-      "reason": "Operating guidance for observed agent capacity, independent ownership and resource reservations; no runtime, model, CI or permission behavior changes.",
+      "reason": "Document the eighth metadata-only operation, its exact native request, limits and bounded evidence without claiming complete cloud compatibility.",
+      "models": []
+    },
+    {
+      "path": "README.md",
+      "sha256": "374e8f63a5b995931eb049d436a64474e44877131a070e10521872e92b5f9fbf",
+      "disposition": "documentation",
+      "reason": "Document the eighth metadata-only operation, its exact native request, limits and bounded evidence without claiming complete cloud compatibility.",
+      "models": []
+    },
+    {
+      "path": "docs/secrets-manager.md",
+      "sha256": "94c100dca4611d41912a338e3b571d3bdbe4332cb814fa6aafc221c1cc82a2c3",
+      "disposition": "documentation",
+      "reason": "Document the eighth metadata-only operation, its exact native request, limits and bounded evidence without claiming complete cloud compatibility.",
+      "models": []
+    },
+    {
+      "path": "formal/README.md",
+      "sha256": "8d8d24c7bdf899dfa1950ba63f2bec28dda6ba59a3691ff91cdae5ec706cf275",
+      "disposition": "documentation",
+      "reason": "Document the eighth metadata-only operation, its exact native request, limits and bounded evidence without claiming complete cloud compatibility.",
+      "models": []
+    },
+    {
+      "path": "formal/SecretVersionListing.cfg",
+      "sha256": "f9a3ecca0c6c8fc74c49e4b625b01719d70c877cc627a94ca807bae151c9aa73",
+      "disposition": "modeled",
+      "reason": "Add bounded metadata-only version listing over the existing saved-ARN authority and native HTTP composition; concrete Go/SDK tests independently verify SQL, strict wire inputs and refusal. Server change only advertises the added operation and does not alter authority.",
+      "models": [
+        {
+          "id": "SecretVersionListing",
+          "properties": [
+            "TypeOK",
+            "ReadAfterAuthorization",
+            "NoDeniedEmission",
+            "TokenScopeBound",
+            "StrictForwardKeyset",
+            "FilterBeforePageLimit",
+            "ContinuationPosition",
+            "TerminalConverges",
+            "ReadFramePreserved"
+          ],
+          "limits": "Metadata-only live keyset projection of ListSecretVersionIds, not a stable snapshot. Parent resolution may precede saved-ARN authorization; version/stage scans and cursor validation follow it. Token signature, database key, region, domain, physical generation, filter and expiry are abstract predicates, not cryptography/byte parsing/time proofs. Does not prove SQL transaction/driver/commit failure, actual IAM/host token authority, HTTP/JSON/UTF8/ARN parsing, secret-value redaction implementation, timestamp ordering/UUIDs, variable page sizes, retention, UI or Go refinement. TerminalConverges is a finite page-shape safety equality, not liveness. Public contract: https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_ListSecretVersionIds.html (reviewed 2026-11-05)."
+        }
+      ]
+    },
+    {
+      "path": "formal/SecretVersionListing.tla",
+      "sha256": "cb7c8a31f20a3bfca7d0129b478cd8c41c62b541fc69973bd94613040a2e14d7",
+      "disposition": "modeled",
+      "reason": "Add bounded metadata-only version listing over the existing saved-ARN authority and native HTTP composition; concrete Go/SDK tests independently verify SQL, strict wire inputs and refusal. Server change only advertises the added operation and does not alter authority.",
+      "models": [
+        {
+          "id": "SecretVersionListing",
+          "properties": [
+            "TypeOK",
+            "ReadAfterAuthorization",
+            "NoDeniedEmission",
+            "TokenScopeBound",
+            "StrictForwardKeyset",
+            "FilterBeforePageLimit",
+            "ContinuationPosition",
+            "TerminalConverges",
+            "ReadFramePreserved"
+          ],
+          "limits": "Metadata-only live keyset projection of ListSecretVersionIds, not a stable snapshot. Parent resolution may precede saved-ARN authorization; version/stage scans and cursor validation follow it. Token signature, database key, region, domain, physical generation, filter and expiry are abstract predicates, not cryptography/byte parsing/time proofs. Does not prove SQL transaction/driver/commit failure, actual IAM/host token authority, HTTP/JSON/UTF8/ARN parsing, secret-value redaction implementation, timestamp ordering/UUIDs, variable page sizes, retention, UI or Go refinement. TerminalConverges is a finite page-shape safety equality, not liveness. Public contract: https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_ListSecretVersionIds.html (reviewed 2026-11-05)."
+        }
+      ]
+    },
+    {
+      "path": "formal/models.json",
+      "sha256": "919e7e0a2bf322ce31d0c7bb65bfc2679c090980765014b7d72ba61dd5229de0",
+      "disposition": "formal-infrastructure",
+      "reason": "Require the added model, its nine properties and thirteen real semantic negative controls; preserve every existing model/control, strict parser, pins and deadlines.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/secret_http.go",
+      "sha256": "4980179095c0897bec1a64517276bfbf44610a32c35b59280a123b3530844c6b",
+      "disposition": "modeled",
+      "reason": "Add bounded metadata-only version listing over the existing saved-ARN authority and native HTTP composition; concrete Go/SDK tests independently verify SQL, strict wire inputs and refusal. Server change only advertises the added operation and does not alter authority.",
+      "models": [
+        {
+          "id": "SecretsDisclosureChannels",
+          "properties": [
+            "TypeOK",
+            "RawRequiresAuthorizedGet",
+            "MetadataLogErrorRedacted",
+            "DeniedNoRaw",
+            "RawEmissionRequiresGet"
+          ],
+          "limits": "Finite classification of plaintext acquisition/output call sites, not Go fmt/JSON/slog, SQL, encryption, memory secrecy or implementation refinement. The private plaintext() accessor itself has no authorization: its only production writer call site must follow successful native Get authorization. Actual private-holder formatting/JSON/slog sentinel tests and native denied-Get/error/metadata tests verify the Go mechanisms independently."
+        },
+        {
+          "id": "SecretVersionListing",
+          "properties": [
+            "TypeOK",
+            "ReadAfterAuthorization",
+            "NoDeniedEmission",
+            "TokenScopeBound",
+            "StrictForwardKeyset",
+            "FilterBeforePageLimit",
+            "ContinuationPosition",
+            "TerminalConverges",
+            "ReadFramePreserved"
+          ],
+          "limits": "Metadata-only live keyset projection of ListSecretVersionIds, not a stable snapshot. Parent resolution may precede saved-ARN authorization; version/stage scans and cursor validation follow it. Token signature, database key, region, domain, physical generation, filter and expiry are abstract predicates, not cryptography/byte parsing/time proofs. Does not prove SQL transaction/driver/commit failure, actual IAM/host token authority, HTTP/JSON/UTF8/ARN parsing, secret-value redaction implementation, timestamp ordering/UUIDs, variable page sizes, retention, UI or Go refinement. TerminalConverges is a finite page-shape safety equality, not liveness. Public contract: https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_ListSecretVersionIds.html (reviewed 2026-11-05)."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/secrets_manager_versions.go",
+      "sha256": "3b442596afa7ab6017320c7ec8194d2a97cfc47cc3c415f914459424ef168f78",
+      "disposition": "modeled",
+      "reason": "Add bounded metadata-only version listing over the existing saved-ARN authority and native HTTP composition; concrete Go/SDK tests independently verify SQL, strict wire inputs and refusal. Server change only advertises the added operation and does not alter authority.",
+      "models": [
+        {
+          "id": "SecretVersionListing",
+          "properties": [
+            "TypeOK",
+            "ReadAfterAuthorization",
+            "NoDeniedEmission",
+            "TokenScopeBound",
+            "StrictForwardKeyset",
+            "FilterBeforePageLimit",
+            "ContinuationPosition",
+            "TerminalConverges",
+            "ReadFramePreserved"
+          ],
+          "limits": "Metadata-only live keyset projection of ListSecretVersionIds, not a stable snapshot. Parent resolution may precede saved-ARN authorization; version/stage scans and cursor validation follow it. Token signature, database key, region, domain, physical generation, filter and expiry are abstract predicates, not cryptography/byte parsing/time proofs. Does not prove SQL transaction/driver/commit failure, actual IAM/host token authority, HTTP/JSON/UTF8/ARN parsing, secret-value redaction implementation, timestamp ordering/UUIDs, variable page sizes, retention, UI or Go refinement. TerminalConverges is a finite page-shape safety equality, not liveness. Public contract: https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_ListSecretVersionIds.html (reviewed 2026-11-05)."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/secrets_manager_versions_http_test.go",
+      "sha256": "485436c9d22e2a95f4fd479d07e08cecc7139f10750ebcb1eef58e29e716cd67",
+      "disposition": "modeled",
+      "reason": "Add bounded metadata-only version listing over the existing saved-ARN authority and native HTTP composition; concrete Go/SDK tests independently verify SQL, strict wire inputs and refusal. Server change only advertises the added operation and does not alter authority.",
+      "models": [
+        {
+          "id": "SecretVersionListing",
+          "properties": [
+            "TypeOK",
+            "ReadAfterAuthorization",
+            "NoDeniedEmission",
+            "TokenScopeBound",
+            "StrictForwardKeyset",
+            "FilterBeforePageLimit",
+            "ContinuationPosition",
+            "TerminalConverges",
+            "ReadFramePreserved"
+          ],
+          "limits": "Metadata-only live keyset projection of ListSecretVersionIds, not a stable snapshot. Parent resolution may precede saved-ARN authorization; version/stage scans and cursor validation follow it. Token signature, database key, region, domain, physical generation, filter and expiry are abstract predicates, not cryptography/byte parsing/time proofs. Does not prove SQL transaction/driver/commit failure, actual IAM/host token authority, HTTP/JSON/UTF8/ARN parsing, secret-value redaction implementation, timestamp ordering/UUIDs, variable page sizes, retention, UI or Go refinement. TerminalConverges is a finite page-shape safety equality, not liveness. Public contract: https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_ListSecretVersionIds.html (reviewed 2026-11-05)."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/secrets_manager_versions_test.go",
+      "sha256": "eb4a81b72ab07f48b832c8a48cfe9295a579f3119dd24f299e6c1d356dfa6d8e",
+      "disposition": "modeled",
+      "reason": "Add bounded metadata-only version listing over the existing saved-ARN authority and native HTTP composition; concrete Go/SDK tests independently verify SQL, strict wire inputs and refusal. Server change only advertises the added operation and does not alter authority.",
+      "models": [
+        {
+          "id": "SecretVersionListing",
+          "properties": [
+            "TypeOK",
+            "ReadAfterAuthorization",
+            "NoDeniedEmission",
+            "TokenScopeBound",
+            "StrictForwardKeyset",
+            "FilterBeforePageLimit",
+            "ContinuationPosition",
+            "TerminalConverges",
+            "ReadFramePreserved"
+          ],
+          "limits": "Metadata-only live keyset projection of ListSecretVersionIds, not a stable snapshot. Parent resolution may precede saved-ARN authorization; version/stage scans and cursor validation follow it. Token signature, database key, region, domain, physical generation, filter and expiry are abstract predicates, not cryptography/byte parsing/time proofs. Does not prove SQL transaction/driver/commit failure, actual IAM/host token authority, HTTP/JSON/UTF8/ARN parsing, secret-value redaction implementation, timestamp ordering/UUIDs, variable page sizes, retention, UI or Go refinement. TerminalConverges is a finite page-shape safety equality, not liveness. Public contract: https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_ListSecretVersionIds.html (reviewed 2026-11-05)."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/apidocs/openapi.json",
+      "sha256": "73023e90ccd911feb5acf48d6ecd1cd5cb0dbcc3e34ee63a6a8f2a1f6d30aabd",
+      "disposition": "presentation",
+      "reason": "Add a native target template and bounded metadata schemas while preserving all previous API identifiers, examples and media; static examples are not live saved state.",
+      "models": []
+    },
+    {
+      "path": "internal/server/secrets_composition_test.go",
+      "sha256": "6eff95c7c4879109c99957d45a9c0e89766c37469a2a1a6492c127481ac684e0",
+      "disposition": "test-support",
+      "reason": "Strengthen the stale seven-operation capability assertion to require all eight distinct supported operation names; preserve native composition and S3 literal-neighbor regression checks.",
+      "models": []
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "0938f0b53af289e17728eeadfd0a728398ef8379e646581156e5308df1c3bd36",
+      "disposition": "modeled",
+      "reason": "Add bounded metadata-only version listing over the existing saved-ARN authority and native HTTP composition; concrete Go/SDK tests independently verify SQL, strict wire inputs and refusal. Server change only advertises the added operation and does not alter authority.",
+      "models": [
+        {
+          "id": "SecretsVersionLifecycle",
+          "properties": [
+            "TypeOK",
+            "ImmutableVersions",
+            "NoOrphans",
+            "UniqueLabels",
+            "SeparateCurrentPrevious",
+            "ActiveHasCurrent",
+            "AuthorizedVersions",
+            "AuthorizedDisclosure"
+          ],
+          "limits": "Finite lifecycle/authority abstraction, not SQL transaction, cryptography, OS authentication, formatter redaction or Go implementation refinement. A team models one secret name and two never-reused ARN incarnations; process/token isolation and cursor bindings require actual native SDK tests. History contains abstract dummy values solely to detect an attempted immutable-version overwrite; runtime force deletion does not retain secret values. IAM is represented by a pure Boolean decision for the resolved resource; policy loading/error ordering and actual IAM rules require concrete Go tests. Shared Gateway/dispatch/server paths bind only Secrets composition into the native SQLite/immutable-policy authority path, not unrelated S3/SSM behavior or a proof of HTTP routing. Cursor signatures, quotas and restart persistence require concrete tests."
+        }
+      ]
+    },
+    {
+      "path": "scripts/check-assets.py",
+      "sha256": "cf907d68ece80ff00cd13ab830abf091edacfd8e975f30d1c6ccb255109f23d4",
+      "disposition": "validation-tooling",
+      "reason": "Append reference completeness assertions after all immutable historical asset checks; preserve provenance and rights guards.",
+      "models": []
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "093de3bf31d01ddef994c119008d6d378563584f78647f283565823931d6d993",
+      "disposition": "formal-infrastructure",
+      "reason": "Require the added model, its nine properties and thirteen real semantic negative controls; preserve every existing model/control, strict parser, pins and deadlines.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "55fa7e39d4dfb81d1a6581fb3cb04994409472ac3cd2db438f29f4faf41e9fbf",
+      "disposition": "formal-infrastructure",
+      "reason": "Require the added model, its nine properties and thirteen real semantic negative controls; preserve every existing model/control, strict parser, pins and deadlines.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/check.py",
+      "sha256": "db51de551bcc2832a2efec8ccdb246a92cf12942cf6b344eba64c13c2f25aa1b",
+      "disposition": "test-support",
+      "reason": "Register and exercise actual local CLI/official SDK and served-example acceptance; preserve all existing tests and negative cases.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/secrets_versions.py",
+      "sha256": "23df06d78646d9e74bb3526973a4d451039d530a790a2fc3e2373737c69a1c3d",
+      "disposition": "test-support",
+      "reason": "Register and exercise actual local CLI/official SDK and served-example acceptance; preserve all existing tests and negative cases.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_openapi_json10.py",
+      "sha256": "78585515041aa0183743c3907246217e0132f66b966eb5ed926de5ad2103aba9",
+      "disposition": "test-support",
+      "reason": "Preserve the exact original 23 JSON1.1 template names, require the added version-list template, and validate its strict per-target schema with missing/null/type/limit/unknown-field refusals. All prior JSON1.0 union and negative-control methods remain intact.",
       "models": []
     }
   ]
