@@ -1,6 +1,7 @@
 """Actual embedded Azure Properties -> native HEAD acceptance (no SDK claim).
 
 Requires a freshly embedded binary containing azure-blob.jsx, Chromium and axe.
+Native HTTP oracle, not an official Azure SDK check.
 No overlay, fake response values or cloud access. Delayed/error routes below
 forward actual native responses; only their delivery timing/auth context varies.
 Source-only until the integration owner schedules real execution.
@@ -142,6 +143,32 @@ def run_azure_live_properties():
                     expect(page.get_by_role('dialog')).to_have_count(0)
                     view.get_by_role('link', name=container, exact=True).click()
                     expect(view.get_by_role('button', name=key, exact=True)).to_be_visible()
+                    # Distinct from Close+unmount above: the supported hash
+                    # navigation changes provider while the native Properties
+                    # dialog is STILL OPEN and HEAD is held. No prior Close.
+                    mode['value'] = 'hold'
+                    view.get_by_role('button', name=key, exact=True).click()
+                    expect(dialog.get_by_role('status')).to_have_text('Loading blob properties…')
+                    expect(dialog.locator('dd')).to_have_count(0)
+                    deadline = time.monotonic()+5
+                    while not held:
+                        assert time.monotonic()<deadline, 'Direct provider HEAD barrier not reached'
+                        page.wait_for_timeout(10)
+                    expect(dialog).to_be_visible()
+                    page.evaluate("location.hash='#/gcp-storage'")
+                    expect(page.get_by_role('region', name='Cloud Storage', exact=True)).to_be_visible()
+                    expect(page.get_by_role('dialog')).to_have_count(0)
+                    route, response = held.pop()
+                    try:
+                        route.fulfill(response=response)
+                    except Exception as error:
+                        assert any(word in str(error).lower() for word in ('cancel', 'closed', 'invalid interception', 'already handled')), type(error).__name__
+                    page.get_by_role('navigation', name='Cloud provider', exact=True).get_by_role('button', name='Azure', exact=True).click()
+                    expect(view.get_by_role('link', name=container, exact=True)).to_be_visible()
+                    expect(page.get_by_role('dialog')).to_have_count(0)
+                    expect(view.get_by_text(actual['x-ms-meta-proof'], exact=True)).to_have_count(0)
+                    view.get_by_role('link', name=container, exact=True).click()
+                    expect(view.get_by_role('button', name=key, exact=True)).to_be_visible()
                     mode['value'] = 'denied'
                     view.get_by_role('button', name=key, exact=True).click()
                     expect(dialog.get_by_role('alert')).to_contain_text('Access denied.')
@@ -163,7 +190,6 @@ def run_azure_live_properties():
                     while not held:
                         assert time.monotonic()<deadline, 'Second native HEAD did not reach barrier'
                         page.wait_for_timeout(10)
-                    dialog.get_by_role('button', name='Close', exact=True).click()
 
                     def choose_identity(identity):
                         page.locator('.cloud-session summary[aria-label="Account menu"]').click()
@@ -172,7 +198,22 @@ def run_azure_live_properties():
                         chooser.get_by_label('Principal name', exact=True).fill(identity)
                         chooser.get_by_role('button', name='Choose identity', exact=True).click()
 
-                    choose_identity('properties-reader')
+                    # Synthetic host-transition boundary, NOT a claim a user
+                    # can click through a native modal. The real root controls
+                    # are inert while it is open, so dispatch only their actual
+                    # handlers; no React state hook, server response or source is
+                    # replaced. The held HEAD is not canceled by Close first.
+                    expect(dialog).to_be_visible()
+                    page.get_by_role('button', name='Choose identity', exact=True, include_hidden=True).dispatch_event('click')
+                    chooser = page.get_by_role('dialog', name='Choose identity', exact=True, include_hidden=True)
+                    chooser.get_by_label('Principal name', exact=True).evaluate("""(input, identity)=>{
+                        const setter=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set;
+                        setter.call(input,identity);
+                        input.dispatchEvent(new Event('input',{bubbles:true}));
+                    }""", 'properties-reader')
+                    expect(chooser.get_by_label('Principal name', exact=True)).to_have_value('properties-reader')
+                    chooser.get_by_role('button', name='Choose identity', exact=True, include_hidden=True).dispatch_event('click')
+                    expect(page.locator('.cloud-session summary[aria-label="Account menu"]')).to_have_text('properties-reader')
                     expect(view.get_by_text('Access denied. This Azure exercise subject does not have permission for this operation.', exact=True)).to_be_visible()
                     route, response = held.pop()
                     try:
@@ -203,7 +244,7 @@ def run_azure_live_properties():
                 assert not errors and not outside
                 wire('DELETE', AZURE+'/'+container+'?restype=container', expected=202)
                 wire('DELETE', AZURE+'/'+container+'?restype=container', expected=202, host=peer, credential=other)
-                REPORTS.joinpath('azure-live-properties.json').write_text(json.dumps({'actualEmbeddedBinary': True, 'nativeLiveHEAD': True, 'bodyFetches': 0, 'staleListReplacement': True, 'localeKeepsLiveRecord': True, 'cancelUnmountLateReplyGuard': True, 'principalChangeLateReplyGuard': True, 'actual403And404NoCachedFallback': True, 'repairedRetry': True, 'peerPreserved': True, 'axeWidths': audits, 'pageErrors': len(errors), 'externalRequests': len(outside)}, indent=2)+'\n')
+                REPORTS.joinpath('azure-live-properties.json').write_text(json.dumps({'actualEmbeddedBinary': True, 'oracle': 'native HTTP (not official SDK)', 'nativeLiveHEAD': True, 'bodyFetches': 0, 'staleListReplacement': True, 'localeKeepsLiveRecord': True, 'cancelThenUnmountLateReplyGuard': True, 'directProviderHashWhileOpenLateReplyGuard': True, 'directPrincipalWhileOpenLateReplyGuard': True, 'principalTransitionFixture': 'synthetic existing root-control events while native dialog open; not user-click usability', 'actual403And404NoCachedFallback': True, 'repairedRetry': True, 'peerPreserved': True, 'axeWidths': audits, 'pageErrors': len(errors), 'externalRequests': len(outside)}, indent=2)+'\n')
             finally:
                 for route, _ in held:
                     try:
