@@ -1,602 +1,801 @@
 {
   "version": 1,
-  "base_sha": "6abcbca4bf6612e36470f7e69f29ea090566b8ea",
+  "base_sha": "e8efc54e0da07522150a93fbdc07f7e2b33f3db9",
   "changes": [
     {
+      "path": ".github/workflows/formal.yml",
+      "sha256": "e2fa36abb9f213fdc288fe42eb3cfd394c61616a2348c3c4a1bda89cba2d8cb7",
+      "disposition": "formal-infrastructure",
+      "reason": "Reserve 30 minutes aggregate capacity for the unchanged serial 391-case named Formal validation job plus checkout, negative-control and exact-blob guards. Only workflow job timeout and explanatory comments change: all step run/uses, permissions, immutable-head checkout, action SHAs, failure/artifact handling and per-case 60-second defaults/bounds/invariants remain unchanged. No runtime behavior or model admission change.",
+      "models": []
+    },
+    {
       "path": "README.ja.md",
-      "sha256": "ed0ceb610f4aa8274c35c54142298f7de874dcbfd4791c276bbb17607da8d9ca",
+      "sha256": "043fc9debccc08fb10a4365a7f8ccdb212875df234bd689014f5155841478d8e",
       "disposition": "documentation",
-      "reason": "Document the current twelve-operation KMS subset, local customer aliases, separate bounded model scopes and exact-revision acceptance requirements; preserve rights/history and unsupported limits.",
+      "reason": "Document opt-in Disk configuration subset, actual earlier scoped receipts and current44models/347controls/391 planned cases with60 mandatory E2E. Historical proofs do not establish the merged revision; no VM/AppRun/cloud-console parity or SDK coverage inflation.",
       "models": []
     },
     {
       "path": "README.md",
-      "sha256": "0b3ad838b8804ff470df6fbed34c76abb3fc8f39b4a2b88877be1e3652fdd462",
+      "sha256": "12e932d94b5fa5da0fe45f2369b06f8d455c7d7dbb25484123581be1dfebcbdb",
       "disposition": "documentation",
-      "reason": "Document the current twelve-operation KMS subset, local customer aliases, separate bounded model scopes and exact-revision acceptance requirements; preserve rights/history and unsupported limits.",
+      "reason": "Document opt-in Disk configuration subset, actual earlier scoped receipts and current44models/347controls/391 planned cases with60 mandatory E2E. Historical proofs do not establish the merged revision; no VM/AppRun/cloud-console parity or SDK coverage inflation.",
       "models": []
     },
     {
-      "path": "docs/kms.md",
-      "sha256": "18cd54a435eca0a370b6137bad9a5b42f53131c37f6b22be85298efe9db38d64",
-      "disposition": "documentation",
-      "reason": "Document the current twelve-operation KMS subset, local customer aliases, separate bounded model scopes and exact-revision acceptance requirements; preserve rights/history and unsupported limits.",
+      "path": "cmd/simulator/main.go",
+      "sha256": "a28d789bbdaf2f9071eac20b44aa259e3d35902c0a32cb6771db9af2ab022676",
+      "disposition": "modeled",
+      "reason": "Only register/pure-validation/constructor hooks changed; Sakura validation precedes listen/state/token. Existing auth and other providers remain intact; the model is not misrepresented as old Actor or Admission coverage of flags.",
+      "models": [
+        {
+          "id": "SakuraStartupAdmission",
+          "properties": [
+            "TypeOK",
+            "NoEffectsOnRefusal",
+            "ValidationPrecedesEffects",
+            "AcceptedConfigExact",
+            "ValidAdmissionAvailable",
+            "DisabledNoSakura",
+            "EnabledOnlyAuthenticated",
+            "SchemaRequiresDatabase",
+            "RegistrationRequiresSchema",
+            "TokenOnlyAuthenticated",
+            "StartupComplete"
+          ],
+          "limits": "Pure parsed-flag admission and startup order abstraction only. Absent fields have empty invalid defaults; explicit empty values count as supplied. Default disabled may create general host DB/listener/token (token skipped when unsafe) but no Sakura schema/provider. Assumes later infrastructure steps succeed; does not prove full constructor atomicity, listener/database/token syscalls, failures/cleanup, flag parser or regex/UTF8 refinement, host authentication, token cryptography, DB lease, SDK/HTTP/UI or Go implementation refinement. Shared server.go scope covers only optional provider setup/registration under validated scope; other providers/auth/routing and all failure rollback are excluded."
+        }
+      ]
+    },
+    {
+      "path": "cmd/simulator/sakura_flags.go",
+      "sha256": "b468cc0ffca2ad6d8e8a68672d72dd0cbce89ed124b1c27c594d8f41b86198c7",
+      "disposition": "modeled",
+      "reason": "Pure new opt-in parser-value holder and validation reject orphan/missing/invalid values and unsafe enabled mode without effects. Actual text syntax is abstracted as supplied/valid, not assumed formally parsed.",
+      "models": [
+        {
+          "id": "SakuraStartupAdmission",
+          "properties": [
+            "TypeOK",
+            "NoEffectsOnRefusal",
+            "ValidationPrecedesEffects",
+            "AcceptedConfigExact",
+            "ValidAdmissionAvailable",
+            "DisabledNoSakura",
+            "EnabledOnlyAuthenticated",
+            "SchemaRequiresDatabase",
+            "RegistrationRequiresSchema",
+            "TokenOnlyAuthenticated",
+            "StartupComplete"
+          ],
+          "limits": "Pure parsed-flag admission and startup order abstraction only. Absent fields have empty invalid defaults; explicit empty values count as supplied. Default disabled may create general host DB/listener/token (token skipped when unsafe) but no Sakura schema/provider. Assumes later infrastructure steps succeed; does not prove full constructor atomicity, listener/database/token syscalls, failures/cleanup, flag parser or regex/UTF8 refinement, host authentication, token cryptography, DB lease, SDK/HTTP/UI or Go implementation refinement. Shared server.go scope covers only optional provider setup/registration under validated scope; other providers/auth/routing and all failure rollback are excluded."
+        }
+      ]
+    },
+    {
+      "path": "cmd/simulator/sakura_flags_test.go",
+      "sha256": "1402d39986fb9bf9c267172fb6540f06cb4923fcace1820edd3d38af272fbc13",
+      "disposition": "test-support",
+      "reason": "Real native SQLite/HTTP/flag/CLI acceptance and failure/repair counterpart only, not modeled implementation. New mandatory native two-CLI wrapper preserves all51 existing Conformance method AST bodies; private generated fixture credentials never become provider authority or SDK success claims.",
       "models": []
     },
     {
-      "path": "formal/KMSAliasCatalog.cfg",
-      "sha256": "ddb1aaa22dd90ee4726c1453bc5d9a949139764cb98e4763986f4cb73a187faa",
-      "disposition": "modeled",
-      "reason": "Register exact finite specification/configuration with mandatory properties and semantic control IDs. Scoped author traces and independent source review are separate from the required new335-case immutable combined run and native implementation evidence.",
-      "models": [
-        {
-          "id": "KMSAliasCatalog",
-          "properties": [
-            "TypeOK",
-            "AcknowledgedSuccess",
-            "MutationAuthority",
-            "ConcreteTarget",
-            "FailureFrame",
-            "PeerRegionFrame",
-            "MutationEffect",
-            "CreationIdentity",
-            "AdmissionBudgets",
-            "RevisionFresh",
-            "ListAuthorized",
-            "CursorBound",
-            "ListPageExact",
-            "ListMoreExact",
-            "ContinuationAfterLast",
-            "ReadFrame",
-            "NoPartialRead"
-          ],
-          "limits": "Independent bounded alias catalog CRUD/pagination abstraction, not cryptography/crypto orchestration or Go/SQLite/HTTP refinement. Fixed same-type/usage concrete keyparents; no DeleteKey/keyrecreation/aliases-as-target/managedaliases/grants/ABAC. MAC authority/integrity are abstract predicates; marker has NO expiry. Atomic write/cursor/read transitions assume sameDB Tx and pure immutable policy; no actual SQL scan/locking/RowsAffected/commit implementation proof. Four reachable seeds plus three requests are not unbounded quotas1000/50 or complete workflows. Failed request identity is intentionally canonicalized; only operation category/outcome/before-frame retained, and checked successful-input properties are success-guarded. Timestamps/birthlabels only model update identity preservation, not physicalclock/UUID entropy. Public JSON projection/wireparser/UI/hostauthentication independent."
-        }
-      ]
+      "path": "cmd/simulator/sakura_integration_test.go",
+      "sha256": "e8619053eec42d34aae36d2988a8055a5be6a775f1a339482f82ebcc1d9d5830",
+      "disposition": "test-support",
+      "reason": "Real native SQLite/HTTP/flag/CLI acceptance and failure/repair counterpart only, not modeled implementation. New mandatory native two-CLI wrapper preserves all51 existing Conformance method AST bodies; private generated fixture credentials never become provider authority or SDK success claims.",
+      "models": []
     },
     {
-      "path": "formal/KMSAliasCatalog.tla",
-      "sha256": "31cc7675ba200cac03c61a2b93a4d45c335ab2b8737d7de23df83c7f05a44a08",
-      "disposition": "modeled",
-      "reason": "Register exact finite specification/configuration with mandatory properties and semantic control IDs. Scoped author traces and independent source review are separate from the required new335-case immutable combined run and native implementation evidence.",
-      "models": [
-        {
-          "id": "KMSAliasCatalog",
-          "properties": [
-            "TypeOK",
-            "AcknowledgedSuccess",
-            "MutationAuthority",
-            "ConcreteTarget",
-            "FailureFrame",
-            "PeerRegionFrame",
-            "MutationEffect",
-            "CreationIdentity",
-            "AdmissionBudgets",
-            "RevisionFresh",
-            "ListAuthorized",
-            "CursorBound",
-            "ListPageExact",
-            "ListMoreExact",
-            "ContinuationAfterLast",
-            "ReadFrame",
-            "NoPartialRead"
-          ],
-          "limits": "Independent bounded alias catalog CRUD/pagination abstraction, not cryptography/crypto orchestration or Go/SQLite/HTTP refinement. Fixed same-type/usage concrete keyparents; no DeleteKey/keyrecreation/aliases-as-target/managedaliases/grants/ABAC. MAC authority/integrity are abstract predicates; marker has NO expiry. Atomic write/cursor/read transitions assume sameDB Tx and pure immutable policy; no actual SQL scan/locking/RowsAffected/commit implementation proof. Four reachable seeds plus three requests are not unbounded quotas1000/50 or complete workflows. Failed request identity is intentionally canonicalized; only operation category/outcome/before-frame retained, and checked successful-input properties are success-guarded. Timestamps/birthlabels only model update identity preservation, not physicalclock/UUID entropy. Public JSON projection/wireparser/UI/hostauthentication independent."
-        }
-      ]
+      "path": "docs/api-reference.md",
+      "sha256": "1510a7305c41fb8ed53a734d92f4f714a1bb8cda07cbc6ee90ea2af0aa74754b",
+      "disposition": "documentation",
+      "reason": "Document actual optional Sakura Disk/reference subset and limits; distinguish prior scoped evidence from pending merged-head whole gates.",
+      "models": []
     },
     {
-      "path": "formal/KMSAliasCrypto.cfg",
-      "sha256": "baceb597f2a967cb5784a74beb127ff60800bdde8f7a7f432b274edd6c2d10c5",
-      "disposition": "modeled",
-      "reason": "Register exact finite specification/configuration with mandatory properties and semantic control IDs. Scoped author traces and independent source review are separate from the required new335-case immutable combined run and native implementation evidence.",
-      "models": [
-        {
-          "id": "KMSAliasCrypto",
-          "properties": [
-            "TypeOK",
-            "TransactionSnapshotStable",
-            "AliasResolutionCurrent",
-            "OmittedDecryptUsesBlob",
-            "ConcreteKeyAuthorization",
-            "AuthorizedCryptoStages",
-            "AuthorizationBeforeMismatch",
-            "NoPublicationBeforeCommit",
-            "FailureCounterFrame",
-            "FailureNoPublication",
-            "WriteFailureRefused",
-            "PublishedKeyBound",
-            "EncryptCounterExact",
-            "DecryptCounterFrame"
-          ],
-          "limits": "New alias selection/concrete authorization/ciphertext match/commit publication finite projection. Not AES/nonce/HMAC, raw ARN/JSON/SigV4/IAM parsing, host authority, arbitrary policies, actualSQLite locking/commit/Go refinement, retries/unbounded history, alias CRUD/capacity/pagination or full lifecycle proof. Trusted authorizer is pure captured policy or SELECT on provided transaction; immediate transaction serialization is an assumption grounded in current core store, not proved. Native crypto/error classes abstract existing KMS helper behavior. Choose phase guard is factored outside its binder by exact logical equivalence, not a state-space reduction."
-        }
-      ]
+      "path": "docs/sakura-sdk-compatibility.md",
+      "sha256": "853d342ed9764d80730eab0ab146ac52d22067457921da88eef53539008f489a",
+      "disposition": "documentation",
+      "reason": "Documents explicit disabled-by-default Sakura Disk metadata subset, safe configured scope, exact limits and historical versus integrated verification, preserving all original rights. No fake VM/UI/S3 ObjectStorage or whole-constructor/refinement claim.",
+      "models": []
     },
     {
-      "path": "formal/KMSAliasCrypto.tla",
-      "sha256": "a1c944d072aa298a5e891a79d4acbf3e866352f16465e91a1fe343508988b38e",
-      "disposition": "modeled",
-      "reason": "Register exact finite specification/configuration with mandatory properties and semantic control IDs. Scoped author traces and independent source review are separate from the required new335-case immutable combined run and native implementation evidence.",
-      "models": [
-        {
-          "id": "KMSAliasCrypto",
-          "properties": [
-            "TypeOK",
-            "TransactionSnapshotStable",
-            "AliasResolutionCurrent",
-            "OmittedDecryptUsesBlob",
-            "ConcreteKeyAuthorization",
-            "AuthorizedCryptoStages",
-            "AuthorizationBeforeMismatch",
-            "NoPublicationBeforeCommit",
-            "FailureCounterFrame",
-            "FailureNoPublication",
-            "WriteFailureRefused",
-            "PublishedKeyBound",
-            "EncryptCounterExact",
-            "DecryptCounterFrame"
-          ],
-          "limits": "New alias selection/concrete authorization/ciphertext match/commit publication finite projection. Not AES/nonce/HMAC, raw ARN/JSON/SigV4/IAM parsing, host authority, arbitrary policies, actualSQLite locking/commit/Go refinement, retries/unbounded history, alias CRUD/capacity/pagination or full lifecycle proof. Trusted authorizer is pure captured policy or SELECT on provided transaction; immediate transaction serialization is an assumption grounded in current core store, not proved. Native crypto/error classes abstract existing KMS helper behavior. Choose phase guard is factored outside its binder by exact logical equivalence, not a state-space reduction."
-        }
-      ]
-    },
-    {
-      "path": "formal/KMSAliasesViewEpoch.cfg",
-      "sha256": "c59e76d2ed57685f7230a9da345ac5e8e8739421a7a5851c4ef631b73b091cf3",
-      "disposition": "modeled",
-      "reason": "Register exact finite specification/configuration with mandatory properties and semantic control IDs. Scoped author traces and independent source review are separate from the required new335-case immutable combined run and native implementation evidence.",
-      "models": [
-        {
-          "id": "KMSAliasesViewEpoch",
-          "properties": [
-            "TypeOK",
-            "CurrentListOutcome",
-            "NoCachedRowsOnFailure",
-            "CurrentTargetMetadata",
-            "ClosedFormHasNoTarget",
-            "AckClosesForm",
-            "AckClearsDraft",
-            "ReadRetryNeverWrites",
-            "OnlyVerifiedTargetSubmitted",
-            "DeleteRequiresExactConfirmation",
-            "LocalePreservesIntent"
-          ],
-          "limits": "Finite UI protocol abstraction, not JS/React/Cloudscape/HTTP/SQL/IAM/crypto refinement or liveness. Initial key-list/Describe lookup completion is abstracted because actual source disables selection until it finishes; later target reads may overlap. Target/list revisions normalized after these reads. Excludes all parser/format/pagination/permission semantics, arbitrary key sets, repeated forms beyond bound, network ambiguity without ACK and full AWS console parity. Current list outcome and target metadata are stored fields, not derived tautologies. Retired-list mutation jointly bypasses redundant captured-object/active/abort checks; submit-target mutation abstracts both button and handler defenses. Retry mutant creates actual second pending write plus request counter, not a ghost-only edit. Root parent context key/principal binding is assumed; locale frame is only this model state, not the locale provider. Parent kms.jsx/main.jsx declarations bind only the Aliases mount and supplied region/principal/key identity; other KMS/general services remain outside. app.js is the canonical compiled correspondence artifact of that component/mount, independently checked by bundle hashes, not a proof of compilation or unrelated UI."
-        }
-      ]
-    },
-    {
-      "path": "formal/KMSAliasesViewEpoch.tla",
-      "sha256": "aa1a6994e460abee3a1ccc68a6f4e255d9ec8f25d2985bb5949dbe60191f87db",
-      "disposition": "modeled",
-      "reason": "Register exact finite specification/configuration with mandatory properties and semantic control IDs. Scoped author traces and independent source review are separate from the required new335-case immutable combined run and native implementation evidence.",
-      "models": [
-        {
-          "id": "KMSAliasesViewEpoch",
-          "properties": [
-            "TypeOK",
-            "CurrentListOutcome",
-            "NoCachedRowsOnFailure",
-            "CurrentTargetMetadata",
-            "ClosedFormHasNoTarget",
-            "AckClosesForm",
-            "AckClearsDraft",
-            "ReadRetryNeverWrites",
-            "OnlyVerifiedTargetSubmitted",
-            "DeleteRequiresExactConfirmation",
-            "LocalePreservesIntent"
-          ],
-          "limits": "Finite UI protocol abstraction, not JS/React/Cloudscape/HTTP/SQL/IAM/crypto refinement or liveness. Initial key-list/Describe lookup completion is abstracted because actual source disables selection until it finishes; later target reads may overlap. Target/list revisions normalized after these reads. Excludes all parser/format/pagination/permission semantics, arbitrary key sets, repeated forms beyond bound, network ambiguity without ACK and full AWS console parity. Current list outcome and target metadata are stored fields, not derived tautologies. Retired-list mutation jointly bypasses redundant captured-object/active/abort checks; submit-target mutation abstracts both button and handler defenses. Retry mutant creates actual second pending write plus request counter, not a ghost-only edit. Root parent context key/principal binding is assumed; locale frame is only this model state, not the locale provider. Parent kms.jsx/main.jsx declarations bind only the Aliases mount and supplied region/principal/key identity; other KMS/general services remain outside. app.js is the canonical compiled correspondence artifact of that component/mount, independently checked by bundle hashes, not a proof of compilation or unrelated UI."
-        }
-      ]
-    },
-    {
-      "path": "formal/KMSBootstrapTransaction.cfg",
-      "sha256": "19bb43a88c9fc58fae50d2e85278ff5c954e2ef5402396f2ac1d97667ef745b2",
-      "disposition": "modeled",
-      "reason": "Register exact finite specification/configuration with mandatory properties and semantic control IDs. Scoped author traces and independent source review are separate from the required new335-case immutable combined run and native implementation evidence.",
-      "models": [
-        {
-          "id": "KMSBootstrapTransaction",
-          "properties": [
-            "TypeOK",
-            "PreCommitFrame",
-            "RejectedDurableFrame",
-            "AdmissionRequired",
-            "OperationAuthorized",
-            "CommitAuthorized",
-            "PublishedAfterCommit",
-            "SuccessfulScope",
-            "PeerFrame",
-            "SuccessComplete"
-          ],
-          "limits": "Intended HTTP transaction seam; base eb03 has confirmed constructor persistence bug; repaired c4d412f source inspected separately, not refinement-proven. Trusted host public NewKMSAliasStore explicitly initializes state and is EXCLUDED from denied HTTP no-write contract. Two regions, one request, optional global logical schema and per-region cursor-row membership; region data is one abstract operation effect bit, not alias CRUD/crypto correctness. Action/alias/key Boolean requirements model bounded operations requiring all three; ListAliases only-action projection is represented by other permissions TRUE, not assertion all operations require alias and key authorization. valid is early wire admission; lateValid is separate target/marker admission after tentative initialization and authorization; no byte/JSON/marker-MAC/SQLite/DDL/Go/HTTP-auth refinement. Captured immutable pure policy, single transaction; no adversarial policy mutation or authorization-before-target-lookup promise. Schema frame is logical table/row state, not WAL/page-byte identity or zero SQL syscall guarantee. Scoped SANY+baseline+13 controls passed at6278443; native Go validation belongs to independent author receipts, not model refinement. Native repair c4d412f source seam independently reviewed; early/late validation order is abstract, not native error-precedence refinement. Scoped627 proof is independent, not canonical current registry proof."
-        }
-      ]
-    },
-    {
-      "path": "formal/KMSBootstrapTransaction.tla",
-      "sha256": "de6d8132c0a4fa623e0734fa7d9fbcd337b058ea1892f741001bf38eb0971d15",
-      "disposition": "modeled",
-      "reason": "Register exact finite specification/configuration with mandatory properties and semantic control IDs. Scoped author traces and independent source review are separate from the required new335-case immutable combined run and native implementation evidence.",
-      "models": [
-        {
-          "id": "KMSBootstrapTransaction",
-          "properties": [
-            "TypeOK",
-            "PreCommitFrame",
-            "RejectedDurableFrame",
-            "AdmissionRequired",
-            "OperationAuthorized",
-            "CommitAuthorized",
-            "PublishedAfterCommit",
-            "SuccessfulScope",
-            "PeerFrame",
-            "SuccessComplete"
-          ],
-          "limits": "Intended HTTP transaction seam; base eb03 has confirmed constructor persistence bug; repaired c4d412f source inspected separately, not refinement-proven. Trusted host public NewKMSAliasStore explicitly initializes state and is EXCLUDED from denied HTTP no-write contract. Two regions, one request, optional global logical schema and per-region cursor-row membership; region data is one abstract operation effect bit, not alias CRUD/crypto correctness. Action/alias/key Boolean requirements model bounded operations requiring all three; ListAliases only-action projection is represented by other permissions TRUE, not assertion all operations require alias and key authorization. valid is early wire admission; lateValid is separate target/marker admission after tentative initialization and authorization; no byte/JSON/marker-MAC/SQLite/DDL/Go/HTTP-auth refinement. Captured immutable pure policy, single transaction; no adversarial policy mutation or authorization-before-target-lookup promise. Schema frame is logical table/row state, not WAL/page-byte identity or zero SQL syscall guarantee. Scoped SANY+baseline+13 controls passed at6278443; native Go validation belongs to independent author receipts, not model refinement. Native repair c4d412f source seam independently reviewed; early/late validation order is abstract, not native error-precedence refinement. Scoped627 proof is independent, not canonical current registry proof."
-        }
-      ]
+      "path": "docs/sakura.md",
+      "sha256": "fe76b422f4b573dfce62014000ac0987ff63dfd1e51cceb8c4f66af774c3486e",
+      "disposition": "documentation",
+      "reason": "Document opt-in Disk configuration subset, actual earlier scoped receipts and current44models/347controls/391 planned cases with60 mandatory E2E. Historical proofs do not establish the merged revision; no VM/AppRun/cloud-console parity or SDK coverage inflation.",
+      "models": []
     },
     {
       "path": "formal/README.md",
-      "sha256": "63e812370a3561c23bec4be1ba0a68993fd723dd7641230b2bb314938290c3c1",
+      "sha256": "0181f1315deae110e75918ac36334b1bb964101f66eff3348b4f717d178877a7",
       "disposition": "documentation",
-      "reason": "Document the current twelve-operation KMS subset, local customer aliases, separate bounded model scopes and exact-revision acceptance requirements; preserve rights/history and unsupported limits.",
+      "reason": "Document opt-in Disk configuration subset, actual earlier scoped receipts and current44models/347controls/391 planned cases with60 mandatory E2E. Historical proofs do not establish the merged revision; no VM/AppRun/cloud-console parity or SDK coverage inflation.",
       "models": []
+    },
+    {
+      "path": "formal/SakuraDiskAdmission.cfg",
+      "sha256": "57c55706f2f372771dc89e183982628e54ad417df487c24e5294c44fca66c2f7",
+      "disposition": "modeled",
+      "reason": "Registers the exact separately authored finite model/config, required invariants, unchanged finite domains and semantic negative controls. Scoped model execution is historical evidence, not a current integrated gate or implementation refinement.",
+      "models": [
+        {
+          "id": "SakuraDiskAdmission",
+          "properties": [
+            "TypeOK",
+            "MappedSubjectUsesExerciseIdentity",
+            "MappedRealmUsesCopiedHostConfig",
+            "NoDefaultActorOnExtractionFailure",
+            "WireHeadersDoNotMapAuthority",
+            "ActorBeforeDispatch",
+            "MarkerBeforeDispatch",
+            "NoUnauthorizedLookup",
+            "DeniedFrame",
+            "AdmissionBeforeLookup",
+            "UnsupportedNoMutation",
+            "FailureNoDisclosure",
+            "ActorFailureStatus",
+            "MarkerFailureStatus",
+            "ConcreteResult"
+          ],
+          "limits": "Finite validated commonActor-class mapping and HTTP admission ordering only. Realm comes from copied host Config, never a commonActor realm field. Direct mode represents valid/invalid trusted leaf embeddings, not public request-selectable modes. Not private context keys/token/session/UTF8/parser validation, DB lease/SQL/locking, all Config syntax, CLI/SDK or Go refinement."
+        }
+      ]
+    },
+    {
+      "path": "formal/SakuraDiskAdmission.tla",
+      "sha256": "fdd4b5bc9f22c58c6665fc6e1d44fe01d39e8506328bb0d39eae1bd640bbf9e2",
+      "disposition": "modeled",
+      "reason": "Registers the exact separately authored finite model/config, required invariants, unchanged finite domains and semantic negative controls. Scoped model execution is historical evidence, not a current integrated gate or implementation refinement.",
+      "models": [
+        {
+          "id": "SakuraDiskAdmission",
+          "properties": [
+            "TypeOK",
+            "MappedSubjectUsesExerciseIdentity",
+            "MappedRealmUsesCopiedHostConfig",
+            "NoDefaultActorOnExtractionFailure",
+            "WireHeadersDoNotMapAuthority",
+            "ActorBeforeDispatch",
+            "MarkerBeforeDispatch",
+            "NoUnauthorizedLookup",
+            "DeniedFrame",
+            "AdmissionBeforeLookup",
+            "UnsupportedNoMutation",
+            "FailureNoDisclosure",
+            "ActorFailureStatus",
+            "MarkerFailureStatus",
+            "ConcreteResult"
+          ],
+          "limits": "Finite validated commonActor-class mapping and HTTP admission ordering only. Realm comes from copied host Config, never a commonActor realm field. Direct mode represents valid/invalid trusted leaf embeddings, not public request-selectable modes. Not private context keys/token/session/UTF8/parser validation, DB lease/SQL/locking, all Config syntax, CLI/SDK or Go refinement."
+        }
+      ]
+    },
+    {
+      "path": "formal/SakuraDiskMetadata.cfg",
+      "sha256": "5b8dfc0d6c00e11d47b50321f28790081ca74e506cc4309ecf6b12a707e582d9",
+      "disposition": "modeled",
+      "reason": "Registers the exact separately authored finite model/config, required invariants, unchanged finite domains and semantic negative controls. Scoped model execution is historical evidence, not a current integrated gate or implementation refinement.",
+      "models": [
+        {
+          "id": "SakuraDiskMetadata",
+          "properties": [
+            "TypeOK",
+            "BindingFrozen",
+            "FailureFrame",
+            "PeerFrame",
+            "FreshCommittedID",
+            "AllocatorOnlyCreate",
+            "CreateExact",
+            "UpdateExact",
+            "DeleteExact",
+            "StoredIDsBound",
+            "ActiveQuota",
+            "QuotaRefusal",
+            "ReadSnapshot"
+          ],
+          "limits": "Atomic metadata state projection only: fixed binding/reopen, committed ID history, selected create/update/delete failure outcomes, peer and read snapshot frames. Not actual100 quota, Generation randomness/CAS, timestamp/description/size/plan parsing, SQL/locking/crash/Go refinement, full tuple-field parsing or authentication. Caller authorization is deliberately separated into Admission, not invented in DiskStore. Three-step cutoff not an API cap."
+        }
+      ]
+    },
+    {
+      "path": "formal/SakuraDiskMetadata.tla",
+      "sha256": "7bf2730f6b9db35ec50fc26622b8388ce0ceff8f84843faf554def85818a76a5",
+      "disposition": "modeled",
+      "reason": "Registers the exact separately authored finite model/config, required invariants, unchanged finite domains and semantic negative controls. Scoped model execution is historical evidence, not a current integrated gate or implementation refinement.",
+      "models": [
+        {
+          "id": "SakuraDiskMetadata",
+          "properties": [
+            "TypeOK",
+            "BindingFrozen",
+            "FailureFrame",
+            "PeerFrame",
+            "FreshCommittedID",
+            "AllocatorOnlyCreate",
+            "CreateExact",
+            "UpdateExact",
+            "DeleteExact",
+            "StoredIDsBound",
+            "ActiveQuota",
+            "QuotaRefusal",
+            "ReadSnapshot"
+          ],
+          "limits": "Atomic metadata state projection only: fixed binding/reopen, committed ID history, selected create/update/delete failure outcomes, peer and read snapshot frames. Not actual100 quota, Generation randomness/CAS, timestamp/description/size/plan parsing, SQL/locking/crash/Go refinement, full tuple-field parsing or authentication. Caller authorization is deliberately separated into Admission, not invented in DiskStore. Three-step cutoff not an API cap."
+        }
+      ]
+    },
+    {
+      "path": "formal/SakuraDisksViewEpoch.cfg",
+      "sha256": "156b316140d894bd9dc0598258d07181fcab5afc6a655516a51bbf4aa0ad41d9",
+      "disposition": "modeled",
+      "reason": "Register bounded Sakura read/write view admission/epoch/ACK/retry/locale projection; exact source inputs and semantic controls are separately checked. No React scheduling/host auth/SQL/compiler refinement or unrelated cloud proof.",
+      "models": [
+        {
+          "id": "SakuraDisksViewEpoch",
+          "properties": [
+            "TypeOK",
+            "AcceptedReadScope",
+            "SuccessfulReadOnly",
+            "RenderedScopeBound",
+            "RenderedResourceBound",
+            "StaleReadFrame",
+            "StaleWriteFrame",
+            "NavigationACKFrame",
+            "AckClosesForm",
+            "AckClearsDraft",
+            "ReadRetryOnly",
+            "SingleWriteSend",
+            "LocaleFrame",
+            "CancelDraftClear"
+          ],
+          "limits": "Original bounded UI safety projection only, not React/JS/AbortController scheduling or server/SQL/IAM/token authority proof. Opaque scope combines trusted principal/session/globalnavigation/endpoint; actualcredential/contextKey production remainstrustedcaller. Read responses may complete afterabort/headers, no zero-network/body-cancel guarantee. No orphan-loading/liveness/hungread promise. ACK is actual2xxresponse beforeCreatebody/metadata, not serverrollback/idempotency underunknownnetworkoutcome. Two opens/onewriteintent excludearbitrarynew-sessionwrite concurrency. Independent request/frame snapshots monitoractualpublishedview changes, not ghost-only mutations. Nativepayloadbytes/schema/confirmation/keyentropy/quota/APIwire/SDK andauthenticatedcloudvisualparity areoutside. Shared main scope is ONLY Sakura fixedcapabilityconfiguration/contextKey+request mount, notAWS/GCP/Azure behavior; shell/CSS/neutralcatalogstate not proved. The generated app.js scope binds only the canonical compiled artifact of this separately declared Sakura child/mount projection; it does not prove bundler/compiler correctness or unrelated AWS/GCP/Azure behavior."
+        }
+      ]
+    },
+    {
+      "path": "formal/SakuraDisksViewEpoch.tla",
+      "sha256": "c0244db3a805dc1a115e2a41ada28d3b53a7aca6034ff6a41740c3da04b765e2",
+      "disposition": "modeled",
+      "reason": "Register bounded Sakura read/write view admission/epoch/ACK/retry/locale projection; exact source inputs and semantic controls are separately checked. No React scheduling/host auth/SQL/compiler refinement or unrelated cloud proof.",
+      "models": [
+        {
+          "id": "SakuraDisksViewEpoch",
+          "properties": [
+            "TypeOK",
+            "AcceptedReadScope",
+            "SuccessfulReadOnly",
+            "RenderedScopeBound",
+            "RenderedResourceBound",
+            "StaleReadFrame",
+            "StaleWriteFrame",
+            "NavigationACKFrame",
+            "AckClosesForm",
+            "AckClearsDraft",
+            "ReadRetryOnly",
+            "SingleWriteSend",
+            "LocaleFrame",
+            "CancelDraftClear"
+          ],
+          "limits": "Original bounded UI safety projection only, not React/JS/AbortController scheduling or server/SQL/IAM/token authority proof. Opaque scope combines trusted principal/session/globalnavigation/endpoint; actualcredential/contextKey production remainstrustedcaller. Read responses may complete afterabort/headers, no zero-network/body-cancel guarantee. No orphan-loading/liveness/hungread promise. ACK is actual2xxresponse beforeCreatebody/metadata, not serverrollback/idempotency underunknownnetworkoutcome. Two opens/onewriteintent excludearbitrarynew-sessionwrite concurrency. Independent request/frame snapshots monitoractualpublishedview changes, not ghost-only mutations. Nativepayloadbytes/schema/confirmation/keyentropy/quota/APIwire/SDK andauthenticatedcloudvisualparity areoutside. Shared main scope is ONLY Sakura fixedcapabilityconfiguration/contextKey+request mount, notAWS/GCP/Azure behavior; shell/CSS/neutralcatalogstate not proved. The generated app.js scope binds only the canonical compiled artifact of this separately declared Sakura child/mount projection; it does not prove bundler/compiler correctness or unrelated AWS/GCP/Azure behavior."
+        }
+      ]
+    },
+    {
+      "path": "formal/SakuraStartupAdmission.cfg",
+      "sha256": "224322c1848f30bfa8f66e03bffa21bfbe96157e2a8f326b0f4fccf149a73902",
+      "disposition": "modeled",
+      "reason": "Registers the exact separately authored finite model/config, required invariants, unchanged finite domains and semantic negative controls. Scoped model execution is historical evidence, not a current integrated gate or implementation refinement.",
+      "models": [
+        {
+          "id": "SakuraStartupAdmission",
+          "properties": [
+            "TypeOK",
+            "NoEffectsOnRefusal",
+            "ValidationPrecedesEffects",
+            "AcceptedConfigExact",
+            "ValidAdmissionAvailable",
+            "DisabledNoSakura",
+            "EnabledOnlyAuthenticated",
+            "SchemaRequiresDatabase",
+            "RegistrationRequiresSchema",
+            "TokenOnlyAuthenticated",
+            "StartupComplete"
+          ],
+          "limits": "Pure parsed-flag admission and startup order abstraction only. Absent fields have empty invalid defaults; explicit empty values count as supplied. Default disabled may create general host DB/listener/token (token skipped when unsafe) but no Sakura schema/provider. Assumes later infrastructure steps succeed; does not prove full constructor atomicity, listener/database/token syscalls, failures/cleanup, flag parser or regex/UTF8 refinement, host authentication, token cryptography, DB lease, SDK/HTTP/UI or Go implementation refinement. Shared server.go scope covers only optional provider setup/registration under validated scope; other providers/auth/routing and all failure rollback are excluded."
+        }
+      ]
+    },
+    {
+      "path": "formal/SakuraStartupAdmission.tla",
+      "sha256": "a8b62c2c7da6f72a1c8096b8ae774e51a9fa5d3df67ce1c6735b5392352f8fa7",
+      "disposition": "modeled",
+      "reason": "Registers the exact separately authored finite model/config, required invariants, unchanged finite domains and semantic negative controls. Scoped model execution is historical evidence, not a current integrated gate or implementation refinement.",
+      "models": [
+        {
+          "id": "SakuraStartupAdmission",
+          "properties": [
+            "TypeOK",
+            "NoEffectsOnRefusal",
+            "ValidationPrecedesEffects",
+            "AcceptedConfigExact",
+            "ValidAdmissionAvailable",
+            "DisabledNoSakura",
+            "EnabledOnlyAuthenticated",
+            "SchemaRequiresDatabase",
+            "RegistrationRequiresSchema",
+            "TokenOnlyAuthenticated",
+            "StartupComplete"
+          ],
+          "limits": "Pure parsed-flag admission and startup order abstraction only. Absent fields have empty invalid defaults; explicit empty values count as supplied. Default disabled may create general host DB/listener/token (token skipped when unsafe) but no Sakura schema/provider. Assumes later infrastructure steps succeed; does not prove full constructor atomicity, listener/database/token syscalls, failures/cleanup, flag parser or regex/UTF8 refinement, host authentication, token cryptography, DB lease, SDK/HTTP/UI or Go implementation refinement. Shared server.go scope covers only optional provider setup/registration under validated scope; other providers/auth/routing and all failure rollback are excluded."
+        }
+      ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "1d25fab63c198315c12a4e42b5bcdeabe543853e8417705c92f9ab471fb88cac",
+      "sha256": "641b8ab3e2ecf49a3287501713b048a0cf435af90289c8a4b70fa3bccd7463c4",
       "disposition": "formal-infrastructure",
-      "reason": "Add mandatory registry/model/property/control inventories and individual-removal negatives without changing existing checker semantics, tool pins, bounds, timeouts or prior models.",
+      "reason": "Add Sakura metadata/admission/startup/view models and literal required properties/control sets while preserving all40 incoming main model objects,295 control IDs, parser/result/deadline requirements. Extend exact artifact scope guard with a missing-artifact negative fixture; no guarantee follows from registration alone.",
       "models": []
     },
     {
-      "path": "internal/aws/kms_alias_failure_frames_test.go",
-      "sha256": "9a258e737ee4ad62f25057394ce03d007bbcc0f5032e82c9041a555c387bbed7",
-      "disposition": "test-support",
-      "reason": "Add real known-policy cold native/SDK denial frames including schema and cursor authority, borrowed transaction ownership, query/metadata/commit faults and repair. Preserve old assertions; no mocks, credential output, lowered floors, timeout changes or proof-by-test-count.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/kms_alias_name_errors_test.go",
-      "sha256": "dd0b930c0822a2116542308763976bbcf014e1c6b1818066fea0e4e760d6d106",
-      "disposition": "test-support",
-      "reason": "Preserve all existing acceptance assertions and add literal alias schemas, actual native SDK/shared-state and mounted UI regressions; tests support concrete contracts without substituting for formal or whole-quality evidence.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/kms_aliases.go",
-      "sha256": "f956e50ba6d4adb25b2838dc4e169ac4d72b735466d338512ebe9342c8c4ff93",
+      "path": "internal/sakura/iaas/disk_http.go",
+      "sha256": "a9982a64904c8f859562ae8a9383ab847edc456cccfd7d321e643a9ef0f78428",
       "disposition": "modeled",
-      "reason": "Three separate finite contracts: native alias catalog admission/cursor/failure frames; concrete-key crypto authorization/commit; and first-use HTTP bootstrap, authorization, operation and publication in one caller-owned transaction. Trusted public initializing constructor is excluded from denied-HTTP no-write scope. Real cold known-policy403/schema+allrows, real SQLite faults and SDK independently exercise the concrete bridge; not Go/SQL refinement.",
+      "reason": "Own native HTTP admission checks trusted actor before public dummy marker, route/body and saved-resource lookup. JSON/body/query/ID/neutral-marker validation remains explicitly native-tested rather than falsely proven by the admission abstraction.",
       "models": [
         {
-          "id": "KMSAliasCatalog",
+          "id": "SakuraDiskAdmission",
           "properties": [
             "TypeOK",
-            "AcknowledgedSuccess",
-            "MutationAuthority",
-            "ConcreteTarget",
+            "MappedSubjectUsesExerciseIdentity",
+            "MappedRealmUsesCopiedHostConfig",
+            "NoDefaultActorOnExtractionFailure",
+            "WireHeadersDoNotMapAuthority",
+            "ActorBeforeDispatch",
+            "MarkerBeforeDispatch",
+            "NoUnauthorizedLookup",
+            "DeniedFrame",
+            "AdmissionBeforeLookup",
+            "UnsupportedNoMutation",
+            "FailureNoDisclosure",
+            "ActorFailureStatus",
+            "MarkerFailureStatus",
+            "ConcreteResult"
+          ],
+          "limits": "Finite validated commonActor-class mapping and HTTP admission ordering only. Realm comes from copied host Config, never a commonActor realm field. Direct mode represents valid/invalid trusted leaf embeddings, not public request-selectable modes. Not private context keys/token/session/UTF8/parser validation, DB lease/SQL/locking, all Config syntax, CLI/SDK or Go refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/sakura/iaas/disk_http_test.go",
+      "sha256": "1cf21b4e4ec3bd3a23b169f6e8e8f8fbb4b017ef9ebcd2b0a6b5ada3d5f04196",
+      "disposition": "test-support",
+      "reason": "Real native SQLite/HTTP/flag/CLI acceptance and failure/repair counterpart only, not modeled implementation. New mandatory native two-CLI wrapper preserves all51 existing Conformance method AST bodies; private generated fixture credentials never become provider authority or SDK success claims.",
+      "models": []
+    },
+    {
+      "path": "internal/sakura/iaas/disk_sdk_neutral_icon_test.go",
+      "sha256": "bf079d676f4bd835c41cc1794193999c764f1cc19ea8a197ddb495c4fc8ce367",
+      "disposition": "test-support",
+      "reason": "Real native SQLite/HTTP/flag/CLI acceptance and failure/repair counterpart only, not modeled implementation. New mandatory native two-CLI wrapper preserves all51 existing Conformance method AST bodies; private generated fixture credentials never become provider authority or SDK success claims.",
+      "models": []
+    },
+    {
+      "path": "internal/sakura/iaas/disk_store.go",
+      "sha256": "f09139d416b4b055c589f0a35675591a337890d9349e86d3912df0544348706f",
+      "disposition": "modeled",
+      "reason": "Own fixed-scope Disk metadata state persists actual rows, monotonic issued IDs and atomic create/update/delete refusal. Native tests cover real SQL ACK/rollback/corruption/reopen independently of the bounded model.",
+      "models": [
+        {
+          "id": "SakuraDiskMetadata",
+          "properties": [
+            "TypeOK",
+            "BindingFrozen",
             "FailureFrame",
-            "PeerRegionFrame",
-            "MutationEffect",
-            "CreationIdentity",
-            "AdmissionBudgets",
-            "RevisionFresh",
-            "ListAuthorized",
-            "CursorBound",
-            "ListPageExact",
-            "ListMoreExact",
-            "ContinuationAfterLast",
-            "ReadFrame",
-            "NoPartialRead"
-          ],
-          "limits": "Independent bounded alias catalog CRUD/pagination abstraction, not cryptography/crypto orchestration or Go/SQLite/HTTP refinement. Fixed same-type/usage concrete keyparents; no DeleteKey/keyrecreation/aliases-as-target/managedaliases/grants/ABAC. MAC authority/integrity are abstract predicates; marker has NO expiry. Atomic write/cursor/read transitions assume sameDB Tx and pure immutable policy; no actual SQL scan/locking/RowsAffected/commit implementation proof. Four reachable seeds plus three requests are not unbounded quotas1000/50 or complete workflows. Failed request identity is intentionally canonicalized; only operation category/outcome/before-frame retained, and checked successful-input properties are success-guarded. Timestamps/birthlabels only model update identity preservation, not physicalclock/UUID entropy. Public JSON projection/wireparser/UI/hostauthentication independent."
-        },
-        {
-          "id": "KMSAliasCrypto",
-          "properties": [
-            "TypeOK",
-            "TransactionSnapshotStable",
-            "AliasResolutionCurrent",
-            "OmittedDecryptUsesBlob",
-            "ConcreteKeyAuthorization",
-            "AuthorizedCryptoStages",
-            "AuthorizationBeforeMismatch",
-            "NoPublicationBeforeCommit",
-            "FailureCounterFrame",
-            "FailureNoPublication",
-            "WriteFailureRefused",
-            "PublishedKeyBound",
-            "EncryptCounterExact",
-            "DecryptCounterFrame"
-          ],
-          "limits": "New alias selection/concrete authorization/ciphertext match/commit publication finite projection. Not AES/nonce/HMAC, raw ARN/JSON/SigV4/IAM parsing, host authority, arbitrary policies, actualSQLite locking/commit/Go refinement, retries/unbounded history, alias CRUD/capacity/pagination or full lifecycle proof. Trusted authorizer is pure captured policy or SELECT on provided transaction; immediate transaction serialization is an assumption grounded in current core store, not proved. Native crypto/error classes abstract existing KMS helper behavior. Choose phase guard is factored outside its binder by exact logical equivalence, not a state-space reduction."
-        },
-        {
-          "id": "KMSBootstrapTransaction",
-          "properties": [
-            "TypeOK",
-            "PreCommitFrame",
-            "RejectedDurableFrame",
-            "AdmissionRequired",
-            "OperationAuthorized",
-            "CommitAuthorized",
-            "PublishedAfterCommit",
-            "SuccessfulScope",
             "PeerFrame",
-            "SuccessComplete"
+            "FreshCommittedID",
+            "AllocatorOnlyCreate",
+            "CreateExact",
+            "UpdateExact",
+            "DeleteExact",
+            "StoredIDsBound",
+            "ActiveQuota",
+            "QuotaRefusal",
+            "ReadSnapshot"
           ],
-          "limits": "Intended HTTP transaction seam; base eb03 has confirmed constructor persistence bug; repaired c4d412f source inspected separately, not refinement-proven. Trusted host public NewKMSAliasStore explicitly initializes state and is EXCLUDED from denied HTTP no-write contract. Two regions, one request, optional global logical schema and per-region cursor-row membership; region data is one abstract operation effect bit, not alias CRUD/crypto correctness. Action/alias/key Boolean requirements model bounded operations requiring all three; ListAliases only-action projection is represented by other permissions TRUE, not assertion all operations require alias and key authorization. valid is early wire admission; lateValid is separate target/marker admission after tentative initialization and authorization; no byte/JSON/marker-MAC/SQLite/DDL/Go/HTTP-auth refinement. Captured immutable pure policy, single transaction; no adversarial policy mutation or authorization-before-target-lookup promise. Schema frame is logical table/row state, not WAL/page-byte identity or zero SQL syscall guarantee. Scoped SANY+baseline+13 controls passed at6278443; native Go validation belongs to independent author receipts, not model refinement. Native repair c4d412f source seam independently reviewed; early/late validation order is abstract, not native error-precedence refinement. Scoped627 proof is independent, not canonical current registry proof."
+          "limits": "Atomic metadata state projection only: fixed binding/reopen, committed ID history, selected create/update/delete failure outcomes, peer and read snapshot frames. Not actual100 quota, Generation randomness/CAS, timestamp/description/size/plan parsing, SQL/locking/crash/Go refinement, full tuple-field parsing or authentication. Caller authorization is deliberately separated into Admission, not invented in DiskStore. Three-step cutoff not an API cap."
         }
       ]
     },
     {
-      "path": "internal/aws/kms_aliases_test.go",
-      "sha256": "871b45379481ac110822f84e1522d9961febfac1e296c8bf2edd243843c987d3",
+      "path": "internal/sakura/iaas/disk_store_test.go",
+      "sha256": "c9800576fe32d1898428da617c66758bfa66214f97bacc65ca66f48991873fc5",
       "disposition": "test-support",
-      "reason": "Preserve all existing acceptance assertions and add literal alias schemas, actual native SDK/shared-state and mounted UI regressions; tests support concrete contracts without substituting for formal or whole-quality evidence.",
+      "reason": "Real native SQLite/HTTP/flag/CLI acceptance and failure/repair counterpart only, not modeled implementation. New mandatory native two-CLI wrapper preserves all51 existing Conformance method AST bodies; private generated fixture credentials never become provider authority or SDK success claims.",
       "models": []
     },
     {
-      "path": "internal/aws/kms_http.go",
-      "sha256": "e1816d9d19f5a1d7f225f61aae5774d8a36b5cb8fc33909884a3a8d50b31ec3d",
+      "path": "internal/sakura/provider.go",
+      "sha256": "bdacc58d074d0889e351a7d01d32e27928ae803260d8462731cbdf9daea1bf9c",
       "disposition": "modeled",
-      "reason": "Retain normalized KMS routing/identity-policy admission while adding four strict alias codecs and delegation to the independently modeled native alias leaf. This binding covers normalized protocol admission only, NOT raw JSON/Unicode/header decoding, operation-specific CRUD/paging state or response serialization; native schema/HTTP/SDK tests independently verify those boundaries.",
+      "reason": "Own borrowed-DB factory uses actual private typed Actor getter; copies fixed Config labels and maps ExerciseIdentity, not credential role/header claims, to leaf owner. Store constructor binding/refusal and generic source validation are separate native evidence.",
       "models": [
         {
-          "id": "KMSProtocolAdmission",
+          "id": "SakuraDiskAdmission",
           "properties": [
             "TypeOK",
-            "NoCrossServiceFallback",
-            "InfraNotDeny",
-            "MissingIdentityDenied",
-            "NoSuccessWithoutKMSTarget",
-            "NoAuthorityFromWireMetadata"
+            "MappedSubjectUsesExerciseIdentity",
+            "MappedRealmUsesCopiedHostConfig",
+            "NoDefaultActorOnExtractionFailure",
+            "WireHeadersDoNotMapAuthority",
+            "ActorBeforeDispatch",
+            "MarkerBeforeDispatch",
+            "NoUnauthorizedLookup",
+            "DeniedFrame",
+            "AdmissionBeforeLookup",
+            "UnsupportedNoMutation",
+            "FailureNoDisclosure",
+            "ActorFailureStatus",
+            "MarkerFailureStatus",
+            "ConcreteResult"
           ],
-          "limits": "Normalized protocol/identity-policy admission abstraction after trusted outer exercise identity selection; not raw HTTP/SigV4 parsing or signature authentication, local token/Access or tenant-isolation proof, full IAM semantics, byte bodies/AES, real DB faults/transactions, Go refinement, timing/concurrency/crash proof or other-service authorization. Other route is only handoff, not modeled S3 success. Body-read-barrier native tests and nine actual Gateway metadata cases independently exercise the intended bridge; new tests and this model are initially UNRUN. Shared Gateway/server/SSM applicability is ONLY the new configured KMS route/module declaration, not unchanged AWS branches, nil-module/constructor behavior or whole provider wiring. Native tests are separate and initially unrun."
+          "limits": "Finite validated commonActor-class mapping and HTTP admission ordering only. Realm comes from copied host Config, never a commonActor realm field. Direct mode represents valid/invalid trusted leaf embeddings, not public request-selectable modes. Not private context keys/token/session/UTF8/parser validation, DB lease/SQL/locking, all Config syntax, CLI/SDK or Go refinement."
         }
       ]
     },
     {
-      "path": "internal/aws/kms_store.go",
-      "sha256": "0a6a2adb695fa375c744157cd38df5a833a9d4cb51407bd55358c2fb5dfeaf74",
-      "disposition": "modeled",
-      "reason": "Extract unchanged concrete Encrypt/Decrypt bodies into caller-owned transaction helpers, used by alias resolution and concrete-target authorization before commit/publication. Existing concrete-key/AES/counter behavior is protected by native regressions; this is not a cryptographic or SQL proof.",
-      "models": [
-        {
-          "id": "KMSAliasCrypto",
-          "properties": [
-            "TypeOK",
-            "TransactionSnapshotStable",
-            "AliasResolutionCurrent",
-            "OmittedDecryptUsesBlob",
-            "ConcreteKeyAuthorization",
-            "AuthorizedCryptoStages",
-            "AuthorizationBeforeMismatch",
-            "NoPublicationBeforeCommit",
-            "FailureCounterFrame",
-            "FailureNoPublication",
-            "WriteFailureRefused",
-            "PublishedKeyBound",
-            "EncryptCounterExact",
-            "DecryptCounterFrame"
-          ],
-          "limits": "New alias selection/concrete authorization/ciphertext match/commit publication finite projection. Not AES/nonce/HMAC, raw ARN/JSON/SigV4/IAM parsing, host authority, arbitrary policies, actualSQLite locking/commit/Go refinement, retries/unbounded history, alias CRUD/capacity/pagination or full lifecycle proof. Trusted authorizer is pure captured policy or SELECT on provided transaction; immediate transaction serialization is an assumption grounded in current core store, not proved. Native crypto/error classes abstract existing KMS helper behavior. Choose phase guard is factored outside its binder by exact logical equivalence, not a state-space reduction."
-        }
-      ]
+      "path": "internal/sakura/provider_test.go",
+      "sha256": "f1d5cd66ff347d71e774bb44be3a4e2de700c00230cb4a2e2e3c36bb9b366a6e",
+      "disposition": "test-support",
+      "reason": "Real native SQLite/HTTP/flag/CLI acceptance and failure/repair counterpart only, not modeled implementation. New mandatory native two-CLI wrapper preserves all51 existing Conformance method AST bodies; private generated fixture credentials never become provider authority or SDK success claims.",
+      "models": []
     },
     {
       "path": "internal/server/apidocs/openapi.json",
-      "sha256": "4b76ed58fd41796a4e1fe9dd106bf677b9c98c9dc427031e579876a56a5770a2",
+      "sha256": "e555b450617bde72c1dbb35e8473c2b158162c9582be133e6320d01ad5f3c65d",
       "disposition": "presentation",
-      "reason": "Static API/schema/example or canonical console build-input/digest declaration. Preserve existing operation IDs, all main examples/media and original dependency rights; this metadata is not an API/state implementation proof.",
+      "reason": "Add five exact Sakura Disk REST paths/methods/schemas/static examples while preserving61 existing operation IDs and old JSON1.0/1.1/query/XML media/examples. Static response examples are not live state; actual native/Scalar execution is separate. Correct only inherited DynamoDB no-console description to the existing bounded table/item console; all other OpenAPI data remain byte-equivalent when description is excluded.",
       "models": []
     },
     {
-      "path": "internal/server/kms_integration_test.go",
-      "sha256": "dbc658e592e8b210b08af7129c033b3cefac30bc00ff1c232f8776000db07be2",
+      "path": "internal/server/sakura_provider.go",
+      "sha256": "9dcca18054fe42104c7fe14bd21ccb1d923482fc7b7db546b0f63d3e9202177f",
+      "disposition": "modeled",
+      "reason": "Validated copied optional configuration enables only the declared metadata subset. Default nil scope leaves Sakura capabilities absent; no implicit owner, credential, UI/SDK completeness or physical readiness is advertised. Conditional configuration corresponds to startup admission; strings/capability projection and exact bounds are native checks.",
+      "models": [
+        {
+          "id": "SakuraStartupAdmission",
+          "properties": [
+            "TypeOK",
+            "NoEffectsOnRefusal",
+            "ValidationPrecedesEffects",
+            "AcceptedConfigExact",
+            "ValidAdmissionAvailable",
+            "DisabledNoSakura",
+            "EnabledOnlyAuthenticated",
+            "SchemaRequiresDatabase",
+            "RegistrationRequiresSchema",
+            "TokenOnlyAuthenticated",
+            "StartupComplete"
+          ],
+          "limits": "Pure parsed-flag admission and startup order abstraction only. Absent fields have empty invalid defaults; explicit empty values count as supplied. Default disabled may create general host DB/listener/token (token skipped when unsafe) but no Sakura schema/provider. Assumes later infrastructure steps succeed; does not prove full constructor atomicity, listener/database/token syscalls, failures/cleanup, flag parser or regex/UTF8 refinement, host authentication, token cryptography, DB lease, SDK/HTTP/UI or Go implementation refinement. Shared server.go scope covers only optional provider setup/registration under validated scope; other providers/auth/routing and all failure rollback are excluded."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/sakura_provider_test.go",
+      "sha256": "bede3598613dd1054d7789d74a394fe31f8b9d447f5c58ffb7e4872ff03308ba",
       "disposition": "test-support",
-      "reason": "Preserve all existing acceptance assertions and add literal alias schemas, actual native SDK/shared-state and mounted UI regressions; tests support concrete contracts without substituting for formal or whole-quality evidence.",
+      "reason": "Real native SQLite/HTTP/flag/CLI acceptance and failure/repair counterpart only, not modeled implementation. New mandatory native two-CLI wrapper preserves all51 existing Conformance method AST bodies; private generated fixture credentials never become provider authority or SDK success claims.",
       "models": []
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "136e84e93dc5d874e9102cf20583fa7b83bd0dc0b6b80f9ed03972177c0e814a",
+      "sha256": "1b63dea003333b60f8279a71bca72c54007a29dbeb6b5aa3a32279296c17239d",
       "disposition": "modeled",
-      "reason": "Stateless KMS capability-map declaration of twelve native operations and bounded customer-alias limits on existing configured KMS composition. The normalized configured-module protocol contract is the referenced seam; capability JSON serialization, constructor failure/whole wiring and every other service are NOT modeled and are independently asserted by native/default-server/SDK tests.",
+      "reason": "Only optional constructor and Registry hook plus truthful capability wrapper changed. NewWithProviders opens core DB before optional Sakura construction; nil scope does not construct/register Sakura. Shared composition binding is success-path only and does not claim all-provider atomic rollback or authentication of raw trusted embeddings.",
       "models": [
         {
-          "id": "KMSProtocolAdmission",
+          "id": "SakuraStartupAdmission",
           "properties": [
             "TypeOK",
-            "NoCrossServiceFallback",
-            "InfraNotDeny",
-            "MissingIdentityDenied",
-            "NoSuccessWithoutKMSTarget",
-            "NoAuthorityFromWireMetadata"
+            "NoEffectsOnRefusal",
+            "ValidationPrecedesEffects",
+            "AcceptedConfigExact",
+            "ValidAdmissionAvailable",
+            "DisabledNoSakura",
+            "EnabledOnlyAuthenticated",
+            "SchemaRequiresDatabase",
+            "RegistrationRequiresSchema",
+            "TokenOnlyAuthenticated",
+            "StartupComplete"
           ],
-          "limits": "Normalized protocol/identity-policy admission abstraction after trusted outer exercise identity selection; not raw HTTP/SigV4 parsing or signature authentication, local token/Access or tenant-isolation proof, full IAM semantics, byte bodies/AES, real DB faults/transactions, Go refinement, timing/concurrency/crash proof or other-service authorization. Other route is only handoff, not modeled S3 success. Body-read-barrier native tests and nine actual Gateway metadata cases independently exercise the intended bridge; new tests and this model are initially UNRUN. Shared Gateway/server/SSM applicability is ONLY the new configured KMS route/module declaration, not unchanged AWS branches, nil-module/constructor behavior or whole provider wiring. Native tests are separate and initially unrun."
+          "limits": "Pure parsed-flag admission and startup order abstraction only. Absent fields have empty invalid defaults; explicit empty values count as supplied. Default disabled may create general host DB/listener/token (token skipped when unsafe) but no Sakura schema/provider. Assumes later infrastructure steps succeed; does not prove full constructor atomicity, listener/database/token syscalls, failures/cleanup, flag parser or regex/UTF8 refinement, host authentication, token cryptography, DB lease, SDK/HTTP/UI or Go implementation refinement. Shared server.go scope covers only optional provider setup/registration under validated scope; other providers/auth/routing and all failure rollback are excluded."
         }
       ]
+    },
+    {
+      "path": "internal/server/web/app.css",
+      "sha256": "dc52374aac62f6614a9359f38d7440d3fc3aa9daa5f6e034d71cb7727b60e3f3",
+      "disposition": "presentation",
+      "reason": "Canonical style/build-input/digest presentation artifact for the bounded Sakura shell and shared console; fixed dependencies and original notices preserved. No native API/authority/state guarantee from CSS or metadata.",
+      "models": []
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "b11d36f0d7b75f1cfda8238dbdfb8fee187cb36262eaf317f5c3671379bf6527",
+      "sha256": "44b9f8a25d57d15efbc06195b0e70224c7234a58088568445a2c91bf4c7f18c1",
       "disposition": "modeled",
-      "reason": "Canonical compiled output of the added aliases component/mount; verified build-input/asset hashes establish correspondence. The finite model does not execute/prove minified JavaScript, compiler correctness, CSS or unrelated bundled services.",
+      "reason": "Canonical compiled artifact of separately bound Sakura child/mount source inputs plus unchanged Secrets reveal/metadata projections. Exact22-package source/rights and digest checks bridge the build; these finite source projections do not prove a JavaScript compiler, CSS/shell or unrelated cloud behavior. Fresh combined actual-browser execution is still required.",
       "models": [
         {
-          "id": "KMSAliasesViewEpoch",
+          "id": "SakuraDisksViewEpoch",
           "properties": [
             "TypeOK",
-            "CurrentListOutcome",
-            "NoCachedRowsOnFailure",
-            "CurrentTargetMetadata",
-            "ClosedFormHasNoTarget",
+            "AcceptedReadScope",
+            "SuccessfulReadOnly",
+            "RenderedScopeBound",
+            "RenderedResourceBound",
+            "StaleReadFrame",
+            "StaleWriteFrame",
+            "NavigationACKFrame",
             "AckClosesForm",
             "AckClearsDraft",
-            "ReadRetryNeverWrites",
-            "OnlyVerifiedTargetSubmitted",
-            "DeleteRequiresExactConfirmation",
-            "LocalePreservesIntent"
+            "ReadRetryOnly",
+            "SingleWriteSend",
+            "LocaleFrame",
+            "CancelDraftClear"
           ],
-          "limits": "Finite UI protocol abstraction, not JS/React/Cloudscape/HTTP/SQL/IAM/crypto refinement or liveness. Initial key-list/Describe lookup completion is abstracted because actual source disables selection until it finishes; later target reads may overlap. Target/list revisions normalized after these reads. Excludes all parser/format/pagination/permission semantics, arbitrary key sets, repeated forms beyond bound, network ambiguity without ACK and full AWS console parity. Current list outcome and target metadata are stored fields, not derived tautologies. Retired-list mutation jointly bypasses redundant captured-object/active/abort checks; submit-target mutation abstracts both button and handler defenses. Retry mutant creates actual second pending write plus request counter, not a ghost-only edit. Root parent context key/principal binding is assumed; locale frame is only this model state, not the locale provider. Parent kms.jsx/main.jsx declarations bind only the Aliases mount and supplied region/principal/key identity; other KMS/general services remain outside. app.js is the canonical compiled correspondence artifact of that component/mount, independently checked by bundle hashes, not a proof of compilation or unrelated UI."
+          "limits": "Original bounded UI safety projection only, not React/JS/AbortController scheduling or server/SQL/IAM/token authority proof. Opaque scope combines trusted principal/session/globalnavigation/endpoint; actualcredential/contextKey production remainstrustedcaller. Read responses may complete afterabort/headers, no zero-network/body-cancel guarantee. No orphan-loading/liveness/hungread promise. ACK is actual2xxresponse beforeCreatebody/metadata, not serverrollback/idempotency underunknownnetworkoutcome. Two opens/onewriteintent excludearbitrarynew-sessionwrite concurrency. Independent request/frame snapshots monitoractualpublishedview changes, not ghost-only mutations. Nativepayloadbytes/schema/confirmation/keyentropy/quota/APIwire/SDK andauthenticatedcloudvisualparity areoutside. Shared main scope is ONLY Sakura fixedcapabilityconfiguration/contextKey+request mount, notAWS/GCP/Azure behavior; shell/CSS/neutralcatalogstate not proved. The generated app.js scope binds only the canonical compiled artifact of this separately declared Sakura child/mount projection; it does not prove bundler/compiler correctness or unrelated AWS/GCP/Azure behavior."
+        },
+        {
+          "id": "SecretsRevealEpoch",
+          "properties": [
+            "TypeOK",
+            "NoUnmountedDisplay",
+            "FreshEmissionHistory",
+            "ReturnedARNMatches",
+            "VisibleContextMatches"
+          ],
+          "limits": "Finite explicit-retrieve/display model, not React, DOM, AbortController, memory zeroization or implementation refinement. Only the successful response path is modeled; native store/IAM must authorize before returning any secret. A returned ARN can differ and must be rejected. Retrieve, Hide and navigation invalidate epochs; unmount also clears visible state. Parent must remount on region/principal changes. Emission history captures the context at each acceptance so later Hide/navigation cannot relabel an earlier stale acceptance. Draft entry, mutation atomicity and form layout are outside this model. Parent main.jsx scope binds only Secrets routing/remount key (region/principal/navigation); the generated app.js binding is the canonical compiled artifact of those source inputs, independently checked by bundle/asset hashes. It does not model unrelated existing console services or prove JavaScript compilation."
+        },
+        {
+          "id": "SecretMetadataViewEpoch",
+          "properties": [
+            "TypeOK",
+            "MetadataRequestsOnly",
+            "CursorRequestBound",
+            "NoStaleCallbackAcceptance",
+            "NoStaleRenderedMetadata",
+            "NoStaleRenderedError",
+            "LoadingTracksLatest",
+            "PendingClearsMetadata",
+            "NoRowsOnError",
+            "ValidatedMetadataOnly",
+            "CurrentPageOnly",
+            "LocalePreservesQuery",
+            "ParentRevealClearedForMetadata"
+          ],
+          "limits": "Scoped metadata-child contract and the parent tab-change invalidate call only. A prior-parent-reveal Boolean models clearing visible state on entry, not pending GetSecretValue replies, byte erasure, old asyncRetrieve, disclosure channels or SQL. Opaque cursor provenance is an annotation, not decoding or HMAC validation. A valid-response Boolean abstracts the concrete metadata parser. Host callback identity/remount and active scope are assumptions, not main navigation/authentication proofs. Abort leaves callbacks schedulable to check guards; actual browser Abort may prevent JavaScript delivery. Locale transitions preserve query state, not arbitrary React scheduling. Finite safety projection only: no stable history snapshot, page completeness, backend/JSON/IAM refinement, whole React proof or liveness. Source scope on the parent and bundle is limited to this tab and child projection; unrelated retrieval/mutation code is excluded."
         }
       ]
     },
     {
+      "path": "scripts/check-assets.py",
+      "sha256": "78244f8eb92f1cd1ca71bf7e6d65809243430c1ef817b766f6eaae26e3cd0215",
+      "disposition": "validation-tooling",
+      "reason": "Extend existing strict asset/provenance checks with exact five new operation IDs while preserving every61 prior ID and existing native/wire/JSON/rights rejection checks; no exclusions or gate weakening.",
+      "models": []
+    },
+    {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "b46d09b3be3b5af5612f1f3250007215be9fd64a69d509fd8091ed411db6422d",
+      "sha256": "a6bfe8155c7ef9104c86b15181530664b57fe9dcd8d7c82fbe29323fcc0ca2c5",
       "disposition": "formal-infrastructure",
-      "reason": "Add mandatory registry/model/property/control inventories and individual-removal negatives without changing existing checker semantics, tool pins, bounds, timeouts or prior models.",
+      "reason": "Add Sakura metadata/admission/startup/view models and literal required properties/control sets while preserving all40 incoming main model objects,295 control IDs, parser/result/deadline requirements. Extend exact artifact scope guard with a missing-artifact negative fixture; no guarantee follows from registration alone.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "1cda00e29dbf092643e50be8311cde44d6bf946159f980514781d2e3efae3428",
+      "sha256": "76002e0457dbd16b2a7c2482739fb5ab7646d490dbe700b9f6f8d711f8f84e02",
       "disposition": "formal-infrastructure",
-      "reason": "Add mandatory registry/model/property/control inventories and individual-removal negatives without changing existing checker semantics, tool pins, bounds, timeouts or prior models.",
+      "reason": "Add Sakura metadata/admission/startup/view models and literal required properties/control sets while preserving all40 incoming main model objects,295 control IDs, parser/result/deadline requirements. Extend exact artifact scope guard with a missing-artifact negative fixture; no guarantee follows from registration alone.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-native-provenance.py",
+      "sha256": "eb0d36e578f5d5514ef0e8c6b6e4290fe734fc5c13bb21e798a1ffb23eb93657",
+      "disposition": "test-support",
+      "reason": "Fail-closed verification of actual native/console/reference contracts or additive66-operation inventories; retain existing service assertions and strict schemas. NativeHTTP is not an official SDK or full cloud equivalence; all runtime results require their recorded source/binary.",
+      "models": []
+    },
+    {
+      "path": "test/console/navigation.test.mjs",
+      "sha256": "b36b08805b8a59e81412f28a1bcd08bf1e72264993223e11d49e440203168ae8",
+      "disposition": "test-support",
+      "reason": "Fail-closed verification of actual native/console/reference contracts or additive66-operation inventories; retain existing service assertions and strict schemas. NativeHTTP is not an official SDK or full cloud equivalence; all runtime results require their recorded source/binary.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/api_cloud_sections.py",
+      "sha256": "d3a0022dc857eba4dd8ad8353525c7aaf9e2a0def4d73b19293ebcfd3308ebe8",
+      "disposition": "test-support",
+      "reason": "Fail-closed verification of actual native/console/reference contracts or additive66-operation inventories; retain existing service assertions and strict schemas. NativeHTTP is not an official SDK or full cloud equivalence; all runtime results require their recorded source/binary.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/api_cloud_sections_contract.py",
+      "sha256": "8c8d7ba4defa11cda0095369080a11e0ef98ad8cd648cc8cb2818c6d1317eb5c",
+      "disposition": "test-support",
+      "reason": "Fail-closed verification of actual native/console/reference contracts or additive66-operation inventories; retain existing service assertions and strict schemas. NativeHTTP is not an official SDK or full cloud equivalence; all runtime results require their recorded source/binary.",
       "models": []
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "c4602f7f7796ec54f8d129658d0a3ac4f7eca65b25c8919aa3ff230af371141e",
+      "sha256": "d3c7621882eec9920e90e744bea412ca5a386874fa64d74449acee734307e8e2",
       "disposition": "test-support",
-      "reason": "Preserve all existing acceptance assertions and add literal alias schemas, actual native SDK/shared-state and mounted UI regressions; tests support concrete contracts without substituting for formal or whole-quality evidence.",
+      "reason": "Preserve all56 incoming main Conformance methods/body AST and add four fail-closed mandatory Sakura CLI, UI, static-reference and actual live-reference helpers. Live-reference passes --browser explicitly and must observe real ScalarSend200; total60 cases, not evidence of completed whole60 execution.",
       "models": []
     },
     {
-      "path": "test/e2e/dynamodb_console.py",
-      "sha256": "c33bfaf458f9b82c8bc3ee1f512b99fff277354b53cd9f79d878d68983bbc4a2",
+      "path": "test/e2e/cloudwatch_logs.py",
+      "sha256": "8514187a29a4dcd886a5ad8d353148949acc49e6776994b5004f57421ea3fc46",
       "disposition": "test-support",
-      "reason": "Bound the actual replaced-startup ListTables abort oracle to the first request, startup phases, native AbortSignal controller replacement and a later successful replacement read. Account exactly for pre-header versus post-header abort responses. Pure positive/negative classifier fixtures are separate from real four-flow SDK/browser evidence; all native operation, write-count, IAM, frame, accessibility and context assertions remain required.",
+      "reason": "Fail-closed verification of actual native/console/reference contracts or additive66-operation inventories; retain existing service assertions and strict schemas. NativeHTTP is not an official SDK or full cloud equivalence; all runtime results require their recorded source/binary.",
       "models": []
     },
     {
-      "path": "test/e2e/kms.py",
-      "sha256": "adb3a0302ccf5b2e92c608d36973d40ca5bcf1eb605d4701ce64c8bffe708035",
+      "path": "test/e2e/dynamodb_docs.py",
+      "sha256": "3536242417ea715259c42d086ee3c8313335f2d40c107aa24a3452bcc167552a",
       "disposition": "test-support",
-      "reason": "Preserve all existing acceptance assertions and add literal alias schemas, actual native SDK/shared-state and mounted UI regressions; tests support concrete contracts without substituting for formal or whole-quality evidence.",
+      "reason": "Fail-closed verification of actual native/console/reference contracts or additive66-operation inventories; retain existing service assertions and strict schemas. NativeHTTP is not an official SDK or full cloud equivalence; all runtime results require their recorded source/binary.",
       "models": []
     },
     {
-      "path": "test/e2e/kms_alias_docs.py",
-      "sha256": "a37b294fb94537721d77297937ecd1fb1b56c7ad4aee8b96abd3cef35834a812",
+      "path": "test/e2e/sakura_cli.py",
+      "sha256": "2378c6c6b716546f2902771da808c0f5ae860c540649b7455e76025fffe3ff43",
       "disposition": "test-support",
-      "reason": "Preserve all existing acceptance assertions and add literal alias schemas, actual native SDK/shared-state and mounted UI regressions; tests support concrete contracts without substituting for formal or whole-quality evidence.",
+      "reason": "Real native SQLite/HTTP/flag/CLI acceptance and failure/repair counterpart only, not modeled implementation. New mandatory native two-CLI wrapper preserves all51 existing Conformance method AST bodies; private generated fixture credentials never become provider authority or SDK success claims.",
       "models": []
     },
     {
-      "path": "test/e2e/kms_aliases.py",
-      "sha256": "fc68148cdf07b56f7bdc676b105b27f0edd4dc481a1a66c2969aca9952c19782",
+      "path": "test/e2e/sakura_disks_console.py",
+      "sha256": "ed89fea94a371d21f4468e5450f0e07992cf02b5ce6686523de7e099b0352da6",
       "disposition": "test-support",
-      "reason": "Preserve all existing acceptance assertions and add literal alias schemas, actual native SDK/shared-state and mounted UI regressions; tests support concrete contracts without substituting for formal or whole-quality evidence.",
+      "reason": "Fail-closed verification of actual native/console/reference contracts or additive66-operation inventories; retain existing service assertions and strict schemas. NativeHTTP is not an official SDK or full cloud equivalence; all runtime results require their recorded source/binary.",
       "models": []
     },
     {
-      "path": "test/e2e/kms_aliases_console.py",
-      "sha256": "d42176768657ae5d560003f0d49bbfcf38b05f8ff8213f16a9a06066bfa26737",
+      "path": "test/e2e/sakura_reference_live.py",
+      "sha256": "777cae053014d0f241ffbb1aa01c4cf68d5d7e1d20e20dd5d56f02a69963cf77",
       "disposition": "test-support",
-      "reason": "Preserve all existing acceptance assertions and add literal alias schemas, actual native SDK/shared-state and mounted UI regressions; tests support concrete contracts without substituting for formal or whole-quality evidence.",
+      "reason": "Fail-closed verification of actual native/console/reference contracts or additive66-operation inventories; retain existing service assertions and strict schemas. NativeHTTP is not an official SDK or full cloud equivalence; all runtime results require their recorded source/binary.",
       "models": []
     },
     {
-      "path": "test/e2e/test_openapi_json10.py",
-      "sha256": "b9e568562d0979f037fa194d435fd58eb924ff2f6216f42f179326aa5e077d35",
+      "path": "test/e2e/scalar_s3_docs.py",
+      "sha256": "c54c2e0040aae1205c4cf2841df810289ee232eb088bdec8e22fb21e5888a60c",
       "disposition": "test-support",
-      "reason": "Preserve all existing acceptance assertions and add literal alias schemas, actual native SDK/shared-state and mounted UI regressions; tests support concrete contracts without substituting for formal or whole-quality evidence.",
+      "reason": "Fail-closed verification of actual native/console/reference contracts or additive66-operation inventories; retain existing service assertions and strict schemas. NativeHTTP is not an official SDK or full cloud equivalence; all runtime results require their recorded source/binary.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/secrets_manager_docs.py",
+      "sha256": "528f3cc774676eaf3bb4eefa9c7d799bee4411680b0f006624d3c46a52307dad",
+      "disposition": "test-support",
+      "reason": "Fail-closed verification of actual native/console/reference contracts or additive66-operation inventories; retain existing service assertions and strict schemas. NativeHTTP is not an official SDK or full cloud equivalence; all runtime results require their recorded source/binary.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/sqs_docs.py",
+      "sha256": "6e4c4c16ca68792c93700baeae938125884f5cab669749e1bbbbf76a68056e50",
+      "disposition": "test-support",
+      "reason": "Fail-closed verification of actual native/console/reference contracts or additive66-operation inventories; retain existing service assertions and strict schemas. NativeHTTP is not an official SDK or full cloud equivalence; all runtime results require their recorded source/binary.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_openapi_parameters.py",
+      "sha256": "f7200aad092a9dff66ba086e59dd48e561ca5f096895ac131e41c2e87554bc85",
+      "disposition": "test-support",
+      "reason": "Fail-closed verification of actual native/console/reference contracts or additive66-operation inventories; retain existing service assertions and strict schemas. NativeHTTP is not an official SDK or full cloud equivalence; all runtime results require their recorded source/binary.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_sakura_openapi.py",
+      "sha256": "794de44bab1727c01e4cd170be080d3dd18ee2a65bd9a1a14d5a50c806cdf628",
+      "disposition": "test-support",
+      "reason": "Fail-closed verification of actual native/console/reference contracts or additive66-operation inventories; retain existing service assertions and strict schemas. NativeHTTP is not an official SDK or full cloud equivalence; all runtime results require their recorded source/binary.",
       "models": []
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "ad942aceb8c9d47c9fc9e381c739a2c8647f995d9a247d89999c6d52547ff902",
+      "sha256": "4f9f838a69ff976a227153888d0a7cdfe850b10e3342746f0e1ff645bd61395c",
       "disposition": "presentation",
-      "reason": "Static API/schema/example or canonical console build-input/digest declaration. Preserve existing operation IDs, all main examples/media and original dependency rights; this metadata is not an API/state implementation proof.",
+      "reason": "Canonical style/build-input/digest presentation artifact for the bounded Sakura shell and shared console; fixed dependencies and original notices preserved. No native API/authority/state guarantee from CSS or metadata.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "818eb6a15e2f22bd6d3f3276a8c44a352b759b7b069cd258487b9f0600941b2f",
+      "sha256": "15b62e407323f745b137a40b45f408fdd75fce0718169a4d3fddabc7728c48d2",
       "disposition": "presentation",
-      "reason": "Static API/schema/example or canonical console build-input/digest declaration. Preserve existing operation IDs, all main examples/media and original dependency rights; this metadata is not an API/state implementation proof.",
+      "reason": "Canonical style/build-input/digest presentation artifact for the bounded Sakura shell and shared console; fixed dependencies and original notices preserved. No native API/authority/state guarantee from CSS or metadata.",
       "models": []
     },
     {
-      "path": "tools/console/src/kms.jsx",
-      "sha256": "1cfa8031bb46ddc0f4567fe95f7eddb7d36e438deb6e30a8aba8530d176ffd84",
-      "disposition": "modeled",
-      "reason": "Only the added Aliases tab mounts the actual component and supplies concrete key/region/principal identity. Existing key-list/crypto UI is unchanged and not modeled by this entry.",
-      "models": [
-        {
-          "id": "KMSAliasesViewEpoch",
-          "properties": [
-            "TypeOK",
-            "CurrentListOutcome",
-            "NoCachedRowsOnFailure",
-            "CurrentTargetMetadata",
-            "ClosedFormHasNoTarget",
-            "AckClosesForm",
-            "AckClearsDraft",
-            "ReadRetryNeverWrites",
-            "OnlyVerifiedTargetSubmitted",
-            "DeleteRequiresExactConfirmation",
-            "LocalePreservesIntent"
-          ],
-          "limits": "Finite UI protocol abstraction, not JS/React/Cloudscape/HTTP/SQL/IAM/crypto refinement or liveness. Initial key-list/Describe lookup completion is abstracted because actual source disables selection until it finishes; later target reads may overlap. Target/list revisions normalized after these reads. Excludes all parser/format/pagination/permission semantics, arbitrary key sets, repeated forms beyond bound, network ambiguity without ACK and full AWS console parity. Current list outcome and target metadata are stored fields, not derived tautologies. Retired-list mutation jointly bypasses redundant captured-object/active/abort checks; submit-target mutation abstracts both button and handler defenses. Retry mutant creates actual second pending write plus request counter, not a ghost-only edit. Root parent context key/principal binding is assumed; locale frame is only this model state, not the locale provider. Parent kms.jsx/main.jsx declarations bind only the Aliases mount and supplied region/principal/key identity; other KMS/general services remain outside. app.js is the canonical compiled correspondence artifact of that component/mount, independently checked by bundle hashes, not a proof of compilation or unrelated UI."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/kms_aliases.jsx",
-      "sha256": "f7eb517b334f89b007c662308057a8b3d63b70598282e78764b3074c0b47715c",
-      "disposition": "modeled",
-      "reason": "Actual aliases component lifecycle, list/target reply epochs, ACK closing/clearing before read refresh, read-only retry, exact typed deletion and locale-preserved draft.",
-      "models": [
-        {
-          "id": "KMSAliasesViewEpoch",
-          "properties": [
-            "TypeOK",
-            "CurrentListOutcome",
-            "NoCachedRowsOnFailure",
-            "CurrentTargetMetadata",
-            "ClosedFormHasNoTarget",
-            "AckClosesForm",
-            "AckClearsDraft",
-            "ReadRetryNeverWrites",
-            "OnlyVerifiedTargetSubmitted",
-            "DeleteRequiresExactConfirmation",
-            "LocalePreservesIntent"
-          ],
-          "limits": "Finite UI protocol abstraction, not JS/React/Cloudscape/HTTP/SQL/IAM/crypto refinement or liveness. Initial key-list/Describe lookup completion is abstracted because actual source disables selection until it finishes; later target reads may overlap. Target/list revisions normalized after these reads. Excludes all parser/format/pagination/permission semantics, arbitrary key sets, repeated forms beyond bound, network ambiguity without ACK and full AWS console parity. Current list outcome and target metadata are stored fields, not derived tautologies. Retired-list mutation jointly bypasses redundant captured-object/active/abort checks; submit-target mutation abstracts both button and handler defenses. Retry mutant creates actual second pending write plus request counter, not a ghost-only edit. Root parent context key/principal binding is assumed; locale frame is only this model state, not the locale provider. Parent kms.jsx/main.jsx declarations bind only the Aliases mount and supplied region/principal/key identity; other KMS/general services remain outside. app.js is the canonical compiled correspondence artifact of that component/mount, independently checked by bundle hashes, not a proof of compilation or unrelated UI."
-        }
-      ]
+      "path": "tools/console/src/console-navigation.mjs",
+      "sha256": "aa4a42cf2a7b2dcfec13d557ab0150cd269e88a1d647fc3bd2e06ec9a0149a80",
+      "disposition": "presentation",
+      "reason": "Pure provider-neutral catalog/route metadata adds only the capability-gated Sakura Disk destination; existing cloud routes and unknown-provider denial remain explicit. Not host authentication or native provider state.",
+      "models": []
     },
     {
       "path": "tools/console/src/main.jsx",
-      "sha256": "398113fc766beb1f536efa61277f5aeab8b75a38f35c688747d1ea9062668c89",
+      "sha256": "846fd2f88fb663ed1d22bab04a4f8186f6166f54d188320edc30ef8d5da72bfc",
       "disposition": "modeled",
-      "reason": "Only passes the actual selected principal to the KMS view, whose existing parent key retires context on region/principal/navigation. This binding covers the aliases mount identity seam, not other services, login, request transport or all navigation.",
+      "reason": "Sakura child and only its fixed-capability/contextKey/request mount projection. Existing AWS/Google/Azure behavior is retained and excluded from the new proof claim; host-typed scope/auth/native persistence are separate boundaries.",
       "models": [
         {
-          "id": "KMSAliasesViewEpoch",
+          "id": "SakuraDisksViewEpoch",
           "properties": [
             "TypeOK",
-            "CurrentListOutcome",
-            "NoCachedRowsOnFailure",
-            "CurrentTargetMetadata",
-            "ClosedFormHasNoTarget",
+            "AcceptedReadScope",
+            "SuccessfulReadOnly",
+            "RenderedScopeBound",
+            "RenderedResourceBound",
+            "StaleReadFrame",
+            "StaleWriteFrame",
+            "NavigationACKFrame",
             "AckClosesForm",
             "AckClearsDraft",
-            "ReadRetryNeverWrites",
-            "OnlyVerifiedTargetSubmitted",
-            "DeleteRequiresExactConfirmation",
-            "LocalePreservesIntent"
+            "ReadRetryOnly",
+            "SingleWriteSend",
+            "LocaleFrame",
+            "CancelDraftClear"
           ],
-          "limits": "Finite UI protocol abstraction, not JS/React/Cloudscape/HTTP/SQL/IAM/crypto refinement or liveness. Initial key-list/Describe lookup completion is abstracted because actual source disables selection until it finishes; later target reads may overlap. Target/list revisions normalized after these reads. Excludes all parser/format/pagination/permission semantics, arbitrary key sets, repeated forms beyond bound, network ambiguity without ACK and full AWS console parity. Current list outcome and target metadata are stored fields, not derived tautologies. Retired-list mutation jointly bypasses redundant captured-object/active/abort checks; submit-target mutation abstracts both button and handler defenses. Retry mutant creates actual second pending write plus request counter, not a ghost-only edit. Root parent context key/principal binding is assumed; locale frame is only this model state, not the locale provider. Parent kms.jsx/main.jsx declarations bind only the Aliases mount and supplied region/principal/key identity; other KMS/general services remain outside. app.js is the canonical compiled correspondence artifact of that component/mount, independently checked by bundle hashes, not a proof of compilation or unrelated UI."
+          "limits": "Original bounded UI safety projection only, not React/JS/AbortController scheduling or server/SQL/IAM/token authority proof. Opaque scope combines trusted principal/session/globalnavigation/endpoint; actualcredential/contextKey production remainstrustedcaller. Read responses may complete afterabort/headers, no zero-network/body-cancel guarantee. No orphan-loading/liveness/hungread promise. ACK is actual2xxresponse beforeCreatebody/metadata, not serverrollback/idempotency underunknownnetworkoutcome. Two opens/onewriteintent excludearbitrarynew-sessionwrite concurrency. Independent request/frame snapshots monitoractualpublishedview changes, not ghost-only mutations. Nativepayloadbytes/schema/confirmation/keyentropy/quota/APIwire/SDK andauthenticatedcloudvisualparity areoutside. Shared main scope is ONLY Sakura fixedcapabilityconfiguration/contextKey+request mount, notAWS/GCP/Azure behavior; shell/CSS/neutralcatalogstate not proved. The generated app.js scope binds only the canonical compiled artifact of this separately declared Sakura child/mount projection; it does not prove bundler/compiler correctness or unrelated AWS/GCP/Azure behavior."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/sakura-console.css",
+      "sha256": "c524b585ed19c2581cc964acddee5f2973a9f3c42581eaf848509866f91c495b",
+      "disposition": "presentation",
+      "reason": "Canonical style/build-input/digest presentation artifact for the bounded Sakura shell and shared console; fixed dependencies and original notices preserved. No native API/authority/state guarantee from CSS or metadata.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/sakura-console.jsx",
+      "sha256": "e313966447b108286ef4d239128b8a9e1f5a12baca92e9d162d7e2c633369670",
+      "disposition": "presentation",
+      "reason": "Local shell/rail expansion and presentation context forward the child List navigation callback; no credential/owner selection or provider API/persistence implementation. Child mutation/read guards are separately bound to SakuraDisksViewEpoch; arbitrary shell/CSS equivalence is not modeled.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/sakura-disks.jsx",
+      "sha256": "150791c18b28ef34ee75ea2be1828bf23dcf71317320c2c74ea0cb91c92b7841",
+      "disposition": "modeled",
+      "reason": "Sakura child and only its fixed-capability/contextKey/request mount projection. Existing AWS/Google/Azure behavior is retained and excluded from the new proof claim; host-typed scope/auth/native persistence are separate boundaries.",
+      "models": [
+        {
+          "id": "SakuraDisksViewEpoch",
+          "properties": [
+            "TypeOK",
+            "AcceptedReadScope",
+            "SuccessfulReadOnly",
+            "RenderedScopeBound",
+            "RenderedResourceBound",
+            "StaleReadFrame",
+            "StaleWriteFrame",
+            "NavigationACKFrame",
+            "AckClosesForm",
+            "AckClearsDraft",
+            "ReadRetryOnly",
+            "SingleWriteSend",
+            "LocaleFrame",
+            "CancelDraftClear"
+          ],
+          "limits": "Original bounded UI safety projection only, not React/JS/AbortController scheduling or server/SQL/IAM/token authority proof. Opaque scope combines trusted principal/session/globalnavigation/endpoint; actualcredential/contextKey production remainstrustedcaller. Read responses may complete afterabort/headers, no zero-network/body-cancel guarantee. No orphan-loading/liveness/hungread promise. ACK is actual2xxresponse beforeCreatebody/metadata, not serverrollback/idempotency underunknownnetworkoutcome. Two opens/onewriteintent excludearbitrarynew-sessionwrite concurrency. Independent request/frame snapshots monitoractualpublishedview changes, not ghost-only mutations. Nativepayloadbytes/schema/confirmation/keyentropy/quota/APIwire/SDK andauthenticatedcloudvisualparity areoutside. Shared main scope is ONLY Sakura fixedcapabilityconfiguration/contextKey+request mount, notAWS/GCP/Azure behavior; shell/CSS/neutralcatalogstate not proved. The generated app.js scope binds only the canonical compiled artifact of this separately declared Sakura child/mount projection; it does not prove bundler/compiler correctness or unrelated AWS/GCP/Azure behavior."
         }
       ]
     }

@@ -8,6 +8,8 @@ import json
 from pathlib import Path
 import unittest
 
+from test_sakura_openapi import NEW_IDS, COLLECTION, ITEM
+
 METHODS = {'get', 'head', 'put', 'post', 'delete', 'patch', 'options'}
 GROUPS = ['AWS', 'Google Cloud', 'Azure', 'Sakura Cloud', 'Simulator']
 EXPECTED_IDS = set('''AddPermission AzureCreateContainer AzureDeleteBlob AzureDeleteContainer
@@ -25,6 +27,7 @@ PutMethod PutObject RemovePermission UpdateFunctionCode awsRegionalOperation'''.
 GUIDES = {'Systems Manager Parameter Store', 'CloudFormation stacks', 'KMS service guide',
           'SQS queues', 'CloudWatch Logs', 'Secrets Manager', 'DynamoDB tables and items'}
 SAKURA_TAG = 'Sakura Cloud status'
+SAKURA_DISK_TAG = 'Sakura Disk configuration'
 
 
 def operations(document):
@@ -60,7 +63,7 @@ def validate_document(document):
     assert group_for['Google Cloud Storage'] == 'Google Cloud'
     assert group_for['Azure Blob Storage'] == 'Azure'
     assert group_for[SAKURA_TAG] == 'Sakura Cloud'
-    assert set(groups[3]['tags']) == {SAKURA_TAG}
+    assert set(groups[3]['tags']) == {SAKURA_TAG, SAKURA_DISK_TAG}
     assert {'Simulator control', 'Simulator IAM state'} == set(groups[4]['tags'])
     assert GUIDES <= set(groups[0]['tags'])
     assert tags_by_name['KMS local symmetric keys']['x-displayName'] == 'Shared AWS JSON/Query endpoint'
@@ -70,21 +73,23 @@ def validate_document(document):
         assert 'static' in description and 'not saved state' in description
         assert 'headers' in description and 'Test Request' in description
     status = tags_by_name[SAKURA_TAG].get('description', '')
-    assert '**Not implemented.**' in status and 'no simulator API operations' in status
+    assert 'Disk configuration API only' in status and 'disabled by default' in status
+    assert 'real VM/block storage' in status and 'not claim console workflow/fidelity' in status
     ops = operations(document)
     ids = [operation['operationId'] for _, _, operation in ops]
-    assert len(document['paths']) == 34 and len(ids) == 61
-    assert len(ids) == len(set(ids)) and set(ids) == EXPECTED_IDS
+    assert len(document['paths']) == 36 and len(ids) == 66
+    assert len(ids) == len(set(ids)) and set(ids) == EXPECTED_IDS | NEW_IDS
     for path, _, operation in ops:
         assert operation.get('tags'), 'An operation must remain discoverable'
         expected = ('Google Cloud' if path.startswith('/_simulator/providers/gcp/') else
                     'Azure' if path.startswith('/_simulator/providers/azure/') else
+                    'Sakura Cloud' if path in (COLLECTION, ITEM) else
                     'Simulator' if path.startswith('/_simulator/v1/') else 'AWS')
         for tag in operation['tags']:
             assert tag in group_for and group_for[tag] == expected, (path, tag, expected)
             assert tag != SAKURA_TAG and tag not in GUIDES, 'A guide must not invent API operations'
     return {'cloudGroups': GROUPS[:4], 'controlGroup': 'Simulator', 'operationIDs': len(ids),
-            'paths': 34, 'documentationOnlyServiceGuides': len(GUIDES), 'SakuraOperations': 0}
+            'paths': 36, 'documentationOnlyServiceGuides': len(GUIDES), 'SakuraOperations': len([op for _,_,op in ops if op['operationId'] in NEW_IDS])}
 
 
 class ContractTests(unittest.TestCase):
@@ -98,7 +103,7 @@ class ContractTests(unittest.TestCase):
             validate_document(bad)
 
     def test_current_navigation(self):
-        self.assertEqual(validate_document(self.document)['SakuraOperations'], 0)
+        self.assertEqual(validate_document(self.document)['SakuraOperations'], 5)
 
     def test_missing_group(self):
         self.rejected(lambda d: d['x-tagGroups'].pop(0))
@@ -121,7 +126,7 @@ class ContractTests(unittest.TestCase):
                 d['x-tagGroups'][2]['tags'], d['x-tagGroups'][1]['tags'])
         self.rejected(change)
 
-    def test_sakura_is_not_an_api(self):
+    def test_sakura_status_tag_is_not_an_api(self):
         self.rejected(lambda d: d['paths']['/']['get'].update(tags=[SAKURA_TAG]))
 
     def test_service_guide_is_not_an_api(self):

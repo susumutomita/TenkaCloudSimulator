@@ -15,6 +15,7 @@ from playwright.sync_api import sync_playwright, expect
 from check import running, REPORTS
 from reflow import assert_reflow
 from openapi_parameters import validate_parameter_lists
+from test_sakura_openapi import OLD_IDS, NEW_IDS, COLLECTION, ITEM
 
 
 def run_scalar_s3_docs():
@@ -39,7 +40,8 @@ def run_scalar_s3_docs():
         validate_parameter_lists(spec)
         assert spec == json.loads(Path('internal/server/apidocs/openapi.json').read_text()), 'Must exercise the actual embedded candidate spec'
         operations = [op['operationId'] for item in spec['paths'].values() for op in item.values() if isinstance(op, dict) and 'operationId' in op]
-        assert len(operations) == 61 and len(set(operations)) == 61
+        assert len(operations) == 66 and len(set(operations)) == 66 and set(operations) == OLD_IDS | NEW_IDS
+        assert len(spec['paths']) == 36 and COLLECTION in spec['paths'] and ITEM in spec['paths']
         assert {'GCPListBuckets', 'GCPUploadObject', 'AzureListContainers', 'AzureGetBlob'} <= set(operations)
         assert spec['paths']['/']['get']['responses']['200']['content']['application/xml']['schema']['$ref'].endswith('/S3BucketList')
         examples = spec['paths']['/{bucket}']['get']['responses']['200']['content']['application/xml']['examples']

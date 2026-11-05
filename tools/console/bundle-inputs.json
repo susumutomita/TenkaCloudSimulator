@@ -31654,6 +31654,52 @@
       ],
       "format": "esm"
     },
+    "src/sakura-console.css": {
+      "bytes": 6270,
+      "imports": []
+    },
+    "src/sakura-console.jsx": {
+      "bytes": 2529,
+      "imports": [
+        {
+          "path": "node_modules/react/index.js",
+          "kind": "import-statement",
+          "original": "react"
+        },
+        {
+          "path": "src/i18n.jsx",
+          "kind": "import-statement",
+          "original": "./i18n.jsx"
+        },
+        {
+          "path": "src/sakura-console.css",
+          "kind": "import-statement",
+          "original": "./sakura-console.css"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/sakura-disks.jsx": {
+      "bytes": 17254,
+      "imports": [
+        {
+          "path": "node_modules/react/index.js",
+          "kind": "import-statement",
+          "original": "react"
+        },
+        {
+          "path": "src/i18n.jsx",
+          "kind": "import-statement",
+          "original": "./i18n.jsx"
+        },
+        {
+          "path": "src/sakura-console.jsx",
+          "kind": "import-statement",
+          "original": "./sakura-console.jsx"
+        }
+      ],
+      "format": "esm"
+    },
     "node_modules/@cloudscape-design/components/internal/components/menu-dropdown/styles.scoped.css": {
       "bytes": 4270,
       "imports": []
@@ -32156,7 +32202,7 @@
       "format": "esm"
     },
     "src/console-navigation.mjs": {
-      "bytes": 4245,
+      "bytes": 5710,
       "imports": [],
       "format": "esm"
     },
@@ -32187,7 +32233,7 @@
       "format": "esm"
     },
     "src/main.jsx": {
-      "bytes": 42627,
+      "bytes": 43212,
       "imports": [
         {
           "path": "src/login.jsx",
@@ -32418,6 +32464,16 @@
           "path": "src/azure-console-shell.jsx",
           "kind": "import-statement",
           "original": "./azure-console-shell.jsx"
+        },
+        {
+          "path": "src/sakura-console.jsx",
+          "kind": "import-statement",
+          "original": "./sakura-console.jsx"
+        },
+        {
+          "path": "src/sakura-disks.jsx",
+          "kind": "import-statement",
+          "original": "./sakura-disks.jsx"
         },
         {
           "path": "src/global-navigation.jsx",
@@ -33302,7 +33358,7 @@
           "bytesInOutput": 0
         },
         "src/main.jsx": {
-          "bytesInOutput": 40394
+          "bytesInOutput": 40658
         },
         "node_modules/@cloudscape-design/global-styles/index.css": {
           "bytesInOutput": 0
@@ -33806,7 +33862,7 @@
           "bytesInOutput": 534
         },
         "node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/state/index.js": {
-          "bytesInOutput": 594
+          "bytesInOutput": 596
         },
         "node_modules/@cloudscape-design/components/internal/widgets/index.js": {
           "bytesInOutput": 158
@@ -33833,7 +33889,7 @@
           "bytesInOutput": 1449
         },
         "node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/state/use-feature-notifications.js": {
-          "bytesInOutput": 3758
+          "bytesInOutput": 3760
         },
         "node_modules/@cloudscape-design/components/internal/do-not-use/feature-prompt/index.js": {
           "bytesInOutput": 258
@@ -33983,7 +34039,7 @@
           "bytesInOutput": 116
         },
         "node_modules/@cloudscape-design/components/internal/plugins/widget/core.js": {
-          "bytesInOutput": 537
+          "bytesInOutput": 539
         },
         "node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/skeleton/styles.scoped.css": {
           "bytesInOutput": 0
@@ -33992,7 +34048,7 @@
           "bytesInOutput": 1772
         },
         "node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/state/use-skeleton-slots-attributes.js": {
-          "bytesInOutput": 1585
+          "bytesInOutput": 1587
         },
         "node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/widget-areas/after-main-slot.js": {
           "bytesInOutput": 1524
@@ -34016,7 +34072,7 @@
           "bytesInOutput": 1371
         },
         "node_modules/@cloudscape-design/components/navigable-group/internal.js": {
-          "bytesInOutput": 2099
+          "bytesInOutput": 2101
         },
         "node_modules/@cloudscape-design/components/internal/utils/circle-index.js": {
           "bytesInOutput": 42
@@ -34034,10 +34090,10 @@
           "bytesInOutput": 41
         },
         "node_modules/@cloudscape-design/components/button-group/item-element.js": {
-          "bytesInOutput": 2582
+          "bytesInOutput": 2584
         },
         "node_modules/@cloudscape-design/components/button-group/copy-to-clipboard-item.js": {
-          "bytesInOutput": 1069
+          "bytesInOutput": 1071
         },
         "node_modules/@cloudscape-design/components/button-group/test-classes/styles.scoped.css": {
           "bytesInOutput": 0
@@ -34046,13 +34102,13 @@
           "bytesInOutput": 258
         },
         "node_modules/@cloudscape-design/components/button-group/file-input-item.js": {
-          "bytesInOutput": 686
+          "bytesInOutput": 688
         },
         "node_modules/@cloudscape-design/components/button-group/icon-button-item.js": {
-          "bytesInOutput": 1091
+          "bytesInOutput": 1093
         },
         "node_modules/@cloudscape-design/components/button-group/icon-toggle-button-item.js": {
-          "bytesInOutput": 1327
+          "bytesInOutput": 1329
         },
         "node_modules/@cloudscape-design/components/toggle-button/internal.js": {
           "bytesInOutput": 581
@@ -34067,7 +34123,7 @@
           "bytesInOutput": 205
         },
         "node_modules/@cloudscape-design/components/button-group/menu-dropdown-item.js": {
-          "bytesInOutput": 1222
+          "bytesInOutput": 1224
         },
         "node_modules/@cloudscape-design/components/button-group/style.js": {
           "bytesInOutput": 2104
@@ -35308,6 +35364,15 @@
         "src/azure-console-shell.jsx": {
           "bytesInOutput": 551
         },
+        "src/sakura-console.jsx": {
+          "bytesInOutput": 2568
+        },
+        "src/sakura-console.css": {
+          "bytesInOutput": 0
+        },
+        "src/sakura-disks.jsx": {
+          "bytesInOutput": 15610
+        },
         "src/global-navigation.jsx": {
           "bytesInOutput": 6449
         },
@@ -35363,10 +35428,10 @@
           "bytesInOutput": 63
         },
         "src/console-navigation.mjs": {
-          "bytesInOutput": 3979
+          "bytesInOutput": 4987
         }
       },
-      "bytes": 1701215
+      "bytes": 1720687
     },
     "../../internal/server/web/app.css.LEGAL.txt": {
       "imports": [],
@@ -35895,6 +35960,9 @@
         "src/azure-blob.css": {
           "bytesInOutput": 8581
         },
+        "src/sakura-console.css": {
+          "bytesInOutput": 6165
+        },
         "node_modules/@cloudscape-design/components/internal/components/menu-dropdown/styles.scoped.css": {
           "bytesInOutput": 3236
         },
@@ -35905,7 +35973,7 @@
           "bytesInOutput": 0
         }
       },
-      "bytes": 1288022
+      "bytes": 1294187
     }
   }
 }

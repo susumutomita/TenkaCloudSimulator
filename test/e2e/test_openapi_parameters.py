@@ -9,6 +9,75 @@ TOKEN = {'name': 'X-Simulator-Token', 'in': 'header', 'schema': {'type': 'string
 REF = {'$ref': '#/components/parameters/Token'}
 
 
+# Exact incoming main e8efc54 operation IDs; independent of candidate enumeration.
+NATIVE_OPERATION_IDS = {'AddPermission',
+ 'AzureCreateContainer',
+ 'AzureDeleteBlob',
+ 'AzureDeleteContainer',
+ 'AzureGetBlob',
+ 'AzureGetBlobProperties',
+ 'AzureGetContainerProperties',
+ 'AzureListBlobs',
+ 'AzureListContainers',
+ 'AzurePutBlob',
+ 'Capabilities',
+ 'CreateBucket',
+ 'CreateDeployment',
+ 'CreateFunction',
+ 'CreateResource',
+ 'CreateRestApi',
+ 'CreateStage',
+ 'DeleteBucket',
+ 'DeleteFunction',
+ 'DeleteIdentityPolicy',
+ 'DeleteObject',
+ 'DeleteResource',
+ 'DeleteRestApi',
+ 'DeleteStage',
+ 'GCPCreateBucket',
+ 'GCPDeleteBucket',
+ 'GCPDeleteObject',
+ 'GCPDownloadObject',
+ 'GCPGetBucket',
+ 'GCPGetObject',
+ 'GCPListBuckets',
+ 'GCPListObjects',
+ 'GCPUploadObject',
+ 'GetDeployment',
+ 'GetFunctionConfiguration',
+ 'GetIdentityPolicy',
+ 'GetMethod',
+ 'GetObject',
+ 'GetPolicy',
+ 'GetResource',
+ 'GetResources',
+ 'GetRestApi',
+ 'GetRestApis',
+ 'GetStage',
+ 'HeadBucket',
+ 'HeadObject',
+ 'IAMRoleQueryOperation',
+ 'Invoke',
+ 'InvokeLocalRESTProxyGet',
+ 'InvokeLocalRESTProxyPost',
+ 'ListBuckets',
+ 'ListFunctions',
+ 'ListObjectsV2OrGetBucketLocation',
+ 'ListPrincipals',
+ 'PutIdentityPolicy',
+ 'PutIntegration',
+ 'PutMethod',
+ 'PutObject',
+ 'RemovePermission',
+ 'UpdateFunctionCode',
+ 'awsRegionalOperation'}
+SAKURA_OPERATION_IDS = {'SakuraListDisks', 'SakuraCreateDisk', 'SakuraGetDisk', 'SakuraUpdateDisk', 'SakuraDeleteDisk'}
+
+def validate_reference_inventory(ids):
+    if len(ids) != 66 or len(set(ids)) != 66 or set(ids) != NATIVE_OPERATION_IDS | SAKURA_OPERATION_IDS:
+        raise ValueError('native and Sakura operation inventory changed')
+
+
 def fixture(parameters):
     return {'components': {'parameters': {'Token': copy.deepcopy(TOKEN)}},
             'paths': {'/': {'get': {'parameters': parameters}}}}
@@ -87,10 +156,11 @@ class ParameterLists(unittest.TestCase):
                  'AzureListContainers', 'AzureCreateContainer', 'AzureGetContainerProperties',
                  'AzureListBlobs', 'AzureDeleteContainer', 'AzurePutBlob', 'AzureGetBlob',
                  'AzureGetBlobProperties', 'AzureDeleteBlob'}
-        self.assertEqual(len(ids), 61)
-        self.assertEqual(len(set(ids)), 61)
+        validate_reference_inventory(ids)
+        self.assertEqual(len(ids), 66)
+        self.assertEqual(len(set(ids)), 66)
         self.assertEqual({name for name in ids if name.startswith(('GCP', 'Azure'))}, added)
-        self.assertEqual(len(set(ids) - added), 43)
+        self.assertEqual(len(set(ids) - added - SAKURA_OPERATION_IDS), 43)
         for item in repaired['paths'].values():
             for operation in item.values():
                 if isinstance(operation, dict) and {'$ref': '#/components/parameters/SimulatorToken'} in operation.get('parameters', []):
@@ -99,6 +169,18 @@ class ParameterLists(unittest.TestCase):
                         validate_parameter_lists(repaired)
                     return
         self.fail('No operation with the shared SimulatorToken reference')
+
+
+    def test_reference_inventory_refuses_removed_native_wrong_sakura_and_provider(self):
+        good = sorted(NATIVE_OPERATION_IDS | SAKURA_OPERATION_IDS)
+        validate_reference_inventory(good)
+        for label, changed in (
+            ('removed-native', [name for name in good if name != 'ListBuckets']),
+            ('wrong-sakura-operation', ['SakuraStartServer' if name == 'SakuraGetDisk' else name for name in good]),
+            ('wrong-provider', ['AzureGetDisk' if name == 'SakuraGetDisk' else name for name in good]),
+        ):
+            with self.subTest(case=label), self.assertRaisesRegex(ValueError, 'operation inventory changed'):
+                validate_reference_inventory(changed)
 
 
 if __name__ == '__main__':

@@ -1,7 +1,8 @@
 """Actual embedded Scalar cloud navigation and live native list responses.
 
 No mocked API responses, provider overlay, external assets or real cloud access.
-The Sakura section is documentation-only and must never acquire an operation.
+The Sakura status guide is documentation-only; five opt-in Disk operations are
+documented separately and the default unregistered provider must remain404.
 """
 import json
 import hashlib
@@ -61,6 +62,7 @@ def run():
         assert code == 200
         assert index.find(b'./scalar.css') < index.find(b'./reference-theme.css')
         assert b'href="./reference-theme.css"' in index
+        assert native('GET', '/_simulator/providers/sakura/cloud/zone/is1a/api/cloud/1.1/disk')[0] == 404, 'Documentation must not enable the default-disabled provider'
         browser = p.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE', '/usr/bin/chromium'),
                                    args=['--no-sandbox'])
         try:
@@ -100,9 +102,10 @@ def run():
                     status_link = sidebar.get_by_role('link', name='Sakura Cloud status', exact=True)
                     expect(status_link).to_be_visible()
                     status_link.click()
-                    expect(page.get_by_text('Not implemented.', exact=True)).to_be_visible()
                     status_region = page.get_by_role('region', name='Sakura Cloud status', exact=True)
                     expect(status_region).to_be_visible()
+                    expect(status_region).to_contain_text('Disk configuration API only, disabled by default.')
+                    expect(sidebar.get_by_role('link', name='Sakura Disk configuration', exact=True)).to_be_visible()
                     assert status_region.get_by_role('button', name=re.compile(r'^Test Request')).count() == 0
                     palette = page.evaluate("""() => {
                       const root = getComputedStyle(document.querySelector('#reference'));
@@ -156,9 +159,9 @@ def run():
                     page.keyboard.press('Escape')
                 assert not errors and not outside
                 assert counters['calls'] == counters['sends'] == counters['responses'] and counters['calls'] > 0
-                report = {'cloudSections': GROUPS[:4], 'SakuraImplementedOperations': 0,
-                          'documentationOnlyAWSServiceGuides': sorted(GUIDES), 'nativeOperationIDs': 61,
-                          'nativePaths': 34, 'staticExamplesAreNotSavedState': True,
+                report = {'cloudSections': GROUPS[:4], 'SakuraImplementedOperations': 5, 'SakuraDefaultProviderDisabled404': True,
+                          'documentationOnlyAWSServiceGuides': sorted(GUIDES), 'nativeOperationIDs': 66,
+                          'nativePaths': 36, 'staticExamplesAreNotSavedState': True,
                           'liveScalarRequests': live, 'strictAxeWidths': axe_states,
                           'mobileMenuAndVisibleContentAxe': True,
                           'loopbackNativeHTTP': counters, 'externalRequests': 0, 'pageErrors': 0,

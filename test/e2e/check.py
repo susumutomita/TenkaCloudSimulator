@@ -71,6 +71,15 @@ def submit(page):
  if dialog.is_visible():dialog.get_by_role('button').last.click()
  else:page.get_by_role('button',name=re.compile('^(Create bucket|Upload|Create parameter|Save changes)$')).last.click()
 class Conformance(unittest.TestCase):
+ def test_sakura_reference_real_examples_and_scalar_send(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('sakura_reference_live.py')), '--root', str(Path(__file__).resolve().parents[2]), '--binary', str(BINARY), '--reports', str(REPORTS/'sakura-reference-live'), '--browser'], check=True, timeout=180)
+ def test_sakura_disk_console_real_native_state_and_scope(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('sakura_disks_console.py'))], check=True, timeout=180)
+ def test_sakura_native_reference_schema_and_preservation_controls(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('test_sakura_openapi.py'))], check=True)
+ def test_sakura_opt_in_native_two_cli_authority_and_persistence(self):
+  # Native stdlib HTTP, not SDK verification; failure is mandatory and unskipped.
+  subprocess.run([sys.executable, str(Path(__file__).with_name('sakura_cli.py')), '--binary', str(BINARY), '--report', str(REPORTS/'sakura-cli.json')], check=True, timeout=180)
  def test_browser_actual_clipboard_login_and_safe_errors(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('login_paste.py'))],check=True)
  def test_browser_explicit_token_file_and_strict_authentication(self):

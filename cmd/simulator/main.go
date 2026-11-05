@@ -37,6 +37,10 @@ func run(ctx context.Context, args []string, output io.Writer) error {
 	unsafe := flags.Bool("unsafe-no-auth", false, "Development-only: disable access tokens on numeric loopback")
 	showToken := flags.Bool("show-token", false, "Display the operator token only on an interactive terminal with CI unset")
 	cloudOwner := flags.String("cloud-storage-owner", "simulator-admin", "Trusted exercise owner of the local GCP project and Azure account (not an AWS IAM grant)")
+	sakuraOptions, err := registerSakuraFlags(flags)
+	if err != nil {
+		return err
+	}
 	if err := flags.Parse(args); err != nil {
 		return err
 	}
@@ -49,6 +53,10 @@ func run(ctx context.Context, args []string, output io.Writer) error {
 	cloudConfig := server.DefaultCloudStorageConfig()
 	cloudConfig.GCPOwner = *cloudOwner
 	cloudConfig.AzureOwner = *cloudOwner
+	sakuraScope, err := validateSakuraFlags(*sakuraOptions, *unsafe)
+	if err != nil {
+		return err
+	}
 	host, _, err := net.SplitHostPort(*listen)
 	if err != nil {
 		return err
@@ -67,7 +75,7 @@ func run(ctx context.Context, args []string, output io.Writer) error {
 	if err != nil {
 		return err
 	}
-	handler, closeState, err := server.NewWithCloudStorage(*statePath, cloudConfig)
+	handler, closeState, err := server.NewWithProviders(*statePath, server.ProviderConfig{CloudStorage: cloudConfig, SakuraDisks: sakuraScope})
 	if err != nil {
 		_ = l.Close()
 		return err
