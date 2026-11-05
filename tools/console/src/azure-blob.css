@@ -1,6 +1,51 @@
-.azure-blob-view { min-width: 0; }
-.azure-blob-view .azure-blob-name { overflow-wrap: anywhere; white-space: pre-wrap; }
-.azure-blob-view a { overflow-wrap: anywhere; }
-@media (max-width: 480px) {
-  .azure-blob-view { width: 100%; max-width: 100%; }
-}
+/* Independent local console. Public Microsoft documentation is a visual
+   reference; no Microsoft logos, screenshot assets or external fonts are used. */
+.azure-console-shell,.azure-blob-view{--az-blue:#0067b8;--az-border:#d1d1d1;--az-text:#242424;color:var(--az-text);font-family:"Segoe UI",Arial,sans-serif;font-size:14px;line-height:1.45;min-width:0;background:#fff}
+.azure-console-shell *,.azure-blob-view *{box-sizing:border-box}
+.azure-console-shell{min-height:100vh}
+.azure-portal-header{background:#0078d4;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:8px 20px;min-height:52px;flex-wrap:wrap}
+.azure-console-brand{font-size:18px;font-weight:600}.azure-console-brand span{font-size:13px;font-weight:400;margin-inline-start:10px}
+.azure-shared-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-width:0;max-width:100%}
+.azure-shared-controls button,.azure-shared-controls select,.azure-shared-controls input{font:inherit;max-width:100%}
+.azure-console-content{min-width:0}.azure-blob-view{padding:12px 20px 24px}
+.azure-blob-view button,.azure-blob-view input{font:inherit}
+.azure-blob-view button{cursor:pointer;border:1px solid var(--az-border);background:#fff;color:var(--az-text);border-radius:2px;min-height:32px;padding:5px 12px;max-width:100%}
+.azure-blob-view button:hover:enabled{background:#f3f2f1}.azure-blob-view button:disabled{cursor:default;color:#707070;background:#f5f5f5}
+.azure-blob-view :focus-visible{outline:2px solid #005a9e;outline-offset:2px}
+.azure-blob-view input:not([type=checkbox]):not([type=file]){width:100%;min-width:0;border:1px solid #737373;background:#fff;color:var(--az-text);border-radius:0;padding:6px 9px;min-height:32px}
+.azure-blob-view input[readonly]{background:#f3f2f1!important}
+.azure-breadcrumbs{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px;margin-bottom:12px;overflow-wrap:anywhere}
+.azure-breadcrumbs a{display:inline-flex;align-items:center;text-decoration:none;border:0;padding:0;color:var(--az-blue);background:none;min-height:28px;overflow-wrap:anywhere}
+.azure-resource-heading{display:flex;gap:12px;align-items:center;margin-bottom:20px;min-width:0}
+.azure-resource-heading h1{font-size:23px;font-weight:600;margin:0;overflow-wrap:anywhere}.azure-resource-section{font-weight:400}.azure-resource-heading p{font-size:12px;margin:0;color:#565656}
+.azure-resource-symbol{font-size:30px;color:#087e8b}.azure-resource-layout{display:grid;grid-template-columns:220px minmax(0,1fr);gap:22px}
+.azure-resource-menu{border-inline-end:1px solid var(--az-border);padding-inline-end:14px;min-width:0}
+.azure-resource-menu h2{font-size:13px;font-weight:600;margin:24px 0 6px}.azure-resource-menu button{display:block;width:100%;border:0;text-align:start;background:#edebe9;font-weight:600;border-inline-start:3px solid var(--az-blue)}
+.azure-resource-menu p{font-size:12px;color:#565656;margin-top:20px}.azure-work-pane{min-width:0}
+.azure-local-banner{font-size:12px;margin:0 0 12px;color:#565656;overflow-wrap:anywhere}.azure-command-bar{display:flex;align-items:center;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--az-border);padding:0 0 7px;margin-bottom:12px}
+.azure-command-bar button{border:0;color:var(--az-blue);padding:5px 10px}.azure-command-bar button:disabled{background:#fff;color:#737373}
+.azure-page-filter{display:block;margin-bottom:8px}.azure-result-count{font-size:12px;color:#565656;margin:6px 0}
+.azure-table-scroll{max-width:100%;overflow-x:auto}.azure-blob-view table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
+.azure-blob-view th,.azure-blob-view td{padding:10px 8px;border-bottom:1px solid #e1dfdd;text-align:start;vertical-align:top;overflow-wrap:anywhere}
+.azure-blob-view th{font-weight:600}.azure-blob-view th:first-child,.azure-blob-view td:first-child{width:36px}
+.azure-blob-view tr.azure-selected{background:#e5f1fb}.azure-blob-view input[type=checkbox]{width:17px;height:17px;accent-color:var(--az-blue)}
+.azure-blob-view .azure-row-link{display:inline-block;text-decoration:none;border:0;padding:0;min-height:24px;background:none;color:var(--az-blue);text-align:start;overflow-wrap:anywhere;white-space:normal}
+.azure-empty{padding:26px 12px;text-align:center;color:#565656}.azure-pagination{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}.azure-limits{font-size:12px;border-top:1px solid var(--az-border);padding-top:12px}.azure-limits summary{cursor:pointer;color:var(--az-blue)}
+.azure-message{background:#eff6fc;padding:12px;margin:10px 0;border-inline-start:3px solid var(--az-blue);overflow-wrap:anywhere}.azure-message p{margin:4px 0 0}.azure-error{background:#fdf3f4;border-color:#a4262c;color:#701c22}
+.azure-action-pane{position:fixed;inset:0 0 0 auto;margin:0;border:0;border-inline-start:1px solid var(--az-border);width:min(440px,100vw);height:100dvh;max-height:100dvh;max-width:100vw;padding:0;background:#fff;color:var(--az-text);box-shadow:-4px 0 12px #0002}
+.azure-action-pane[open]{display:flex;flex-direction:column}.azure-action-pane::backdrop{background:#0003}
+.azure-action-pane>header{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:center;padding:16px 20px;border-bottom:1px solid var(--az-border)}.azure-action-pane h2{min-width:0;overflow-wrap:anywhere;font-size:21px;margin:0;font-weight:600}
+.azure-action-pane>header button{border:0;font-size:24px;padding:0 8px}.azure-action-pane form{display:flex;flex-direction:column;min-height:0;flex:1}.azure-pane-body{padding:20px;overflow:auto;flex:1;min-height:0}.azure-pane-body label{display:block;font-weight:600;margin-bottom:18px}.azure-pane-body input{display:block;margin-top:6px;font-weight:400;max-width:100%}.azure-pane-body input[type=file]{width:100%}.azure-pane-body p{font-size:13px;font-weight:400;overflow-wrap:anywhere}
+.azure-action-pane footer{display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid var(--az-border);padding:16px 20px;background:#fff}.azure-blob-view .azure-primary{background:#0067b8;color:#fff;border-color:#0067b8}.azure-blob-view .azure-primary:hover:enabled{background:#005a9e}.azure-blob-view .azure-primary:disabled{background:#f3f2f1;color:#707070;border-color:var(--az-border)}
+.azure-pane-body dl{margin:0}.azure-pane-body dt{font-weight:600;margin-top:18px}.azure-pane-body dd{margin:4px 0;overflow-wrap:anywhere}
+.azure-visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:700px){.azure-portal-header{padding:10px 12px}.azure-blob-view{padding:10px 12px 20px}.azure-resource-layout{grid-template-columns:minmax(0,1fr);gap:12px}.azure-resource-menu{border-inline-end:0;border-bottom:1px solid var(--az-border);padding:0 0 10px}.azure-resource-menu h2{margin:8px 0 4px}.azure-resource-menu p{margin:8px 0}.azure-resource-heading{margin-bottom:12px}.azure-resource-heading h1{font-size:20px}.azure-blob-view th,.azure-blob-view td{padding:8px 4px;font-size:12px}.azure-blob-view th:first-child,.azure-blob-view td:first-child{width:27px}.azure-action-pane{width:100vw}.azure-pane-body{padding:16px}.azure-shared-controls{width:100%}}
+
+.azure-pane-header-controls{display:flex;align-items:center;flex-wrap:wrap;gap:8px;max-width:100%}.azure-pane-language{display:flex;align-items:center;flex-wrap:wrap;gap:6px;font-size:12px}.azure-pane-language select{font:inherit;color:var(--az-text);background:#fff;border:1px solid #737373;min-height:32px;padding:4px 6px;max-width:100%}
+
+/* Neutral simulator controls belong to the Azure header, without an AWS bar. */
+.azure-shared-controls .cloud-global-nav{background:transparent;color:#fff;padding:0;font:14px/1.45 "Segoe UI",Arial,sans-serif}
+.azure-shared-controls .cloud-global-nav :is(button,select,summary){background:#0067b8;color:#fff;border-color:#c8e4fa;border-radius:2px}
+.azure-shared-controls .cloud-provider-choices button[aria-pressed=true]{background:#fff;color:#005a9e;border-color:#fff}
+.azure-shared-controls .cloud-service-panel :is(button,input){background:#fff;color:#242424}
+.azure-shared-controls .cloud-api-reference{color:#fff}

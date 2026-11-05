@@ -1,102 +1,152 @@
-# Azure Blob console source candidate
+# Azure Blob console
 
-This independent component is not mounted or bundled into the simulator yet.
-No browser, bundle, Go or Azure SDK acceptance was performed in this source-only
-phase. It must not be advertised as available Azure support. Existing Cloudscape
-components supply accessible controls; this is provider-specific Azure-labelled
-content, not an AWS service screen and not an exact Azure portal replica.
+The simulator provides a bounded, independent Azure Blob Storage console over
+its local Azure HTTP API and SQLite state. It does not connect to Azure. The
+provider-specific redesign is a private integration candidate. Its canonical
+22-package build and actual embedded CLI passed focused browser acceptance;
+whole new-head regression gates and hosted CI remain separate obligations.
+This is not authenticated Azure Portal parity or official SDK compatibility.
 
-## Root composition contract
+## Screen and operation sequence
+
+The redesigned resource view uses native React controls, a storage-account
+heading, resource navigation, a flat command bar, a checkbox table and a right
+operation pane. It does not use AWS Cloudscape layout or table components.
+The integration owner supplies the separate provider/service/language/session
+controls. The host-configured account is read-only; it is not an ARM resource
+created by the user. Only implemented storage operations are actionable.
+
+1. Select Azure and Blob Storage in the host console. The resource menu's
+   **Data storage → Containers** entry opens the live container list for the
+   configured account. The menu search only filters that resource navigation.
+2. Select **+ Container**, enter a valid name, then select **Create** in the
+   right pane. Names use 3–63 lowercase letters, digits or hyphens, without
+   consecutive hyphens. Access remains private to the local authorized subject;
+   no anonymous-access policy switch is implemented.
+3. Open a container by its name. Select **Upload**, choose one file, and confirm
+   its blob name. The maximum file size is 8 MiB. Creation is conditional by
+   default. To replace an existing target and its metadata, enter the literal
+   API-independent confirmation word `replace`; the target must already exist.
+4. Select a blob's checkbox to download or delete it. Selecting its name or
+   **Properties** opens the last-list metadata: name, modification time, ETag,
+   type and size. This pane does not issue a new HEAD request or preview content;
+   use **Refresh** to obtain a new list snapshot.
+5. Deleting a blob requires its exact name and sends the selected ETag. A changed
+   blob produces a conflict message rather than an unconditional deletion.
+   Return through the **Containers** breadcrumb to select a container for
+   deletion. Its confirmation warns that all contained blobs, including later
+   pages, are permanently removed.
+
+**First page** reloads the first live page; **Next page** uses the server's opaque
+continuation marker. **Filter this page by name** is a local substring filter,
+not a search over other pages. Empty, loading, permission-error and successful
+states remain distinct. English is the default; Japanese presentation uses the
+shared saved locale. Changing language does not change account, resource names,
+API values, authority, form data or tokens.
+
+## Composition and native API contract
 
 ```jsx
-import AzureBlobView from './azure-blob.jsx';
-<AzureBlobView key={'azure:'+principal+':'+account}
-  request={request} account="tenkacloudlocal" />
+<AzureConsoleShell controls={neutralControls}>
+  <AzureBlobView key={'azure:'+subject+':'+environment+':'+account}
+    request={request} account={account} />
+</AzureConsoleShell>
 ```
 
-`request(path, options)` is the host console's same-origin native HTTP function.
-It returns a raw fetch `Response`, throws for non-success and handles expired host
-login. It must honor `options.signal` and headers/body without injecting an AWS
-service selector into Azure requests. Root binds the already-authenticated Azure
-exercise subject server-side; the component neither reads credentials nor selects
-an Actor through arbitrary headers. Root owns provider navigation, authorization,
-account fixture configuration, module import and final asset regeneration.
+The shell accepts `{children, controls}`. `AzureBlobView` retains
+`{request, account='tenkacloudlocal'}`. The integration owner must place this shell
+outside AWS AppLayout and preserve a distinct key for each subject, environment
+or account. `request(path, options)` is the host's authenticated same-origin HTTP
+helper: it preserves body, headers and AbortSignal, handles expired sessions and
+must not add AWS selectors to Azure operations. Neither component reads tokens
+or constructs trusted Actors from headers. Local owner authorization is not
+Microsoft Entra ID, Azure RBAC, SAS or an account-key implementation.
 
-The parent must remount with a different React key on subject, environment or
-account change. Pending work is generation-guarded, serialized and abortable on
-unmount; responses are checked again after asynchronous reads before publishing.
-30-second action deadlines bound stalled UI work. No token/Entra/SAS inputs exist.
-Do not preview an object body as HTML or navigate to an upstream download URL.
-
-The existing leaf is account-in-path, which is different from the Azure cloud
-hostname. `tenkacloudlocal` is host configuration, not successful ARM deployment:
-
-| UI action | Actual native request |
+| Action | Actual native operation |
 | --- | --- |
-| Containers | GET `/_simulator/providers/azure/tenkacloudlocal?comp=list&maxresults=100` |
-| New container | PUT `.../tenkacloudlocal/{container}?restype=container` |
+| Containers | GET `/_simulator/providers/azure/{account}?comp=list&maxresults=100` |
+| Create container | PUT `.../{account}/{container}?restype=container` |
 | Blobs | GET `.../{container}?restype=container&comp=list&maxresults=100` |
-| Upload | PUT `.../{container}/{blob}`, `x-ms-blob-type: BlockBlob`, File body |
-| Download | GET blob, bounded bytes saved as an octet-stream download |
-| Delete blob | DELETE blob, selected ETag as `If-Match` |
-| Delete container | DELETE container with `restype=container`; atomic cascade |
+| Upload | PUT blob with `x-ms-blob-type: BlockBlob` and the selected File |
+| Create-only / replace | `If-None-Match: *` / explicit `If-Match: *` |
+| Properties pane | Last successful list metadata; no extra request |
+| Download | GET blob, bounded bytes saved as an octet-stream attachment |
+| Delete blob | DELETE blob with the selected ETag in `If-Match` |
+| Delete container | DELETE with `restype=container`; atomic cascade |
 
-Every request carries leaf version `2023-11-03`. Container names are encoded as
-one segment; blob segments are individually encoded while literal slash separators
-are preserved. A literal percent is encoded once, not decoded again. Browser URL
-parsing normalizes standalone `.`/`..` segments even if percent-encoded, so this UI
-refuses those exact blob paths and explains the need for a native client. It does
-not silently edit their spelling. The generic RawPath router candidate remains a
-separate patch and prerequisite to strict account/container path fidelity.
+Each request carries `x-ms-version: 2023-11-03`. Container names are encoded as
+one segment. Blob segments are encoded individually, preserving slash separators
+and literal percent spelling. Standalone `.` and `..` path segments are explicitly
+refused because browser URL parsing can normalize them; use a native client for
+those names. No second decoding or silent name repair is introduced by this UI.
 
-Lists parse only bounded1MiB UTF-8 XML, expected EnumerationResults roots, DTD-free
-XML, depth16/nodes10000 and at most100 entries. No innerHTML or parsed-node adoption.
-NextMarker is carried opaquely to the next live page; local filtering applies only
-to the current page. Upload is one file up to8MiB, create-only by default, with an
-explicit `replace` action for an existing target; overwrite replaces metadata too.
-Download has an8MiB streaming cap and never runs the blob's MIME type. Destructive
-confirmation repeats the exact selected resource name. Container deletion warns
-that **all blobs, including later pages, are permanently removed**; no soft-delete
-or snapshot recovery is implied. Errors retain useful native codes without showing
-raw payloads or credentials. 403 is distinct from an empty successful list.
+The existing API/read/lifetime functions are byte-identical to the redesign's
+`c334f4f` baseline. Actions remain serialized, abortable and generation-guarded,
+including checks after asynchronous reads, with a 30-second deadline. XML lists
+are limited to 1 MiB, 100 entries, depth 16 and 10,000 nodes, with strict UTF-8,
+expected roots and no DTD/entities. No parsed HTML is injected. Downloads have an
+8 MiB streaming cap, fixed safe MIME type and revoked object URLs. Error messages
+map known status conditions without echoing response bodies or credentials.
 
-## Public portal reference and intentional gaps
+## Public visual references and remaining differences
 
-Checked2026-11-04 against Microsoft primary sources:
+Reference review date: **2026-11-05**. These are official public documentation
+images, not observations of an authenticated current Azure Portal session.
+Document publication dates do not establish screenshot capture dates.
 
-- [Portal quickstart](https://learn.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-portal)
-  (updated2026-08-25): account → Data storage/Containers → New container;
-  open container → Upload → list/download/delete; deleting a container removes blobs.
-- [Manage containers](https://learn.microsoft.com/en-us/azure/storage/blobs/blob-containers-portal):
-  New container name/private access, selection and confirmed cascade deletion.
-- Official linked screenshots:
-  [upload](https://learn.microsoft.com/en-us/azure/storage/blobs/media/storage-quickstart-blobs-portal/upload-blob.png),
-  [download](https://learn.microsoft.com/en-us/azure/storage/blobs/media/storage-quickstart-blobs-portal/download-blob.png),
-  [delete](https://learn.microsoft.com/en-us/azure/storage/blobs/media/storage-quickstart-blobs-portal/delete-blobs.png).
-  Their primary guide links were inspected, but image downloads returned403 in this
-  environment. The screenshots themselves were not visually inspected. An initial
-  guessed repository image path returned404; it was corrected using guide links.
+| Official source | Visually inspected reference and date limits |
+| --- | --- |
+| [Azure Portal overview](https://learn.microsoft.com/en-us/azure/azure-portal/azure-portal-overview), document dated 2026-01-26 | [Portal callouts image](https://raw.githubusercontent.com/MicrosoftDocs/azure-management-docs/main/articles/azure-portal/media/azure-portal-overview/portal-callouts.png): header, breadcrumbs, resource title, service menu and command bar. It depicts a VM, not Blob Storage. |
+| Same overview | [Service-menu image](https://raw.githubusercontent.com/MicrosoftDocs/azure-management-docs/main/articles/azure-portal/media/azure-portal-overview/service-menu-toggle.png): resource-menu search and menu toggle. |
+| [Manage containers](https://learn.microsoft.com/en-us/azure/storage/blobs/blob-containers-portal), document dated 2023-06-26 | [Create-container image](https://raw.githubusercontent.com/MicrosoftDocs/azure-docs/main/articles/storage/blobs/media/blob-containers-portal/create-container-lrg.png): account/Containers title, flat actions, checkbox list and right creation pane. This is a historical visual reference. |
 
-No authenticated Azure portal was observed. Public page chrome displayed an
-access notice, but the documented operation text was available without sign-in.
-No real Azure sign-in, subscription, resource, SAS or billable action was used.
-The upload interaction is a local modal instead of Azure's blade; this source is
-not a pixel-fidelity claim. Anonymous access changes, Entra/RBAC management, SAS,
-ARM account creation, leases, access tiers, snapshots, versions, staged blocks and
-soft-delete remain unsupported and are not shown as working controls. The parent
-must offer an Azure-specific shell without AWS account/region navigation semantics.
+The [Portal quickstart](https://learn.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-portal)
+(document dated 2026-08-25) supplies the documented account → container → upload
+sequence. The [authorization guide](https://learn.microsoft.com/en-us/azure/storage/blobs/authorize-data-operations-portal)
+explains real Portal authorization concepts; this simulator does not claim them.
+The public images guide the new structure, not copied runtime artwork or logos.
 
-## Required integration acceptance (not yet executed)
+The exact upload-image fetch at
+`https://learn.microsoft.com/en-us/azure/storage/blobs/media/storage-quickstart-blobs-portal/upload-blob.png`
+stopped with `Tunnel connection failed: 403 Forbidden`. It has not been retried
+through another tool, mirror or proxy. Its pixels remain unconfirmed. The
+Portal sign-in wall was not crossed. Current authenticated upload/detail screens,
+theme and mobile behavior remain unverified; no sign-in, subscription change,
+real resource creation or billable action was performed.
 
-Use actual host authentication with the Azure Actor adapter and actual leaf/SQLite:
-create private container, upload binary/slash/percent/UTF-8 names, compare SDK/list/
-download bytes, ETag-conflict rejection, delete blob, confirmed nonempty container
-cascade, restart persistence, cross-team token denial, missing actor and operation
-403. Check native error/unsupported paths; do not use mocked API responses.
+## Unsupported scope
 
-At1440px and390px verify real keyboard navigation/focus, labels, upload limits,
-confirmation, stale-request suppression on unmount, page navigation/empty/error
-states, no external requests, safe HTML/SVG download and no document horizontal
-scroll. Cloudscape file picker/table layouts need actual browser measurement;
-the scoped CSS alone does not establish responsive or accessibility success.
-Bundle/digest/license checks and final whole regression gates remain required.
+No ARM account/subscription management, Entra sign-in, Azure RBAC editing,
+anonymous-access changes, SAS generation, leases, tiers, snapshots, versions,
+soft delete, staged blocks or recovery is simulated by these controls. The
+resource menu does not present other storage services as working. Blob Properties
+is an actual list snapshot, not a claim of every property available in Azure.
+
+## Redesign verification status
+
+This table separates source checks from runtime acceptance. The integration owner
+can replace pending entries with exact new-head receipts after running the gates;
+older API or browser evidence alone does not validate the redesigned screen.
+
+| Check | Current redesign evidence |
+| --- | --- |
+| JSX for view/shell and CSS parsing | PASS at `8e199c4`: existing esbuild transform; zero warnings; no asset output or dependency installation |
+| API/read/error helpers and lifetime/native CRUD | Byte-identical to `c334f4f`; this is source comparison, not a new API execution |
+| Diff whitespace check | PASS at `8e199c4` |
+| Canonical bundle, embedded CLI and license/digests | PASS: canonical 22-package bundle and actual embedded CLI; existing original notices retained |
+| Real browser lifecycle, keyboard, pane focus/Cancel and axe | PASS: actual two-CLI native HTTP lifecycle; 22 cross-provider audit states, not an SDK claim |
+| Desktop 1440 / mobile 390, layout and no horizontal overflow | PASS in focused embedded provider/language tests; authenticated Azure mobile parity unverified |
+| Same-SQLite native HTTP, cross-team/auth denial | PASS: exact download bytes, peer isolation, native/UI403, cross-token/cookie401 and logout replay refusal |
+| Official Azure SDK / restart persistence | Not certified by the browser helper; separate native/SDK gates remain necessary |
+| Locale switching/persistence without losing entered data | PASS: real in-pane selector, draft/file/confirmation and native412 error retained; 12 combined language audit states |
+| Whole Go, E2E, formal applicability and hosted CI | Pending for the integrated head |
+
+Runtime acceptance must use real authenticated local HTTP/SQLite, not mocked
+responses: container create, binary/slash/percent/UTF-8 upload, native SDK and
+safe-download byte comparison, stale ETag refusal, explicit replacement, confirmed
+nonempty cascade deletion, restart persistence, missing/cross-team credentials and
+nonowner denial with unchanged state. Verify stale responses are discarded on
+scope change, no external calls or page errors occur, and only the owned pane
+handles its dismissal. The native checkbox selection replaces the earlier radio
+selection; browser tests must exercise that real selection without weakening the
+state or deletion assertions. No runtime acceptance is inferred from CSS alone.
