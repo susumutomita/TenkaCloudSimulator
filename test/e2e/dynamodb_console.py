@@ -69,6 +69,10 @@ def _run():
                         schema={'TableName':name,'KeySchema':[{'AttributeName':pk,'KeyType':'HASH'}]+([{'AttributeName':'sort','KeyType':'RANGE'}] if sort else []),'AttributeDefinitions':[{'AttributeName':pk,'AttributeType':kind}]+([{'AttributeName':'sort','AttributeType':'S'}] if sort else []),'BillingMode':'PAY_PER_REQUEST'}
                         peer.create_table(**schema);peer.put_item(TableName=name,Item={**key,'payload':{'S':'peer must survive'}})
                         context=browser.new_context(viewport={'width':width,'height':1000});contexts.append(context);page=context.new_page();page.set_default_timeout(10000)
+                        # Observe real AbortSignals without replacing responses,
+                        # touching DOM state, or changing fetch's returned promise.
+                        page.add_init_script('''(() => {const original=window.fetch.bind(window),ids=new WeakMap();let serial=0;window.__ddbSignalObservations=[];window.fetch=(url,options={})=>{const target=new Headers(options.headers||{}).get('X-Amz-Target')||'';if(target.startsWith('DynamoDB_20120810.')&&options.signal){if(!ids.has(options.signal))ids.set(options.signal,++serial);const item={operation:target.slice('DynamoDB_20120810.'.length),signal:ids.get(options.signal),aborted:options.signal.aborted};window.__ddbSignalObservations.push(item);options.signal.addEventListener('abort',()=>{item.aborted=true},{once:true})}return original(url,options)}})();''')
+
                         calls,responses,failed=[],[],[];intercept=[None];phase=['startup'];request_records={}
                         def operation(request):return request.headers.get('x-amz-target','').removeprefix('DynamoDB_20120810.')
                         def guard(route):
@@ -108,7 +112,13 @@ def _run():
                         def keys():
                             page.get_by_label(pk+' ('+kind+')',exact=True).fill(value)
                             if sort:page.get_by_label('sort (S)',exact=True).fill('entry')
+                        sentinel='cancel-sentinel-'+kind.lower()+'-'+str(width)
+                        own.create_table(TableName=sentinel,KeySchema=[{'AttributeName':'id','KeyType':'HASH'}],AttributeDefinitions=[{'AttributeName':'id','AttributeType':'S'}],BillingMode='PAY_PER_REQUEST')
                         login(page,a.token);expect(page.get_by_role('button',name='Refresh tables',exact=True)).to_be_enabled()
+                        page.evaluate('()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))')
+                        expect(page.get_by_role('button',name='Refresh tables',exact=True)).to_be_enabled()
+                        expect(page.get_by_text('DynamoDB request failed',exact=True)).to_have_count(0)
+
                         # Cancel while a real list request is pending: no stuck loading or write.
                         held=[]
                         def hold_list(route):
@@ -120,6 +130,12 @@ def _run():
                         page.get_by_role('button',name='Create table',exact=True).click();page.get_by_role('button',name='Cancel',exact=True).click()
                         with page.expect_response(lambda response:operation(response.request)=='ListTables') as released:held.pop().continue_()
                         assert released.value.status==200;phase[0]='post-cancel';intercept[0]=None;expect(page.get_by_role('button',name='Refresh tables',exact=True)).to_be_enabled();assert calls.count('CreateTable')==0
+                        expect(page.get_by_role('link',name=sentinel,exact=True)).to_have_count(0)
+                        native('Refresh tables','ListTables');expect(page.get_by_role('link',name=sentinel,exact=True)).to_be_visible()
+                        own.delete_table(TableName=sentinel);native('Refresh tables','ListTables')
+                        expect(page.get_by_role('link',name=sentinel,exact=True)).to_have_count(0)
+                        expect(page.get_by_text('DynamoDB request failed',exact=True)).to_have_count(0)
+
                         page.get_by_role('button',name='Create table',exact=True).click();page.get_by_label('Table name',exact=True).fill(name);page.get_by_label('Partition key',exact=True).fill(pk)
                         if kind!='S':page.get_by_label('Partition key type',exact=True).click();page.get_by_role('option',name='Number (N)' if kind=='N' else 'Binary (B)',exact=True).click()
                         if sort:page.get_by_role('checkbox',name='Sort key (optional)',exact=True).check()
@@ -164,9 +180,19 @@ def _run():
                         page.get_by_role('button',name='Delete table',exact=True).click();page.get_by_label('Confirm table name',exact=True).fill(name);native('Delete','DeleteTable',page.get_by_role('dialog'));expect(page.get_by_role('button',name='Refresh tables',exact=True)).to_be_enabled()
                         assert name not in own.list_tables()['TableNames'];assert peer.get_item(TableName=name,Key=key)['Item']['payload']=={'S':'peer must survive'}
                         (REPORTS/('transport-'+kind+'-'+str(width)+'.json')).write_text(json.dumps({'calls':calls,'responses':responses,'failed':failed,'pageErrors':len(errors),'outside':len(outside),'requestRecords':list(request_records.values())},indent=2)+'\n')
-                        assert set(calls)==OPS;assert failed==['DescribeTable'];assert len(responses)+1==len(calls);assert calls.count('CreateTable')==1 and calls.count('DeleteTable')==1 and calls.count('DeleteItem')==1 and calls.count('PutItem')==3
+                        assert set(calls)==OPS
+                        observed=page.evaluate('window.__ddbSignalObservations')
+                        startup=[r for r in request_records.values() if r['failure'] and r['operation']=='ListTables' and r['phase']=='startup' and r['failurePhase']=='startup' and r['status']==200 and r['failure']=='net::ERR_ABORTED']
+                        intentional=[r for r in request_records.values() if r['failure'] and r['operation']=='DescribeTable' and r['status'] is None and r['failure']=='net::ERR_FAILED' and r['phase']=='normal-lifecycle']
+                        assert len(startup)<=1 and len(intentional)==1
+                        assert len(failed)==len(startup)+len(intentional), 'Unexpected native network failure'
+                        if startup:
+                            lists=[r for r in observed if r['operation']=='ListTables']
+                            assert lists[0]['aborted'] and not lists[-1]['aborted'] and lists[0]['signal']!=lists[-1]['signal'], 'Startup abort did not belong to a replaced view controller'
+                        assert len(request_records)==len(calls) and len(responses)+1==len(calls)
+                        assert calls.count('CreateTable')==1 and calls.count('DeleteTable')==1 and calls.count('DeleteItem')==1 and calls.count('PutItem')==3
                         assert all(status==200 or op=='PutItem' and status==400 for op,status in responses);assert not errors and not outside
-                        flows.append({'width':width,'keyType':kind,'sortKey':sort,'partitionKeyName':pk,'operations':sorted(set(calls)),'postACKReadAbort':1,'readRetryDidNotRepeatPut':True,'conditionalAndDuplicateRefused':True,'cancelNoMutation':True,'reader403NoMutation':True,'keyChangeClearsOldResult':True})
+                        flows.append({'width':width,'keyType':kind,'sortKey':sort,'partitionKeyName':pk,'operations':sorted(set(calls)),'postACKReadAbort':1,'readRetryDidNotRepeatPut':True,'conditionalAndDuplicateRefused':True,'cancelNoMutation':True,'reader403NoMutation':True,'keyChangeClearsOldResult':True,'expectedOldViewStartupAbort':len(startup),'signalObservations':observed})
                         context.close();contexts.remove(context);peer.delete_table(TableName=name)
                     assert own.list_tables()['TableNames']==[] and peer.list_tables()['TableNames']==[];assert SEEN==OPS;assert COUNTS['calls']>0 and COUNTS['calls']==COUNTS['sends']==COUNTS['responses']
                     report={'actualEmbeddedUI':True,'twoCLIsDBTokens':True,'flows':flows,'SDKCounts':COUNTS,'axeStates':audits,'foreignToken401':True,'peerPreserved':True,'outsideRequests':0,'pageErrors':0,'cleanup':'DELETED','actualAWS':False};(REPORTS/'dynamodb-console.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report))
