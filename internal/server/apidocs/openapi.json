@@ -78,7 +78,7 @@
       },
       "post": {
         "summary": "AWS native JSON or Query operation",
-        "description": "**Static request templates:** choose the correct Content-Type and routing headers before Test Request → Send. SSM/SQS send JSON with X-Amz-Target (JSON 1.1 for SSM, JSON 1.0 for SQS); CloudFormation/IAM send URL-encoded Query fields. The 200 response is JSON for SSM/SQS and XML for Query protocols. A successful DeleteStack has no result payload beyond Query response metadata.\n\nNative regional root endpoint. SQS: X-Amz-Target AmazonSQS.CreateQueue, ListQueues, GetQueueUrl, DeleteQueue, SendMessage, ReceiveMessage, DeleteMessage, ChangeMessageVisibility, GetQueueAttributes (JSON 1.0, Standard queues only; local body limit 256 KiB, aggregate physical storage 10000 messages/64 MiB across queues/regions including expired foreign rows until scoped cleanup; bytes count body UTF-8 plus stored attribute JSON. Over-budget SendMessage returns local SimulatorQuotaExceeded without mutation; existing over-cap data remains readable/deletable; FIFO, Query protocol, batch operations and dead-letter redrive are unsupported). SSM: X-Amz-Target AmazonSSM.PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter. CloudFormation: CreateStack, DescribeStacks, DeleteStack; S3 buckets, SSM parameters, inline Python Lambda functions, one inline IAM identity policy per role, five Regional REST API Gateway resource types, and bounded Lambda::Permission. Unsupported options fail. Real credentials and session tokens are rejected. Create/DeleteStack also require the caller to allow the underlying S3/SSM/IAM/Lambda actions; CAPABILITY_IAM grants no permissions. API resources use NONE/POST AWS_PROXY local Lambda, same-stack API children, explicit deployment DependsOn methods and reverse guarded cleanup. Lambda permission uses only apigateway.amazonaws.com and local execute-api SourceArn. No service RoleArn or general CloudFormation lifecycle is supported. IAM is global: send X-Simulator-Service: iam, Version2010-05-08 and one of CreateRole/GetRole/ListRoles/DeleteRole/PutRolePolicy/GetRolePolicy/DeleteRolePolicy/ListRolePolicies/UpdateAssumeRolePolicy. Policy documents are JSON strings; successful IAM XML returns them RFC3986 URL-encoded. Native role names use the local alphanumeric/underscore/hyphen subset,1–64; inline policy names1–128 AWS characters. Trust and aggregate policies32KiB, at most10 inline policies/100 statements,1000 active+retired name claims. Deleted role names cannot be adopted by legacy identity writes. No managed grants or session issuance.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.\n\nUse X-Amz-Target TrentService.<operation> matching the selected body example; example choice does not change routing headers automatically. CreateKey first, copy returned KeyId into later requests, and copy an actual local Encrypt CiphertextBlob into Decrypt (the valid-base64 documentation placeholder is deliberately not decryptable). All calls require host X-Simulator-Token or signed-in local session. Dummy TCSIM SigV4 scope is not authentication.\n\nCreateKey/ListKeys require their exact kms action on *. DescribeKey/EnableKey/DisableKey/GetKeyPolicy/Encrypt/Decrypt require the actual key ARN. Decrypt without KeyId resolves the local blob key. Explicit Deny wins. Programmatic default policy only enables local identity-policy delegation; no grant for all participants.\n\nEnabled/Disabled only; disabled blocks Encrypt/Decrypt, metadata/default policy remain readable. Local request64KiB,1000keys,plaintext1–4096bytes,context100entries/8192canonicalbytes,counter2^32 ceiling. Ciphertext/material are simulator-local; SQLite stores raw material, not an at-rest security boundary. Unsupported aliases/tags/grants/custom policies/asymmetric/data keys/rotation/deletion/multi-region/CFN/other-service encryption fail; no problem availability is implied. Actual AWS eventual consistency and ciphertext portability are not reproduced.\n\nKMS JSON1.1 targets TrentService.CreateKey/DescribeKey/ListKeys/EnableKey/DisableKey/GetKeyPolicy/Encrypt/Decrypt are also accepted here. This root JSON1.1 section includes all eight bounded KMS body templates and limitations.\n\nSQS static templates use application/x-amz-json-1.0 with X-Amz-Target: AmazonSQS.<operation> and X-Simulator-Service: sqs. Replace QueueUrl and ReceiptHandle fixtures with current native values; static examples are not live saved state. CloudWatch Logs JSON1.1 uses Logs_20140328.<operation> and service=logs; only the seven declared operations are implemented. Choose the matching headers separately from the body example. Secrets Manager adds seven bounded JSON1.1 operations over this same root; practice values are plaintext, not KMS-encrypted. No recovery window or rotation.\n\n**DynamoDB JSON 1.0 static templates:** select application/x-amz-json-1.0 and set X-Amz-Target to the exact DynamoDB_20120810.<operation> shown by the selected example. X-Simulator-Service may be dynamodb. Use a private practice table name; samples are not current state and selecting a body does not automatically change the target header. Seven basic operations only; immediate local lifecycle, no indexes/Query/Scan/console/CFN. DeleteItem of an absent key is idempotent; unsupported options fail. Item bytes use UTF-8 and decoded binary rather than JSON transfer length; numeric sizing is approximate. Failed conditional, oversized and IAM-refused writes leave saved state unchanged. DeleteTable permanently removes that practice table and all its items.",
+        "description": "**Static request templates:** choose the correct Content-Type and routing headers before Test Request → Send. SSM/SQS send JSON with X-Amz-Target (JSON 1.1 for SSM, JSON 1.0 for SQS); CloudFormation/IAM send URL-encoded Query fields. The 200 response is JSON for SSM/SQS and XML for Query protocols. A successful DeleteStack has no result payload beyond Query response metadata.\n\nNative regional root endpoint. SQS: X-Amz-Target AmazonSQS.CreateQueue, ListQueues, GetQueueUrl, DeleteQueue, SendMessage, ReceiveMessage, DeleteMessage, ChangeMessageVisibility, GetQueueAttributes (JSON 1.0, Standard queues only; local body limit 256 KiB, aggregate physical storage 10000 messages/64 MiB across queues/regions including expired foreign rows until scoped cleanup; bytes count body UTF-8 plus stored attribute JSON. Over-budget SendMessage returns local SimulatorQuotaExceeded without mutation; existing over-cap data remains readable/deletable; FIFO, Query protocol, batch operations and dead-letter redrive are unsupported). SSM: X-Amz-Target AmazonSSM.PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter. CloudFormation: CreateStack, DescribeStacks, DeleteStack; S3 buckets, SSM parameters, inline Python Lambda functions, one inline IAM identity policy per role, five Regional REST API Gateway resource types, and bounded Lambda::Permission. Unsupported options fail. Real credentials and session tokens are rejected. Create/DeleteStack also require the caller to allow the underlying S3/SSM/IAM/Lambda actions; CAPABILITY_IAM grants no permissions. API resources use NONE/POST AWS_PROXY local Lambda, same-stack API children, explicit deployment DependsOn methods and reverse guarded cleanup. Lambda permission uses only apigateway.amazonaws.com and local execute-api SourceArn. No service RoleArn or general CloudFormation lifecycle is supported. IAM customer-managed policies and role attachments are also available through the dedicated IAM provider template, with explicit ListPolicies Scope=Local. IAM is global: send X-Simulator-Service: iam, Version2010-05-08 and one of CreateRole/GetRole/ListRoles/DeleteRole/PutRolePolicy/GetRolePolicy/DeleteRolePolicy/ListRolePolicies/UpdateAssumeRolePolicy. Policy documents are JSON strings; successful IAM XML returns them RFC3986 URL-encoded. Native role names use the local alphanumeric/underscore/hyphen subset,1–64; inline policy names1–128 AWS characters. Trust and aggregate policies32KiB, at most10 inline policies/100 statements,1000 active+retired name claims. Deleted role names cannot be adopted by legacy identity writes. No managed grants or session issuance.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.\n\nUse X-Amz-Target TrentService.<operation> matching the selected body example; example choice does not change routing headers automatically. CreateKey first, copy returned KeyId into later requests, and copy an actual local Encrypt CiphertextBlob into Decrypt (the valid-base64 documentation placeholder is deliberately not decryptable). All calls require host X-Simulator-Token or signed-in local session. Dummy TCSIM SigV4 scope is not authentication.\n\nCreateKey/ListKeys require their exact kms action on *. DescribeKey/EnableKey/DisableKey/GetKeyPolicy/Encrypt/Decrypt require the actual key ARN. Decrypt without KeyId resolves the local blob key. Explicit Deny wins. Programmatic default policy only enables local identity-policy delegation; no grant for all participants.\n\nEnabled/Disabled only; disabled blocks Encrypt/Decrypt, metadata/default policy remain readable. Local request64KiB,1000keys,plaintext1–4096bytes,context100entries/8192canonicalbytes,counter2^32 ceiling. Ciphertext/material are simulator-local; SQLite stores raw material, not an at-rest security boundary. Unsupported aliases/tags/grants/custom policies/asymmetric/data keys/rotation/deletion/multi-region/CFN/other-service encryption fail; no problem availability is implied. Actual AWS eventual consistency and ciphertext portability are not reproduced.\n\nKMS JSON1.1 targets TrentService.CreateKey/DescribeKey/ListKeys/EnableKey/DisableKey/GetKeyPolicy/Encrypt/Decrypt are also accepted here. This root JSON1.1 section includes all eight bounded KMS body templates and limitations.\n\nSQS static templates use application/x-amz-json-1.0 with X-Amz-Target: AmazonSQS.<operation> and X-Simulator-Service: sqs. Replace QueueUrl and ReceiptHandle fixtures with current native values; static examples are not live saved state. CloudWatch Logs JSON1.1 uses Logs_20140328.<operation> and service=logs; only the seven declared operations are implemented. Choose the matching headers separately from the body example. Secrets Manager adds seven bounded JSON1.1 operations over this same root; practice values are plaintext, not KMS-encrypted. No recovery window or rotation.\n\n**DynamoDB JSON 1.0 static templates:** select application/x-amz-json-1.0 and set X-Amz-Target to the exact DynamoDB_20120810.<operation> shown by the selected example. X-Simulator-Service may be dynamodb. Use a private practice table name; samples are not current state and selecting a body does not automatically change the target header. Seven basic operations only; immediate local lifecycle, no indexes/Query/Scan/console/CFN. DeleteItem of an absent key is idempotent; unsupported options fail. Item bytes use UTF-8 and decoded binary rather than JSON transfer length; numeric sizing is approximate. Failed conditional, oversized and IAM-refused writes leave saved state unchanged. DeleteTable permanently removes that practice table and all its items.",
         "operationId": "awsRegionalOperation",
         "parameters": [
           {
@@ -2990,11 +2990,11 @@
     "/_simulator/providers/aws/": {
       "post": {
         "operationId": "IAMRoleQueryOperation",
-        "summary": "Manage IAM roles and inline policies",
+        "summary": "Manage IAM roles, customer policies and role attachments",
         "tags": [
           "IAM roles"
         ],
-        "description": "Global native IAM Query/XML on the existing AWS provider alias. This is the same role/inline-policy SQLite state used by native SDKs, Lambda and the console. The IAM service header below is required and prefilled. Select one of the nine verified request examples. Policies are JSON strings; response policy documents are RFC3986 URL encoded. Only root-path local role names and explicit service-principal trust are supported. No STS, managed policies, advanced Conditions, users or federation. Default roles grant no service permissions. Delete inline policies before DeleteRole. Local tokens remain mandatory in the CLI. See capabilities for limits and docs/iam.md for the bounded contract.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.",
+        "description": "Global native IAM Query/XML on the existing AWS provider alias. Roles, inline policies, customer-managed policy versions and attachments share SQLite with native SDKs, Lambda and the console. Select one of 21 static request templates; use Test Request → Send for live state. Root-path customer policies only. ListPolicies requires explicit Scope=Local; AWS default All, AWS catalog, OnlyAttached/PolicyUsageFilter and nonroot paths return501. GetPolicyVersion and role-policy document responses are RFC3986 encoded once; CreatePolicyVersion/ListPolicyVersions omit Document. Default switches atomically update every attached role; effective permissions union inline and attached default versions with explicit Deny priority. Default versions cannot be deleted, attached or multi-version policies cannot be deleted, and attached roles cannot be deleted. No STS, users/groups, boundaries, advanced Conditions or AWS-managed grants. CFN ManagedPolicyArns remain metadata. See docs/iam.md and capabilities for exact local bounds.\n\nStatic examples use dummy names/ARNs and never represent current state. Execute CreateRole/CreatePolicy first, then attach their returned ARN; create v2 before selecting or deleting it, detach and delete nondefault versions before cleanup. SDK/console/live requests use the same state. Browser requests use your signed-in session. curl/SDK need the host-issued X-Simulator-Token; dummy AWS signing keys are not login credentials. Host401 means sign in; IAM403 means current identity lacks permission.",
         "parameters": [
           {
             "name": "X-Simulator-Service",
@@ -3384,6 +3384,434 @@
                         "description": "IAM action-specific field; unsupported fields fail explicitly."
                       }
                     }
+                  },
+                  {
+                    "title": "CreatePolicy",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "Action",
+                      "Version",
+                      "PolicyName",
+                      "PolicyDocument"
+                    ],
+                    "properties": {
+                      "Action": {
+                        "type": "string",
+                        "const": "CreatePolicy",
+                        "default": "CreatePolicy"
+                      },
+                      "Version": {
+                        "type": "string",
+                        "const": "2010-05-08",
+                        "default": "2010-05-08"
+                      },
+                      "PolicyName": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 128,
+                        "pattern": "^[A-Za-z0-9_+=,.@-]+$"
+                      },
+                      "PolicyDocument": {
+                        "type": "string",
+                        "description": "JSON identity policy string: raw UTF-8≤32KiB, Latin-1 pattern, compact JSON≤6144 characters; quoted whitespace remains significant. Existing encoded Query body≤128KiB. Supported Action/Resource grammar only; no Conditions."
+                      },
+                      "Path": {
+                        "type": "string",
+                        "enum": [
+                          "/"
+                        ]
+                      },
+                      "Description": {
+                        "type": "string",
+                        "maxLength": 1000,
+                        "description": "Local Latin-1/tab/newline/CR range; no other control characters."
+                      }
+                    }
+                  },
+                  {
+                    "title": "GetPolicy",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "Action",
+                      "Version",
+                      "PolicyArn"
+                    ],
+                    "properties": {
+                      "Action": {
+                        "type": "string",
+                        "const": "GetPolicy",
+                        "default": "GetPolicy"
+                      },
+                      "Version": {
+                        "type": "string",
+                        "const": "2010-05-08",
+                        "default": "2010-05-08"
+                      },
+                      "PolicyArn": {
+                        "type": "string",
+                        "pattern": "^arn:aws:iam::000000000000:policy/[A-Za-z0-9_+=,.@-]{1,128}$",
+                        "description": "Returned local customer policy ARN; AWS-managed catalog is unsupported."
+                      }
+                    }
+                  },
+                  {
+                    "title": "ListPolicies",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "Action",
+                      "Version",
+                      "Scope"
+                    ],
+                    "properties": {
+                      "Action": {
+                        "type": "string",
+                        "const": "ListPolicies",
+                        "default": "ListPolicies"
+                      },
+                      "Version": {
+                        "type": "string",
+                        "const": "2010-05-08",
+                        "default": "2010-05-08"
+                      },
+                      "Scope": {
+                        "type": "string",
+                        "enum": [
+                          "Local"
+                        ],
+                        "description": "Required explicitly; omitted/All/AWS return501."
+                      },
+                      "PathPrefix": {
+                        "type": "string",
+                        "enum": [
+                          "/"
+                        ]
+                      },
+                      "MaxItems": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 1000
+                      },
+                      "Marker": {
+                        "type": "string",
+                        "maxLength": 2048,
+                        "description": "Return the exact previous Marker. Parent generation/context checked; no snapshot guarantee."
+                      }
+                    }
+                  },
+                  {
+                    "title": "DeletePolicy",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "Action",
+                      "Version",
+                      "PolicyArn"
+                    ],
+                    "properties": {
+                      "Action": {
+                        "type": "string",
+                        "const": "DeletePolicy",
+                        "default": "DeletePolicy"
+                      },
+                      "Version": {
+                        "type": "string",
+                        "const": "2010-05-08",
+                        "default": "2010-05-08"
+                      },
+                      "PolicyArn": {
+                        "type": "string",
+                        "pattern": "^arn:aws:iam::000000000000:policy/[A-Za-z0-9_+=,.@-]{1,128}$",
+                        "description": "Returned local customer policy ARN; AWS-managed catalog is unsupported."
+                      }
+                    }
+                  },
+                  {
+                    "title": "CreatePolicyVersion",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "Action",
+                      "Version",
+                      "PolicyArn",
+                      "PolicyDocument"
+                    ],
+                    "properties": {
+                      "Action": {
+                        "type": "string",
+                        "const": "CreatePolicyVersion",
+                        "default": "CreatePolicyVersion"
+                      },
+                      "Version": {
+                        "type": "string",
+                        "const": "2010-05-08",
+                        "default": "2010-05-08"
+                      },
+                      "PolicyArn": {
+                        "type": "string",
+                        "pattern": "^arn:aws:iam::000000000000:policy/[A-Za-z0-9_+=,.@-]{1,128}$",
+                        "description": "Returned local customer policy ARN; AWS-managed catalog is unsupported."
+                      },
+                      "PolicyDocument": {
+                        "type": "string",
+                        "description": "JSON identity policy string: raw UTF-8≤32KiB, Latin-1 pattern, compact JSON≤6144 characters; quoted whitespace remains significant. Existing encoded Query body≤128KiB. Supported Action/Resource grammar only; no Conditions."
+                      },
+                      "SetAsDefault": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "true atomically refreshes every attached role; aggregate overflow aborts the entire transaction."
+                      }
+                    }
+                  },
+                  {
+                    "title": "GetPolicyVersion",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "Action",
+                      "Version",
+                      "PolicyArn",
+                      "VersionId"
+                    ],
+                    "properties": {
+                      "Action": {
+                        "type": "string",
+                        "const": "GetPolicyVersion",
+                        "default": "GetPolicyVersion"
+                      },
+                      "Version": {
+                        "type": "string",
+                        "const": "2010-05-08",
+                        "default": "2010-05-08"
+                      },
+                      "PolicyArn": {
+                        "type": "string",
+                        "pattern": "^arn:aws:iam::000000000000:policy/[A-Za-z0-9_+=,.@-]{1,128}$",
+                        "description": "Returned local customer policy ARN; AWS-managed catalog is unsupported."
+                      },
+                      "VersionId": {
+                        "type": "string",
+                        "pattern": "^v[1-9][0-9]*(\\.[A-Za-z0-9-]*)?$",
+                        "description": "Use an actual returned VersionId. Deleted version IDs are not reused."
+                      }
+                    }
+                  },
+                  {
+                    "title": "ListPolicyVersions",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "Action",
+                      "Version",
+                      "PolicyArn"
+                    ],
+                    "properties": {
+                      "Action": {
+                        "type": "string",
+                        "const": "ListPolicyVersions",
+                        "default": "ListPolicyVersions"
+                      },
+                      "Version": {
+                        "type": "string",
+                        "const": "2010-05-08",
+                        "default": "2010-05-08"
+                      },
+                      "PolicyArn": {
+                        "type": "string",
+                        "pattern": "^arn:aws:iam::000000000000:policy/[A-Za-z0-9_+=,.@-]{1,128}$",
+                        "description": "Returned local customer policy ARN; AWS-managed catalog is unsupported."
+                      },
+                      "MaxItems": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 1000
+                      },
+                      "Marker": {
+                        "type": "string",
+                        "maxLength": 2048,
+                        "description": "Return the exact previous Marker. Parent generation/context checked; no snapshot guarantee."
+                      }
+                    }
+                  },
+                  {
+                    "title": "SetDefaultPolicyVersion",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "Action",
+                      "Version",
+                      "PolicyArn",
+                      "VersionId"
+                    ],
+                    "properties": {
+                      "Action": {
+                        "type": "string",
+                        "const": "SetDefaultPolicyVersion",
+                        "default": "SetDefaultPolicyVersion"
+                      },
+                      "Version": {
+                        "type": "string",
+                        "const": "2010-05-08",
+                        "default": "2010-05-08"
+                      },
+                      "PolicyArn": {
+                        "type": "string",
+                        "pattern": "^arn:aws:iam::000000000000:policy/[A-Za-z0-9_+=,.@-]{1,128}$",
+                        "description": "Returned local customer policy ARN; AWS-managed catalog is unsupported."
+                      },
+                      "VersionId": {
+                        "type": "string",
+                        "pattern": "^v[1-9][0-9]*(\\.[A-Za-z0-9-]*)?$",
+                        "description": "Use an actual returned VersionId. Deleted version IDs are not reused."
+                      }
+                    }
+                  },
+                  {
+                    "title": "DeletePolicyVersion",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "Action",
+                      "Version",
+                      "PolicyArn",
+                      "VersionId"
+                    ],
+                    "properties": {
+                      "Action": {
+                        "type": "string",
+                        "const": "DeletePolicyVersion",
+                        "default": "DeletePolicyVersion"
+                      },
+                      "Version": {
+                        "type": "string",
+                        "const": "2010-05-08",
+                        "default": "2010-05-08"
+                      },
+                      "PolicyArn": {
+                        "type": "string",
+                        "pattern": "^arn:aws:iam::000000000000:policy/[A-Za-z0-9_+=,.@-]{1,128}$",
+                        "description": "Returned local customer policy ARN; AWS-managed catalog is unsupported."
+                      },
+                      "VersionId": {
+                        "type": "string",
+                        "pattern": "^v[1-9][0-9]*(\\.[A-Za-z0-9-]*)?$",
+                        "description": "Use an actual returned VersionId. Deleted version IDs are not reused."
+                      }
+                    }
+                  },
+                  {
+                    "title": "AttachRolePolicy",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "Action",
+                      "Version",
+                      "RoleName",
+                      "PolicyArn"
+                    ],
+                    "properties": {
+                      "Action": {
+                        "type": "string",
+                        "const": "AttachRolePolicy",
+                        "default": "AttachRolePolicy"
+                      },
+                      "Version": {
+                        "type": "string",
+                        "const": "2010-05-08",
+                        "default": "2010-05-08"
+                      },
+                      "RoleName": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 64,
+                        "pattern": "^[A-Za-z0-9_-]+$"
+                      },
+                      "PolicyArn": {
+                        "type": "string",
+                        "pattern": "^arn:aws:iam::000000000000:policy/[A-Za-z0-9_+=,.@-]{1,128}$",
+                        "description": "Returned local customer policy ARN; AWS-managed catalog is unsupported."
+                      }
+                    }
+                  },
+                  {
+                    "title": "DetachRolePolicy",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "Action",
+                      "Version",
+                      "RoleName",
+                      "PolicyArn"
+                    ],
+                    "properties": {
+                      "Action": {
+                        "type": "string",
+                        "const": "DetachRolePolicy",
+                        "default": "DetachRolePolicy"
+                      },
+                      "Version": {
+                        "type": "string",
+                        "const": "2010-05-08",
+                        "default": "2010-05-08"
+                      },
+                      "RoleName": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 64,
+                        "pattern": "^[A-Za-z0-9_-]+$"
+                      },
+                      "PolicyArn": {
+                        "type": "string",
+                        "pattern": "^arn:aws:iam::000000000000:policy/[A-Za-z0-9_+=,.@-]{1,128}$",
+                        "description": "Returned local customer policy ARN; AWS-managed catalog is unsupported."
+                      }
+                    }
+                  },
+                  {
+                    "title": "ListAttachedRolePolicies",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "Action",
+                      "Version",
+                      "RoleName"
+                    ],
+                    "properties": {
+                      "Action": {
+                        "type": "string",
+                        "const": "ListAttachedRolePolicies",
+                        "default": "ListAttachedRolePolicies"
+                      },
+                      "Version": {
+                        "type": "string",
+                        "const": "2010-05-08",
+                        "default": "2010-05-08"
+                      },
+                      "RoleName": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 64,
+                        "pattern": "^[A-Za-z0-9_-]+$"
+                      },
+                      "PathPrefix": {
+                        "type": "string",
+                        "enum": [
+                          "/"
+                        ]
+                      },
+                      "MaxItems": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 1000
+                      },
+                      "Marker": {
+                        "type": "string",
+                        "maxLength": 2048,
+                        "description": "Return the exact previous Marker. Parent generation/context checked; no snapshot guarantee."
+                      }
+                    }
                   }
                 ],
                 "discriminator": {
@@ -3469,6 +3897,113 @@
                     "RoleName": "practice-executor",
                     "PolicyDocument": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"sts:AssumeRole\",\"Principal\":{\"Service\":\"lambda.amazonaws.com\"}}]}"
                   }
+                },
+                "CreatePolicy": {
+                  "summary": "CreatePolicy — static request template; send for live state",
+                  "value": {
+                    "Action": "CreatePolicy",
+                    "Version": "2010-05-08",
+                    "PolicyName": "ReadObjects",
+                    "PolicyDocument": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"s3:GetObject\",\"Resource\":\"arn:aws:s3:::practice-bucket/*\"}]}"
+                  }
+                },
+                "GetPolicy": {
+                  "summary": "GetPolicy — static request template; send for live state",
+                  "value": {
+                    "Action": "GetPolicy",
+                    "Version": "2010-05-08",
+                    "PolicyArn": "arn:aws:iam::000000000000:policy/ReadObjects"
+                  }
+                },
+                "ListPolicies": {
+                  "summary": "ListPolicies — static request template; send for live state",
+                  "value": {
+                    "Action": "ListPolicies",
+                    "Version": "2010-05-08",
+                    "Scope": "Local",
+                    "MaxItems": 100
+                  }
+                },
+                "DeletePolicy": {
+                  "summary": "DeletePolicy — static request template; send for live state",
+                  "value": {
+                    "Action": "DeletePolicy",
+                    "Version": "2010-05-08",
+                    "PolicyArn": "arn:aws:iam::000000000000:policy/ReadObjects"
+                  }
+                },
+                "CreatePolicyVersion": {
+                  "summary": "CreatePolicyVersion — static request template; send for live state",
+                  "value": {
+                    "Action": "CreatePolicyVersion",
+                    "Version": "2010-05-08",
+                    "PolicyArn": "arn:aws:iam::000000000000:policy/ReadObjects",
+                    "PolicyDocument": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"s3:GetObject\",\"Resource\":\"arn:aws:s3:::practice-bucket/*\"}]}",
+                    "SetAsDefault": true
+                  }
+                },
+                "GetPolicyVersion": {
+                  "summary": "GetPolicyVersion — static request template; send for live state",
+                  "value": {
+                    "Action": "GetPolicyVersion",
+                    "Version": "2010-05-08",
+                    "PolicyArn": "arn:aws:iam::000000000000:policy/ReadObjects",
+                    "VersionId": "v2"
+                  }
+                },
+                "ListPolicyVersions": {
+                  "summary": "ListPolicyVersions — static request template; send for live state",
+                  "value": {
+                    "Action": "ListPolicyVersions",
+                    "Version": "2010-05-08",
+                    "PolicyArn": "arn:aws:iam::000000000000:policy/ReadObjects",
+                    "MaxItems": 100
+                  }
+                },
+                "SetDefaultPolicyVersion": {
+                  "summary": "SetDefaultPolicyVersion — static request template; send for live state",
+                  "value": {
+                    "Action": "SetDefaultPolicyVersion",
+                    "Version": "2010-05-08",
+                    "PolicyArn": "arn:aws:iam::000000000000:policy/ReadObjects",
+                    "VersionId": "v2"
+                  }
+                },
+                "DeletePolicyVersion": {
+                  "summary": "DeletePolicyVersion — static request template; send for live state",
+                  "value": {
+                    "Action": "DeletePolicyVersion",
+                    "Version": "2010-05-08",
+                    "PolicyArn": "arn:aws:iam::000000000000:policy/ReadObjects",
+                    "VersionId": "v2"
+                  }
+                },
+                "AttachRolePolicy": {
+                  "summary": "AttachRolePolicy — static request template; send for live state",
+                  "value": {
+                    "Action": "AttachRolePolicy",
+                    "Version": "2010-05-08",
+                    "RoleName": "practice-executor",
+                    "PolicyArn": "arn:aws:iam::000000000000:policy/ReadObjects"
+                  }
+                },
+                "DetachRolePolicy": {
+                  "summary": "DetachRolePolicy — static request template; send for live state",
+                  "value": {
+                    "Action": "DetachRolePolicy",
+                    "Version": "2010-05-08",
+                    "RoleName": "practice-executor",
+                    "PolicyArn": "arn:aws:iam::000000000000:policy/ReadObjects"
+                  }
+                },
+                "ListAttachedRolePolicies": {
+                  "summary": "ListAttachedRolePolicies — static request template; send for live state",
+                  "value": {
+                    "Action": "ListAttachedRolePolicies",
+                    "Version": "2010-05-08",
+                    "RoleName": "practice-executor",
+                    "MaxItems": 100
+                  }
                 }
               }
             }
@@ -3476,7 +4011,7 @@
         },
         "responses": {
           "200": {
-            "description": "IAM Query XML response. Policy documents are RFC3986 URL encoded; SDKs may decode them automatically."
+            "description": "Operation-specific IAM Query XML. These are static shapes, not live state. GetPolicyVersion Document is URL encoded once; SDKs may decode it to JSON. Create/ListPolicyVersion omit Document. Mutation acknowledgements have no fabricated policy document. Send a request to inspect actual local state."
           },
           "400": {
             "description": "Validation/unsupported field/state conflict IAM ValidationError/MalformedPolicyDocument reject unknown trust or permissions semantics."

@@ -35,7 +35,7 @@ make build
 | [KMS](docs/kms.md) | CreateKey、DescribeKey、ListKeys、EnableKey、DisableKey、GetKeyPolicy、Encrypt、Decrypt。対称鍵・実ローカルAES-GCM、同一SQLiteのSDK/Cloudscape | alias、tags、grants、custom policy、rotation、scheduled deletion、CFN・他サービス暗号化。raw keyはSQLite保存でHSM/保存時暗号化保証ではない |
 | [Systems Manager Parameter Store](docs/console.md) | PutParameter、GetParameter、GetParameters、GetParametersByPath、DescribeParameters、DeleteParameter。最新値・version・overwrite判定 | SecureString/KMS、履歴・labels。StandardのString/StringList/textのみ |
 | [DynamoDB](docs/dynamodb.md) | CreateTable/ListTables/DescribeTable/DeleteTable、PutItem/GetItem/DeleteItem | Native JSON 1.0 API only; S/N/B keys, optional sort key; only partition-key attribute_(not_)exists conditions. No Query/Scan/indexes/Streams/console/CFN/Challenge integration |
-| [IAM](docs/iam.md) | Create/Get/List/DeleteRole、Put/Get/Delete/ListRolePolicy、UpdateAssumeRolePolicy。Lambda service trust、inline policy評価 | STS、managed policyの権限付与、一般Condition・permissions boundary・SCP |
+| [IAM](docs/iam.md) | Create/Get/List/DeleteRole、inline/trust、customer policy CRUD・version/default・ロールへのAttach/Detach。inlineと既定managed policyを合成、Deny優先 | AWS-managed catalog、STS、user/group attachments、一般Condition・permissions boundary・SCP |
 | [Lambda](docs/lambda.md) | CreateFunction、ListFunctions、GetFunctionConfiguration、UpdateFunctionCode、Invoke、DeleteFunction、AddPermission/GetPolicy/RemovePermission。固定CPython 3.12.16/WASIによるPython ZIP実行、限定S3/SSM SDK bridge | 他言語、非同期実行、Function URL、任意network。128 MiB・timeout 1–30秒 |
 | [CloudFormation](docs/cloudformation-rest.md) | CreateStack、DescribeStacks、DeleteStack。S3 Bucket、SSM Parameter、inline Python Lambda、限定IAM Role、API Gateway 5 resource types・Lambda Permission、限定Ref/Sub/GetAtt/DependsOn | UpdateStack、一般resource types、実AWS相当の非同期lifecycle、CFN専用service role |
 | [API Gateway](docs/apigateway.md) | Regional REST管理16操作。API/resource/method/integration、immutable deployment、新規stage、ローカルLambda proxy実行 | HTTP/WebSocket API、authorizer、API key、既存stage編集、public endpoint |
@@ -54,7 +54,7 @@ SQSの操作画面とAPI referenceはnative JSON 1.0 APIを使用し、SDKと同
 
 ## IAMロールからLambdaを作る
 
-Services→IAM→Roles→Create roleで信頼先Lambda、権限なし、名前と確認へ進みます。RoleのPermissionsに必要なinline policyを追加し、Lambda→Create function→Permissions→Existing roleで選択します。CodeでZIPをDeployし、Testで実Pythonを実行します。権限なしはimplicit Denyです。未実装のmanaged policyを選んだ扱いで権限を与えません。
+Services→IAM→Roles→Create roleで信頼先Lambda、権限なし、名前と確認へ進みます。RoleのPermissionsに必要なinline policyを追加し、Lambda→Create function→Permissions→Existing roleで選択します。CodeでZIPをDeployし、Testで実Pythonを実行します。権限なしはimplicit Denyです。IAM→Policiesでcustomer policyを作成し、Role→Permissions→Add permissionsからAttachできます。管理版は5件、attachmentは20/role、ListPoliciesはScope=Localのみ。AWS-managed ARNと既存CFNメタデータから権限を与えません。
 
 IAMはAction/Resourceの限定wildcardと明示Deny優先を評価します。一般のCondition/Principal/NotAction/NotResource、resource policies、permissions boundary・SCPは未対応です。限定Lambda resource policyはAPI GatewayのローカルSourceArn付きInvokeのみ対応します。既存CFN roleやLocal identitiesはnative IAM roleとは別の保存・信頼モデルで、相互の名前採用を拒否します。カタログのSignInLocalDevelopmentAccess/AWSLambdaBasicExecutionRole ARNは記録のみで権限を付与しません。[認可の詳細](docs/iam.md)。
 
