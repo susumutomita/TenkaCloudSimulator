@@ -293,6 +293,12 @@ def handler(event,context):
   subprocess.run([sys.executable,str(Path(__file__).with_name('kms.py'))],check=True)
  def test_kms_console_actual_native_state_identity_and_logout(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('kms_console.py'))],check=True)
+ def test_kms_aliases_native_sdk_scopes_crypto_and_restart(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('kms_aliases.py'))],check=True)
+ def test_kms_aliases_console_actual_native_lifecycle(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('kms_aliases_console.py'))],check=True)
+ def test_kms_aliases_served_examples_both_native_routes(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('kms_alias_docs.py'))],check=True)
  def test_kms_japanese_uses_canonical_crypto_operations(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('kms_locale.py'))],check=True,timeout=120)
  def test_service_japanese_uses_canonical_native_operations(self):

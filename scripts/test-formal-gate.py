@@ -35,85 +35,13 @@ class FormalGateTests(unittest.TestCase):
 
     def test_complete_registry_and_exact_mutations(self):
         registry = load_registry(self.root)
-        self.assertEqual({model['id'] for model in registry['models']}, {'CFNConditionAdmission', 'SecretMetadataViewEpoch', 'DynamoDBConsoleEpoch', 'SecretVersionListing', 'NativeWireProjection', 'RESTRouteMatching', 'RESTProxyEventBoundary', 'AzurePropertiesTarget', 'AzurePropertiesEpoch', 'AzureBlobState', 'BlobRange', 'BrowserSessions', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'DynamoDBAdmission', 'DynamoDBLifecycle', 'GCPStorageState', 'KMSKeyState', 'KMSProtocolAdmission', 'IAMManagedPolicies', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'SecretsDisclosureChannels', 'SecretsMutationRefresh', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'StackOwnership', 'StartupTokenVisibility'})
+        self.assertEqual({model['id'] for model in registry['models']}, {'CFNConditionAdmission', 'SecretMetadataViewEpoch', 'DynamoDBConsoleEpoch', 'KMSBootstrapTransaction', 'KMSAliasCatalog', 'SecretVersionListing', 'KMSAliasCrypto', 'KMSAliasesViewEpoch', 'NativeWireProjection', 'RESTRouteMatching', 'RESTProxyEventBoundary', 'AzurePropertiesTarget', 'AzurePropertiesEpoch', 'AzureBlobState', 'BlobRange', 'BrowserSessions', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'DynamoDBAdmission', 'DynamoDBLifecycle', 'GCPStorageState', 'KMSKeyState', 'KMSProtocolAdmission', 'IAMManagedPolicies', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'SecretsDisclosureChannels', 'SecretsMutationRefresh', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'StackOwnership', 'StartupTokenVisibility'})
         for model in registry['models']:
             source = (self.root / model['model']).read_text()
             for mutant in model['mutants']:
                 name, mutated = apply_mutant(source, model['id'], mutant)
                 self.assertNotEqual(mutated, source)
                 self.assertIn('MODULE ' + name, mutated)
-
-    def test_dynamodb_console_inventory_and_artifacts_are_required(self):
-        path = self.root / 'formal/models.json'
-        original = path.read_text()
-        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'DynamoDBConsoleEpoch')
-        model, config = self.root / entry['model'], self.root / entry['config']
-        for artifact in (model, config):
-            saved = artifact.read_bytes()
-            artifact.unlink()
-            with self.subTest(missing=artifact.name), self.assertRaises(GateError):
-                load_registry(self.root)
-            artifact.write_bytes(saved)
-        model_bytes, config_bytes = model.read_bytes(), config.read_bytes()
-        registry = json.loads(original)
-        registry['models'] = [m for m in registry['models'] if m['id'] != 'DynamoDBConsoleEpoch']
-        path.write_text(json.dumps(registry)); model.unlink(); config.unlink()
-        with self.assertRaisesRegex(GateError, 'required existing model was removed'):
-            load_registry(self.root)
-        model.write_bytes(model_bytes); config.write_bytes(config_bytes); path.write_text(original)
-
-
-    def test_dynamodb_console_all_properties_are_required(self):
-        path = self.root / 'formal/models.json'
-        original = path.read_text()
-        properties = {'AckBelongsToCurrentView', 'TypeOK', 'AckClosesDraft', 'CancelNoOrphanLoading', 'ReadRetryNeverWrites', 'DisplayedKeyBound', 'ReadGenerationVerified', 'LocalePreservesDraft', 'NoStalePublication', 'SingleSendBeforeACK'}
-        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'DynamoDBConsoleEpoch')
-        self.assertEqual(set(entry['properties']), properties)
-        config = self.root / entry['config']; config_bytes = config.read_bytes()
-        for prop in properties:
-            registry = json.loads(original)
-            target = next(m for m in registry['models'] if m['id'] == 'DynamoDBConsoleEpoch')
-            target['properties'].remove(prop)
-            target['mutants'] = [m for m in target['mutants'] if m['expect_invariant'] != prop]
-            config.write_text(config_bytes.decode().replace('INVARIANT ' + prop + '\n', ''))
-            path.write_text(json.dumps(registry))
-            with self.subTest(property=prop), self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
-                load_registry(self.root)
-            config.write_bytes(config_bytes)
-        path.write_text(original)
-
-
-    def test_dynamodb_console_each_literal_control_is_required(self):
-        path = self.root / 'formal/models.json'
-        original = path.read_text()
-        controls = {'IgnoreReadViewGuard', 'ACKKeepsDraft', 'LocaleClearsDirtyDraft', 'IgnorePostReadGeneration', 'RemoveSynchronousOwnerLock', 'CancelKeepsLoading', 'ACKKeepsForm', 'IgnoreWriteViewGuard', 'RetryRepeatsWrite', 'KeepDisplayedItemOnKeyEdit'}
-        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'DynamoDBConsoleEpoch')
-        self.assertEqual({m['id'] for m in entry['mutants']}, controls)
-        for control in controls:
-            registry = json.loads(original)
-            target = next(m for m in registry['models'] if m['id'] == 'DynamoDBConsoleEpoch')
-            target['mutants'] = [m for m in target['mutants'] if m['id'] != control]
-            path.write_text(json.dumps(registry))
-            with self.subTest(control=control), self.assertRaisesRegex(GateError, 'required mutation control was removed'):
-                load_registry(self.root)
-        path.write_text(original)
-
-
-    def test_dynamodb_console_source_bindings_cannot_be_descoped(self):
-        path = self.root / 'formal/models.json'
-        original = path.read_text()
-        scopes = {'tools/console/src/dynamodb.jsx', 'tools/console/src/main.jsx', 'internal/server/web/app.js'}
-        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'DynamoDBConsoleEpoch')
-        self.assertEqual(set(entry['source_scope']), scopes)
-        for omitted in scopes:
-            registry = json.loads(original)
-            target = next(m for m in registry['models'] if m['id'] == 'DynamoDBConsoleEpoch')
-            target['source_scope'].remove(omitted)
-            path.write_text(json.dumps(registry))
-            with self.subTest(scope=omitted), self.assertRaisesRegex(GateError, 'required exact source scope changed'):
-                load_registry(self.root)
-        path.write_text(original)
-
 
     def test_startup_required_model_and_properties_cannot_disappear(self):
         path = self.root / 'formal/models.json'
@@ -543,12 +471,36 @@ class FormalGateTests(unittest.TestCase):
                         load_registry(self.root)
         path.write_text(original)
 
+    def test_alias_models_and_each_required_property_cannot_disappear(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        for name in ('KMSAliasCatalog', 'KMSAliasCrypto', 'KMSAliasesViewEpoch'):
+            registry = json.loads(original)
+            model = next(m for m in registry['models'] if m['id'] == name)
+            config_path = self.root / model['config']
+            original_config = config_path.read_text()
+            for property_name in model['properties']:
+                with self.subTest(model=name, property=property_name):
+                    changed = json.loads(original)
+                    target = next(m for m in changed['models'] if m['id'] == name)
+                    target['properties'].remove(property_name)
+                    path.write_text(json.dumps(changed))
+                    config_path.write_text(original_config.replace('INVARIANT ' + property_name + '\n', ''))
+                    with self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                        load_registry(self.root)
+                    config_path.write_text(original_config)
+            registry['models'] = [m for m in registry['models'] if m['id'] != name]
+            path.write_text(json.dumps(registry))
+            with self.assertRaises(GateError):
+                load_registry(self.root)
+        path.write_text(original)
+
     def test_each_required_mutation_control_cannot_disappear(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
         registry = json.loads(original)
         self.assertEqual(set(REQUIRED_MUTANTS), BASE_MODELS)
-        self.assertEqual(sum(map(len, REQUIRED_MUTANTS.values())), 248)
+        self.assertEqual(sum(map(len, REQUIRED_MUTANTS.values())), 309)
         self.assertEqual({m['id']: {c['id'] for c in m['mutants']} for m in registry['models']}, REQUIRED_MUTANTS)
         for model in registry['models']:
             for mutant in model['mutants']:
@@ -565,7 +517,7 @@ class FormalGateTests(unittest.TestCase):
     def test_every_required_control_is_protected_against_single_removal(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
-        self.assertEqual(sum(len(v) for v in REQUIRED_MUTANTS.values()), 248)
+        self.assertEqual(sum(len(v) for v in REQUIRED_MUTANTS.values()), 309)
         for model_id, controls in REQUIRED_MUTANTS.items():
             for control in controls:
                 with self.subTest(model=model_id, control=control):
@@ -785,7 +737,6 @@ class FormalGateTests(unittest.TestCase):
                                          (1, 'Semantic errors: fixture')):
                         with self.assertRaisesRegex(GateError, 'required invariant counterexample'):
                             validate_result(code, output, expected)
-
     def test_secret_version_listing_model_and_every_property_are_required(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
@@ -810,6 +761,7 @@ class FormalGateTests(unittest.TestCase):
                 with self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
                     load_registry(self.root)
         cfg.write_bytes(config); path.write_text(original)
+
 
     def test_secret_version_listing_each_control_rejects_removal_and_placeholder(self):
         path = self.root / 'formal/models.json'
@@ -838,6 +790,7 @@ class FormalGateTests(unittest.TestCase):
                         load_registry(self.root)
         path.write_text(original)
 
+
     def test_secret_version_listing_exact_scope_and_semantic_oracles_are_required(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
@@ -860,6 +813,157 @@ class FormalGateTests(unittest.TestCase):
                 with self.subTest(control=control['id'], code=code):
                     with self.assertRaisesRegex(GateError, 'required invariant counterexample'):
                         validate_result(code, text, expected)
+
+
+    def test_kms_bootstrap_model_and_every_property_are_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'KMSBootstrapTransaction')
+        tla, cfg = self.root / entry['model'], self.root / entry['config']
+        source, config = tla.read_bytes(), cfg.read_bytes()
+        removed = json.loads(original)
+        removed['models'] = [m for m in removed['models'] if m['id'] != entry['id']]
+        path.write_text(json.dumps(removed)); tla.unlink(); cfg.unlink()
+        with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+            load_registry(self.root)
+        tla.write_bytes(source); cfg.write_bytes(config)
+        for prop in entry['properties']:
+            changed = json.loads(original)
+            target = next(m for m in changed['models'] if m['id'] == entry['id'])
+            target['properties'].remove(prop)
+            target['mutants'] = [m for m in target['mutants'] if m['expect_invariant'] != prop]
+            cfg.write_text('\n'.join(line for line in config.decode().splitlines()
+                                     if line != 'INVARIANT '+prop)+'\n')
+            path.write_text(json.dumps(changed))
+            with self.subTest(property=prop):
+                with self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                    load_registry(self.root)
+        cfg.write_bytes(config); path.write_text(original)
+
+
+    def test_kms_bootstrap_each_control_rejects_removal_and_placeholder(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'KMSBootstrapTransaction')
+        for control in entry['mutants']:
+            for fault in ('remove', 'noop', 'stale', 'wrong-invariant'):
+                changed = json.loads(original)
+                target = next(m for m in changed['models'] if m['id'] == entry['id'])
+                candidate = next(m for m in target['mutants'] if m['id'] == control['id'])
+                if fault == 'remove':
+                    target['mutants'].remove(candidate)
+                    error = 'required mutation control was removed'
+                elif fault == 'noop':
+                    candidate['edits'][0]['new'] = candidate['edits'][0]['old']
+                    error = 'mutation must change a nonempty exact anchor'
+                elif fault == 'stale':
+                    candidate['edits'][0]['old'] += ' absent anchor'
+                    error = 'mutation anchor count mismatch'
+                else:
+                    candidate['expect_invariant'] = 'UncheckedPlaceholder'
+                    error = 'mutant expects unchecked invariant'
+                path.write_text(json.dumps(changed))
+                with self.subTest(control=control['id'], fault=fault):
+                    with self.assertRaisesRegex(GateError, error):
+                        load_registry(self.root)
+        path.write_text(original)
+
+
+    def test_kms_bootstrap_exact_scope_and_semantic_oracles_are_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'KMSBootstrapTransaction')
+        for scope in ([], ['internal/aws/kms_aliases.go'], ['internal/server/server.go']):
+            changed = json.loads(original)
+            target = next(m for m in changed['models'] if m['id'] == entry['id'])
+            target['source_scope'] = scope
+            path.write_text(json.dumps(changed))
+            with self.subTest(scope=scope):
+                with self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+                    load_registry(self.root)
+        path.write_text(original)
+        for control in entry['mutants']:
+            expected = control['expect_invariant']
+            validate_result(12, 'Invariant '+expected+' is violated.', expected)
+            for code, text in ((12, 'Invariant TypeOK is violated.'),
+                               (0, 'No error has been found.'),
+                               (1, 'Semantic errors: placeholder')):
+                with self.subTest(control=control['id'], code=code):
+                    with self.assertRaisesRegex(GateError, 'required invariant counterexample'):
+                        validate_result(code, text, expected)
+
+
+    def test_dynamodb_console_inventory_and_artifacts_are_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'DynamoDBConsoleEpoch')
+        model, config = self.root / entry['model'], self.root / entry['config']
+        for artifact in (model, config):
+            saved = artifact.read_bytes()
+            artifact.unlink()
+            with self.subTest(missing=artifact.name), self.assertRaises(GateError):
+                load_registry(self.root)
+            artifact.write_bytes(saved)
+        model_bytes, config_bytes = model.read_bytes(), config.read_bytes()
+        registry = json.loads(original)
+        registry['models'] = [m for m in registry['models'] if m['id'] != 'DynamoDBConsoleEpoch']
+        path.write_text(json.dumps(registry)); model.unlink(); config.unlink()
+        with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+            load_registry(self.root)
+        model.write_bytes(model_bytes); config.write_bytes(config_bytes); path.write_text(original)
+
+
+    def test_dynamodb_console_all_properties_are_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        properties = {'AckBelongsToCurrentView', 'TypeOK', 'AckClosesDraft', 'CancelNoOrphanLoading', 'ReadRetryNeverWrites', 'DisplayedKeyBound', 'ReadGenerationVerified', 'LocalePreservesDraft', 'NoStalePublication', 'SingleSendBeforeACK'}
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'DynamoDBConsoleEpoch')
+        self.assertEqual(set(entry['properties']), properties)
+        config = self.root / entry['config']; config_bytes = config.read_bytes()
+        for prop in properties:
+            registry = json.loads(original)
+            target = next(m for m in registry['models'] if m['id'] == 'DynamoDBConsoleEpoch')
+            target['properties'].remove(prop)
+            target['mutants'] = [m for m in target['mutants'] if m['expect_invariant'] != prop]
+            config.write_text(config_bytes.decode().replace('INVARIANT ' + prop + '\n', ''))
+            path.write_text(json.dumps(registry))
+            with self.subTest(property=prop), self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                load_registry(self.root)
+            config.write_bytes(config_bytes)
+        path.write_text(original)
+
+
+    def test_dynamodb_console_each_literal_control_is_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        controls = {'IgnoreReadViewGuard', 'ACKKeepsDraft', 'LocaleClearsDirtyDraft', 'IgnorePostReadGeneration', 'RemoveSynchronousOwnerLock', 'CancelKeepsLoading', 'ACKKeepsForm', 'IgnoreWriteViewGuard', 'RetryRepeatsWrite', 'KeepDisplayedItemOnKeyEdit'}
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'DynamoDBConsoleEpoch')
+        self.assertEqual({m['id'] for m in entry['mutants']}, controls)
+        for control in controls:
+            registry = json.loads(original)
+            target = next(m for m in registry['models'] if m['id'] == 'DynamoDBConsoleEpoch')
+            target['mutants'] = [m for m in target['mutants'] if m['id'] != control]
+            path.write_text(json.dumps(registry))
+            with self.subTest(control=control), self.assertRaisesRegex(GateError, 'required mutation control was removed'):
+                load_registry(self.root)
+        path.write_text(original)
+
+
+    def test_dynamodb_console_source_bindings_cannot_be_descoped(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        scopes = {'tools/console/src/dynamodb.jsx', 'tools/console/src/main.jsx', 'internal/server/web/app.js'}
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'DynamoDBConsoleEpoch')
+        self.assertEqual(set(entry['source_scope']), scopes)
+        for omitted in scopes:
+            registry = json.loads(original)
+            target = next(m for m in registry['models'] if m['id'] == 'DynamoDBConsoleEpoch')
+            target['source_scope'].remove(omitted)
+            path.write_text(json.dumps(registry))
+            with self.subTest(scope=omitted), self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+                load_registry(self.root)
+        path.write_text(original)
+
 
     def test_secret_metadata_view_epoch_model_and_every_property_are_required(self):
         path = self.root / 'formal/models.json'
@@ -885,6 +989,7 @@ class FormalGateTests(unittest.TestCase):
                 with self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
                     load_registry(self.root)
         cfg.write_bytes(config); path.write_text(original)
+
 
     def test_secret_metadata_view_epoch_each_control_rejects_removal_and_placeholder(self):
         path = self.root / 'formal/models.json'
@@ -913,6 +1018,7 @@ class FormalGateTests(unittest.TestCase):
                         load_registry(self.root)
         path.write_text(original)
 
+
     def test_secret_metadata_view_epoch_exact_scope_and_semantic_oracles_are_required(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
@@ -935,6 +1041,8 @@ class FormalGateTests(unittest.TestCase):
                 with self.subTest(control=control['id'], code=code):
                     with self.assertRaisesRegex(GateError, 'required invariant counterexample'):
                         validate_result(code, text, expected)
+
+
 
 
     def test_cfn_condition_admission_model_and_every_property_are_required(self):

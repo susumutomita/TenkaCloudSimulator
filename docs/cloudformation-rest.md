@@ -126,7 +126,7 @@ defaults and enabled mode, actual SSM permissions/refusals, invalid-input and la
 name-conflict rollback, restart and cleanup. At `2d76646` the helper passed against a regular embedded CLI: 73 SDK logical
 calls/sends/raw HTTP responses/parsed responses, plus nine auxiliary HTTP pairs,
 across four CLI process incarnations. This dated result is not the new combined
-54-case E2E or 285-case formal gate after the normal main merge; those are pending.
+57-case E2E or 350-case formal gate after the normal main merge; those are pending.
 It is not a game or grading acceptance. The separate SQLite ignored-write
 DeleteStack ACK correction remains an integration dependency before this
 candidate can be called merge-ready; happy-path cleanup does not prove every

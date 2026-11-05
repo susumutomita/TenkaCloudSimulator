@@ -73,7 +73,7 @@ with tempfile.TemporaryDirectory(prefix='kms-sdk-') as d:
   # Native option rejection is verified without changing the protocol or granting success.
   denied('ValidationException',lambda:kms.create_key(Tags=[{'TagKey':'x','TagValue':'y'}]))
   denied('ValidationException',lambda:kms.create_key(Policy='{}'))
-  denied('UnknownOperationException',lambda:kms.create_alias(AliasName='alias/test',TargetKeyId=kid))
+  denied('UnknownOperationException',lambda:kms.create_grant(KeyId=kid,GranteePrincipal='arn:aws:iam::000000000000:role/unsupported',Operations=['Encrypt']))
   iam.delete_role_policy(RoleName=role['RoleName'],PolicyName='KeyDeny');iam.delete_role_policy(RoleName=role['RoleName'],PolicyName='KeyUse');iam.delete_role(RoleName=role['RoleName'])
  with running(state,authenticated=True) as (endpoint,new_operator):
   resumed=client('kms',endpoint,new_operator);assert resumed.decrypt(CiphertextBlob=blob,EncryptionContext=ctx)['Plaintext']==plain
@@ -85,7 +85,7 @@ with tempfile.TemporaryDirectory(prefix='kms-sdk-') as d:
   local_target(spec_request.full_url,endpoint)
   with urllib.request.build_opener(urllib.request.ProxyHandler({})).open(spec_request) as response:served_spec=json.load(response)
   root_operation=served_spec['paths']['/']['post'];examples=root_operation['requestBody']['content']['application/x-amz-json-1.1']['examples'];mapping=root_operation['x-simulator-kms-operation-schemas']
-  expected_ops={'CreateKey','DescribeKey','ListKeys','EnableKey','DisableKey','GetKeyPolicy','Encrypt','Decrypt'}
+  expected_ops={'CreateKey','DescribeKey','ListKeys','EnableKey','DisableKey','GetKeyPolicy','Encrypt','Decrypt','CreateAlias','ListAliases','UpdateAlias','DeleteAlias'}
   assert set(mapping)==expected_ops and {name[3:] for name in examples if name.startswith('KMS')}==expected_ops
   for operation in expected_ops:assert mapping[operation]['target']=='TrentService.'+operation
   def template(operation):return json.loads(json.dumps(examples['KMS'+operation]['value']))
@@ -118,4 +118,4 @@ with tempfile.TemporaryDirectory(prefix='kms-sdk-') as d:
  for stats in sdk_stats:assert stats['calls']>0 and stats['calls']==stats['sends']==stats['responses'],stats
  totals={key:sum(stats[key] for stats in sdk_stats) for key in ('calls','sends','responses')}
  for c in sdk_clients:c.close()
- print(json.dumps({'nativeEightOperations':True,'servedOpenAPIExamples':8,'servedExamplesUseSameSQLite':True,'guardedSDKCounts':totals,'sdkClients':len(sdk_stats),'beforeSendLoopbackGuard':True,'binaryRoundtrip':True,'contextKeyRegionTamperGuards':True,'disabledGuard':True,'IAMExactKeyAndExplicitDeny':True,'twoTeamDBs':True,'crossToken':401,'restart':True,'scheduledDeletion':'unsupported; temporary fixture DBs removed'}))
+ print(json.dumps({'nativeEightOperations':True,'servedOpenAPIExamples':8,'strictServedKMSOperationSet':12,'servedExamplesUseSameSQLite':True,'guardedSDKCounts':totals,'sdkClients':len(sdk_stats),'beforeSendLoopbackGuard':True,'binaryRoundtrip':True,'contextKeyRegionTamperGuards':True,'disabledGuard':True,'IAMExactKeyAndExplicitDeny':True,'twoTeamDBs':True,'crossToken':401,'restart':True,'scheduledDeletion':'unsupported; temporary fixture DBs removed'}))

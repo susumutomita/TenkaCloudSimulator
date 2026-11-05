@@ -104,9 +104,19 @@ func TestKMSRegularServerUsesLocalAccessAndPersistsRegionalKeys(t *testing.T) {
 	if err := json.Unmarshal(services["kms"], &kms); err != nil {
 		t.Fatal(err)
 	}
-	if !reflect.DeepEqual(kms.Operations, []string{"CreateKey", "DescribeKey", "ListKeys", "EnableKey", "DisableKey", "GetKeyPolicy", "Encrypt", "Decrypt"}) {
+	if !reflect.DeepEqual(kms.Operations, []string{"CreateKey", "DescribeKey", "ListKeys", "EnableKey", "DisableKey", "GetKeyPolicy", "Encrypt", "Decrypt", "CreateAlias", "ListAliases", "UpdateAlias", "DeleteAlias"}) {
 		t.Fatal("capabilities advertised incorrect operation set", kms.Operations)
 	}
+	// Real default-server alias operations share this existing key/DB. No
+	// additional key or crypto counter changes disturb the original assertions.
+	call(srv, "/", "POST", token, "CreateAlias", map[string]any{"AliasName": "alias/server-check", "TargetKeyId": arn}, 200)
+	aliasPage := call(srv, "/_simulator/providers/aws/", "POST", token, "ListAliases", map[string]any{"KeyId": id}, 200)
+	var aliases []struct{ AliasName, AliasArn, TargetKeyId string }
+	if err := json.Unmarshal(aliasPage["Aliases"], &aliases); err != nil || len(aliases) != 1 || aliases[0].AliasName != "alias/server-check" || aliases[0].AliasArn != "arn:aws:kms:us-east-1:000000000000:alias/server-check" || aliases[0].TargetKeyId != id {
+		t.Fatal("regular server alias did not use the existing key", err)
+	}
+	call(srv, "/", "POST", token, "UpdateAlias", map[string]any{"AliasName": "alias/server-check", "TargetKeyId": id}, 200)
+	call(srv, "/_simulator/providers/aws/", "POST", token, "DeleteAlias", map[string]any{"AliasName": "alias/server-check"}, 200)
 	for _, service := range []string{"s3", "ssm", "sqs", "iam", "lambda", "cloudformation", "apigateway"} {
 		if len(services[service]) == 0 {
 			t.Fatal("existing service disappeared", service)

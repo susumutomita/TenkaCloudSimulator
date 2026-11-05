@@ -22,6 +22,64 @@ OPS={'CreateTable','ListTables','DescribeTable','DeleteTable','PutItem','GetItem
 PRIVATE=[]
 
 
+
+def validate_transport(records, observed, calls, responses, failed):
+    """Classify only the real replaced startup read and explicit fault fixture."""
+    startup=[r for r in records if r['failure'] and r['operation']=='ListTables'
+             and r['phase']=='startup' and r.get('failurePhase')=='startup'
+             and r['status'] in (None,200) and r['failure']=='net::ERR_ABORTED']
+    intentional=[r for r in records if r['failure'] and r['operation']=='DescribeTable'
+                 and r['status'] is None and r['failure']=='net::ERR_FAILED'
+                 and r['phase']=='normal-lifecycle']
+    assert len(startup)<=1 and len(intentional)==1
+    assert len(failed)==sum(bool(r['failure']) for r in records)==len(startup)+len(intentional), 'Unexpected native network failure'
+    if startup:
+        lists=[r for r in records if r['operation']=='ListTables']
+        signals=[r for r in observed if r['operation']=='ListTables']
+        assert startup[0] is lists[0], 'Only the first ListTables may be a startup abort'
+        assert any(r['ordinal']>startup[0]['ordinal'] and r['phase']=='startup'
+                   and r['status']==200 and not r['failure'] for r in lists), 'No successful startup replacement read'
+        assert len(signals)>=2 and signals[0]['aborted'] and not signals[-1]['aborted'] and signals[0]['signal']!=signals[-1]['signal'], 'Startup abort did not belong to a replaced view controller'
+    missing=1+sum(r['status'] is None for r in startup)
+    assert len(records)==len(calls) and len(responses)+missing==len(calls), 'Unbalanced native transport'
+    return len(startup)
+
+
+def transport_oracle_controls():
+    """Pure classifier controls; these are not API responses or SDK evidence."""
+    import copy
+    def fixture(status):
+        records=[{'operation':'ListTables','phase':'startup','failurePhase':'startup','status':status,'failure':'net::ERR_ABORTED','ordinal':0},
+                 {'operation':'ListTables','phase':'startup','status':200,'failure':None,'ordinal':1},
+                 {'operation':'DescribeTable','phase':'normal-lifecycle','status':None,'failure':'net::ERR_FAILED','ordinal':2}]
+        observed=[{'operation':'ListTables','signal':1,'aborted':True},{'operation':'ListTables','signal':2,'aborted':False}]
+        return records,observed,[r['operation'] for r in records],[('ListTables',200)]*(1+(status==200)),['ListTables','DescribeTable']
+    for status in (None,200):assert validate_transport(*fixture(status))==1
+    cases={
+        'unknown-failure':lambda r,o,c,p,f:r[0].update(failure='net::ERR_FAILED'),
+        'http-error':lambda r,o,c,p,f:r[0].update(status=403),
+        'wrong-start-phase':lambda r,o,c,p,f:r[0].update(phase='normal-lifecycle'),
+        'wrong-failure-phase':lambda r,o,c,p,f:r[0].update(failurePhase='post-cancel'),
+        'not-first-list':lambda r,o,c,p,f:r.insert(0,dict(r[1],ordinal=-1)),
+        'multiple-startup-aborts':lambda r,o,c,p,f:r.append(dict(r[0],ordinal=3)),
+        'unobserved-abort':lambda r,o,c,p,f:o[0].update(aborted=False),
+        'same-controller':lambda r,o,c,p,f:o[-1].update(signal=1),
+        'current-controller-aborted':lambda r,o,c,p,f:o[-1].update(aborted=True),
+        'no-replacement':lambda r,o,c,p,f:r[1].update(status=None),
+        'replacement-failed':lambda r,o,c,p,f:r[1].update(failure='net::ERR_ABORTED'),
+        'replacement-not-startup':lambda r,o,c,p,f:r[1].update(phase='post-cancel'),
+        'replacement-not-later':lambda r,o,c,p,f:r[1].update(ordinal=0),
+        'missing-extra-response':lambda r,o,c,p,f:p.clear(),
+        'unexpected-extra-response':lambda r,o,c,p,f:p.append(('ListTables',200)),
+    }
+    for name,mutate in cases.items():
+        args=copy.deepcopy(fixture(None));mutate(*args)
+        try:validate_transport(*args)
+        except AssertionError:continue
+        raise AssertionError('Transport oracle accepted negative control: '+name)
+    return {'positiveCases':2,'negativeCases':sorted(cases),'scope':'pure classifier fixtures, not native SDK evidence'}
+
+
 def wire(value):
     if isinstance(value,bytes):return base64.b64encode(value).decode()
     if isinstance(value,dict):return {k:wire(v) for k,v in value.items()}
@@ -42,6 +100,7 @@ def run():
 
 def _run():
     REPORTS.mkdir(parents=True,exist_ok=True)
+    oracle_controls=transport_oracle_controls()
     axe_path=Path(os.environ['AXE_SCRIPT']);axe=axe_path.read_text()
     assert hashlib.sha256(axe_path.read_bytes()).hexdigest()==json.loads((axe_path.parent/'provenance.json').read_text())['bundleSha256']
     audits,flows,errors,outside=[],[],[],[]
@@ -83,7 +142,7 @@ def _run():
                         context.route('**/*',guard);page.on('pageerror',lambda _:errors.append(True))
                         def begun(request):
                             if operation(request) in OPS:
-                                calls.append(operation(request));request_records[request]={'operation':operation(request),'phase':phase[0],'status':None,'failure':None}
+                                calls.append(operation(request));request_records[request]={'operation':operation(request),'phase':phase[0],'status':None,'failure':None,'ordinal':len(calls)-1}
                         def answered(response):
                             if operation(response.request) in OPS:
                                 responses.append((operation(response.request),response.status));request_records[response.request]['status']=response.status
@@ -209,23 +268,16 @@ def _run():
                         page.get_by_role('button',name='Delete table',exact=True).click();page.get_by_role('dialog').get_by_role('button',name='Cancel',exact=True).click();assert own.describe_table(TableName=name)['Table']['TableId']==meta['TableId']
                         page.get_by_role('button',name='Delete table',exact=True).click();page.get_by_label('Confirm table name',exact=True).fill(name);native('Delete','DeleteTable',page.get_by_role('dialog'),enter=page.get_by_label('Confirm table name',exact=True));expect(page.get_by_role('button',name='Refresh tables',exact=True)).to_be_enabled()
                         assert name not in own.list_tables()['TableNames'];assert peer.get_item(TableName=name,Key=key)['Item']['payload']=={'S':'peer must survive'}
-                        (REPORTS/('transport-'+kind+'-'+str(width)+'.json')).write_text(json.dumps({'calls':calls,'responses':responses,'failed':failed,'pageErrors':len(errors),'outside':len(outside),'requestRecords':list(request_records.values())},indent=2)+'\n')
                         assert set(calls)==OPS
                         observed=page.evaluate('window.__ddbSignalObservations')
-                        startup=[r for r in request_records.values() if r['failure'] and r['operation']=='ListTables' and r['phase']=='startup' and r['failurePhase']=='startup' and r['status']==200 and r['failure']=='net::ERR_ABORTED']
-                        intentional=[r for r in request_records.values() if r['failure'] and r['operation']=='DescribeTable' and r['status'] is None and r['failure']=='net::ERR_FAILED' and r['phase']=='normal-lifecycle']
-                        assert len(startup)<=1 and len(intentional)==1
-                        assert len(failed)==len(startup)+len(intentional), 'Unexpected native network failure'
-                        if startup:
-                            lists=[r for r in observed if r['operation']=='ListTables']
-                            assert lists[0]['aborted'] and not lists[-1]['aborted'] and lists[0]['signal']!=lists[-1]['signal'], 'Startup abort did not belong to a replaced view controller'
-                        assert len(request_records)==len(calls) and len(responses)+1==len(calls)
+                        (REPORTS/('transport-'+kind+'-'+str(width)+'.json')).write_text(json.dumps({'calls':calls,'responses':responses,'failed':failed,'pageErrors':len(errors),'outside':len(outside),'requestRecords':list(request_records.values()),'signalObservations':observed},indent=2)+'\n')
+                        startup_count=validate_transport(list(request_records.values()),observed,calls,responses,failed)
                         assert calls.count('CreateTable')==1 and calls.count('DeleteTable')==1 and calls.count('DeleteItem')==1 and calls.count('PutItem')==3
                         assert all(status==200 or op=='PutItem' and status==400 for op,status in responses);assert not errors and not outside
-                        flows.append({'width':width,'keyType':kind,'sortKey':sort,'partitionKeyName':pk,'operations':sorted(set(calls)),'postACKReadAbort':1,'readRetryDidNotRepeatPut':True,'conditionalAndDuplicateRefused':True,'cancelNoMutation':True,'reader403NoMutation':True,'keyChangeClearsOldResult':True,'keyboardEnterAndEscapeFocus':True,'regionAndPrincipalReset':True,'localizedServiceSearchNoNativeCalls':True,'expectedOldViewStartupAbort':len(startup),'signalObservations':observed})
+                        flows.append({'width':width,'keyType':kind,'sortKey':sort,'partitionKeyName':pk,'operations':sorted(set(calls)),'postACKReadAbort':1,'readRetryDidNotRepeatPut':True,'conditionalAndDuplicateRefused':True,'cancelNoMutation':True,'reader403NoMutation':True,'keyChangeClearsOldResult':True,'keyboardEnterAndEscapeFocus':True,'regionAndPrincipalReset':True,'localizedServiceSearchNoNativeCalls':True,'expectedOldViewStartupAbort':startup_count,'signalObservations':observed})
                         context.close();contexts.remove(context);peer.delete_table(TableName=name)
                     assert own.list_tables()['TableNames']==[] and peer.list_tables()['TableNames']==[];assert SEEN==OPS;assert COUNTS['calls']>0 and COUNTS['calls']==COUNTS['sends']==COUNTS['responses']
-                    report={'actualEmbeddedUI':True,'twoCLIsDBTokens':True,'flows':flows,'SDKCounts':COUNTS,'axeStates':audits,'foreignToken401':True,'peerPreserved':True,'outsideRequests':0,'pageErrors':0,'cleanup':'DELETED','actualAWS':False};(REPORTS/'dynamodb-console.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report))
+                    report={'transportOracleControls':oracle_controls,'actualEmbeddedUI':True,'twoCLIsDBTokens':True,'flows':flows,'SDKCounts':COUNTS,'axeStates':audits,'foreignToken401':True,'peerPreserved':True,'outsideRequests':0,'pageErrors':0,'cleanup':'DELETED','actualAWS':False};(REPORTS/'dynamodb-console.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report))
                 finally:
                     for context in contexts:context.close()
                     browser.close()
