@@ -25,7 +25,7 @@ finite models do not prove Go/SQL/HTTP/UI refinement or complete cloud compatibi
 The required `Formal validation` job reserves 30 minutes for checkout, the gate
 negative controls, exact-blob applicability and the complete serial registry.
 Each TLC case retains its 60-second default deadline and existing per-model
-settings; all 391 SANY/baseline/counterexample checks and failure requirements
+settings; all 391 baseline/counterexample runs and failure requirements
 remain mandatory. This is an aggregate execution budget, not a model-bound,
 acceptance, permission or per-case timeout change.
 
