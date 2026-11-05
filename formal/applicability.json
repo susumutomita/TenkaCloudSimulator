@@ -3,6 +3,13 @@
   "base_sha": "e8efc54e0da07522150a93fbdc07f7e2b33f3db9",
   "changes": [
     {
+      "path": ".github/workflows/formal.yml",
+      "sha256": "e2fa36abb9f213fdc288fe42eb3cfd394c61616a2348c3c4a1bda89cba2d8cb7",
+      "disposition": "formal-infrastructure",
+      "reason": "Reserve30minutes aggregate capacity for the unchanged serial391-case named Formal validation job plus checkout, negative-control and exact-blob guards. Only workflow job timeout and explanatory comments change: all step run/uses, permissions, immutable-head checkout, action SHAs, failure/artifact handling and per-case60-second defaults/bounds/invariants remain unchanged. No runtime behavior or model admission change.",
+      "models": []
+    },
+    {
       "path": "README.ja.md",
       "sha256": "043fc9debccc08fb10a4365a7f8ccdb212875df234bd689014f5155841478d8e",
       "disposition": "documentation",
@@ -103,7 +110,7 @@
     },
     {
       "path": "formal/README.md",
-      "sha256": "609c618bfb6ea505961a2a76add63c1151830f853ae17b025104a94b70be8531",
+      "sha256": "26e4aef0320f92dcde4df24e7ab90a4b360b7c1f7790e6215ea5c69f841fb07f",
       "disposition": "documentation",
       "reason": "Document opt-in Disk configuration subset, actual earlier scoped receipts and current44models/347controls/391 planned cases with60 mandatory E2E. Historical proofs do not establish the merged revision; no VM/AppRun/cloud-console parity or SDK coverage inflation.",
       "models": []

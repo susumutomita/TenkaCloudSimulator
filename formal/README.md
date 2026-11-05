@@ -20,6 +20,22 @@ Registration is source evidence, not itself evidence of successful execution. Da
 refer to their recorded inputs; later revisions require their own checks. These
 finite models do not prove Go/SQL/HTTP/UI refinement or complete cloud compatibility.
 
+## Aggregate CI execution capacity
+
+The required `Formal validation` job reserves30 minutes for checkout, the gate
+negative controls, exact-blob applicability and the complete serial registry.
+Each TLC case retains its60-second default deadline and existing per-model
+settings; all391 SANY/baseline/counterexample checks and failure requirements
+remain mandatory. This is an aggregate execution budget, not a model-bound,
+acceptance, permission or per-case timeout change.
+
+The earlier15-minute job on `8bb8a3d` ended cancelled after roughly15 minutes;
+the returned log did not identify its cancellation actor or definitive reason.
+That incomplete run is not evidence of successful391-case execution. GitHub
+[documents automatic cancellation when a job exceeds its configured timeout](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idtimeout-minutes).
+A fresh exact-HEAD named-job success remains required; a different CI job or a
+historical scoped receipt does not replace it.
+
 Legacy integration sections below retain historical counts and status statements
 for traceability. Their word “current” refers to the recorded integration, not
 today's registry. The authoritative current inventory is the 44/347 registry
