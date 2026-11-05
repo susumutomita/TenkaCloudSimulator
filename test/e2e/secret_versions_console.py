@@ -157,6 +157,38 @@ def run():
                 expect(page.get_by_role("button", name="Next page", exact=True)).to_be_disabled()
                 page.set_viewport_size({"width": 390, "height": 844})
                 audit(page, "versions-page-two-mobile")
+                # Actual user language controls, without reload or remount.
+                # Preserve the live current page/query and selected host scope.
+                page.evaluate("window.__versionLocaleNode=document.querySelector('[data-secret-versions]')")
+                locale_reads = sum(op == "secretsmanager.ListSecretVersionIds" for op in operations)
+                page.get_by_role("combobox", name="Language", exact=True).select_option("ja")
+                expect(page.locator("html")).to_have_attribute("lang", "ja")
+                expect(page.get_by_label("バージョンメタデータのシークレット ARN", exact=True)).to_have_value(arn)
+                expect(page.get_by_role("checkbox", name="非推奨バージョンを含める", exact=True)).to_be_checked()
+                expect(page.get_by_role("heading", name="バージョン — ページ 2", exact=True)).to_be_visible()
+                ja_table = page.get_by_role("table", name="シークレットのバージョンメタデータ", exact=True)
+                for item in expected[20:]:
+                    expect(ja_table.get_by_text(item["VersionId"], exact=True)).to_be_visible()
+                expect(ja_table.get_by_text(token(0), exact=True)).to_have_count(0)
+                expect(page.get_by_role("button", name="us-east-1", exact=True)).to_be_visible()
+                expect(page.get_by_role("button", name="アカウントメニュー", exact=True)).to_contain_text("simulator-admin")
+                assert page.evaluate("window.__versionLocaleNode===document.querySelector('[data-secret-versions]')"), "Language change remounted metadata view"
+                assert sum(op == "secretsmanager.ListSecretVersionIds" for op in operations) == locale_reads
+                no_values(page)
+                page.get_by_role("combobox", name="言語", exact=True).select_option("en")
+                expect(page.locator("html")).to_have_attribute("lang", "en")
+                expect(page.get_by_label("Secret ARN for version metadata", exact=True)).to_have_value(arn)
+                expect(page.get_by_role("checkbox", name="Include deprecated versions", exact=True)).to_be_checked()
+                expect(page.get_by_role("heading", name="Versions — Page 2", exact=True)).to_be_visible()
+                for item in expected[20:]:
+                    expect(table.get_by_text(item["VersionId"], exact=True)).to_be_visible()
+                expect(page.get_by_role("button", name="Account menu", exact=True)).to_contain_text("simulator-admin")
+                expect(page.get_by_role("button", name="us-east-1", exact=True)).to_be_visible()
+                assert page.evaluate("window.__versionLocaleNode===document.querySelector('[data-secret-versions]')")
+                assert sum(op == "secretsmanager.ListSecretVersionIds" for op in operations) == locale_reads
+                boundaries.append({"sameMountLanguageRoundTrip": True, "actualLanguageControl": True,
+                    "queryFilterPageIDsHostScopePreserved": True, "reloadUsed": False})
+                no_values(page)
                 page.set_viewport_size({"width": 1440, "height": 1000})
 
                 held, hold = [], {"next": False, "arn": arn}
