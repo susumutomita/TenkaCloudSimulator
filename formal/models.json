@@ -3655,6 +3655,222 @@
           "expect_invariant": "TokenOnlyAuthenticated"
         }
       ]
+    },
+    {
+      "id": "SakuraDisksViewEpoch",
+      "model": "formal/SakuraDisksViewEpoch.tla",
+      "config": "formal/SakuraDisksViewEpoch.cfg",
+      "bounds": "Two opaque trusted scope/lifetime labels with one remount, two immutable read slots used once, readseq0..3/no wrap, internalnav0..2, fixedsavedresources1/2 andlist0, read/write scenarios, two form opens but one global writeintent/send, create/edit/delete symbolicACK/body/read outcomes; en/ja locale.",
+      "properties": [
+        "TypeOK",
+        "AcceptedReadScope",
+        "SuccessfulReadOnly",
+        "RenderedScopeBound",
+        "RenderedResourceBound",
+        "StaleReadFrame",
+        "StaleWriteFrame",
+        "NavigationACKFrame",
+        "AckClosesForm",
+        "AckClearsDraft",
+        "ReadRetryOnly",
+        "SingleWriteSend",
+        "LocaleFrame",
+        "CancelDraftClear"
+      ],
+      "limits": "Original bounded UI safety projection only, not React/JS/AbortController scheduling or server/SQL/IAM/token authority proof. Opaque scope combines trusted principal/session/globalnavigation/endpoint; actualcredential/contextKey production remainstrustedcaller. Read responses may complete afterabort/headers, no zero-network/body-cancel guarantee. No orphan-loading/liveness/hungread promise. ACK is actual2xxresponse beforeCreatebody/metadata, not serverrollback/idempotency underunknownnetworkoutcome. Two opens/onewriteintent excludearbitrarynew-sessionwrite concurrency. Independent request/frame snapshots monitoractualpublishedview changes, not ghost-only mutations. Nativepayloadbytes/schema/confirmation/keyentropy/quota/APIwire/SDK andauthenticatedcloudvisualparity areoutside. Shared main scope is ONLY Sakura fixedcapabilityconfiguration/contextKey+request mount, notAWS/GCP/Azure behavior; shell/CSS/neutralcatalogstate not proved.",
+      "source_scope": [
+        "tools/console/src/sakura-disks.jsx",
+        "tools/console/src/main.jsx"
+      ],
+      "mutants": [
+        {
+          "id": "DropPublicationContextGuard",
+          "edits": [
+            {
+              "old": "publish == live /\\ ok",
+              "new": "publish == (r.seq=s.seq) /\\ ok",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AcceptedReadScope"
+        },
+        {
+          "id": "DropPublicationSequenceGuard",
+          "edits": [
+            {
+              "old": "publish == live /\\ ok",
+              "new": "publish == (r.life=s.life /\\ r.scope=s.scope) /\\ ok",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AcceptedReadScope"
+        },
+        {
+          "id": "DropReadContextGuard",
+          "edits": [
+            {
+              "old": "\nReadCurrent(r) == r.life=s.life /\\ r.scope=s.scope /\\ r.seq=s.seq",
+              "new": "\nReadCurrent(r) == r.seq=s.seq",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StaleReadFrame"
+        },
+        {
+          "id": "DropReadSequenceGuard",
+          "edits": [
+            {
+              "old": "\nReadCurrent(r) == r.life=s.life /\\ r.scope=s.scope /\\ r.seq=s.seq",
+              "new": "\nReadCurrent(r) == r.life=s.life /\\ r.scope=s.scope",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StaleReadFrame"
+        },
+        {
+          "id": "StaleFinallyClearsLoading",
+          "edits": [
+            {
+              "old": "!.loading=IF live THEN FALSE ELSE @",
+              "new": "!.loading=FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StaleReadFrame"
+        },
+        {
+          "id": "KeepDisplayOnNavigation",
+          "edits": [
+            {
+              "old": "!.panel=\"none\",!.draft=0,!.display=None,!.error=FALSE,!.notice=\"none\"]",
+              "new": "!.panel=\"none\",!.draft=0,!.display=@,!.error=FALSE,!.notice=\"none\"]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RenderedResourceBound"
+        },
+        {
+          "id": "KeepDisplayOnScopeChange",
+          "edits": [
+            {
+              "old": "!.panel=\"none\",!.draft=0,!.display=None,!.error=FALSE,\n         !.loading=FALSE",
+              "new": "!.panel=\"none\",!.draft=0,!.display=@,!.error=FALSE,\n         !.loading=FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RenderedScopeBound"
+        },
+        {
+          "id": "KeepFormOnACK",
+          "edits": [
+            {
+              "old": "!.panel=IF live /\\ sameNav THEN \"none\" ELSE @",
+              "new": "!.panel=@",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AckClosesForm"
+        },
+        {
+          "id": "KeepDraftOnACK",
+          "edits": [
+            {
+              "old": "!.draft=IF live /\\ sameNav THEN 0 ELSE @",
+              "new": "!.draft=@",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AckClearsDraft"
+        },
+        {
+          "id": "DropWriteContextGuard",
+          "edits": [
+            {
+              "old": "\nWriteCurrent(r) == r.life=s.life /\\ r.scope=s.scope",
+              "new": "\nWriteCurrent(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StaleWriteFrame"
+        },
+        {
+          "id": "ACKStealsNavigation",
+          "edits": [
+            {
+              "old": "!.phase=IF live /\\ sameNav THEN \"body\" ELSE \"obsolete\",",
+              "new": "!.phase=IF live /\\ sameNav THEN \"body\" ELSE \"obsolete\",\n           !.resource=IF live /\\ ~sameNav THEN r.resource ELSE @,",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NavigationACKFrame"
+        },
+        {
+          "id": "ReadRetryResendsWrite",
+          "edits": [
+            {
+              "old": "nextSends == s.sends (* RetryOnlyGET *)",
+              "new": "nextSends == s.sends+1 (* RetryOnlyGET *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadRetryOnly"
+        },
+        {
+          "id": "DropSynchronousTicket",
+          "edits": [
+            {
+              "old": "!.sends=@] (* SynchronousTicket *)",
+              "new": "!.sends=@+1] (* SynchronousTicket *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SingleWriteSend"
+        },
+        {
+          "id": "LocaleClearsDraft",
+          "edits": [
+            {
+              "old": "nextDraft == s.draft (* LocaleDraftPreserved *)",
+              "new": "nextDraft == 0 (* LocaleDraftPreserved *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "LocaleFrame"
+        },
+        {
+          "id": "CancelRetainsDraft",
+          "edits": [
+            {
+              "old": "candidate == [s EXCEPT !.panel=\"none\",!.draft=0,",
+              "new": "candidate == [s EXCEPT !.panel=\"none\",!.draft=@,",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CancelDraftClear"
+        },
+        {
+          "id": "WrongDisplayedDisk",
+          "edits": [
+            {
+              "old": "Published(r) == [life |-> r.life,scope |-> r.scope,resource |-> r.resource]",
+              "new": "Published(r) == [life |-> r.life,scope |-> r.scope,resource |-> IF r.resource=0 THEN 0 ELSE 3-r.resource]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RenderedResourceBound"
+        },
+        {
+          "id": "FailedReadPublishesMetadata",
+          "edits": [
+            {
+              "old": "publish == live /\\ ok",
+              "new": "publish == live",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SuccessfulReadOnly"
+        }
+      ]
     }
   ]
 }

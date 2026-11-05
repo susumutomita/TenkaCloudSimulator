@@ -9,8 +9,9 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-BASE_MODELS = {'SakuraDiskMetadata', 'SakuraDiskAdmission', 'SakuraStartupAdmission', 'SecretVersionListing', 'NativeWireProjection', 'RESTRouteMatching', 'RESTProxyEventBoundary', 'AzurePropertiesTarget', 'AzurePropertiesEpoch', 'AzureBlobState', 'BlobRange', 'BrowserSessions', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'DynamoDBAdmission', 'DynamoDBLifecycle', 'GCPStorageState', 'KMSKeyState', 'KMSProtocolAdmission', 'IAMManagedPolicies', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'SecretsDisclosureChannels', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'SecretsMutationRefresh', 'StackOwnership', 'StartupTokenVisibility'}
+BASE_MODELS = {'SakuraDisksViewEpoch', 'SakuraDiskMetadata', 'SakuraDiskAdmission', 'SakuraStartupAdmission', 'SecretVersionListing', 'NativeWireProjection', 'RESTRouteMatching', 'RESTProxyEventBoundary', 'AzurePropertiesTarget', 'AzurePropertiesEpoch', 'AzureBlobState', 'BlobRange', 'BrowserSessions', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'DynamoDBAdmission', 'DynamoDBLifecycle', 'GCPStorageState', 'KMSKeyState', 'KMSProtocolAdmission', 'IAMManagedPolicies', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'SecretsDisclosureChannels', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'SecretsMutationRefresh', 'StackOwnership', 'StartupTokenVisibility'}
 BASE_INVARIANTS = {
+    'SakuraDisksViewEpoch': {'AcceptedReadScope', 'AckClearsDraft', 'AckClosesForm', 'CancelDraftClear', 'LocaleFrame', 'NavigationACKFrame', 'ReadRetryOnly', 'RenderedResourceBound', 'RenderedScopeBound', 'SingleWriteSend', 'StaleReadFrame', 'StaleWriteFrame', 'SuccessfulReadOnly', 'TypeOK'},
     'SakuraDiskMetadata': {'ActiveQuota', 'AllocatorOnlyCreate', 'BindingFrozen', 'CreateExact', 'DeleteExact', 'FailureFrame', 'FreshCommittedID', 'PeerFrame', 'QuotaRefusal', 'ReadSnapshot', 'StoredIDsBound', 'TypeOK', 'UpdateExact'},
     'SakuraDiskAdmission': {'ActorBeforeDispatch', 'ActorFailureStatus', 'AdmissionBeforeLookup', 'ConcreteResult', 'DeniedFrame', 'FailureNoDisclosure', 'MappedRealmUsesCopiedHostConfig', 'MappedSubjectUsesExerciseIdentity', 'MarkerBeforeDispatch', 'MarkerFailureStatus', 'NoDefaultActorOnExtractionFailure', 'NoUnauthorizedLookup', 'TypeOK', 'UnsupportedNoMutation', 'WireHeadersDoNotMapAuthority'},
     'SakuraStartupAdmission': {'AcceptedConfigExact', 'DisabledNoSakura', 'EnabledOnlyAuthenticated', 'NoEffectsOnRefusal', 'RegistrationRequiresSchema', 'SchemaRequiresDatabase', 'StartupComplete', 'TokenOnlyAuthenticated', 'TypeOK', 'ValidAdmissionAvailable', 'ValidationPrecedesEffects'},
@@ -51,6 +52,7 @@ BASE_INVARIANTS = {
 }
 # Established controls require an explicit gate-policy change before retirement.
 REQUIRED_MUTANTS = {
+    'SakuraDisksViewEpoch': {'ACKStealsNavigation', 'CancelRetainsDraft', 'DropPublicationContextGuard', 'DropPublicationSequenceGuard', 'DropReadContextGuard', 'DropReadSequenceGuard', 'DropSynchronousTicket', 'DropWriteContextGuard', 'FailedReadPublishesMetadata', 'KeepDisplayOnNavigation', 'KeepDisplayOnScopeChange', 'KeepDraftOnACK', 'KeepFormOnACK', 'LocaleClearsDraft', 'ReadRetryResendsWrite', 'StaleFinallyClearsLoading', 'WrongDisplayedDisk'},
     'SakuraDiskMetadata': {'AdoptReopenedOwner', 'CommitFailedCandidate', 'DeleteWrongID', 'IgnoreQuotaBoundary', 'MissingCreatedRow', 'ModifyPeerRows', 'ReturnPeerList', 'ReuseDeletedID', 'UpdateAdvancesAllocator', 'UpdateNeighbor'},
     'SakuraDiskAdmission': {'AcceptWrongMarker', 'CredentialInsteadOfExercise', 'DefaultOwnerMissing', 'DeniedMetadataDisclosure', 'DummyMarkerAsAuthority', 'EarlyLookupFault', 'FaultCommitsWrite', 'IgnoreFixedRealm', 'OperatorForcesOwner', 'OperatorRoleBypass', 'RealmFromHeader', 'UnsupportedReachesStore'},
     'SakuraStartupAdmission': {'ConstructBeforeDatabase', 'CreateTokenBeforeCheck', 'CreateTokenWhenUnsafe', 'DefaultMissingScope', 'IgnoreInvalidScopeValue', 'IgnoreOrphanScope', 'OpenDatabaseBeforeCheck', 'OpenListenerBeforeCheck', 'PermitUnsafeEnabled', 'RegisterDisabled', 'RejectValidEnabled', 'SkipEnabledRegistration', 'SkipEnabledSchema'},
@@ -90,6 +92,7 @@ REQUIRED_MUTANTS = {
     'StartupTokenVisibility': {'OmittedCIGuard', 'OmittedTTYGuard', 'OverwriteExistingToken'},
 }
 REQUIRED_SOURCE_SCOPES = {
+    'SakuraDisksViewEpoch': {'tools/console/src/main.jsx', 'tools/console/src/sakura-disks.jsx'},
     'SakuraDiskMetadata': {'internal/sakura/iaas/disk_store.go'},
     'SakuraDiskAdmission': {'internal/sakura/iaas/disk_http.go', 'internal/sakura/provider.go'},
     'SakuraStartupAdmission': {'cmd/simulator/main.go', 'cmd/simulator/sakura_flags.go', 'internal/server/sakura_provider.go', 'internal/server/server.go'},
