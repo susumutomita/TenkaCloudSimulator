@@ -15,7 +15,7 @@ machine-discovered semantic coverage. A newly added implementation file is not
 covered merely because an existing model passes: its exact path must have an
 appropriate reviewed scope mapping and property argument.
 
-The current source registry has16 baselines/82 required named mutation controls.
+The current source registry has19 baselines/98 required named mutation controls.
 Registration and Python guards are not a successful immutable TLC execution.
 
 | Model | Finite contract | Important exclusions |

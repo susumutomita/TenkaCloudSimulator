@@ -7,6 +7,7 @@ export const PROVIDERS = Object.freeze([
 export const SERVICES = Object.freeze([
   {id: 's3', provider: 'aws', label: 'S3', capability: 's3', route: '/s3', keywords: 'bucket object バケット オブジェクト ストレージ'},
   {id: 'ssm', provider: 'aws', label: 'Systems Manager', capability: 'ssm', route: '/parameters', keywords: 'parameter store パラメータ 設定 システムマネージャー パラメータストア'},
+  {id: 'sqs', provider: 'aws', label: 'SQS', capability: 'sqs', route: '/sqs', keywords: 'queue message キュー メッセージ シンプルキューサービス'},
   {id: 'lambda', provider: 'aws', label: 'Lambda', capability: 'lambda', route: '/lambda', keywords: 'function 関数 ラムダ'},
   {id: 'iam', provider: 'aws', label: 'IAM', capability: 'iam', route: '/iam', keywords: 'role identity ロール 権限 アイアム アクセス管理'},
   {id: 'apigateway', provider: 'aws', label: 'API Gateway', capability: 'apigateway', route: '/apigateway', keywords: 'rest api エーピーアイ APIゲートウェイ ゲートウェイ'},

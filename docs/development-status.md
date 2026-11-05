@@ -1,43 +1,37 @@
 # Development roster
 
-Current integration snapshot: 2026-11-05. Integration owner: `root`.
+Integration owner: `root`. Snapshot: 2026-11-05 after PR412.
 
-Verified public main: `fcf8e702b45953cdeeba49883a238e638af725e8` (PR411 merged).
-All six main checks / three workflows succeeded, including CI41941140492 and
-Formal41941140471. This does not establish Dia-specific compatibility.
+PR412 is merged at main `f5dba056da9bf69df047b391a45d06a3aff3dc66`.
+Its exact source `eb545c94` passed 28 mandatory E2E cases, both unchanged
+90% coverage floors, 50 screen audits and 112 finite model executions in CI.
+Post-merge main Formal validation and four CodeQL analyses succeeded; main CI
+was still running at this snapshot. No authenticated cloud pixel parity or
+actual Dia device test is claimed.
 
-## Current console assignments and integration
-
-All five source scopes are privately integrated on
-`integrate/cloud-console-contract-20261105`; no new UI PR is published yet.
-Each author used a dedicated worktree from the shared `c334f4f` baseline.
-
-| Owner | Delivered scope | Verified / remaining |
+| Owner | Work | Current state / remaining acceptance |
 |---|---|---|
-| root | shared locale, Login extraction, integration/assets, focus and final gates | Canonical 22-package embed/build, actual clipboard and file login, language and provider focused tests PASS; whole gates/CI pending |
-| cfn_adapters | provider catalog/search, AWS-only Cloudscape shell, S3/SSM/CFN translation | Five catalog unit checks PASS; root fixed keyboard focus recovery and provider-owned control styling |
-| team_host | GCP shell, staged create, live generation-conditional object metadata, docs | Syntax/11 presentation checks and root actual metadata412→200/browser lifecycle PASS; authenticated Google pixels unverified |
-| waf_service | Azure resource menu/table/action pane, pane locale, docs | Root actual lifecycle/properties/native frames PASS; three public official images inspected, authenticated Portal unverified |
-| grader_http | masked explicit token-file fallback and bounded read revision tests | Actual embedded chooser/login/logout/clipboard/races PASS; Mac/Dia real device remains unverified |
-| cfn_callback | seven AWS child modules and success notices; independent integration review | 435 presentation translations; default-English erasure exactly matches seven base modules. Found menu-focus issue; root fixed and browser checked it |
-| waf_console | provider/language acceptance and latest PR CI observation | Existing HTTP/data/auth/peer/download oracles retained; 22 provider and12 language audit states PASS, no external requests/page errors |
+| root | PR410 SQS console and shared AWS catalog integration | Private normal merge preserves original service history and PR412; canonical assets and nine pure tests pass. Actual locale/receipt browser acceptance passed at PC/mobile; original helpers, whole gates and exact-HEAD CI remain pending. |
+| waf_console | SQS locale and native receipt acceptance | Real locale helper passed nine native operations at PC/mobile, retained drafts/receipts and 12 axe states; original English helpers are running. |
+| team_host | PR408 Secrets Manager main alignment | Ready transition succeeded; main now conflicts. New isolated normal merge and translated leaf integration in progress; native APIs and disclosure guards must remain intact. |
+| grader_http | CloudWatch Logs English/Japanese leaf | Private source ready; whole English-erased component matches original. Backend/main integration and runtime checks remain. |
+| cfn_adapters | Public-reference provider fidelity review | Comparing Google Cloud Storage and Azure Blob navigation and flows; no real cloud login or resource creation. |
+| cfn_callback | Exact main hosted acceptance | Known main CI run41955562786 is being monitored; previous PR412 results are not relabelled as main results. |
 
-Focused checks do not certify the full integration HEAD. Full Go/race, both
-coverage floors, 28-case E2E, audit, immutable formal and hosted CI are the
-remaining gates. GCP/Azure official SDK execution and authenticated cloud visual
-parity are unverified. See [common contract](design/0006-console-provider-contract.md).
-There are seven local slots including root, not 200 executing agents. Heavy
-checks are explicitly reserved within four available CPUs. Library screenshot
-saving failed at the helper's tools-list network request; candidate images are
-preserved locally and no alternate write was attempted.
+Current claims are recorded in [SQS48](https://github.com/susumutomita/TenkaCloudSimulator/issues/48#issuecomment-6648229551),
+[Secrets266](https://github.com/susumutomita/TenkaCloudSimulator/issues/266#issuecomment-6648234024)
+and [Azure316](https://github.com/susumutomita/TenkaCloudSimulator/issues/316#issuecomment-6648265039).
+The separate grader_http task now implements live native Azure HEAD properties
+in a dedicated worktree; no shared files or backend edits are assigned to it.
+External Codex scope/identity is not independently confirmed; these narrow
+claims do not assume ownership of other service work.
 
-## Other work boundaries
-
-Other open PRs retain their existing public descriptions and review state.
-Their metadata and Ready transitions are outside this console change. The
-previously denied PR408 Ready transition and WAF50 security reproduction remain
-stopped. No Composio, real cloud mutation or protection-setting change is part
-of this work.
+Seven available local slots include root; they do not imply 200 executing
+agents. Shared files have one owner per worktree. Public service descriptions
+are unchanged by this roster. WAF50 security reproduction and denied PR407
+metadata edits remain held; there is no Composio, security-setting change or
+real cloud mutation. Library image saving failed before a file was created;
+review images remain local.
 
 ---
 

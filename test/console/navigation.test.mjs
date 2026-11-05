@@ -4,10 +4,10 @@ import {PROVIDERS, SERVICES, serviceAvailable, servicesForProvider, serviceFromH
 const capabilities={services:{s3:{},ssm:{},iam:{},lambda:{},apigateway:{},cloudformation:{},kms:{},sqs:{}},cloudStorage:{gcp:{project:'dummy-project'},azure:{account:'dummyaccount'}}};
 test('each provider is the same catalog level and contains only real console routes',()=>{
   assert.deepEqual(PROVIDERS.map(p=>p.id),['aws','gcp','azure']);
-  assert.equal(servicesForProvider('aws',capabilities).length,7);
+  assert.equal(servicesForProvider('aws',capabilities).length,8);
   assert.deepEqual(servicesForProvider('gcp',capabilities).map(s=>s.id),['gcp-storage']);
   assert.deepEqual(servicesForProvider('azure',capabilities).map(s=>s.id),['azure-blob']);
-  assert.equal(serviceAvailable('sqs',capabilities),false);
+  assert.equal(serviceAvailable('sqs',capabilities),true);
   assert.equal(serviceAvailable('unknown',capabilities),false);
   assert.deepEqual(servicesForProvider('unknown',capabilities),[]);
 });
@@ -16,6 +16,7 @@ test('missing capabilities cannot invent provider scopes or enabled services',()
     assert.deepEqual(servicesForProvider('gcp',c),[]);assert.deepEqual(servicesForProvider('azure',c),[]);
   }
   assert.equal(serviceAvailable('s3',{}),false);
+  assert.equal(serviceAvailable('sqs',{services:{}}),false);
   assert.equal(serviceAvailable('gcp-storage',{cloudStorage:{gcp:{project:''}}}),false);
 });
 test('English/Japanese filtering is provider scoped and never mutates capabilities',()=>{
@@ -37,6 +38,9 @@ test('existing hashes and aliases roundtrip; unknown routes do not claim S3 supp
 test('natural Japanese aliases find canonical services within the selected cloud',()=>{
   for(const [provider,query,expected] of [
     ['aws','ラムダ',['lambda']],
+    ['aws','キュー',['sqs']],
+    ['aws','シンプルキューサービス',['sqs']],
+    ['gcp','キュー',[]],
     ['aws','パラメータストア',['ssm']],
     ['aws','暗号化',['kms']],
     ['aws','APIゲートウェイ',['apigateway']],

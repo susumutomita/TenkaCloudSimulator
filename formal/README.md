@@ -124,7 +124,7 @@ BrowserSessions, SQSLifecycle and SQSStorageBudget remain mandatory in the large
 The registry adds ProviderActor (7 properties/6 sensitivity controls),
 GCPStorageState (10 properties/8 controls), and AzureBlobState (10 properties/11
 controls), plus ProjectAuthority (10 properties/6 controls), BlobRange (11 properties/8 controls), and ProviderPath (finite carrier properties/7 controls), retaining all existing models/controls. The current source registry
-has16 models/82 controls in main before this KMS restack. Individual finite runs and the final immutable integrated
+has19 models/98 controls in the current SQS candidate (main has18/94). Individual finite runs and the final immutable integrated
 run are recorded separately; registration alone is not a successful TLC run.
 
 ProviderActor abstracts post-authentication emission, selected identity and
@@ -162,7 +162,7 @@ XML order, escaping, disclosure, actual SDK parsing and SQL initialization are n
 proved by this association. Independent serializer byte-goldens and native HTTP
 checks cover the wire format separately.
 
-All82 established sensitivity-control IDs (including36 earlier baseline controls) have literal per-model minimum sets. Real-filesystem tests remove each control individually and require rejection. This protects the checked inventory, not semantic completeness or a Go implementation proof.
+All98 established sensitivity-control IDs (including36 earlier baseline controls) have literal per-model minimum sets. Real-filesystem tests remove each control individually and require rejection. This protects the checked inventory, not semantic completeness or a Go implementation proof.
 
 
 ## Bounded KMS key-state registration
@@ -208,4 +208,15 @@ Documentation-only children do not change model bytes; each final HEAD still
 requires its own immutable input/applicability gate before publication.
 
 
-Current main-preserving KMS restack:18 baselines/94 controls, retaining every main16/82 entry and adding only the two owned KMS models. The current merged source has not run TLC, native/browser or whole-profile acceptance. Earlier911/8ccc receipts do not establish current-head success.
+Historical KMS restack contributed two models to main18/94. The current SQS candidate preserves all of them and adds SQSConsoleEpoch. Earlier branch receipts do not establish current-head success.
+
+## Current SQS console main integration
+
+Mainfcf contributes18 baselines/94 mandatory controls, including the two
+merged KMS models. SQSConsoleEpoch adds one baseline/four literal-protected
+controls:19 baselines/98 controls,117 planned executions. Every existing
+main model/property/bound/control/config and removal fixture is retained.
+This source union has not run TLC; old99/base5c97 actual103 success is historical.
+The SQS epoch model covers bounded accepted replies/private receipt custody,
+not native receipt validity, authentication, React/DOM/thread execution or
+Go/SQLite refinement. See [correspondence](../docs/formal-sqs-console.md).
