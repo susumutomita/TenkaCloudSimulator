@@ -41,6 +41,21 @@ packages=json.loads(Path('third_party/console-packages.json').read_text())
 assert all(p.get('evidence') for p in packages)
 assert Path('third_party/CONSOLE-NOTICES.txt').read_bytes()==Path('internal/legal/assets/CONSOLE-NOTICES.txt').read_bytes()
 assert spec['paths']['/']['post']['operationId']=='awsRegionalOperation'
+print('Cloudscape bundle, original notices and regional API description verified.')
+
+import runpy
+runpy.run_path('tools/python/check.py',run_name='__main__')
+
+# Retain exact historical rights and require reviewed current source identities.
+# Pending replacement review is a hard failure, never an adapted-comment check.
+native_provenance=runpy.run_path('scripts/check-native-provenance.py')
+assert native_provenance['main']()==0, 'Native provenance gate did not pass.'
+
+# Exercise refusal cases in the same required asset check, including missing
+# historical notices and unreviewed or modified current-source identities.
+import subprocess,sys
+subprocess.run([sys.executable,'scripts/test-native-provenance.py'],check=True)
+
 # The eighth Secrets operation must stay discoverable without dropping the
 # original request templates or narrowing the shared JSON1.1 response to one API.
 regional = spec['paths']['/']['post']
@@ -56,17 +71,3 @@ assert version_example == {'SecretId': 'training/version-list', 'IncludeDeprecat
 assert 'SecretsListSecretVersionIdsInput' in spec['components']['schemas']
 assert 'SecretsListSecretVersionIdsOutput' in spec['components']['schemas']
 assert 'application/x-amz-json-1.1' in regional['responses']['200']['content']
-print('Cloudscape bundle, original notices and regional API description verified.')
-
-import runpy
-runpy.run_path('tools/python/check.py',run_name='__main__')
-
-# Retain exact historical rights and require reviewed current source identities.
-# Pending replacement review is a hard failure, never an adapted-comment check.
-native_provenance=runpy.run_path('scripts/check-native-provenance.py')
-assert native_provenance['main']()==0, 'Native provenance gate did not pass.'
-
-# Exercise refusal cases in the same required asset check, including missing
-# historical notices and unreviewed or modified current-source identities.
-import subprocess,sys
-subprocess.run([sys.executable,'scripts/test-native-provenance.py'],check=True)
