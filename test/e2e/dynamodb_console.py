@@ -173,10 +173,15 @@ def _run():
                         keys();native('Get item','GetItem');expect(page.get_by_label('Returned item JSON',exact=True)).not_to_have_value('');assert json.loads(page.get_by_label('Returned item JSON',exact=True).input_value())==wire(own.get_item(TableName=name,Key=key)['Item']);audit('item-returned')
                         # Real region and principal transitions must discard displayed
                         # items and dirty drafts without discarding native stored data.
-                        page.get_by_role('button',name='us-east-1',exact=True).click();page.get_by_role('menuitem',name='us-west-2',exact=True).click()
+                        def change_region(current,destination):
+                            if width==390:
+                                page.get_by_role('button',name='More',exact=True).click();page.get_by_role('button',name=current,exact=True).click();page.get_by_role('button',name=destination,exact=True).click()
+                            else:
+                                page.get_by_role('button',name=current,exact=True).click();page.get_by_role('menuitem',name=destination,exact=True).click()
+                        change_region('us-east-1','us-west-2')
                         expect(page.get_by_role('button',name='Refresh tables',exact=True)).to_be_enabled();expect(page.get_by_role('link',name=name,exact=True)).to_have_count(0);expect(page.get_by_label('Returned item JSON',exact=True)).to_have_count(0)
                         west=client(a,region='us-west-2');assert name not in west.list_tables()['TableNames'];assert wire(own.get_item(TableName=name,Key=key)['Item'])==raw
-                        page.get_by_role('button',name='us-west-2',exact=True).click();page.get_by_role('menuitem',name='us-east-1',exact=True).click();expect(page.get_by_role('button',name='Refresh tables',exact=True)).to_be_enabled()
+                        change_region('us-west-2','us-east-1');expect(page.get_by_role('button',name='Refresh tables',exact=True)).to_be_enabled()
                         page.get_by_role('link',name=name,exact=True).click();page.get_by_role('tab',name='Explore table items',exact=True).click();expect(page.get_by_label(pk+' ('+kind+')',exact=True)).to_have_value('');keys();native('Get item','GetItem')
                         page.get_by_role('button',name='Create item',exact=True).click();page.get_by_label('Item JSON',exact=True).fill(json.dumps({**raw,'payload':{'S':'must reset after principal change'}}))
                         before_scope_writes=calls.count('PutItem')
