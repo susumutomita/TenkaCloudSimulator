@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
@@ -152,7 +153,7 @@ func TestSakuraProviderUsesActualTypedActorNotHeadersOrOperatorRole(t *testing.T
 	good := actor()
 	call(t, h, request("POST", nativePath, `{"Disk":{"Name":"saved","Plan":{"ID":4},"SizeMB":20480}}`, &good), 201)
 	before := frame(t, db)
-	for _, a := range []*common.Actor{nil, {}, {CredentialIdentity: "host", ExerciseIdentity: "simulator-admin", CredentialRole: common.CredentialOperator}, {CredentialIdentity: "host", ExerciseIdentity: "other", CredentialRole: common.CredentialOperator}, {CredentialIdentity: "other", ExerciseIdentity: "learner", CredentialRole: common.CredentialParticipant}, {CredentialIdentity: "learner", ExerciseIdentity: "learner", CredentialRole: "unknown"}} {
+	for _, a := range []*common.Actor{nil, {}, {CredentialIdentity: "host", ExerciseIdentity: "simulator-admin", CredentialRole: common.CredentialOperator}, {CredentialIdentity: "host", ExerciseIdentity: "other", CredentialRole: common.CredentialOperator}, {CredentialIdentity: "learner", ExerciseIdentity: "other", CredentialRole: common.CredentialOperator}, {CredentialIdentity: "other", ExerciseIdentity: "learner", CredentialRole: common.CredentialParticipant}, {CredentialIdentity: "learner", ExerciseIdentity: "learner", CredentialRole: "unknown"}} {
 		r := request("DELETE", nativePath+"/1", "", a)
 		r.Header.Set("X-Simulator-Principal", "learner")
 		r.Header.Set("X-Simulator-Access-Role", "operator")
@@ -307,4 +308,86 @@ func TestSakuraProviderComposesWithRealHostAccessAndIndependentAuthorities(t *te
 		t.Fatal("wrong authority resolved peer state")
 	}
 	// This real middleware fixture is recorder-based, not a standalone CLI/process.
+}
+
+type trackedBody struct {
+	reads int
+	fail  bool
+}
+
+func (b *trackedBody) Read([]byte) (int, error) {
+	b.reads++
+	if b.fail {
+		return 0, errors.New("private test body fault")
+	}
+	return 0, io.EOF
+}
+func (*trackedBody) Close() error { return nil }
+func TestSakuraProviderDenialPrecedesBodyAndObservableDatabaseFault(t *testing.T) {
+	_, db := database(t)
+	h := construct(t, db, config)
+	token := strings.Repeat("c", 64)
+	access, e := server.NewAccess(h, token, false)
+	if e != nil {
+		t.Fatal(e)
+	}
+	makeRequest := func(path, principal string, validMarker bool, body *trackedBody) *http.Request {
+		r := request("GET", path, "", nil)
+		r.Header.Set("X-Simulator-Token", token)
+		r.Header.Set("X-Simulator-Principal", principal)
+		if !validMarker {
+			r.SetBasicAuth("not-the-public-marker", "dummy-local-only")
+		}
+		r.Body = body
+		return r
+	}
+	create := request("POST", nativePath, `{"Disk":{"Name":"retained","Plan":{"ID":4},"SizeMB":20480}}`, nil)
+	create.Header.Set("X-Simulator-Token", token)
+	create.Header.Set("X-Simulator-Principal", config.Owner)
+	call(t, access, create, 201)
+	before := frame(t, db)
+	if _, e = db.Exec("ALTER TABLE sakura_disk_scope RENAME COLUMN owner TO missing_owner"); e != nil {
+		t.Fatal(e)
+	}
+	for _, id := range []string{"1", "999"} {
+		for _, tc := range []struct {
+			principal string
+			marker    bool
+			status    int
+		}{{"other", true, 403}, {"other", false, 403}, {config.Owner, false, 401}} {
+			body := &trackedBody{fail: true}
+			call(t, access, makeRequest(nativePath+"/"+id, tc.principal, tc.marker, body), tc.status)
+			if body.reads != 0 {
+				t.Fatal("denied request consumed its body")
+			}
+			if frame(t, db) != before {
+				t.Fatal("denied request changed retained data")
+			}
+		}
+		// Authorized requests do encounter the real poisoned binding, independently
+		// demonstrating that the denial tests did not run against an inert fixture.
+		body := &trackedBody{}
+		call(t, access, makeRequest(nativePath+"/"+id, config.Owner, true, body), 500)
+		if body.reads == 0 {
+			t.Fatal("authorized request did not reach body admission")
+		}
+		if frame(t, db) != before {
+			t.Fatal("failed authorized lookup changed data")
+		}
+	}
+	if _, e = db.Exec("ALTER TABLE sakura_disk_scope RENAME COLUMN missing_owner TO owner"); e != nil {
+		t.Fatal(e)
+	}
+	if frame(t, db) != before {
+		t.Fatal("repair changed stored graph")
+	}
+	for _, tc := range []struct {
+		id     string
+		status int
+	}{{"1", 200}, {"999", 404}} {
+		body := &trackedBody{}
+		call(t, access, makeRequest(nativePath+"/"+tc.id, config.Owner, true, body), tc.status)
+	}
+	// Error priority + bodyread0 are observable evidence. They do not instrument or
+	// prove that every possible implementation executes zero SQL read syscalls.
 }
