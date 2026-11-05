@@ -173,6 +173,9 @@ def _run():
                         page.get_by_role('menuitem', name='IAM', exact=True).click()
                         # Preserve a real pending initial list across Create/Cancel.
                         # Cancel must clear loading while rejecting its old response.
+                        sentinel_name = 'cancelled-read-sentinel-' + str(width)
+                        sentinel_policy = iam.create_policy(PolicyName=sentinel_name,
+                            PolicyDocument=json.dumps(deny))['Policy']
                         held_initial = []
                         def initial_list(route):
                             if action(route.request) == 'ListPolicies': held_initial.append(route)
@@ -193,8 +196,16 @@ def _run():
                         page.unroute(a.endpoint + '/', initial_list)
                         expect(page.get_by_role('button', name='Refresh', exact=True)).to_be_enabled()
                         assert operations.count('CreatePolicy') == 0
-                        assert iam.list_policies(Scope='Local')['Policies'] == []
+                        # The held native result contains a real row, so rejecting
+                        # stale publication is observable rather than an empty fixture.
+                        expect(page.get_by_role('link', name=sentinel_name, exact=True)).to_have_count(0)
+                        assert [p['PolicyName'] for p in iam.list_policies(Scope='Local')['Policies']] == [sentinel_name]
                         native('Refresh', 'ListPolicies')
+                        expect(page.get_by_role('link', name=sentinel_name, exact=True)).to_be_visible()
+                        iam.delete_policy(PolicyArn=sentinel_policy['Arn'])
+                        native('Refresh', 'ListPolicies')
+                        expect(page.get_by_role('link', name=sentinel_name, exact=True)).to_have_count(0)
+                        assert iam.list_policies(Scope='Local')['Policies'] == []
                         expect(page.get_by_role('heading', name='Customer managed policies', exact=True)).to_be_visible()
                         audit('policy-list-cancelled-read')
                         page.get_by_role('button', name='Create policy', exact=True).click()
