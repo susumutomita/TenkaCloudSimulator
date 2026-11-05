@@ -20,41 +20,29 @@ native SQS HTTP operations and SQLite state as SDK clients. No separate browser
 queue/message store, native API change, actual AWS connection or host runtime is
 needed. The simulator remains independent and implements a limited local subset.
 
-## Pending locale integration (source checkpoint)
+## Locale continuation and acceptance requirements
 
-The PR410 continuation normal-merges main `0a6bdce` and retains its native
-services, shared JSON1.0 reference checks, 26 registered finite models and 149
-controls. It adds one mandatory locale acceptance case to the 42 main
-Conformance methods. English/Japanese switching preserves queue and message
-drafts and private receipt custody; fixed notices translate at render time,
-while API values, resource names and raw errors stay opaque. The new helper
-reads completed JSON bodies without redundant Playwright `Response.finished()`
-waiters. The helper is exact candidate `2902fc0` except for nested shutdown
-cleanup: both owned CLIs are stopped even if the first shutdown assertion
-raises. Both shutdown checks and all product assertions remain enabled. Earlier
-two clean focused runs belong to candidate `2902fc0`, not this restack or the
-new cleanup path.
+The PR410 continuation normal-merges actual main `ce1ddd1`, which includes
+PR408. Its native services, shared JSON1.0 reference checks, Secrets readiness,
+mutation acknowledgment and motion fixes, 27 finite models and 153 controls are
+preserved. SQS English/Japanese switching preserves drafts and private receipt
+custody; fixed notices translate at render time while API values, resource names
+and raw errors remain opaque. Both owned helper CLIs are stopped even if one
+shutdown assertion fails. Two Japanese selectors in the shared service helper
+match the current SQS labels without changing native-operation assertions.
 
-The translated source has now been canonically bundled with the existing
-same-lock dependencies and all 22 original package notices retained. The four
-SQS pure locale checks and five catalog checks passed without skipped cases.
-These are compilation/presentation checks, not browser acceptance. No Go build,
-browser, full Go, immutable formal run or hosted checks for this checkpoint
-have been executed. All 42 main acceptance bodies and the improved shared
-SQS/DynamoDB reference validator are preserved; the new locale case makes 43
-methods, not 43 observed passes.
-
-### Private PR408 dependency checkpoint
-
-This private continuation also normal-merges the unmerged PR408 source
-`df7b049`. It is a dependency preparation, not a claim that PR408 is on main.
-Its exact Secrets Enter/typed-error/acknowledgment/retry/motion fixes, login and
-DynamoDB recovery tests are preserved. The combined registry has 27 models and
-153 controls; all 42 main Conformance bodies plus the SQS locale case remain
-43 methods. A canonical same-lock build and 19 SQS/catalog/Secrets pure checks
-passed. Runtime acceptance and current-head formal/full-quality results must be
-reported separately. After PR408 merges, merge the actual new main normally and
-refresh this declaration; do not substitute this private dependency for main.
+A canonical same-lock bundle with 22 original notices and 19 pure SQS/catalog/
+Secrets checks passed on the identical product inputs before this main restack.
+Actual focused SQS English/Japanese, shared Japanese services and the repaired
+Secrets readiness/ACK/motion checks also passed on those exact product/helper
+inputs. These are historical, byte-bound focused receipts, not new-HEAD full CI.
+The 42 main Conformance method bodies are preserved and one SQS locale case
+makes 43 mandatory cases. Publication requires exact-HEAD hosted acceptance,
+whole-module statement and source coverage of at least 90% from one profile,
+and all 27 baselines plus 153 specific finite-model controls. Bounded models do
+not establish React/Go/SQL refinement or actual AWS fidelity. No full local43
+claim is made: this environment lacks some canonical development SDK/schema
+dependencies, and no dependency installation or alternative feed was used.
 
 ## Screens and operations
 
