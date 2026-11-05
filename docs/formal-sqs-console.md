@@ -1,13 +1,11 @@
 # SQS console epoch and receipt-custody model
 
-> Current source incorporates main26d's S3 regression tests without changing
-> runtime/UI/model/asset inputs from the main0a4/deeb92e candidate. Main25 E2E
-> method bodies remain unchanged; two owned SQS helpers make27 mandatory.
-> Prior targeted canonical/native/race/policy/app/SQS-console/reference evidence
-> stays bound to its recorded unchanged inputs, not a new whole-suite result.
-> Registry19 baselines/98 controls requires117 actual TLC executions. Full27
-> E2E, one-profile dual90%, final immutable applicability and hosted CI remain
-> separate gates. No heavy validation was rerun solely for this source refresh.
+> Current source normal-merges mainfcf's login paste/error repair into public73.
+> Login is exact main, with SQS/KMS content mounts and fixed GCP/Azure scope
+> utilities preserved. Main26 E2E method bodies plus two SQS helpers require28.
+> The19-model/98-control inventory remains117 planned executions. Earlier73
+> results stay bound to the old login input; fresh canonical/login/SQS browser,
+> applicability and final whole28/dual90/117TLC/hosted checks are separate gates.
 
 
 `SQSConsoleEpoch` has a bounded SANY/TLC result at immutable341dec2. It adds one finite

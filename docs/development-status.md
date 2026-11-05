@@ -1,14 +1,14 @@
-# Current SQS/main26d source refresh
+# Current SQS/login-main source refresh
 
-Main26d adds S3 regression test/documentation/application-record changes to
-main0a4; runtime/UI/model/asset inputs are byte-identical. The existing SQS
-candidate preserves its public99/private-deeb ancestry through a normal merge.
-Main25 E2E method bodies plus the two owned SQS helpers make27 mandatory;
-19 models/98 controls remain117 planned executions. Prior targeted acceptance
-stays attached to the unchanged recorded inputs. This source-only refresh has
-not rerun Go/Node/browser/Java; fresh applicability/policy and final hosted
-whole-suite/dual90/formal validation remain required. No unrelated unmerged
-service, public action or settings change is included.
+Mainfcf adds the merged native-clipboard login/error handling to main26d.
+A new isolated branch normally merges it into public73 without editing old
+SQS/private checkpoints. Login is exact main; SQS/KMS real content mounts,
+all native Go/auth/raw-path behavior and fixed non-AWS scope utilities remain.
+Main26 methods plus two owned SQS helpers require28 E2E cases.19 models/98
+controls remain117 planned finite runs. Canonical combined-UI rebuild and
+new-login/unchanged-SQS real-browser acceptance must be recorded separately
+from old73 success. Fresh exact-base policy/applicability and whole28/dual90/
+117TLC/hosted checks remain required; no Ready/merge/public action by worker.
 
 ---
 

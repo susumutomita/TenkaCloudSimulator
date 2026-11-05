@@ -50,7 +50,49 @@ const keyPath = (bucket,key) => {
 };
 function Login(){
   const [token,setToken]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false);
-  return <ContentLayout header={<Header variant="h1">Open your local sandbox</Header>}><Container><form onSubmit={async e=>{e.preventDefault();setBusy(true);try{const r=await fetch('/_simulator/login',{method:'POST',body:new URLSearchParams({token})});if(!r.ok)throw Error('Invalid or expired access token');location.assign('/_simulator/console/');}catch(e){setError(e.message)}finally{setBusy(false)}}}><Form errorText={error} actions={<Button variant="primary" loading={busy} formAction="submit">Open sandbox</Button>}><SpaceBetween size="l"><Alert type="info">Use the access token supplied by your host. This is an independent local simulator.</Alert><FormField label="Access token"><Input value={token} type="password" onChange={({detail})=>setToken(detail.value)} autoComplete="off"/></FormField></SpaceBetween></Form></form></Container></ContentLayout>;
+  const inputRevision=useRef(0),pendingPaste=useRef(null),pasteTimer=useRef(null);
+  function clearPendingPaste(){clearTimeout(pasteTimer.current);pasteTimer.current=null;pendingPaste.current=null}
+  useEffect(()=>()=>{inputRevision.current++;clearPendingPaste()},[]);
+  function changeToken(value){inputRevision.current++;clearPendingPaste();setToken(value);setError('')}
+  function flushPendingPaste(){
+    const pending=pendingPaste.current;
+    if(pending&&pending.revision===inputRevision.current&&pending.input.isConnected){
+      changeToken(pending.value);return pending.value;
+    }
+    clearPendingPaste();return token;
+  }
+  function capturePaste(event){
+    const input=event.target;
+    if(!(input instanceof HTMLInputElement)||input.type!=='password')return;
+    clearPendingPaste();const revision=++inputRevision.current;
+    const clipboard=event.clipboardData,plain=clipboard?.getData('text/plain')||'';
+    if(!plain){
+      if(clipboard?.types?.length)setError('The clipboard has no plain-text token. Copy the token as plain text and paste again.');
+      return;
+    }
+    const start=input.selectionStart??input.value.length,end=input.selectionEnd??start;
+    // Match the HTML password input's CR/LF sanitization; never trim spaces,
+    // remove labels or reinterpret HTML. Normal native editing keeps its undo.
+    const value=input.value.slice(0,start)+plain.replace(/[\r\n]/g,'')+input.value.slice(end);
+    pendingPaste.current={input,value,revision};
+    // Native onChange invalidates this backup. Use it only when a real paste
+    // reaches the field without the normal input/change state update.
+    pasteTimer.current=setTimeout(flushPendingPaste,0);
+  }
+  async function submit(event){
+    event.preventDefault();if(busy)return;
+    const submitted=flushPendingPaste();
+    if(!submitted){setError('Enter your access token. If paste left this blank, copy the token as plain text.');return}
+    setBusy(true);setError('');
+    try{
+      let response;
+      try{response=await fetch('/_simulator/login',{method:'POST',body:new URLSearchParams({token:submitted})})}
+      catch{setError('Could not reach this simulator. Check the connection and try again.');return}
+      if(!response.ok){setError(response.status===401?'Invalid or expired access token':`Sign-in failed (HTTP ${response.status}). Try again or contact your host.`);return}
+      location.assign('/_simulator/console/');
+    }finally{setBusy(false)}
+  }
+  return <ContentLayout header={<Header variant="h1">Open your local sandbox</Header>}><Container><form onSubmit={submit}><Form errorText={error} actions={<Button variant="primary" loading={busy} formAction="submit">Open sandbox</Button>}><SpaceBetween size="l"><Alert type="info">Use the access token supplied by your host. This is an independent local simulator.</Alert><FormField label="Access token" description="Paste the token itself as plain text. It stays hidden; do not include a command or label."><div onPasteCapture={capturePaste}><Input value={token} type="password" onChange={({detail})=>changeToken(detail.value)} autoComplete="off"/></div></FormField></SpaceBetween></Form></form></Container></ContentLayout>;
 }
 function Console(){
   const routeService=()=> /^#\/(sqs)/.test(location.hash)?'sqs':/^#\/kms(?:\/|$)/.test(location.hash)?'kms':/^#\/gcp-storage/.test(location.hash)?'gcp-storage':/^#\/azure-blob/.test(location.hash)?'azure-blob':/^#\/(apigateway)/.test(location.hash)?'apigateway':/^#\/(parameters|ssm)/.test(location.hash)?'ssm':/^#\/(stacks|cfn)/.test(location.hash)?'cfn':/^#\/(lambda|functions)/.test(location.hash)?'lambda':/^#\/(iam|roles)/.test(location.hash)?'iam':'s3';
