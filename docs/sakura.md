@@ -98,10 +98,10 @@ The initial real SDK501 for its no-icon default was preserved before the narrow
 compatibility fix. No console materials or real cloud resources were used.
 
 The registered `SakuraDiskMetadata` and `SakuraDiskAdmission` add22 controls;
-`SakuraStartupAdmission` adds13 more (36 baselines +232 controls =268 executions).
-All main33 models/197 controls and both earlier Sakura model objects are retained.
+`SakuraStartupAdmission` adds13 more (37 baselines +245 controls =282 executions).
+All main34 models/210 controls and both earlier Sakura model objects are retained.
 The author previously ran the two scoped baselines and22 controls. A complete
-immutable268-case execution on the integrated revision is still required.
+immutable282-case execution on the integrated revision is still required.
 Metadata models abstract atomic resource/allocator/binding/peer frames. Admission
 models validated common Actor mapping, fixed configured realm, dummy-marker and
 request/lookup ordering. The Startup model separately checks abstract parsed presence/validity, explicit
@@ -109,7 +109,7 @@ opt-in/authenticated-mode admission before effects, and the successful optional
 construction/registration sequence. Its initial TLC baseline stopped with an
 enumeration error before states; the same324-input finite domain was rewritten
 as explicit membership. Corrected source passed independent SANY, baseline and
-all13 named controls; integrated268-case execution is still required. The models do
+all13 named controls; integrated282-case execution is still required. The models do
 not prove private context keys, host token cryptography, concrete Go flag/regex/
 UTF8 parsing, exact JSON neutral markers, full Registry composition, later startup
 failures or cleanup, constructor atomicity, SQLite/locking/crashes, DB leases,
