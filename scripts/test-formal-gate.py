@@ -1,4 +1,5 @@
 """Small real-filesystem tests of gate failure handling; these do not run TLC."""
+import ast
 import contextlib
 import io
 import hashlib
@@ -16,6 +17,16 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class FormalGateTests(unittest.TestCase):
+    def test_test_methods_cannot_silently_shadow_each_other(self):
+        tree = ast.parse(Path(__file__).read_text())
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ClassDef):
+                names = [item.name for item in node.body
+                         if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef))
+                         and item.name.startswith('test_')]
+                self.assertEqual(len(names), len(set(names)),
+                                 'duplicate test methods in ' + node.name)
+
     def setUp(self):
         self.output_capture = contextlib.redirect_stdout(io.StringIO())
         self.output_capture.__enter__()
@@ -108,23 +119,6 @@ class FormalGateTests(unittest.TestCase):
         cfg.write_text(original_cfg)
         path.write_text(original)
 
-    def test_each_required_mutation_control_cannot_disappear(self):
-        path = self.root / 'formal/models.json'
-        original = path.read_text()
-        registry = json.loads(original)
-        checked = 0
-        for model in registry['models']:
-            for control in model['mutants']:
-                with self.subTest(model=model['id'], control=control['id']):
-                    candidate = json.loads(original)
-                    entry = next(m for m in candidate['models'] if m['id'] == model['id'])
-                    entry['mutants'] = [m for m in entry['mutants'] if m['id'] != control['id']]
-                    path.write_text(json.dumps(candidate))
-                    with self.assertRaisesRegex(GateError, 'required mutation control|needs a sensitivity control'):
-                        load_registry(self.root)
-                    checked += 1
-        self.assertEqual(checked, 112)
-        path.write_text(original)
 
     def test_missing_model_config_checksum_each_fail(self):
         for path in ('formal/ObjectStore.tla', 'formal/ObjectStore.cfg',
@@ -529,28 +523,6 @@ class FormalGateTests(unittest.TestCase):
                         load_registry(self.root)
         path.write_text(original)
 
-    def test_mutation_refresh_model_and_each_property_are_required(self):
-        path = self.root / 'formal/models.json'
-        original = path.read_text()
-        registry = json.loads(original)
-        model = next(m for m in registry['models'] if m['id'] == 'SecretsMutationRefresh')
-        cfg = self.root / model['config']
-        original_cfg = cfg.read_text()
-        registry['models'] = [m for m in registry['models'] if m['id'] != model['id']]
-        path.write_text(json.dumps(registry))
-        with self.assertRaises(GateError):
-            load_registry(self.root)
-        for prop in model['properties']:
-            with self.subTest(property=prop):
-                candidate = json.loads(original)
-                target = next(m for m in candidate['models'] if m['id'] == model['id'])
-                target['properties'].remove(prop)
-                cfg.write_text(original_cfg.replace(' ' + prop, ''))
-                path.write_text(json.dumps(candidate))
-                with self.assertRaises(GateError):
-                    load_registry(self.root)
-        cfg.write_text(original_cfg)
-        path.write_text(original)
 
     def test_each_required_mutation_control_cannot_disappear(self):
         path = self.root / 'formal/models.json'
