@@ -400,8 +400,35 @@ refinement, backend admission coverage or liveness.
 The scoped model executions are separate evidence: the UI baseline visited
 431,932 distinct states and all eleven controls produced their named invariant
 violations; the crypto author's scoped evidence records its fourteen cases.
-Registration now requires 36 baselines and 234 controls (270 executions), with
+Registration now requires 37 baselines and 258 controls (295 executions), with
 all main 34 models and 210 controls retained. A fresh immutable combined gate
 must actually execute before reporting this inventory as current-HEAD passed.
-Catalog/CRUD/paging correspondence remains a separate integration obligation;
-these two entries do not supply that missing proof.
+Catalog/CRUD/paging is represented separately below; neither of these two
+entries supplies catalog behavior or native implementation proof.
+
+## Customer-alias catalog admission and paging
+
+KMSAliasCatalog adds seventeen required properties and twenty-four protected
+behavioral controls. Its four API-reachable seeds and three-request suffix bound
+two regions, two concrete keys, three names, a global row cap two, per-key cap one
+and page sizes one/two. Stored aliases, creation identities and regional revision
+are explicit. A single per-request key-permission map ensures same-key old/new
+checks agree while distinct-key retarget denials remain independent. Failed
+mutations preserve the frame; successful mutations require checked acknowledgment
+and advance revision. Listing authenticates before publication, filters before
+limit, binds cursor revision/authority/integrity/filter/limit, resumes strictly
+after its position and refuses partial read failure.
+
+The corrected scoped baseline completed13,025 distinct states in47.395 seconds;
+all twenty-four controls exited12 with their exact named invariant and a
+transition trace. The earlier same-key contradictory-permission witnesses are
+not reused. Source review and existing scoped logs were independently checked;
+registration is not a fresh295-case current-HEAD gate or Go/SQL refinement proof.
+
+Only catalog portions of kms_aliases.go correspond to this model; crypto and UI
+remain separate entries. MAC integrity/authority are abstract predicates, not
+HMAC/JSON/wire parsing or entropy proofs. Markers have no expiry. Fixed concrete
+key parents exclude DeleteKey/recreation, AWS-managed aliases, alias targets,
+grants and alias ABAC. Limits two/one are abstractions of native1000/50, not
+unbounded-quota proofs. Public JSON projection, authentication, physical clock,
+locking, SQL acknowledgments and commit behavior require native/SDK evidence.

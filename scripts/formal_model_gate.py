@@ -9,8 +9,9 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-BASE_MODELS = {'AzureBlobState', 'AzurePropertiesEpoch', 'AzurePropertiesTarget', 'BlobRange', 'BrowserSessions', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'DynamoDBAdmission', 'DynamoDBLifecycle', 'GCPStorageState', 'IAMManagedPolicies', 'KMSAliasCrypto', 'KMSAliasesViewEpoch', 'KMSKeyState', 'KMSProtocolAdmission', 'NativeIAMOwnership', 'NativeWireProjection', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'RESTProxyEventBoundary', 'RESTRouteMatching', 'S3Versions', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'SecretVersionListing', 'SecretsDisclosureChannels', 'SecretsMutationRefresh', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'StackOwnership', 'StartupTokenVisibility'}
+BASE_MODELS = {'KMSAliasCatalog', 'AzureBlobState', 'AzurePropertiesEpoch', 'AzurePropertiesTarget', 'BlobRange', 'BrowserSessions', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'DynamoDBAdmission', 'DynamoDBLifecycle', 'GCPStorageState', 'IAMManagedPolicies', 'KMSAliasCrypto', 'KMSAliasesViewEpoch', 'KMSKeyState', 'KMSProtocolAdmission', 'NativeIAMOwnership', 'NativeWireProjection', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'RESTProxyEventBoundary', 'RESTRouteMatching', 'S3Versions', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'SecretVersionListing', 'SecretsDisclosureChannels', 'SecretsMutationRefresh', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'StackOwnership', 'StartupTokenVisibility'}
 BASE_INVARIANTS = {
+    'KMSAliasCatalog': {'TypeOK', 'AcknowledgedSuccess', 'MutationAuthority', 'ConcreteTarget', 'FailureFrame', 'PeerRegionFrame', 'MutationEffect', 'CreationIdentity', 'AdmissionBudgets', 'RevisionFresh', 'ListAuthorized', 'CursorBound', 'ListPageExact', 'ListMoreExact', 'ContinuationAfterLast', 'ReadFrame', 'NoPartialRead'},
     'SecretVersionListing': {'ContinuationPosition', 'FilterBeforePageLimit', 'NoDeniedEmission', 'ReadAfterAuthorization', 'ReadFramePreserved', 'StrictForwardKeyset', 'TerminalConverges', 'TokenScopeBound', 'TypeOK'},
     'NativeWireProjection': {'BadValueRefused', 'CompleteProjection', 'FailureNoPartial', 'OmissionExact', 'OrderExact', 'SkippedBadDoesNotFail', 'TypeOK', 'ValueKindsPreserved'},
     'RESTRouteMatching': {'CaptureFidelity', 'InvalidTemplateRejected', 'MatchOracle', 'RejectedShape', 'Specificity', 'TypeOK'},
@@ -50,6 +51,7 @@ BASE_INVARIANTS = {
 }
 # Established controls require an explicit gate-policy change before retirement.
 REQUIRED_MUTANTS = {
+    'KMSAliasCatalog': {'OmitAliasCreatePermission', 'OmitNewKeyCreatePermission', 'OmitOldKeyUpdatePermission', 'OmitNewKeyUpdatePermission', 'OmitDeleteTargetPermission', 'AliasAsTarget', 'CrossRegionMutation', 'ReplaceCreationOnUpdate', 'IgnoreGlobalCap', 'IgnorePerKeyCap', 'DirtyFailedCommit', 'IgnoreWriteAcknowledgement', 'OmitRevisionAdvance', 'IgnoreCursorRevision', 'IgnoreCursorAuthority', 'BypassMACIntegrity', 'IgnoreCursorFilter', 'IgnoreCursorLimit', 'InclusiveResume', 'PublishPartialReadFailure', 'FilterAfterLimit', 'OmitListPermission', 'MissingContinuation', 'StaleContinuationPosition'},
     'SecretVersionListing': {'AuthorityKeyBypass', 'AuthorizationBypass', 'DomainBypass', 'ExpiryBypass', 'FilterAfterLimit', 'FilterBindingBypass', 'GenerationBindingBypass', 'InclusiveResume', 'MissingNextToken', 'ReadWritesVersionState', 'RegionBindingBypass', 'SignatureBypass', 'StaleNextPosition'},
     'NativeWireProjection': {'AcceptBadValue', 'CollapseNullToZero', 'EncodeOmittedBad', 'IgnoreOmission', 'PublishErrorPrefix', 'ReverseFieldOrder'},
     'RESTRouteMatching': {'AllowEmptyGreedy', 'BadRejectedScore', 'FirstDuplicateCaptureWins', 'IgnoreLiteral', 'LoseSpecificity', 'TruncateGreedy'},
@@ -88,6 +90,7 @@ REQUIRED_MUTANTS = {
     'KMSAliasesViewEpoch': {'BypassRetiredListLife', 'DeleteWithoutExactConfirmation', 'IgnoreSameLifeListRevision', 'IgnoreSelectedTargetRevision', 'KeepDraftAfterAcknowledgedWrite', 'KeepFormAfterAcknowledgedWrite', 'LocaleClearsUnsavedDraft', 'ReplayWriteOnReadRetry', 'RetainRowsOnCurrentReadFailure', 'RetainTargetMetadataOnCancel', 'SubmitWithoutVerifiedTarget'},
 }
 REQUIRED_SOURCE_SCOPES = {
+    'KMSAliasCatalog': {'internal/aws/kms_aliases.go'},
     'SecretVersionListing': {'internal/aws/secrets_manager_versions_http_test.go', 'internal/aws/secret_http.go', 'internal/aws/secrets_manager_versions.go', 'internal/aws/secrets_manager_versions_test.go'},
     'NativeWireProjection': {'internal/aws/wire_json_projection.go'},
     'RESTRouteMatching': {'internal/aws/apirouting/path.go'},

@@ -3503,6 +3503,301 @@
           ]
         }
       ]
+    },
+    {
+      "id": "KMSAliasCatalog",
+      "model": "formal/KMSAliasCatalog.tla",
+      "config": "formal/KMSAliasCatalog.cfg",
+      "bounds": "Two regions, two fixed existing concrete keys per region, three alias names; four API-reachable catalog seeds, abstract globalcap2/perregionalkeycap1, page1..2, three request suffixes, catalog revision0..5. Pure captured aliasBoolean plus allfour two-key permissionmaps; same-key old/new decisions identical; write outcomes ok/ignored/commitfail, list ok/readfail.",
+      "properties": [
+        "TypeOK",
+        "AcknowledgedSuccess",
+        "MutationAuthority",
+        "ConcreteTarget",
+        "FailureFrame",
+        "PeerRegionFrame",
+        "MutationEffect",
+        "CreationIdentity",
+        "AdmissionBudgets",
+        "RevisionFresh",
+        "ListAuthorized",
+        "CursorBound",
+        "ListPageExact",
+        "ListMoreExact",
+        "ContinuationAfterLast",
+        "ReadFrame",
+        "NoPartialRead"
+      ],
+      "limits": "Independent bounded alias catalog CRUD/pagination abstraction, not cryptography/crypto orchestration or Go/SQLite/HTTP refinement. Fixed same-type/usage concrete keyparents; no DeleteKey/keyrecreation/aliases-as-target/managedaliases/grants/ABAC. MAC authority/integrity are abstract predicates; marker has NO expiry. Atomic write/cursor/read transitions assume sameDB Tx and pure immutable policy; no actual SQL scan/locking/RowsAffected/commit implementation proof. Four reachable seeds plus three requests are not unbounded quotas1000/50 or complete workflows. Failed request identity is intentionally canonicalized; only operation category/outcome/before-frame retained, and checked successful-input properties are success-guarded. Timestamps/birthlabels only model update identity preservation, not physicalclock/UUID entropy. Public JSON projection/wireparser/UI/hostauthentication independent.",
+      "source_scope": [
+        "internal/aws/kms_aliases.go"
+      ],
+      "mutants": [
+        {
+          "id": "OmitAliasCreatePermission",
+          "edits": [
+            {
+              "old": "Allowed(op,p,old,k) == CASE op=\"create\" -> p.alias /\\ KeyPermit(p,k)\n                        [] op=\"update\" -> p.alias /\\ KeyPermit(p,old) /\\ KeyPermit(p,k)\n                        [] OTHER -> p.alias /\\ KeyPermit(p,old)\n",
+              "new": "Allowed(op,p,old,k) == CASE op=\"create\" -> KeyPermit(p,k)\n                        [] op=\"update\" -> p.alias /\\ KeyPermit(p,old) /\\ KeyPermit(p,k)\n                        [] OTHER -> p.alias /\\ KeyPermit(p,old)\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MutationAuthority"
+        },
+        {
+          "id": "OmitNewKeyCreatePermission",
+          "edits": [
+            {
+              "old": "Allowed(op,p,old,k) == CASE op=\"create\" -> p.alias /\\ KeyPermit(p,k)\n                        [] op=\"update\" -> p.alias /\\ KeyPermit(p,old) /\\ KeyPermit(p,k)\n                        [] OTHER -> p.alias /\\ KeyPermit(p,old)\n",
+              "new": "Allowed(op,p,old,k) == CASE op=\"create\" -> p.alias\n                        [] op=\"update\" -> p.alias /\\ KeyPermit(p,old) /\\ KeyPermit(p,k)\n                        [] OTHER -> p.alias /\\ KeyPermit(p,old)\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MutationAuthority"
+        },
+        {
+          "id": "OmitOldKeyUpdatePermission",
+          "edits": [
+            {
+              "old": "Allowed(op,p,old,k) == CASE op=\"create\" -> p.alias /\\ KeyPermit(p,k)\n                        [] op=\"update\" -> p.alias /\\ KeyPermit(p,old) /\\ KeyPermit(p,k)\n                        [] OTHER -> p.alias /\\ KeyPermit(p,old)\n",
+              "new": "Allowed(op,p,old,k) == CASE op=\"create\" -> p.alias /\\ KeyPermit(p,k)\n                        [] op=\"update\" -> p.alias /\\ KeyPermit(p,k)\n                        [] OTHER -> p.alias /\\ KeyPermit(p,old)\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MutationAuthority"
+        },
+        {
+          "id": "OmitNewKeyUpdatePermission",
+          "edits": [
+            {
+              "old": "Allowed(op,p,old,k) == CASE op=\"create\" -> p.alias /\\ KeyPermit(p,k)\n                        [] op=\"update\" -> p.alias /\\ KeyPermit(p,old) /\\ KeyPermit(p,k)\n                        [] OTHER -> p.alias /\\ KeyPermit(p,old)\n",
+              "new": "Allowed(op,p,old,k) == CASE op=\"create\" -> p.alias /\\ KeyPermit(p,k)\n                        [] op=\"update\" -> p.alias /\\ KeyPermit(p,old)\n                        [] OTHER -> p.alias /\\ KeyPermit(p,old)\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MutationAuthority"
+        },
+        {
+          "id": "OmitDeleteTargetPermission",
+          "edits": [
+            {
+              "old": "Allowed(op,p,old,k) == CASE op=\"create\" -> p.alias /\\ KeyPermit(p,k)\n                        [] op=\"update\" -> p.alias /\\ KeyPermit(p,old) /\\ KeyPermit(p,k)\n                        [] OTHER -> p.alias /\\ KeyPermit(p,old)\n",
+              "new": "Allowed(op,p,old,k) == CASE op=\"create\" -> p.alias /\\ KeyPermit(p,k)\n                        [] op=\"update\" -> p.alias /\\ KeyPermit(p,old) /\\ KeyPermit(p,k)\n                        [] OTHER -> p.alias\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MutationAuthority"
+        },
+        {
+          "id": "AliasAsTarget",
+          "edits": [
+            {
+              "old": "Concrete(kind) == kind=\"concrete\"",
+              "new": "Concrete(kind) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ConcreteTarget"
+        },
+        {
+          "id": "CrossRegionMutation",
+          "edits": [
+            {
+              "old": "WriteRegion(r) == r",
+              "new": "WriteRegion(r) == IF r=1 THEN 2 ELSE 1",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PeerRegionFrame"
+        },
+        {
+          "id": "ReplaceCreationOnUpdate",
+          "edits": [
+            {
+              "old": "[] OTHER -> @",
+              "new": "[] OTHER -> step+3",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CreationIdentity"
+        },
+        {
+          "id": "IgnoreGlobalCap",
+          "edits": [
+            {
+              "old": "GlobalRoom(op,c) == Count(c)+(IF op=\"create\" THEN 1 ELSE 0)<=2",
+              "new": "GlobalRoom(op,c) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionBudgets"
+        },
+        {
+          "id": "IgnorePerKeyCap",
+          "edits": [
+            {
+              "old": "KeyRoom(c,r,k) == KeyCount(c,r,k)+1<=1",
+              "new": "KeyRoom(c,r,k) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionBudgets"
+        },
+        {
+          "id": "DirtyFailedCommit",
+          "edits": [
+            {
+              "old": "nextCatalog == IF committed THEN NextCatalog(op,r,n,k) ELSE catalog",
+              "new": "nextCatalog == IF committed \\/ (admitted /\\ outcome=\"commitfail\") THEN NextCatalog(op,r,n,k) ELSE catalog",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FailureFrame"
+        },
+        {
+          "id": "IgnoreWriteAcknowledgement",
+          "edits": [
+            {
+              "old": "Committed(admitted,outcome) == admitted /\\ outcome=\"ok\"",
+              "new": "Committed(admitted,outcome) == admitted",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AcknowledgedSuccess"
+        },
+        {
+          "id": "OmitRevisionAdvance",
+          "edits": [
+            {
+              "old": "IF committed THEN [revisions EXCEPT ![r]=@+1] ELSE revisions",
+              "new": "IF committed THEN revisions ELSE revisions",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RevisionFresh"
+        },
+        {
+          "id": "IgnoreCursorRevision",
+          "edits": [
+            {
+              "old": "BoundRevision(t,r) == t.revision=revisions[r]",
+              "new": "BoundRevision(t,r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CursorBound"
+        },
+        {
+          "id": "IgnoreCursorAuthority",
+          "edits": [
+            {
+              "old": "ValidMAC(t) == t.authority=1 /\\ t.integrity",
+              "new": "ValidMAC(t) == t.integrity",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CursorBound"
+        },
+        {
+          "id": "BypassMACIntegrity",
+          "edits": [
+            {
+              "old": "ValidMAC(t) == t.authority=1 /\\ t.integrity",
+              "new": "ValidMAC(t) == t.authority=1",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CursorBound"
+        },
+        {
+          "id": "IgnoreCursorFilter",
+          "edits": [
+            {
+              "old": "BoundFilter(t,f) == t.filter=f",
+              "new": "BoundFilter(t,f) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CursorBound"
+        },
+        {
+          "id": "IgnoreCursorLimit",
+          "edits": [
+            {
+              "old": "BoundLimit(t,l) == t.limit=l",
+              "new": "BoundLimit(t,l) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CursorBound"
+        },
+        {
+          "id": "InclusiveResume",
+          "edits": [
+            {
+              "old": "c[<<r,n>>]#0 /\\ n>after /\\ (f=0 \\/ c[<<r,n>>]=f))",
+              "new": "c[<<r,n>>]#0 /\\ n>=after /\\ (f=0 \\/ c[<<r,n>>]=f))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListPageExact"
+        },
+        {
+          "id": "PublishPartialReadFailure",
+          "edits": [
+            {
+              "old": "ReadPage(admitted,outcome,page) == IF admitted /\\ outcome=\"ok\" THEN page ELSE <<>>",
+              "new": "ReadPage(admitted,outcome,page) == IF admitted THEN page ELSE <<>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoPartialRead"
+        },
+        {
+          "id": "FilterAfterLimit",
+          "edits": [
+            {
+              "old": "IN SubSeq(names,1,IF Len(names)<l THEN Len(names) ELSE l)",
+              "new": "IN SelectSeq(SubSeq(CandidateNames(c,r,0,after),1,IF Len(CandidateNames(c,r,0,after))<l THEN Len(CandidateNames(c,r,0,after)) ELSE l),LAMBDA n : f=0 \\/ c[<<r,n>>]=f)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListPageExact"
+        },
+        {
+          "id": "OmitListPermission",
+          "edits": [
+            {
+              "old": "admitted == allowed /\\ Usable(t,r,f,l)",
+              "new": "admitted == Usable(t,r,f,l)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListAuthorized"
+        },
+        {
+          "id": "MissingContinuation",
+          "edits": [
+            {
+              "old": "more == success /\\ Len(CandidateNames(catalog,r,f,after))>l",
+              "new": "more == FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListMoreExact"
+        },
+        {
+          "id": "StaleContinuationPosition",
+          "edits": [
+            {
+              "old": "after |-> page[Len(page)]] ELSE marker",
+              "new": "after |-> after] ELSE marker",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ContinuationAfterLast"
+        }
+      ]
     }
   ]
 }
