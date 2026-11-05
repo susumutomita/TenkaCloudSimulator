@@ -102,7 +102,7 @@ SDK、操作画面、再起動、チーム分離の受入検証は `make e2e` �
 
 CIはstatementと未フィルターsource-line coverageを両方90%以上に強制します。`make before-commit`単独のcoverage判定はstatementのみで、source-line判定はCIのCobertura生成後ステージと上記の2コマンドで行います。SDK/browser、license、依存security、埋込asset、形式検査も行います。cross compileは他OSでの実行成功を意味しません。開発用Python/Node/Javaはruntime依存ではありません。UI・Scalarの再生成は権利表記とlockを保持する[各build手順](tools/console/README.md)・[Scalar手順](tools/scalar/README.md)・[Python runtimeの権利・再生成手順](tools/python/README.md)に従います。
 
-形式検査にはObjectStore、StackOwnership、S3Versions、NativeIAMOwnership、RESTDeploymentSnapshot、SSMParameterState、StartupTokenVisibility、BrowserSessions、SQSLifecycle、SQSStorageBudget、ProviderActor、GCPStorageState、AzureBlobState、ProjectAuthority、BlobRange、ProviderPath、KMSKeyState、KMSProtocolAdmission、SQSConsoleEpoch、CloudWatchLogsLifecycle、CloudWatchLogsViewEpoch、SecretsVersionLifecycle、SecretsRevealEpoch、SecretsDisclosureChannels、DynamoDBLifecycle、DynamoDBAdmission、SecretsMutationRefresh、AzurePropertiesEpochの28有限モデルと158の意図した欠陥検出をregistryへ登録しています。追加モデルの有限検査結果と、統合後の固定HEAD検査は区別して記録します。TLCと意図したmutantの反例で限定した安全条件を検査しますが、Go実装のrefinement、暗号、全AWS仕様・実AWSとの一致を証明するものではありません。変更はregistryとsource対応を更新し、固定HEADのCI結果で判断します。[形式検査](formal/README.md)、[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)。
+形式検査にはObjectStore、StackOwnership、S3Versions、NativeIAMOwnership、RESTDeploymentSnapshot、SSMParameterState、StartupTokenVisibility、BrowserSessions、SQSLifecycle、SQSStorageBudget、ProviderActor、GCPStorageState、AzureBlobState、ProjectAuthority、BlobRange、ProviderPath、KMSKeyState、KMSProtocolAdmission、SQSConsoleEpoch、CloudWatchLogsLifecycle、CloudWatchLogsViewEpoch、SecretsVersionLifecycle、SecretsRevealEpoch、SecretsDisclosureChannels、DynamoDBLifecycle、DynamoDBAdmission、SecretsMutationRefresh、AzurePropertiesEpoch、AzurePropertiesTargetの29有限モデルと164の意図した欠陥検出をregistryへ登録しています。追加モデルの有限検査結果と、統合後の固定HEAD検査は区別して記録します。TLCと意図したmutantの反例で限定した安全条件を検査しますが、Go実装のrefinement、暗号、全AWS仕様・実AWSとの一致を証明するものではありません。変更はregistryとsource対応を更新し、固定HEADのCI結果で判断します。[形式検査](formal/README.md)、[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)。
 
 ## ライセンス
 
@@ -118,8 +118,8 @@ preserves its token-file Login, native services and locale behavior. Secrets Man
 its actual capability is present; /secretsmanager and the /secrets alias select the
 same child. Seven native APIs and dummy plaintext values remain the documented
 limit; no KMS/rotation/recovery/CFN behavior is added. Earlier Secrets/native/main
-receipts remain separate from the current Azure live-Properties candidate; its
-combined28 models/158 controls require fresh exact-HEAD verification.
+receipts remain separate from later Azure Properties extensions. Their combined
+29 models/164 controls require verification at the exact revision being reviewed.
 
 An acknowledged Secrets create/update now closes and clears its form before the
 independent metadata read. Read failure permits read-only refresh, not a replayed
@@ -128,11 +128,17 @@ write. A new form intent obtains a fresh request token. The new bounded
 unacknowledged network ambiguity or prove JavaScript refinement.
 
 
-## Azure live Blob Properties candidate
+## Azure Blob and Container Properties
 
-The local candidate opens Blob Properties with an authenticated native HEAD,
-showing supported live headers and metadata without fetching blob content. It
-clears previous values on loading/failure and rejects late replies after Close
-or scope remount. See [the console contract](docs/azure-console.md). The current
-main-preserving normal merge requires fresh44-case integration and186 finite
-model/control executions; older focused results are not combined-head evidence.
+Main `ce622018` includes live Blob Properties from an authenticated native HEAD,
+with current-request guards and no blob-body fetch. Container
+Properties uses **More → Container properties** and displays only its
+real ETag, Last-Modified and metadata; Blob-only fields are not invented.
+See [the console contract](docs/azure-console.md) and
+[typed target model](docs/formal-azure-properties-target.md).
+
+At revision `4a586db`, Container Properties passed focused native/browser checks
+at desktop/mobile widths, full Go race and both 90% coverage floors, and the
+combined 29-model/164-control formal gate (193 executions). These receipts apply
+to that revision. Every later change still requires its exact-HEAD CI, including
+the 45-case E2E suite; focused results do not replace whole-suite verification.

@@ -49,3 +49,12 @@
 .azure-shared-controls .cloud-provider-choices button[aria-pressed=true]{background:#fff;color:#005a9e;border-color:#fff}
 .azure-shared-controls .cloud-service-panel :is(button,input){background:#fff;color:#242424}
 .azure-shared-controls .cloud-api-reference{color:#fff}
+
+/* Container actions use a local disclosure, with no unsupported Azure actions. */
+.azure-command-bar{position:relative}
+.azure-container-more>summary{list-style:none;cursor:pointer;color:var(--az-blue);padding:5px 10px;min-height:32px;box-sizing:border-box}
+.azure-container-more>summary::-webkit-details-marker{display:none}
+.azure-container-more>summary[aria-disabled=true]{cursor:default;color:#737373}
+.azure-container-more>summary:focus-visible{outline:2px solid var(--az-blue);outline-offset:2px}
+.azure-container-more>div{position:absolute;inset-inline-start:0;top:100%;z-index:4;max-width:min(280px,100%);background:#fff;border:1px solid var(--az-border);box-shadow:0 3px 9px #0002;padding:4px}
+.azure-container-more>div>button{display:block;width:100%;text-align:start;white-space:normal}

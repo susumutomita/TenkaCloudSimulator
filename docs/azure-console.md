@@ -2,10 +2,11 @@
 
 The simulator provides a bounded, independent Azure Blob Storage console over
 its local Azure HTTP API and SQLite state. It does not connect to Azure. The
-provider-specific console is present in main. The live Blob Properties change
-is a new local integration candidate rebased by normal merge onto main
-`cba0a29a0397ab01ca106bbc5374b85b50d736b2`. Earlier focused browser evidence
-does not certify this combined source, rebuilt assets or hosted CI.
+provider-specific console and live Blob Properties are present in main after
+[#417](https://github.com/susumutomita/TenkaCloudSimulator/pull/417), merge `ce622018`.
+Read-only Container Properties uses the same native API and lifetime guards,
+with separate target-kind and field-shape checks. Dated evidence below applies
+to its recorded inputs; later revisions require their own hosted checks.
 This is not authenticated Azure Portal parity or official SDK compatibility.
 
 ## Screen and operation sequence
@@ -125,15 +126,17 @@ anonymous-access changes, SAS generation, leases, tiers, snapshots, versions,
 soft delete, staged blocks or recovery is simulated by these controls. The
 resource menu does not present other storage services as working. Blob Properties
 shows only supported native HEAD response fields, not every Azure system
-property. Container Properties remains outside this console increment.
+property. Read-only Container Properties is described below; container metadata editing
+and unsupported system properties are not implemented.
 
 ## Redesign verification status
 
-This table separates source checks from runtime acceptance. The integration owner
-can replace pending entries with exact new-head receipts after running the gates;
-older API or browser evidence alone does not validate the redesigned screen.
+This table preserves historical base-console source/runtime evidence. It does
+not claim that those older inputs certify later changes. Merged `ce622018`
+subsequently passed its actual 44 E2E, 186 formal executions and 50-screen audit;
+Container Properties expands the required gates to 45 E2E and 193 formal executions.
 
-| Check | Historical base-console evidence; new live-HEAD union is pending |
+| Check | Historical base-console evidence |
 | --- | --- |
 | JSX for view/shell and CSS parsing | PASS at `8e199c4`: existing esbuild transform; zero warnings; no asset output or dependency installation |
 | Original API/error/native CRUD paths | Existing base evidence; live HEAD adds a new bounded read and cancel handling, requiring fresh combined-head execution |
@@ -173,8 +176,45 @@ environments and PC/mobile accessibility. It separately tests real Close, direct
 provider hash navigation while a response is held, and a deliberately synthetic
 existing-root-control principal transition while the modal is open. The latter
 is a state-lifetime fixture, not a claim that users can click through a native
-modal. Combined-head execution remains pending after this normal merge.
+modal. The merged Blob revision `ce622018` passed its combined
+[main CI](https://github.com/susumutomita/TenkaCloudSimulator/actions/runs/41991476850).
+Those results do not establish a later Container Properties revision.
 
 Primary API reference: [Get Blob Properties](https://learn.microsoft.com/en-us/rest/api/storageservices/get-blob-properties).
 Authenticated Azure Portal pixels, broader Azure RBAC/ARM and unsupported system
 properties remain unverified or unavailable; no actual cloud resource is used.
+
+## Container Properties
+
+The Containers list provides a read-only **More → Container properties** action
+for a selected row in the Containers list. The container name link still opens
+its blobs; Blob Properties keeps its existing fields and heading. The new pane
+uses the existing native `HEAD .../{container}?restype=container`, with the
+configured API version and unchanged local subject authorization. It displays
+only the returned ETag, Last-Modified and supported metadata, plus the selected
+container name. It does not enumerate blobs, fetch blob content or infer a
+container size from HTTP Content-Length.
+
+Loading, errors and Close clear old properties; the shared epoch/abort lifetime
+and explicit target kind keep container and blob data separate. Metadata remains
+text, not HTML or translation keys. Container HEAD does not supply BlobType or
+Content-Type, so those blob-only fields are not required or invented. Container
+metadata editing, GET compatibility expansion, SAS, leases, Azure RBAC, account
+management, public-access settings and legal holds are unsupported.
+
+`test/e2e/azure_container_properties.py` exercises actual local responses,
+empty and bounded metadata, explicit dummy delete/recreate after listing,
+denied/missing/error cases, Close/reopen, same-name blob versus container, locale,
+peer preservation, keyboard and desktop/mobile accessibility. Focused execution at revision `4a586db` passed at 1440px and 390px,
+alongside the unchanged Blob Properties helper. Its initial table-readiness fixture failure was retained and corrected
+by waiting for the real Containers table and enabled Refresh before selection.
+Both helpers are mandatory in the 45-case suite. Revision `4a586db` also passed
+the immutable 193-case formal gate and exact applicability checks. Whole-suite
+E2E and hosted checks must succeed for the revision being reviewed; the focused
+results do not substitute for those checks.
+The [typed-target model](formal-azure-properties-target.md) complements lifecycle
+checks; it does not prove HTTP parsing, authorization or JavaScript refinement.
+
+References: [Portal container properties](https://learn.microsoft.com/en-us/azure/storage/blobs/blob-containers-portal)
+and [Get Container Properties](https://learn.microsoft.com/en-us/rest/api/storageservices/get-container-properties).
+Only public documentation has been inspected, not an authenticated Azure Portal.

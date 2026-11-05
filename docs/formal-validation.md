@@ -15,8 +15,8 @@ machine-discovered semantic coverage. A newly added implementation file is not
 covered merely because an existing model passes: its exact path must have an
 appropriate reviewed scope mapping and property argument.
 
-The current source candidate registry has 28 baselines/158 required named mutation controls
-(186 required executions), preserving maincba 27/153 and adding AzurePropertiesEpoch 1/5.
+The current registry has 29 baselines/164 required named mutation controls
+(193 required executions), preserving maince622 28/158 and adding AzurePropertiesTarget 1/6.
 Registration and Python guards are not a successful immutable TLC execution.
 
 | Model | Finite contract | Important exclusions |
@@ -143,9 +143,9 @@ configured. No security-sensitive repository settings were changed.
 
 ## Secrets Manager registration and executed evidence
 
-The registry includes main's ten models/thirty-six controls plus
-SecretsVersionLifecycle (six), SecretsRevealEpoch (three), and
-SecretsDisclosureChannels (five): thirteen baselines and fifty controls.
+Historical Secrets registration at `c97bdde` retained ten prior models/thirty-six
+controls and added SecretsVersionLifecycle (six), SecretsRevealEpoch (three),
+and SecretsDisclosureChannels (five): thirteen baselines and fifty controls.
 All required models/invariants and each reviewed control identity are protected;
 unit fixtures reject every individual control removal.
 
@@ -168,24 +168,40 @@ Hosted exact-HEAD CI and publication review remain separate from local results.
 
 ## Current Secrets ACK / metadata-read union
 
-All26 main models/149 literal controls remain byte-semantically unchanged.
+Historical ACK integration retained26 prior models/149 literal controls.
 SecretsMutationRefresh adds five properties/four named controls:27/153,180
 required finite executions. It covers only live-ACK form exit/draft clearing/read-only
 retry/fresh form intent. It excludes ambiguous unacknowledged writes, React/Go/SQL
 refinement and auth. Earlier eac3/f5d134 success is a historical input, not current
-union verification. [Mapping](formal-secrets-mutation-refresh.md).
+later-revision verification. [Mapping](formal-secrets-mutation-refresh.md).
 
 
 ## Azure properties lifecycle candidate
 
-The current source candidate preserves all 27 main models and 153 named controls,
-and adds the existing AzurePropertiesEpoch model (nine invariants, five controls):
-28 baselines + 158 controls = 186 required executions. Its exact original finite
-bounds, configuration and mutation edits are retained. This source registration
-is not a current-HEAD execution result. Historical standalone six-case and earlier
-whole-candidate results do not establish the new merged candidate.
+Historical registration at `8e656eb` preserved 27 prior models/153 controls
+and added AzurePropertiesEpoch (nine invariants/five controls), producing
+28 baselines + 158 controls = 186 executions. The merged `ce622018` subsequently
+passed the full 186-case gate and its main CI. Later Container Properties adds
+AzurePropertiesTarget without changing those TLA/CFG files, bounds, properties
+or controls. Use the current inventory above and exact-revision CI; older
+receipts do not certify later source changes.
 
 The model abstracts component lifecycle/request epochs, successful HEAD publication,
 close/open clearing and locale-stable state; it does not prove JavaScript, native
 HTTP parsing, Go/SQLite authorization, SDK compatibility or full Azure parity.
 New immutable formal/application checks and hosted gates remain required.
+
+
+## Azure Properties typed targets
+
+The Container Properties extension preserves every maince622 model/config/control
+and adds `AzurePropertiesTarget`: complete kind/parent/name target identity,
+read-only HEAD route carriers and exact container/blob displayed field sets.
+All seven invariants and six literal controls are mandatory. A pinned scoped run
+passed the baseline (85 generated / 20 distinct states) and all six expected
+semantic counterexamples. Registration plus this scoped result is not a full
+193-execution or implementation/refinement proof.
+
+[Source correspondence and limits](formal-azure-properties-target.md) explain
+ghost capture provenance, the separately checked lifecycle/epoch assumptions and
+concrete native/browser obligations.

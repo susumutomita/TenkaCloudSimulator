@@ -81,18 +81,24 @@ export default function AzureBlobView({request,account='tenkacloudlocal'}) {
   const open=kind=>{setError('');setProperties(null);setModal(kind);setName('');setConfirm('');setFiles([]);setOverwrite('');};
   // HEAD is authenticated by the existing request helper and bounded by perform.
   // Do not fall back to the stale list row or fetch object content on failure.
-  const showProperties=row=>{
-    if(lifecycle.current.busy||!row||!container)return;
-    setSelection([row]);open('properties');
+  const showProperties=(row,kind='blob')=>{
+    if(lifecycle.current.busy||!row||(kind!=='blob'&&kind!=='container')||(kind==='blob'?!container:!!container))return;
+    setSelection([row]);open(kind==='container'?'container-properties':'properties');
     return perform(async(native,signal,current)=>{
-      const response=await native(blobPath(container,row.name),{method:'HEAD'});
+      const target=kind==='container'?containerPath(row.name)+'?restype=container':blobPath(container,row.name);
+      const response=await native(target,{method:'HEAD'});
       const headers=response.headers;
       const required=(key,limit)=>{const text=headers.get(key);if(!text||text.length>limit)throw Error('InvalidProperties');return text;};
-      const size=required('content-length',16);
-      if(!/^(0|[1-9][0-9]*)$/.test(size)||Number(size)>MAX_BLOB)throw Error('InvalidProperties');
       const metadata=[...headers].filter(([key])=>key.startsWith('x-ms-meta-')).map(([key,value])=>[key.slice(10),value]);
       if(metadata.length>32||new TextEncoder().encode(JSON.stringify(Object.fromEntries(metadata))).length>8192)throw Error('LocalDisplayLimit');
-      const detail={name:row.name,size,type:required('x-ms-blob-type',32),contentType:required('content-type',256),etag:required('etag',128),modified:required('last-modified',128),metadata};
+      const detail={kind,name:row.name,etag:required('etag',128),modified:required('last-modified',128),metadata};
+      // Container HEAD has no blob type, content type or size contract. Never
+      // manufacture these fields from a transport Content-Length or list row.
+      if(kind==='blob'){
+        const size=required('content-length',16);
+        if(!/^(0|[1-9][0-9]*)$/.test(size)||Number(size)>MAX_BLOB)throw Error('InvalidProperties');
+        Object.assign(detail,{size,type:required('x-ms-blob-type',32),contentType:required('content-type',256)});
+      }
       if(current())setProperties(detail);
     });
   };
@@ -134,12 +140,13 @@ export default function AzureBlobView({request,account='tenkacloudlocal'}) {
     case "Blob deleted.":return t("Blob deleted.","BLOB を削除しました。");
     default:return text;
   }};
+  const propertyPane=modal==='properties'||modal==='container-properties';
   const closePane=()=>{
-    if(modal==='properties'){
+    if(propertyPane){
       const life=lifecycle.current;++life.epoch;life.controller?.abort();life.controller=null;life.busy=false;setBusy(false);setProperties(null);setError('');setModal('');
     }else if(!busy){setProperties(null);setModal('');}
   };
-  const title=modal==='create'?t('New container','新しいコンテナー'):modal==='upload'?t('Upload blob','BLOB のアップロード'):modal==='properties'?t('Blob properties','BLOB のプロパティ'):modal==='delete-container'?t('Delete container','コンテナーの削除'):t('Delete blob','BLOB の削除');
+  const title=modal==='create'?t('New container','新しいコンテナー'):modal==='upload'?t('Upload blob','BLOB のアップロード'):modal==='container-properties'?t('Container properties','コンテナーのプロパティ'):modal==='properties'?t('Blob properties','BLOB のプロパティ'):modal==='delete-container'?t('Delete container','コンテナーの削除'):t('Delete blob','BLOB の削除');
   return <section className="azure-blob-view" aria-label="Azure Blob Storage">
     <nav className="azure-breadcrumbs" aria-label={t('Storage navigation','ストレージのナビゲーション')}><a href="#account" onClick={e=>{e.preventDefault();if(!busy)load('');}}>{account}</a><span aria-hidden="true">›</span><a href="#containers" onClick={e=>{e.preventDefault();if(!busy)load('');}}>{t('Containers','コンテナー')}</a>{container&&<><span aria-hidden="true">›</span><span>{container}</span></>}</nav>
     <header className="azure-resource-heading"><div className="azure-resource-symbol" aria-hidden="true">▤</div><div><h1>{container||account}{!container&&<span className="azure-resource-section"> | {t('Containers','コンテナー')}</span>}</h1><p>{container?t('Container','コンテナー'):t('Storage account','ストレージ アカウント')}</p></div></header>
@@ -157,6 +164,10 @@ export default function AzureBlobView({request,account='tenkacloudlocal'}) {
           <button type="button" disabled={busy||!validAccount} onClick={()=>open(container?'upload':'create')}>{container?t('Upload','アップロード'):t('+ Container','+ コンテナー')}</button>
           <button type="button" disabled={busy||!validAccount} onClick={()=>load()}>↻ {t('Refresh','最新の情報に更新')}</button>
           {container&&<><button type="button" disabled={busy||!selected} onClick={download}>↓ {t('Download','ダウンロード')}</button><button type="button" disabled={busy||!selected} onClick={()=>showProperties(selected)}>{t('Properties','プロパティ')}</button></>}
+          {!container&&<details className="azure-container-more" onKeyDown={event=>{if(event.key==='Escape'){event.preventDefault();event.currentTarget.open=false;event.currentTarget.querySelector('summary').focus();}}}>
+            <summary aria-disabled={busy||!selected} tabIndex={busy||!selected?-1:0} onClick={event=>{if(busy||!selected)event.preventDefault();}}>{t('More','その他')} <span aria-hidden="true">⋯</span></summary>
+            <div><button type="button" disabled={busy||!selected} onClick={event=>{const menu=event.currentTarget.closest('details');menu.open=false;menu.querySelector('summary').focus();showProperties(selected,'container');}}>{t('Container properties','コンテナーのプロパティ')}</button></div>
+          </details>}
           <button type="button" disabled={busy||!selected} onClick={()=>open(container?'delete-blob':'delete-container')}>{t('Delete','削除')}</button>
         </div>
         <label className="azure-page-filter"><span className="azure-visually-hidden">{t('Filter this page by name','このページを名前で絞り込み')}</span><input type="search" placeholder={t('Filter this page by name','このページを名前で絞り込み')} value={filter} onChange={e=>setFilter(e.target.value)}/></label>
@@ -171,11 +182,11 @@ export default function AzureBlobView({request,account='tenkacloudlocal'}) {
       </div>
     </div>
     <dialog ref={pane} className="azure-action-pane" aria-labelledby="azure-pane-title" onCancel={e=>{e.preventDefault();closePane();}}>
-      <header><h2 id="azure-pane-title">{title}</h2><div className="azure-pane-header-controls"><label className="azure-pane-language">Language / 言語<select value={locale} onChange={e=>setLocale(e.target.value)}><option value="en">English</option><option value="ja">日本語</option></select></label><button type="button" disabled={busy&&modal!=='properties'} aria-label={t('Close storage action','ストレージ操作を閉じる')} onClick={closePane}>×</button></div></header>
-      {modal==='properties'?<><div className="azure-pane-body" aria-busy={busy}>
-        {busy&&<p role="status">{t('Loading blob properties…','BLOB のプロパティを読み込み中…')}</p>}
+      <header><h2 id="azure-pane-title">{title}</h2><div className="azure-pane-header-controls"><label className="azure-pane-language">Language / 言語<select value={locale} onChange={e=>setLocale(e.target.value)}><option value="en">English</option><option value="ja">日本語</option></select></label><button type="button" disabled={busy&&!propertyPane} aria-label={t('Close storage action','ストレージ操作を閉じる')} onClick={closePane}>×</button></div></header>
+      {propertyPane?<><div className="azure-pane-body" aria-busy={busy}>
+        {busy&&<p role="status">{modal==='container-properties'?t('Loading container properties…','コンテナーのプロパティを読み込み中…'):t('Loading blob properties…','BLOB のプロパティを読み込み中…')}</p>}
         {error&&<p className="azure-message azure-error" role="alert">{presentation(error)}</p>}
-        {properties&&<><dl><dt>{t('Name','名前')}</dt><dd>{properties.name}</dd><dt>{t('Last modified','最終更新日時')}</dt><dd>{properties.modified}</dd><dt>ETag</dt><dd>{properties.etag}</dd><dt>{t('Blob type','BLOB の種類')}</dt><dd>{properties.type}</dd><dt>{t('Size (bytes)','サイズ (バイト)')}</dt><dd>{properties.size}</dd><dt>{t('Content type','コンテンツの種類')}</dt><dd>{properties.contentType}</dd></dl>
+        {properties&&properties.kind===(modal==='container-properties'?'container':'blob')&&<><dl><dt>{t('Name','名前')}</dt><dd>{properties.name}</dd><dt>{t('Last modified','最終更新日時')}</dt><dd>{properties.modified}</dd><dt>ETag</dt><dd>{properties.etag}</dd>{properties.kind==='blob'&&<><dt>{t('Blob type','BLOB の種類')}</dt><dd>{properties.type}</dd><dt>{t('Size (bytes)','サイズ (バイト)')}</dt><dd>{properties.size}</dd><dt>{t('Content type','コンテンツの種類')}</dt><dd>{properties.contentType}</dd></>}</dl>
         <h3>{t('Metadata','メタデータ')}</h3>{properties.metadata.length?<dl>{properties.metadata.map(([key,value])=><React.Fragment key={key}><dt>{key}</dt><dd>{value}</dd></React.Fragment>)}</dl>:<p>{t('No metadata.','メタデータはありません。')}</p>}
         <p>{t('Properties were fetched from the native HEAD response when this pane opened. Content is not previewed.','このペインを開いたときのネイティブ HEAD 応答を表示しています。内容のプレビューは行いません。')}</p></>}
       </div><footer><button type="button" onClick={closePane}>{t('Close','閉じる')}</button></footer></>:<form onSubmit={e=>{e.preventDefault();if(!busy){if(modal==='create')create();else if(modal==='upload')upload();else remove();}}}>

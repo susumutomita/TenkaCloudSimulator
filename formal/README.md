@@ -1,11 +1,16 @@
 # Finite state model
 
-Current source candidate registry: 28 models / 158 literal-protected controls
-(186 required executions). Maincba contributes 27 models/153 controls unchanged;
-AzurePropertiesEpoch adds one model/five controls. Registration is source evidence,
-not successful execution of this new immutable candidate. Dated receipts below
-refer to their recorded historical inputs, not this current integration. These
+Current registry: 29 models / 164 literal-protected controls
+(193 required executions). Maince622 contributes 28 models/158 controls unchanged;
+AzurePropertiesTarget adds one model/six controls. Registration is source evidence,
+not itself evidence of successful execution. Dated receipts below
+refer to their recorded inputs; later revisions require their own checks. These
 finite models do not prove Go/SQL/HTTP/UI refinement or complete cloud compatibility.
+
+Legacy integration sections below retain historical counts and status statements
+for traceability. Their word “current” refers to the recorded integration, not
+today's registry. The authoritative current inventory is the 29/164 registry
+above; proof claims always require evidence for the exact revision.
 
 `ObjectStore.tla` models two buckets and two keys, shared object ownership, create/put/delete transitions, and an abstract identity decision `allow /\ ~deny`. `ObjectStore.cfg` checks type correctness, no orphan objects, no unauthorized mutation, and explicit-deny precedence.
 
@@ -241,14 +246,30 @@ immutable applicability/TLC and whole-quality/hosted CI remain required.
 
 ## Azure properties lifecycle candidate
 
-The current source candidate preserves all 27 main models and 153 named controls,
-and adds the existing AzurePropertiesEpoch model (nine invariants, five controls):
-28 baselines + 158 controls = 186 required executions. Its exact original finite
-bounds, configuration and mutation edits are retained. This source registration
-is not a current-HEAD execution result. Historical standalone six-case and earlier
-whole-candidate results do not establish the new merged candidate.
+Historical registration at `8e656eb` preserved 27 prior models/153 controls
+and added AzurePropertiesEpoch (nine invariants/five controls), producing
+28 baselines + 158 controls = 186 executions. The merged `ce622018` subsequently
+passed the full 186-case gate and its main CI. Later Container Properties adds
+AzurePropertiesTarget without changing those TLA/CFG files, bounds, properties
+or controls. Use the current inventory above and exact-revision CI; older
+receipts do not certify later source changes.
 
 The model abstracts component lifecycle/request epochs, successful HEAD publication,
 close/open clearing and locale-stable state; it does not prove JavaScript, native
 HTTP parsing, Go/SQLite authorization, SDK compatibility or full Azure parity.
 New immutable formal/application checks and hosted gates remain required.
+
+
+## Azure Properties typed targets
+
+The Container Properties extension preserves every maince622 model/config/control
+and adds `AzurePropertiesTarget`: complete kind/parent/name target identity,
+read-only HEAD route carriers and exact container/blob displayed field sets.
+All seven invariants and six literal controls are mandatory. A pinned scoped run
+passed the baseline (85 generated / 20 distinct states) and all six expected
+semantic counterexamples. Registration plus this scoped result is not a full
+193-execution or implementation/refinement proof.
+
+[Source correspondence and limits](../docs/formal-azure-properties-target.md) explain
+ghost capture provenance, the separately checked lifecycle/epoch assumptions and
+concrete native/browser obligations.
