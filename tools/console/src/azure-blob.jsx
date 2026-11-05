@@ -41,6 +41,7 @@ export default function AzureBlobView({request,account='tenkacloudlocal'}) {
   const {locale,setLocale,t}=useLocale();
   const pane=useRef(null), opener=useRef(null), firstField=useRef(null);
   const [menuFilter,setMenuFilter]=useState('');
+  const [properties,setProperties]=useState(null);
   const [container,setContainer]=useState(''),[rows,setRows]=useState([]),[next,setNext]=useState(''),[selection,setSelection]=useState([]),[filter,setFilter]=useState('');
   const [busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[modal,setModal]=useState(''),[name,setName]=useState(''),[confirm,setConfirm]=useState(''),[files,setFiles]=useState([]),[overwrite,setOverwrite]=useState('');
   useEffect(()=>{const node=pane.current;if(!node)return;if(modal&&!node.open){opener.current=document.activeElement;node.showModal();firstField.current?.focus();}else if(!modal&&node.open){node.close();opener.current?.focus();}},[modal]);
@@ -77,7 +78,24 @@ export default function AzureBlobView({request,account='tenkacloudlocal'}) {
     return()=>{life.active=false;++life.epoch;life.busy=false;life.controller?.abort();for(const u of downloadURLs.current)URL.revokeObjectURL(u);downloadURLs.current.clear();};
   },[]); // Root MUST remount with a key for every subject/environment/account change.
   const selected=selection[0];
-  const open=kind=>{setError('');setModal(kind);setName('');setConfirm('');setFiles([]);setOverwrite('');};
+  const open=kind=>{setError('');setProperties(null);setModal(kind);setName('');setConfirm('');setFiles([]);setOverwrite('');};
+  // HEAD is authenticated by the existing request helper and bounded by perform.
+  // Do not fall back to the stale list row or fetch object content on failure.
+  const showProperties=row=>{
+    if(lifecycle.current.busy||!row||!container)return;
+    setSelection([row]);open('properties');
+    return perform(async(native,signal,current)=>{
+      const response=await native(blobPath(container,row.name),{method:'HEAD'});
+      const headers=response.headers;
+      const required=(key,limit)=>{const text=headers.get(key);if(!text||text.length>limit)throw Error('InvalidProperties');return text;};
+      const size=required('content-length',16);
+      if(!/^(0|[1-9][0-9]*)$/.test(size)||Number(size)>MAX_BLOB)throw Error('InvalidProperties');
+      const metadata=[...headers].filter(([key])=>key.startsWith('x-ms-meta-')).map(([key,value])=>[key.slice(10),value]);
+      if(metadata.length>32||new TextEncoder().encode(JSON.stringify(Object.fromEntries(metadata))).length>8192)throw Error('LocalDisplayLimit');
+      const detail={name:row.name,size,type:required('x-ms-blob-type',32),contentType:required('content-type',256),etag:required('etag',128),modified:required('last-modified',128),metadata};
+      if(current())setProperties(detail);
+    });
+  };
   const create=()=>perform(async(native,signal,current)=>{
     if(!/^(?!.*--)[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$/.test(name))throw Error('InvalidContainerName');
     await native(containerPath(name)+'?restype=container',{method:'PUT'});await fetchPage(native,signal,current,'');if(current()){setModal('');setNotice('Container created.');}
@@ -116,7 +134,11 @@ export default function AzureBlobView({request,account='tenkacloudlocal'}) {
     case "Blob deleted.":return t("Blob deleted.","BLOB を削除しました。");
     default:return text;
   }};
-  const closePane=()=>{if(!busy)setModal('');};
+  const closePane=()=>{
+    if(modal==='properties'){
+      const life=lifecycle.current;++life.epoch;life.controller?.abort();life.controller=null;life.busy=false;setBusy(false);setProperties(null);setError('');setModal('');
+    }else if(!busy){setProperties(null);setModal('');}
+  };
   const title=modal==='create'?t('New container','新しいコンテナー'):modal==='upload'?t('Upload blob','BLOB のアップロード'):modal==='properties'?t('Blob properties','BLOB のプロパティ'):modal==='delete-container'?t('Delete container','コンテナーの削除'):t('Delete blob','BLOB の削除');
   return <section className="azure-blob-view" aria-label="Azure Blob Storage">
     <nav className="azure-breadcrumbs" aria-label={t('Storage navigation','ストレージのナビゲーション')}><a href="#account" onClick={e=>{e.preventDefault();if(!busy)load('');}}>{account}</a><span aria-hidden="true">›</span><a href="#containers" onClick={e=>{e.preventDefault();if(!busy)load('');}}>{t('Containers','コンテナー')}</a>{container&&<><span aria-hidden="true">›</span><span>{container}</span></>}</nav>
@@ -134,14 +156,14 @@ export default function AzureBlobView({request,account='tenkacloudlocal'}) {
         <div className="azure-command-bar" aria-label={t('Storage actions','ストレージ操作')}>
           <button type="button" disabled={busy||!validAccount} onClick={()=>open(container?'upload':'create')}>{container?t('Upload','アップロード'):t('+ Container','+ コンテナー')}</button>
           <button type="button" disabled={busy||!validAccount} onClick={()=>load()}>↻ {t('Refresh','最新の情報に更新')}</button>
-          {container&&<><button type="button" disabled={busy||!selected} onClick={download}>↓ {t('Download','ダウンロード')}</button><button type="button" disabled={busy||!selected} onClick={()=>open('properties')}>{t('Properties','プロパティ')}</button></>}
+          {container&&<><button type="button" disabled={busy||!selected} onClick={download}>↓ {t('Download','ダウンロード')}</button><button type="button" disabled={busy||!selected} onClick={()=>showProperties(selected)}>{t('Properties','プロパティ')}</button></>}
           <button type="button" disabled={busy||!selected} onClick={()=>open(container?'delete-blob':'delete-container')}>{t('Delete','削除')}</button>
         </div>
         <label className="azure-page-filter"><span className="azure-visually-hidden">{t('Filter this page by name','このページを名前で絞り込み')}</span><input type="search" placeholder={t('Filter this page by name','このページを名前で絞り込み')} value={filter} onChange={e=>setFilter(e.target.value)}/></label>
         <p className="azure-result-count" role="status">{busy?t('Loading storage resources','ストレージ リソースを読み込み中'):t(`${rows.length} on this page`, `このページに ${rows.length} 件`)}</p>
         <div className="azure-table-scroll"><table aria-label={container?t('Blobs','BLOB'):t('Containers','コンテナー')} aria-busy={busy}>
           <thead><tr><th scope="col"><span className="azure-visually-hidden">{t('Select','選択')}</span></th><th scope="col">{t('Name','名前')}</th><th scope="col">{t('Last modified','最終更新日時')}</th>{container?<><th scope="col">{t('Blob type','BLOB の種類')}</th><th scope="col">{t('Size (bytes)','サイズ (バイト)')}</th></>:<th scope="col">{t('Anonymous access level','匿名アクセス レベル')}</th>}</tr></thead>
-          <tbody>{rows.filter(row=>row.name.toLowerCase().includes(filter.toLowerCase())).map(row=><tr key={row.name} className={selected?.name===row.name?'azure-selected':''}><td><input type="checkbox" aria-label={t('Select ','選択: ')+row.name} checked={selected?.name===row.name} disabled={busy} onChange={e=>setSelection(e.target.checked?[row]:[])}/></td><td>{container?<button className="azure-row-link" type="button" disabled={busy} onClick={()=>{setSelection([row]);open('properties');}}>{row.name}</button>:<a className="azure-row-link" href="#container" onClick={e=>{e.preventDefault();if(!busy)load(row.name);}}>{row.name}</a>}</td><td>{row.modified}</td>{container?<><td>{row.type}</td><td>{row.size}</td></>:<td>{t('Private (local subject required)','非公開 (ローカルの主体が必要)')}</td>}</tr>)}</tbody>
+          <tbody>{rows.filter(row=>row.name.toLowerCase().includes(filter.toLowerCase())).map(row=><tr key={row.name} className={selected?.name===row.name?'azure-selected':''}><td><input type="checkbox" aria-label={t('Select ','選択: ')+row.name} checked={selected?.name===row.name} disabled={busy} onChange={e=>setSelection(e.target.checked?[row]:[])}/></td><td>{container?<button className="azure-row-link" type="button" disabled={busy} onClick={()=>showProperties(row)}>{row.name}</button>:<a className="azure-row-link" href="#container" onClick={e=>{e.preventDefault();if(!busy)load(row.name);}}>{row.name}</a>}</td><td>{row.modified}</td>{container?<><td>{row.type}</td><td>{row.size}</td></>:<td>{t('Private (local subject required)','非公開 (ローカルの主体が必要)')}</td>}</tr>)}</tbody>
         </table></div>
         {!busy&&!rows.length&&<p className="azure-empty">{container?t('No blobs on this page. Upload a block blob to get started.','このページに BLOB はありません。ブロック BLOB をアップロードしてください。'):t('No containers on this page. Create a private container to get started.','このページにコンテナーはありません。非公開のコンテナーを作成してください。')}</p>}
         <div className="azure-pagination"><button type="button" disabled={busy||!validAccount} onClick={()=>load()}>{t('First page','最初のページ')}</button><button type="button" disabled={busy||!next} onClick={()=>load(container,next)}>{t('Next page','次のページ')}</button></div>
@@ -149,8 +171,14 @@ export default function AzureBlobView({request,account='tenkacloudlocal'}) {
       </div>
     </div>
     <dialog ref={pane} className="azure-action-pane" aria-labelledby="azure-pane-title" onCancel={e=>{e.preventDefault();closePane();}}>
-      <header><h2 id="azure-pane-title">{title}</h2><div className="azure-pane-header-controls"><label className="azure-pane-language">Language / 言語<select value={locale} onChange={e=>setLocale(e.target.value)}><option value="en">English</option><option value="ja">日本語</option></select></label><button type="button" disabled={busy} aria-label={t('Close storage action','ストレージ操作を閉じる')} onClick={closePane}>×</button></div></header>
-      {modal==='properties'?<><div className="azure-pane-body"><dl><dt>{t('Name','名前')}</dt><dd>{selected?.name}</dd><dt>{t('Last modified','最終更新日時')}</dt><dd>{selected?.modified}</dd><dt>ETag</dt><dd>{selected?.etag}</dd><dt>{t('Blob type','BLOB の種類')}</dt><dd>{selected?.type}</dd><dt>{t('Size (bytes)','サイズ (バイト)')}</dt><dd>{selected?.size}</dd></dl><p>{t('Properties are from the last list response. Refresh to see changes. Content is not previewed.','プロパティは最後の一覧応答の値です。変更を確認するには更新してください。内容のプレビューは行いません。')}</p></div><footer><button type="button" onClick={closePane}>{t('Close','閉じる')}</button></footer></>:<form onSubmit={e=>{e.preventDefault();if(!busy){if(modal==='create')create();else if(modal==='upload')upload();else remove();}}}>
+      <header><h2 id="azure-pane-title">{title}</h2><div className="azure-pane-header-controls"><label className="azure-pane-language">Language / 言語<select value={locale} onChange={e=>setLocale(e.target.value)}><option value="en">English</option><option value="ja">日本語</option></select></label><button type="button" disabled={busy&&modal!=='properties'} aria-label={t('Close storage action','ストレージ操作を閉じる')} onClick={closePane}>×</button></div></header>
+      {modal==='properties'?<><div className="azure-pane-body" aria-busy={busy}>
+        {busy&&<p role="status">{t('Loading blob properties…','BLOB のプロパティを読み込み中…')}</p>}
+        {error&&<p className="azure-message azure-error" role="alert">{presentation(error)}</p>}
+        {properties&&<><dl><dt>{t('Name','名前')}</dt><dd>{properties.name}</dd><dt>{t('Last modified','最終更新日時')}</dt><dd>{properties.modified}</dd><dt>ETag</dt><dd>{properties.etag}</dd><dt>{t('Blob type','BLOB の種類')}</dt><dd>{properties.type}</dd><dt>{t('Size (bytes)','サイズ (バイト)')}</dt><dd>{properties.size}</dd><dt>{t('Content type','コンテンツの種類')}</dt><dd>{properties.contentType}</dd></dl>
+        <h3>{t('Metadata','メタデータ')}</h3>{properties.metadata.length?<dl>{properties.metadata.map(([key,value])=><React.Fragment key={key}><dt>{key}</dt><dd>{value}</dd></React.Fragment>)}</dl>:<p>{t('No metadata.','メタデータはありません。')}</p>}
+        <p>{t('Properties were fetched from the native HEAD response when this pane opened. Content is not previewed.','このペインを開いたときのネイティブ HEAD 応答を表示しています。内容のプレビューは行いません。')}</p></>}
+      </div><footer><button type="button" onClick={closePane}>{t('Close','閉じる')}</button></footer></>:<form onSubmit={e=>{e.preventDefault();if(!busy){if(modal==='create')create();else if(modal==='upload')upload();else remove();}}}>
         <div className="azure-pane-body">{error&&<p className="azure-message azure-error" role="alert">{presentation(error)}</p>}
           {modal==='create'?<><label>{t('Name','名前')} <span aria-hidden="true">*</span><input ref={firstField} autoFocus required value={name} onChange={e=>setName(e.target.value)} disabled={busy}/></label><p>{t('3–63 lowercase letters, numbers or hyphens; no consecutive hyphens.','小文字、数字、ハイフンの 3～63 文字。連続したハイフンは使用できません。')}</p><label>{t('Anonymous access level','匿名アクセス レベル')}<input readOnly value={t('Private (no anonymous access)','非公開 (匿名アクセスなし)')}/></label><p className="azure-message">{t('Only local authenticated subjects can access data. Changing access policy is unsupported.','ローカルで認証された主体のみアクセスできます。アクセスポリシーの変更は未対応です。')}</p></>:modal==='upload'?<><label>{t('Files','ファイル')}<input ref={firstField} type="file" disabled={busy} onChange={e=>{const f=e.target.files?.[0];setFiles(f?[f]:[]);setName(f?.name||'');}}/></label><p>{t('One block blob, maximum 8 MiB.','ブロック BLOB 1 件、最大 8 MiB。')}</p><label>{t('Blob name','BLOB 名')}<input required value={name} onChange={e=>setName(e.target.value)} disabled={busy}/></label><p>{t('Use / for virtual paths. Standalone . and .. segments cannot be addressed by this browser.','仮想パスには / を使用します。単独の . と .. はこのブラウザーから指定できません。')}</p><label>{t('Replace existing blob','既存 BLOB の置換')}<input value={overwrite} onChange={e=>setOverwrite(e.target.value)} disabled={busy}/></label><p>{t('Create only by default. Type replace to replace an existing blob and its metadata. The target must already exist.','既定は新規作成のみです。既存 BLOB とメタデータを置き換えるには replace と入力します。対象が存在する必要があります。')}</p></>:<><p className="azure-message">{modal==='delete-container'?t('Permanently delete this container and ALL its blobs, including other pages. Recovery is unsupported.','このコンテナーと別ページを含むすべての BLOB を完全に削除します。復元は未対応です。'):t('Permanently delete this blob. Soft delete is unsupported.','この BLOB を完全に削除します。論理削除は未対応です。')}</p><label>{t('Type ','削除の確認: ')+(selected?.name||'')+t(' to confirm deletion',' と入力')}<input ref={firstField} autoFocus value={confirm} onChange={e=>setConfirm(e.target.value)} disabled={busy}/></label></>}
         </div><footer><button type="submit" className="azure-primary" disabled={busy||(modal==='create'?!validContainer:modal==='upload'?(!files[0]||files[0].size>MAX_BLOB||!name||(overwrite&&overwrite!=='replace')):confirm!==selected?.name)}>{busy?t('Working…','処理中…'):modal==='create'?t('Create','作成'):modal==='upload'?t('Upload','アップロード'):t('Delete','削除')}</button><button type="button" disabled={busy} onClick={closePane}>{t('Cancel','キャンセル')}</button></footer>
