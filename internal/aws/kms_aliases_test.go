@@ -212,7 +212,11 @@ func TestKMSAliasesRejectInvalidDuplicateCrossRegionAndRename(t *testing.T) {
 	}
 	before := kmsAliasFrame(t, keys)
 	for _, name := range []string{"", "alias/", "App", "alias/aws/s3", "alias/日本語", "alias/with space", "arn:aws:kms:us-east-1:000000000000:alias/Other", "alias/" + strings.Repeat("a", 251)} {
-		kmsWantCode(t, s.CreateAlias(ctx, name, key.KeyID, kmsAliasAllow), "ValidationException")
+		code := "InvalidAliasNameException"
+		if name == "" {
+			code = "ValidationException"
+		}
+		kmsWantCode(t, s.CreateAlias(ctx, name, key.KeyID, kmsAliasAllow), code)
 		kmsAliasUnchanged(t, keys, before)
 	}
 	kmsWantCode(t, s.CreateAlias(ctx, "alias/Original", key.KeyID, kmsAliasAllow), "AlreadyExistsException")
