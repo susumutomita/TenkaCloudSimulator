@@ -242,13 +242,13 @@ func (g *Gateway) serveIAM(w http.ResponseWriter, r *http.Request) {
 			}{roles, truncated, marker})
 		}
 	case "PutRolePolicy":
-		err = g.Roles.PutPolicy(r.Context(), role.RoleName, input.Get("PolicyName"), input.Get("PolicyDocument"))
+		err = g.Roles.PutPolicy(r.Context(), role.RoleName, input.Get("PolicyName"), input.Get("PolicyDocument"), role.RoleID)
 		if err == nil {
 			iamResponse(w, action, nil)
 		}
 	case "GetRolePolicy":
 		var document string
-		document, err = g.Roles.Policy(r.Context(), role.RoleName, input.Get("PolicyName"))
+		document, err = g.Roles.Policy(r.Context(), role.RoleName, input.Get("PolicyName"), role.RoleID)
 		if err == nil {
 			iamResponse(w, action, struct {
 				RoleName       string
@@ -257,13 +257,13 @@ func (g *Gateway) serveIAM(w http.ResponseWriter, r *http.Request) {
 			}{role.RoleName, input.Get("PolicyName"), iamEncoded(document)})
 		}
 	case "DeleteRolePolicy":
-		err = g.Roles.DeletePolicy(r.Context(), role.RoleName, input.Get("PolicyName"))
+		err = g.Roles.DeletePolicy(r.Context(), role.RoleName, input.Get("PolicyName"), role.RoleID)
 		if err == nil {
 			iamResponse(w, action, nil)
 		}
 	case "ListRolePolicies":
 		var names []string
-		names, err = g.Roles.PolicyNames(r.Context(), role.RoleName)
+		names, err = g.Roles.PolicyNames(r.Context(), role.RoleName, role.RoleID)
 		if err == nil {
 			filtered := []string{}
 			for _, name := range names {
@@ -284,12 +284,12 @@ func (g *Gateway) serveIAM(w http.ResponseWriter, r *http.Request) {
 			}{filtered, truncated, marker})
 		}
 	case "UpdateAssumeRolePolicy":
-		err = g.Roles.UpdateTrust(r.Context(), role.RoleName, input.Get("PolicyDocument"))
+		err = g.Roles.UpdateTrust(r.Context(), role.RoleName, input.Get("PolicyDocument"), role.RoleID)
 		if err == nil {
 			iamResponse(w, action, nil)
 		}
 	case "DeleteRole":
-		err = g.Roles.Delete(r.Context(), role.RoleName)
+		err = g.Roles.Delete(r.Context(), role.RoleName, role.RoleID)
 		if err == nil {
 			iamResponse(w, action, nil)
 		}

@@ -202,12 +202,20 @@ func (s *IAMRoleStore) List(ctx context.Context, after string, limit int) ([]IAM
 	}
 	return roles, rows.Err()
 }
-func (s *IAMRoleStore) PolicyNames(ctx context.Context, name string) ([]string, error) {
-	role, err := s.Get(ctx, name)
+func (s *IAMRoleStore) PolicyNames(ctx context.Context, name string, expectedRoleID ...string) ([]string, error) {
+	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, err
 	}
-	rows, err := s.db.QueryContext(ctx, "SELECT name FROM aws_iam_role_policies WHERE role_name=? ORDER BY name", role.RoleName)
+	defer tx.Rollback()
+	role, err := iamReadRole(ctx, tx, name, false)
+	if err != nil {
+		return nil, err
+	}
+	if err = iamManagedExpectedRole(role, expectedRoleID); err != nil {
+		return nil, err
+	}
+	rows, err := tx.QueryContext(ctx, "SELECT name FROM aws_iam_role_policies WHERE role_name=? ORDER BY name", role.RoleName)
 	if err != nil {
 		return nil, err
 	}
@@ -220,7 +228,16 @@ func (s *IAMRoleStore) PolicyNames(ctx context.Context, name string) ([]string, 
 		}
 		names = append(names, name)
 	}
-	return names, rows.Err()
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	if err = rows.Close(); err != nil {
+		return nil, err
+	}
+	if err = tx.Commit(); err != nil {
+		return nil, err
+	}
+	return names, nil
 }
 func (s *IAMRoleStore) Owns(ctx context.Context, name string) (bool, error) {
 	var count int
@@ -438,7 +455,7 @@ func iamSyncPolicy(ctx context.Context, tx *sql.Tx, name string) error {
 	}
 	return nil
 }
-func (s *IAMRoleStore) PutPolicy(ctx context.Context, name, policyName, document string) error {
+func (s *IAMRoleStore) PutPolicy(ctx context.Context, name, policyName, document string, expectedRoleID ...string) error {
 	if !iamInlineName.MatchString(policyName) || len(document) > 32<<10 {
 		return ssmFailure{"MalformedPolicyDocument", "Use a named inline policy of at most32KiB."}
 	}
@@ -457,6 +474,9 @@ func (s *IAMRoleStore) PutPolicy(ctx context.Context, name, policyName, document
 	if err != nil {
 		return err
 	}
+	if err = iamManagedExpectedRole(role, expectedRoleID); err != nil {
+		return err
+	}
 	err = iamExactlyOne(tx.ExecContext(ctx, "INSERT INTO aws_iam_role_policies(role_name,name,document) VALUES(?,?,?) ON CONFLICT(role_name,name) DO UPDATE SET document=excluded.document", role.RoleName, policyName, string(data)))
 	if err != nil {
 		return err
@@ -466,19 +486,33 @@ func (s *IAMRoleStore) PutPolicy(ctx context.Context, name, policyName, document
 	}
 	return tx.Commit()
 }
-func (s *IAMRoleStore) Policy(ctx context.Context, name, policyName string) (string, error) {
-	role, err := s.Get(ctx, name)
+func (s *IAMRoleStore) Policy(ctx context.Context, name, policyName string, expectedRoleID ...string) (string, error) {
+	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return "", err
 	}
-	var document string
-	err = s.db.QueryRowContext(ctx, "SELECT document FROM aws_iam_role_policies WHERE role_name=? AND name=?", role.RoleName, policyName).Scan(&document)
-	if err == sql.ErrNoRows {
-		err = ssmFailure{"NoSuchEntity", "Inline policy does not exist."}
+	defer tx.Rollback()
+	role, err := iamReadRole(ctx, tx, name, false)
+	if err != nil {
+		return "", err
 	}
-	return document, err
+	if err = iamManagedExpectedRole(role, expectedRoleID); err != nil {
+		return "", err
+	}
+	var document string
+	err = tx.QueryRowContext(ctx, "SELECT document FROM aws_iam_role_policies WHERE role_name=? AND name=?", role.RoleName, policyName).Scan(&document)
+	if err == sql.ErrNoRows {
+		return "", ssmFailure{"NoSuchEntity", "Inline policy does not exist."}
+	}
+	if err != nil {
+		return "", err
+	}
+	if err = tx.Commit(); err != nil {
+		return "", err
+	}
+	return document, nil
 }
-func (s *IAMRoleStore) DeletePolicy(ctx context.Context, name, policyName string) error {
+func (s *IAMRoleStore) DeletePolicy(ctx context.Context, name, policyName string, expectedRoleID ...string) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -486,6 +520,9 @@ func (s *IAMRoleStore) DeletePolicy(ctx context.Context, name, policyName string
 	defer tx.Rollback()
 	role, err := iamReadRole(ctx, tx, name, false)
 	if err != nil {
+		return err
+	}
+	if err = iamManagedExpectedRole(role, expectedRoleID); err != nil {
 		return err
 	}
 	var present int
@@ -511,24 +548,10 @@ func (s *IAMRoleStore) DeletePolicy(ctx context.Context, name, policyName string
 	}
 	return tx.Commit()
 }
-func (s *IAMRoleStore) UpdateTrust(ctx context.Context, name, trust string) error {
+func (s *IAMRoleStore) UpdateTrust(ctx context.Context, name, trust string, expectedRoleID ...string) error {
 	if _, err := iamTrust(trust); err != nil {
 		return err
 	}
-	result, err := s.db.ExecContext(ctx, "UPDATE aws_iam_roles SET trust=? WHERE name=? AND deleted=0", trust, name)
-	if err != nil {
-		return err
-	}
-	n, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if n == 0 {
-		return ssmFailure{"NoSuchEntity", "The role does not exist."}
-	}
-	return nil
-}
-func (s *IAMRoleStore) Delete(ctx context.Context, name string) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -536,6 +559,27 @@ func (s *IAMRoleStore) Delete(ctx context.Context, name string) error {
 	defer tx.Rollback()
 	role, err := iamReadRole(ctx, tx, name, false)
 	if err != nil {
+		return err
+	}
+	if err = iamManagedExpectedRole(role, expectedRoleID); err != nil {
+		return err
+	}
+	if err = iamExactlyOne(tx.ExecContext(ctx, "UPDATE aws_iam_roles SET trust=? WHERE name=? AND role_id=? AND deleted=0", trust, role.RoleName, role.RoleID)); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+func (s *IAMRoleStore) Delete(ctx context.Context, name string, expectedRoleID ...string) error {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	role, err := iamReadRole(ctx, tx, name, false)
+	if err != nil {
+		return err
+	}
+	if err = iamManagedExpectedRole(role, expectedRoleID); err != nil {
 		return err
 	}
 	var count int
