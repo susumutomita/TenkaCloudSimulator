@@ -116,7 +116,7 @@ def run():
                                 response.request.headers.get('x-amz-target') == list_target) as completed:
                             held.pop().continue_()
                         assert completed.value.status == 200, 'Discovered service failed its native list'
-                        expect(probe.get_by_role('heading',
+                        expect(probe.get_by_role('heading', level=1,
                                name=re.compile(r'^' + re.escape(heading) + r'(?:\s|$)'))).to_be_visible()
                         assert native_requests == [list_target], 'Deep link issued an unexpected native operation'
                     finally:
