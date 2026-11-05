@@ -3311,6 +3311,190 @@
           "expect_invariant": "AckBelongsToCurrentView"
         }
       ]
+    },
+    {
+      "id": "CFNConditionAdmission",
+      "model": "formal/CFNConditionAdmission.tla",
+      "config": "formal/CFNConditionAdmission.cfg",
+      "bounds": "13 defect scenarios \u00d7 2 equality results \u00d7 3 then arms \u00d7 3 else arms = 234 immutable inputs; 6 deterministic compilation phases, no request loops",
+      "properties": [
+        "TypeOK",
+        "ParameterAdmission",
+        "AllConditionsValidated",
+        "DisabledDeclarationsValidated",
+        "BothBranchesValidated",
+        "SelectedLinkValidated",
+        "NoResultOnInvalid",
+        "NoEarlyPublication",
+        "SelectedBranchExact",
+        "MapNoValuePruned",
+        "ListNoValuePruned",
+        "DisabledResourcesAbsent",
+        "ConditionalOutputsAbsent",
+        "PlanExact"
+      ],
+      "mutants": [
+        {
+          "id": "DefaultOverrideBypass",
+          "edits": [
+            {
+              "old": "{\"definition\", \"default\", \"supplied\", \"missing\", \"unknownParameter\"}",
+              "new": "{\"definition\", \"supplied\", \"missing\", \"unknownParameter\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ParameterAdmission"
+        },
+        {
+          "id": "InvalidSuppliedAccepted",
+          "edits": [
+            {
+              "old": "{\"definition\", \"default\", \"supplied\", \"missing\", \"unknownParameter\"}",
+              "new": "{\"definition\", \"default\", \"missing\", \"unknownParameter\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ParameterAdmission"
+        },
+        {
+          "id": "UnknownParameterAccepted",
+          "edits": [
+            {
+              "old": "{\"definition\", \"default\", \"supplied\", \"missing\", \"unknownParameter\"}",
+              "new": "{\"definition\", \"default\", \"supplied\", \"missing\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ParameterAdmission"
+        },
+        {
+          "id": "CycleAccepted",
+          "edits": [
+            {
+              "old": "ConditionsOK(i) == i.defect \\notin {\"cycle\", \"unknownCondition\", \"conditionSyntax\"}",
+              "new": "ConditionsOK(i) == i.defect \\notin {\"unknownCondition\", \"conditionSyntax\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AllConditionsValidated"
+        },
+        {
+          "id": "DisabledDeclarationBypass",
+          "edits": [
+            {
+              "old": "DeclarationsOK(i) == i.defect # \"disabledDeclaration\"",
+              "new": "DeclarationsOK(i) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DisabledDeclarationsValidated"
+        },
+        {
+          "id": "UnusedElseSyntaxBypass",
+          "edits": [
+            {
+              "old": "BranchesOK(i) == i.defect \\notin {\"thenSyntax\", \"elseSyntax\"}",
+              "new": "BranchesOK(i) == i.defect # \"thenSyntax\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BothBranchesValidated"
+        },
+        {
+          "id": "SelectedLinkBypass",
+          "edits": [
+            {
+              "old": "LinksOK(i) == i.defect # \"selectedLink\"",
+              "new": "LinksOK(i) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SelectedLinkValidated"
+        },
+        {
+          "id": "WrongSelectedArm",
+          "edits": [
+            {
+              "old": "Arm(i) == IF i.enabled THEN i.thenValue ELSE i.elseValue",
+              "new": "Arm(i) == IF i.enabled THEN i.elseValue ELSE i.thenValue",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SelectedBranchExact"
+        },
+        {
+          "id": "MapNoValueRetained",
+          "edits": [
+            {
+              "old": "mapValue |-> Keep(v), listValue |-> Keep(v)",
+              "new": "mapValue |-> <<v>>, listValue |-> Keep(v)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MapNoValuePruned"
+        },
+        {
+          "id": "ListNoValueRetained",
+          "edits": [
+            {
+              "old": "mapValue |-> Keep(v), listValue |-> Keep(v)",
+              "new": "mapValue |-> Keep(v), listValue |-> <<v>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListNoValuePruned"
+        },
+        {
+          "id": "DisabledResourceIncluded",
+          "edits": [
+            {
+              "old": "ResourceSet(i) == IF i.enabled THEN {\"BaseRole\", \"ScoreItem\"} ELSE {\"BaseRole\"}",
+              "new": "ResourceSet(i) == {\"BaseRole\", \"ScoreItem\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DisabledResourcesAbsent"
+        },
+        {
+          "id": "DisabledOutputIncluded",
+          "edits": [
+            {
+              "old": "OutputSet(i) == IF i.enabled THEN {\"Public\", \"Coordination\"} ELSE {\"Public\"}",
+              "new": "OutputSet(i) == {\"Public\", \"Coordination\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ConditionalOutputsAbsent"
+        },
+        {
+          "id": "FailedResultPublished",
+          "edits": [
+            {
+              "old": "CheckLink == /\\ phase=\"Link\"\n /\\ phase'=(IF LinksOK(input) THEN \"Publish\" ELSE \"Failed\")\n /\\ UNCHANGED <<input,selected,result>>",
+              "new": "CheckLink == /\\ phase=\"Link\"\n /\\ phase'=(IF LinksOK(input) THEN \"Publish\" ELSE \"Failed\")\n /\\ result'=(IF LinksOK(input) THEN result ELSE Plan(input,selected))\n /\\ UNCHANGED <<input,selected>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoResultOnInvalid"
+        },
+        {
+          "id": "EarlyResultPublished",
+          "edits": [
+            {
+              "old": "Select == /\\ phase=\"Select\" /\\ selected'=Arm(input) /\\ phase'=\"Link\"\n /\\ UNCHANGED <<input,result>>",
+              "new": "Select == /\\ phase=\"Select\" /\\ selected'=Arm(input) /\\ phase'=\"Link\"\n /\\ result'=Plan(input,Arm(input)) /\\ UNCHANGED input",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoEarlyPublication"
+        }
+      ],
+      "source_scope": [
+        "internal/aws/cloudformation_conditions.go",
+        "internal/aws/cloudformation.go",
+        "internal/aws/cloudformation_conditions_link.go"
+      ],
+      "limits": "Finite validation witnesses, not real Go constraint evaluation, rational arithmetic, regex, UTF8/byte limits, YAML/JSON parser or graph recursion refinement. Condition equality is an immutable Boolean input; alias/cycle/unknown graphs are abstract witnesses, not evaluated graph nodes. Chosen symbol-link validity is abstract and integration binding remains pending actual compiler freeze. Unused branch syntax is validated; resource linking is distinct. No SQL, transaction, runtime provisioning, policy grant, output privacy/NoEcho, grader execution, VM or host authority proof. selectedLink witness is an unconditional BaseRole link, independent of the optional map/list arm; NoValue can prune that optional arm while BaseRole linking still fails. Exact compiler4177 correspondence is a bounded plan-admission projection only: outer declaration validation actually precedes parameters, unlike the model phase order. Both-arm raw Ref/GetAtt/Sub validation, active-disabled dependency graph, resource schema allowlists/copies/ordering are separate native obligations, not modeled individually. Resource/output sets represent a pure StackRecord plan, not SQL/resource allocation, rollback, grant, NoEcho/private-output filtering or host grading. File scope covers only these named compile preparation contracts, not every behavior in cloudformation.go."
     }
   ]
 }
