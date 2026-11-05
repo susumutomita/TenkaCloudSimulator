@@ -3801,6 +3801,174 @@
           "expect_invariant": "ContinuationAfterLast"
         }
       ]
+    },
+    {
+      "id": "KMSBootstrapTransaction",
+      "model": "formal/KMSBootstrapTransaction.tla",
+      "config": "formal/KMSBootstrapTransaction.cfg",
+      "bounds": "Two regions, one request, five logical schema/cursor membership seeds, independent early wire validity and late target/marker validity; immutable three-resource permissions, read/write effect bit, one staged fault or success.",
+      "properties": [
+        "TypeOK",
+        "PreCommitFrame",
+        "RejectedDurableFrame",
+        "AdmissionRequired",
+        "OperationAuthorized",
+        "CommitAuthorized",
+        "PublishedAfterCommit",
+        "SuccessfulScope",
+        "PeerFrame",
+        "SuccessComplete"
+      ],
+      "source_scope": [
+        "internal/aws/kms_aliases.go",
+        "internal/aws/kms_http.go"
+      ],
+      "mutants": [
+        {
+          "id": "PersistSchemaAtBootstrap",
+          "expect_invariant": "PreCommitFrame",
+          "edits": [
+            {
+              "old": "!.working = Boot(s.working,s.region), !.phase = \"authorize\"",
+              "new": "!.working = Boot(s.working,s.region), !.durable.schema = TRUE, !.phase = \"authorize\"",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "PersistCursorAtBootstrap",
+          "expect_invariant": "PreCommitFrame",
+          "edits": [
+            {
+              "old": "!.working = Boot(s.working,s.region), !.phase = \"authorize\"",
+              "new": "!.working = Boot(s.working,s.region), !.durable = Boot(s.durable,s.region), !.phase = \"authorize\"",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "PersistDeniedBootstrap",
+          "expect_invariant": "PreCommitFrame",
+          "edits": [
+            {
+              "old": "ELSE Abort(\"denied\")",
+              "new": "ELSE [s EXCEPT !.phase = \"done\", !.status = \"denied\", !.durable = s.working]",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "BypassInvalidAdmission",
+          "expect_invariant": "AdmissionRequired",
+          "edits": [
+            {
+              "old": "IF s.valid /\\ s.policy THEN",
+              "new": "IF s.policy THEN",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "BypassMissingPolicy",
+          "expect_invariant": "AdmissionRequired",
+          "edits": [
+            {
+              "old": "IF s.valid /\\ s.policy THEN",
+              "new": "IF s.valid THEN",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "BypassActionPermission",
+          "expect_invariant": "OperationAuthorized",
+          "edits": [
+            {
+              "old": "ELSE IF Allowed THEN",
+              "new": "ELSE IF s.policy /\\ s.alias /\\ s.key THEN",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "BypassAliasPermission",
+          "expect_invariant": "OperationAuthorized",
+          "edits": [
+            {
+              "old": "ELSE IF Allowed THEN",
+              "new": "ELSE IF s.policy /\\ s.action /\\ s.key THEN",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "BypassKeyPermission",
+          "expect_invariant": "OperationAuthorized",
+          "edits": [
+            {
+              "old": "ELSE IF Allowed THEN",
+              "new": "ELSE IF s.policy /\\ s.action /\\ s.alias THEN",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "CommitAfterFailure",
+          "expect_invariant": "CommitAuthorized",
+          "edits": [
+            {
+              "old": "IF s.fault = \"commit\" THEN Abort(\"fault\")",
+              "new": "IF FALSE THEN Abort(\"fault\")",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "PublishBeforeCommit",
+          "expect_invariant": "PublishedAfterCommit",
+          "edits": [
+            {
+              "old": "!.working = Boot(s.working,s.region), !.phase = \"authorize\"",
+              "new": "!.working = Boot(s.working,s.region), !.published = TRUE, !.phase = \"authorize\"",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "CommitWrongRegion",
+          "expect_invariant": "SuccessfulScope",
+          "edits": [
+            {
+              "old": "!.durable = s.working, !.committed = TRUE",
+              "new": "!.durable = Operate(Boot(s.before,Other(s.region)),Other(s.region),s.write), !.committed = TRUE",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "DiscardPeerCursor",
+          "expect_invariant": "SuccessfulScope",
+          "edits": [
+            {
+              "old": "!.working = Boot(s.working,s.region), !.phase = \"authorize\"",
+              "new": "!.working = [Boot(s.working,s.region) EXCEPT !.rows = {s.region}], !.phase = \"authorize\"",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "OperationNoEffect",
+          "edits": [
+            {
+              "old": "Operate(d,r,w) == IF w THEN",
+              "new": "Operate(d,r,w) == IF FALSE THEN",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SuccessfulScope"
+        }
+      ],
+      "limits": "Intended HTTP transaction seam; base eb03 has confirmed constructor persistence bug; repaired c4d412f source inspected separately, not refinement-proven. Trusted host public NewKMSAliasStore explicitly initializes state and is EXCLUDED from denied HTTP no-write contract. Two regions, one request, optional global logical schema and per-region cursor-row membership; region data is one abstract operation effect bit, not alias CRUD/crypto correctness. Action/alias/key Boolean requirements model bounded operations requiring all three; ListAliases only-action projection is represented by other permissions TRUE, not assertion all operations require alias and key authorization. valid is early wire admission; lateValid is separate target/marker admission after tentative initialization and authorization; no byte/JSON/marker-MAC/SQLite/DDL/Go/HTTP-auth refinement. Captured immutable pure policy, single transaction; no adversarial policy mutation or authorization-before-target-lookup promise. Schema frame is logical table/row state, not WAL/page-byte identity or zero SQL syscall guarantee. Scoped SANY+baseline+13 controls passed at6278443; native Go validation belongs to independent author receipts, not model refinement. Native repair c4d412f source seam independently reviewed; early/late validation order is abstract, not native error-precedence refinement. Scoped627 proof is independent, not canonical current registry proof."
     }
   ]
 }
