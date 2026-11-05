@@ -4,11 +4,11 @@ import {PROVIDERS, SERVICES, serviceAvailable, servicesForProvider, serviceFromH
 const capabilities={services:{s3:{},ssm:{},iam:{},lambda:{},apigateway:{},cloudformation:{},kms:{},sqs:{},logs:{},secretsmanager:{},dynamodb:{}},cloudStorage:{gcp:{project:'dummy-project'},azure:{account:'dummyaccount'}}};
 test('each provider is the same catalog level and contains only real console routes',()=>{
   assert.deepEqual(PROVIDERS.map(p=>p.id),['aws','gcp','azure','sakura']);
-  assert.equal(servicesForProvider('aws',capabilities).length,10);
+  assert.equal(servicesForProvider('aws',capabilities).length,11);
   assert.deepEqual(servicesForProvider('gcp',capabilities).map(s=>s.id),['gcp-storage']);
   assert.deepEqual(servicesForProvider('azure',capabilities).map(s=>s.id),['azure-blob']);
   for (const id of ['sqs','logs','secretsmanager']) assert.equal(serviceAvailable(id,capabilities),true);
-  assert.equal(serviceAvailable('dynamodb',capabilities),false); // API-only: never advertise a nonexistent console.
+  assert.equal(serviceAvailable('dynamodb',capabilities),true); // Mounted native console; discovery grants no API authority.
   assert.equal(serviceAvailable('unknown',capabilities),false);
   assert.deepEqual(servicesForProvider('unknown',capabilities),[]);
 });
@@ -69,7 +69,7 @@ test('Secrets is an AWS-only capability-gated route with an exact legacy alias',
   assert.deepEqual(servicesForProvider('aws',enabled,'credentials').map(s=>s.id),['secretsmanager']);
   assert.deepEqual(servicesForProvider('gcp',enabled,'secret'),[]);
   assert.deepEqual(servicesForProvider('azure',enabled,'secret'),[]);
-  assert.equal(servicesForProvider('aws',enabled).length,10);
+  assert.equal(servicesForProvider('aws',enabled).length,11);
   assert.equal(new Set(servicesForProvider('aws',enabled).map(service=>service.id)).size,servicesForProvider('aws',enabled).length);
   assert.equal(providerForService('secretsmanager'),'aws');
   assert.equal(serviceFromHash('#/secrets'),'secretsmanager');
@@ -105,4 +105,20 @@ test('Sakura discovery requires explicit provider console capability and fixed n
   assert.equal(serviceAvailable('sakura-disks',{...enabled,providers:['aws']}),false);
   assert.equal(serviceAvailable('sakura-disks',capabilities),false);
   assert.equal(JSON.stringify(enabled),before);
+});
+
+test('DynamoDB is a capability-gated AWS console with English/Japanese table navigation',()=>{
+  const before=JSON.stringify(capabilities);
+  assert.equal(serviceAvailable('dynamodb',{services:{}}),false);
+  assert.equal(serviceAvailable('dynamodb',capabilities),true);
+  for(const query of ['DynamoDB','ddb','ダイナモDB','テーブル']) {
+    assert.deepEqual(servicesForProvider('aws',capabilities,query).map(service=>service.id),['dynamodb']);
+    assert.deepEqual(servicesForProvider('gcp',capabilities,query),[]);
+    assert.deepEqual(servicesForProvider('azure',capabilities,query),[]);
+  }
+  assert.equal(providerForService('dynamodb'),'aws');
+  assert.equal(serviceFromHash('#/dynamodb'),'dynamodb');
+  assert.equal(hashForService('dynamodb'),'/dynamodb');
+  assert.equal(serviceFromHash('#/dynamodb-fake'),null);
+  assert.equal(JSON.stringify(capabilities),before);
 });

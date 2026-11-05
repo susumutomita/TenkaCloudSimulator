@@ -35,7 +35,7 @@ class FormalGateTests(unittest.TestCase):
 
     def test_complete_registry_and_exact_mutations(self):
         registry = load_registry(self.root)
-        self.assertEqual({model['id'] for model in registry['models']}, {'SakuraDisksViewEpoch', 'SakuraDiskMetadata', 'SakuraDiskAdmission', 'SakuraStartupAdmission', 'SecretVersionListing', 'NativeWireProjection', 'RESTRouteMatching', 'RESTProxyEventBoundary', 'AzurePropertiesTarget', 'AzurePropertiesEpoch', 'AzureBlobState', 'BlobRange', 'BrowserSessions', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'DynamoDBAdmission', 'DynamoDBLifecycle', 'GCPStorageState', 'KMSKeyState', 'KMSProtocolAdmission', 'IAMManagedPolicies', 'NativeIAMOwnership', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'S3Versions', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'SecretsDisclosureChannels', 'SecretsMutationRefresh', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'StackOwnership', 'StartupTokenVisibility'})
+        self.assertEqual({model['id'] for model in registry['models']}, {'SSMParameterState', 'GCPStorageState', 'CloudWatchLogsLifecycle', 'ProjectAuthority', 'SecretsVersionLifecycle', 'SQSConsoleEpoch', 'NativeWireProjection', 'RESTDeploymentSnapshot', 'ObjectStore', 'NativeIAMOwnership', 'AzureBlobState', 'AzurePropertiesEpoch', 'DynamoDBLifecycle', 'StartupTokenVisibility', 'SQSLifecycle', 'AzurePropertiesTarget', 'RESTProxyEventBoundary', 'KMSKeyState', 'CloudWatchLogsViewEpoch', 'RESTRouteMatching', 'KMSProtocolAdmission', 'SecretsDisclosureChannels', 'SakuraStartupAdmission', 'ProviderPath', 'BrowserSessions', 'SecretVersionListing', 'SakuraDisksViewEpoch', 'StackOwnership', 'SQSStorageBudget', 'S3Versions', 'IAMManagedPolicies', 'SecretsRevealEpoch', 'DynamoDBAdmission', 'DynamoDBConsoleEpoch', 'ProviderActor', 'SecretsMutationRefresh', 'SakuraDiskMetadata', 'SakuraDiskAdmission', 'BlobRange'})
         for model in registry['models']:
             source = (self.root / model['model']).read_text()
             for mutant in model['mutants']:
@@ -503,7 +503,7 @@ class FormalGateTests(unittest.TestCase):
         original = path.read_text()
         registry = json.loads(original)
         self.assertEqual(set(REQUIRED_MUTANTS), BASE_MODELS)
-        self.assertEqual(sum(map(len, REQUIRED_MUTANTS.values())), 262)
+        self.assertEqual(sum(map(len, REQUIRED_MUTANTS.values())), 272)
         self.assertEqual({m['id']: {c['id'] for c in m['mutants']} for m in registry['models']}, REQUIRED_MUTANTS)
         for model in registry['models']:
             for mutant in model['mutants']:
@@ -520,7 +520,7 @@ class FormalGateTests(unittest.TestCase):
     def test_every_required_control_is_protected_against_single_removal(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
-        self.assertEqual(sum(len(v) for v in REQUIRED_MUTANTS.values()), 262)
+        self.assertEqual(sum(len(v) for v in REQUIRED_MUTANTS.values()), 272)
         for model_id, controls in REQUIRED_MUTANTS.items():
             for control in controls:
                 with self.subTest(model=model_id, control=control):
@@ -889,6 +889,78 @@ class FormalGateTests(unittest.TestCase):
                 with self.subTest(control=control['id'], code=code):
                     with self.assertRaisesRegex(GateError, 'required invariant counterexample'):
                         validate_result(code, text, expected)
+
+    def test_dynamodb_console_inventory_and_artifacts_are_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'DynamoDBConsoleEpoch')
+        model, config = self.root / entry['model'], self.root / entry['config']
+        for artifact in (model, config):
+            saved = artifact.read_bytes()
+            artifact.unlink()
+            with self.subTest(missing=artifact.name), self.assertRaises(GateError):
+                load_registry(self.root)
+            artifact.write_bytes(saved)
+        model_bytes, config_bytes = model.read_bytes(), config.read_bytes()
+        registry = json.loads(original)
+        registry['models'] = [m for m in registry['models'] if m['id'] != 'DynamoDBConsoleEpoch']
+        path.write_text(json.dumps(registry)); model.unlink(); config.unlink()
+        with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+            load_registry(self.root)
+        model.write_bytes(model_bytes); config.write_bytes(config_bytes); path.write_text(original)
+
+
+    def test_dynamodb_console_all_properties_are_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        properties = {'AckBelongsToCurrentView', 'TypeOK', 'AckClosesDraft', 'CancelNoOrphanLoading', 'ReadRetryNeverWrites', 'DisplayedKeyBound', 'ReadGenerationVerified', 'LocalePreservesDraft', 'NoStalePublication', 'SingleSendBeforeACK'}
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'DynamoDBConsoleEpoch')
+        self.assertEqual(set(entry['properties']), properties)
+        config = self.root / entry['config']; config_bytes = config.read_bytes()
+        for prop in properties:
+            registry = json.loads(original)
+            target = next(m for m in registry['models'] if m['id'] == 'DynamoDBConsoleEpoch')
+            target['properties'].remove(prop)
+            target['mutants'] = [m for m in target['mutants'] if m['expect_invariant'] != prop]
+            config.write_text(config_bytes.decode().replace('INVARIANT ' + prop + '\n', ''))
+            path.write_text(json.dumps(registry))
+            with self.subTest(property=prop), self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                load_registry(self.root)
+            config.write_bytes(config_bytes)
+        path.write_text(original)
+
+
+    def test_dynamodb_console_each_literal_control_is_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        controls = {'IgnoreReadViewGuard', 'ACKKeepsDraft', 'LocaleClearsDirtyDraft', 'IgnorePostReadGeneration', 'RemoveSynchronousOwnerLock', 'CancelKeepsLoading', 'ACKKeepsForm', 'IgnoreWriteViewGuard', 'RetryRepeatsWrite', 'KeepDisplayedItemOnKeyEdit'}
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'DynamoDBConsoleEpoch')
+        self.assertEqual({m['id'] for m in entry['mutants']}, controls)
+        for control in controls:
+            registry = json.loads(original)
+            target = next(m for m in registry['models'] if m['id'] == 'DynamoDBConsoleEpoch')
+            target['mutants'] = [m for m in target['mutants'] if m['id'] != control]
+            path.write_text(json.dumps(registry))
+            with self.subTest(control=control), self.assertRaisesRegex(GateError, 'required mutation control was removed'):
+                load_registry(self.root)
+        path.write_text(original)
+
+
+    def test_dynamodb_console_source_bindings_cannot_be_descoped(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        scopes = {'tools/console/src/dynamodb.jsx', 'tools/console/src/main.jsx', 'internal/server/web/app.js'}
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'DynamoDBConsoleEpoch')
+        self.assertEqual(set(entry['source_scope']), scopes)
+        for omitted in scopes:
+            registry = json.loads(original)
+            target = next(m for m in registry['models'] if m['id'] == 'DynamoDBConsoleEpoch')
+            target['source_scope'].remove(omitted)
+            path.write_text(json.dumps(registry))
+            with self.subTest(scope=omitted), self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+                load_registry(self.root)
+        path.write_text(original)
+
 
 if __name__ == '__main__':
     unittest.main()
