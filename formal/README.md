@@ -6,8 +6,8 @@ properties and175 controls are preserved. RESTRouteMatching adds six properties
 and six semantic controls; RESTProxyEventBoundary adds eight properties and ten
 controls. NativeWireProjection adds eight properties and six controls for the
 shared explicit ordered JSON writer. Independent scoped checks passed all three
-baselines and22 controls; the full230-case immutable integration has not been run
-by this change.
+baselines and22 controls. Integration requires a complete230-case run against the
+exact immutable revision; scoped results and registration do not replace that gate.
 IAMManagedPolicies retains its four API-reachable seeds and two-request suffixes;
 the earlier four-request exploration timed out and is not claimed.
 Registration is source evidence, not itself evidence of successful execution. Dated receipts below

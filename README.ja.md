@@ -11,12 +11,14 @@ MIT ライセンスで公開された取り組みを、サービス登録、プ�
 エンドポイント、サービス接続の設計で参考にしました。TenkaCloud Simulator は独自の実装で動作し、
 Kumo を実行時のバックエンドとして利用するものではありません。
 
-設計上の参考への謝意と、コードを利用した際の権利表記は区別しています。
-[IAM](third_party/kumo-iam.json)、[REST/API Gateway](third_party/kumo-apigateway.json)、
-[CloudWatch Logs](third_party/kumo-cloudwatch-logs.json)、[KMS](third_party/kumo-kms.json) では
-一部を適合して利用した経緯があり、過去の利用も含めて出典と
-[元の MIT 著作権・許諾表記](third_party/KUMO-LICENSE.txt)を保持しています。
-この謝辞は、由来コードの全置換が完了したことを示すものではありません。
+過去の版では [IAM](third_party/kumo-iam.json)、
+[REST/API Gateway](third_party/kumo-apigateway.json)、
+[CloudWatch Logs](third_party/kumo-cloudwatch-logs.json)、[KMS](third_party/kumo-kms.json) の
+一部の wire 表現やライフサイクル処理を適合して利用しました。特定できた実行コードは、
+AWS の公開仕様に基づく独自実装へ置き換えています。歴史的な出典と
+[元の MIT 著作権・許諾表記](third_party/KUMO-LICENSE.txt)は保持しています。
+[置換ソースの記録](third_party/independent-native-source.json)はレビューした範囲を示し、
+クリーンルーム開発や法的適合性の証明ではありません。
 
 ## 起動する
 

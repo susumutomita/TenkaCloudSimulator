@@ -23,14 +23,14 @@ service registration, protocol routing, SDK-compatible endpoints, and service
 wiring. TenkaCloud Simulator runs its own implementation rather than using Kumo
 as a runtime backend.
 
-Design credit is distinct from the rights notices for adapted code. Limited
-adaptations have been used in [IAM](third_party/kumo-iam.json),
-[REST/API Gateway](third_party/kumo-apigateway.json),
+Earlier revisions adapted limited native wire and lifecycle code in
+[IAM](third_party/kumo-iam.json), [REST/API Gateway](third_party/kumo-apigateway.json),
 [CloudWatch Logs](third_party/kumo-cloudwatch-logs.json), and
-[KMS](third_party/kumo-kms.json). Their provenance and
-[original MIT copyright and permission notice](third_party/KUMO-LICENSE.txt)
-are preserved, including for historical adaptations. This acknowledgment does
-not claim that all prior adaptations have been replaced.
+[KMS](third_party/kumo-kms.json). Those identified runtime portions have been
+independently reimplemented against public AWS contracts. Historical provenance
+and the [original MIT copyright and permission notice](third_party/KUMO-LICENSE.txt)
+remain intact. The [replacement source record](third_party/independent-native-source.json)
+describes the reviewed scope; it is not a clean-room or legal certification.
 
 ## Start locally
 
