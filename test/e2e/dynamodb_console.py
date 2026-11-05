@@ -69,7 +69,7 @@ def _run():
                         schema={'TableName':name,'KeySchema':[{'AttributeName':pk,'KeyType':'HASH'}]+([{'AttributeName':'sort','KeyType':'RANGE'}] if sort else []),'AttributeDefinitions':[{'AttributeName':pk,'AttributeType':kind}]+([{'AttributeName':'sort','AttributeType':'S'}] if sort else []),'BillingMode':'PAY_PER_REQUEST'}
                         peer.create_table(**schema);peer.put_item(TableName=name,Item={**key,'payload':{'S':'peer must survive'}})
                         context=browser.new_context(viewport={'width':width,'height':1000});contexts.append(context);page=context.new_page();page.set_default_timeout(10000)
-                        calls,responses,failed=[],[],[];intercept=[None]
+                        calls,responses,failed=[],[],[];intercept=[None];phase=['startup'];request_records={}
                         def operation(request):return request.headers.get('x-amz-target','').removeprefix('DynamoDB_20120810.')
                         def guard(route):
                             target=urlsplit(route.request.url)
@@ -77,9 +77,16 @@ def _run():
                             if intercept[0] is not None and intercept[0](route):return
                             route.continue_()
                         context.route('**/*',guard);page.on('pageerror',lambda _:errors.append(True))
-                        page.on('request',lambda request:calls.append(operation(request)) if operation(request) in OPS else None)
-                        page.on('response',lambda response:responses.append((operation(response.request),response.status)) if operation(response.request) in OPS else None)
-                        page.on('requestfailed',lambda request:failed.append(operation(request)) if operation(request) in OPS else None)
+                        def begun(request):
+                            if operation(request) in OPS:
+                                calls.append(operation(request));request_records[request]={'operation':operation(request),'phase':phase[0],'status':None,'failure':None}
+                        def answered(response):
+                            if operation(response.request) in OPS:
+                                responses.append((operation(response.request),response.status));request_records[response.request]['status']=response.status
+                        def unsuccessful(request):
+                            if operation(request) in OPS:
+                                failed.append(operation(request));request_records[request]['failure']=request.failure;request_records[request]['failurePhase']=phase[0]
+                        page.on('request',begun);page.on('response',answered);page.on('requestfailed',unsuccessful)
                         def login(target,token):
                             target.goto(a.endpoint+'/_simulator/console/');target.get_by_label('Access token',exact=True).fill(token);target.get_by_role('button',name='Open sandbox',exact=True).click()
                             target.wait_for_url(re.compile(r'/_simulator/console/(?:#.*)?$'));expect(target.get_by_role('button',name='Services',exact=True)).to_be_enabled()
@@ -107,17 +114,17 @@ def _run():
                         def hold_list(route):
                             if operation(route.request)=='ListTables':held.append(route);return True
                             return False
-                        intercept[0]=hold_list;page.get_by_role('button',name='Refresh tables',exact=True).click()
+                        phase[0]='held-list-cancel';intercept[0]=hold_list;page.get_by_role('button',name='Refresh tables',exact=True).click()
                         deadline=time.monotonic()+5
                         while not held:assert time.monotonic()<deadline;page.wait_for_timeout(10)
                         page.get_by_role('button',name='Create table',exact=True).click();page.get_by_role('button',name='Cancel',exact=True).click()
                         with page.expect_response(lambda response:operation(response.request)=='ListTables') as released:held.pop().continue_()
-                        assert released.value.status==200;intercept[0]=None;expect(page.get_by_role('button',name='Refresh tables',exact=True)).to_be_enabled();assert calls.count('CreateTable')==0
+                        assert released.value.status==200;phase[0]='post-cancel';intercept[0]=None;expect(page.get_by_role('button',name='Refresh tables',exact=True)).to_be_enabled();assert calls.count('CreateTable')==0
                         page.get_by_role('button',name='Create table',exact=True).click();page.get_by_label('Table name',exact=True).fill(name);page.get_by_label('Partition key',exact=True).fill(pk)
                         if kind!='S':page.get_by_label('Partition key type',exact=True).click();page.get_by_role('option',name='Number (N)' if kind=='N' else 'Binary (B)',exact=True).click()
                         if sort:page.get_by_role('checkbox',name='Sort key (optional)',exact=True).check()
                         before=list(calls);locale('ja');expect(page.get_by_label('テーブル名',exact=True)).to_have_value(name);assert calls==before;locale('en')
-                        audit('create-table-draft');native('Create table','CreateTable');expect(page.get_by_role('heading',name=name,exact=True)).to_be_visible()
+                        phase[0]='normal-lifecycle';audit('create-table-draft');native('Create table','CreateTable');expect(page.get_by_role('heading',name=name,exact=True)).to_be_visible()
                         meta=own.describe_table(TableName=name)['Table'];assert meta['KeySchema']==schema['KeySchema'];assert meta['BillingModeSummary']['BillingMode']=='PAY_PER_REQUEST'
                         page.get_by_role('tab',name='Explore table items',exact=True).click();page.get_by_role('button',name='Create item',exact=True).click();page.get_by_label('Item JSON',exact=True).fill(json.dumps(raw,ensure_ascii=False))
                         before=list(calls);locale('ja');expect(page.get_by_label('項目 JSON',exact=True)).to_have_value(json.dumps(raw,ensure_ascii=False));assert calls==before;locale('en');audit('item-draft')
@@ -156,7 +163,7 @@ def _run():
                         page.get_by_role('button',name='Delete table',exact=True).click();page.get_by_role('dialog').get_by_role('button',name='Cancel',exact=True).click();assert own.describe_table(TableName=name)['Table']['TableId']==meta['TableId']
                         page.get_by_role('button',name='Delete table',exact=True).click();page.get_by_label('Confirm table name',exact=True).fill(name);native('Delete','DeleteTable',page.get_by_role('dialog'));expect(page.get_by_role('button',name='Refresh tables',exact=True)).to_be_enabled()
                         assert name not in own.list_tables()['TableNames'];assert peer.get_item(TableName=name,Key=key)['Item']['payload']=={'S':'peer must survive'}
-                        (REPORTS/('transport-'+kind+'-'+str(width)+'.json')).write_text(json.dumps({'calls':calls,'responses':responses,'failed':failed,'pageErrors':len(errors),'outside':len(outside)},indent=2)+'\n')
+                        (REPORTS/('transport-'+kind+'-'+str(width)+'.json')).write_text(json.dumps({'calls':calls,'responses':responses,'failed':failed,'pageErrors':len(errors),'outside':len(outside),'requestRecords':list(request_records.values())},indent=2)+'\n')
                         assert set(calls)==OPS;assert failed==['DescribeTable'];assert len(responses)+1==len(calls);assert calls.count('CreateTable')==1 and calls.count('DeleteTable')==1 and calls.count('DeleteItem')==1 and calls.count('PutItem')==3
                         assert all(status==200 or op=='PutItem' and status==400 for op,status in responses);assert not errors and not outside
                         flows.append({'width':width,'keyType':kind,'sortKey':sort,'partitionKeyName':pk,'operations':sorted(set(calls)),'postACKReadAbort':1,'readRetryDidNotRepeatPut':True,'conditionalAndDuplicateRefused':True,'cancelNoMutation':True,'reader403NoMutation':True,'keyChangeClearsOldResult':True})
