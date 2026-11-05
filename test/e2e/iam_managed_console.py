@@ -11,14 +11,16 @@ import re
 import shutil
 import tempfile
 import time
-from urllib.parse import parse_qs, urlsplit
+import urllib.error
+import urllib.request
+from urllib.parse import parse_qs, urlencode, urlsplit
 
 import boto3
 from botocore.config import Config
 from botocore.exceptions import ClientError
 from playwright.sync_api import expect, sync_playwright
 from reflow import assert_reflow
-from sqs import Team
+from sqs import Team, NoRedirect
 
 REPORTS = Path(os.environ.get('SIMULATOR_REPORTS', 'reports')).resolve()
 OPERATIONS = {'CreatePolicy', 'GetPolicy', 'ListPolicies', 'DeletePolicy',
@@ -98,8 +100,21 @@ def _run():
             a.start(); b.start(); _PRIVATE.extend([a.token, b.token])
             iam, peer = sdk(a, 'iam'), sdk(b, 'iam')
             objects, peer_objects = sdk(a, 's3'), sdk(b, 's3')
-            foreign = sdk(b, 'iam', token=a.token)
-            refused(lambda: foreign.list_policies(Scope='Local'), 401)
+            # Local access failures are JSON401 before IAM XML dispatch. Check
+            # actual HTTP status directly rather than claim botocore can parse
+            # this independent authentication envelope as an IAM service error.
+            foreign = urllib.request.Request(b.endpoint + '/', method='POST',
+                data=urlencode({'Action': 'ListPolicies', 'Version': '2010-05-08',
+                                'Scope': 'Local'}).encode(),
+                headers={'Content-Type': 'application/x-www-form-urlencoded',
+                         'X-Simulator-Service': 'iam', 'X-Simulator-Token': a.token})
+            try:
+                urllib.request.build_opener(NoRedirect()).open(foreign, timeout=5)
+            except urllib.error.HTTPError as failure:
+                assert failure.code == 401
+                assert json.load(failure) == {'error': 'A valid simulator access token is required'}
+            else:
+                raise AssertionError('Foreign token unexpectedly crossed CLI authority')
             with sync_playwright() as playwright:
                 browser = playwright.chromium.launch(
                     executable_path=os.environ.get('CHROMIUM_EXECUTABLE') or shutil.which('chromium'),
