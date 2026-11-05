@@ -103,8 +103,10 @@ def _run():
                                 assert not observed.evaluate('(v)=>Object.values(localStorage).some(x=>x.includes(v))||Object.values(sessionStorage).some(x=>x.includes(v))',token)
                             observed.evaluate(axe);result=observed.evaluate("async()=>await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}})");assert not result['violations'],'DynamoDB axe violation'
                             observed.screenshot(path=str(REPORTS/(label+'-'+kind+'-'+str(width)+'.png')),full_page=False,animations='disabled');audits.append({'state':label,'width':width,'key':kind,'violations':0})
-                        def native(button,op,scope=None,status=200):
-                            with page.expect_response(lambda response:operation(response.request)==op) as result:(scope or page).get_by_role('button',name=button,exact=True).click()
+                        def native(button,op,scope=None,status=200,enter=None):
+                            with page.expect_response(lambda response:operation(response.request)==op) as result:
+                                if enter is not None:enter.press('Enter')
+                                else:(scope or page).get_by_role('button',name=button,exact=True).click()
                             assert result.value.status==status
                             return result.value.json()
                         def locale(target):
@@ -140,7 +142,7 @@ def _run():
                         if kind!='S':page.get_by_label('Partition key type',exact=True).click();page.get_by_role('option',name='Number (N)' if kind=='N' else 'Binary (B)',exact=True).click()
                         if sort:page.get_by_role('checkbox',name='Sort key (optional)',exact=True).check()
                         before=list(calls);locale('ja');expect(page.get_by_label('テーブル名',exact=True)).to_have_value(name);assert calls==before;locale('en')
-                        phase[0]='normal-lifecycle';audit('create-table-draft');native('Create table','CreateTable');expect(page.get_by_role('heading',name=name,exact=True)).to_be_visible()
+                        phase[0]='normal-lifecycle';audit('create-table-draft');native('Create table','CreateTable',enter=page.get_by_label('Table name',exact=True));expect(page.get_by_role('heading',name=name,exact=True)).to_be_visible()
                         meta=own.describe_table(TableName=name)['Table'];assert meta['KeySchema']==schema['KeySchema'];assert meta['BillingModeSummary']['BillingMode']=='PAY_PER_REQUEST'
                         page.get_by_role('tab',name='Explore table items',exact=True).click();page.get_by_role('button',name='Create item',exact=True).click();page.get_by_label('Item JSON',exact=True).fill(json.dumps(raw,ensure_ascii=False))
                         before=list(calls);locale('ja');expect(page.get_by_label('項目 JSON',exact=True)).to_have_value(json.dumps(raw,ensure_ascii=False));assert calls==before;locale('en');audit('item-draft')
@@ -162,7 +164,7 @@ def _run():
                         assert wire(own.get_item(TableName=name,Key=key)['Item'])==raw;page.get_by_role('button',name='Cancel',exact=True).click()
                         keys();native('Get item','GetItem');expect(page.get_by_label('Returned item JSON',exact=True)).not_to_have_value('');assert json.loads(page.get_by_label('Returned item JSON',exact=True).input_value())==wire(own.get_item(TableName=name,Key=key)['Item']);audit('item-returned')
                         page.get_by_label(pk+' ('+kind+')',exact=True).fill('different' if kind=='S' else '3' if kind=='N' else 'Aw==');expect(page.get_by_label('Returned item JSON',exact=True)).to_have_count(0);expect(page.get_by_role('button',name='Delete item',exact=True)).to_have_count(0)
-                        keys();native('Get item','GetItem');page.get_by_role('button',name='Delete item',exact=True).click();page.get_by_role('dialog').get_by_role('button',name='Cancel',exact=True).click();assert calls.count('DeleteItem')==0
+                        keys();native('Get item','GetItem');page.get_by_role('button',name='Delete item',exact=True).click();expect(page.get_by_role('dialog')).to_be_visible();page.keyboard.press('Escape');expect(page.get_by_role('dialog')).to_have_count(0);expect(page.get_by_role('button',name='Delete item',exact=True)).to_be_focused();assert calls.count('DeleteItem')==0
                         page.get_by_role('button',name='Delete item',exact=True).click();page.get_by_label('Type delete to confirm',exact=True).fill('delete');native('Delete','DeleteItem',page.get_by_role('dialog'))
                         assert own.get_item(TableName=name,Key=key).get('Item') is None;own.delete_item(TableName=name,Key=key);assert own.get_item(TableName=name,Key=key).get('Item') is None;assert own.describe_table(TableName=name)['Table']['ItemCount']==0
                         page.get_by_role('tab',name='Explore table items',exact=True).click();keys();native('Get item','GetItem');expect(page.get_by_role('heading',name='Item not found',exact=True)).to_be_visible();audit('item-not-found')
@@ -177,7 +179,7 @@ def _run():
                         with lp.expect_response(lambda response:response.request.headers.get('x-amz-target')=='DynamoDB_20120810.PutItem') as denied:lp.get_by_role('button',name='Create item',exact=True).click()
                         assert denied.value.status==403;expect(lp.get_by_text('DynamoDB request failed',exact=True)).to_be_visible();audit('reader403',lp);assert own.get_item(TableName=name,Key=key).get('Item') is None;limited.close();contexts.remove(limited)
                         page.get_by_role('button',name='Delete table',exact=True).click();page.get_by_role('dialog').get_by_role('button',name='Cancel',exact=True).click();assert own.describe_table(TableName=name)['Table']['TableId']==meta['TableId']
-                        page.get_by_role('button',name='Delete table',exact=True).click();page.get_by_label('Confirm table name',exact=True).fill(name);native('Delete','DeleteTable',page.get_by_role('dialog'));expect(page.get_by_role('button',name='Refresh tables',exact=True)).to_be_enabled()
+                        page.get_by_role('button',name='Delete table',exact=True).click();page.get_by_label('Confirm table name',exact=True).fill(name);native('Delete','DeleteTable',page.get_by_role('dialog'),enter=page.get_by_label('Confirm table name',exact=True));expect(page.get_by_role('button',name='Refresh tables',exact=True)).to_be_enabled()
                         assert name not in own.list_tables()['TableNames'];assert peer.get_item(TableName=name,Key=key)['Item']['payload']=={'S':'peer must survive'}
                         (REPORTS/('transport-'+kind+'-'+str(width)+'.json')).write_text(json.dumps({'calls':calls,'responses':responses,'failed':failed,'pageErrors':len(errors),'outside':len(outside),'requestRecords':list(request_records.values())},indent=2)+'\n')
                         assert set(calls)==OPS
@@ -192,7 +194,7 @@ def _run():
                         assert len(request_records)==len(calls) and len(responses)+1==len(calls)
                         assert calls.count('CreateTable')==1 and calls.count('DeleteTable')==1 and calls.count('DeleteItem')==1 and calls.count('PutItem')==3
                         assert all(status==200 or op=='PutItem' and status==400 for op,status in responses);assert not errors and not outside
-                        flows.append({'width':width,'keyType':kind,'sortKey':sort,'partitionKeyName':pk,'operations':sorted(set(calls)),'postACKReadAbort':1,'readRetryDidNotRepeatPut':True,'conditionalAndDuplicateRefused':True,'cancelNoMutation':True,'reader403NoMutation':True,'keyChangeClearsOldResult':True,'expectedOldViewStartupAbort':len(startup),'signalObservations':observed})
+                        flows.append({'width':width,'keyType':kind,'sortKey':sort,'partitionKeyName':pk,'operations':sorted(set(calls)),'postACKReadAbort':1,'readRetryDidNotRepeatPut':True,'conditionalAndDuplicateRefused':True,'cancelNoMutation':True,'reader403NoMutation':True,'keyChangeClearsOldResult':True,'keyboardEnterAndEscapeFocus':True,'expectedOldViewStartupAbort':len(startup),'signalObservations':observed})
                         context.close();contexts.remove(context);peer.delete_table(TableName=name)
                     assert own.list_tables()['TableNames']==[] and peer.list_tables()['TableNames']==[];assert SEEN==OPS;assert COUNTS['calls']>0 and COUNTS['calls']==COUNTS['sends']==COUNTS['responses']
                     report={'actualEmbeddedUI':True,'twoCLIsDBTokens':True,'flows':flows,'SDKCounts':COUNTS,'axeStates':audits,'foreignToken401':True,'peerPreserved':True,'outsideRequests':0,'pageErrors':0,'cleanup':'DELETED','actualAWS':False};(REPORTS/'dynamodb-console.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report))
