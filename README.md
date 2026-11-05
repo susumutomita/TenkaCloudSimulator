@@ -270,4 +270,3 @@ modules, Cloudscape, Scalar, CPython/WASI and other bundled components ship at
 `/_simulator/licenses/` and must be preserved on redistribution. This is not an
 official AWS service and does not use AWS logos. See the
 [design and handoff guides](docs/handoff/README.md).
-
