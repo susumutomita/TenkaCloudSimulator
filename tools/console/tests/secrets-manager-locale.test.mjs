@@ -41,8 +41,16 @@ function normalizeACK(candidate) {
   assert.equal(candidate.split(ackFixed).length-1, 1, 'Exactly one ACK-bound form close is required');
   return candidate.replace(ackFixed, ackOriginal);
 }
+const motionImport="import React,{useEffect,useLayoutEffect,useRef,useState} from 'react';\nimport {disableMotion} from '@cloudscape-design/global-styles';";
+const motionSetup=" const motionRoot=useRef(null);\n useLayoutEffect(()=>{const target=motionRoot.current;if(!target)return;disableMotion(true,target);return()=>disableMotion(false,target)},[]);\n";
+function normalizeScopedMotion(candidate) {
+  candidate=replaceExactlyOne(candidate,motionImport,"import React,{useEffect,useRef,useState} from 'react';");
+  candidate=replaceExactlyOne(candidate,motionSetup,'');
+  candidate=replaceExactlyOne(candidate,' return <div data-secrets-motion ref={motionRoot}><SpaceBetween',' return <SpaceBetween');
+  return replaceExactlyOne(candidate,'</SpaceBetween></div>\n}\n','</SpaceBetween>\n}\n');
+}
 function assertEnglishContract(candidate) {
-  let erased = normalizeACK(normalizeIncomingRecovery(candidate)).replace("import {useLocale} from './i18n.jsx';\n", '').replace(' const {t}=useLocale();\n', '');
+  let erased = normalizeACK(normalizeIncomingRecovery(normalizeScopedMotion(candidate))).replace("import {useLocale} from './i18n.jsx';\n", '').replace(' const {t}=useLocale();\n', '');
   const a = erased.indexOf('// Canonical presentation state only.');
   const b = erased.indexOf('// Parent remounts');
   erased = erased.slice(0, a) + erased.slice(b);
@@ -85,6 +93,17 @@ test('incoming metadata recovery normalization rejects missing or changed fences
     source.replace(incomingMetadataAlert,incomingMetadataAlert.replace('browse(error.arn)','mutate(error.arn)'))]) {
     assert.throws(()=>assertEnglishContract(candidate));
   }
+});
+
+test('scoped before-paint motion normalization rejects global, missing, late or uncleaned effects',()=>{
+ for(const candidate of [source.replace('disableMotion(true,target)','disableMotion(true)'),
+  source.replace('disableMotion(true,target)','disableMotion(true,document.body)'),
+  source.replace('useLayoutEffect(()=>','useEffect(()=>'),
+  source.replace('return()=>disableMotion(false,target)','return()=>{}'),
+  source.replace('if(!target)return;',''),
+  source.replace('data-secrets-motion ref={motionRoot}','data-secrets-motion')]) {
+   assert.throws(()=>assertEnglishContract(candidate));
+ }
 });
 
 test('all seven internal errors keep canonical English and render current Japanese', () => {
