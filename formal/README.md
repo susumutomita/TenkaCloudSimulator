@@ -229,5 +229,5 @@ and measured actual PRE/POST frames; its observation projection preserves
 all data actions and input domains. Earlier parser/type errors and60s timeouts
 remain failed diagnostics, never accepted negative controls. Both models are
 bounded abstractions, not Go/SQL/parser/IAM/team-authentication proofs.
-Current test input distinctions and remaining27-E2E/hosted-CI obligations are
+Current test input distinctions and remaining28-E2E/hosted-CI obligations are
 in [DynamoDB integration](../docs/dynamodb-integration.md).

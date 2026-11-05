@@ -2,17 +2,17 @@
 
 2026-11-04. This private branch starts from the actual public PR309 head
 `ed877ecc56c0fd4eef7a3a5a3b0b23d3ca435cfe`; a normal two-parent merge incorporates
-main `5c97dc5916fa39fd43d80ae79532d5892fcb30ea` as `fc15261`, then KMS main `0a4ed897f492011bcef0a5d8765f45c200809db9`. The normal merge `33ece2d` incorporates main `26d51142703b2b32946e06363d0d1d299eaf87c9`; all18 main models/94 controls and25 main E2E methods are retained. External Muse work,
+main `5c97dc5916fa39fd43d80ae79532d5892fcb30ea` as `fc15261`, then KMS main `0a4ed897f492011bcef0a5d8765f45c200809db9`. The normal merge `33ece2d` incorporates main `26d51142703b2b32946e06363d0d1d299eaf87c9`; all18 main models/94 controls and25 main E2E methods were retained. A further normal merge incorporates login main `fcf8e702b45953cdeeba49883a238e638af725e8`, preserving its26 main E2E methods and exact login helper/source/assets. External Muse work,
 the original public branch and previous local `e97f69f` candidate are preserved.
 No force push, public update, workflow rerun or repository-setting change occurred.
 
 ## Preserved contracts and selective source reuse
 
 Main GCP/Azure handlers, Actor/access context, raw path preservation, fixed provider
-scope menu, assets/dependencies/notices, all25 existing mandatory E2E methods and
+scope menu, assets/dependencies/notices, all26 existing mandatory E2E methods and
 all18 existing model entries/94 literal controls remain intact. Four conflicts
 were resolved additively: README, Gateway field, server initialization/capability
-metadata and two OpenAPI descriptions. OpenAPI paths and all61 operation IDs are retained, along with all main schema and example objects. Seven new DynamoDB JSON1.0 templates and two mandatory actual-process/served-template E2E sources are prepared; their isolated real-process/served-template execution passed on the input-equivalent native snapshot; the unified27-case run remains pending.
+metadata and two OpenAPI descriptions. OpenAPI paths and all61 operation IDs are retained, along with all main schema and example objects. Seven new DynamoDB JSON1.0 templates and two mandatory actual-process/served-template E2E sources are prepared; their isolated real-process/served-template execution passed on the input-equivalent native snapshot; the unified28-case run remains pending.
 
 Owned earlier fixes are separate commits: validation tests `cedc2f3`, decimal
 compatibility `edd8743`, semantic400KiB/statistics `67d45c6`, generation preparation
@@ -55,7 +55,7 @@ local100/10000/409600 limits, not the actual runtime quota values.
 Admission scopes are two region/table namespaces inside ONE already-selected
 DB; Lifecycle owners abstract separately selected DB/table authorities. Neither
 is two authenticated CLI processes; the mandatory real-process acceptance is
-separate; isolated acceptance is recorded below, while the complete27-case run remains pending. Constructor startupValid is the normalized success/
+separate; isolated acceptance is recorded below, while the complete28-case run remains pending. Constructor startupValid is the normalized success/
 orphan-refusal result, not a proof of arbitrary SQL discovery or imported data.
 Shared constructor/Gateway/dispatch files bind only to initialized-store and
 preflight-denial call contracts. Existing routes and actor authority retain their
@@ -97,7 +97,7 @@ escaped-string70000-character/oversize-refusal test ran. That input predates the
 26d merge: native/runtime source identity is provenance only, not a current-HEAD
 whole-suite or hosted-CI result. No profile union, exclusions or lower floors.
 
-The current mandatory E2E inventory is25 main plus two DynamoDB methods (27).
+The current mandatory E2E inventory is26 main plus two DynamoDB methods (28).
 The independent two-CLI helper initially reached the token API but read `token`
 instead of the actual `AccessToken` field; the failure is retained. The one-field
 test-only correction4cda2ad was selectively cherry-picked after the immutable
@@ -106,7 +106,7 @@ acceptance passed6.052s:51 SDK calls, distinct DB/token authorities, same table
 name/different data, mutual401, IAM403 and refusal frames, region/prefix/restart
 and cleanup. All seven served templates also passed2.314s (seven actual HTTP
 operations and four shared-state SDK operations). Neither process remained
-running. This is actual isolated acceptance, not the complete unified27-case
+running. This is actual isolated acceptance, not the complete unified28-case
 run or a current child-HEAD hosted CI claim; no helper is silently skipped.
 
 ## Verification queue
@@ -124,11 +124,11 @@ run or a current child-HEAD hosted CI claim; no helper is silently skipped.
    source87.91% failure remains a real historical blocker, not a current profile.
    Do not merge profiles, lower floors, add exclusions or infer global coverage
    from selected tests.
-5. Preserve all25 main E2E cases; retain two new mandatory real DynamoDB cases: two authenticated
+5. Preserve all26 main E2E cases; retain two new mandatory real DynamoDB cases: two authenticated
    CLI/processes, distinct DB/token, same-name keys, cross-token rejection,
    participant IAM refusal, restart and cleanup. Existing two-database native
    fixtures are not two authenticated processes. The optional SDK size test is
-   not a mandatory whole E2E replacement. The seven served templates are the second mandatory case; both isolated cases have executed against the verified input-equivalent real binary; the full27-case current composition must still run.
+   not a mandatory whole E2E replacement. The seven served templates are the second mandatory case; both isolated cases have executed against the verified input-equivalent real binary; the full28-case current composition must still run.
 6. Full before-commit/build/cross/E2E/start/audit/rights and hosted canonical
    security checks, independent review, fresh exact-HEAD CI. Known denied feed
    and old ed877 check-run reads are stopped; no retry or alternate route.
@@ -141,3 +141,14 @@ Official primary references re-read 2026-11-04:
 [constraints](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Constraints.html),
 [item sizing](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/CapacityUnitCalculations.html),
 [TableDescription](https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_TableDescription.html).
+
+
+## Login-main normal merge
+
+The fcf8 login improvement is adopted byte-for-byte, including the native paste
+handling, clear auth/network status messages, canonical assets and the required
+login_paste.py acceptance. DynamoDB has no custom UI; it does not replace those
+files. All26 main Conformance method bodies are exact; the two retained DynamoDB
+methods make28. This new composition requires a fresh CLI/login/SDK/reference
+check and exact applicability. Earlier303 formal/99d CI receipts are separate
+inputs, not automatically a successful run on this newer commit.
