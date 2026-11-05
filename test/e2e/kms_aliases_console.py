@@ -250,7 +250,11 @@ def main():
                     expect(page.get_by_text(second['Arn'], exact=True)).to_be_visible()
                     with page.expect_response(lambda response: response.request.headers.get('x-amz-target') == 'TrentService.CreateAlias' and response.status == 403):
                         page.get_by_role('button', name='Create alias', exact=True).click()
-                    expect(page.locator('[data-kms-aliases-view]').get_by_role('alert').filter(has_text='403:')).to_be_visible()
+                    # Cloudscape Alert exposes a group, not role=alert. Keep
+                    # the observed native403 and exact visible error/header.
+                    view = page.locator('[data-kms-aliases-view]')
+                    expect(view.get_by_text('Alias operation failed', exact=True)).to_be_visible()
+                    expect(view.get_by_text('403: Local KMS alias permission denied.', exact=True)).to_be_visible()
                     assert kms.list_aliases()['Aliases'] == []
                     page.get_by_role('button', name='Account menu', exact=True).click()
                     page.get_by_role('menuitem', name='Sign out', exact=True).click()
