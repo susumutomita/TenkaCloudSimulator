@@ -6,14 +6,28 @@
       "path": "README.ja.md",
       "sha256": "6768432a35752c96f6dfb1bc77abd393881a912bb5f181321b5676bed0a67361",
       "disposition": "documentation",
-      "reason": "English entry point and preserved Japanese documentation for the verified current Go main subset; commands, security boundaries and limitations retained. No runtime, state, cloud API, model or generated asset change.",
+      "reason": "English entry point and preserved Japanese documentation describe the verified current Go main subset; commands and safety/compatibility limits retained. No runtime, state or model change.",
       "models": []
     },
     {
       "path": "README.md",
       "sha256": "f248259a5b16a46de6113d63f310938411cb8279e2c509ae9eaf216dac8237e9",
       "disposition": "documentation",
-      "reason": "English entry point and preserved Japanese documentation for the verified current Go main subset; commands, security boundaries and limitations retained. No runtime, state, cloud API, model or generated asset change.",
+      "reason": "English entry point and preserved Japanese documentation describe the verified current Go main subset; commands and safety/compatibility limits retained. No runtime, state or model change.",
+      "models": []
+    },
+    {
+      "path": "scripts/formal_applicability.py",
+      "sha256": "ee84ec28ca7b97d1520f11d762e29f28c2c3af2a8024be6227cf691b80faaf0f",
+      "disposition": "formal-infrastructure",
+      "reason": "Recognize exactly README.ja.md as documentation so the preserved Japanese entry can receive immutable blob coverage. Real Git fixture validates Japanese README acceptance and rejects a Go lookalike; unknown runtime and all existing model/control checks remain unchanged.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-applicability.py",
+      "sha256": "bcaf2dc7aa1afc0f9e13da33b25c910bc7dbf1eb3279c623898f11956c47e7c2",
+      "disposition": "formal-infrastructure",
+      "reason": "Recognize exactly README.ja.md as documentation so the preserved Japanese entry can receive immutable blob coverage. Real Git fixture validates Japanese README acceptance and rejects a Go lookalike; unknown runtime and all existing model/control checks remain unchanged.",
       "models": []
     }
   ]

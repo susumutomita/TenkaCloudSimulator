@@ -79,6 +79,15 @@ class ApplicabilityTests(unittest.TestCase):
                      'internal/aws/dynamodb_store.go'):
             self.assertIsNone(disposition(path), path)
 
+    def test_japanese_readme_is_bound_without_accepting_runtime_lookalikes(self):
+        self.prepare('README.ja.md')
+        evidence = validate_record(self.root, self.base)
+        self.assertEqual(evidence['changes'][0]['path'], 'README.ja.md')
+        self.assertEqual(evidence['changes'][0]['disposition'], 'documentation')
+        self.prepare('README.ja.go')
+        with self.assertRaisesRegex(GateError, 'unclassified implementation/state path'):
+            validate_record(self.root, self.base)
+
     def test_exact_modeled_change_and_known_documentation(self):
         self.prepare()
         evidence = validate_record(self.root, self.base)
