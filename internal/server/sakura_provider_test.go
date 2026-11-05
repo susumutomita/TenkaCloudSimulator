@@ -118,6 +118,25 @@ func sakuraServerFrame(t *testing.T, db *sql.DB) string {
 	sum := sha256.Sum256(b)
 	return hex.EncodeToString(sum[:])
 }
+func sakuraAssertPeerCapabilities(t *testing.T, caps map[string]any) {
+	t.Helper()
+	services, ok := caps["services"].(map[string]any)
+	if !ok {
+		t.Fatal("missing native AWS services")
+	}
+	kms, ok := services["kms"].(map[string]any)
+	if !ok {
+		t.Fatal("missing native KMS capability")
+	}
+	if !reflect.DeepEqual(kms["operations"], []any{"CreateKey", "DescribeKey", "ListKeys", "EnableKey", "DisableKey", "GetKeyPolicy", "Encrypt", "Decrypt", "CreateAlias", "ListAliases", "UpdateAlias", "DeleteAlias"}) {
+		t.Fatal("incoming twelve-operation KMS capability changed")
+	}
+	storage, ok := caps["cloudStorage"].(map[string]any)
+	if !ok || len(storage) != 2 || storage["gcp"] == nil || storage["azure"] == nil {
+		t.Fatal("peer storage capabilities changed")
+	}
+}
+
 func TestSakuraServerDefaultDisabledPreservesLegacyProviderSet(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "state.db")
 	h, closeState, e := server.New(path)
@@ -126,6 +145,7 @@ func TestSakuraServerDefaultDisabledPreservesLegacyProviderSet(t *testing.T) {
 	}
 	defer closeState()
 	caps := sakuraServerRequest(t, h, "GET", "/_simulator/v1/capabilities", "", false, 200)
+	sakuraAssertPeerCapabilities(t, caps)
 	if !reflect.DeepEqual(caps["providers"], []any{"aws", "azure", "gcp"}) {
 		t.Fatal("default provider set changed")
 	}
@@ -171,6 +191,7 @@ func TestSakuraServerOptInUsesRegistryAuthenticationAndCopiedScope(t *testing.T)
 		t.Fatal("invented physical readiness")
 	}
 	caps := sakuraServerRequest(t, access, "GET", "/_simulator/v1/capabilities", "", true, 200)
+	sakuraAssertPeerCapabilities(t, caps)
 	if !reflect.DeepEqual(caps["providers"], []any{"aws", "azure", "gcp", "sakura"}) {
 		t.Fatal("optional registry missing provider")
 	}
