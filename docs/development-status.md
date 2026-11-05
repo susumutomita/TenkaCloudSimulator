@@ -5,15 +5,15 @@ Integration owner: `root`. Snapshot: 2026-11-05 after PR412.
 PR412 is merged at main `f5dba056da9bf69df047b391a45d06a3aff3dc66`.
 Its exact source `eb545c94` passed 28 mandatory E2E cases, both unchanged
 90% coverage floors, 50 screen audits and 112 finite model executions in CI.
-Post-merge main Formal validation and four CodeQL analyses succeeded; main CI
-was still running at this snapshot. No authenticated cloud pixel parity or
+Post-merge main CI, Formal validation and four CodeQL analyses succeeded.
+Main CI passed28 cases,50 screen audits,112 model executions and both90% floors. No authenticated cloud pixel parity or
 actual Dia device test is claimed.
 
 | Owner | Work | Current state / remaining acceptance |
 |---|---|---|
-| root | PR410 SQS console and shared AWS catalog integration | Private normal merge preserves original service history and PR412; canonical assets and nine pure tests pass. Actual locale/receipt browser acceptance passed at PC/mobile; original helpers, whole gates and exact-HEAD CI remain pending. |
+| root | PR410 SQS console and shared AWS catalog integration | Private normal merge preserves original service history and PR412; canonical assets and nine pure tests pass. All three focused helpers passed. Full31/start exited0 at f518ed8, but four Playwright cleanup exceptions require a test-only repair and fresh focused/hosted acceptance. Go/race and both90% floors passed;117 finite cases passed. |
 | waf_console | SQS locale and native receipt acceptance | Real locale helper passed nine native operations at PC/mobile, retained drafts/receipts and 12 axe states; original English helpers are running. |
-| team_host | PR408 Secrets Manager main alignment | Ready transition succeeded; main now conflicts. New isolated normal merge and translated leaf integration in progress; native APIs and disclosure guards must remain intact. |
+| team_host | PR408 Secrets Manager main alignment | Ready transition succeeded; private25b286a resolves main conflicts and preserves native/disclosure boundaries.129 model executions passed. Whole Go failed two unchanged3-second sandbox deadlines; isolated diagnosis is in progress, no merge. |
 | grader_http | CloudWatch Logs English/Japanese leaf | Private source ready; whole English-erased component matches original. Backend/main integration and runtime checks remain. |
 | cfn_adapters | Public-reference provider fidelity review | Comparing Google Cloud Storage and Azure Blob navigation and flows; no real cloud login or resource creation. |
 | cfn_callback | Exact main hosted acceptance | Known main CI run41955562786 is being monitored; previous PR412 results are not relabelled as main results. |

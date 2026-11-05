@@ -207,7 +207,7 @@ def _run():
                         audit('message-draft-en')
                         with page.expect_response(lambda r: r.request.headers.get('x-amz-target') == 'AmazonSQS.SendMessage') as sent:
                             page.get_by_role('button', name='Send message', exact=True).click()
-                        sent.value.finished()
+                        # json() reads the complete response body without a redundant lifecycle waiter.
                         send_md5[0] = sent.value.json()['MD5OfMessageBody']
                         assert send_md5[0] == hashlib.md5(body.encode()).hexdigest()
                         expect(page.get_by_text('Message sent.', exact=True)).to_be_visible()
@@ -220,7 +220,6 @@ def _run():
                         # Read the two required bodies at explicit completed-operation
                         # seams. Background list responses may legitimately be aborted
                         # by navigation; their status/call accounting remains strict.
-                        received.value.finished()
                         messages = received.value.json().get('Messages', [])
                         assert len(messages) == 1 and messages[0]['Body'] == body
                         receipt = messages[0]['ReceiptHandle']
