@@ -10,6 +10,7 @@ import (
 	"errors"
 	"math"
 	"net/http/httptest"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -650,6 +651,8 @@ func TestKMSAliasesConcreteFiltersAndCryptoRefusalsPreserveFrame(t *testing.T) {
 	cancel()
 	for _, operation := range []func() error{
 		func() error { return aliases.CreateAlias(canceled, "alias/new", key.KeyID, kmsAliasAllow) },
+		func() error { return aliases.UpdateAlias(canceled, "alias/valid", key.KeyID, kmsAliasAllow) },
+		func() error { return aliases.DeleteAlias(canceled, "alias/valid", kmsAliasAllow) },
 		func() error {
 			_, _, e := aliases.Encrypt(canceled, "alias/valid", nil, []byte("dummy"), kmsAliasAllow)
 			return e
@@ -662,5 +665,272 @@ func TestKMSAliasesConcreteFiltersAndCryptoRefusalsPreserveFrame(t *testing.T) {
 	}
 	if kmsAliasDatabaseFrame(t, keys.db) != before {
 		t.Fatal("refused input changed key/cursor/alias frame")
+	}
+}
+
+func TestKMSAliasesBorrowedPortRefusalsDoNotCloseOrChangeCallerState(t *testing.T) {
+	keys, aliases, key, _ := kmsAliasFixture(t)
+	ctx := context.Background()
+	if err := aliases.CreateAlias(ctx, "alias/existing", key.KeyID, kmsAliasAllow); err != nil {
+		t.Fatal(err)
+	}
+	blob, _, err := keys.Encrypt(ctx, "us-east-1", key.KeyID, nil, []byte("dummy"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	west, err := keys.CreateKey(ctx, "us-west-2", "west")
+	if err != nil {
+		t.Fatal(err)
+	}
+	westBlob, _, err := keys.Encrypt(ctx, "us-west-2", west.KeyID, nil, []byte("dummy"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	before := kmsAliasDatabaseFrame(t, keys.db)
+	tx, err := keys.db.BeginTx(ctx, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer tx.Rollback()
+	checks := []struct {
+		name, code string
+		call       func() error
+	}{
+		{"missing-create-name", "ValidationException", func() error { return aliases.createAliasTx(ctx, tx, "", key.KeyID, kmsAliasAllow) }},
+		{"malformed-create-target", "ValidationException", func() error { return aliases.createAliasTx(ctx, tx, "alias/new", "alias/existing", kmsAliasAllow) }},
+		{"malformed-update-target", "ValidationException", func() error { return aliases.updateAliasTx(ctx, tx, "alias/existing", "not-a-key", kmsAliasAllow) }},
+		{"zero-page-size", "ValidationException", func() error { _, e := aliases.listAliasesTx(ctx, tx, "", 0, "", kmsAliasAllow); return e }},
+		{"empty-encryption", "ValidationException", func() error {
+			data, arn, e := aliases.encryptAliasTx(ctx, tx, "alias/existing", nil, nil, kmsAliasAllow)
+			if len(data) > 0 || arn != "" {
+				t.Fatal("invalid encryption emitted data")
+			}
+			return e
+		}},
+		{"invalid-encryption-context", "ValidationException", func() error {
+			_, _, e := aliases.encryptAliasTx(ctx, tx, "alias/existing", map[string]string{"": "bad"}, []byte("dummy"), kmsAliasAllow)
+			return e
+		}},
+		{"invalid-ciphertext", "InvalidCiphertextException", func() error {
+			data, arn, e := aliases.decryptAliasTx(ctx, tx, "alias/existing", nil, []byte("invalid"), kmsAliasAllow)
+			if len(data) > 0 || arn != "" {
+				t.Fatal("invalid decryption emitted data")
+			}
+			return e
+		}},
+		{"foreign-ciphertext", "InvalidCiphertextException", func() error {
+			_, _, e := aliases.decryptAliasTx(ctx, tx, "alias/existing", nil, westBlob, kmsAliasAllow)
+			return e
+		}},
+		{"invalid-decryption-context", "ValidationException", func() error {
+			_, _, e := aliases.decryptAliasTx(ctx, tx, "alias/existing", map[string]string{"": "bad"}, blob, kmsAliasAllow)
+			return e
+		}},
+	}
+	for _, check := range checks {
+		t.Run(check.name, func(t *testing.T) {
+			kmsWantCode(t, check.call(), check.code)
+			var count int
+			if e := tx.QueryRow(`SELECT count(*) FROM aws_kms_aliases`).Scan(&count); e != nil || count != 1 {
+				t.Fatal("refused leaf changed/closed caller transaction")
+			}
+		})
+	}
+	// Concrete IDs/ARNs and omitted decrypt select the same actual key without
+	// converting identifier selection into an authorization grant.
+	data, arn, err := aliases.encryptAliasTx(ctx, tx, key.Arn, nil, []byte("concrete"), kmsAliasAllow)
+	if err != nil || arn != key.Arn {
+		t.Fatal("concrete trusted selection failed")
+	}
+	plain, arn, err := aliases.decryptAliasTx(ctx, tx, "", nil, data, kmsAliasAllow)
+	if err != nil || arn != key.Arn || string(plain) != "concrete" {
+		t.Fatal("embedded key selection failed")
+	}
+	if _, err = aliases.ResolveAliasTx(ctx, nil, "alias/existing"); err == nil {
+		t.Fatal("missing caller transaction accepted")
+	}
+	if _, err = aliases.ResolveAliasTx(ctx, tx, "arn:aws:kms:us-west-2:000000000000:alias/existing"); err == nil {
+		t.Fatal("foreign alias ARN adopted")
+	}
+	if _, err = aliases.ResolveAliasTx(ctx, tx, "not-an-alias"); err == nil {
+		t.Fatal("invalid alias identifier adopted")
+	}
+	if err = tx.Rollback(); err != nil {
+		t.Fatal(err)
+	}
+	if kmsAliasDatabaseFrame(t, keys.db) != before {
+		t.Fatal("borrowed operations escaped caller rollback")
+	}
+}
+
+func TestKMSAliasesMissingTargetsClockRegressionAndDisabledDecrypt(t *testing.T) {
+	keys, aliases, key, next := kmsAliasFixture(t)
+	ctx := context.Background()
+	if err := aliases.CreateAlias(ctx, "alias/existing", key.KeyID, kmsAliasAllow); err != nil {
+		t.Fatal(err)
+	}
+	before := kmsAliasDatabaseFrame(t, keys.db)
+	kmsWantCode(t, aliases.CreateAlias(ctx, "alias/new", "alias/existing", kmsAliasAllow), "ValidationException")
+	kmsWantCode(t, aliases.UpdateAlias(ctx, "alias/existing", "11111111-1111-4111-8111-111111111111", kmsAliasAllow), "NotFoundException")
+	kmsWantCode(t, aliases.UpdateAlias(ctx, "alias/existing", "invalid", kmsAliasAllow), "ValidationException")
+	kmsWantCode(t, aliases.DeleteAlias(ctx, "alias/aws/reserved", kmsAliasAllow), "ValidationException")
+	if kmsAliasDatabaseFrame(t, keys.db) != before {
+		t.Fatal("missing/invalid target changed frame")
+	}
+	// A persisted timestamp may legitimately be ahead after a host clock rollback.
+	page, err := aliases.ListAliases(ctx, "", 10, "", kmsAliasAllow)
+	if err != nil {
+		t.Fatal(err)
+	}
+	creation := page.Aliases[0].CreationDate
+	future := page.Aliases[0].LastUpdatedDate + 86400
+	if _, err = keys.db.Exec(`UPDATE aws_kms_aliases SET updated=? WHERE name='alias/existing'`, future); err != nil {
+		t.Fatal(err)
+	}
+	if err = aliases.UpdateAlias(ctx, "alias/existing", next.KeyID, kmsAliasAllow); err != nil {
+		t.Fatal(err)
+	}
+	page, err = aliases.ListAliases(ctx, "", 10, "", kmsAliasAllow)
+	if err != nil || page.Aliases[0].CreationDate != creation || page.Aliases[0].LastUpdatedDate != future || page.Aliases[0].TargetKeyId != next.KeyID {
+		t.Fatal("retarget regressed saved time/creation identity")
+	}
+	blob, _, err := keys.Encrypt(ctx, "us-east-1", next.KeyID, nil, []byte("dummy"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = keys.SetEnabled(ctx, "us-east-1", next.KeyID, false); err != nil {
+		t.Fatal(err)
+	}
+	before = kmsAliasDatabaseFrame(t, keys.db)
+	plain, arn, err := aliases.Decrypt(ctx, "alias/existing", nil, blob, kmsAliasAllow)
+	kmsWantCode(t, err, "DisabledException")
+	if len(plain) != 0 || arn != "" || kmsAliasDatabaseFrame(t, keys.db) != before {
+		t.Fatal("disabled key disclosed/changed state")
+	}
+	if err = keys.SetEnabled(ctx, "us-east-1", next.KeyID, true); err != nil {
+		t.Fatal(err)
+	}
+	plain, _, err = aliases.Decrypt(ctx, "alias/existing", nil, blob, kmsAliasAllow)
+	if err != nil || string(plain) != "dummy" {
+		t.Fatal("enabled repair did not recover ciphertext")
+	}
+}
+
+func TestKMSAliasesBootstrapInsertFailureAndKeyLedgerOutage(t *testing.T) {
+	_, keys := kmsTestStore(t, "")
+	_, err := keys.db.Exec(`CREATE TABLE aws_kms_alias_state(region TEXT PRIMARY KEY,revision INTEGER,secret BLOB);
+ CREATE TRIGGER fail_alias_bootstrap BEFORE INSERT ON aws_kms_alias_state BEGIN SELECT RAISE(ABORT,'fixture bootstrap failure'); END;`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	before := kmsAliasDatabaseFrame(t, keys.db)
+	if _, err = NewKMSAliasStore(keys, "us-east-1"); err == nil {
+		t.Fatal("failed state insertion acknowledged")
+	}
+	if kmsAliasDatabaseFrame(t, keys.db) != before {
+		t.Fatal("failed state insertion retained schema")
+	}
+	if _, err = keys.db.Exec(`DROP TRIGGER fail_alias_bootstrap`); err != nil {
+		t.Fatal(err)
+	}
+	aliases, err := NewKMSAliasStore(keys, "us-east-1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	key, err := keys.CreateKey(context.Background(), "us-east-1", "dummy")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = aliases.CreateAlias(context.Background(), "alias/existing", key.KeyID, kmsAliasAllow); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = keys.db.Exec(`ALTER TABLE aws_kms_keys RENAME COLUMN description TO unavailable_description`); err != nil {
+		t.Fatal(err)
+	}
+	before = kmsAliasDatabaseFrame(t, keys.db)
+	response := kmsAliasRegionHTTP(&Gateway{KMS: keys}, "us-east-1", "", "ListAliases", `{}`)
+	if response.Code != 500 || strings.Contains(response.Body.String(), "unavailable_description") || strings.Contains(response.Body.String(), "alias/existing") {
+		t.Fatal("key ledger outage disclosed/acknowledged page")
+	}
+	if kmsAliasDatabaseFrame(t, keys.db) != before {
+		t.Fatal("key ledger outage changed frame")
+	}
+	if _, err = keys.db.Exec(`ALTER TABLE aws_kms_keys RENAME COLUMN unavailable_description TO description`); err != nil {
+		t.Fatal(err)
+	}
+	page, err := aliases.ListAliases(context.Background(), "", 10, "", kmsAliasAllow)
+	if err != nil || len(page.Aliases) != 1 {
+		t.Fatal("key ledger repair did not recover")
+	}
+}
+
+func TestKMSAliasesCanceledHTTPDoesNotBootstrapOrAuthorize(t *testing.T) {
+	_, keys := kmsTestStore(t, "")
+	before := kmsAliasDatabaseFrame(t, keys.db)
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	request := httptest.NewRequest("POST", "/", strings.NewReader(`{}`)).WithContext(ctx)
+	request.Header.Set("Content-Type", "application/x-amz-json-1.1")
+	request.Header.Set("X-Amz-Target", "TrentService.ListAliases")
+	response := httptest.NewRecorder()
+	calls := 0
+	keys.ServeHTTP(response, request, "us-east-1", func(string, string) bool { calls++; return true })
+	if response.Code != 500 || calls != 0 || kmsAliasDatabaseFrame(t, keys.db) != before {
+		t.Fatal("canceled HTTP acquired authority or saved state")
+	}
+}
+
+func TestKMSAliasesStoredTypeFaultHasNoPartialOutput(t *testing.T) {
+	keys, aliases, key, _ := kmsAliasFixture(t)
+	for _, name := range []string{"alias/a-good", "alias/z-type-fault"} {
+		if err := aliases.CreateAlias(context.Background(), name, key.KeyID, kmsAliasAllow); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, err := keys.db.Exec(`UPDATE aws_kms_aliases SET target_created='invalid-saved-number' WHERE name='alias/z-type-fault'`); err != nil {
+		t.Fatal(err)
+	}
+	before := kmsAliasDatabaseFrame(t, keys.db)
+	page, err := aliases.ListAliases(context.Background(), "", 10, "", kmsAliasAllow)
+	if err == nil || len(page.Aliases) != 0 || page.Truncated || page.NextMarker != "" {
+		t.Fatal("stored type fault published a partial page")
+	}
+	response := kmsAliasRegionHTTP(&Gateway{KMS: keys}, "us-east-1", "", "ListAliases", `{}`)
+	if response.Code != 500 || strings.Contains(response.Body.String(), "invalid-saved-number") || strings.Contains(response.Body.String(), "a-good") {
+		t.Fatal("stored type failure leaked data")
+	}
+	if kmsAliasDatabaseFrame(t, keys.db) != before {
+		t.Fatal("stored type failure changed state")
+	}
+	if _, err = keys.db.Exec(`UPDATE aws_kms_aliases SET target_created=? WHERE name='alias/z-type-fault'`, key.CreationDate); err != nil {
+		t.Fatal(err)
+	}
+	page, err = aliases.ListAliases(context.Background(), "", 10, "", kmsAliasAllow)
+	if err != nil || len(page.Aliases) != 2 {
+		t.Fatal("stored type repair failed")
+	}
+}
+
+func TestKMSAliasesClosedBorrowedDatabaseDoesNotReinitialize(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "borrowed.db")
+	db, keys := kmsTestStore(t, path)
+	key, err := keys.CreateKey(context.Background(), "us-east-1", "preserved")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = db.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if store, e := NewKMSAliasStore(keys, "us-east-1"); e == nil || store != nil {
+		t.Fatal("closed borrowed database was replaced")
+	}
+	reopened, actual := kmsTestStore(t, path)
+	metadata, err := actual.DescribeKey(context.Background(), "us-east-1", key.KeyID)
+	if err != nil || metadata.KeyID != key.KeyID {
+		t.Fatal("borrowed key ledger lost")
+	}
+	var schema int
+	if err = reopened.Database().QueryRow(`SELECT count(*) FROM sqlite_master WHERE name IN ('aws_kms_aliases','aws_kms_alias_state')`).Scan(&schema); err != nil || schema != 0 {
+		t.Fatal("failed closed-db initialization created alias schema")
 	}
 }
