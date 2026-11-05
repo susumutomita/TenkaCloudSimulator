@@ -17,6 +17,95 @@ from check import REPORTS, assert_reflow, expect, running, sync_playwright
 from secrets_manager import client, control
 
 
+def authenticated_console_ready(page, endpoint):
+    # Login submits asynchronously, then location.assign replaces the document.
+    # A raw evaluate must run only after authenticated console controls exist.
+    page.wait_for_url(endpoint + "/_simulator/console/")
+    expect(page.get_by_role("button", name="Services", exact=True)).to_be_visible()
+
+
+def login_readiness_regression(endpoint, token):
+    """Hold one real native303 in an independent async diagnostic context."""
+    import asyncio
+    from playwright.async_api import async_playwright
+    outcomes = []
+
+    async def exercise():
+        async with async_playwright() as playwright:
+            diagnostic = await playwright.chromium.launch(executable_path=os.environ.get("CHROMIUM_EXECUTABLE") or shutil.which("chromium"), args=["--no-sandbox"])
+            context = await diagnostic.new_context()
+            page = await context.new_page()
+            page.set_default_timeout(5000)
+            held, fixture_errors, ready = [], [], asyncio.Event()
+            pending = None
+            try:
+                await page.goto(endpoint + "/_simulator/console/")
+
+                async def hold_login(route):
+                    if route.request.method != "POST":
+                        await route.continue_()
+                        return
+                    try:
+                        response = await route.fetch(max_redirects=0)
+                        assert response.status == 303
+                        held.append((route, response))
+                    except Exception as error:
+                        # Network exception strings may contain cookies: types only.
+                        fixture_errors.append(type(error).__name__)
+                        try:
+                            await route.abort()
+                        except Exception:
+                            pass  # Failure remains recorded and must fail the fixture.
+                    finally:
+                        ready.set()
+
+                await page.route(endpoint + "/_simulator/login", hold_login)
+                await page.get_by_label("Access token", exact=True).fill(token)
+                await page.get_by_role("button", name="Open sandbox", exact=True).click()
+                await asyncio.wait_for(ready.wait(), 5)
+                assert not fixture_errors and len(held) == 1, "Native login303 fixture failed"
+                old = await page.evaluate("({onLogin:location.pathname==='/_simulator/login',motion:document.body.classList.contains('awsui-motion-disabled')})")
+                assert old["onLogin"] and not old["motion"]
+                assert await page.get_by_role("button", name="Services", exact=True).count() == 0
+                # Explicit pending-evaluation diagnostic, not a claim that the
+                # original synchronous check itself waited this way in CI.
+                pending = asyncio.create_task(page.evaluate("()=>{window.__oldEvaluationStarted=true;return new Promise(()=>{})}"))
+                await page.wait_for_function("window.__oldEvaluationStarted===true")
+                route, response = held.pop()
+                await route.fulfill(response=response)
+                destroyed = False
+                try:
+                    await asyncio.wait_for(pending, 5)
+                except Exception as error:
+                    destroyed = "Execution context was destroyed" in str(error)
+                    assert destroyed, "Real navigation diagnostic failed unexpectedly"
+                await page.wait_for_url(endpoint + "/_simulator/console/")
+                await page.get_by_role("button", name="Services", exact=True).wait_for(state="visible")
+                assert await page.evaluate("location.pathname==='/_simulator/console/'&&!document.body.classList.contains('awsui-motion-disabled')")
+                outcomes.append({"oneRealNativeLogin303":True,"oldImmediateCheckRanOnLoginDocument":True,"deliberatelyPendingEvaluationDestroyedByRealNavigation":destroyed,"fixedCheckRunsAfterAuthenticatedControls":True,"fabricatedResponse":False,"tokensOrValuesReported":False})
+            finally:
+                for route, _ in held:
+                    try:
+                        await route.abort()
+                    except Exception:
+                        pass  # Context teardown still revokes the fixture session.
+                if pending is not None and not pending.done():
+                    pending.cancel()
+                    await asyncio.gather(pending, return_exceptions=True)
+                await context.close()
+                await diagnostic.close()
+
+    async def bounded():
+        await asyncio.wait_for(exercise(), 20)
+
+    try:
+        asyncio.run(bounded())
+    except Exception as error:
+        outcomes.append({"fixtureErrorType":type(error).__name__})
+    assert len(outcomes) == 1 and "fixtureErrorType" not in outcomes[0], "Controlled login readiness fixture failed"
+    (REPORTS/"secrets-login-readiness.json").write_text(json.dumps(outcomes[0],indent=2)+"\n")
+
+
 def mutation_ack_refresh_regression(page, sdk, endpoint):
     """Real writes, followed by one failed read per case; no fake API success."""
     state = {"expected": None, "acked": False, "aborted": 0}
@@ -198,6 +287,9 @@ def run():
     assert hashlib.sha256(axe_path.read_bytes()).hexdigest() == provenance["bundleSha256"]
     axe = axe_path.read_text()
     audits, summaries = [], []
+    # Run async response control before entering Sync Playwright's event loop.
+    with running(authenticated=True) as (endpoint, token):
+        login_readiness_regression(endpoint, token)
     with running(authenticated=True) as (endpoint, token), sync_playwright() as playwright:
         sdk = client(endpoint, token)
         browser = playwright.chromium.launch(
@@ -239,6 +331,7 @@ def run():
             page.goto(endpoint+"/_simulator/console/")
             page.get_by_label("Access token", exact=True).fill(token)
             page.get_by_role("button", name="Open sandbox", exact=True).click()
+            authenticated_console_ready(page, endpoint)
             assert not page.evaluate("document.body.classList.contains('awsui-motion-disabled')"), "Global motion unexpectedly disabled"
             page.get_by_role("button", name="Services", exact=True).click()
             page.get_by_role("menuitem", name="Secrets Manager", exact=True).click()
