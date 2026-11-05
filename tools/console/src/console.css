@@ -1,2 +1,45 @@
 /* Long resource identifiers must wrap inside official Cloudscape components. */
 .resource-identifier { overflow-wrap: anywhere; word-break: break-word; }
+
+/* Neutral simulator controls; provider-specific console chrome lives below. */
+.cloud-global-nav { box-sizing: border-box; position: relative; z-index: 1001; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 16px; background: #17212e; color: #fff; font: 14px/1.4 system-ui, sans-serif; }
+.cloud-global-nav * { box-sizing: border-box; }
+.cloud-global-brand { color: #fff; font-weight: 700; text-decoration: none; margin-right: 6px; }
+.cloud-global-nav button, .cloud-global-nav select, .cloud-global-nav summary { font: inherit; color: #fff; background: #26384a; border: 1px solid #71849a; border-radius: 5px; padding: 6px 10px; cursor: pointer; }
+.cloud-global-nav button:disabled, .cloud-global-nav select:disabled { cursor: not-allowed; opacity: .6; }
+.cloud-global-nav :is(button, select, input, summary, a):focus-visible { outline: 3px solid #80c9ff; outline-offset: 2px; }
+.cloud-provider-choices { display: flex; gap: 4px; }
+.cloud-provider-choices button[aria-pressed="true"] { background: #fff; color: #132438; border-color: #fff; font-weight: 700; }
+.cloud-catalog-control { position: relative; }
+.cloud-service-panel { position: absolute; z-index: 2; top: calc(100% + 8px); left: 0; width: min(390px, calc(100vw - 32px)); max-height: calc(100vh - 120px); overflow: auto; background: #fff; color: #17212e; padding: 16px; border: 1px solid #71849a; border-radius: 6px; box-shadow: 0 6px 20px #0004; }
+.cloud-service-panel label { display: block; font-weight: 600; }
+.cloud-service-panel input { width: 100%; margin: 8px 0; padding: 8px; color: #17212e; border: 1px solid #68798c; border-radius: 4px; font: inherit; }
+.cloud-service-panel button { display: block; width: 100%; color: #17212e; background: #fff; text-align: left; border: 0; padding: 9px; }
+.cloud-service-panel button:hover { background: #eef6ff; }
+.cloud-current-service { float: right; font-size: 12px; color: #42576b; margin-left: 10px; }
+.cloud-language, .cloud-region { display: flex; align-items: center; gap: 5px; }
+.cloud-language { margin-left: auto; }
+.cloud-session { position: relative; }
+.cloud-session > div { position: absolute; top: calc(100% + 8px); right: 0; min-width: 230px; padding: 12px; background: #fff; color: #17212e; border: 1px solid #71849a; border-radius: 6px; }
+.cloud-session button { color: #17212e; background: #fff; display: block; width: 100%; margin: 4px 0; text-align: left; }
+.cloud-api-reference { color: #b9e0ff; }
+.cloud-provider-notice { margin: 16px; }
+@media (max-width: 720px) {
+  .cloud-global-nav { padding: 10px 12px; gap: 8px; }
+  .cloud-global-brand { flex-basis: 100%; }
+  .cloud-provider-choices { flex: 1; }
+  .cloud-provider-choices button { flex: 1; padding-inline: 8px; }
+  .cloud-catalog-control { position: static; }
+  .cloud-service-panel { top: 100%; left: 12px; }
+  .cloud-language { margin-left: 0; }
+  .cloud-global-nav label { font-size: 12px; }
+  .cloud-region { flex: 1; }
+  .cloud-region select { min-width: 0; max-width: 160px; }
+  .cloud-session > div { position: fixed; top: auto; left: 12px; right: 12px; min-width: 0; }
+}
+
+.cloud-session-error { flex-basis: 100%; background: #fff2f0; color: #721c13; border: 1px solid #d37b70; border-radius: 4px; padding: 8px; }
+
+/* The official compact Utilities drawer uses z-index 1001. Its parent must
+   remain above the additional simulator control bar, including on mobile. */
+.aws-console-top-navigation { position: relative; z-index: 1002; }
