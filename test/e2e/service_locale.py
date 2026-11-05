@@ -147,7 +147,7 @@ def run():
             assert sqs.get_queue_attributes(QueueUrl=queue_url, AttributeNames=['All'])['Attributes']['ApproximateNumberOfMessages'] == '1'
             page.get_by_label('可視性タイムアウト（秒）', exact=True).fill('0')
             native_click('メッセージをポーリング', 'AmazonSQS.ReceiveMessage')
-            page.get_by_role('radio', name=re.compile(r'^メッセージを選択 ')).check()
+            page.get_by_role('radio', name='メッセージを選択 ', exact=False).check()
             expect(page.get_by_label('受信したメッセージ本文', exact=True)).to_have_value(sqs_value)
             assert sqs.receive_message(QueueUrl=queue_url, VisibilityTimeout=0)['Messages'][0]['Body'] == sqs_value
             check_reflow('sqs-ja')
