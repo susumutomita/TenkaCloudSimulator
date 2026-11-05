@@ -14,9 +14,9 @@ Permissions == {[alias |-> TRUE,old |-> TRUE,new |-> TRUE],
                 [alias |-> TRUE,old |-> TRUE,new |-> FALSE]}
 AllPermit == [alias |-> TRUE,old |-> TRUE,new |-> TRUE]
 Empty == [s \in Slots |-> 0]
-SeedOne == [Empty EXCEPT ![<<1,1>>]=1]
-SeedTwo == [SeedOne EXCEPT ![<<1,2>>]=2]
-SeedRegions == [SeedOne EXCEPT ![<<2,1>>]=1]
+SeedOne == [s \in Slots |-> IF s = <<1,1>> THEN 1 ELSE 0]
+SeedTwo == [s \in Slots |-> CASE s = <<1,1>> -> 1 [] s = <<1,2>> -> 2 [] OTHER -> 0]
+SeedRegions == [s \in Slots |-> IF s = <<1,1>> \/ s = <<2,1>> THEN 1 ELSE 0]
 Seeds == {Empty,SeedOne,SeedTwo,SeedRegions}
 Count(c) == Cardinality({s \in Slots : c[s]#0})
 KeyCount(c,r,k) == Cardinality({n \in Names : c[<<r,n>>]=k})
