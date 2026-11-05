@@ -13,7 +13,7 @@ Decisions == {"unchecked","accepted","refused"}
    implicit realm. Explicit empty/invalid values are present but not valid.
    Inputs are immutable. Validity is abstract, not a Go regexp/UTF8 proof. *)
 Init == /\ enabled \in BOOLEAN /\ unsafe \in BOOLEAN
-        /\ present \subseteq Fields /\ valid \subseteq present
+        /\ present \in SUBSET Fields /\ valid \in SUBSET present
         /\ phase="parsed" /\ decision="unchecked"
         /\ listener=FALSE /\ database=FALSE /\ schema=FALSE
         /\ registered=FALSE /\ token=FALSE
