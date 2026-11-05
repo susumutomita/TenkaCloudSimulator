@@ -1,13 +1,12 @@
 # Finite state model
 
-Current registry: 34 models / 210 literal-protected controls
-(244 required executions). All previous30 model entries, TLA/CFG bytes,
-properties and175 controls are preserved. RESTRouteMatching adds six properties
-and six semantic controls; RESTProxyEventBoundary adds eight properties and ten
-controls. NativeWireProjection adds eight properties and six controls for the
-shared explicit ordered JSON writer. Independent scoped checks passed all three
-baselines and22 controls. Integration requires a complete230-case run against the
-exact immutable revision; scoped results and registration do not replace that gate.
+Current branch registry: 35 models / 220 literal-protected controls
+(255 required executions). Every34 model entry, TLA/CFG byte sequence,
+property and210 controls from maina8 are preserved. DynamoDBConsoleEpoch adds
+one bounded console model and ten semantic controls. SecretVersionListing's
+metadata-only listing contract is retained. Previous241-case DynamoDB and
+244-case Secrets receipts belong to their recorded inputs; neither substitutes
+for the complete255-case immutable check of this combined revision.
 IAMManagedPolicies retains its four API-reachable seeds and two-request suffixes;
 the earlier four-request exploration timed out and is not claimed.
 Registration is source evidence, not itself evidence of successful execution. Dated receipts below
@@ -16,7 +15,7 @@ finite models do not prove Go/SQL/HTTP/UI refinement or complete cloud compatibi
 
 Legacy integration sections below retain historical counts and status statements
 for traceability. Their word “current” refers to the recorded integration, not
-today's registry. The authoritative current inventory is the 34/210 registry
+today's registry. The authoritative branch inventory is the 35/220 registry
 above; proof claims always require evidence for the exact revision.
 
 `ObjectStore.tla` models two buckets and two keys, shared object ownership, create/put/delete transitions, and an abstract identity decision `allow /\ ~deny`. `ObjectStore.cfg` checks type correctness, no orphan objects, no unauthorized mutation, and explicit-deny precedence.
@@ -340,13 +339,48 @@ or a refinement proof. The entire original30/175 inventory, timeouts and tool pi
 remain unchanged. All three exact native source scopes and all new properties
 and control IDs are protected by the loader and failure tests.
 
+## DynamoDB console request epochs and acknowledged writes
+
+DynamoDBConsoleEpoch binds tools/console/src/dynamodb.jsx, the narrow DynamoDB
+route/mount-key caller in main.jsx, and canonical embedded app.js as its derived
+artifact. It does not prove other shell/components or compiler/bundler correctness.
+Separate read
+and write scenarios cover two combined authority/region labels, one remount,
+epochs0..2 without wrap, two one-use pending-read slots, two exact keys, two
+symbolic TableIds with one recreation, one form/write intent and en/ja.
+Acceptance snapshots reject old request epochs/instances and failed post-read
+TableId verification. Key edits clear displayed item/delete bindings;
+invalidation clears loading even when an older finally is discarded. A
+synchronous owner ticket refuses repeated submission. An accepted write ACK
+closes the form and clears its draft before independent metadata refresh;
+read-only Retry does not resend a write. Locale presentation preserves the draft.
+
+The scoped baseline completed3,832 distinct states (16,950 generated), and each
+of ten semantic mutants exited12 with its exact expected invariant and a real
+transition trace. An earlier string-versus-record sentinel type error exited75
+and is retained as a failed attempt; replacing it with one configured model-value
+sentinel changed no transition, property, control or finite bound. This result
+is leaf evidence for those model bytes, not the registered241-case suite.
+
+This is not a JavaScript/React/AbortController/HTTP/IAM/SQLite refinement proof.
+It does not prove concrete AttributeValue parsing, sizes, numbers, credentials,
+missing-item/delete-confirmation behavior, arbitrary pagination or the full
+read/write interleaving. TableId agreement is checked at item-read acceptance;
+it does not promise freshness after a later native change or an atomic TableId
+compare-and-swap on official TableName-only mutations. A server may commit a
+write before a client aborts it. Stutter observation admits no liveness claim.
+Native DynamoDBAdmission/Lifecycle and concrete tests remain separate evidence.
+The root mount key (region|principal|navigation) and actual UI state changes are
+independently exercised by the mandatory dynamodb_console.py helper, not proved
+by a complete shell/React refinement.
+
 
 ## Secret version metadata listing
 
 SecretVersionListing adds nine invariants and thirteen literal-protected semantic
 controls, preserving all prior33 registry objects and197 controls and their
-TLA/CFG bytes. The combined inventory is34 baselines +210 controls =244 required
-executions. Registration and earlier independent scoped results are not a
+TLA/CFG bytes. The Secrets-only addition had34 baselines +210 controls =244 required
+executions. The current combined inventory above also includes DynamoDBConsoleEpoch. Registration and earlier independent scoped results are not a
 successful immutable244-case integration gate or hosted-CI result.
 
 Four-transition suffixes cover four ordered symbolic version keys, two database
