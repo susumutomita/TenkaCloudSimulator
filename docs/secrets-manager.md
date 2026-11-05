@@ -119,9 +119,11 @@ no value or GetSecretValue request is part of this view.
 
 English/Japanese changes static labels without resetting the mounted query,
 ARN, Include deprecated selection or current page. The dedicated helper includes
-a same-DOM-node language round trip; that newly added assertion still requires
-execution at the integrated revision. Earlier Japanese-after-reload evidence is
-a separate check and does not establish same-mount retention.
+an actual no-reload English → Japanese → English round trip preserving the same
+metadata DOM node, ARN, filter and page IDs without additional metadata/value
+requests. That focused check passed on the byte-identical embedded product;
+earlier Japanese-after-reload evidence remains a separate check. Integrated
+whole-suite and hosted results are still revision-specific.
 
 The registered [metadata-view model](../formal/SecretMetadataViewEpoch.tla)
 checks thirteen finite properties and fourteen named controls. Its scoped

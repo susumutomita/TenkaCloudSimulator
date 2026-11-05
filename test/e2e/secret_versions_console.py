@@ -157,6 +157,10 @@ def run():
                 expect(page.get_by_role("button", name="Next page", exact=True)).to_be_disabled()
                 page.set_viewport_size({"width": 390, "height": 844})
                 audit(page, "versions-page-two-mobile")
+                # The mobile audit above retains the 390px page. Restore the
+                # desktop utility layout before asserting region/account text:
+                # Cloudscape puts those utilities into More on narrow screens.
+                page.set_viewport_size({"width": 1440, "height": 1000})
                 # Actual user language controls, without reload or remount.
                 # Preserve the live current page/query and selected host scope.
                 page.evaluate("window.__versionLocaleNode=document.querySelector('[data-secret-versions]')")

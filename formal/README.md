@@ -405,5 +405,7 @@ JSON parser proofs; the live pager is not a stable complete history snapshot.
 
 The actual helper exercises 23 native versions as20+3 rows, list-only authority,
 metadata-read failure/repair, scope transitions, cancellation and peer frames.
-The newly added no-reload language round trip still awaits an execution lease at
-this source revision. Earlier Japanese-after-reload checks are not that oracle.
+The no-reload language round trip passed on the unchanged canonical embedded
+product: same metadata DOM node, ARN/filter/page IDs and host scope, no additional
+reads or value requests. Earlier Japanese-after-reload checks are a distinct
+oracle; neither focused result replaces the complete immutable integration gate.
