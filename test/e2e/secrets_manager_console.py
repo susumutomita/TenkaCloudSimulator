@@ -89,11 +89,14 @@ def login_readiness_regression(endpoint, token):
                         await route.abort()
                     except Exception:
                         pass  # Context teardown still revokes the fixture session.
-                if pending is not None and not pending.done():
-                    pending.cancel()
+                if pending is not None:
+                    if not pending.done():
+                        pending.cancel()
                     await asyncio.gather(pending, return_exceptions=True)
-                await context.close()
-                await diagnostic.close()
+                try:
+                    await context.close()
+                finally:
+                    await diagnostic.close()
 
     async def bounded():
         await asyncio.wait_for(exercise(), 20)
