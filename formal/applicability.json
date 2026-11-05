@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "base_sha": "36ebfd4808d539d22579181a59ce4db3c768420d",
+  "base_sha": "c563215b9fb3042364b7145ab4515fc387c66ef9",
   "changes": [
     {
       "path": "README.ja.md",
@@ -194,6 +194,13 @@
       "models": []
     },
     {
+      "path": "internal/server/secrets_composition_test.go",
+      "sha256": "6eff95c7c4879109c99957d45a9c0e89766c37469a2a1a6492c127481ac684e0",
+      "disposition": "test-support",
+      "reason": "Strengthen the stale seven-operation capability assertion to require all eight distinct supported operation names; preserve native composition and S3 literal-neighbor regression checks.",
+      "models": []
+    },
+    {
       "path": "internal/server/server.go",
       "sha256": "0938f0b53af289e17728eeadfd0a728398ef8379e646581156e5308df1c3bd36",
       "disposition": "modeled",
@@ -248,6 +255,13 @@
       "sha256": "23df06d78646d9e74bb3526973a4d451039d530a790a2fc3e2373737c69a1c3d",
       "disposition": "test-support",
       "reason": "Register and exercise actual local CLI/official SDK and served-example acceptance; preserve all existing tests and negative cases.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_openapi_json10.py",
+      "sha256": "78585515041aa0183743c3907246217e0132f66b966eb5ed926de5ad2103aba9",
+      "disposition": "test-support",
+      "reason": "Preserve the exact original 23 JSON1.1 template names, require the added version-list template, and validate its strict per-target schema with missing/null/type/limit/unknown-field refusals. All prior JSON1.0 union and negative-control methods remain intact.",
       "models": []
     }
   ]
