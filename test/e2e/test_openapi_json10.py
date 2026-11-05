@@ -107,9 +107,41 @@ class SharedJSON10Schemas(unittest.TestCase):
     def test_json11_templates_remain_admitted_by_shared_schema(self):
         media = self.spec['paths']['/']['post']['requestBody']['content']['application/x-amz-json-1.1']
         shared = validator(self.spec, media['schema'])
-        self.assertEqual(len(media['examples']), 23)
+        expected = {
+            'SSMGetParameter', 'KMSCreateKey', 'KMSDescribeKey', 'KMSListKeys',
+            'KMSEnableKey', 'KMSDisableKey', 'KMSGetKeyPolicy', 'KMSEncrypt',
+            'KMSDecrypt', 'LogsCreateLogGroup', 'LogsDescribeLogGroups',
+            'LogsDeleteLogGroup', 'LogsCreateLogStream', 'LogsDescribeLogStreams',
+            'LogsPutLogEvents', 'LogsGetLogEvents', 'CreateSecret', 'DescribeSecret',
+            'ListSecrets', 'PutSecretValue', 'GetSecretValue',
+            'UpdateSecretVersionStage', 'DeleteSecret', 'ListSecretVersionIds',
+        }
+        self.assertEqual(set(media['examples']), expected)
         for example in media['examples'].values():
             shared.validate(example['value'])
+
+
+    def test_version_list_template_has_its_strict_native_target_schema(self):
+        regional = self.spec['paths']['/']['post']
+        template = regional['requestBody']['content']['application/x-amz-json-1.1']['examples']['ListSecretVersionIds']
+        self.assertEqual(template['summary'], 'X-Amz-Target: secretsmanager.ListSecretVersionIds')
+        operation = regional['x-simulator-secrets-operation-schemas']['secretsmanager.ListSecretVersionIds']
+        self.assertEqual(operation['request'], '#/components/schemas/SecretsListSecretVersionIdsInput')
+        strict = validator(self.spec, {'$ref': operation['request']})
+        strict.validate(template['value'])
+        original = template['value']
+        missing = copy.deepcopy(original)
+        del missing['SecretId']
+        invalid_inputs = [missing, {**original, 'SecretId': None},
+                          {**original, 'MaxResults': 0}, {**original, 'MaxResults': 101},
+                          {**original, 'MaxResults': True},
+                          {**original, 'IncludeDeprecated': None},
+                          {**original, 'IncludeDeprecated': 'true'},
+                          {**original, 'NextToken': ''},
+                          {**original, 'UnsupportedSetting': True}]
+        for index, invalid in enumerate(invalid_inputs):
+            with self.subTest(index=index), self.assertRaises(ValidationError):
+                strict.validate(invalid)
 
 
 if __name__ == '__main__':
