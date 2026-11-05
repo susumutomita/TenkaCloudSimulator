@@ -83,14 +83,35 @@ func NewKMSAliasStore(keys *KMSStore, region string) (*KMSAliasStore, error) {
 		return nil, err
 	}
 	defer tx.Rollback()
+	s, err := newKMSAliasStoreTx(context.Background(), tx, keys, region)
+	if err != nil {
+		return nil, err
+	}
+	if err = tx.Commit(); err != nil {
+		return nil, err
+	}
+	return s, nil
+}
+
+// newKMSAliasStoreTx initializes only inside the caller's transaction. HTTP
+// keeps this tentative schema/cursor state in the same transaction as the actual
+// resource authorization and operation; any refusal rolls everything back.
+func newKMSAliasStoreTx(ctx context.Context, tx *sql.Tx, keys *KMSStore, region string) (*KMSAliasStore, error) {
+	if keys == nil || keys.db == nil || !kmsRegion(region) {
+		return nil, kmsInvalid()
+	}
+	if tx == nil {
+		return nil, kmsInvalid()
+	}
+	var err error
 	var keyTable int
-	if err = tx.QueryRow(`SELECT count(*) FROM sqlite_master WHERE type='table' AND name='aws_kms_keys'`).Scan(&keyTable); err != nil {
+	if err = tx.QueryRowContext(ctx, `SELECT count(*) FROM sqlite_master WHERE type='table' AND name='aws_kms_keys'`).Scan(&keyTable); err != nil {
 		return nil, err
 	}
 	if keyTable != 1 {
 		return nil, kmsCorrupt("missing key ledger")
 	}
-	_, err = tx.Exec(`CREATE TABLE IF NOT EXISTS aws_kms_aliases (
+	_, err = tx.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS aws_kms_aliases (
  region TEXT NOT NULL,name TEXT NOT NULL,key_id TEXT NOT NULL,target_created REAL NOT NULL,
  created REAL NOT NULL,updated REAL NOT NULL,PRIMARY KEY(region,name),
  FOREIGN KEY(region,key_id) REFERENCES aws_kms_keys(region,key_id) ON DELETE RESTRICT);
@@ -100,14 +121,11 @@ func NewKMSAliasStore(keys *KMSStore, region string) (*KMSAliasStore, error) {
 	if err != nil {
 		return nil, err
 	}
-	if _, err = tx.Exec(`INSERT INTO aws_kms_alias_state SELECT ?,0,randomblob(32) WHERE NOT EXISTS(SELECT 1 FROM aws_kms_alias_state WHERE region=?)`, region, region); err != nil {
+	if _, err = tx.ExecContext(ctx, `INSERT INTO aws_kms_alias_state SELECT ?,0,randomblob(32) WHERE NOT EXISTS(SELECT 1 FROM aws_kms_alias_state WHERE region=?)`, region, region); err != nil {
 		return nil, err
 	}
 	s := &KMSAliasStore{keys.db, region}
-	if _, _, err = s.stateTx(context.Background(), tx); err != nil {
-		return nil, err
-	}
-	if err = tx.Commit(); err != nil {
+	if _, _, err = s.stateTx(ctx, tx); err != nil {
 		return nil, err
 	}
 	return s, nil
@@ -190,6 +208,20 @@ func (s *KMSAliasStore) CreateAlias(ctx context.Context, name, target string, au
 		return err
 	}
 	defer tx.Rollback()
+	if err = s.createAliasTx(ctx, tx, name, target, authorize); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+// createAliasTx borrows tx; it never begins, commits or rolls back it.
+func (s *KMSAliasStore) createAliasTx(ctx context.Context, tx *sql.Tx, name, target string, authorize KMSAliasAuthorizer) error {
+	if name == "" {
+		return kmsInvalid()
+	}
+	if !kmsCustomerAlias(name) {
+		return kmsFailure("InvalidAliasNameException", "The customer alias name is invalid.")
+	}
 	id, err := kmsID(s.region, target)
 	if err != nil {
 		return err
@@ -218,13 +250,13 @@ func (s *KMSAliasStore) CreateAlias(ctx context.Context, name, target string, au
 	if err = s.changedTx(ctx, tx); err != nil {
 		return err
 	}
-	return tx.Commit()
+	return nil
 }
 func (s *KMSAliasStore) UpdateAlias(ctx context.Context, name, target string, authorize KMSAliasAuthorizer) error {
 	if !kmsCustomerAlias(name) {
 		return kmsInvalid()
 	}
-	id, err := kmsID(s.region, target)
+	_, err := kmsID(s.region, target)
 	if err != nil {
 		return err
 	}
@@ -233,6 +265,21 @@ func (s *KMSAliasStore) UpdateAlias(ctx context.Context, name, target string, au
 		return err
 	}
 	defer tx.Rollback()
+	if err = s.updateAliasTx(ctx, tx, name, target, authorize); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+// updateAliasTx borrows tx; it never begins, commits or rolls back it.
+func (s *KMSAliasStore) updateAliasTx(ctx context.Context, tx *sql.Tx, name, target string, authorize KMSAliasAuthorizer) error {
+	if !kmsCustomerAlias(name) {
+		return kmsInvalid()
+	}
+	id, err := kmsID(s.region, target)
+	if err != nil {
+		return err
+	}
 	if err = kmsAliasAuthorize(ctx, tx, authorize, "kms:UpdateAlias", kmsAliasARN(s.region, name)); err != nil {
 		return err
 	}
@@ -270,7 +317,7 @@ func (s *KMSAliasStore) UpdateAlias(ctx context.Context, name, target string, au
 	if err = s.changedTx(ctx, tx); err != nil {
 		return err
 	}
-	return tx.Commit()
+	return nil
 }
 func (s *KMSAliasStore) DeleteAlias(ctx context.Context, name string, authorize KMSAliasAuthorizer) error {
 	if !kmsCustomerAlias(name) {
@@ -281,6 +328,18 @@ func (s *KMSAliasStore) DeleteAlias(ctx context.Context, name string, authorize 
 		return err
 	}
 	defer tx.Rollback()
+	if err = s.deleteAliasTx(ctx, tx, name, authorize); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+// deleteAliasTx borrows tx; it never begins, commits or rolls back it.
+func (s *KMSAliasStore) deleteAliasTx(ctx context.Context, tx *sql.Tx, name string, authorize KMSAliasAuthorizer) error {
+	if !kmsCustomerAlias(name) {
+		return kmsInvalid()
+	}
+	var err error
 	if err = kmsAliasAuthorize(ctx, tx, authorize, "kms:DeleteAlias", kmsAliasARN(s.region, name)); err != nil {
 		return err
 	}
@@ -297,7 +356,7 @@ func (s *KMSAliasStore) DeleteAlias(ctx context.Context, name string, authorize 
 	if err = s.changedTx(ctx, tx); err != nil {
 		return err
 	}
-	return tx.Commit()
+	return nil
 }
 
 // ResolveAliasTx is a trusted composition port, not an additional public API.
@@ -348,6 +407,25 @@ func (s *KMSAliasStore) ListAliases(ctx context.Context, keyID string, limit int
 		return result, err
 	}
 	defer tx.Rollback()
+	result, err = s.listAliasesTx(ctx, tx, keyID, limit, marker, authorize)
+	if err != nil {
+		return KMSAliasList{Aliases: []KMSAlias{}}, err
+	}
+	if err = tx.Commit(); err != nil {
+		return KMSAliasList{Aliases: []KMSAlias{}}, err
+	}
+	return result, nil
+}
+
+// listAliasesTx borrows tx; it never begins, commits or rolls back it.
+func (s *KMSAliasStore) listAliasesTx(ctx context.Context, tx *sql.Tx, keyID string, limit int, marker string, authorize KMSAliasAuthorizer) (KMSAliasList, error) {
+	result := KMSAliasList{Aliases: []KMSAlias{}}
+	if limit < 1 || limit > 100 || len(marker) > 1024 {
+		return result, kmsInvalid()
+	}
+	// The embedded SQLite driver does not support sql.TxOptions.ReadOnly.
+	// This transaction issues only SELECTs; use the established provider BeginTx.
+	var err error
 	if err = kmsAliasAuthorize(ctx, tx, authorize, "kms:ListAliases", "*"); err != nil {
 		return result, err
 	}
@@ -411,9 +489,6 @@ func (s *KMSAliasStore) ListAliases(ctx context.Context, keyID string, limit int
 		}
 		result.Aliases = append(result.Aliases, alias)
 	}
-	if err = tx.Commit(); err != nil {
-		return KMSAliasList{Aliases: []KMSAlias{}}, err
-	}
 	return result, nil
 }
 
@@ -441,6 +516,25 @@ func (s *KMSAliasStore) Encrypt(ctx context.Context, selected string, contextMap
 		return nil, "", err
 	}
 	defer tx.Rollback()
+	blob, arn, err := s.encryptAliasTx(ctx, tx, selected, contextMap, plaintext, authorize)
+	if err != nil {
+		return nil, "", err
+	}
+	if err = tx.Commit(); err != nil {
+		return nil, "", err
+	}
+	return blob, arn, nil
+}
+
+// encryptAliasTx borrows tx; it never begins, commits or rolls back it.
+func (s *KMSAliasStore) encryptAliasTx(ctx context.Context, tx *sql.Tx, selected string, contextMap map[string]string, plaintext []byte, authorize KMSAliasAuthorizer) ([]byte, string, error) {
+	if len(plaintext) < 1 || len(plaintext) > 4096 {
+		return nil, "", kmsInvalid()
+	}
+	if _, err := kmsContext(contextMap); err != nil {
+		return nil, "", err
+	}
+	var err error
 	id, err := s.cryptoKeyTx(ctx, tx, selected)
 	if err != nil {
 		return nil, "", err
@@ -452,9 +546,6 @@ func (s *KMSAliasStore) Encrypt(ctx context.Context, selected string, contextMap
 	if err != nil {
 		return nil, "", err
 	}
-	if err = tx.Commit(); err != nil {
-		return nil, "", err
-	}
 	return blob, arn, nil
 }
 
@@ -462,7 +553,7 @@ func (s *KMSAliasStore) Encrypt(ctx context.Context, selected string, contextMap
 // target. An explicit alias must still point to that UUID after resolution; old
 // ciphertext does not silently switch keys when an alias is retargeted.
 func (s *KMSAliasStore) Decrypt(ctx context.Context, selected string, contextMap map[string]string, blob []byte, authorize KMSAliasAuthorizer) ([]byte, string, error) {
-	region, id, encrypted, err := kmsBlob(blob)
+	region, _, _, err := kmsBlob(blob)
 	if err != nil {
 		return nil, "", err
 	}
@@ -477,6 +568,28 @@ func (s *KMSAliasStore) Decrypt(ctx context.Context, selected string, contextMap
 		return nil, "", err
 	}
 	defer tx.Rollback()
+	plaintext, arn, err := s.decryptAliasTx(ctx, tx, selected, contextMap, blob, authorize)
+	if err != nil {
+		return nil, "", err
+	}
+	if err = tx.Commit(); err != nil {
+		return nil, "", err
+	}
+	return plaintext, arn, nil
+}
+
+// decryptAliasTx borrows tx; it never begins, commits or rolls back it.
+func (s *KMSAliasStore) decryptAliasTx(ctx context.Context, tx *sql.Tx, selected string, contextMap map[string]string, blob []byte, authorize KMSAliasAuthorizer) ([]byte, string, error) {
+	region, id, encrypted, err := kmsBlob(blob)
+	if err != nil {
+		return nil, "", err
+	}
+	if region != s.region {
+		return nil, "", kmsFailure("InvalidCiphertextException", "The local ciphertext is invalid for this request.")
+	}
+	if _, err = kmsContext(contextMap); err != nil {
+		return nil, "", err
+	}
 	requested := id
 	if selected != "" {
 		requested, err = s.cryptoKeyTx(ctx, tx, selected)
@@ -494,9 +607,6 @@ func (s *KMSAliasStore) Decrypt(ctx context.Context, selected string, contextMap
 	}
 	plaintext, arn, err := kmsDecryptTx(ctx, tx, s.region, id, contextMap, encrypted)
 	if err != nil {
-		return nil, "", err
-	}
-	if err = tx.Commit(); err != nil {
 		return nil, "", err
 	}
 	return plaintext, arn, nil
@@ -519,7 +629,13 @@ func (s *KMSStore) serveAliasRequest(w http.ResponseWriter, r *http.Request, reg
 		kmsWriteError(w, kmsAliasDenied())
 		return true
 	}
-	aliases, err := NewKMSAliasStore(s, region)
+	tx, err := s.db.BeginTx(r.Context(), nil)
+	if err != nil {
+		kmsWriteError(w, err)
+		return true
+	}
+	defer tx.Rollback()
+	aliases, err := newKMSAliasStoreTx(r.Context(), tx, s, region)
 	if err != nil {
 		kmsWriteError(w, err)
 		return true
@@ -530,25 +646,29 @@ func (s *KMSStore) serveAliasRequest(w http.ResponseWriter, r *http.Request, reg
 	var response any
 	switch op {
 	case "CreateAlias":
-		err = aliases.CreateAlias(r.Context(), request.AliasName, request.TargetKeyId, auth)
+		err = aliases.createAliasTx(r.Context(), tx, request.AliasName, request.TargetKeyId, auth)
 	case "UpdateAlias":
-		err = aliases.UpdateAlias(r.Context(), request.AliasName, request.TargetKeyId, auth)
+		err = aliases.updateAliasTx(r.Context(), tx, request.AliasName, request.TargetKeyId, auth)
 	case "DeleteAlias":
-		err = aliases.DeleteAlias(r.Context(), request.AliasName, auth)
+		err = aliases.deleteAliasTx(r.Context(), tx, request.AliasName, auth)
 	case "ListAliases":
-		response, err = aliases.ListAliases(r.Context(), request.KeyId, request.Limit, request.Marker, auth)
+		response, err = aliases.listAliasesTx(r.Context(), tx, request.KeyId, request.Limit, request.Marker, auth)
 	case "Encrypt":
 		var blob []byte
 		var arn string
-		blob, arn, err = aliases.Encrypt(r.Context(), request.KeyId, request.EncryptionContext, request.Plaintext, auth)
+		blob, arn, err = aliases.encryptAliasTx(r.Context(), tx, request.KeyId, request.EncryptionContext, request.Plaintext, auth)
 		response = map[string]any{"CiphertextBlob": blob, "KeyId": arn, "EncryptionAlgorithm": "SYMMETRIC_DEFAULT"}
 	case "Decrypt":
 		var plaintext []byte
 		var arn string
-		plaintext, arn, err = aliases.Decrypt(r.Context(), request.KeyId, request.EncryptionContext, request.CiphertextBlob, auth)
+		plaintext, arn, err = aliases.decryptAliasTx(r.Context(), tx, request.KeyId, request.EncryptionContext, request.CiphertextBlob, auth)
 		response = map[string]any{"Plaintext": plaintext, "KeyId": arn, "EncryptionAlgorithm": "SYMMETRIC_DEFAULT"}
 	}
 	if err != nil {
+		kmsWriteError(w, err)
+		return true
+	}
+	if err = tx.Commit(); err != nil {
 		kmsWriteError(w, err)
 		return true
 	}
