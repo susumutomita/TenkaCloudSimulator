@@ -9,7 +9,7 @@ jobs:
   console-acceptance:
     name: Japanese service console acceptance
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
@@ -20,11 +20,17 @@ jobs:
           cache: true
       - name: Build the actual embedded simulator
         run: make build
-      - name: Install pinned development-only browser and SDK tools
+      - name: Install pinned Python SDK and browser tools
+        timeout-minutes: 3
         run: |
           python3 -m venv /tmp/simulator-tests
           /tmp/simulator-tests/bin/pip install -r scripts/requirements-test.txt
-          /tmp/simulator-tests/bin/playwright install --with-deps chromium
+      - name: Install full Chromium system dependencies
+        timeout-minutes: 12
+        run: /tmp/simulator-tests/bin/playwright install-deps chromium
+      - name: Install pinned Chromium browser
+        timeout-minutes: 5
+        run: /tmp/simulator-tests/bin/playwright install chromium
       - name: Check native discovery, Japanese operations and desktop/mobile layouts
         run: /tmp/simulator-tests/bin/python test/e2e/service_locale.py
       - name: Check Secrets disclosure boundaries and actual metadata accessibility
@@ -87,11 +93,17 @@ jobs:
         run: npm audit --prefix tools/scalar --audit-level=high
       - name: Check Go vulnerabilities against the canonical service
         run: go run golang.org/x/vuln/cmd/govulncheck@v1.1.4 ./...
-      - name: Install development-only browser and SDK tools
+      - name: Install Python SDK and browser tools
+        timeout-minutes: 3
         run: |
           python3 -m venv /tmp/simulator-tests
           /tmp/simulator-tests/bin/pip install -r scripts/requirements-test.txt
-          /tmp/simulator-tests/bin/playwright install --with-deps chromium
+      - name: Install full Chromium system dependencies
+        timeout-minutes: 12
+        run: /tmp/simulator-tests/bin/playwright install-deps chromium
+      - name: Install pinned Chromium browser
+        timeout-minutes: 5
+        run: /tmp/simulator-tests/bin/playwright install chromium
       - name: Prepare pinned axe-core for mandatory browser accessibility checks
         run: /tmp/simulator-tests/bin/python scripts/get-audit-tools.py /tmp/simulator-audit
       - name: Verify real binary, SDK, console, and offline API reference

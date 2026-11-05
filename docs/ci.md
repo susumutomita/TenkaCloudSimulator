@@ -139,3 +139,36 @@ Checksum failure is outside the transport retry. Exhaustion or refusal remains
 a failed job; no model run is inferred from another job. The local fixture used
 a 0.2s outer deadline; full 95s expiry, SIGKILL fallback and real CDN availability
 are not established by that fixture. Hosted checks validate the actual runner.
+
+## Browser acquisition budgets
+
+Both browser jobs install the pinned Python test requirements, the complete
+Playwright Chromium operating-system dependencies (including fonts), and the
+matching browser in separate required steps. Their acquisition budgets are
+3, 12 and 5 minutes. The focused Japanese job has a 30-minute overall budget;
+that includes build, acquisition, unchanged acceptance and evidence upload, so
+individual step maxima are not a promise that all maxima fit simultaneously.
+A failed dependency step fails the job. Later UI steps may be skipped by
+GitHub Actions; skipped UI steps do not establish acceptance. Browser test deadlines, accessibility checks and both
+coverage floors are unchanged.
+
+The split makes an infrastructure failure distinguishable from a browser test
+failure. One earlier main139 Japanese job exhausted its previous ten-minute job
+budget during a slow signed APT download, before UI acceptance. Increasing an
+acquisition budget does not improve transfer speed or establish test success.
+
+No browser/system-package cache or additional Action is introduced. Playwright's
+[CI guidance](https://playwright.dev/python/docs/ci#caching-browsers) notes that Linux
+OS dependencies still need installation even if browser binaries are cached.
+APT repository signatures, package hashes, TLS, the pinned requirements and
+original browser installer are retained. No alternate mirrors or host-validation
+bypass is used. The browser download idle-timeout option does not control APT.
+
+This acquisition change does not diagnose model execution speed. The main139
+normal CI ObjectStore execution failure and successful dedicated formal run used workflows
+with no explicit JVM resource options in either job. The failure occurred near
+the 60-second subprocess deadline, but the runner discarded the underlying
+exception and partial output, so a timeout or resource cause is not established.
+A resource-cap proposal
+requires actual timing/resource evidence and separate validation; no model
+60-second deadline, invariant, bound or formal runner is changed here.
