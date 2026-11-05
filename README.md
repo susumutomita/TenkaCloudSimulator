@@ -4,7 +4,8 @@ English | [日本語](README.ja.md)
 
 Practice cloud APIs and console workflows locally, without a cloud account.
 TenkaCloud Simulator is an independent, AWS-first learning simulator with bounded
-Google Cloud Storage and Azure Blob Storage support. One Go binary embeds the
+Google Cloud Storage and Azure Blob Storage support, plus an optional local
+[Sakura Disk configuration API](docs/sakura.md). One Go binary embeds the
 AWS-style console built with Cloudscape, local Google Cloud and Azure consoles, a
 Scalar API reference, SQLite, and a pinned CPython/WASI runtime for Python Lambda.
 Running a built binary requires no Go, Node.js, host Python, Docker, external
@@ -101,7 +102,9 @@ need both stack permissions and underlying resource permissions;
 SQS permits at most 10,000 physical message rows and 64 MiB of UTF-8 bodies plus
 serialized attribute JSON across the process, including expired rows not yet
 collected. This is not the SQLite file size, process-memory usage, or AWS billing
-size. Other Google Cloud/Azure services and Sakura are not implemented. Using
+size. Other Google Cloud/Azure services are not implemented. An explicit opt-in
+[Sakura Disk metadata API](docs/sakura.md) is available without VM/block storage
+or a Sakura console; it is disabled by default. Using
 Cloudscape does not establish full AWS console fidelity or completed comparison
 against authenticated cloud consoles.
 
@@ -161,7 +164,8 @@ not permission grants. See [IAM details](docs/iam.md).
 
 After signing in, open `/_simulator/docs/`. Examples are **static documentation,
 not current saved state**. Navigation separates AWS, Google Cloud, Azure and a
-clearly unavailable Sakura Cloud status. Shared AWS endpoint guides explain the
+Sakura console-unavailable status. The optional [Sakura Disk native API](docs/sakura.md)
+is separate from that unimplemented console/reference surface. Shared AWS endpoint guides explain the
 required routing fields; see [reference navigation](docs/api-reference.md).
 Use **Test Request → Send** to inspect the real status,
 headers and body. Native formats remain intact: S3 XML/bytes, SSM JSON 1.1,
@@ -241,8 +245,9 @@ not binary runtime dependencies. Regeneration must preserve locks and original
 rights: [console](tools/console/README.md), [Scalar](tools/scalar/README.md),
 [Python/WASI runtime](tools/python/README.md).
 
-The registry contains 33 finite models and 197 deliberate defect controls
-(230 required model/check executions). The new IAM scenario checks two requests
+The registry contains 35 finite models and 219 deliberate defect controls
+(254 required model/check executions), including two Sakura metadata/admission
+models. Registration is not an integrated-revision execution receipt. The new IAM scenario checks two requests
 from each of four reachable seeds. A broader four-request trial timed out and
 is not claimed as verified. TLC examines bounded safety properties and checks
 that targeted mutants produce real counterexamples. It does not prove Go/JS

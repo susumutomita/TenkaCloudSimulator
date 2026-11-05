@@ -1,13 +1,18 @@
 # Finite state model
 
-Current registry: 33 models / 197 literal-protected controls
-(230 required executions). All previous30 model entries, TLA/CFG bytes,
-properties and175 controls are preserved. RESTRouteMatching adds six properties
-and six semantic controls; RESTProxyEventBoundary adds eight properties and ten
-controls. NativeWireProjection adds eight properties and six controls for the
-shared explicit ordered JSON writer. Independent scoped checks passed all three
-baselines and22 controls. Integration requires a complete230-case run against the
-exact immutable revision; scoped results and registration do not replace that gate.
+Current registry: 35 models / 219 literal-protected controls
+(254 required executions). All previous33 entries, TLA/CFG bytes, properties
+and197 controls are preserved. SakuraDiskMetadata adds13 safety properties and10
+controls for bounded metadata/allocator/binding/peer frames. SakuraDiskAdmission
+adds15 properties and12 controls for validated Actor-to-fixed-config mapping and
+HTTP admission/lookup ordering. The author previously ran these two baselines and
+22 controls; current integrated immutable254-case execution is still pending.
+See [Sakura boundaries and native correspondence](../docs/sakura.md). These models
+do not prove CLI flag parsing, DB leases, Icon resources, SQL/locking, VM/storage
+reality or Go refinement. Existing native/SDK evidence and current global gates
+must be reported separately; registration itself is not an execution pass.
+The prior RESTRouteMatching, RESTProxyEventBoundary and NativeWireProjection
+models retain their exact registered bounds, safety properties and22 controls.
 IAMManagedPolicies retains its four API-reachable seeds and two-request suffixes;
 the earlier four-request exploration timed out and is not claimed.
 Registration is source evidence, not itself evidence of successful execution. Dated receipts below
@@ -16,7 +21,7 @@ finite models do not prove Go/SQL/HTTP/UI refinement or complete cloud compatibi
 
 Legacy integration sections below retain historical counts and status statements
 for traceability. Their word “current” refers to the recorded integration, not
-today's registry. The authoritative current inventory is the 33/197 registry
+today's registry. The authoritative current inventory is the 35/219 registry
 above; proof claims always require evidence for the exact revision.
 
 `ObjectStore.tla` models two buckets and two keys, shared object ownership, create/put/delete transitions, and an abstract identity decision `allow /\ ~deny`. `ObjectStore.cfg` checks type correctness, no orphan objects, no unauthorized mutation, and explicit-deny precedence.

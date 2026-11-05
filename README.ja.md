@@ -62,7 +62,7 @@ make build
 
 S3のCloudFormationはBucketName/Versioning/PublicAccessBlock/ユーザーTagsとRef/Arnに対応し、空でない履歴は削除しません。呼出者にはStack ARNと各リソース操作の両方の権限が必要で、CAPABILITY_IAMは権限を付与しません。
 
-SQSの操作画面とAPI referenceはnative JSON 1.0 APIを使用し、SDKと同じ状態を操作します。保持中・期限切れ未回収を含む物理message rowはプロセス全体10000件、UTF-8 bodyとserialized attribute JSONの合計64 MiBまでです。これはSQLiteファイル全体・プロセスメモリ・AWS課金サイズの上限ではありません。下記の限定GCP Storage・Azure Blob実装がありますが、両クラウドの他サービスとSakuraは未対応です。Issueや計画は実装完了を意味しません。[開発状況](docs/development-status.md)を参照してください。Cloudscapeを使用していますが、本物のAWSコンソールとの全画面・全挙動の一致や実AWSとの差分検証完了は主張していません。
+SQSの操作画面とAPI referenceはnative JSON 1.0 APIを使用し、SDKと同じ状態を操作します。保持中・期限切れ未回収を含む物理message rowはプロセス全体10000件、UTF-8 bodyとserialized attribute JSONの合計64 MiBまでです。これはSQLiteファイル全体・プロセスメモリ・AWS課金サイズの上限ではありません。下記の限定GCP Storage・Azure Blob実装がありますが、両クラウドの他サービスは未対応です。[Sakura Disk構成メタデータAPI](docs/sakura.md)は明示的な有効化で使用できますが、既定は無効で、VM・実ストレージ・Sakuraコンソールは未対応です。Issueや計画は実装完了を意味しません。[開発状況](docs/development-status.md)を参照してください。Cloudscapeを使用していますが、本物のAWSコンソールとの全画面・全挙動の一致や実AWSとの差分検証完了は主張していません。
 
 ## Google Cloud Storage・Azure Blob Storageのローカル接続
 
@@ -161,4 +161,4 @@ combined 29-model/164-control formal gate (193 executions). These receipts apply
 to that revision. Every later change still requires its exact-HEAD CI, including
 the 45-case E2E suite; focused results do not replace whole-suite verification.
 
-現在の形式検査の登録は33モデル・197制御（230実行）です。IAMの追加モデルは4つの到達可能な初期状態から各2要求の範囲で、4要求の試案はタイムアウトし未成功です。上の過去の受領証とは区別し、最新HEADで全ゲートを実行してください。API資料はAWS・Google Cloud・Azureを分け、Sakura Cloudは未実装表示です。[ナビゲーション](docs/api-reference.md)を参照してください。
+現在の形式検査の登録は35モデル・219制御（254実行）です。IAMの追加モデルは4つの到達可能な初期状態から各2要求の範囲で、4要求の試案はタイムアウトし未成功です。上の過去の受領証とは区別し、最新HEADで全ゲートを実行してください。API資料はAWS・Google Cloud・Azureを分け、Sakura CloudコンソールとAPI referenceの操作一覧は未実装表示です。任意有効化するDisk native APIとは区別してください。[ナビゲーション](docs/api-reference.md)を参照してください。
