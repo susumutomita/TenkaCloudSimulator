@@ -107,9 +107,20 @@
     {
       "path": "internal/server/web/app.js",
       "sha256": "a613d269aff36d7366dff0700982fdb1fe0e2d7c47237377daf59ae2fa712d34",
-      "disposition": "presentation",
-      "reason": "Canonical Cloudscape bundle/digests/source receipt regenerated from unchanged pinned dependencies and original rights; generated JavaScript is integration evidence, not separate transport or authorization proof.",
-      "models": []
+      "disposition": "modeled",
+      "reason": "Canonical same-lock generated bundle preserves maince1 Secrets source and routing byte-for-byte while adding Azure live properties. Retain the existing finite SecretsRevealEpoch correspondence as an unchanged/frame-limited compiled projection only; it does not cover Azure HEAD/header parsing, all JavaScript, animation, minification or compiler correctness. Azure source has its separate AzurePropertiesEpoch binding. Independent build/browser and exact-new-HEAD formal gates remain required.",
+      "models": [
+        {
+          "id": "SecretsRevealEpoch",
+          "properties": [
+            "NoUnmountedDisplay",
+            "FreshEmissionHistory",
+            "ReturnedARNMatches",
+            "VisibleContextMatches"
+          ],
+          "limits": "Finite explicit-retrieve/display model, not React, DOM, AbortController, memory zeroization or implementation refinement. Only the successful response path is modeled; native store/IAM must authorize before returning any secret. A returned ARN can differ and must be rejected. Retrieve, Hide and navigation invalidate epochs; unmount also clears visible state. Parent must remount on region/principal changes. Emission history captures the context at each acceptance so later Hide/navigation cannot relabel an earlier stale acceptance. Draft entry, mutation atomicity and form layout are outside this model. Parent main.jsx scope binds only Secrets routing/remount key (region/principal/navigation); the generated app.js binding is the canonical compiled artifact of those source inputs, independently checked by bundle/asset hashes. It does not model unrelated existing console services or prove JavaScript compilation."
+        }
+      ]
     },
     {
       "path": "scripts/formal_model_gate.py",
