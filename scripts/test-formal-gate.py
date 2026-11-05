@@ -34,7 +34,7 @@ class FormalGateTests(unittest.TestCase):
 
     def test_complete_registry_and_exact_mutations(self):
         registry = load_registry(self.root)
-        self.assertEqual({model['id'] for model in registry['models']}, {'SecretsVersionLifecycle', 'SecretsRevealEpoch', 'SecretsDisclosureChannels', 'ObjectStore', 'StackOwnership', 'S3Versions', 'NativeIAMOwnership', 'RESTDeploymentSnapshot', 'SSMParameterState', 'StartupTokenVisibility', 'SQSLifecycle', 'SQSStorageBudget', 'BrowserSessions', 'ProviderActor', 'GCPStorageState', 'AzureBlobState', 'ProjectAuthority', 'BlobRange', 'ProviderPath', 'KMSKeyState', 'KMSProtocolAdmission'})
+        self.assertEqual({model['id'] for model in registry['models']}, {'SecretsMutationRefresh', 'SecretsVersionLifecycle', 'SecretsRevealEpoch', 'SecretsDisclosureChannels', 'ObjectStore', 'StackOwnership', 'S3Versions', 'NativeIAMOwnership', 'RESTDeploymentSnapshot', 'SSMParameterState', 'StartupTokenVisibility', 'SQSLifecycle', 'SQSStorageBudget', 'BrowserSessions', 'ProviderActor', 'GCPStorageState', 'AzureBlobState', 'ProjectAuthority', 'BlobRange', 'ProviderPath', 'KMSKeyState', 'KMSProtocolAdmission'})
         for model in registry['models']:
             source = (self.root / model['model']).read_text()
             for mutant in model['mutants']:
@@ -85,6 +85,29 @@ class FormalGateTests(unittest.TestCase):
                     load_registry(self.root)
         path.write_text(original)
 
+    def test_mutation_refresh_model_and_each_property_are_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        registry = json.loads(original)
+        model = next(m for m in registry['models'] if m['id'] == 'SecretsMutationRefresh')
+        cfg = self.root / model['config']
+        original_cfg = cfg.read_text()
+        registry['models'] = [m for m in registry['models'] if m['id'] != model['id']]
+        path.write_text(json.dumps(registry))
+        with self.assertRaisesRegex(GateError, 'required existing model'):
+            load_registry(self.root)
+        for prop in model['properties']:
+            with self.subTest(property=prop):
+                candidate = json.loads(original)
+                target = next(m for m in candidate['models'] if m['id'] == model['id'])
+                target['properties'].remove(prop)
+                cfg.write_text('\n'.join(line for line in original_cfg.splitlines() if line != 'INVARIANT ' + prop) + '\n')
+                path.write_text(json.dumps(candidate))
+                with self.assertRaisesRegex(GateError, 'existing required invariant'):
+                    load_registry(self.root)
+        cfg.write_text(original_cfg)
+        path.write_text(original)
+
     def test_each_required_mutation_control_cannot_disappear(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
@@ -100,7 +123,7 @@ class FormalGateTests(unittest.TestCase):
                     with self.assertRaisesRegex(GateError, 'required mutation control|needs a sensitivity control'):
                         load_registry(self.root)
                     checked += 1
-        self.assertEqual(checked, 108)
+        self.assertEqual(checked, 112)
         path.write_text(original)
 
     def test_missing_model_config_checksum_each_fail(self):
@@ -506,12 +529,35 @@ class FormalGateTests(unittest.TestCase):
                         load_registry(self.root)
         path.write_text(original)
 
+    def test_mutation_refresh_model_and_each_property_are_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        registry = json.loads(original)
+        model = next(m for m in registry['models'] if m['id'] == 'SecretsMutationRefresh')
+        cfg = self.root / model['config']
+        original_cfg = cfg.read_text()
+        registry['models'] = [m for m in registry['models'] if m['id'] != model['id']]
+        path.write_text(json.dumps(registry))
+        with self.assertRaises(GateError):
+            load_registry(self.root)
+        for prop in model['properties']:
+            with self.subTest(property=prop):
+                candidate = json.loads(original)
+                target = next(m for m in candidate['models'] if m['id'] == model['id'])
+                target['properties'].remove(prop)
+                cfg.write_text(original_cfg.replace(' ' + prop, ''))
+                path.write_text(json.dumps(candidate))
+                with self.assertRaises(GateError):
+                    load_registry(self.root)
+        cfg.write_text(original_cfg)
+        path.write_text(original)
+
     def test_each_required_mutation_control_cannot_disappear(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
         registry = json.loads(original)
         self.assertEqual(set(REQUIRED_MUTANTS), BASE_MODELS)
-        self.assertEqual(sum(map(len, REQUIRED_MUTANTS.values())), 108)
+        self.assertEqual(sum(map(len, REQUIRED_MUTANTS.values())), 112)
         self.assertEqual({m['id']: {c['id'] for c in m['mutants']} for m in registry['models']}, REQUIRED_MUTANTS)
         for model in registry['models']:
             for mutant in model['mutants']:

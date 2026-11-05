@@ -1,6 +1,6 @@
 # Secrets Manager: local training subset
 
-> Provider-aware normal merge candidate: main `f5dba056da9bf69df047b391a45d06a3aff3dc66` plus preserved PR408 `ffdf1e29` native source. All18 Core model entries (including Login/BrowserSessions binding) and three Secrets models remain:21 models/108 controls,129 finite cases. All28 main Conformance method bodies are retained plus three mandatory Secrets cases:31 total. The localized Secrets child preserves its native protocol, mutation and explicit-disclosure guards; source/pure checks do not replace fresh integrated formal/race/E2E/CI execution.
+> Provider-aware normal merge candidate: main `f5dba056da9bf69df047b391a45d06a3aff3dc66` plus preserved PR408 `ffdf1e29` native source. All18 Core model entries (including Login/BrowserSessions binding) and three earlier Secrets models remain; SecretsMutationRefresh adds one model/four controls:22 models/112 controls,134 finite cases. All28 main Conformance method bodies are retained plus three mandatory Secrets cases:31 total. The localized Secrets child preserves its native protocol, mutation and explicit-disclosure guards; source/pure checks do not replace fresh integrated formal/race/E2E/CI execution.
 
 
 Seven native Secrets Manager operations, the Cloudscape console, SDK clients and
@@ -242,7 +242,28 @@ the independently preserved ffdf1e29 child output; six pure checks passed. The
 new provider catalog adds six tests including capability gating, both routes and
 AWS-only Japanese discovery, for12 pure checks total. The canonical console was
 built from the existing same-lock dependencies without any install. These checks
-are not real browser/reveal/SDK or full model-129 acceptance at this new union.
+are not real browser/reveal/SDK or full model-134 acceptance at this new union.
 Fresh integrated gates are still required; old62ba/ffdf/main receipts remain
 separate historical inputs. No blocked public operation is retried by this local
 source preparation.
+
+## Acknowledged writes and metadata-read failures
+
+A live/current CreateSecret or PutSecretValue acknowledgement closes the form and
+clears the draft and its request token before the independent Describe/List read.
+If that read fails, the error is shown in a metadata/list view with read-only
+refresh; Save/Store cannot replay the acknowledged write from a cleared form.
+Opening a new user form is a new intent with a fresh nonempty request token.
+This does not claim rollback or certainty for an unacknowledged network failure.
+
+The new [finite contract](formal-secrets-mutation-refresh.md) registers five
+properties and four targeted controls while preserving all prior 21/108 entries.
+The old-source real-binary regression failed both Create/Put form-closure
+assertions. A focused overlay pass is retained separately. The new canonical
+embedded binary (no overlay) passed the full Secrets helper and new regression:
+both actual native ACKs close their forms, raw drafts disappear, read-only
+refresh preserves ARN/current version without another write, and a separately
+opened form uses a distinct nonempty token. Pure7 checks and canonical assets
+passed. Policy/app checks and final 134-case immutable/whole-quality/hosted gates
+remain separately required. The explicit aborted-read fixture is not a claim
+about the cause of an earlier hosted CI failure.

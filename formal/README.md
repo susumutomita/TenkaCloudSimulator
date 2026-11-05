@@ -1,5 +1,9 @@
 # Finite state model
 
+Current registered input: **22 models / 112 required controls (134 planned runs)**.
+The earlier inventories and run receipts below are historical increments; only
+a completed exact-HEAD run establishes current verification.
+
 `ObjectStore.tla` models two buckets and two keys, shared object ownership, create/put/delete transitions, and an abstract identity decision `allow /\ ~deny`. `ObjectStore.cfg` checks type correctness, no orphan objects, no unauthorized mutation, and explicit-deny precedence.
 
 Run `TLA_JAR=/path/to/tla2tools.jar make formal`. The jar is TLC 1.7.4 from the official tlaplus/tlaplus release and checked against `tla2tools.sha256`. The script also removes the nonempty-delete guard in a temporary mutant and requires TLC to detect a NoOrphans violation. No Java/TLC dependency is needed at application runtime.
@@ -123,8 +127,8 @@ BrowserSessions, SQSLifecycle and SQSStorageBudget remain mandatory in the large
 
 The registry adds ProviderActor (7 properties/6 sensitivity controls),
 GCPStorageState (10 properties/8 controls), and AzureBlobState (10 properties/11
-controls), plus ProjectAuthority (10 properties/6 controls), BlobRange (11 properties/8 controls), and ProviderPath (finite carrier properties/7 controls), retaining all existing models/controls. The current source registry
-has16 models/82 controls in main before this KMS restack. Individual finite runs and the final immutable integrated
+controls), plus ProjectAuthority (10 properties/6 controls), BlobRange (11 properties/8 controls), and ProviderPath (finite carrier properties/7 controls), retaining all existing models/controls. That historical source registry
+had16 models/82 controls before the KMS restack. Individual finite runs and the final immutable integrated
 run are recorded separately; registration alone is not a successful TLC run.
 
 ProviderActor abstracts post-authentication emission, selected identity and
@@ -162,7 +166,7 @@ XML order, escaping, disclosure, actual SDK parsing and SQL initialization are n
 proved by this association. Independent serializer byte-goldens and native HTTP
 checks cover the wire format separately.
 
-All82 established sensitivity-control IDs (including36 earlier baseline controls) have literal per-model minimum sets. Real-filesystem tests remove each control individually and require rejection. This protects the checked inventory, not semantic completeness or a Go implementation proof.
+All112 current sensitivity-control IDs (retaining those82 and36 earlier baseline controls) have literal per-model minimum sets. Real-filesystem tests remove each control individually and require rejection. This protects the checked inventory, not semantic completeness or a Go implementation proof.
 
 
 ## Bounded KMS key-state registration
@@ -210,7 +214,7 @@ requires its own immutable input/applicability gate before publication.
 
 The KMS increment now belongs to public main0a4:18 baselines/94 controls. Its source was checked before merge; old911/8ccc receipts remain historical inputs. This new Secrets restack retains those entries and needs its own exact-head validation; no previous KMS or Secrets proof is promoted to the new union.
 
-## Secrets candidate on current main (new-head verification pending)
+## Historical provider-aware Secrets registration (21/108)
 
 This union retains main18models/94controls and adds exactSecretsVersionLifecycle, SecretsRevealEpoch and SecretsDisclosureChannels (3/14):21models/108controls,129plannedTLCcases. No new integrated execution claimed; old62ba,9b,7a results remain historical inputs. The finite models do not prove Go/SQL/React refinement or KMS encryption ofSecrets. See [Secrets limits](../docs/secrets-manager.md).
 
@@ -222,3 +226,13 @@ cases. No TLA/CFG or control is changed by locale/catalog integration. Existing
 finite state/source contracts do not prove translations, bundling, React lifetimes,
 Google/Azure parity or actual secret erasure. Fresh immutable checks remain
 required on the final union.
+
+## Current Secrets mutation/read integration
+
+The current registry preserves those 21 models and 108 controls and adds only
+SecretsMutationRefresh (five properties/four named controls): 22 models, 112
+controls, 134 planned executions. Every original model/config/property/control is
+retained. The new property mapping separates acknowledged writes from read-only
+metadata recovery; it does not prove React/HTTP/native idempotency or ambiguous
+write outcomes. [Contract](../docs/formal-secrets-mutation-refresh.md). Full new-HEAD
+immutable applicability/TLC and whole-quality/hosted CI remain required.

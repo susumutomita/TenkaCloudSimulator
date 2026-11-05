@@ -3,7 +3,10 @@
 `SecretsMutationRefresh` models the view contract after one CreateSecret or
 PutSecretValue submission. It does not modify or replace SecretsRevealEpoch or
 SecretsDisclosureChannels, which cover different reveal/context boundaries.
-This standalone proposal is not yet registered in the repository gate.
+It is registered additively in the repository gate with five required properties
+and four literal-protected sensitivity controls. The combined registry has
+22 models and 112 controls: 134 planned executions. Registration is not a
+successful full integrated TLC run.
 
 ## Source correspondence and defect
 
@@ -14,8 +17,9 @@ successful metadata response. When that read fails after an acknowledged write,
 the existing form remains open with cleared draft/token. Root's targeted fix
 adds form exit immediately after the live write ACK and before the independent
 metadata refresh. The model specifies that corrected contract, not the buggy
-baseline as a passing implementation. Root owns the actual source fix and
-before/after SDK/browser regression; no runtime file is changed in this branch.
+baseline as a passing implementation. The integrated fix closes the form after the live ACK. The actual browser/native
+regression retains the failed old-source case and separately checks the fixed
+embedded binary; see the current validation status in [Secrets Manager](secrets-manager.md).
 
 `Submit` represents one native Create/Put request, including its original T1.
 `WriteACK` closes the form and clears draft/token. `StartMetadataRead` is a separate
@@ -58,5 +62,5 @@ Each control must produce exit 12, the named invariant and a real counterexample
 Syntax/runtime/type failures and timeouts are failures of validation, not accepted
 controls. Execution receipts belong outside the source tree and identify exact
 model/config/tool hashes. No old PR or other model success establishes this
-model's result; root will register it additively with all existing protected models,
-properties and controls if the proposal is accepted.
+model's result. All 21 earlier models and 108 protected controls are retained
+unchanged. The full immutable integrated run remains a separate required gate.

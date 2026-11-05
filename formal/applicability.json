@@ -4,30 +4,44 @@
   "changes": [
     {
       "path": "README.md",
-      "sha256": "194646d75a5af753bf29610a812698172e78b37373f0a95a54af36da96b44197",
+      "sha256": "9cbeb3698c3f465c5555cf4dc21b8cd03eaeb8b3fb68e3d54ca5f04b2d6be5ba",
       "disposition": "documentation",
-      "reason": "Currentmainf5 provider-aware Secrets source integration and explicit limits/evidence-input distinctions. Historical ffdf/62ba/main checks are not relabeled new-head success. No runtime, service scope, publication/Ready/merge or real cloud action is inferred.",
+      "reason": "Refresh current22/112 scope, ACK/read recovery behavior and actual canonical focused evidence; explicitly separate historical failures/overlay, current focused checks and pending whole134/Go/E2E/hosted results. Preserve rights and unsupported boundaries.",
       "models": []
     },
     {
-      "path": "docs/formal-validation.md",
-      "sha256": "8a90df36d4f799ad0e9bcd5555eafc487ed95fe6e4428f18111ae28022b3edb2",
+      "path": "docs/ci.md",
       "disposition": "documentation",
-      "reason": "Currentmainf5 provider-aware Secrets source integration and explicit limits/evidence-input distinctions. Historical ffdf/62ba/main checks are not relabeled new-head success. No runtime, service scope, publication/Ready/merge or real cloud action is inferred.",
+      "models": [],
+      "reason": "Refresh current22/112 scope, ACK/read recovery behavior and actual canonical focused evidence; explicitly separate historical failures/overlay, current focused checks and pending whole134/Go/E2E/hosted results. Preserve rights and unsupported boundaries.",
+      "sha256": "d4595c608c6270e2b49d72b4ad6c7b6482cd24195b65ffcd28e28c5bd315e534"
+    },
+    {
+      "path": "docs/formal-secrets-mutation-refresh.md",
+      "disposition": "documentation",
+      "models": [],
+      "reason": "Refresh current22/112 scope, ACK/read recovery behavior and actual canonical focused evidence; explicitly separate historical failures/overlay, current focused checks and pending whole134/Go/E2E/hosted results. Preserve rights and unsupported boundaries.",
+      "sha256": "ecea31f367f794a416199ea5a4809a415cadfe8116a19c27d59d3f39a4cf30ef"
+    },
+    {
+      "path": "docs/formal-validation.md",
+      "sha256": "8b7c3cd244f3a0dbaf33e0784fb296affd4bed797fd07ccffc623f51cae52a02",
+      "disposition": "documentation",
+      "reason": "Refresh current22/112 scope, ACK/read recovery behavior and actual canonical focused evidence; explicitly separate historical failures/overlay, current focused checks and pending whole134/Go/E2E/hosted results. Preserve rights and unsupported boundaries.",
       "models": []
     },
     {
       "path": "docs/secrets-manager.md",
-      "sha256": "08e56ee709f006be93bc2a1512ae16e488e7fbe58acf8ae2eb82a42d17ce0a79",
+      "sha256": "a1ad4b0c11aea087c8bbb53157fb8c292a8b1d4fbc0fbb27b843d067e85c7f6e",
       "disposition": "documentation",
-      "reason": "Currentmainf5 provider-aware Secrets source integration and explicit limits/evidence-input distinctions. Historical ffdf/62ba/main checks are not relabeled new-head success. No runtime, service scope, publication/Ready/merge or real cloud action is inferred.",
+      "reason": "Refresh current22/112 scope, ACK/read recovery behavior and actual canonical focused evidence; explicitly separate historical failures/overlay, current focused checks and pending whole134/Go/E2E/hosted results. Preserve rights and unsupported boundaries.",
       "models": []
     },
     {
       "path": "formal/README.md",
-      "sha256": "62f64b22bcf003ad110c73e4a6e0bbe7371b8bfba129094e4e7109f28b298d41",
+      "sha256": "d1c3f19fa93e31d9cebdc3f1737f08338efa9a001b3b5c5f8f1e6cb1ec65586e",
       "disposition": "documentation",
-      "reason": "Currentmainf5 provider-aware Secrets source integration and explicit limits/evidence-input distinctions. Historical ffdf/62ba/main checks are not relabeled new-head success. No runtime, service scope, publication/Ready/merge or real cloud action is inferred.",
+      "reason": "Refresh current22/112 scope, ACK/read recovery behavior and actual canonical focused evidence; explicitly separate historical failures/overlay, current focused checks and pending whole134/Go/E2E/hosted results. Preserve rights and unsupported boundaries.",
       "models": []
     },
     {
@@ -65,6 +79,44 @@
           "limits": "Finite classification of plaintext acquisition/output call sites, not Go fmt/JSON/slog, SQL, encryption, memory secrecy or implementation refinement. The private plaintext() accessor itself has no authorization: its only production writer call site must follow successful native Get authorization. Actual private-holder formatting/JSON/slog sentinel tests and native denied-Get/error/metadata tests verify the Go mechanisms independently."
         }
       ]
+    },
+    {
+      "path": "formal/SecretsMutationRefresh.cfg",
+      "disposition": "modeled",
+      "models": [
+        {
+          "id": "SecretsMutationRefresh",
+          "properties": [
+            "TypeOK",
+            "AckClosesForm",
+            "NoWriteOnReadRetry",
+            "AckClearsDraft",
+            "FreshFormHasToken"
+          ],
+          "limits": "UI ACK-to-metadata/form-state abstraction assuming live current ACK; not epoch/auth/SQL/server idempotency/refinement/liveness or disclosure proof. Excludes unacknowledged network ambiguity/delete/stage-label/rollback/further writes. Corresponds to the reviewed live-ACK form exit in mutate; historical d9 source omitted that exit. Keyboard, React scheduling, concrete HTTP and fresh-token entropy require executable checks."
+        }
+      ],
+      "reason": "Add bounded live-ACK form exit, draft clear, read-only metadata retry and fresh new-intent token specification. Five properties and four literal controls are protected; standalone22states/4controls is separate prior evidence, not current full134 execution. No Go/React/auth/SQL/unacknowledged-network refinement claim.",
+      "sha256": "7f970bd6d3d69844869feadf01b3f66d7c23cfc7cb6afa6d527612a6fca7f443"
+    },
+    {
+      "path": "formal/SecretsMutationRefresh.tla",
+      "disposition": "modeled",
+      "models": [
+        {
+          "id": "SecretsMutationRefresh",
+          "properties": [
+            "TypeOK",
+            "AckClosesForm",
+            "NoWriteOnReadRetry",
+            "AckClearsDraft",
+            "FreshFormHasToken"
+          ],
+          "limits": "UI ACK-to-metadata/form-state abstraction assuming live current ACK; not epoch/auth/SQL/server idempotency/refinement/liveness or disclosure proof. Excludes unacknowledged network ambiguity/delete/stage-label/rollback/further writes. Corresponds to the reviewed live-ACK form exit in mutate; historical d9 source omitted that exit. Keyboard, React scheduling, concrete HTTP and fresh-token entropy require executable checks."
+        }
+      ],
+      "reason": "Add bounded live-ACK form exit, draft clear, read-only metadata retry and fresh new-intent token specification. Five properties and four literal controls are protected; standalone22states/4controls is separate prior evidence, not current full134 execution. No Go/React/auth/SQL/unacknowledged-network refinement claim.",
+      "sha256": "c376c2e0c0bfd5ed25a96ade77d05f4077419eb8a8bf09a811c39901b59910a7"
     },
     {
       "path": "formal/SecretsRevealEpoch.cfg",
@@ -146,9 +198,9 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "7b4e2c48f5f3bf320838c33d9e85415a972cfd281c252ed4e5d50701be33cd5f",
+      "sha256": "ed76607383013a696b0917ee919999f0391ed0d84d7a9a1192637331442a749d",
       "disposition": "formal-infrastructure",
-      "reason": "Preserve all main18 Core entries/94 controls including extracted Login binding; union only the three existing Secrets models/14 controls and strict required-property/control omission fixtures. No timeout/domain/property weakening or workflow/security-setting changes; new full suite execution still required.",
+      "reason": "Preserve original21 entries/108 literal controls byte-semantically and append only bounded SecretsMutationRefresh (5properties/4controls), with explicit source/limitations. New current22/112 registry must receive its own immutable134-case validation.",
       "models": []
     },
     {
@@ -413,7 +465,7 @@
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "51c088d9418744142e9c91c5f713bd32e976c7cbc790bcf76a2239ff081eb136",
+      "sha256": "29c2f21e679d7776539199d78eb7969a008be683fa4067a11ae0764f4a776d34",
       "disposition": "modeled",
       "reason": "Canonical locally built console carries the unchanged normalized Secrets disclosure/epoch contract and preserved current Core source. Binding is to the selected Secret child behavior, not a proof of minification, bundler, all embedded JavaScript or cryptographic erasure. Real browser/session/reveal acceptance and license/asset checks remain separately required.",
       "models": [
@@ -431,16 +483,16 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "b15b3589215f663dca86675dfd35c30a5d4e6123065fbe36ca7e3f33a02b2a68",
+      "sha256": "ffffca7df2710d33a624b68f998b9f80d230aa3aeb2f78dcc8d461aae4272d51",
       "disposition": "formal-infrastructure",
-      "reason": "Preserve all main18 Core entries/94 controls including extracted Login binding; union only the three existing Secrets models/14 controls and strict required-property/control omission fixtures. No timeout/domain/property weakening or workflow/security-setting changes; new full suite execution still required.",
+      "reason": "Add SecretsMutationRefresh to literal required model/property/four-control minima while preserving all earlier21/108. Valid CFG+registry property-removal detectors and each of112 control-removal fixtures must reject; no domain/deadline/property/threshold reduction. Registration and units are not full134 execution.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "621836f81d1a50b6fca76d259a1fbf809bbcd8749bc70002e292fa7b6f6b60fe",
+      "sha256": "ebbabc8a015b597ce7fee054df35c9c155149ec20ba49edf18dd011a947f76a4",
       "disposition": "formal-infrastructure",
-      "reason": "Preserve all main18 Core entries/94 controls including extracted Login binding; union only the three existing Secrets models/14 controls and strict required-property/control omission fixtures. No timeout/domain/property weakening or workflow/security-setting changes; new full suite execution still required.",
+      "reason": "Add SecretsMutationRefresh to literal required model/property/four-control minima while preserving all earlier21/108. Valid CFG+registry property-removal detectors and each of112 control-removal fixtures must reject; no domain/deadline/property/threshold reduction. Registration and units are not full134 execution.",
       "models": []
     },
     {
@@ -473,9 +525,9 @@
     },
     {
       "path": "test/e2e/secrets_manager_console.py",
-      "sha256": "1793974514bcfd565da878fb3f3afc8c7341f09462d7903cbbe7b1c744e1cd4c",
+      "sha256": "422292db26d69cf62b93328adea9007e663af089a0fec4ac305b6082ff356a24",
       "disposition": "test-support",
-      "reason": "Retain all28 main Conformance method bodies and three actual Secrets process/browser/served-example methods; add provider catalog discovery/alias checks. No assertions/skips/limits weakened. New test execution results must be recorded separately; pure checks are not HTTP/SDK/browser proof.",
+      "reason": "Retain full native UI/SDK/privacy/auth/PCmobile regression and add actual Create/Put ACK followed by one explicitly aborted Describe; assert closed/cleared form, read-only recovery without another write, exact native version/value and new-intent nonempty distinct tokens. No fake write response, timeout relaxation or actual CI-cause claim.",
       "models": []
     },
     {
@@ -487,14 +539,14 @@
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "7cb269e0b0af110a9ed763357b3734ecfd6d77f00412cd2bfc2480e0c2ec6276",
+      "sha256": "423dad821b2acce0737211fd5d6f36b13ca542502e3d1bd886cc387379e59a5d",
       "disposition": "presentation",
       "reason": "Provider-scoped AWS catalog/alias/static localized child or canonical embedded assets only. Same native fields/data/credentials and safe disclosure guards are preserved; capability checks are discovery, not authority. Same-lock existing dependencies reused without install, and original notices retained. Syntax/pure/source checks do not establish real browser/SDK/localization/asset or fullCI acceptance.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "378854af3172b936a877de0a244edc18b994541742393bb11fe74bb1478f23f6",
+      "sha256": "0b7835e598ae0e59b4140174011f673b74842e47b6c1155484d0f147cda03d79",
       "disposition": "presentation",
       "reason": "Provider-scoped AWS catalog/alias/static localized child or canonical embedded assets only. Same native fields/data/credentials and safe disclosure guards are preserved; capability checks are discovery, not authority. Same-lock existing dependencies reused without install, and original notices retained. Syntax/pure/source checks do not establish real browser/SDK/localization/asset or fullCI acceptance.",
       "models": []
@@ -542,9 +594,9 @@
     },
     {
       "path": "tools/console/src/secrets-manager.jsx",
-      "sha256": "a6810f157899c12e2540dc1a19a7c3f73555361c517f81cc21e33307bcf2453a",
+      "sha256": "c99808205bd9b9f9429873d9cb7da64988104ba9c944bfc2940478b65aaa0b7a",
       "disposition": "modeled",
-      "reason": "The copied ffdf1e29 child preserves call/reveal clearing/lifecycle/hide blocks and default-English compiled erasure exactly; presentation alone uses shared locale and finite structured notices/typed internal validation. Existing explicit Get/returned ARN/epoch/live checks bind this finite disclosure-context contract. No secret/name/ARN/JSON/API enum/raw server message is translated. Source equality/pure checks are not actual browser, authorization, SQL or Go/React refinement proof.",
+      "reason": "Retain explicit retrieve/ARN/current-epoch/hide and typed static localization contract. Live acknowledged mutation now closes form before clearing draft/token and independently refreshing metadata. New bounded ACK/read-only-retry/fresh-intent mapping is separate from epoch/disclosure; concrete browser/SQLite regression is independently required. No full JS scheduling, server idempotency, ambiguous write, entropy or cryptographic erasure proof.",
       "models": [
         {
           "id": "SecretsRevealEpoch",
@@ -555,14 +607,24 @@
             "VisibleContextMatches"
           ],
           "limits": "Finite explicit-retrieve/display model, not React, DOM, AbortController, memory zeroization or implementation refinement. Only the successful response path is modeled; native store/IAM must authorize before returning any secret. A returned ARN can differ and must be rejected. Retrieve, Hide and navigation invalidate epochs; unmount also clears visible state. Parent must remount on region/principal changes. Emission history captures the context at each acceptance so later Hide/navigation cannot relabel an earlier stale acceptance. Draft entry, mutation atomicity and form layout are outside this model. Parent main.jsx scope binds only Secrets routing/remount key (region/principal/navigation); the generated app.js binding is the canonical compiled artifact of those source inputs, independently checked by bundle/asset hashes. It does not model unrelated existing console services or prove JavaScript compilation."
+        },
+        {
+          "id": "SecretsMutationRefresh",
+          "properties": [
+            "AckClosesForm",
+            "NoWriteOnReadRetry",
+            "AckClearsDraft",
+            "FreshFormHasToken"
+          ],
+          "limits": "UI ACK-to-metadata/form-state abstraction assuming live current ACK; not epoch/auth/SQL/server idempotency/refinement/liveness or disclosure proof. Excludes unacknowledged network ambiguity/delete/stage-label/rollback/further writes. Corresponds to the reviewed live-ACK form exit in mutate; historical d9 source omitted that exit. Keyboard, React scheduling, concrete HTTP and fresh-token entropy require executable checks."
         }
       ]
     },
     {
       "path": "tools/console/tests/secrets-manager-locale.test.mjs",
-      "sha256": "d1bc5fbff5e9de7e57d0068b42a11aba3efd871537f5638123e370b6eb9e85ce",
-      "disposition": "presentation",
-      "reason": "Provider-scoped AWS catalog/alias/static localized child or canonical embedded assets only. Same native fields/data/credentials and safe disclosure guards are preserved; capability checks are discovery, not authority. Same-lock existing dependencies reused without install, and original notices retained. Syntax/pure/source checks do not establish real browser/SDK/localization/asset or fullCI acceptance.",
+      "sha256": "85aaaf6a33bca1fecc1b1be10c5a5ee6360f7209f4e2286ce0decf6fc778d247",
+      "disposition": "test-support",
+      "reason": "Seven pure checks retain independent ffdf English compiled oracle, normalizing only one exact reviewed ACK form exit. Missing/moved/wrong/duplicate/unrelated mutations must fail normalization; not a replacement for actual browser/native/full gates.",
       "models": []
     }
   ]
