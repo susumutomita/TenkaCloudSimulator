@@ -1,7 +1,8 @@
 # Azure live-properties callback model
 
 `AzurePropertiesEpoch` is an independent finite model of the local blob Properties
-view. It is not yet registered in the repository formal gate. It neither proves
+view, registered in `formal/models.json` and required by the repository formal
+gate. It neither proves
 JavaScript refinement nor Azure RBAC, transport authenticity, SQL, cryptography,
 header parsing, resource-name encoding or authenticated Azure portal parity.
 Container properties remain deferred.
@@ -44,9 +45,14 @@ clearing on Close; no previous metadata during loading or after failed HEAD;
 metadata matching the active selected request; stale finalizers not clearing a
 new request's busy state; and locale frame preservation.
 
-Literal controls below are proposed sensitivity checks. They are not claims that
-every individual redundant defense is independently necessary. Their actual TLC
-classification remains unrun until a pinned-jar execution receipt is available.
+The five literal controls below are required sensitivity checks. They do not claim
+that every individual redundant defense is independently necessary. At source
+revision `8e656eb`, the pinned TLC gate passed the baseline and observed the named
+invariant counterexample for each control. The full registry at that revision
+passed 28 baselines and 158 controls (186 executions), locally and in
+[branch CI 41984532262](https://github.com/susumutomita/TenkaCloudSimulator/actions/runs/41984532262).
+These receipts describe that immutable revision; later revisions require their
+own applicable checks.
 
 | ID | Exact replacement | Expected invariant |
 | --- | --- | --- |
@@ -69,7 +75,12 @@ fail with the named invariant and a real trace, not syntax/type/timeout errors.
 
 The helper `azure_live_properties.py` uses actual native HTTP, not an official
 Azure SDK. It compares stale-list versus new HEAD fields, checks no body GET,
-403/404 refusal without cached details, locale stability, actual delayed-response
-Close/unmount behavior and a synthetic existing-root-handler principal transition.
+403/404 refusal without cached details, locale stability, same-component
+Close/reopen with old and new native HEAD responses held independently, actual
+delayed-response Close/unmount behavior and a synthetic existing-root-handler
+principal transition. The same-component check keeps the new HEAD withheld while
+releasing the old response and verifies that loading and empty properties persist.
+Browser abort may reject the old fetch before that release; this test therefore
+does not independently prove that an old JavaScript callback ran past abort.
 This model is supplementary; it cannot replace actual browser/native tests,
 canonical asset embedding, mandatory wrapper registration or full repository gates.

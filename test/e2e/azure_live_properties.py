@@ -4,7 +4,8 @@ Requires a freshly embedded binary containing azure-blob.jsx, Chromium and axe.
 Native HTTP oracle, not an official Azure SDK check.
 No overlay, fake response values or cloud access. Delayed/error routes below
 forward actual native responses; only their delivery timing/auth context varies.
-Source-only until the integration owner schedules real execution.
+Run the exact helper revision against its matching embedded product binary;
+earlier receipts do not certify a changed revision.
 """
 import json
 import os
@@ -22,7 +23,7 @@ from reflow import assert_reflow
 
 def run_azure_live_properties():
     axe = Path(os.environ['AXE_SCRIPT']).read_text()
-    errors, outside, audits, held = [], [], [], []
+    errors, outside, audits, held, same_component = [], [], [], [], []
     container, key = 'live-properties', 'folder/percent%25-日本語.txt'
     tail = '/' + container + '/' + urllib.parse.quote(key, safe='/')
     path = AZURE + tail
@@ -117,6 +118,79 @@ def run_azure_live_properties():
                     page.screenshot(path=str(REPORTS/f'azure-live-properties-{width}.png'), full_page=True, animations='disabled')
                     audits.append(width)
                     dialog.get_by_role('button', name='Close', exact=True).click()
+
+                    # SAME component, not the unmount cases below. Both HTTP
+                    # responses come from the actual local server. Hold the old
+                    # response, close/reopen without navigating or remounting,
+                    # and release it while a newer HEAD remains outstanding.
+                    # AbortController may cancel the old browser fetch before
+                    # delivery; report that path honestly rather than claiming
+                    # this independently isolates an after-abort JS callback.
+                    leaf_handle = view.element_handle()
+                    assert leaf_handle is not None
+                    failed_old = []
+                    def same_component_failed(request):
+                        if request.url == url and request.method == 'HEAD':
+                            failed_old.append(request)
+                    page.on('requestfailed', same_component_failed)
+                    try:
+                        mode['value'] = 'hold'
+                        view.get_by_role('button', name=key, exact=True).click()
+                        expect(dialog.get_by_role('status')).to_have_text('Loading blob properties…')
+                        deadline = time.monotonic()+5
+                        while len(held) != 1:
+                            assert time.monotonic()<deadline, 'Same-component old HEAD barrier not reached'
+                            page.wait_for_timeout(10)
+                        old_route, old_response = held[0]
+                        old_etag = old_response.headers['etag']
+                        dialog.get_by_role('button', name='Close', exact=True).click()
+                        expect(dialog).to_have_count(0)
+                        put(('same-component-fresh-body-'+str(width)).encode(), 'same-component-fresh-'+str(width))
+                        actual = wire('HEAD', path)[1]
+                        assert actual['ETag'] != old_etag, 'Native replacement did not create a fresh ETag'
+                        view.get_by_role('button', name=key, exact=True).click()
+                        expect(dialog.get_by_role('status')).to_have_text('Loading blob properties…')
+                        expect(dialog.locator('dd')).to_have_count(0)
+                        deadline = time.monotonic()+5
+                        while len(held) != 2:
+                            assert time.monotonic()<deadline, 'Same-component new HEAD barrier not reached'
+                            page.wait_for_timeout(10)
+                        assert view.evaluate('(node, original)=>node===original', leaf_handle), 'Close/reopen remounted the leaf'
+                        new_route, new_response = held[1]
+                        assert new_response.status == 200 and new_response.headers['etag'] == actual['ETag']
+                        release_outcome = 'fulfill-returned'
+                        try:
+                            old_route.fulfill(response=old_response)
+                        except Exception as error:
+                            assert any(word in str(error).lower() for word in ('cancel', 'closed', 'invalid interception', 'already handled')), type(error).__name__
+                            release_outcome = 'browser-already-canceled-route'
+                        # A real animation-frame barrier, not a reduced timeout:
+                        # permit scheduled promise/finally/render work to run
+                        # while the NEW route is still deliberately withheld.
+                        page.evaluate('()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))')
+                        assert len(held) == 2
+                        assert view.evaluate('(node, original)=>node===original', leaf_handle)
+                        expect(dialog.get_by_role('status')).to_have_text('Loading blob properties…')
+                        expect(dialog.locator('.azure-pane-body')).to_have_attribute('aria-busy', 'true')
+                        expect(dialog.locator('dd')).to_have_count(0)
+                        expect(dialog.get_by_text(old_etag, exact=True)).to_have_count(0)
+                        # Only now may the live current HEAD publish its actual
+                        # native headers. Release order is part of the oracle.
+                        new_route.fulfill(response=new_response)
+                        held.clear()
+                        for label, header in [('ETag', 'ETag'), ('Size (bytes)', 'Content-Length'), ('Content type', 'Content-Type'), ('Last modified', 'Last-Modified'), ('Blob type', 'x-ms-blob-type')]:
+                            property_value(label, actual[header])
+                        property_value('proof', actual['x-ms-meta-proof'])
+                        expect(dialog.get_by_role('status')).to_have_count(0)
+                        expect(dialog.locator('.azure-pane-body')).to_have_attribute('aria-busy', 'false')
+                        same_component.append({'width': width, 'sameLeafDOMNode': True, 'oldRelease': release_outcome,
+                                               'oldFetchRequestFailedObserved': bool(failed_old),
+                                               'newStillLoadingAfterOldRelease': True, 'oldPropertiesAbsent': True,
+                                               'newActualHEADHeadersPublished': True,
+                                               'limit': 'Browser abort can reject the old fetch before release; this does not independently prove an old response callback ran past abort.'})
+                        dialog.get_by_role('button', name='Close', exact=True).click()
+                    finally:
+                        page.remove_listener('requestfailed', same_component_failed)
 
                     # Loading cannot reuse any previous success. A genuine old
                     # HEAD response delivered after Close/unmount is ignored.
@@ -244,7 +318,7 @@ def run_azure_live_properties():
                 assert not errors and not outside
                 wire('DELETE', AZURE+'/'+container+'?restype=container', expected=202)
                 wire('DELETE', AZURE+'/'+container+'?restype=container', expected=202, host=peer, credential=other)
-                REPORTS.joinpath('azure-live-properties.json').write_text(json.dumps({'actualEmbeddedBinary': True, 'oracle': 'native HTTP (not official SDK)', 'nativeLiveHEAD': True, 'bodyFetches': 0, 'staleListReplacement': True, 'localeKeepsLiveRecord': True, 'cancelThenUnmountLateReplyGuard': True, 'directProviderHashWhileOpenLateReplyGuard': True, 'directPrincipalWhileOpenLateReplyGuard': True, 'principalTransitionFixture': 'synthetic existing root-control events while native dialog open; not user-click usability', 'actual403And404NoCachedFallback': True, 'repairedRetry': True, 'peerPreserved': True, 'axeWidths': audits, 'pageErrors': len(errors), 'externalRequests': len(outside)}, indent=2)+'\n')
+                REPORTS.joinpath('azure-live-properties.json').write_text(json.dumps({'actualEmbeddedBinary': True, 'oracle': 'native HTTP (not official SDK)', 'nativeLiveHEAD': True, 'bodyFetches': 0, 'staleListReplacement': True, 'localeKeepsLiveRecord': True, 'sameComponentCloseReopenOldNewHEAD': same_component, 'cancelThenUnmountLateReplyGuard': True, 'directProviderHashWhileOpenLateReplyGuard': True, 'directPrincipalWhileOpenLateReplyGuard': True, 'principalTransitionFixture': 'synthetic existing root-control events while native dialog open; not user-click usability', 'actual403And404NoCachedFallback': True, 'repairedRetry': True, 'peerPreserved': True, 'axeWidths': audits, 'pageErrors': len(errors), 'externalRequests': len(outside)}, indent=2)+'\n')
             finally:
                 for route, _ in held:
                     try:
