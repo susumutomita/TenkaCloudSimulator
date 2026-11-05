@@ -1,22 +1,17 @@
 # Finite state model
 
-Current branch registry: 35 models / 220 literal-protected controls
-(255 required executions). Every34 model entry, TLA/CFG byte sequence,
-property and210 controls from maina8 are preserved. DynamoDBConsoleEpoch adds
-one bounded console model and ten semantic controls. SecretVersionListing's
-metadata-only listing contract is retained. Previous241-case DynamoDB and
-244-case Secrets receipts belong to their recorded inputs; neither substitutes
-for the complete255-case immutable check of this combined revision.
-IAMManagedPolicies retains its four API-reachable seeds and two-request suffixes;
-the earlier four-request exploration timed out and is not claimed.
-Registration is source evidence, not itself evidence of successful execution. Dated receipts below
-refer to their recorded inputs; later revisions require their own checks. These
-finite models do not prove Go/SQL/HTTP/UI refinement or complete cloud compatibility.
+Current branch registry: **36 models / 234 literal-protected controls**
+(**270 required executions**). All 35 main model entries and 220 controls are
+preserved. SecretMetadataViewEpoch adds thirteen properties and fourteen semantic
+controls for the metadata child and parent tab invalidation. DynamoDBConsoleEpoch
+and SecretVersionListing remain registered without changes. Earlier scoped and
+combined receipts apply only to their recorded inputs; the complete immutable
+270-case gate for this integration remains required. Registration is not execution.
 
-Legacy integration sections below retain historical counts and status statements
-for traceability. Their word “current” refers to the recorded integration, not
-today's registry. The authoritative branch inventory is the 35/220 registry
-above; proof claims always require evidence for the exact revision.
+IAMManagedPolicies retains its four API-reachable seeds and two-request suffixes;
+the earlier four-request exploration timed out and is not claimed. These finite
+models do not prove Go/SQL/HTTP/UI refinement or complete cloud compatibility.
+Historical sections retain their recorded counts; current inventory is 36/234.
 
 `ObjectStore.tla` models two buckets and two keys, shared object ownership, create/put/delete transitions, and an abstract identity decision `allow /\ ~deny`. `ObjectStore.cfg` checks type correctness, no orphan objects, no unauthorized mutation, and explicit-deny precedence.
 
@@ -379,9 +374,9 @@ by a complete shell/React refinement.
 
 SecretVersionListing adds nine invariants and thirteen literal-protected semantic
 controls, preserving all prior33 registry objects and197 controls and their
-TLA/CFG bytes. The Secrets-only addition had34 baselines +210 controls =244 required
-executions. The current combined inventory above also includes DynamoDBConsoleEpoch. Registration and earlier independent scoped results are not a
-successful immutable244-case integration gate or hosted-CI result.
+TLA/CFG bytes. At the listing-only registration checkpoint the inventory was34 baselines
++210 controls =244 required executions. That historical registration and scoped
+results do not establish a complete integration or hosted-CI result.
 
 Four-transition suffixes cover four ordered symbolic version keys, two database
 authorities/regions, two physical generations and page size one. List permission
@@ -393,7 +388,7 @@ precedes the page limit, resume positions advance strictly, and reads preserve
 version/stage state. Add/promote/delete/recreate/reopen expose live keyset changes;
 this is not a stable snapshot or a proof of eventual termination.
 
-Correspondence is limited to ListSecretVersionIDs metadata enumeration/cursor
+Correspondence is limited to ListSecretVersionIds metadata enumeration/cursor
 logic in `secrets_manager_versions.go` and the exact added operation dispatch in
 `secret_http.go`; the other seven operations do not acquire new guarantees. Native
 store and HTTP tests named in source_scope separately exercise denied frames,
@@ -408,3 +403,42 @@ parsing, actual timestamp/UUID order, variable page sizes, secret-value redactio
 retention, UI and Go refinement remain native/integration obligations. All thirteen
 controls must fail their exact named semantic invariant with a behavioral trace;
 syntax/type/config failures or timeouts are not accepted counterexamples.
+
+
+## Secret metadata view epoch
+
+`SecretMetadataViewEpoch` checks six transitions, at most two reads and five
+separate seeds for overlap, scope changes, paging, locale and parent tab entry.
+A valid page has one symbolic row; a second row exposes accidental accumulation.
+Render and committed scopes are distinct. Old callbacks remain schedulable after
+Abort so the finite epoch/identity guards are checked independently of transport
+cancellation. Concrete browser cancellation may prevent JavaScript delivery and
+is not evidence that every post-Abort callback branch executed.
+
+Thirteen properties cover metadata-only requests, cursor provenance, stale
+acceptance/render/error refusal, loading ownership, clearing on new reads/errors,
+validated current-page rows, same-mount locale retention and clearing a prior
+parent reveal on metadata-tab entry. Fourteen named controls must each produce
+its specified invariant violation, not a parser/type/runtime error or timeout.
+The source projection includes `secret_versions.jsx`, the parent's tab-invalidate
+call and the derived bundle. It excludes old asyncRetrieve behavior, secret-byte
+zeroization, SQL, host authentication and whole React scheduling/refinement.
+Cursor provenance and response validation are abstract predicates, not HMAC or
+JSON parser proofs; the live pager is not a stable complete history snapshot.
+
+
+| Finite action / carrier | Concrete scope |
+| --- | --- |
+| Begin / current callback / Settle | Child `load`, captured scope/ticket/controller, `current()` success/catch/finally guard |
+| Cancel / Unmount / scope commit | `clear` and layout-effect cleanup; render result/error scope checks |
+| Next / cursor provenance | Next uses only the displayed page cursor, unchanged ARN/filter; current rows replace prior page |
+| Payload validity | `metadataPage` validation abstracted as a Boolean; malformed-payload implementation remains a test obligation |
+| LocaleFlip | `useLocale` static rendering; locale absent from the query-scope memo dependencies |
+| EnterMetadata | Parent tab-change `invalidate()`; prior visible-reveal Boolean only |
+
+The actual helper exercises 23 native versions as20+3 rows, list-only authority,
+metadata-read failure/repair, scope transitions, cancellation and peer frames.
+The no-reload language round trip passed on the unchanged canonical embedded
+product: same metadata DOM node, ARN/filter/page IDs and host scope, no additional
+reads or value requests. Earlier Japanese-after-reload checks are a distinct
+oracle; neither focused result replaces the complete immutable integration gate.

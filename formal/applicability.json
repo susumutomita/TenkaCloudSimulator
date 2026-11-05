@@ -1,96 +1,132 @@
 {
   "version": 1,
-  "base_sha": "a8b920b264cf8060c6a49f7c4cd421a317ba94d2",
+  "base_sha": "74c93ea9b00818b83ea87d78a7946600ad823680",
   "changes": [
     {
       "path": "README.ja.md",
-      "sha256": "25f514c14818a398d2102f8115f69ec636f25a80d8cfe521523cbebfe711ceec",
+      "sha256": "1e3b9a591e2492a0fd034bb9b97a34a83ed71d367b1d3af6ef1e262dfefef114",
       "disposition": "documentation",
-      "reason": "Documents actual bounded native/UI behavior, scoped receipts and unrun combined gates; no runtime execution or AWS parity claim.",
+      "reason": "Normal main integration and source inventory refresh; no authority, runtime, or model semantics changed by this nonformal artifact.",
       "models": []
     },
     {
       "path": "README.md",
-      "sha256": "23021fad860d857f0b2235d409a966eae664109b0402b6a1fa47dcac0fe62938",
+      "sha256": "d82e8a117416bcdbe78ef3287d6db4e51fd3ed340fffc6be073b78a3daa81581",
       "disposition": "documentation",
-      "reason": "Documents actual bounded native/UI behavior, scoped receipts and unrun combined gates; no runtime execution or AWS parity claim.",
+      "reason": "Normal main integration and source inventory refresh; no authority, runtime, or model semantics changed by this nonformal artifact.",
       "models": []
     },
     {
-      "path": "docs/dynamodb.md",
-      "sha256": "277523a977bba19465baa572b9dc765ecd4d594222253d4275b66c8319c4633f",
+      "path": "docs/secrets-manager.md",
+      "sha256": "349af3888bdbe2752a56dc3025df038d952ba08f3980be097fd432208dce14ed",
       "disposition": "documentation",
-      "reason": "Documents actual bounded native/UI behavior, scoped receipts and unrun combined gates; no runtime execution or AWS parity claim.",
+      "reason": "Normal main integration and source inventory refresh; no authority, runtime, or model semantics changed by this nonformal artifact.",
       "models": []
-    },
-    {
-      "path": "formal/DynamoDBConsoleEpoch.cfg",
-      "sha256": "fe29c57429b02e9e0a44e8e11a60e1427019256fd9ead3a40b2e060c9fb26b9a",
-      "disposition": "modeled",
-      "reason": "Independent bounded console context/read epoch/key/TableId-at-acceptance/form cancellation/synchronous owner/ACK-before-refresh/read-only retry model; not native storage, protocol/IAM/SQL correctness or unbounded JavaScript/React refinement. Concrete browser and native tests are separate evidence.",
-      "models": [
-        {
-          "id": "DynamoDBConsoleEpoch",
-          "properties": [
-            "TypeOK",
-            "NoStalePublication",
-            "ReadGenerationVerified",
-            "DisplayedKeyBound",
-            "CancelNoOrphanLoading",
-            "AckClosesDraft",
-            "AckBelongsToCurrentView",
-            "ReadRetryNeverWrites",
-            "SingleSendBeforeACK",
-            "LocalePreservesDraft"
-          ],
-          "limits": "UI finite safety abstraction only, not JS/React/AbortController scheduling refinement, native protocol/JSON/IAM/auth/SQLite state/number/binary/size/capacity proof. TableId checks establish agreement at item-read acceptance only, not freshness after later native changes or atomic TableId-CAS on mutation; official TableName writes remain subject to recreation between preflight and send. Combined context labels abstract principal/region/remount, not credentials/tenant isolation. Stutter observation admits no liveness/hung-read progress claim. One write intent only; symbolic ACK/no automatic replay, not server rollback when an aborted request already committed. No concrete item values, missing-item/delete-confirmation semantics or arbitrary pagination. Main caller scope is limited to the DynamoDB route and its region|principal|navigation mount key/reset; embedded app.js is the canonical derived component/caller artifact. Neither binding proves other shell/components, compiler/bundler correctness or JavaScript refinement."
-        }
-      ]
-    },
-    {
-      "path": "formal/DynamoDBConsoleEpoch.tla",
-      "sha256": "da131cfbaa28709430cc4de67ca16f9674f33d6cd8f87e21475d592f9a13a4ed",
-      "disposition": "modeled",
-      "reason": "Independent bounded console context/read epoch/key/TableId-at-acceptance/form cancellation/synchronous owner/ACK-before-refresh/read-only retry model; not native storage, protocol/IAM/SQL correctness or unbounded JavaScript/React refinement. Concrete browser and native tests are separate evidence.",
-      "models": [
-        {
-          "id": "DynamoDBConsoleEpoch",
-          "properties": [
-            "TypeOK",
-            "NoStalePublication",
-            "ReadGenerationVerified",
-            "DisplayedKeyBound",
-            "CancelNoOrphanLoading",
-            "AckClosesDraft",
-            "AckBelongsToCurrentView",
-            "ReadRetryNeverWrites",
-            "SingleSendBeforeACK",
-            "LocalePreservesDraft"
-          ],
-          "limits": "UI finite safety abstraction only, not JS/React/AbortController scheduling refinement, native protocol/JSON/IAM/auth/SQLite state/number/binary/size/capacity proof. TableId checks establish agreement at item-read acceptance only, not freshness after later native changes or atomic TableId-CAS on mutation; official TableName writes remain subject to recreation between preflight and send. Combined context labels abstract principal/region/remount, not credentials/tenant isolation. Stutter observation admits no liveness/hung-read progress claim. One write intent only; symbolic ACK/no automatic replay, not server rollback when an aborted request already committed. No concrete item values, missing-item/delete-confirmation semantics or arbitrary pagination. Main caller scope is limited to the DynamoDB route and its region|principal|navigation mount key/reset; embedded app.js is the canonical derived component/caller artifact. Neither binding proves other shell/components, compiler/bundler correctness or JavaScript refinement."
-        }
-      ]
     },
     {
       "path": "formal/README.md",
-      "sha256": "67b2256ad8e0c7420e9a04b1690d6b6250511b2d71306770cfac080d41c2b930",
+      "sha256": "3db4c46330ae68c3565efa155ea7ff238b67acca5307afcb61444945ecd57f07",
       "disposition": "documentation",
-      "reason": "Documents actual bounded native/UI behavior, scoped receipts and unrun combined gates; no runtime execution or AWS parity claim.",
+      "reason": "Normal main integration and source inventory refresh; no authority, runtime, or model semantics changed by this nonformal artifact.",
       "models": []
     },
     {
+      "path": "formal/SecretMetadataViewEpoch.cfg",
+      "sha256": "36e3f08c0c9aa2040694e0cc4b5de9e21970fad6dc9ac740b953ac262bf90fd0",
+      "disposition": "modeled",
+      "reason": "Preserve exact declared finite scopes from both normal-merge parents; source integration does not establish execution/refinement.",
+      "models": [
+        {
+          "id": "SecretMetadataViewEpoch",
+          "properties": [
+            "TypeOK",
+            "MetadataRequestsOnly",
+            "CursorRequestBound",
+            "NoStaleCallbackAcceptance",
+            "NoStaleRenderedMetadata",
+            "NoStaleRenderedError",
+            "LoadingTracksLatest",
+            "PendingClearsMetadata",
+            "NoRowsOnError",
+            "ValidatedMetadataOnly",
+            "CurrentPageOnly",
+            "LocalePreservesQuery",
+            "ParentRevealClearedForMetadata"
+          ],
+          "limits": "Scoped metadata-child contract and the parent tab-change invalidate call only. A prior-parent-reveal Boolean models clearing visible state on entry, not pending GetSecretValue replies, byte erasure, old asyncRetrieve, disclosure channels or SQL. Opaque cursor provenance is an annotation, not decoding or HMAC validation. A valid-response Boolean abstracts the concrete metadata parser. Host callback identity/remount and active scope are assumptions, not main navigation/authentication proofs. Abort leaves callbacks schedulable to check guards; actual browser Abort may prevent JavaScript delivery. Locale transitions preserve query state, not arbitrary React scheduling. Finite safety projection only: no stable history snapshot, page completeness, backend/JSON/IAM refinement, whole React proof or liveness. Source scope on the parent and bundle is limited to this tab and child projection; unrelated retrieval/mutation code is excluded."
+        }
+      ]
+    },
+    {
+      "path": "formal/SecretMetadataViewEpoch.tla",
+      "sha256": "12819b1dc64f7381f8c511305e3b5c7144f6ad5c03ccacff8b10c5bd4c53631f",
+      "disposition": "modeled",
+      "reason": "Preserve exact declared finite scopes from both normal-merge parents; source integration does not establish execution/refinement.",
+      "models": [
+        {
+          "id": "SecretMetadataViewEpoch",
+          "properties": [
+            "TypeOK",
+            "MetadataRequestsOnly",
+            "CursorRequestBound",
+            "NoStaleCallbackAcceptance",
+            "NoStaleRenderedMetadata",
+            "NoStaleRenderedError",
+            "LoadingTracksLatest",
+            "PendingClearsMetadata",
+            "NoRowsOnError",
+            "ValidatedMetadataOnly",
+            "CurrentPageOnly",
+            "LocalePreservesQuery",
+            "ParentRevealClearedForMetadata"
+          ],
+          "limits": "Scoped metadata-child contract and the parent tab-change invalidate call only. A prior-parent-reveal Boolean models clearing visible state on entry, not pending GetSecretValue replies, byte erasure, old asyncRetrieve, disclosure channels or SQL. Opaque cursor provenance is an annotation, not decoding or HMAC validation. A valid-response Boolean abstracts the concrete metadata parser. Host callback identity/remount and active scope are assumptions, not main navigation/authentication proofs. Abort leaves callbacks schedulable to check guards; actual browser Abort may prevent JavaScript delivery. Locale transitions preserve query state, not arbitrary React scheduling. Finite safety projection only: no stable history snapshot, page completeness, backend/JSON/IAM refinement, whole React proof or liveness. Source scope on the parent and bundle is limited to this tab and child projection; unrelated retrieval/mutation code is excluded."
+        }
+      ]
+    },
+    {
       "path": "formal/models.json",
-      "sha256": "8496f209ce144dbea0f898e20736db1f0baf908fc8328d781fbdb250ef1f83fc",
+      "sha256": "9a2d9e33c0231218acb8772bc5fd32c747d0811945213b9d82cebcf6be511ad1",
       "disposition": "formal-infrastructure",
-      "reason": "Adds literal-required DynamoDB console model/property/control/source inventory without changing checker functions, CFG grammar, old33 models or197 controls; negative removal tests protect the additive obligations.",
+      "reason": "Normal main integration and source inventory refresh; no authority, runtime, or model semantics changed by this nonformal artifact.",
       "models": []
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "50c7631e2b6eaf11d113fb1db8c3477ffdb3cf0e8d1a124e456ae90a6fedbc31",
+      "sha256": "38a2cd6fa3b89c35e5aa4e37d29e366f1462594f431c06729eeefa8b134e96b3",
       "disposition": "modeled",
-      "reason": "Only the added DynamoDB route/component and region|principal|navigation mount key are related to finite old-view publication/ACK/key binding. Embedded app.js is the canonical same-lock derived artifact. Actual native browser tests separately exercise scope transitions. No claim about other bundled components, compiler/React refinement, IAM/SQL/native behavior or atomic TableId-CAS.",
+      "reason": "Preserve exact declared finite scopes from both normal-merge parents; source integration does not establish execution/refinement.",
       "models": [
+        {
+          "id": "SecretsRevealEpoch",
+          "properties": [
+            "TypeOK",
+            "NoUnmountedDisplay",
+            "FreshEmissionHistory",
+            "ReturnedARNMatches",
+            "VisibleContextMatches"
+          ],
+          "limits": "Finite explicit-retrieve/display model, not React, DOM, AbortController, memory zeroization or implementation refinement. Only the successful response path is modeled; native store/IAM must authorize before returning any secret. A returned ARN can differ and must be rejected. Retrieve, Hide and navigation invalidate epochs; unmount also clears visible state. Parent must remount on region/principal changes. Emission history captures the context at each acceptance so later Hide/navigation cannot relabel an earlier stale acceptance. Draft entry, mutation atomicity and form layout are outside this model. Parent main.jsx scope binds only Secrets routing/remount key (region/principal/navigation); the generated app.js binding is the canonical compiled artifact of those source inputs, independently checked by bundle/asset hashes. It does not model unrelated existing console services or prove JavaScript compilation."
+        },
+        {
+          "id": "SecretMetadataViewEpoch",
+          "properties": [
+            "TypeOK",
+            "MetadataRequestsOnly",
+            "CursorRequestBound",
+            "NoStaleCallbackAcceptance",
+            "NoStaleRenderedMetadata",
+            "NoStaleRenderedError",
+            "LoadingTracksLatest",
+            "PendingClearsMetadata",
+            "NoRowsOnError",
+            "ValidatedMetadataOnly",
+            "CurrentPageOnly",
+            "LocalePreservesQuery",
+            "ParentRevealClearedForMetadata"
+          ],
+          "limits": "Scoped metadata-child contract and the parent tab-change invalidate call only. A prior-parent-reveal Boolean models clearing visible state on entry, not pending GetSecretValue replies, byte erasure, old asyncRetrieve, disclosure channels or SQL. Opaque cursor provenance is an annotation, not decoding or HMAC validation. A valid-response Boolean abstracts the concrete metadata parser. Host callback identity/remount and active scope are assumptions, not main navigation/authentication proofs. Abort leaves callbacks schedulable to check guards; actual browser Abort may prevent JavaScript delivery. Locale transitions preserve query state, not arbitrary React scheduling. Finite safety projection only: no stable history snapshot, page completeness, backend/JSON/IAM refinement, whole React proof or liveness. Source scope on the parent and bundle is limited to this tab and child projection; unrelated retrieval/mutation code is excluded."
+        },
         {
           "id": "DynamoDBConsoleEpoch",
           "properties": [
@@ -104,98 +140,108 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "2df98ef8cdb238c7e9a7a4134b0c415ffb4cfd1f2d881048006d992afde48e3e",
+      "sha256": "114e00c9d2cd5188acd0d66fd98f5f75d5dfa612d61e8c46bda1358880112abf",
       "disposition": "formal-infrastructure",
-      "reason": "Adds literal-required DynamoDB console model/property/control/source inventory without changing checker functions, CFG grammar, old33 models or197 controls; negative removal tests protect the additive obligations.",
+      "reason": "Normal main integration and source inventory refresh; no authority, runtime, or model semantics changed by this nonformal artifact.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "6fc3fbf586ddfda801592d5e42de79aa570fffeb6d6b071c9a29f47e0e9f2161",
+      "sha256": "112b114039e592b270d3d98154e069f29673d73bc1987100e594136ce6916f6a",
       "disposition": "formal-infrastructure",
-      "reason": "Adds literal-required DynamoDB console model/property/control/source inventory without changing checker functions, CFG grammar, old33 models or197 controls; negative removal tests protect the additive obligations.",
-      "models": []
-    },
-    {
-      "path": "test/console/navigation.test.mjs",
-      "sha256": "19dc49a8e14765bac407a3dc692139c674952604659542ff856e75699848fdae",
-      "disposition": "test-support",
-      "reason": "Adds actual two-CLI/native DynamoDB browser lifecycle oracles or additive mandatory wrapper/gate removal tests. Old50 wrappers and all old native assertions are preserved; tests do not grant runtime authority.",
+      "reason": "Normal main integration and source inventory refresh; no authority, runtime, or model semantics changed by this nonformal artifact.",
       "models": []
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "fe6c3f17ba33f77399e1e7d38ff186523ac951b991275c560fdcc530ab826359",
+      "sha256": "05850955625d37b71eb678569894afd6ced1e21e2db404682d2f7eece4015521",
       "disposition": "test-support",
-      "reason": "Adds actual two-CLI/native DynamoDB browser lifecycle oracles or additive mandatory wrapper/gate removal tests. Old50 wrappers and all old native assertions are preserved; tests do not grant runtime authority.",
+      "reason": "Normal main integration and source inventory refresh; no authority, runtime, or model semantics changed by this nonformal artifact.",
       "models": []
     },
     {
-      "path": "test/e2e/dynamodb_console.py",
-      "sha256": "23147109716c2a02e2bed70e86cacbac781feedfbd7d75d9a32d688c8d6d7489",
+      "path": "test/e2e/secret_versions_console.py",
+      "sha256": "6107fd4e7bba2e057f67c676f1f46997011f5428c553dc7806f4288df1cc4fcf",
       "disposition": "test-support",
-      "reason": "Adds actual two-CLI/native DynamoDB browser lifecycle oracles or additive mandatory wrapper/gate removal tests. Old50 wrappers and all old native assertions are preserved; tests do not grant runtime authority.",
+      "reason": "Normal main integration and source inventory refresh; no authority, runtime, or model semantics changed by this nonformal artifact.",
       "models": []
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "03f23ca2c6e6bb23756ac5a1dedb677e486e5049bb59bf440e0ffcc32412a70d",
+      "sha256": "dd105d72d56352794b50edcda6cca250bb9fff1a8dd3baf47e8e66eb61b8af1a",
       "disposition": "presentation",
-      "reason": "Adds capability-gated DynamoDB discovery or canonical sourcegraph/digest metadata. This artifact alone changes no native API/auth/storage; component/caller/runtime bundle are independently modeled with explicit limits.",
+      "reason": "Normal main integration and source inventory refresh; no authority, runtime, or model semantics changed by this nonformal artifact.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "a2362487bdd3cb7413ad2caf5a900e224c42b56ecd77d2da2ec006cfd378969a",
+      "sha256": "fef7396f47bbd621e8cdcff31dac4d3b1a0f7045fc032af809f6d91d2bbfca6e",
       "disposition": "presentation",
-      "reason": "Adds capability-gated DynamoDB discovery or canonical sourcegraph/digest metadata. This artifact alone changes no native API/auth/storage; component/caller/runtime bundle are independently modeled with explicit limits.",
+      "reason": "Normal main integration and source inventory refresh; no authority, runtime, or model semantics changed by this nonformal artifact.",
       "models": []
     },
     {
-      "path": "tools/console/src/console-navigation.mjs",
-      "sha256": "ee8fe6958cc3202f4f6e69dab93e55554c78a1e8e7aa47275dfbfed740692a3d",
-      "disposition": "presentation",
-      "reason": "Adds capability-gated DynamoDB discovery or canonical sourcegraph/digest metadata. This artifact alone changes no native API/auth/storage; component/caller/runtime bundle are independently modeled with explicit limits.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/dynamodb.jsx",
-      "sha256": "56e826044dc8300561cf21d068f2582735d4800fb4171b47b2e998ce75a4ebe4",
+      "path": "tools/console/src/secret_versions.jsx",
+      "sha256": "c07f2e2088e71b4331be016ae5d2e4d21d493b07811e394376a50d39f7f9ef51",
       "disposition": "modeled",
-      "reason": "Independent bounded console context/read epoch/key/TableId-at-acceptance/form cancellation/synchronous owner/ACK-before-refresh/read-only retry model; not native storage, protocol/IAM/SQL correctness or unbounded JavaScript/React refinement. Concrete browser and native tests are separate evidence.",
+      "reason": "Preserve exact declared finite scopes from both normal-merge parents; source integration does not establish execution/refinement.",
       "models": [
         {
-          "id": "DynamoDBConsoleEpoch",
+          "id": "SecretMetadataViewEpoch",
           "properties": [
             "TypeOK",
-            "NoStalePublication",
-            "ReadGenerationVerified",
-            "DisplayedKeyBound",
-            "CancelNoOrphanLoading",
-            "AckClosesDraft",
-            "AckBelongsToCurrentView",
-            "ReadRetryNeverWrites",
-            "SingleSendBeforeACK",
-            "LocalePreservesDraft"
+            "MetadataRequestsOnly",
+            "CursorRequestBound",
+            "NoStaleCallbackAcceptance",
+            "NoStaleRenderedMetadata",
+            "NoStaleRenderedError",
+            "LoadingTracksLatest",
+            "PendingClearsMetadata",
+            "NoRowsOnError",
+            "ValidatedMetadataOnly",
+            "CurrentPageOnly",
+            "LocalePreservesQuery",
+            "ParentRevealClearedForMetadata"
           ],
-          "limits": "UI finite safety abstraction only, not JS/React/AbortController scheduling refinement, native protocol/JSON/IAM/auth/SQLite state/number/binary/size/capacity proof. TableId checks establish agreement at item-read acceptance only, not freshness after later native changes or atomic TableId-CAS on mutation; official TableName writes remain subject to recreation between preflight and send. Combined context labels abstract principal/region/remount, not credentials/tenant isolation. Stutter observation admits no liveness/hung-read progress claim. One write intent only; symbolic ACK/no automatic replay, not server rollback when an aborted request already committed. No concrete item values, missing-item/delete-confirmation semantics or arbitrary pagination. Main caller scope is limited to the DynamoDB route and its region|principal|navigation mount key/reset; embedded app.js is the canonical derived component/caller artifact. Neither binding proves other shell/components, compiler/bundler correctness or JavaScript refinement."
+          "limits": "Scoped metadata-child contract and the parent tab-change invalidate call only. A prior-parent-reveal Boolean models clearing visible state on entry, not pending GetSecretValue replies, byte erasure, old asyncRetrieve, disclosure channels or SQL. Opaque cursor provenance is an annotation, not decoding or HMAC validation. A valid-response Boolean abstracts the concrete metadata parser. Host callback identity/remount and active scope are assumptions, not main navigation/authentication proofs. Abort leaves callbacks schedulable to check guards; actual browser Abort may prevent JavaScript delivery. Locale transitions preserve query state, not arbitrary React scheduling. Finite safety projection only: no stable history snapshot, page completeness, backend/JSON/IAM refinement, whole React proof or liveness. Source scope on the parent and bundle is limited to this tab and child projection; unrelated retrieval/mutation code is excluded."
         }
       ]
     },
     {
-      "path": "tools/console/src/main.jsx",
-      "sha256": "863627e558a1041d559f74e790a5a3adcabbff98e87aed12cd2b448edda0754c",
+      "path": "tools/console/src/secrets-manager.jsx",
+      "sha256": "2876a2b76b88bc9777fc435dd057d094cdb4fbbf690f4a55480b7be9d45edd32",
       "disposition": "modeled",
-      "reason": "Only the added DynamoDB route/component and region|principal|navigation mount key are related to finite old-view publication/ACK/key binding. Embedded app.js is the canonical same-lock derived artifact. Actual native browser tests separately exercise scope transitions. No claim about other bundled components, compiler/React refinement, IAM/SQL/native behavior or atomic TableId-CAS.",
+      "reason": "Preserve exact declared finite scopes from both normal-merge parents; source integration does not establish execution/refinement.",
       "models": [
         {
-          "id": "DynamoDBConsoleEpoch",
+          "id": "SecretsRevealEpoch",
           "properties": [
-            "NoStalePublication",
-            "AckBelongsToCurrentView",
-            "DisplayedKeyBound"
+            "TypeOK",
+            "NoUnmountedDisplay",
+            "FreshEmissionHistory",
+            "ReturnedARNMatches",
+            "VisibleContextMatches"
           ],
-          "limits": "UI finite safety abstraction only, not JS/React/AbortController scheduling refinement, native protocol/JSON/IAM/auth/SQLite state/number/binary/size/capacity proof. TableId checks establish agreement at item-read acceptance only, not freshness after later native changes or atomic TableId-CAS on mutation; official TableName writes remain subject to recreation between preflight and send. Combined context labels abstract principal/region/remount, not credentials/tenant isolation. Stutter observation admits no liveness/hung-read progress claim. One write intent only; symbolic ACK/no automatic replay, not server rollback when an aborted request already committed. No concrete item values, missing-item/delete-confirmation semantics or arbitrary pagination. Main caller scope is limited to the DynamoDB route and its region|principal|navigation mount key/reset; embedded app.js is the canonical derived component/caller artifact. Neither binding proves other shell/components, compiler/bundler correctness or JavaScript refinement."
+          "limits": "Finite explicit-retrieve/display model, not React, DOM, AbortController, memory zeroization or implementation refinement. Only the successful response path is modeled; native store/IAM must authorize before returning any secret. A returned ARN can differ and must be rejected. Retrieve, Hide and navigation invalidate epochs; unmount also clears visible state. Parent must remount on region/principal changes. Emission history captures the context at each acceptance so later Hide/navigation cannot relabel an earlier stale acceptance. Draft entry, mutation atomicity and form layout are outside this model. Parent main.jsx scope binds only Secrets routing/remount key (region/principal/navigation); the generated app.js binding is the canonical compiled artifact of those source inputs, independently checked by bundle/asset hashes. It does not model unrelated existing console services or prove JavaScript compilation."
+        },
+        {
+          "id": "SecretMetadataViewEpoch",
+          "properties": [
+            "TypeOK",
+            "MetadataRequestsOnly",
+            "CursorRequestBound",
+            "NoStaleCallbackAcceptance",
+            "NoStaleRenderedMetadata",
+            "NoStaleRenderedError",
+            "LoadingTracksLatest",
+            "PendingClearsMetadata",
+            "NoRowsOnError",
+            "ValidatedMetadataOnly",
+            "CurrentPageOnly",
+            "LocalePreservesQuery",
+            "ParentRevealClearedForMetadata"
+          ],
+          "limits": "Scoped metadata-child contract and the parent tab-change invalidate call only. A prior-parent-reveal Boolean models clearing visible state on entry, not pending GetSecretValue replies, byte erasure, old asyncRetrieve, disclosure channels or SQL. Opaque cursor provenance is an annotation, not decoding or HMAC validation. A valid-response Boolean abstracts the concrete metadata parser. Host callback identity/remount and active scope are assumptions, not main navigation/authentication proofs. Abort leaves callbacks schedulable to check guards; actual browser Abort may prevent JavaScript delivery. Locale transitions preserve query state, not arbitrary React scheduling. Finite safety projection only: no stable history snapshot, page completeness, backend/JSON/IAM refinement, whole React proof or liveness. Source scope on the parent and bundle is limited to this tab and child projection; unrelated retrieval/mutation code is excluded."
         }
       ]
     }

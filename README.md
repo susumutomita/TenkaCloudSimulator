@@ -241,8 +241,8 @@ not binary runtime dependencies. Regeneration must preserve locks and original
 rights: [console](tools/console/README.md), [Scalar](tools/scalar/README.md),
 [Python/WASI runtime](tools/python/README.md).
 
-The registry contains 35 finite models and 220 deliberate defect controls
-(255 required model/check executions), including bounded DynamoDB console
+The registry contains 36 finite models and 234 deliberate defect controls
+(270 required model/check executions), including bounded DynamoDB console
 epoch/ACK/read-retry and Secrets version-metadata listing contracts. The new IAM scenario checks two requests
 from each of four reachable seeds. A broader four-request trial timed out and
 is not claimed as verified. TLC examines bounded safety properties and checks
