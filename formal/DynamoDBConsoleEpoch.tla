@@ -3,7 +3,7 @@ EXTENDS Naturals, TLC
 (* Independent finite view-safety abstraction. No storage/IAM/JS refinement.
    Two request slots, epochs 0..2 (no wrap), one remount, one write intent.
    A published item is checked at acceptance, not against future native changes. *)
-None == "None"
+CONSTANT None
 Contexts == 0..1
 Request == [ctx:Contexts, inst:0..1, epoch:0..2, key:0..1, table:1..2]
 Visible == [ctx:Contexts, inst:0..1, key:0..1]
