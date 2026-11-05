@@ -30,17 +30,19 @@ def operations(spec):
 
 
 def preserved(spec):
+    # Exact incoming main e8efc54 projections include the four KMS alias templates.
+    # These independent pinned baseline hashes exclude only Sakura additions.
     original_paths = {path:value for path,value in spec['paths'].items() if path not in (COLLECTION,ITEM)}
     assert len(original_paths)==34
-    assert digest(original_paths)=='c6c1de38c4451d9244b0729ea1575fd859eb6034348fd69632d7c0ee12986bb4', 'Existing paths/operations/response examples changed'
+    assert digest(original_paths)=='23edfc382b16d935340335e33c96b578a6919381e7ae1bfed7df05d0601f31c6', 'Existing paths/operations/response examples changed'
     original = copy.deepcopy(spec['components'])
     original.pop('securitySchemes',None)
     for group in ('schemas','parameters'):
         original[group]={name:value for name,value in original[group].items() if not name.startswith('Sakura')}
-    assert digest(original)=='58c332f5b70298d08475578019c794f0ebec23de457f9b8692d4f73edcae7d57', 'Existing components changed'
+    assert digest(original)=='666030651aa243e81d3c3a5e376473f2ec48725dfc4962fd563dbb1f3bb0998d', 'Existing components changed'
     media=spec['paths']['/']['post']['requestBody']['content'][JSON11]
-    assert len(media['examples'])==24
-    assert digest(media)=='f65982f037c915f3fd66db995e0a21c9ec96e07bb35371d306c2fe402c81a646', 'Shared JSON1.1 schema/templates changed'
+    assert len(media['examples'])==28
+    assert digest(media)=='b96fff5512a8e196907d650263e61c839c1275ca2ea4415991361021852d13a2', 'Shared JSON1.1 schema/templates changed'
     ids=[op['operationId'] for _,_,op in operations(spec)]
     assert len(ids)==66 and len(set(ids))==66 and set(ids)==OLD_IDS|NEW_IDS
 

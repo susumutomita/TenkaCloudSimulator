@@ -18,6 +18,8 @@ type kmsRequest struct {
 	Origin              string
 	MultiRegion         bool
 	KeyId               string
+	AliasName           string
+	TargetKeyId         string
 	PolicyName          string
 	Limit               int
 	Marker              string
@@ -33,6 +35,10 @@ var kmsFields = map[string][]string{
 	"GetKeyPolicy": {"KeyId", "PolicyName"},
 	"Encrypt":      {"KeyId", "Plaintext", "EncryptionContext", "EncryptionAlgorithm"},
 	"Decrypt":      {"KeyId", "CiphertextBlob", "EncryptionContext", "EncryptionAlgorithm"},
+	"CreateAlias":  {"AliasName", "TargetKeyId"},
+	"UpdateAlias":  {"AliasName", "TargetKeyId"},
+	"DeleteAlias":  {"AliasName"},
+	"ListAliases":  {"KeyId", "Limit", "Marker"},
 }
 
 func kmsJSON(w http.ResponseWriter, status int, value any) {
@@ -207,7 +213,7 @@ func kmsDecode(data []byte, op string) (kmsRequest, error) {
 	if json.Unmarshal(data, &request) != nil {
 		return request, kmsInvalid()
 	}
-	for _, f := range []string{"KeySpec", "KeyUsage", "Origin", "PolicyName", "KeyId", "EncryptionAlgorithm", "Marker"} {
+	for _, f := range []string{"KeySpec", "KeyUsage", "Origin", "PolicyName", "KeyId", "EncryptionAlgorithm", "Marker", "AliasName", "TargetKeyId"} {
 		if value, ok := raw[f]; ok {
 			var s string
 			if json.Unmarshal(value, &s) != nil || s == "" {
@@ -221,8 +227,28 @@ func kmsDecode(data []byte, op string) (kmsRequest, error) {
 	if _, err := kmsContext(request.EncryptionContext); err != nil {
 		return request, err
 	}
-	if op != "CreateKey" && op != "ListKeys" && op != "Decrypt" && request.KeyId == "" {
-		return request, kmsInvalid()
+	switch op {
+	case "CreateAlias", "UpdateAlias":
+		if request.AliasName == "" || request.TargetKeyId == "" {
+			return request, kmsInvalid()
+		}
+	case "DeleteAlias":
+		if request.AliasName == "" {
+			return request, kmsInvalid()
+		}
+	case "CreateKey", "ListKeys", "ListAliases", "Decrypt":
+	default:
+		if request.KeyId == "" {
+			return request, kmsInvalid()
+		}
+	}
+	if op == "ListAliases" {
+		if _, present := raw["Limit"]; !present {
+			request.Limit = 50
+		}
+		if request.Limit < 1 || request.Limit > 100 {
+			return request, kmsInvalid()
+		}
 	}
 	if op == "ListKeys" {
 		if _, present := raw["Limit"]; !present {
@@ -261,6 +287,9 @@ func (s *KMSStore) ServeHTTP(w http.ResponseWriter, r *http.Request, region stri
 	request, err := kmsDecode(data, op)
 	if err != nil {
 		kmsWriteError(w, err)
+		return
+	}
+	if s.serveAliasRequest(w, r, region, op, request, authorize) {
 		return
 	}
 	resource := "*"

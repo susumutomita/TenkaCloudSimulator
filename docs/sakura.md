@@ -137,10 +137,10 @@ credentials, default endpoint rewriting, retries, waiters or real-cloud behavior
 The initial real SDK501 for its no-icon default was preserved before the narrow
 compatibility fix. No console materials or real cloud resources were used.
 
-The current registry has40 baselines and286 controls (326 executions), preserving
-main36/234. SakuraDiskMetadata/SakuraDiskAdmission add22 controls,
+The current registry has44 baselines and347 controls (391 executions), preserving
+main40/295. SakuraDiskMetadata/SakuraDiskAdmission add22 controls,
 SakuraStartupAdmission adds13 and SakuraDisksViewEpoch adds17. All four scoped
-baselines and52 controls passed separately; the full integrated326 cases remain
+baselines and52 controls passed separately; the full integrated391 cases remain
 pending. Historical282-case source registrations are not current-revision proof.
 The UI model retains14 properties and the original15 faults; two targeted
 publication controls supplement the broad read-guard faults. Its first wrong
@@ -152,7 +152,7 @@ opt-in/authenticated-mode admission before effects, and the successful optional
 construction/registration sequence. Its initial TLC baseline stopped with an
 enumeration error before states; the same324-input finite domain was rewritten
 as explicit membership. Corrected source passed independent SANY, baseline and
-all13 named controls; integrated326-case execution is still required. The models do
+all13 named controls; integrated391-case execution is still required. The models do
 not prove private context keys, host token cryptography, concrete Go flag/regex/
 UTF8 parsing, exact JSON neutral markers, full Registry composition, later startup
 failures or cleanup, constructor atomicity, SQLite/locking/crashes, DB leases,
@@ -181,11 +181,11 @@ had zero serious/critical axe findings and no external requests. These focused
 receipts do not replace current combined Go/E2E/formal/hosted verification.
 
 
-Current mandatory acceptance inventory: **57 Conformance cases**, preserving all53
+Current mandatory acceptance inventory: **60 Conformance cases**, preserving all56
 incoming main cases and adding the Sakura CLI, console, static-reference and
 actual served-reference/Scalar flows. The live reference wrapper passes
 `--browser` explicitly; native examples alone do not substitute for Send.
-Full combined57-case execution at this merged source is still pending.
+Full combined60-case execution at this merged source is still pending.
 
 The UI model’s exact generated `app.js` binding is limited to the separately
 modeled Sakura child/mount inputs. The canonical22-package build and asset
