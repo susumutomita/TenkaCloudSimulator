@@ -89,3 +89,49 @@ It checks cross-team token rejection, persistence across process restart and
 preservation of unrelated SSM state. It does not return fabricated grading flags.
 The Go adapter tests additionally cover rollback, foreign native children/policy
 statements, missing owned state and immutable deployment behavior.
+
+## Parameters and conditions
+
+The local compiler accepts String and Number parameters with bounded defaults,
+AllowedValues, String AllowedPattern/MinLength/MaxLength, and Number MinValue/
+MaxValue. Every definition and default is checked, even when a supplied value
+replaces that default. Unknown supplied parameters fail. The local String length
+unit is bytes, not a claim of AWS Unicode-length parity. Number comparison uses
+bounded exact decimal rational values (at most 128 text bytes, exponent −308…308);
+it is not general AWS parameter-type or numeric compatibility.
+
+Conditions support `Fn::Equals` over literals or parameter/pseudo-parameter Ref,
+and `{Condition: name}` aliases. All condition definitions must be valid, including
+unused aliases; unknown names and cycles fail. And, Or, Not, mappings, dynamic
+references and general intrinsic languages remain unsupported. Local bounds are
+100 parameter/condition definitions, depth 32 and 10,000 conditional-value nodes.
+String scalars are capped at 51,200 bytes; the TemplateBody limit remains 51,200.
+
+A resource or output may have a named Condition. `Fn::If` selects only the chosen
+value; direct `AWS::NoValue` arms remove a map property or list member. Both arms
+must have supported syntax and known Ref/GetAtt/Sub symbols. Only selected active
+links may require active resources. Disabled declarations still undergo resource
+kind/attribute/property validation and do not authorize unsupported types. This
+is a pure compile step before native state mutation; it adds no UpdateStack,
+custom resources, new resource types or host problem-specific behavior.
+
+The exact original catalog fixture is retained at
+`internal/aws/testdata/crypto-battle-a749.yaml` with its Apache-2.0 license and
+SHA-256 `fb2af9be3ba67619b80de0ad8f00dc102aaade740742aea5861c9039d8bd09e6`.
+Its default-disabled ScoreSteal condition omits the optional SSM item/permissions
+and conditioned outputs. A new enabled stack adds the SSM item and matching
+inline permissions. `test/e2e/cloudformation_crypto.py` is the mandatory proposed
+real-CLI/boto3 acceptance: unchanged fixture, two separate DB/token environments,
+defaults and enabled mode, actual SSM permissions/refusals, invalid-input and late
+name-conflict rollback, restart and cleanup. The helper is source-prepared and
+has not yet run in this candidate; it is not a game or grading acceptance.
+
+`NoEcho` is accepted only as Boolean metadata. It does **not** guarantee secret
+storage or redaction: dummy parameter values persist in SQLite and are visible
+to the operator through DescribeStacks, including conditioned raw outputs.
+Participant tokens are host-issued local role-bound credentials, not STS; native
+CFN rejects their stack-output reads. CFN roles retain the legacy aggregate model,
+so native IAM GetRole/ListRoles do not expose them. Trust and allowed
+ManagedPolicyArns metadata do not grant AWS sign-in, federation, managed-policy
+or external-account authority. Host coordination, private-output filtering and
+actual crypto-battle scoring remain outside this simulator acceptance.

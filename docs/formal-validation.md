@@ -15,10 +15,12 @@ machine-discovered semantic coverage. A newly added implementation file is not
 covered merely because an existing model passes: its exact path must have an
 appropriate reviewed scope mapping and property argument.
 
-The current registry has 33 baselines/197 required named mutation controls
-(230 required executions). The previous30/175 entries and controls are preserved;
-RESTRouteMatching, RESTProxyEventBoundary and NativeWireProjection add three
-bounded contracts and22 semantic defect controls.
+The current registry has 36 baselines/234 required named mutation controls
+(270 required executions). The 35 main74 model entries and 220 controls are
+preserved. CFNConditionAdmission adds a finite compile-plan projection with 14
+controls, scoped at `f69fb46`; the complete 270-case registered gate of this
+candidate is still pending. Numeric/regex/parser correctness, actual resource
+provisioning and NoEcho/output secrecy are not proved by this model.
 The new IAM scope is four API-reachable seeds and at most two subsequent requests;
 the broader four-request exploratory candidate timed out and is not claimed.
 Registration and Python guards are not a successful immutable TLC execution.
@@ -26,6 +28,7 @@ Registration and Python guards are not a successful immutable TLC execution.
 | Model | Finite contract | Important exclusions |
 |---|---|---|
 | ObjectStore | two buckets/two keys; parent integrity, abstract allow/deny | concrete IAM, HTTP, SQL, crashes |
+| CFNConditionAdmission | 234 finite input witnesses; defaults/supplied admission, all conditions/declarations, branch choice, NoValue pruning, pure resource/output plan | real parser/numeric/regex/graph evaluation, exact error ordering, raw-link/dependency completeness, SQL, resource mutation, grants, privacy and host grading |
 | StackOwnership | two owners/two names; retained drift reservations | authentication, callback recovery, full CFN |
 | S3Versions | one bucket/two keys; at most three history entries per key | suspended versions, byte quotas, SQL |
 | NativeIAMOwnership | two case-folded names; native/legacy exclusivity | trust parsing, full IAM, process isolation |

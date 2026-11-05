@@ -71,6 +71,8 @@ def submit(page):
  if dialog.is_visible():dialog.get_by_role('button').last.click()
  else:page.get_by_role('button',name=re.compile('^(Create bucket|Upload|Create parameter|Save changes)$')).last.click()
 class Conformance(unittest.TestCase):
+ def test_cloudformation_original_crypto_template_native_sdk_lifecycle(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('cloudformation_crypto.py'))], check=True, timeout=180)
  def test_browser_actual_clipboard_login_and_safe_errors(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('login_paste.py'))],check=True)
  def test_browser_explicit_token_file_and_strict_authentication(self):

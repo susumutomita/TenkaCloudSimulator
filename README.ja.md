@@ -55,7 +55,7 @@ make build
 | [DynamoDB](docs/dynamodb.md) | JSON 1.0 の7操作: CreateTable/ListTables/DescribeTable/DeleteTable、PutItem/GetItem/DeleteItem。Cloudscapeでテーブル一覧・作成・詳細・削除、完全キーによる項目の書き込み・取得・削除 | S/N/Bキーと任意sort key、条件はpartition-key attribute_(not_)existsのみ。Query/Scan・項目一覧・indexes・Streams・CFN・Challenge連携は未対応 |
 | [IAM](docs/iam.md) | Create/Get/List/DeleteRole、inline/trust、customer policy CRUD・version/default・ロールへのAttach/Detach。inlineと既定managed policyを合成、Deny優先 | AWS-managed catalog、STS、user/group attachments、一般Condition・permissions boundary・SCP |
 | [Lambda](docs/lambda.md) | CreateFunction、ListFunctions、GetFunctionConfiguration、UpdateFunctionCode、Invoke、DeleteFunction、AddPermission/GetPolicy/RemovePermission。固定CPython 3.12.16/WASIによるPython ZIP実行、限定S3/SSM SDK bridge | 他言語、非同期実行、Function URL、任意network。128 MiB・timeout 1–30秒 |
-| [CloudFormation](docs/cloudformation-rest.md) | CreateStack、DescribeStacks、DeleteStack。S3 Bucket、SSM Parameter、inline Python Lambda、限定IAM Role、API Gateway 5 resource types・Lambda Permission、限定Ref/Sub/GetAtt/DependsOn | UpdateStack、一般resource types、実AWS相当の非同期lifecycle、CFN専用service role |
+| [CloudFormation](docs/cloudformation-rest.md) | CreateStack、DescribeStacks、DeleteStack。S3 Bucket、SSM Parameter、inline Python Lambda、限定IAM Role、API Gateway 5 resource types・Lambda Permission、限定Ref/Sub/GetAtt/DependsOn、String/Number制約、Equals/条件alias、resource/outputのCondition、If/NoValue選択 | UpdateStack、And/Or/Not、NoEcho秘匿、一般resource types、実AWS相当の非同期lifecycle、CFN専用service role |
 | [API Gateway](docs/apigateway.md) | Regional REST管理16操作。API/resource/method/integration、immutable deployment、新規stage、ローカルLambda proxy実行 | HTTP/WebSocket API、authorizer、API key、既存stage編集、public endpoint |
 
 対応regionは`us-east-1`、`us-west-2`、`ap-northeast-1`、`eu-west-1`。S3 objectは8 MiB、保持version合計64 MiB、SSM値4096 UTF-8 bytes、CFN TemplateBody51200 bytesなどの上限があります。全フィールド・エラー・quotaの範囲は各サービス資料を確認してください。 1プロセスの上限は1000 buckets、10000 objects/versions/delete markers、1000 parameters/identities、100 stacks、100 resources/stackです。これらはプロセスメモリ全体の上限ではありません。
@@ -120,7 +120,7 @@ SDK、操作画面、再起動、チーム分離の受入検証は `make e2e` �
 
 CIはstatementと未フィルターsource-line coverageを両方90%以上に強制します。`make before-commit`単独のcoverage判定はstatementのみで、source-line判定はCIのCobertura生成後ステージと上記の2コマンドで行います。SDK/browser、license、依存security、埋込asset、形式検査も行います。cross compileは他OSでの実行成功を意味しません。開発用Python/Node/Javaはruntime依存ではありません。UI・Scalarの再生成は権利表記とlockを保持する[各build手順](tools/console/README.md)・[Scalar手順](tools/scalar/README.md)・[Python runtimeの権利・再生成手順](tools/python/README.md)に従います。
 
-形式検査の現在の登録は35有限モデル・220個の意図した欠陥検出（全255実行）です。DynamoDB画面のepoch・ACK後の読み取り再試行と、保存済みARN認可後のSecretsバージョンメタデータ一覧・限定cursor境界をモデル化します。値の読取許可や履歴画面を自動的に追加するものではありません。正確な一覧・境界・未モデル化部分は[形式検査](formal/README.md)とregistryを参照してください。過去の受領証と、現在の固定HEADの全体検査は分けて判断します。TLCはGo/JS実装のrefinement、暗号、全AWS仕様・実AWSとの一致を証明しません。[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)。
+形式検査の現在の登録は36有限モデル・234個の意図した欠陥検出（全270実行）です。CFN条件の有限なコンパイル計画、DynamoDB画面のepoch・ACK後の読み取り再試行と、保存済みARN認可後のSecretsバージョンメタデータ一覧・限定cursor境界をモデル化します。値の読取許可や履歴画面を自動的に追加するものではありません。正確な一覧・境界・未モデル化部分は[形式検査](formal/README.md)とregistryを参照してください。過去の受領証と、現在の固定HEADの全体検査は分けて判断します。CFNモデル単体は`f69fb46`で基準と14変異の検査が成功していますが、この候補の登録済み270ケース全体は未実行です。NoEchoによる秘匿・実プロビジョニング・ホストの協調処理や採点の証明ではありません。TLCはGo/JS実装のrefinement、暗号、全AWS仕様・実AWSとの一致を証明しません。[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)。
 
 ## ライセンス
 
@@ -161,4 +161,4 @@ combined 29-model/164-control formal gate (193 executions). These receipts apply
 to that revision. Every later change still requires its exact-HEAD CI, including
 the 45-case E2E suite; focused results do not replace whole-suite verification.
 
-現在の形式検査の登録は35モデル・220制御（255実行）です。IAMの追加モデルは4つの到達可能な初期状態から各2要求の範囲で、4要求の試案はタイムアウトし未成功です。上の過去の受領証とは区別し、最新HEADで全ゲートを実行してください。API資料はAWS・Google Cloud・Azureを分け、Sakura Cloudは未実装表示です。[ナビゲーション](docs/api-reference.md)を参照してください。
+現在の形式検査の登録は36モデル・234制御（270実行）です。IAMの追加モデルは4つの到達可能な初期状態から各2要求の範囲で、4要求の試案はタイムアウトし未成功です。上の過去の受領証とは区別し、最新HEADで全ゲートを実行してください。API資料はAWS・Google Cloud・Azureを分け、Sakura Cloudは未実装表示です。[ナビゲーション](docs/api-reference.md)を参照してください。

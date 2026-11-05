@@ -1,12 +1,23 @@
 # Finite state model
 
-Current branch registry: 35 models / 220 literal-protected controls
-(255 required executions). Every34 model entry, TLA/CFG byte sequence,
-property and210 controls from maina8 are preserved. DynamoDBConsoleEpoch adds
-one bounded console model and ten semantic controls. SecretVersionListing's
-metadata-only listing contract is retained. Previous241-case DynamoDB and
-244-case Secrets receipts belong to their recorded inputs; neither substitutes
-for the complete255-case immutable check of this combined revision.
+Current branch registry: 36 models / 234 literal-protected controls
+(270 required executions). All 35 model entries, TLA/CFG bytes, properties and 220
+controls from main `74c93ea9` are preserved. CFNConditionAdmission adds fourteen
+invariants and fourteen semantic controls over 234 immutable finite inputs.
+Its isolated `f69fb46` SANY/baseline/control run passed (792 reachable states);
+the initial unparenthesized phase assignment produced an incomplete successor
+(exit75), was corrected without changing inputs/properties/bounds, and its
+failure is retained. The registered combined270-case gate of this candidate is
+pending; no earlier receipt substitutes for that exact-input check.
+
+The CFN binding covers only named pure parameter/condition/selection and
+compile-plan admission contracts in `cloudformation_conditions.go`,
+`cloudformation_conditions_link.go` and `cloudformation.go`. Equality and invalid
+syntax/graph/link are finite witnesses, not Go evaluator/parser/number/regex/UTF8
+proofs. Both-arm raw symbols, dependency ordering, actual resource allowlists,
+SQL/lifecycle/grants and output privacy remain native test obligations. The
+compiler validates outer declarations before parameters; the abstract phase
+order makes no error-priority claim. See [CFN boundaries](../docs/cloudformation-rest.md#parameters-and-conditions).
 IAMManagedPolicies retains its four API-reachable seeds and two-request suffixes;
 the earlier four-request exploration timed out and is not claimed.
 Registration is source evidence, not itself evidence of successful execution. Dated receipts below
@@ -15,7 +26,7 @@ finite models do not prove Go/SQL/HTTP/UI refinement or complete cloud compatibi
 
 Legacy integration sections below retain historical counts and status statements
 for traceability. Their word “current” refers to the recorded integration, not
-today's registry. The authoritative branch inventory is the 35/220 registry
+today's registry. The authoritative branch inventory is the 36/234 registry
 above; proof claims always require evidence for the exact revision.
 
 `ObjectStore.tla` models two buckets and two keys, shared object ownership, create/put/delete transitions, and an abstract identity decision `allow /\ ~deny`. `ObjectStore.cfg` checks type correctness, no orphan objects, no unauthorized mutation, and explicit-deny precedence.
