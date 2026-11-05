@@ -1,5 +1,55 @@
 # Development roster
 
+## Backlog integration: 2026-11-05
+
+The user authorized backlog implementation and merging. Integration owner: `root`.
+Base: `f5dba05` (PR412); branch `integrate/backlog-services-20261105`.
+Existing service PR heads have successful hosted checks against their previous
+base, but require integration with the merged provider/language console changes
+and fresh complete verification before this integration can merge.
+
+| Owner | Claimed scope and editing boundary | Acceptance / handoff |
+|---|---|---|
+| root | Integrate PR410 SQS console, PR407 Logs, PR408 Secrets and PR309 DynamoDB; shared routing/navigation, OpenAPI, generated assets, registry, applicability and publication | Preserve all main/service tests; current-HEAD quality, both coverage floors, E2E/audit and formal gates; merge only after required checks succeed |
+| backlog_triage | Official Python GCP/Azure SDK acceptance: isolated test, pinned development dependencies and acceptance documentation | Two real local CLIs, persistence/isolation/CAS/checksums and denied access; propose minimal CI integration to root; no cloud calls |
+| service_review | Independent Logs and DynamoDB source/contract review in a dedicated worktree; service leaf fixes only after handoff | Preserve existing API scope, state limits and all negative tests; report concrete blockers with tests |
+| secrets_review | Independent Secrets Manager source/contract review in a dedicated worktree; service leaf fixes only after handoff | Preserve local practice-only scope and redaction; report concrete blockers with tests |
+
+Four local agent slots including root are available in this session. Root owns
+the heavy runtime/test lane; other agents coordinate execution rather than
+running deadline-sensitive Go/WASI/browser/TLC checks concurrently. Original PR
+branches are preserved. WAF50 and unrelated historical candidates are excluded.
+No real cloud resource, release or repository protection change is authorized by
+this implementation record.
+
+### Integrated source and remaining acceptance
+
+All four service candidates are composed with PR412's provider/language shell.
+The service leaf reviews added strict DynamoDB admission checks, canonical KMS
+operation IDs in Japanese, and Japanese SQS/Logs/Secrets presentation. Native
+API/SDK lifecycle and served-example checks have passed on the composed source;
+the pinned official Google/Azure Python SDK check also passed with two independent
+authenticated local CLIs. These focused results do not certify the final HEAD.
+
+The acceptance inventory now contains 42 mandatory E2E cases and 26 finite models
+with 149 sensitivity controls. Current-HEAD race/coverage, exact-file applicability,
+all 175 finite baseline/control runs and hosted checks remain required. Local
+Chrome is denied at process initialization, so actual browser operation and the
+six Japanese desktop/mobile screenshots must pass in hosted CI before merge.
+See [the integration scope and limits](acceptance/backlog-services.md).
+
+---
+
+## Historical SQS/login-main source refresh
+
+Mainfcf added the merged native-clipboard login/error handling to main26d.
+That isolated SQS refresh planned 28 E2E cases and 19 models / 98 controls.
+Its acceptance requirements and restricted publication delegation applied to
+that previous task; the current integration above has a new explicit user
+authorization, shared source composition and a larger verification inventory.
+
+## Previous console integration snapshot
+
 Current integration snapshot: 2026-11-05. Integration owner: `root`.
 
 Verified public main: `fcf8e702b45953cdeeba49883a238e638af725e8` (PR411 merged).
@@ -175,3 +225,7 @@ shared Gateway/dispatch/server/OpenAPI/navigation/assets/CI. Propose minimal
 additive hunks; preserve existing providers, IAM and SQLite state. SNS-to-SQS
 composition must agree atomicity/retry behavior without nested transactions.
 Inspect the service backlog and roster before claiming another service.
+
+### PR407 source refresh
+
+CloudWatch Logs basic7 only, normal merge of main5c97 into publiccca ancestry. Source integration pending currentHEAD validation; retention/CFN/Lambda delivery remain unsupported. Separate private CFN candidate is excluded.

@@ -94,8 +94,8 @@ security policy excludes.
   receipt deletion may succeed without deleting the message. No distributed
   replicas, probabilistic delivery or exactly-once processing is simulated.
 - FIFO, batch APIs, Query/XML, DLQ/redrive, encryption, queue tags/policies,
-  PurgeQueue, CloudFormation SQS resources, Lambda SQS event sources/guest SDK
-  capability and a SQS console screen are not implemented. Existing unsupported
+  PurgeQueue, CloudFormation SQS resources and Lambda SQS event sources/guest SDK
+  capability are not implemented. Existing unsupported
   Challenge problems are not marked runnable by this native API increment.
 
 ## Reproducible verification
@@ -157,3 +157,14 @@ concrete tests. Bounds are exploration limits, not production quotas.
 - [ChangeMessageVisibility](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_ChangeMessageVisibility.html)
 - [Queue count attributes](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_GetQueueAttributes.html)
 - [SQLite trigger cautions and RAISE](https://www.sqlite.org/lang_createtrigger.html)
+
+## Basic console and served API reference
+
+The [Cloudscape console](sqs-console.md) uses these exact nine native operations
+for queues, Standard creation with the three supported attributes, details,
+send/poll, current-receipt visibility/deletion and queue deletion. Focused actual
+browser/SDK and served nine-example checks passed against the same SQLite;
+see the console document for precise verified states and remaining whole gates.
+This does not add native API/schema/IAM semantics, FIFO/CFN/Lambda/Challenge,
+resource policies, editing or encryption support. Static API examples require
+actual QueueUrl/current ReceiptHandle substitution and are never live state.

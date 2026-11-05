@@ -1,11 +1,18 @@
 # Cross-provider console integration acceptance
 
-Status: **actual standalone integration execution passed** against the root-built
+Historical browser acceptance: **actual standalone integration execution passed** against the root-built
 binary recorded in `/workspace/catalog-deliverables/multicloud-browser/execution-receipt.json`.
 This is a local integration result, not exact-HEAD hosted CI or a merge approval. This helper is an integration test,
 not the GCP/Azure leaf unit evidence or an official SDK/live-cloud comparison.
 No guest code, actual Google/Azure resources, credentials or new dependencies
 are required. Root owns the final embedded binary and execution window.
+
+Separately, [official Python SDK acceptance](crossprovider-official-storage.md)
+executed successfully on 2026-11-05 with pinned Google/Azure packages. GCP keeps
+all twelve exact-key cases with its disclosed official session/OAuth-refresh
+configuration; Azure keeps ten and explicitly measures/reports the two Requests
+dot-segment exclusions. That new SDK run is independent of this browser helper's
+native-HTTP oracle and does not establish new final integration CI success.
 
 ```sh
 AXE_SCRIPT=/path/to/verified/axe.min.js \
@@ -45,10 +52,10 @@ contexts and CLI processes in finally paths; state fixtures use temporary DBs.
   reader states. Page geometry uses existing strict reflow checks. Screenshots
   contain dummy names/data, never tokens. Non-local requests and page errors fail.
 
-## Source integration dependencies / pending acceptance
+## Integration dependencies and historical execution
 
-The helper is not registered in shared check.py by this task; root owns mandatory
-registration after a successful standalone execution. Provider capabilities,
+The helper is now registered as a mandatory case in shared `test/e2e/check.py`;
+its original source-only registration dependency is resolved. Provider capabilities,
 actor policy, UI imports/navigation, OpenAPI and generated bundles are root-owned.
 The default fixtures require project tenkacloud-local, account tenkacloudlocal and
 simulator-admin as local configured owner. Another subject must not inherit
@@ -68,6 +75,8 @@ not declared resolved by this helper; provider-state axe checks remain mandatory
 
 Evidence is outside Git: `crossprovider-console.json`, `execution-receipt.json`,
 `attempt-1.log` through `attempt-5.log` and18 dummy-data PNGs in the report
-directory above. Native HTTP is the state oracle; official GCP/Azure SDK execution
-remains separately pending. Scalar static-versus-actual Send passed at390px;
+directory above. Native HTTP remains this helper's state oracle. The separately
+executed [official SDK acceptance](crossprovider-official-storage.md) supplies
+SDK evidence for its pinned subset, not a reinterpretation of those browser
+reports. Scalar static-versus-actual Send passed at390px;
 Scalar open-client axe conformance is not asserted.

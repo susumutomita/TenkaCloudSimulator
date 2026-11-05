@@ -452,7 +452,7 @@
       "id": "SQSStorageBudget",
       "model": "formal/SQSStorageBudget.tla",
       "config": "formal/SQSStorageBudget.cfg",
-      "bounds": "Two trusted queue scopes; three possible pre-existing row IDs plus one additional fresh ID; each row weight1\u20132 abstract payload units. MaxRows2/MaxBytes3. Initial unique-ID row sets include legacy states with3rows and up to6units, beyond either cap. Initial enumeration uses the exact729 unique-ID assignments, not a powerset filter. No time transition: expiry is a pre-existing Boolean classification.",
+      "bounds": "Two trusted queue scopes; three possible pre-existing row IDs plus one additional fresh ID; each row weight1–2 abstract payload units. MaxRows2/MaxBytes3. Initial unique-ID row sets include legacy states with3rows and up to6units, beyond either cap. Initial enumeration uses the exact729 unique-ID assignments, not a powerset filter. No time transition: expiry is a pre-existing Boolean classification.",
       "properties": [
         "TypeOK",
         "FailedSendPreservesRows",
@@ -644,7 +644,7 @@
       "id": "ProviderActor",
       "model": "formal/ProviderActor.tla",
       "config": "formal/ProviderActor.cfg",
-      "bounds": "64 request combinations: authentication2 \u00d7 credential roles2 \u00d7 exercise selections4 \u00d7 spoofed wire roles2 \u00d7 capabilities2; captured emission includes original request; uniform tagged records distinguish absent/attached actors without TLC heterogeneous equality;65 reachable emissions expected, to be verified",
+      "bounds": "64 request combinations: authentication2 × credential roles2 × exercise selections4 × spoofed wire roles2 × capabilities2; captured emission includes original request; uniform tagged records distinguish absent/attached actors without TLC heterogeneous equality;65 reachable emissions expected, to be verified",
       "properties": [
         "TypeOK",
         "NoActorOnRejected",
@@ -848,7 +848,7 @@
       "id": "AzureBlobState",
       "model": "formal/AzureBlobState.tla",
       "config": "formal/AzureBlobState.cfg",
-      "bounds": "Two account/environment scopes with one container each, two distinct abstract keys and payload values1\u20132, at most three accepted puts, rowcap2 and abstractbytecap3. Context trust and two fixed owner subjects modeled explicitly. Three-write frontier is an exploration bound, not an API quota.",
+      "bounds": "Two account/environment scopes with one container each, two distinct abstract keys and payload values1–2, at most three accepted puts, rowcap2 and abstractbytecap3. Context trust and two fixed owner subjects modeled explicitly. Three-write frontier is an exploration bound, not an API quota.",
       "properties": [
         "TypeOK",
         "NoUnauthorizedMutation",
@@ -1490,6 +1490,834 @@
             }
           ],
           "expect_invariant": "NoAuthorityFromWireMetadata"
+        }
+      ]
+    },
+    {
+      "id": "SQSConsoleEpoch",
+      "model": "formal/SQSConsoleEpoch.tla",
+      "config": "formal/SQSConsoleEpoch.cfg",
+      "bounds": "Two abstract queue/context labels, epochs0..1 with no wrap, one abstract response/receipt per context+epoch; finite pending/display/custody and captured acceptance history.",
+      "properties": [
+        "TypeOK",
+        "OnlyCurrentReplies",
+        "NoUnmountedAcceptance",
+        "ReceiptCustodyBound",
+        "RawReceiptsPrivate"
+      ],
+      "limits": "Finite view acceptance/custody abstraction only, not React/AbortController/DOM/thread execution, token authentication, IAM, native receipt validity/freshness, Go/SQL, cryptography or AWS visual parity. Native requests may finish after cancellation; only current replies enter the view. Accepted history captures its original mounted/context/epoch, so later changes cannot relabel an old acceptance. Unmount epoch advance is redundant with the alive guard and the combined mutant deliberately removes both. Receipt values abstract one response identity per context/epoch; native freshness and release require actual browser/SDK tests. main.jsx source scope is only added SQS keyed-remount/navigation seam, not all other services or authentication.",
+      "source_scope": [
+        "tools/console/src/sqs.jsx",
+        "tools/console/src/main.jsx"
+      ],
+      "mutants": [
+        {
+          "id": "OmitReplyEpochGuard",
+          "edits": [
+            {
+              "old": "ReplyEpochOK(r) == r.epoch = epoch",
+              "new": "ReplyEpochOK(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OnlyCurrentReplies"
+        },
+        {
+          "id": "OmitUnmountGuardAndEpochAdvance",
+          "edits": [
+            {
+              "old": "MountedOK == mounted",
+              "new": "MountedOK == TRUE",
+              "count": 1
+            },
+            {
+              "old": "AdvanceUnmountEpoch == TRUE",
+              "new": "AdvanceUnmountEpoch == FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoUnmountedAcceptance"
+        },
+        {
+          "id": "RetainReceiptsAcrossContextSwitch",
+          "edits": [
+            {
+              "old": "ClearSwitchHandles == TRUE",
+              "new": "ClearSwitchHandles == FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReceiptCustodyBound"
+        },
+        {
+          "id": "RenderRawReceiptInRows",
+          "edits": [
+            {
+              "old": "CopyRawReceiptIntoRows == FALSE",
+              "new": "CopyRawReceiptIntoRows == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RawReceiptsPrivate"
+        }
+      ]
+    },
+    {
+      "id": "CloudWatchLogsLifecycle",
+      "model": "formal/CloudWatchLogsLifecycle.tla",
+      "config": "formal/CloudWatchLogsLifecycle.cfg",
+      "bounds": "{\"abstractEventRecordsPerIncarnation\": 1, \"groupsPerTeam\": 1, \"incarnationsPerTeam\": 2, \"streamsPerGroup\": 1, \"teams\": 2} (abstract finite bounds, not API quota values)",
+      "properties": [
+        "TypeOK",
+        "NoOrphans",
+        "OnlyAcceptedWrites",
+        "TokenAuthority"
+      ],
+      "limits": "Finite safety only; no liveness or implementation refinement. Models transaction atomicity and database identity as abstract steps, not SQLite faults, HMAC cryptography or OS process isolation. Byte/time limits, sorting, page convergence, expiry and real IAM documents require native/SDK tests. Captured read receipts preserve the authorization context when later resource generations change. Shared source scope covers only the added Logs field/dispatch/construction seam; not all other service dispatch or server lifecycle/authentication.",
+      "source_scope": [
+        "internal/aws/cloudwatch_logs_store.go",
+        "internal/aws/cloudwatch_logs_query.go",
+        "internal/aws/cloudwatch_logs_http.go",
+        "internal/aws/cloudwatch_logs_dispatch.go",
+        "internal/aws/s3.go",
+        "internal/aws/ssm.go",
+        "internal/server/server.go"
+      ],
+      "mutants": [
+        {
+          "id": "OmitTokenTeam",
+          "edits": [
+            {
+              "old": "/\\ token.team = t /\\ token.gen = generation[t]",
+              "new": "/\\ token.gen = generation[t]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TokenAuthority"
+        },
+        {
+          "id": "OmitTokenGeneration",
+          "edits": [
+            {
+              "old": "/\\ token.team = t /\\ token.gen = generation[t]",
+              "new": "/\\ token.team = t",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TokenAuthority"
+        },
+        {
+          "id": "AcceptInvalidBatch",
+          "edits": [
+            {
+              "old": "/\\ allowed /\\ valid",
+              "new": "/\\ allowed",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OnlyAcceptedWrites"
+        },
+        {
+          "id": "OmitPutAuthority",
+          "edits": [
+            {
+              "old": "/\\ allowed /\\ valid",
+              "new": "/\\ valid",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OnlyAcceptedWrites"
+        },
+        {
+          "id": "OmitDeleteEventCascade",
+          "edits": [
+            {
+              "old": "/\\ events' = {e \\in events : e.team # t}",
+              "new": "/\\ UNCHANGED events",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoOrphans"
+        }
+      ]
+    },
+    {
+      "id": "CloudWatchLogsViewEpoch",
+      "model": "formal/CloudWatchLogsViewEpoch.tla",
+      "config": "formal/CloudWatchLogsViewEpoch.cfg",
+      "bounds": "{\"componentLifetimes\": 1, \"queryContexts\": 2, \"requestVersions\": 2} (abstract finite bounds, not API quota values)",
+      "properties": [
+        "TypeOK",
+        "FreshResults",
+        "NoUnmountedResults"
+      ],
+      "limits": "Finite async-display acceptance model, not React/AbortController/DOM execution or implementation refinement. Context abstracts a group/stream/page query; parent region/principal changes unmount the component. IAM, team authentication, page tokens, SQL state and mutation atomicity are separate backend obligations. Form input, busy indicators and navigation layout are not modeled; actual stale-reply and browser tests remain required. Shared main.jsx scope covers the added Logs identity/region/navigation remount only, not all other service views or browser authentication.",
+      "source_scope": [
+        "tools/console/src/cloudwatch-logs.jsx",
+        "tools/console/src/main.jsx"
+      ],
+      "mutants": [
+        {
+          "id": "OmitResponseEpoch",
+          "edits": [
+            {
+              "old": "Reply(r) == /\\ alive /\\ r.version = epoch",
+              "new": "Reply(r) == /\\ alive",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FreshResults"
+        },
+        {
+          "id": "AcceptUnmountedReply",
+          "edits": [
+            {
+              "old": "Reply(r) == /\\ alive /\\ r.version = epoch",
+              "new": "Reply(r) == /\\ r.version = epoch",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoUnmountedResults"
+        }
+      ]
+    },
+    {
+      "id": "SecretsVersionLifecycle",
+      "model": "formal/SecretsVersionLifecycle.tla",
+      "config": "formal/SecretsVersionLifecycle.cfg",
+      "bounds": "teams=2; versionsPerIncarnation=2; dummyValues=2; incarnationsPerTeam=2.",
+      "properties": [
+        "TypeOK",
+        "ImmutableVersions",
+        "NoOrphans",
+        "UniqueLabels",
+        "SeparateCurrentPrevious",
+        "ActiveHasCurrent",
+        "AuthorizedVersions",
+        "AuthorizedDisclosure"
+      ],
+      "limits": "Finite lifecycle/authority abstraction, not SQL transaction, cryptography, OS authentication, formatter redaction or Go implementation refinement. A team models one secret name and two never-reused ARN incarnations; process/token isolation and cursor bindings require actual native SDK tests. History contains abstract dummy values solely to detect an attempted immutable-version overwrite; runtime force deletion does not retain secret values. IAM is represented by a pure Boolean decision for the resolved resource; policy loading/error ordering and actual IAM rules require concrete Go tests. Shared Gateway/dispatch/server paths bind only Secrets composition into the native SQLite/immutable-policy authority path, not unrelated S3/SSM behavior or a proof of HTTP routing. Cursor signatures, quotas and restart persistence require concrete tests.",
+      "source_scope": [
+        "internal/aws/secret_store.go",
+        "internal/aws/secret_values.go",
+        "internal/aws/secret_query.go",
+        "internal/aws/secret_gateway.go",
+        "internal/aws/s3.go",
+        "internal/aws/ssm.go",
+        "internal/server/server.go"
+      ],
+      "mutants": [
+        {
+          "id": "OverwriteConflictingVersion",
+          "edits": [
+            {
+              "old": "                         /\\ UNCHANGED vars",
+              "new": "                         /\\ versions'={stored \\in versions : ~(stored.team=t /\\ stored.gen=generation[t] /\\ stored.id=i)} \\cup {Record(t,generation[t],i,v,a)}\n                         /\\ history'=history \\cup {Record(t,generation[t],i,v,a)}\n                         /\\ UNCHANGED <<active,generation,current,previous,receipts>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ImmutableVersions"
+        },
+        {
+          "id": "RetainDeletedVersions",
+          "edits": [
+            {
+              "old": "/\\ versions'={r \\in versions : r.team#t}",
+              "new": "/\\ versions'=versions",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoOrphans"
+        },
+        {
+          "id": "RetainPreviousLabelOnPromote",
+          "edits": [
+            {
+              "old": "/\\ previous'=[previous EXCEPT ![t]={remove}]",
+              "new": "/\\ previous'=[previous EXCEPT ![t]=@ \\cup {remove}]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "UniqueLabels"
+        },
+        {
+          "id": "OmitCreatePermission",
+          "edits": [
+            {
+              "old": "/\\ t \\notin active /\\ generation[t]<2 /\\ a",
+              "new": "/\\ t \\notin active /\\ generation[t]<2",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AuthorizedVersions"
+        },
+        {
+          "id": "OmitReadTeamBinding",
+          "edits": [
+            {
+              "old": "/\\ t \\in active /\\ caller=t /\\ g=generation[t] /\\ a",
+              "new": "/\\ t \\in active /\\ g=generation[t] /\\ a",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AuthorizedDisclosure"
+        },
+        {
+          "id": "OmitReadGenerationBinding",
+          "edits": [
+            {
+              "old": "/\\ t \\in active /\\ caller=t /\\ g=generation[t] /\\ a",
+              "new": "/\\ t \\in active /\\ caller=t /\\ a",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AuthorizedDisclosure"
+        }
+      ]
+    },
+    {
+      "id": "SecretsRevealEpoch",
+      "model": "formal/SecretsRevealEpoch.tla",
+      "config": "formal/SecretsRevealEpoch.cfg",
+      "bounds": "resources=2; requestOrNavigationEpochs=2; componentLifetimes=1.",
+      "properties": [
+        "TypeOK",
+        "NoUnmountedDisplay",
+        "FreshEmissionHistory",
+        "ReturnedARNMatches",
+        "VisibleContextMatches"
+      ],
+      "limits": "Finite explicit-retrieve/display model, not React, DOM, AbortController, memory zeroization or implementation refinement. Only the successful response path is modeled; native store/IAM must authorize before returning any secret. A returned ARN can differ and must be rejected. Retrieve, Hide and navigation invalidate epochs; unmount also clears visible state. Parent must remount on region/principal changes. Emission history captures the context at each acceptance so later Hide/navigation cannot relabel an earlier stale acceptance. Draft entry, mutation atomicity and form layout are outside this model. Parent main.jsx scope binds only Secrets routing/remount key (region/principal/navigation); the generated app.js binding is the canonical compiled artifact of those source inputs, independently checked by bundle/asset hashes. It does not model unrelated existing console services or prove JavaScript compilation.",
+      "source_scope": [
+        "tools/console/src/secrets-manager.jsx",
+        "tools/console/src/main.jsx",
+        "internal/server/web/app.js"
+      ],
+      "mutants": [
+        {
+          "id": "OmitReplyEpoch",
+          "edits": [
+            {
+              "old": "/\\ alive /\\ req.ticket=epoch /\\ returned=req.resource",
+              "new": "/\\ alive /\\ returned=req.resource",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FreshEmissionHistory"
+        },
+        {
+          "id": "OmitResponseArnBinding",
+          "edits": [
+            {
+              "old": "/\\ alive /\\ req.ticket=epoch /\\ returned=req.resource",
+              "new": "/\\ alive /\\ req.ticket=epoch",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReturnedARNMatches"
+        },
+        {
+          "id": "RetainVisibleValueOnUnmount",
+          "edits": [
+            {
+              "old": "/\\ alive'=FALSE /\\ epoch'=epoch+1 /\\ visible'={}",
+              "new": "/\\ alive'=FALSE /\\ epoch'=epoch+1 /\\ visible'=visible",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoUnmountedDisplay"
+        }
+      ]
+    },
+    {
+      "id": "SecretsDisclosureChannels",
+      "model": "formal/SecretsDisclosureChannels.tla",
+      "config": "formal/SecretsDisclosureChannels.cfg",
+      "bounds": "Four operation contexts, Boolean native authorization, four output sinks, and at most two captured emissions.",
+      "properties": [
+        "TypeOK",
+        "RawRequiresAuthorizedGet",
+        "MetadataLogErrorRedacted",
+        "DeniedNoRaw",
+        "RawEmissionRequiresGet"
+      ],
+      "limits": "Finite classification of plaintext acquisition/output call sites, not Go fmt/JSON/slog, SQL, encryption, memory secrecy or implementation refinement. The private plaintext() accessor itself has no authorization: its only production writer call site must follow successful native Get authorization. Actual private-holder formatting/JSON/slog sentinel tests and native denied-Get/error/metadata tests verify the Go mechanisms independently.",
+      "source_scope": [
+        "internal/aws/secret_material.go",
+        "internal/aws/secret_http.go"
+      ],
+      "mutants": [
+        {
+          "id": "RawAccessorForMetadata",
+          "edits": [
+            {
+              "old": "AcquireRaw == /\\ context.operation=GetValue /\\ context.allowed",
+              "new": "AcquireRaw == /\\ context.allowed",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RawRequiresAuthorizedGet"
+        },
+        {
+          "id": "RawAccessorDenied",
+          "edits": [
+            {
+              "old": "AcquireRaw == /\\ context.operation=GetValue /\\ context.allowed",
+              "new": "AcquireRaw == /\\ context.operation=GetValue",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RawRequiresAuthorizedGet"
+        },
+        {
+          "id": "PrivateSinkGetsRaw",
+          "edits": [
+            {
+              "old": "Emission(sink,FALSE)",
+              "new": "Emission(sink,TRUE)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MetadataLogErrorRedacted"
+        },
+        {
+          "id": "RetainRawAcrossContext",
+          "edits": [
+            {
+              "old": "/\\ raw'=FALSE",
+              "new": "/\\ raw'=raw",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RawRequiresAuthorizedGet"
+        },
+        {
+          "id": "DirectDeniedGetWriter",
+          "edits": [
+            {
+              "old": "/\\ context.operation=GetValue /\\ context.allowed /\\ raw",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DeniedNoRaw"
+        }
+      ]
+    },
+    {
+      "id": "DynamoDBLifecycle",
+      "model": "formal/DynamoDBLifecycle.tla",
+      "config": "formal/DynamoDBLifecycle.cfg",
+      "bounds": "Two abstract owner/database+fixed-region/table scopes, one key, at most two immutable table generations; one delayed request interleaves with complete other writes/deletion/recreation.",
+      "properties": [
+        "TypeOK",
+        "NoOrphans",
+        "GenerationChecked",
+        "NoStaleItems",
+        "ConditionalAtomicity",
+        "NoUnauthorizedMutation",
+        "NoForeignMutation",
+        "FailedUnchanged"
+      ],
+      "limits": "Generation/condition/atomic-commit abstraction only. Store is trusted internal composition; IAM is Gateway preflight, not a Store policy check. Owners are separate process databases, not row-level tenants. No SQL/Go refinement, real IAM parsing, tokens/two-auth-process proof, payload size/quotas/stat arithmetic, async AWS lifecycle, liveness or full API completeness. Model and mutants remain UNRUN until a reserved TLC check.",
+      "source_scope": [
+        "internal/aws/dynamodb.go",
+        "internal/aws/dynamodb_store.go",
+        "internal/aws/dynamodb_generation.go"
+      ],
+      "mutants": [
+        {
+          "id": "MissingPutGenerationGuard",
+          "edits": [
+            {
+              "old": " /\\ tables[reqOwner] # 0 /\\ tables[reqOwner] = reqGeneration",
+              "new": " /\\ reqAction = \"Put\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoOrphans"
+        },
+        {
+          "id": "AcceptRecreatedGeneration",
+          "edits": [
+            {
+              "old": " /\\ tables[reqOwner] # 0 /\\ tables[reqOwner] = reqGeneration",
+              "new": " /\\ tables[reqOwner] # 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GenerationChecked"
+        },
+        {
+          "id": "CachedCondition",
+          "edits": [
+            {
+              "old": " /\\ ConditionHolds(reqCondition,items[reqOwner][reqKey] # 0)",
+              "new": " /\\ ConditionHolds(reqCondition,reqSawExists)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ConditionalAtomicity"
+        },
+        {
+          "id": "IgnoreDeny",
+          "edits": [
+            {
+              "old": " /\\ pending /\\ reqAllow /\\ ~reqDeny",
+              "new": " /\\ pending /\\ reqAllow",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoUnauthorizedMutation"
+        },
+        {
+          "id": "IgnoreAllow",
+          "edits": [
+            {
+              "old": " /\\ pending /\\ reqAllow /\\ ~reqDeny",
+              "new": " /\\ pending /\\ ~reqDeny",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoUnauthorizedMutation"
+        },
+        {
+          "id": "MissingDropChildCleanup",
+          "edits": [
+            {
+              "old": " /\\ items' = [items EXCEPT ![owner] = Empty]\n /\\ Trace(owner,\"OtherDrop\"",
+              "new": " /\\ items' = items\n /\\ Trace(owner,\"OtherDrop\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoOrphans"
+        },
+        {
+          "id": "ForeignPut",
+          "edits": [
+            {
+              "old": " /\\ tables[reqOwner] # 0 /\\ tables[reqOwner] = reqGeneration",
+              "new": " /\\ tables[reqOwner] # 0 /\\ tables[reqOwner] = reqGeneration\n /\\ reqAction = \"Put\" /\\ \\A owner \\in Owners : tables[owner] = reqGeneration",
+              "count": 1
+            },
+            {
+              "old": "items' = [items EXCEPT ![reqOwner][reqKey] =",
+              "new": "items' = [items EXCEPT ![CHOOSE owner \\in Owners : owner # reqOwner][reqKey] =",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoForeignMutation"
+        },
+        {
+          "id": "DirtyRollback",
+          "edits": [
+            {
+              "old": "SQLRollback ==\n /\\ pending /\\ pending' = FALSE",
+              "new": "SQLRollback ==\n /\\ pending /\\ reqAllow /\\ ~reqDeny /\\ reqGeneration # 0 /\\ tables[reqOwner] = reqGeneration\n /\\ pending' = FALSE\n /\\ items' = [items EXCEPT ![reqOwner][reqKey] = reqGeneration]",
+              "count": 1
+            },
+            {
+              "old": " /\\ UNCHANGED <<tables,serial,items,reqOwner,reqKey,reqGeneration,reqAction,\n                reqCondition,reqAllow,reqDeny,reqSawExists>>\nRestart ==",
+              "new": " /\\ UNCHANGED <<tables,serial,reqOwner,reqKey,reqGeneration,reqAction,\n                reqCondition,reqAllow,reqDeny,reqSawExists>>\nRestart ==",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FailedUnchanged"
+        }
+      ]
+    },
+    {
+      "id": "DynamoDBAdmission",
+      "model": "formal/DynamoDBAdmission.tla",
+      "config": "formal/DynamoDBAdmission.cfg",
+      "bounds": "One preselected trusted Store/DB authority, two region/table slots, at most one active table and one item per table; four abstract semantic bytes, eight normalized key tokens/five canonical keys and six size fixtures; constructor predicate and restart.",
+      "properties": [
+        "TypeOK",
+        "InitializedBeforeMutation",
+        "DeniedFrame",
+        "ValidKeysOnly",
+        "CanonicalKeys",
+        "SemanticBytes",
+        "CommittedBytes",
+        "CreateCommitted",
+        "AcknowledgedRemoval",
+        "ActiveTableRequired",
+        "TableBudget",
+        "ItemBudget",
+        "ItemCountBudget",
+        "StatisticsExact",
+        "PeerFrame",
+        "NoOrphans",
+        "RefusalFrame",
+        "AdmissionExact",
+        "TableAdmissionExact",
+        "RemovalAdmissionExact",
+        "StartupAdmission",
+        "StartupRefusedFrame"
+      ],
+      "limits": "Finite normalized admission, acknowledgement/row-effect, canonical-key and semantic-byte fixtures with independent literal oracle functions. Actual Go literal/SQL IGNORE tests are separate evidence. No full decimal grammar/UTF8/base64/JSON or 400KiB exhaustive arithmetic proof, SQL/driver/Go refinement/durability, arbitrary persisted-data import, live external writers, IAM/token/HTTP parsing, host or multi-process authentication proof. startupValid abstracts constructor success/orphan-refusal, not discovery/validation of arbitrary SQL. Scopes are fixed region/table namespaces inside one selected DB, not row tenants or two authenticated teams. Shared factory/dispatch/Gateway-field files are narrow call-contract seams for initialized-store and preflight denial only; their other routes/authority are not modeled. Lifecycle generations/conditional races are the separate unchanged DynamoDBLifecycle model. Targeted finite-model receipts are separate from exact-HEAD whole-registry merge checking and actual Go/native/integration execution.",
+      "source_scope": [
+        "internal/aws/dynamodb.go",
+        "internal/aws/dynamodb_store.go",
+        "internal/aws/dynamodb_number.go",
+        "internal/aws/dynamodb_size.go",
+        "internal/aws/dynamodb_write.go",
+        "internal/aws/s3.go",
+        "internal/aws/ssm.go",
+        "internal/server/server.go"
+      ],
+      "mutants": [
+        {
+          "id": "BypassStartupValidation",
+          "edits": [
+            {
+              "old": "Initialize == /\\ ~initialized /\\ startupValid /\\ initialized'=TRUE",
+              "new": "Initialize == /\\ ~initialized /\\ initialized'=TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StartupAdmission"
+        },
+        {
+          "id": "WriteBeforeInitialization",
+          "edits": [
+            {
+              "old": "permit == initialized /\\ tables[s] /\\ Valid(t) /\\ allow /\\ ~deny /\\ bytes<=MaxItemBytes",
+              "new": "permit == tables[s] /\\ Valid(t) /\\ allow /\\ ~deny /\\ bytes<=MaxItemBytes",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "InitializedBeforeMutation"
+        },
+        {
+          "id": "IgnoreDeny",
+          "edits": [
+            {
+              "old": "permit == initialized /\\ tables[s] /\\ Valid(t) /\\ allow /\\ ~deny /\\ bytes<=MaxItemBytes",
+              "new": "permit == initialized /\\ tables[s] /\\ Valid(t) /\\ allow /\\ bytes<=MaxItemBytes",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DeniedFrame"
+        },
+        {
+          "id": "IgnoreAllow",
+          "edits": [
+            {
+              "old": "permit == initialized /\\ tables[s] /\\ Valid(t) /\\ allow /\\ ~deny /\\ bytes<=MaxItemBytes",
+              "new": "permit == initialized /\\ tables[s] /\\ Valid(t) /\\ ~deny /\\ bytes<=MaxItemBytes",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DeniedFrame"
+        },
+        {
+          "id": "AdmitInvalidKey",
+          "edits": [
+            {
+              "old": "permit == initialized /\\ tables[s] /\\ Valid(t) /\\ allow /\\ ~deny /\\ bytes<=MaxItemBytes",
+              "new": "permit == initialized /\\ tables[s] /\\ allow /\\ ~deny /\\ bytes<=MaxItemBytes",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ValidKeysOnly"
+        },
+        {
+          "id": "WriteWithoutTable",
+          "edits": [
+            {
+              "old": "permit == initialized /\\ tables[s] /\\ Valid(t) /\\ allow /\\ ~deny /\\ bytes<=MaxItemBytes",
+              "new": "permit == initialized /\\ Valid(t) /\\ allow /\\ ~deny /\\ bytes<=MaxItemBytes",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ActiveTableRequired"
+        },
+        {
+          "id": "SplitNumericAlias",
+          "edits": [
+            {
+              "old": "Key(t) == ExpectedKey(t)",
+              "new": "Key(t) == IF t=\"nExponent\" THEN \"N2\" ELSE ExpectedKey(t)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CanonicalKeys"
+        },
+        {
+          "id": "EraseKeyType",
+          "edits": [
+            {
+              "old": "Key(t) == ExpectedKey(t)",
+              "new": "Key(t) == IF t \\in {\"sOne\",\"bOne\"} THEN \"N1\" ELSE ExpectedKey(t)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CanonicalKeys"
+        },
+        {
+          "id": "ChargeWireEncoding",
+          "edits": [
+            {
+              "old": "Size(k) == ExpectedSize(k)",
+              "new": "Size(k) == WireSize(k)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionExact"
+        },
+        {
+          "id": "OmitNestedOverhead",
+          "edits": [
+            {
+              "old": "Size(k) == ExpectedSize(k)",
+              "new": "Size(k) == IF k=\"nested\" THEN 2 ELSE ExpectedSize(k)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SemanticBytes"
+        },
+        {
+          "id": "IgnoreItemByteCap",
+          "edits": [
+            {
+              "old": " /\\ bytes<=MaxItemBytes",
+              "new": "",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ItemBudget"
+        },
+        {
+          "id": "IgnoreItemCountCap",
+          "edits": [
+            {
+              "old": "(rows[s][key] # 0 \\/ Count(rows[s])<MaxItems)",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ItemCountBudget"
+        },
+        {
+          "id": "IgnoreTableCountCap",
+          "edits": [
+            {
+              "old": "permit == initialized /\\ allow /\\ ~deny /\\ ~tables[s] /\\ TableCount(tables)<MaxTables",
+              "new": "permit == initialized /\\ allow /\\ ~deny /\\ ~tables[s]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TableBudget"
+        },
+        {
+          "id": "AcknowledgeIgnoredCreate",
+          "edits": [
+            {
+              "old": "tables'=(IF permit THEN [tables EXCEPT ![s]=TRUE] ELSE tables)",
+              "new": "tables'=tables",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CreateCommitted"
+        },
+        {
+          "id": "AcknowledgeIgnoredWrite",
+          "edits": [
+            {
+              "old": " IN /\\ rows'=(IF permit THEN replacement ELSE rows)\n    /\\ stats'=(IF permit THEN [stats EXCEPT ![s]=Sum(replacement[s])] ELSE stats)\n    /\\ UNCHANGED <<initialized,startupValid,tables>>\n    /\\ Trace(s,\"Put\",t,k,allow,deny,permit,key,bytes)",
+              "new": " IN /\\ rows'=rows\n    /\\ stats'=stats\n    /\\ UNCHANGED <<initialized,startupValid,tables>>\n    /\\ Trace(s,\"Put\",t,k,allow,deny,permit,key,bytes)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CommittedBytes"
+        },
+        {
+          "id": "WrongTableStatistics",
+          "edits": [
+            {
+              "old": " IN /\\ rows'=(IF permit THEN replacement ELSE rows)\n    /\\ stats'=(IF permit THEN [stats EXCEPT ![s]=Sum(replacement[s])] ELSE stats)\n    /\\ UNCHANGED <<initialized,startupValid,tables>>\n    /\\ Trace(s,\"Put\",t,k,allow,deny,permit,key,bytes)",
+              "new": " IN /\\ rows'=(IF permit THEN replacement ELSE rows)\n    /\\ stats'=(IF permit THEN [stats EXCEPT ![s]=Sum(replacement[s])+1] ELSE stats)\n    /\\ UNCHANGED <<initialized,startupValid,tables>>\n    /\\ Trace(s,\"Put\",t,k,allow,deny,permit,key,bytes)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StatisticsExact"
+        },
+        {
+          "id": "WritePeerScope",
+          "edits": [
+            {
+              "old": "replacement == [rows EXCEPT ![s][key]=bytes]",
+              "new": "replacement == [rows EXCEPT ![s][key]=bytes, ![CHOOSE peer \\in Scopes : peer#s][key]=bytes]",
+              "count": 1
+            },
+            {
+              "old": " IN /\\ rows'=(IF permit THEN replacement ELSE rows)\n    /\\ stats'=(IF permit THEN [stats EXCEPT ![s]=Sum(replacement[s])] ELSE stats)\n    /\\ UNCHANGED <<initialized,startupValid,tables>>\n    /\\ Trace(s,\"Put\",t,k,allow,deny,permit,key,bytes)",
+              "new": " IN /\\ rows'=(IF permit THEN replacement ELSE rows)\n    /\\ stats'=(IF permit THEN [stats EXCEPT ![s]=Sum(replacement[s]), ![CHOOSE peer \\in Scopes : peer#s]=Sum(replacement[CHOOSE peer \\in Scopes : peer#s])] ELSE stats)\n    /\\ UNCHANGED <<initialized,startupValid,tables>>\n    /\\ Trace(s,\"Put\",t,k,allow,deny,permit,key,bytes)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PeerFrame"
+        },
+        {
+          "id": "DirtyOversizeRefusal",
+          "edits": [
+            {
+              "old": " IN /\\ rows'=(IF permit THEN replacement ELSE rows)\n    /\\ stats'=(IF permit THEN [stats EXCEPT ![s]=Sum(replacement[s])] ELSE stats)\n    /\\ UNCHANGED <<initialized,startupValid,tables>>\n    /\\ Trace(s,\"Put\",t,k,allow,deny,permit,key,bytes)",
+              "new": " IN /\\ rows'=(IF permit THEN replacement ELSE IF initialized /\\ tables[s] /\\ Valid(t) /\\ allow /\\ ~deny /\\ bytes>MaxItemBytes /\\ rows[s][key]#0 THEN [rows EXCEPT ![s][key]=2] ELSE rows)\n    /\\ stats'=(IF permit THEN [stats EXCEPT ![s]=Sum(replacement[s])] ELSE IF initialized /\\ tables[s] /\\ Valid(t) /\\ allow /\\ ~deny /\\ bytes>MaxItemBytes /\\ rows[s][key]#0 THEN [stats EXCEPT ![s]=Sum([rows EXCEPT ![s][key]=2][s])] ELSE stats)\n    /\\ UNCHANGED <<initialized,startupValid,tables>>\n    /\\ Trace(s,\"Put\",t,k,allow,deny,permit,key,bytes)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RefusalFrame"
+        },
+        {
+          "id": "AcknowledgeIgnoredItemDelete",
+          "edits": [
+            {
+              "old": " IN /\\ rows'=(IF permit THEN replacement ELSE rows)\n    /\\ stats'=(IF permit THEN [stats EXCEPT ![s]=Sum(replacement[s])] ELSE stats)\n    /\\ UNCHANGED <<initialized,startupValid,tables>>\n    /\\ Trace(s,\"Delete\",t,\"small\",allow,deny,permit,key,0)",
+              "new": " IN /\\ rows'=rows\n    /\\ stats'=stats\n    /\\ UNCHANGED <<initialized,startupValid,tables>>\n    /\\ Trace(s,\"Delete\",t,\"small\",allow,deny,permit,key,0)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AcknowledgedRemoval"
+        },
+        {
+          "id": "AcknowledgeIgnoredTableDelete",
+          "edits": [
+            {
+              "old": "tables'=(IF permit THEN [tables EXCEPT ![s]=FALSE] ELSE tables)",
+              "new": "tables'=tables",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AcknowledgedRemoval"
+        },
+        {
+          "id": "AcknowledgeIgnoredChildDelete",
+          "edits": [
+            {
+              "old": "rows'=(IF permit THEN [rows EXCEPT ![s]=Empty] ELSE rows)",
+              "new": "rows'=rows",
+              "count": 1
+            },
+            {
+              "old": "stats'=(IF permit THEN [stats EXCEPT ![s]=0] ELSE stats)",
+              "new": "stats'=stats",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AcknowledgedRemoval"
+        },
+        {
+          "id": "RestartLosesStatistics",
+          "edits": [
+            {
+              "old": "Restart == /\\ initialized'=FALSE /\\ lastOp'=\"Restart\"\n /\\ UNCHANGED <<startupValid,tables,rows,stats,event,lastScope,\n lastAccepted,lastReady,lastKey,lastBytes>>\n /\\ Observe(lastScope)\n",
+              "new": "Restart == /\\ initialized'=FALSE /\\ lastOp'=\"Restart\"\n /\\ stats'=[s \\in Scopes |-> 0]\n /\\ UNCHANGED <<startupValid,tables,rows,event,lastScope,\n lastAccepted,lastReady,lastKey,lastBytes>>\n /\\ Observe(lastScope)\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StatisticsExact"
         }
       ]
     }

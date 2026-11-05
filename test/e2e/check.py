@@ -278,6 +278,8 @@ def handler(event,context):
 
  def test_openapi_parameter_detector_controls(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('test_openapi_parameters.py'))],check=True)
+ def test_openapi_json10_shared_schema_controls(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('test_openapi_json10.py'))],check=True,timeout=30)
  def test_scalar_s3_docs_live_response_reader(self):
   from scalar_s3_docs import run_scalar_s3_docs
   run_scalar_s3_docs()
@@ -285,6 +287,14 @@ def handler(event,context):
   subprocess.run([sys.executable,str(Path(__file__).with_name('kms.py'))],check=True)
  def test_kms_console_actual_native_state_identity_and_logout(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('kms_console.py'))],check=True)
+ def test_kms_japanese_uses_canonical_crypto_operations(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('kms_locale.py'))],check=True,timeout=120)
+ def test_service_japanese_uses_canonical_native_operations(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('service_locale.py'))],check=True,timeout=180)
+ def test_official_storage_sdk_harness_boundaries(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('test_crossprovider_official_storage.py'))],check=True,timeout=30)
+ def test_official_storage_sdks_two_teams_restart_and_conditions(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('crossprovider_official_storage.py')),'--binary',str(BINARY),'--provider','both'],check=True,timeout=300)
  def test_cloudformation_rest_native_sdk_lifecycle(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('cloudformation_rest.py'))],check=True)
  def test_sqs_native_sdk_two_teams_restart_retention_and_cleanup(self):
@@ -520,4 +530,35 @@ def handler(event,context):
    page.get_by_role('button',name='Functions',exact=True).click();page.get_by_role('radio',name='Select ui-lambda',exact=True).check();page.get_by_role('button',name='Delete',exact=True).click();page.get_by_label('Type ui-lambda to confirm',exact=True).fill('ui-lambda');page.get_by_role('dialog').get_by_role('button',name='Delete',exact=True).click();expect(page.get_by_role('heading',name='No functions yet',exact=True)).to_be_visible();self.assertEqual(c.list_functions()['Functions'],[]);self.assertEqual(len(other.list_functions()['Functions']),1);other.delete_function(FunctionName='ui-lambda');self.assertEqual(errors,[]);self.assertEqual(outside,[]);browser.close()
  def test_refuses_non_loopback_by_default(self):
   result=subprocess.run([str(BINARY),'--listen','0.0.0.0:0'],capture_output=True,text=True);self.assertNotEqual(result.returncode,0);self.assertIn('--allow-remote',result.stderr)
+
+ def test_sqs_served_static_templates_execute_against_native_state(self):
+  from sqs_docs import run
+  run()
+
+ def test_sqs_console_native_state_scope_and_receipt_custody(self):
+  from sqs_console import run
+  run()
+
+ def test_cloudwatch_logs_native_sdk_restart_and_two_teams(self):
+  from cloudwatch_logs import run
+  run()
+
+ def test_cloudwatch_logs_console_and_native_sdk_share_state(self):
+  from cloudwatch_logs_console import run
+  run()
+
+ def test_secrets_manager_native_two_teams_restart_and_redaction(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('secrets_manager.py'))],check=True)
+
+ def test_secrets_manager_console_reveal_context_and_hide(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('secrets_manager_console.py'))],check=True)
+
+ def test_secrets_manager_served_openapi_examples(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('secrets_manager_docs.py'))],check=True)
+
+ def test_dynamodb_native_sdk_two_clis_identity_restart_and_cleanup(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('dynamodb.py'))],check=True,timeout=120)
+
+ def test_dynamodb_served_seven_templates_native_shared_state(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('dynamodb_docs.py'))],check=True,timeout=120)
 if __name__=='__main__':unittest.main(verbosity=2)

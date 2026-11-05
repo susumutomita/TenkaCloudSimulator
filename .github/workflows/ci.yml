@@ -60,6 +60,14 @@ jobs:
         run: /tmp/simulator-tests/bin/python scripts/get-audit-tools.py /tmp/simulator-audit
       - name: Verify real binary, SDK, console, and offline API reference
         run: AXE_SCRIPT=/tmp/simulator-audit/axe.min.js make e2e PYTHON=/tmp/simulator-tests/bin/python
+      - name: Retain Japanese service console screenshots
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: service-console-${{ github.event.pull_request.head.sha || github.sha }}
+          path: reports/service-locale-*.png
+          if-no-files-found: warn
+          retention-days: 14
       - name: Run the actual platform hello-world lifecycle and participant browser
         run: |
           git init /tmp/simulator-platform

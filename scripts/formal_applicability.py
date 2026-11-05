@@ -31,7 +31,8 @@ NONFORMAL = {
                       'LICENSE', 'NOTICE', 'third_party/**', 'internal/legal/assets/**'],
     'presentation': ['tools/console/**', 'tools/scalar/**', 'internal/server/web/**',
                      'internal/server/apidocs/**'],
-    'test-support': ['test/**', '*_test.go', 'scripts/test-*.py'],
+    'test-support': ['test/**', '*_test.go', 'scripts/test-*.py',
+                     'internal/aws/testdata/dynamodb_size_sdk.py'],
     'build-metadata': ['Makefile', '.gitignore', '.gitattributes', '.github/CODEOWNERS',
                        '.github/PULL_REQUEST_TEMPLATE.md'],
 }
