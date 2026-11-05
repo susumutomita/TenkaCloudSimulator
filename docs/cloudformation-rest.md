@@ -126,14 +126,14 @@ defaults and enabled mode, actual SSM permissions/refusals, invalid-input and la
 name-conflict rollback, restart and cleanup. At `2d76646` the helper passed against a regular embedded CLI: 73 SDK logical
 calls/sends/raw HTTP responses/parsed responses, plus nine auxiliary HTTP pairs,
 across four CLI process incarnations. This dated result is not the new combined
-61-case E2E after the normal main139eb merge, which remains pending. The full 429-case formal gate passed at `c298972`; this is not host grading acceptance.
+61-case E2E after the normal main139eb merge. Those checks subsequently passed at docs-only `414c902` (980.726 seconds), including reflow/start. The full 429-case formal gate passed at `c298972`; this is not host grading acceptance.
 It is not a game or grading acceptance. The standalone final DeleteStack ACK
 correction from `7d56d9d` is now integrated as source: exactly one selected stack
 row must be deleted and both selected stack and owned-claim records must be
 absent before commit. A refusal rolls back the transaction. The new finite model
 covers only these final records; it assumes physical resource handlers succeed
 and does not prove their individual DELETE acknowledgement. Combined native,
-E2E, formal and coverage gates still remain pending for this changed candidate.
+The dated checks passed at `c298972` (Go/profile/full429) and docs-only `414c902` (61 E2E/start). These are source-specific receipts; the latest publication HEAD still requires its hosted gates.
 The alias-depth cache correction additionally validates structural depth
 independently of sorted-name/memoization order; native regressions cover both
 naming directions, shared cached children and cycles. The separate
@@ -144,9 +144,12 @@ The final-ACK CFG has an explicitly reviewed formatting-only adaptation to the
 repository grammar: the same five invariants each use a named INVARIANT line;
 its standalone TLA body, constants and finite bounds are unchanged.
 
-`NoEcho` is accepted only as Boolean metadata. It does **not** guarantee secret
-storage or redaction: dummy parameter values persist in SQLite and are visible
-to the operator through DescribeStacks, including conditioned raw outputs.
+`NoEcho` is accepted only as Boolean metadata, not implemented parameter masking
+or a secret-storage guarantee. Dummy values can persist in the private SQLite
+stack record and resource properties. DescribeStacks does not expose a Parameters
+list or raw template; explicit outputs can contain parameter-derived values and
+are operator-only. AWS NoEcho itself also excludes Outputs from masking; see the
+[official parameter documentation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html).
 Participant tokens are host-issued local role-bound credentials, not STS; native
 CFN rejects their stack-output reads. CFN roles retain the legacy aggregate model,
 so native IAM GetRole/ListRoles do not expose them. Trust and allowed
@@ -154,4 +157,4 @@ ManagedPolicyArns metadata do not grant AWS sign-in, federation, managed-policy
 or external-account authority. Host coordination, private-output filtering and
 actual crypto-battle scoring remain outside this simulator acceptance.
 
-A separate candidate check now verifies every selected SSM parameter (region/name) and S3 bucket (global name) is absent at the very end of the same deletion transaction, after all resource, ownership and stack cleanup writes. It detects ignored physical DELETEs and late reinsertion, rolling back on failure. Existing missing-resource and nonempty-bucket behavior is preserved. This does not change the standalone native S3 DeleteBucket API or promise acknowledgement checks for other resource types. The 196 native/scoped model receipts are historical inputs; the current combined 429-case formal suite passed at `c298972`; 61 E2E/start and hosted CI remain pending.
+A separate candidate check now verifies every selected SSM parameter (region/name) and S3 bucket (global name) is absent at the very end of the same deletion transaction, after all resource, ownership and stack cleanup writes. It detects ignored physical DELETEs and late reinsertion, rolling back on failure. Existing missing-resource and nonempty-bucket behavior is preserved. This does not change the standalone native S3 DeleteBucket API or promise acknowledgement checks for other resource types. The 196 native/scoped model receipts are historical inputs; the current combined 429-case formal suite passed at `c298972`; 61 E2E/start checks subsequently passed at docs-only `414c902`; exact-head hosted CI for this publication candidate remains pending.

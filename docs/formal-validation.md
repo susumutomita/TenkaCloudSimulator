@@ -19,7 +19,7 @@ The current registry has 48 baselines/381 required named mutation controls
 (429 required executions). All 44 main `139eb82` model entries and 347 controls are
 preserved. CFNConditionAdmission adds a finite compile-plan projection with 14
 controls, scoped at `f69fb46`; the complete 429-case registered gate of this
-combined candidate passed at `c298972`. Current 61-case E2E/start and hosted CI remain pending. SecretMetadataViewEpoch from main is preserved byte-for-byte. Numeric/regex/parser correctness, actual resource
+combined candidate passed at `c298972`. The docs-only `414c902` subsequently passed all 61 E2E/start checks; exact-head hosted CI for the publication candidate remains pending. SecretMetadataViewEpoch from main is preserved byte-for-byte. Numeric/regex/parser correctness, actual resource
 provisioning and NoEcho/output secrecy are not proved by this model.
 The new IAM scope is four API-reachable seeds and at most two subsequent requests;
 the broader four-request exploratory candidate timed out and is not claimed.

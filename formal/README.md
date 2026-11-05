@@ -5,7 +5,7 @@ Current registry: 48 models / 381 literal-protected controls
 and347 controls are preserved. Sakura metadata/admission/startup add35 controls;
 SakuraDisksViewEpoch adds17 more for request scope/sequence, stale frames,
 ACK/form exit, read-only retry and locale continuity. These four scoped baselines
-and52 controls passed separately. The combined immutable 429-case gate passed at `c298972` (48 baselines and 381 named controls). Current 61-case E2E/start and hosted CI remain pending. Registration alone and source review do not substitute for actual execution.
+and52 controls passed separately. The combined immutable 429-case gate passed at `c298972` (48 baselines and 381 named controls). The docs-only `414c902` subsequently passed all 61 E2E/start checks; exact-head hosted CI for the publication candidate remains pending. Registration alone and source review do not substitute for actual execution.
 The initial Startup enumeration failure and UI wrong-first-invariant attempt
 remain recorded. The UI retains its original15 faults and adds two targeted
 publication controls; all14 UI properties and bounds remain unchanged.
@@ -47,7 +47,7 @@ check is not a Go/unbounded-depth/SQL/parser proof. The native32/33 regressions
 remain separate; the earlier 365-case source preparation is historical; the current 429-case gate passed at `c298972`.
 
 
-CFNPhysicalResourceACK adds five properties and seven controls for selected SSM/S3 SQLite-row absence after all cleanup writes, rollback and peer frames. Its 196 scoped source run passed 8 SANY and 8 TLC phases; the canonical CFG formatting passed a fresh 16-phase SANY/TLC run at `c298972`. It does not prove native S3 deletion, other resource handlers, cloud hardware, SQL/Go refinement or host scoring. The combined current 429-execution gate passed at `c298972`; its 61-case E2E/start and hosted CI remain pending.
+CFNPhysicalResourceACK adds five properties and seven controls for selected SSM/S3 SQLite-row absence after all cleanup writes, rollback and peer frames. Its 196 scoped source run passed 8 SANY and 8 TLC phases; the canonical CFG formatting passed a fresh 16-phase SANY/TLC run at `c298972`. It does not prove native S3 deletion, other resource handlers, cloud hardware, SQL/Go refinement or host scoring. The combined current 429-execution gate passed at `c298972`; the later docs-only `414c902` passed all 61 E2E/start checks. Exact-head hosted gates for this publication candidate remain pending.
 
 ## Aggregate CI execution capacity
 
