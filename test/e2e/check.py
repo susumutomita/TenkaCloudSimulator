@@ -307,6 +307,10 @@ def handler(event,context):
   subprocess.run([sys.executable,str(Path(__file__).with_name('apigateway.py'))],check=True)
  def test_apigateway_console_and_actual_scalar_requests(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('apigateway_console.py'))],check=True)
+ def test_iam_managed_console_native_policy_versions_and_attachments(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('iam_managed_console.py'))],check=True,timeout=240)
+ def test_iam_managed_policy_sdk_isolation_restart_and_cleanup(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('iam_managed.py'))],check=True)
  def test_native_iam_query_and_console_to_lambda(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('native_iam.py'))],check=True)
  def test_iam_role_console_to_lambda_deploy_without_host_setup(self):
