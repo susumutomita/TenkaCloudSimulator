@@ -13712,7 +13712,84 @@
     },
     {
       "name": "KMS local symmetric keys",
-      "description": "Independent bounded symmetric encryption simulator. Raw key material in SQLite; local ciphertext is incompatible with AWS KMS. No aliases/grants/deletion/rotation or HSM guarantee."
+      "description": "One real root POST is shared by Systems Manager, CloudFormation, KMS, SQS, CloudWatch Logs, Secrets Manager and DynamoDB. The service guides explain routing; the request/response templates and schemas below remain their native wire contracts. Independent bounded symmetric encryption simulator. Raw key material in SQLite; local ciphertext is incompatible with AWS KMS. No aliases/grants/deletion/rotation or HSM guarantee.",
+      "x-displayName": "Shared AWS JSON/Query endpoint"
+    },
+    {
+      "name": "Systems Manager Parameter Store",
+      "description": "Use JSON 1.1 with `X-Amz-Target: AmazonSSM.<operation>`. The `SSMGetParameter` template is static. Only the documented Standard String subset is supported.\n\nThese are static documentation instructions, not saved state. This service uses the existing shared AWS root POST (`awsRegionalOperation`), shown under **Shared AWS JSON/Query endpoint**. Choose the matching Content-Type, routing header and named body example manually; selecting an example does not automatically change headers. Use Test Request → Send for a real local response. No real cloud is contacted."
+    },
+    {
+      "name": "CloudFormation stacks",
+      "description": "Use URL-encoded Query fields with `Action` and `Version=2010-05-15`. `DescribeStacks` and `CreateRESTStack` are static examples of the bounded stack/resource subset; unsupported resources fail.\n\nThese are static documentation instructions, not saved state. This service uses the existing shared AWS root POST (`awsRegionalOperation`), shown under **Shared AWS JSON/Query endpoint**. Choose the matching Content-Type, routing header and named body example manually; selecting an example does not automatically change headers. Use Test Request → Send for a real local response. No real cloud is contacted."
+    },
+    {
+      "name": "KMS service guide",
+      "description": "Use JSON 1.1 with `X-Amz-Target: TrentService.<operation>`. Eight `KMS...` templates cover the local symmetric-key subset; local ciphertext is not compatible with real AWS KMS.\n\nThese are static documentation instructions, not saved state. This service uses the existing shared AWS root POST (`awsRegionalOperation`), shown under **Shared AWS JSON/Query endpoint**. Choose the matching Content-Type, routing header and named body example manually; selecting an example does not automatically change headers. Use Test Request → Send for a real local response. No real cloud is contacted."
+    },
+    {
+      "name": "SQS queues",
+      "description": "Use JSON 1.0 with `X-Amz-Target: AmazonSQS.<operation>`. Nine Standard-queue templates use current QueueUrl and ReceiptHandle values returned by actual requests; FIFO/batch/Query protocol are unsupported.\n\nThese are static documentation instructions, not saved state. This service uses the existing shared AWS root POST (`awsRegionalOperation`), shown under **Shared AWS JSON/Query endpoint**. Choose the matching Content-Type, routing header and named body example manually; selecting an example does not automatically change headers. Use Test Request → Send for a real local response. No real cloud is contacted."
+    },
+    {
+      "name": "CloudWatch Logs",
+      "description": "Use JSON 1.1 with `X-Amz-Target: Logs_20140328.<operation>`. Seven `Logs...` templates cover log groups, streams and events. Retention APIs, metrics, alarms, CFN Logs and automatic Lambda delivery are unsupported in this reference.\n\nThese are static documentation instructions, not saved state. This service uses the existing shared AWS root POST (`awsRegionalOperation`), shown under **Shared AWS JSON/Query endpoint**. Choose the matching Content-Type, routing header and named body example manually; selecting an example does not automatically change headers. Use Test Request → Send for a real local response. No real cloud is contacted."
+    },
+    {
+      "name": "Secrets Manager",
+      "description": "Use JSON 1.1 with `X-Amz-Target: secretsmanager.<operation>`. Seven templates cover the bounded practice-only plaintext subset; no real KMS encryption, rotation or recovery window.\n\nThese are static documentation instructions, not saved state. This service uses the existing shared AWS root POST (`awsRegionalOperation`), shown under **Shared AWS JSON/Query endpoint**. Choose the matching Content-Type, routing header and named body example manually; selecting an example does not automatically change headers. Use Test Request → Send for a real local response. No real cloud is contacted."
+    },
+    {
+      "name": "DynamoDB tables and items",
+      "description": "Use JSON 1.0 with `X-Amz-Target: DynamoDB_20120810.<operation>`. Seven `DynamoDB...` templates cover tables and items; no Query/Scan/indexes/CFN/console support.\n\nThese are static documentation instructions, not saved state. This service uses the existing shared AWS root POST (`awsRegionalOperation`), shown under **Shared AWS JSON/Query endpoint**. Choose the matching Content-Type, routing header and named body example manually; selecting an example does not automatically change headers. Use Test Request → Send for a real local response. No real cloud is contacted."
+    },
+    {
+      "name": "Sakura Cloud status",
+      "description": "**Not implemented.** Sakura Cloud currently has no simulator API operations, endpoints, authorization adapter, SDK compatibility or console execution workflow. This is an availability status section only; no Test Request or Send operation is provided. AWS, GCP and Azure sections describe their separately implemented local subsets, not Sakura compatibility."
+    }
+  ],
+  "x-tagGroups": [
+    {
+      "name": "AWS",
+      "tags": [
+        "S3 basic object storage",
+        "Systems Manager Parameter Store",
+        "CloudFormation stacks",
+        "Lambda Python functions",
+        "IAM roles",
+        "API Gateway REST APIs",
+        "KMS service guide",
+        "SQS queues",
+        "CloudWatch Logs",
+        "Secrets Manager",
+        "DynamoDB tables and items",
+        "KMS local symmetric keys"
+      ]
+    },
+    {
+      "name": "GCP",
+      "tags": [
+        "Google Cloud Storage"
+      ]
+    },
+    {
+      "name": "Azure",
+      "tags": [
+        "Azure Blob Storage"
+      ]
+    },
+    {
+      "name": "Sakura",
+      "tags": [
+        "Sakura Cloud status"
+      ]
+    },
+    {
+      "name": "Simulator",
+      "tags": [
+        "Simulator control",
+        "Simulator IAM state"
+      ]
     }
   ]
 }
