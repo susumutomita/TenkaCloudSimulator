@@ -3677,10 +3677,11 @@
         "LocaleFrame",
         "CancelDraftClear"
       ],
-      "limits": "Original bounded UI safety projection only, not React/JS/AbortController scheduling or server/SQL/IAM/token authority proof. Opaque scope combines trusted principal/session/globalnavigation/endpoint; actualcredential/contextKey production remainstrustedcaller. Read responses may complete afterabort/headers, no zero-network/body-cancel guarantee. No orphan-loading/liveness/hungread promise. ACK is actual2xxresponse beforeCreatebody/metadata, not serverrollback/idempotency underunknownnetworkoutcome. Two opens/onewriteintent excludearbitrarynew-sessionwrite concurrency. Independent request/frame snapshots monitoractualpublishedview changes, not ghost-only mutations. Nativepayloadbytes/schema/confirmation/keyentropy/quota/APIwire/SDK andauthenticatedcloudvisualparity areoutside. Shared main scope is ONLY Sakura fixedcapabilityconfiguration/contextKey+request mount, notAWS/GCP/Azure behavior; shell/CSS/neutralcatalogstate not proved.",
+      "limits": "Original bounded UI safety projection only, not React/JS/AbortController scheduling or server/SQL/IAM/token authority proof. Opaque scope combines trusted principal/session/globalnavigation/endpoint; actualcredential/contextKey production remainstrustedcaller. Read responses may complete afterabort/headers, no zero-network/body-cancel guarantee. No orphan-loading/liveness/hungread promise. ACK is actual2xxresponse beforeCreatebody/metadata, not serverrollback/idempotency underunknownnetworkoutcome. Two opens/onewriteintent excludearbitrarynew-sessionwrite concurrency. Independent request/frame snapshots monitoractualpublishedview changes, not ghost-only mutations. Nativepayloadbytes/schema/confirmation/keyentropy/quota/APIwire/SDK andauthenticatedcloudvisualparity areoutside. Shared main scope is ONLY Sakura fixedcapabilityconfiguration/contextKey+request mount, notAWS/GCP/Azure behavior; shell/CSS/neutralcatalogstate not proved. The generated app.js scope binds only the canonical compiled artifact of this separately declared Sakura child/mount projection; it does not prove bundler/compiler correctness or unrelated AWS/GCP/Azure behavior.",
       "source_scope": [
         "tools/console/src/sakura-disks.jsx",
-        "tools/console/src/main.jsx"
+        "tools/console/src/main.jsx",
+        "internal/server/web/app.js"
       ],
       "mutants": [
         {
@@ -4005,6 +4006,189 @@
             }
           ],
           "expect_invariant": "AckBelongsToCurrentView"
+        }
+      ]
+    },
+    {
+      "id": "SecretMetadataViewEpoch",
+      "model": "formal/SecretMetadataViewEpoch.tla",
+      "config": "formal/SecretMetadataViewEpoch.cfg",
+      "bounds": "Six transitions, at most two requests and epoch six; five seeds (Overlap, Scope, Paging, Locale, Tab); two regions, two request-callback identities, empty or two manual ARNs, host revision zero through two. One valid row per page and two pages; an invalid two-row state exposes accumulation. Render and committed scopes are separate finite carriers.",
+      "properties": [
+        "TypeOK",
+        "MetadataRequestsOnly",
+        "CursorRequestBound",
+        "NoStaleCallbackAcceptance",
+        "NoStaleRenderedMetadata",
+        "NoStaleRenderedError",
+        "LoadingTracksLatest",
+        "PendingClearsMetadata",
+        "NoRowsOnError",
+        "ValidatedMetadataOnly",
+        "CurrentPageOnly",
+        "LocalePreservesQuery",
+        "ParentRevealClearedForMetadata"
+      ],
+      "limits": "Scoped metadata-child contract and the parent tab-change invalidate call only. A prior-parent-reveal Boolean models clearing visible state on entry, not pending GetSecretValue replies, byte erasure, old asyncRetrieve, disclosure channels or SQL. Opaque cursor provenance is an annotation, not decoding or HMAC validation. A valid-response Boolean abstracts the concrete metadata parser. Host callback identity/remount and active scope are assumptions, not main navigation/authentication proofs. Abort leaves callbacks schedulable to check guards; actual browser Abort may prevent JavaScript delivery. Locale transitions preserve query state, not arbitrary React scheduling. Finite safety projection only: no stable history snapshot, page completeness, backend/JSON/IAM refinement, whole React proof or liveness. Source scope on the parent and bundle is limited to this tab and child projection; unrelated retrieval/mutation code is excluded.",
+      "source_scope": [
+        "tools/console/src/secret_versions.jsx",
+        "tools/console/src/secrets-manager.jsx",
+        "internal/server/web/app.js"
+      ],
+      "mutants": [
+        {
+          "id": "ChildRequestsValue",
+          "edits": [
+            {
+              "old": "RequestedOperation == \"ListSecretVersionIds\"",
+              "new": "RequestedOperation == \"GetSecretValue\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MetadataRequestsOnly"
+        },
+        {
+          "id": "NextFilterContext",
+          "edits": [
+            {
+              "old": "arn |-> arn,include |-> include,page |-> page,cursor |-> cursor",
+              "new": "arn |-> arn,include |-> IF cursor.present THEN ~include ELSE include,page |-> page,cursor |-> cursor",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CursorRequestBound"
+        },
+        {
+          "id": "LateCallbackAccepted",
+          "edits": [
+            {
+              "old": "alive /\\ requests[id].ticket=epoch /\\ requests[id].scope=committedScope\n               /\\ id \\notin aborted",
+              "new": "alive /\\ requests[id].scope=committedScope",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoStaleCallbackAcceptance"
+        },
+        {
+          "id": "OldFinallyClearsNewLoading",
+          "edits": [
+            {
+              "old": "loading'=IF accept THEN FALSE ELSE loading",
+              "new": "loading'=FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "LoadingTracksLatest"
+        },
+        {
+          "id": "RenderOldMetadata",
+          "edits": [
+            {
+              "old": "mounted /\\ result.present /\\ result.scope=renderScope",
+              "new": "mounted /\\ result.present",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoStaleRenderedMetadata"
+        },
+        {
+          "id": "RenderOldNativeError",
+          "edits": [
+            {
+              "old": "mounted /\\ problem.present /\\ problem.scope=renderScope",
+              "new": "mounted /\\ problem.present",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoStaleRenderedError"
+        },
+        {
+          "id": "NewReadKeepsOldRows",
+          "edits": [
+            {
+              "old": "result'=EmptyResult /\\ problem'=EmptyProblem /\\ loading'=TRUE",
+              "new": "result'=result /\\ problem'=EmptyProblem /\\ loading'=TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PendingClearsMetadata"
+        },
+        {
+          "id": "SkipPayloadValidation",
+          "edits": [
+            {
+              "old": "success == kind=\"Success\" /\\ valid",
+              "new": "success == kind=\"Success\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ValidatedMetadataOnly"
+        },
+        {
+          "id": "ErrorFabricatesRows",
+          "edits": [
+            {
+              "old": "result'=IF accept /\\ success THEN Accepted(req,rows,hasNext,valid) ELSE result",
+              "new": "result'=IF accept THEN IF success THEN Accepted(req,rows,hasNext,valid) ELSE Accepted(req,ReplyRows(req,stamp,FALSE),FALSE,TRUE) ELSE result",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoRowsOnError"
+        },
+        {
+          "id": "AppendPreviousPage",
+          "edits": [
+            {
+              "old": "THEN Accepted(req,rows,hasNext,valid) ELSE result",
+              "new": "THEN Accepted(req,IF req.page=1 THEN rows ELSE ReplyRows([req EXCEPT !.page=1],stamp,FALSE) \\o rows,hasNext,valid) ELSE result",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CurrentPageOnly"
+        },
+        {
+          "id": "LocaleResetsQuery",
+          "edits": [
+            {
+              "old": "locale'=1-locale /\\ arn'=arn /\\ include'=include",
+              "new": "locale'=1-locale /\\ arn'=committedScope.selected /\\ include'=include",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "LocalePreservesQuery"
+        },
+        {
+          "id": "UnmountWithoutCleanup",
+          "edits": [
+            {
+              "old": "mounted'=FALSE /\\ alive'=FALSE /\\ epoch'=epoch+1\n           /\\ aborted'=aborted \\cup (IF latest=0 THEN {} ELSE {latest}) /\\ latest'=0",
+              "new": "mounted'=FALSE /\\ alive'=alive /\\ epoch'=epoch\n           /\\ aborted'=aborted /\\ latest'=latest",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoStaleCallbackAcceptance"
+        },
+        {
+          "id": "ParentKeepsPriorReveal",
+          "edits": [
+            {
+              "old": "layoutPending'=TRUE /\\ parentReveal'=FALSE",
+              "new": "layoutPending'=TRUE /\\ parentReveal'=parentReveal",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ParentRevealClearedForMetadata"
+        },
+        {
+          "id": "ScopeCommitKeepsLoading",
+          "edits": [
+            {
+              "old": "arn'=renderScope.selected /\\ include'=FALSE /\\ Clear",
+              "new": "arn'=renderScope.selected /\\ include'=FALSE /\\ UNCHANGED <<epoch,aborted,latest,result,problem,loading>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "LoadingTracksLatest"
         }
       ]
     }

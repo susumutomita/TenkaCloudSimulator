@@ -1,11 +1,11 @@
 # Finite state model
 
-Current registry: 39 models / 272 literal-protected controls
-(311 required executions). All main35 model objects, TLA/CFG bytes, properties
-and220 controls are preserved. Sakura metadata/admission/startup add35 controls;
+Current registry: 40 models / 286 literal-protected controls
+(326 required executions). All incoming main36 model objects, TLA/CFG bytes, properties
+and234 controls are preserved. Sakura metadata/admission/startup add35 controls;
 SakuraDisksViewEpoch adds17 more for request scope/sequence, stale frames,
 ACK/form exit, read-only retry and locale continuity. These four scoped baselines
-and52 controls passed separately. The integrated immutable311-case gate remains
+and52 controls passed separately. The integrated immutable326-case gate remains
 pending; registrations and independent source review do not substitute for it.
 The initial Startup enumeration failure and UI wrong-first-invariant attempt
 remain recorded. The UI retains its original15 faults and adds two targeted
@@ -22,7 +22,7 @@ finite models do not prove Go/SQL/HTTP/UI refinement or complete cloud compatibi
 
 Legacy integration sections below retain historical counts and status statements
 for traceability. Their word “current” refers to the recorded integration, not
-today's registry. The authoritative current inventory is the 39/272 registry
+today's registry. The authoritative current inventory is the 40/286 registry
 above; proof claims always require evidence for the exact revision.
 
 `ObjectStore.tla` models two buckets and two keys, shared object ownership, create/put/delete transitions, and an abstract identity decision `allow /\ ~deny`. `ObjectStore.cfg` checks type correctness, no orphan objects, no unauthorized mutation, and explicit-deny precedence.
@@ -351,9 +351,9 @@ and control IDs are protected by the loader and failure tests.
 
 SecretVersionListing adds nine invariants and thirteen literal-protected semantic
 controls, preserving all prior33 registry objects and197 controls and their
-TLA/CFG bytes. The combined inventory is34 baselines +210 controls =244 required
-executions. Registration and earlier independent scoped results are not a
-successful immutable244-case integration gate or hosted-CI result.
+TLA/CFG bytes. At the listing-only registration checkpoint the inventory was34 baselines
++210 controls =244 required executions. That historical registration and scoped
+results do not establish a complete integration or hosted-CI result.
 
 Four-transition suffixes cover four ordered symbolic version keys, two database
 authorities/regions, two physical generations and page size one. List permission
@@ -380,3 +380,42 @@ parsing, actual timestamp/UUID order, variable page sizes, secret-value redactio
 retention, UI and Go refinement remain native/integration obligations. All thirteen
 controls must fail their exact named semantic invariant with a behavioral trace;
 syntax/type/config failures or timeouts are not accepted counterexamples.
+
+
+## Secret metadata view epoch
+
+`SecretMetadataViewEpoch` checks six transitions, at most two reads and five
+separate seeds for overlap, scope changes, paging, locale and parent tab entry.
+A valid page has one symbolic row; a second row exposes accidental accumulation.
+Render and committed scopes are distinct. Old callbacks remain schedulable after
+Abort so the finite epoch/identity guards are checked independently of transport
+cancellation. Concrete browser cancellation may prevent JavaScript delivery and
+is not evidence that every post-Abort callback branch executed.
+
+Thirteen properties cover metadata-only requests, cursor provenance, stale
+acceptance/render/error refusal, loading ownership, clearing on new reads/errors,
+validated current-page rows, same-mount locale retention and clearing a prior
+parent reveal on metadata-tab entry. Fourteen named controls must each produce
+its specified invariant violation, not a parser/type/runtime error or timeout.
+The source projection includes `secret_versions.jsx`, the parent's tab-invalidate
+call and the derived bundle. It excludes old asyncRetrieve behavior, secret-byte
+zeroization, SQL, host authentication and whole React scheduling/refinement.
+Cursor provenance and response validation are abstract predicates, not HMAC or
+JSON parser proofs; the live pager is not a stable complete history snapshot.
+
+
+| Finite action / carrier | Concrete scope |
+| --- | --- |
+| Begin / current callback / Settle | Child `load`, captured scope/ticket/controller, `current()` success/catch/finally guard |
+| Cancel / Unmount / scope commit | `clear` and layout-effect cleanup; render result/error scope checks |
+| Next / cursor provenance | Next uses only the displayed page cursor, unchanged ARN/filter; current rows replace prior page |
+| Payload validity | `metadataPage` validation abstracted as a Boolean; malformed-payload implementation remains a test obligation |
+| LocaleFlip | `useLocale` static rendering; locale absent from the query-scope memo dependencies |
+| EnterMetadata | Parent tab-change `invalidate()`; prior visible-reveal Boolean only |
+
+The actual helper exercises 23 native versions as20+3 rows, list-only authority,
+metadata-read failure/repair, scope transitions, cancellation and peer frames.
+The no-reload language round trip passed on the unchanged canonical embedded
+product: same metadata DOM node, ARN/filter/page IDs and host scope, no additional
+reads or value requests. Earlier Japanese-after-reload checks are a distinct
+oracle; neither focused result replaces the complete immutable integration gate.
