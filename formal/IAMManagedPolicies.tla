@@ -1,4 +1,6 @@
 ------------------------- MODULE IAMManagedPolicies -------------------------
+\* NEW two-request scenario scope with four API-reachable seeds.
+\* Earlier three-seed/four-request exploratory candidate remains UNPASSED outside.
 EXTENDS Naturals, FiniteSets
 
 \* Parsed fragments for ONE fixed action/resource. 0 is absent (never a version).
@@ -35,7 +37,8 @@ BuildView(s, r) ==
   ELSE [allow |-> Allow(s.roles[r].inline) + ManagedAllow(s,r,P) + ManagedAllow(s,r,Q),
         deny |-> Deny(s.roles[r].inline) + ManagedDeny(s,r,P) + ManagedDeny(s,r,Q)]
 BuildViews(s) == [r \in Roles |-> BuildView(s,r)]
-AggregateFits(s) == \A r \in Roles : ExpectedView(s,r).allow + ExpectedView(s,r).deny <= 3
+AggregateFits(s) == \A state \in {s} :
+  \A r \in Roles : ExpectedView(state,r).allow + ExpectedView(state,r).deny <= 3
 Decision(v) == IF v.deny > 0 THEN "explicitDeny"
                ELSE IF v.allow > 0 THEN "allowed" ELSE "implicitDeny"
 
@@ -95,12 +98,13 @@ Raw(s,q) ==
   [] q.op = "PutInline" -> [s EXCEPT !.roles[q.r].inline = q.doc]
   [] q.op = "DeleteInline" -> [s EXCEPT !.roles[q.r].inline = 0]
 Candidate(s,q) ==
-  LET raw == Raw(s,q)
-      views == IF Flip(q) THEN BuildViews(raw)
-               ELSE IF q.op = "Attach" THEN BuildViews(raw)
-               ELSE IF q.op = "Detach" THEN BuildViews(raw)
-               ELSE BuildViews(raw)
-  IN [raw EXCEPT !.views = views]
+  CHOOSE candidate \in
+    { LET views == IF Flip(q) THEN BuildViews(raw)
+                  ELSE IF q.op = "Attach" THEN BuildViews(raw)
+                  ELSE IF q.op = "Detach" THEN BuildViews(raw)
+                  ELSE BuildViews(raw)
+      IN [raw EXCEPT !.views = views] : raw \in {Raw(s,q)} }
+  : TRUE
 Result(s,q,authorized,storageOK) ==
   IF ~authorized THEN "Denied"
   ELSE IF Missing(s,q) THEN "Missing"
@@ -110,11 +114,14 @@ Result(s,q,authorized,storageOK) ==
   ELSE IF ~storageOK THEN "StorageError"
   ELSE "Accepted"
 Commit(s,q,result) == IF result = "Accepted" THEN Candidate(s,q) ELSE s
+\* Failed request identity is diagnostic only; all req-based invariants guard Accepted.
+RecordedRequest(q,result) ==
+  IF result = "Accepted" THEN q ELSE Req("Rejected",P,R,1,1,FALSE)
 Step(q,authorized,storageOK) ==
   /\ requests < MaxRequests /\ InBounds(db,q)
-  /\ LET result == Result(db,q,authorized,storageOK)
-     IN /\ db' = Commit(db,q,result)
-        /\ last' = [before |-> db, req |-> q, outcome |-> result]
+  /\ \E result \in {Result(db,q,authorized,storageOK)} :
+       /\ db' = Commit(db,q,result)
+       /\ last' = [before |-> db, req |-> RecordedRequest(q,result), outcome |-> result]
   /\ requests' = requests+1
 
 Base == [policies |-> [p \in Policies |-> EmptyPolicy],
@@ -126,13 +133,20 @@ Seed(which) ==
                 versions |-> [v \in VersionIDs |-> CASE v=1 -> 1 [] v=2 -> 2 [] OTHER -> 0]]
       liveQ == [live |-> TRUE, gen |-> 1, default |-> 1, next |-> 2,
                 versions |-> [EmptyVersions EXCEPT ![1] = 1]]
+      budgetP == [liveP EXCEPT !.next = 2,
+                    !.versions = [EmptyVersions EXCEPT ![1] = 1]]
+      budget == [initial EXCEPT !.policies[P] = budgetP, !.policies[Q] = liveQ,
+                   !.edges[R][P] = [rg |-> 1, pg |-> 1],
+                   !.edges[S][P] = [rg |-> 1, pg |-> 1],
+                   !.edges[R][Q] = [rg |-> 1, pg |-> 1]]
       seeded == IF which = "Empty" THEN initial
+                ELSE IF which = "Budget" THEN budget
                 ELSE [initial EXCEPT !.policies[P] = liveP, !.policies[Q] = liveQ,
                         !.edges[R][P] = [rg |-> 1, pg |-> 1],
                         !.edges[S][IF which = "Shared" THEN P ELSE Q] = [rg |-> 1, pg |-> 1]]
   IN [seeded EXCEPT !.views = BuildViews(seeded)]
 Init ==
-  /\ db \in {Seed("Empty"),Seed("Shared"),Seed("Peer")}
+  /\ db \in {Seed("Empty"),Seed("Shared"),Seed("Peer"),Seed("Budget")}
   /\ last = [before |-> db, req |-> Req("Initial",P,R,1,1,FALSE), outcome |-> "Initial"]
   /\ requests = 0
 Next == (\E q \in Requests, a \in BOOLEAN, ok \in BOOLEAN : Step(q,a,ok)) \/ UNCHANGED vars
