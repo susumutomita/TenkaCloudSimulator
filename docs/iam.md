@@ -48,7 +48,7 @@ iam.detach_role_policy(RoleName='practice-executor', PolicyArn=policy['Arn'])
 iam.delete_policy(PolicyArn=policy['Arn'])
 ```
 
-ロールは先にCreateRoleする。例のバケット・オブジェクトはダミーで、作成済みを意味しない。API referenceの例も固定テンプレートで、実行結果ではない。`Test Request → Send`で現在の状態を取得する。GetPolicyVersionのDocumentだけをRFC3986で一度エンコードし、SDKは通常辞書に戻す。CreatePolicyVersionとListPolicyVersionsにはDocumentを含めない。
+ロールは先にCreateRoleする。例のバケット・オブジェクトはダミーで、作成済みを意味しない。API referenceの例も固定テンプレートで、実行結果ではない。`Test Request → Send`で現在の状態を取得する。GetPolicyVersionのDocumentだけをRFC3986で一度エンコードし、SDKは通常辞書に戻す。CreatePolicyVersionとListPolicyVersionsにはDocumentを含めない。成功応答はtext/xml、IAMエラー応答はapplication/xmlで、いずれもXML本文。ホスト認証の401は別のJSONエンベロープである。
 
 | 項目 | ローカル実装と制限 |
 | --- | --- |

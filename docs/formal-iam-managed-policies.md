@@ -1,11 +1,11 @@
 # Managed-policy two-request scenario contract
 
-This is an **unregistered, locally checked new scenario scope** for Issue53, not a
+This is a **registered source scope with local focused checks** for Issue53, not a
 successful optimization or proof of the earlier four-request exploratory model.
 The original candidate timed out three times at the unchanged60-second deadline.
 Its full source/config/document, all failed receipts and8d8dda9 source history
-are retained. No existing29 registered models, gates, deadlines or coverage floors
-are changed by this proposal.
+are retained. The existing29 registered models, gates, deadlines and coverage floors
+remain unchanged; this scope adds one model and eleven required controls.
 
 The current candidate deliberately checks **at most two further arbitrary API
 requests from four API-reachable initial states**. It does not exhaust arbitrary
@@ -118,12 +118,12 @@ original60s/CPU1/512MiB condition. These results apply only to the two-request,
 four-seed source/configuration, not the failed four-request model. No parse/type
 error, timeout, deadlock or unexecuted case was counted as success.
 
-Before registration/integration: compare actual native methods and source scope;
-register exact new bounds and immutable input binding; run the complete registered
-gate at the resulting HEAD. The local twelve TLC cases do not establish global
+The registry now declares the actual bounds and source correspondence. Integration
+still requires immutable input binding and the complete registered gate at the
+resulting HEAD. The local twelve TLC cases do not establish global
 registered-model, native Go, SDK, browser or hosted-CI success.
 
-The planned source bridge is `internal/aws/iam_managed.go` plus narrow aggregate,
+The reviewed source bridge is `internal/aws/iam_managed.go` plus narrow aggregate,
 constructor and DeleteRole hooks in `iam_roles.go`. It must be compared with actual
 code, not inferred from model presence. Native tests must demonstrate real core
 Allow/Deny decisions, second-role SQL failure/IGNORE rollback, generation/version

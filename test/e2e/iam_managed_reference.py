@@ -107,7 +107,7 @@ def run():
                     assert len(data) <= 1024 * 1024, 'Native reference response exceeded bound'
                     if value is None:
                         return json.loads(data)
-                    assert response.headers['Content-Type'].startswith('text/xml')
+                    assert response.headers['Content-Type'].split(';', 1)[0] == ('text/xml' if status == 200 else 'application/xml')
                     assert b'<!DOCTYPE' not in data.upper() and b'<!ENTITY' not in data.upper()
                     root = ET.fromstring(data)
                     assert root.tag == '{' + NAMESPACE + '}' + (
