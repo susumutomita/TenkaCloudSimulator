@@ -138,7 +138,7 @@ def _run():
                         page.get_by_label('id ('+kind+')',exact=True).fill('different' if kind=='S' else '3' if kind=='N' else 'Aw==');expect(page.get_by_label('Returned item JSON',exact=True)).to_have_count(0);expect(page.get_by_role('button',name='Delete item',exact=True)).to_have_count(0)
                         keys();native('Get item','GetItem');page.get_by_role('button',name='Delete item',exact=True).click();page.get_by_role('dialog').get_by_role('button',name='Cancel',exact=True).click();assert calls.count('DeleteItem')==0
                         page.get_by_role('button',name='Delete item',exact=True).click();page.get_by_label('Type delete to confirm',exact=True).fill('delete');native('Delete','DeleteItem',page.get_by_role('dialog'))
-                        assert own.get_item(TableName=name,Key=key).get('Item') is None;assert own.describe_table(TableName=name)['Table']['ItemCount']==0
+                        assert own.get_item(TableName=name,Key=key).get('Item') is None;own.delete_item(TableName=name,Key=key);assert own.get_item(TableName=name,Key=key).get('Item') is None;assert own.describe_table(TableName=name)['Table']['ItemCount']==0
                         page.get_by_role('tab',name='Explore items',exact=True).click();keys();native('Get item','GetItem');expect(page.get_by_role('heading',name='Item not found',exact=True)).to_be_visible();audit('item-not-found')
                         # Participant can read but cannot put; SDK confirms no new data.
                         limited=browser.new_context(viewport={'width':width,'height':1000});contexts.append(limited);lp=limited.new_page();lp.set_default_timeout(10000);lp.on('pageerror',lambda _:errors.append(True))
