@@ -30,6 +30,10 @@ func (g *Gateway) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		g.serveMetrics(w, r)
 		return
 	}
+	if g.CatalogOwns != nil && g.CatalogOwns(r) {
+		g.Catalog.ServeHTTP(w, r)
+		return
+	}
 	if isSecretRequest(r) {
 		serveSecretGateway(w, r, g.Secrets, g.Identities)
 		return

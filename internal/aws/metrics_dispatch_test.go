@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"io"
+	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"path/filepath"
@@ -16,6 +17,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/susumutomita/TenkaCloudSimulator/internal/aws/catalog"
 	"github.com/susumutomita/TenkaCloudSimulator/internal/aws/metrics"
 	"github.com/susumutomita/TenkaCloudSimulator/internal/core"
 	"github.com/susumutomita/TenkaCloudSimulator/internal/provider"
@@ -206,6 +208,70 @@ func TestCloudWatchMetricsMetadataCannotFallThroughToAnotherService(t *testing.T
 	missing := &Gateway{Store: g.Store, S3: g.S3}
 	metricsGatewayError(t, metricsGatewayCall(missing, &actor, "GET", url.Values{}, map[string][]string{"Authorization": {auth}}), 501, "UnknownOperationException")
 }
+func TestCloudWatchMetricsIntentPrecedesRegisteredCatalogAndRejectsEveryTarget(t *testing.T) {
+	g, s := metricsGatewayFixture(t)
+	engine, err := catalog.New(s.Database(), catalog.Config{Regions: Regions, Account: "000000000000", DefaultPrincipal: core.Administrator, Authorize: g.Identities.DecisionContext}, catalog.Services())
+	if err != nil {
+		t.Fatal(err)
+	}
+	catalogCalls := 0
+	g.CatalogOwns = engine.Owns
+	g.Catalog = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		catalogCalls++
+		w.WriteHeader(http.StatusAccepted)
+	})
+	actor := metricsGatewayActor(core.Administrator)
+	target := "AmazonEC2ContainerRegistry_V20150921.CreateRepository"
+	form := metricsGatewayForm("PutMetricData")
+	form.Set("Namespace", "Practice/App")
+	form.Set("MetricData.member.1.MetricName", "Metric")
+	form.Set("MetricData.member.1.Value", "7")
+	before := metricsGatewayFrame(t, s.Database())
+	for _, item := range []struct {
+		name    string
+		targets []string
+	}{
+		{"single_catalog_target", []string{target}},
+		{"first_empty_second_catalog_target", []string{"", target}},
+		{"first_catalog_target_second_empty", []string{target, ""}},
+	} {
+		t.Run(item.name, func(t *testing.T) {
+			body := &metricsAuthorityBody{reader: strings.NewReader(form.Encode())}
+			r := httptest.NewRequest("POST", "http://127.0.0.1/", body)
+			r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+			r.Header.Set("X-Simulator-Service", "monitoring")
+			r.Header.Set("X-Simulator-Region", "us-east-1")
+			for _, value := range item.targets {
+				r.Header.Add("X-Amz-Target", value)
+			}
+			r = r.WithContext(provider.WithActor(r.Context(), actor))
+			w := httptest.NewRecorder()
+			g.ServeHTTP(w, r)
+			metricsGatewayError(t, w, http.StatusBadRequest, "InvalidParameterCombination")
+			if catalogCalls != 0 || body.reads != 0 || body.bytes != 0 {
+				t.Fatal("conflicting monitoring intent reached catalog or consumed the Query body")
+			}
+			if !reflect.DeepEqual(before, metricsGatewayFrame(t, s.Database())) {
+				t.Fatal("catalog target conflict changed the complete Metrics/identity frame")
+			}
+		})
+	}
+	// Positive control: the real registered catalog selector reaches the fake
+	// handler when monitoring intent is absent; rejection above is not a dead route.
+	r := httptest.NewRequest("POST", "http://127.0.0.1/", strings.NewReader(`{"repositoryName":"local-control"}`))
+	r.Header.Set("X-Amz-Target", target)
+	r.Header.Set("Content-Type", "application/x-amz-json-1.1")
+	r = r.WithContext(provider.WithActor(r.Context(), actor))
+	w := httptest.NewRecorder()
+	g.ServeHTTP(w, r)
+	if w.Code != http.StatusAccepted || catalogCalls != 1 {
+		t.Fatal("registered catalog positive control did not reach its handler")
+	}
+	if !reflect.DeepEqual(before, metricsGatewayFrame(t, s.Database())) {
+		t.Fatal("routing-only catalog control changed the Metrics/identity frame")
+	}
+}
+
 func TestCloudWatchMetricsFactoryRefusesDifferentDatabaseAndMissingActorBeforeBody(t *testing.T) {
 	g, s := metricsGatewayFixture(t)
 	other, err := core.New(filepath.Join(t.TempDir(), "other.sqlite"))

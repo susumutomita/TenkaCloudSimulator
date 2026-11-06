@@ -62,6 +62,7 @@ make build
 | [Lambda](docs/lambda.md) | CreateFunction、ListFunctions、GetFunctionConfiguration、UpdateFunctionCode、Invoke、DeleteFunction、AddPermission/GetPolicy/RemovePermission。固定CPython 3.12.16/WASIによるPython ZIP実行、限定S3/SSM SDK bridge | 他言語、非同期実行、Function URL、任意network。128 MiB・timeout 1–30秒 |
 | [CloudFormation](docs/cloudformation-rest.md) | CreateStack、DescribeStacks、DeleteStack。S3 Bucket、SSM Parameter、inline Python Lambda、限定IAM Role、API Gateway 5 resource types・Lambda Permission、限定Ref/Sub/GetAtt/DependsOn、String/Number制約、Equals/条件alias、resource/outputのCondition、If/NoValue選択 | UpdateStack、And/Or/Not、NoEcho秘匿、一般resource types、実AWS相当の非同期lifecycle、CFN専用service role |
 | [API Gateway](docs/apigateway.md) | Regional REST管理16操作。API/resource/method/integration、immutable deployment、新規stage、ローカルLambda proxy実行 | HTTP/WebSocket API、authorizer、API key、既存stage編集、public endpoint |
+| [サービスカタログ](docs/aws-catalog.md) | CodeConnections、Step Functions、ECR、Amplify の設定メタデータを、各サービスのネイティブ JSON または REST-JSON で扱います。汎用コンソール画面とサービス別 API リファレンスを含みます | 実行、イメージ、ビルド、ホスティング、OAuth、一覧にない公式操作（HTTP 501） |
 
 対応regionは`us-east-1`、`us-west-2`、`ap-northeast-1`、`eu-west-1`。S3 objectは8 MiB、保持version合計64 MiB、SSM値4096 UTF-8 bytes、CFN TemplateBody51200 bytesなどの上限があります。全フィールド・エラー・quotaの範囲は各サービス資料を確認してください。 1プロセスの上限は1000 buckets、10000 objects/versions/delete markers、1000 parameters/identities、100 stacks、100 resources/stackです。これらはプロセスメモリ全体の上限ではありません。
 
@@ -125,18 +126,20 @@ SDK、操作画面、再起動、チーム分離の受入検証は `make e2e` �
 
 CIはstatementと未フィルターsource-line coverageを両方90%以上に強制します。`make before-commit`単独のcoverage判定はstatementのみで、source-line判定はCIのCobertura生成後ステージと上記の2コマンドで行います。SDK/browser、license、依存security、埋込asset、形式検査も行います。cross compileは他OSでの実行成功を意味しません。開発用Python/Node/Javaはruntime依存ではありません。UI・Scalarの再生成は権利表記とlockを保持する[各build手順](tools/console/README.md)・[Scalar手順](tools/scalar/README.md)・[Python runtimeの権利・再生成手順](tools/python/README.md)に従います。
 
-Metrics統合で必要となるregistryは**56有限モデル・559の意図した欠陥検出（計615実行）**です。
-公開版の50モデル・398制御を保持し、Metricsの6モデル・161制御を追加します。
-615は実行計画であり、統合した版での全件成功を意味しません。
-Sakura、DynamoDB画面、Secretsメタデータ画面も保持します。
+Metrics・カタログ・ログインのprivate統合では**59有限モデル・590制御（649実行）**を必須とします。
+mainの53モデル・429制御を保持し、Metricsの6モデル・161制御を追加します。
+CatalogResourceLifecycle、CatalogConsoleEpoch、LoginInputIntentと既存のLP・Sakura・DynamoDB・Secretsの範囲を保持します。
+新しい固定HEADの全体検証は未実行であり、登録数は成功の受領証ではありません。
 LPモデルは信頼済みのhost/origin/認証判定や閉じたノード入力を前提とし、URL解析、フォーカス、
 レイアウト、SVG線の位置、ブラウザー描画、Go/JavaScriptのrefinementは証明しません。
-SecretVersionListingは認可後のメタデータ一覧と限定cursor境界を対象とし、値の読取権限や
-完全な履歴画面を追加しません。有限モデル検査、実コード試験、固定HEADの全体検査は別の結果です。
+LoginInputIntentのfocus／keydown時の制御値リセットは限定モデルの仮定であり、実ブラウザーの原因や
+拡張機能の修復を証明しません。SecretVersionListingは認可後のメタデータ一覧と限定cursor境界を対象とし、
+値の読取権限や完全な履歴画面を追加しません。有限モデル検査、実コード試験、固定HEADの全体検査は別の結果です。
+`8149cac`の463実行や102件のpure検査の受領証は統合前の版に属し、新しい649実行の成功を意味しません。
 [形式検査](formal/README.md)、[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)。
 
 Metricsの受入検証は2026-11-06時点で未完了です。過去の限定native試験は通常57件・race57件が成功しましたが、
-統合版の全65 E2E、SDK・画面、全形式検査、固定HEADのCIは別途確認が必要です。
+新しい統合版の全68 E2E、SDK・画面、全形式検査、固定HEADのCIは別途確認が必要です。
 private版`fb925491`のScalar診断は最初のSend前に停止し、厳格なaxe検査で
 `aria-required-attr`違反28対象・未判定11対象が残りました。ソース修正案だけでは
 配布バンドルや実画面が直ったことにはならず、Metrics API referenceの受入完了やリリース可能とは扱いません。
@@ -145,11 +148,15 @@ private版`fb925491`のScalar診断は最初のSend前に停止し、厳格なax
 公開版`30ec082`の50モデル・398制御（448実行）は2026-11-06にhosted検査が成功しました。
 これは後続のMetrics統合版の検証ではありません。private環境の712ケースも公開版の全件成功とは扱いません。
 
+過去のMetrics単独版`7246b71`は56モデル・559制御（615実行）を予定しましたが、
+全体実行は448件成功後の449件目で失敗し、166件は未実行です。後の449件目だけの成功は
+615件の完了や新しい649件の受入成功を意味しません。
+
 ## ライセンス
 
 本体は[MIT](LICENSE)。`/_simulator/licenses/`にGo・Cloudscape・Scalar・CPython/WASI等の原文LICENSE/NOTICEを同梱しています。再配布時も保持してください。AWS公式サービスではなく、AWSロゴは使用しません。[設計・引継ぎ資料](docs/handoff/README.md)。
 
-貼り付けが動かない場合はログイン画面の「トークンファイルを選択」で、主催者から受け取った小さなファイルを明示選択できます。値は隠したまま読み込み、サインイン操作時にサーバーが認証します。[形式・制限とDia未確認の境界](docs/login-token-file.md)。
+貼り付けが動かない場合はログイン画面の「トークンファイルを選択」で、主催者から受け取った小さなファイルを明示選択できます。値は隠したまま読み込み、サインイン操作時にサーバーが認証します。[形式・制限とDia未確認の境界](docs/login-token-file.md)。入力欄にはフィールド単位のパスワードマネージャー向け無視ヒントを付け、input／focus／keydownのcaptureとblurで接続中のnative入力値を取り込み、送信時にも現在値を確認します。意図的な空欄を尊重し、送信時には現在の明示的な貼り付けを先に処理します。取り込みは新しい入力意図として古い非同期処理を無効にします。拡張機能が原因という診断や、Dia／1Passwordでの修復確認ではありません。339c264では最初のnative入力ケースは成功しましたが、native clear後のEnterで空欄説明が出ないケースは失敗しました。keydown同期を追加した8149cacでは、62件のブラウザ試験が2回とも成功しました。その後のサービスカタログ統合版は別途、全体CIの確認が必要です。実際のDia／1Passwordや利用者のOSクリップボード動作は引き続き未確認です。[過去のCI結果と残検証](docs/login-token-file.md#dated-validation-and-current-candidate)を区別してください。
 
 
 ## Secrets Manager contract
@@ -184,7 +191,7 @@ combined 29-model/164-control formal gate (193 executions). These receipts apply
 to that revision. Every later change still requires its exact-HEAD CI, including
 the 45-case E2E suite; focused results do not replace whole-suite verification.
 
-公開版`30ec082`までの形式検査は50モデル・398制御（448実行）でした。IAMモデルは4つの到達可能な初期状態から
+現在のMetrics・カタログ・ログイン統合で必要な形式検査は59モデル・590制御（649実行）で、新しい統合HEADの全体成功は未確認です。IAMモデルは4つの到達可能な初期状態から
 各2要求の範囲で、4要求の試案はタイムアウトし未成功です。2026-11-06にLPの限定19実行が
 `4382ec4`で成功しましたが、その版の全448実行はDynamoDBAdmissionで失敗しました。
 `fad3b8a`のLPはPC・スマートフォンの8ブラウザーケースと6状態の厳格なアクセシビリティ検査に成功。
@@ -198,5 +205,5 @@ API資料ではクラウドを分け、Sakura Cloudの任意有効化するDisk�
 全Go race/build、同一profileのstatement94.94%・未除外source90.32%が成功しました。
 資料のみを変えた後続`414c902`では全61 E2E（980.726秒）・reflow・startが成功しました。
 「資料のみの追補」「実行コード等が同一」はその過去の版の説明であり、現在のLP実装を指しません。
-当時のhosted検査の留保もその版に属します。Metrics統合後の全615実行の成功や、ホスト採点・SQL/Go refinement・
+当時のhosted検査の留保もその版に属します。現在の全649実行の成功や、ホスト採点・SQL/Go refinement・
 秘匿出力・全リソース物理削除の証明へ読み替えないでください。

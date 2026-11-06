@@ -890,8 +890,25 @@ def _run_native_acceptance(cleanup, failures, diagnostics):
             expect(page.get_by_text(re.compile('^Last completed read'))).to_have_count(0)
             expect(page.get_by_text('The metric request failed. Refresh or retry the read; no metric data was changed.', exact=True)).to_be_visible()
             page.get_by_label('Period (seconds, multiple of 60)', exact=True).fill('60')
-            page.get_by_role('button', name='Read statistics', exact=True).click()
+            # Both a real datapoint and Cloudscape's empty placeholder have two
+            # rows. Require this repair's native response and literal data,
+            # rather than letting the previous empty/error view satisfy recovery.
+            with page.expect_response(lambda response: (
+                response.request.method == 'POST' and response.url == endpoint+'/'
+                and all(parse_qs(response.request.post_data or '').get(key) == [value]
+                        for key, value in {
+                            'Action':'GetMetricStatistics', 'Namespace':namespace,
+                            'MetricName':metric, 'StartTime':start, 'EndTime':end,
+                            'Period':'60', 'Dimensions.member.1.Name':'Fixture',
+                            'Dimensions.member.1.Value':'selected',
+                        }.items())), timeout=5000) as repaired:
+                page.get_by_role('button', name='Read statistics', exact=True).click()
+            assert repaired.value.status == 200, 'Invalid-period repair was not an actual native200'
             expect(values.get_by_role('row')).to_have_count(2)
+            expect(values.get_by_role('row').nth(1).get_by_role('cell')).to_have_text([
+                stamp.isoformat().replace('+00:00','Z'), 'Count', '3', '6', '2', '4', '2'])
+            expect(values.get_by_text('No returned datapoints.', exact=True)).to_have_count(0)
+            expect(page.get_by_text('The metric request failed. Refresh or retry the read; no metric data was changed.', exact=True)).to_have_count(0)
             assert_reflow(page)
             page.evaluate(axe)
             result = page.evaluate("async () => { const r=await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}}); return {violations:r.violations.map(v=>({id:v.id,count:v.nodes.length})),passes:r.passes.length}; }")

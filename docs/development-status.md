@@ -1,6 +1,72 @@
 # Development roster
 
-## Local Metrics-only integration snapshot: 2026-11-06 12:06 UTC
+## Private Metrics/main integration snapshot: 2026-11-06
+
+Root composes frozen Metrics source `7246b7170dfae5fea985f55618a419ab0486d2f1`
+with main `3a9b0ce9b7afed3f6b3253f4df9e7c59c3764e9a` in a private integration.
+The original Metrics worktree and existing owners remain unchanged. This is
+source conflict resolution, with no new runtime acceptance or publication.
+Metrics scope remains [bounded Query/API/UI](cloudwatch-metrics.md); main's
+catalog, auth/login, provider boundaries and original notices remain preserved.
+The expected union is 59 models / 590 controls / 649 required executions;
+The combined conformance source requires 68 E2E cases (65 main plus three Metrics);
+these cases and exact-HEAD formal validation remain unrun. No number of active
+workers is inferred here.
+
+Historical Metrics-only source `7246b71` required 56 models / 559 controls
+(615 executions). Its full attempt failed at case 449 after 448 successes, leaving
+166 cases unrun. A later isolated case-449 success does not complete that run or
+validate this new integration. The combined exact-HEAD whole gate remains unrun.
+
+The retained Scalar diagnostic remains a real acceptance blocker; a source adapter
+or isolated formal success is not a rebuilt/validated reference. Actual Dia and
+1Password remain unverified. Previously held actions remain held.
+
+## Historical main snapshot: login and published catalog, 2026-11-06
+
+PR [#437](https://github.com/susumutomita/TenkaCloudSimulator/pull/437) is being
+integrated with published main `b81496f73e31be6150fc237f4641d6369446cc38`
+(catalog PR #438). The catalog's Go code, model data, tests and notices are kept;
+the login input-capture fix and its original browser assertions are also kept.
+The combined inventory is **53 models / 429 controls / 482 executions**.
+
+| Owner / handoff | Exclusive scope and observed status |
+|---|---|
+| root | Merge coordination, applicability record, final commits and serialized execution; combined validation is pending |
+| lp_quality | Registry and formal-gate/test union resolved; source handoff complete |
+| formal_review | Independent model/policy union review complete; no combined runtime acceptance claimed |
+| docs_merge_b8 | Four documentation conflicts recovered and verified; source handoff complete |
+| assets_merge_b8 | Merged-source console rebuilt in local commit `5219eb1`; 1353 inputs and unchanged original package notices verified; combined CI remains pending |
+| catalog_compat_b8 | Read-only routing/authentication intersection review complete; Go and catalog fixtures kept byte-identical to incoming main |
+| ci_watch_b8 | Exact-SHA monitoring for prior login `8149cac` and incoming main; these results do not validate the combined tree |
+
+These are ownership and handoff entries, not a claim that seven workers are
+currently running. The ceiling remains seven including root. Completed reviewers
+can take the next independent task; heavy checks use one explicit local runtime
+lane. The prior login's 102 focused checks and all eleven hosted checks passed,
+but its base was `03060d4`. Actual Dia/1Password behavior remains unverified.
+The new combined HEAD must pass its own quality, browser and formal gates.
+
+The following sections retain their original dated evidence and assignments;
+their counts, pending checks and ownership language do not describe this new
+Metrics/main integration.
+
+## Historical main snapshot: AWS service catalog, 2026-11-06
+
+Root integrates the model-driven AWS catalog on branch
+`claude/adoring-noether-7fvwju` from main `03060d44f2c7c6e52aaf8799f4bacf21a22cd6bc`.
+The user authorized implementing and merging the open backlog. This slice adds
+the [catalog engine and four services](aws-catalog.md) (#297, #83, #111, #147);
+later slices add further backlog services to the same engine. No other agent
+writes these files; existing open PRs and their owners are untouched.
+
+| Scope | Status and evidence boundary |
+|---|---|
+| `internal/aws/catalog` engine, specifications and embedded official subsets | Focused package tests, real-binary boto3 two-team flow and console/reference browser flow pass locally |
+| Formal `CatalogResourceLifecycle` | Baseline and all 12 controls produce their expected counterexamples locally |
+| Whole gates | `make before-commit`, `make e2e`, `make formal` and hosted CI are required before merge |
+
+## Historical Metrics-only snapshot: 2026-11-06 12:06 UTC
 
 Issue [58](https://github.com/susumutomita/TenkaCloudSimulator/issues/58) owns
 this bounded Metrics work. Public baseline is `30ec082`; the private integration
@@ -9,14 +75,11 @@ Metrics changes only. This is an unpushed source candidate, not a merged service
 The earlier combined Firestore candidate is excluded; its publication hold remains.
 Existing external S3 multipart work under Issue51 is excluded.
 
-At this observation the integration owner and six workers were running in the
-seven available local slots. A worker shown as completed is reassigned after
-ownership and resource checks; a task list alone is not evidence of execution.
-The heavy-test reservation is focused offline Go tests with one CPU, plus the
-separate bounded offline console build. Full-module race/coverage, browser and TLC
-runs wait for a fixed integrated source and an explicit resource reservation.
+The owner table below records historical handoffs only. It is not a current
+worker/process count or a new heavy-test reservation. Current exact-source
+review and separately scheduled acceptance remain required.
 
-| Owner | Current bounded scope | Concrete evidence / remaining gate |
+| Historical owner | Recorded bounded scope | Recorded evidence / remaining gate |
 |---|---|---|
 | root | Shared source composition, applicability and this roster | Public30-based local integration only; no private Firestore ancestry or generated bundle reuse |
 | formal_review | Backend runtime; independent UI source review | Backend `3dce66d`: 57 focused normal and57 race tests passed. UI `e4e2ea2` source review passed. No whole-module coverage claim |
@@ -41,7 +104,8 @@ separate paths. Firestore PR publication, PR433 Ready/merge and other previously
 rejected actions remain held. No real cloud requests/resources or release occur.
 
 
-## Current integration snapshot: IAM53, 2026-11-05
+
+## Historical main snapshot: IAM53, 2026-11-05
 
 Root integrates `feat/iam-managed-policy-53-20261105` from main
 `4a649814bee73b06ee82aecc6ca952dfe6bc8137`. The public claim and contract decisions

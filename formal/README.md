@@ -1,10 +1,25 @@
 # Finite state models
 
-Metrics integration inventory: **56 models / 559 literal-protected controls
-(615 planned required executions)**. The public 50/398 inventory is preserved;
-six Metrics models add 161 controls. These counts describe the required plan,
-not a successful aggregate execution at the integrated HEAD. Required inventory and exact source bindings live
-in `models.json` and the protected policy in `scripts/formal_model_gate.py`.
+Private Metrics/catalog/login inventory: **59 models / 590 literal-protected
+controls (649 required executions)**. Main's 53/429 inventory is preserved;
+six bounded Metrics models add 161 controls. Exact-HEAD combined validation
+remains unrun. Inventory/source bindings live in `models.json` and the protected
+policy in `scripts/formal_model_gate.py`; registration is not an execution receipt.
+
+Historical `28d37d1` checked 13 input cases/73 distinct states before focus capture.
+Scoped `5b270e9` checked 14 cases: 77 distinct states, 94 generated, empty queue,
+and all 13 declared noninitial counterexamples. The focus control failed at state
+3 under a controlled-reset assumption, not an established cause of the hosted
+login failure. This is not a combined 649-case or browser proof.
+Scoped keyboard source `7bd15bf` subsequently checked 15 cases: 83 distinct
+baseline states (101 generated, empty queue) and all 14 required noninitial
+counterexamples. The keyboard control first violated `AdoptedValueExact` at
+state 5. The controlled reset remains an explicit assumption; the original
+empty-error/no-POST browser assertions are independent required checks.
+Any 463-execution or 102-pure-test receipt at `8149cac` applies to the pre-merge
+base, not this new 649-execution inventory.
+See [input correspondence](../docs/login-token-file.md#bounded-input-intent-model)
+and the [dated failed login CI](../docs/login-token-file.md#dated-validation-and-current-candidate).
 
 Historical evidence: the complete 48-baseline/381-control gate (429 executions)
 passed at `c298972`. Its documentation-only successor `414c902` passed all 61
@@ -45,13 +60,34 @@ integration. All declared implementation paths must exist in the actual tested
 revision; missing paths cannot be satisfied by stubs or a model-only branch.
 
 The public `30ec082` hosted gate completed 50 baselines and 398 controls on
-2026-11-06. This is historical public evidence, not a result for the new 615-case
-Metrics plan. Prior private 712-case runs do not certify a public revision.
+2026-11-06. This is historical public evidence, not a result for the historical Metrics-only 615-case
+plan. Prior private 712-case runs do not certify a public revision.
 Focused native Metrics runs passed 57 regular and 57 race tests; integrated
-65-case E2E, SDK/UI, full formal and hosted checks remain pending. A private
+68-case combined E2E, SDK/UI, full formal and hosted checks remain pending. A private
 `fb925491` Scalar run stopped before Send with 28 required-ARIA violations and
 11 incomplete targets. Source-only fixes do not establish rebuilt-bundle or
 reference acceptance. See [Metrics scope](../docs/cloudwatch-metrics.md).
+
+Historical Metrics-only source `7246b71` required 56 models / 559 controls
+(615 executions). Its full attempt failed at case 449 after 448 successes, leaving
+166 cases unrun. A later isolated case-449 success does not complete that run or
+validate this new integration. The combined exact-HEAD whole gate remains unrun.
+
+## Bounded service catalog
+
+`CatalogResourceLifecycle` checks two service/region scopes, IDs 1..3, three
+names, quota two, two child slots, one client token and three steps. Its twelve
+controls cover the abstract authorization/commit, allocation, generation, child
+reference and replay boundaries. Official shape and wire validation, pagination,
+tags, ARNs, SQL/locking/crashes and Go refinement are outside this finite model.
+
+`CatalogConsoleEpoch` checks two services, epochs 0..3, one mounted view and
+unmount, with five controls for accepted view state and write sequencing. Native
+requests, DOM rendering, keyboard focus, accessibility, form conversion and React
+scheduling remain independent test obligations. The
+[service catalog](../docs/aws-catalog.md) implements bounded configuration
+metadata for CodeConnections, Step Functions, ECR and Amplify; this is not workload
+execution, image storage, hosting, OAuth or all-service AWS compatibility.
 
 ## Landing admission and selection
 
@@ -74,7 +110,7 @@ On 2026-11-06, scoped 19-case checking passed at `4382ec4`; that revision's full
 cases at `fad3b8a` passed on Chromium 154, including six strict accessibility
 audits. These are dated, separate results. Chromium 154 lacks the current
 HTML-in-Canvas API, so native Chrome 157 drawing and other engines are unverified.
-The later public `30ec082` full-448 hosted success is recorded above; it does not validate the Metrics integration.
+No successful combined 649-case or later exact-head acceptance is claimed here.
 
 CFNConditionAdmission adds fourteen invariants and fourteen semantic controls over
 234 immutable inputs. Its isolated `f69fb46` SANY/baseline/control run passed
@@ -112,8 +148,8 @@ CFNPhysicalResourceACK adds five properties and seven controls for selected SSM/
 The required `Formal validation` job reserves 30 minutes for checkout, the gate
 negative controls, exact-blob applicability and the complete serial registry.
 Each TLC case retains its 60-second default deadline and existing per-model
-settings; all 615 planned baseline/counterexample runs and failure requirements
-remain mandatory. This is an aggregate execution budget, not a model-bound,
+settings; all 649 combined baseline/counterexample runs and failure requirements
+remain mandatory, including the preserved 482 catalog/login checks and 167 Metrics checks. This is an aggregate execution budget, not a model-bound,
 acceptance, permission or per-case timeout change.
 
 The earlier 15-minute job on `8bb8a3d` ended cancelled after roughly 15 minutes;
@@ -125,8 +161,10 @@ historical scoped receipt does not replace it.
 
 Legacy integration sections below retain historical counts and status statements
 for traceability. Their word “current” refers to the recorded integration, not
-today's registry. The Metrics integration inventory is the 56/559 registry
-above; proof claims always require evidence for the exact revision.
+today's registry. The combined Metrics/catalog/login inventory above requires 59 models /
+590 controls (649 executions), with the new exact-HEAD whole gate pending. Historical
+48/381 results retain their recorded revision; source-specific landing and login
+results do not substitute for combined acceptance.
 
 `ObjectStore.tla` models two buckets and two keys, shared object ownership, create/put/delete transitions, and an abstract identity decision `allow /\ ~deny`. `ObjectStore.cfg` checks type correctness, no orphan objects, no unauthorized mutation, and explicit-deny precedence.
 

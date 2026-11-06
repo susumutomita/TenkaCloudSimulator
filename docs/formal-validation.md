@@ -15,13 +15,25 @@ machine-discovered semantic coverage. A newly added implementation file is not
 covered merely because an existing model passes: its exact path must have an
 appropriate reviewed scope mapping and property argument.
 
-The Metrics integration requires **56 baselines/559 named mutation controls
-(615 planned executions)**. It preserves the public 50/398 inventory, including
-LandingAccessAdmission and LandingTopologyState, and adds six Metrics models and
-161 controls. This count is a required plan, not a successful integrated gate.
-SecretMetadataViewEpoch and the existing CFN, Sakura and DynamoDB scopes remain.
-Numeric/regex/parser correctness, actual resource provisioning and NoEcho/output
-secrecy are not proved by registration. The IAM scope is four API-reachable seeds and at most two subsequent requests;
+The private Metrics/catalog/login registry requires **59 baselines / 590 named
+mutation controls (649 executions)**. Main's 53/429 inventory remains protected;
+six Metrics models add 161 controls. This is the combined required inventory,
+not an execution receipt. Exact-HEAD whole-gate validation remains unrun.
+
+Historical `28d37d1` checked 13 input cases/73 distinct states before focus
+capture; scoped `5b270e9` checked 14 cases/77 distinct states (94 generated,
+empty queue) and all 13 declared noninitial counterexamples, including the focus
+control at state 3. Scoped keyboard source `7bd15bf` checked 15 cases, 83 distinct
+baseline states (101 generated, empty queue) and all fourteen required noninitial
+counterexamples; the keyboard control first violated AdoptedValueExact at state 5.
+The controlled reset on focus/keydown is an explicit assumption, not an
+established browser cause or implementation refinement proof.
+[Input correspondence](login-token-file.md#bounded-input-intent-model) and the
+[dated login CI failure](login-token-file.md#dated-validation-and-current-candidate)
+remain distinct from combined acceptance. SecretMetadataViewEpoch and the existing
+CFN, Sakura and DynamoDB scopes remain. Numeric/regex/parser correctness, actual
+resource provisioning and NoEcho/output secrecy are not proved by registration.
+The IAM scope is four API-reachable seeds and at most two subsequent requests;
 the broader four-request exploratory candidate timed out and is not claimed.
 Registration and Python guards are not a successful immutable TLC execution.
 
@@ -34,13 +46,18 @@ behavior or full console accessibility. See the
 [Metrics model boundaries](../formal/README.md#bounded-metrics-models-and-pending-acceptance).
 
 As of 2026-11-06, public `30ec082` completed its hosted 448-execution gate.
-That historical success does not cover the new 615-case integration; private
+That historical success does not cover the historical Metrics-only 615-case integration; private
 712-case experiments are not public acceptance. Prior focused native Metrics
-runs passed 57 regular and 57 race tests. The integrated 65-case E2E suite,
+runs passed 57 regular and 57 race tests. The new combined 68-case E2E suite,
 SDK/UI acceptance, full gate and exact-HEAD CI remain pending. A private
 `fb925491` reference diagnostic stopped before Send with 28 required-ARIA
 violations and 11 incomplete targets. Neither a source patch nor model
 registration resolves that runtime blocker. [Metrics scope](cloudwatch-metrics.md).
+
+Historical Metrics-only source `7246b71` required 56 models / 559 controls
+(615 executions). Its full attempt failed at case 449 after 448 successes, leaving
+166 cases unrun. A later isolated case-449 success does not complete that run or
+validate this new integration. The combined exact-HEAD whole gate remains unrun.
 
 New models must be registered in `formal/models.json` **and** added to the
 mandatory `BASE_MODELS`, `BASE_INVARIANTS`, `REQUIRED_MUTANTS` and
@@ -59,8 +76,11 @@ fallback evidence, not native Chrome 157 rendering or successful full-gate CI.
 
 | Model | Finite contract | Important exclusions |
 |---|---|---|
+| [CatalogResourceLifecycle](aws-catalog.md) | two service/region scopes, three IDs/names, quota two, two child slots, one client token and three steps; twelve controls | official shape/wire validation, pagination/tag/ARN encoding, SQL/locking/crashes and Go refinement |
+| [CatalogConsoleEpoch](aws-catalog.md) | two services, epochs 0..3, one mounted view with unmount and defective overlapping writes; five controls | native requests, DOM/focus/accessibility, form conversion and React scheduling |
 | ObjectStore | two buckets/two keys; parent integrity, abstract allow/deny | concrete IAM, HTTP, SQL, crashes |
 | CFNConditionAdmission | 234 finite input witnesses; defaults/supplied admission, all conditions/declarations, branch choice, NoValue pruning, pure resource/output plan | real parser/numeric/regex/graph evaluation, exact error ordering, raw-link/dependency completeness, SQL, resource mutation, grants, privacy and host grading |
+| [LoginInputIntent](login-token-file.md#bounded-input-intent-model) | 18 scheduled input/focus/keyboard/paste/file/submit/locale scenarios, revision 0..3, at most six events and two POST snapshots; eight invariant families | arbitrary interleavings, React/DOM refinement, clipboard/extension behavior, file parser, server authentication and liveness |
 | StackOwnership | two owners/two names; retained drift reservations | authentication, callback recovery, full CFN |
 | S3Versions | one bucket/two keys; at most three history entries per key | suspended versions, byte quotas, SQL |
 | NativeIAMOwnership | two case-folded names; native/legacy exclusivity | trust parsing, full IAM, process isolation |

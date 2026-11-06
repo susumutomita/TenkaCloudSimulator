@@ -63,6 +63,16 @@ Git, logs, terminal recordings, and screen sharing. If paste is unavailable, use
 **Choose token file**: the browser reads a bounded local file without uploading
 it, and the server authenticates when you submit. See the
 [token-file format and unverified browser boundaries](docs/login-token-file.md).
+The masked field includes per-field password-manager ignore hints. It adopts a
+connected native value during input/focus/keyboard capture or blur, and snapshots it at
+submission, including an intentional clear. Submission flushes a current explicit
+paste first; adoption is a new intent that cancels older asynchronous input work.
+These are compatibility measures, not proof of an extension cause or a confirmed
+Dia/1Password repair. At `339c264`, the first native-input browser case passed,
+but the native-clear/Enter case failed. The keyboard-capture follow-up passed both
+complete 62-test browser suites at `8149cac`. The later catalog integration still requires its own complete CI.
+Actual Dia/1Password and user-device clipboard behavior remain unverified.
+See the [dated login CI result and remaining checks](docs/login-token-file.md#dated-validation-and-current-candidate).
 
 Press Ctrl+C to stop. Restarting with the same state and token files reuses them.
 Omitting `--state` when invoking the CLI creates a fresh in-memory database.
@@ -91,6 +101,7 @@ adapter, or Challenge integration.
 | [Lambda](docs/lambda.md) | CreateFunction, ListFunctions, GetFunctionConfiguration, UpdateFunctionCode, Invoke, DeleteFunction, AddPermission/GetPolicy/RemovePermission; Python ZIP execution through CPython 3.12.16/WASI and a bounded S3/SSM SDK bridge | Other languages, asynchronous invocation, Function URLs, arbitrary networking; 128 MiB and 1–30 second timeout |
 | [CloudFormation](docs/cloudformation-rest.md) | CreateStack, DescribeStacks, DeleteStack; S3 Bucket, SSM Parameter, inline Python Lambda, bounded IAM Role, 5 API Gateway resource types and Lambda Permission; bounded Ref/Sub/GetAtt/DependsOn, String/Number constraints, Equals/condition aliases, resource/output Condition and If/NoValue selection | UpdateStack, And/Or/Not, NoEcho secrecy, general resource types, full AWS asynchronous lifecycle, dedicated CloudFormation service roles |
 | [API Gateway](docs/apigateway.md) | 16 Regional REST management operations, resources/methods/integrations, immutable deployments, new stages and local Lambda proxy execution | HTTP/WebSocket APIs, authorizers, API keys, editing existing stages, public endpoints |
+| [Service catalog](docs/aws-catalog.md) | Model-driven configuration metadata for CodeConnections, Step Functions, ECR and Amplify through their native JSON or REST-JSON protocols, with one generic console view and per-service reference | Executions, images, builds, hosting, OAuth and every unlisted official operation (HTTP 501) |
 
 AWS regions are `us-east-1`, `us-west-2`, `ap-northeast-1`, and `eu-west-1`.
 Local limits include 8 MiB per S3 object, 64 MiB across retained object versions,
@@ -253,12 +264,13 @@ not binary runtime dependencies. Regeneration must preserve locks and original
 rights: [console](tools/console/README.md), [Scalar](tools/scalar/README.md),
 [Python/WASI runtime](tools/python/README.md).
 
-The Metrics integration requires **56 finite models and 559 deliberate defect
-controls (615 planned model/check executions)**. It preserves the public
-50/398 landing-era inventory and adds six bounded Metrics models with 161 controls.
-This is a required execution plan, not a successful aggregate result for the
-integrated revision. The Sakura, Secrets metadata and DynamoDB console models remain registered.
-Registration is not an integrated-revision execution receipt. The IAM scenario checks two requests
+The private Metrics/catalog/login integration requires **59 finite models and 590
+intentional defect controls (649 required executions)**. It preserves main's
+53-model/429-control catalog/login inventory and adds six bounded Metrics models
+with 161 controls. The catalog store/console and LoginInputIntent scopes remain
+registered alongside the earlier landing, Sakura, Secrets and DynamoDB models.
+This required inventory is not a successful execution receipt. Old-base
+`8149cac` results do not validate this composition. The IAM scenario checks two requests
 from each of four reachable seeds. A broader four-request trial timed out and
 is not claimed as verified. TLC examines bounded safety properties and checks
 that targeted mutants produce real counterexamples. It does not prove Go/JS
@@ -269,7 +281,7 @@ See [formal validation](formal/README.md), [CI](docs/ci.md),
 [standalone architecture](docs/design/0001-go-standalone.md).
 
 Metrics acceptance is incomplete as of 2026-11-06. Prior focused native runs
-passed 57 regular and 57 race tests; the integrated 65-case E2E suite, SDK/console
+passed 57 regular and 57 race tests; the new combined 68-case E2E suite, SDK/console
 acceptance, full formal gate and exact-HEAD CI still need verification. A private
 reference diagnostic at `fb925491` stopped before its first Send: strict axe found
 28 `aria-required-attr` violations and 11 incomplete targets. An offline source
@@ -280,6 +292,11 @@ reference acceptance or release readiness is claimed. See
 The public `30ec082` revision completed its hosted 50-baseline/398-control gate
 (448 executions) on 2026-11-06. That result does not cover the later Metrics
 integration. Private 712-case experiments are not a public aggregate result.
+
+Historical Metrics-only source `7246b71` required 56 models / 559 controls
+(615 executions). Its full attempt failed at case 449 after 448 successes, leaving
+166 cases unrun. A later isolated case-449 success does not complete that run or
+validate this new integration. The combined exact-HEAD whole gate remains unrun.
 
 On 2026-11-06, the two landing models passed their scoped 19 executions at
 `4382ec4`; the full 448-case attempt at that revision failed at DynamoDBAdmission.
@@ -301,7 +318,7 @@ implementation. These receipts and their then-pending hosted checks belong to
 those revisions. The original crypto fixture also passed the two-CLI SDK helper
 at `2d76646` (73 SDK calls/responses and nine auxiliary HTTP pairs across four CLI
 incarnations). None proves host scoring, output secrecy, every physical resource
-deletion, Go/SQL refinement or success of the Metrics integration’s planned 615-case gate.
+deletion, Go/SQL refinement or success of the current 649-case combined gate.
 
 ## License and attribution
 

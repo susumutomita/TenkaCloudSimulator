@@ -67,7 +67,14 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	if r.URL.RawQuery != "" || r.Header.Get("X-Amz-Target") != "" {
+	hasTarget := false
+	for _, target := range r.Header.Values("X-Amz-Target") {
+		if target != "" {
+			hasTarget = true
+			break
+		}
+	}
+	if r.URL.RawQuery != "" || hasTarget {
 		h.failure(w, unsupported("Query-string or JSON-target routing is unsupported by this leaf."), requestID)
 		return
 	}

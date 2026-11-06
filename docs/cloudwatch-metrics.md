@@ -41,4 +41,13 @@ The reference helper requires real Send responses and native-state cross-checks 
 
 The public baseline has 66 operation IDs and 36 paths. Metrics adds three form schemas (121 schemas total), three named form examples and the reviewed XML responses to the existing root POST. The closed inverse removes only those exact reviewed additions and requires canonical equality to the complete immutable public baseline. It refuses missing/renamed/duplicate cloud groups, changed old operations, schemas, authentication/routing fields and unknown additions. The static examples are also checked against the real JSON Schema branches.
 
-The main conformance suite retains all 62 existing public tests and adds separate native SDK/two-process, console and served-reference Metrics tests. Source presence and pure detector success are not successful execution of those three flows. Build, race/coverage, bounded model checks, whole E2E, review and hosted CI remain integration gates.
+The historical Metrics-only source `7246b71` retained the then-public 62 tests
+and added three Metrics tests, requiring 65 E2E cases. The new private integration
+preserves all 65 tests from main `3a9b0ce` and adds those separate native
+SDK/two-process, console and served-reference Metrics tests: **68 required E2E
+cases**. This is a source inventory, not a successful run. Source presence and
+pure detector success do not establish execution of those flows. Build,
+race/coverage, all 649 combined formal outcomes, whole E2E, review and exact-HEAD
+hosted CI remain integration gates. The earlier 615-case formal attempt failed
+at case 449 after 448 successes, leaving 166 unrun; an isolated case-449 success
+does not establish aggregate acceptance.

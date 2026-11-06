@@ -649,6 +649,15 @@ def handler(event,context):
  def test_cloudformation_original_crypto_template_native_sdk_lifecycle(self):
   subprocess.run([sys.executable, str(Path(__file__).with_name('cloudformation_crypto.py'))], check=True, timeout=180)
 
+ def test_aws_catalog_native_sdk_two_teams_policy_restart_and_cleanup(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('aws_catalog.py'))], check=True, timeout=240)
+
+ def test_aws_catalog_console_reference_and_shared_native_state(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('aws_catalog_console.py'))], check=True, timeout=300)
+
+ def test_aws_catalog_fixture_lifecycles_cover_every_bound_operation(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('aws_catalog_fixtures.py'))], check=True, timeout=900)
+
 
  def test_cloudwatch_metrics_native_sdk_two_clis_current_policy_and_restart(self):
   result=_metrics_acceptance_receipt('cloudwatch_metrics.py','metrics-sdk',180,sdk=True)

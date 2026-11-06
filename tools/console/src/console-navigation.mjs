@@ -18,6 +18,7 @@ export const SERVICES = Object.freeze([
   {id: 'logs', provider: 'aws', label: 'CloudWatch Logs', capability: 'logs', route: '/logs', keywords: 'log group stream monitoring ログ グループ ストリーム 監視'},
   {id: 'cloudwatch-metrics', provider: 'aws', label: 'CloudWatch Metrics', capability: 'cloudwatch', route: '/cloudwatch-metrics', keywords: 'metric namespace dimensions statistics monitoring メトリクス 名前空間 ディメンション 統計 監視'},
   {id: 'secretsmanager', provider: 'aws', label: 'Secrets Manager', capability: 'secretsmanager', route: '/secretsmanager', keywords: 'secret version credential credentials シークレット バージョン 秘密 認証情報'},
+  {id: 'catalog', provider: 'aws', label: 'Service catalog', capability: 'catalog', route: '/catalog', keywords: 'catalog metadata control plane カタログ サービス メタデータ'},
   {id: 'gcp-storage', provider: 'gcp', label: 'Cloud Storage', route: '/gcp-storage', keywords: 'google bucket object バケット オブジェクト ストレージ クラウドストレージ'},
   {id: 'azure-blob', provider: 'azure', label: 'Blob Storage', route: '/azure-blob', keywords: 'container blob コンテナー コンテナ ブロブ ストレージ ブロブストレージ'},
   {id: 'sakura-disks', provider: 'sakura', label: 'Disks', route: '/sakura-disks', keywords: 'sakura cloud disk configuration storage さくらのクラウド さくら ディスク 構成 ストレージ'},
@@ -59,10 +60,16 @@ export function serviceAvailable(id, capabilities) {
   return service.provider === 'gcp' ? typeof scope?.project === 'string' && scope.project.length > 0
     : typeof scope?.account === 'string' && scope.account.length > 0;
 }
+// Catalog service titles come from capabilities so search finds each one.
+function searchText(service, capabilities) {
+  const titles = service.id === 'catalog' && Array.isArray(capabilities?.services?.catalog?.services)
+    ? capabilities.services.catalog.services.map(entry => entry.title + ' ' + entry.serviceId).join(' ') : '';
+  return (service.label + ' ' + service.keywords + ' ' + titles).normalize('NFKC').toLocaleLowerCase('en');
+}
 export function servicesForProvider(provider, capabilities, query = '') {
   const search = String(query).normalize('NFKC').trim().toLocaleLowerCase('en');
   return SERVICES.filter(service => service.provider === provider && serviceAvailable(service.id, capabilities)
-    && (service.label + ' ' + service.keywords).normalize('NFKC').toLocaleLowerCase('en').includes(search));
+    && searchText(service, capabilities).includes(search));
 }
 export function serviceFromHash(hash) {
   if (!hash || hash === '#' || hash === '#/') return 's3';
