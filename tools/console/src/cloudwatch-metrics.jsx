@@ -14,6 +14,7 @@ import SpaceBetween from '@cloudscape-design/components/space-between';
 import Table from '@cloudscape-design/components/table';
 import Tabs from '@cloudscape-design/components/tabs';
 import {useLocale} from './i18n.jsx';
+import {metricStatisticLabel} from './metrics-presentation.mjs';
 
 // Original read-only local projection of ListMetrics/GetMetricStatistics.
 // Request is the parent's authenticated HTTP seam, never an independent fetch.
@@ -33,7 +34,7 @@ const text = (node, name) => child(node, name).textContent;
 const safeError = error => error instanceof Error && error.name === 'AbortError' ? '' : 'The metric request failed. Refresh or retry the read; no metric data was changed.';
 
 export default function CloudWatchMetricsView({region, principal = '', request}) {
- const {t} = useLocale();
+ const {locale, t} = useLocale();
  const lifeRef = useRef(null), scopeRef = useRef(null), graphStartRef = useRef(null), focusGraphRef = useRef(false);
  scopeRef.current = {region, principal, request};
  const [items, setItems] = useState([]), [selected, setSelected] = useState([]), [points, setPoints] = useState([]);
@@ -119,7 +120,7 @@ export default function CloudWatchMetricsView({region, principal = '', request})
    focusGraphRef.current=false; graphStartRef.current?.focus();
   }
  }, [tab, selected]);
- const series = useMemo(() => [...new Set(points.map(p => p.Unit))].map(u => ({title:`${statistic.value} (${u})`, type:'line', data:points.filter(p => p.Unit===u).map(p => ({x:new Date(p.Timestamp), y:p[statistic.value]}))})), [points, statistic.value]);
+ const series = useMemo(() => [...new Set(points.map(p => p.Unit))].map(u => ({title:`${metricStatisticLabel(statistic.value, locale)} (${u})`, type:'line', data:points.filter(p => p.Unit===u).map(p => ({x:new Date(p.Timestamp), y:p[statistic.value]}))})), [points, statistic.value, locale]);
  const changeQuery = setter => value => { invalidateStatistics(lifeRef.current); setter(value); };
  const actions = <Button disabled={listing} onClick={() => browse(lifeRef.current, pageFilters)}>{t('Refresh metrics','メトリクスを更新')}</Button>;
  return <SpaceBetween size="l">
@@ -152,10 +153,10 @@ export default function CloudWatchMetricsView({region, principal = '', request})
      <FormField label={t('Unit filter','単位フィルター')}><Select selectedOption={{...unit,label:unit.value || t('All native units','すべてのネイティブ単位')}} options={[{label:t('All native units','すべてのネイティブ単位'),value:''},...units.map(u=>({label:u,value:u}))]} onChange={({detail})=>changeQuery(setUnit)(detail.selectedOption)}/></FormField>
      <Button formAction="submit" loading={reading} disabled={listing}>{t('Read statistics','統計を読み取る')}</Button>
     </SpaceBetween></form></Container>
-    <FormField label={t('Graph statistic','グラフの統計')}><Select selectedOption={statistic} options={stats.map(s=>({label:s,value:s}))} onChange={({detail})=>setStatistic(detail.selectedOption)}/></FormField>
-    <LineChart series={series} xScaleType="time" yScaleType="linear" height={260} ariaLabel={t('Metric statistic by UTC time and unit','UTC 時刻・単位ごとのメトリクス統計')} xTitle={t('Time','時刻')} yTitle={statistic.value} statusType={reading?'loading':'finished'} empty={<Box>{t('No datapoints loaded. Read statistics; missing data is not zero.','データポイントは読み込まれていません。統計を読み取ってください。欠損データはゼロではありません。')}</Box>}/>
+    <FormField label={t('Graph statistic','グラフの統計')}><Select selectedOption={{...statistic,label:metricStatisticLabel(statistic.value, locale)}} options={stats.map(s=>({label:metricStatisticLabel(s, locale),value:s}))} onChange={({detail})=>setStatistic(detail.selectedOption)}/></FormField>
+    <LineChart series={series} xScaleType="time" yScaleType="linear" height={260} ariaLabel={t('Metric statistic by UTC time and unit','UTC 時刻・単位ごとのメトリクス統計')} xTitle={t('Time','時刻')} yTitle={metricStatisticLabel(statistic.value, locale)} statusType={reading?'loading':'finished'} empty={<Box>{t('No datapoints loaded. Read statistics; missing data is not zero.','データポイントは読み込まれていません。統計を読み取ってください。欠損データはゼロではありません。')}</Box>}/>
     {loadedQuery && <Box variant="small">{t('Last completed read','最後に完了した読み取り')}: {loadedQuery.start} → {loadedQuery.end} ({loadedQuery.period}s)</Box>}
-    <Table wrapLines loading={reading} items={points.slice((pointPage-1)*50,pointPage*50)} pagination={<Pagination currentPageIndex={pointPage} pagesCount={Math.max(1,Math.ceil(points.length/50))} onChange={({detail})=>setPointPage(detail.currentPageIndex)} ariaLabels={{paginationLabel:t('Statistic pages','統計のページ'),nextPageLabel:t('Next page','次のページ'),previousPageLabel:t('Previous page','前のページ'),pageLabel:n=>String(n)}}/>} trackBy="id" ariaLabels={{tableLabel:t('Native statistic values','ネイティブ統計値')}} columnDefinitions={[{id:'time',header:t('Timestamp (UTC)','タイムスタンプ（UTC）'),cell:p=>p.Timestamp},{id:'unit',header:t('Unit','単位'),cell:p=>p.Unit},...stats.map(s=>({id:s,header:s,cell:p=>p[s]}))]} empty={<Box padding="m">{t('No returned datapoints.','返されたデータポイントはありません。')}</Box>}/>
+    <Table wrapLines loading={reading} items={points.slice((pointPage-1)*50,pointPage*50)} pagination={<Pagination currentPageIndex={pointPage} pagesCount={Math.max(1,Math.ceil(points.length/50))} onChange={({detail})=>setPointPage(detail.currentPageIndex)} ariaLabels={{paginationLabel:t('Statistic pages','統計のページ'),nextPageLabel:t('Next page','次のページ'),previousPageLabel:t('Previous page','前のページ'),pageLabel:n=>String(n)}}/>} trackBy="id" ariaLabels={{tableLabel:t('Native statistic values','ネイティブ統計値')}} columnDefinitions={[{id:'time',header:t('Timestamp (UTC)','タイムスタンプ（UTC）'),cell:p=>p.Timestamp},{id:'unit',header:t('Unit','単位'),cell:p=>p.Unit},...stats.map(s=>({id:s,header:metricStatisticLabel(s, locale),cell:p=>p[s]}))]} empty={<Box padding="m">{t('No returned datapoints.','返されたデータポイントはありません。')}</Box>}/>
    </SpaceBetween>}
   ]}/>
  </SpaceBetween>;
