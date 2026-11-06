@@ -30,7 +30,12 @@ type request struct {
 	location string
 	params   map[string]any
 	body     map[string]any
-	target   string // the resource a create, patch or delete acts on
+	// scopePath is global, regions/{region} or zones/{zone} for the
+	// "zonal" scope; zone marks a zones/{zone} path.
+	scopePath string
+	zone      bool
+	// targetName is the resource a create, patch, set or delete acts on.
+	targetName string
 }
 
 func (q *request) collection() *Collection { return q.b.api.collection(q.bound.Collection) }
@@ -41,7 +46,13 @@ func (q *request) permission() string {
 		return q.bound.Permission
 	}
 	if q.bound.Kind == OperationGet || q.bound.Kind == OperationList {
-		return q.b.model.Name + ".operations." + verbs[q.bound.Kind]
+		// The operations resource names the permission, such as
+		// "operations" (AIP) or "zoneOperations" (Compute Engine).
+		parts := strings.Split(q.method.ID, ".")
+		return q.b.model.Name + "." + parts[len(parts)-2] + "." + verbs[q.bound.Kind]
+	}
+	if q.bound.Kind == Set {
+		return q.collection().Permission + "." + q.verb()
 	}
 	return q.collection().Permission + "." + verbs[q.bound.Kind]
 }
@@ -67,7 +78,7 @@ func (q *request) execute() (any, error) {
 	case Create:
 		return q.create()
 	case Get:
-		r, err := q.find(q.path)
+		r, err := q.target()
 		if err != nil {
 			return nil, err
 		}
@@ -78,6 +89,8 @@ func (q *request) execute() (any, error) {
 		return q.patch()
 	case Delete:
 		return q.remove()
+	case Set:
+		return q.set()
 	case OperationGet:
 		return q.operation()
 	}
@@ -100,6 +113,16 @@ func (q *request) find(name string) (row, error) {
 	return r, err
 }
 
+// target finds the resource the request path names in the bound collection.
+func (q *request) target() (row, error) {
+	r, err := q.find(q.path)
+	if err == nil && r.Collection != q.bound.Collection {
+		return row{}, &status{"NOT_FOUND", fmt.Sprintf("Resource '%s' was not found.", q.path)}
+	}
+	q.targetName = r.Name
+	return r, err
+}
+
 // parentName validates the parent of a collection path and that it exists.
 func (q *request) parentName(parent string) error {
 	c := q.collection()
@@ -116,11 +139,7 @@ func (q *request) parentName(parent string) error {
 		parent = strings.Join(segments[:n-2], "/")
 	}
 	if c.Parent == "" {
-		root := "projects/" + q.e.cfg.Project
-		if q.location != "" {
-			root += "/locations/" + q.location
-		}
-		if parent != root {
+		if root := q.root(); parent != root {
 			return invalid("Parent %q is not a valid %s parent.", parent, c.ID)
 		}
 		return nil
@@ -148,7 +167,7 @@ func (q *request) required(schema string) error {
 	sort.Strings(keys)
 	for _, key := range keys {
 		p := s.Properties[key]
-		if p.Required && !p.ReadOnly && key != "name" && !relaxed[key] {
+		if q.b.requiredFor(p, q.method.ID) && !p.ReadOnly && key != "name" && !relaxed[key] {
 			if _, ok := q.body[key]; !ok {
 				return invalid("Field '%s' is required.", key)
 			}
@@ -171,6 +190,8 @@ func (q *request) generated(value any, name, id, parent string) any {
 		return uuid()
 	case "$etag":
 		return randomHex(8)
+	case "$fingerprint":
+		return fingerprint()
 	case "$id":
 		return id
 	case "$project":
@@ -220,15 +241,15 @@ func mustJSON(v any) string {
 // respond wraps a result in a completed long-running operation when the
 // official method returns one.
 func (q *request) respond(result map[string]any, typeName string, tx *sql.Tx) (any, error) {
+	if q.flatOperation() {
+		return q.completed(result, tx)
+	}
 	if !q.longRunning() {
 		return result, nil
 	}
-	scope := "projects/" + q.e.cfg.Project
-	if q.location != "" {
-		scope += "/locations/" + q.location
-	}
+	scope := q.root()
 	if anchor := q.collection().Operations; anchor != "" {
-		scope = ancestor(q.target, anchor)
+		scope = ancestor(q.targetName, anchor)
 	}
 	opName := scope + "/operations/operation-" + randomHex(10)
 	response := map[string]any{"@type": "type.googleapis.com/google.protobuf.Empty"}
@@ -242,6 +263,12 @@ func (q *request) respond(result map[string]any, typeName string, tx *sql.Tx) (a
 		}
 	}
 	op := map[string]any{"name": opName, "done": true, "response": response}
+	return q.storeOperation(tx, opName, scope, op)
+}
+
+// storeOperation keeps a completed operation readable under its scope,
+// pruning the oldest beyond the operation budget.
+func (q *request) storeOperation(tx *sql.Tx, opName, scope string, op map[string]any) (any, error) {
 	if q.params["validateOnly"] == true {
 		return op, nil
 	}
@@ -274,61 +301,6 @@ func ancestor(name, collection string) string {
 		}
 	}
 	return name
-}
-
-// references requires every written reference field (all when written is
-// nil) to name an existing resource of its collection, normalizing project
-// numbers to the project ID.
-func (q *request) references(tx *sql.Tx, document map[string]any, written map[string]bool) error {
-	fields := make([]string, 0, len(q.collection().References))
-	for field := range q.collection().References {
-		if written == nil || written[field] {
-			fields = append(fields, field)
-		}
-	}
-	sort.Strings(fields)
-	for _, field := range fields {
-		value, ok := document[field].(string)
-		if !ok {
-			continue
-		}
-		value = q.e.normalize(value)
-		document[field] = value
-		r, err := findName(tx, q.b.model.Name, value)
-		if errors.Is(err, sql.ErrNoRows) || err == nil && r.Collection != q.collection().References[field].Collection {
-			return &status{"NOT_FOUND", fmt.Sprintf("Referenced resource '%s' in field '%s' was not found.", value, field)}
-		}
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// referenced finds a resource outside the deleted subtree that still names
-// the target through a blocking reference.
-func (q *request) referenced(tx *sql.Tx, target row) (string, error) {
-	for _, c := range q.b.api.Collections {
-		fields := make([]string, 0, len(c.References))
-		for field, ref := range c.References {
-			if ref.Blocks && ref.Collection == target.Collection && !(ref.Override != "" && q.params[ref.Override] == true) {
-				fields = append(fields, field)
-			}
-		}
-		sort.Strings(fields)
-		for _, field := range fields {
-			var name string
-			err := tx.QueryRow("SELECT name FROM gcp_catalog_resources WHERE api=? AND collection=? AND json_extract(document, '$.' || ?)=? AND name NOT LIKE ? ESCAPE '\\' ORDER BY seq LIMIT 1",
-				q.b.model.Name, c.ID, field, target.Name, escapeLike(target.Name)+"/%").Scan(&name)
-			if err == nil {
-				return name, nil
-			}
-			if !errors.Is(err, sql.ErrNoRows) {
-				return "", err
-			}
-		}
-	}
-	return "", nil
 }
 
 func (q *request) longRunning() bool {
@@ -368,8 +340,8 @@ func (q *request) newID(parent string) (string, map[string]any, error) {
 			}
 			if c.FullName {
 				full := q.e.normalize(id)
-				if id = strings.TrimPrefix(full, parent+"/"+c.ID+"/"); id == full {
-					return "", nil, invalid("Field '%s' must name a resource under %s/%s.", c.IDField, parent, c.ID)
+				if id = strings.TrimPrefix(full, parent+"/"+q.segment()+"/"); id == full {
+					return "", nil, invalid("Field '%s' must name a resource under %s/%s.", c.IDField, parent, q.segment())
 				}
 			}
 		case q.bound.Unwrap != nil:
@@ -390,11 +362,11 @@ func (q *request) newID(parent string) (string, map[string]any, error) {
 
 func (q *request) create() (any, error) {
 	c := q.collection()
-	parent := q.path
-	if !strings.HasSuffix(parent, "/"+c.ID) {
+	parent, segment := q.path, q.segment()
+	if !strings.HasSuffix(parent, "/"+segment) {
 		return nil, invalid("The create path must name the %s collection.", c.ID)
 	}
-	parent = strings.TrimSuffix(parent, "/"+c.ID)
+	parent = strings.TrimSuffix(parent, "/"+segment)
 	if err := q.parentName(parent); err != nil {
 		return nil, err
 	}
@@ -405,8 +377,11 @@ func (q *request) create() (any, error) {
 	if err := q.required(q.method.Request); err != nil {
 		return nil, err
 	}
-	name := parent + "/" + c.ID + "/" + id
+	name := parent + "/" + segment + "/" + id
+	q.targetName = name
 	document := map[string]any{}
+	schema := q.b.model.Schemas[c.Schema]
+	defaults(schema, document)
 	for k, v := range body {
 		document[k] = v
 	}
@@ -425,14 +400,20 @@ func (q *request) create() (any, error) {
 			document[key] = generated
 		}
 	}
-	q.target = name
+	q.flatFields(schema, document, name)
 	return q.idempotent(func() (any, error) {
 		tx, err := q.e.store.db.Begin()
 		if err != nil {
 			return nil, err
 		}
 		defer tx.Rollback()
-		if err := q.references(tx, document, nil); err != nil {
+		// References resolve, conflicts are checked and the document is
+		// encoded inside the writing transaction, so a concurrent delete
+		// of a referenced resource cannot slip in between.
+		if err := q.references(tx, c, document, nil); err != nil {
+			return nil, err
+		}
+		if err := q.conflicts(tx, c, name, document); err != nil {
 			return nil, err
 		}
 		data, err := encode(document)
@@ -490,7 +471,7 @@ type pageToken struct {
 
 func (q *request) list() (any, error) {
 	c := q.collection()
-	parent := strings.TrimSuffix(q.path, "/"+c.ID)
+	parent := strings.TrimSuffix(q.path, "/"+q.segment())
 	if parent == q.path {
 		return nil, invalid("The list path must name the %s collection.", c.ID)
 	}
@@ -502,23 +483,9 @@ func (q *request) list() (any, error) {
 	if err := q.parentName(parent); err != nil {
 		return nil, err
 	}
-	size := int64(defaultPageSize)
-	if n, ok := q.params["pageSize"].(int64); ok {
-		if n < 0 {
-			return nil, invalid("pageSize must not be negative.")
-		}
-		if n > 0 {
-			size = min(n, maxPageSize)
-		}
-	}
-	after := int64(0)
-	if text, _ := q.params["pageToken"].(string); text != "" {
-		raw, err := base64.RawURLEncoding.DecodeString(text)
-		var token pageToken
-		if err != nil || json.Unmarshal(raw, &token) != nil || token.Parent != parent || token.Kind != c.ID {
-			return nil, invalid("Invalid page token.")
-		}
-		after = token.After
+	size, after, err := q.page(parent, c.ID)
+	if err != nil {
+		return nil, err
 	}
 	rows, err := listChildren(q.e.store.db, q.b.model.Name, parent, c.ID)
 	if err != nil {
@@ -546,6 +513,10 @@ func (q *request) list() (any, error) {
 	}
 	out := map[string]any{}
 	response := q.b.model.Schemas[q.method.Response]
+	defaults(response, out)
+	if q.b.api.SelfLink != "" && response.Properties["selfLink"] != nil {
+		out["selfLink"] = q.link(q.path)
+	}
 	for field, p := range response.Properties {
 		if p.Type == "array" && p.Items != nil && p.Items.Ref == c.Schema {
 			out[field] = items
@@ -557,9 +528,34 @@ func (q *request) list() (any, error) {
 	return out, nil
 }
 
+// page reads pageSize (AIP) or maxResults (Compute Engine) and pageToken.
+func (q *request) page(parent, kind string) (int64, int64, error) {
+	size := int64(defaultPageSize)
+	for _, key := range []string{"pageSize", "maxResults"} {
+		if n, ok := q.params[key].(int64); ok {
+			if n < 0 {
+				return 0, 0, invalid("%s must not be negative.", key)
+			}
+			if n > 0 {
+				size = min(n, maxPageSize)
+			}
+		}
+	}
+	after := int64(0)
+	if text, _ := q.params["pageToken"].(string); text != "" {
+		raw, err := base64.RawURLEncoding.DecodeString(text)
+		var token pageToken
+		if err != nil || json.Unmarshal(raw, &token) != nil || token.Parent != parent || token.Kind != kind {
+			return 0, 0, invalid("Invalid page token.")
+		}
+		after = token.After
+	}
+	return size, after, nil
+}
+
 func (q *request) patch() (any, error) {
 	c := q.collection()
-	r, err := q.find(q.path)
+	r, err := q.target()
 	if err != nil {
 		return nil, err
 	}
@@ -615,14 +611,59 @@ func (q *request) patch() (any, error) {
 	if etag, ok := q.body["etag"].(string); ok && r.Document["etag"] != nil && etag != r.Document["etag"] {
 		return nil, &status{"ABORTED", "The etag does not match the current resource."}
 	}
+	if err := q.guard(r.Document); err != nil {
+		return nil, err
+	}
+	// Flat APIs merge objects of a mask-less patch (RFC 7396).
+	merge := q.b.api.SelfLink != "" && mask == "" && !replace
 	written := map[string]bool{}
 	for _, field := range fields {
 		field = strings.TrimSpace(field)
-		if field == "etag" {
+		if field == "etag" || q.bound.Fingerprint != "" && field == q.bound.Fingerprint {
+			continue
+		}
+		if given, ok := q.body[field].(string); ok && c.IDField != "" && field == c.IDField && q.e.normalize(given) == r.Document[field] {
+			// Sending the unchanged body ID back is not an update.
+			continue
+		}
+		if merge && !mutable[field] && mustJSON(q.body[field]) == mustJSON(r.Document[field]) {
+			// A merge patch may restate an immutable field unchanged.
 			continue
 		}
 		if !replace && !mutable[field] {
 			return nil, invalid("Field %q cannot be updated by the simulator.", field)
+		}
+		written[field] = true
+		value, ok := q.body[field]
+		patch, isObject := value.(map[string]any)
+		existing, wasObject := r.Document[field].(map[string]any)
+		switch {
+		case !ok:
+			delete(r.Document, field)
+		case merge && isObject && wasObject:
+			mergePatch(existing, patch)
+		default:
+			r.Document[field] = value
+		}
+	}
+	return q.save(c, r, written)
+}
+
+// set writes every writable request field of a custom method onto the
+// resource; an omitted field is cleared, as setLabels clears labels.
+func (q *request) set() (any, error) {
+	c := q.collection()
+	r, err := q.target()
+	if err != nil {
+		return nil, err
+	}
+	if err := q.guard(r.Document); err != nil {
+		return nil, err
+	}
+	written := map[string]bool{}
+	for field, p := range q.b.model.Schemas[q.method.Request].Properties {
+		if p.ReadOnly || field == q.bound.Fingerprint {
+			continue
 		}
 		written[field] = true
 		if value, ok := q.body[field]; ok {
@@ -631,20 +672,46 @@ func (q *request) patch() (any, error) {
 			delete(r.Document, field)
 		}
 	}
+	return q.save(c, r, written)
+}
+
+// guard applies the binding's fingerprint and transition checks.
+func (q *request) guard(current map[string]any) error {
+	if fp := q.bound.Fingerprint; fp != "" {
+		if value, ok := q.body[fp]; ok && value != current[fp] {
+			return &status{"ABORTED", "The fingerprint does not match the current resource; read it again before retrying."}
+		}
+	}
+	if q.bound.Transition != nil {
+		return q.bound.Transition(current, q.body)
+	}
+	return nil
+}
+
+// save stores an updated resource and returns it or its operation. The
+// written reference fields resolve, conflicts are checked, the document is
+// encoded and the metadata budget is checked inside the transaction.
+func (q *request) save(c *Collection, r row, written map[string]bool) (any, error) {
+	if fp := q.bound.Fingerprint; fp != "" {
+		r.Document[fp] = fingerprint()
+	}
 	if _, ok := r.Document["updateTime"]; ok || c.Generate["updateTime"] != nil {
 		r.Document["updateTime"] = q.now().Format(time.RFC3339Nano)
 	}
 	if _, ok := r.Document["etag"]; ok {
 		r.Document["etag"] = randomHex(8)
 	}
-	q.target = r.Name
+	q.targetName = r.Name
 	return q.idempotent(func() (any, error) {
 		tx, err := q.e.store.db.Begin()
 		if err != nil {
 			return nil, err
 		}
 		defer tx.Rollback()
-		if err := q.references(tx, r.Document, written); err != nil {
+		if err := q.references(tx, c, r.Document, written); err != nil {
+			return nil, err
+		}
+		if err := q.conflicts(tx, c, r.Name, r.Document); err != nil {
 			return nil, err
 		}
 		data, err := encode(r.Document)
@@ -669,7 +736,7 @@ func (q *request) patch() (any, error) {
 
 func (q *request) remove() (any, error) {
 	c := q.collection()
-	r, err := q.find(q.path)
+	r, err := q.target()
 	if err != nil {
 		return nil, err
 	}
@@ -681,15 +748,16 @@ func (q *request) remove() (any, error) {
 	}
 	_, optional := q.method.Parameters["force"]
 	force := q.params["force"] == true || !optional
-	q.target = r.Name
 	return q.idempotent(func() (any, error) {
 		tx, err := q.e.store.db.Begin()
 		if err != nil {
 			return nil, err
 		}
 		defer tx.Rollback()
-		if holder, err := q.referenced(tx, r); err != nil {
+		if holder, err := q.referrer(tx, r); err != nil {
 			return nil, err
+		} else if holder != "" && q.b.api.SelfLink != "" {
+			return nil, &status{"FAILED_PRECONDITION", fmt.Sprintf("The resource '%s' is already being used by '%s'.", r.Name, holder)}
 		} else if holder != "" {
 			return nil, &status{"FAILED_PRECONDITION", fmt.Sprintf("Resource '%s' is still referenced by '%s'.", r.Name, holder)}
 		}
@@ -715,9 +783,10 @@ func (q *request) remove() (any, error) {
 				return nil, err
 			}
 		}
-		// Methods such as BigLake catalogs.delete return the deleted resource.
+		// Methods such as BigLake catalogs.delete return the deleted
+		// resource, and flat operations name it as their target.
 		deleted := map[string]any{}
-		if q.method.Response == c.Schema {
+		if q.method.Response == c.Schema || q.flatOperation() {
 			deleted = r.Document
 		}
 		out, err := q.respond(deleted, "", tx)
@@ -784,19 +853,35 @@ func (q *request) operations() (any, error) {
 	if scope == q.path {
 		return nil, invalid("The list path must name the operations collection.")
 	}
-	if text, _ := q.params["filter"].(string); text != "" {
-		return nil, invalid("Parameter \"filter\" is not supported by the simulator.")
+	for _, unsupported := range []string{"filter", "orderBy"} {
+		if text, _ := q.params[unsupported].(string); text != "" {
+			return nil, invalid("Parameter %q is not supported by the simulator.", unsupported)
+		}
 	}
-	rows, err := q.e.store.db.Query("SELECT document FROM gcp_catalog_operations WHERE api=? AND scope=? ORDER BY seq", q.b.model.Name, scope)
+	// Flat operation lists page with maxResults; AIP lists return every
+	// operation of the scope, as before.
+	size, after := int64(-1), int64(0)
+	if q.b.api.SelfLink != "" {
+		var err error
+		if size, after, err = q.page(scope, "operations"); err != nil {
+			return nil, err
+		}
+	}
+	rows, err := q.e.store.db.Query("SELECT document, seq FROM gcp_catalog_operations WHERE api=? AND scope=? AND seq>? ORDER BY seq", q.b.model.Name, scope, after)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []any{}
+	items, next, last := []any{}, "", int64(0)
 	for rows.Next() {
+		if int64(len(items)) == size {
+			data, _ := json.Marshal(pageToken{scope, "operations", last})
+			next = base64.RawURLEncoding.EncodeToString(data)
+			break
+		}
 		var document string
 		var op any
-		if err := rows.Scan(&document); err != nil {
+		if err := rows.Scan(&document, &last); err != nil {
 			return nil, err
 		}
 		if err := json.Unmarshal([]byte(document), &op); err != nil {
@@ -807,7 +892,19 @@ func (q *request) operations() (any, error) {
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
-	return map[string]any{"operations": items}, nil
+	response := q.b.model.Schemas[q.method.Response]
+	field := "operations"
+	for name, p := range response.Properties {
+		if p.Type == "array" && p.Items != nil && p.Items.Ref != "" {
+			field = name
+		}
+	}
+	out := map[string]any{field: items}
+	defaults(response, out)
+	if next != "" {
+		out["nextPageToken"] = next
+	}
+	return out, nil
 }
 
 // storedParent strips an implicit, unstored collection segment such as a

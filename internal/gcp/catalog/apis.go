@@ -12,5 +12,7 @@ func APIs() []*API {
 		managedKafka, datastream, dataprocMetastore, dataform, dataFusion, looker, composer, dataplex, bigLake, dataproc,
 		// Networking, network security and operations.
 		serviceDirectory, networkConnectivity, networkManagement, cloudIDS, networkSecurity, networkServices, cloudLogging, cloudMonitoring,
+		// Compute Engine networking, disks and load balancing (flat API).
+		compute,
 	}
 }

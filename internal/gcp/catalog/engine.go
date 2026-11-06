@@ -92,11 +92,16 @@ func (e *Engine) add(b *binding) error {
 }
 
 func bindAPI(api *API, model *Model) (*binding, error) {
-	if api.Title == "" || len(api.Issues) == 0 || len(api.Bounds) == 0 || !strings.HasPrefix(api.TypeURL, "type.googleapis.com/") {
+	// Flat APIs return their own operation resource and need no type URL.
+	typed := strings.HasPrefix(api.TypeURL, "type.googleapis.com/") || api.SelfLink != "" && api.TypeURL == ""
+	if api.Title == "" || len(api.Issues) == 0 || len(api.Bounds) == 0 || !typed {
 		return nil, fmt.Errorf("GCP catalog %s lacks a title, Issue, bounds or type URL", api.Key)
 	}
-	if api.Scope != "location" && api.Scope != "project" {
+	if api.Scope != "location" && api.Scope != "project" && api.Scope != "zonal" {
 		return nil, fmt.Errorf("GCP catalog %s has an unknown scope", api.Key)
+	}
+	if api.SelfLink != "" && (!strings.HasPrefix(api.SelfLink, "https://") || !strings.HasSuffix(api.SelfLink, "/")) {
+		return nil, fmt.Errorf("GCP catalog %s has a malformed selfLink prefix", api.Key)
 	}
 	b := &binding{api: api, model: model, bindings: map[string]*Binding{}}
 	for _, c := range api.Collections {
@@ -109,9 +114,17 @@ func bindAPI(api *API, model *Model) (*binding, error) {
 		if c.FullName && (c.IDField == "" || c.ShortName) {
 			return nil, fmt.Errorf("GCP catalog %s collection %s carries a full name without a body ID field or with a short name", api.Key, c.ID)
 		}
-		for field, ref := range c.References {
-			if model.Schemas[c.Schema].Properties[field] == nil || api.collection(ref.Collection) == nil {
-				return nil, fmt.Errorf("GCP catalog %s collection %s references an unknown field or collection", api.Key, c.ID)
+		if c.Zonal && api.Scope == "zonal" {
+			return nil, fmt.Errorf("GCP catalog %s collection %s is zonal in a flat API, whose paths name zones", api.Key, c.ID)
+		}
+		for path, ref := range c.References {
+			if !model.referencePath(model.Schemas[c.Schema], path) {
+				return nil, fmt.Errorf("GCP catalog %s collection %s references through unknown field %s", api.Key, c.ID, path)
+			}
+			for _, target := range ref.targets() {
+				if api.collection(target) == nil {
+					return nil, fmt.Errorf("GCP catalog %s collection %s references unknown collection %s", api.Key, c.ID, target)
+				}
 			}
 		}
 		anchor := c
@@ -129,7 +142,7 @@ func bindAPI(api *API, model *Model) (*binding, error) {
 			return nil, fmt.Errorf("GCP catalog %s method %s is missing or bound twice", api.Key, bound.Method)
 		}
 		switch bound.Kind {
-		case Create, Get, List, Patch, Replace, Delete:
+		case Create, Get, List, Patch, Replace, Delete, Set:
 			if api.collection(bound.Collection) == nil {
 				return nil, fmt.Errorf("GCP catalog %s method %s names an unknown collection", api.Key, bound.Method)
 			}
@@ -137,10 +150,8 @@ func bindAPI(api *API, model *Model) (*binding, error) {
 		default:
 			return nil, fmt.Errorf("GCP catalog %s method %s has an unknown kind", api.Key, bound.Method)
 		}
-		for _, name := range bound.Refuse {
-			if method.Parameters[name].Location != "query" {
-				return nil, fmt.Errorf("GCP catalog %s method %s refuses unknown query parameter %s", api.Key, bound.Method, name)
-			}
+		if err := checkBinding(api, model, bound, method); err != nil {
+			return nil, err
 		}
 		b.bindings[bound.Method] = bound
 	}
@@ -168,6 +179,32 @@ func bindAPI(api *API, model *Model) (*binding, error) {
 		_ = r
 	}
 	return b, nil
+}
+
+// checkBinding fails closed on custom-method fields, fingerprints and
+// refused parameters that the official method does not have.
+func checkBinding(api *API, model *Model, bound *Binding, method *Method) error {
+	request := model.Schemas[method.Request]
+	if bound.Kind == Set {
+		resource := model.Schemas[api.collection(bound.Collection).Schema]
+		if request == nil {
+			return fmt.Errorf("GCP catalog %s method %s sets no request fields", api.Key, bound.Method)
+		}
+		for field, p := range request.Properties {
+			if !p.ReadOnly && resource.Properties[field] == nil {
+				return fmt.Errorf("GCP catalog %s method %s sets %s, which %s lacks", api.Key, bound.Method, field, api.collection(bound.Collection).Schema)
+			}
+		}
+	}
+	if bound.Fingerprint != "" && (request == nil || request.Properties[bound.Fingerprint] == nil || bound.Kind != Patch && bound.Kind != Replace && bound.Kind != Set) {
+		return fmt.Errorf("GCP catalog %s method %s has no request field %s to guard", api.Key, bound.Method, bound.Fingerprint)
+	}
+	for _, name := range bound.Refuse {
+		if method.Parameters[name].Location != "query" {
+			return fmt.Errorf("GCP catalog %s method %s refuses unknown parameter %s", api.Key, bound.Method, name)
+		}
+	}
+	return nil
 }
 
 func splitPath(p string) []string {
@@ -257,11 +294,13 @@ func (e *Engine) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, out)
 }
 
-// match finds the official binding of a path. Overlapping bindings, such as
-// Cloud Logging's {+parent} aliases of projects/{project} paths, resolve to
-// the template with the most literal segments.
+// match finds the official binding of a path. Where templates overlap, the
+// one with the most literal segments wins, as Cloud Logging's projects/
+// {project} paths win over their {+parent} aliases and Compute Engine
+// backendServices/listUsable wins over backendServices/{name}; among equally
+// literal templates the earliest literal segment wins.
 func (b *binding) match(method string, segments []string) (route, bool) {
-	best, literals := route{}, -1
+	best, literals, score := route{}, -1, -1
 	for _, rt := range b.routes {
 		if b.model.Routes[rt.method].HTTPMethod != method || len(rt.segments) != len(segments) {
 			continue
@@ -295,14 +334,15 @@ func (b *binding) match(method string, segments []string) (route, bool) {
 		if !matched {
 			continue
 		}
-		n := 0
-		for _, template := range rt.segments {
+		n, literal := 0, 0
+		for i, template := range rt.segments {
 			if !strings.HasPrefix(template, "{") {
 				n++
+				literal |= 1 << (len(rt.segments) - 1 - i)
 			}
 		}
-		if n > literals {
-			best, literals = rt, n
+		if n > literals || n == literals && literal > score {
+			best, literals, score = rt, n, literal
 		}
 	}
 	return best, literals >= 0
@@ -333,7 +373,28 @@ func (e *Engine) prepare(w http.ResponseWriter, r *http.Request, b *binding, rt 
 		q.path = strings.TrimSuffix(q.path, ":"+rt.verb)
 	}
 	q.project = segments[start+1]
-	if b.api.Scope == "location" && bound.Kind != OperationGet && bound.Kind != OperationList || strings.Contains(q.path, "/locations/") {
+	if n := len(rt.segments); rt.verb == "" && (bound.Kind == Set || bound.Kind == OperationGet) && n > 1 &&
+		!strings.HasPrefix(rt.segments[n-1], "{") && strings.HasPrefix(rt.segments[n-2], "{") {
+		// A trailing literal after the resource is a slash-style custom
+		// verb, such as Compute Engine .../disks/{disk}/resize or
+		// .../operations/{operation}/wait.
+		q.path = q.path[:strings.LastIndex(q.path, "/")]
+	}
+	if b.api.Scope == "zonal" {
+		if start+2 >= len(segments) {
+			return nil, invalid("Resource paths must name global, regions/{region} or zones/{zone}.")
+		}
+		switch scope := strings.Join(segments[start+2:min(start+4, len(segments))], "/"); {
+		case segments[start+2] == "global":
+			q.scopePath = "global"
+		case strings.HasPrefix(scope, "regions/") && start+4 < len(segments):
+			q.scopePath, q.location = scope, segments[start+3]
+		case strings.HasPrefix(scope, "zones/") && start+4 < len(segments):
+			q.scopePath, q.location, q.zone = scope, segments[start+3], true
+		default:
+			return nil, invalid("Resource paths must name global, regions/{region} or zones/{zone}.")
+		}
+	} else if b.api.Scope == "location" && bound.Kind != OperationGet && bound.Kind != OperationList || strings.Contains(q.path, "/locations/") {
 		if start+3 >= len(segments) || segments[start+2] != "locations" {
 			return nil, invalid("Resource names must include locations/{location}.")
 		}
@@ -409,17 +470,23 @@ func (e *Engine) authorize(q *request) error {
 		return &status{"PERMISSION_DENIED", fmt.Sprintf("Permission '%s' denied on resource '%s' (or it may not exist).", permission, q.path)}
 	}
 	if q.location != "" {
-		regional, zonal := true, false
-		if q.bound.Kind == OperationGet || q.bound.Kind == OperationList {
-			for _, c := range q.b.api.Collections {
-				zonal = zonal || c.Zonal
+		// A flat path says whether it names a zone. An AIP location is a
+		// zone for zonal collections and a region (or global) otherwise,
+		// and either for the operations of an API with zonal collections.
+		regional, zonal := !q.zone, q.zone
+		if q.b.api.Scope != "zonal" {
+			if q.bound.Kind == OperationGet || q.bound.Kind == OperationList {
+				for _, c := range q.b.api.Collections {
+					zonal = zonal || c.Zonal
+				}
+			} else {
+				zonal = q.collection().Zonal
+				regional = !zonal
 			}
-		} else {
-			zonal = q.collection().Zonal
-			regional = !zonal
 		}
+		region, isZone := zoneRegion(q.location)
 		for _, l := range e.cfg.Locations {
-			if regional && l == q.location || zonal && l != "global" && isZone(q.location, l) {
+			if regional && l == q.location && !(q.scopePath != "" && l == "global") || zonal && isZone && l == region {
 				return nil
 			}
 		}
@@ -428,8 +495,14 @@ func (e *Engine) authorize(q *request) error {
 	return nil
 }
 
-// isZone reports whether location is a zone such as us-central1-a of region.
-func isZone(location, region string) bool {
-	zone, ok := strings.CutPrefix(location, region+"-")
-	return ok && len(zone) == 1 && zone[0] >= 'a' && zone[0] <= 'z'
+func (b *binding) requiredFor(p *Property, method string) bool {
+	if p.Required {
+		return true
+	}
+	for _, id := range p.RequiredBy {
+		if id == b.model.Name+"."+method {
+			return true
+		}
+	}
+	return false
 }

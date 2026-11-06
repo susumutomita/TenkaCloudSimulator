@@ -59,6 +59,7 @@ Google Cloud call is executed or simulated.
 | Network Security (`networksecurity.v1`) | #353, #354, #364, #367 | `projects.locations.{securityProfiles,securityProfileGroups,firewallEndpoints,firewallEndpointAssociations,mirroringDeploymentGroups,mirroringDeployments,mirroringEndpointGroups,mirroringEndpointGroupAssociations,interceptDeploymentGroups,interceptDeployments,interceptEndpointGroups,interceptEndpointGroupAssociations,gatewaySecurityPolicies,urlLists,tlsInspectionPolicies,addressGroups}.{create,get,list,patch,delete}`, `gatewaySecurityPolicies.rules.{create,get,list,patch,delete}`, `operations.{get,list}` | Configuration metadata. No firewall engine, mirroring, interception, TLS inspection or proxy runs. Firewall endpoints, associations and deployments are zonal. Organization-level resources are not implemented |
 | Network Services (`networkservices.v1`) | #367 | `projects.locations.gateways.{create,get,list,patch,delete}`, `operations.{get,list}` | Secure Web Proxy and mesh gateways are metadata. No proxy is deployed and no address is allocated. Media CDN, meshes and routes are not implemented |
 | Service Directory (`servicedirectory.v1`) | #368 | `projects.locations.namespaces.{create,get,list,patch,delete}`, `namespaces.services.{create,get,list,patch,delete}`, `services.endpoints.{create,get,list,patch,delete}` | Registry metadata. No DNS or resolution (`services.resolve`) exists. Endpoint addresses must be literal IP addresses. Deleting a namespace or service deletes its children, as the official API does |
+| Compute Engine (`compute.v1`): Virtual Private Cloud, Persistent Disk, instance templates, Cloud Router and Cloud NAT, Cloud VPN, Google Cloud Armor (and Enterprise policy settings), Cloud Load Balancing, Cloud CDN, Partner Interconnect, Network Service Tiers on forwarding rules | #371, #322, #332, #355, #351, #356, #358, #359, #350, #342, #345, #347, #365 | `networks.{insert,get,list,patch,delete}`, `subnetworks.{insert,get,list,patch,delete,expandIpCidrRange,setPrivateIpGoogleAccess}`, `firewalls.{insert,get,list,patch,delete}`, `routes.{insert,get,list,delete}`, `disks.{insert,get,list,delete,setLabels,resize}`, `snapshots.{insert,get,list,delete,setLabels}`, `instanceTemplates.{insert,get,list,delete}`, `routers.{insert,get,list,patch,delete}`, `vpnGateways`/`externalVpnGateways`/`vpnTunnels` `.{insert,get,list,delete,setLabels}`, `securityPolicies.{insert,get,list,patch,delete,setLabels}`, `healthChecks.{insert,get,list,patch,delete}`, `backendServices.{insert,get,list,patch,delete,setSecurityPolicy}`, `backendBuckets.{insert,get,list,patch,delete}`, `urlMaps.{insert,get,list,patch,delete}`, `targetHttpProxies.{insert,get,list,patch,delete}`, `globalForwardingRules.{insert,get,list,patch,delete,setTarget,setLabels}`, `interconnectAttachments.{insert,get,list,patch,delete,setLabels}`, `globalOperations`/`regionOperations`/`zoneOperations` `.{get,list,wait}` | Configuration metadata only: no packet is routed, filtered, translated or load balanced, no VM runs, no BGP or IKE session exists, no probe runs and no block storage or cache exists. Only custom mode networks; no default network or system routes. References must exist, and a referenced resource cannot be deleted. No address is allocated: forwarding rules state `IPAddress`, NAT uses `AUTO_ONLY`, HA VPN interfaces carry no IP. Customer-supplied encryption keys, VPN shared secrets, router MD5 keys and IAP client secrets are refused and never stored. Security policy rules are fixed at creation (`addRule`/`patchRule`/`removeRule` return `UNIMPLEMENTED`). Partner attachments stay `PENDING_PARTNER`. Instances, Dedicated/Cross-Cloud/Cross-Site Interconnect and the project default network tier are not simulated |
 
 The capability document lists the same APIs under `gcpCatalog.apis`. Each
 entry includes every implemented method, the number of official methods,
@@ -69,10 +70,15 @@ bounds above.
 
 - Requests use `/_simulator/providers/gcp/<api>/<official path>`, for example
   `/_simulator/providers/gcp/alloydb/v1/projects/tenkacloud-local/locations/us-central1/clusters`.
-  Set the client's `api_endpoint` to `/_simulator/providers/gcp/<api>/`.
-  When several official bindings match one path, such as Cloud Logging's
-  `{+parent}` aliases, the binding with the most literal segments (the
-  `projects.*` method) serves it.
+  Set the client's `api_endpoint` to the advertised `endpoint`, which is
+  `/_simulator/providers/gcp/<api>/` followed by the API's service path, for
+  example `/_simulator/providers/gcp/alloydb/` or
+  `/_simulator/providers/gcp/compute/compute/v1/` (the official client
+  replaces both the root URL and the service path with it).
+  When several official bindings match one path, the one with the most
+  literal segments serves it, such as Cloud Logging's `projects.*` methods
+  over their `{+parent}` aliases and Compute Engine
+  `backendServices/listUsable` over `backendServices/{name}`.
 - The configured project ID or project number is accepted. Only the
   configured project owner (`--cloud-storage-owner`, default
   `simulator-admin`) may call a method. Any other subject or project receives
@@ -114,6 +120,52 @@ bounds above.
   patch clears them.
 - Errors use `google.rpc.Status` with the canonical HTTP mapping, for example
   `ALREADY_EXISTS` 409 and `FAILED_PRECONDITION` 400.
+
+### Flat APIs (Compute Engine style)
+
+APIs such as Compute Engine (`compute.v1`) address resources with separate
+path parameters (`projects/{project}/zones/{zone}/disks/{disk}`,
+`.../regions/{region}/...`, `.../global/...`) and take the resource name in
+the request body.
+
+- Zones are the published zones of the supported regions: `us-central1-a`,
+  `-b`, `-c`, `-f`; `us-east1-b`, `-c`, `-d`; `us-west1-a`, `-b`, `-c`;
+  `europe-west1-b`, `-c`, `-d`; and `asia-northeast1-a`, `-b`, `-c`. Other
+  zones and regions are refused with `INVALID_ARGUMENT`.
+- Created resources carry their official `kind`, a server-assigned 19-digit
+  `id`, `selfLink` (`https://www.googleapis.com/compute/v1/...`),
+  `creationTimestamp` and, where the schema has them, `zone` or `region`
+  URLs. `name` holds the short name.
+- Mutations return the API's own operation resource (for example
+  `compute#operation`) with `status: DONE`, `progress: 100`,
+  `operationType` (the method name, such as `insert` or `setLabels`),
+  `targetLink` and `targetId`. Operations are stored under the scope of the
+  resource and remain readable through `zoneOperations`, `regionOperations`
+  or `globalOperations` `get`, `list` and `wait`. `requestId` is echoed as
+  `clientOperationId` and replays the stored operation.
+- `patch` without `updateMask` applies a JSON merge patch (RFC 7396): nested
+  objects merge and arrays replace. `null` members are refused. Sending the
+  unchanged `name` back is accepted; a different `name` is refused.
+- Custom methods that set fields (for example `setLabels` or `resize`) write
+  every field of their request; an omitted field is cleared. A supplied
+  `fingerprint` or `labelFingerprint` must match the stored value
+  (`ABORTED` 409 otherwise, where Compute Engine returns 412) and is
+  regenerated after the change.
+- Lists page with `maxResults` (default 50, capped at 1,000) and
+  `pageToken`; `filter` and `orderBy` are refused when non-empty.
+- Reviewed reference fields (for example a subnetwork's `network`) must name
+  an existing resource of the same API in the configured project, as a full
+  URL, a partial URL such as `global/networks/default`, or a resource name.
+  The value is stored as the `selfLink`. A missing resource is `NOT_FOUND`,
+  another collection or a malformed value is `INVALID_ARGUMENT`, and a
+  resource that another one still references cannot be deleted
+  (`FAILED_PRECONDITION` 400, as Compute Engine's
+  `resourceInUseByAnotherResource`).
+- Some references are checked only at creation and do not block deletion,
+  as a snapshot outlives its source disk. Reviewed conflict rules, such as
+  overlapping subnetwork ranges in one network, are checked against every
+  other resource of the collection on create and update.
+- A merge patch may restate an immutable field with its stored value.
 
 ## Limits
 

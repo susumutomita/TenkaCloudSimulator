@@ -5,7 +5,9 @@ documents come from the pinned google-api-python-client package (Apache-2.0).
 For every selected API the output keeps the reviewed methods, the HTTP
 binding of every method (so unreviewed methods are refused explicitly) and the
 schemas reachable from the reviewed methods. Field descriptions are reduced to
-`required` (official "Required." marker) and `readOnly` flags.
+`required` (official "Required." marker), `requiredBy` (official per-method
+`annotations.required`), `readOnly` ("Output only" or "[Output Only]") flags
+and official `default` values.
 
 Usage: python tools/gcpmodels/extract.py  (selection: internal/gcp/catalog/selection.json)
 """
@@ -27,11 +29,15 @@ DOCUMENTS = Path(googleapiclient.__file__).parent / 'discovery_cache' / 'documen
 
 def flags(prop):
     text = (prop.get('description') or '').lstrip()
-    out = {k: prop[k] for k in ('type', 'format', 'enum', '$ref', 'pattern') if k in prop}
-    if prop.get('readOnly') or text.startswith('Output only'):
+    out = {k: prop[k] for k in ('type', 'format', 'enum', '$ref', 'pattern', 'default') if k in prop}
+    # AIP documents say "Output only."; Compute-style documents say "[Output Only]".
+    if prop.get('readOnly') or text.startswith('Output only') or text.lower().startswith('[output only]'):
         out['readOnly'] = True
     if text.startswith('Required') or '(Required)' in text[:40]:
         out['required'] = True
+    # Compute-style documents mark per-method requirements in annotations.
+    if prop.get('annotations', {}).get('required'):
+        out['requiredBy'] = sorted(prop['annotations']['required'])
     if 'items' in prop:
         out['items'] = flags(prop['items'])
     if 'additionalProperties' in prop:

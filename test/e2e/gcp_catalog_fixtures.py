@@ -60,8 +60,10 @@ def lookup(value, path):
 
 def client(team, fixture, token=None):
     name, version = fixture['api'].split('.', 1)
+    # api_endpoint replaces rootUrl and servicePath, so it is the advertised
+    # endpoint, for example /_simulator/providers/gcp/compute/compute/v1/.
     return build(name, version, static_discovery=True, http=TokenHttp(team, token or team.token),
-                 client_options={'api_endpoint': f'{team.endpoint}/_simulator/providers/gcp/{name}/'})
+                 client_options={'api_endpoint': team.endpoint + fixture.get('endpoint', f'/_simulator/providers/gcp/{name}/')})
 
 
 def run_steps(team, fixture, steps, saved, called, token=None):
@@ -112,6 +114,7 @@ def main(selected=None):
             for path in fixtures:
                 fixture = json.loads(path.read_text())
                 assert fixture['api'] == path.stem and path.stem in apis, f'{path.stem} has no reviewed API'
+                fixture['endpoint'] = apis[path.stem]['endpoint']
                 saved, called = {}, set()
                 first = {**fixture['steps'][0], 'error': 'PERMISSION_DENIED', 'status': 403}
                 first.pop('save', None)
