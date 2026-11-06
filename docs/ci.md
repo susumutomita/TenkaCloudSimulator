@@ -50,8 +50,9 @@ mask editable fields; diagnostic errors retain their types rather than messages.
 This is test evidence, not a release binary or certification of native
 HTML-in-Canvas support. Artifact retention does not make a failed check pass.
 
-The same artifact retains the login test's failure-only native-input report and
-incomplete-observer status, when produced. This test starts its own disposable
+The same artifact retains the login test's failure-only native-input reports and
+incomplete-observer statuses for both insertion and native-clear cases, when
+produced. This test starts its own disposable
 instance with a fresh dummy token. Reports contain field-state booleans, bounded
 request/response counts, HTTP status codes and exception types; they contain no
 token value or hash, clipboard content, body, header, cookie or real user file.
@@ -126,17 +127,18 @@ A required pinned-catalog subset rehearsal runs the unchanged original wp2shell 
 
 ## Formal validation merge check
 
-The standalone `Formal validation` job is proposed as a stable required check;
+The standalone `Formal validation` job provides the stable required check;
 its inventory/applicability contract is documented in
 [formal-validation.md](formal-validation.md). The checker always runs all
 registered models and requires the intended invariant counterexamples. Exact
 base/blob-bound dispositions prevent absent/stale applicability metadata from
 silently passing; unknown implementation paths fail. This validates declared
 bounded correspondence, not Go refinement or authenticated human review.
-A later read-only inspection observed a main ruleset requiring `ci`, without a
-separate required `Formal validation` context. Adding that requirement remains on
-hold under the latest owner instruction; Composio and alternate settings routes
-are not used. No repository settings were changed. A green workflow is distinct
+Read-only inspection on 2026-11-06 observed an active ruleset for `main` requiring
+both `ci` and `Formal validation` from GitHub Actions. Those settings are separate
+from this source change; no repository settings were changed here. A later base
+update still requires integration review and fresh checks. Composio and alternate
+settings routes are not used. A green workflow is distinct
 from verified merge enforcement.
 
 

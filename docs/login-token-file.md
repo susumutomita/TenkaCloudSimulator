@@ -111,13 +111,28 @@ JavaScript/React/Cloudscape/DOM refinement proof, OS/extension test, file-parser
 proof, cryptographic/authentication guarantee, liveness proof or full event-space
 exploration. No real tokens are represented.
 
-This combined landing/login integration adds 15 login checks to main's preserved
-448-check inventory (50 models/398 controls): **51 models / 412 controls / 463
+This combined catalog/login integration adds 15 login checks to main's preserved
+467-check inventory (52 models/415 controls): **53 models / 429 controls / 482
 required executions**. The combined exact-HEAD
 formal gate and new embedded-binary browser/E2E checks remain pending; the scoped
 result does not substitute for them.
 
 ## Dated validation and current candidate
+
+Both complete runs on old-base head `8149cac` passed all 62 E2E tests, including
+native insertion, native clear/Enter with the required empty-error/no-POST result,
+paste/undo and locale cases. All eleven hosted checks passed, including 463
+immutable model outcomes and both actual Japanese UI jobs. Those results belong
+to base `03060d4`; they do not validate the later catalog integration.
+
+Published main then advanced to catalog commit `b81496f`. Its independent seven
+checks passed, including 65 E2E cases and 467 model outcomes. Integration source
+`bd135b5` preserves the incoming catalog's Go code and adds the login fix. The
+console was rebuilt in `5219eb1` with 1353 resolved inputs and original notices for
+22 packages. The earlier build supervisor rejection and its outputs remain
+recorded as a failed attempt; a separately reviewed retry completed with verified
+cleanup. The combined immutable HEAD must now pass 65 E2E cases, 482 model
+outcomes and the other existing gates. Actual Dia/1Password remains unverified.
 
 At `339c264`, both complete E2E runs had 61 successes and one error out of 62.
 The first native insertion/Enter case passed; the next, already-focused native
@@ -132,7 +147,8 @@ That immutable HEAD passed all 51 model baselines and 411 required controls
 (462 outcomes), the 18-file applicability check, asset reproducibility and the
 Go/race/cross-build, security and unchanged coverage gates. These successful
 checks do not replace the failed browser case. The keyboard-capture follow-up
-adds one model control, requiring 463 combined outcomes; its own gate is pending.
+added one model control, requiring 463 combined outcomes on that previous base;
+the later `8149cac` result above supersedes that pending status.
 
 The new `focused-key-clear-submit` model scenario assumes an intermediate
 controlled render during Enter handling after paste has settled. Its
@@ -146,9 +162,10 @@ At local source `7bd15bf`, the scoped baseline exhausted 83 distinct states
 noninitial counterexamples. `KeyDownSkipsNativeAdoption` first violated
 `AdoptedValueExact` at state 5. Source `f9f2231` produced the rebuilt keyboard-capture
 assets in `7bd15bf`, with 1352 resolved inputs and original notices for 22 packages.
-Default-CI build equivalence, the full 463-case gate and the unchanged actual
-native-clear/Enter browser assertions still require the next immutable HEAD's
-verification. These scoped results do not establish the user's browser cause.
+At that receipt, default-CI build equivalence, the full 463-case gate and actual
+native-clear/Enter browser assertions were pending; `8149cac` subsequently passed
+them. They remain independent of the new catalog integration's required gates.
+These scoped results do not establish the user's browser cause.
 
 The earlier `6b249e6` [push CI run](https://github.com/susumutomita/TenkaCloudSimulator/actions/runs/42234615389)
 rebuilt the embedded assets and passed Go quality, supported-target compilation,

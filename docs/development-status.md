@@ -14,7 +14,7 @@ The combined inventory is **53 models / 429 controls / 482 executions**.
 | lp_quality | Registry and formal-gate/test union resolved; source handoff complete |
 | formal_review | Independent model/policy union review complete; no combined runtime acceptance claimed |
 | docs_merge_b8 | Four documentation conflicts recovered and verified; source handoff complete |
-| assets_merge_b8 | Three generated files temporarily match incoming main; merged-source rebuild awaits a clean freeze |
+| assets_merge_b8 | Merged-source console rebuilt in local commit `5219eb1`; 1353 inputs and unchanged original package notices verified; combined CI remains pending |
 | catalog_compat_b8 | Read-only routing/authentication intersection review complete; Go and catalog fixtures kept byte-identical to incoming main |
 | ci_watch_b8 | Exact-SHA monitoring for prior login `8149cac` and incoming main; these results do not validate the combined tree |
 
