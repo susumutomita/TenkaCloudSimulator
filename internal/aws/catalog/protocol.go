@@ -302,7 +302,7 @@ func writeOutput(w http.ResponseWriter, model *Model, op *Operation, output map[
 				}
 				w.Header().Set(wire, fmt.Sprint(value))
 			case "statusCode":
-				if n, ok := value.(int64); ok {
+				if n, ok := value.(int64); ok && n >= 100 && n <= 599 {
 					status = int(n)
 				}
 			default:
@@ -319,11 +319,7 @@ func writeOutput(w http.ResponseWriter, model *Model, op *Operation, output map[
 			}
 		}
 	}
-	if protocol == "json" {
-		w.Header().Set("Content-Type", "application/x-amz-json-"+model.Metadata.JSONVersion)
-	} else {
-		w.Header().Set("Content-Type", "application/json")
-	}
+	w.Header().Set("Content-Type", contentType(model))
 	if raw == nil {
 		raw, _ = json.Marshal(body)
 	}
@@ -345,11 +341,20 @@ func writeError(w http.ResponseWriter, model *Model, code string, status int, me
 	w.Header().Set("X-Amzn-ErrorType", code)
 	if model != nil && model.Metadata.Protocol == "json" {
 		body["__type"] = code
-		w.Header().Set("Content-Type", "application/x-amz-json-"+model.Metadata.JSONVersion)
-	} else {
-		w.Header().Set("Content-Type", "application/json")
 	}
+	w.Header().Set("Content-Type", contentType(model))
 	raw, _ := json.Marshal(body)
 	w.WriteHeader(status)
 	_, _ = w.Write(raw)
+}
+
+// contentType returns a constant non-HTML media type for every response.
+func contentType(model *Model) string {
+	if model != nil && model.Metadata.Protocol == "json" {
+		if model.Metadata.JSONVersion == "1.0" {
+			return "application/x-amz-json-1.0"
+		}
+		return "application/x-amz-json-1.1"
+	}
+	return "application/json"
 }

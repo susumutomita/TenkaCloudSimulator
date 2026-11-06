@@ -777,6 +777,9 @@ func (q *request) pagination() (string, string, string) {
 	return inputToken, outputToken, limitKey
 }
 
+// maxListLimit bounds any page size before it is converted to int.
+const maxListLimit = 1000
+
 type pageToken struct {
 	Op     string `json:"o"`
 	Region string `json:"r"`
@@ -808,7 +811,8 @@ func (q *request) list() (map[string]any, error) {
 			if n < 1 {
 				return nil, invalid("%s must be at least 1.", limitKey)
 			}
-			if int(n) < limit {
+			// The bound check keeps the conversion within int on every platform.
+			if n <= maxListLimit && int(n) < limit {
 				limit = int(n)
 			}
 		}
