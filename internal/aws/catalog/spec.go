@@ -12,6 +12,8 @@ const (
 	Tag      Kind = "tag"
 	Untag    Kind = "untag"
 	ListTags Kind = "list-tags"
+	// Put creates the identified resource or replaces its supplied members.
+	Put Kind = "put"
 )
 
 // Op binds one official operation to a reviewed semantic role.
@@ -47,6 +49,11 @@ type Op struct {
 	Names string
 	// Check validates semantic constraints the official shape cannot express.
 	Check func(input map[string]any) error
+	// Failures names the output list that reports identifiers of Names that do
+	// not exist, instead of failing the whole request; FailureItem builds
+	// each element, replacing "$name" with the missing identifier.
+	Failures    string
+	FailureItem map[string]any
 }
 
 // Failure returns a semantic validation error with a modeled exception code
@@ -92,6 +99,10 @@ type Resource struct {
 	// Refs maps stored members holding ARNs to the resource kind they must
 	// reference; creation and update fail when the referenced one is missing.
 	Refs map[string]string
+	// Singleton resources have exactly one instance per region (account
+	// settings). Reads without a stored instance return the Generate
+	// defaults; Put and Update store it.
+	Singleton bool
 }
 
 // Service is a reviewed bounded specification of one official AWS service.

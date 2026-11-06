@@ -51,10 +51,77 @@ func (q *request) execute() (map[string]any, error) {
 		return q.update()
 	case Delete:
 		return q.remove()
+	case Put:
+		return q.put()
 	case Tag, Untag:
 		return q.tag()
 	}
 	return q.listTags()
+}
+
+// identifier is the value that names the target of this operation.
+func (q *request) identifier() string {
+	if q.resource() != nil && q.resource().Singleton {
+		return "default"
+	}
+	value, _ := q.input[q.op.Lookup].(string)
+	return value
+}
+
+// put creates the identified resource or replaces the supplied members of
+// the existing one; generated identity members are preserved.
+func (q *request) put() (map[string]any, error) {
+	res := q.resource()
+	parent, err := q.parentRow(res)
+	if err != nil {
+		return nil, err
+	}
+	found, err := find(q.e.store.db, q.b.spec.Model, q.region, res.Kind, parentID(parent), q.identifier())
+	if errors.Is(err, sql.ErrNoRows) {
+		return q.create()
+	}
+	if err != nil {
+		return nil, err
+	}
+	if err := q.authorize(found.ARN); err != nil {
+		return nil, err
+	}
+	resourceShape := q.b.model.shape(res.Shape)
+	tagsMember := q.tagMember(q.official.Input)
+	for key, value := range q.members() {
+		if key == tagsMember || q.passive(key) && key != res.NameMember {
+			continue
+		}
+		target := key
+		if alias, ok := res.Aliases[key]; ok {
+			target = alias
+		}
+		if _, ok := resourceShape.Members[target]; !ok {
+			return nil, &fault{kind: "unsupported", message: fmt.Sprintf("Member %s of %s is not supported by the simulator.", key, q.op.Name)}
+		}
+		found.Document[target] = stored(value)
+	}
+	if value, ok := q.input[tagsMember]; ok && tagsMember != "" {
+		for k, v := range q.tagsFrom(q.b.model.shape(q.official.Input).Members[tagsMember].Shape, value) {
+			found.Tags[k] = v
+		}
+		if len(found.Tags) > maxTagsPerResource {
+			return nil, &fault{kind: "limit", message: fmt.Sprintf("At most %d tags are supported per resource.", maxTagsPerResource)}
+		}
+	}
+	for _, key := range q.op.Touch {
+		found.Document[key] = q.now().Format(time.RFC3339Nano)
+	}
+	for key, value := range q.op.Set {
+		found.Document[key] = q.generated(value, found, parent)
+	}
+	if err := q.checkRefs(res, found.Document); err != nil {
+		return nil, err
+	}
+	if err := q.commit(func(tx *sql.Tx) error { return updateRow(tx, found) }); err != nil {
+		return nil, err
+	}
+	return q.output(found, parent), nil
 }
 
 // members flattens the From structure into the top-level input members.
@@ -189,8 +256,21 @@ func (q *request) lookup() (row, *row, error) {
 	if err != nil {
 		return row{}, nil, err
 	}
-	identifier, _ := q.input[q.op.Lookup].(string)
+	identifier := q.identifier()
 	found, err := find(q.e.store.db, q.b.spec.Model, q.region, res.Kind, parentID(parent), identifier)
+	if errors.Is(err, sql.ErrNoRows) && res.Singleton {
+		r := row{Service: q.b.spec.Model, Region: q.region, Kind: res.Kind, ID: "default", Name: "default", Tags: map[string]string{}, Document: map[string]any{}}
+		r.ARN = q.formatARN(res, r.ID, r.Name, parent)
+		if err := q.authorize(r.ARN); err != nil {
+			return row{}, nil, err
+		}
+		for key, value := range res.Generate {
+			if generated := q.generated(value, r, parent); generated != nil {
+				r.Document[key] = generated
+			}
+		}
+		return r, parent, nil
+	}
 	if errors.Is(err, sql.ErrNoRows) {
 		guess := identifier
 		if !strings.HasPrefix(identifier, "arn:") {
@@ -396,7 +476,8 @@ func (q *request) create() (map[string]any, error) {
 	document := map[string]any{}
 	members := q.members()
 	for key, value := range members {
-		if key == tagsMember || key == tokenMember || q.passive(key) {
+		// A Put names its resource with the lookup member, which is stored.
+		if key == tagsMember || key == tokenMember || q.passive(key) && !(q.op.Kind == Put && key == q.op.Lookup) {
 			continue
 		}
 		target := key
@@ -414,6 +495,9 @@ func (q *request) create() (map[string]any, error) {
 	id, err := newID(res.ID, name)
 	if err != nil {
 		return nil, err
+	}
+	if res.Singleton {
+		id, name = "default", "default"
 	}
 	if name == "" {
 		name = id
@@ -587,7 +671,18 @@ func (q *request) update() (map[string]any, error) {
 	if err := q.checkRefs(res, r.Document); err != nil {
 		return nil, err
 	}
-	if err := q.commit(func(tx *sql.Tx) error { return updateRow(tx, r) }); err != nil {
+	if err := q.commit(func(tx *sql.Tx) error {
+		if r.Seq == 0 {
+			// A singleton that was never stored is created by its first update.
+			seq, err := nextSeq(tx)
+			if err != nil {
+				return err
+			}
+			r.Seq = seq
+			return insertRow(tx, r)
+		}
+		return updateRow(tx, r)
+	}); err != nil {
 		return nil, err
 	}
 	return q.output(r, parent), nil
@@ -737,6 +832,7 @@ func (q *request) list() (map[string]any, error) {
 			filtered = append(filtered, r)
 		}
 	}
+	var failures []any
 	if names, ok := q.input[q.op.Names].([]any); ok {
 		selected := []row{}
 		for _, name := range names {
@@ -746,6 +842,17 @@ func (q *request) list() (map[string]any, error) {
 				if filtered[i].Name == identifier || filtered[i].ARN == identifier || filtered[i].ID == identifier {
 					match = &filtered[i]
 				}
+			}
+			if match == nil && q.op.Failures != "" {
+				item := map[string]any{}
+				for key, value := range q.op.FailureItem {
+					if text, ok := value.(string); ok {
+						value = strings.ReplaceAll(text, "$name", identifier)
+					}
+					item[key] = value
+				}
+				failures = append(failures, item)
+				continue
 			}
 			if match == nil {
 				return nil, &fault{kind: "notfound", message: fmt.Sprintf("The %s %s does not exist.", res.Kind, identifier)}
@@ -783,7 +890,17 @@ func (q *request) list() (map[string]any, error) {
 		data, _ := json.Marshal(pageToken{q.op.Name, q.region, scope, page[len(page)-1].Seq})
 		next = base64.RawURLEncoding.EncodeToString(data)
 	}
-	return q.listOutput(page, parent, outputToken, next), nil
+	out := q.listOutput(page, parent, outputToken, next)
+	if q.op.Failures != "" {
+		enc := &encoder{model: q.b.model, protocol: q.b.model.Metadata.Protocol}
+		if failures == nil {
+			failures = []any{}
+		}
+		if value, ok := enc.project(q.b.model.shape(q.official.Output).Members[q.op.Failures].Shape, failures, 0); ok {
+			out[q.op.Failures] = value
+		}
+	}
+	return out, nil
 }
 
 func (q *request) listOutput(page []row, parent *row, outputToken, next string) map[string]any {

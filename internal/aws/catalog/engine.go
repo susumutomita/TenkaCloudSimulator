@@ -137,7 +137,7 @@ func bindModel(spec *Service, model *Model) (*binding, error) {
 			return nil, fmt.Errorf("catalog %s operation %s is bound twice", spec.Model, op.Name)
 		}
 		switch op.Kind {
-		case Create, Read, List, Update, Delete:
+		case Create, Read, List, Update, Delete, Put:
 			if spec.resource(op.Resource) == nil {
 				return nil, fmt.Errorf("catalog %s operation %s names an unknown resource", spec.Model, op.Name)
 			}
@@ -151,8 +151,12 @@ func bindModel(spec *Service, model *Model) (*binding, error) {
 				return nil, fmt.Errorf("catalog %s operation %s names missing input member %s", spec.Model, op.Name, member)
 			}
 		}
-		if (op.Kind == Read || op.Kind == Update || op.Kind == Delete || op.Kind == Tag || op.Kind == Untag || op.Kind == ListTags) && op.Lookup == "" {
+		singleton := spec.resource(op.Resource) != nil && spec.resource(op.Resource).Singleton
+		if (op.Kind == Read || op.Kind == Update || op.Kind == Delete || op.Kind == Put || op.Kind == Tag || op.Kind == Untag || op.Kind == ListTags) && op.Lookup == "" && !singleton {
 			return nil, fmt.Errorf("catalog %s operation %s needs an identifying input member", spec.Model, op.Name)
+		}
+		if op.Failures != "" && (model.Shapes[official.Output] == nil || model.shape(official.Output).Members[op.Failures].Shape == "" || op.Names == "") {
+			return nil, fmt.Errorf("catalog %s operation %s reports failures in a missing output member", spec.Model, op.Name)
 		}
 		if res := spec.resource(op.Resource); res != nil && res.Parent != "" && op.Parent == "" {
 			return nil, fmt.Errorf("catalog %s operation %s needs the parent identifier member", spec.Model, op.Name)
