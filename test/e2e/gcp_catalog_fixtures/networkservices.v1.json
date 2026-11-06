@@ -1,0 +1,25 @@
+{
+ "api": "networkservices.v1",
+ "steps": [
+  {"call": "projects.locations.gateways.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "gatewayId": "swp"}, "body": {"type": "SECURE_WEB_GATEWAY", "ports": [443], "addresses": ["10.128.0.99"], "network": "projects/tenkacloud-local/global/networks/default", "subnetwork": "projects/tenkacloud-local/regions/us-central1/subnetworks/default", "gatewaySecurityPolicy": "projects/tenkacloud-local/locations/us-central1/gatewaySecurityPolicies/proxy_policy", "routingMode": "EXPLICIT_ROUTING_MODE"}, "save": {"op0": "name", "r0": "response.name"}, "expect": {"done": true}},
+  {"call": "projects.locations.operations.get", "args": {"name": "${op0}"}, "expect": {"done": true}},
+  {"call": "projects.locations.operations.list", "args": {"name": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"operations#count": 1}},
+  {"call": "projects.locations.gateways.get", "args": {"name": "${r0}"}},
+  {"call": "projects.locations.gateways.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"gateways#count": 1}},
+  {"call": "projects.locations.gateways.patch", "args": {"name": "${r0}", "updateMask": "description"}, "body": {"description": "Secure Web Proxy"}},
+  {"call": "projects.locations.gateways.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "gatewayId": "untyped"}, "error": "INVALID_ARGUMENT", "status": 400, "body": {"ports": [443]}},
+  {"call": "projects.locations.edgeCacheServices.getIamPolicy", "args": {"resource": "projects/tenkacloud-local/locations/global/edgeCacheServices/cdn"}, "error": "UNIMPLEMENTED", "status": 501},
+  {"call": "projects.locations.gateways.get", "args": {"name": "projects/tenkacloud-local/locations/us-central1/gateways/missing"}, "error": "NOT_FOUND", "status": 404},
+  {"call": "projects.locations.gateways.list", "args": {"parent": "projects/other-project/locations/us-central1"}, "error": "PERMISSION_DENIED", "status": 403}
+ ],
+ "isolation": [
+  {"call": "projects.locations.gateways.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"gateways#count": 0}}
+ ],
+ "after_restart": [
+  {"call": "projects.locations.gateways.get", "args": {"name": "${r0}"}, "expect": {"description": "Secure Web Proxy"}}
+ ],
+ "cleanup": [
+  {"call": "projects.locations.gateways.delete", "args": {"name": "${r0}"}},
+  {"call": "projects.locations.gateways.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"gateways#count": 0}}
+ ]
+}

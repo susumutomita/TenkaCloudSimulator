@@ -70,7 +70,8 @@ def run_steps(team, fixture, steps, saved, called, token=None):
         target = service
         parts = step['call'].split('.')
         for part in parts[:-1]:
-            target = getattr(target, part)()
+            # The client renames Python keywords such as "global" to "global_".
+            target = getattr(target, part if hasattr(target, part) else part + '_')()
         args = substitute(step.get('args', {}), saved)
         if 'body' in step:
             args['body'] = substitute(step['body'], saved)
