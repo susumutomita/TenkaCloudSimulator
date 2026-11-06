@@ -18,7 +18,7 @@ simulator runs with `--state`.
 | Subscribe | Protocols: http, https, email, email-json, sms, lambda, application, firehose. Duplicate (topic, protocol, endpoint) returns the existing subscription. |
 | Unsubscribe | Unknown subscription ARN is `NotFoundException`. |
 | ListSubscriptions / ListSubscriptionsByTopic | `NextToken` pagination (page size 100). |
-| Publish | Message up to 256 KiB UTF-8, optional Subject (<=100 chars). Returns a MessageId. |
+| Publish | Message up to 256 KiB UTF-8, optional Subject (fewer than100 Unicode characters; no line breaks or controls). Standard topics only; FIFO publication is explicitly refused. Returns a MessageId. |
 
 Requests are root `POST` form Query requests, routed by the SNS credential
 scope (`/sns/aws4_request`) or the `X-Simulator-Service: sns` header (the
@@ -91,6 +91,23 @@ topic = sns.create_topic(Name="alerts")["TopicArn"]
 sns.subscribe(TopicArn=topic, Protocol="email", Endpoint="team@example.com")
 sns.publish(TopicArn=topic, Message="hello")
 ```
+
+Query fields must occur exactly once. CreateTopic parses every
+`Attributes.entry.N.key/value` pair, including sparse positive numeric indexes;
+malformed/unpaired entries, duplicate attribute names and unsupported attributes
+are refused before state changes. Unsupported trailing entries are never ignored.
+`ReturnSubscriptionArn` accepts only `true` or `false`; confirmation remains the
+local immediate-confirmation deviation described above. Unsubscribe uses the
+selected region and cannot remove another region's subscription.
+
+FIFO topic metadata can still be created/read/deleted, but Publish refuses FIFO
+topics because ordering/deduplication/group semantics are not implemented.
+
+These admission fixes do not establish complete SNS acceptance. This old PR
+base has no current formal registry, full main integration or SNS console/API
+reference. The optional SQS adapter must not be enabled without atomic fanout
+and real native SQS tests. Topic/message storage quotas and lifecycle integrity
+remain separate review obligations.
 
 Real AWS credentials, session tokens and presigned requests are rejected,
 consistent with the other services.

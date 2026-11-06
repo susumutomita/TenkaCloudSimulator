@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 	"unicode/utf8"
 
 	"github.com/susumutomita/TenkaCloudSimulator/internal/core"
@@ -23,8 +24,9 @@ import (
 const snsNamespace = "http://sns.amazonaws.com/doc/2010-03-31/"
 
 var (
-	snsTopicName     = regexp.MustCompile(`^[A-Za-z0-9_-]{1,256}$`)
-	snsFIFOTopicName = regexp.MustCompile(`^[A-Za-z0-9_-]{1,251}\.fifo$`)
+	snsTopicName      = regexp.MustCompile(`^[A-Za-z0-9_-]{1,256}$`)
+	snsFIFOTopicName  = regexp.MustCompile(`^[A-Za-z0-9_-]{1,251}\.fifo$`)
+	snsAttributeField = regexp.MustCompile(`^Attributes\.entry\.([1-9][0-9]*)\.(key|value)$`)
 	// Protocols whose subscriptions are stored as locally confirmed.
 	// "sqs" is handled separately: it is only accepted when a
 	// SNSQueueFanout adapter is wired (see below), and is otherwise
@@ -36,7 +38,10 @@ var (
 )
 
 func isSNS(r *http.Request) bool {
-	return r.Header.Get("X-Simulator-Service") == "sns" || strings.Contains(r.Header.Get("Authorization"), "/sns/aws4_request")
+	if service := r.Header.Get("X-Simulator-Service"); service != "" {
+		return service == "sns"
+	}
+	return strings.Contains(r.Header.Get("Authorization"), "/sns/aws4_request")
 }
 
 // SNSQueueFanout is the contract SNS needs from the SQS workstream to
@@ -159,21 +164,38 @@ type snsTopicAttributesResult struct {
 }
 
 func attributeEntries(form url.Values) (map[string]string, error) {
-	attrs := map[string]string{}
-	for i := 1; ; i++ {
-		key, hasKey := form[fmt.Sprintf("Attributes.entry.%d.key", i)]
-		value, hasValue := form[fmt.Sprintf("Attributes.entry.%d.value", i)]
-		if !hasKey && !hasValue {
-			return attrs, nil
+	type entry struct {
+		key, value       string
+		hasKey, hasValue bool
+	}
+	entries := map[string]entry{}
+	for name, values := range form {
+		if !strings.HasPrefix(name, "Attributes.entry.") {
+			continue
 		}
-		if !hasKey || !hasValue || len(key) != 1 || len(value) != 1 {
+		parts := snsAttributeField.FindStringSubmatch(name)
+		if len(parts) != 3 || len(values) != 1 {
+			return nil, ssmFailure{"InvalidParameterException", "Malformed or duplicate topic attribute field."}
+		}
+		item := entries[parts[1]]
+		if parts[2] == "key" {
+			item.key, item.hasKey = values[0], true
+		} else {
+			item.value, item.hasValue = values[0], true
+		}
+		entries[parts[1]] = item
+	}
+	attrs := map[string]string{}
+	for _, item := range entries {
+		if !item.hasKey || !item.hasValue {
 			return nil, ssmFailure{"InvalidParameterException", "Attributes entries require paired key and value."}
 		}
-		if _, dup := attrs[key[0]]; dup {
-			return nil, ssmFailure{"InvalidParameterException", "Duplicate topic attribute: " + key[0]}
+		if _, dup := attrs[item.key]; dup {
+			return nil, ssmFailure{"InvalidParameterException", "Duplicate topic attribute: " + item.key}
 		}
-		attrs[key[0]] = value[0]
+		attrs[item.key] = item.value
 	}
+	return attrs, nil
 }
 
 func snsPage[T any](items []T, token string, limit int, arnOf func(T) string) ([]T, string, error) {
@@ -219,9 +241,10 @@ func (g *Gateway) serveSNS(w http.ResponseWriter, r *http.Request) {
 	}
 	if a := r.Header.Get("Authorization"); a != "" {
 		_, credential, ok := strings.Cut(a, "Credential=")
-		key, _, _ := strings.Cut(credential, "/")
-		if !ok || !strings.HasPrefix(key, "TCSIM") {
-			snsError(w, ssmFailure{"AuthorizationErrorException", "Use unsigned requests or dummy TCSIM credentials."})
+		credential, _, _ = strings.Cut(credential, ",")
+		parts := strings.Split(credential, "/")
+		if !ok || len(parts) != 5 || !strings.HasPrefix(parts[0], "TCSIM") || parts[1] == "" || parts[3] != "sns" || parts[4] != "aws4_request" {
+			snsError(w, ssmFailure{"AuthorizationErrorException", "Use unsigned requests or dummy TCSIM credentials with an SNS signing scope."})
 			return
 		}
 	}
@@ -259,6 +282,12 @@ func (g *Gateway) serveSNS(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		invalid("Malformed SNS Query body.")
 		return
+	}
+	for _, values := range form {
+		if len(values) != 1 {
+			invalid("Duplicate SNS Query fields are unsupported.")
+			return
+		}
 	}
 	if form.Get("Version") != "2010-03-31" {
 		invalid("Use SNS Version 2010-03-31.")
@@ -443,6 +472,10 @@ func (g *Gateway) serveSNS(w http.ResponseWriter, r *http.Request) {
 		}
 		snsResponse(w, action, snsTopicAttributesResult{Attributes: entries})
 	case "Subscribe":
+		if value, present := form["ReturnSubscriptionArn"]; present && value[0] != "true" && value[0] != "false" {
+			invalid("ReturnSubscriptionArn must be true or false.")
+			return
+		}
 		arn := form.Get("TopicArn")
 		topic, ok := topicByARN(arn)
 		if !ok {
@@ -497,6 +530,9 @@ func (g *Gateway) serveSNS(w http.ResponseWriter, r *http.Request) {
 		sub, err := g.SNS.GetSubscription(arn)
 		if err != nil {
 			snsError(w, err)
+			return
+		}
+		if _, ok := topicByARN(sub.TopicARN); !ok {
 			return
 		}
 		if !authorize(sub.TopicARN) {
@@ -554,11 +590,15 @@ func (g *Gateway) serveSNS(w http.ResponseWriter, r *http.Request) {
 			snsError(w, ssmFailure{"InvalidParameterException", "Message is required and limited to 256 KiB of UTF-8."})
 			return
 		}
-		if len(subject) > 100 {
-			snsError(w, ssmFailure{"InvalidParameterException", "Subject is limited to 100 characters."})
+		if !utf8.ValidString(subject) || utf8.RuneCountInString(subject) >= 100 || strings.ContainsFunc(subject, func(r rune) bool { return unicode.IsControl(r) || r == '\u2028' || r == '\u2029' }) {
+			snsError(w, ssmFailure{"InvalidParameterException", "Subject must be UTF-8 text with fewer than 100 characters and no line breaks or control characters."})
 			return
 		}
 		if !authorize(arn) {
+			return
+		}
+		if topic.FIFO {
+			snsError(w, ssmFailure{"InvalidParameterException", "FIFO publication, ordering and deduplication are unsupported; no message was recorded."})
 			return
 		}
 		subs, err := g.SNS.ListSubscriptionsByTopic(r.Context(), arn)
