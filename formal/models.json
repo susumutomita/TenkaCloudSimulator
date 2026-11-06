@@ -5712,7 +5712,7 @@
     "TokenBinding",
     "TokenOnce"
    ],
-   "limits": "Atomic catalog store projection only: authorization-before-commit, typed refusal frames, quota, optional name uniqueness, fresh identifiers, generation-guarded update/delete, child reference integrity with refuse or cascade deletion, and client-token replay. Official shape validation, wire projection, pagination tokens, tag maps, ARN formatting, SQL/locking/crash behavior, JSON encoding and Go refinement are verified by native tests, not this model. A three-step bound is not an API cap.",
+   "limits": "Atomic catalog store projection only, shared by the AWS catalog and the Google API catalog (configured project owner as authorization, etag as generation, requestId as client token, force as cascade): authorization-before-commit, typed refusal frames, quota, optional name uniqueness, fresh identifiers, generation-guarded update/delete, child reference integrity with refuse or cascade deletion, and client-token replay. Official shape validation, wire projection, pagination tokens, tag maps, ARN formatting, SQL/locking/crash behavior, JSON encoding and Go refinement are verified by native tests, not this model. A three-step bound is not an API cap.",
    "source_scope": [
     "internal/aws/catalog/describe.go",
     "internal/aws/catalog/engine.go",
@@ -5732,7 +5732,20 @@
     "internal/aws/catalog/value.go",
     "internal/aws/s3.go",
     "internal/aws/ssm.go",
+    "internal/gcp/catalog/apis.go",
+    "internal/gcp/catalog/apis_databases.go",
+    "internal/gcp/catalog/describe.go",
+    "internal/gcp/catalog/engine.go",
+    "internal/gcp/catalog/model.go",
+    "internal/gcp/catalog/models/alloydb.v1.json",
+    "internal/gcp/catalog/openapi.go",
+    "internal/gcp/catalog/selection.json",
+    "internal/gcp/catalog/semantics.go",
+    "internal/gcp/catalog/spec.go",
+    "internal/gcp/catalog/store.go",
+    "internal/gcp/catalog/value.go",
     "internal/server/aws_catalog.go",
+    "internal/server/cloud_storage.go",
     "internal/server/server.go",
     "tools/awsmodels/draft.py",
     "tools/awsmodels/extract.py"
@@ -5889,6 +5902,7 @@
    "source_scope": [
     "internal/server/web/app.js",
     "tools/console/src/catalog.jsx",
+    "tools/console/src/gcp-catalog.jsx",
     "tools/console/src/main.jsx"
    ],
    "mutants": [

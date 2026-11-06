@@ -97,7 +97,8 @@ export default function GCPCatalogView({request, catalog}) {
   return <section className="gcp-storage" aria-labelledby={ids + 'title'}>
     <div className="gcp-storage-toolbar">
       <h1 id={ids + 'title'} className="gcp-storage-title">{t('Google Cloud service catalog', 'Google Cloud サービスカタログ')}</h1>
-      <a className="gcp-storage-link" href="/_simulator/docs/catalog.html" target="_blank" rel="noreferrer">{t('API reference', 'API リファレンス')}</a>
+      <button type="button" disabled={busy || loading} onClick={() => { setNotice(''); load(); }}>{t('Refresh', '更新')}</button>
+      <a className="gcp-storage-link" href="/_simulator/docs/gcp-catalog.html" target="_blank" rel="noreferrer">{t('API reference', 'API リファレンス')}</a>
     </div>
     <div className="gcp-storage-form">
       <label htmlFor={ids + 'api'}>{t('API', 'API')}</label>
@@ -123,7 +124,7 @@ export default function GCPCatalogView({request, catalog}) {
       <pre className="gcp-catalog-json">{JSON.stringify(detail, null, 2)}</pre>
       <button type="button" onClick={() => setDetail(null)}>{t('Back to list', '一覧に戻る')}</button>
     </div> : <div className="gcp-storage-table-scroll">
-      <table aria-busy={loading}>
+      <table className="gcp-catalog-table" aria-busy={loading}>
         <caption>{collection?.id} ({items.length})</caption>
         <thead><tr><th scope="col">{t('Name', '名前')}</th><th scope="col">{t('Actions', '操作')}</th></tr></thead>
         <tbody>{items.length ? items.map(item => <tr key={item.name}>

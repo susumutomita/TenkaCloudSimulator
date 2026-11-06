@@ -82,7 +82,7 @@ func registerCloudStorage(db *sql.DB, registry *provider.Registry, cfg CloudStor
 // official method of these APIs returns UNIMPLEMENTED.
 func gcpCatalogCapabilities(engine *gcpcatalog.Engine, cfg CloudStorageConfig) map[string]any {
 	return map[string]any{"apis": engine.Describe(), "project": cfg.GCPProject, "projectNumber": cfg.GCPProjectNumber, "locations": gcpLocations,
-		"endpoint": "/_simulator/providers/gcp/{api}/", "reference": "/_simulator/docs/catalog.html",
+		"endpoint": "/_simulator/providers/gcp/{api}/", "reference": "/_simulator/docs/gcp-catalog.html",
 		"authorization": "Local configured project owner only; not Google IAM", "operations": "long-running operations complete synchronously and stay readable through operations.get/list",
 		"state": "configuration metadata in provider-owned SQLite; no workload, network, data plane or real Google Cloud call"}
 }

@@ -631,5 +631,11 @@ def handler(event,context):
  def test_aws_catalog_fixture_lifecycles_cover_every_bound_operation(self):
   subprocess.run([sys.executable, str(Path(__file__).with_name('aws_catalog_fixtures.py'))], check=True, timeout=900)
 
+ def test_gcp_catalog_discovery_client_two_teams_owner_restart_and_cleanup(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('gcp_catalog_fixtures.py'))], check=True, timeout=600)
+
+ def test_gcp_catalog_console_reference_and_shared_native_state(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('gcp_catalog_console.py'))], check=True, timeout=300)
+
 
 if __name__=='__main__':unittest.main(verbosity=2)
