@@ -123,7 +123,7 @@ func TestGuardDutyDetectorsFiltersAndErrors(t *testing.T) {
 	if len(id) != 32 {
 		t.Fatalf("detector id %q", id)
 	}
-	expect(t, h.rest("guardduty", "POST", "/detector", map[string]any{"enable": true}), 400, "LimitExceededException")
+	expect(t, h.rest("guardduty", "POST", "/detector", map[string]any{"enable": true}), 400, "BadRequestException")
 	expect(t, h.rest("guardduty", "GET", "/detector/"+strings.Repeat("0", 32), nil), 400, "BadRequestException")
 	filter := map[string]any{"name": "archive-low", "findingCriteria": map[string]any{"criterion": map[string]any{"severity": map[string]any{"lt": 4}}}}
 	expect(t, h.rest("guardduty", "POST", "/detector/"+id+"/filter", filter), 200, "")

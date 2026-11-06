@@ -9,7 +9,8 @@ import (
 func TestExceptionSelectionPrefersSpecificModeledNames(t *testing.T) {
 	m := syntheticModel()
 	for _, name := range []string{"AlreadyExistsException", "FederatedResourceAlreadyExistsException", "ConflictException", "StateMachineAlreadyExists", "PipelineNameInUseException",
-		"EncryptionKeyNotFoundException", "RepositoryDoesNotExistException", "TagsLimitExceededException", "TooManyRequestsException", "UnknownResourceException", "InvalidParametersException", "TrailLimitExceededException"} {
+		"EncryptionKeyNotFoundException", "RepositoryDoesNotExistException", "TagsLimitExceededException", "TooManyRequestsException", "UnknownResourceException", "InvalidParametersException", "TrailLimitExceededException",
+		"DirectConnectServerException", "DirectConnectClientException", "BadRequest", "FileSystemNotFound", "ArgumentException", "InvalidInput", "InvalidGatewayRequestException", "BadRequestException", "InvalidParameterValueException"} {
 		m.Shapes[name] = &Shape{Type: "structure", Exception: true}
 	}
 	b := &binding{spec: syntheticSpec(), model: m}
@@ -28,6 +29,13 @@ func TestExceptionSelectionPrefersSpecificModeledNames(t *testing.T) {
 		{[]string{"UnknownResourceException"}, "notfound", "UnknownResourceException"},
 		{[]string{"InvalidParametersException"}, "notfound", "InvalidParametersException"},
 		{[]string{"ConflictException"}, "dependents", "ConflictException"},
+		{[]string{"DirectConnectServerException", "DirectConnectClientException"}, "notfound", "DirectConnectClientException"},
+		{[]string{"BadRequest", "FileSystemNotFound"}, "validation", "BadRequest"},
+		{[]string{"ArgumentException", "NotFoundException"}, "unsupported", "ArgumentException"},
+		{[]string{"InvalidInput"}, "conflict", "InvalidInput"},
+		{[]string{"InvalidGatewayRequestException"}, "validation", "InvalidGatewayRequestException"},
+		{[]string{"BadRequestException"}, "limit", "BadRequestException"},
+		{[]string{"InvalidParameterValueException"}, "tags", "InvalidParameterValueException"},
 	}
 	for _, c := range cases {
 		m.Operations["GetWidget"].Errors = c.errors

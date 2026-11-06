@@ -387,8 +387,8 @@ func (e *Engine) fail(w http.ResponseWriter, b *binding, op *Op, err error) {
 // errorFamilies lists, in priority order, exact names or documented name
 // fragments of modeled exceptions for each failure family.
 var errorFamilies = map[string][]string{
-	"validation":    {"ValidationException", "InvalidParameterException", "InvalidParameterValueException", "InvalidParametersException", "InvalidInputException", "InvalidRequestException", "BadRequestException", "InvalidArgumentException", "InvalidParameterCombinationException", "ClientException"},
-	"unsupported":   {"ValidationException", "InvalidParameterException", "InvalidParameterValueException", "InvalidParametersException", "InvalidInputException", "InvalidRequestException", "BadRequestException", "InvalidArgumentException", "ClientException"},
+	"validation":    {"ValidationException", "InvalidParameterException", "InvalidParameterValueException", "InvalidParametersException", "InvalidInputException", "InvalidRequestException", "BadRequestException", "InvalidArgumentException", "InvalidParameterCombinationException", "ClientException", "BadRequest", "InvalidInput", "ArgumentException", "InvalidGatewayRequestException"},
+	"unsupported":   {"ValidationException", "InvalidParameterException", "InvalidParameterValueException", "InvalidParametersException", "InvalidInputException", "InvalidRequestException", "BadRequestException", "InvalidArgumentException", "ClientException", "BadRequest", "InvalidInput", "ArgumentException", "InvalidGatewayRequestException"},
 	"notfound":      {"ResourceNotFoundException", "NotFoundException", "NotFound", "NoSuch", "DoesNotExist", "UnknownResource"},
 	"conflict":      {"ResourceAlreadyExistsException", "AlreadyExistsException", "AlreadyExists", "NameExists", "Duplicate", "NameInUse", "ResourceInUseException"},
 	"dependents":    {"NotEmpty", "ResourceInUseException", "InUse", "DependencyViolation"},
@@ -409,7 +409,7 @@ var genericFamilies = map[string][]string{
 
 // fallbackToValidation lists families whose unmodeled failures use the
 // operation's own validation exception rather than an invented name.
-var fallbackToValidation = map[string]bool{"conflict": true, "dependents": true, "mismatch": true, "token": true, "notfound": true}
+var fallbackToValidation = map[string]bool{"conflict": true, "dependents": true, "mismatch": true, "token": true, "notfound": true, "limit": true, "tags": true}
 
 var familyDefaults = map[string][2]any{
 	"validation": {"ValidationException", 400}, "unsupported": {"ValidationException", 400},
@@ -445,12 +445,8 @@ func (b *binding) errorCode(opName, kind string) (string, int) {
 			}
 		}
 		if fallbackToValidation[kind] {
-			for _, candidate := range errorFamilies["validation"] {
-				for _, name := range official.Errors {
-					if name == candidate {
-						return name, b.status(name, "validation")
-					}
-				}
+			if name, ok := pick(official.Errors, errorFamilies["validation"], "validation"); ok {
+				return name, b.status(name, "validation")
 			}
 		}
 	}

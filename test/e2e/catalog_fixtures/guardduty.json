@@ -14,7 +14,7 @@
   {"op": "list_tags_for_resource", "args": {"ResourceArn": "arn:aws:guardduty:us-east-1:000000000000:detector/${detector}"}, "expect": {"Tags": {"k": "v"}}},
   {"op": "update_detector", "args": {"DetectorId": "${detector}", "Enable": false}, "error": "BadRequestException", "status": 400},
   {"op": "create_detector", "args": {"Enable": true, "Features": [{"Name": "S3_DATA_EVENTS", "Status": "ENABLED"}]}, "error": "BadRequestException", "status": 400},
-  {"op": "create_detector", "args": {"Enable": true}, "error": "LimitExceededException", "status": 400},
+  {"op": "create_detector", "args": {"Enable": true}, "error": "BadRequestException", "status": 400},
   {"op": "list_findings", "args": {"DetectorId": "${detector}"}, "error": "UnknownOperationException", "status": 501},
   {"op": "get_detector", "args": {"DetectorId": "00000000000000000000000000000000"}, "error": "BadRequestException", "status": 400}
  ],
