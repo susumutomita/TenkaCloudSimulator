@@ -15,6 +15,11 @@ function start() {
     || links.some(link => !ids.has(link.dataset.nodeId))
     || details.some(detail => !ids.has(detail.dataset.nodeDetail))) return;
   let provider = 'aws', selectedId = 'aws-lambda';
+  function nodeFromFragment(hash) {
+    if (!hash.startsWith('#detail-')) return null;
+    const id = hash.slice('#detail-'.length);
+    return ids.has(id) ? id : null;
+  }
   function select(id) {
     const node = TOPOLOGY.nodes.find(item => item.id === id);
     if (!node) return;
@@ -29,7 +34,12 @@ function start() {
     if (status) status.textContent = `${node.title} の役割と制限`;
     root.dispatchEvent(new CustomEvent('topology:change', {detail: Object.freeze({provider, selectedId})}));
   }
-  for (const link of links) link.addEventListener('click', event => {event.preventDefault(); select(link.dataset.nodeId);});
+  for (const link of links) link.addEventListener('click', event => {
+    if (event.defaultPrevented || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+    // Reveal the target before native fragment navigation; leave URL, scroll,
+    // keyboard activation and modified-link gestures to the browser.
+    select(link.dataset.nodeId);
+  });
   for (const control of controls) {
     control.disabled = false;
     control.addEventListener('click', () => {
@@ -37,7 +47,11 @@ function start() {
       if (item) select(item.defaultNode);
     });
   }
-  select(selectedId);
+  window.addEventListener('hashchange', () => {
+    const id = nodeFromFragment(window.location.hash);
+    if (id) select(id);
+  });
+  select(nodeFromFragment(window.location.hash) || selectedId);
   if (!canvas || !status) return;
   // Only this decorative projection is generated. The readable HTML above is
   // already present, and remains the authoritative keyboard/content interface.
