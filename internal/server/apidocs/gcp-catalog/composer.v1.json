@@ -738,7 +738,7 @@
   }
  },
  "info": {
-  "description": "Bounded simulator subset of the official Cloud Composer API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Environments are configuration metadata (formerly Cloud Composer): no Airflow scheduler, web server, DAG bucket, GKE cluster or database exists, they report RUNNING immediately and no airflowUri or dagGcsPrefix is assigned. The state field is server-assigned and refused in requests; only labels may be updated, and nested update mask paths such as config.softwareConfig.pypiPackages are refused. Airflow commands, snapshots, upgrades, user workload config maps and secrets are unimplemented.",
+  "description": "Bounded simulator subset of the official Cloud Composer API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Environments are configuration metadata (formerly Cloud Composer): no Airflow scheduler, web server, DAG bucket, GKE cluster or database exists, they report RUNNING immediately and no airflowUri or dagGcsPrefix is assigned. The state field is server-assigned and refused in requests; only labels may be updated, and nested update mask paths such as config.softwareConfig.pypiPackages are refused. Airflow commands, snapshots, upgrade checks, database failover, web server restarts, workloads and user workload config maps and secrets are unimplemented.",
   "title": "Managed Service for Apache Airflow (simulator catalog)",
   "version": "v1"
  },
@@ -1210,7 +1210,7 @@
  ],
  "tags": [
   {
-   "description": "Bounded simulator subset of the official Cloud Composer API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Environments are configuration metadata (formerly Cloud Composer): no Airflow scheduler, web server, DAG bucket, GKE cluster or database exists, they report RUNNING immediately and no airflowUri or dagGcsPrefix is assigned. The state field is server-assigned and refused in requests; only labels may be updated, and nested update mask paths such as config.softwareConfig.pypiPackages are refused. Airflow commands, snapshots, upgrades, user workload config maps and secrets are unimplemented.",
+   "description": "Bounded simulator subset of the official Cloud Composer API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Environments are configuration metadata (formerly Cloud Composer): no Airflow scheduler, web server, DAG bucket, GKE cluster or database exists, they report RUNNING immediately and no airflowUri or dagGcsPrefix is assigned. The state field is server-assigned and refused in requests; only labels may be updated, and nested update mask paths such as config.softwareConfig.pypiPackages are refused. Airflow commands, snapshots, upgrade checks, database failover, web server restarts, workloads and user workload config maps and secrets are unimplemented.",
    "name": "Managed Service for Apache Airflow"
   }
  ],

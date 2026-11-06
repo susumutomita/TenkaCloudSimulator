@@ -94,7 +94,7 @@ var datastream = &API{
 		{Method: "projects.locations.connectionProfiles.patch", Kind: Patch, Collection: "connectionProfiles", Check: datastreamSecrets},
 		{Method: "projects.locations.connectionProfiles.delete", Kind: Delete, Collection: "connectionProfiles"},
 		{Method: "projects.locations.privateConnections.create", Kind: Create, Collection: "privateConnections",
-			Check: analyticsRequire("vpcPeeringConfig?.vpc", "vpcPeeringConfig?.subnet", "pscInterfaceConfig?.networkAttachment")},
+			Check: analyticsAll(privateConnectivity, analyticsRequire("vpcPeeringConfig?.vpc", "vpcPeeringConfig?.subnet", "pscInterfaceConfig?.networkAttachment"))},
 		{Method: "projects.locations.privateConnections.get", Kind: Get, Collection: "privateConnections"},
 		{Method: "projects.locations.privateConnections.list", Kind: List, Collection: "privateConnections"},
 		{Method: "projects.locations.privateConnections.delete", Kind: Delete, Collection: "privateConnections"},
@@ -226,7 +226,7 @@ var dataFusion = &API{
 	},
 	Bounds: []string{
 		"Instances and DNS peerings are configuration metadata: no CDAP, pipeline, Dataproc cluster, bucket, service endpoint or DNS zone exists, and instances report ACTIVE immediately.",
-		"Restart, upgrade and IAM policy methods are unimplemented; Resource Manager tags are refused; deleting an instance with DNS peerings requires force=true.",
+		"Restart, version listing and IAM policy methods are unimplemented; Resource Manager tags are refused; deleting an instance with DNS peerings requires force=true.",
 	},
 }
 
@@ -274,7 +274,7 @@ var composer = &API{
 	Bounds: []string{
 		"Environments are configuration metadata (formerly Cloud Composer): no Airflow scheduler, web server, DAG bucket, GKE cluster or database exists, they report RUNNING immediately and no airflowUri or dagGcsPrefix is assigned.",
 		"The state field is server-assigned and refused in requests; only labels may be updated, and nested update mask paths such as config.softwareConfig.pypiPackages are refused.",
-		"Airflow commands, snapshots, upgrades, user workload config maps and secrets are unimplemented.",
+		"Airflow commands, snapshots, upgrade checks, database failover, web server restarts, workloads and user workload config maps and secrets are unimplemented.",
 	},
 }
 
@@ -300,6 +300,15 @@ var dataplex = &API{
 		{ID: "aspectTypes", Schema: "GoogleCloudDataplexV1AspectType", Type: "AspectType", IDParam: "aspectTypeId", Limit: 50, Permission: "dataplex.aspectTypes",
 			Generate: map[string]any{"uid": "$uid", "createTime": "$now", "updateTime": "$now", "etag": "$etag"},
 			Mutable:  []string{"displayName", "description", "labels", "metadataTemplate", "authorization", "dataClassification"}},
+		{ID: "glossaries", Schema: "GoogleCloudDataplexV1Glossary", Type: "Glossary", IDParam: "glossaryId", Limit: 20, Permission: "dataplex.glossaries",
+			Generate: map[string]any{"uid": "$uid", "createTime": "$now", "updateTime": "$now", "etag": "$etag"},
+			Mutable:  []string{"displayName", "description", "labels"}},
+		{ID: "categories", Schema: "GoogleCloudDataplexV1GlossaryCategory", Type: "GlossaryCategory", Parent: "glossaries", IDParam: "categoryId", Limit: 100,
+			Permission: "dataplex.glossaryCategories", Generate: map[string]any{"uid": "$uid", "createTime": "$now", "updateTime": "$now"},
+			Mutable: []string{"displayName", "description", "labels"}},
+		{ID: "terms", Schema: "GoogleCloudDataplexV1GlossaryTerm", Type: "GlossaryTerm", Parent: "glossaries", IDParam: "termId", Limit: 200,
+			Permission: "dataplex.glossaryTerms", Generate: map[string]any{"uid": "$uid", "createTime": "$now", "updateTime": "$now"},
+			Mutable: []string{"displayName", "description", "labels"}},
 	},
 	Bindings: []Binding{
 		{Method: "projects.locations.lakes.create", Kind: Create, Collection: "lakes"},
@@ -332,13 +341,28 @@ var dataplex = &API{
 		{Method: "projects.locations.aspectTypes.list", Kind: List, Collection: "aspectTypes"},
 		{Method: "projects.locations.aspectTypes.patch", Kind: Patch, Collection: "aspectTypes", Check: analyticsRequire("metadataTemplate?.name", "metadataTemplate?.type")},
 		{Method: "projects.locations.aspectTypes.delete", Kind: Delete, Collection: "aspectTypes"},
+		{Method: "projects.locations.glossaries.create", Kind: Create, Collection: "glossaries"},
+		{Method: "projects.locations.glossaries.get", Kind: Get, Collection: "glossaries"},
+		{Method: "projects.locations.glossaries.list", Kind: List, Collection: "glossaries"},
+		{Method: "projects.locations.glossaries.patch", Kind: Patch, Collection: "glossaries"},
+		{Method: "projects.locations.glossaries.delete", Kind: Delete, Collection: "glossaries"},
+		{Method: "projects.locations.glossaries.categories.create", Kind: Create, Collection: "categories", Check: glossaryParent},
+		{Method: "projects.locations.glossaries.categories.get", Kind: Get, Collection: "categories"},
+		{Method: "projects.locations.glossaries.categories.list", Kind: List, Collection: "categories"},
+		{Method: "projects.locations.glossaries.categories.patch", Kind: Patch, Collection: "categories"},
+		{Method: "projects.locations.glossaries.categories.delete", Kind: Delete, Collection: "categories"},
+		{Method: "projects.locations.glossaries.terms.create", Kind: Create, Collection: "terms", Check: glossaryParent},
+		{Method: "projects.locations.glossaries.terms.get", Kind: Get, Collection: "terms"},
+		{Method: "projects.locations.glossaries.terms.list", Kind: List, Collection: "terms"},
+		{Method: "projects.locations.glossaries.terms.patch", Kind: Patch, Collection: "terms"},
+		{Method: "projects.locations.glossaries.terms.delete", Kind: Delete, Collection: "terms"},
 		{Method: "projects.locations.operations.get", Kind: OperationGet},
 		{Method: "projects.locations.operations.list", Kind: OperationList},
 	},
 	Bounds: []string{
-		"Lakes, zones, assets, entry groups, entry types and aspect types are configuration metadata (formerly Dataplex Universal Catalog): no bucket, dataset, metastore or entry is read, created or published, and lakes, zones and assets report ACTIVE immediately.",
-		"Discovery, data scans, tasks and metadata jobs never run; asset resource references are not resolved and zone IDs are unique only within their lake.",
-		"Delete zones before their lake and assets before their zone, as Dataplex requires. Entries, entry links, glossaries, data products and taxonomies are unimplemented.",
+		"Lakes, zones, assets, entry groups, entry types, aspect types and business glossaries are configuration metadata (formerly Dataplex Universal Catalog): no bucket, dataset, metastore or entry is read, created or published, and lakes, zones and assets report ACTIVE immediately.",
+		"Discovery, data scans, tasks and metadata jobs never run; asset resources, lake metastores, required aspect types and glossary parents are not resolved, and zone IDs are unique only within their lake.",
+		"Delete zones before their lake, assets before their zone, and categories and terms before their glossary, as Dataplex requires. Entries, entry links, data products and taxonomies are unimplemented.",
 	},
 }
 
@@ -437,10 +461,30 @@ func kafkaTopic(body map[string]any) error {
 // datastreamSecrets refuses inline credentials in connection profiles.
 var datastreamSecrets = analyticsSecrets("password", "privateKey", "clientKey", "clientSecret", "securityToken", "rawValue")
 
+// privateConnectivity requires exactly one of VPC peering or a PSC interface.
+func privateConnectivity(body map[string]any) error {
+	_, peering := body["vpcPeeringConfig"]
+	_, psc := body["pscInterfaceConfig"]
+	if peering == psc {
+		return invalid("Exactly one of 'vpcPeeringConfig' and 'pscInterfaceConfig' is required.")
+	}
+	return nil
+}
+
 // streamNotStarted refuses any state change: the simulator never starts streams.
 func streamNotStarted(body map[string]any) error {
 	if state, ok := body["state"]; ok && state != "NOT_STARTED" {
 		return invalid("The simulator never starts streams; state must be NOT_STARTED.")
+	}
+	return nil
+}
+
+var glossaryParentName = regexp.MustCompile(`^projects/[^/]+/locations/[^/]+/glossaries/[^/]+(/categories/[^/]+)?$`)
+
+// glossaryParent requires the documented glossary or category name form.
+func glossaryParent(body map[string]any) error {
+	if parent, _ := body["parent"].(string); !glossaryParentName.MatchString(parent) {
+		return invalid("Field 'parent' must name a glossary or glossary category.")
 	}
 	return nil
 }

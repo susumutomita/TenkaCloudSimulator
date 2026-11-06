@@ -27,6 +27,19 @@
   {"call": "projects.locations.entryTypes.get", "args": {"name": "${entryType}"}, "expect": {"requiredAspects[0].type": "${aspect}"}},
   {"call": "projects.locations.entryTypes.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"entryTypes#count": 1}},
   {"call": "projects.locations.entryTypes.patch", "args": {"name": "${entryType}", "updateMask": "typeAliases"}, "body": {"typeAliases": ["TABLE"]}},
+  {"call": "projects.locations.glossaries.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "glossaryId": "sales"}, "body": {"displayName": "Sales"}, "save": {"glossary": "response.name"}, "expect": {"response.etag#count": 16}},
+  {"call": "projects.locations.glossaries.get", "args": {"name": "${glossary}"}, "expect": {"displayName": "Sales"}},
+  {"call": "projects.locations.glossaries.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"glossaries#count": 1}},
+  {"call": "projects.locations.glossaries.patch", "args": {"name": "${glossary}", "updateMask": "description"}, "body": {"description": "Sales terms"}},
+  {"call": "projects.locations.glossaries.categories.create", "args": {"parent": "${glossary}", "categoryId": "revenue"}, "body": {"parent": "${glossary}", "displayName": "Revenue"}, "save": {"category": "name"}},
+  {"call": "projects.locations.glossaries.categories.get", "args": {"name": "${category}"}, "expect": {"parent": "${glossary}"}},
+  {"call": "projects.locations.glossaries.categories.list", "args": {"parent": "${glossary}"}, "expect": {"categories#count": 1}},
+  {"call": "projects.locations.glossaries.categories.patch", "args": {"name": "${category}", "updateMask": "description"}, "body": {"description": "Revenue metrics"}},
+  {"call": "projects.locations.glossaries.terms.create", "args": {"parent": "${glossary}", "termId": "arr"}, "body": {"parent": "${category}", "description": "Annual recurring revenue"}, "save": {"term": "name"}},
+  {"call": "projects.locations.glossaries.terms.get", "args": {"name": "${term}"}, "expect": {"parent": "${category}"}},
+  {"call": "projects.locations.glossaries.terms.list", "args": {"parent": "${glossary}"}, "expect": {"terms#count": 1}},
+  {"call": "projects.locations.glossaries.terms.patch", "args": {"name": "${term}", "updateMask": "displayName"}, "body": {"displayName": "ARR"}},
+  {"call": "projects.locations.glossaries.delete", "args": {"name": "${glossary}"}, "error": "FAILED_PRECONDITION", "status": 400},
   {"call": "projects.locations.lakes.zones.create", "args": {"parent": "${lake}", "zoneId": "curated"}, "body": {"type": "CURATED", "resourceSpec": {}}, "error": "INVALID_ARGUMENT", "status": 400},
   {"call": "projects.locations.lakes.delete", "args": {"name": "${lake}"}, "error": "FAILED_PRECONDITION", "status": 400},
   {"call": "projects.locations.dataScans.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "dataScanId": "quality", "body": {"data": {"resource": "//bigquery.googleapis.com/projects/tenkacloud-local/datasets/d/tables/t"}}}, "error": "UNIMPLEMENTED", "status": 501},
@@ -39,7 +52,8 @@
  ],
  "after_restart": [
   {"call": "projects.locations.lakes.zones.assets.get", "args": {"name": "${asset}"}, "expect": {"labels.tier": "raw"}},
-  {"call": "projects.locations.entryGroups.get", "args": {"name": "${group}"}, "expect": {"description": "CRM systems"}}
+  {"call": "projects.locations.entryGroups.get", "args": {"name": "${group}"}, "expect": {"description": "CRM systems"}},
+  {"call": "projects.locations.glossaries.terms.get", "args": {"name": "${term}"}, "expect": {"displayName": "ARR"}}
  ],
  "cleanup": [
   {"call": "projects.locations.lakes.zones.assets.delete", "args": {"name": "${asset}"}},
@@ -48,6 +62,10 @@
   {"call": "projects.locations.entryTypes.delete", "args": {"name": "${entryType}"}},
   {"call": "projects.locations.aspectTypes.delete", "args": {"name": "${aspect}"}},
   {"call": "projects.locations.entryGroups.delete", "args": {"name": "${group}"}},
+  {"call": "projects.locations.glossaries.terms.delete", "args": {"name": "${term}"}},
+  {"call": "projects.locations.glossaries.categories.delete", "args": {"name": "${category}"}},
+  {"call": "projects.locations.glossaries.delete", "args": {"name": "${glossary}"}},
+  {"call": "projects.locations.glossaries.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"glossaries#count": 0}},
   {"call": "projects.locations.lakes.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"lakes#count": 0}},
   {"call": "projects.locations.entryGroups.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"entryGroups#count": 0}}
  ]

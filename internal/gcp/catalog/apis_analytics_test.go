@@ -131,6 +131,8 @@ func TestDatastreamProfilesPrivateConnectionsAndStreams(t *testing.T) {
 	for _, bad := range []map[string]any{
 		{"displayName": "x", "vpcPeeringConfig": map[string]any{"vpc": "projects/tenkacloud-local/global/networks/default"}},
 		{"displayName": "x", "pscInterfaceConfig": map[string]any{}},
+		{"displayName": "x"},
+		{"displayName": "x", "vpcPeeringConfig": map[string]any{"vpc": "v", "subnet": "10.0.0.0/29"}, "pscInterfaceConfig": map[string]any{"networkAttachment": "a"}},
 	} {
 		expect(t, h.call("owner", "POST", base+"/privateConnections?privateConnectionId=bad", bad), 400, "INVALID_ARGUMENT")
 	}
@@ -359,6 +361,28 @@ func TestDataplexLakesZonesAssetsAndCatalogTypes(t *testing.T) {
 	analyticsOK(t, h, "PATCH", base+"/aspectTypes/owner?updateMask=description", map[string]any{"description": "Data owner"})
 	expect(t, h.call("owner", "PATCH", base+"/aspectTypes/owner?updateMask=metadataTemplate", map[string]any{"metadataTemplate": map[string]any{"type": "record"}}), 400, "INVALID_ARGUMENT")
 	expect(t, h.call("owner", "POST", base+"/dataScans?dataScanId=dq", map[string]any{}), 501, "UNIMPLEMENTED")
+
+	glossary := base + "/glossaries/sales"
+	analyticsOK(t, h, "POST", base+"/glossaries?glossaryId=sales", map[string]any{"displayName": "Sales"})
+	analyticsOK(t, h, "GET", glossary, nil)
+	analyticsCount(t, h, base+"/glossaries", "glossaries", 1)
+	analyticsOK(t, h, "PATCH", glossary+"?updateMask=description", map[string]any{"description": "Sales terms"})
+	expect(t, h.call("owner", "POST", glossary+"/categories?categoryId=revenue", map[string]any{"parent": "glossaries/sales"}), 400, "INVALID_ARGUMENT")
+	if got := analyticsOK(t, h, "POST", glossary+"/categories?categoryId=revenue", map[string]any{"parent": analyticsScope + "/glossaries/sales"}); got["@type"] != nil || got["uid"] == nil {
+		t.Fatalf("category %v", got)
+	}
+	analyticsOK(t, h, "GET", glossary+"/categories/revenue", nil)
+	analyticsCount(t, h, glossary+"/categories", "categories", 1)
+	analyticsOK(t, h, "PATCH", glossary+"/categories/revenue?updateMask=displayName", map[string]any{"displayName": "Revenue"})
+	expect(t, h.call("owner", "POST", glossary+"/terms?termId=arr", map[string]any{}), 400, "INVALID_ARGUMENT")
+	analyticsOK(t, h, "POST", glossary+"/terms?termId=arr", map[string]any{"parent": analyticsScope + "/glossaries/sales/categories/revenue", "description": "Annual recurring revenue"})
+	analyticsOK(t, h, "GET", glossary+"/terms/arr", nil)
+	analyticsCount(t, h, glossary+"/terms", "terms", 1)
+	analyticsOK(t, h, "PATCH", glossary+"/terms/arr?updateMask=labels", map[string]any{"labels": map[string]any{"a": "b"}})
+	expect(t, h.call("owner", "DELETE", glossary, nil), 400, "FAILED_PRECONDITION")
+	analyticsOK(t, h, "DELETE", glossary+"/terms/arr", nil)
+	analyticsOK(t, h, "DELETE", glossary+"/categories/revenue", nil)
+	analyticsOK(t, h, "DELETE", glossary, nil)
 	analyticsOK(t, h, "DELETE", base+"/aspectTypes/owner", nil)
 }
 
