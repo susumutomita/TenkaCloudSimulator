@@ -86,10 +86,10 @@ func (b *binding) openAPI() map[string]any {
 					case "header":
 						params = append(params, map[string]any{"name": wire, "in": "header", "schema": b.schema(member.Shape, schemas, 0)})
 					case "", "body":
-						body["properties"].(map[string]any)[name] = b.schema(member.Shape, schemas, 0)
+						body["properties"].(map[string]any)[wire] = b.schema(member.Shape, schemas, 0)
 						for _, r := range shape.Required {
 							if r == name {
-								required = append(required, name)
+								required = append(required, wire)
 							}
 						}
 					}
@@ -139,13 +139,17 @@ func (b *binding) schema(name string, schemas map[string]any, depth int) map[str
 		}
 		props := map[string]any{}
 		schemas[name] = map[string]any{"type": "object"}
+		// Properties use the serialized (locationName) keys clients send.
 		for _, member := range shape.sortedMembers() {
-			props[member] = b.schema(shape.Members[member].Shape, schemas, depth+1)
+			props[shape.Members[member].wire(member)] = b.schema(shape.Members[member].Shape, schemas, depth+1)
 		}
 		entry := map[string]any{"type": "object", "properties": props, "additionalProperties": false}
 		if len(shape.Required) > 0 {
 			required := []any{}
 			for _, r := range shape.Required {
+				if member, ok := shape.Members[r]; ok {
+					r = member.wire(r)
+				}
 				required = append(required, r)
 			}
 			entry["required"] = required

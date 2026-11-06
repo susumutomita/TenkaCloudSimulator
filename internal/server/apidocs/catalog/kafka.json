@@ -4,13 +4,13 @@
    "BrokerLogs": {
     "additionalProperties": false,
     "properties": {
-     "CloudWatchLogs": {
+     "cloudWatchLogs": {
       "$ref": "#/components/schemas/CloudWatchLogs"
      },
-     "Firehose": {
+     "firehose": {
       "$ref": "#/components/schemas/Firehose"
      },
-     "S3": {
+     "s3": {
       "$ref": "#/components/schemas/S3"
      }
     },
@@ -19,36 +19,36 @@
    "BrokerNodeGroupInfo": {
     "additionalProperties": false,
     "properties": {
-     "BrokerAZDistribution": {
+     "brokerAZDistribution": {
       "enum": [
        "DEFAULT"
       ],
       "type": "string"
      },
-     "ClientSubnets": {
+     "clientSubnets": {
       "items": {
        "type": "string"
       },
       "type": "array"
      },
-     "ConnectivityInfo": {
+     "connectivityInfo": {
       "$ref": "#/components/schemas/ConnectivityInfo"
      },
-     "InstanceType": {
+     "instanceType": {
       "maxLength": 32,
       "minLength": 5,
       "type": "string"
      },
-     "SecurityGroups": {
+     "securityGroups": {
       "items": {
        "type": "string"
       },
       "type": "array"
      },
-     "StorageInfo": {
+     "storageInfo": {
       "$ref": "#/components/schemas/StorageInfo"
      },
-     "ZoneIds": {
+     "zoneIds": {
       "items": {
        "type": "string"
       },
@@ -56,21 +56,21 @@
      }
     },
     "required": [
-     "ClientSubnets",
-     "InstanceType"
+     "clientSubnets",
+     "instanceType"
     ],
     "type": "object"
    },
    "BrokerSoftwareInfo": {
     "additionalProperties": false,
     "properties": {
-     "ConfigurationArn": {
+     "configurationArn": {
       "type": "string"
      },
-     "ConfigurationRevision": {
+     "configurationRevision": {
       "type": "integer"
      },
-     "KafkaVersion": {
+     "kafkaVersion": {
       "type": "string"
      }
     },
@@ -79,13 +79,13 @@
    "ClientAuthentication": {
     "additionalProperties": false,
     "properties": {
-     "Sasl": {
+     "sasl": {
       "$ref": "#/components/schemas/Sasl"
      },
-     "Tls": {
+     "tls": {
       "$ref": "#/components/schemas/Tls"
      },
-     "Unauthenticated": {
+     "unauthenticated": {
       "$ref": "#/components/schemas/Unauthenticated"
      }
     },
@@ -94,50 +94,50 @@
    "CloudWatchLogs": {
     "additionalProperties": false,
     "properties": {
-     "Enabled": {
+     "enabled": {
       "type": "boolean"
      },
-     "LogGroup": {
+     "logGroup": {
       "type": "string"
      }
     },
     "required": [
-     "Enabled"
+     "enabled"
     ],
     "type": "object"
    },
    "ClusterInfo": {
     "additionalProperties": false,
     "properties": {
-     "ActiveOperationArn": {
+     "activeOperationArn": {
       "type": "string"
      },
-     "BrokerNodeGroupInfo": {
+     "brokerNodeGroupInfo": {
       "$ref": "#/components/schemas/BrokerNodeGroupInfo"
      },
-     "ClientAuthentication": {
+     "clientAuthentication": {
       "$ref": "#/components/schemas/ClientAuthentication"
      },
-     "ClusterArn": {
+     "clusterArn": {
       "type": "string"
      },
-     "ClusterName": {
+     "clusterName": {
       "type": "string"
      },
-     "CreationTime": {
+     "creationTime": {
       "description": "Epoch seconds in JSON protocols",
       "type": [
        "number",
        "string"
       ]
      },
-     "CurrentBrokerSoftwareInfo": {
+     "currentBrokerSoftwareInfo": {
       "$ref": "#/components/schemas/BrokerSoftwareInfo"
      },
-     "CurrentVersion": {
+     "currentVersion": {
       "type": "string"
      },
-     "CustomerActionStatus": {
+     "customerActionStatus": {
       "enum": [
        "CRITICAL_ACTION_REQUIRED",
        "ACTION_RECOMMENDED",
@@ -145,10 +145,10 @@
       ],
       "type": "string"
      },
-     "EncryptionInfo": {
+     "encryptionInfo": {
       "$ref": "#/components/schemas/EncryptionInfo"
      },
-     "EnhancedMonitoring": {
+     "enhancedMonitoring": {
       "enum": [
        "DEFAULT",
        "PER_BROKER",
@@ -157,19 +157,19 @@
       ],
       "type": "string"
      },
-     "LoggingInfo": {
+     "loggingInfo": {
       "$ref": "#/components/schemas/LoggingInfo"
      },
-     "NumberOfBrokerNodes": {
+     "numberOfBrokerNodes": {
       "type": "integer"
      },
-     "OpenMonitoring": {
+     "openMonitoring": {
       "$ref": "#/components/schemas/OpenMonitoring"
      },
-     "Rebalancing": {
+     "rebalancing": {
       "$ref": "#/components/schemas/Rebalancing"
      },
-     "State": {
+     "state": {
       "enum": [
        "ACTIVE",
        "CREATING",
@@ -182,26 +182,26 @@
       ],
       "type": "string"
      },
-     "StateInfo": {
+     "stateInfo": {
       "$ref": "#/components/schemas/StateInfo"
      },
-     "StorageMode": {
+     "storageMode": {
       "enum": [
        "LOCAL",
        "TIERED"
       ],
       "type": "string"
      },
-     "Tags": {
+     "tags": {
       "additionalProperties": {
        "type": "string"
       },
       "type": "object"
      },
-     "ZookeeperConnectString": {
+     "zookeeperConnectString": {
       "type": "string"
      },
-     "ZookeeperConnectStringTls": {
+     "zookeeperConnectStringTls": {
       "type": "string"
      }
     },
@@ -210,26 +210,26 @@
    "ConfigurationInfo": {
     "additionalProperties": false,
     "properties": {
-     "Arn": {
+     "arn": {
       "type": "string"
      },
-     "Revision": {
+     "revision": {
       "type": "integer"
      }
     },
     "required": [
-     "Revision",
-     "Arn"
+     "revision",
+     "arn"
     ],
     "type": "object"
    },
    "ConnectivityInfo": {
     "additionalProperties": false,
     "properties": {
-     "PublicAccess": {
+     "publicAccess": {
       "$ref": "#/components/schemas/PublicAccess"
      },
-     "VpcConnectivity": {
+     "vpcConnectivity": {
       "$ref": "#/components/schemas/VpcConnectivity"
      }
     },
@@ -238,13 +238,13 @@
    "CreateClusterResponse": {
     "additionalProperties": false,
     "properties": {
-     "ClusterArn": {
+     "clusterArn": {
       "type": "string"
      },
-     "ClusterName": {
+     "clusterName": {
       "type": "string"
      },
-     "State": {
+     "state": {
       "enum": [
        "ACTIVE",
        "CREATING",
@@ -263,10 +263,10 @@
    "DeleteClusterResponse": {
     "additionalProperties": false,
     "properties": {
-     "ClusterArn": {
+     "clusterArn": {
       "type": "string"
      },
-     "State": {
+     "state": {
       "enum": [
        "ACTIVE",
        "CREATING",
@@ -285,7 +285,7 @@
    "DescribeClusterResponse": {
     "additionalProperties": false,
     "properties": {
-     "ClusterInfo": {
+     "clusterInfo": {
       "$ref": "#/components/schemas/ClusterInfo"
      }
     },
@@ -294,10 +294,10 @@
    "EBSStorageInfo": {
     "additionalProperties": false,
     "properties": {
-     "ProvisionedThroughput": {
+     "provisionedThroughput": {
       "$ref": "#/components/schemas/ProvisionedThroughput"
      },
-     "VolumeSize": {
+     "volumeSize": {
       "maximum": 16384,
       "minimum": 1,
       "type": "integer"
@@ -308,19 +308,19 @@
    "EncryptionAtRest": {
     "additionalProperties": false,
     "properties": {
-     "DataVolumeKMSKeyId": {
+     "dataVolumeKMSKeyId": {
       "type": "string"
      }
     },
     "required": [
-     "DataVolumeKMSKeyId"
+     "dataVolumeKMSKeyId"
     ],
     "type": "object"
    },
    "EncryptionInTransit": {
     "additionalProperties": false,
     "properties": {
-     "ClientBroker": {
+     "clientBroker": {
       "enum": [
        "TLS",
        "TLS_PLAINTEXT",
@@ -328,7 +328,7 @@
       ],
       "type": "string"
      },
-     "InCluster": {
+     "inCluster": {
       "type": "boolean"
      }
     },
@@ -337,10 +337,10 @@
    "EncryptionInfo": {
     "additionalProperties": false,
     "properties": {
-     "EncryptionAtRest": {
+     "encryptionAtRest": {
       "$ref": "#/components/schemas/EncryptionAtRest"
      },
-     "EncryptionInTransit": {
+     "encryptionInTransit": {
       "$ref": "#/components/schemas/EncryptionInTransit"
      }
     },
@@ -349,22 +349,22 @@
    "Firehose": {
     "additionalProperties": false,
     "properties": {
-     "DeliveryStream": {
+     "deliveryStream": {
       "type": "string"
      },
-     "Enabled": {
+     "enabled": {
       "type": "boolean"
      }
     },
     "required": [
-     "Enabled"
+     "enabled"
     ],
     "type": "object"
    },
    "Iam": {
     "additionalProperties": false,
     "properties": {
-     "Enabled": {
+     "enabled": {
       "type": "boolean"
      }
     },
@@ -373,37 +373,37 @@
    "JmxExporter": {
     "additionalProperties": false,
     "properties": {
-     "EnabledInBroker": {
+     "enabledInBroker": {
       "type": "boolean"
      }
     },
     "required": [
-     "EnabledInBroker"
+     "enabledInBroker"
     ],
     "type": "object"
    },
    "JmxExporterInfo": {
     "additionalProperties": false,
     "properties": {
-     "EnabledInBroker": {
+     "enabledInBroker": {
       "type": "boolean"
      }
     },
     "required": [
-     "EnabledInBroker"
+     "enabledInBroker"
     ],
     "type": "object"
    },
    "ListClustersResponse": {
     "additionalProperties": false,
     "properties": {
-     "ClusterInfoList": {
+     "clusterInfoList": {
       "items": {
        "$ref": "#/components/schemas/ClusterInfo"
       },
       "type": "array"
      },
-     "NextToken": {
+     "nextToken": {
       "type": "string"
      }
     },
@@ -412,7 +412,7 @@
    "ListTagsForResourceResponse": {
     "additionalProperties": false,
     "properties": {
-     "Tags": {
+     "tags": {
       "additionalProperties": {
        "type": "string"
       },
@@ -424,70 +424,70 @@
    "LoggingInfo": {
     "additionalProperties": false,
     "properties": {
-     "BrokerLogs": {
+     "brokerLogs": {
       "$ref": "#/components/schemas/BrokerLogs"
      }
     },
     "required": [
-     "BrokerLogs"
+     "brokerLogs"
     ],
     "type": "object"
    },
    "NodeExporter": {
     "additionalProperties": false,
     "properties": {
-     "EnabledInBroker": {
+     "enabledInBroker": {
       "type": "boolean"
      }
     },
     "required": [
-     "EnabledInBroker"
+     "enabledInBroker"
     ],
     "type": "object"
    },
    "NodeExporterInfo": {
     "additionalProperties": false,
     "properties": {
-     "EnabledInBroker": {
+     "enabledInBroker": {
       "type": "boolean"
      }
     },
     "required": [
-     "EnabledInBroker"
+     "enabledInBroker"
     ],
     "type": "object"
    },
    "OpenMonitoring": {
     "additionalProperties": false,
     "properties": {
-     "Prometheus": {
+     "prometheus": {
       "$ref": "#/components/schemas/Prometheus"
      }
     },
     "required": [
-     "Prometheus"
+     "prometheus"
     ],
     "type": "object"
    },
    "OpenMonitoringInfo": {
     "additionalProperties": false,
     "properties": {
-     "Prometheus": {
+     "prometheus": {
       "$ref": "#/components/schemas/PrometheusInfo"
      }
     },
     "required": [
-     "Prometheus"
+     "prometheus"
     ],
     "type": "object"
    },
    "Prometheus": {
     "additionalProperties": false,
     "properties": {
-     "JmxExporter": {
+     "jmxExporter": {
       "$ref": "#/components/schemas/JmxExporter"
      },
-     "NodeExporter": {
+     "nodeExporter": {
       "$ref": "#/components/schemas/NodeExporter"
      }
     },
@@ -496,10 +496,10 @@
    "PrometheusInfo": {
     "additionalProperties": false,
     "properties": {
-     "JmxExporter": {
+     "jmxExporter": {
       "$ref": "#/components/schemas/JmxExporterInfo"
      },
-     "NodeExporter": {
+     "nodeExporter": {
       "$ref": "#/components/schemas/NodeExporterInfo"
      }
     },
@@ -508,10 +508,10 @@
    "ProvisionedThroughput": {
     "additionalProperties": false,
     "properties": {
-     "Enabled": {
+     "enabled": {
       "type": "boolean"
      },
-     "VolumeThroughput": {
+     "volumeThroughput": {
       "type": "integer"
      }
     },
@@ -520,7 +520,7 @@
    "PublicAccess": {
     "additionalProperties": false,
     "properties": {
-     "Type": {
+     "type": {
       "type": "string"
      }
     },
@@ -529,7 +529,7 @@
    "Rebalancing": {
     "additionalProperties": false,
     "properties": {
-     "Status": {
+     "status": {
       "enum": [
        "PAUSED",
        "ACTIVE"
@@ -542,28 +542,28 @@
    "S3": {
     "additionalProperties": false,
     "properties": {
-     "Bucket": {
+     "bucket": {
       "type": "string"
      },
-     "Enabled": {
+     "enabled": {
       "type": "boolean"
      },
-     "Prefix": {
+     "prefix": {
       "type": "string"
      }
     },
     "required": [
-     "Enabled"
+     "enabled"
     ],
     "type": "object"
    },
    "Sasl": {
     "additionalProperties": false,
     "properties": {
-     "Iam": {
+     "iam": {
       "$ref": "#/components/schemas/Iam"
      },
-     "Scram": {
+     "scram": {
       "$ref": "#/components/schemas/Scram"
      }
     },
@@ -572,7 +572,7 @@
    "Scram": {
     "additionalProperties": false,
     "properties": {
-     "Enabled": {
+     "enabled": {
       "type": "boolean"
      }
     },
@@ -581,10 +581,10 @@
    "StateInfo": {
     "additionalProperties": false,
     "properties": {
-     "Code": {
+     "code": {
       "type": "string"
      },
-     "Message": {
+     "message": {
       "type": "string"
      }
     },
@@ -593,7 +593,7 @@
    "StorageInfo": {
     "additionalProperties": false,
     "properties": {
-     "EbsStorageInfo": {
+     "ebsStorageInfo": {
       "$ref": "#/components/schemas/EBSStorageInfo"
      }
     },
@@ -602,13 +602,13 @@
    "Tls": {
     "additionalProperties": false,
     "properties": {
-     "CertificateAuthorityArnList": {
+     "certificateAuthorityArnList": {
       "items": {
        "type": "string"
       },
       "type": "array"
      },
-     "Enabled": {
+     "enabled": {
       "type": "boolean"
      }
     },
@@ -617,7 +617,7 @@
    "Unauthenticated": {
     "additionalProperties": false,
     "properties": {
-     "Enabled": {
+     "enabled": {
       "type": "boolean"
      }
     },
@@ -626,7 +626,7 @@
    "VpcConnectivity": {
     "additionalProperties": false,
     "properties": {
-     "ClientAuthentication": {
+     "clientAuthentication": {
       "$ref": "#/components/schemas/VpcConnectivityClientAuthentication"
      }
     },
@@ -635,10 +635,10 @@
    "VpcConnectivityClientAuthentication": {
     "additionalProperties": false,
     "properties": {
-     "Sasl": {
+     "sasl": {
       "$ref": "#/components/schemas/VpcConnectivitySasl"
      },
-     "Tls": {
+     "tls": {
       "$ref": "#/components/schemas/VpcConnectivityTls"
      }
     },
@@ -647,7 +647,7 @@
    "VpcConnectivityIam": {
     "additionalProperties": false,
     "properties": {
-     "Enabled": {
+     "enabled": {
       "type": "boolean"
      }
     },
@@ -656,10 +656,10 @@
    "VpcConnectivitySasl": {
     "additionalProperties": false,
     "properties": {
-     "Iam": {
+     "iam": {
       "$ref": "#/components/schemas/VpcConnectivityIam"
      },
-     "Scram": {
+     "scram": {
       "$ref": "#/components/schemas/VpcConnectivityScram"
      }
     },
@@ -668,7 +668,7 @@
    "VpcConnectivityScram": {
     "additionalProperties": false,
     "properties": {
-     "Enabled": {
+     "enabled": {
       "type": "boolean"
      }
     },
@@ -677,7 +677,7 @@
    "VpcConnectivityTls": {
     "additionalProperties": false,
     "properties": {
-     "Enabled": {
+     "enabled": {
       "type": "boolean"
      }
     },
@@ -779,24 +779,24 @@
       "application/json": {
        "schema": {
         "properties": {
-         "BrokerNodeGroupInfo": {
+         "brokerNodeGroupInfo": {
           "$ref": "#/components/schemas/BrokerNodeGroupInfo"
          },
-         "ClientAuthentication": {
+         "clientAuthentication": {
           "$ref": "#/components/schemas/ClientAuthentication"
          },
-         "ClusterName": {
+         "clusterName": {
           "maxLength": 64,
           "minLength": 1,
           "type": "string"
          },
-         "ConfigurationInfo": {
+         "configurationInfo": {
           "$ref": "#/components/schemas/ConfigurationInfo"
          },
-         "EncryptionInfo": {
+         "encryptionInfo": {
           "$ref": "#/components/schemas/EncryptionInfo"
          },
-         "EnhancedMonitoring": {
+         "enhancedMonitoring": {
           "enum": [
            "DEFAULT",
            "PER_BROKER",
@@ -805,33 +805,33 @@
           ],
           "type": "string"
          },
-         "KafkaVersion": {
+         "kafkaVersion": {
           "maxLength": 128,
           "minLength": 1,
           "type": "string"
          },
-         "LoggingInfo": {
+         "loggingInfo": {
           "$ref": "#/components/schemas/LoggingInfo"
          },
-         "NumberOfBrokerNodes": {
+         "numberOfBrokerNodes": {
           "maximum": 15,
           "minimum": 1,
           "type": "integer"
          },
-         "OpenMonitoring": {
+         "openMonitoring": {
           "$ref": "#/components/schemas/OpenMonitoringInfo"
          },
-         "Rebalancing": {
+         "rebalancing": {
           "$ref": "#/components/schemas/Rebalancing"
          },
-         "StorageMode": {
+         "storageMode": {
           "enum": [
            "LOCAL",
            "TIERED"
           ],
           "type": "string"
          },
-         "Tags": {
+         "tags": {
           "additionalProperties": {
            "type": "string"
           },
@@ -839,10 +839,10 @@
          }
         },
         "required": [
-         "BrokerNodeGroupInfo",
-         "ClusterName",
-         "KafkaVersion",
-         "NumberOfBrokerNodes"
+         "brokerNodeGroupInfo",
+         "clusterName",
+         "kafkaVersion",
+         "numberOfBrokerNodes"
         ],
         "type": "object"
        }
@@ -1118,7 +1118,7 @@
       "application/json": {
        "schema": {
         "properties": {
-         "Tags": {
+         "tags": {
           "additionalProperties": {
            "type": "string"
           },
@@ -1126,7 +1126,7 @@
          }
         },
         "required": [
-         "Tags"
+         "tags"
         ],
         "type": "object"
        }

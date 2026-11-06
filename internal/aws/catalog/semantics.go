@@ -214,7 +214,7 @@ func (q *request) checkRefs(res *Resource, document map[string]any) error {
 }
 
 func (q *request) authorize(resource string) error {
-	decision, err := q.e.cfg.Authorize(q.ctx, q.principal, q.b.spec.IAMPrefix+":"+q.op.Name, resource)
+	decision, err := q.e.cfg.Authorize(q.ctx, q.principal, q.b.spec.IAMPrefix+":"+q.op.action(), resource)
 	if err != nil {
 		return err
 	}
@@ -226,6 +226,14 @@ func (q *request) authorize(resource string) error {
 }
 
 func (q *request) resource() *Resource { return q.b.spec.resource(q.op.Resource) }
+
+// action is the IAM action name an operation is authorized as.
+func (op *Op) action() string {
+	if op.Action != "" {
+		return op.Action
+	}
+	return op.Name
+}
 
 func (q *request) arnRegion() string {
 	if q.b.spec.Global {

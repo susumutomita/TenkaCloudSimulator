@@ -4,7 +4,7 @@
    "CloudTrailConfigurationResult": {
     "additionalProperties": false,
     "properties": {
-     "Status": {
+     "status": {
       "enum": [
        "ENABLED",
        "DISABLED"
@@ -15,56 +15,56 @@
      }
     },
     "required": [
-     "Status"
+     "status"
     ],
     "type": "object"
    },
    "Condition": {
     "additionalProperties": false,
     "properties": {
-     "Eq": {
+     "eq": {
       "items": {
        "type": "string"
       },
       "type": "array"
      },
-     "Equals": {
+     "equals": {
       "items": {
        "type": "string"
       },
       "type": "array"
      },
-     "GreaterThan": {
+     "greaterThan": {
       "type": "integer"
      },
-     "GreaterThanOrEqual": {
+     "greaterThanOrEqual": {
       "type": "integer"
      },
-     "Gt": {
+     "gt": {
       "type": "integer"
      },
-     "Gte": {
+     "gte": {
       "type": "integer"
      },
-     "LessThan": {
+     "lessThan": {
       "type": "integer"
      },
-     "LessThanOrEqual": {
+     "lessThanOrEqual": {
       "type": "integer"
      },
-     "Lt": {
+     "lt": {
       "type": "integer"
      },
-     "Lte": {
+     "lte": {
       "type": "integer"
      },
-     "Neq": {
+     "neq": {
       "items": {
        "type": "string"
       },
       "type": "array"
      },
-     "NotEquals": {
+     "notEquals": {
       "items": {
        "type": "string"
       },
@@ -76,12 +76,12 @@
    "CreateDetectorResponse": {
     "additionalProperties": false,
     "properties": {
-     "DetectorId": {
+     "detectorId": {
       "maxLength": 300,
       "minLength": 1,
       "type": "string"
      },
-     "UnprocessedDataSources": {
+     "unprocessedDataSources": {
       "$ref": "#/components/schemas/UnprocessedDataSourcesResult"
      }
     },
@@ -90,21 +90,21 @@
    "CreateFilterResponse": {
     "additionalProperties": false,
     "properties": {
-     "Name": {
+     "name": {
       "maxLength": 64,
       "minLength": 3,
       "type": "string"
      }
     },
     "required": [
-     "Name"
+     "name"
     ],
     "type": "object"
    },
    "DNSLogsConfigurationResult": {
     "additionalProperties": false,
     "properties": {
-     "Status": {
+     "status": {
       "enum": [
        "ENABLED",
        "DISABLED"
@@ -115,20 +115,20 @@
      }
     },
     "required": [
-     "Status"
+     "status"
     ],
     "type": "object"
    },
    "DataSourceConfigurations": {
     "additionalProperties": false,
     "properties": {
-     "Kubernetes": {
+     "kubernetes": {
       "$ref": "#/components/schemas/KubernetesConfiguration"
      },
-     "MalwareProtection": {
+     "malwareProtection": {
       "$ref": "#/components/schemas/MalwareProtectionConfiguration"
      },
-     "S3Logs": {
+     "s3Logs": {
       "$ref": "#/components/schemas/S3LogsConfiguration"
      }
     },
@@ -137,30 +137,30 @@
    "DataSourceConfigurationsResult": {
     "additionalProperties": false,
     "properties": {
-     "CloudTrail": {
+     "cloudTrail": {
       "$ref": "#/components/schemas/CloudTrailConfigurationResult"
      },
-     "DNSLogs": {
+     "dnsLogs": {
       "$ref": "#/components/schemas/DNSLogsConfigurationResult"
      },
-     "FlowLogs": {
+     "flowLogs": {
       "$ref": "#/components/schemas/FlowLogsConfigurationResult"
      },
-     "Kubernetes": {
+     "kubernetes": {
       "$ref": "#/components/schemas/KubernetesConfigurationResult"
      },
-     "MalwareProtection": {
+     "malwareProtection": {
       "$ref": "#/components/schemas/MalwareProtectionConfigurationResult"
      },
-     "S3Logs": {
+     "s3Logs": {
       "$ref": "#/components/schemas/S3LogsConfigurationResult"
      }
     },
     "required": [
-     "CloudTrail",
-     "DNSLogs",
-     "FlowLogs",
-     "S3Logs"
+     "cloudTrail",
+     "dnsLogs",
+     "flowLogs",
+     "s3Logs"
     ],
     "type": "object"
    },
@@ -177,7 +177,7 @@
    "DetectorAdditionalConfiguration": {
     "additionalProperties": false,
     "properties": {
-     "Name": {
+     "name": {
       "enum": [
        "EKS_ADDON_MANAGEMENT",
        "ECS_FARGATE_AGENT_MANAGEMENT",
@@ -185,7 +185,7 @@
       ],
       "type": "string"
      },
-     "Status": {
+     "status": {
       "enum": [
        "ENABLED",
        "DISABLED"
@@ -198,7 +198,7 @@
    "DetectorAdditionalConfigurationResult": {
     "additionalProperties": false,
     "properties": {
-     "Name": {
+     "name": {
       "enum": [
        "EKS_ADDON_MANAGEMENT",
        "ECS_FARGATE_AGENT_MANAGEMENT",
@@ -206,14 +206,14 @@
       ],
       "type": "string"
      },
-     "Status": {
+     "status": {
       "enum": [
        "ENABLED",
        "DISABLED"
       ],
       "type": "string"
      },
-     "UpdatedAt": {
+     "updatedAt": {
       "description": "Epoch seconds in JSON protocols",
       "type": [
        "number",
@@ -226,13 +226,13 @@
    "DetectorFeatureConfiguration": {
     "additionalProperties": false,
     "properties": {
-     "AdditionalConfiguration": {
+     "additionalConfiguration": {
       "items": {
        "$ref": "#/components/schemas/DetectorAdditionalConfiguration"
       },
       "type": "array"
      },
-     "Name": {
+     "name": {
       "enum": [
        "S3_DATA_EVENTS",
        "EKS_AUDIT_LOGS",
@@ -244,7 +244,7 @@
       ],
       "type": "string"
      },
-     "Status": {
+     "status": {
       "enum": [
        "ENABLED",
        "DISABLED"
@@ -257,13 +257,13 @@
    "DetectorFeatureConfigurationResult": {
     "additionalProperties": false,
     "properties": {
-     "AdditionalConfiguration": {
+     "additionalConfiguration": {
       "items": {
        "$ref": "#/components/schemas/DetectorAdditionalConfigurationResult"
       },
       "type": "array"
      },
-     "Name": {
+     "name": {
       "enum": [
        "FLOW_LOGS",
        "CLOUD_TRAIL",
@@ -278,14 +278,14 @@
       ],
       "type": "string"
      },
-     "Status": {
+     "status": {
       "enum": [
        "ENABLED",
        "DISABLED"
       ],
       "type": "string"
      },
-     "UpdatedAt": {
+     "updatedAt": {
       "description": "Epoch seconds in JSON protocols",
       "type": [
        "number",
@@ -298,10 +298,10 @@
    "EbsVolumesResult": {
     "additionalProperties": false,
     "properties": {
-     "Reason": {
+     "reason": {
       "type": "string"
      },
-     "Status": {
+     "status": {
       "enum": [
        "ENABLED",
        "DISABLED"
@@ -316,7 +316,7 @@
    "FindingCriteria": {
     "additionalProperties": false,
     "properties": {
-     "Criterion": {
+     "criterion": {
       "additionalProperties": {
        "$ref": "#/components/schemas/Condition"
       },
@@ -328,7 +328,7 @@
    "FlowLogsConfigurationResult": {
     "additionalProperties": false,
     "properties": {
-     "Status": {
+     "status": {
       "enum": [
        "ENABLED",
        "DISABLED"
@@ -339,26 +339,26 @@
      }
     },
     "required": [
-     "Status"
+     "status"
     ],
     "type": "object"
    },
    "GetDetectorResponse": {
     "additionalProperties": false,
     "properties": {
-     "CreatedAt": {
+     "createdAt": {
       "type": "string"
      },
-     "DataSources": {
+     "dataSources": {
       "$ref": "#/components/schemas/DataSourceConfigurationsResult"
      },
-     "Features": {
+     "features": {
       "items": {
        "$ref": "#/components/schemas/DetectorFeatureConfigurationResult"
       },
       "type": "array"
      },
-     "FindingPublishingFrequency": {
+     "findingPublishingFrequency": {
       "enum": [
        "FIFTEEN_MINUTES",
        "ONE_HOUR",
@@ -366,10 +366,10 @@
       ],
       "type": "string"
      },
-     "ServiceRole": {
+     "serviceRole": {
       "type": "string"
      },
-     "Status": {
+     "status": {
       "enum": [
        "ENABLED",
        "DISABLED"
@@ -378,7 +378,7 @@
       "minLength": 1,
       "type": "string"
      },
-     "Tags": {
+     "tags": {
       "additionalProperties": {
        "maxLength": 256,
        "type": "string"
@@ -387,20 +387,20 @@
       "minProperties": 1,
       "type": "object"
      },
-     "UpdatedAt": {
+     "updatedAt": {
       "type": "string"
      }
     },
     "required": [
-     "ServiceRole",
-     "Status"
+     "serviceRole",
+     "status"
     ],
     "type": "object"
    },
    "GetFilterResponse": {
     "additionalProperties": false,
     "properties": {
-     "Action": {
+     "action": {
       "enum": [
        "NOOP",
        "ARCHIVE"
@@ -409,25 +409,25 @@
       "minLength": 1,
       "type": "string"
      },
-     "Description": {
+     "description": {
       "maxLength": 512,
       "minLength": 0,
       "type": "string"
      },
-     "FindingCriteria": {
+     "findingCriteria": {
       "$ref": "#/components/schemas/FindingCriteria"
      },
-     "Name": {
+     "name": {
       "maxLength": 64,
       "minLength": 3,
       "type": "string"
      },
-     "Rank": {
+     "rank": {
       "maximum": 100,
       "minimum": 1,
       "type": "integer"
      },
-     "Tags": {
+     "tags": {
       "additionalProperties": {
        "maxLength": 256,
        "type": "string"
@@ -438,28 +438,28 @@
      }
     },
     "required": [
-     "Name",
-     "Action",
-     "FindingCriteria"
+     "name",
+     "action",
+     "findingCriteria"
     ],
     "type": "object"
    },
    "KubernetesAuditLogsConfiguration": {
     "additionalProperties": false,
     "properties": {
-     "Enable": {
+     "enable": {
       "type": "boolean"
      }
     },
     "required": [
-     "Enable"
+     "enable"
     ],
     "type": "object"
    },
    "KubernetesAuditLogsConfigurationResult": {
     "additionalProperties": false,
     "properties": {
-     "Status": {
+     "status": {
       "enum": [
        "ENABLED",
        "DISABLED"
@@ -470,38 +470,38 @@
      }
     },
     "required": [
-     "Status"
+     "status"
     ],
     "type": "object"
    },
    "KubernetesConfiguration": {
     "additionalProperties": false,
     "properties": {
-     "AuditLogs": {
+     "auditLogs": {
       "$ref": "#/components/schemas/KubernetesAuditLogsConfiguration"
      }
     },
     "required": [
-     "AuditLogs"
+     "auditLogs"
     ],
     "type": "object"
    },
    "KubernetesConfigurationResult": {
     "additionalProperties": false,
     "properties": {
-     "AuditLogs": {
+     "auditLogs": {
       "$ref": "#/components/schemas/KubernetesAuditLogsConfigurationResult"
      }
     },
     "required": [
-     "AuditLogs"
+     "auditLogs"
     ],
     "type": "object"
    },
    "ListDetectorsResponse": {
     "additionalProperties": false,
     "properties": {
-     "DetectorIds": {
+     "detectorIds": {
       "items": {
        "maxLength": 300,
        "minLength": 1,
@@ -511,19 +511,19 @@
       "minItems": 0,
       "type": "array"
      },
-     "NextToken": {
+     "nextToken": {
       "type": "string"
      }
     },
     "required": [
-     "DetectorIds"
+     "detectorIds"
     ],
     "type": "object"
    },
    "ListFiltersResponse": {
     "additionalProperties": false,
     "properties": {
-     "FilterNames": {
+     "filterNames": {
       "items": {
        "maxLength": 64,
        "minLength": 3,
@@ -533,19 +533,19 @@
       "minItems": 0,
       "type": "array"
      },
-     "NextToken": {
+     "nextToken": {
       "type": "string"
      }
     },
     "required": [
-     "FilterNames"
+     "filterNames"
     ],
     "type": "object"
    },
    "ListTagsForResourceResponse": {
     "additionalProperties": false,
     "properties": {
-     "Tags": {
+     "tags": {
       "additionalProperties": {
        "maxLength": 256,
        "type": "string"
@@ -560,7 +560,7 @@
    "MalwareProtectionConfiguration": {
     "additionalProperties": false,
     "properties": {
-     "ScanEc2InstanceWithFindings": {
+     "scanEc2InstanceWithFindings": {
       "$ref": "#/components/schemas/ScanEc2InstanceWithFindings"
      }
     },
@@ -569,10 +569,10 @@
    "MalwareProtectionConfigurationResult": {
     "additionalProperties": false,
     "properties": {
-     "ScanEc2InstanceWithFindings": {
+     "scanEc2InstanceWithFindings": {
       "$ref": "#/components/schemas/ScanEc2InstanceWithFindingsResult"
      },
-     "ServiceRole": {
+     "serviceRole": {
       "type": "string"
      }
     },
@@ -581,19 +581,19 @@
    "S3LogsConfiguration": {
     "additionalProperties": false,
     "properties": {
-     "Enable": {
+     "enable": {
       "type": "boolean"
      }
     },
     "required": [
-     "Enable"
+     "enable"
     ],
     "type": "object"
    },
    "S3LogsConfigurationResult": {
     "additionalProperties": false,
     "properties": {
-     "Status": {
+     "status": {
       "enum": [
        "ENABLED",
        "DISABLED"
@@ -604,14 +604,14 @@
      }
     },
     "required": [
-     "Status"
+     "status"
     ],
     "type": "object"
    },
    "ScanEc2InstanceWithFindings": {
     "additionalProperties": false,
     "properties": {
-     "EbsVolumes": {
+     "ebsVolumes": {
       "type": "boolean"
      }
     },
@@ -620,7 +620,7 @@
    "ScanEc2InstanceWithFindingsResult": {
     "additionalProperties": false,
     "properties": {
-     "EbsVolumes": {
+     "ebsVolumes": {
       "$ref": "#/components/schemas/EbsVolumesResult"
      }
     },
@@ -634,7 +634,7 @@
    "UnprocessedDataSourcesResult": {
     "additionalProperties": false,
     "properties": {
-     "MalwareProtection": {
+     "malwareProtection": {
       "$ref": "#/components/schemas/MalwareProtectionConfigurationResult"
      }
     },
@@ -653,14 +653,14 @@
    "UpdateFilterResponse": {
     "additionalProperties": false,
     "properties": {
-     "Name": {
+     "name": {
       "maxLength": 64,
       "minLength": 3,
       "type": "string"
      }
     },
     "required": [
-     "Name"
+     "name"
     ],
     "type": "object"
    }
@@ -753,24 +753,24 @@
       "application/json": {
        "schema": {
         "properties": {
-         "ClientToken": {
+         "clientToken": {
           "maxLength": 64,
           "minLength": 0,
           "type": "string"
          },
-         "DataSources": {
+         "dataSources": {
           "$ref": "#/components/schemas/DataSourceConfigurations"
          },
-         "Enable": {
+         "enable": {
           "type": "boolean"
          },
-         "Features": {
+         "features": {
           "items": {
            "$ref": "#/components/schemas/DetectorFeatureConfiguration"
           },
           "type": "array"
          },
-         "FindingPublishingFrequency": {
+         "findingPublishingFrequency": {
           "enum": [
            "FIFTEEN_MINUTES",
            "ONE_HOUR",
@@ -778,7 +778,7 @@
           ],
           "type": "string"
          },
-         "Tags": {
+         "tags": {
           "additionalProperties": {
            "maxLength": 256,
            "type": "string"
@@ -789,7 +789,7 @@
          }
         },
         "required": [
-         "Enable"
+         "enable"
         ],
         "type": "object"
        }
@@ -959,19 +959,19 @@
       "application/json": {
        "schema": {
         "properties": {
-         "DataSources": {
+         "dataSources": {
           "$ref": "#/components/schemas/DataSourceConfigurations"
          },
-         "Enable": {
+         "enable": {
           "type": "boolean"
          },
-         "Features": {
+         "features": {
           "items": {
            "$ref": "#/components/schemas/DetectorFeatureConfiguration"
           },
           "type": "array"
          },
-         "FindingPublishingFrequency": {
+         "findingPublishingFrequency": {
           "enum": [
            "FIFTEEN_MINUTES",
            "ONE_HOUR",
@@ -1112,7 +1112,7 @@
       "application/json": {
        "schema": {
         "properties": {
-         "Action": {
+         "action": {
           "enum": [
            "NOOP",
            "ARCHIVE"
@@ -1121,30 +1121,30 @@
           "minLength": 1,
           "type": "string"
          },
-         "ClientToken": {
+         "clientToken": {
           "maxLength": 64,
           "minLength": 0,
           "type": "string"
          },
-         "Description": {
+         "description": {
           "maxLength": 512,
           "minLength": 0,
           "type": "string"
          },
-         "FindingCriteria": {
+         "findingCriteria": {
           "$ref": "#/components/schemas/FindingCriteria"
          },
-         "Name": {
+         "name": {
           "maxLength": 64,
           "minLength": 3,
           "type": "string"
          },
-         "Rank": {
+         "rank": {
           "maximum": 100,
           "minimum": 1,
           "type": "integer"
          },
-         "Tags": {
+         "tags": {
           "additionalProperties": {
            "maxLength": 256,
            "type": "string"
@@ -1155,8 +1155,8 @@
          }
         },
         "required": [
-         "FindingCriteria",
-         "Name"
+         "findingCriteria",
+         "name"
         ],
         "type": "object"
        }
@@ -1350,7 +1350,7 @@
       "application/json": {
        "schema": {
         "properties": {
-         "Action": {
+         "action": {
           "enum": [
            "NOOP",
            "ARCHIVE"
@@ -1359,15 +1359,15 @@
           "minLength": 1,
           "type": "string"
          },
-         "Description": {
+         "description": {
           "maxLength": 512,
           "minLength": 0,
           "type": "string"
          },
-         "FindingCriteria": {
+         "findingCriteria": {
           "$ref": "#/components/schemas/FindingCriteria"
          },
-         "Rank": {
+         "rank": {
           "maximum": 100,
           "minimum": 1,
           "type": "integer"
@@ -1549,7 +1549,7 @@
       "application/json": {
        "schema": {
         "properties": {
-         "Tags": {
+         "tags": {
           "additionalProperties": {
            "maxLength": 256,
            "type": "string"
@@ -1560,7 +1560,7 @@
          }
         },
         "required": [
-         "Tags"
+         "tags"
         ],
         "type": "object"
        }

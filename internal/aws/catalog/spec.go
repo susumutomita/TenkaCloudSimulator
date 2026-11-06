@@ -24,7 +24,10 @@ const (
 // resource members compared for equality. ListValue selects the stored member
 // rendered when the official list output is a list of strings.
 type Op struct {
-	Name      string
+	Name string
+	// Action is the documented IAM action when it differs from the
+	// operation name (for example budgets:ModifyBudget for CreateBudget).
+	Action    string
 	Kind      Kind
 	Resource  string
 	Lookup    string

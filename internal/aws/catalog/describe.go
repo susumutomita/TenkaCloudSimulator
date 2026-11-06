@@ -21,23 +21,29 @@ type OpDescriptor struct {
 	Method  string             `json:"method"`
 	URI     string             `json:"uri"`
 	Members []MemberDescriptor `json:"members"`
-	// Wrapper is the output member holding the resource, or "" when the
-	// output structure itself carries the resource members.
+	// Wrapper is the serialized output key holding the resource, or ""
+	// when the output structure itself carries the resource members.
 	Wrapper string `json:"wrapper,omitempty"`
-	// Items is the output list member of a list operation.
-	Items       string `json:"items,omitempty"`
+	// Items is the serialized output key of a list operation's items.
+	Items string `json:"items,omitempty"`
+	// InputToken is an input member name; OutputToken a serialized key.
 	InputToken  string `json:"inputToken,omitempty"`
 	OutputToken string `json:"outputToken,omitempty"`
 	Lookup      string `json:"lookup,omitempty"`
 	Parent      string `json:"parent,omitempty"`
 }
 
-// ResourceDescriptor describes one reviewed resource kind.
+// ResourceDescriptor describes one reviewed resource kind. The *Member
+// fields are official member names (input keys); the *Wire fields are the
+// serialized keys that responses carry.
 type ResourceDescriptor struct {
 	Kind       string                  `json:"kind"`
 	ARNMember  string                  `json:"arnMember,omitempty"`
 	NameMember string                  `json:"nameMember,omitempty"`
 	IDMember   string                  `json:"idMember,omitempty"`
+	ARNWire    string                  `json:"arnWire,omitempty"`
+	NameWire   string                  `json:"nameWire,omitempty"`
+	IDWire     string                  `json:"idWire,omitempty"`
 	Parent     string                  `json:"parent,omitempty"`
 	Limit      int                     `json:"limit"`
 	Ops        map[string]OpDescriptor `json:"operations"`
@@ -84,7 +90,8 @@ func (b *binding) describe() Descriptor {
 	}
 	sort.Strings(d.Operations)
 	for _, res := range b.spec.Resources {
-		rd := ResourceDescriptor{Kind: res.Kind, ARNMember: res.ARNMember, NameMember: res.NameMember, IDMember: res.IDMember, Parent: res.Parent, Limit: res.Limit, Ops: map[string]OpDescriptor{}}
+		rd := ResourceDescriptor{Kind: res.Kind, ARNMember: res.ARNMember, NameMember: res.NameMember, IDMember: res.IDMember, Parent: res.Parent, Limit: res.Limit, Ops: map[string]OpDescriptor{},
+			ARNWire: b.resourceWire(res, res.ARNMember), NameWire: b.resourceWire(res, res.NameMember), IDWire: b.resourceWire(res, res.IDMember)}
 		if rd.Limit == 0 {
 			rd.Limit = defaultKindLimit
 		}
@@ -133,16 +140,33 @@ func (b *binding) describeOp(op *Op, res *Resource) OpDescriptor {
 		for _, name := range output.sortedMembers() {
 			member := output.Members[name]
 			if member.Shape == res.Shape || member.Shape == res.Summary {
-				od.Wrapper = name
+				od.Wrapper = member.wire(name)
 			}
 			if shape := b.model.shape(member.Shape); shape.Type == "list" && (shape.Member.Shape == res.Shape || shape.Member.Shape == res.Summary) {
-				od.Items = name
+				od.Items = member.wire(name)
 			}
 		}
 	}
 	if op.Kind == List {
 		q := &request{b: b, official: official}
 		od.InputToken, od.OutputToken, _ = q.pagination()
+		if output := b.model.Shapes[official.Output]; output != nil {
+			if member, ok := output.Members[od.OutputToken]; ok {
+				od.OutputToken = member.wire(od.OutputToken)
+			}
+		}
 	}
 	return od
+}
+
+// resourceWire is the serialized key of a resource member in responses.
+func (b *binding) resourceWire(res *Resource, name string) string {
+	for _, shapeName := range []string{res.Shape, res.Summary} {
+		if shape := b.model.Shapes[shapeName]; shape != nil && name != "" {
+			if member, ok := shape.Members[name]; ok {
+				return member.wire(name)
+			}
+		}
+	}
+	return name
 }

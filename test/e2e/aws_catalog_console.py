@@ -96,6 +96,23 @@ def run():
                 page.get_by_label('repositoryName', exact=True).fill('sdk/made')
                 page.get_by_role('button', name='Create', exact=True).click()
                 expect(page.get_by_text('The repository sdk/made already exists.', exact=False)).to_be_visible()
+                # Wire names: Amazon MQ serializes lowerCamel keys. The console
+                # must send and read them as SDKs do.
+                broker = team.client('mq')
+                broker.create_configuration(Name='sdk-config', EngineType='ACTIVEMQ', EngineVersion='5.18')
+                page.get_by_role('button', name=re.compile('^Catalog service')).click()
+                page.get_by_role('option', name=re.compile('^Amazon MQ')).click()
+                expect(page.get_by_role('link', name='sdk-config')).to_be_visible()
+                page.get_by_label('Name', exact=True).fill('console-config')
+                page.get_by_role('button', name=re.compile('^EngineType')).click()
+                page.get_by_role('option', name='ACTIVEMQ', exact=True).click()
+                page.get_by_label(re.compile('^EngineVersion')).fill('5.18')
+                page.get_by_role('button', name='Create', exact=True).click()
+                expect(page.get_by_role('link', name='console-config')).to_be_visible()
+                configurations = broker.list_configurations()['Configurations']
+                assert sorted(c['Name'] for c in configurations) == ['console-config', 'sdk-config'], configurations
+                for configuration in configurations:
+                    broker.delete_configuration(ConfigurationId=configuration['Id'])
                 # A REST-JSON parent and child through the same generic view.
                 page.get_by_role('button', name=re.compile('^Catalog service')).click()
                 page.get_by_role('option', name=re.compile('^AWS Amplify')).click()

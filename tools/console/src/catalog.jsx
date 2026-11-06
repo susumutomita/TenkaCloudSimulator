@@ -20,8 +20,11 @@ import Toggle from '@cloudscape-design/components/toggle';
 
 // Generic console for the model-driven catalog. Every request uses the
 // service's actual native wire protocol; the descriptor only says how.
+// Inputs are keyed by official member names; the wire uses each member's
+// serialized locationName, exactly as SDKs send it.
 export function buildCatalogRequest(service,op,input,region){
- if(service.protocol==='json')return {path:'/',options:{method:'POST',headers:{'Content-Type':'application/x-amz-json-'+service.jsonVersion,'X-Amz-Target':service.targetPrefix+'.'+op.name,'X-Simulator-Region':region},body:JSON.stringify(input)}};
+ if(service.protocol==='json'){const body={};for(const member of op.members)if(member.name in input)body[member.locationName||member.name]=input[member.name];
+  return {path:'/',options:{method:'POST',headers:{'Content-Type':'application/x-amz-json-'+service.jsonVersion,'X-Amz-Target':service.targetPrefix+'.'+op.name,'X-Simulator-Region':region},body:JSON.stringify(body)}}}
  let [path,queryText]=op.uri.split('?');const query=new URLSearchParams(queryText||'');const body={};
  const headers={'X-Simulator-Service':service.signingName,'X-Simulator-Region':region};
  for(const member of op.members){
@@ -29,7 +32,7 @@ export function buildCatalogRequest(service,op,input,region){
   if(member.location==='uri')path=path.replace('{'+wire+'+}',String(value).split('/').map(encodeURIComponent).join('/')).replace('{'+wire+'}',encodeURIComponent(String(value)));
   else if(member.location==='querystring')(Array.isArray(value)?value:[value]).forEach(item=>query.append(wire,String(item)));
   else if(member.location==='header')headers[wire]=String(value);
-  else body[member.name]=value;
+  else body[wire]=value;
  }
  const search=query.toString();const hasBody=Object.keys(body).length>0;
  if(hasBody)headers['Content-Type']='application/json';
@@ -69,17 +72,18 @@ export default function CatalogView({region,request,catalog,onSaving}){
   const {path,options}=buildCatalogRequest(service,op,input,region);
   const response=await request(path,options);const text=await response.text();return text?JSON.parse(text):{};
  }
- const identity=item=>item?.[resource?.nameMember]||item?.[resource?.idMember]||item?.[resource?.arnMember]||'';
+ // Responses carry serialized keys (nameWire/idWire/arnWire).
+ const identity=item=>item?.[resource?.nameWire]||item?.[resource?.idWire]||item?.[resource?.arnWire]||'';
  const lookupValue=(item,op)=>{
-  const member=op.lookup;if(member===resource.arnMember||/arn$/i.test(member))return item[resource.arnMember]||item[member];
-  if(member===resource.idMember)return item[resource.idMember];return item[resource.nameMember]||item[member]||item[resource.idMember];
+  const member=op.lookup;if(member===resource.arnMember||/arn$/i.test(member))return item[resource.arnWire]||item[member];
+  if(member===resource.idMember)return item[resource.idWire];return item[resource.nameWire]||item[member]||item[resource.idWire];
  };
  const parentInput=op=>op?.parent&&parent?{[op.parent]:parent}:{};
  async function loadParents(epoch,preferred){
   const list=parentResource?.operations.list;if(!list)return '';
   const page=await call(list,{});if(!valid(epoch))return '';
   const rows=page[list.items]||[];setParents(rows);
-  const keep=rows.some(r=>(r[parentResource.idMember]||r[parentResource.nameMember])===preferred)?preferred:(rows[0]?.[parentResource.idMember]||rows[0]?.[parentResource.nameMember]||'');
+  const keep=rows.some(r=>(r[parentResource.idWire]||r[parentResource.nameWire])===preferred)?preferred:(rows[0]?.[parentResource.idWire]||rows[0]?.[parentResource.nameWire]||'');
   setParent(keep);return keep;
  }
  // A selection passes its parent explicitly: the state update is not yet
@@ -103,7 +107,7 @@ export default function CatalogView({region,request,catalog,onSaving}){
   try{
    const out=await call(read,{...parentInput(read),[read.lookup]:lookupValue(item,read)});if(!valid(epoch))return;
    const value=read.wrapper?out[read.wrapper]:out;setDetail(value);
-   const arn=value?.[resource.arnMember];const listTags=service.tagging?.['list-tags'];
+   const arn=value?.[resource.arnWire];const listTags=service.tagging?.['list-tags'];
    if(arn&&listTags){try{const tagged=await call(listTags,{[listTags.lookup]:arn});if(valid(epoch))setTags(tagged.Tags||tagged.tags||null)}catch{/* Tag permission is independent of read permission. */}}
   }catch(e){if(valid(epoch))setError(e.message)}finally{if(valid(epoch))setLoading(false)}
  }
@@ -129,8 +133,8 @@ export default function CatalogView({region,request,catalog,onSaving}){
  const createOp=resource?.operations.create;
  const fields=useMemo(()=>formMembers(createOp,skipped(createOp)),[createOp]);
  if(!services.length)return <Alert type="info">{t('No catalog services are enabled.','有効なカタログサービスはありません。')}</Alert>;
- const columns=[{id:'name',header:t('Name or identifier','名前または識別子'),cell:item=><Link onFollow={e=>{e.preventDefault();inspect(item)}} href="#">{item[resource.nameMember]||item[resource.idMember]||identity(item)}</Link>},
-  {id:'arn',header:'ARN',cell:item=>item[resource.arnMember]||'-'}];
+ const columns=[{id:'name',header:t('Name or identifier','名前または識別子'),cell:item=><Link onFollow={e=>{e.preventDefault();inspect(item)}} href="#">{item[resource.nameWire]||item[resource.idWire]||identity(item)}</Link>},
+  {id:'arn',header:'ARN',cell:item=>item[resource.arnWire]||'-'}];
  return <ContentLayout header={<Header variant="h1" description={t('Bounded configuration metadata through each service\'s native API. Unlisted official operations return HTTP 501.','各サービスのネイティブ API で扱う、範囲を限定した設定メタデータです。一覧にない公式操作は HTTP 501 を返します。')}
    actions={<Link external href="/_simulator/docs/catalog.html">{t('API reference','API リファレンス')}</Link>}>{t('AWS service catalog','AWS サービスカタログ')}</Header>}>
   <SpaceBetween size="l">
@@ -140,7 +144,7 @@ export default function CatalogView({region,request,catalog,onSaving}){
    {notice&&<Alert type="success" dismissible onDismiss={()=>setNotice('')}>{notice}</Alert>}
    <Tabs activeTabId={resource.kind} onChange={e=>{if(!busy){setKind(e.detail.activeTabId);setParent('')}}} tabs={service.resources.map(r=>({id:r.kind,label:r.kind}))}/>
    {parentResource&&<FormField label={parentResource.kind}><Select selectedOption={parent?{value:parent,label:parent}:null} placeholder={t('Create a parent resource first','先に親リソースを作成してください')} disabled={busy||!parents.length}
-     onChange={e=>{const chosen=e.detail.selectedOption.value;setParent(chosen);load('',chosen)}} options={parents.map(p=>{const v=p[parentResource.idMember]||p[parentResource.nameMember];return {value:v,label:p[parentResource.nameMember]||v}})}/></FormField>}
+     onChange={e=>{const chosen=e.detail.selectedOption.value;setParent(chosen);load('',chosen)}} options={parents.map(p=>{const v=p[parentResource.idWire]||p[parentResource.nameWire];return {value:v,label:p[parentResource.nameWire]||v}})}/></FormField>}
    {mode==='detail'?<Container header={<Header variant="h2" actions={<Button onClick={()=>load()}>{t('Back to list','一覧に戻る')}</Button>}>{t('Details','詳細')}</Header>}>
      {loading?<Box>{t('Loading','読み込み中')}</Box>:detail?<SpaceBetween size="m"><KeyValuePairs columns={2} items={Object.entries(detail).filter(([,v])=>isScalar(v)).map(([k,v])=>({label:k,value:display(v)}))}/>
       {Object.entries(detail).filter(([,v])=>!isScalar(v)).map(([k,v])=><FormField key={k} label={k}><pre className="catalog-json">{JSON.stringify(v,null,2)}</pre></FormField>)}

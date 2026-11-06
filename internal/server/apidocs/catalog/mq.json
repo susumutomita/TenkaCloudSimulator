@@ -4,10 +4,10 @@
    "Configuration": {
     "additionalProperties": false,
     "properties": {
-     "Arn": {
+     "arn": {
       "type": "string"
      },
-     "AuthenticationStrategy": {
+     "authenticationStrategy": {
       "enum": [
        "SIMPLE",
        "LDAP",
@@ -15,36 +15,36 @@
       ],
       "type": "string"
      },
-     "Created": {
+     "created": {
       "description": "Epoch seconds in JSON protocols",
       "type": [
        "number",
        "string"
       ]
      },
-     "Description": {
+     "description": {
       "type": "string"
      },
-     "EngineType": {
+     "engineType": {
       "enum": [
        "ACTIVEMQ",
        "RABBITMQ"
       ],
       "type": "string"
      },
-     "EngineVersion": {
+     "engineVersion": {
       "type": "string"
      },
-     "Id": {
+     "id": {
       "type": "string"
      },
-     "LatestRevision": {
+     "latestRevision": {
       "$ref": "#/components/schemas/ConfigurationRevision"
      },
-     "Name": {
+     "name": {
       "type": "string"
      },
-     "Tags": {
+     "tags": {
       "additionalProperties": {
        "type": "string"
       },
@@ -52,48 +52,48 @@
      }
     },
     "required": [
-     "Description",
-     "EngineVersion",
-     "LatestRevision",
-     "AuthenticationStrategy",
-     "EngineType",
-     "Id",
-     "Arn",
-     "Name",
-     "Created"
+     "description",
+     "engineVersion",
+     "latestRevision",
+     "authenticationStrategy",
+     "engineType",
+     "id",
+     "arn",
+     "name",
+     "created"
     ],
     "type": "object"
    },
    "ConfigurationRevision": {
     "additionalProperties": false,
     "properties": {
-     "Created": {
+     "created": {
       "description": "Epoch seconds in JSON protocols",
       "type": [
        "number",
        "string"
       ]
      },
-     "Description": {
+     "description": {
       "type": "string"
      },
-     "Revision": {
+     "revision": {
       "type": "integer"
      }
     },
     "required": [
-     "Revision",
-     "Created"
+     "revision",
+     "created"
     ],
     "type": "object"
    },
    "CreateConfigurationResponse": {
     "additionalProperties": false,
     "properties": {
-     "Arn": {
+     "arn": {
       "type": "string"
      },
-     "AuthenticationStrategy": {
+     "authenticationStrategy": {
       "enum": [
        "SIMPLE",
        "LDAP",
@@ -101,20 +101,20 @@
       ],
       "type": "string"
      },
-     "Created": {
+     "created": {
       "description": "Epoch seconds in JSON protocols",
       "type": [
        "number",
        "string"
       ]
      },
-     "Id": {
+     "id": {
       "type": "string"
      },
-     "LatestRevision": {
+     "latestRevision": {
       "$ref": "#/components/schemas/ConfigurationRevision"
      },
-     "Name": {
+     "name": {
       "type": "string"
      }
     },
@@ -123,7 +123,7 @@
    "DeleteConfigurationResponse": {
     "additionalProperties": false,
     "properties": {
-     "ConfigurationId": {
+     "configurationId": {
       "type": "string"
      }
     },
@@ -132,10 +132,10 @@
    "DescribeConfigurationResponse": {
     "additionalProperties": false,
     "properties": {
-     "Arn": {
+     "arn": {
       "type": "string"
      },
-     "AuthenticationStrategy": {
+     "authenticationStrategy": {
       "enum": [
        "SIMPLE",
        "LDAP",
@@ -143,36 +143,36 @@
       ],
       "type": "string"
      },
-     "Created": {
+     "created": {
       "description": "Epoch seconds in JSON protocols",
       "type": [
        "number",
        "string"
       ]
      },
-     "Description": {
+     "description": {
       "type": "string"
      },
-     "EngineType": {
+     "engineType": {
       "enum": [
        "ACTIVEMQ",
        "RABBITMQ"
       ],
       "type": "string"
      },
-     "EngineVersion": {
+     "engineVersion": {
       "type": "string"
      },
-     "Id": {
+     "id": {
       "type": "string"
      },
-     "LatestRevision": {
+     "latestRevision": {
       "$ref": "#/components/schemas/ConfigurationRevision"
      },
-     "Name": {
+     "name": {
       "type": "string"
      },
-     "Tags": {
+     "tags": {
       "additionalProperties": {
        "type": "string"
       },
@@ -184,16 +184,16 @@
    "ListConfigurationsResponse": {
     "additionalProperties": false,
     "properties": {
-     "Configurations": {
+     "configurations": {
       "items": {
        "$ref": "#/components/schemas/Configuration"
       },
       "type": "array"
      },
-     "MaxResults": {
+     "maxResults": {
       "type": "integer"
      },
-     "NextToken": {
+     "nextToken": {
       "type": "string"
      }
     },
@@ -202,7 +202,7 @@
    "ListTagsResponse": {
     "additionalProperties": false,
     "properties": {
-     "Tags": {
+     "tags": {
       "additionalProperties": {
        "type": "string"
       },
@@ -300,7 +300,7 @@
       "application/json": {
        "schema": {
         "properties": {
-         "AuthenticationStrategy": {
+         "authenticationStrategy": {
           "enum": [
            "SIMPLE",
            "LDAP",
@@ -308,20 +308,20 @@
           ],
           "type": "string"
          },
-         "EngineType": {
+         "engineType": {
           "enum": [
            "ACTIVEMQ",
            "RABBITMQ"
           ],
           "type": "string"
          },
-         "EngineVersion": {
+         "engineVersion": {
           "type": "string"
          },
-         "Name": {
+         "name": {
           "type": "string"
          },
-         "Tags": {
+         "tags": {
           "additionalProperties": {
            "type": "string"
           },
@@ -329,8 +329,8 @@
          }
         },
         "required": [
-         "EngineType",
-         "Name"
+         "engineType",
+         "name"
         ],
         "type": "object"
        }
@@ -599,7 +599,7 @@
       "application/json": {
        "schema": {
         "properties": {
-         "Tags": {
+         "tags": {
           "additionalProperties": {
            "type": "string"
           },

@@ -4,7 +4,7 @@
    "AssociateServiceRoleToAccountResponse": {
     "additionalProperties": false,
     "properties": {
-     "associatedAt": {
+     "AssociatedAt": {
       "type": "string"
      }
     },
@@ -13,7 +13,7 @@
    "DisassociateServiceRoleFromAccountResponse": {
     "additionalProperties": false,
     "properties": {
-     "disassociatedAt": {
+     "DisassociatedAt": {
       "type": "string"
      }
     },
@@ -22,10 +22,10 @@
    "GetServiceRoleForAccountResponse": {
     "additionalProperties": false,
     "properties": {
-     "associatedAt": {
+     "AssociatedAt": {
       "type": "string"
      },
-     "roleArn": {
+     "RoleArn": {
       "type": "string"
      }
     },
@@ -146,12 +146,12 @@
       "application/json": {
        "schema": {
         "properties": {
-         "roleArn": {
+         "RoleArn": {
           "type": "string"
          }
         },
         "required": [
-         "roleArn"
+         "RoleArn"
         ],
         "type": "object"
        }
