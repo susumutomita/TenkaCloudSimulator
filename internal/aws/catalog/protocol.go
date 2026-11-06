@@ -64,15 +64,26 @@ func (r route) match(method string, escaped []string, query url.Values) (map[str
 	i := 0
 	for si, segment := range r.segments {
 		if strings.HasPrefix(segment, "{") && strings.HasSuffix(segment, "+}") {
-			if si != len(r.segments)-1 || i >= len(escaped) {
+			// A greedy label takes every segment except those the rest of
+			// the route needs, so "/portals/{arn+}/browserSettings" matches.
+			suffix := r.segments[si+1:]
+			end := len(escaped) - len(suffix)
+			if end <= i {
 				return nil, false
 			}
-			rest := strings.Join(escaped[i:], "/")
-			decoded, err := url.PathUnescape(rest)
+			decoded, err := url.PathUnescape(strings.Join(escaped[i:end], "/"))
 			if err != nil || decoded == "" {
 				return nil, false
 			}
 			labels[strings.TrimSuffix(strings.TrimPrefix(segment, "{"), "+}")] = decoded
+			tail := route{method: r.method, segments: suffix}
+			rest, ok := tail.match(method, escaped[end:], nil)
+			if !ok {
+				return nil, false
+			}
+			for k, v := range rest {
+				labels[k] = v
+			}
 			return labels, true
 		}
 		if i >= len(escaped) {

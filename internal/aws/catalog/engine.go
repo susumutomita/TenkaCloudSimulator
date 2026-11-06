@@ -387,8 +387,8 @@ func (e *Engine) fail(w http.ResponseWriter, b *binding, op *Op, err error) {
 // errorFamilies lists, in priority order, exact names or documented name
 // fragments of modeled exceptions for each failure family.
 var errorFamilies = map[string][]string{
-	"validation":    {"ValidationException", "InvalidParameterException", "InvalidParameterValueException", "InvalidParametersException", "InvalidInputException", "InvalidRequestException", "BadRequestException", "InvalidArgumentException", "InvalidParameterCombinationException", "ClientException", "BadRequest", "InvalidInput", "ArgumentException", "InvalidGatewayRequestException"},
-	"unsupported":   {"ValidationException", "InvalidParameterException", "InvalidParameterValueException", "InvalidParametersException", "InvalidInputException", "InvalidRequestException", "BadRequestException", "InvalidArgumentException", "ClientException", "BadRequest", "InvalidInput", "ArgumentException", "InvalidGatewayRequestException"},
+	"validation":    {"ValidationException", "InvalidParameterException", "InvalidParameterValueException", "InvalidParametersException", "InvalidInputException", "InvalidRequestException", "BadRequestException", "InvalidArgumentException", "InvalidParameterCombinationException", "ClientException", "BadRequest", "InvalidInput", "ArgumentException", "InvalidGatewayRequestException", "InvalidParameterValues"},
+	"unsupported":   {"ValidationException", "InvalidParameterException", "InvalidParameterValueException", "InvalidParametersException", "InvalidInputException", "InvalidRequestException", "BadRequestException", "InvalidArgumentException", "ClientException", "BadRequest", "InvalidInput", "ArgumentException", "InvalidGatewayRequestException", "InvalidParameterValues"},
 	"notfound":      {"ResourceNotFoundException", "NotFoundException", "NotFound", "NoSuch", "DoesNotExist", "UnknownResource"},
 	"conflict":      {"ResourceAlreadyExistsException", "AlreadyExistsException", "AlreadyExists", "NameExists", "Duplicate", "NameInUse", "ResourceInUseException"},
 	"dependents":    {"NotEmpty", "ResourceInUseException", "InUse", "DependencyViolation"},

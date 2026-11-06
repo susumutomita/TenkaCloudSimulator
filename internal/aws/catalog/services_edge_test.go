@@ -169,9 +169,9 @@ func TestSecureBrowserRefusesRoutesBelowPortalARNs(t *testing.T) {
 	settings := h.rest("workspaces-web", "POST", "/browserSettings", map[string]any{"browserPolicy": `{"chromePolicies":{}}`})
 	expect(t, settings, 200, "")
 	query := "?browserSettingsArn=" + url.QueryEscape(str(settings.body["browserSettingsArn"]))
-	expect(t, h.rest("workspaces-web", "PUT", "/portals/"+arn+"/browserSettings"+query, nil), 400, "ValidationException")
-	expect(t, h.rest("workspaces-web", "DELETE", "/portals/"+arn+"/browserSettings", nil), 400, "ValidationException")
-	expect(t, h.rest("workspaces-web", "GET", "/portals/"+arn+"/identityProviders", nil), 400, "ValidationException")
+	expect(t, h.rest("workspaces-web", "PUT", "/portals/"+arn+"/browserSettings"+query, nil), 501, "UnknownOperationException")
+	expect(t, h.rest("workspaces-web", "DELETE", "/portals/"+arn+"/browserSettings", nil), 501, "UnknownOperationException")
+	expect(t, h.rest("workspaces-web", "GET", "/portals/"+arn+"/identityProviders", nil), 501, "UnknownOperationException")
 	if got := h.rest("workspaces-web", "GET", "/portals/"+arn, nil); got.body["portal"].(map[string]any)["portalStatus"] != "Incomplete" {
 		t.Fatalf("portal remains %v", got.body)
 	}
@@ -218,6 +218,6 @@ func TestWorkSpacesIPGroupsUseOfficialMemberNames(t *testing.T) {
 	if group := groups[0].(map[string]any); group["groupName"] != "office" || group["groupDesc"] != "HQ" || len(group["userRules"].([]any)) != 0 {
 		t.Fatalf("group %v", group)
 	}
-	expect(t, h.json1("workspaces", "DescribeIpGroups", map[string]any{"GroupIds": []any{"wsipg-missing00"}}), 400, "ResourceNotFoundException")
+	expect(t, h.json1("workspaces", "DescribeIpGroups", map[string]any{"GroupIds": []any{"wsipg-missing00"}}), 400, "InvalidParameterValuesException")
 	expect(t, h.json1("workspaces", "CreateIpGroup", map[string]any{"GroupName": "office"}), 400, "ResourceAlreadyExistsException")
 }

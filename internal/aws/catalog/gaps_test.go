@@ -156,3 +156,30 @@ func TestAlternateAndNestedLookupsIdempotentDeletesAndStoredSingletons(t *testin
 		t.Fatal("the official Tags member is preferred")
 	}
 }
+
+// A greedy label may precede literal and label segments; it takes every
+// segment the rest of the route does not need.
+func TestGreedyLabelsBeforeTrailingSegments(t *testing.T) {
+	r := parseRoute("DisassociateBrowserSettings", HTTP{Method: "DELETE", RequestURI: "/portals/{portalArn+}/browserSettings"})
+	labels, ok := r.match("DELETE", []string{"portals", "arn%3Aaws%3Aweb", "portal", "abc", "browserSettings"}, nil)
+	if !ok || labels["portalArn"] != "arn:aws:web/portal/abc" {
+		t.Fatalf("greedy prefix: %v %v", labels, ok)
+	}
+	for _, path := range [][]string{{"portals", "browserSettings"}, {"portals", "a", "b"}, {"portals", "a", "%zz", "browserSettings"}} {
+		if _, ok := r.match("DELETE", path, nil); ok {
+			t.Fatalf("%v must not match", path)
+		}
+	}
+	nested := parseRoute("GetItem", HTTP{Method: "GET", RequestURI: "/things/{Arn+}/items/{Item}"})
+	labels, ok = nested.match("GET", []string{"things", "a", "b", "items", "x"}, nil)
+	if !ok || labels["Arn"] != "a/b" || labels["Item"] != "x" {
+		t.Fatalf("greedy then label: %v %v", labels, ok)
+	}
+	if _, ok := nested.match("GET", []string{"things", "a", "items", ""}, nil); ok {
+		t.Fatal("an empty trailing label must not match")
+	}
+	plain := parseRoute("GetObject", HTTP{Method: "GET", RequestURI: "/objects/{Key+}"})
+	if labels, ok := plain.match("GET", []string{"objects", "a", "b"}, nil); !ok || labels["Key"] != "a/b" {
+		t.Fatalf("trailing greedy: %v %v", labels, ok)
+	}
+}

@@ -430,7 +430,7 @@ var storageGateway = &Service{
 	},
 	Bounds: []string{
 		"Only custom tape pools are stored: no gateway is activated or contacted, no tape, volume, file share, cache or upload buffer exists, and ActivateGateway and every gateway, tape, volume and file share API return UnknownOperationException with HTTP 501.",
-		"Tape pool IDs use lowercase hexadecimal, pool names are not required to be unique and ListTapePools fails when any requested pool ARN is missing. Unknown members, missing pools and simulator limits, which the official API reports as InvalidGatewayRequestException, are returned as ValidationException, ResourceNotFoundException or LimitExceededException, and the tagging APIs do not echo ResourceARN.",
+		"Tape pool IDs use lowercase hexadecimal, pool names are not required to be unique and ListTapePools fails when any requested pool ARN is missing. Unknown members, missing pools and simulator limits are reported as the modeled InvalidGatewayRequestException, and the tagging APIs do not echo ResourceARN.",
 	},
 }
 

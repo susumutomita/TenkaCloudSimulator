@@ -10,7 +10,7 @@
   {"op": "remove_tags_from_resource", "args": {"ResourceARN": "${plain}", "TagKeys": ["stage"]}},
   {"op": "list_tags_for_resource", "args": {"ResourceARN": "${pool}"}, "expect": {"Tags": [{"Key": "team", "Value": "a"}]}},
   {"op": "list_gateways", "args": {}, "error": "UnknownOperationException", "status": 501},
-  {"op": "delete_tape_pool", "args": {"PoolARN": "arn:aws:storagegateway:us-east-1:000000000000:tapepool/pool-00000000"}, "error": "ResourceNotFoundException"}
+  {"op": "delete_tape_pool", "args": {"PoolARN": "arn:aws:storagegateway:us-east-1:000000000000:tapepool/pool-00000000"}, "error": "InvalidGatewayRequestException"}
  ],
  "isolation": [
   {"op": "list_tape_pools", "args": {}, "expect": {"PoolInfos#count": 0}}

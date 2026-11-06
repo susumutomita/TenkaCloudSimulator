@@ -240,15 +240,14 @@ var secureBrowser = &Service{
 	},
 	Bounds: []string{
 		"Portals and browser, network, user and IP access settings are configuration metadata: portals stay Incomplete, the portal endpoint is not served, and no streaming instance, session, network interface or IAM Identity Center application is created. Sessions, identity providers, trust stores, data protection settings, session loggers and user access logging settings return UnknownOperationException with HTTP 501.",
-		"Settings cannot be associated with portals, so associatedPortalArns stays empty and portals name no settings. The official Associate*, Disassociate* and ListIdentityProviders routes extend the greedy portal ARN label; the simulator refuses them with ValidationException (HTTP 400) instead of HTTP 501.",
+		"Settings cannot be associated with portals, so associatedPortalArns stays empty and portals name no settings. The official Associate*, Disassociate* and ListIdentityProviders operations below a portal ARN return HTTP 501.",
 		"VPCs, subnets, security groups and KMS keys are stored without checking them, and browser policies must be JSON objects. Deleting a missing resource succeeds, as the official delete operations model no not-found error. Update and tagging client tokens are accepted but not recorded.",
 	},
 }
 
 var portalARN = regexp.MustCompile(`^arn:aws:workspaces-web:[a-z0-9-]+:[0-9]{12}:portal/[0-9a-f-]+$`)
 
-// secureBrowserPortal refuses portal paths with further segments, which
-// belong to unimplemented association and identity-provider operations.
+// secureBrowserPortal refuses anything but a whole portal ARN.
 func secureBrowserPortal(input map[string]any) error {
 	if arn, _ := input["portalArn"].(string); !portalARN.MatchString(arn) {
 		return Failure("ValidationException", "The simulator serves only whole portal ARNs; association and identity provider operations are not implemented.")
