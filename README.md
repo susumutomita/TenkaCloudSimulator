@@ -69,9 +69,9 @@ submission, including an intentional clear. Submission flushes a current explici
 paste first; adoption is a new intent that cancels older asynchronous input work.
 These are compatibility measures, not proof of an extension cause or a confirmed
 Dia/1Password repair. At `339c264`, the first native-input browser case passed,
-but the native-clear/Enter case failed. The keyboard-capture follow-up has a local
-UI build and scoped model checks; its actual browser validation, real extension
-and user-device clipboard behavior remain unverified.
+but the native-clear/Enter case failed. The keyboard-capture follow-up passed both
+complete 62-test browser suites at `8149cac`. The later catalog integration still requires its own complete CI.
+Actual Dia/1Password and user-device clipboard behavior remain unverified.
 See the [dated login CI result and remaining checks](docs/login-token-file.md#dated-validation-and-current-candidate).
 
 Press Ctrl+C to stop. Restarting with the same state and token files reuses them.
