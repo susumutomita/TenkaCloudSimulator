@@ -41,8 +41,8 @@ finite models do not prove Go/SQL/HTTP/UI refinement or complete cloud compatibi
 All 161 controls must produce their declared named-invariant counterexamples;
 a parse error, timeout or unrelated first failure is not a passing control.
 Implementation paths and artifact hashes must be rebound to the actual final
-integration. The model-only branch lacks eight required Metrics source paths;
-its policy units and TLC executions are not accepted by substituting stubs.
+integration. All declared implementation paths must exist in the actual tested
+revision; missing paths cannot be satisfied by stubs or a model-only branch.
 
 The public `30ec082` hosted gate completed 50 baselines and 398 controls on
 2026-11-06. This is historical public evidence, not a result for the new 615-case

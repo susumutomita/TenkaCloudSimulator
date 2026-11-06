@@ -19,12 +19,12 @@ runs wait for a fixed integrated source and an explicit resource reservation.
 | Owner | Current bounded scope | Concrete evidence / remaining gate |
 |---|---|---|
 | root | Shared source composition, applicability and this roster | Public30-based local integration only; no private Firestore ancestry or generated bundle reuse |
-| formal_review | Backend runtime; independent UI source review | Backend `3dce66d`: 57 focused normal tests passed; race running. UI `e4e2ea2` source review passed. No whole-module coverage claim |
+| formal_review | Backend runtime; independent UI source review | Backend `3dce66d`: 57 focused normal and57 race tests passed. UI `e4e2ea2` source review passed. No whole-module coverage claim |
 | lp_css | Backend source review, model semantics and LP retention review | Backend23-file review clear; six model abstractions reviewed without claiming Go/SQL/React refinement |
-| lp_js | UI source and offline asset build | `e4e2ea2`: existing8 plus new2 navigation tests passed. Pinned cached-source closure reviewed; fresh build and actual input verification in progress |
+| lp_js | UI source and offline asset build | `e4e2ea2`: existing8 plus new2 navigation tests passed. Offline build/input verification complete (1485 inputs, original notices retained); loaded-data locale browser check pending |
 | lp_browser | Model registry and independent API/helper review | `f8c0a88` preserves public50 models/398 controls and adds six Metrics models/161 controls: planned56/559/615 executions, not aggregate success |
-| lp_quality | Metrics-only OpenAPI, SDK/UI/reference helpers and documentation | Local36 paths/66 operations/121 schemas; public62 E2E methods plus three planned Metrics methods. Focused pure checks passed; fixed handoff pending |
-| metrics_acceptance | Hosted LP CI and cross-service integration review | PR436 old HEAD30ec082 passed all11 checks; subsequent artifact-retention HEAD requires its own CI. Metrics cross-service review remains separate |
+| lp_quality | Metrics-only OpenAPI, SDK/UI/reference helpers and documentation | Local36 paths/66 operations/121 schemas; public62 E2E methods plus three planned Metrics methods. 98 focused pure checks passed; fixed handoff `e2ebbc5` independently reviewed |
+| metrics_acceptance | Hosted LP CI and cross-service integration review | PR436 old HEAD30ec082 passed all11 checks; subsequent artifact-retention HEAD requires its own CI. Metrics cross-service source review complete for its recorded intermediate revision; final fixed-head review remains |
 
 Scalar actual strict reference acceptance remains blocked: the retained combined
 run failed before Send, with28 `aria-required-attr` nodes and11 incomplete findings.
