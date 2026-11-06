@@ -1,5 +1,46 @@
 # Development roster
 
+## Local Metrics-only integration snapshot: 2026-11-06 12:06 UTC
+
+Issue [58](https://github.com/susumutomita/TenkaCloudSimulator/issues/58) owns
+this bounded Metrics work. Public baseline is `30ec082`; the private integration
+branch `integrate/metrics-only-public30-20261106` combines independently handed-off
+Metrics changes only. This is an unpushed source candidate, not a merged service.
+The earlier combined Firestore candidate is excluded; its publication hold remains.
+Existing external S3 multipart work under Issue51 is excluded.
+
+At this observation the integration owner and six workers were running in the
+seven available local slots. A worker shown as completed is reassigned after
+ownership and resource checks; a task list alone is not evidence of execution.
+The heavy-test reservation is focused offline Go tests with one CPU, plus the
+separate bounded offline console build. Full-module race/coverage, browser and TLC
+runs wait for a fixed integrated source and an explicit resource reservation.
+
+| Owner | Current bounded scope | Concrete evidence / remaining gate |
+|---|---|---|
+| root | Shared source composition, applicability and this roster | Public30-based local integration only; no private Firestore ancestry or generated bundle reuse |
+| formal_review | Backend runtime; independent UI source review | Backend `3dce66d`: 57 focused normal tests passed; race running. UI `e4e2ea2` source review passed. No whole-module coverage claim |
+| lp_css | Backend source review, model semantics and LP retention review | Backend23-file review clear; six model abstractions reviewed without claiming Go/SQL/React refinement |
+| lp_js | UI source and offline asset build | `e4e2ea2`: existing8 plus new2 navigation tests passed. Pinned cached-source closure reviewed; fresh build and actual input verification in progress |
+| lp_browser | Model registry and independent API/helper review | `f8c0a88` preserves public50 models/398 controls and adds six Metrics models/161 controls: planned56/559/615 executions, not aggregate success |
+| lp_quality | Metrics-only OpenAPI, SDK/UI/reference helpers and documentation | Local36 paths/66 operations/121 schemas; public62 E2E methods plus three planned Metrics methods. Focused pure checks passed; fixed handoff pending |
+| metrics_acceptance | Hosted LP CI and cross-service integration review | PR436 old HEAD30ec082 passed all11 checks; subsequent artifact-retention HEAD requires its own CI. Metrics cross-service review remains separate |
+
+Scalar actual strict reference acceptance remains blocked: the retained combined
+run failed before Send, with28 `aria-required-attr` nodes and11 incomplete findings.
+A reviewed first-party source adapter is inactive. The complete pinned Scalar
+source/build closure is unavailable; no vendor bundle patch, dependency install,
+network-policy bypass or success waiver has been performed. The separately
+approved SafeChain one-host verification has not run because this environment
+provides no supported network-policy mutation tool.
+
+The old Scalar handoff namespace collision was preserved independently. Existing
+code, patch and test evidence was found intact; original pre-overwrite metadata
+bytes were not recovered, so exact restoration is unproven. New handoffs use
+separate paths. Firestore PR publication, PR433 Ready/merge and other previously
+rejected actions remain held. No real cloud requests/resources or release occur.
+
+
 ## Current integration snapshot: IAM53, 2026-11-05
 
 Root integrates `feat/iam-managed-policy-53-20261105` from main
