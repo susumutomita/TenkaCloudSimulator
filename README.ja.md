@@ -52,7 +52,8 @@ make build
 | --- | --- | --- |
 | [S3](docs/s3.md) | bucket作成・一覧・存在確認・region取得・削除、object PUT/GET/HEAD/DELETE・ListObjectsV2、bucket versioning・ListObjectVersions、public access block・tags | multipart、ACL、一般bucket policy、暗号化設定。path-styleのみ |
 | [SQS](docs/sqs.md) | Cloudscape操作画面とStandard queue JSON 1.0 API 9操作：CreateQueue、GetQueueUrl、ListQueues、GetQueueAttributes、DeleteQueue、SendMessage、ReceiveMessage、DeleteMessage、ChangeMessageVisibility | CloudFormation、function SDK bridge、Challenge連携、FIFO、batch、DLQ、SNS連携 |
-| [CloudWatch Logs](docs/cloudwatch-logs.md) | ロググループ／ストリームの作成・一覧、グループ削除、PutLogEvents・GetLogEvents。7 APIと同一状態の操作画面 | メトリクス、アラーム、保持期間、Lambda自動配送、CFN、Insights |
+| [CloudWatch Metrics](docs/cloudwatch-metrics.md) | Query/XMLのPutMetricData・ListMetrics・GetMetricStatistics。SQLiteの限定的なカスタムraw sampleと、一覧・統計を参照する読み取り専用Metrics画面 | Alarm、GetMetricData、percentile、高解像度、Logs/Lambdaの自動送信、CloudFormation、実AWSとの完全互換。受入検証の留保は下記を参照 |
+| [CloudWatch Logs](docs/cloudwatch-logs.md) | ロググループ／ストリームの作成・一覧、グループ削除、PutLogEvents・GetLogEvents。7 APIと同一状態の操作画面 | Metricsへのフィルター・自動送信、アラーム、保持期間、Lambda自動配送、CFN、Insights |
 | [Secrets Manager](docs/secrets-manager.md) | Create/Describe/ListSecret、値を返さないListSecretVersionIds、Put/GetSecretValue、UpdateSecretVersionStage、即時DeleteSecret。8 APIとバージョン／明示表示付き操作画面 | KMS暗号化、実秘密情報の保管、rotation、replica、SecretBinary、scheduled deletion、CFN。ダミー値はSQLiteに平文保存 |
 | [KMS](docs/kms.md) |12 API。対称キー・ローカルAES-GCM、Create/List/Update/DeleteAlias、同一Txのalias暗号操作。SDK／Cloudscapeのキー詳細「エイリアス」タブ | AWSマネージドalias／alias ABAC、tags、grants、custom policy、rotation、キー削除、CFN・他サービス暗号化。raw keyはSQLite保存でHSM／保存時暗号化保証ではない |
 | [Systems Manager Parameter Store](docs/console.md) | PutParameter、GetParameter、GetParameters、GetParametersByPath、DescribeParameters、DeleteParameter。最新値・version・overwrite判定 | SecureString/KMS、履歴・labels。StandardのString/StringList/textのみ |
@@ -124,14 +125,25 @@ SDK、操作画面、再起動、チーム分離の受入検証は `make e2e` �
 
 CIはstatementと未フィルターsource-line coverageを両方90%以上に強制します。`make before-commit`単独のcoverage判定はstatementのみで、source-line判定はCIのCobertura生成後ステージと上記の2コマンドで行います。SDK/browser、license、依存security、埋込asset、形式検査も行います。cross compileは他OSでの実行成功を意味しません。開発用Python/Node/Javaはruntime依存ではありません。UI・Scalarの再生成は権利表記とlockを保持する[各build手順](tools/console/README.md)・[Scalar手順](tools/scalar/README.md)・[Python runtimeの権利・再生成手順](tools/python/README.md)に従います。
 
-現在のregistryは**50有限モデル・398の意図した欠陥検出（448実行）**です。
-以前の48モデル・381制御を保持し、LPの限定的なアクセス受理と選択・装飾ライフサイクルの
-2モデル・17制御を追加しています。Sakura、DynamoDB画面、Secretsメタデータ画面も保持します。
+Metrics統合で必要となるregistryは**56有限モデル・559の意図した欠陥検出（計615実行）**です。
+公開版の50モデル・398制御を保持し、Metricsの6モデル・161制御を追加します。
+615は実行計画であり、統合した版での全件成功を意味しません。
+Sakura、DynamoDB画面、Secretsメタデータ画面も保持します。
 LPモデルは信頼済みのhost/origin/認証判定や閉じたノード入力を前提とし、URL解析、フォーカス、
 レイアウト、SVG線の位置、ブラウザー描画、Go/JavaScriptのrefinementは証明しません。
 SecretVersionListingは認可後のメタデータ一覧と限定cursor境界を対象とし、値の読取権限や
 完全な履歴画面を追加しません。有限モデル検査、実コード試験、固定HEADの全体検査は別の結果です。
 [形式検査](formal/README.md)、[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)。
+
+Metricsの受入検証は2026-11-06時点で未完了です。過去の限定native試験は通常57件・race57件が成功しましたが、
+統合版の全65 E2E、SDK・画面、全形式検査、固定HEADのCIは別途確認が必要です。
+private版`fb925491`のScalar診断は最初のSend前に停止し、厳格なaxe検査で
+`aria-required-attr`違反28対象・未判定11対象が残りました。ソース修正案だけでは
+配布バンドルや実画面が直ったことにはならず、Metrics API referenceの受入完了やリリース可能とは扱いません。
+[対応範囲と検証状況](docs/cloudwatch-metrics.md)。
+
+公開版`30ec082`の50モデル・398制御（448実行）は2026-11-06にhosted検査が成功しました。
+これは後続のMetrics統合版の検証ではありません。private環境の712ケースも公開版の全件成功とは扱いません。
 
 ## ライセンス
 
@@ -172,7 +184,7 @@ combined 29-model/164-control formal gate (193 executions). These receipts apply
 to that revision. Every later change still requires its exact-HEAD CI, including
 the 45-case E2E suite; focused results do not replace whole-suite verification.
 
-現在の形式検査は50モデル・398制御（448実行）です。IAMモデルは4つの到達可能な初期状態から
+公開版`30ec082`までの形式検査は50モデル・398制御（448実行）でした。IAMモデルは4つの到達可能な初期状態から
 各2要求の範囲で、4要求の試案はタイムアウトし未成功です。2026-11-06にLPの限定19実行が
 `4382ec4`で成功しましたが、その版の全448実行はDynamoDBAdmissionで失敗しました。
 `fad3b8a`のLPはPC・スマートフォンの8ブラウザーケースと6状態の厳格なアクセシビリティ検査に成功。
@@ -186,5 +198,5 @@ API資料ではクラウドを分け、Sakura Cloudの任意有効化するDisk�
 全Go race/build、同一profileのstatement94.94%・未除外source90.32%が成功しました。
 資料のみを変えた後続`414c902`では全61 E2E（980.726秒）・reflow・startが成功しました。
 「資料のみの追補」「実行コード等が同一」はその過去の版の説明であり、現在のLP実装を指しません。
-当時のhosted検査の留保もその版に属します。現在の全448実行の成功や、ホスト採点・SQL/Go refinement・
+当時のhosted検査の留保もその版に属します。Metrics統合後の全615実行の成功や、ホスト採点・SQL/Go refinement・
 秘匿出力・全リソース物理削除の証明へ読み替えないでください。

@@ -1,8 +1,9 @@
 # Finite state models
 
-Current registry: **50 models / 398 literal-protected controls
-(448 required executions)**. The previous 48/381 inventory is preserved; the two
-landing models add 17 controls. Required inventory and exact source bindings live
+Metrics integration inventory: **56 models / 559 literal-protected controls
+(615 planned required executions)**. The public 50/398 inventory is preserved;
+six Metrics models add 161 controls. These counts describe the required plan,
+not a successful aggregate execution at the integrated HEAD. Required inventory and exact source bindings live
 in `models.json` and the protected policy in `scripts/formal_model_gate.py`.
 
 Historical evidence: the complete 48-baseline/381-control gate (429 executions)
@@ -26,6 +27,32 @@ Registration is source evidence, not itself evidence of successful execution. Da
 refer to their recorded inputs; later revisions require their own checks. These
 finite models do not prove Go/SQL/HTTP/UI refinement or complete cloud compatibility.
 
+## Bounded Metrics models and pending acceptance
+
+| Model | Finite contract | Main assumptions and exclusions |
+|---|---|---|
+| CloudWatchMetricsRawLedger | two regions/namespaces/dimension identities; two requests, row/series/abstract-byte budgets, unit-separated samples, own-scope collection, read frames and revision-bound cursors | abstract auth/fault/crypto/time classes; no SQL/Go, floating-point, concurrency or liveness proof |
+| MetricsHTTPAdmission | 41 request categories and two durable seeds; scope/envelope before body, gzip-size classes, authorization before semantic decode, preparation/commit/reply order | codec/UTF8/size verdicts are assumed; no real decompressor/parser/token proof |
+| MetricsRequestAdmission | 71 request categories; field/index/normalization classes, defaults, dimension order and identity | primitive lexer/name/time/cardinality verdicts assumed; not full Go DTO behavior |
+| MetricsTrustedScope | 58 factory/request categories; same-DB binding, captured actor/region, current caller-transaction policy and peer frames | policy/metadata verdicts assumed; document revision is provenance, not a SQL column or isolation proof |
+| MetricsConsoleEpoch | 37 selected workflows with at most seven events; captured query, stale callbacks, view clearing and locale continuity | React instance delivery/remount assumed; no arbitrary schedules, DOM/ARIA, decoder or compiled-code refinement |
+| CapabilityProjection | 32 producer inputs and 23 consumer classes; strict operation inventory, visibility and peer preservation | qualification is an input, not evidence of SDK/reference/console acceptance or authority |
+
+All 161 controls must produce their declared named-invariant counterexamples;
+a parse error, timeout or unrelated first failure is not a passing control.
+Implementation paths and artifact hashes must be rebound to the actual final
+integration. The model-only branch lacks eight required Metrics source paths;
+its policy units and TLC executions are not accepted by substituting stubs.
+
+The public `30ec082` hosted gate completed 50 baselines and 398 controls on
+2026-11-06. This is historical public evidence, not a result for the new 615-case
+Metrics plan. Prior private 712-case runs do not certify a public revision.
+Focused native Metrics runs passed 57 regular and 57 race tests; integrated
+65-case E2E, SDK/UI, full formal and hosted checks remain pending. A private
+`fb925491` Scalar run stopped before Send with 28 required-ARIA violations and
+11 incomplete targets. Source-only fixes do not establish rebuilt-bundle or
+reference acceptance. See [Metrics scope](../docs/cloudwatch-metrics.md).
+
 ## Landing admission and selection
 
 `LandingAccessAdmission` checks ten literal paths, three methods and trusted
@@ -47,7 +74,7 @@ On 2026-11-06, scoped 19-case checking passed at `4382ec4`; that revision's full
 cases at `fad3b8a` passed on Chromium 154, including six strict accessibility
 audits. These are dated, separate results. Chromium 154 lacks the current
 HTML-in-Canvas API, so native Chrome 157 drawing and other engines are unverified.
-No successful current full-448 or later exact-head acceptance is claimed here.
+The later public `30ec082` full-448 hosted success is recorded above; it does not validate the Metrics integration.
 
 CFNConditionAdmission adds fourteen invariants and fourteen semantic controls over
 234 immutable inputs. Its isolated `f69fb46` SANY/baseline/control run passed
@@ -85,7 +112,7 @@ CFNPhysicalResourceACK adds five properties and seven controls for selected SSM/
 The required `Formal validation` job reserves 30 minutes for checkout, the gate
 negative controls, exact-blob applicability and the complete serial registry.
 Each TLC case retains its 60-second default deadline and existing per-model
-settings; all 448 baseline/counterexample runs and failure requirements
+settings; all 615 planned baseline/counterexample runs and failure requirements
 remain mandatory. This is an aggregate execution budget, not a model-bound,
 acceptance, permission or per-case timeout change.
 
@@ -98,7 +125,7 @@ historical scoped receipt does not replace it.
 
 Legacy integration sections below retain historical counts and status statements
 for traceability. Their word “current” refers to the recorded integration, not
-today's registry. The authoritative current inventory is the 50/398 registry
+today's registry. The Metrics integration inventory is the 56/559 registry
 above; proof claims always require evidence for the exact revision.
 
 `ObjectStore.tla` models two buckets and two keys, shared object ownership, create/put/delete transitions, and an abstract identity decision `allow /\ ~deny`. `ObjectStore.cfg` checks type correctness, no orphan objects, no unauthorized mutation, and explicit-deny precedence.

@@ -15,14 +15,32 @@ machine-discovered semantic coverage. A newly added implementation file is not
 covered merely because an existing model passes: its exact path must have an
 appropriate reviewed scope mapping and property argument.
 
-The current registry has **50 baselines/398 required named mutation controls
-(448 required executions)**. It preserves the pre-landing 48/381 inventory and
-adds LandingAccessAdmission (six controls) and LandingTopologyState (eleven).
+The Metrics integration requires **56 baselines/559 named mutation controls
+(615 planned executions)**. It preserves the public 50/398 inventory, including
+LandingAccessAdmission and LandingTopologyState, and adds six Metrics models and
+161 controls. This count is a required plan, not a successful integrated gate.
 SecretMetadataViewEpoch and the existing CFN, Sakura and DynamoDB scopes remain.
 Numeric/regex/parser correctness, actual resource provisioning and NoEcho/output
 secrecy are not proved by registration. The IAM scope is four API-reachable seeds and at most two subsequent requests;
 the broader four-request exploratory candidate timed out and is not claimed.
 Registration and Python guards are not a successful immutable TLC execution.
+
+The new scopes are raw-ledger safety, HTTP admission, request normalization,
+trusted actor/current-transaction policy, console request epochs and descriptive
+capability projection. They use finite categories and independent literal
+oracles; codec/policy verdicts, React delivery and backend qualification remain
+explicit assumptions. They do not prove Go/SQL/JavaScript refinement, real AWS
+behavior or full console accessibility. See the
+[Metrics model boundaries](../formal/README.md#bounded-metrics-models-and-pending-acceptance).
+
+As of 2026-11-06, public `30ec082` completed its hosted 448-execution gate.
+That historical success does not cover the new 615-case integration; private
+712-case experiments are not public acceptance. Prior focused native Metrics
+runs passed 57 regular and 57 race tests. The integrated 65-case E2E suite,
+SDK/UI acceptance, full gate and exact-HEAD CI remain pending. A private
+`fb925491` reference diagnostic stopped before Send with 28 required-ARIA
+violations and 11 incomplete targets. Neither a source patch nor model
+registration resolves that runtime blocker. [Metrics scope](cloudwatch-metrics.md).
 
 New models must be registered in `formal/models.json` **and** added to the
 mandatory `BASE_MODELS`, `BASE_INVARIANTS`, `REQUIRED_MUTANTS` and

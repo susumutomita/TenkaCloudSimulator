@@ -81,7 +81,8 @@ adapter, or Challenge integration.
 | --- | --- | --- |
 | [S3](docs/s3.md) | Bucket create/list/head/location/delete; object PUT/GET/HEAD/DELETE and ListObjectsV2; versioning and ListObjectVersions; public access block and tags | Multipart uploads, ACLs, general bucket policies, encryption settings; path-style addressing only |
 | [SQS](docs/sqs.md) | Standard queues, a Cloudscape console, and 9 JSON 1.0 operations: CreateQueue, GetQueueUrl, ListQueues, GetQueueAttributes, DeleteQueue, SendMessage, ReceiveMessage, DeleteMessage, ChangeMessageVisibility | FIFO, batches, DLQ, SNS integration, CloudFormation, function SDK bridge, Challenge integration |
-| [CloudWatch Logs](docs/cloudwatch-logs.md) | Log groups/streams, group deletion, PutLogEvents/GetLogEvents; 7 APIs and a console sharing their state | Metrics, alarms, retention settings, automatic Lambda delivery, CloudFormation, Logs Insights |
+| [CloudWatch Metrics](docs/cloudwatch-metrics.md) | PutMetricData, ListMetrics and GetMetricStatistics via Query/XML; bounded custom raw samples in SQLite; read-only Metrics console for browsing and statistics | Alarms, GetMetricData, percentiles, high-resolution metrics, automatic Logs/Lambda emission, CloudFormation, full AWS compatibility; see acceptance limits below |
+| [CloudWatch Logs](docs/cloudwatch-logs.md) | Log groups/streams, group deletion, PutLogEvents/GetLogEvents; 7 APIs and a console sharing their state | Metric filters/emission into Metrics, alarms, retention settings, automatic Lambda delivery, CloudFormation, Logs Insights |
 | [Secrets Manager](docs/secrets-manager.md) | CreateSecret, DescribeSecret, ListSecrets, ListSecretVersionIds (metadata only), PutSecretValue, GetSecretValue, UpdateSecretVersionStage, immediate DeleteSecret; versions and explicit reveal in the console | Real-secret storage, KMS encryption, rotation, replicas, SecretBinary, scheduled deletion, CloudFormation; dummy values are plaintext in SQLite |
 | [KMS](docs/kms.md) |12 APIs: symmetric keys, local AES-GCM, Create/List/Update/DeleteAlias, same-Tx alias crypto; SDK and Cloudscape key-detail Aliases | AWS-managed aliases/alias ABAC, tags, grants, custom policies, rotation, key deletion, CloudFormation, other-service encryption; raw SQLite keys are not an HSM or at-rest guarantee |
 | [Systems Manager Parameter Store](docs/console.md) | PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter; current values, versions and overwrite checks | SecureString/KMS, history, labels; Standard String/StringList with text data only |
@@ -252,10 +253,11 @@ not binary runtime dependencies. Regeneration must preserve locks and original
 rights: [console](tools/console/README.md), [Scalar](tools/scalar/README.md),
 [Python/WASI runtime](tools/python/README.md).
 
-The registry contains **50 finite models and 398 deliberate defect controls**
-(448 required model/check executions). This preserves the earlier 48/381 inventory
-and adds bounded landing admission and selection/lifecycle models with 17 controls.
-The Sakura, Secrets metadata and DynamoDB console models remain registered.
+The Metrics integration requires **56 finite models and 559 deliberate defect
+controls (615 planned model/check executions)**. It preserves the public
+50/398 landing-era inventory and adds six bounded Metrics models with 161 controls.
+This is a required execution plan, not a successful aggregate result for the
+integrated revision. The Sakura, Secrets metadata and DynamoDB console models remain registered.
 Registration is not an integrated-revision execution receipt. The IAM scenario checks two requests
 from each of four reachable seeds. A broader four-request trial timed out and
 is not claimed as verified. TLC examines bounded safety properties and checks
@@ -265,6 +267,19 @@ parity. Historical receipts and combined exact-revision results are separate.
 See [formal validation](formal/README.md), [CI](docs/ci.md),
 [backlog acceptance](docs/acceptance/backlog-services.md), and the
 [standalone architecture](docs/design/0001-go-standalone.md).
+
+Metrics acceptance is incomplete as of 2026-11-06. Prior focused native runs
+passed 57 regular and 57 race tests; the integrated 65-case E2E suite, SDK/console
+acceptance, full formal gate and exact-HEAD CI still need verification. A private
+reference diagnostic at `fb925491` stopped before its first Send: strict axe found
+28 `aria-required-attr` violations and 11 incomplete targets. An offline source
+adapter proposal is not a rebuilt or validated Scalar bundle. No Metrics
+reference acceptance or release readiness is claimed. See
+[Metrics scope and verification](docs/cloudwatch-metrics.md).
+
+The public `30ec082` revision completed its hosted 50-baseline/398-control gate
+(448 executions) on 2026-11-06. That result does not cover the later Metrics
+integration. Private 712-case experiments are not a public aggregate result.
 
 On 2026-11-06, the two landing models passed their scoped 19 executions at
 `4382ec4`; the full 448-case attempt at that revision failed at DynamoDBAdmission.
@@ -286,7 +301,7 @@ implementation. These receipts and their then-pending hosted checks belong to
 those revisions. The original crypto fixture also passed the two-CLI SDK helper
 at `2d76646` (73 SDK calls/responses and nine auxiliary HTTP pairs across four CLI
 incarnations). None proves host scoring, output secrecy, every physical resource
-deletion, Go/SQL refinement or success of the current 448-case gate.
+deletion, Go/SQL refinement or success of the Metrics integration’s planned 615-case gate.
 
 ## License and attribution
 
