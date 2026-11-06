@@ -253,9 +253,9 @@ not binary runtime dependencies. Regeneration must preserve locks and original
 rights: [console](tools/console/README.md), [Scalar](tools/scalar/README.md),
 [Python/WASI runtime](tools/python/README.md).
 
-The registry contains **51 finite models and 410 deliberate defect controls**
-(461 required model/check executions). This preserves the earlier 50/398 inventory
-and adds the bounded catalog store model with 12 controls.
+The registry contains **52 finite models and 415 deliberate defect controls**
+(467 required model/check executions). This preserves the earlier 50/398 inventory
+and adds the bounded catalog store model (12 controls) and catalog console view model (5 controls).
 The Sakura, Secrets metadata and DynamoDB console models remain registered.
 Registration is not an integrated-revision execution receipt. The IAM scenario checks two requests
 from each of four reachable seeds. A broader four-request trial timed out and

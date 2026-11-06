@@ -5871,6 +5871,83 @@
      "expect_invariant": "TokenBinding"
     }
    ]
+  },
+  {
+   "id": "CatalogConsoleEpoch",
+   "model": "formal/CatalogConsoleEpoch.tla",
+   "config": "formal/CatalogConsoleEpoch.cfg",
+   "bounds": "Two catalog services, epochs0..3, one mounted view with unmount, at most two in-flight writes reachable only by defective controls; synchronous reload on acknowledgement.",
+   "properties": [
+    "TypeOK",
+    "NoUnmountedAcceptance",
+    "OnlyCurrentReplies",
+    "SingleWriter",
+    "ReloadOnlyAfterAck",
+    "FailureVisible"
+   ],
+   "limits": "View acceptance and write sequencing only: native request results, DOM rendering, keyboard focus, accessibility, form conversion and React scheduling are covered by browser tests, not this model.",
+   "source_scope": [
+    "internal/server/web/app.js",
+    "tools/console/src/catalog.jsx",
+    "tools/console/src/main.jsx"
+   ],
+   "mutants": [
+    {
+     "id": "OmitReplyEpochGuard",
+     "edits": [
+      {
+       "old": "ReplyEpochOK(r) == r.epoch = epoch /\\ r.service = service",
+       "new": "ReplyEpochOK(r) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OnlyCurrentReplies"
+    },
+    {
+     "id": "AcceptAfterUnmount",
+     "edits": [
+      {
+       "old": "MountedOK == mounted",
+       "new": "MountedOK == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoUnmountedAcceptance"
+    },
+    {
+     "id": "AllowConcurrentWrites",
+     "edits": [
+      {
+       "old": "WriterIdle == inflight = 0",
+       "new": "WriterIdle == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "SingleWriter"
+    },
+    {
+     "id": "ReloadAfterFailedWrite",
+     "edits": [
+      {
+       "old": "ReloadAfterFailure == FALSE",
+       "new": "ReloadAfterFailure == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ReloadOnlyAfterAck"
+    },
+    {
+     "id": "DropFailureError",
+     "edits": [
+      {
+       "old": "/\\ error' = ~ReloadAfterFailure",
+       "new": "/\\ error' = FALSE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "FailureVisible"
+    }
+   ]
   }
  ]
 }

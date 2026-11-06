@@ -125,8 +125,8 @@ SDK、操作画面、再起動、チーム分離の受入検証は `make e2e` �
 
 CIはstatementと未フィルターsource-line coverageを両方90%以上に強制します。`make before-commit`単独のcoverage判定はstatementのみで、source-line判定はCIのCobertura生成後ステージと上記の2コマンドで行います。SDK/browser、license、依存security、埋込asset、形式検査も行います。cross compileは他OSでの実行成功を意味しません。開発用Python/Node/Javaはruntime依存ではありません。UI・Scalarの再生成は権利表記とlockを保持する[各build手順](tools/console/README.md)・[Scalar手順](tools/scalar/README.md)・[Python runtimeの権利・再生成手順](tools/python/README.md)に従います。
 
-現在のregistryは**51有限モデル・410の意図した欠陥検出（461実行）**です。
-以前の50モデル・398制御を保持し、サービスカタログの保存状態モデルと12制御を追加しています。
+現在のregistryは**52有限モデル・415の意図した欠陥検出（467実行）**です。
+以前の50モデル・398制御を保持し、サービスカタログの保存状態モデル（12制御）と画面モデル（5制御）を追加しています。
 その前の48モデル・381制御には、LPの限定的なアクセス受理と選択・装飾ライフサイクルの
 2モデル・17制御を追加しています。Sakura、DynamoDB画面、Secretsメタデータ画面も保持します。
 LPモデルは信頼済みのhost/origin/認証判定や閉じたノード入力を前提とし、URL解析、フォーカス、
@@ -174,7 +174,7 @@ combined 29-model/164-control formal gate (193 executions). These receipts apply
 to that revision. Every later change still requires its exact-HEAD CI, including
 the 45-case E2E suite; focused results do not replace whole-suite verification.
 
-現在の形式検査は51モデル・410制御（461実行）です。IAMモデルは4つの到達可能な初期状態から
+現在の形式検査は52モデル・415制御（467実行）です。IAMモデルは4つの到達可能な初期状態から
 各2要求の範囲で、4要求の試案はタイムアウトし未成功です。2026-11-06にLPの限定19実行が
 `4382ec4`で成功しましたが、その版の全448実行はDynamoDBAdmissionで失敗しました。
 `fad3b8a`のLPはPC・スマートフォンの8ブラウザーケースと6状態の厳格なアクセシビリティ検査に成功。

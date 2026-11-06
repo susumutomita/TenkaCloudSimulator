@@ -15,9 +15,9 @@ machine-discovered semantic coverage. A newly added implementation file is not
 covered merely because an existing model passes: its exact path must have an
 appropriate reviewed scope mapping and property argument.
 
-The current registry has **51 baselines/410 required named mutation controls
-(461 required executions)**. It preserves the 50/398 inventory and adds
-CatalogResourceLifecycle (twelve controls). The earlier pre-landing 48/381
+The current registry has **52 baselines/415 required named mutation controls
+(467 required executions)**. It preserves the 50/398 inventory and adds
+CatalogResourceLifecycle (twelve controls) and CatalogConsoleEpoch (five). The earlier pre-landing 48/381
 inventory gained LandingAccessAdmission (six controls) and LandingTopologyState (eleven).
 SecretMetadataViewEpoch and the existing CFN, Sakura and DynamoDB scopes remain.
 Numeric/regex/parser correctness, actual resource provisioning and NoEcho/output

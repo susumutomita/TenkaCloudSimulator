@@ -65,7 +65,9 @@ document per service, generated from the same embedded official shapes.
 - `test/e2e/aws_catalog_console.py` drives the console and reference in Chromium
   with axe at 1440 px and 390 px, checking shared native state.
 - `formal/CatalogResourceLifecycle.tla` checks bounded store invariants with 12
-  mutation controls. It does not prove the Go implementation.
+  mutation controls, and `formal/CatalogConsoleEpoch.tla` checks view epochs,
+  single writes and failure visibility with 5. They do not prove the Go or
+  JavaScript implementation.
 
 Authenticated AWS console parity and live-AWS differential behavior are not
 verified.
