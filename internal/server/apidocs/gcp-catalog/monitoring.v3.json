@@ -1,0 +1,1934 @@
+{
+ "components": {
+  "schemas": {
+   "Aggregation": {
+    "additionalProperties": false,
+    "properties": {
+     "alignmentPeriod": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "crossSeriesReducer": {
+      "enum": [
+       "REDUCE_NONE",
+       "REDUCE_MEAN",
+       "REDUCE_MIN",
+       "REDUCE_MAX",
+       "REDUCE_SUM",
+       "REDUCE_STDDEV",
+       "REDUCE_COUNT",
+       "REDUCE_COUNT_TRUE",
+       "REDUCE_COUNT_FALSE",
+       "REDUCE_FRACTION_TRUE",
+       "REDUCE_PERCENTILE_99",
+       "REDUCE_PERCENTILE_95",
+       "REDUCE_PERCENTILE_50",
+       "REDUCE_PERCENTILE_05"
+      ],
+      "type": "string"
+     },
+     "groupByFields": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "perSeriesAligner": {
+      "enum": [
+       "ALIGN_NONE",
+       "ALIGN_DELTA",
+       "ALIGN_RATE",
+       "ALIGN_INTERPOLATE",
+       "ALIGN_NEXT_OLDER",
+       "ALIGN_MIN",
+       "ALIGN_MAX",
+       "ALIGN_MEAN",
+       "ALIGN_COUNT",
+       "ALIGN_SUM",
+       "ALIGN_STDDEV",
+       "ALIGN_COUNT_TRUE",
+       "ALIGN_COUNT_FALSE",
+       "ALIGN_FRACTION_TRUE",
+       "ALIGN_PERCENTILE_99",
+       "ALIGN_PERCENTILE_95",
+       "ALIGN_PERCENTILE_50",
+       "ALIGN_PERCENTILE_05",
+       "ALIGN_PERCENT_CHANGE"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "AlertPolicy": {
+    "additionalProperties": false,
+    "properties": {
+     "alertStrategy": {
+      "$ref": "#/components/schemas/AlertStrategy"
+     },
+     "combiner": {
+      "enum": [
+       "COMBINE_UNSPECIFIED",
+       "AND",
+       "OR",
+       "AND_WITH_MATCHING_RESOURCE"
+      ],
+      "type": "string"
+     },
+     "conditions": {
+      "items": {
+       "$ref": "#/components/schemas/Condition"
+      },
+      "type": "array"
+     },
+     "creationRecord": {
+      "$ref": "#/components/schemas/MutationRecord"
+     },
+     "displayName": {
+      "type": "string"
+     },
+     "documentation": {
+      "$ref": "#/components/schemas/Documentation"
+     },
+     "enabled": {
+      "type": "boolean"
+     },
+     "mutationRecord": {
+      "$ref": "#/components/schemas/MutationRecord"
+     },
+     "name": {
+      "type": "string"
+     },
+     "notificationChannels": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "severity": {
+      "enum": [
+       "SEVERITY_UNSPECIFIED",
+       "CRITICAL",
+       "ERROR",
+       "WARNING"
+      ],
+      "type": "string"
+     },
+     "userLabels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "validity": {
+      "$ref": "#/components/schemas/Status"
+     }
+    },
+    "type": "object"
+   },
+   "AlertStrategy": {
+    "additionalProperties": false,
+    "properties": {
+     "autoClose": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "notificationChannelStrategy": {
+      "items": {
+       "$ref": "#/components/schemas/NotificationChannelStrategy"
+      },
+      "type": "array"
+     },
+     "notificationPrompts": {
+      "items": {
+       "enum": [
+        "NOTIFICATION_PROMPT_UNSPECIFIED",
+        "OPENED",
+        "CLOSED"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "notificationRateLimit": {
+      "$ref": "#/components/schemas/NotificationRateLimit"
+     }
+    },
+    "type": "object"
+   },
+   "BasicAuthentication": {
+    "additionalProperties": false,
+    "properties": {
+     "password": {
+      "type": "string"
+     },
+     "username": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "BooleanTest": {
+    "additionalProperties": false,
+    "properties": {
+     "column": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CloudFunctionV2Target": {
+    "additionalProperties": false,
+    "properties": {
+     "cloudRunRevision": {
+      "$ref": "#/components/schemas/MonitoredResource"
+     },
+     "name": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Condition": {
+    "additionalProperties": false,
+    "properties": {
+     "conditionAbsent": {
+      "$ref": "#/components/schemas/MetricAbsence"
+     },
+     "conditionMatchedLog": {
+      "$ref": "#/components/schemas/LogMatch"
+     },
+     "conditionMonitoringQueryLanguage": {
+      "$ref": "#/components/schemas/MonitoringQueryLanguageCondition"
+     },
+     "conditionPrometheusQueryLanguage": {
+      "$ref": "#/components/schemas/PrometheusQueryLanguageCondition"
+     },
+     "conditionSql": {
+      "$ref": "#/components/schemas/SqlCondition"
+     },
+     "conditionThreshold": {
+      "$ref": "#/components/schemas/MetricThreshold"
+     },
+     "displayName": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ContentMatcher": {
+    "additionalProperties": false,
+    "properties": {
+     "content": {
+      "type": "string"
+     },
+     "jsonPathMatcher": {
+      "$ref": "#/components/schemas/JsonPathMatcher"
+     },
+     "matcher": {
+      "enum": [
+       "CONTENT_MATCHER_OPTION_UNSPECIFIED",
+       "CONTAINS_STRING",
+       "NOT_CONTAINS_STRING",
+       "MATCHES_REGEX",
+       "NOT_MATCHES_REGEX",
+       "MATCHES_JSON_PATH",
+       "NOT_MATCHES_JSON_PATH"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Daily": {
+    "additionalProperties": false,
+    "properties": {
+     "executionTime": {
+      "$ref": "#/components/schemas/TimeOfDay"
+     },
+     "periodicity": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "Documentation": {
+    "additionalProperties": false,
+    "properties": {
+     "content": {
+      "type": "string"
+     },
+     "links": {
+      "items": {
+       "$ref": "#/components/schemas/Link"
+      },
+      "type": "array"
+     },
+     "mimeType": {
+      "type": "string"
+     },
+     "subject": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Empty": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "ForecastOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "forecastHorizon": {
+      "format": "google-duration",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Hourly": {
+    "additionalProperties": false,
+    "properties": {
+     "minuteOffset": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "periodicity": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "HttpCheck": {
+    "additionalProperties": false,
+    "properties": {
+     "acceptedResponseStatusCodes": {
+      "items": {
+       "$ref": "#/components/schemas/ResponseStatusCode"
+      },
+      "type": "array"
+     },
+     "authInfo": {
+      "$ref": "#/components/schemas/BasicAuthentication"
+     },
+     "body": {
+      "format": "byte",
+      "type": "string"
+     },
+     "contentType": {
+      "enum": [
+       "TYPE_UNSPECIFIED",
+       "URL_ENCODED",
+       "USER_PROVIDED"
+      ],
+      "type": "string"
+     },
+     "customContentType": {
+      "type": "string"
+     },
+     "headers": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "maskHeaders": {
+      "type": "boolean"
+     },
+     "path": {
+      "type": "string"
+     },
+     "pingConfig": {
+      "$ref": "#/components/schemas/PingConfig"
+     },
+     "port": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "requestMethod": {
+      "enum": [
+       "METHOD_UNSPECIFIED",
+       "GET",
+       "POST"
+      ],
+      "type": "string"
+     },
+     "serviceAgentAuthentication": {
+      "$ref": "#/components/schemas/ServiceAgentAuthentication"
+     },
+     "useSsl": {
+      "type": "boolean"
+     },
+     "validateSsl": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "InternalChecker": {
+    "additionalProperties": false,
+    "properties": {
+     "displayName": {
+      "type": "string"
+     },
+     "gcpZone": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "network": {
+      "type": "string"
+     },
+     "peerProjectId": {
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "UNSPECIFIED",
+       "CREATING",
+       "RUNNING"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "JsonPathMatcher": {
+    "additionalProperties": false,
+    "properties": {
+     "jsonMatcher": {
+      "enum": [
+       "JSON_PATH_MATCHER_OPTION_UNSPECIFIED",
+       "EXACT_MATCH",
+       "REGEX_MATCH"
+      ],
+      "type": "string"
+     },
+     "jsonPath": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Link": {
+    "additionalProperties": false,
+    "properties": {
+     "displayName": {
+      "type": "string"
+     },
+     "url": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListAlertPoliciesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "alertPolicies": {
+      "items": {
+       "$ref": "#/components/schemas/AlertPolicy"
+      },
+      "type": "array"
+     },
+     "nextPageToken": {
+      "type": "string"
+     },
+     "totalSize": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "ListNotificationChannelsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "notificationChannels": {
+      "items": {
+       "$ref": "#/components/schemas/NotificationChannel"
+      },
+      "type": "array"
+     },
+     "totalSize": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "ListUptimeCheckConfigsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "totalSize": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "uptimeCheckConfigs": {
+      "items": {
+       "$ref": "#/components/schemas/UptimeCheckConfig"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "LogMatch": {
+    "additionalProperties": false,
+    "properties": {
+     "filter": {
+      "type": "string"
+     },
+     "labelExtractors": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "MetricAbsence": {
+    "additionalProperties": false,
+    "properties": {
+     "aggregations": {
+      "items": {
+       "$ref": "#/components/schemas/Aggregation"
+      },
+      "type": "array"
+     },
+     "duration": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "filter": {
+      "type": "string"
+     },
+     "trigger": {
+      "$ref": "#/components/schemas/Trigger"
+     }
+    },
+    "type": "object"
+   },
+   "MetricThreshold": {
+    "additionalProperties": false,
+    "properties": {
+     "aggregations": {
+      "items": {
+       "$ref": "#/components/schemas/Aggregation"
+      },
+      "type": "array"
+     },
+     "comparison": {
+      "enum": [
+       "COMPARISON_UNSPECIFIED",
+       "COMPARISON_GT",
+       "COMPARISON_GE",
+       "COMPARISON_LT",
+       "COMPARISON_LE",
+       "COMPARISON_EQ",
+       "COMPARISON_NE"
+      ],
+      "type": "string"
+     },
+     "denominatorAggregations": {
+      "items": {
+       "$ref": "#/components/schemas/Aggregation"
+      },
+      "type": "array"
+     },
+     "denominatorFilter": {
+      "type": "string"
+     },
+     "duration": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "evaluationMissingData": {
+      "enum": [
+       "EVALUATION_MISSING_DATA_UNSPECIFIED",
+       "EVALUATION_MISSING_DATA_INACTIVE",
+       "EVALUATION_MISSING_DATA_ACTIVE",
+       "EVALUATION_MISSING_DATA_NO_OP"
+      ],
+      "type": "string"
+     },
+     "filter": {
+      "type": "string"
+     },
+     "forecastOptions": {
+      "$ref": "#/components/schemas/ForecastOptions"
+     },
+     "thresholdValue": {
+      "format": "double",
+      "type": "number"
+     },
+     "trigger": {
+      "$ref": "#/components/schemas/Trigger"
+     }
+    },
+    "type": "object"
+   },
+   "Minutes": {
+    "additionalProperties": false,
+    "properties": {
+     "periodicity": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "MonitoredResource": {
+    "additionalProperties": false,
+    "properties": {
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "type": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "MonitoringQueryLanguageCondition": {
+    "additionalProperties": false,
+    "properties": {
+     "duration": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "evaluationMissingData": {
+      "enum": [
+       "EVALUATION_MISSING_DATA_UNSPECIFIED",
+       "EVALUATION_MISSING_DATA_INACTIVE",
+       "EVALUATION_MISSING_DATA_ACTIVE",
+       "EVALUATION_MISSING_DATA_NO_OP"
+      ],
+      "type": "string"
+     },
+     "query": {
+      "type": "string"
+     },
+     "trigger": {
+      "$ref": "#/components/schemas/Trigger"
+     }
+    },
+    "type": "object"
+   },
+   "MutationRecord": {
+    "additionalProperties": false,
+    "properties": {
+     "mutateTime": {
+      "format": "google-datetime",
+      "type": "string"
+     },
+     "mutatedBy": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NotificationChannel": {
+    "additionalProperties": false,
+    "properties": {
+     "creationRecord": {
+      "$ref": "#/components/schemas/MutationRecord"
+     },
+     "description": {
+      "type": "string"
+     },
+     "displayName": {
+      "type": "string"
+     },
+     "enabled": {
+      "type": "boolean"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "mutationRecords": {
+      "items": {
+       "$ref": "#/components/schemas/MutationRecord"
+      },
+      "type": "array"
+     },
+     "name": {
+      "type": "string"
+     },
+     "type": {
+      "type": "string"
+     },
+     "userLabels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "verificationStatus": {
+      "enum": [
+       "VERIFICATION_STATUS_UNSPECIFIED",
+       "UNVERIFIED",
+       "VERIFIED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NotificationChannelStrategy": {
+    "additionalProperties": false,
+    "properties": {
+     "notificationChannelNames": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "renotifyInterval": {
+      "format": "google-duration",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NotificationRateLimit": {
+    "additionalProperties": false,
+    "properties": {
+     "period": {
+      "format": "google-duration",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PingConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "pingsCount": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "PrometheusQueryLanguageCondition": {
+    "additionalProperties": false,
+    "properties": {
+     "alertRule": {
+      "type": "string"
+     },
+     "disableMetricValidation": {
+      "type": "boolean"
+     },
+     "duration": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "evaluationInterval": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "query": {
+      "type": "string"
+     },
+     "ruleGroup": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ResourceGroup": {
+    "additionalProperties": false,
+    "properties": {
+     "groupId": {
+      "type": "string"
+     },
+     "resourceType": {
+      "enum": [
+       "RESOURCE_TYPE_UNSPECIFIED",
+       "INSTANCE",
+       "AWS_ELB_LOAD_BALANCER"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ResponseStatusCode": {
+    "additionalProperties": false,
+    "properties": {
+     "statusClass": {
+      "enum": [
+       "STATUS_CLASS_UNSPECIFIED",
+       "STATUS_CLASS_1XX",
+       "STATUS_CLASS_2XX",
+       "STATUS_CLASS_3XX",
+       "STATUS_CLASS_4XX",
+       "STATUS_CLASS_5XX",
+       "STATUS_CLASS_ANY"
+      ],
+      "type": "string"
+     },
+     "statusValue": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "RowCountTest": {
+    "additionalProperties": false,
+    "properties": {
+     "comparison": {
+      "enum": [
+       "COMPARISON_UNSPECIFIED",
+       "COMPARISON_GT",
+       "COMPARISON_GE",
+       "COMPARISON_LT",
+       "COMPARISON_LE",
+       "COMPARISON_EQ",
+       "COMPARISON_NE"
+      ],
+      "type": "string"
+     },
+     "threshold": {
+      "format": "int64",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ServiceAgentAuthentication": {
+    "additionalProperties": false,
+    "properties": {
+     "type": {
+      "enum": [
+       "SERVICE_AGENT_AUTHENTICATION_TYPE_UNSPECIFIED",
+       "OIDC_TOKEN"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SqlCondition": {
+    "additionalProperties": false,
+    "properties": {
+     "booleanTest": {
+      "$ref": "#/components/schemas/BooleanTest"
+     },
+     "daily": {
+      "$ref": "#/components/schemas/Daily"
+     },
+     "hourly": {
+      "$ref": "#/components/schemas/Hourly"
+     },
+     "minutes": {
+      "$ref": "#/components/schemas/Minutes"
+     },
+     "query": {
+      "type": "string"
+     },
+     "rowCountTest": {
+      "$ref": "#/components/schemas/RowCountTest"
+     }
+    },
+    "type": "object"
+   },
+   "Status": {
+    "additionalProperties": false,
+    "properties": {
+     "code": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "details": {
+      "items": {
+       "additionalProperties": {
+        "description": "Any JSON value"
+       },
+       "type": "object"
+      },
+      "type": "array"
+     },
+     "message": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SyntheticMonitorTarget": {
+    "additionalProperties": false,
+    "properties": {
+     "cloudFunctionV2": {
+      "$ref": "#/components/schemas/CloudFunctionV2Target"
+     }
+    },
+    "type": "object"
+   },
+   "TcpCheck": {
+    "additionalProperties": false,
+    "properties": {
+     "pingConfig": {
+      "$ref": "#/components/schemas/PingConfig"
+     },
+     "port": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "TimeOfDay": {
+    "additionalProperties": false,
+    "properties": {
+     "hours": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "minutes": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "nanos": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "seconds": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "Trigger": {
+    "additionalProperties": false,
+    "properties": {
+     "count": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "percent": {
+      "format": "double",
+      "type": "number"
+     }
+    },
+    "type": "object"
+   },
+   "UptimeCheckConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "checkerType": {
+      "enum": [
+       "CHECKER_TYPE_UNSPECIFIED",
+       "STATIC_IP_CHECKERS",
+       "VPC_CHECKERS"
+      ],
+      "type": "string"
+     },
+     "contentMatchers": {
+      "items": {
+       "$ref": "#/components/schemas/ContentMatcher"
+      },
+      "type": "array"
+     },
+     "disabled": {
+      "type": "boolean"
+     },
+     "displayName": {
+      "type": "string"
+     },
+     "httpCheck": {
+      "$ref": "#/components/schemas/HttpCheck"
+     },
+     "internalCheckers": {
+      "items": {
+       "$ref": "#/components/schemas/InternalChecker"
+      },
+      "type": "array"
+     },
+     "isInternal": {
+      "type": "boolean"
+     },
+     "logCheckFailures": {
+      "type": "boolean"
+     },
+     "monitoredResource": {
+      "$ref": "#/components/schemas/MonitoredResource"
+     },
+     "name": {
+      "type": "string"
+     },
+     "period": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "resourceGroup": {
+      "$ref": "#/components/schemas/ResourceGroup"
+     },
+     "selectedRegions": {
+      "items": {
+       "enum": [
+        "REGION_UNSPECIFIED",
+        "USA",
+        "EUROPE",
+        "SOUTH_AMERICA",
+        "ASIA_PACIFIC",
+        "USA_OREGON",
+        "USA_IOWA",
+        "USA_VIRGINIA"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "syntheticMonitor": {
+      "$ref": "#/components/schemas/SyntheticMonitorTarget"
+     },
+     "tcpCheck": {
+      "$ref": "#/components/schemas/TcpCheck"
+     },
+     "timeout": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "userLabels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Cloud Monitoring API (v3) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Alert policies, notification channels and uptime check configurations are configuration metadata: no metric, time series, incident or uptime probe exists, conditions are never evaluated and no notification is sent. Resource IDs are server-generated. Condition names, creation and mutation records and verification status are not assigned; client-sent records and verification status are dropped as the official API ignores them. A patch without updateMask updates only the supplied fields rather than replacing the resource, and updateMask paths use JSON field names such as displayName. Deleting a notification channel does not check alert policies that reference it. Notification channel credentials (tokens, passwords, service keys) and uptime check passwords or secret headers are refused and never stored; channel verification methods are not implemented. Groups, snoozes, services, SLOs, metric descriptors and time series are not implemented.",
+  "title": "Cloud Monitoring (simulator catalog)",
+  "version": "v3"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/v3/projects/{projectsId}/alertPolicies": {
+   "get": {
+    "operationId": "monitoring.projects.alertPolicies.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListAlertPoliciesResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.alertPolicies.list",
+    "tags": [
+     "Cloud Monitoring"
+    ]
+   },
+   "post": {
+    "operationId": "monitoring.projects.alertPolicies.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AlertPolicy"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AlertPolicy"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.alertPolicies.create",
+    "tags": [
+     "Cloud Monitoring"
+    ]
+   }
+  },
+  "/v3/projects/{projectsId}/alertPolicies/{alertPoliciesId}": {
+   "delete": {
+    "operationId": "monitoring.projects.alertPolicies.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "alertPoliciesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Empty"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.alertPolicies.delete",
+    "tags": [
+     "Cloud Monitoring"
+    ]
+   },
+   "get": {
+    "operationId": "monitoring.projects.alertPolicies.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "alertPoliciesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AlertPolicy"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.alertPolicies.get",
+    "tags": [
+     "Cloud Monitoring"
+    ]
+   },
+   "patch": {
+    "operationId": "monitoring.projects.alertPolicies.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "alertPoliciesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AlertPolicy"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AlertPolicy"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.alertPolicies.patch",
+    "tags": [
+     "Cloud Monitoring"
+    ]
+   }
+  },
+  "/v3/projects/{projectsId}/notificationChannels": {
+   "get": {
+    "operationId": "monitoring.projects.notificationChannels.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListNotificationChannelsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.notificationChannels.list",
+    "tags": [
+     "Cloud Monitoring"
+    ]
+   },
+   "post": {
+    "operationId": "monitoring.projects.notificationChannels.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/NotificationChannel"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/NotificationChannel"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.notificationChannels.create",
+    "tags": [
+     "Cloud Monitoring"
+    ]
+   }
+  },
+  "/v3/projects/{projectsId}/notificationChannels/{notificationChannelsId}": {
+   "delete": {
+    "operationId": "monitoring.projects.notificationChannels.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "notificationChannelsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "force",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Empty"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.notificationChannels.delete",
+    "tags": [
+     "Cloud Monitoring"
+    ]
+   },
+   "get": {
+    "operationId": "monitoring.projects.notificationChannels.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "notificationChannelsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/NotificationChannel"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.notificationChannels.get",
+    "tags": [
+     "Cloud Monitoring"
+    ]
+   },
+   "patch": {
+    "operationId": "monitoring.projects.notificationChannels.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "notificationChannelsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/NotificationChannel"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/NotificationChannel"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.notificationChannels.patch",
+    "tags": [
+     "Cloud Monitoring"
+    ]
+   }
+  },
+  "/v3/projects/{projectsId}/uptimeCheckConfigs": {
+   "get": {
+    "operationId": "monitoring.projects.uptimeCheckConfigs.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListUptimeCheckConfigsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.uptimeCheckConfigs.list",
+    "tags": [
+     "Cloud Monitoring"
+    ]
+   },
+   "post": {
+    "operationId": "monitoring.projects.uptimeCheckConfigs.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/UptimeCheckConfig"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UptimeCheckConfig"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.uptimeCheckConfigs.create",
+    "tags": [
+     "Cloud Monitoring"
+    ]
+   }
+  },
+  "/v3/projects/{projectsId}/uptimeCheckConfigs/{uptimeCheckConfigsId}": {
+   "delete": {
+    "operationId": "monitoring.projects.uptimeCheckConfigs.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "uptimeCheckConfigsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Empty"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.uptimeCheckConfigs.delete",
+    "tags": [
+     "Cloud Monitoring"
+    ]
+   },
+   "get": {
+    "operationId": "monitoring.projects.uptimeCheckConfigs.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "uptimeCheckConfigsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UptimeCheckConfig"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.uptimeCheckConfigs.get",
+    "tags": [
+     "Cloud Monitoring"
+    ]
+   },
+   "patch": {
+    "operationId": "monitoring.projects.uptimeCheckConfigs.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "uptimeCheckConfigsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/UptimeCheckConfig"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UptimeCheckConfig"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.uptimeCheckConfigs.patch",
+    "tags": [
+     "Cloud Monitoring"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/_simulator/providers/gcp/monitoring"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Cloud Monitoring API (v3) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Alert policies, notification channels and uptime check configurations are configuration metadata: no metric, time series, incident or uptime probe exists, conditions are never evaluated and no notification is sent. Resource IDs are server-generated. Condition names, creation and mutation records and verification status are not assigned; client-sent records and verification status are dropped as the official API ignores them. A patch without updateMask updates only the supplied fields rather than replacing the resource, and updateMask paths use JSON field names such as displayName. Deleting a notification channel does not check alert policies that reference it. Notification channel credentials (tokens, passwords, service keys) and uptime check passwords or secret headers are refused and never stored; channel verification methods are not implemented. Groups, snoozes, services, SLOs, metric descriptors and time series are not implemented.",
+   "name": "Cloud Monitoring"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "google-api-python-client",
+  "version": "2.199.0",
+  "file": "googleapiclient/discovery_cache/documents/monitoring.v3.json",
+  "sha256": "1e2544c25079409c59f22caf17231bd369667ff066af7ef423bb8f3bf2f9f441",
+  "license": "Apache-2.0",
+  "revision": "20260129"
+ }
+}

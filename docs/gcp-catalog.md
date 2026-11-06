@@ -51,6 +51,14 @@ Google Cloud call is executed or simulated.
 | Knowledge Catalog (`dataplex.v1`) | #400 | `projects.locations.lakes.{create,get,list,patch,delete}`, `lakes.zones.{create,get,list,patch,delete}`, `lakes.zones.assets.{create,get,list,patch,delete}`, `entryGroups`, `entryTypes`, `aspectTypes` and `glossaries` `.{create,get,list,patch,delete}`, `glossaries.{categories,terms}.{create,get,list,patch,delete}`, `operations.{get,list}` | No bucket, dataset or entry is read or published. Discovery, scans, tasks and metadata jobs never run, and asset, metastore, aspect type and glossary parent references are not resolved. Delete children before their lake, zone or glossary. Entries, data products and taxonomies return 501 |
 | Lakehouse (`biglake.v1`) | #401 | `projects.locations.catalogs.{create,get,list,delete}`, `catalogs.databases.{create,get,list,patch,delete}`, `catalogs.databases.tables.{create,get,list,patch,delete}` | Hive-style metadata only: no storage, Iceberg file or query engine. Deletes return the deleted resource. Delete children before their parent. `tables.list` returns full tables for every view. Rename and the Iceberg REST catalog return 501 |
 | Managed Service for Apache Spark (`dataproc.v1`) | #404 | `projects.locations.autoscalingPolicies.{create,get,list,update,delete}`, `projects.locations.sessionTemplates.{create,get,list,patch,delete}` | Configuration only: no cluster, batch, session or autoscaler runs. Updates replace the whole policy or template and cannot change its ID. Clusters, jobs, batches, sessions and workflow templates return 501, as does `projects.regions.*` |
+| Cloud IDS (`ids.v1`) | #344 | `projects.locations.endpoints.{create,get,list,patch,delete}`, `operations.{get,list}` | Endpoints are zonal (for example `us-central1-a`) configuration metadata and report `READY` immediately. No IDS engine, load balancer, packet mirroring or threat log exists, and `endpointIp` stays absent |
+| Cloud Logging (`logging.v2`) | #372 | `projects.sinks.{create,get,list,patch,delete}`, `projects.exclusions.{create,get,list,patch,delete}`, `projects.metrics.{create,get,list,delete}`, `projects.locations.buckets.{create,get,list,patch,delete}`, `buckets.views.{create,get,list,patch,delete}` | Configuration only: no log entry is written, read, routed, excluded, counted or exported. Sinks get no writer identity, `_Default` and `_Required` are not pre-created, bucket locks are refused, deleted buckets are removed immediately and `metrics.update` is not implemented |
+| Cloud Monitoring (`monitoring.v3`) | #374 | `projects.alertPolicies.{create,get,list,patch,delete}`, `projects.notificationChannels.{create,get,list,patch,delete}`, `projects.uptimeCheckConfigs.{create,get,list,patch,delete}` | Server-generated IDs. No metric, incident, probe or notification exists. Channel credentials and uptime check passwords or secret headers are refused. A patch without `updateMask` updates only the supplied fields |
+| Network Connectivity Center (`networkconnectivity.v1`) | #361, #362 | `projects.locations.global.hubs.{create,get,list,patch,delete}`, `projects.locations.spokes.{create,get,list,patch,delete}`, `spokes.gatewayAdvertisedRoutes.{create,get,list,patch,delete}`, `operations.{get,list}` | Hubs, spokes (including NCC gateway spokes) and gateway advertised routes are metadata that report `ACTIVE`. No route is exchanged and no linked resource is resolved. Spoke review, hub groups and route tables are not implemented |
+| Network Management (`networkmanagement.v1`) | #363 | `projects.locations.global.connectivityTests.{create,get,list,patch,delete}`, `global.operations.{get,list}` | Stored test definitions only. No reachability analysis runs, `reachabilityDetails` stays absent and `rerun` is not implemented |
+| Network Security (`networksecurity.v1`) | #353, #354, #364, #367 | `projects.locations.{securityProfiles,securityProfileGroups,firewallEndpoints,firewallEndpointAssociations,mirroringDeploymentGroups,mirroringDeployments,mirroringEndpointGroups,mirroringEndpointGroupAssociations,interceptDeploymentGroups,interceptDeployments,interceptEndpointGroups,interceptEndpointGroupAssociations,gatewaySecurityPolicies,urlLists,tlsInspectionPolicies,addressGroups}.{create,get,list,patch,delete}`, `gatewaySecurityPolicies.rules.{create,get,list,patch,delete}`, `operations.{get,list}` | Configuration metadata. No firewall engine, mirroring, interception, TLS inspection or proxy runs. Firewall endpoints, associations and deployments are zonal. Organization-level resources are not implemented |
+| Network Services (`networkservices.v1`) | #367 | `projects.locations.gateways.{create,get,list,patch,delete}`, `operations.{get,list}` | Secure Web Proxy and mesh gateways are metadata. No proxy is deployed and no address is allocated. Media CDN, meshes and routes are not implemented |
+| Service Directory (`servicedirectory.v1`) | #368 | `projects.locations.namespaces.{create,get,list,patch,delete}`, `namespaces.services.{create,get,list,patch,delete}`, `services.endpoints.{create,get,list,patch,delete}` | Registry metadata. No DNS or resolution (`services.resolve`) exists. Endpoint addresses must be literal IP addresses. Deleting a namespace or service deletes its children, as the official API does |
 
 The capability document lists the same APIs under `gcpCatalog.apis`. Each
 entry includes every implemented method, the number of official methods,
@@ -62,6 +70,9 @@ bounds above.
 - Requests use `/_simulator/providers/gcp/<api>/<official path>`, for example
   `/_simulator/providers/gcp/alloydb/v1/projects/tenkacloud-local/locations/us-central1/clusters`.
   Set the client's `api_endpoint` to `/_simulator/providers/gcp/<api>/`.
+  When several official bindings match one path, such as Cloud Logging's
+  `{+parent}` aliases, the binding with the most literal segments (the
+  `projects.*` method) serves it.
 - The configured project ID or project number is accepted. Only the
   configured project owner (`--cloud-storage-owner`, default
   `simulator-admin`) may call a method. Any other subject or project receives
@@ -70,6 +81,8 @@ bounds above.
   policies grant nothing here.
 - Supported locations are `global`, `us-central1`, `us-east1`, `us-west1`,
   `europe-west1` and `asia-northeast1`. Each location is a separate scope.
+  Zonal collections, such as Cloud IDS endpoints and Cloud NGFW firewall
+  endpoints, use zones of those regions (`us-central1-a` to `us-central1-z`).
 
 ## Request semantics
 

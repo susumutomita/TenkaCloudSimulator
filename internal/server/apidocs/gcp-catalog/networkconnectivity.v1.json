@@ -1,0 +1,2055 @@
+{
+ "components": {
+  "schemas": {
+   "Gateway": {
+    "additionalProperties": false,
+    "properties": {
+     "capacity": {
+      "enum": [
+       "GATEWAY_CAPACITY_UNSPECIFIED",
+       "CAPACITY_1_GBPS",
+       "CAPACITY_10_GBPS"
+      ],
+      "type": "string"
+     },
+     "cloudRouters": {
+      "items": {
+       "type": "string"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "ipRangeReservations": {
+      "items": {
+       "$ref": "#/components/schemas/IpRangeReservation"
+      },
+      "type": "array"
+     },
+     "sacAttachment": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GatewayAdvertisedRoute": {
+    "additionalProperties": false,
+    "properties": {
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "ipRange": {
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "priority": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "recipient": {
+      "enum": [
+       "RECIPIENT_UNSPECIFIED",
+       "ADVERTISE_TO_HUB"
+      ],
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "CREATING",
+       "ACTIVE",
+       "DELETING",
+       "ACCEPTING",
+       "REJECTING",
+       "UPDATING",
+       "INACTIVE",
+       "OBSOLETE",
+       "FAILED"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "uniqueId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleLongrunningListOperationsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "operations": {
+      "items": {
+       "$ref": "#/components/schemas/GoogleLongrunningOperation"
+      },
+      "type": "array"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleLongrunningOperation": {
+    "additionalProperties": false,
+    "properties": {
+     "done": {
+      "type": "boolean"
+     },
+     "error": {
+      "$ref": "#/components/schemas/GoogleRpcStatus"
+     },
+     "metadata": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "response": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleRpcStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "code": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "details": {
+      "items": {
+       "additionalProperties": {
+        "description": "Any JSON value"
+       },
+       "type": "object"
+      },
+      "type": "array"
+     },
+     "message": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Hub": {
+    "additionalProperties": false,
+    "properties": {
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "exportPsc": {
+      "type": "boolean"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "policyMode": {
+      "enum": [
+       "POLICY_MODE_UNSPECIFIED",
+       "PRESET"
+      ],
+      "type": "string"
+     },
+     "presetTopology": {
+      "enum": [
+       "PRESET_TOPOLOGY_UNSPECIFIED",
+       "MESH",
+       "STAR",
+       "HYBRID_INSPECTION"
+      ],
+      "type": "string"
+     },
+     "routeTables": {
+      "items": {
+       "type": "string"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "routingVpcs": {
+      "items": {
+       "$ref": "#/components/schemas/RoutingVPC"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "spokeSummary": {
+      "$ref": "#/components/schemas/SpokeSummary"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "CREATING",
+       "ACTIVE",
+       "DELETING",
+       "ACCEPTING",
+       "REJECTING",
+       "UPDATING",
+       "INACTIVE",
+       "OBSOLETE",
+       "FAILED"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "uniqueId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "IpRangeReservation": {
+    "additionalProperties": false,
+    "properties": {
+     "ipRange": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "LinkedInterconnectAttachments": {
+    "additionalProperties": false,
+    "properties": {
+     "excludeExportRanges": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "excludeImportRanges": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "includeExportRanges": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "includeImportRanges": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "siteToSiteDataTransfer": {
+      "type": "boolean"
+     },
+     "uris": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "vpcNetwork": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "LinkedProducerVpcNetwork": {
+    "additionalProperties": false,
+    "properties": {
+     "excludeExportRanges": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "includeExportRanges": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "network": {
+      "type": "string"
+     },
+     "peering": {
+      "type": "string"
+     },
+     "producerNetwork": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "proposedExcludeExportRanges": {
+      "items": {
+       "type": "string"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "proposedIncludeExportRanges": {
+      "items": {
+       "type": "string"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "serviceConsumerVpcSpoke": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "LinkedRouterApplianceInstances": {
+    "additionalProperties": false,
+    "properties": {
+     "excludeExportRanges": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "excludeImportRanges": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "includeExportRanges": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "includeImportRanges": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "instances": {
+      "items": {
+       "$ref": "#/components/schemas/RouterApplianceInstance"
+      },
+      "type": "array"
+     },
+     "siteToSiteDataTransfer": {
+      "type": "boolean"
+     },
+     "vpcNetwork": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "LinkedVpcNetwork": {
+    "additionalProperties": false,
+    "properties": {
+     "excludeExportRanges": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "includeExportRanges": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "producerVpcSpokes": {
+      "items": {
+       "type": "string"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "proposedExcludeExportRanges": {
+      "items": {
+       "type": "string"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "proposedIncludeExportRanges": {
+      "items": {
+       "type": "string"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "uri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "LinkedVpnTunnels": {
+    "additionalProperties": false,
+    "properties": {
+     "excludeExportRanges": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "excludeImportRanges": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "includeExportRanges": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "includeImportRanges": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "siteToSiteDataTransfer": {
+      "type": "boolean"
+     },
+     "uris": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "vpcNetwork": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListGatewayAdvertisedRoutesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "gatewayAdvertisedRoutes": {
+      "items": {
+       "$ref": "#/components/schemas/GatewayAdvertisedRoute"
+      },
+      "type": "array"
+     },
+     "nextPageToken": {
+      "type": "string"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListHubsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "hubs": {
+      "items": {
+       "$ref": "#/components/schemas/Hub"
+      },
+      "type": "array"
+     },
+     "nextPageToken": {
+      "type": "string"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListSpokesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "spokes": {
+      "items": {
+       "$ref": "#/components/schemas/Spoke"
+      },
+      "type": "array"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "RouterApplianceInstance": {
+    "additionalProperties": false,
+    "properties": {
+     "ipAddress": {
+      "type": "string"
+     },
+     "virtualMachine": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "RoutingVPC": {
+    "additionalProperties": false,
+    "properties": {
+     "requiredForNewSiteToSiteDataTransferSpokes": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "uri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Spoke": {
+    "additionalProperties": false,
+    "properties": {
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "etag": {
+      "type": "string"
+     },
+     "fieldPathsPendingUpdate": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "gateway": {
+      "$ref": "#/components/schemas/Gateway"
+     },
+     "group": {
+      "type": "string"
+     },
+     "hub": {
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "linkedInterconnectAttachments": {
+      "$ref": "#/components/schemas/LinkedInterconnectAttachments"
+     },
+     "linkedProducerVpcNetwork": {
+      "$ref": "#/components/schemas/LinkedProducerVpcNetwork"
+     },
+     "linkedRouterApplianceInstances": {
+      "$ref": "#/components/schemas/LinkedRouterApplianceInstances"
+     },
+     "linkedVpcNetwork": {
+      "$ref": "#/components/schemas/LinkedVpcNetwork"
+     },
+     "linkedVpnTunnels": {
+      "$ref": "#/components/schemas/LinkedVpnTunnels"
+     },
+     "name": {
+      "type": "string"
+     },
+     "reasons": {
+      "items": {
+       "$ref": "#/components/schemas/StateReason"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "spokeType": {
+      "enum": [
+       "SPOKE_TYPE_UNSPECIFIED",
+       "VPN_TUNNEL",
+       "INTERCONNECT_ATTACHMENT",
+       "ROUTER_APPLIANCE",
+       "VPC_NETWORK",
+       "GATEWAY",
+       "PRODUCER_VPC_NETWORK"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "CREATING",
+       "ACTIVE",
+       "DELETING",
+       "ACCEPTING",
+       "REJECTING",
+       "UPDATING",
+       "INACTIVE",
+       "OBSOLETE",
+       "FAILED"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "uniqueId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SpokeStateCount": {
+    "additionalProperties": false,
+    "properties": {
+     "count": {
+      "format": "int64",
+      "readOnly": true,
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "CREATING",
+       "ACTIVE",
+       "DELETING",
+       "ACCEPTING",
+       "REJECTING",
+       "UPDATING",
+       "INACTIVE",
+       "OBSOLETE",
+       "FAILED"
+      ],
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SpokeStateReasonCount": {
+    "additionalProperties": false,
+    "properties": {
+     "count": {
+      "format": "int64",
+      "readOnly": true,
+      "type": "string"
+     },
+     "stateReasonCode": {
+      "enum": [
+       "CODE_UNSPECIFIED",
+       "PENDING_REVIEW",
+       "REJECTED",
+       "PAUSED",
+       "FAILED",
+       "UPDATE_PENDING_REVIEW",
+       "UPDATE_REJECTED",
+       "UPDATE_FAILED"
+      ],
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SpokeSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "spokeStateCounts": {
+      "items": {
+       "$ref": "#/components/schemas/SpokeStateCount"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "spokeStateReasonCounts": {
+      "items": {
+       "$ref": "#/components/schemas/SpokeStateReasonCount"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "spokeTypeCounts": {
+      "items": {
+       "$ref": "#/components/schemas/SpokeTypeCount"
+      },
+      "readOnly": true,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "SpokeTypeCount": {
+    "additionalProperties": false,
+    "properties": {
+     "count": {
+      "format": "int64",
+      "readOnly": true,
+      "type": "string"
+     },
+     "spokeType": {
+      "enum": [
+       "SPOKE_TYPE_UNSPECIFIED",
+       "VPN_TUNNEL",
+       "INTERCONNECT_ATTACHMENT",
+       "ROUTER_APPLIANCE",
+       "VPC_NETWORK",
+       "GATEWAY",
+       "PRODUCER_VPC_NETWORK"
+      ],
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "StateReason": {
+    "additionalProperties": false,
+    "properties": {
+     "code": {
+      "enum": [
+       "CODE_UNSPECIFIED",
+       "PENDING_REVIEW",
+       "REJECTED",
+       "PAUSED",
+       "FAILED",
+       "UPDATE_PENDING_REVIEW",
+       "UPDATE_REJECTED",
+       "UPDATE_FAILED"
+      ],
+      "type": "string"
+     },
+     "message": {
+      "type": "string"
+     },
+     "userDetails": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Network Connectivity API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Hubs, spokes and gateway advertised routes are configuration metadata: no route is exchanged, no VPC, VPN, Interconnect, router appliance or gateway capacity is connected, and every resource reports ACTIVE immediately. A spoke names its hub and exactly one linked resource or gateway; the simulator derives spokeType from it but does not resolve the hub or linked resources, check route-advertisement parents, or block deleting a hub with spokes. Spoke acceptance and rejection, hub groups, route tables, listSpokes and queryStatus are not implemented. Long-running operations complete synchronously.",
+  "title": "Network Connectivity Center (simulator catalog)",
+  "version": "v1"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/v1/projects/{projectsId}/locations/global/hubs": {
+   "get": {
+    "operationId": "networkconnectivity.projects.locations.global.hubs.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListHubsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.global.hubs.list",
+    "tags": [
+     "Network Connectivity Center"
+    ]
+   },
+   "post": {
+    "operationId": "networkconnectivity.projects.locations.global.hubs.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "hubId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Hub"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.global.hubs.create",
+    "tags": [
+     "Network Connectivity Center"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/global/hubs/{hubsId}": {
+   "delete": {
+    "operationId": "networkconnectivity.projects.locations.global.hubs.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "hubsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.global.hubs.delete",
+    "tags": [
+     "Network Connectivity Center"
+    ]
+   },
+   "get": {
+    "operationId": "networkconnectivity.projects.locations.global.hubs.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "hubsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Hub"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.global.hubs.get",
+    "tags": [
+     "Network Connectivity Center"
+    ]
+   },
+   "patch": {
+    "operationId": "networkconnectivity.projects.locations.global.hubs.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "hubsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Hub"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.global.hubs.patch",
+    "tags": [
+     "Network Connectivity Center"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/operations": {
+   "get": {
+    "operationId": "networkconnectivity.projects.locations.operations.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "returnPartialSuccess",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningListOperationsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.operations.list",
+    "tags": [
+     "Network Connectivity Center"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}": {
+   "get": {
+    "operationId": "networkconnectivity.projects.locations.operations.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "operationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.operations.get",
+    "tags": [
+     "Network Connectivity Center"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/spokes": {
+   "get": {
+    "operationId": "networkconnectivity.projects.locations.spokes.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListSpokesResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.spokes.list",
+    "tags": [
+     "Network Connectivity Center"
+    ]
+   },
+   "post": {
+    "operationId": "networkconnectivity.projects.locations.spokes.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "spokeId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Spoke"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.spokes.create",
+    "tags": [
+     "Network Connectivity Center"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/spokes/{spokesId}": {
+   "delete": {
+    "operationId": "networkconnectivity.projects.locations.spokes.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "spokesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.spokes.delete",
+    "tags": [
+     "Network Connectivity Center"
+    ]
+   },
+   "get": {
+    "operationId": "networkconnectivity.projects.locations.spokes.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "spokesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Spoke"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.spokes.get",
+    "tags": [
+     "Network Connectivity Center"
+    ]
+   },
+   "patch": {
+    "operationId": "networkconnectivity.projects.locations.spokes.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "spokesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Spoke"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.spokes.patch",
+    "tags": [
+     "Network Connectivity Center"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/spokes/{spokesId}/gatewayAdvertisedRoutes": {
+   "get": {
+    "operationId": "networkconnectivity.projects.locations.spokes.gatewayAdvertisedRoutes.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "spokesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListGatewayAdvertisedRoutesResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.spokes.gatewayAdvertisedRoutes.list",
+    "tags": [
+     "Network Connectivity Center"
+    ]
+   },
+   "post": {
+    "operationId": "networkconnectivity.projects.locations.spokes.gatewayAdvertisedRoutes.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "spokesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "gatewayAdvertisedRouteId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/GatewayAdvertisedRoute"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.spokes.gatewayAdvertisedRoutes.create",
+    "tags": [
+     "Network Connectivity Center"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/spokes/{spokesId}/gatewayAdvertisedRoutes/{gatewayAdvertisedRoutesId}": {
+   "delete": {
+    "operationId": "networkconnectivity.projects.locations.spokes.gatewayAdvertisedRoutes.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "spokesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "gatewayAdvertisedRoutesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.spokes.gatewayAdvertisedRoutes.delete",
+    "tags": [
+     "Network Connectivity Center"
+    ]
+   },
+   "get": {
+    "operationId": "networkconnectivity.projects.locations.spokes.gatewayAdvertisedRoutes.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "spokesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "gatewayAdvertisedRoutesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GatewayAdvertisedRoute"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.spokes.gatewayAdvertisedRoutes.get",
+    "tags": [
+     "Network Connectivity Center"
+    ]
+   },
+   "patch": {
+    "operationId": "networkconnectivity.projects.locations.spokes.gatewayAdvertisedRoutes.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "spokesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "gatewayAdvertisedRoutesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/GatewayAdvertisedRoute"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.spokes.gatewayAdvertisedRoutes.patch",
+    "tags": [
+     "Network Connectivity Center"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/_simulator/providers/gcp/networkconnectivity"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Network Connectivity API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Hubs, spokes and gateway advertised routes are configuration metadata: no route is exchanged, no VPC, VPN, Interconnect, router appliance or gateway capacity is connected, and every resource reports ACTIVE immediately. A spoke names its hub and exactly one linked resource or gateway; the simulator derives spokeType from it but does not resolve the hub or linked resources, check route-advertisement parents, or block deleting a hub with spokes. Spoke acceptance and rejection, hub groups, route tables, listSpokes and queryStatus are not implemented. Long-running operations complete synchronously.",
+   "name": "Network Connectivity Center"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "google-api-python-client",
+  "version": "2.199.0",
+  "file": "googleapiclient/discovery_cache/documents/networkconnectivity.v1.json",
+  "sha256": "5e517bb6d2c94f22a7f356219643f25e46384801a3b2c163851a1518c1f79595",
+  "license": "Apache-2.0",
+  "revision": "20260715"
+ }
+}

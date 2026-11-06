@@ -98,6 +98,9 @@ type Collection struct {
 	// GoogleFirestoreAdminV1Database or GoogleCloudDataplexV1Lake: a name
 	// under the API TypeURL or a full type.googleapis.com/ URL.
 	Message string
+	// Zonal places the collection in zones of the supported regions, such
+	// as us-central1-a, instead of the regions and global themselves.
+	Zonal bool
 }
 
 // Reference is a field that names another resource of the same API.
@@ -128,6 +131,8 @@ type API struct {
 	// for example "type.googleapis.com/google.cloud.alloydb.v1.".
 	TypeURL string
 	// Scope is "location" or "project": the root under which collections live.
+	// A project-scope collection whose official path names a location (as
+	// Cloud Logging buckets do) lives under that location.
 	Scope       string
 	Collections []*Collection
 	Bindings    []Binding

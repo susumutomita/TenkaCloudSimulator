@@ -10,5 +10,7 @@ func APIs() []*API {
 		filestore, netAppVolumes, memorystoreRedis, memorystoreMemcached, backupAndDR, backupForGKE, firestoreAdmin, spanner,
 		// Data analytics.
 		managedKafka, datastream, dataprocMetastore, dataform, dataFusion, looker, composer, dataplex, bigLake, dataproc,
+		// Networking, network security and operations.
+		serviceDirectory, networkConnectivity, networkManagement, cloudIDS, networkSecurity, networkServices, cloudLogging, cloudMonitoring,
 	}
 }

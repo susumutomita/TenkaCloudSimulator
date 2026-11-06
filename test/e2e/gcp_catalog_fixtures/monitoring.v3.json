@@ -1,0 +1,35 @@
+{
+ "api": "monitoring.v3",
+ "steps": [
+  {"call": "projects.notificationChannels.create", "args": {"name": "projects/tenkacloud-local"}, "body": {"type": "email", "displayName": "Ops", "labels": {"email_address": "ops@example.com"}}, "save": {"r0": "name"}},
+  {"call": "projects.notificationChannels.get", "args": {"name": "${r0}"}},
+  {"call": "projects.notificationChannels.list", "args": {"name": "projects/tenkacloud-local"}, "expect": {"notificationChannels#count": 1}},
+  {"call": "projects.notificationChannels.patch", "args": {"name": "${r0}", "updateMask": "displayName"}, "body": {"displayName": "On-call"}},
+  {"call": "projects.alertPolicies.create", "args": {"name": "projects/tenkacloud-local"}, "body": {"displayName": "High errors", "combiner": "OR", "notificationChannels": ["${r0}"], "conditions": [{"displayName": "errors", "conditionThreshold": {"filter": "metric.type=\"logging.googleapis.com/user/error_count\" AND resource.type=\"global\"", "comparison": "COMPARISON_GT", "thresholdValue": 1, "duration": "60s"}}]}, "save": {"r1": "name"}},
+  {"call": "projects.alertPolicies.get", "args": {"name": "${r1}"}},
+  {"call": "projects.alertPolicies.list", "args": {"name": "projects/tenkacloud-local"}, "expect": {"alertPolicies#count": 1}},
+  {"call": "projects.alertPolicies.patch", "args": {"name": "${r1}", "updateMask": "displayName"}, "body": {"displayName": "Errors"}},
+  {"call": "projects.uptimeCheckConfigs.create", "args": {"parent": "projects/tenkacloud-local"}, "body": {"displayName": "Site", "monitoredResource": {"type": "uptime_url", "labels": {"host": "example.com", "project_id": "tenkacloud-local"}}, "httpCheck": {"path": "/", "port": 443, "useSsl": true}, "timeout": "10s", "period": "60s"}, "save": {"r2": "name"}},
+  {"call": "projects.uptimeCheckConfigs.get", "args": {"name": "${r2}"}},
+  {"call": "projects.uptimeCheckConfigs.list", "args": {"parent": "projects/tenkacloud-local"}, "expect": {"uptimeCheckConfigs#count": 1}},
+  {"call": "projects.uptimeCheckConfigs.patch", "args": {"name": "${r2}", "updateMask": "displayName"}, "body": {"displayName": "Website"}},
+  {"call": "projects.notificationChannels.create", "args": {"name": "projects/tenkacloud-local"}, "error": "INVALID_ARGUMENT", "status": 400, "body": {"type": "slack", "labels": {"auth_token": "not-stored"}}},
+  {"call": "projects.notificationChannels.sendVerificationCode", "args": {"name": "${r0}", "body": {}}, "error": "UNIMPLEMENTED", "status": 501},
+  {"call": "projects.alertPolicies.get", "args": {"name": "projects/tenkacloud-local/alertPolicies/missing"}, "error": "NOT_FOUND", "status": 404},
+  {"call": "projects.alertPolicies.list", "args": {"name": "projects/other-project"}, "error": "PERMISSION_DENIED", "status": 403}
+ ],
+ "isolation": [
+  {"call": "projects.notificationChannels.list", "args": {"name": "projects/tenkacloud-local"}, "expect": {"notificationChannels#count": 0}}
+ ],
+ "after_restart": [
+  {"call": "projects.notificationChannels.get", "args": {"name": "${r0}"}, "expect": {"displayName": "On-call"}},
+  {"call": "projects.alertPolicies.get", "args": {"name": "${r1}"}, "expect": {"displayName": "Errors"}},
+  {"call": "projects.uptimeCheckConfigs.get", "args": {"name": "${r2}"}, "expect": {"displayName": "Website"}}
+ ],
+ "cleanup": [
+  {"call": "projects.uptimeCheckConfigs.delete", "args": {"name": "${r2}"}},
+  {"call": "projects.alertPolicies.delete", "args": {"name": "${r1}"}},
+  {"call": "projects.notificationChannels.delete", "args": {"name": "${r0}"}},
+  {"call": "projects.notificationChannels.list", "args": {"name": "projects/tenkacloud-local"}, "expect": {"notificationChannels#count": 0}}
+ ]
+}

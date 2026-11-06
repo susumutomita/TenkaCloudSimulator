@@ -117,7 +117,7 @@ func (q *request) parentName(parent string) error {
 	}
 	if c.Parent == "" {
 		root := "projects/" + q.e.cfg.Project
-		if q.b.api.Scope == "location" {
+		if q.location != "" {
 			root += "/locations/" + q.location
 		}
 		if parent != root {

@@ -121,3 +121,77 @@ func TestWrappedFullNamesAndMasklessReplacements(t *testing.T) {
 		}
 	}
 }
+
+// zonalAPI places full-name body IDs, implicit parent segments and
+// operations in zones of a project-scope API.
+func zonalAPI(t *testing.T) *binding {
+	t.Helper()
+	zone := "v1/projects/{projectsId}/locations/{locationsId}"
+	node := zone + "/nodes/{nodesId}"
+	methods := map[string]*Method{
+		"projects.locations.nodes.create":              {HTTPMethod: "POST", FlatPath: zone + "/nodes", Request: "Node", Response: "Operation"},
+		"projects.locations.nodes.get":                 {HTTPMethod: "GET", FlatPath: node, Response: "Node"},
+		"projects.locations.nodes.delete":              {HTTPMethod: "DELETE", FlatPath: node, Response: "Operation"},
+		"projects.locations.nodes.groups.ports.create": {HTTPMethod: "POST", FlatPath: node + "/groups/{groupsId}/ports", Request: "Node", Response: "Node", Parameters: map[string]Parameter{"portId": {Type: "string", Location: "query"}}},
+		"projects.locations.nodes.groups.ports.get":    {HTTPMethod: "GET", FlatPath: node + "/groups/{groupsId}/ports/{portsId}", Response: "Node"},
+		"projects.locations.operations.get":            {HTTPMethod: "GET", FlatPath: zone + "/operations/{operationsId}", Response: "Operation"},
+	}
+	routes := map[string]Route{}
+	for id, m := range methods {
+		routes[id] = Route{HTTPMethod: m.HTTPMethod, FlatPath: m.FlatPath}
+	}
+	model := &Model{Key: "mix.v1", Name: "mix", Version: "v1", Title: "Mixed", Source: Source{Package: "google-api-python-client", SHA256: "test", License: "Apache-2.0"},
+		Routes: routes, Methods: methods, Schemas: map[string]*Property{
+			"Node":      {Type: "object", Properties: map[string]*Property{"name": {Type: "string"}, "note": {Type: "string"}}},
+			"Operation": {Type: "object", Properties: map[string]*Property{"name": {Type: "string"}, "done": {Type: "boolean"}, "response": {Type: "object"}}},
+		}}
+	if err := validateModel(model); err != nil {
+		t.Fatal(err)
+	}
+	api := &API{Key: "mix.v1", Title: "Mixed", Issues: []int{1}, Scope: "project", TypeURL: "type.googleapis.com/mix.v1.", Bounds: []string{"test"},
+		Collections: []*Collection{
+			{ID: "nodes", Schema: "Node", Message: "MixNode", IDField: "name", FullName: true, Zonal: true, Permission: "mix.nodes"},
+			{ID: "ports", Schema: "Node", Parent: "nodes", Implicit: "groups", IDParam: "portId", Zonal: true, Permission: "mix.ports"},
+		},
+		Bindings: []Binding{
+			{Method: "projects.locations.nodes.create", Kind: Create, Collection: "nodes"},
+			{Method: "projects.locations.nodes.get", Kind: Get, Collection: "nodes"},
+			{Method: "projects.locations.nodes.delete", Kind: Delete, Collection: "nodes"},
+			{Method: "projects.locations.nodes.groups.ports.create", Kind: Create, Collection: "ports"},
+			{Method: "projects.locations.nodes.groups.ports.get", Kind: Get, Collection: "ports"},
+			{Method: "projects.locations.operations.get", Kind: OperationGet},
+		}}
+	b, err := bindAPI(api, model)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return b
+}
+
+func TestZonalFullNamesImplicitChildrenAndOperations(t *testing.T) {
+	h := newHarness(t)
+	if err := h.engine.add(zonalAPI(t)); err != nil {
+		t.Fatal(err)
+	}
+	zone := "/mix/v1/projects/tenkacloud-local/locations/us-central1-a"
+	node := "projects/tenkacloud-local/locations/us-central1-a/nodes/n1"
+	expect(t, h.call("owner", "POST", "/mix/v1/projects/tenkacloud-local/locations/us-central1/nodes", map[string]any{"name": "projects/tenkacloud-local/locations/us-central1/nodes/n1"}), 400, "INVALID_ARGUMENT")
+	expect(t, h.call("owner", "POST", zone+"/nodes", map[string]any{"name": "projects/tenkacloud-local/locations/us-central1-b/nodes/n1"}), 400, "INVALID_ARGUMENT")
+	created := h.call("owner", "POST", zone+"/nodes", map[string]any{"name": "projects/100000000001/locations/us-central1-a/nodes/n1"})
+	expect(t, created, 200, "")
+	op, _ := created.body["name"].(string)
+	response := created.body["response"].(map[string]any)
+	if !strings.HasPrefix(op, "projects/tenkacloud-local/locations/us-central1-a/operations/") || response["@type"] != "type.googleapis.com/mix.v1.MixNode" || response["name"] != node {
+		t.Fatalf("zonal full-name create %v", created.body)
+	}
+	expect(t, h.call("owner", "GET", "/mix/v1/"+op, nil), 200, "")
+	expect(t, h.call("owner", "POST", zone+"/nodes/missing/groups/g1/ports?portId=p1", map[string]any{}), 404, "NOT_FOUND")
+	expect(t, h.call("owner", "POST", zone+"/nodes/n1/groups/Bad_Group/ports?portId=p1", map[string]any{}), 400, "INVALID_ARGUMENT")
+	port := h.call("owner", "POST", zone+"/nodes/n1/groups/g1/ports?portId=p1", map[string]any{})
+	expect(t, port, 200, "")
+	if port.body["name"] != node+"/groups/g1/ports/p1" {
+		t.Fatalf("implicit zonal child %v", port.body)
+	}
+	expect(t, h.call("owner", "GET", zone+"/nodes/n1/groups/g1/ports/p1", nil), 200, "")
+	expect(t, h.call("owner", "DELETE", zone+"/nodes/n1", nil), 400, "FAILED_PRECONDITION")
+}
