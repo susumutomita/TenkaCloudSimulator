@@ -1,0 +1,38 @@
+{
+ "api": "firestore.v1",
+ "steps": [
+  {"call": "projects.databases.create", "args": {"parent": "projects/tenkacloud-local", "databaseId": "(default)"}, "body": {"locationId": "nam5", "type": "FIRESTORE_NATIVE", "deleteProtectionState": "DELETE_PROTECTION_ENABLED"}, "save": {"op": "name", "database": "response.name"}, "expect": {"done": true, "response.name": "projects/tenkacloud-local/databases/(default)"}},
+  {"call": "projects.databases.operations.get", "args": {"name": "${op}"}, "expect": {"response.locationId": "nam5"}},
+  {"call": "projects.databases.operations.list", "args": {"name": "${database}"}, "expect": {"operations#count": 1}},
+  {"call": "projects.databases.get", "args": {"name": "${database}"}, "expect": {"type": "FIRESTORE_NATIVE"}},
+  {"call": "projects.databases.list", "args": {"parent": "projects/tenkacloud-local"}, "expect": {"databases#count": 1}},
+  {"call": "projects.databases.patch", "args": {"name": "${database}", "updateMask": "pointInTimeRecoveryEnablement"}, "body": {"pointInTimeRecoveryEnablement": "POINT_IN_TIME_RECOVERY_ENABLED"}},
+  {"call": "projects.databases.backupSchedules.create", "args": {"parent": "${database}"}, "body": {"retention": "604800s", "dailyRecurrence": {}}, "save": {"schedule": "name"}},
+  {"call": "projects.databases.backupSchedules.get", "args": {"name": "${schedule}"}, "expect": {"retention": "604800s"}},
+  {"call": "projects.databases.backupSchedules.list", "args": {"parent": "${database}"}, "expect": {"backupSchedules#count": 1}},
+  {"call": "projects.databases.backupSchedules.patch", "args": {"name": "${schedule}", "updateMask": "retention"}, "body": {"retention": "1209600s"}},
+  {"call": "projects.databases.backupSchedules.create", "args": {"parent": "${database}"}, "body": {"retention": "604800s"}, "error": "INVALID_ARGUMENT", "status": 400},
+  {"call": "projects.databases.collectionGroups.indexes.create", "args": {"parent": "${database}/collectionGroups/users"}, "body": {"queryScope": "COLLECTION", "fields": [{"fieldPath": "city", "order": "ASCENDING"}, {"fieldPath": "age", "order": "DESCENDING"}]}, "save": {"index": "response.name"}, "expect": {"response.state": "READY"}},
+  {"call": "projects.databases.collectionGroups.indexes.get", "args": {"name": "${index}"}, "expect": {"fields[1].fieldPath": "age"}},
+  {"call": "projects.databases.collectionGroups.indexes.list", "args": {"parent": "${database}/collectionGroups/users"}, "expect": {"indexes#count": 1}},
+  {"call": "projects.databases.collectionGroups.indexes.create", "args": {"parent": "${database}/collectionGroups/users"}, "body": {"fields": [{"fieldPath": "city", "order": "ASCENDING"}]}, "error": "INVALID_ARGUMENT", "status": 400},
+  {"call": "projects.databases.collectionGroups.fields.patch", "args": {"name": "${database}/collectionGroups/users/fields/city", "body": {"ttlConfig": {}}}, "error": "UNIMPLEMENTED", "status": 501},
+  {"call": "projects.databases.delete", "args": {"name": "${database}"}, "error": "FAILED_PRECONDITION", "status": 400},
+  {"call": "projects.databases.documents.get", "args": {"name": "${database}/documents/users/alice"}, "error": "UNIMPLEMENTED", "status": 501},
+  {"call": "projects.databases.list", "args": {"parent": "projects/other-project"}, "error": "PERMISSION_DENIED", "status": 403}
+ ],
+ "isolation": [
+  {"call": "projects.databases.list", "args": {"parent": "projects/tenkacloud-local"}, "expect": {"databases#count": 0}}
+ ],
+ "after_restart": [
+  {"call": "projects.databases.get", "args": {"name": "${database}"}, "expect": {"pointInTimeRecoveryEnablement": "POINT_IN_TIME_RECOVERY_ENABLED"}},
+  {"call": "projects.databases.backupSchedules.get", "args": {"name": "${schedule}"}, "expect": {"retention": "1209600s"}}
+ ],
+ "cleanup": [
+  {"call": "projects.databases.collectionGroups.indexes.delete", "args": {"name": "${index}"}},
+  {"call": "projects.databases.backupSchedules.delete", "args": {"name": "${schedule}"}},
+  {"call": "projects.databases.patch", "args": {"name": "${database}", "updateMask": "deleteProtectionState"}, "body": {"deleteProtectionState": "DELETE_PROTECTION_DISABLED"}},
+  {"call": "projects.databases.delete", "args": {"name": "${database}"}},
+  {"call": "projects.databases.list", "args": {"parent": "projects/tenkacloud-local"}, "expect": {"databases#count": 0}}
+ ]
+}

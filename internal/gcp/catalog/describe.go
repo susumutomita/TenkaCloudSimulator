@@ -27,6 +27,7 @@ type CollectionDescriptor struct {
 	ID         string                      `json:"id"`
 	Schema     string                      `json:"schema"`
 	Parent     string                      `json:"parent,omitempty"`
+	Implicit   string                      `json:"implicit,omitempty"`
 	IDParam    string                      `json:"idParam,omitempty"`
 	Limit      int                         `json:"limit"`
 	Mutable    []string                    `json:"mutable,omitempty"`
@@ -61,7 +62,7 @@ func (e *Engine) Describe() []Descriptor {
 		}
 		sort.Strings(d.Methods)
 		for _, c := range b.api.Collections {
-			cd := CollectionDescriptor{ID: c.ID, Schema: c.Schema, Parent: c.Parent, IDParam: c.IDParam, Limit: c.Limit, Mutable: c.Mutable, Permission: c.Permission, Methods: map[string]MethodDescriptor{}}
+			cd := CollectionDescriptor{ID: c.ID, Schema: c.Schema, Parent: c.Parent, Implicit: c.Implicit, IDParam: c.IDParam, Limit: c.Limit, Mutable: c.Mutable, Permission: c.Permission, Methods: map[string]MethodDescriptor{}}
 			if cd.Limit == 0 {
 				cd.Limit = defaultLimit
 			}

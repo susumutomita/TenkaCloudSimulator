@@ -25,6 +25,13 @@ type Binding struct {
 	// Refuse lists official query parameters the simulator does not
 	// implement; a request setting one to a non-default value is refused.
 	Refuse []string
+	// Unwrap maps a request body that wraps or derives the resource, such
+	// as Spanner's CreateInstanceRequest, to the resource and its key: the
+	// new resource ID for create, the update mask for patch.
+	Unwrap func(body map[string]any) (resource map[string]any, key string, err error)
+	// Permission overrides the derived IAM permission, for APIs whose
+	// operation permissions use another prefix.
+	Permission string
 }
 
 // Collection is one resource collection in Google resource-name form.
@@ -36,6 +43,12 @@ type Collection struct {
 	// Parent names the parent collection; "" means the API scope root
 	// (projects/{project}/locations/{location} or projects/{project}).
 	Parent string
+	// Implicit names an unstored collection segment between Parent and
+	// this collection, such as Firestore collection groups: the parent path
+	// is <parent>/<Implicit>/<id>, where id matches ImplicitPattern (the
+	// AIP-122 ID pattern when nil).
+	Implicit        string
+	ImplicitPattern *regexp.Regexp
 	// IDParam is the create query parameter carrying the client-chosen ID;
 	// "" with an empty IDField means the server generates one.
 	IDParam string
@@ -59,9 +72,43 @@ type Collection struct {
 	// Relax lists fields whose official "Required." marker is superseded
 	// by an alternative field; a Check hook then enforces the alternative.
 	Relax []string
-	// Cascade lets delete with force=true remove children; otherwise
-	// deleting a parent with children fails with FAILED_PRECONDITION.
+	// Cascade lets delete remove children: with force=true when the
+	// official delete method has a force parameter, and always when it has
+	// none. Otherwise deleting a parent with children fails with
+	// FAILED_PRECONDITION.
 	Cascade bool
+	// References maps top-level fields to the same-API collection whose
+	// existing resource they must name at create and update.
+	References map[string]Reference
+	// Protection lists stored field values, such as a deletion protection
+	// flag, that make delete fail with FAILED_PRECONDITION.
+	Protection map[string]any
+	// Operations names the collection (this one or an ancestor) whose
+	// resource name prefixes this collection's long-running operations,
+	// as in projects/{project}/databases/{database}/operations/{operation}.
+	// "" places them under the API scope root.
+	Operations string
+	// Message is the operation response type when it differs from Schema,
+	// for discovery schemas such as GoogleFirestoreAdminV1Database: a name
+	// under the API TypeURL or a full type.googleapis.com/ URL.
+	Message string
+}
+
+// Reference is a field that names another resource of the same API.
+type Reference struct {
+	Collection string
+	// Blocks refuses deleting the referenced resource while it is named.
+	Blocks bool
+	// Override is a delete query parameter that lifts Blocks when true,
+	// such as ignoreBackupPlanReferences.
+	Override string
+}
+
+func (c *Collection) message() string {
+	if c.Message != "" {
+		return c.Message
+	}
+	return c.Schema
 }
 
 // API is a reviewed bounded specification of one official Google API.

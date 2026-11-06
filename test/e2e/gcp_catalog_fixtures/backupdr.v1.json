@@ -1,0 +1,36 @@
+{
+ "api": "backupdr.v1",
+ "steps": [
+  {"call": "projects.locations.backupVaults.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "backupVaultId": "fixture"}, "body": {"backupMinimumEnforcedRetentionDuration": "86400s", "labels": {"team": "a"}}, "save": {"op": "name", "vault": "response.name"}, "expect": {"done": true}},
+  {"call": "projects.locations.operations.get", "args": {"name": "${op}"}, "expect": {"response.state": "ACTIVE"}},
+  {"call": "projects.locations.operations.list", "args": {"name": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"operations#count": 1}},
+  {"call": "projects.locations.backupVaults.get", "args": {"name": "${vault}"}, "expect": {"backupMinimumEnforcedRetentionDuration": "86400s", "deletable": true}},
+  {"call": "projects.locations.backupVaults.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"backupVaults#count": 1}},
+  {"call": "projects.locations.backupVaults.patch", "args": {"name": "${vault}", "updateMask": "description"}, "body": {"description": "Fixture"}},
+  {"call": "projects.locations.backupPlans.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "backupPlanId": "daily"}, "body": {"backupVault": "${vault}", "resourceType": "compute.googleapis.com/Instance", "backupRules": [{"ruleId": "daily", "backupRetentionDays": 7, "standardSchedule": {"recurrenceType": "DAILY", "timeZone": "UTC", "backupWindow": {"startHourOfDay": 1, "endHourOfDay": 5}}}]}, "save": {"plan": "response.name"}},
+  {"call": "projects.locations.backupPlans.get", "args": {"name": "${plan}"}, "expect": {"backupVault": "${vault}", "backupRules[0].ruleId": "daily"}},
+  {"call": "projects.locations.backupPlans.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"backupPlans#count": 1}},
+  {"call": "projects.locations.backupPlans.patch", "args": {"name": "${plan}", "updateMask": "description"}, "body": {"description": "Daily"}},
+  {"call": "projects.locations.managementServers.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "managementServerId": "console"}, "body": {"type": "BACKUP_RESTORE", "networks": [{"network": "projects/tenkacloud-local/global/networks/default"}]}, "save": {"server": "response.name"}},
+  {"call": "projects.locations.managementServers.get", "args": {"name": "${server}"}, "expect": {"state": "READY"}},
+  {"call": "projects.locations.managementServers.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"managementServers#count": 1}},
+  {"call": "projects.locations.backupPlans.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "backupPlanId": "orphan"}, "body": {"backupVault": "projects/tenkacloud-local/locations/us-central1/backupVaults/missing", "resourceType": "compute.googleapis.com/Instance"}, "error": "NOT_FOUND", "status": 404},
+  {"call": "projects.locations.backupVaults.delete", "args": {"name": "${vault}"}, "error": "FAILED_PRECONDITION", "status": 400},
+  {"call": "projects.locations.backupVaults.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "backupVaultId": "locked"}, "body": {"backupMinimumEnforcedRetentionDuration": "86400s", "effectiveTime": "2026-12-01T00:00:00Z"}, "error": "INVALID_ARGUMENT", "status": 400},
+  {"call": "projects.locations.backupPlanAssociations.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "backupPlanAssociationId": "a", "body": {"backupPlan": "${plan}", "resource": "projects/tenkacloud-local/zones/us-central1-a/instances/vm", "resourceType": "compute.googleapis.com/Instance"}}, "error": "UNIMPLEMENTED", "status": 501},
+  {"call": "projects.locations.backupVaults.list", "args": {"parent": "projects/other-project/locations/us-central1"}, "error": "PERMISSION_DENIED", "status": 403}
+ ],
+ "isolation": [
+  {"call": "projects.locations.backupVaults.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"backupVaults#count": 0}}
+ ],
+ "after_restart": [
+  {"call": "projects.locations.backupPlans.get", "args": {"name": "${plan}"}, "expect": {"description": "Daily"}}
+ ],
+ "cleanup": [
+  {"call": "projects.locations.backupPlans.delete", "args": {"name": "${plan}"}},
+  {"call": "projects.locations.backupVaults.delete", "args": {"name": "${vault}"}},
+  {"call": "projects.locations.managementServers.delete", "args": {"name": "${server}"}},
+  {"call": "projects.locations.backupVaults.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"backupVaults#count": 0}},
+  {"call": "projects.locations.managementServers.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"managementServers#count": 0}}
+ ]
+}

@@ -34,6 +34,8 @@ func newStore(db *sql.DB) (*store, error) {
 	if db == nil {
 		return nil, errors.New("the GCP catalog requires a provider database")
 	}
+	// Resource names are unique per API, as in Google Cloud: Memorystore
+	// and Filestore may each hold projects/p/locations/l/instances/x.
 	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS gcp_catalog_resources(
  api TEXT NOT NULL, name TEXT NOT NULL, parent TEXT NOT NULL, collection TEXT NOT NULL,
  id TEXT NOT NULL, document TEXT NOT NULL, seq INTEGER NOT NULL, generation INTEGER NOT NULL, PRIMARY KEY(api, name));
