@@ -40,6 +40,12 @@ type Collection struct {
 	// Parent names the parent collection; "" means the API scope root
 	// (projects/{project}/locations/{location} or projects/{project}).
 	Parent string
+	// Implicit names an unstored collection segment between Parent and
+	// this collection, such as Firestore collection groups: the parent path
+	// is <parent>/<Implicit>/<id>, where id matches ImplicitPattern (the
+	// AIP-122 ID pattern when nil).
+	Implicit        string
+	ImplicitPattern *regexp.Regexp
 	// IDParam is the create query parameter carrying the client-chosen ID;
 	// "" with an empty IDField means the server generates one.
 	IDParam string

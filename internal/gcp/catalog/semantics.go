@@ -103,6 +103,18 @@ func (q *request) find(name string) (row, error) {
 // parentName validates the parent of a collection path and that it exists.
 func (q *request) parentName(parent string) error {
 	c := q.collection()
+	if c.Implicit != "" {
+		segments := strings.Split(parent, "/")
+		n := len(segments)
+		pattern := resourceID
+		if c.ImplicitPattern != nil {
+			pattern = c.ImplicitPattern
+		}
+		if n < 4 || segments[n-2] != c.Implicit || !pattern.MatchString(segments[n-1]) {
+			return invalid("Parent %q is not a valid %s parent.", parent, c.ID)
+		}
+		parent = strings.Join(segments[:n-2], "/")
+	}
 	if c.Parent == "" {
 		root := "projects/" + q.e.cfg.Project
 		if q.b.api.Scope == "location" {

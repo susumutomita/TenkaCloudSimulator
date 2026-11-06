@@ -118,17 +118,19 @@ func referenceAPI(t *testing.T) (*API, *Model) {
 	pool := "v1/projects/{projectsId}/pools/{poolsId}"
 	volume := "v1/projects/{projectsId}/volumes/{volumesId}"
 	methods := map[string]*Method{
-		"projects.pools.create":          {HTTPMethod: "POST", FlatPath: "v1/projects/{projectsId}/pools", Request: "SynthPool", Response: "Operation", Parameters: map[string]Parameter{"poolId": {Type: "string", Location: "query"}}},
-		"projects.pools.patch":           {HTTPMethod: "PATCH", FlatPath: pool, Request: "SynthPool", Response: "Operation", Parameters: map[string]Parameter{"updateMask": {Type: "string", Location: "query"}}},
-		"projects.pools.delete":          {HTTPMethod: "DELETE", FlatPath: pool, Response: "Operation", Parameters: map[string]Parameter{"ignoreReferences": {Type: "boolean", Location: "query"}}},
-		"projects.pools.members.create":  {HTTPMethod: "POST", FlatPath: pool + "/members", Request: "CreateMemberRequest", Response: "Volume"},
-		"projects.pools.members.patch":   {HTTPMethod: "PATCH", FlatPath: pool + "/members/{membersId}", Request: "UpdateMemberRequest", Response: "Volume"},
-		"projects.pools.members.get":     {HTTPMethod: "GET", FlatPath: pool + "/members/{membersId}", Response: "Volume"},
-		"projects.pools.operations.get":  {HTTPMethod: "GET", FlatPath: pool + "/operations/{operationsId}", Response: "Operation"},
-		"projects.pools.operations.list": {HTTPMethod: "GET", FlatPath: pool + "/operations", Response: "ListOperationsResponse"},
-		"projects.volumes.create":        {HTTPMethod: "POST", FlatPath: "v1/projects/{projectsId}/volumes", Request: "Volume", Response: "Volume", Parameters: map[string]Parameter{"volumeId": {Type: "string", Location: "query"}}},
-		"projects.volumes.patch":         {HTTPMethod: "PATCH", FlatPath: volume, Request: "Volume", Response: "Volume", Parameters: map[string]Parameter{"updateMask": {Type: "string", Location: "query"}}},
-		"projects.volumes.delete":        {HTTPMethod: "DELETE", FlatPath: volume, Response: "Empty"},
+		"projects.pools.create":             {HTTPMethod: "POST", FlatPath: "v1/projects/{projectsId}/pools", Request: "SynthPool", Response: "Operation", Parameters: map[string]Parameter{"poolId": {Type: "string", Location: "query"}}},
+		"projects.pools.patch":              {HTTPMethod: "PATCH", FlatPath: pool, Request: "SynthPool", Response: "Operation", Parameters: map[string]Parameter{"updateMask": {Type: "string", Location: "query"}}},
+		"projects.pools.delete":             {HTTPMethod: "DELETE", FlatPath: pool, Response: "Operation", Parameters: map[string]Parameter{"ignoreReferences": {Type: "boolean", Location: "query"}}},
+		"projects.pools.members.create":     {HTTPMethod: "POST", FlatPath: pool + "/members", Request: "CreateMemberRequest", Response: "Volume"},
+		"projects.pools.members.patch":      {HTTPMethod: "PATCH", FlatPath: pool + "/members/{membersId}", Request: "UpdateMemberRequest", Response: "Volume"},
+		"projects.pools.groups.tags.create": {HTTPMethod: "POST", FlatPath: pool + "/groups/{groupsId}/tags", Request: "Volume", Response: "Volume"},
+		"projects.pools.groups.tags.list":   {HTTPMethod: "GET", FlatPath: pool + "/groups/{groupsId}/tags", Response: "ListTagsResponse"},
+		"projects.pools.members.get":        {HTTPMethod: "GET", FlatPath: pool + "/members/{membersId}", Response: "Volume"},
+		"projects.pools.operations.get":     {HTTPMethod: "GET", FlatPath: pool + "/operations/{operationsId}", Response: "Operation"},
+		"projects.pools.operations.list":    {HTTPMethod: "GET", FlatPath: pool + "/operations", Response: "ListOperationsResponse"},
+		"projects.volumes.create":           {HTTPMethod: "POST", FlatPath: "v1/projects/{projectsId}/volumes", Request: "Volume", Response: "Volume", Parameters: map[string]Parameter{"volumeId": {Type: "string", Location: "query"}}},
+		"projects.volumes.patch":            {HTTPMethod: "PATCH", FlatPath: volume, Request: "Volume", Response: "Volume", Parameters: map[string]Parameter{"updateMask": {Type: "string", Location: "query"}}},
+		"projects.volumes.delete":           {HTTPMethod: "DELETE", FlatPath: volume, Response: "Empty"},
 	}
 	routes := map[string]Route{}
 	for id, m := range methods {
@@ -141,6 +143,7 @@ func referenceAPI(t *testing.T) (*API, *Model) {
 			"Operation":              {Type: "object", Properties: map[string]*Property{"name": {Type: "string"}, "done": {Type: "boolean"}, "response": {Type: "object"}}},
 			"ListOperationsResponse": {Type: "object", Properties: map[string]*Property{"operations": {Type: "array", Items: &Property{Ref: "Operation"}}}},
 			"Empty":                  {Type: "object", Properties: map[string]*Property{}},
+			"ListTagsResponse":       {Type: "object", Properties: map[string]*Property{"tags": {Type: "array", Items: &Property{Ref: "Volume"}}}},
 			"CreateMemberRequest":    {Type: "object", Properties: map[string]*Property{"memberId": {Type: "string"}, "member": {Ref: "Volume"}}},
 			"UpdateMemberRequest":    {Type: "object", Properties: map[string]*Property{"fieldMask": {Type: "string"}, "member": {Ref: "Volume"}}},
 		}}
@@ -150,6 +153,7 @@ func referenceAPI(t *testing.T) (*API, *Model) {
 	api := &API{Key: "refs.v1", Title: "References", Issues: []int{1}, Scope: "project", TypeURL: "type.googleapis.com/test.", Bounds: []string{"test"},
 		Collections: []*Collection{
 			{ID: "pools", Schema: "SynthPool", Message: "type.googleapis.com/other.Pool", IDParam: "poolId", Permission: "refs.pools", Operations: "pools", Cascade: true, Mutable: []string{"protected", "note"}, Protection: map[string]any{"protected": true}},
+			{ID: "tags", Schema: "Volume", Parent: "pools", Implicit: "groups", Permission: "refs.tags"},
 			{ID: "members", Schema: "Volume", Parent: "pools", Permission: "refs.members", Mutable: []string{"note"}, Protection: map[string]any{"note": "locked"}},
 			{ID: "volumes", Schema: "Volume", IDParam: "volumeId", Permission: "refs.volumes", Mutable: []string{"origin", "note"},
 				References: map[string]Reference{"pool": {Collection: "pools", Blocks: true, Override: "ignoreReferences"}, "origin": {Collection: "pools"}}},
@@ -161,6 +165,9 @@ func referenceAPI(t *testing.T) (*API, *Model) {
 		}
 		if strings.HasPrefix(id, "projects.pools.members.") {
 			collection = "members"
+		}
+		if strings.HasPrefix(id, "projects.pools.groups.tags.") {
+			collection = "tags"
 		}
 		if strings.Contains(id, ".operations.") {
 			kind, collection = OperationGet, ""
@@ -257,6 +264,28 @@ func TestReferencesProtectionAndOperationAnchors(t *testing.T) {
 	expect(t, h.call("owner", "GET", "/refs/v1/"+member.body["name"].(string), nil), 404, "NOT_FOUND")
 	h.call("owner", "POST", base+"/pools?poolId=c", map[string]any{})
 	h.call("owner", "POST", base+"/volumes?volumeId=x", map[string]any{"pool": "projects/tenkacloud-local/pools/c"})
+	// Implicit parent segments are validated but not stored, and their
+	// children cascade with the stored parent.
+	h.call("owner", "POST", base+"/pools?poolId=g", map[string]any{})
+	tag := h.call("owner", "POST", base+"/pools/g/groups/blue/tags", map[string]any{"note": "t"})
+	expect(t, tag, 200, "")
+	if !strings.HasPrefix(tag.body["name"].(string), "projects/tenkacloud-local/pools/g/groups/blue/tags/") {
+		t.Fatalf("implicit child name %v", tag.body)
+	}
+	if items := h.call("owner", "GET", base+"/pools/g/groups/blue/tags", nil).body["tags"].([]any); len(items) != 1 {
+		t.Fatalf("implicit children %v", items)
+	}
+	expect(t, h.call("owner", "POST", base+"/pools/g/groups/Bad_Group/tags", map[string]any{}), 400, "INVALID_ARGUMENT")
+	expect(t, h.call("owner", "POST", base+"/pools/missing/groups/blue/tags", map[string]any{}), 404, "NOT_FOUND")
+	expect(t, h.call("owner", "DELETE", base+"/pools/g", nil), 200, "")
+	if items := h.call("owner", "GET", base+"/pools/g/groups/blue/tags", nil); items.status != 404 {
+		t.Fatalf("implicit children outlived their parent: %v", items.raw)
+	}
+	for _, d := range h.engine.Describe() {
+		if d.Name == "refs" && d.Collections[1].Implicit != "groups" {
+			t.Fatalf("descriptor %+v", d.Collections[1])
+		}
+	}
 	// A corrupt child fails the protected-child scan of a cascade.
 	h.call("owner", "POST", base+"/pools?poolId=e", map[string]any{})
 	h.call("owner", "POST", base+"/pools/e/members", map[string]any{"memberId": "bad"})
@@ -274,7 +303,7 @@ func TestReferencesProtectionAndOperationAnchors(t *testing.T) {
 	for name, broken := range map[string]func(*API){
 		"reference field":      func(a *API) { a.Collections[1].References = map[string]Reference{"nope": {Collection: "pools"}} },
 		"reference collection": func(a *API) { a.Collections[1].References = map[string]Reference{"pool": {Collection: "nope"}} },
-		"operations anchor":    func(a *API) { a.Collections[2].Operations = "pools" },
+		"operations anchor":    func(a *API) { a.Collections[3].Operations = "pools" },
 	} {
 		api, model := referenceAPI(t)
 		broken(api)
