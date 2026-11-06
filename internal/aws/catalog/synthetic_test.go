@@ -206,7 +206,7 @@ func TestQuotasNamesAndListValues(t *testing.T) {
 		many = append(many, map[string]any{"Key": strings.Repeat("k", i+1), "Value": "v"})
 	}
 	expect(t, h.json1("synthetic", "DeleteWidget", map[string]any{"WidgetId": ids[1]}), 200, "")
-	expect(t, h.json1("synthetic", "CreateWidget", map[string]any{"Name": "tagged", "Tags": many}), 400, "ValidationException")
+	expect(t, h.json1("synthetic", "CreateWidget", map[string]any{"Name": "tagged", "Tags": many}), 400, "LimitExceededException")
 }
 
 func TestConcurrentChangeIsDetectedByGeneration(t *testing.T) {

@@ -51,9 +51,19 @@ type Op struct {
 	Check func(input map[string]any) error
 	// Failures names the output list that reports identifiers of Names that do
 	// not exist, instead of failing the whole request; FailureItem builds
-	// each element, replacing "$name" with the missing identifier.
+	// each element, replacing "$name" with the missing identifier. Without
+	// FailureItem the list holds the missing identifiers themselves.
 	Failures    string
 	FailureItem map[string]any
+	// LookupAlt lists alternative identifying members (for example a name
+	// or an ARN); the first one supplied identifies the resource. Lookup may
+	// also be a dotted path into a structure member.
+	LookupAlt []string
+	// IdempotentDelete makes deleting a missing resource succeed, as the
+	// official operation documents.
+	IdempotentDelete bool
+	// HasMore names a boolean output member that reports a further page.
+	HasMore string
 }
 
 // Failure returns a semantic validation error with a modeled exception code

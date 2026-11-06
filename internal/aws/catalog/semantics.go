@@ -64,8 +64,25 @@ func (q *request) identifier() string {
 	if q.resource() != nil && q.resource().Singleton {
 		return "default"
 	}
-	value, _ := q.input[q.op.Lookup].(string)
-	return value
+	for _, member := range append([]string{q.op.Lookup}, q.op.LookupAlt...) {
+		if value, ok := lookupPath(q.input, member).(string); ok && value != "" {
+			return value
+		}
+	}
+	return ""
+}
+
+// lookupPath reads a member or a dotted path into nested structures.
+func lookupPath(input map[string]any, path string) any {
+	var current any = input
+	for _, part := range strings.Split(path, ".") {
+		object, ok := current.(map[string]any)
+		if !ok {
+			return nil
+		}
+		current = object[part]
+	}
+	return current
 }
 
 // put creates the identified resource or replaces the supplied members of
@@ -106,7 +123,7 @@ func (q *request) put() (map[string]any, error) {
 			found.Tags[k] = v
 		}
 		if len(found.Tags) > maxTagsPerResource {
-			return nil, &fault{kind: "limit", message: fmt.Sprintf("At most %d tags are supported per resource.", maxTagsPerResource)}
+			return nil, &fault{kind: "tags", message: fmt.Sprintf("At most %d tags are supported per resource.", maxTagsPerResource)}
 		}
 	}
 	for _, key := range q.op.Touch {
@@ -142,8 +159,13 @@ func (q *request) members() map[string]any {
 
 // passive reports input members that carry no state change of their own.
 func (q *request) passive(key string) bool {
-	if key == q.op.Lookup || key == q.op.Parent || key == q.op.Names {
+	if key == q.op.Lookup || key == q.op.Parent || key == q.op.Names || key == strings.Split(q.op.Lookup, ".")[0] {
 		return true
+	}
+	for _, member := range q.op.LookupAlt {
+		if key == member {
+			return true
+		}
 	}
 	for _, member := range q.op.Accept {
 		if key == member {
@@ -351,6 +373,11 @@ func (m *Model) tagLike(shapeName string) (string, string, string) {
 
 func (q *request) tagMember(shapeName string) string {
 	shape := q.b.model.shape(shapeName)
+	for _, name := range []string{"Tags", "tags", "TagList", "tagList", "Tag"} {
+		if member, ok := shape.Members[name]; ok && q.b.model.isTagShape(member.Shape) {
+			return name
+		}
+	}
 	for _, name := range shape.sortedMembers() {
 		if kind, _, _ := q.b.model.tagLike(shape.Members[name].Shape); kind != "" && strings.Contains(strings.ToLower(name), "tag") {
 			return name
@@ -423,6 +450,24 @@ func fingerprint(input map[string]any, skip string) string {
 func (q *request) now() time.Time { return q.e.cfg.Now().UTC().Truncate(time.Millisecond) }
 
 func (q *request) generated(value any, r row, parent *row) any {
+	switch nested := value.(type) {
+	case map[string]any:
+		out := map[string]any{}
+		for key, item := range nested {
+			if generated := q.generated(item, r, parent); generated != nil {
+				out[key] = generated
+			}
+		}
+		return out
+	case []any:
+		out := []any{}
+		for _, item := range nested {
+			if generated := q.generated(item, r, parent); generated != nil {
+				out = append(out, generated)
+			}
+		}
+		return out
+	}
 	text, ok := value.(string)
 	if !ok || !strings.HasPrefix(text, "$") {
 		return value
@@ -512,7 +557,7 @@ func (q *request) create() (map[string]any, error) {
 		}
 	}
 	if len(tags) > maxTagsPerResource {
-		return nil, invalid("At most %d tags are supported per resource.", maxTagsPerResource)
+		return nil, &fault{kind: "tags", message: fmt.Sprintf("At most %d tags are supported per resource.", maxTagsPerResource)}
 	}
 	r := row{Service: q.b.spec.Model, Region: q.region, Kind: res.Kind, Parent: parentID(parent), ID: id, Name: name, Tags: tags}
 	r.ARN = q.formatARN(res, id, name, parent)
@@ -722,8 +767,16 @@ func (q *request) remove() (map[string]any, error) {
 		return nil, err
 	}
 	r, parent, err := q.lookup()
+	var missing *fault
+	if errors.As(err, &missing) && missing.kind == "notfound" && q.op.IdempotentDelete {
+		// The official operation succeeds when the resource is already gone.
+		return map[string]any{}, nil
+	}
 	if err != nil {
 		return nil, err
+	}
+	if r.Seq == 0 {
+		return nil, &fault{kind: "notfound", message: fmt.Sprintf("The %s has no stored configuration.", q.resource().Kind)}
 	}
 	res := q.resource()
 	kinds := q.children(res)
@@ -762,14 +815,14 @@ func (q *request) pagination() (string, string, string) {
 	var inputToken, outputToken, limitKey string
 	in := q.b.model.shape(q.official.Input)
 	out := q.b.model.Shapes[q.official.Output]
-	for _, name := range []string{"NextToken", "nextToken"} {
+	for _, name := range []string{"NextToken", "nextToken", "Marker", "marker"} {
 		if _, ok := in.Members[name]; ok && out != nil {
 			if _, ok := out.Members[name]; ok {
 				inputToken, outputToken = name, name
 			}
 		}
 	}
-	for _, name := range []string{"MaxResults", "maxResults"} {
+	for _, name := range []string{"MaxResults", "maxResults", "Limit", "limit", "MaxItems", "maxItems", "MaxRecords", "PageSize", "pageSize"} {
 		if _, ok := in.Members[name]; ok {
 			limitKey = name
 		}
@@ -848,6 +901,10 @@ func (q *request) list() (map[string]any, error) {
 				}
 			}
 			if match == nil && q.op.Failures != "" {
+				if q.op.FailureItem == nil {
+					failures = append(failures, identifier)
+					continue
+				}
 				item := map[string]any{}
 				for key, value := range q.op.FailureItem {
 					if text, ok := value.(string); ok {
@@ -895,6 +952,9 @@ func (q *request) list() (map[string]any, error) {
 		next = base64.RawURLEncoding.EncodeToString(data)
 	}
 	out := q.listOutput(page, parent, outputToken, next)
+	if q.op.HasMore != "" {
+		out[q.op.HasMore] = next != ""
+	}
 	if q.op.Failures != "" {
 		enc := &encoder{model: q.b.model, protocol: q.b.model.Metadata.Protocol}
 		if failures == nil {
@@ -1038,7 +1098,7 @@ func (q *request) tag() (map[string]any, error) {
 		}
 	}
 	if len(r.Tags) > maxTagsPerResource {
-		return nil, &fault{kind: "limit", message: fmt.Sprintf("At most %d tags are supported per resource.", maxTagsPerResource)}
+		return nil, &fault{kind: "tags", message: fmt.Sprintf("At most %d tags are supported per resource.", maxTagsPerResource)}
 	}
 	if err := q.commit(func(tx *sql.Tx) error { return updateRow(tx, r) }); err != nil {
 		return nil, err

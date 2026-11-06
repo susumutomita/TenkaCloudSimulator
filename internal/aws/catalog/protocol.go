@@ -35,6 +35,10 @@ func parseRoute(op string, h HTTP) route {
 			r.literals++
 		}
 	}
+	// An official trailing slash is part of the path: "/tags/" ≠ "/tags".
+	if len(pathPart) > 1 && strings.HasSuffix(pathPart, "/") {
+		r.segments = append(r.segments, "")
+	}
 	if queryPart != "" {
 		for _, item := range strings.Split(queryPart, "&") {
 			key, value, _ := strings.Cut(item, "=")
@@ -259,7 +263,7 @@ func restInput(model *Model, op *Operation, r *http.Request, labels map[string]s
 	}
 	allowed := map[string]bool{}
 	for _, name := range bodyMembers {
-		allowed[name] = true
+		allowed[shape.Members[name].wire(name)] = true
 	}
 	for key, value := range object {
 		if !allowed[key] {
@@ -268,6 +272,7 @@ func restInput(model *Model, op *Operation, r *http.Request, labels map[string]s
 			}
 			return nil, invalid("Unknown member %s is not part of the official input shape.", key)
 		}
+		// The decoder maps official wire names back to member names.
 		raw[key] = value
 	}
 	return raw, nil
@@ -291,7 +296,7 @@ func writeOutput(w http.ResponseWriter, model *Model, op *Operation, output map[
 		for name, value := range output {
 			member := shape.Members[name]
 			if protocol != "rest-json" {
-				body[name] = value
+				body[member.wire(name)] = value
 				continue
 			}
 			switch member.Location {
@@ -314,7 +319,7 @@ func writeOutput(w http.ResponseWriter, model *Model, op *Operation, output map[
 						raw = encoded
 					}
 				} else {
-					body[name] = value
+					body[member.wire(name)] = value
 				}
 			}
 		}

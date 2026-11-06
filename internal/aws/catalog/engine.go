@@ -146,7 +146,7 @@ func bindModel(spec *Service, model *Model) (*binding, error) {
 			return nil, fmt.Errorf("catalog %s operation %s has an unknown kind", spec.Model, op.Name)
 		}
 		input := model.Shapes[official.Input]
-		for _, member := range []string{op.Lookup, op.Parent} {
+		for _, member := range append([]string{strings.Split(op.Lookup, ".")[0], op.Parent}, op.LookupAlt...) {
 			if member != "" && (input == nil || input.Members[member].Shape == "") {
 				return nil, fmt.Errorf("catalog %s operation %s names missing input member %s", spec.Model, op.Name, member)
 			}
@@ -154,6 +154,9 @@ func bindModel(spec *Service, model *Model) (*binding, error) {
 		singleton := spec.resource(op.Resource) != nil && spec.resource(op.Resource).Singleton
 		if (op.Kind == Read || op.Kind == Update || op.Kind == Delete || op.Kind == Put || op.Kind == Tag || op.Kind == Untag || op.Kind == ListTags) && op.Lookup == "" && !singleton {
 			return nil, fmt.Errorf("catalog %s operation %s needs an identifying input member", spec.Model, op.Name)
+		}
+		if op.HasMore != "" && (model.Shapes[official.Output] == nil || model.shape(official.Output).Members[op.HasMore].Shape == "") {
+			return nil, fmt.Errorf("catalog %s operation %s reports more pages in a missing output member", spec.Model, op.Name)
 		}
 		if op.Failures != "" && (model.Shapes[official.Output] == nil || model.shape(official.Output).Members[op.Failures].Shape == "" || op.Names == "") {
 			return nil, fmt.Errorf("catalog %s operation %s reports failures in a missing output member", spec.Model, op.Name)
@@ -384,49 +387,61 @@ func (e *Engine) fail(w http.ResponseWriter, b *binding, op *Op, err error) {
 // errorFamilies lists, in priority order, exact names or documented name
 // fragments of modeled exceptions for each failure family.
 var errorFamilies = map[string][]string{
-	"validation":    {"ValidationException", "InvalidParameterException", "InvalidParameterValueException", "InvalidInputException", "InvalidRequestException", "BadRequestException", "InvalidArgumentException", "InvalidParameterCombinationException"},
-	"unsupported":   {"ValidationException", "InvalidParameterException", "InvalidParameterValueException", "InvalidInputException", "InvalidRequestException", "BadRequestException", "InvalidArgumentException"},
-	"notfound":      {"ResourceNotFoundException", "NotFoundException", "NotFound", "NoSuch", "DoesNotExist"},
-	"conflict":      {"ResourceAlreadyExistsException", "AlreadyExistsException", "AlreadyExists", "NameExists", "Duplicate", "ConflictException", "Conflict"},
-	"dependents":    {"NotEmpty", "ResourceInUseException", "InUse", "DependencyViolation", "ConflictException", "Conflict"},
-	"limit":         {"ServiceQuotaExceededException", "LimitExceededException", "QuotaExceeded", "LimitExceeded", "TooMany"},
-	"mismatch":      {"IdempotentParameterMismatchException", "IdempotentParameterMismatch", "Idempotency", "ConflictException"},
+	"validation":    {"ValidationException", "InvalidParameterException", "InvalidParameterValueException", "InvalidParametersException", "InvalidInputException", "InvalidRequestException", "BadRequestException", "InvalidArgumentException", "InvalidParameterCombinationException", "ClientException"},
+	"unsupported":   {"ValidationException", "InvalidParameterException", "InvalidParameterValueException", "InvalidParametersException", "InvalidInputException", "InvalidRequestException", "BadRequestException", "InvalidArgumentException", "ClientException"},
+	"notfound":      {"ResourceNotFoundException", "NotFoundException", "NotFound", "NoSuch", "DoesNotExist", "UnknownResource"},
+	"conflict":      {"ResourceAlreadyExistsException", "AlreadyExistsException", "AlreadyExists", "NameExists", "Duplicate", "NameInUse", "ResourceInUseException"},
+	"dependents":    {"NotEmpty", "ResourceInUseException", "InUse", "DependencyViolation"},
+	"limit":         {"ServiceQuotaExceededException", "LimitExceededException", "QuotaExceeded", "LimitExceeded"},
+	"tags":          {"TooManyTagsException", "TagsLimitExceededException", "TagLimitExceededException", "TooManyTags", "TagLimit", "TagsLimit", "LimitExceededException"},
+	"mismatch":      {"IdempotentParameterMismatchException", "IdempotentParameterMismatch", "Idempotency"},
 	"denied":        {"AccessDeniedException"},
 	"internal":      {"InternalServerException", "InternalFailure", "InternalServiceError", "InternalServerError", "ServiceException", "ServerException"},
 	"serialization": {"SerializationException"},
 	"token":         {"InvalidNextTokenException", "InvalidNextToken", "InvalidToken", "InvalidPaginationToken", "ValidationException", "InvalidParameterException", "InvalidParameterValueException", "InvalidInputException", "InvalidRequestException", "BadRequestException"},
 }
 
+// genericFamilies are tried only after every specific candidate failed.
+var genericFamilies = map[string][]string{
+	"conflict": {"ConflictException", "Conflict"}, "dependents": {"ConflictException", "Conflict"},
+	"mismatch": {"ConflictException"},
+}
+
 // fallbackToValidation lists families whose unmodeled failures use the
 // operation's own validation exception rather than an invented name.
-var fallbackToValidation = map[string]bool{"conflict": true, "dependents": true, "mismatch": true, "token": true}
+var fallbackToValidation = map[string]bool{"conflict": true, "dependents": true, "mismatch": true, "token": true, "notfound": true}
 
 var familyDefaults = map[string][2]any{
 	"validation": {"ValidationException", 400}, "unsupported": {"ValidationException", 400},
 	"notfound": {"ResourceNotFoundException", 404}, "conflict": {"ConflictException", 409},
 	"dependents": {"ConflictException", 409},
-	"limit":      {"LimitExceededException", 400}, "mismatch": {"IdempotentParameterMismatchException", 400},
-	"denied": {"AccessDeniedException", 403}, "internal": {"InternalFailure", 500},
+	"limit":      {"LimitExceededException", 400}, "tags": {"LimitExceededException", 400},
+	"mismatch": {"IdempotentParameterMismatchException", 400},
+	"denied":   {"AccessDeniedException", 403}, "internal": {"InternalFailure", 500},
 	"serialization": {"SerializationException", 400},
 	"token":         {"ValidationException", 400},
 }
 
+// unrelatedFragment reports modeled exceptions that only look like a family
+// member: errors about dependent keys, tag counts or request throttling.
+func unrelatedFragment(name, kind string) bool {
+	lower := strings.ToLower(name)
+	if kind == "denied" || strings.HasPrefix(lower, "kms") || strings.HasPrefix(lower, "encryptionkey") {
+		return true
+	}
+	if kind != "tags" && strings.Contains(lower, "tag") {
+		return true
+	}
+	return strings.Contains(lower, "request") && kind != "validation" && kind != "unsupported" && kind != "token" || strings.Contains(lower, "throttl")
+}
+
 // errorCode chooses the modeled exception of this operation for a failure
-// family, taking candidates in priority order (exact name, then fragment).
+// family: every exact candidate first, then documented name fragments.
 func (b *binding) errorCode(opName, kind string) (string, int) {
 	if official := b.model.Operations[opName]; official != nil {
-		for _, candidate := range errorFamilies[kind] {
-			for _, name := range official.Errors {
-				if name == candidate {
-					return name, b.status(name, kind)
-				}
-			}
-			// Authorization failures use only the exact modeled name, and
-			// errors about dependent KMS keys never stand for this resource.
-			for _, name := range official.Errors {
-				if kind != "denied" && !strings.HasPrefix(strings.ToLower(name), "kms") && strings.Contains(name, candidate) {
-					return name, b.status(name, kind)
-				}
+		for _, candidates := range [][]string{errorFamilies[kind], genericFamilies[kind]} {
+			if name, ok := pick(official.Errors, candidates, kind); ok {
+				return name, b.status(name, kind)
 			}
 		}
 		if fallbackToValidation[kind] {
@@ -441,6 +456,25 @@ func (b *binding) errorCode(opName, kind string) (string, int) {
 	}
 	code := familyDefaults[kind][0].(string)
 	return code, b.status(code, kind)
+}
+
+// pick prefers any exact candidate, then documented name fragments.
+func pick(errors, candidates []string, kind string) (string, bool) {
+	for _, candidate := range candidates {
+		for _, name := range errors {
+			if name == candidate {
+				return name, true
+			}
+		}
+	}
+	for _, candidate := range candidates {
+		for _, name := range errors {
+			if !unrelatedFragment(name, kind) && strings.Contains(name, candidate) {
+				return name, true
+			}
+		}
+	}
+	return "", false
 }
 
 func (b *binding) status(code, kind string) int {
