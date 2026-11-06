@@ -215,14 +215,150 @@ var firestoreAdmin = &API{
 		storageCRUD("projects.databases", "databases", noTagBindings, nil),
 		storageCRUD("projects.databases.backupSchedules", "backupSchedules", backupRecurrence, nil),
 		[]Binding{
-			{Method: "projects.databases.operations.get", Kind: OperationGet},
-			{Method: "projects.databases.operations.list", Kind: OperationList},
+			{Method: "projects.databases.operations.get", Kind: OperationGet, Permission: "datastore.operations.get"},
+			{Method: "projects.databases.operations.list", Kind: OperationList, Permission: "datastore.operations.list"},
 		},
 	),
 	Bounds: []string{
 		"Databases and backup schedules are configuration metadata: no document store, query engine, index build or backup exists. The documents, export, import, clone, restore, index, field and user credential methods remain unimplemented.",
 		"Deleting a database removes its backup schedules immediately and keeps no deleted database for showDeleted; deletion protection blocks delete. Tag bindings are refused. Operations complete synchronously under projects/{project}/databases/{database}/operations.",
 	},
+}
+
+var spanner = &API{
+	Key: "spanner.v1", Title: "Spanner", Issues: []int{340}, Scope: "project",
+	TypeURL: "type.googleapis.com/google.spanner.admin.instance.v1.",
+	Collections: []*Collection{
+		{ID: "instances", Schema: "Instance", Limit: 10, Permission: "spanner.instances", Cascade: true, Operations: "instances",
+			IDPattern: regexp.MustCompile(`^[a-z][-a-z0-9]{0,62}[a-z0-9]$`),
+			Generate:  map[string]any{"createTime": "$now", "updateTime": "$now", "state": "READY"},
+			Mutable:   []string{"displayName", "nodeCount", "processingUnits", "autoscalingConfig", "labels", "edition", "defaultBackupScheduleType"}},
+		{ID: "databases", Schema: "Database", Parent: "instances", Limit: 20, Permission: "spanner.databases", Cascade: true, Operations: "databases",
+			Message: "type.googleapis.com/google.spanner.admin.database.v1.Database", IDPattern: regexp.MustCompile(`^[a-z][a-z0-9_-]{0,28}[a-z0-9]$`),
+			Protection: map[string]any{"enableDropProtection": true},
+			Generate:   map[string]any{"createTime": "$now", "state": "READY", "databaseDialect": "GOOGLE_STANDARD_SQL", "versionRetentionPeriod": "1h", "reconciling": false},
+			Mutable:    []string{"enableDropProtection"}},
+		{ID: "backupSchedules", Schema: "BackupSchedule", Parent: "databases", IDParam: "backupScheduleId", Limit: 4, Permission: "spanner.backupSchedules",
+			IDPattern: regexp.MustCompile(`^[a-z][a-z0-9_-]{0,58}[a-z0-9]$`),
+			Generate:  map[string]any{"updateTime": "$now"},
+			Mutable:   []string{"spec", "retentionDuration", "encryptionConfig", "fullBackupSpec", "incrementalBackupSpec"}},
+	},
+	Bindings: []Binding{
+		{Method: "projects.instances.create", Kind: Create, Collection: "instances", Unwrap: spannerInstance},
+		{Method: "projects.instances.get", Kind: Get, Collection: "instances"},
+		{Method: "projects.instances.list", Kind: List, Collection: "instances"},
+		{Method: "projects.instances.patch", Kind: Patch, Collection: "instances", Unwrap: spannerInstanceUpdate},
+		{Method: "projects.instances.delete", Kind: Delete, Collection: "instances"},
+		{Method: "projects.instances.databases.create", Kind: Create, Collection: "databases", Unwrap: spannerDatabase},
+		{Method: "projects.instances.databases.get", Kind: Get, Collection: "databases"},
+		{Method: "projects.instances.databases.list", Kind: List, Collection: "databases"},
+		{Method: "projects.instances.databases.patch", Kind: Patch, Collection: "databases"},
+		{Method: "projects.instances.databases.dropDatabase", Kind: Delete, Collection: "databases"},
+		{Method: "projects.instances.databases.backupSchedules.create", Kind: Create, Collection: "backupSchedules", Check: spannerBackupType},
+		{Method: "projects.instances.databases.backupSchedules.get", Kind: Get, Collection: "backupSchedules"},
+		{Method: "projects.instances.databases.backupSchedules.list", Kind: List, Collection: "backupSchedules"},
+		{Method: "projects.instances.databases.backupSchedules.patch", Kind: Patch, Collection: "backupSchedules", Check: spannerBackupType},
+		{Method: "projects.instances.databases.backupSchedules.delete", Kind: Delete, Collection: "backupSchedules"},
+		{Method: "projects.instances.operations.get", Kind: OperationGet, Permission: "spanner.instanceOperations.get"},
+		{Method: "projects.instances.operations.list", Kind: OperationList, Permission: "spanner.instanceOperations.list"},
+		{Method: "projects.instances.databases.operations.get", Kind: OperationGet, Permission: "spanner.databaseOperations.get"},
+		{Method: "projects.instances.databases.operations.list", Kind: OperationList, Permission: "spanner.databaseOperations.list"},
+	},
+	Bounds: []string{
+		"Instances, databases and backup schedules are configuration metadata: no compute capacity, storage, schema, session, SQL or DML execution, or backup exists, and resources report READY immediately.",
+		"Google-managed instance configurations are not listed; an instance records its config name as given. A database ID comes from its CREATE DATABASE statement, and extra DDL statements and proto descriptors are refused because no DDL runs.",
+		"Deleting an instance removes its databases unless one has drop protection, which also blocks dropDatabase. Operations complete synchronously under the instance or database they act on.",
+	},
+}
+
+var (
+	spannerConfig = regexp.MustCompile(`^projects/[^/]+/instanceConfigs/[a-z0-9-]+$`)
+	// A GoogleSQL ID may be quoted with backticks, a PostgreSQL ID with
+	// double quotes.
+	spannerCreate = regexp.MustCompile("(?is)^\\s*CREATE\\s+DATABASE\\s+(`[^`]*`|\"[^\"]*\"|[a-z0-9_-]+)\\s*;?\\s*$")
+)
+
+// spannerInstance unwraps CreateInstanceRequest and enforces the nested
+// required fields and capacity choice of Instance.
+func spannerInstance(body map[string]any) (map[string]any, string, error) {
+	instance, _ := body["instance"].(map[string]any)
+	id, _ := body["instanceId"].(string)
+	if instance == nil || id == "" {
+		return nil, "", invalid("Fields 'instance' and 'instanceId' are required.")
+	}
+	if name, ok := instance["name"].(string); ok && !strings.HasSuffix(name, "/instances/"+id) {
+		return nil, "", invalid("Field 'instance.name' must end with /instances/%s.", id)
+	}
+	if config, _ := instance["config"].(string); !spannerConfig.MatchString(config) {
+		return nil, "", invalid("Field 'instance.config' must be projects/{project}/instanceConfigs/{config}.")
+	}
+	if name, _ := instance["displayName"].(string); len(name) < 4 || len(name) > 30 {
+		return nil, "", invalid("Field 'instance.displayName' must be 4 to 30 characters.")
+	}
+	if err := spannerCapacity(instance); err != nil {
+		return nil, "", err
+	}
+	return instance, id, nil
+}
+
+// spannerInstanceUpdate unwraps UpdateInstanceRequest.
+func spannerInstanceUpdate(body map[string]any) (map[string]any, string, error) {
+	instance, _ := body["instance"].(map[string]any)
+	mask, _ := body["fieldMask"].(string)
+	if instance == nil || mask == "" {
+		return nil, "", invalid("Fields 'instance' and 'fieldMask' are required.")
+	}
+	return instance, mask, spannerCapacity(instance)
+}
+
+// spannerCapacity allows at most one of the official capacity choices.
+func spannerCapacity(instance map[string]any) error {
+	chosen := 0
+	for _, field := range []string{"nodeCount", "processingUnits", "autoscalingConfig"} {
+		if _, ok := instance[field]; ok {
+			chosen++
+		}
+	}
+	if chosen > 1 {
+		return invalid("At most one of 'nodeCount', 'processingUnits' and 'autoscalingConfig' may be set.")
+	}
+	return nil
+}
+
+// spannerDatabase derives the database from CreateDatabaseRequest: its ID
+// comes from the CREATE DATABASE statement, and no further DDL runs.
+func spannerDatabase(body map[string]any) (map[string]any, string, error) {
+	statement, _ := body["createStatement"].(string)
+	match := spannerCreate.FindStringSubmatch(statement)
+	if match == nil {
+		return nil, "", invalid("Field 'createStatement' must be one CREATE DATABASE statement.")
+	}
+	dialect, _ := body["databaseDialect"].(string)
+	if strings.HasPrefix(match[1], "`") && dialect == "POSTGRESQL" || strings.HasPrefix(match[1], "\"") && dialect != "POSTGRESQL" {
+		return nil, "", invalid("The database ID quoting in 'createStatement' does not match the database dialect.")
+	}
+	for _, field := range []string{"extraStatements", "protoDescriptors"} {
+		if value, ok := body[field]; ok && !(field == "extraStatements" && len(value.([]any)) == 0) {
+			return nil, "", invalid("Field '%s' is not supported by the simulator: DDL is not executed.", field)
+		}
+	}
+	database := map[string]any{}
+	for _, field := range []string{"databaseDialect", "encryptionConfig"} {
+		if value, ok := body[field]; ok {
+			database[field] = value
+		}
+	}
+	return database, strings.Trim(match[1], "`\""), nil
+}
+
+// spannerBackupType allows at most one backup type, as the official oneof does.
+func spannerBackupType(body map[string]any) error {
+	_, full := body["fullBackupSpec"]
+	_, incremental := body["incrementalBackupSpec"]
+	if full && incremental {
+		return invalid("At most one of 'fullBackupSpec' and 'incrementalBackupSpec' may be set.")
+	}
+	return nil
 }
 
 // storageAll runs checks in order and returns the first failure.

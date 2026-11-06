@@ -216,6 +216,9 @@ func TestFirestoreDatabasesBackupSchedulesAndOperations(t *testing.T) {
 	storageRefused(t, h.call("owner", "POST", api+db+"/backupSchedules", map[string]any{"retention": "604800s"}), "dailyRecurrence")
 	storageRefused(t, h.call("owner", "POST", api+db+"/backupSchedules", map[string]any{"dailyRecurrence": map[string]any{}, "weeklyRecurrence": map[string]any{"day": "MONDAY"}}), "weeklyRecurrence")
 	expect(t, h.call("owner", "GET", api+db+"/documents/users/alice", nil), 501, "UNIMPLEMENTED")
+	if denied := h.call("intruder", "GET", api+db+"/operations", nil); !strings.Contains(denied.raw, "datastore.operations.list") {
+		t.Fatalf("operation permission %s", denied.raw)
+	}
 	expect(t, h.call("owner", "DELETE", api+db, nil), 400, "FAILED_PRECONDITION")
 	expect(t, h.call("owner", "PATCH", api+db+"?updateMask=deleteProtectionState", map[string]any{"deleteProtectionState": "DELETE_PROTECTION_DISABLED"}), 200, "")
 	deleted := h.call("owner", "DELETE", api+db, nil)
@@ -240,5 +243,91 @@ func TestStorageCheckHelpers(t *testing.T) {
 	}
 	if storageRefuseValue("a.b", 3, "x")(body) != nil || storageRefuseValue("a.b", 2, "x")(body) == nil {
 		t.Fatal("value refusal")
+	}
+}
+
+func TestSpannerInstancesDatabasesAndBackupSchedules(t *testing.T) {
+	h := newHarness(t, spanner)
+	api := "/spanner/v1/"
+	instances := api + storageProject + "/instances"
+	config := storageProject + "/instanceConfigs/regional-us-central1"
+	created := h.call("owner", "POST", instances, map[string]any{"instanceId": "main", "instance": map[string]any{"config": config, "displayName": "Main instance", "nodeCount": 1, "state": "CREATING"}})
+	expect(t, created, 200, "")
+	instance := storageProject + "/instances/main"
+	if response := created.body["response"].(map[string]any); response["@type"] != "type.googleapis.com/google.spanner.admin.instance.v1.Instance" || response["name"] != instance || response["state"] != "READY" {
+		t.Fatalf("instance operation %v", created.body)
+	}
+	storageOperations(t, h, api, created, instance)
+	for field, body := range map[string]map[string]any{
+		"instanceId":      {"instance": map[string]any{"config": config, "displayName": "Other one"}},
+		"name":            {"instanceId": "other", "instance": map[string]any{"name": storageProject + "/instances/else", "config": config, "displayName": "Other one"}},
+		"config":          {"instanceId": "other", "instance": map[string]any{"config": "regional-us-central1", "displayName": "Other one"}},
+		"displayName":     {"instanceId": "other", "instance": map[string]any{"config": config, "displayName": "abc"}},
+		"processingUnits": {"instanceId": "other", "instance": map[string]any{"config": config, "displayName": "Other one", "nodeCount": 1, "processingUnits": 100}},
+	} {
+		storageRefused(t, h.call("owner", "POST", instances, body), field)
+	}
+	expect(t, h.call("owner", "GET", api+instance, nil), 200, "")
+	if items := h.call("owner", "GET", instances, nil).body["instances"].([]any); len(items) != 1 {
+		t.Fatalf("instances %v", items)
+	}
+	expect(t, h.call("owner", "PATCH", api+instance, map[string]any{"instance": map[string]any{"displayName": "Renamed instance"}}), 400, "INVALID_ARGUMENT")
+	expect(t, h.call("owner", "PATCH", api+instance, map[string]any{"fieldMask": "processingUnits", "instance": map[string]any{"processingUnits": 100, "autoscalingConfig": map[string]any{}}}), 400, "INVALID_ARGUMENT")
+	expect(t, h.call("owner", "PATCH", api+instance, map[string]any{"fieldMask": "config", "instance": map[string]any{"config": config}}), 400, "INVALID_ARGUMENT")
+	patched := h.call("owner", "PATCH", api+instance, map[string]any{"fieldMask": "displayName,nodeCount", "instance": map[string]any{"name": instance, "displayName": "Renamed instance", "nodeCount": 2}})
+	expect(t, patched, 200, "")
+	if got := h.call("owner", "GET", api+instance, nil).body; got["displayName"] != "Renamed instance" || got["config"] != config {
+		t.Fatalf("patched instance %v", got)
+	}
+
+	databases := api + instance + "/databases"
+	db := h.call("owner", "POST", databases, map[string]any{"createStatement": "CREATE DATABASE `orders`", "extraStatements": []any{}})
+	expect(t, db, 200, "")
+	orders := instance + "/databases/orders"
+	if response := db.body["response"].(map[string]any); response["@type"] != "type.googleapis.com/google.spanner.admin.database.v1.Database" || response["databaseDialect"] != "GOOGLE_STANDARD_SQL" || response["name"] != orders {
+		t.Fatalf("database operation %v", db.body)
+	}
+	storageOperations(t, h, api, db, orders)
+	pg := h.call("owner", "POST", databases, map[string]any{"createStatement": `create database "pg-db";`, "databaseDialect": "POSTGRESQL"})
+	expect(t, pg, 200, "")
+	for _, body := range []map[string]any{
+		{"createStatement": "CREATE TABLE t (id INT64) PRIMARY KEY (id)"},
+		{"createStatement": "CREATE DATABASE `pg2`", "databaseDialect": "POSTGRESQL"},
+		{"createStatement": `CREATE DATABASE "gsql"`},
+		{"createStatement": "CREATE DATABASE `ddl`", "extraStatements": []any{"CREATE TABLE t (id INT64) PRIMARY KEY (id)"}},
+		{"createStatement": "CREATE DATABASE `proto`", "protoDescriptors": "aGk="},
+		{"createStatement": "CREATE DATABASE `Upper_Case`"},
+	} {
+		expect(t, h.call("owner", "POST", databases, body), 400, "INVALID_ARGUMENT")
+	}
+	expect(t, h.call("owner", "GET", api+orders, nil), 200, "")
+	if items := h.call("owner", "GET", databases, nil).body["databases"].([]any); len(items) != 2 {
+		t.Fatalf("databases %v", items)
+	}
+	expect(t, h.call("owner", "PATCH", api+orders+"?updateMask=enableDropProtection", map[string]any{"enableDropProtection": true}), 200, "")
+	schedules := api + orders + "/backupSchedules"
+	schedule := h.call("owner", "POST", schedules+"?backupScheduleId=daily", map[string]any{"spec": map[string]any{"cronSpec": map[string]any{"text": "0 2 * * *"}}, "retentionDuration": "86400s", "fullBackupSpec": map[string]any{}})
+	expect(t, schedule, 200, "")
+	expect(t, h.call("owner", "POST", schedules+"?backupScheduleId=both", map[string]any{"fullBackupSpec": map[string]any{}, "incrementalBackupSpec": map[string]any{}}), 400, "INVALID_ARGUMENT")
+	expect(t, h.call("owner", "GET", api+schedule.body["name"].(string), nil), 200, "")
+	if items := h.call("owner", "GET", schedules, nil).body["backupSchedules"].([]any); len(items) != 1 {
+		t.Fatalf("schedules %v", items)
+	}
+	expect(t, h.call("owner", "PATCH", api+schedule.body["name"].(string)+"?updateMask=retentionDuration", map[string]any{"retentionDuration": "172800s"}), 200, "")
+	expect(t, h.call("owner", "POST", api+orders+"/sessions", map[string]any{}), 501, "UNIMPLEMENTED")
+	expect(t, h.call("owner", "DELETE", api+orders, nil), 400, "FAILED_PRECONDITION")
+	expect(t, h.call("owner", "DELETE", api+instance, nil), 400, "FAILED_PRECONDITION")
+	expect(t, h.call("owner", "PATCH", api+orders+"?updateMask=enableDropProtection", map[string]any{"enableDropProtection": false}), 200, "")
+	expect(t, h.call("owner", "DELETE", api+schedule.body["name"].(string), nil), 200, "")
+	expect(t, h.call("owner", "DELETE", api+orders, nil), 200, "")
+	deleted := h.call("owner", "DELETE", api+instance, nil)
+	expect(t, deleted, 200, "")
+	if deleted.body["done"] != nil {
+		t.Fatalf("instance delete returns Empty: %v", deleted.body)
+	}
+	expect(t, h.call("owner", "GET", api+instance+"/databases/pg-db", nil), 404, "NOT_FOUND")
+	denied := h.call("intruder", "GET", api+instance+"/operations", nil)
+	if denied.status != 403 || !strings.Contains(denied.raw, "spanner.instanceOperations.list") {
+		t.Fatalf("operation permission %s", denied.raw)
 	}
 }
