@@ -103,6 +103,9 @@ func bindAPI(api *API, model *Model) (*binding, error) {
 		if model.Schemas[c.Schema] == nil || c.Permission == "" || c.Parent != "" && api.collection(c.Parent) == nil {
 			return nil, fmt.Errorf("GCP catalog %s collection %s has a missing schema, permission or parent", api.Key, c.ID)
 		}
+		if c.IDParam != "" && c.IDField != "" || c.IDField != "" && model.Schemas[c.Schema].Properties[c.IDField] == nil {
+			return nil, fmt.Errorf("GCP catalog %s collection %s needs one ID source that names a schema field", api.Key, c.ID)
+		}
 	}
 	for i := range api.Bindings {
 		bound := &api.Bindings[i]

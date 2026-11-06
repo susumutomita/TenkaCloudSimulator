@@ -2,6 +2,7 @@ package catalog
 
 import (
 	"net/http/httptest"
+	"regexp"
 	"strings"
 	"testing"
 )
@@ -68,3 +69,44 @@ func TestServicePathsServerIDsAndGenerators(t *testing.T) {
 type errString string
 
 func (e errString) Error() string { return string(e) }
+
+// Body-supplied IDs, custom ID rules and short names serve APIs such as
+// Cloud Logging whose create bodies carry the ID in "name".
+func TestBodyIDsPatternsAndShortNames(t *testing.T) {
+	h := newHarness(t)
+	api, model := syntheticAPI(t)
+	c := api.Collections[0]
+	c.IDField, c.ShortName, c.IDPattern = "name", true, regexp.MustCompile(`^[A-Za-z0-9_]{1,10}$`)
+	b, err := bindAPI(api, model)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := h.engine.add(b); err != nil {
+		t.Fatal(err)
+	}
+	base := "/synth/synth/v1/projects/tenkacloud-local/widgets"
+	expect(t, h.call("owner", "POST", base, map[string]any{"note": "x"}), 400, "INVALID_ARGUMENT")
+	expect(t, h.call("owner", "POST", base, map[string]any{"name": "has-dash"}), 400, "INVALID_ARGUMENT")
+	created := h.call("owner", "POST", base, map[string]any{"name": "My_Sink"})
+	expect(t, created, 200, "")
+	if created.body["name"] != "My_Sink" || created.body["id"] != "My_Sink" {
+		t.Fatalf("short name %v", created.body)
+	}
+	got := h.call("owner", "GET", base+"/My_Sink", nil)
+	expect(t, got, 200, "")
+	if got.body["name"] != "My_Sink" {
+		t.Fatalf("stored short name %v", got.body)
+	}
+	expect(t, h.call("owner", "POST", base, map[string]any{"name": "My_Sink"}), 409, "ALREADY_EXISTS")
+	for _, broken := range []func(*Collection){
+		func(c *Collection) { c.IDParam = "widgetId" },
+		func(c *Collection) { c.IDParam, c.IDField = "", "missing" },
+	} {
+		api, model := syntheticAPI(t)
+		api.Collections[0].IDField = "name"
+		broken(api.Collections[0])
+		if _, err := bindAPI(api, model); err == nil {
+			t.Fatal("an ambiguous or unknown ID source must be refused")
+		}
+	}
+}

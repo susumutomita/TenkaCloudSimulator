@@ -1,5 +1,7 @@
 package catalog
 
+import "regexp"
+
 // Kind is the reviewed role of one official discovery method.
 type Kind string
 
@@ -32,8 +34,16 @@ type Collection struct {
 	// (projects/{project}/locations/{location} or projects/{project}).
 	Parent string
 	// IDParam is the create query parameter carrying the client-chosen ID;
-	// "" means the server generates one.
+	// "" with an empty IDField means the server generates one.
 	IDParam string
+	// IDField is the top-level create body field carrying the client-chosen
+	// ID, for APIs that take it in the request body (for example "name").
+	IDField string
+	// IDPattern replaces the AIP-122 ID pattern for APIs with other rules.
+	IDPattern *regexp.Regexp
+	// ShortName stores the ID rather than the full resource name in the
+	// "name" field, as APIs such as Cloud Logging sinks do.
+	ShortName bool
 	// Limit bounds live resources per parent.
 	Limit int
 	// Generate assigns output fields at creation: $name, $now, $uid,

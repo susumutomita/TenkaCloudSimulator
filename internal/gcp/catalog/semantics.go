@@ -258,13 +258,21 @@ func (q *request) create() (any, error) {
 	}
 	// Server-generated IDs are opaque; client-chosen IDs follow AIP-122.
 	id := randomHex(8)
-	if c.IDParam != "" {
-		id, _ = q.params[c.IDParam].(string)
-		if id == "" {
-			return nil, invalid("Query parameter %q is required.", c.IDParam)
+	if c.IDParam != "" || c.IDField != "" {
+		if c.IDParam != "" {
+			id, _ = q.params[c.IDParam].(string)
+			if id == "" {
+				return nil, invalid("Query parameter %q is required.", c.IDParam)
+			}
+		} else if id, _ = q.body[c.IDField].(string); id == "" {
+			return nil, invalid("Field '%s' is required.", c.IDField)
 		}
-		if !resourceID.MatchString(id) {
-			return nil, invalid("Resource ID %q must match %s.", id, resourceID.String())
+		pattern := resourceID
+		if c.IDPattern != nil {
+			pattern = c.IDPattern
+		}
+		if !pattern.MatchString(id) {
+			return nil, invalid("Resource ID %q must match %s.", id, pattern.String())
 		}
 	}
 	if err := q.required(q.method.Request); err != nil {
@@ -276,6 +284,9 @@ func (q *request) create() (any, error) {
 		document[k] = v
 	}
 	document["name"] = name
+	if c.ShortName {
+		document["name"] = id
+	}
 	for key, value := range c.Generate {
 		if _, supplied := document[key]; supplied && !strings.HasPrefix(fmt.Sprint(value), "$") {
 			continue
