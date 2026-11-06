@@ -1,0 +1,1002 @@
+{
+ "components": {
+  "schemas": {
+   "ApplicationSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "CreatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Description": {
+      "maxLength": 80,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Id": {
+      "maxLength": 32,
+      "minLength": 1,
+      "type": "string"
+     },
+     "LastUpdatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "RuntimeEnvironment": {
+      "$ref": "#/components/schemas/RuntimeEnvironment"
+     },
+     "Status": {
+      "enum": [
+       "INITIALIZED",
+       "PROCESSING",
+       "READY",
+       "DELETING",
+       "ERROR"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "Arn"
+    ],
+    "type": "object"
+   },
+   "CreateApplicationOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "ApplicationLogOutputUri": {
+      "maxLength": 1024,
+      "minLength": 0,
+      "type": "string"
+     },
+     "ApplicationLogPaths": {
+      "items": {
+       "maxLength": 1024,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 0,
+      "type": "array"
+     },
+     "ApplicationSourceUri": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Arn": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "AssociatedStreamGroups": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "CreatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Description": {
+      "maxLength": 80,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ExecutablePath": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Id": {
+      "maxLength": 32,
+      "minLength": 1,
+      "type": "string"
+     },
+     "LastUpdatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "ReplicationStatuses": {
+      "items": {
+       "$ref": "#/components/schemas/ReplicationStatus"
+      },
+      "type": "array"
+     },
+     "RuntimeEnvironment": {
+      "$ref": "#/components/schemas/RuntimeEnvironment"
+     },
+     "Status": {
+      "enum": [
+       "INITIALIZED",
+       "PROCESSING",
+       "READY",
+       "DELETING",
+       "ERROR"
+      ],
+      "type": "string"
+     },
+     "StatusReason": {
+      "enum": [
+       "internalError",
+       "accessDenied"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "Arn"
+    ],
+    "type": "object"
+   },
+   "GetApplicationOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "ApplicationLogOutputUri": {
+      "maxLength": 1024,
+      "minLength": 0,
+      "type": "string"
+     },
+     "ApplicationLogPaths": {
+      "items": {
+       "maxLength": 1024,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 0,
+      "type": "array"
+     },
+     "ApplicationSourceUri": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Arn": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "AssociatedStreamGroups": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "CreatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Description": {
+      "maxLength": 80,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ExecutablePath": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Id": {
+      "maxLength": 32,
+      "minLength": 1,
+      "type": "string"
+     },
+     "LastUpdatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "ReplicationStatuses": {
+      "items": {
+       "$ref": "#/components/schemas/ReplicationStatus"
+      },
+      "type": "array"
+     },
+     "RuntimeEnvironment": {
+      "$ref": "#/components/schemas/RuntimeEnvironment"
+     },
+     "Status": {
+      "enum": [
+       "INITIALIZED",
+       "PROCESSING",
+       "READY",
+       "DELETING",
+       "ERROR"
+      ],
+      "type": "string"
+     },
+     "StatusReason": {
+      "enum": [
+       "internalError",
+       "accessDenied"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "Arn"
+    ],
+    "type": "object"
+   },
+   "ListApplicationsOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "Items": {
+      "items": {
+       "$ref": "#/components/schemas/ApplicationSummary"
+      },
+      "type": "array"
+     },
+     "NextToken": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListTagsForResourceResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 1,
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "ReplicationStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "Location": {
+      "maxLength": 20,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Status": {
+      "enum": [
+       "REPLICATING",
+       "COMPLETED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "RuntimeEnvironment": {
+    "additionalProperties": false,
+    "properties": {
+     "Type": {
+      "enum": [
+       "PROTON",
+       "WINDOWS",
+       "UBUNTU"
+      ],
+      "type": "string"
+     },
+     "Version": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Type",
+     "Version"
+    ],
+    "type": "object"
+   },
+   "TagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UntagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UpdateApplicationOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "ApplicationLogOutputUri": {
+      "maxLength": 1024,
+      "minLength": 0,
+      "type": "string"
+     },
+     "ApplicationLogPaths": {
+      "items": {
+       "maxLength": 1024,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 0,
+      "type": "array"
+     },
+     "ApplicationSourceUri": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Arn": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "AssociatedStreamGroups": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "CreatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Description": {
+      "maxLength": 80,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ExecutablePath": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Id": {
+      "maxLength": 32,
+      "minLength": 1,
+      "type": "string"
+     },
+     "LastUpdatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "ReplicationStatuses": {
+      "items": {
+       "$ref": "#/components/schemas/ReplicationStatus"
+      },
+      "type": "array"
+     },
+     "RuntimeEnvironment": {
+      "$ref": "#/components/schemas/RuntimeEnvironment"
+     },
+     "Status": {
+      "enum": [
+       "INITIALIZED",
+       "PROCESSING",
+       "READY",
+       "DELETING",
+       "ERROR"
+      ],
+      "type": "string"
+     },
+     "StatusReason": {
+      "enum": [
+       "internalError",
+       "accessDenied"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "Arn"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon GameLift Streams API (2018-05-10). Every other official operation returns HTTP 501 UnknownOperationException. Applications are configuration metadata that stay INITIALIZED: no content is copied from Amazon S3, replicated, processed or streamed, and nothing is written to ApplicationLogOutputUri. ApplicationSourceUri must be an Amazon S3 URI; runtime environments are stored without checking the supported versions. Stream groups, stream sessions, their connections, locations and file exports return UnknownOperationException with HTTP 501, so applications are never associated with a stream group.",
+  "title": "Amazon GameLift Streams (simulator catalog)",
+  "version": "2018-05-10"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/applications": {
+   "get": {
+    "operationId": "gameliftstreamsListApplications",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "gameliftstreams"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "MaxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "NextToken",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListApplicationsOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListApplications",
+    "tags": [
+     "Amazon GameLift Streams"
+    ]
+   },
+   "post": {
+    "operationId": "gameliftstreamsCreateApplication",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "gameliftstreams"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "ApplicationLogOutputUri": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+         },
+         "ApplicationLogPaths": {
+          "items": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxItems": 10,
+          "minItems": 0,
+          "type": "array"
+         },
+         "ApplicationSourceUri": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "type": "string"
+         },
+         "ClientToken": {
+          "maxLength": 128,
+          "minLength": 32,
+          "type": "string"
+         },
+         "Description": {
+          "maxLength": 80,
+          "minLength": 1,
+          "type": "string"
+         },
+         "ExecutablePath": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "type": "string"
+         },
+         "RuntimeEnvironment": {
+          "$ref": "#/components/schemas/RuntimeEnvironment"
+         },
+         "Tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 1,
+          "type": "object"
+         }
+        },
+        "required": [
+         "ApplicationSourceUri",
+         "Description",
+         "ExecutablePath",
+         "RuntimeEnvironment"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateApplicationOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateApplication",
+    "tags": [
+     "Amazon GameLift Streams"
+    ]
+   }
+  },
+  "/applications/{Identifier}": {
+   "delete": {
+    "operationId": "gameliftstreamsDeleteApplication",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "gameliftstreams"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "Identifier",
+      "required": true,
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteApplication",
+    "tags": [
+     "Amazon GameLift Streams"
+    ]
+   },
+   "get": {
+    "operationId": "gameliftstreamsGetApplication",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "gameliftstreams"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "Identifier",
+      "required": true,
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GetApplicationOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetApplication",
+    "tags": [
+     "Amazon GameLift Streams"
+    ]
+   },
+   "patch": {
+    "operationId": "gameliftstreamsUpdateApplication",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "gameliftstreams"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "Identifier",
+      "required": true,
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "ApplicationLogOutputUri": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+         },
+         "ApplicationLogPaths": {
+          "items": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxItems": 10,
+          "minItems": 0,
+          "type": "array"
+         },
+         "Description": {
+          "maxLength": 80,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UpdateApplicationOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateApplication",
+    "tags": [
+     "Amazon GameLift Streams"
+    ]
+   }
+  },
+  "/tags/{ResourceArn}": {
+   "delete": {
+    "operationId": "gameliftstreamsUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "gameliftstreams"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ResourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 50,
+       "minItems": 0,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UntagResourceResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "Amazon GameLift Streams"
+    ]
+   },
+   "get": {
+    "operationId": "gameliftstreamsListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "gameliftstreams"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ResourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "Amazon GameLift Streams"
+    ]
+   },
+   "post": {
+    "operationId": "gameliftstreamsTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "gameliftstreams"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ResourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 1,
+          "type": "object"
+         }
+        },
+        "required": [
+         "Tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/TagResourceResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "Amazon GameLift Streams"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon GameLift Streams API (2018-05-10). Every other official operation returns HTTP 501 UnknownOperationException. Applications are configuration metadata that stay INITIALIZED: no content is copied from Amazon S3, replicated, processed or streamed, and nothing is written to ApplicationLogOutputUri. ApplicationSourceUri must be an Amazon S3 URI; runtime environments are stored without checking the supported versions. Stream groups, stream sessions, their connections, locations and file exports return UnknownOperationException with HTTP 501, so applications are never associated with a stream group.",
+   "name": "Amazon GameLift Streams"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/gameliftstreams/2018-05-10/service-2.json",
+  "sha256": "17f93c9ee3e1ac531bd60f50a3c5ef5abc0fa3728d2201be6ad68220e906d063",
+  "license": "Apache-2.0"
+ }
+}

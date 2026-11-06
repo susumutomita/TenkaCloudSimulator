@@ -23,5 +23,8 @@ func Services() []*Service {
 		auroraDSQL, awsBackup, efs, firehose, fsx, glacier, amazonMQ, memoryDB, msk, oracleDatabaseAtAWS, storageGateway, timestreamWrite,
 		// Machine learning and AI.
 		bedrock, bedrockAgentCore, comprehend, kendra, lexModels, polly, rekognition, sageMaker, textract, transcribe, translate,
+		// End-user computing, game technology and IoT.
+		appStream, gameLift, gameLiftStreams, greengrassV2, iotCore, iotFleetWise, iotSiteWise, iotTwinMaker, iotWireless,
+		secureBrowser, thinClient, workSpaces,
 	}
 }

@@ -1,0 +1,1213 @@
+{
+ "components": {
+  "schemas": {
+   "Actuator": {
+    "additionalProperties": false,
+    "properties": {
+     "allowedValues": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "assignedValue": {
+      "type": "string"
+     },
+     "comment": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "dataType": {
+      "enum": [
+       "INT8",
+       "UINT8",
+       "INT16",
+       "UINT16",
+       "INT32",
+       "UINT32",
+       "INT64",
+       "UINT64",
+       "BOOLEAN",
+       "FLOAT",
+       "DOUBLE",
+       "STRING",
+       "UNIX_TIMESTAMP",
+       "INT8_ARRAY",
+       "UINT8_ARRAY",
+       "INT16_ARRAY",
+       "UINT16_ARRAY",
+       "INT32_ARRAY",
+       "UINT32_ARRAY",
+       "INT64_ARRAY",
+       "UINT64_ARRAY",
+       "BOOLEAN_ARRAY",
+       "FLOAT_ARRAY",
+       "DOUBLE_ARRAY",
+       "STRING_ARRAY",
+       "UNIX_TIMESTAMP_ARRAY",
+       "UNKNOWN",
+       "STRUCT",
+       "STRUCT_ARRAY"
+      ],
+      "type": "string"
+     },
+     "deprecationMessage": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "description": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "fullyQualifiedName": {
+      "maxLength": 150,
+      "minLength": 1,
+      "type": "string"
+     },
+     "max": {
+      "type": "number"
+     },
+     "min": {
+      "type": "number"
+     },
+     "structFullyQualifiedName": {
+      "maxLength": 150,
+      "minLength": 1,
+      "type": "string"
+     },
+     "unit": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "fullyQualifiedName",
+     "dataType"
+    ],
+    "type": "object"
+   },
+   "Attribute": {
+    "additionalProperties": false,
+    "properties": {
+     "allowedValues": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "assignedValue": {
+      "type": "string"
+     },
+     "comment": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "dataType": {
+      "enum": [
+       "INT8",
+       "UINT8",
+       "INT16",
+       "UINT16",
+       "INT32",
+       "UINT32",
+       "INT64",
+       "UINT64",
+       "BOOLEAN",
+       "FLOAT",
+       "DOUBLE",
+       "STRING",
+       "UNIX_TIMESTAMP",
+       "INT8_ARRAY",
+       "UINT8_ARRAY",
+       "INT16_ARRAY",
+       "UINT16_ARRAY",
+       "INT32_ARRAY",
+       "UINT32_ARRAY",
+       "INT64_ARRAY",
+       "UINT64_ARRAY",
+       "BOOLEAN_ARRAY",
+       "FLOAT_ARRAY",
+       "DOUBLE_ARRAY",
+       "STRING_ARRAY",
+       "UNIX_TIMESTAMP_ARRAY",
+       "UNKNOWN",
+       "STRUCT",
+       "STRUCT_ARRAY"
+      ],
+      "type": "string"
+     },
+     "defaultValue": {
+      "type": "string"
+     },
+     "deprecationMessage": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "description": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "fullyQualifiedName": {
+      "maxLength": 150,
+      "minLength": 1,
+      "type": "string"
+     },
+     "max": {
+      "type": "number"
+     },
+     "min": {
+      "type": "number"
+     },
+     "unit": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "fullyQualifiedName",
+     "dataType"
+    ],
+    "type": "object"
+   },
+   "Branch": {
+    "additionalProperties": false,
+    "properties": {
+     "comment": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "deprecationMessage": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "description": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "fullyQualifiedName": {
+      "maxLength": 150,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "fullyQualifiedName"
+    ],
+    "type": "object"
+   },
+   "CreateFleetRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "description": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "fleetId": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "signalCatalogArn": {
+      "type": "string"
+     },
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "fleetId",
+     "signalCatalogArn"
+    ],
+    "type": "object"
+   },
+   "CreateFleetResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "id": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "id",
+     "arn"
+    ],
+    "type": "object"
+   },
+   "CreateSignalCatalogRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "description": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "nodes": {
+      "items": {
+       "$ref": "#/components/schemas/Node"
+      },
+      "maxItems": 500,
+      "minItems": 0,
+      "type": "array"
+     },
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "CreateSignalCatalogResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "arn"
+    ],
+    "type": "object"
+   },
+   "CustomProperty": {
+    "additionalProperties": false,
+    "properties": {
+     "comment": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "dataEncoding": {
+      "enum": [
+       "BINARY",
+       "TYPED"
+      ],
+      "type": "string"
+     },
+     "dataType": {
+      "enum": [
+       "INT8",
+       "UINT8",
+       "INT16",
+       "UINT16",
+       "INT32",
+       "UINT32",
+       "INT64",
+       "UINT64",
+       "BOOLEAN",
+       "FLOAT",
+       "DOUBLE",
+       "STRING",
+       "UNIX_TIMESTAMP",
+       "INT8_ARRAY",
+       "UINT8_ARRAY",
+       "INT16_ARRAY",
+       "UINT16_ARRAY",
+       "INT32_ARRAY",
+       "UINT32_ARRAY",
+       "INT64_ARRAY",
+       "UINT64_ARRAY",
+       "BOOLEAN_ARRAY",
+       "FLOAT_ARRAY",
+       "DOUBLE_ARRAY",
+       "STRING_ARRAY",
+       "UNIX_TIMESTAMP_ARRAY",
+       "UNKNOWN",
+       "STRUCT",
+       "STRUCT_ARRAY"
+      ],
+      "type": "string"
+     },
+     "deprecationMessage": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "description": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "fullyQualifiedName": {
+      "maxLength": 150,
+      "minLength": 1,
+      "type": "string"
+     },
+     "structFullyQualifiedName": {
+      "maxLength": 150,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "fullyQualifiedName",
+     "dataType"
+    ],
+    "type": "object"
+   },
+   "CustomStruct": {
+    "additionalProperties": false,
+    "properties": {
+     "comment": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "deprecationMessage": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "description": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "fullyQualifiedName": {
+      "maxLength": 150,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "fullyQualifiedName"
+    ],
+    "type": "object"
+   },
+   "DeleteFleetRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "fleetId": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "fleetId"
+    ],
+    "type": "object"
+   },
+   "DeleteFleetResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "id": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteSignalCatalogRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "DeleteSignalCatalogResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "arn"
+    ],
+    "type": "object"
+   },
+   "FleetSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "creationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "description": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "id": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "lastModificationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "signalCatalogArn": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "id",
+     "arn",
+     "signalCatalogArn",
+     "creationTime"
+    ],
+    "type": "object"
+   },
+   "GetFleetRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "fleetId": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "fleetId"
+    ],
+    "type": "object"
+   },
+   "GetFleetResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "creationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "description": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "id": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "lastModificationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "signalCatalogArn": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "id",
+     "arn",
+     "signalCatalogArn",
+     "creationTime",
+     "lastModificationTime"
+    ],
+    "type": "object"
+   },
+   "GetSignalCatalogRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "GetSignalCatalogResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "creationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "description": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "lastModificationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "nodeCounts": {
+      "$ref": "#/components/schemas/NodeCounts"
+     }
+    },
+    "required": [
+     "name",
+     "arn",
+     "creationTime",
+     "lastModificationTime"
+    ],
+    "type": "object"
+   },
+   "ListFleetsRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "listResponseScope": {
+      "enum": [
+       "METADATA_ONLY"
+      ],
+      "type": "string"
+     },
+     "maxResults": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "nextToken": {
+      "maxLength": 4096,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListFleetsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "fleetSummaries": {
+      "items": {
+       "$ref": "#/components/schemas/FleetSummary"
+      },
+      "type": "array"
+     },
+     "nextToken": {
+      "maxLength": 4096,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListSignalCatalogsRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "maxResults": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "nextToken": {
+      "maxLength": 4096,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListSignalCatalogsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextToken": {
+      "maxLength": 4096,
+      "minLength": 1,
+      "type": "string"
+     },
+     "summaries": {
+      "items": {
+       "$ref": "#/components/schemas/SignalCatalogSummary"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListTagsForResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceARN": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ResourceARN"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Node": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "actuator": {
+      "$ref": "#/components/schemas/Actuator"
+     },
+     "attribute": {
+      "$ref": "#/components/schemas/Attribute"
+     },
+     "branch": {
+      "$ref": "#/components/schemas/Branch"
+     },
+     "property": {
+      "$ref": "#/components/schemas/CustomProperty"
+     },
+     "sensor": {
+      "$ref": "#/components/schemas/Sensor"
+     },
+     "struct": {
+      "$ref": "#/components/schemas/CustomStruct"
+     }
+    },
+    "type": "object"
+   },
+   "NodeCounts": {
+    "additionalProperties": false,
+    "properties": {
+     "totalActuators": {
+      "type": "integer"
+     },
+     "totalAttributes": {
+      "type": "integer"
+     },
+     "totalBranches": {
+      "type": "integer"
+     },
+     "totalNodes": {
+      "type": "integer"
+     },
+     "totalProperties": {
+      "type": "integer"
+     },
+     "totalSensors": {
+      "type": "integer"
+     },
+     "totalStructs": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "Sensor": {
+    "additionalProperties": false,
+    "properties": {
+     "allowedValues": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "comment": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "dataType": {
+      "enum": [
+       "INT8",
+       "UINT8",
+       "INT16",
+       "UINT16",
+       "INT32",
+       "UINT32",
+       "INT64",
+       "UINT64",
+       "BOOLEAN",
+       "FLOAT",
+       "DOUBLE",
+       "STRING",
+       "UNIX_TIMESTAMP",
+       "INT8_ARRAY",
+       "UINT8_ARRAY",
+       "INT16_ARRAY",
+       "UINT16_ARRAY",
+       "INT32_ARRAY",
+       "UINT32_ARRAY",
+       "INT64_ARRAY",
+       "UINT64_ARRAY",
+       "BOOLEAN_ARRAY",
+       "FLOAT_ARRAY",
+       "DOUBLE_ARRAY",
+       "STRING_ARRAY",
+       "UNIX_TIMESTAMP_ARRAY",
+       "UNKNOWN",
+       "STRUCT",
+       "STRUCT_ARRAY"
+      ],
+      "type": "string"
+     },
+     "deprecationMessage": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "description": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "fullyQualifiedName": {
+      "maxLength": 150,
+      "minLength": 1,
+      "type": "string"
+     },
+     "max": {
+      "type": "number"
+     },
+     "min": {
+      "type": "number"
+     },
+     "structFullyQualifiedName": {
+      "maxLength": 150,
+      "minLength": 1,
+      "type": "string"
+     },
+     "unit": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "fullyQualifiedName",
+     "dataType"
+    ],
+    "type": "object"
+   },
+   "SignalCatalogSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "creationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "lastModificationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "name": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "Key": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Value": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key",
+     "Value"
+    ],
+    "type": "object"
+   },
+   "TagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceARN": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "ResourceARN",
+     "Tags"
+    ],
+    "type": "object"
+   },
+   "TagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UntagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceARN": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     },
+     "TagKeys": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "ResourceARN",
+     "TagKeys"
+    ],
+    "type": "object"
+   },
+   "UntagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UpdateFleetRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "description": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "fleetId": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "fleetId"
+    ],
+    "type": "object"
+   },
+   "UpdateFleetResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "id": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "UpdateSignalCatalogRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "description": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "nodesToAdd": {
+      "items": {
+       "$ref": "#/components/schemas/Node"
+      },
+      "maxItems": 500,
+      "minItems": 0,
+      "type": "array"
+     },
+     "nodesToRemove": {
+      "items": {
+       "maxLength": 150,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 500,
+      "minItems": 1,
+      "type": "array"
+     },
+     "nodesToUpdate": {
+      "items": {
+       "$ref": "#/components/schemas/Node"
+      },
+      "maxItems": 500,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "UpdateSignalCatalogResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "arn"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS IoT FleetWise API (2021-06-17). Every other official operation returns HTTP 501 UnknownOperationException. Signal catalogs and fleets are configuration metadata: no vehicle, decoder manifest, model manifest, state template or campaign exists, so fleets hold no vehicles and no vehicle data is collected. CreateVehicle, CreateCampaign, RegisterAccount and the other vehicle and data-collection APIs return UnknownOperationException with HTTP 501. Signal catalogs hold no nodes: nodes, nodesToAdd, nodesToUpdate and nodesToRemove are refused, node counts stay 0, and ImportSignalCatalog and ListSignalCatalogNodes return HTTP 501. One signal catalog exists per Region. Fleets must reference a live signal catalog, but deleting a signal catalog does not check the fleets that reference it. Deleting a missing signal catalog or fleet succeeds, as the official operations model no not-found error; ListFleets listResponseScope is refused.",
+  "title": "AWS IoT FleetWise (simulator catalog)",
+  "version": "2021-06-17"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/": {
+   "post": {
+    "description": "Choose the X-Amz-Target of one implemented operation. Request and response members follow the linked official input/output schemas.",
+    "operationId": "iotfleetwiseJSONOperation",
+    "parameters": [
+     {
+      "in": "header",
+      "name": "X-Amz-Target",
+      "required": true,
+      "schema": {
+       "enum": [
+        "IoTAutobahnControlPlane.CreateFleet",
+        "IoTAutobahnControlPlane.CreateSignalCatalog",
+        "IoTAutobahnControlPlane.DeleteFleet",
+        "IoTAutobahnControlPlane.DeleteSignalCatalog",
+        "IoTAutobahnControlPlane.GetFleet",
+        "IoTAutobahnControlPlane.GetSignalCatalog",
+        "IoTAutobahnControlPlane.ListFleets",
+        "IoTAutobahnControlPlane.ListSignalCatalogs",
+        "IoTAutobahnControlPlane.ListTagsForResource",
+        "IoTAutobahnControlPlane.TagResource",
+        "IoTAutobahnControlPlane.UntagResource",
+        "IoTAutobahnControlPlane.UpdateFleet",
+        "IoTAutobahnControlPlane.UpdateSignalCatalog"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-amz-json-1.0": {
+       "examples": {
+        "CreateFleet": {
+         "summary": "X-Amz-Target: IoTAutobahnControlPlane.CreateFleet",
+         "value": {}
+        },
+        "CreateSignalCatalog": {
+         "summary": "X-Amz-Target: IoTAutobahnControlPlane.CreateSignalCatalog",
+         "value": {}
+        },
+        "DeleteFleet": {
+         "summary": "X-Amz-Target: IoTAutobahnControlPlane.DeleteFleet",
+         "value": {}
+        },
+        "DeleteSignalCatalog": {
+         "summary": "X-Amz-Target: IoTAutobahnControlPlane.DeleteSignalCatalog",
+         "value": {}
+        },
+        "GetFleet": {
+         "summary": "X-Amz-Target: IoTAutobahnControlPlane.GetFleet",
+         "value": {}
+        },
+        "GetSignalCatalog": {
+         "summary": "X-Amz-Target: IoTAutobahnControlPlane.GetSignalCatalog",
+         "value": {}
+        },
+        "ListFleets": {
+         "summary": "X-Amz-Target: IoTAutobahnControlPlane.ListFleets",
+         "value": {}
+        },
+        "ListSignalCatalogs": {
+         "summary": "X-Amz-Target: IoTAutobahnControlPlane.ListSignalCatalogs",
+         "value": {}
+        },
+        "ListTagsForResource": {
+         "summary": "X-Amz-Target: IoTAutobahnControlPlane.ListTagsForResource",
+         "value": {}
+        },
+        "TagResource": {
+         "summary": "X-Amz-Target: IoTAutobahnControlPlane.TagResource",
+         "value": {}
+        },
+        "UntagResource": {
+         "summary": "X-Amz-Target: IoTAutobahnControlPlane.UntagResource",
+         "value": {}
+        },
+        "UpdateFleet": {
+         "summary": "X-Amz-Target: IoTAutobahnControlPlane.UpdateFleet",
+         "value": {}
+        },
+        "UpdateSignalCatalog": {
+         "summary": "X-Amz-Target: IoTAutobahnControlPlane.UpdateSignalCatalog",
+         "value": {}
+        }
+       },
+       "schema": {
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/x-amz-json-1.0": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception in __type."
+     },
+     "403": {
+      "description": "AccessDeniedException from local identity policy evaluation."
+     },
+     "501": {
+      "description": "Official operation not implemented by the simulator."
+     }
+    },
+    "summary": "AWS IoT FleetWise JSON 1.0 operations",
+    "tags": [
+     "AWS IoT FleetWise"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS IoT FleetWise API (2021-06-17). Every other official operation returns HTTP 501 UnknownOperationException. Signal catalogs and fleets are configuration metadata: no vehicle, decoder manifest, model manifest, state template or campaign exists, so fleets hold no vehicles and no vehicle data is collected. CreateVehicle, CreateCampaign, RegisterAccount and the other vehicle and data-collection APIs return UnknownOperationException with HTTP 501. Signal catalogs hold no nodes: nodes, nodesToAdd, nodesToUpdate and nodesToRemove are refused, node counts stay 0, and ImportSignalCatalog and ListSignalCatalogNodes return HTTP 501. One signal catalog exists per Region. Fleets must reference a live signal catalog, but deleting a signal catalog does not check the fleets that reference it. Deleting a missing signal catalog or fleet succeeds, as the official operations model no not-found error; ListFleets listResponseScope is refused.",
+   "name": "AWS IoT FleetWise"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/iotfleetwise/2021-06-17/service-2.json",
+  "sha256": "f257ff79e3f0a08dfed86d00d7f31a4f125254c28bde4671d04217bbca83921d",
+  "license": "Apache-2.0"
+ }
+}

@@ -1,0 +1,421 @@
+{
+ "client": "iot",
+ "steps": [
+  {
+   "op": "create_thing_type",
+   "args": {
+    "thingTypeName": "sensor",
+    "thingTypeProperties": {
+     "thingTypeDescription": "Temperature sensor",
+     "searchableAttributes": [
+      "room"
+     ]
+    },
+    "tags": [
+     {
+      "Key": "team",
+      "Value": "a"
+     }
+    ]
+   },
+   "save": {
+    "type": "thingTypeArn"
+   },
+   "expect": {
+    "thingTypeArn": "arn:aws:iot:us-east-1:000000000000:thingtype/sensor"
+   }
+  },
+  {
+   "op": "describe_thing_type",
+   "args": {
+    "thingTypeName": "sensor"
+   },
+   "expect": {
+    "thingTypeMetadata.deprecated": false,
+    "thingTypeProperties.searchableAttributes#count": 1
+   }
+  },
+  {
+   "op": "list_thing_types",
+   "args": {},
+   "expect": {
+    "thingTypes#count": 1
+   }
+  },
+  {
+   "op": "update_thing_type",
+   "args": {
+    "thingTypeName": "sensor",
+    "thingTypeProperties": {
+     "thingTypeDescription": "Room sensor",
+     "searchableAttributes": [
+      "room",
+      "floor"
+     ]
+    }
+   }
+  },
+  {
+   "op": "create_thing",
+   "args": {
+    "thingName": "sensor-1",
+    "thingTypeName": "sensor",
+    "attributePayload": {
+     "attributes": {
+      "room": "101"
+     }
+    }
+   },
+   "save": {
+    "thing": "thingArn"
+   }
+  },
+  {
+   "op": "describe_thing",
+   "args": {
+    "thingName": "sensor-1"
+   },
+   "expect": {
+    "attributes.room": "101",
+    "version": 1,
+    "defaultClientId": "sensor-1",
+    "thingTypeName": "sensor"
+   }
+  },
+  {
+   "op": "update_thing",
+   "args": {
+    "thingName": "sensor-1",
+    "attributePayload": {
+     "attributes": {
+      "room": "102",
+      "floor": "1"
+     }
+    },
+    "expectedVersion": 1
+   }
+  },
+  {
+   "op": "list_things",
+   "args": {
+    "thingTypeName": "sensor"
+   },
+   "expect": {
+    "things[0].attributes.floor": "1",
+    "things#count": 1
+   }
+  },
+  {
+   "op": "update_thing",
+   "args": {
+    "thingName": "sensor-1",
+    "expectedVersion": 5
+   },
+   "error": "VersionConflictException"
+  },
+  {
+   "op": "create_policy",
+   "args": {
+    "policyName": "sensor-publish",
+    "policyDocument": "{\"Version\": \"2012-10-17\", \"Statement\": [{\"Effect\": \"Allow\", \"Action\": \"iot:Publish\", \"Resource\": \"arn:aws:iot:us-east-1:000000000000:topic/sensors/*\"}]}"
+   },
+   "save": {
+    "policy": "policyArn"
+   },
+   "expect": {
+    "policyVersionId": "1"
+   }
+  },
+  {
+   "op": "get_policy",
+   "args": {
+    "policyName": "sensor-publish"
+   },
+   "expect": {
+    "defaultVersionId": "1",
+    "policyDocument": "{\"Version\": \"2012-10-17\", \"Statement\": [{\"Effect\": \"Allow\", \"Action\": \"iot:Publish\", \"Resource\": \"arn:aws:iot:us-east-1:000000000000:topic/sensors/*\"}]}"
+   }
+  },
+  {
+   "op": "list_policies",
+   "args": {},
+   "expect": {
+    "policies#count": 1
+   }
+  },
+  {
+   "op": "create_policy",
+   "args": {
+    "policyName": "broken",
+    "policyDocument": "allow everything"
+   },
+   "error": "MalformedPolicyException"
+  },
+  {
+   "op": "create_thing_group",
+   "args": {
+    "thingGroupName": "line-1",
+    "thingGroupProperties": {
+     "thingGroupDescription": "Line 1",
+     "attributePayload": {
+      "attributes": {
+       "site": "tokyo"
+      }
+     }
+    }
+   },
+   "save": {
+    "group": "thingGroupArn"
+   }
+  },
+  {
+   "op": "describe_thing_group",
+   "args": {
+    "thingGroupName": "line-1"
+   },
+   "expect": {
+    "thingGroupProperties.attributePayload.attributes.site": "tokyo",
+    "version": 1
+   }
+  },
+  {
+   "op": "list_thing_groups",
+   "args": {},
+   "expect": {
+    "thingGroups[0].groupName": "line-1",
+    "thingGroups[0].groupArn": "${group}"
+   }
+  },
+  {
+   "op": "update_thing_group",
+   "args": {
+    "thingGroupName": "line-1",
+    "thingGroupProperties": {
+     "thingGroupDescription": "Line one"
+    }
+   },
+   "expect": {
+    "version": 1
+   }
+  },
+  {
+   "op": "create_security_profile",
+   "args": {
+    "securityProfileName": "msg-rate",
+    "securityProfileDescription": "Messages",
+    "behaviors": [
+     {
+      "name": "too-many-messages",
+      "metric": "aws:num-messages-sent",
+      "criteria": {
+       "comparisonOperator": "greater-than",
+       "value": {
+        "count": 100
+       },
+       "durationSeconds": 300
+      }
+     }
+    ],
+    "tags": [
+     {
+      "Key": "team",
+      "Value": "a"
+     }
+    ]
+   },
+   "save": {
+    "profile": "securityProfileArn"
+   }
+  },
+  {
+   "op": "describe_security_profile",
+   "args": {
+    "securityProfileName": "msg-rate"
+   },
+   "expect": {
+    "behaviors[0].name": "too-many-messages",
+    "version": 1
+   }
+  },
+  {
+   "op": "list_security_profiles",
+   "args": {},
+   "expect": {
+    "securityProfileIdentifiers[0].name": "msg-rate",
+    "securityProfileIdentifiers[0].arn": "${profile}"
+   }
+  },
+  {
+   "op": "update_security_profile",
+   "args": {
+    "securityProfileName": "msg-rate",
+    "securityProfileDescription": "Message rate",
+    "expectedVersion": 1
+   },
+   "expect": {
+    "securityProfileDescription": "Message rate"
+   }
+  },
+  {
+   "op": "tag_resource",
+   "args": {
+    "resourceArn": "${group}",
+    "tags": [
+     {
+      "Key": "stage",
+      "Value": "dev"
+     }
+    ]
+   }
+  },
+  {
+   "op": "untag_resource",
+   "args": {
+    "resourceArn": "${group}",
+    "tagKeys": [
+     "stage"
+    ]
+   }
+  },
+  {
+   "op": "list_tags_for_resource",
+   "args": {
+    "resourceArn": "${type}"
+   },
+   "expect": {
+    "tags[0].Key": "team"
+   }
+  },
+  {
+   "op": "tag_resource",
+   "args": {
+    "resourceArn": "${thing}",
+    "tags": [
+     {
+      "Key": "stage",
+      "Value": "dev"
+     }
+    ]
+   },
+   "error": "InvalidRequestException"
+  },
+  {
+   "op": "create_keys_and_certificate",
+   "args": {
+    "setAsActive": false
+   },
+   "error": "UnknownOperationException",
+   "status": 501
+  },
+  {
+   "op": "describe_thing",
+   "args": {
+    "thingName": "missing"
+   },
+   "error": "ResourceNotFoundException"
+  }
+ ],
+ "isolation": [
+  {
+   "op": "list_things",
+   "args": {},
+   "expect": {
+    "things#count": 0
+   }
+  },
+  {
+   "op": "list_policies",
+   "args": {},
+   "expect": {
+    "policies#count": 0
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "op": "describe_thing",
+   "args": {
+    "thingName": "sensor-1"
+   },
+   "expect": {
+    "attributes.room": "102"
+   }
+  },
+  {
+   "op": "describe_security_profile",
+   "args": {
+    "securityProfileName": "msg-rate"
+   },
+   "expect": {
+    "securityProfileDescription": "Message rate"
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "op": "delete_thing",
+   "args": {
+    "thingName": "sensor-1",
+    "expectedVersion": 1
+   }
+  },
+  {
+   "op": "delete_thing_type",
+   "args": {
+    "thingTypeName": "sensor"
+   }
+  },
+  {
+   "op": "delete_policy",
+   "args": {
+    "policyName": "sensor-publish"
+   }
+  },
+  {
+   "op": "delete_thing_group",
+   "args": {
+    "thingGroupName": "line-1"
+   }
+  },
+  {
+   "op": "delete_thing_group",
+   "args": {
+    "thingGroupName": "line-1"
+   }
+  },
+  {
+   "op": "delete_security_profile",
+   "args": {
+    "securityProfileName": "msg-rate"
+   }
+  },
+  {
+   "op": "list_things",
+   "args": {},
+   "expect": {
+    "things#count": 0
+   }
+  },
+  {
+   "op": "list_thing_types",
+   "args": {},
+   "expect": {
+    "thingTypes#count": 0
+   }
+  },
+  {
+   "op": "list_thing_groups",
+   "args": {},
+   "expect": {
+    "thingGroups#count": 0
+   }
+  },
+  {
+   "op": "list_security_profiles",
+   "args": {},
+   "expect": {
+    "securityProfileIdentifiers#count": 0
+   }
+  }
+ ]
+}

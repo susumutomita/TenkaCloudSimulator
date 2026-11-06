@@ -1,0 +1,366 @@
+{
+ "client": "workspaces-web",
+ "steps": [
+  {
+   "op": "create_portal",
+   "args": {
+    "displayName": "Kiosk",
+    "tags": [
+     {
+      "Key": "team",
+      "Value": "a"
+     }
+    ]
+   },
+   "save": {
+    "portal": "portalArn"
+   }
+  },
+  {
+   "op": "get_portal",
+   "args": {
+    "portalArn": "${portal}"
+   },
+   "expect": {
+    "portal.portalStatus": "Incomplete",
+    "portal.rendererType": "AppStream",
+    "portal.browserType": "Chrome",
+    "portal.displayName": "Kiosk"
+   }
+  },
+  {
+   "op": "list_portals",
+   "args": {},
+   "expect": {
+    "portals#count": 1
+   }
+  },
+  {
+   "op": "update_portal",
+   "args": {
+    "portalArn": "${portal}",
+    "displayName": "Front desk",
+    "instanceType": "standard.large"
+   },
+   "expect": {
+    "portal.displayName": "Front desk",
+    "portal.instanceType": "standard.large"
+   }
+  },
+  {
+   "op": "create_browser_settings",
+   "args": {
+    "browserPolicy": "{\"chromePolicies\":{\"AllowDeletingBrowserHistory\":{\"value\":false}}}"
+   },
+   "save": {
+    "browser": "browserSettingsArn"
+   }
+  },
+  {
+   "op": "get_browser_settings",
+   "args": {
+    "browserSettingsArn": "${browser}"
+   },
+   "expect": {
+    "browserSettings.associatedPortalArns#count": 0
+   }
+  },
+  {
+   "op": "list_browser_settings",
+   "args": {},
+   "expect": {
+    "browserSettings[0].browserSettingsArn": "${browser}"
+   }
+  },
+  {
+   "op": "update_browser_settings",
+   "args": {
+    "browserSettingsArn": "${browser}",
+    "webContentFilteringPolicy": {
+     "blockedCategories": [
+      "Gambling"
+     ]
+    }
+   },
+   "expect": {
+    "browserSettings.webContentFilteringPolicy.blockedCategories[0]": "Gambling"
+   }
+  },
+  {
+   "op": "create_browser_settings",
+   "args": {
+    "browserPolicy": "{not json}"
+   },
+   "error": "ValidationException"
+  },
+  {
+   "op": "create_network_settings",
+   "args": {
+    "vpcId": "vpc-0a1b2c3d",
+    "subnetIds": [
+     "subnet-0a1b2c3d",
+     "subnet-1a2b3c4d"
+    ],
+    "securityGroupIds": [
+     "sg-0a1b2c3d"
+    ]
+   },
+   "save": {
+    "network": "networkSettingsArn"
+   }
+  },
+  {
+   "op": "get_network_settings",
+   "args": {
+    "networkSettingsArn": "${network}"
+   },
+   "expect": {
+    "networkSettings.subnetIds#count": 2
+   }
+  },
+  {
+   "op": "list_network_settings",
+   "args": {},
+   "expect": {
+    "networkSettings[0].vpcId": "vpc-0a1b2c3d"
+   }
+  },
+  {
+   "op": "update_network_settings",
+   "args": {
+    "networkSettingsArn": "${network}",
+    "securityGroupIds": [
+     "sg-1a2b3c4d"
+    ]
+   },
+   "expect": {
+    "networkSettings.securityGroupIds[0]": "sg-1a2b3c4d"
+   }
+  },
+  {
+   "op": "create_user_settings",
+   "args": {
+    "copyAllowed": "Enabled",
+    "pasteAllowed": "Enabled",
+    "downloadAllowed": "Disabled",
+    "uploadAllowed": "Disabled",
+    "printAllowed": "Disabled",
+    "disconnectTimeoutInMinutes": 60
+   },
+   "save": {
+    "user": "userSettingsArn"
+   }
+  },
+  {
+   "op": "get_user_settings",
+   "args": {
+    "userSettingsArn": "${user}"
+   },
+   "expect": {
+    "userSettings.copyAllowed": "Enabled",
+    "userSettings.disconnectTimeoutInMinutes": 60
+   }
+  },
+  {
+   "op": "list_user_settings",
+   "args": {},
+   "expect": {
+    "userSettings#count": 1
+   }
+  },
+  {
+   "op": "update_user_settings",
+   "args": {
+    "userSettingsArn": "${user}",
+    "printAllowed": "Enabled"
+   },
+   "expect": {
+    "userSettings.printAllowed": "Enabled"
+   }
+  },
+  {
+   "op": "create_ip_access_settings",
+   "args": {
+    "displayName": "office",
+    "ipRules": [
+     {
+      "ipRange": "198.51.100.0/24",
+      "description": "HQ"
+     }
+    ]
+   },
+   "save": {
+    "ip": "ipAccessSettingsArn"
+   }
+  },
+  {
+   "op": "get_ip_access_settings",
+   "args": {
+    "ipAccessSettingsArn": "${ip}"
+   },
+   "expect": {
+    "ipAccessSettings.ipRules[0].ipRange": "198.51.100.0/24"
+   }
+  },
+  {
+   "op": "list_ip_access_settings",
+   "args": {},
+   "expect": {
+    "ipAccessSettings[0].displayName": "office"
+   }
+  },
+  {
+   "op": "update_ip_access_settings",
+   "args": {
+    "ipAccessSettingsArn": "${ip}",
+    "description": "Head office"
+   },
+   "expect": {
+    "ipAccessSettings.description": "Head office"
+   }
+  },
+  {
+   "op": "tag_resource",
+   "args": {
+    "resourceArn": "${portal}",
+    "tags": [
+     {
+      "Key": "stage",
+      "Value": "dev"
+     }
+    ]
+   }
+  },
+  {
+   "op": "untag_resource",
+   "args": {
+    "resourceArn": "${portal}",
+    "tagKeys": [
+     "stage"
+    ]
+   }
+  },
+  {
+   "op": "list_tags_for_resource",
+   "args": {
+    "resourceArn": "${portal}"
+   },
+   "expect": {
+    "tags#count": 1,
+    "tags[0].Key": "team"
+   }
+  },
+  {
+   "op": "associate_browser_settings",
+   "args": {
+    "portalArn": "${portal}",
+    "browserSettingsArn": "${browser}"
+   },
+   "error": "ValidationException",
+   "status": 400
+  },
+  {
+   "op": "list_sessions",
+   "args": {
+    "portalId": "00000000-0000-0000-0000-000000000000"
+   },
+   "error": "UnknownOperationException",
+   "status": 501
+  },
+  {
+   "op": "get_portal",
+   "args": {
+    "portalArn": "arn:aws:workspaces-web:us-east-1:000000000000:portal/00000000-0000-0000-0000-000000000000"
+   },
+   "error": "ResourceNotFoundException"
+  }
+ ],
+ "isolation": [
+  {
+   "op": "list_portals",
+   "args": {},
+   "expect": {
+    "portals#count": 0
+   }
+  },
+  {
+   "op": "list_user_settings",
+   "args": {},
+   "expect": {
+    "userSettings#count": 0
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "op": "get_user_settings",
+   "args": {
+    "userSettingsArn": "${user}"
+   },
+   "expect": {
+    "userSettings.printAllowed": "Enabled"
+   }
+  },
+  {
+   "op": "get_portal",
+   "args": {
+    "portalArn": "${portal}"
+   },
+   "expect": {
+    "portal.displayName": "Front desk"
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "op": "delete_portal",
+   "args": {
+    "portalArn": "${portal}"
+   }
+  },
+  {
+   "op": "delete_browser_settings",
+   "args": {
+    "browserSettingsArn": "${browser}"
+   }
+  },
+  {
+   "op": "delete_network_settings",
+   "args": {
+    "networkSettingsArn": "${network}"
+   }
+  },
+  {
+   "op": "delete_user_settings",
+   "args": {
+    "userSettingsArn": "${user}"
+   }
+  },
+  {
+   "op": "delete_ip_access_settings",
+   "args": {
+    "ipAccessSettingsArn": "${ip}"
+   }
+  },
+  {
+   "op": "delete_portal",
+   "args": {
+    "portalArn": "${portal}"
+   }
+  },
+  {
+   "op": "list_portals",
+   "args": {},
+   "expect": {
+    "portals#count": 0
+   }
+  },
+  {
+   "op": "list_browser_settings",
+   "args": {},
+   "expect": {
+    "browserSettings#count": 0
+   }
+  }
+ ]
+}

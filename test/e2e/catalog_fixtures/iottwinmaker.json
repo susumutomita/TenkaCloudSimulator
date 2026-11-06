@@ -1,0 +1,198 @@
+{
+ "client": "iottwinmaker",
+ "inject_host_prefix": false,
+ "steps": [
+  {
+   "op": "create_workspace",
+   "args": {
+    "workspaceId": "factory",
+    "description": "Factory twin",
+    "s3Location": "arn:aws:s3:::fixture-twin",
+    "role": "arn:aws:iam::000000000000:role/twinmaker",
+    "tags": {
+     "team": "a"
+    }
+   },
+   "save": {
+    "workspace": "arn"
+   },
+   "expect": {
+    "arn": "arn:aws:iottwinmaker:us-east-1:000000000000:workspace/factory"
+   }
+  },
+  {
+   "op": "get_workspace",
+   "args": {
+    "workspaceId": "factory"
+   },
+   "expect": {
+    "arn": "${workspace}",
+    "linkedServices#count": 0
+   }
+  },
+  {
+   "op": "list_workspaces",
+   "args": {},
+   "expect": {
+    "workspaceSummaries#count": 1
+   }
+  },
+  {
+   "op": "update_workspace",
+   "args": {
+    "workspaceId": "factory",
+    "description": "Factory digital twin"
+   }
+  },
+  {
+   "op": "create_scene",
+   "args": {
+    "workspaceId": "factory",
+    "sceneId": "floor-1",
+    "contentLocation": "s3://fixture-twin/floor-1.json",
+    "capabilities": [
+     "DYNAMIC_SCENE"
+    ]
+   },
+   "save": {
+    "scene": "arn"
+   },
+   "expect": {
+    "arn": "arn:aws:iottwinmaker:us-east-1:000000000000:workspace/factory/scene/floor-1"
+   }
+  },
+  {
+   "op": "get_scene",
+   "args": {
+    "workspaceId": "factory",
+    "sceneId": "floor-1"
+   },
+   "expect": {
+    "contentLocation": "s3://fixture-twin/floor-1.json",
+    "workspaceId": "factory"
+   }
+  },
+  {
+   "op": "list_scenes",
+   "args": {
+    "workspaceId": "factory"
+   },
+   "expect": {
+    "sceneSummaries#count": 1
+   }
+  },
+  {
+   "op": "update_scene",
+   "args": {
+    "workspaceId": "factory",
+    "sceneId": "floor-1",
+    "description": "Floor 1"
+   }
+  },
+  {
+   "op": "delete_workspace",
+   "args": {
+    "workspaceId": "factory"
+   },
+   "error": "ValidationException"
+  },
+  {
+   "op": "tag_resource",
+   "args": {
+    "resourceARN": "${workspace}",
+    "tags": {
+     "stage": "dev"
+    }
+   }
+  },
+  {
+   "op": "untag_resource",
+   "args": {
+    "resourceARN": "${workspace}",
+    "tagKeys": [
+     "stage"
+    ]
+   }
+  },
+  {
+   "op": "list_tags_for_resource",
+   "args": {
+    "resourceARN": "${workspace}"
+   },
+   "expect": {
+    "tags": {
+     "team": "a"
+    }
+   }
+  },
+  {
+   "op": "create_entity",
+   "args": {
+    "workspaceId": "factory",
+    "entityName": "pump"
+   },
+   "error": "UnknownOperationException",
+   "status": 501
+  },
+  {
+   "op": "get_scene",
+   "args": {
+    "workspaceId": "factory",
+    "sceneId": "missing"
+   },
+   "error": "ResourceNotFoundException"
+  }
+ ],
+ "isolation": [
+  {
+   "op": "list_workspaces",
+   "args": {},
+   "expect": {
+    "workspaceSummaries#count": 0
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "op": "get_scene",
+   "args": {
+    "workspaceId": "factory",
+    "sceneId": "floor-1"
+   },
+   "expect": {
+    "description": "Floor 1"
+   }
+  },
+  {
+   "op": "get_workspace",
+   "args": {
+    "workspaceId": "factory"
+   },
+   "expect": {
+    "description": "Factory digital twin"
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "op": "delete_scene",
+   "args": {
+    "workspaceId": "factory",
+    "sceneId": "floor-1"
+   }
+  },
+  {
+   "op": "delete_workspace",
+   "args": {
+    "workspaceId": "factory"
+   }
+  },
+  {
+   "op": "list_workspaces",
+   "args": {},
+   "expect": {
+    "workspaceSummaries#count": 0
+   }
+  }
+ ]
+}

@@ -1,0 +1,925 @@
+{
+ "components": {
+  "schemas": {
+   "CreateEnvironmentResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "environment": {
+      "$ref": "#/components/schemas/EnvironmentSummary"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteEnvironmentResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "Environment": {
+    "additionalProperties": false,
+    "properties": {
+     "activationCode": {
+      "type": "string"
+     },
+     "arn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "desiredSoftwareSetId": {
+      "type": "string"
+     },
+     "desktopArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "desktopEndpoint": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "desktopType": {
+      "enum": [
+       "workspaces",
+       "appstream",
+       "workspaces-web"
+      ],
+      "type": "string"
+     },
+     "deviceCreationTags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     },
+     "id": {
+      "type": "string"
+     },
+     "kmsKeyArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "maintenanceWindow": {
+      "$ref": "#/components/schemas/MaintenanceWindow"
+     },
+     "name": {
+      "maxLength": 64,
+      "minLength": 0,
+      "type": "string"
+     },
+     "pendingSoftwareSetId": {
+      "type": "string"
+     },
+     "pendingSoftwareSetVersion": {
+      "type": "string"
+     },
+     "registeredDevicesCount": {
+      "type": "integer"
+     },
+     "softwareSetComplianceStatus": {
+      "enum": [
+       "NO_REGISTERED_DEVICES",
+       "COMPLIANT",
+       "NOT_COMPLIANT"
+      ],
+      "type": "string"
+     },
+     "softwareSetUpdateMode": {
+      "enum": [
+       "USE_LATEST",
+       "USE_DESIRED"
+      ],
+      "type": "string"
+     },
+     "softwareSetUpdateSchedule": {
+      "enum": [
+       "USE_MAINTENANCE_WINDOW",
+       "APPLY_IMMEDIATELY"
+      ],
+      "type": "string"
+     },
+     "updatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "type": "object"
+   },
+   "EnvironmentSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "activationCode": {
+      "type": "string"
+     },
+     "arn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "desiredSoftwareSetId": {
+      "type": "string"
+     },
+     "desktopArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "desktopEndpoint": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "desktopType": {
+      "enum": [
+       "workspaces",
+       "appstream",
+       "workspaces-web"
+      ],
+      "type": "string"
+     },
+     "id": {
+      "type": "string"
+     },
+     "maintenanceWindow": {
+      "$ref": "#/components/schemas/MaintenanceWindow"
+     },
+     "name": {
+      "maxLength": 64,
+      "minLength": 0,
+      "type": "string"
+     },
+     "pendingSoftwareSetId": {
+      "type": "string"
+     },
+     "softwareSetUpdateMode": {
+      "enum": [
+       "USE_LATEST",
+       "USE_DESIRED"
+      ],
+      "type": "string"
+     },
+     "softwareSetUpdateSchedule": {
+      "enum": [
+       "USE_MAINTENANCE_WINDOW",
+       "APPLY_IMMEDIATELY"
+      ],
+      "type": "string"
+     },
+     "updatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "type": "object"
+   },
+   "GetEnvironmentResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "environment": {
+      "$ref": "#/components/schemas/Environment"
+     }
+    },
+    "type": "object"
+   },
+   "ListEnvironmentsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "environments": {
+      "items": {
+       "$ref": "#/components/schemas/EnvironmentSummary"
+      },
+      "type": "array"
+     },
+     "nextToken": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListTagsForResourceResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "MaintenanceWindow": {
+    "additionalProperties": false,
+    "properties": {
+     "applyTimeOf": {
+      "enum": [
+       "UTC",
+       "DEVICE"
+      ],
+      "type": "string"
+     },
+     "daysOfTheWeek": {
+      "items": {
+       "enum": [
+        "MONDAY",
+        "TUESDAY",
+        "WEDNESDAY",
+        "THURSDAY",
+        "FRIDAY",
+        "SATURDAY",
+        "SUNDAY"
+       ],
+       "type": "string"
+      },
+      "maxItems": 7,
+      "minItems": 1,
+      "type": "array"
+     },
+     "endTimeHour": {
+      "maximum": 23,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "endTimeMinute": {
+      "maximum": 59,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "startTimeHour": {
+      "maximum": 23,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "startTimeMinute": {
+      "maximum": 59,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "type": {
+      "enum": [
+       "SYSTEM",
+       "CUSTOM"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "type"
+    ],
+    "type": "object"
+   },
+   "TagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UntagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UpdateEnvironmentResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "environment": {
+      "$ref": "#/components/schemas/EnvironmentSummary"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon WorkSpaces Thin Client API (2023-08-22). Every other official operation returns HTTP 501 UnknownOperationException. Environments are configuration metadata: no device is activated, registered or updated and no activation code is issued, so registeredDevicesCount stays 0. Devices and software sets are not implemented: GetDevice, ListDevices, DeregisterDevice, ListSoftwareSets and UpdateSoftwareSet return UnknownOperationException with HTTP 501. desktopArn must be a WorkSpaces directory, WorkSpaces Applications stack or WorkSpaces Secure Browser portal ARN; desktopType is derived from it, but the desktop and its endpoint are neither looked up nor contacted. desiredSoftwareSetId and the USE_DESIRED update mode are refused because no software set exists; KMS keys are stored without resolving them. CUSTOM maintenance windows require start and end hours and minutes. Delete client tokens are accepted but not recorded. SDK clients must disable host-prefix injection (botocore inject_host_prefix=False) because the official api. host prefix cannot address the loopback endpoint.",
+  "title": "Amazon WorkSpaces Thin Client (simulator catalog)",
+  "version": "2023-08-22"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/environments": {
+   "get": {
+    "operationId": "workspaces-thin-clientListEnvironments",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "thinclient"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 50,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 0,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListEnvironmentsResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListEnvironments",
+    "tags": [
+     "Amazon WorkSpaces Thin Client"
+    ]
+   },
+   "post": {
+    "operationId": "workspaces-thin-clientCreateEnvironment",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "thinclient"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "maxLength": 512,
+          "minLength": 1,
+          "type": "string"
+         },
+         "desiredSoftwareSetId": {
+          "type": "string"
+         },
+         "desktopArn": {
+          "maxLength": 2048,
+          "minLength": 20,
+          "type": "string"
+         },
+         "desktopEndpoint": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "type": "string"
+         },
+         "deviceCreationTags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         },
+         "kmsKeyArn": {
+          "maxLength": 2048,
+          "minLength": 20,
+          "type": "string"
+         },
+         "maintenanceWindow": {
+          "$ref": "#/components/schemas/MaintenanceWindow"
+         },
+         "name": {
+          "maxLength": 64,
+          "minLength": 0,
+          "type": "string"
+         },
+         "softwareSetUpdateMode": {
+          "enum": [
+           "USE_LATEST",
+           "USE_DESIRED"
+          ],
+          "type": "string"
+         },
+         "softwareSetUpdateSchedule": {
+          "enum": [
+           "USE_MAINTENANCE_WINDOW",
+           "APPLY_IMMEDIATELY"
+          ],
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "desktopArn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateEnvironmentResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateEnvironment",
+    "tags": [
+     "Amazon WorkSpaces Thin Client"
+    ]
+   }
+  },
+  "/environments/{id}": {
+   "delete": {
+    "operationId": "workspaces-thin-clientDeleteEnvironment",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "thinclient"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "clientToken",
+      "schema": {
+       "maxLength": 512,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DeleteEnvironmentResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteEnvironment",
+    "tags": [
+     "Amazon WorkSpaces Thin Client"
+    ]
+   },
+   "get": {
+    "operationId": "workspaces-thin-clientGetEnvironment",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "thinclient"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GetEnvironmentResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetEnvironment",
+    "tags": [
+     "Amazon WorkSpaces Thin Client"
+    ]
+   },
+   "patch": {
+    "operationId": "workspaces-thin-clientUpdateEnvironment",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "thinclient"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "desiredSoftwareSetId": {
+          "type": "string"
+         },
+         "desktopArn": {
+          "maxLength": 2048,
+          "minLength": 20,
+          "type": "string"
+         },
+         "desktopEndpoint": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "type": "string"
+         },
+         "deviceCreationTags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         },
+         "maintenanceWindow": {
+          "$ref": "#/components/schemas/MaintenanceWindow"
+         },
+         "name": {
+          "maxLength": 64,
+          "minLength": 0,
+          "type": "string"
+         },
+         "softwareSetUpdateMode": {
+          "enum": [
+           "USE_LATEST",
+           "USE_DESIRED"
+          ],
+          "type": "string"
+         },
+         "softwareSetUpdateSchedule": {
+          "enum": [
+           "USE_MAINTENANCE_WINDOW",
+           "APPLY_IMMEDIATELY"
+          ],
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UpdateEnvironmentResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateEnvironment",
+    "tags": [
+     "Amazon WorkSpaces Thin Client"
+    ]
+   }
+  },
+  "/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "workspaces-thin-clientUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "thinclient"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UntagResourceResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "Amazon WorkSpaces Thin Client"
+    ]
+   },
+   "get": {
+    "operationId": "workspaces-thin-clientListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "thinclient"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "Amazon WorkSpaces Thin Client"
+    ]
+   },
+   "post": {
+    "operationId": "workspaces-thin-clientTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "thinclient"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/TagResourceResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "Amazon WorkSpaces Thin Client"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon WorkSpaces Thin Client API (2023-08-22). Every other official operation returns HTTP 501 UnknownOperationException. Environments are configuration metadata: no device is activated, registered or updated and no activation code is issued, so registeredDevicesCount stays 0. Devices and software sets are not implemented: GetDevice, ListDevices, DeregisterDevice, ListSoftwareSets and UpdateSoftwareSet return UnknownOperationException with HTTP 501. desktopArn must be a WorkSpaces directory, WorkSpaces Applications stack or WorkSpaces Secure Browser portal ARN; desktopType is derived from it, but the desktop and its endpoint are neither looked up nor contacted. desiredSoftwareSetId and the USE_DESIRED update mode are refused because no software set exists; KMS keys are stored without resolving them. CUSTOM maintenance windows require start and end hours and minutes. Delete client tokens are accepted but not recorded. SDK clients must disable host-prefix injection (botocore inject_host_prefix=False) because the official api. host prefix cannot address the loopback endpoint.",
+   "name": "Amazon WorkSpaces Thin Client"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/workspaces-thin-client/2023-08-22/service-2.json",
+  "sha256": "6dc2482bb1615ffc56a151fb5526981a1a6a0ab885f95213c7684a4848bc755a",
+  "license": "Apache-2.0"
+ }
+}

@@ -1,0 +1,180 @@
+{
+ "client": "iotsitewise",
+ "inject_host_prefix": false,
+ "steps": [
+  {
+   "op": "create_gateway",
+   "args": {
+    "gatewayName": "plant-edge",
+    "gatewayPlatform": {
+     "greengrassV2": {
+      "coreDeviceThingName": "plant-core"
+     }
+    },
+    "tags": {
+     "team": "a"
+    }
+   },
+   "save": {
+    "gateway": "gatewayId",
+    "gatewayArn": "gatewayArn"
+   }
+  },
+  {
+   "op": "describe_gateway",
+   "args": {
+    "gatewayId": "${gateway}"
+   },
+   "expect": {
+    "gatewayPlatform.greengrassV2.coreDeviceThingName": "plant-core",
+    "gatewayCapabilitySummaries#count": 0,
+    "gatewayArn": "${gatewayArn}"
+   }
+  },
+  {
+   "op": "list_gateways",
+   "args": {},
+   "expect": {
+    "gatewaySummaries#count": 1
+   }
+  },
+  {
+   "op": "update_gateway",
+   "args": {
+    "gatewayId": "${gateway}",
+    "gatewayName": "plant-edge-1"
+   }
+  },
+  {
+   "op": "create_gateway",
+   "args": {
+    "gatewayName": "both",
+    "gatewayPlatform": {
+     "greengrassV2": {
+      "coreDeviceThingName": "a"
+     },
+     "siemensIE": {
+      "iotCoreThingName": "b"
+     }
+    }
+   },
+   "error": "InvalidRequestException"
+  },
+  {
+   "op": "describe_logging_options",
+   "args": {},
+   "expect": {
+    "loggingOptions.level": "OFF"
+   }
+  },
+  {
+   "op": "put_logging_options",
+   "args": {
+    "loggingOptions": {
+     "level": "ERROR"
+    }
+   }
+  },
+  {
+   "op": "tag_resource",
+   "args": {
+    "resourceArn": "${gatewayArn}",
+    "tags": {
+     "stage": "dev"
+    }
+   }
+  },
+  {
+   "op": "untag_resource",
+   "args": {
+    "resourceArn": "${gatewayArn}",
+    "tagKeys": [
+     "stage"
+    ]
+   }
+  },
+  {
+   "op": "list_tags_for_resource",
+   "args": {
+    "resourceArn": "${gatewayArn}"
+   },
+   "expect": {
+    "tags": {
+     "team": "a"
+    }
+   }
+  },
+  {
+   "op": "create_asset_model",
+   "args": {
+    "assetModelName": "pump"
+   },
+   "error": "UnknownOperationException",
+   "status": 501
+  },
+  {
+   "op": "describe_gateway",
+   "args": {
+    "gatewayId": "00000000-0000-0000-0000-000000000000"
+   },
+   "error": "ResourceNotFoundException"
+  }
+ ],
+ "isolation": [
+  {
+   "op": "list_gateways",
+   "args": {},
+   "expect": {
+    "gatewaySummaries#count": 0
+   }
+  },
+  {
+   "op": "describe_logging_options",
+   "args": {},
+   "expect": {
+    "loggingOptions.level": "OFF"
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "op": "describe_gateway",
+   "args": {
+    "gatewayId": "${gateway}"
+   },
+   "expect": {
+    "gatewayName": "plant-edge-1"
+   }
+  },
+  {
+   "op": "describe_logging_options",
+   "args": {},
+   "expect": {
+    "loggingOptions.level": "ERROR"
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "op": "delete_gateway",
+   "args": {
+    "gatewayId": "${gateway}"
+   }
+  },
+  {
+   "op": "put_logging_options",
+   "args": {
+    "loggingOptions": {
+     "level": "OFF"
+    }
+   }
+  },
+  {
+   "op": "list_gateways",
+   "args": {},
+   "expect": {
+    "gatewaySummaries#count": 0
+   }
+  }
+ ]
+}

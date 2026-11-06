@@ -1,0 +1,208 @@
+{
+ "components": {
+  "schemas": {
+   "AssociateServiceRoleToAccountResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "associatedAt": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DisassociateServiceRoleFromAccountResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "disassociatedAt": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GetServiceRoleForAccountResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "associatedAt": {
+      "type": "string"
+     },
+     "roleArn": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS IoT Greengrass V2 API (2020-11-30). Every other official operation returns HTTP 501 UnknownOperationException. Only the Regional Greengrass service role association is implemented. The role is stored without checking that it exists or carries AWSGreengrassResourceAccessRolePolicy, and nothing assumes it. Components, deployments, core devices, client devices and connectivity information return UnknownOperationException with HTTP 501: deployments and core devices would reach devices, and component version ARNs combine the recipe's name and version, which the simulator does not derive. Disassociating when no role is associated fails with ResourceNotFoundException (HTTP 404) instead of succeeding.",
+  "title": "AWS IoT Greengrass (simulator catalog)",
+  "version": "2020-11-30"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/greengrass/servicerole": {
+   "delete": {
+    "operationId": "greengrassv2DisassociateServiceRoleFromAccount",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "greengrass"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DisassociateServiceRoleFromAccountResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DisassociateServiceRoleFromAccount",
+    "tags": [
+     "AWS IoT Greengrass"
+    ]
+   },
+   "get": {
+    "operationId": "greengrassv2GetServiceRoleForAccount",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "greengrass"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GetServiceRoleForAccountResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetServiceRoleForAccount",
+    "tags": [
+     "AWS IoT Greengrass"
+    ]
+   },
+   "put": {
+    "operationId": "greengrassv2AssociateServiceRoleToAccount",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "greengrass"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "roleArn": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "roleArn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AssociateServiceRoleToAccountResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "AssociateServiceRoleToAccount",
+    "tags": [
+     "AWS IoT Greengrass"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS IoT Greengrass V2 API (2020-11-30). Every other official operation returns HTTP 501 UnknownOperationException. Only the Regional Greengrass service role association is implemented. The role is stored without checking that it exists or carries AWSGreengrassResourceAccessRolePolicy, and nothing assumes it. Components, deployments, core devices, client devices and connectivity information return UnknownOperationException with HTTP 501: deployments and core devices would reach devices, and component version ARNs combine the recipe's name and version, which the simulator does not derive. Disassociating when no role is associated fails with ResourceNotFoundException (HTTP 404) instead of succeeding.",
+   "name": "AWS IoT Greengrass"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/greengrassv2/2020-11-30/service-2.json",
+  "sha256": "e83793dcc17d86a17235d2b09c41669ab4fcaf3de76e574d227d591c8d804981",
+  "license": "Apache-2.0"
+ }
+}
