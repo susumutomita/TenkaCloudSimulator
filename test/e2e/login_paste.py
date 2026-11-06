@@ -52,21 +52,40 @@ with running(authenticated=True) as (endpoint,token),sync_playwright() as p:
  # Observe only the first fixture. No focus/event injection, wait or retry; the
  # original write -> Enter-submit -> success sequence and timeout stay intact.
  first_snapshot=None;first_statuses=[]
+ first_counts={'requests':0,'responses':0};observer_errors={'count':0,'types':[]};observer_active={'value':True};registered=[]
+ def observer_error(failure):
+  observer_errors['count']=min(9,observer_errors['count']+1)
+  if len(observer_errors['types'])<4:observer_errors['types'].append(type(failure).__name__)
  def first_request(request):
-  if request.method=='POST'and request.url==endpoint+'/_simulator/login':
-   first_counts['requests']=min(9,first_counts['requests']+1)
+  if not observer_active['value']:return
+  try:
+   if request.method=='POST'and request.url==endpoint+'/_simulator/login':
+    first_counts['requests']=min(9,first_counts['requests']+1)
+  except Exception as metadata_failure:observer_error(metadata_failure)
  def first_response(response):
-  if response.request.method=='POST'and response.url==endpoint+'/_simulator/login':
-   first_counts['responses']=min(9,first_counts['responses']+1)
-   if len(first_statuses)<8:first_statuses.append(response.status if isinstance(response.status,int)and 100<=response.status<=599 else 0)
- first_counts={'requests':0,'responses':0}
- page.on('request',first_request);page.on('response',first_response)
+  if not observer_active['value']:return
+  try:
+   if response.request.method=='POST'and response.url==endpoint+'/_simulator/login':
+    first_counts['responses']=min(9,first_counts['responses']+1)
+    status=response.status
+    if len(first_statuses)<8:first_statuses.append(status if isinstance(status,int)and 100<=status<=599 else 0)
+  except Exception as metadata_failure:observer_error(metadata_failure)
  try:
+  for event,listener in [('request',first_request),('response',first_response)]:
+   try:
+    page.on(event,listener);registered.append((event,listener))
+   except Exception as registration_failure:
+    observer_error(registration_failure)
+    # Also attempt to detach the failed registration in case it attached before
+    # raising. This diagnostic problem must not replace the actual test outcome.
+    try:page.remove_listener(event,listener)
+    except Exception as detach_failure:observer_error(detach_failure)
   first_snapshot=native_write(page,token);submit(page,303,True);success(page)
  except Exception as failure:
   diagnostic={'stage':'first-native-DOM-insertion-keyboard-submit','primaryExceptionType':type(failure).__name__,
    'nativeWrite':first_snapshot,'loginPOSTRequests':first_counts['requests'],'loginPOSTResponses':first_counts['responses'],
    'responseStatuses':list(first_statuses),'countsCappedAt9':True,'status0MeansOther':True,
+   'observerMetadataComplete':observer_errors['count']==0,
    'scope':'Failure-only dummy fixture; no token values, hashes, bodies, headers or clipboard; no focus-cause or extension proof.'}
   try:
    diagnostic['afterFailure']=page.evaluate("""()=>{
@@ -79,12 +98,16 @@ with running(authenticated=True) as (endpoint,token),sync_playwright() as p:
   except Exception:pass # Diagnostic I/O must never replace the original failure.
   raise
  finally:
-  unwinding=sys.exc_info()[0] is not None
-  detach_errors=[]
-  for event,listener in [('request',first_request),('response',first_response)]:
+  observer_active['value']=False
+  for event,listener in registered:
    try:page.remove_listener(event,listener)
-   except Exception as detach_failure:detach_errors.append(type(detach_failure).__name__)
-  if detach_errors and not unwinding:raise AssertionError('First-fixture diagnostic observers did not detach')
+   except Exception as detach_failure:observer_error(detach_failure)
+  if observer_errors['count']:
+   # Incomplete diagnostics are separate from the original product assertions:
+   # do not turn a passing case into a failure or hide its original exception.
+   report['firstNativeDiagnosticObserverErrors']=dict(observer_errors)
+   try:(REPORTS/'login-first-native-observer-status.json').write_text(json.dumps({'status':'INCOMPLETE_PASSIVE_DIAGNOSTICS','errors':observer_errors},indent=2)+'\n')
+   except Exception:pass
  report['nativeDOMWriteWithoutChangeEventAuthenticates']=True
  page=fresh();paste(page,token);native_write(page,'');posts=[]
  page.on('request',lambda request:posts.append(True)if request.method=='POST'and request.url==endpoint+'/_simulator/login'else None)
