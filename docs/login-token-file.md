@@ -68,7 +68,8 @@ hypothesis, not a diagnosis of Cloudscape, React, Dia or a password manager.
 Actual 1Password/Dia/Safari behavior, screenshot/image interpretation, and the
 user's OS clipboard remain unverified. The focus-capture integration at `339c264`
 passed its first native-input browser case but failed native clear followed by
-Enter. The keyboard-capture follow-up is not yet built or browser-validated. Earlier hosted checks
+Enter. The keyboard-capture follow-up has a local UI build and scoped model checks;
+its actual browser behavior remains unverified. Earlier hosted checks
 and scoped model evidence must not be presented as current device-level acceptance.
 
 ## Bounded input-intent model
@@ -139,6 +140,15 @@ controlled render during Enter handling after paste has settled. Its
 state. The scenario is a safety exploration, not a proven browser cause; the
 eight invariant families do not assert DOM error-message visibility. The original
 E2E assertions and five-second timeout remain mandatory and unchanged.
+
+At local source `7bd15bf`, the scoped baseline exhausted 83 distinct states
+(101 generated, empty queue), and all 14 controls produced their required first
+noninitial counterexamples. `KeyDownSkipsNativeAdoption` first violated
+`AdoptedValueExact` at state 5. Source `f9f2231` produced the rebuilt keyboard-capture
+assets in `7bd15bf`, with 1352 resolved inputs and original notices for 22 packages.
+Default-CI build equivalence, the full 463-case gate and the unchanged actual
+native-clear/Enter browser assertions still require the next immutable HEAD's
+verification. These scoped results do not establish the user's browser cause.
 
 The earlier `6b249e6` [push CI run](https://github.com/susumutomita/TenkaCloudSimulator/actions/runs/42234615389)
 rebuilt the embedded assets and passed Go quality, supported-target compilation,

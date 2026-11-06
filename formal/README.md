@@ -12,6 +12,11 @@ Scoped `5b270e9` checked 14 cases: 77 distinct states, 94 generated, empty queue
 and all 13 declared noninitial counterexamples. The focus control failed at state
 3 under a controlled-reset assumption, not an established cause of the hosted
 login failure. This is not a combined 463-case or browser proof.
+Scoped keyboard source `7bd15bf` subsequently checked 15 cases: 83 distinct
+baseline states (101 generated, empty queue) and all 14 required noninitial
+counterexamples. The keyboard control first violated `AdoptedValueExact` at
+state 5. The controlled reset remains an explicit assumption; the original
+empty-error/no-POST browser assertions are independent required checks.
 See [input correspondence](../docs/login-token-file.md#bounded-input-intent-model)
 and the [dated failed login CI](../docs/login-token-file.md#dated-validation-and-current-candidate).
 
