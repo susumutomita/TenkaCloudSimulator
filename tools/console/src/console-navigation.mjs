@@ -16,6 +16,7 @@ export const SERVICES = Object.freeze([
   {id: 'dynamodb', provider: 'aws', label: 'DynamoDB', capability: 'dynamodb', route: '/dynamodb', keywords: 'table item key-value database ddb ダイナモ ダイナモDB テーブル 項目 キー データベース'},
   {id: 'sqs', provider: 'aws', label: 'SQS', capability: 'sqs', route: '/sqs', keywords: 'queue message messaging キュー メッセージ メッセージング シンプルキューサービス'},
   {id: 'logs', provider: 'aws', label: 'CloudWatch Logs', capability: 'logs', route: '/logs', keywords: 'log group stream monitoring ログ グループ ストリーム 監視'},
+  {id: 'cloudwatch-metrics', provider: 'aws', label: 'CloudWatch Metrics', capability: 'cloudwatch', route: '/cloudwatch-metrics', keywords: 'metric namespace dimensions statistics monitoring メトリクス 名前空間 ディメンション 統計 監視'},
   {id: 'secretsmanager', provider: 'aws', label: 'Secrets Manager', capability: 'secretsmanager', route: '/secretsmanager', keywords: 'secret version credential credentials シークレット バージョン 秘密 認証情報'},
   {id: 'gcp-storage', provider: 'gcp', label: 'Cloud Storage', route: '/gcp-storage', keywords: 'google bucket object バケット オブジェクト ストレージ クラウドストレージ'},
   {id: 'azure-blob', provider: 'azure', label: 'Blob Storage', route: '/azure-blob', keywords: 'container blob コンテナー コンテナ ブロブ ストレージ ブロブストレージ'},
@@ -41,6 +42,17 @@ export function sakuraConfiguration(capabilities) {
 export function serviceAvailable(id, capabilities) {
   const service = serviceDescriptor(id);
   if (!service || !capabilities) return false;
+  // Metrics requires its exact bounded protocol contract and an explicit console
+  // flag. Native API presence alone must not advertise an unverified UI route.
+  if (id === 'cloudwatch-metrics') {
+    const metrics = capabilities.services?.cloudwatch;
+    const expected = ['PutMetricData', 'ListMetrics', 'GetMetricStatistics'];
+    return metrics?.available === true && metrics.console === true
+      && metrics.apiVersion === '2010-08-01' && metrics.protocol === 'Query'
+      && metrics.serviceSelector === 'monitoring' && Array.isArray(metrics.operations)
+      && metrics.operations.length === expected.length && new Set(metrics.operations).size === expected.length
+      && expected.every(operation => metrics.operations.includes(operation));
+  }
   if (service.provider === 'aws') return !!capabilities.services?.[service.capability];
   if (service.provider === 'sakura') return sakuraConfiguration(capabilities) !== null;
   const scope = capabilities.cloudStorage?.[service.provider];
