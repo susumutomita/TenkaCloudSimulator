@@ -114,7 +114,7 @@ func bindAPI(api *API, model *Model) (*binding, error) {
 			return nil, fmt.Errorf("GCP catalog %s method %s is missing or bound twice", api.Key, bound.Method)
 		}
 		switch bound.Kind {
-		case Create, Get, List, Patch, Delete:
+		case Create, Get, List, Patch, Replace, Delete:
 			if api.collection(bound.Collection) == nil {
 				return nil, fmt.Errorf("GCP catalog %s method %s names an unknown collection", api.Key, bound.Method)
 			}

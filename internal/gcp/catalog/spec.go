@@ -10,6 +10,7 @@ const (
 	Get           Kind = "get"
 	List          Kind = "list"
 	Patch         Kind = "patch"
+	Replace       Kind = "replace" // full-resource update: PUT, or PATCH without a mask
 	Delete        Kind = "delete"
 	OperationGet  Kind = "operation-get"
 	OperationList Kind = "operation-list"

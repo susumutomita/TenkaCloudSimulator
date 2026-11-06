@@ -35,7 +35,7 @@ type request struct {
 func (q *request) collection() *Collection { return q.b.api.collection(q.bound.Collection) }
 
 func (q *request) permission() string {
-	verbs := map[Kind]string{Create: "create", Get: "get", List: "list", Patch: "update", Delete: "delete", OperationGet: "get", OperationList: "list"}
+	verbs := map[Kind]string{Create: "create", Get: "get", List: "list", Patch: "update", Replace: "update", Delete: "delete", OperationGet: "get", OperationList: "list"}
 	if q.bound.Kind == OperationGet || q.bound.Kind == OperationList {
 		return q.b.model.Name + ".operations." + verbs[q.bound.Kind]
 	}
@@ -72,7 +72,7 @@ func (q *request) execute() (any, error) {
 		return r.Document, nil
 	case List:
 		return q.list()
-	case Patch:
+	case Patch, Replace:
 		return q.patch()
 	case Delete:
 		return q.remove()
@@ -442,7 +442,28 @@ func (q *request) patch() (any, error) {
 		mutable[f] = true
 	}
 	fields := []string{}
-	if mask, _ := q.params["updateMask"].(string); mask != "" {
+	replace := q.bound.Kind == Replace
+	if replace {
+		// A full replacement keeps the resource ID and output fields and
+		// replaces every writable field, clearing those the body omits.
+		if given, ok := q.body[c.IDField].(string); ok && c.IDField != "" {
+			if strings.HasPrefix(given, "projects/"+q.e.cfg.ProjectNumber+"/") {
+				given = "projects/" + q.e.cfg.Project + strings.TrimPrefix(given, "projects/"+q.e.cfg.ProjectNumber)
+			}
+			if given != r.Document[c.IDField] {
+				return nil, invalid("Field '%s' cannot change the resource ID.", c.IDField)
+			}
+		}
+		if err := q.required(q.method.Request); err != nil {
+			return nil, err
+		}
+		for key, p := range q.b.model.Schemas[c.Schema].Properties {
+			if !p.ReadOnly && key != "name" && key != "etag" && key != c.IDField {
+				fields = append(fields, key)
+			}
+		}
+		sort.Strings(fields)
+	} else if mask, _ := q.params["updateMask"].(string); mask != "" {
 		fields = strings.Split(mask, ",")
 	} else {
 		for key := range q.body {
@@ -458,7 +479,7 @@ func (q *request) patch() (any, error) {
 		if field == "etag" {
 			continue
 		}
-		if !mutable[field] {
+		if !replace && !mutable[field] {
 			return nil, invalid("Field %q cannot be updated by the simulator.", field)
 		}
 		if value, ok := q.body[field]; ok {

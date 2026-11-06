@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"time"
 )
 
 // syntheticAPI uses a service path prefix, project scope, server-generated
@@ -183,5 +184,51 @@ func TestResourceNamesAreScopedByAPI(t *testing.T) {
 	}
 	if got := h.call("owner", "GET", other+"/w", nil); got.body["note"] != "other" {
 		t.Fatalf("other resource %v", got.body)
+	}
+}
+
+// Full-resource updates (PUT) keep the ID and output fields and clear the
+// writable fields the body omits, as Dataproc autoscaling policies do.
+func TestReplaceUpdatesKeepIdentityAndClearOmittedFields(t *testing.T) {
+	h := newHarness(t)
+	widget := &Property{Type: "object", Properties: map[string]*Property{"name": {Type: "string", ReadOnly: true}, "id": {Type: "string", Required: true},
+		"size": {Type: "integer", Required: true}, "note": {Type: "string"}, "etag": {Type: "string"}, "createTime": {Type: "string", ReadOnly: true}, "updateTime": {Type: "string", ReadOnly: true}}}
+	flat := "v1/projects/{projectsId}/locations/{locationsId}/widgets"
+	methods := map[string]*Method{
+		"projects.locations.widgets.create": {HTTPMethod: "POST", FlatPath: flat, Request: "Widget", Response: "Widget"},
+		"projects.locations.widgets.update": {HTTPMethod: "PUT", FlatPath: flat + "/{widgetsId}", Request: "Widget", Response: "Widget"},
+	}
+	model := &Model{Key: "synth.v1", Name: "synth", Version: "v1", Title: "Synthetic", Source: Source{Package: "google-api-python-client", SHA256: "test", License: "Apache-2.0"},
+		Routes: map[string]Route{}, Methods: methods, Schemas: map[string]*Property{"Widget": widget}}
+	for id, m := range methods {
+		model.Routes[id] = Route{HTTPMethod: m.HTTPMethod, FlatPath: m.FlatPath}
+	}
+	if err := validateModel(model); err != nil {
+		t.Fatal(err)
+	}
+	api := &API{Key: "synth.v1", Title: "Synthetic", Issues: []int{1}, Scope: "location", TypeURL: "type.googleapis.com/test.v1.", Bounds: []string{"test"},
+		Collections: []*Collection{{ID: "widgets", Schema: "Widget", IDField: "id", Permission: "synth.widgets", Generate: map[string]any{"createTime": "$now", "updateTime": "$now", "etag": "$etag"}}},
+		Bindings:    []Binding{{Method: "projects.locations.widgets.create", Kind: Create, Collection: "widgets"}, {Method: "projects.locations.widgets.update", Kind: Replace, Collection: "widgets"}}}
+	b, err := bindAPI(api, model)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := h.engine.add(b); err != nil {
+		t.Fatal(err)
+	}
+	base := "/synth/v1/projects/tenkacloud-local/locations/us-central1/widgets"
+	created := h.call("owner", "POST", base, map[string]any{"id": "w1", "size": 1, "note": "keep?"})
+	expect(t, created, 200, "")
+	expect(t, h.call("owner", "PUT", base+"/w1", map[string]any{"id": "w2", "size": 2}), 400, "INVALID_ARGUMENT")
+	expect(t, h.call("owner", "PUT", base+"/w1", map[string]any{"id": "w1"}), 400, "INVALID_ARGUMENT")
+	expect(t, h.call("owner", "PUT", base+"/w1", map[string]any{"id": "w1", "size": 2, "etag": "stale"}), 409, "ABORTED")
+	expect(t, h.call("owner", "PUT", base+"/missing", map[string]any{"id": "missing", "size": 2}), 404, "NOT_FOUND")
+	h.now = h.now.Add(time.Minute)
+	replaced := h.call("owner", "PUT", base+"/w1", map[string]any{"id": "w1", "size": 2, "etag": created.body["etag"]})
+	expect(t, replaced, 200, "")
+	got := replaced.body
+	if got["size"] != float64(2) || got["note"] != nil || got["name"] != "projects/tenkacloud-local/locations/us-central1/widgets/w1" ||
+		got["createTime"] != created.body["createTime"] || got["updateTime"] == created.body["updateTime"] || got["etag"] == created.body["etag"] {
+		t.Fatalf("replace semantics %v (created %v)", got, created.body)
 	}
 }
