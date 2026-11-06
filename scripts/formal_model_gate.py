@@ -884,7 +884,8 @@ REQUIRED_SOURCE_SCOPES = {'CFNConditionAdmission': {'internal/aws/cloudformation
  'LoginInputIntent': {'test/console/login-native-input.test.mjs',
  'test/e2e/login_paste.py',
  'test/e2e/login_token_file.py',
- 'tools/console/src/login.jsx'}}
+ 'tools/console/src/login.jsx',
+                      'internal/server/web/app.js'}}
 IDENTIFIER = re.compile(r'^[A-Za-z][A-Za-z0-9_]*$')
 
 # TLC1.7.4 ModelConfig.ALL_KEYWORDS. A directive cannot masquerade as a

@@ -1455,6 +1455,10 @@ class FormalGateTests(unittest.TestCase):
         path = self.root / 'formal/models.json'
         original = path.read_text()
         entry = next(m for m in json.loads(original)['models'] if m['id'] == 'LoginInputIntent')
+        self.assertEqual(set(entry['source_scope']), {
+            'tools/console/src/login.jsx', 'test/console/login-native-input.test.mjs',
+            'test/e2e/login_paste.py', 'test/e2e/login_token_file.py',
+            'internal/server/web/app.js'})
         tla, cfg = self.root / entry['model'], self.root / entry['config']
         source, config = tla.read_bytes(), cfg.read_bytes()
         changed = json.loads(original)
@@ -1477,9 +1481,11 @@ class FormalGateTests(unittest.TestCase):
             with self.subTest(property=prop), self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
                 load_registry(self.root)
         cfg.write_bytes(config)
-        scopes = [entry['source_scope'][:-1],
-                  entry['source_scope']+['tools/console/src/main.jsx'],
-                  ['tools/console/src/main.jsx']]
+        # Every exact path, including the compiled-login artifact, is required.
+        scopes = [[path for path in entry['source_scope'] if path != removed]
+                  for removed in entry['source_scope']]
+        scopes += [entry['source_scope']+['tools/console/src/main.jsx'],
+                   ['tools/console/src/main.jsx']]
         for scope in scopes:
             changed = json.loads(original)
             next(m for m in changed['models'] if m['id'] == entry['id'])['source_scope'] = scope
