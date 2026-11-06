@@ -109,6 +109,19 @@ def run():
                 app = hosting.list_apps()['apps'][0]
                 assert [b['branchName'] for b in hosting.list_branches(appId=app['appId'])['branches']] == ['main']
                 audit('amplify-branch')
+                # Choosing another parent loads its children and keeps the choice.
+                second = hosting.create_app(name='sdk-site')['app']
+                page.get_by_role('button', name='Refresh').click()
+                page.get_by_role('button', name=re.compile('^app ')).click()
+                page.get_by_role('option', name='sdk-site').click()
+                expect(page.get_by_role('link', name='main')).to_have_count(0)
+                page.get_by_label('branchName', exact=True).fill('dev')
+                page.get_by_role('button', name='Create', exact=True).click()
+                expect(page.get_by_role('link', name='dev')).to_be_visible()
+                assert [b['branchName'] for b in hosting.list_branches(appId=second['appId'])['branches']] == ['dev']
+                assert [b['branchName'] for b in hosting.list_branches(appId=app['appId'])['branches']] == ['main']
+                hosting.delete_branch(appId=second['appId'], branchName='dev')
+                hosting.delete_app(appId=second['appId'])
                 page.get_by_role('tab', name='app').click()
                 page.get_by_role('button', name='Delete console-site').click()
                 page.get_by_role('dialog').get_by_role('button', name='Delete').click()
@@ -121,8 +134,9 @@ def run():
                 # The served reference lists every catalog service document.
                 docs = context.new_page()
                 docs.goto(team.endpoint + '/_simulator/docs/catalog.html')
-                expect(docs.get_by_text('AWS Amplify (simulator catalog)')).to_be_visible(timeout=20000)
                 index = docs.evaluate("fetch('/_simulator/docs/catalog/index.json').then(r=>r.json())")
+                # The first indexed service is the default source of the multi-source page.
+                expect(docs.get_by_text(index[0]['title'] + ' (simulator catalog)').first).to_be_visible(timeout=20000)
                 assert {'amplify', 'codeconnections', 'ecr', 'stepfunctions'} <= {s['model'] for s in index}
                 document = docs.evaluate("fetch('/_simulator/docs/catalog/ecr.json').then(r=>r.json())")
                 targets = document['paths']['/']['post']['parameters'][0]['schema']['enum']

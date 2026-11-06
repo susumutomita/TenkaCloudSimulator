@@ -196,7 +196,23 @@ func insertRow(tx *sql.Tx, r row) error {
 	if err != nil {
 		return err
 	}
-	return exactlyOne(tx.Exec("INSERT INTO aws_catalog_resources("+columns+") VALUES(?,?,?,?,?,?,?,?,?,?,1)", r.Service, r.Region, r.Kind, r.Parent, r.ID, r.Name, r.ARN, document, tags, r.Seq))
+	if err := exactlyOne(tx.Exec("INSERT INTO aws_catalog_resources("+columns+") VALUES(?,?,?,?,?,?,?,?,?,?,1)", r.Service, r.Region, r.Kind, r.Parent, r.ID, r.Name, r.ARN, document, tags, r.Seq)); err != nil {
+		return err
+	}
+	return withinBudget(tx)
+}
+
+// withinBudget enforces the aggregate metadata budget after a write inside
+// its transaction, so insertions and replacements alike roll back.
+func withinBudget(tx *sql.Tx) error {
+	total, err := storedBytes(tx)
+	if err != nil {
+		return err
+	}
+	if total > maxStoredBytes {
+		return &fault{kind: "limit", message: "The simulator catalog metadata budget is exhausted."}
+	}
+	return nil
 }
 
 // updateRow replaces document/tags only when the row still has the
@@ -207,7 +223,10 @@ func updateRow(tx *sql.Tx, r row) error {
 	if err != nil {
 		return err
 	}
-	return exactlyOne(tx.Exec("UPDATE aws_catalog_resources SET document=?, tags=?, generation=generation+1 WHERE service=? AND arn=? AND seq=? AND generation=?", document, tags, r.Service, r.ARN, r.Seq, r.Generation))
+	if err := exactlyOne(tx.Exec("UPDATE aws_catalog_resources SET document=?, tags=?, generation=generation+1 WHERE service=? AND arn=? AND seq=? AND generation=?", document, tags, r.Service, r.ARN, r.Seq, r.Generation)); err != nil {
+		return err
+	}
+	return withinBudget(tx)
 }
 
 func deleteRow(tx *sql.Tx, r row) error {

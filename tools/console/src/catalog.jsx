@@ -75,17 +75,19 @@ export default function CatalogView({region,request,catalog,onSaving}){
   if(member===resource.idMember)return item[resource.idMember];return item[resource.nameMember]||item[member]||item[resource.idMember];
  };
  const parentInput=op=>op?.parent&&parent?{[op.parent]:parent}:{};
- async function loadParents(epoch){
+ async function loadParents(epoch,preferred){
   const list=parentResource?.operations.list;if(!list)return '';
   const page=await call(list,{});if(!valid(epoch))return '';
   const rows=page[list.items]||[];setParents(rows);
-  const keep=rows.some(r=>(r[parentResource.idMember]||r[parentResource.nameMember])===parent)?parent:(rows[0]?.[parentResource.idMember]||rows[0]?.[parentResource.nameMember]||'');
+  const keep=rows.some(r=>(r[parentResource.idMember]||r[parentResource.nameMember])===preferred)?preferred:(rows[0]?.[parentResource.idMember]||rows[0]?.[parentResource.nameMember]||'');
   setParent(keep);return keep;
  }
- async function load(token=''){
+ // A selection passes its parent explicitly: the state update is not yet
+ // visible to this render's closure.
+ async function load(token='',preferred=parent){
   if(!service||!resource)return;const epoch=fresh();setLoading(true);setError('');setMode('list');setDetail(null);setTags(null);
   try{
-   let scope=parent;if(parentResource){scope=await loadParents(epoch);if(!valid(epoch))return;if(!scope){setItems([]);setNext('');return}}
+   let scope=preferred;if(parentResource){scope=await loadParents(epoch,preferred);if(!valid(epoch))return;if(!scope){setItems([]);setNext('');return}}
    const list=resource.operations.list;if(!list){setItems([]);return}
    const page=await call(list,{...(list.parent&&scope?{[list.parent]:scope}:{}),...(token&&list.inputToken?{[list.inputToken]:token}:{})});
    if(valid(epoch)){setItems(page[list.items]||[]);setNext(list.outputToken?page[list.outputToken]||'':'')}
@@ -138,7 +140,7 @@ export default function CatalogView({region,request,catalog,onSaving}){
    {notice&&<Alert type="success" dismissible onDismiss={()=>setNotice('')}>{notice}</Alert>}
    <Tabs activeTabId={resource.kind} onChange={e=>{if(!busy){setKind(e.detail.activeTabId);setParent('')}}} tabs={service.resources.map(r=>({id:r.kind,label:r.kind}))}/>
    {parentResource&&<FormField label={parentResource.kind}><Select selectedOption={parent?{value:parent,label:parent}:null} placeholder={t('Create a parent resource first','先に親リソースを作成してください')} disabled={busy||!parents.length}
-     onChange={e=>{setParent(e.detail.selectedOption.value);setTimeout(()=>load(),0)}} options={parents.map(p=>{const v=p[parentResource.idMember]||p[parentResource.nameMember];return {value:v,label:p[parentResource.nameMember]||v}})}/></FormField>}
+     onChange={e=>{const chosen=e.detail.selectedOption.value;setParent(chosen);load('',chosen)}} options={parents.map(p=>{const v=p[parentResource.idMember]||p[parentResource.nameMember];return {value:v,label:p[parentResource.nameMember]||v}})}/></FormField>}
    {mode==='detail'?<Container header={<Header variant="h2" actions={<Button onClick={()=>load()}>{t('Back to list','一覧に戻る')}</Button>}>{t('Details','詳細')}</Header>}>
      {loading?<Box>{t('Loading','読み込み中')}</Box>:detail?<SpaceBetween size="m"><KeyValuePairs columns={2} items={Object.entries(detail).filter(([,v])=>isScalar(v)).map(([k,v])=>({label:k,value:display(v)}))}/>
       {Object.entries(detail).filter(([,v])=>!isScalar(v)).map(([k,v])=><FormField key={k} label={k}><pre className="catalog-json">{JSON.stringify(v,null,2)}</pre></FormField>)}

@@ -519,6 +519,7 @@ func (q *request) create() (map[string]any, error) {
 	tokenMember := idempotencyMember(inputShape)
 	name := ""
 	document := map[string]any{}
+	supplied := map[string]bool{}
 	members := q.members()
 	for key, value := range members {
 		// A Put names its resource with the lookup member, which is stored.
@@ -533,6 +534,7 @@ func (q *request) create() (map[string]any, error) {
 			return nil, &fault{kind: "unsupported", message: fmt.Sprintf("Member %s of %s is not supported by the simulator.", key, q.op.Name)}
 		}
 		document[target] = stored(value)
+		supplied[target] = true
 	}
 	if res.NameMember != "" {
 		name, _ = document[res.NameMember].(string)
@@ -573,8 +575,11 @@ func (q *request) create() (map[string]any, error) {
 	}
 	sort.Strings(keys)
 	for _, key := range keys {
-		if _, supplied := document[key]; supplied && !strings.HasPrefix(fmt.Sprint(res.Generate[key]), "$") {
-			continue // A literal default never overrides a supplied official member.
+		// Literal and $name defaults are fallbacks: they never override a
+		// supplied member. Other generators are server-authoritative.
+		generator := fmt.Sprint(res.Generate[key])
+		if _, present := document[key]; present && !strings.HasPrefix(generator, "$") || supplied[key] && generator == "$name" {
+			continue
 		}
 		if value := q.generated(res.Generate[key], r, parent); value != nil {
 			document[key] = value
@@ -637,12 +642,8 @@ func (q *request) create() (map[string]any, error) {
 			return nil, &fault{kind: "conflict", message: fmt.Sprintf("The %s %s already exists.", res.Kind, r.Name)}
 		}
 	}
-	total, err := storedBytes(tx)
-	if err != nil {
+	if err := parentAlive(tx, parent); err != nil {
 		return nil, err
-	}
-	if total > maxStoredBytes {
-		return nil, &fault{kind: "limit", message: "The simulator catalog metadata budget is exhausted."}
 	}
 	if r.Seq, err = nextSeq(tx); err != nil {
 		return nil, err
@@ -1069,7 +1070,26 @@ func (q *request) tagged() (row, error) {
 	if err := q.authorize(found.ARN); err != nil {
 		return row{}, err
 	}
+	if found.Region != q.region {
+		// Tagging stays inside the request's regional scope, like reads.
+		return row{}, &fault{kind: "notfound", message: "The resource " + arn + " does not exist."}
+	}
 	return found, nil
+}
+
+// parentAlive rechecks inside the insert transaction that the parent read
+// before authorization still exists, so a concurrent parent deletion
+// cannot leave an orphaned child.
+func parentAlive(tx *sql.Tx, parent *row) error {
+	if parent == nil {
+		return nil
+	}
+	if _, err := findARN(tx, parent.Service, parent.ARN); errors.Is(err, sql.ErrNoRows) {
+		return &fault{kind: "notfound", message: "The parent resource " + parent.ARN + " no longer exists."}
+	} else if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (q *request) tag() (map[string]any, error) {
