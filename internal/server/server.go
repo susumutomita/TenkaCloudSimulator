@@ -126,6 +126,7 @@ func NewWithProviders(path string, options ProviderConfig) (http.Handler, func()
 		return nil, nil, err
 	}
 	mux := http.NewServeMux()
+	mux.HandleFunc("/_simulator/", serveLanding)
 	mux.Handle("/_simulator/licenses/", http.StripPrefix("/_simulator/licenses/", legal.Handler()))
 	mux.Handle(provider.Prefix, registry)
 	docs, _ := fs.Sub(assets, "apidocs")
