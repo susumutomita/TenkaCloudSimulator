@@ -56,7 +56,7 @@
     },
     {
       "path": "formal/LandingTopologyState.cfg",
-      "sha256": "1c76a12d98f839fb0d10801cdd53945dd3086f067d725aec00d1a9634b75ed41",
+      "sha256": "ece267cec9d9146294f44ef045d28ee87ca2d3772e4e9bcaef1d2c49e2863b78",
       "disposition": "modeled",
       "reason": "Original bounded landing admission or stored-selection projection for the changed scope. HTTP, DOM, accessibility, native Chrome rendering and JavaScript/Go refinement require independent tests.",
       "models": [
@@ -73,15 +73,16 @@
             "UnsupportedCanvasHidden",
             "RetiredCanvasHidden",
             "PaintUsesLatestSelection",
-            "RetiredCallbackNoEffect"
+            "RetiredCallbackNoEffect",
+            "InitialFragmentSelection"
           ],
-          "limits": "Post-start semantic selection and optional decorative lifecycle safety only. Trusted source data and native feature/paint verdicts are assumed; no DOM/accessibility/layout/rendering/Chrome support/backend/route/network or JavaScript refinement proof. Reduced-motion has identical static transitions because implementation has no animation loop; no preference-detection proof. Timeout is an environment event, not wall-clock/liveness."
+          "limits": "Post-start semantic selection and optional decorative lifecycle safety only. Trusted source data and native feature/paint verdicts are assumed; no DOM/accessibility/layout/rendering/Chrome support/backend/route/network or JavaScript refinement proof. Reduced-motion has identical static transitions because implementation has no animation loop; no preference-detection proof. Timeout is an environment event, not wall-clock/liveness. Initial fragment choice is a trusted closed node ID or absent input; URL parsing, encoding, browser scroll and history are outside this model."
         }
       ]
     },
     {
       "path": "formal/LandingTopologyState.tla",
-      "sha256": "a5073aac66e48e8bd7343fed9521ea0f1248eaf517e9ef703584730326750dd2",
+      "sha256": "67599e8c1742dd8455492ae0a6eb533a0ec5324b864a0564105e69557567ebe2",
       "disposition": "modeled",
       "reason": "Original bounded landing admission or stored-selection projection for the changed scope. HTTP, DOM, accessibility, native Chrome rendering and JavaScript/Go refinement require independent tests.",
       "models": [
@@ -98,15 +99,16 @@
             "UnsupportedCanvasHidden",
             "RetiredCanvasHidden",
             "PaintUsesLatestSelection",
-            "RetiredCallbackNoEffect"
+            "RetiredCallbackNoEffect",
+            "InitialFragmentSelection"
           ],
-          "limits": "Post-start semantic selection and optional decorative lifecycle safety only. Trusted source data and native feature/paint verdicts are assumed; no DOM/accessibility/layout/rendering/Chrome support/backend/route/network or JavaScript refinement proof. Reduced-motion has identical static transitions because implementation has no animation loop; no preference-detection proof. Timeout is an environment event, not wall-clock/liveness."
+          "limits": "Post-start semantic selection and optional decorative lifecycle safety only. Trusted source data and native feature/paint verdicts are assumed; no DOM/accessibility/layout/rendering/Chrome support/backend/route/network or JavaScript refinement proof. Reduced-motion has identical static transitions because implementation has no animation loop; no preference-detection proof. Timeout is an environment event, not wall-clock/liveness. Initial fragment choice is a trusted closed node ID or absent input; URL parsing, encoding, browser scroll and history are outside this model."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "6f83b49c7520468b73c235241ad44d7443136e9278d02dfd05361c4e17753723",
+      "sha256": "8ccc156c16b0def0f1cf560ceb4a0c7f529ba2cb65eb975dab38c565ee43bbc2",
       "disposition": "formal-infrastructure",
       "reason": "LP-only documentation, validation policy or tests; preserves SDK root, old checks and existing model values. No browser or implementation proof claim.",
       "models": []
@@ -182,9 +184,10 @@
             "UnsupportedCanvasHidden",
             "RetiredCanvasHidden",
             "PaintUsesLatestSelection",
-            "RetiredCallbackNoEffect"
+            "RetiredCallbackNoEffect",
+            "InitialFragmentSelection"
           ],
-          "limits": "Post-start semantic selection and optional decorative lifecycle safety only. Trusted source data and native feature/paint verdicts are assumed; no DOM/accessibility/layout/rendering/Chrome support/backend/route/network or JavaScript refinement proof. Reduced-motion has identical static transitions because implementation has no animation loop; no preference-detection proof. Timeout is an environment event, not wall-clock/liveness."
+          "limits": "Post-start semantic selection and optional decorative lifecycle safety only. Trusted source data and native feature/paint verdicts are assumed; no DOM/accessibility/layout/rendering/Chrome support/backend/route/network or JavaScript refinement proof. Reduced-motion has identical static transitions because implementation has no animation loop; no preference-detection proof. Timeout is an environment event, not wall-clock/liveness. Initial fragment choice is a trusted closed node ID or absent input; URL parsing, encoding, browser scroll and history are outside this model."
         }
       ]
     },
@@ -207,9 +210,10 @@
             "UnsupportedCanvasHidden",
             "RetiredCanvasHidden",
             "PaintUsesLatestSelection",
-            "RetiredCallbackNoEffect"
+            "RetiredCallbackNoEffect",
+            "InitialFragmentSelection"
           ],
-          "limits": "Post-start semantic selection and optional decorative lifecycle safety only. Trusted source data and native feature/paint verdicts are assumed; no DOM/accessibility/layout/rendering/Chrome support/backend/route/network or JavaScript refinement proof. Reduced-motion has identical static transitions because implementation has no animation loop; no preference-detection proof. Timeout is an environment event, not wall-clock/liveness."
+          "limits": "Post-start semantic selection and optional decorative lifecycle safety only. Trusted source data and native feature/paint verdicts are assumed; no DOM/accessibility/layout/rendering/Chrome support/backend/route/network or JavaScript refinement proof. Reduced-motion has identical static transitions because implementation has no animation loop; no preference-detection proof. Timeout is an environment event, not wall-clock/liveness. Initial fragment choice is a trusted closed node ID or absent input; URL parsing, encoding, browser scroll and history are outside this model."
         }
       ]
     },
@@ -232,9 +236,10 @@
             "UnsupportedCanvasHidden",
             "RetiredCanvasHidden",
             "PaintUsesLatestSelection",
-            "RetiredCallbackNoEffect"
+            "RetiredCallbackNoEffect",
+            "InitialFragmentSelection"
           ],
-          "limits": "Post-start semantic selection and optional decorative lifecycle safety only. Trusted source data and native feature/paint verdicts are assumed; no DOM/accessibility/layout/rendering/Chrome support/backend/route/network or JavaScript refinement proof. Reduced-motion has identical static transitions because implementation has no animation loop; no preference-detection proof. Timeout is an environment event, not wall-clock/liveness."
+          "limits": "Post-start semantic selection and optional decorative lifecycle safety only. Trusted source data and native feature/paint verdicts are assumed; no DOM/accessibility/layout/rendering/Chrome support/backend/route/network or JavaScript refinement proof. Reduced-motion has identical static transitions because implementation has no animation loop; no preference-detection proof. Timeout is an environment event, not wall-clock/liveness. Initial fragment choice is a trusted closed node ID or absent input; URL parsing, encoding, browser scroll and history are outside this model."
         }
       ]
     },

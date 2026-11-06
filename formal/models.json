@@ -5547,9 +5547,10 @@
       "id": "LandingTopologyState",
       "model": "formal/LandingTopologyState.tla",
       "config": "formal/LandingTopologyState.cfg",
-      "bounds": "Literal nine nodes/three providers, two selections (including invalid input), at most two paint callbacks; capability and reduced-motion booleans; one module mount and one retirement.",
+      "bounds": "Literal nine nodes/three providers, one trusted initial fragment choice (nine known IDs or Absent for unknown/no fragment), two selections (including invalid input), at most two paint callbacks; capability and reduced-motion booleans; one module mount and one retirement.",
       "properties": [
         "TypeOK",
+        "InitialFragmentSelection",
         "ProviderSelectsDefault",
         "NodeClickSelectsExact",
         "InvalidInputPreservesSelection",
@@ -5566,7 +5567,7 @@
         "internal/server/landing/topology-data.mjs",
         "internal/server/landing/topology-canvas.mjs"
       ],
-      "limits": "Post-start semantic selection and optional decorative lifecycle safety only. Trusted source data and native feature/paint verdicts are assumed; no DOM/accessibility/layout/rendering/Chrome support/backend/route/network or JavaScript refinement proof. Reduced-motion has identical static transitions because implementation has no animation loop; no preference-detection proof. Timeout is an environment event, not wall-clock/liveness.",
+      "limits": "Post-start semantic selection and optional decorative lifecycle safety only. Trusted source data, closed initial-fragment resolution and native feature/paint verdicts are assumed; direct URL parsing/encoding/scroll/history is not modeled; no DOM/accessibility/layout/rendering/Chrome support/backend/route/network or JavaScript refinement proof. Reduced-motion has identical static transitions because implementation has no animation loop; no preference-detection proof. Timeout is an environment event, not wall-clock/liveness.",
       "mutants": [
         {
           "id": "WrongProviderDefault",
@@ -5616,8 +5617,8 @@
           "id": "HideCanonicalHTMLOnRetire",
           "edits": [
             {
-              "old": "/\\ last' = Event(reason,Absent)\n /\\ UNCHANGED <<ui, capability, reducedMotion, selections, paints>>",
-              "new": "/\\ last' = Event(reason,Absent)\n /\\ ui' = [ui EXCEPT !.available = FALSE]\n /\\ UNCHANGED <<capability, reducedMotion, selections, paints>>",
+              "old": "/\\ last' = Event(reason,Absent)\n /\\ UNCHANGED <<ui, capability, reducedMotion, selections, paints, initialFragment>>",
+              "new": "/\\ last' = Event(reason,Absent)\n /\\ ui' = [ui EXCEPT !.available = FALSE]\n /\\ UNCHANGED <<capability, reducedMotion, selections, paints, initialFragment>>",
               "count": 1
             }
           ],
@@ -5677,6 +5678,17 @@
             }
           ],
           "expect_invariant": "RetiredCallbackNoEffect"
+        },
+        {
+          "id": "ResetInitialFragmentSelectionOnMount",
+          "edits": [
+            {
+              "old": "/\\ last' = Event(\"mount\",Absent)\n /\\ UNCHANGED <<ui, capability, reducedMotion, selections, paints, initialFragment>>",
+              "new": "/\\ last' = Event(\"mount\",Absent)\n /\\ ui' = FreshUI\n /\\ UNCHANGED <<capability, reducedMotion, selections, paints, initialFragment>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "InitialFragmentSelection"
         }
       ]
     }
