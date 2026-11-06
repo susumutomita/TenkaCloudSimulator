@@ -2,6 +2,7 @@ package aws
 
 import (
 	"bytes"
+	"context"
 	"crypto/rand"
 	"crypto/sha256"
 	"database/sql"
@@ -27,6 +28,8 @@ type StackStore struct{ db *sql.DB }
 type StackResource struct {
 	LogicalID, Type, PhysicalID string
 	Properties                  map[string]any
+	StateHash                   string            `json:",omitempty"`
+	StateParts                  map[string]string `json:",omitempty"`
 }
 type StackRecord struct {
 	ClientToken               string
@@ -39,6 +42,12 @@ type StackRecord struct {
 }
 
 func NewStackStore(db *sql.DB) (*StackStore, error) {
+	if _, err := NewAPIGatewayStore(db); err != nil {
+		return nil, err
+	}
+	if _, err := NewLambdaPermissionStore(db); err != nil {
+		return nil, err
+	}
 	if _, err := NewIAMRoleStore(db); err != nil {
 		return nil, err
 	}
@@ -46,8 +55,37 @@ func NewStackStore(db *sql.DB) (*StackStore, error) {
 	return &StackStore{db}, err
 }
 func taggedYAML(n *yaml.Node) (any, error) {
+	nodes := 0
+	return stackTaggedYAMLNode(n, 0, &nodes)
+}
+func stackTaggedYAMLNode(n *yaml.Node, depth int, nodes *int) (any, error) {
+	if n == nil || depth > stackConditionalDepth || *nodes >= stackConditionalNodes {
+		return nil, fmt.Errorf("template exceeds local depth/node bound")
+	}
+	*nodes++
 	if n.Kind == yaml.DocumentNode {
-		return taggedYAML(n.Content[0])
+		if len(n.Content) != 1 {
+			return nil, fmt.Errorf("invalid template document")
+		}
+		return stackTaggedYAMLNode(n.Content[0], depth+1, nodes)
+	}
+	if n.Tag == "!Equals" || n.Tag == "!If" {
+		if n.Kind != yaml.SequenceNode {
+			return nil, fmt.Errorf("condition shorthand requires a sequence")
+		}
+		values := []any{}
+		for _, child := range n.Content {
+			value, err := stackTaggedYAMLNode(child, depth+1, nodes)
+			if err != nil {
+				return nil, err
+			}
+			values = append(values, value)
+		}
+		key := "Fn::Equals"
+		if n.Tag == "!If" {
+			key = "Fn::If"
+		}
+		return map[string]any{key: values}, nil
 	}
 	if strings.HasPrefix(n.Tag, "!") && !strings.HasPrefix(n.Tag, "!!") && n.Kind != yaml.ScalarNode {
 		return nil, fmt.Errorf("intrinsic shorthand must be scalar")
@@ -72,7 +110,7 @@ func taggedYAML(n *yaml.Node) (any, error) {
 			if _, ok := m[k]; ok {
 				return nil, fmt.Errorf("duplicate template key %s", k)
 			}
-			v, e := taggedYAML(n.Content[i+1])
+			v, e := stackTaggedYAMLNode(n.Content[i+1], depth+1, nodes)
 			if e != nil {
 				return nil, e
 			}
@@ -82,7 +120,7 @@ func taggedYAML(n *yaml.Node) (any, error) {
 	case yaml.SequenceNode:
 		a := []any{}
 		for _, c := range n.Content {
-			v, e := taggedYAML(c)
+			v, e := stackTaggedYAMLNode(c, depth+1, nodes)
 			if e != nil {
 				return nil, e
 			}
@@ -298,7 +336,7 @@ func compileStack(region, name, body string, parameters map[string]string, capab
 	template := object(value)
 	for k := range template {
 		switch k {
-		case "AWSTemplateFormatVersion", "Description", "Parameters", "Resources", "Outputs":
+		case "AWSTemplateFormatVersion", "Description", "Parameters", "Conditions", "Resources", "Outputs":
 		default:
 			return fail("Unsupported template section: " + k)
 		}
@@ -310,11 +348,11 @@ func compileStack(region, name, body string, parameters map[string]string, capab
 	for _, value := range resources {
 		r := object(value)
 		kind := stringValue(r["Type"])
-		if kind != "AWS::SSM::Parameter" && kind != "AWS::IAM::Role" && kind != "AWS::S3::Bucket" && kind != "AWS::Lambda::Function" {
+		if kind != "AWS::SSM::Parameter" && kind != "AWS::IAM::Role" && kind != "AWS::S3::Bucket" && kind != "AWS::Lambda::Function" && !stackAPIKind(kind) {
 			return fail("Unsupported resource type: " + kind)
 		}
 		for k := range r {
-			if k != "Type" && k != "Properties" && k != "DependsOn" {
+			if k != "Type" && k != "Properties" && k != "DependsOn" && k != "Condition" {
 				return fail("Unsupported resource attribute: " + k)
 			}
 		}
@@ -328,47 +366,67 @@ func compileStack(region, name, body string, parameters map[string]string, capab
 	refs := map[string]string{"AWS::Region": region, "AWS::AccountId": "000000000000", "AWS::StackName": name, "AWS::StackId": id, "AWS::Partition": "aws", "AWS::URLSuffix": "amazonaws.com"}
 	attrs := map[string]string{}
 	definitions := object(template["Parameters"])
-	for key := range parameters {
-		if _, ok := definitions[key]; !ok {
-			return fail("Unknown template parameter: " + key)
-		}
+	if _, exists := template["Parameters"]; exists && definitions == nil {
+		return fail("Parameters must be an object.")
 	}
-	for key, raw := range definitions {
-		definition := object(raw)
-		for field := range definition {
-			switch field {
-			case "Type", "Default", "Description", "NoEcho", "AllowedPattern", "MinLength", "MaxLength", "ConstraintDescription":
-			default:
-				return fail("Unsupported parameter constraint: " + field)
-			}
-		}
-		if stringValue(definition["Type"]) != "String" {
-			return fail("Only String template parameters are supported.")
-		}
-		v, ok := parameters[key]
-		if !ok {
-			v, ok = definition["Default"].(string)
-		}
-		if !ok {
-			return fail("Missing required parameter: " + key)
-		}
-		if pattern, ok := definition["AllowedPattern"].(string); ok {
-			re, e := regexp.Compile("^(?:" + pattern + ")$")
-			if e != nil || !re.MatchString(v) {
-				return fail("Parameter constraint failed: " + key)
-			}
-		}
-		for field, minimum := range map[string]bool{"MinLength": true, "MaxLength": false} {
-			if raw, ok := definition[field]; ok {
-				n, e := strconv.Atoi(stringValue(raw))
-				if e != nil || n < 0 || minimum && len(v) < n || !minimum && len(v) > n {
-					return fail("Parameter length constraint failed: " + key)
-				}
-			}
-		}
-		refs[key] = v
-		record.Parameters[key] = v
+	values, e := stackParameterValues(definitions, parameters)
+	if e != nil {
+		return fail(e.Error())
 	}
+	for key, value := range values {
+		refs[key] = value
+		record.Parameters[key] = value
+	}
+	conditionDefinitions := object(template["Conditions"])
+	if _, exists := template["Conditions"]; exists && conditionDefinitions == nil {
+		return fail("Conditions must be an object.")
+	}
+	conditions, e := stackConditionValues(conditionDefinitions, refs)
+	if e != nil {
+		return fail(e.Error())
+	}
+	enabled := map[string]bool{}
+	for key, raw := range resources {
+		if !stackConditionalName.MatchString(key) {
+			return fail("Invalid resource logical ID.")
+		}
+		if _, exists := refs[key]; exists {
+			return fail("Resource logical ID conflicts with parameter.")
+		}
+		selected, err := stackConditionalEnabled(object(raw), conditions)
+		if err != nil {
+			return fail(err.Error())
+		}
+		enabled[key] = selected
+	}
+	// Compile every declaration purely before filtering the native record. This
+	// prevents conditions from hiding unsupported resource types/properties.
+	prepared := map[string]any{}
+	for key, raw := range resources {
+		r := object(raw)
+		selected, omit, err := stackSelectConditional(r["Properties"], conditions)
+		if err != nil || omit {
+			return fail("Invalid conditional resource properties.")
+		}
+		if err = stackConditionalLinks(r["Properties"], resources, refs, enabled, false); err != nil {
+			return fail(err.Error())
+		}
+		if err = stackConditionalLinks(selected, resources, refs, enabled, enabled[key]); err != nil {
+			return fail(err.Error())
+		}
+		if err = stackConditionalDependency(r["DependsOn"], resources, enabled, enabled[key]); err != nil {
+			return fail(err.Error())
+		}
+		copy := map[string]any{}
+		for field, value := range r {
+			if field != "Condition" {
+				copy[field] = value
+			}
+		}
+		copy["Properties"] = selected
+		prepared[key] = copy
+	}
+	resources = prepared
 	keys, err := resourceOrder(resources)
 	if err != nil {
 		return fail(err.Error())
@@ -386,7 +444,12 @@ func compileStack(region, name, body string, parameters map[string]string, capab
 			return fail("Resource Properties must be an object.")
 		}
 		physical := ""
-		if kind == "AWS::SSM::Parameter" {
+		if stackAPIKind(kind) {
+			physical, e = compileStackAPI(region, id, key, kind, properties, attrs)
+			if e != nil {
+				return fail(e.Error())
+			}
+		} else if kind == "AWS::SSM::Parameter" {
 			for k := range properties {
 				switch k {
 				case "Name", "Value", "Type", "Description", "Tier":
@@ -481,15 +544,53 @@ func compileStack(region, name, body string, parameters map[string]string, capab
 			attrs[key+".Arn"] = "arn:aws:iam::000000000000:role/" + physical
 		}
 		refs[key] = physical
-		record.Resources = append(record.Resources, StackResource{key, kind, physical, properties})
+		if kind == "AWS::ApiGateway::Stage" {
+			refs[key] = stringValue(properties["StageName"])
+		}
+		if enabled[key] {
+			record.Resources = append(record.Resources, StackResource{LogicalID: key, Type: kind, PhysicalID: physical, Properties: properties})
+		}
 	}
-	for key, raw := range object(template["Outputs"]) {
-		for field := range object(raw) {
-			if field != "Value" && field != "Description" {
+	outputs := object(template["Outputs"])
+	if _, exists := template["Outputs"]; exists && outputs == nil {
+		return fail("Outputs must be an object.")
+	}
+	for key, raw := range outputs {
+		output, ok := raw.(map[string]any)
+		if !ok {
+			return fail("Output must be an object.")
+		}
+		if _, exists := output["Value"]; !exists {
+			return fail("Output requires Value.")
+		}
+		if raw, exists := output["Description"]; exists {
+			if _, ok := raw.(string); !ok {
+				return fail("Output Description must be a string.")
+			}
+		}
+		for field := range output {
+			if field != "Value" && field != "Description" && field != "Condition" {
 				return fail("Unsupported output attribute: " + field)
 			}
 		}
-		v, e := resolve(object(raw)["Value"], refs, attrs)
+		selected, e := stackConditionalEnabled(output, conditions)
+		if e != nil {
+			return fail(e.Error())
+		}
+		projected, omit, e := stackSelectConditional(output["Value"], conditions)
+		if e != nil || omit {
+			return fail("Invalid conditional output value.")
+		}
+		if e = stackConditionalLinks(output["Value"], resources, refs, enabled, false); e != nil {
+			return fail(e.Error())
+		}
+		if !selected {
+			continue
+		}
+		if e = stackConditionalLinks(projected, resources, refs, enabled, true); e != nil {
+			return fail(e.Error())
+		}
+		v, e := resolve(projected, refs, attrs)
 		if e != nil {
 			return fail(e.Error())
 		}
@@ -522,6 +623,15 @@ func (s *StackStore) Create(record StackRecord) error {
 		return ssmFailure{"AlreadyExistsException", "Stack already exists."}
 	}
 	for _, r := range record.Resources {
+		if stackAPIKind(r.Type) {
+			if err = claimStackAPI(tx, record, r); err != nil {
+				return err
+			}
+			if err = createStackAPI(context.Background(), tx, record, r); err != nil {
+				return err
+			}
+			continue
+		}
 		table, limit := "aws_ssm_parameters", 1000
 		if r.Type == "AWS::S3::Bucket" {
 			table, limit = "buckets", core.MaxBuckets
@@ -569,6 +679,9 @@ func (s *StackStore) Create(record StackRecord) error {
 		if err != nil {
 			return ssmFailure{"AlreadyExistsException", "A resource already exists or its creation was rejected."}
 		}
+	}
+	if err = saveStackAPIFingerprints(tx, &record); err != nil {
+		return err
 	}
 	return tx.Commit()
 }
@@ -632,6 +745,9 @@ func (s *StackStore) deleteChecked(region, name string, authorize func(StackReco
 			return err
 		}
 	}
+	if err = checkStackAPIFingerprints(tx, records[0]); err != nil {
+		return err
+	}
 	for i := len(records[0].Resources) - 1; i >= 0; i-- {
 		r := records[0].Resources[i]
 		namespace := stackResourceNamespace(region, r.Type)
@@ -642,7 +758,9 @@ func (s *StackStore) deleteChecked(region, name string, authorize func(StackReco
 		if owned != 1 {
 			return ssmFailure{"ValidationError", "Stack resource ownership changed; deletion refused."}
 		}
-		if r.Type == "AWS::SSM::Parameter" {
+		if stackAPIKind(r.Type) {
+			err = deleteStackAPI(context.Background(), tx, region, r)
+		} else if r.Type == "AWS::SSM::Parameter" {
 			_, err = tx.Exec("DELETE FROM aws_ssm_parameters WHERE region=? AND name=?", region, r.PhysicalID)
 		} else if r.Type == "AWS::Lambda::Function" {
 			_, err = tx.Exec("DELETE FROM aws_lambda_functions WHERE region=? AND name=?", region, r.PhysicalID)
@@ -665,8 +783,42 @@ func (s *StackStore) deleteChecked(region, name string, authorize func(StackReco
 	if _, err = tx.Exec("DELETE FROM aws_cfn_ownership WHERE stack_id=?", records[0].ID); err != nil {
 		return err
 	}
-	if _, err = tx.Exec("DELETE FROM aws_cfn_stacks WHERE id=?", records[0].ID); err != nil {
+	result, err := tx.Exec("DELETE FROM aws_cfn_stacks WHERE id=?", records[0].ID)
+	if err != nil {
 		return err
+	}
+	removed, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if removed != 1 {
+		return errors.New("stack cleanup did not remove exactly the selected stack")
+	}
+	var remainingStack, remainingClaims int
+	if err = tx.QueryRow("SELECT (SELECT count(*) FROM aws_cfn_stacks WHERE id=?),(SELECT count(*) FROM aws_cfn_ownership WHERE stack_id=?)", records[0].ID, records[0].ID).Scan(&remainingStack, &remainingClaims); err != nil {
+		return err
+	}
+	if remainingStack != 0 || remainingClaims != 0 {
+		return errors.New("stack cleanup postcondition failed")
+	}
+	// Verify physical effects after every cleanup write. A trigger on a later
+	// resource/claim/stack deletion must not resurrect an acknowledged resource.
+	for _, resource := range records[0].Resources {
+		var remaining int
+		switch resource.Type {
+		case "AWS::SSM::Parameter":
+			err = tx.QueryRow("SELECT count(*) FROM aws_ssm_parameters WHERE region=? AND name=?", region, resource.PhysicalID).Scan(&remaining)
+		case "AWS::S3::Bucket":
+			err = tx.QueryRow("SELECT count(*) FROM buckets WHERE name=?", resource.PhysicalID).Scan(&remaining)
+		default:
+			continue
+		}
+		if err != nil {
+			return err
+		}
+		if remaining != 0 {
+			return errors.New("stack physical resource cleanup postcondition failed")
+		}
 	}
 	return tx.Commit()
 }

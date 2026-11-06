@@ -35,7 +35,11 @@ func TestNativeIAMReferenceExamplesAndLegacyOwnershipBoundary(t *testing.T) {
 		}
 		examples := post.RequestBody.Content["application/x-www-form-urlencoded"].Examples
 		headers := map[string]string{"X-Simulator-Service": "iam", "Content-Type": "application/x-www-form-urlencoded"}
-		for _, action := range []string{"CreateRole", "GetRole", "ListRoles", "PutRolePolicy", "GetRolePolicy", "ListRolePolicies", "UpdateAssumeRolePolicy", "DeleteRolePolicy", "DeleteRole"} {
+		executed := map[string]bool{}
+		for _, action := range []string{"CreateRole", "GetRole", "ListRoles", "PutRolePolicy", "GetRolePolicy", "ListRolePolicies", "UpdateAssumeRolePolicy", "CreatePolicy", "GetPolicy", "ListPolicies", "AttachRolePolicy", "ListAttachedRolePolicies", "CreatePolicyVersion", "GetPolicyVersion", "ListPolicyVersions", "SetDefaultPolicyVersion", "DeletePolicyVersion", "DetachRolePolicy", "DeletePolicy", "DeleteRolePolicy", "DeleteRole"} {
+			if action == "SetDefaultPolicyVersion" || action == "DeletePolicyVersion" {
+				status(t, s, "POST", endpoint, "Action=SetDefaultPolicyVersion&Version=2010-05-08&PolicyArn=arn%3Aaws%3Aiam%3A%3A000000000000%3Apolicy%2FReadObjects&VersionId=v1", 200, headers)
+			}
 			fields, exists := examples[action]
 			if !exists {
 				t.Fatal("Missing advertised IAM example", action)
@@ -45,6 +49,7 @@ func TestNativeIAMReferenceExamplesAndLegacyOwnershipBoundary(t *testing.T) {
 				input.Set(name, fmt.Sprint(value))
 			}
 			body := status(t, s, "POST", endpoint, input.Encode(), 200, headers)
+			executed[action] = true
 			if !strings.Contains(string(body), "<"+action+"Response") {
 				t.Fatal(action, string(body))
 			}
@@ -67,11 +72,11 @@ func TestNativeIAMReferenceExamplesAndLegacyOwnershipBoundary(t *testing.T) {
 		if err = json.Unmarshal(status(t, s, "GET", "/_simulator/v1/capabilities", "", 200, nil), &capabilities); err != nil {
 			t.Fatal(err)
 		}
-		if len(capabilities.Services["iam"].Operations) != 9 {
+		if len(capabilities.Services["iam"].Operations) != 21 {
 			t.Fatal(capabilities)
 		}
 		for _, action := range capabilities.Services["iam"].Operations {
-			if _, ok := examples[action]; !ok {
+			if !executed[action] {
 				t.Fatal("Capability lacks executed reference example", action)
 			}
 		}

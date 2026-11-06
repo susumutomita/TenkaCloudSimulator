@@ -1,0 +1,22 @@
+/* Original TenkaCloudSimulator API-reference theme overrides.
+ * SPDX-License-Identifier: MIT
+ * Scalar's public theme variables, scoped to this embedded light reference.
+ * Muted text and semantic HTTP-method colors retain their distinct meanings.
+ * Browser acceptance must verify actual backgrounds; token arithmetic alone
+ * does not establish accessible rendering.
+ */
+.light-mode #reference {
+  --scalar-color-3: #595959;
+  --scalar-sidebar-search-color: var(--scalar-color-3);
+  --scalar-color-green: #006644;
+  --scalar-color-red: #b42318;
+  --scalar-color-orange: #9c3b00;
+}
+
+/* Scalar nests dark request cards inside its light reference. Their own red
+ * token needs a lighter shade against the measured #1a1a1a card background.
+ * This leaves the rest of the dark palette and other pages unchanged.
+ */
+.light-mode #reference .request-card.dark-mode {
+  --scalar-color-red: #ff8a80;
+}

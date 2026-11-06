@@ -18,7 +18,7 @@
 
 ## ブラウザ検証
 
-`make e2e`は実バイナリを空ディレクトリ・PATH空で起動し、UI/SDK共有状態、upload/download、literal dot-segment keys、IAM拒否、Scalarの実Sendを検証。全外部requestsを遮断し、要求があれば失敗。`make audit`は23段階を撮影、DOM snapshot、キーボードfocus/validation、390px/720pxのdocument幅、axe WCAGルールを検証。機械検査は完全なアクセシビリティ認証ではない。
+`make e2e`は実バイナリを空ディレクトリ・PATH空で起動し、UI/SDK共有状態、upload/download、literal dot-segment keys、IAM拒否、Scalarの実Sendを検証。全外部requestsを遮断し、要求があれば失敗。`make audit`は50段階を撮影、DOM snapshot、キーボードfocus/validation、390px/720pxのdocument幅、axe WCAGルールを検証。機械検査は完全なアクセシビリティ認証ではない。
 
 スクリーンショットはreports/console-objects-desktop.png、reports/console-mobile.png、reports/audit/へ保存。ダミー値のみ使用。実ホストintegrationは秘密flagをログや画面に出さず採点結果のみ記録する。
 
@@ -36,10 +36,73 @@ S3のProperties→Tagsは公式Cloudscape TagEditorのAdd tag/Key/Value/Remove/S
 
 ## IAM / Lambdaのロール導線と比較の限界
 
-IAM→Roles→Create role→Role details→Lambda→Create function→Permissions→Existing roleを実装した。role ARNとpermissions JSONは既存のlocal identity API/SQLiteを使用し、create時のIf-None-Match:*で同名identityを上書きしない。編集だけが既存policyを置き換える。simulator-adminは選択肢から除く。operatorだけが管理でき、participantはIAMの一覧/作成を拒否する。
+IAM→Roles→Create role→Role details→Lambda→Create function→Permissions→Existing roleを、native IAM Query APIの状態で操作する。Trust relationships と inline permissions は限定された実装範囲で検証する。従来の独自JSON identity APIは Local identities に分離している。自動ロール作成、AWS全managed policies、STSや完全なIAM評価との同等性は主張しない。[IAMの対応範囲](iam.md)を参照。
 
-[公式Lambda execution-role手順](https://docs.aws.amazon.com/lambda/latest/dg/lambda-intro-execution-role.html)と[公式IAM role作成](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create.html)を参照した。公式はLambda service principalへのtrust、managed policies、自動role作成等を持つが、ここでは未対応。AWS風の項目名/Cloudscape componentの使用を、AWS画面の完全再現やtrust評価と扱わない。認証済みの現行AWS画面を直接確認していないため、pixel一致/最新の全配置は未検証。公開文書は操作の参考資料であり、実AWS画面を監査した証拠ではない。
-
-実ブラウザでは空のIAMからrole作成、Lambdaのrole選択、関数作成、ZIP Deploy、実Pythonが42を返すまで確認する。PC/390px、別teamのrole非共有、participant管理拒否も検証。残る差分はdocs/console-fidelity.mdに記録する。
+[公式Lambda execution-role手順](https://docs.aws.amazon.com/lambda/latest/dg/lambda-intro-execution-role.html)と[公式IAM role作成](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create.html)を操作の参照にする。認証済みの現行AWS画面は直接確認していないため、pixel一致・最新の全配置は未検証。既存の実ブラウザ回帰は空のIAMからrole作成、Lambdaのrole選択、関数作成、ZIP Deploy、実Pythonが42を返すまでを検査する。PC/390px、別teamのrole非共有、participant管理拒否も別の実行検証として扱う。
 
 IAMはnative Query APIを使うCloudscape Wizard、Permissions/Trust relationshipsの実状態操作に対応する。従来のidentity方式はLocal identitiesへ残す。[導線・制限](iam.md)。
+
+API GatewayはAPIs→Regional REST作成→resource/method→Lambda proxy→Deploy API/new stage→stage実行をnative APIと共有する。作成時はAPI/method限定Lambda resource permissionを追加し、実行ロールによるサービスアクセスとは分離する。応答は安全な非実行downloadで、AWSのbrowser app hostingとは異なる。resource tree、既存stage編集等の差と実確認範囲は[API Gateway](apigateway.md)と[再現差分](console-fidelity.md)を参照。
+
+
+## Access-token paste boundary
+
+Login uses the real Cloudscape password Input. The field accepts only the token
+itself; command labels, surrounding spaces and invalid/expired tokens are not
+trimmed or granted access. Clipboard HTML is never interpreted. Copy a plain-text
+token when the clipboard contains no text/plain representation. CR/LF are removed
+only as required by the existing HTML password-input behavior.
+
+A capture-phase backup records an explicit plain-text paste and its selection.
+Normal native insertion/onChange cancels that backup, preserving native undo.
+Only a paste without the normal state update uses the next-task fallback; newer
+typing/paste/navigation invalidates it, including a later empty/HTML-only paste;
+nullable clipboard data is ignored safely. Keyboard submission flushes it first.
+No token is logged, stored in browser storage, or granted authority by this UI.
+The server still checks its exact local credential and issues its separate opaque
+browser session.401 remains invalid/expired; connection failures and other HTTP
+errors have fixed distinct messages without reflecting response bodies.
+
+Baseline cloud Chromium tests used actual Clipboard.writeText and trusted paste
+events, not fill() as paste evidence. Valid generated tokens logged in/out/in;
+invalid/spaces/label inputs remained401. An artificial target preventDefault
+fixture caused the old input to stay empty and is a regression seam, not a Dia
+root-cause claim. An HTML-only clipboard also produced empty password input while
+a rich editor received its content, but the user's clipboard format is unknown.
+Linux Meta+V is not Mac proof; native context-menu Paste and real Mac/Dia remain
+unverified. No Mac or real user credentials were accessed. PR411の元HEADとマージ後mainでは既存のブラウザ・CI検査が成功した。
+それでも実Mac/Diaの動作確認にはならず、以後の変更は新しいHEADの検証が必要。 The final focused helper passed real
+trusted plain/HTML clipboard cases, native and selected-replacement Undo, the
+artificial canceled/default/bubble path, stale typing/paste/navigation boundaries,
+immediate Enter, invalid inputs, safe HTTP/network errors, busy-submit guards and
+PC1440/390 reflow/axe with zero external requests/page errors. The null-data case
+is explicitly synthetic, not OS-paste evidence. This is not real Mac/Dia validation.
+
+References: [React capture-phase paste events](https://react.dev/reference/react-dom/components/common#onpaste),
+[HTML password sanitization](https://html.spec.whatwg.org/multipage/input.html#password-state-(type=password)),
+and [official Cloudscape Input](https://cloudscape.design/components/input/).
+
+### Update and retry
+
+Stop the old simulator with Ctrl+C in its terminal, then run `git pull --ff-only`
+and `make start` in the repository. The start helper rebuilds current source and
+reuses `./practice.db` and `./simulator-token`; preserve any configured
+`START_STATE` / `START_TOKEN_FILE` overrides. In the browser use Cmd+Shift+R to
+reload the updated page, then paste into Access token and choose Open sandbox.
+On the owner's Mac, `pbcopy < ./simulator-token` is an optional plain-text copy
+command (substitute the configured private token path). It is documentation only,
+not a command executed during this investigation. Never send the token in chat or
+include it in logs/screenshots. If paste still leaves the field empty, the actual
+Mac/Dia behavior needs owner-device verification; no official Dia-specific cause
+is confirmed. Native paste is preserved following
+[Chrome's paste guidance](https://developer.chrome.com/docs/lighthouse/best-practices/paste-preventing-inputs).
+
+## クラウド別ナビゲーションと言語（刷新中）
+
+AWS、Google Cloud、Azure を同じ階層で選び、そのクラウドの対応済みサービスだけを検索する。サービスのバックログ件数を操作可能なサービス数として表示しない。旧サービスhash URLは維持する。AWSは公式Cloudscape、Google CloudとAzureはそれぞれの公開公式資料に基づく専用の外枠・リソース導線を持つ。名前や色の変更だけで実コンソールとの一致とは扱わない。
+
+言語は日本語／英語を明示選択する。初回は英語、選択した表示言語だけをブラウザへ保存する。資格情報は保存しない。入力中のフォーム・選択リソース・認証主体を言語切替で初期化しない。Cloudscapeの標準表示には公式翻訳メッセージを同梱し、画面独自の静的文言も翻訳する。APIの値、ARN、リソース名、エラーコードは翻訳しない。
+
+共通言語設定は実Chromiumで切替・保存・再読込・編集中の値の保持・保存禁止環境を検査した。共通の言語設定と各クラウド操作は実埋込バイナリのPC1440/390で検証済み。言語12状態・ストレージ操作22状態のaxe、外部通信0・ページエラー0、チーム分離、403/401、世代412拒否と詳細表示を確認した。既存E2Eを含む全体ゲートと新HEADのCIは進行中。完了前の画面を完成版として扱わない。Google Cloudの公開手順とAzureの公開公式画像を参照しているが、認証済みの現行画面は未確認。[GCP画面](gcp-console.md)、[Azure画面](azure-console.md)、[共通契約](design/0006-console-provider-contract.md)に範囲を分けて記録する。
+
+明示的なローカルトークンファイル選択は[専用ガイド](login-token-file.md)を参照。実埋込バイナリでもファイル選択・ログイン／ログアウト、古い読込結果の破棄、日英表示を検証したが、実Mac/Diaの確認は含まない。

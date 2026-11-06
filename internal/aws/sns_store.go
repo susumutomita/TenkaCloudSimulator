@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"encoding/hex"
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -41,19 +42,119 @@ type SNSMessage struct {
 const (
 	maxSNSTopics        = 1000
 	maxSNSSubscriptions = 10000
+	maxSNSMessages      = 10000
+	maxSNSMessageBytes  = 64 << 20
+	maxSNSDeliveries    = 100000
 )
 
+// Write acknowledgements describe persisted state in the same write transaction.
+// A successful driver call alone does not establish that a row was saved.
+func snsAffected(result sql.Result, err error, want int64) error {
+	if err != nil {
+		return err
+	}
+	n, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if n != want {
+		return fmt.Errorf("SNS write affected %d rows; expected %d", n, want)
+	}
+	return nil
+}
+
+func snsCount(tx *sql.Tx, want int, query string, args ...any) error {
+	var count int
+	if err := tx.QueryRow(query, args...).Scan(&count); err != nil {
+		return err
+	}
+	if count != want {
+		return fmt.Errorf("SNS persisted-state acknowledgement failed")
+	}
+	return nil
+}
+
+func snsRequireTopic(tx *sql.Tx, arn string) (bool, error) {
+	var fifo bool
+	err := tx.QueryRow("SELECT fifo FROM aws_sns_topics WHERE arn=?", arn).Scan(&fifo)
+	if err == sql.ErrNoRows {
+		return false, ssmFailure{"NotFoundException", "Topic does not exist."}
+	}
+	return fifo, err
+}
+
+func snsIDs(tx *sql.Tx, query, arn string) ([]string, error) {
+	rows, err := tx.Query(query, arn)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var ids []string
+	for rows.Next() {
+		var id string
+		if err = rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	return ids, rows.Err()
+}
+
+func snsNoDeliveryIDs(tx *sql.Tx, column string, ids []string) error {
+	// Column comes only from the two fixed internal calls below. Batch frozen
+	// identifiers so deletion verification remains below SQLite's bind limit.
+	for len(ids) > 0 {
+		n := min(200, len(ids))
+		args := make([]any, n)
+		for i, id := range ids[:n] {
+			args[i] = id
+		}
+		if err := snsCount(tx, 0, "SELECT count(*) FROM aws_sns_deliveries WHERE "+column+" IN ("+strings.TrimSuffix(strings.Repeat("?,", n), ",")+")", args...); err != nil {
+			return err
+		}
+		ids = ids[n:]
+	}
+	return nil
+}
+
 func NewSNSStore(db *sql.DB) (*SNSStore, error) {
+	tx, err := db.Begin()
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
 	statements := []string{
 		`CREATE TABLE IF NOT EXISTS aws_sns_topics(region TEXT NOT NULL,name TEXT NOT NULL,arn TEXT NOT NULL UNIQUE,display_name TEXT NOT NULL DEFAULT '',fifo INTEGER NOT NULL DEFAULT 0 CHECK(fifo IN (0,1)),created REAL NOT NULL,PRIMARY KEY(region,name));`,
 		`CREATE TABLE IF NOT EXISTS aws_sns_subscriptions(arn TEXT PRIMARY KEY,topic_arn TEXT NOT NULL,protocol TEXT NOT NULL,endpoint TEXT NOT NULL,created REAL NOT NULL);`,
 		`CREATE TABLE IF NOT EXISTS aws_sns_messages(id TEXT PRIMARY KEY,topic_arn TEXT NOT NULL,message TEXT NOT NULL,subject TEXT NOT NULL DEFAULT '',published REAL NOT NULL);`,
 		`CREATE TABLE IF NOT EXISTS aws_sns_deliveries(message_id TEXT NOT NULL,subscription_arn TEXT NOT NULL,PRIMARY KEY(message_id,subscription_arn));`,
+		`CREATE INDEX IF NOT EXISTS aws_sns_subscriptions_topic ON aws_sns_subscriptions(topic_arn);`,
+		`CREATE INDEX IF NOT EXISTS aws_sns_messages_topic ON aws_sns_messages(topic_arn);`,
+		`CREATE UNIQUE INDEX IF NOT EXISTS aws_sns_subscription_endpoint ON aws_sns_subscriptions(topic_arn,protocol,endpoint);`,
 	}
 	for _, q := range statements {
-		if _, err := db.Exec(q); err != nil {
+		if _, err := tx.Exec(q); err != nil {
 			return nil, err
 		}
+	}
+	var topics, subs, messages, bytes, deliveries, orphans int
+	if err = tx.QueryRow("SELECT (SELECT count(*) FROM aws_sns_topics),(SELECT count(*) FROM aws_sns_subscriptions),(SELECT count(*) FROM aws_sns_messages),(SELECT coalesce(sum(length(CAST(message AS BLOB))+length(CAST(subject AS BLOB))),0) FROM aws_sns_messages),(SELECT count(*) FROM aws_sns_deliveries)").Scan(&topics, &subs, &messages, &bytes, &deliveries); err != nil {
+		return nil, err
+	}
+	if topics > maxSNSTopics || subs > maxSNSSubscriptions || messages > maxSNSMessages || bytes > maxSNSMessageBytes || deliveries > maxSNSDeliveries {
+		return nil, fmt.Errorf("persisted SNS state exceeds local limits")
+	}
+	if err = tx.QueryRow(`SELECT
+	(SELECT count(*) FROM aws_sns_subscriptions s WHERE NOT EXISTS(SELECT 1 FROM aws_sns_topics t WHERE t.arn=s.topic_arn))+
+	(SELECT count(*) FROM aws_sns_messages m WHERE NOT EXISTS(SELECT 1 FROM aws_sns_topics t WHERE t.arn=m.topic_arn))+
+	(SELECT count(*) FROM aws_sns_deliveries d WHERE NOT EXISTS(SELECT 1 FROM aws_sns_messages m WHERE m.id=d.message_id))`).Scan(&orphans); err != nil {
+		return nil, err
+	}
+	if orphans != 0 {
+		return nil, fmt.Errorf("persisted SNS state has orphan records; legacy audit-only state requires a fresh database")
+	}
+	if err = tx.Commit(); err != nil {
+		return nil, err
 	}
 	return &SNSStore{db}, nil
 }
@@ -95,7 +196,11 @@ func (s *SNSStore) CreateTopic(region, name, displayName string, fifo bool) (SNS
 		return SNSTopic{}, false, ssmFailure{"LimitExceededException", "Simulator topic limit reached."}
 	}
 	topic := SNSTopic{Region: region, Name: name, ARN: snsARN(region, name), DisplayName: displayName, FIFO: fifo, CreatedAt: float64(time.Now().UnixMilli()) / 1000}
-	if _, err = tx.Exec("INSERT INTO aws_sns_topics VALUES(?,?,?,?,?,?)", topic.Region, topic.Name, topic.ARN, topic.DisplayName, topic.FIFO, topic.CreatedAt); err != nil {
+	r, err := tx.Exec("INSERT INTO aws_sns_topics VALUES(?,?,?,?,?,?)", topic.Region, topic.Name, topic.ARN, topic.DisplayName, topic.FIFO, topic.CreatedAt)
+	if err = snsAffected(r, err, 1); err != nil {
+		return SNSTopic{}, false, err
+	}
+	if err = snsCount(tx, 1, "SELECT count(*) FROM aws_sns_topics WHERE arn=? AND region=? AND name=? AND display_name=? AND fifo=?", topic.ARN, topic.Region, topic.Name, topic.DisplayName, topic.FIFO); err != nil {
 		return SNSTopic{}, false, err
 	}
 	return topic, true, tx.Commit()
@@ -128,31 +233,51 @@ func (s *SNSStore) ListTopics(ctx context.Context, region string) ([]SNSTopic, e
 	return result, rows.Err()
 }
 
-// DeleteTopic removes the topic, its subscriptions and their recorded
-// deliveries in one transaction. Published message records are retained
-// as local audit state; they carry no delivery effect after deletion.
+// DeleteTopic removes all topic-owned records atomically, including deliveries
+// retained after an earlier Unsubscribe. The frozen identifiers also detect
+// ignored deletes and late reinsertion before acknowledging cleanup.
 func (s *SNSStore) DeleteTopic(arn string) error {
 	tx, err := s.db.Begin()
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback()
-	if _, err = tx.Exec("DELETE FROM aws_sns_deliveries WHERE subscription_arn IN (SELECT arn FROM aws_sns_subscriptions WHERE topic_arn=?)", arn); err != nil {
+	if _, err = snsRequireTopic(tx, arn); err != nil {
 		return err
 	}
-	if _, err = tx.Exec("DELETE FROM aws_sns_subscriptions WHERE topic_arn=?", arn); err != nil {
+	messages, err := snsIDs(tx, "SELECT id FROM aws_sns_messages WHERE topic_arn=?", arn)
+	if err != nil {
 		return err
+	}
+	subs, err := snsIDs(tx, "SELECT arn FROM aws_sns_subscriptions WHERE topic_arn=?", arn)
+	if err != nil {
+		return err
+	}
+	if _, err = tx.Exec("DELETE FROM aws_sns_deliveries WHERE message_id IN (SELECT id FROM aws_sns_messages WHERE topic_arn=?) OR subscription_arn IN (SELECT arn FROM aws_sns_subscriptions WHERE topic_arn=?)", arn, arn); err != nil {
+		return err
+	}
+	for _, table := range []string{"aws_sns_messages", "aws_sns_subscriptions"} {
+		if _, err = tx.Exec("DELETE FROM "+table+" WHERE topic_arn=?", arn); err != nil {
+			return err
+		}
 	}
 	r, err := tx.Exec("DELETE FROM aws_sns_topics WHERE arn=?", arn)
-	if err != nil {
+	if err = snsAffected(r, err, 1); err != nil {
 		return err
 	}
-	n, err := r.RowsAffected()
-	if err != nil {
+	for _, table := range []string{"aws_sns_messages", "aws_sns_subscriptions"} {
+		if err = snsCount(tx, 0, "SELECT count(*) FROM "+table+" WHERE topic_arn=?", arn); err != nil {
+			return err
+		}
+	}
+	if err = snsCount(tx, 0, "SELECT count(*) FROM aws_sns_topics WHERE arn=?", arn); err != nil {
 		return err
 	}
-	if n == 0 {
-		return ssmFailure{"NotFoundException", "Topic does not exist."}
+	if err = snsNoDeliveryIDs(tx, "message_id", messages); err != nil {
+		return err
+	}
+	if err = snsNoDeliveryIDs(tx, "subscription_arn", subs); err != nil {
+		return err
 	}
 	return tx.Commit()
 }
@@ -163,6 +288,9 @@ func (s *SNSStore) Subscribe(topic SNSTopic, protocol, endpoint string) (SNSSubs
 		return SNSSubscription{}, err
 	}
 	defer tx.Rollback()
+	if _, err = snsRequireTopic(tx, topic.ARN); err != nil {
+		return SNSSubscription{}, err
+	}
 	var existing SNSSubscription
 	err = tx.QueryRow("SELECT arn,topic_arn,protocol,endpoint FROM aws_sns_subscriptions WHERE topic_arn=? AND protocol=? AND endpoint=?", topic.ARN, protocol, endpoint).
 		Scan(&existing.ARN, &existing.TopicARN, &existing.Protocol, &existing.Endpoint)
@@ -180,7 +308,14 @@ func (s *SNSStore) Subscribe(topic SNSTopic, protocol, endpoint string) (SNSSubs
 		return SNSSubscription{}, ssmFailure{"LimitExceededException", "Simulator subscription limit reached."}
 	}
 	sub := SNSSubscription{ARN: topic.ARN + ":" + snsRandomID(), TopicARN: topic.ARN, Protocol: protocol, Endpoint: endpoint}
-	if _, err = tx.Exec("INSERT INTO aws_sns_subscriptions VALUES(?,?,?,?,?)", sub.ARN, sub.TopicARN, sub.Protocol, sub.Endpoint, float64(time.Now().UnixMilli())/1000); err != nil {
+	r, err := tx.Exec("INSERT INTO aws_sns_subscriptions VALUES(?,?,?,?,?)", sub.ARN, sub.TopicARN, sub.Protocol, sub.Endpoint, float64(time.Now().UnixMilli())/1000)
+	if err = snsAffected(r, err, 1); err != nil {
+		return SNSSubscription{}, err
+	}
+	if err = snsCount(tx, 1, "SELECT count(*) FROM aws_sns_subscriptions WHERE arn=? AND topic_arn=? AND protocol=? AND endpoint=?", sub.ARN, sub.TopicARN, sub.Protocol, sub.Endpoint); err != nil {
+		return SNSSubscription{}, err
+	}
+	if _, err = snsRequireTopic(tx, topic.ARN); err != nil {
 		return SNSSubscription{}, err
 	}
 	return sub, tx.Commit()
@@ -197,7 +332,12 @@ func (s *SNSStore) GetSubscription(arn string) (SNSSubscription, error) {
 }
 
 func (s *SNSStore) Unsubscribe(arn string) error {
-	r, err := s.db.Exec("DELETE FROM aws_sns_subscriptions WHERE arn=?", arn)
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	r, err := tx.Exec("DELETE FROM aws_sns_subscriptions WHERE arn=?", arn)
 	if err != nil {
 		return err
 	}
@@ -205,7 +345,13 @@ func (s *SNSStore) Unsubscribe(arn string) error {
 	if err == nil && n == 0 {
 		return ssmFailure{"NotFoundException", "Subscription does not exist."}
 	}
-	return err
+	if err != nil {
+		return err
+	}
+	if err = snsCount(tx, 0, "SELECT count(*) FROM aws_sns_subscriptions WHERE arn=?", arn); err != nil {
+		return err
+	}
+	return tx.Commit()
 }
 
 func (s *SNSStore) listSubscriptions(ctx context.Context, where string, arg string) ([]SNSSubscription, error) {
@@ -251,18 +397,50 @@ func (s *SNSStore) PublishWithID(topic SNSTopic, id, message, subject string) (s
 		return "", 0, err
 	}
 	defer tx.Rollback()
-	if _, err = tx.Exec("INSERT INTO aws_sns_messages VALUES(?,?,?,?,?)", id, topic.ARN, message, subject, float64(time.Now().UnixMilli())/1000); err != nil {
-		return "", 0, err
-	}
-	r, err := tx.Exec("INSERT INTO aws_sns_deliveries(message_id,subscription_arn) SELECT ?,arn FROM aws_sns_subscriptions WHERE topic_arn=?", id, topic.ARN)
+	fifo, err := snsRequireTopic(tx, topic.ARN)
 	if err != nil {
 		return "", 0, err
 	}
-	n, err := r.RowsAffected()
+	if fifo {
+		return "", 0, ssmFailure{"InvalidParameterException", "FIFO publication is unsupported."}
+	}
+	var count, bytes, deliveries, subCount int
+	if err = tx.QueryRow("SELECT count(*),coalesce(sum(length(CAST(message AS BLOB))+length(CAST(subject AS BLOB))),0) FROM aws_sns_messages").Scan(&count, &bytes); err != nil {
+		return "", 0, err
+	}
+	if err = tx.QueryRow("SELECT count(*) FROM aws_sns_deliveries").Scan(&deliveries); err != nil {
+		return "", 0, err
+	}
+	if err = tx.QueryRow("SELECT count(*) FROM aws_sns_subscriptions WHERE topic_arn=?", topic.ARN).Scan(&subCount); err != nil {
+		return "", 0, err
+	}
+	if count >= maxSNSMessages || len(message)+len(subject) > maxSNSMessageBytes || bytes > maxSNSMessageBytes-len(message)-len(subject) || deliveries > maxSNSDeliveries-subCount {
+		return "", 0, ssmFailure{"LimitExceededException", "Simulator SNS message, byte or delivery limit reached."}
+	}
+	r, err := tx.Exec("INSERT INTO aws_sns_messages VALUES(?,?,?,?,?)", id, topic.ARN, message, subject, float64(time.Now().UnixMilli())/1000)
+	if err = snsAffected(r, err, 1); err != nil {
+		return "", 0, err
+	}
+	r, err = tx.Exec("INSERT INTO aws_sns_deliveries(message_id,subscription_arn) SELECT ?,arn FROM aws_sns_subscriptions WHERE topic_arn=?", id, topic.ARN)
 	if err != nil {
 		return "", 0, err
 	}
-	return id, int(n), tx.Commit()
+	if err = snsAffected(r, err, int64(subCount)); err != nil {
+		return "", 0, err
+	}
+	if err = snsCount(tx, 1, "SELECT count(*) FROM aws_sns_messages WHERE id=? AND topic_arn=? AND message=? AND subject=?", id, topic.ARN, message, subject); err != nil {
+		return "", 0, err
+	}
+	if err = snsCount(tx, subCount, "SELECT count(*) FROM aws_sns_deliveries WHERE message_id=?", id); err != nil {
+		return "", 0, err
+	}
+	if err = snsCount(tx, subCount, "SELECT count(*) FROM aws_sns_deliveries d JOIN aws_sns_subscriptions s ON d.subscription_arn=s.arn WHERE d.message_id=? AND s.topic_arn=?", id, topic.ARN); err != nil {
+		return "", 0, err
+	}
+	if _, err = snsRequireTopic(tx, topic.ARN); err != nil {
+		return "", 0, err
+	}
+	return id, subCount, tx.Commit()
 }
 
 func (s *SNSStore) ListMessages(ctx context.Context, topicARN string) ([]SNSMessage, error) {

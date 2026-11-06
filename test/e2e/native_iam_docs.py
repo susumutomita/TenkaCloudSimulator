@@ -5,7 +5,7 @@ from check import REPORTS
 
 def verify_native_iam_docs(page, endpoint, iam):
  page.goto(endpoint+'/_simulator/docs/#tag/iam-roles/POST/_simulator/providers/aws/')
- expect(page.get_by_text('Manage IAM roles and inline policies',exact=True).first).to_be_visible(timeout=30000)
+ expect(page.get_by_text('Manage IAM roles, customer policies and role attachments',exact=True).first).to_be_visible(timeout=30000)
  page.get_by_role('button').filter(has_text='Test Request').filter(has_text='/_simulator/providers/aws/').last.click()
  expect(page.get_by_role('checkbox',name='Include RoleName in request',exact=True)).to_be_checked()
  expect(page.get_by_role('checkbox',name='Include AssumeRolePolicyDocument in request',exact=True)).to_be_checked()

@@ -115,6 +115,8 @@ func snsError(w http.ResponseWriter, err error) {
 			status = 403
 		case "LimitExceededException":
 			status = 409
+		case "RequestEntityTooLarge":
+			status = 413
 		case "InternalError":
 			status = 500
 		}
@@ -198,26 +200,22 @@ func attributeEntries(form url.Values) (map[string]string, error) {
 	return attrs, nil
 }
 
-func snsPage[T any](items []T, token string, limit int, arnOf func(T) string) ([]T, string, error) {
+func snsPage[T any](items []T, token, scope string, limit int, arnOf func(T) string) ([]T, string, error) {
 	start := 0
 	if token != "" {
-		decoded, err := base64.RawURLEncoding.DecodeString(token)
-		if err != nil || len(decoded) == 0 {
+		decoded, err := base64.RawURLEncoding.DecodeString(strings.TrimPrefix(token, "SNS1."))
+		bound, cursor, ok := strings.Cut(string(decoded), "\x00")
+		if err != nil || len(token) > 2048 || !strings.HasPrefix(token, "SNS1.") || !ok || bound != scope || cursor == "" || !validText(cursor) {
 			return nil, "", ssmFailure{"InvalidParameterException", "Invalid NextToken for this request."}
 		}
-		cursor := string(decoded)
 		for start < len(items) && arnOf(items[start]) <= cursor {
 			start++
-		}
-		if start == 0 && len(items) > 0 && arnOf(items[0]) > cursor {
-			// Cursor came from another list scope.
-			return nil, "", ssmFailure{"InvalidParameterException", "Invalid NextToken for this request."}
 		}
 	}
 	end := start + limit
 	next := ""
 	if end < len(items) {
-		next = base64.RawURLEncoding.EncodeToString([]byte(arnOf(items[end-1])))
+		next = "SNS1." + base64.RawURLEncoding.EncodeToString([]byte(scope+"\x00"+arnOf(items[end-1])))
 		items = items[start:end]
 	} else {
 		items = items[start:]
@@ -229,6 +227,10 @@ func (g *Gateway) serveSNS(w http.ResponseWriter, r *http.Request) {
 	invalid := func(message string) { snsError(w, ssmFailure{"ValidationError", message}) }
 	if r.Method != "POST" || r.URL.Path != "/" || r.URL.RawQuery != "" {
 		invalid("Use the regional root POST endpoint without query parameters.")
+		return
+	}
+	if r.Header.Get("X-Amz-Target") != "" {
+		invalid("SNS uses Query/XML, not JSON target dispatch.")
 		return
 	}
 	if g.SNS == nil || g.Identities == nil {
@@ -275,7 +277,12 @@ func (g *Gateway) serveSNS(w http.ResponseWriter, r *http.Request) {
 	}
 	data, err := io.ReadAll(http.MaxBytesReader(w, r.Body, 1<<20))
 	if err != nil {
-		snsError(w, ssmFailure{"RequestEntityTooLarge", "SNS Query requests are limited to 1 MiB."})
+		var tooLarge *http.MaxBytesError
+		if errors.As(err, &tooLarge) {
+			snsError(w, ssmFailure{"RequestEntityTooLarge", "SNS Query requests are limited to 1 MiB."})
+		} else {
+			invalid("Could not read SNS Query body.")
+		}
 		return
 	}
 	form, err := url.ParseQuery(string(data))
@@ -378,8 +385,8 @@ func (g *Gateway) serveSNS(w http.ResponseWriter, r *http.Request) {
 		for key, value := range attrs {
 			switch key {
 			case "DisplayName":
-				if len(value) > 100 {
-					invalid("DisplayName is limited to 100 characters.")
+				if !validText(value) || utf8.RuneCountInString(value) > 100 {
+					invalid("DisplayName requires at most 100 UTF-8 characters without unsupported XML controls.")
 					return
 				}
 				displayName = value
@@ -419,7 +426,7 @@ func (g *Gateway) serveSNS(w http.ResponseWriter, r *http.Request) {
 			snsError(w, err)
 			return
 		}
-		page, next, err := snsPage(topics, form.Get("NextToken"), pageLimit, func(t SNSTopic) string { return t.ARN })
+		page, next, err := snsPage(topics, form.Get("NextToken"), action+":"+region, pageLimit, func(t SNSTopic) string { return t.ARN })
 		if err != nil {
 			snsError(w, err)
 			return
@@ -506,7 +513,7 @@ func (g *Gateway) serveSNS(w http.ResponseWriter, r *http.Request) {
 			snsError(w, ssmFailure{"InvalidParameterException", "Unsupported subscription protocol: " + protocol})
 			return
 		}
-		if endpoint == "" || len(endpoint) > 2048 || !utf8.ValidString(endpoint) {
+		if endpoint == "" || len(endpoint) > 2048 || !validText(endpoint) {
 			snsError(w, ssmFailure{"InvalidParameterException", "Endpoint is required and limited to 2048 bytes."})
 			return
 		}
@@ -565,7 +572,7 @@ func (g *Gateway) serveSNS(w http.ResponseWriter, r *http.Request) {
 			snsError(w, err)
 			return
 		}
-		page, next, err := snsPage(subs, form.Get("NextToken"), pageLimit, func(s SNSSubscription) string { return s.ARN })
+		page, next, err := snsPage(subs, form.Get("NextToken"), action+":"+region+":"+form.Get("TopicArn"), pageLimit, func(s SNSSubscription) string { return s.ARN })
 		if err != nil {
 			snsError(w, err)
 			return
@@ -613,13 +620,15 @@ func (g *Gateway) serveSNS(w http.ResponseWriter, r *http.Request) {
 				if sub.Protocol != "sqs" {
 					continue
 				}
-				_, queueName, ok := snsQueueEndpoint(sub.Endpoint)
-				if !ok {
-					continue
+				queueRegion, queueName, ok := snsQueueEndpoint(sub.Endpoint)
+				if !ok || queueRegion != topic.Region {
+					snsError(w, ssmFailure{"InternalError", "Saved SQS subscription endpoint is invalid for this topic."})
+					return
 				}
 				if err := g.QueueFanout.DeliverToQueue(topic.Region, queueName, envelope); err != nil {
-					// Nothing is recorded when queue delivery fails, so a
-					// failed Publish never looks successful.
+					// SQLite publish records are not committed on failure. Earlier
+					// callback effects cannot be rolled back by this interface;
+					// the standalone service intentionally wires no adapter.
 					snsError(w, err)
 					return
 				}

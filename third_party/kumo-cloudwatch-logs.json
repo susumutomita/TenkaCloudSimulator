@@ -1,0 +1,52 @@
+{
+  "provenanceSchemaVersion": 2,
+  "historicalAdaptation": {
+    "upstream": "https://github.com/sivchari/kumo",
+    "commit": "ce37a8fb406ecb96b5619204f645c26302b651a5",
+    "license": "MIT",
+    "copyright": "Copyright (c) 2025 sivchari",
+    "licenseFile": "third_party/KUMO-LICENSE.txt",
+    "licenseSha256": "02f8d83277fea29291727639f45ddafcbcbf7cbc2d92ea1297eb84f0b8ee9fe2",
+    "sourceGitBlobs": {
+      "internal/service/cloudwatchlogs/storage.go": "5ec2d8fe1703d51ebfab2ae5ad3671c435068f10",
+      "internal/service/cloudwatchlogs/types.go": "92c38fbec9f1ede7194d1bc8bc31d31562c9dc85",
+      "internal/service/cloudwatchlogs/handlers.go": "df795ba6f004942c3bb65525b947ffdb6cf065f5"
+    },
+    "modifications": [
+      "Adapt selected group/stream/event response fields and create/delete/put/get lifecycle to existing provider-owned SQLite state",
+      "Replace map/JSON persistence and UUID dependency with atomic SQL transactions and host-generated opaque generations",
+      "Persist original ingestion timestamps; exclusive endTime; deterministic event-time/insertion ordering",
+      "Enforce current AWS batch size/count/order/time boundaries and partial old/future rejection metadata",
+      "Ignore deprecated sequenceToken as required by current AWS behavior",
+      "Replace fresh UUID pagination placeholders with durable HMAC-authenticated, scoped, expiring cursors",
+      "Require host IAM callback on each request and scope group/stream ARNs to the selected region",
+      "Reject unsupported retention, tags, KMS, non-Standard classes, cross-account and automatic Lambda delivery rather than representing partial success"
+    ],
+    "localStackReview": {
+      "upstream": "https://github.com/localstack/localstack",
+      "commit": "8b9a79f05846835cf4dff63ab7eefdde9df83783",
+      "path": "localstack-core/localstack/services/logs/provider.py",
+      "gitBlob": "15007079d980284ac705fd3b0f71dd422d5f7721",
+      "license": "Apache-2.0 in the public archived snapshot; not permission to use current commercial images",
+      "decision": "Reference review only. Core ingest/query delegates to moto; no LocalStack or moto source, dependency, image or runtime copied. Python/moto backend does not match the Go single-binary SQLite contract."
+    }
+  },
+  "historicalRuntimeFiles": {
+    "internal/aws/cloudwatch_logs_store.go": {
+      "sourceCommit": "1b34ed4e5fe7c9a314194c10bd2d0261ec7efb98",
+      "gitBlob": "553966ce2046b508359c40ed79ef7cd3293b716e",
+      "sha256": "e51fa3089657926a0af14a00a18681e36a66ff2cb1d819afb7ef314f25080846"
+    }
+  },
+  "replacement": {
+    "currentKumoCode": false,
+    "status": "accepted",
+    "reviewedReplacementIdentity": {
+      "sourceCommit": "01679251d937ca29e1248af66c082e4d619a1611",
+      "receiptSha256": "1fd689d88b05a566fb491b8a6a87d3d30b59f8112387bd80cde48f0671cc714f"
+    },
+    "paths": [
+      "internal/aws/cloudwatch_logs_store.go"
+    ]
+  }
+}

@@ -12,13 +12,13 @@ simulator runs with `--state`.
 | Operation | Notes |
 | --- | --- |
 | CreateTopic | Idempotent like real SNS. `Name` plus `Attributes.entry.N` for `DisplayName` and `FifoTopic` only. FIFO names must end in `.fifo`. |
-| ListTopics | Per region, `NextToken` pagination (page size 100). |
+| ListTopics | Per region, scoped `NextToken` pagination bound to operation, region and topic (page size 100). |
 | GetTopicAttributes | TopicArn, Owner, DisplayName, subscription counts, FifoTopic. |
-| DeleteTopic | Removes the topic, its subscriptions and their delivery records in one transaction. |
+| DeleteTopic | Removes the topic, subscriptions, messages and all delivery records in one transaction, including history from removed subscriptions. |
 | Subscribe | Protocols: http, https, email, email-json, sms, lambda, application, firehose. Duplicate (topic, protocol, endpoint) returns the existing subscription. |
 | Unsubscribe | Unknown subscription ARN is `NotFoundException`. |
 | ListSubscriptions / ListSubscriptionsByTopic | `NextToken` pagination (page size 100). |
-| Publish | Message up to 256 KiB UTF-8, optional Subject (fewer than100 Unicode characters; no line breaks or controls). Standard topics only; FIFO publication is explicitly refused. Returns a MessageId. |
+| Publish | Message up to 256 KiB UTF-8, optional Subject (fewer than 100 Unicode characters; no line breaks or controls). Standard topics only; FIFO publication is explicitly refused. Returns a MessageId. |
 
 Requests are root `POST` form Query requests, routed by the SNS credential
 scope (`/sns/aws4_request`) or the `X-Simulator-Service: sns` header (the
@@ -27,8 +27,16 @@ same convention IAM uses). Region comes from the credential scope or
 authorized against identity policies as `sns:<Operation>` on the topic ARN
 (`*` for list operations), like SSM.
 
-Limits: 1000 topics and 10000 subscriptions per simulator process database
-(not per region). Errors use the SNS Query `ErrorResponse` shape:
+Limits per simulator process/database (across all regions): 1000 topics,
+10000 subscriptions, 10000 stored messages, 64 MiB of UTF-8 message plus Subject
+bytes, and 100000 delivery rows. Unsubscribe retains delivery history until
+DeleteTopic; DeleteTopic removes all topic-owned records and releases budgets.
+SQLite validates live topic ownership and final persisted state in the same
+write transaction. Ignored/vanishing writes or incomplete cleanup return an
+error and roll back. A deleted topic snapshot cannot create new records.
+Startup rejects orphan/over-budget SNS state without deleting it. Older SNS PR
+databases containing audit messages for deleted topics require a fresh database.
+These are local simulator limits and do not claim AWS quotas or process RSS. Errors use the SNS Query `ErrorResponse` shape:
 `ValidationError`, `InvalidParameterException`, `InvalidAction` for
 unimplemented operations (HTTP 400), `NotFoundException` (404),
 `AuthorizationErrorException` (403), `LimitExceededException` (409).
@@ -48,27 +56,14 @@ unimplemented operations (HTTP 400), `NotFoundException` (404),
   `Publish` delivers the standard SNS notification envelope JSON
   (Type/MessageId/TopicArn/Subject/Message/Timestamp) into each subscribed
   queue before recording the publish; a failed queue delivery fails the
-  Publish and records nothing. This behavior is covered by Go tests
+  Publish and records no SNS message. This callback interface cannot roll back
+  an earlier queue delivery when a later callback or SNS commit fails, and is
+  not an atomic fanout integration. Keep it disabled in the standalone service. This behavior is covered by Go tests
   against a stub fanout. The standalone SNS branch wires no adapter
   (`Gateway.QueueFanout == nil`), so sqs subscriptions there are rejected
   with `InvalidParameterException` saying fanout is not integrated in
-  this build. The merge-time adapter against the SQS branch's store is:
+  this build.
 
-  ```go
-  type sqsFanout struct{ queues *SQSStore }
-  func (a sqsFanout) QueueExists(region, name string) (bool, error) {
-      _, err := a.queues.GetQueue(region, name)
-      if err != nil { return false, nil } // NonExistentQueue only; store errors surface on deliver
-      return true, nil
-  }
-  func (a sqsFanout) DeliverToQueue(region, name, body string) error {
-      q, err := a.queues.GetQueue(region, name)
-      if err != nil { return err }
-      _, err = a.queues.Send(region, q, body, nil, -1)
-      return err
-  }
-  // in server composition: gateway.QueueFanout = sqsFanout{sqsStore}
-  ```
 - SNS-to-Lambda invocation is likewise not performed; `lambda` protocol
   subscriptions are stored (endpoint must be a Lambda function ARN) and
   receive only local delivery records.
@@ -83,10 +78,16 @@ unimplemented operations (HTTP 400), `NotFoundException` (404),
 
 ```python
 import boto3
+from pathlib import Path
+
+# Operator token supplied locally by the host; never commit or print it.
+token = Path("simulator-token").read_text().strip()
 sns = boto3.client(
     "sns", region_name="us-east-1", endpoint_url="http://127.0.0.1:4566",
     aws_access_key_id="TCSIMDUMMY", aws_secret_access_key="dummy",
 )
+sns.meta.events.register("before-sign.sns", lambda request, **kwargs:
+    request.headers.add_header("X-Simulator-Token", token))
 topic = sns.create_topic(Name="alerts")["TopicArn"]
 sns.subscribe(TopicArn=topic, Protocol="email", Endpoint="team@example.com")
 sns.publish(TopicArn=topic, Message="hello")
@@ -103,11 +104,23 @@ selected region and cannot remove another region's subscription.
 FIFO topic metadata can still be created/read/deleted, but Publish refuses FIFO
 topics because ordering/deduplication/group semantics are not implemented.
 
-These admission fixes do not establish complete SNS acceptance. This old PR
-base has no current formal registry, full main integration or SNS console/API
-reference. The optional SQS adapter must not be enabled without atomic fanout
-and real native SQS tests. Topic/message storage quotas and lifecycle integrity
-remain separate review obligations.
+The service has no SNS console, CloudFormation adapter or real cloud delivery.
+SDK/HTTP operations are the supported workflow. The disabled queue callback
+requires a separate transaction-aware contract and native SQS verification
+before it can be advertised as supported fanout.
 
 Real AWS credentials, session tokens and presigned requests are rejected,
 consistent with the other services.
+
+List tokens encode only a position and operation/region/topic scope; they are
+not authentication or authorization credentials. Permission checks run on every
+request. Tokens from the earlier unscoped SNS PR format are refused. Lists can
+change between pages; continuation resumes after the last ARN, even if earlier
+rows were deleted. No immutable-snapshot consistency is claimed.
+
+The finite models `SNSAdmission` and `SNSLifecycle` cover normalized admission
+witnesses, parent ownership, global abstract budgets, post-operation ACK and
+cleanup/peer frames. Native malformed Query, SQLite ignored/vanishing/late-write,
+read/commit failures and exact-byte quota tests remain separate obligations.
+The models do not prove Go/SQL refinement, parsing, cryptography, UUID allocation,
+actual cloud behavior or the disabled SQS callback. See the registered bounds.

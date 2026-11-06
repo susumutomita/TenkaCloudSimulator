@@ -116,6 +116,9 @@ func (g *Gateway) serveIAM(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fields := map[string][]string{"CreateRole": {"RoleName", "AssumeRolePolicyDocument", "Description", "Path", "MaxSessionDuration"}, "GetRole": {"RoleName"}, "ListRoles": {"PathPrefix", "Marker", "MaxItems"}, "DeleteRole": {"RoleName"}, "PutRolePolicy": {"RoleName", "PolicyName", "PolicyDocument"}, "GetRolePolicy": {"RoleName", "PolicyName"}, "DeleteRolePolicy": {"RoleName", "PolicyName"}, "ListRolePolicies": {"RoleName", "Marker", "MaxItems"}, "UpdateAssumeRolePolicy": {"RoleName", "PolicyDocument"}}
+	for operation, operationFields := range iamManagedQueryFields {
+		fields[operation] = operationFields
+	}
 	allowed, ok := fields[action]
 	if !ok {
 		iamError(w, ssmFailure{"NotImplemented", "Only the declared native role and inline-policy Query operations are implemented."})
@@ -134,6 +137,10 @@ func (g *Gateway) serveIAM(w http.ResponseWriter, r *http.Request) {
 			iamError(w, ssmFailure{"NotImplemented", "Unsupported IAM field: " + name})
 			return
 		}
+	}
+	if _, managed := iamManagedQueryFields[action]; managed {
+		g.serveIAMManaged(w, r, action, input)
+		return
 	}
 	name := input.Get("RoleName")
 	if action != "ListRoles" && (!iamRoleName.MatchString(name) || strings.EqualFold(name, core.Administrator)) {
@@ -235,13 +242,13 @@ func (g *Gateway) serveIAM(w http.ResponseWriter, r *http.Request) {
 			}{roles, truncated, marker})
 		}
 	case "PutRolePolicy":
-		err = g.Roles.PutPolicy(r.Context(), role.RoleName, input.Get("PolicyName"), input.Get("PolicyDocument"))
+		err = g.Roles.PutPolicy(r.Context(), role.RoleName, input.Get("PolicyName"), input.Get("PolicyDocument"), role.RoleID)
 		if err == nil {
 			iamResponse(w, action, nil)
 		}
 	case "GetRolePolicy":
 		var document string
-		document, err = g.Roles.Policy(r.Context(), role.RoleName, input.Get("PolicyName"))
+		document, err = g.Roles.Policy(r.Context(), role.RoleName, input.Get("PolicyName"), role.RoleID)
 		if err == nil {
 			iamResponse(w, action, struct {
 				RoleName       string
@@ -250,13 +257,13 @@ func (g *Gateway) serveIAM(w http.ResponseWriter, r *http.Request) {
 			}{role.RoleName, input.Get("PolicyName"), iamEncoded(document)})
 		}
 	case "DeleteRolePolicy":
-		err = g.Roles.DeletePolicy(r.Context(), role.RoleName, input.Get("PolicyName"))
+		err = g.Roles.DeletePolicy(r.Context(), role.RoleName, input.Get("PolicyName"), role.RoleID)
 		if err == nil {
 			iamResponse(w, action, nil)
 		}
 	case "ListRolePolicies":
 		var names []string
-		names, err = g.Roles.PolicyNames(r.Context(), role.RoleName)
+		names, err = g.Roles.PolicyNames(r.Context(), role.RoleName, role.RoleID)
 		if err == nil {
 			filtered := []string{}
 			for _, name := range names {
@@ -277,12 +284,12 @@ func (g *Gateway) serveIAM(w http.ResponseWriter, r *http.Request) {
 			}{filtered, truncated, marker})
 		}
 	case "UpdateAssumeRolePolicy":
-		err = g.Roles.UpdateTrust(r.Context(), role.RoleName, input.Get("PolicyDocument"))
+		err = g.Roles.UpdateTrust(r.Context(), role.RoleName, input.Get("PolicyDocument"), role.RoleID)
 		if err == nil {
 			iamResponse(w, action, nil)
 		}
 	case "DeleteRole":
-		err = g.Roles.Delete(r.Context(), role.RoleName)
+		err = g.Roles.Delete(r.Context(), role.RoleName, role.RoleID)
 		if err == nil {
 			iamResponse(w, action, nil)
 		}

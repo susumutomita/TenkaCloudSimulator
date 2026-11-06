@@ -14,6 +14,8 @@ func TestSNSRejectedQueryCannotCreateOrPublish(t *testing.T) {
 		name   string
 		fields url.Values
 	}{
+		{"DisplayName control", url.Values{"Action": {"CreateTopic"}, "Name": {"unintended"}, "Attributes.entry.1.key": {"DisplayName"}, "Attributes.entry.1.value": {"bad\x00name"}}},
+		{"endpoint control", url.Values{"Action": {"Subscribe"}, "TopicArn": {snsARN("us-east-1", "base")}, "Protocol": {"email"}, "Endpoint": {"bad\x00endpoint"}}},
 		{"duplicate action", url.Values{"Action": {"CreateTopic", "DeleteTopic"}, "Name": {"unintended"}}},
 		{"duplicate version", url.Values{"Action": {"CreateTopic"}, "Version": {"2010-03-31", "invalid"}, "Name": {"unintended"}}},
 		{"duplicate name", url.Values{"Action": {"CreateTopic"}, "Name": {"unintended", "other"}}},

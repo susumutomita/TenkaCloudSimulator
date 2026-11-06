@@ -1,0 +1,63 @@
+- banner:
+  - link "TenkaCloud Simulator":
+    - /url: /_simulator/console/
+  - button "Services"
+  - button "us-east-1"
+  - button "Choose identity": simulator-admin
+  - link "API reference":
+    - /url: /_simulator/docs/
+- main:
+  - navigation "Service navigation":
+    - button "Toggle service navigation"
+  - navigation "Breadcrumbs":
+    - list:
+      - listitem:
+        - link "Services":
+          - /url: "#/s3"
+      - listitem:
+        - link "API Gateway" [disabled]
+  - group: REST API created.
+  - button "Dismiss API Gateway notification"
+  - group: Independent local simulator. Regional REST APIs with Lambda proxy integrations. Responses download as data; browser application hosting and unsupported AWS settings are unavailable.
+  - heading "audit-rest-api" [level=1]
+  - button "APIs"
+  - button "Delete API"
+  - button "Deploy API"
+  - term: API ID
+  - definition: 7ecb6af5e8
+  - term: API type
+  - definition: REST
+  - term: Endpoint type
+  - definition: Regional
+  - tablist "API views":
+    - tab "Resources" [selected]
+    - tab "Stages"
+    - tab "API settings" [disabled]
+  - tabpanel "Resources"
+  - heading "Resources" [level=2]
+  - button "Refresh API resources"
+  - button "Create resource"
+  - button "Create method"
+  - table "API resources":
+    - rowgroup:
+      - row "Resource selection Resource path Methods":
+        - columnheader "Resource selection"
+        - columnheader "Resource path"
+        - columnheader "Methods"
+    - rowgroup:
+      - row "Select resource / / —":
+        - cell "Select resource /":
+          - radio "Select resource /" [checked]
+        - cell /
+        - cell "—"
+  - heading "/ Methods" [level=2]
+  - text: No methods yet.
+  - complementary "Help panel":
+    - button "Close help panel"
+    - heading "Simulator scope" [level=2]
+    - paragraph: Independent local simulator. Not affiliated with AWS. No real cloud resources are created.
+    - paragraph: S3 basic operations, Standard SSM text parameters, Python 3.12 Lambda functions and limited CloudFormation stacks using S3 buckets, SSM parameters, inline Python functions and IAM identity policies.
+    - paragraph: Cloud IAM sessions, managed policies, EC2, KMS and other cloud providers are not implemented.
+    - button "Manage identity policy"
+    - link "Console licenses":
+      - /url: /_simulator/licenses/CONSOLE-NOTICES.txt

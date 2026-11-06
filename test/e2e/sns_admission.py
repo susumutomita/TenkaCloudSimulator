@@ -2,6 +2,8 @@
 
 No cloud calls. Whole-suite results do not substitute for these SNS checks.
 """
+import json
+import sqlite3
 import tempfile
 from pathlib import Path
 import urllib.error
@@ -85,25 +87,42 @@ with tempfile.TemporaryDirectory(prefix='sns-413-') as directory:
         for subject in ('bad\nsubject', 'bad\x00subject', 'a' * 100):
             denied('InvalidParameterException', lambda: client.publish(TopicArn=topic, Message='test', Subject=subject))
         assert client.get_topic_attributes(TopicArn=topic)['Attributes'] == before
+        control_headers = {'Content-Type': 'application/json', 'X-Simulator-Token': operator}
+        policy = {'Version': '2012-10-17', 'Statement': [{'Effect': 'Deny', 'Action': 'sns:Publish', 'Resource': topic}]}
+        opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+        request = urllib.request.Request(endpoint + '/_simulator/v1/iam/principals/sns-reader/policy', data=json.dumps(policy).encode(), headers=control_headers, method='PUT')
+        with opener.open(request) as response:
+            assert response.status == 200
+        request = urllib.request.Request(endpoint + '/_simulator/v1/access', data=json.dumps({'Principal': 'sns-reader'}).encode(), headers=control_headers)
+        with opener.open(request) as response:
+            reader_token = json.load(response)['AccessToken']
+        denied('AuthorizationErrorException', lambda: sdk(endpoint, reader_token).publish(TopicArn=topic, Message='denied'))
         assert client.publish(TopicArn=topic, Message='actual UTF-8', Subject='日' * 99)['MessageId']
         raw(endpoint, operator, [('Action', 'CreateTopic'), ('Version', '2010-03-31'),
             ('Name', 'sparse'), ('Attributes.entry.2.key', 'DisplayName'),
-            ('Attributes.entry.2.value', 'Expected')])
+            ('Attributes.entry.2.value', '日' * 99)])
         sparse = 'arn:aws:sns:us-east-1:000000000000:sparse'
-        assert client.get_topic_attributes(TopicArn=sparse)['Attributes']['DisplayName'] == 'Expected'
+        assert client.get_topic_attributes(TopicArn=sparse)['Attributes']['DisplayName'] == '日' * 99
         fifo = client.create_topic(Name='events.fifo', Attributes={'FifoTopic': 'true'})['TopicArn']
         denied('InvalidParameterException', lambda: client.publish(TopicArn=fifo, Message='unsupported'))
         # These are separate real processes/DBs/token authorities, with no peer state.
         assert second.list_topics()['Topics'] == []
         denied('NotFoundException', lambda: second.get_topic_attributes(TopicArn=topic))
         raw(other, operator, [('Action', 'ListTopics'), ('Version', '2010-03-31')], 401)
+    with sqlite3.connect('file:' + str(state) + '?mode=ro', uri=True) as database:
+        assert database.execute('SELECT count(*) FROM aws_sns_messages').fetchone()[0] == 1
+        assert database.execute('SELECT count(*) FROM aws_sns_deliveries').fetchone()[0] == 1
     with running(state, authenticated=True) as (endpoint, operator):
         client = sdk(endpoint, operator)
-        assert client.get_topic_attributes(TopicArn=sparse)['Attributes']['DisplayName'] == 'Expected'
+        assert client.get_topic_attributes(TopicArn=sparse)['Attributes']['DisplayName'] == '日' * 99
         assert client.list_subscriptions_by_topic(TopicArn=topic)['Subscriptions'][0]['SubscriptionArn'] == sub
         client.unsubscribe(SubscriptionArn=sub)
         for arn in (topic, sparse, fifo):
             client.delete_topic(TopicArn=arn)
         assert client.list_topics()['Topics'] == []
+    with sqlite3.connect('file:' + str(state) + '?mode=ro', uri=True) as database:
+        for table in ('aws_sns_topics', 'aws_sns_subscriptions', 'aws_sns_messages', 'aws_sns_deliveries'):
+            assert database.execute('SELECT count(*) FROM ' + table).fetchone()[0] == 0
+
 
 print('SNS real Query/boto3 admission, Unicode subject, regional deletion guard, two-host isolation, restart and cleanup passed.')

@@ -95,6 +95,29 @@ with running(authenticated=True) as (endpoint,token),sync_playwright() as p:
  browser=p.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE') or shutil.which('chromium'),args=['--no-sandbox'])
  page=browser.new_page(viewport={'width':1440,'height':1000});errors=[];outside=[]
  page.on('pageerror',lambda e:errors.append(str(e)))
+ def assert_empty_console_permissions():
+  # A split empty inline/managed display alone does not prove denied service
+  # access. Exercise the native role against an existing, independently read
+  # object in this exact authenticated CLI and remove the fixture afterward.
+  expect(page.get_by_text('No inline policies. Customer managed permissions are listed separately.',exact=True)).to_be_visible()
+  expect(page.get_by_text('No attached customer managed policies.',exact=True)).to_be_visible()
+  native_role=iam_at(endpoint,token)
+  admin=client('s3');empty_role=client('s3','native-console-executor')
+  bucket='native-console-empty-role-check';body=b'dummy existing object for empty-role denial'
+  try:
+   assert native_role.list_role_policies(RoleName='native-console-executor')['PolicyNames']==[]
+   assert native_role.list_attached_role_policies(RoleName='native-console-executor')['AttachedPolicies']==[]
+   admin.create_bucket(Bucket=bucket)
+   try:
+    admin.put_object(Bucket=bucket,Key='exists',Body=body)
+    assert admin.get_object(Bucket=bucket,Key='exists')['Body'].read()==body
+    error('AccessDenied',lambda:empty_role.get_object(Bucket=bucket,Key='exists'))
+    assert admin.get_object(Bucket=bucket,Key='exists')['Body'].read()==body
+   finally:
+    admin.delete_object(Bucket=bucket,Key='exists');admin.delete_bucket(Bucket=bucket)
+   assert all(item['Name']!=bucket for item in admin.list_buckets()['Buckets'])
+  finally:
+   empty_role.close();admin.close();native_role.close()
  def route(r):
   if r.request.url.startswith(endpoint+'/'):r.continue_()
   else:outside.append(r.request.url);r.abort()
@@ -107,7 +130,7 @@ with running(authenticated=True) as (endpoint,token),sync_playwright() as p:
  page.get_by_role('button',name='Next',exact=True).click();expect(page.get_by_text('Choose a service or use case.',exact=True)).to_be_visible();page.get_by_label('Service or use case',exact=True).click();page.get_by_role('option',name='Lambda',exact=True).click();page.get_by_role('button',name='Next',exact=True).click();expect(page.get_by_text('No permissions added',exact=True)).to_be_visible()
  page.get_by_role('button',name='Next',exact=True).click();page.get_by_label('Role name',exact=True).fill('native-console-executor');page.get_by_label('Description',exact=True).fill('Dummy local Lambda role')
  page.get_by_role('button',name='Create role',exact=True).click();expect(page.get_by_role('heading',name='native-console-executor',exact=True)).to_be_visible()
- expect(page.get_by_text('No permissions policies. Service access is implicitly denied.',exact=True)).to_be_visible()
+ assert_empty_console_permissions()
  page.get_by_role('tab',name='Trust relationships',exact=True).click();assert json.loads(page.get_by_label('Trust policy JSON',exact=True).input_value())==trust
  page.screenshot(path=str(REPORTS/'native-iam-role-trust-desktop.png'),full_page=True)
  page.get_by_role('tab',name='Permissions',exact=True).click();page.get_by_role('button',name='Create inline policy',exact=True).click();page.get_by_label('Policy name',exact=True).fill('ReadOwnBucket');page.get_by_label('Permissions policy JSON',exact=True).fill(json.dumps(policy));page.get_by_role('button',name='Save changes',exact=True).click();expect(page.get_by_role('link',name='ReadOwnBucket',exact=True)).to_be_visible()
@@ -130,7 +153,7 @@ with running(authenticated=True) as (endpoint,token),sync_playwright() as p:
  with zipfile.ZipFile(data,'w') as z:z.writestr('lambda_function.py','def lambda_handler(event,context): return {"native_role_answer": event["value"] * 6}')
  page.get_by_label('Function ZIP',exact=True).set_input_files({'name':'function.zip','mimeType':'application/zip','buffer':data.getvalue()});page.get_by_role('button',name='Deploy',exact=True).click();expect(page.get_by_text('Function code deployed.',exact=True)).to_be_visible();page.get_by_role('tab',name='Test',exact=True).click();page.get_by_role('button',name='Test',exact=True).click();expect(page.get_by_text('Execution succeeded',exact=True)).to_be_visible(timeout=20000);assert json.loads(page.get_by_label('Response',exact=True).input_value())=={'native_role_answer':42}
  page.screenshot(path=str(REPORTS/'native-iam-lambda-executed.png'),full_page=True)
- page.get_by_role('button',name='Services',exact=True).click();page.get_by_role('menuitem',name='IAM',exact=True).click();page.get_by_role('link',name='native-console-executor',exact=True).click();page.get_by_role('button',name='Delete policy ReadOwnBucket',exact=True).click();expect(page.get_by_text('No permissions policies. Service access is implicitly denied.',exact=True)).to_be_visible()
+ page.get_by_role('button',name='Services',exact=True).click();page.get_by_role('menuitem',name='IAM',exact=True).click();page.get_by_role('link',name='native-console-executor',exact=True).click();page.get_by_role('button',name='Delete policy ReadOwnBucket',exact=True).click();assert_empty_console_permissions()
  page.get_by_role('button',name='Delete role',exact=True).click();dialog=page.get_by_role('dialog');dialog.get_by_label('Confirm role name',exact=True).fill('native-console-executor');dialog.get_by_role('button',name='Delete role',exact=True).click();expect(page.get_by_role('heading',name='No roles yet',exact=True)).to_be_visible()
  native=iam_at(endpoint,token)
  for n in range(21):native.create_role(RoleName=f'page-role-{n:02d}',AssumeRolePolicyDocument=json.dumps(trust))
