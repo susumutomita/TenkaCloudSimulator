@@ -43,6 +43,9 @@ before-commit: format-check vet verify-assets
 	$(MAKE) test build
 
 e2e: build
+	$(PYTHON) scripts/test-metrics-e2e-receipts.py
+	$(PYTHON) test/e2e/test_metrics_openapi.py
+	$(PYTHON) test/e2e/test_metrics_reference_locators.py
 	$(PYTHON) test/e2e/reflow_test.py
 	$(PYTHON) test/e2e/check.py
 	$(MAKE) test-start
