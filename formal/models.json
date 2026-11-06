@@ -5460,7 +5460,7 @@
       "id": "LoginInputIntent",
       "model": "formal/LoginInputIntent.tla",
       "config": "formal/LoginInputIntent.cfg",
-      "bounds": "16 explicitly scheduled interaction scenarios, two opaque nonempty labels plus Empty, revision0..3 without wrap, one outstanding paste/file read/request; at most2 recorded POST attempts and6 events per scenario. Terminal plans stutter; unfinished plans cannot stutter.",
+      "bounds": "17 explicitly scheduled interaction scenarios, two opaque nonempty labels plus Empty, revision0..3 without wrap, one outstanding paste/file read/request; at most2 recorded POST attempts and6 events per scenario. Terminal plans stutter; unfinished plans cannot stutter.",
       "properties": [
         "TypeOK",
         "NoEmptyPOST",
@@ -5471,7 +5471,7 @@
         "IntentInvalidatesAsync",
         "LocaleIntentFrame"
       ],
-      "limits": "Scoped local 13-case checking at model source 28d37d1 exhausted 73 baseline states and observed all 12 declared noninitial counterexamples. This is historical scoped evidence, not full current 442-case acceptance or JavaScript/React/1Password proof. Combined UnmountedFileCompletionPublishes first failed the file-edit scenario and establishes StaleFileCompletionFrame sensitivity, not an isolated unmount witness. Bounded committed-state input/intent safety correspondence only; not JavaScript/React/Cloudscape/DOM/OS/event scheduling refinement, actual1Password/Dia/Safari, arbitrary focused/unfocused rerenders, clipboard/undo/IME/selection bytes, file UTF8/MIME/size/parser, authentication/HTTP/cookie/crypto/server/browser sessions, liveness or arbitrary event sequences/revision horizons. Pending explicit paste has precedence over current connected DOM. Locale protects adopted control/intent state only; unfocused unadopted DOM may reset. Independent before-state oracles observe actual token/refs/POST records; no server accepts every nonempty label. Mutation sensitivity requires real noninitial named TLC counterexamples, not static anchor counts. Generated app.js scope is ONLY the compiled login-input intent projection tied to independently verified Console build inputs at 696aecf4ac676ba72fb2e5b54019f9d2f1248f51; compiler/minifier correctness, React/DOM/native input APIs and backend behavior are not refinement-proved. This binding does not prove the rest of the bundle.",
+      "limits": "Scoped local 13-case checking at model source 28d37d1 exhausted 73 baseline states and observed all 12 declared noninitial counterexamples. This is historical scoped evidence, not full current 443-case acceptance or JavaScript/React/1Password proof. Combined UnmountedFileCompletionPublishes first failed the file-edit scenario and establishes StaleFileCompletionFrame sensitivity, not an isolated unmount witness. Bounded committed-state input/intent safety correspondence only; not JavaScript/React/Cloudscape/DOM/OS/event scheduling refinement, actual1Password/Dia/Safari, arbitrary focused/unfocused rerenders, clipboard/undo/IME/selection bytes, file UTF8/MIME/size/parser, authentication/HTTP/cookie/crypto/server/browser sessions, liveness or arbitrary event sequences/revision horizons. Pending explicit paste has precedence over current connected DOM. Locale protects adopted control/intent state only; unfocused unadopted DOM may reset. Independent before-state oracles observe actual token/refs/POST records; no server accepts every nonempty label. Mutation sensitivity requires real noninitial named TLC counterexamples, not static anchor counts. Generated app.js scope is ONLY the compiled login-input intent projection tied to independently verified Console build inputs at 696aecf4ac676ba72fb2e5b54019f9d2f1248f51; compiler/minifier correctness, React/DOM/native input APIs and backend behavior are not refinement-proved. This binding does not prove the rest of the bundle. New focus scenario explicitly assumes a possible controlled render after focus capture resets DOM from adopted controlled state. This is a safety exploration of a suspected ordering hazard, not an established explanation of the actual CI response timeout. The new focus-only control and current 443-case gate remain unexecuted until fresh validation.",
       "source_scope": [
         "tools/console/src/login.jsx",
         "test/console/login-native-input.test.mjs",
@@ -5616,6 +5616,17 @@
             }
           ],
           "expect_invariant": "LocaleIntentFrame"
+        },
+        {
+          "id": "FocusSkipsNativeAdoption",
+          "edits": [
+            {
+              "old": "Focus(s) == LET adopted == Sync(s) IN [adopted EXCEPT !.dom = adopted.token]",
+              "new": "Focus(s) == LET adopted == s IN [adopted EXCEPT !.dom = adopted.token]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdoptedValueExact"
         }
       ]
     }

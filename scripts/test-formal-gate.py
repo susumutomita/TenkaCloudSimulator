@@ -503,7 +503,7 @@ class FormalGateTests(unittest.TestCase):
         original = path.read_text()
         registry = json.loads(original)
         self.assertEqual(set(REQUIRED_MUTANTS), BASE_MODELS)
-        self.assertEqual(sum(map(len, REQUIRED_MUTANTS.values())), 393)
+        self.assertEqual(sum(map(len, REQUIRED_MUTANTS.values())), 394)
         self.assertEqual({m['id']: {c['id'] for c in m['mutants']} for m in registry['models']}, REQUIRED_MUTANTS)
         for model in registry['models']:
             for mutant in model['mutants']:
@@ -520,7 +520,7 @@ class FormalGateTests(unittest.TestCase):
     def test_every_required_control_is_protected_against_single_removal(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
-        self.assertEqual(sum(len(v) for v in REQUIRED_MUTANTS.values()), 393)
+        self.assertEqual(sum(len(v) for v in REQUIRED_MUTANTS.values()), 394)
         for model_id, controls in REQUIRED_MUTANTS.items():
             for control in controls:
                 with self.subTest(model=model_id, control=control):
@@ -1498,7 +1498,7 @@ class FormalGateTests(unittest.TestCase):
         path = self.root / 'formal/models.json'
         original = path.read_text()
         entry = next(m for m in json.loads(original)['models'] if m['id'] == 'LoginInputIntent')
-        self.assertEqual(len(entry['mutants']), 12)
+        self.assertEqual(len(entry['mutants']), 13)
         for control in entry['mutants']:
             changed = json.loads(original)
             target = next(m for m in changed['models'] if m['id'] == entry['id'])
@@ -1519,6 +1519,27 @@ class FormalGateTests(unittest.TestCase):
                 load_registry(self.root)
         path.write_text(original)
 
+
+    def test_login_focus_control_preserves_independent_adoption_oracle(self):
+        registry = load_registry(self.root)
+        entry = next(m for m in registry['models'] if m['id'] == 'LoginInputIntent')
+        source = (self.root / entry['model']).read_text()
+        control = next(m for m in entry['mutants'] if m['id'] == 'FocusSkipsNativeAdoption')
+        self.assertEqual(control['expect_invariant'], 'AdoptedValueExact')
+        name, mutated = apply_mutant(source, entry['id'], control)
+        self.assertEqual(name, 'LoginInputIntent_FocusSkipsNativeAdoption')
+        self.assertIn('Focus(s) == LET adopted == s IN [adopted EXCEPT !.dom = adopted.token]', mutated)
+        # Mutation must touch the actual focus transition, not its independent
+        # before-state oracle or the unchanged ordinary Sync operation.
+        self.assertIn(' [] e.op = "focus" -> Focus(s)', mutated)
+        self.assertIn(' [] k = "native-focus-submit" -> <<Event("native","A"),Event("focus","empty"),Event("submit","empty")>>', mutated)
+        self.assertIn('Sync(s) == IF s.connected /\\ s.dom # s.token THEN Adopt(s,s.dom) ELSE s', mutated)
+        for before_state_oracle in (
+            '(Op \\in {"sync","focus"} /\\ Before.connected /\\ Before.dom # Before.token)',
+            'ELSE IF Op \\in {"sync","focus"} /\\ Before.connected THEN Before.dom',
+            '"edit","sync","focus","flush","submit","fileok","fileerr"',
+        ):
+            self.assertIn(before_state_oracle, mutated)
 
 if __name__ == '__main__':
     unittest.main()
