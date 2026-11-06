@@ -61,7 +61,7 @@ make build
 | [Lambda](docs/lambda.md) | CreateFunction、ListFunctions、GetFunctionConfiguration、UpdateFunctionCode、Invoke、DeleteFunction、AddPermission/GetPolicy/RemovePermission。固定CPython 3.12.16/WASIによるPython ZIP実行、限定S3/SSM SDK bridge | 他言語、非同期実行、Function URL、任意network。128 MiB・timeout 1–30秒 |
 | [CloudFormation](docs/cloudformation-rest.md) | CreateStack、DescribeStacks、DeleteStack。S3 Bucket、SSM Parameter、inline Python Lambda、限定IAM Role、API Gateway 5 resource types・Lambda Permission、限定Ref/Sub/GetAtt/DependsOn、String/Number制約、Equals/条件alias、resource/outputのCondition、If/NoValue選択 | UpdateStack、And/Or/Not、NoEcho秘匿、一般resource types、実AWS相当の非同期lifecycle、CFN専用service role |
 | [API Gateway](docs/apigateway.md) | Regional REST管理16操作。API/resource/method/integration、immutable deployment、新規stage、ローカルLambda proxy実行 | HTTP/WebSocket API、authorizer、API key、既存stage編集、public endpoint |
-| [サービスカタログ](docs/aws-catalog.md) | 追加の AWS 41 サービス（[生成済みの一覧](docs/aws-catalog-services.md)）の設定メタデータを、各サービスのネイティブ JSON または REST-JSON で扱います。汎用コンソール画面とサービス別 API リファレンスを含みます | ワークロード、実行、データプレーン、配信、OAuth、一覧にない公式操作（HTTP 501） |
+| [サービスカタログ](docs/aws-catalog.md) | 追加の AWS 112 サービス（[生成済みの一覧](docs/aws-catalog-services.md)）の設定メタデータを、各サービスのネイティブ JSON または REST-JSON で扱います。汎用コンソール画面とサービス別 API リファレンスを含みます | ワークロード、実行、データプレーン、配信、OAuth、一覧にない公式操作（HTTP 501） |
 
 対応regionは`us-east-1`、`us-west-2`、`ap-northeast-1`、`eu-west-1`。S3 objectは8 MiB、保持version合計64 MiB、SSM値4096 UTF-8 bytes、CFN TemplateBody51200 bytesなどの上限があります。全フィールド・エラー・quotaの範囲は各サービス資料を確認してください。 1プロセスの上限は1000 buckets、10000 objects/versions/delete markers、1000 parameters/identities、100 stacks、100 resources/stackです。これらはプロセスメモリ全体の上限ではありません。
 

@@ -13,7 +13,7 @@ network, OAuth or real AWS call is executed or simulated.
 
 ## Services
 
-The catalog serves 41 services. The [generated service table](aws-catalog-services.md)
+The catalog serves 112 services. The [generated service table](aws-catalog-services.md)
 lists each service's Issues, protocol, implemented operations and bounds; it is
 checked against the reviewed specifications by `go test ./internal/aws/catalog`.
 The capability document lists the same services under `services.catalog`,
@@ -21,11 +21,13 @@ including every implemented operation, the number of official operations, the
 model source hash and the bounds.
 
 Services whose official API needs behavior the engine cannot express truthfully
-remain unimplemented rather than approximated, for example Amazon Data
-Firehose, Managed Service for Apache Flink, Amazon MSK, AWS Data Pipeline,
-Amazon MQ, Amazon SWF, AWS Batch, CodeStar Notifications, Amazon Managed
-Grafana, AWS Organizations, Service Quotas, Application Auto Scaling,
-GuardDuty, Amazon Cognito and AWS Network Firewall.
+remain unimplemented rather than approximated, for example Managed Service for
+Apache Flink, AWS Data Pipeline, Amazon SWF, AWS Batch, CodeStar
+Notifications, Amazon Managed Grafana, AWS Organizations, Service Quotas,
+Application Auto Scaling, Amazon Cognito, AWS Network Firewall, AWS Control
+Tower, AWS Launch Wizard, Amazon Keyspaces and Amazon Comprehend Medical.
+Services that use the Query, EC2 or REST-XML protocols are not served by the
+catalog yet.
 
 ## Routing and authorization
 
