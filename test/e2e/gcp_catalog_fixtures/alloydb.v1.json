@@ -1,0 +1,36 @@
+{
+ "api": "alloydb.v1",
+ "steps": [
+  {"call": "projects.locations.clusters.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "clusterId": "fixture"}, "body": {"networkConfig": {"network": "projects/tenkacloud-local/global/networks/default"}, "labels": {"team": "a"}}, "save": {"op": "name", "cluster": "response.name"}, "expect": {"done": true}},
+  {"call": "projects.locations.operations.get", "args": {"name": "${op}"}, "expect": {"response.state": "READY"}},
+  {"call": "projects.locations.operations.list", "args": {"name": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"operations#count": 1}},
+  {"call": "projects.locations.clusters.get", "args": {"name": "${cluster}"}, "expect": {"labels.team": "a"}},
+  {"call": "projects.locations.clusters.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"clusters#count": 1}},
+  {"call": "projects.locations.clusters.patch", "args": {"name": "${cluster}", "updateMask": "displayName"}, "body": {"displayName": "Fixture"}},
+  {"call": "projects.locations.clusters.instances.create", "args": {"parent": "${cluster}", "instanceId": "primary"}, "body": {"instanceType": "PRIMARY"}, "save": {"instance": "response.name"}},
+  {"call": "projects.locations.clusters.instances.get", "args": {"name": "${instance}"}, "expect": {"state": "READY"}},
+  {"call": "projects.locations.clusters.instances.list", "args": {"parent": "${cluster}"}, "expect": {"instances#count": 1}},
+  {"call": "projects.locations.clusters.instances.patch", "args": {"name": "${instance}", "updateMask": "labels"}, "body": {"labels": {"tier": "primary"}}},
+  {"call": "projects.locations.clusters.users.create", "args": {"parent": "${cluster}", "userId": "app"}, "body": {"databaseRoles": ["alloydbsuperuser"]}, "save": {"user": "name"}},
+  {"call": "projects.locations.clusters.users.get", "args": {"name": "${user}"}, "expect": {"databaseRoles[0]": "alloydbsuperuser"}},
+  {"call": "projects.locations.clusters.users.list", "args": {"parent": "${cluster}"}, "expect": {"users#count": 1}},
+  {"call": "projects.locations.clusters.users.patch", "args": {"name": "${user}", "updateMask": "databaseRoles"}, "body": {"databaseRoles": []}},
+  {"call": "projects.locations.clusters.users.create", "args": {"parent": "${cluster}", "userId": "secret"}, "body": {"password": "not-stored"}, "error": "INVALID_ARGUMENT", "status": 400},
+  {"call": "projects.locations.clusters.delete", "args": {"name": "${cluster}"}, "error": "FAILED_PRECONDITION", "status": 400},
+  {"call": "projects.locations.clusters.instances.restart", "args": {"name": "${instance}", "body": {}}, "error": "UNIMPLEMENTED", "status": 501},
+  {"call": "projects.locations.clusters.get", "args": {"name": "projects/tenkacloud-local/locations/us-central1/clusters/missing"}, "error": "NOT_FOUND", "status": 404},
+  {"call": "projects.locations.clusters.list", "args": {"parent": "projects/other-project/locations/us-central1"}, "error": "PERMISSION_DENIED", "status": 403}
+ ],
+ "isolation": [
+  {"call": "projects.locations.clusters.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"clusters#count": 0}}
+ ],
+ "after_restart": [
+  {"call": "projects.locations.clusters.get", "args": {"name": "${cluster}"}, "expect": {"displayName": "Fixture"}}
+ ],
+ "cleanup": [
+  {"call": "projects.locations.clusters.users.delete", "args": {"name": "${user}"}},
+  {"call": "projects.locations.clusters.instances.delete", "args": {"name": "${instance}"}},
+  {"call": "projects.locations.clusters.delete", "args": {"name": "${cluster}"}},
+  {"call": "projects.locations.clusters.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"clusters#count": 0}}
+ ]
+}

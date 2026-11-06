@@ -19,6 +19,7 @@ export const SERVICES = Object.freeze([
   {id: 'secretsmanager', provider: 'aws', label: 'Secrets Manager', capability: 'secretsmanager', route: '/secretsmanager', keywords: 'secret version credential credentials シークレット バージョン 秘密 認証情報'},
   {id: 'catalog', provider: 'aws', label: 'Service catalog', capability: 'catalog', route: '/catalog', keywords: 'catalog metadata control plane カタログ サービス メタデータ'},
   {id: 'gcp-storage', provider: 'gcp', label: 'Cloud Storage', route: '/gcp-storage', keywords: 'google bucket object バケット オブジェクト ストレージ クラウドストレージ'},
+  {id: 'gcp-catalog', provider: 'gcp', label: 'Service catalog', route: '/gcp-catalog', keywords: 'google catalog api metadata カタログ サービス'},
   {id: 'azure-blob', provider: 'azure', label: 'Blob Storage', route: '/azure-blob', keywords: 'container blob コンテナー コンテナ ブロブ ストレージ ブロブストレージ'},
   {id: 'sakura-disks', provider: 'sakura', label: 'Disks', route: '/sakura-disks', keywords: 'sakura cloud disk configuration storage さくらのクラウド さくら ディスク 構成 ストレージ'},
 ]);
@@ -44,6 +45,7 @@ export function serviceAvailable(id, capabilities) {
   if (!service || !capabilities) return false;
   if (service.provider === 'aws') return !!capabilities.services?.[service.capability];
   if (service.provider === 'sakura') return sakuraConfiguration(capabilities) !== null;
+  if (service.id === 'gcp-catalog') return Array.isArray(capabilities.gcpCatalog?.apis) && capabilities.gcpCatalog.apis.length > 0;
   const scope = capabilities.cloudStorage?.[service.provider];
   return service.provider === 'gcp' ? typeof scope?.project === 'string' && scope.project.length > 0
     : typeof scope?.account === 'string' && scope.account.length > 0;
@@ -51,7 +53,9 @@ export function serviceAvailable(id, capabilities) {
 // Catalog service titles come from capabilities so search finds each one.
 function searchText(service, capabilities) {
   const titles = service.id === 'catalog' && Array.isArray(capabilities?.services?.catalog?.services)
-    ? capabilities.services.catalog.services.map(entry => entry.title + ' ' + entry.serviceId).join(' ') : '';
+    ? capabilities.services.catalog.services.map(entry => entry.title + ' ' + entry.serviceId).join(' ')
+    : service.id === 'gcp-catalog' && Array.isArray(capabilities?.gcpCatalog?.apis)
+      ? capabilities.gcpCatalog.apis.map(entry => entry.title + ' ' + entry.name).join(' ') : '';
   return (service.label + ' ' + service.keywords + ' ' + titles).normalize('NFKC').toLocaleLowerCase('en');
 }
 export function servicesForProvider(provider, capabilities, query = '') {
