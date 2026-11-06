@@ -1,7 +1,12 @@
 # Finite state models
 
-Current registry: 48 models / 381 literal-protected controls
-(429 required executions). All incoming main44 model objects, TLA/CFG bytes, properties
+Login integration inventory: 49 models / 393 literal-protected controls
+(442 required executions). The combined exact-HEAD gate is pending; the existing
+48 models / 381 controls are preserved. LoginInputIntent adds one baseline and
+12 controls. Its isolated `28d37d1` model run passed: 73 distinct states, empty
+queue, and all 12 declared noninitial counterexamples. This scoped result is
+not a combined 442-case or browser/implementation proof.
+See [login input correspondence and limits](../docs/login-token-file.md#bounded-input-intent-model). All incoming main44 model objects, TLA/CFG bytes, properties
 and347 controls are preserved. Sakura metadata/admission/startup add35 controls;
 SakuraDisksViewEpoch adds17 more for request scope/sequence, stale frames,
 ACK/form exit, read-only retry and locale continuity. These four scoped baselines
@@ -67,8 +72,9 @@ historical scoped receipt does not replace it.
 
 Legacy integration sections below retain historical counts and status statements
 for traceability. Their word “current” refers to the recorded integration, not
-today's registry. The authoritative current inventory is the 48/381 registry
-above; proof claims always require evidence for the exact revision.
+today's registry. The login integration inventory is 49/393 (442 required runs),
+with the combined exact-HEAD gate pending. Historical 48/381 results remain
+dated evidence; proof claims always require evidence for the exact revision.
 
 `ObjectStore.tla` models two buckets and two keys, shared object ownership, create/put/delete transitions, and an abstract identity decision `allow /\ ~deny`. `ObjectStore.cfg` checks type correctness, no orphan objects, no unauthorized mutation, and explicit-deny precedence.
 

@@ -1,4 +1,4 @@
-# Explicit token-file fallback
+# Masked login input and explicit token-file fallback
 
 This is a bounded alternative to typing/pasting into the existing masked login
 field. It is not a diagnosis or confirmed repair of any Dia/password-manager
@@ -41,6 +41,61 @@ persists only the non-secret locale preference. Language changes do not remount
 Login, clear its token, restart file reading, submit credentials or change
 identity. Error/status presentation follows the current language. No arbitrary
 user content is passed as a translation key.
+
+## Native input and password-manager hints
+
+The field remains `type="password"`, with `autoComplete="off"` and per-field
+`data-1p-ignore="true"` / `data-op-ignore="true"` hints. These hints do not disable
+an extension, establish its behavior, or diagnose the cause of a failed paste.
+There is no recommendation to disable browser protection as a permanent fix.
+
+A connected native input may differ from React's controlled value after an
+external/native write. Input capture and blur adopt that value as a new intent;
+submission also reads the connected control, including an intentional empty
+value rather than falling back to an older credential. A still-current explicit
+paste takes precedence over another native write. If the control is disconnected,
+submission falls back to controlled state. Adoption invalidates older file reads
+and paste timers. These semantics do not guarantee preservation of an unobserved,
+unfocused native write across every rerender: a locale render may reset such a
+write before it is adopted. File parsing and server authentication remain separate.
+
+Actual 1Password/Dia behavior, screenshot/image interpretation, OS clipboard,
+and the new integrated binary's browser flows remain unverified. Existing source
+and focused test evidence must not be presented as that device-level acceptance.
+
+## Bounded input-intent model
+
+[`LoginInputIntent.tla`](../formal/LoginInputIntent.tla) and its
+[configuration](../formal/LoginInputIntent.cfg) describe committed input outcomes
+using two opaque nonempty values and Empty, not real credentials. Sixteen scheduled
+scenarios cover native insertion/clear, explicit paste precedence, disconnected
+fallback, blur then locale, current/stale file completion, busy/file submit gates
+and unmount. Revisions range from 0 to 3 without wrap, with at most six events and
+two recorded POST attempts. These finite traces do not cover arbitrary event order.
+
+The eight invariant families are TypeOK, NoEmptyPOST, NoPOSTWhileBlocked,
+StaleFileCompletionFrame, SubmissionSelectionExact, AdoptedValueExact,
+IntentInvalidatesAsync and LocaleIntentFrame. The transition functions model
+selection, new-intent invalidation and publication; independent before-state
+oracles check actual token/ref fields and POST records. The 12 mutation controls
+change those transitions, leaving the oracles unchanged. The locale frame covers
+adopted controlled intent, not unadopted DOM contents. The existing BrowserSessions
+model covers its separate server-session boundary and does not prove input behavior.
+
+At isolated model revision `28d37d1`, TLC explored 73 distinct states (89 generated,
+queue empty, depth 7); all 12 controls produced their declared first invariant
+failure in a noninitial state. The combined mutation named
+UnmountedFileCompletionPublishes first failed the **file-edit** scenario: it does
+not prove isolated alive-guard necessity or an unmount-specific counterexample.
+The baseline includes the bounded unmount scenario. Model checking is not a
+JavaScript/React/Cloudscape/DOM refinement proof, OS/extension test, file-parser
+proof, cryptographic/authentication guarantee, liveness proof or full event-space
+exploration. No real tokens are represented.
+
+This login integration adds these 13 checks to the preserved 429-check inventory:
+**49 models / 393 controls / 442 required executions**. The combined exact-HEAD
+formal gate, new embedded-binary browser/E2E checks and hosted CI remain pending;
+the scoped model result does not substitute for them.
 
 ## Input-scoped verification
 

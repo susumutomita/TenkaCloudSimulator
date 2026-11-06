@@ -58,6 +58,11 @@ Git, logs, terminal recordings, and screen sharing. If paste is unavailable, use
 **Choose token file**: the browser reads a bounded local file without uploading
 it, and the server authenticates when you submit. See the
 [token-file format and unverified browser boundaries](docs/login-token-file.md).
+The masked field includes per-field password-manager ignore hints and adopts a
+connected native input value before blur or submission, including an intentional
+clear. A current explicit paste retains precedence. These are compatibility
+measures, not proof of an extension cause or a confirmed Dia/1Password repair.
+Actual extension, OS clipboard and new embedded-binary browser checks remain pending.
 
 Press Ctrl+C to stop. Restarting with the same state and token files reuses them.
 Omitting `--state` when invoking the CLI creates a fresh in-memory database.
@@ -247,8 +252,9 @@ not binary runtime dependencies. Regeneration must preserve locks and original
 rights: [console](tools/console/README.md), [Scalar](tools/scalar/README.md),
 [Python/WASI runtime](tools/python/README.md).
 
-The registry contains 48 finite models and 381 deliberate defect controls
-(429 required model/check executions), including four Sakura metadata/admission/startup/view
+This login integration requires 49 finite models and 393 deliberate defect controls
+(442 required model/check executions); the combined exact-HEAD gate is pending.
+The previous 48-model/381-control inventory is preserved, including four Sakura metadata/admission/startup/view
 models, the Secrets metadata view and the preserved DynamoDB console model. Registration is not an integrated-revision execution receipt. The new IAM scenario checks two requests
 from each of four reachable seeds. A broader four-request trial timed out and
 is not claimed as verified. TLC examines bounded safety properties and checks
@@ -261,7 +267,7 @@ See [formal validation](formal/README.md), [CI](docs/ci.md),
 
 The CFN condition model adds a bounded compile-plan projection. Its isolated SANY/baseline/fourteen controls passed at `f69fb46`; that 365-case source preparation is historical. The full 429-case gate passed at `c298972`; the later docs-only `414c902` passed all 61 E2E/start checks. Exact-head hosted gates for this publication candidate remain pending. The original crypto fixture also passed the regular two-CLI SDK helper at `2d76646` (73 SDK calls/responses and 9 auxiliary HTTP pairs across four CLI incarnations). That verifies local provisioning and permissions, not host coordination, scoring or NoEcho secrecy.
 
-At `c298972`, all 48 finite models and 381 controls (429 executions) passed, as did fresh full-module Go race/build and one-profile statement/source coverage of 94.94%/90.32%. The later docs-only `414c902` passed all 61 E2E cases in 980.726 seconds, reflow and start checks. Exact-head hosted CI for this publication candidate remains pending. This follow-up changes documentation and applicability hashes only; runtime, model and test bytes remain identical to `c298972`. Its exact-head hosted gates must still pass. Separate models cover final stack/claim acknowledgement and selected SSM/S3 SQLite-row absence after all cleanup writes. These checks do not prove host scoring, output secrecy, native S3 DeleteBucket, every resource type or Go/SQL refinement.
+At `c298972`, all 48 finite models and 381 controls (429 executions) passed, as did fresh full-module Go race/build and one-profile statement/source coverage of 94.94%/90.32%. The later docs-only `414c902` passed all 61 E2E cases in 980.726 seconds, reflow and start checks. Exact-head hosted CI for this publication candidate remains pending. That historical follow-up changed documentation and applicability hashes only, with runtime, model and test bytes identical to `c298972`; its results do not cover the current login changes. Current exact-head hosted gates must still pass. Separate models cover final stack/claim acknowledgement and selected SSM/S3 SQLite-row absence after all cleanup writes. These checks do not prove host scoring, output secrecy, native S3 DeleteBucket, every resource type or Go/SQL refinement.
 
 ## License and attribution
 
