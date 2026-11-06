@@ -339,6 +339,14 @@ func (q *request) create() (any, error) {
 			return nil, err
 		}
 		defer tx.Rollback()
+		if len(c.References) > 0 {
+			if err := q.resolveReferences(tx, c, document); err != nil {
+				return nil, err
+			}
+			if data, err = encode(document); err != nil {
+				return nil, err
+			}
+		}
 		if _, err := findName(tx, name); err == nil {
 			return nil, &status{"ALREADY_EXISTS", fmt.Sprintf("Resource '%s' already exists.", name)}
 		} else if !errors.Is(err, sql.ErrNoRows) {
@@ -584,6 +592,14 @@ func (q *request) save(c *Collection, r row) (any, error) {
 			return nil, err
 		}
 		defer tx.Rollback()
+		if len(c.References) > 0 {
+			if err := q.resolveReferences(tx, c, r.Document); err != nil {
+				return nil, err
+			}
+			if data, err = encode(r.Document); err != nil {
+				return nil, err
+			}
+		}
 		if q.params["validateOnly"] != true {
 			if err := exactlyOne(tx.Exec("UPDATE gcp_catalog_resources SET document=?, generation=generation+1 WHERE name=? AND generation=?", data, r.Name, r.Generation)); err != nil {
 				return nil, err
@@ -619,6 +635,11 @@ func (q *request) remove() (any, error) {
 		}
 		if children > 0 && !(force && c.Cascade) {
 			return nil, &status{"FAILED_PRECONDITION", fmt.Sprintf("Resource '%s' still has child resources.", r.Name)}
+		}
+		if user, err := q.referrer(tx, r); err != nil {
+			return nil, err
+		} else if user != "" {
+			return nil, &status{"FAILED_PRECONDITION", fmt.Sprintf("The resource '%s' is already being used by '%s'.", r.Name, user)}
 		}
 		if q.params["validateOnly"] != true {
 			if _, err := tx.Exec("DELETE FROM gcp_catalog_resources WHERE name LIKE ? ESCAPE '\\'", escapeLike(r.Name)+"/%"); err != nil {

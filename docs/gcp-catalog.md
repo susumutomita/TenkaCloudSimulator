@@ -86,6 +86,14 @@ the request body.
   regenerated after the change.
 - Lists page with `maxResults` (default 50, capped at 1,000) and
   `pageToken`; `filter` and `orderBy` are refused when non-empty.
+- Reviewed reference fields (for example a subnetwork's `network`) must name
+  an existing resource of the same API in the configured project, as a full
+  URL, a partial URL such as `global/networks/default`, or a resource name.
+  The value is stored as the `selfLink`. A missing resource is `NOT_FOUND`,
+  another collection or a malformed value is `INVALID_ARGUMENT`, and a
+  resource that another one still references cannot be deleted
+  (`FAILED_PRECONDITION` 400, as Compute Engine's
+  `resourceInUseByAnotherResource`).
 
 ## Limits
 

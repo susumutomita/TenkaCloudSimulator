@@ -111,6 +111,16 @@ func bindAPI(api *API, model *Model) (*binding, error) {
 		if c.IDParam != "" && c.IDField != "" || c.IDField != "" && model.Schemas[c.Schema].Properties[c.IDField] == nil {
 			return nil, fmt.Errorf("GCP catalog %s collection %s needs one ID source that names a schema field", api.Key, c.ID)
 		}
+		for path, targets := range c.References {
+			if !model.referencePath(model.Schemas[c.Schema], path) || len(targets) == 0 {
+				return nil, fmt.Errorf("GCP catalog %s collection %s references through unknown field %s", api.Key, c.ID, path)
+			}
+			for _, target := range targets {
+				if api.collection(target) == nil {
+					return nil, fmt.Errorf("GCP catalog %s collection %s references unknown collection %s", api.Key, c.ID, target)
+				}
+			}
+		}
 	}
 	for i := range api.Bindings {
 		bound := &api.Bindings[i]

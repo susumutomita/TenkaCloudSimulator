@@ -75,6 +75,14 @@ type Collection struct {
 	// Cascade lets delete with force=true remove children; otherwise
 	// deleting a parent with children fails with FAILED_PRECONDITION.
 	Cascade bool
+	// References maps field paths (dots for objects, [] for list items,
+	// for example "network" or "nats[].subnetworks[].name") to the
+	// collections of this API they may name. Each value must name an
+	// existing resource in the configured project by selfLink, partial URL
+	// or resource name, is stored as the selfLink (flat APIs) or resource
+	// name, and keeps that resource from being deleted
+	// (FAILED_PRECONDITION). Cascade children are not checked.
+	References map[string][]string
 }
 
 // API is a reviewed bounded specification of one official Google API.

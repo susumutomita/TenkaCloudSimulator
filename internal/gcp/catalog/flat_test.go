@@ -22,6 +22,8 @@ func flatModel(t *testing.T) *Model {
 		"networks.listUsable":      {HTTPMethod: "GET", FlatPath: "projects/{project}/global/networks/listUsable"},
 		"subnetworks.insert":       {HTTPMethod: "POST", FlatPath: "projects/{project}/regions/{region}/subnetworks"},
 		"subnetworks.patch":        {HTTPMethod: "PATCH", FlatPath: "projects/{project}/regions/{region}/subnetworks/{subnetwork}"},
+		"subnetworks.get":          {HTTPMethod: "GET", FlatPath: "projects/{project}/regions/{region}/subnetworks/{subnetwork}"},
+		"subnetworks.delete":       {HTTPMethod: "DELETE", FlatPath: "projects/{project}/regions/{region}/subnetworks/{subnetwork}"},
 		"disks.insert":             {HTTPMethod: "POST", FlatPath: "projects/{project}/zones/{zone}/disks"},
 		"disks.get":                {HTTPMethod: "GET", FlatPath: "projects/{project}/zones/{zone}/disks/{disk}"},
 		"disks.setLabels":          {HTTPMethod: "POST", FlatPath: "projects/{project}/zones/{zone}/disks/{resource}/setLabels"},
@@ -52,6 +54,8 @@ func flatModel(t *testing.T) *Model {
 		"networks.delete":       {Response: "Operation", Parameters: query("requestId")},
 		"subnetworks.insert":    {Request: "Subnetwork", Response: "Operation"},
 		"subnetworks.patch":     {Request: "Subnetwork", Response: "Operation", Parameters: query("drainTimeoutSeconds")},
+		"subnetworks.get":       {Response: "Subnetwork"},
+		"subnetworks.delete":    {Response: "Operation"},
 		"disks.insert":          {Request: "Disk", Response: "Operation", Parameters: query("sourceImage")},
 		"disks.get":             {Response: "Disk"},
 		"disks.setLabels":       {Request: "SetLabelsRequest", Response: "Operation"},
@@ -77,13 +81,14 @@ func flatModel(t *testing.T) *Model {
 		}
 		return p
 	}
-	model := &Model{Key: "flat.v1", Name: "flat", Version: "v1", Title: "Flat", ServicePath: "flat/v1/",
+	model := &Model{Key: "flat.v1", Name: "flat", Version: "v1", Title: "Flat", ServicePath: "flat/v1/", RootURL: "https://flat.googleapis.com/",
 		Source: Source{Package: "google-api-python-client", SHA256: "test", License: "Apache-2.0"}, Routes: routes, Methods: methods,
 		Schemas: map[string]*Property{
 			"Network": common("flat#network", map[string]*Property{"mtu": {Type: "integer", Format: "int32"},
 				"routingConfig": {Type: "object", Properties: map[string]*Property{"routingMode": str(), "bgpAlways": str()}},
 				"peerings":      {Type: "array", ReadOnly: true, Items: &Property{Type: "string"}}}),
-			"Subnetwork": common("flat#subnetwork", map[string]*Property{"region": str(), "fingerprint": {Type: "string", Format: "byte"},
+			"Subnetwork": common("flat#subnetwork", map[string]*Property{"region": str(), "fingerprint": {Type: "string", Format: "byte"}, "network": str(),
+				"peers":       {Type: "array", Items: &Property{Type: "object", Properties: map[string]*Property{"subnetwork": str(), "weight": {Type: "integer"}}}},
 				"ipCidrRange": {Type: "string", RequiredBy: []string{"flat.subnetworks.insert"}}}),
 			"Disk": common("flat#disk", map[string]*Property{"zone": out(), "region": out(), "sizeGb": {Type: "string", Format: "int64"},
 				"labels": {Type: "object", Additional: &Property{Type: "string"}}, "labelFingerprint": {Type: "string", Format: "byte"}}),
@@ -119,8 +124,8 @@ func flatAPI() *API {
 	return &API{Key: "flat.v1", Title: "Flat", Issues: []int{1}, Scope: "zonal", SelfLink: "https://www.googleapis.com/flat/v1/", Bounds: []string{"test"},
 		Collections: []*Collection{
 			{ID: "networks", Schema: "Network", IDField: "name", ShortName: true, IDPattern: name, Limit: 3, Permission: "flat.networks", Mutable: []string{"routingConfig", "mtu"}},
-			{ID: "subnetworks", Schema: "Subnetwork", IDField: "name", ShortName: true, Permission: "flat.subnetworks", Mutable: []string{"description"},
-				Generate: map[string]any{"fingerprint": "$fingerprint"}},
+			{ID: "subnetworks", Schema: "Subnetwork", IDField: "name", ShortName: true, Permission: "flat.subnetworks", Mutable: []string{"description", "peers"},
+				Generate: map[string]any{"fingerprint": "$fingerprint"}, References: map[string][]string{"network": {"networks"}, "peers[].subnetwork": {"subnetworks"}}},
 			{ID: "disks", Schema: "Disk", IDField: "name", ShortName: true, Permission: "flat.disks",
 				Generate: map[string]any{"labelFingerprint": "$fingerprint", "sizeGb": "10"}},
 			{ID: "things", Schema: "Network", Permission: "flat.things"},
@@ -143,6 +148,8 @@ func flatAPI() *API {
 			{Method: "globalOperations.wait", Kind: OperationGet},
 			{Method: "regionOperations.get", Kind: OperationGet},
 			{Method: "zoneOperations.list", Kind: OperationList},
+			{Method: "subnetworks.get", Kind: Get, Collection: "subnetworks"},
+			{Method: "subnetworks.delete", Kind: Delete, Collection: "subnetworks"},
 		}}
 }
 
@@ -394,4 +401,70 @@ func TestMergePatchFollowsRFC7396(t *testing.T) {
 		t.Fatalf("merge %v", target)
 	}
 	defaults(nil, target)
+}
+
+func TestFlatReferencesResolveAndProtectDeletion(t *testing.T) {
+	h := flatHarness(t)
+	subnets := flatRoot + "/regions/us-central1/subnetworks"
+	subnet := func(name, network string) reply {
+		return h.call("owner", "POST", subnets, map[string]any{"name": name, "ipCidrRange": "10.0.0.0/24", "network": network})
+	}
+	expect(t, subnet("early", "global/networks/vpc"), 404, "NOT_FOUND")
+	expect(t, h.call("owner", "POST", flatRoot+"/global/networks", map[string]any{"name": "vpc"}), 200, "")
+	link := "https://www.googleapis.com/flat/v1/projects/tenkacloud-local/global/networks/vpc"
+	for i, form := range []string{"global/networks/vpc", "projects/100000000001/global/networks/vpc", "https://flat.googleapis.com/flat/v1/projects/tenkacloud-local/global/networks/vpc", link} {
+		name := "s" + strconv.Itoa(i)
+		expect(t, subnet(name, form), 200, "")
+		if got := h.call("owner", "GET", subnets+"/"+name, nil); got.body["network"] != link {
+			t.Fatalf("reference %q stored as %v", form, got.body["network"])
+		}
+	}
+	for form, code := range map[string]string{"vpc": "INVALID_ARGUMENT", "projects//global/networks/vpc": "INVALID_ARGUMENT",
+		"projects/other/global/networks/vpc": "NOT_FOUND", "regions/us-central1/subnetworks/s0": "INVALID_ARGUMENT"} {
+		r := subnet("bad", form)
+		if r.code() != code {
+			t.Fatalf("reference %q: %s", form, r.raw)
+		}
+	}
+	// Nested list references resolve too, inside patches as well.
+	peered := h.call("owner", "POST", subnets, map[string]any{"name": "peered", "ipCidrRange": "10.1.0.0/24", "peers": []any{map[string]any{"subnetwork": "regions/us-central1/subnetworks/s0", "weight": 1}}})
+	expect(t, peered, 200, "")
+	peers := h.call("owner", "GET", subnets+"/peered", nil).body["peers"].([]any)
+	if peers[0].(map[string]any)["subnetwork"] != "https://www.googleapis.com/flat/v1/projects/tenkacloud-local/regions/us-central1/subnetworks/s0" {
+		t.Fatalf("nested reference %v", peers)
+	}
+	expect(t, h.call("owner", "PATCH", subnets+"/peered", map[string]any{"peers": []any{map[string]any{"subnetwork": "regions/us-central1/subnetworks/gone"}}}), 404, "NOT_FOUND")
+	expect(t, h.call("owner", "DELETE", subnets+"/s0", nil), 400, "FAILED_PRECONDITION")
+	// A resource that references only itself can still be deleted.
+	expect(t, h.call("owner", "PATCH", subnets+"/peered", map[string]any{"peers": []any{map[string]any{"subnetwork": "regions/us-central1/subnetworks/peered"}}}), 200, "")
+	expect(t, h.call("owner", "DELETE", subnets+"/s0", nil), 200, "")
+	expect(t, h.call("owner", "DELETE", subnets+"/peered", nil), 200, "")
+	expect(t, h.call("owner", "DELETE", flatRoot+"/global/networks/vpc", nil), 400, "FAILED_PRECONDITION")
+	for i := 1; i < 4; i++ {
+		expect(t, h.call("owner", "DELETE", subnets+"/s"+strconv.Itoa(i), nil), 200, "")
+	}
+	expect(t, h.call("owner", "DELETE", flatRoot+"/global/networks/vpc", nil), 200, "")
+
+	model := flatModel(t)
+	for name, refs := range map[string]map[string][]string{
+		"unknown field":      {"nope": {"networks"}},
+		"not a list":         {"network[]": {"networks"}},
+		"not a string":       {"peers": {"networks"}},
+		"unknown collection": {"network": {"nope"}},
+		"no targets":         {"network": nil},
+	} {
+		api := flatAPI()
+		c := *api.Collections[1]
+		c.References = refs
+		api.Collections[1] = &c
+		if _, err := bindAPI(api, model); err == nil {
+			t.Fatalf("%s accepted", name)
+		}
+	}
+	h.call("owner", "POST", flatRoot+"/global/networks", map[string]any{"name": "keep"})
+	h.call("owner", "POST", subnets, map[string]any{"name": "user", "ipCidrRange": "10.0.0.0/24", "network": "global/networks/keep"})
+	if _, err := h.engine.store.db.Exec("UPDATE gcp_catalog_resources SET document='nope' WHERE id='user'"); err != nil {
+		t.Fatal(err)
+	}
+	expect(t, h.call("owner", "DELETE", flatRoot+"/global/networks/keep", nil), 500, "INTERNAL")
 }
