@@ -1,0 +1,26 @@
+{
+ "client": "mwaa",
+ "inject_host_prefix": false,
+ "steps": [
+  {"op": "create_environment", "args": {"Name": "etl", "ExecutionRoleArn": "arn:aws:iam::000000000000:role/mwaa-execution", "SourceBucketArn": "arn:aws:s3:::fixture-dags", "DagS3Path": "dags", "NetworkConfiguration": {"SubnetIds": ["subnet-0a", "subnet-0b"], "SecurityGroupIds": ["sg-0a"]}, "MaxWorkers": 5, "MinWorkers": 1, "Tags": {"team": "a"}}, "save": {"environment": "Arn"}},
+  {"op": "get_environment", "args": {"Name": "etl"}, "expect": {"Environment.Arn": "${environment}", "Environment.Status": "CREATING", "Environment.Tags.team": "a", "Environment.NetworkConfiguration.SubnetIds#count": 2}},
+  {"op": "update_environment", "args": {"Name": "etl", "MaxWorkers": 8, "AirflowConfigurationOptions": {"core.default_timezone": "utc"}}, "expect": {"Arn": "${environment}"}},
+  {"op": "list_environments", "args": {}, "expect": {"Environments": ["etl"]}},
+  {"op": "tag_resource", "args": {"ResourceArn": "${environment}", "Tags": {"stage": "dev"}}},
+  {"op": "untag_resource", "args": {"ResourceArn": "${environment}", "tagKeys": ["stage"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "${environment}"}, "expect": {"Tags": {"team": "a"}}},
+  {"op": "create_web_login_token", "args": {"Name": "etl"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_environment", "args": {"Name": "missing"}, "error": "ResourceNotFoundException"},
+  {"op": "update_environment", "args": {"Name": "etl", "MinWorkers": 6, "MaxWorkers": 2}, "error": "ValidationException"}
+ ],
+ "isolation": [
+  {"op": "list_environments", "args": {}, "expect": {"Environments#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_environment", "args": {"Name": "etl"}, "expect": {"Environment.MaxWorkers": 8, "Environment.MinWorkers": 1}}
+ ],
+ "cleanup": [
+  {"op": "delete_environment", "args": {"Name": "etl"}},
+  {"op": "list_environments", "args": {}, "expect": {"Environments#count": 0}}
+ ]
+}

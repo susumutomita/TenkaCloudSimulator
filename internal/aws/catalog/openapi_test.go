@@ -3,8 +3,10 @@ package catalog
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -70,5 +72,33 @@ func TestBotocoreNoticesAreMirroredForRedistribution(t *testing.T) {
 		if !bytes.Contains(original, []byte(needle)) {
 			t.Fatalf("notice lacks %q", needle)
 		}
+	}
+}
+
+const servicesDocument = "../../../docs/aws-catalog-services.md"
+
+// The service table is generated from the same descriptors as capabilities.
+func TestServiceTableMatchesReviewedSpecifications(t *testing.T) {
+	h := newHarness(t)
+	var b strings.Builder
+	b.WriteString("# AWS service catalog: services\n\nGenerated from the reviewed specifications by `CATALOG_WRITE_DOCS=1 go test ./internal/aws/catalog`. Every other official operation of each service returns HTTP 501 `UnknownOperationException`.\n\n")
+	b.WriteString("| Service | Issues | Protocol | Implemented / official operations | Implemented operations | Bounds |\n| --- | --- | --- | --- | --- | --- |\n")
+	for _, d := range h.engine.Describe() {
+		issues := []string{}
+		for _, issue := range d.Issues {
+			issues = append(issues, fmt.Sprintf("#%d", issue))
+		}
+		fmt.Fprintf(&b, "| %s (`%s`) | %s | %s | %d / %d | %s | %s |\n", d.Title, d.Model, strings.Join(issues, ", "), d.Protocol,
+			len(d.Operations), d.Official, strings.Join(d.Operations, ", "), strings.ReplaceAll(strings.Join(d.Bounds, " "), "|", "\\|"))
+	}
+	want := []byte(b.String())
+	if os.Getenv("CATALOG_WRITE_DOCS") == "1" {
+		if err := os.WriteFile(servicesDocument, want, 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	got, err := os.ReadFile(servicesDocument)
+	if err != nil || !bytes.Equal(got, want) {
+		t.Fatal("docs/aws-catalog-services.md is stale; run CATALOG_WRITE_DOCS=1 go test ./internal/aws/catalog")
 	}
 }

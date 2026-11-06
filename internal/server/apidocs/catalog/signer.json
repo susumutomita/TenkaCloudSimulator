@@ -1,0 +1,787 @@
+{
+ "components": {
+  "schemas": {
+   "GetSigningProfileResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "overrides": {
+      "$ref": "#/components/schemas/SigningPlatformOverrides"
+     },
+     "platformDisplayName": {
+      "type": "string"
+     },
+     "platformId": {
+      "type": "string"
+     },
+     "profileName": {
+      "maxLength": 64,
+      "minLength": 2,
+      "type": "string"
+     },
+     "profileVersion": {
+      "maxLength": 10,
+      "minLength": 10,
+      "type": "string"
+     },
+     "profileVersionArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "revocationRecord": {
+      "$ref": "#/components/schemas/SigningProfileRevocationRecord"
+     },
+     "signatureValidityPeriod": {
+      "$ref": "#/components/schemas/SignatureValidityPeriod"
+     },
+     "signingMaterial": {
+      "$ref": "#/components/schemas/SigningMaterial"
+     },
+     "signingParameters": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "status": {
+      "enum": [
+       "Active",
+       "Canceled",
+       "Revoked"
+      ],
+      "type": "string"
+     },
+     "statusReason": {
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "type": "string"
+      },
+      "maxProperties": 200,
+      "minProperties": 1,
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "ListSigningProfilesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextToken": {
+      "type": "string"
+     },
+     "profiles": {
+      "items": {
+       "$ref": "#/components/schemas/SigningProfile"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListTagsForResourceResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "type": "string"
+      },
+      "maxProperties": 200,
+      "minProperties": 1,
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "PutSigningProfileResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "profileVersion": {
+      "maxLength": 10,
+      "minLength": 10,
+      "type": "string"
+     },
+     "profileVersionArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SignatureValidityPeriod": {
+    "additionalProperties": false,
+    "properties": {
+     "type": {
+      "enum": [
+       "DAYS",
+       "MONTHS",
+       "YEARS"
+      ],
+      "type": "string"
+     },
+     "value": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "SigningConfigurationOverrides": {
+    "additionalProperties": false,
+    "properties": {
+     "encryptionAlgorithm": {
+      "enum": [
+       "RSA",
+       "ECDSA"
+      ],
+      "type": "string"
+     },
+     "hashAlgorithm": {
+      "enum": [
+       "SHA1",
+       "SHA256"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SigningMaterial": {
+    "additionalProperties": false,
+    "properties": {
+     "certificateArn": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "certificateArn"
+    ],
+    "type": "object"
+   },
+   "SigningPlatformOverrides": {
+    "additionalProperties": false,
+    "properties": {
+     "signingConfiguration": {
+      "$ref": "#/components/schemas/SigningConfigurationOverrides"
+     },
+     "signingImageFormat": {
+      "enum": [
+       "JSON",
+       "JSONEmbedded",
+       "JSONDetached"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SigningProfile": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "platformDisplayName": {
+      "type": "string"
+     },
+     "platformId": {
+      "type": "string"
+     },
+     "profileName": {
+      "maxLength": 64,
+      "minLength": 2,
+      "type": "string"
+     },
+     "profileVersion": {
+      "maxLength": 10,
+      "minLength": 10,
+      "type": "string"
+     },
+     "profileVersionArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "signatureValidityPeriod": {
+      "$ref": "#/components/schemas/SignatureValidityPeriod"
+     },
+     "signingMaterial": {
+      "$ref": "#/components/schemas/SigningMaterial"
+     },
+     "signingParameters": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "status": {
+      "enum": [
+       "Active",
+       "Canceled",
+       "Revoked"
+      ],
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "type": "string"
+      },
+      "maxProperties": 200,
+      "minProperties": 1,
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "SigningProfileRevocationRecord": {
+    "additionalProperties": false,
+    "properties": {
+     "revocationEffectiveFrom": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "revokedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "revokedBy": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UntagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS Signer API (2017-08-25). Every other official operation returns HTTP 501 UnknownOperationException. Signing profiles are configuration metadata for the AWS-managed AWSLambda-SHA384-ECDSA and Notation-OCI-SHA384-ECDSA platforms: no signing key or certificate is used and no code, image or payload is ever signed or verified. StartSigningJob, SignPayload, signing jobs, revocations, platform listings and profile permissions return UnknownOperationException with HTTP 501; signingMaterial and other platforms are refused. PutSigningProfile for an existing profile name, including a canceled one, is refused; profile versions are never replaced. CancelSigningProfile keeps the profile with status Canceled, and ListSigningProfiles lists canceled profiles as well; its includeCanceled and statuses members are refused.",
+  "title": "AWS Signer (simulator catalog)",
+  "version": "2017-08-25"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/signing-profiles": {
+   "get": {
+    "operationId": "signerListSigningProfiles",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "signer"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "includeCanceled",
+      "schema": {
+       "type": "boolean"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 25,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "platformId",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "statuses",
+      "schema": {
+       "items": {
+        "enum": [
+         "Active",
+         "Canceled",
+         "Revoked"
+        ],
+        "type": "string"
+       },
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListSigningProfilesResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListSigningProfiles",
+    "tags": [
+     "AWS Signer"
+    ]
+   }
+  },
+  "/signing-profiles/{profileName}": {
+   "delete": {
+    "operationId": "signerCancelSigningProfile",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "signer"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "profileName",
+      "required": true,
+      "schema": {
+       "maxLength": 64,
+       "minLength": 2,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CancelSigningProfile",
+    "tags": [
+     "AWS Signer"
+    ]
+   },
+   "get": {
+    "operationId": "signerGetSigningProfile",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "signer"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "profileName",
+      "required": true,
+      "schema": {
+       "maxLength": 64,
+       "minLength": 2,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "profileOwner",
+      "schema": {
+       "maxLength": 12,
+       "minLength": 12,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GetSigningProfileResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetSigningProfile",
+    "tags": [
+     "AWS Signer"
+    ]
+   },
+   "put": {
+    "operationId": "signerPutSigningProfile",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "signer"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "profileName",
+      "required": true,
+      "schema": {
+       "maxLength": 64,
+       "minLength": 2,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "overrides": {
+          "$ref": "#/components/schemas/SigningPlatformOverrides"
+         },
+         "platformId": {
+          "type": "string"
+         },
+         "signatureValidityPeriod": {
+          "$ref": "#/components/schemas/SignatureValidityPeriod"
+         },
+         "signingMaterial": {
+          "$ref": "#/components/schemas/SigningMaterial"
+         },
+         "signingParameters": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "maxProperties": 200,
+          "minProperties": 1,
+          "type": "object"
+         }
+        },
+        "required": [
+         "platformId"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PutSigningProfileResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "PutSigningProfile",
+    "tags": [
+     "AWS Signer"
+    ]
+   }
+  },
+  "/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "signerUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "signer"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 200,
+       "minItems": 1,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UntagResourceResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "AWS Signer"
+    ]
+   },
+   "get": {
+    "operationId": "signerListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "signer"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "AWS Signer"
+    ]
+   },
+   "post": {
+    "operationId": "signerTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "signer"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "maxProperties": 200,
+          "minProperties": 1,
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/TagResourceResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "AWS Signer"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS Signer API (2017-08-25). Every other official operation returns HTTP 501 UnknownOperationException. Signing profiles are configuration metadata for the AWS-managed AWSLambda-SHA384-ECDSA and Notation-OCI-SHA384-ECDSA platforms: no signing key or certificate is used and no code, image or payload is ever signed or verified. StartSigningJob, SignPayload, signing jobs, revocations, platform listings and profile permissions return UnknownOperationException with HTTP 501; signingMaterial and other platforms are refused. PutSigningProfile for an existing profile name, including a canceled one, is refused; profile versions are never replaced. CancelSigningProfile keeps the profile with status Canceled, and ListSigningProfiles lists canceled profiles as well; its includeCanceled and statuses members are refused.",
+   "name": "AWS Signer"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/signer/2017-08-25/service-2.json",
+  "sha256": "7375b8d5b821a2eb10cdb47632deb5c81def13d434a81aac38f4938723ad4dcc",
+  "license": "Apache-2.0"
+ }
+}

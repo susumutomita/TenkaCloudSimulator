@@ -1,0 +1,37 @@
+{
+ "client": "apprunner",
+ "steps": [
+  {"op": "create_auto_scaling_configuration", "args": {"AutoScalingConfigurationName": "fixture-scale", "MinSize": 2, "MaxSize": 5, "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"scale": "AutoScalingConfiguration.AutoScalingConfigurationArn"}, "expect": {"AutoScalingConfiguration.AutoScalingConfigurationRevision": 1, "AutoScalingConfiguration.MaxConcurrency": 100, "AutoScalingConfiguration.Status": "ACTIVE"}},
+  {"op": "describe_auto_scaling_configuration", "args": {"AutoScalingConfigurationArn": "${scale}"}, "expect": {"AutoScalingConfiguration.MinSize": 2, "AutoScalingConfiguration.Latest": true}},
+  {"op": "list_auto_scaling_configurations", "args": {"AutoScalingConfigurationName": "fixture-scale", "LatestOnly": true}, "expect": {"AutoScalingConfigurationSummaryList#count": 1}},
+  {"op": "create_auto_scaling_configuration", "args": {"AutoScalingConfigurationName": "fixture-bad", "MinSize": 10, "MaxSize": 5}, "error": "InvalidRequestException"},
+  {"op": "create_auto_scaling_configuration", "args": {"AutoScalingConfigurationName": "fixture-scale"}, "error": "InvalidRequestException"},
+  {"op": "create_observability_configuration", "args": {"ObservabilityConfigurationName": "fixture-trace", "TraceConfiguration": {"Vendor": "AWSXRAY"}}, "save": {"trace": "ObservabilityConfiguration.ObservabilityConfigurationArn"}},
+  {"op": "describe_observability_configuration", "args": {"ObservabilityConfigurationArn": "${trace}"}, "expect": {"ObservabilityConfiguration.TraceConfiguration.Vendor": "AWSXRAY"}},
+  {"op": "list_observability_configurations", "args": {}, "expect": {"ObservabilityConfigurationSummaryList#count": 1}},
+  {"op": "create_connection", "args": {"ConnectionName": "fixture-github", "ProviderType": "GITHUB"}, "save": {"connection": "Connection.ConnectionArn"}, "expect": {"Connection.Status": "PENDING_HANDSHAKE"}},
+  {"op": "list_connections", "args": {"ConnectionName": "fixture-github"}, "expect": {"ConnectionSummaryList[0].ConnectionArn": "${connection}"}},
+  {"op": "create_vpc_connector", "args": {"VpcConnectorName": "fixture-vpc", "Subnets": ["subnet-0123456789abcdef0"], "SecurityGroups": ["sg-0123456789abcdef0"]}, "save": {"vpc": "VpcConnector.VpcConnectorArn"}},
+  {"op": "describe_vpc_connector", "args": {"VpcConnectorArn": "${vpc}"}, "expect": {"VpcConnector.Subnets#count": 1, "VpcConnector.VpcConnectorRevision": 1}},
+  {"op": "list_vpc_connectors", "args": {}, "expect": {"VpcConnectors#count": 1}},
+  {"op": "tag_resource", "args": {"ResourceArn": "${vpc}", "Tags": [{"Key": "k", "Value": "v"}]}},
+  {"op": "untag_resource", "args": {"ResourceArn": "${vpc}", "TagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "${scale}"}, "expect": {"Tags[0].Key": "team"}},
+  {"op": "list_services", "args": {}, "error": "UnknownOperationException", "status": 501},
+  {"op": "describe_vpc_connector", "args": {"VpcConnectorArn": "arn:aws:apprunner:us-east-1:000000000000:vpcconnector/missing/1/0123456789abcdef0123456789abcdef"}, "error": "ResourceNotFoundException"}
+ ],
+ "isolation": [
+  {"op": "list_vpc_connectors", "args": {}, "expect": {"VpcConnectors#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_auto_scaling_configuration", "args": {"AutoScalingConfigurationArn": "${scale}"}, "expect": {"AutoScalingConfiguration.MaxSize": 5}}
+ ],
+ "cleanup": [
+  {"op": "delete_auto_scaling_configuration", "args": {"AutoScalingConfigurationArn": "${scale}", "DeleteAllRevisions": true}, "expect": {"AutoScalingConfiguration.Status": "INACTIVE"}},
+  {"op": "delete_observability_configuration", "args": {"ObservabilityConfigurationArn": "${trace}"}, "expect": {"ObservabilityConfiguration.Status": "INACTIVE"}},
+  {"op": "delete_connection", "args": {"ConnectionArn": "${connection}"}, "expect": {"Connection.Status": "DELETED"}},
+  {"op": "delete_vpc_connector", "args": {"VpcConnectorArn": "${vpc}"}, "expect": {"VpcConnector.Status": "INACTIVE"}},
+  {"op": "list_vpc_connectors", "args": {}, "expect": {"VpcConnectors#count": 0}},
+  {"op": "list_auto_scaling_configurations", "args": {}, "expect": {"AutoScalingConfigurationSummaryList#count": 0}}
+ ]
+}

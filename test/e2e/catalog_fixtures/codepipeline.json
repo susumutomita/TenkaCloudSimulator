@@ -1,0 +1,25 @@
+{
+ "client": "codepipeline",
+ "steps": [
+  {"op": "create_pipeline", "args": {"pipeline": {"name": "fixture-pipe", "roleArn": "arn:aws:iam::000000000000:role/fixture-pipeline", "artifactStore": {"type": "S3", "location": "fixture-artifacts"}, "stages": [{"name": "Source", "actions": [{"name": "Source", "actionTypeId": {"category": "Source", "owner": "AWS", "provider": "S3", "version": "1"}, "configuration": {"S3Bucket": "fixture-source", "S3ObjectKey": "source.zip"}, "outputArtifacts": [{"name": "src"}]}]}, {"name": "Build", "actions": [{"name": "Build", "actionTypeId": {"category": "Build", "owner": "AWS", "provider": "CodeBuild", "version": "1"}, "configuration": {"ProjectName": "fixture-build"}, "inputArtifacts": [{"name": "src"}]}]}]}, "tags": [{"key": "team", "value": "a"}]}, "expect": {"pipeline.version": 1, "pipeline.name": "fixture-pipe", "tags[0].key": "team"}},
+  {"op": "get_pipeline", "args": {"name": "fixture-pipe", "version": 1}, "expect": {"pipeline.stages#count": 2, "pipeline.stages[1].actions[0].configuration.ProjectName": "fixture-build"}},
+  {"op": "get_pipeline", "args": {"name": "fixture-pipe", "version": 2}, "error": "PipelineVersionNotFoundException"},
+  {"op": "list_pipelines", "args": {}, "expect": {"pipelines[0].name": "fixture-pipe", "pipelines[0].executionMode": "SUPERSEDED"}},
+  {"op": "create_pipeline", "args": {"pipeline": {"name": "fixture-short", "roleArn": "arn:aws:iam::000000000000:role/fixture-pipeline", "artifactStore": {"type": "S3", "location": "fixture-artifacts"}, "stages": [{"name": "Source", "actions": [{"name": "Source", "actionTypeId": {"category": "Source", "owner": "AWS", "provider": "S3", "version": "1"}, "outputArtifacts": [{"name": "src"}]}]}]}}, "error": "InvalidStructureException"},
+  {"op": "tag_resource", "args": {"resourceArn": "arn:aws:codepipeline:us-east-1:000000000000:fixture-pipe", "tags": [{"key": "k", "value": "v"}]}},
+  {"op": "untag_resource", "args": {"resourceArn": "arn:aws:codepipeline:us-east-1:000000000000:fixture-pipe", "tagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "arn:aws:codepipeline:us-east-1:000000000000:fixture-pipe"}, "expect": {"tags#count": 1, "tags[0].value": "a"}},
+  {"op": "start_pipeline_execution", "args": {"name": "fixture-pipe"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_pipeline", "args": {"name": "missing"}, "error": "PipelineNotFoundException"}
+ ],
+ "isolation": [
+  {"op": "list_pipelines", "args": {}, "expect": {"pipelines#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_pipeline", "args": {"name": "fixture-pipe"}, "expect": {"pipeline.artifactStore.location": "fixture-artifacts"}}
+ ],
+ "cleanup": [
+  {"op": "delete_pipeline", "args": {"name": "fixture-pipe"}},
+  {"op": "list_pipelines", "args": {}, "expect": {"pipelines#count": 0}}
+ ]
+}

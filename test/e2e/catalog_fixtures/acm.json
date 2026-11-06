@@ -1,0 +1,31 @@
+{
+ "client": "acm",
+ "steps": [
+  {"op": "request_certificate", "args": {"DomainName": "fixture.example.com", "SubjectAlternativeNames": ["www.fixture.example.com"], "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"cert": "CertificateArn"}},
+  {"op": "describe_certificate", "args": {"CertificateArn": "${cert}"}, "expect": {"Certificate.Status": "PENDING_VALIDATION", "Certificate.DomainName": "fixture.example.com", "Certificate.KeyAlgorithm": "RSA_2048"}},
+  {"op": "list_certificates", "args": {}, "expect": {"CertificateSummaryList#count": 1, "CertificateSummaryList[0].CertificateArn": "${cert}"}},
+  {"op": "update_certificate_options", "args": {"CertificateArn": "${cert}", "Options": {"CertificateTransparencyLoggingPreference": "DISABLED"}}},
+  {"op": "get_account_configuration", "args": {}, "expect": {"ExpiryEvents.DaysBeforeExpiry": 45}},
+  {"op": "put_account_configuration", "args": {"ExpiryEvents": {"DaysBeforeExpiry": 30}, "IdempotencyToken": "fixture1"}},
+  {"op": "get_account_configuration", "args": {}, "expect": {"ExpiryEvents.DaysBeforeExpiry": 30}},
+  {"op": "add_tags_to_certificate", "args": {"CertificateArn": "${cert}", "Tags": [{"Key": "k", "Value": "v"}]}},
+  {"op": "list_tags_for_certificate", "args": {"CertificateArn": "${cert}"}, "expect": {"Tags#count": 2, "Tags[0].Key": "k"}},
+  {"op": "request_certificate", "args": {"DomainName": "dns.example.com", "ValidationMethod": "DNS"}, "error": "InvalidParameterException", "status": 400},
+  {"op": "request_certificate", "args": {"DomainName": "private.example.com", "CertificateAuthorityArn": "arn:aws:acm-pca:us-east-1:000000000000:certificate-authority/00000000-0000-0000-0000-000000000000"}, "error": "InvalidParameterException", "status": 400},
+  {"op": "remove_tags_from_certificate", "args": {"CertificateArn": "${cert}", "Tags": [{"Key": "k"}]}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_certificate", "args": {"CertificateArn": "${cert}"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "describe_certificate", "args": {"CertificateArn": "arn:aws:acm:us-east-1:000000000000:certificate/00000000-0000-0000-0000-000000000000"}, "error": "ResourceNotFoundException"}
+ ],
+ "isolation": [
+  {"op": "list_certificates", "args": {}, "expect": {"CertificateSummaryList#count": 0}},
+  {"op": "get_account_configuration", "args": {}, "expect": {"ExpiryEvents.DaysBeforeExpiry": 45}}
+ ],
+ "after_restart": [
+  {"op": "describe_certificate", "args": {"CertificateArn": "${cert}"}, "expect": {"Certificate.Options.CertificateTransparencyLoggingPreference": "DISABLED"}},
+  {"op": "get_account_configuration", "args": {}, "expect": {"ExpiryEvents.DaysBeforeExpiry": 30}}
+ ],
+ "cleanup": [
+  {"op": "delete_certificate", "args": {"CertificateArn": "${cert}"}},
+  {"op": "list_certificates", "args": {}, "expect": {"CertificateSummaryList#count": 0}}
+ ]
+}

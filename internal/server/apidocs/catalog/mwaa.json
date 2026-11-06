@@ -1,0 +1,1215 @@
+{
+ "components": {
+  "schemas": {
+   "CreateEnvironmentOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "maxLength": 1224,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteEnvironmentOutput": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "Environment": {
+    "additionalProperties": false,
+    "properties": {
+     "AirflowConfigurationOptions": {
+      "additionalProperties": {
+       "maxLength": 65536,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "AirflowVersion": {
+      "maxLength": 32,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Arn": {
+      "maxLength": 1224,
+      "minLength": 1,
+      "type": "string"
+     },
+     "CeleryExecutorQueue": {
+      "maxLength": 1224,
+      "minLength": 1,
+      "type": "string"
+     },
+     "CreatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "DagS3Path": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DatabaseVpcEndpointService": {
+      "maxLength": 1224,
+      "minLength": 1,
+      "type": "string"
+     },
+     "EndpointManagement": {
+      "enum": [
+       "CUSTOMER",
+       "SERVICE"
+      ],
+      "type": "string"
+     },
+     "EnvironmentClass": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ExecutionRoleArn": {
+      "maxLength": 1224,
+      "minLength": 1,
+      "type": "string"
+     },
+     "KmsKey": {
+      "maxLength": 1224,
+      "minLength": 1,
+      "type": "string"
+     },
+     "LastUpdate": {
+      "$ref": "#/components/schemas/LastUpdate"
+     },
+     "LoggingConfiguration": {
+      "$ref": "#/components/schemas/LoggingConfiguration"
+     },
+     "MaxWebservers": {
+      "minimum": 1,
+      "type": "integer"
+     },
+     "MaxWorkers": {
+      "minimum": 1,
+      "type": "integer"
+     },
+     "MinWebservers": {
+      "minimum": 1,
+      "type": "integer"
+     },
+     "MinWorkers": {
+      "minimum": 1,
+      "type": "integer"
+     },
+     "Name": {
+      "maxLength": 80,
+      "minLength": 1,
+      "type": "string"
+     },
+     "NetworkConfiguration": {
+      "$ref": "#/components/schemas/NetworkConfiguration"
+     },
+     "PluginsS3ObjectVersion": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "PluginsS3Path": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "RequirementsS3ObjectVersion": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "RequirementsS3Path": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Schedulers": {
+      "maximum": 5,
+      "type": "integer"
+     },
+     "ServiceRoleArn": {
+      "maxLength": 1224,
+      "minLength": 1,
+      "type": "string"
+     },
+     "SourceBucketArn": {
+      "maxLength": 1224,
+      "minLength": 1,
+      "type": "string"
+     },
+     "StartupScriptS3ObjectVersion": {
+      "type": "string"
+     },
+     "StartupScriptS3Path": {
+      "type": "string"
+     },
+     "Status": {
+      "enum": [
+       "CREATING",
+       "CREATE_FAILED",
+       "AVAILABLE",
+       "UPDATING",
+       "DELETING",
+       "DELETED",
+       "UNAVAILABLE",
+       "UPDATE_FAILED",
+       "ROLLING_BACK",
+       "CREATING_SNAPSHOT",
+       "PENDING",
+       "MAINTENANCE"
+      ],
+      "type": "string"
+     },
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 1,
+      "type": "object"
+     },
+     "WebserverAccessMode": {
+      "enum": [
+       "PRIVATE_ONLY",
+       "PUBLIC_ONLY"
+      ],
+      "type": "string"
+     },
+     "WebserverUrl": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "WebserverVpcEndpointService": {
+      "maxLength": 1224,
+      "minLength": 1,
+      "type": "string"
+     },
+     "WeeklyMaintenanceWindowStart": {
+      "maxLength": 9,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GetEnvironmentOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "Environment": {
+      "$ref": "#/components/schemas/Environment"
+     }
+    },
+    "type": "object"
+   },
+   "LastUpdate": {
+    "additionalProperties": false,
+    "properties": {
+     "CreatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Error": {
+      "$ref": "#/components/schemas/UpdateError"
+     },
+     "Source": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Status": {
+      "enum": [
+       "SUCCESS",
+       "PENDING",
+       "FAILED"
+      ],
+      "type": "string"
+     },
+     "WorkerReplacementStrategy": {
+      "enum": [
+       "FORCED",
+       "GRACEFUL"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListEnvironmentsOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "Environments": {
+      "items": {
+       "maxLength": 80,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "NextToken": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Environments"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 1,
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "LoggingConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "DagProcessingLogs": {
+      "$ref": "#/components/schemas/ModuleLoggingConfiguration"
+     },
+     "SchedulerLogs": {
+      "$ref": "#/components/schemas/ModuleLoggingConfiguration"
+     },
+     "TaskLogs": {
+      "$ref": "#/components/schemas/ModuleLoggingConfiguration"
+     },
+     "WebserverLogs": {
+      "$ref": "#/components/schemas/ModuleLoggingConfiguration"
+     },
+     "WorkerLogs": {
+      "$ref": "#/components/schemas/ModuleLoggingConfiguration"
+     }
+    },
+    "type": "object"
+   },
+   "LoggingConfigurationInput": {
+    "additionalProperties": false,
+    "properties": {
+     "DagProcessingLogs": {
+      "$ref": "#/components/schemas/ModuleLoggingConfigurationInput"
+     },
+     "SchedulerLogs": {
+      "$ref": "#/components/schemas/ModuleLoggingConfigurationInput"
+     },
+     "TaskLogs": {
+      "$ref": "#/components/schemas/ModuleLoggingConfigurationInput"
+     },
+     "WebserverLogs": {
+      "$ref": "#/components/schemas/ModuleLoggingConfigurationInput"
+     },
+     "WorkerLogs": {
+      "$ref": "#/components/schemas/ModuleLoggingConfigurationInput"
+     }
+    },
+    "type": "object"
+   },
+   "ModuleLoggingConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "CloudWatchLogGroupArn": {
+      "maxLength": 1224,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Enabled": {
+      "type": "boolean"
+     },
+     "LogLevel": {
+      "enum": [
+       "CRITICAL",
+       "ERROR",
+       "WARNING",
+       "INFO",
+       "DEBUG"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ModuleLoggingConfigurationInput": {
+    "additionalProperties": false,
+    "properties": {
+     "Enabled": {
+      "type": "boolean"
+     },
+     "LogLevel": {
+      "enum": [
+       "CRITICAL",
+       "ERROR",
+       "WARNING",
+       "INFO",
+       "DEBUG"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "Enabled",
+     "LogLevel"
+    ],
+    "type": "object"
+   },
+   "NetworkConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "SecurityGroupIds": {
+      "items": {
+       "maxLength": 1024,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 5,
+      "minItems": 1,
+      "type": "array"
+     },
+     "SubnetIds": {
+      "items": {
+       "maxLength": 1024,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 2,
+      "minItems": 2,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "TagResourceOutput": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UntagResourceOutput": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UpdateEnvironmentOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "maxLength": 1224,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "UpdateError": {
+    "additionalProperties": false,
+    "properties": {
+     "ErrorCode": {
+      "type": "string"
+     },
+     "ErrorMessage": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "UpdateNetworkConfigurationInput": {
+    "additionalProperties": false,
+    "properties": {
+     "SecurityGroupIds": {
+      "items": {
+       "maxLength": 1024,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 5,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "SecurityGroupIds"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AmazonMWAA API (2020-07-01). Every other official operation returns HTTP 501 UnknownOperationException. Environments are configuration metadata and stay CREATING: no Airflow scheduler, worker, web server, VPC endpoint or log group is provisioned, and DAG, plugin, requirement and startup-script paths in S3 are not read. CreateCliToken, CreateWebLoginToken, InvokeRestApi and PublishMetrics return UnknownOperationException with HTTP 501; no WebserverUrl or service-linked role is assigned. UpdateEnvironment cannot change NetworkConfiguration or WorkerReplacementStrategy. SDK clients must disable host-prefix injection (botocore inject_host_prefix=False) because the official api. host prefix cannot address the loopback endpoint.",
+  "title": "Amazon Managed Workflows for Apache Airflow (simulator catalog)",
+  "version": "2020-07-01"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/environments": {
+   "get": {
+    "operationId": "mwaaListEnvironments",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "airflow"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "MaxResults",
+      "schema": {
+       "maximum": 25,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "NextToken",
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 0,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListEnvironmentsOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListEnvironments",
+    "tags": [
+     "Amazon Managed Workflows for Apache Airflow"
+    ]
+   }
+  },
+  "/environments/{Name}": {
+   "delete": {
+    "operationId": "mwaaDeleteEnvironment",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "airflow"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "Name",
+      "required": true,
+      "schema": {
+       "maxLength": 80,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DeleteEnvironmentOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteEnvironment",
+    "tags": [
+     "Amazon Managed Workflows for Apache Airflow"
+    ]
+   },
+   "get": {
+    "operationId": "mwaaGetEnvironment",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "airflow"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "Name",
+      "required": true,
+      "schema": {
+       "maxLength": 80,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GetEnvironmentOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetEnvironment",
+    "tags": [
+     "Amazon Managed Workflows for Apache Airflow"
+    ]
+   },
+   "patch": {
+    "operationId": "mwaaUpdateEnvironment",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "airflow"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "Name",
+      "required": true,
+      "schema": {
+       "maxLength": 80,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "AirflowConfigurationOptions": {
+          "additionalProperties": {
+           "maxLength": 65536,
+           "minLength": 1,
+           "type": "string"
+          },
+          "type": "object"
+         },
+         "AirflowVersion": {
+          "maxLength": 32,
+          "minLength": 1,
+          "type": "string"
+         },
+         "DagS3Path": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "type": "string"
+         },
+         "EnvironmentClass": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "type": "string"
+         },
+         "ExecutionRoleArn": {
+          "maxLength": 1224,
+          "minLength": 1,
+          "type": "string"
+         },
+         "LoggingConfiguration": {
+          "$ref": "#/components/schemas/LoggingConfigurationInput"
+         },
+         "MaxWebservers": {
+          "minimum": 1,
+          "type": "integer"
+         },
+         "MaxWorkers": {
+          "minimum": 1,
+          "type": "integer"
+         },
+         "MinWebservers": {
+          "minimum": 1,
+          "type": "integer"
+         },
+         "MinWorkers": {
+          "minimum": 1,
+          "type": "integer"
+         },
+         "NetworkConfiguration": {
+          "$ref": "#/components/schemas/UpdateNetworkConfigurationInput"
+         },
+         "PluginsS3ObjectVersion": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "type": "string"
+         },
+         "PluginsS3Path": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "type": "string"
+         },
+         "RequirementsS3ObjectVersion": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "type": "string"
+         },
+         "RequirementsS3Path": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "type": "string"
+         },
+         "Schedulers": {
+          "maximum": 5,
+          "type": "integer"
+         },
+         "SourceBucketArn": {
+          "maxLength": 1224,
+          "minLength": 1,
+          "type": "string"
+         },
+         "StartupScriptS3ObjectVersion": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "type": "string"
+         },
+         "StartupScriptS3Path": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "type": "string"
+         },
+         "WebserverAccessMode": {
+          "enum": [
+           "PRIVATE_ONLY",
+           "PUBLIC_ONLY"
+          ],
+          "type": "string"
+         },
+         "WeeklyMaintenanceWindowStart": {
+          "maxLength": 9,
+          "minLength": 1,
+          "type": "string"
+         },
+         "WorkerReplacementStrategy": {
+          "enum": [
+           "FORCED",
+           "GRACEFUL"
+          ],
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UpdateEnvironmentOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateEnvironment",
+    "tags": [
+     "Amazon Managed Workflows for Apache Airflow"
+    ]
+   },
+   "put": {
+    "operationId": "mwaaCreateEnvironment",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "airflow"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "Name",
+      "required": true,
+      "schema": {
+       "maxLength": 80,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "AirflowConfigurationOptions": {
+          "additionalProperties": {
+           "maxLength": 65536,
+           "minLength": 1,
+           "type": "string"
+          },
+          "type": "object"
+         },
+         "AirflowVersion": {
+          "maxLength": 32,
+          "minLength": 1,
+          "type": "string"
+         },
+         "DagS3Path": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "type": "string"
+         },
+         "EndpointManagement": {
+          "enum": [
+           "CUSTOMER",
+           "SERVICE"
+          ],
+          "type": "string"
+         },
+         "EnvironmentClass": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "type": "string"
+         },
+         "ExecutionRoleArn": {
+          "maxLength": 1224,
+          "minLength": 1,
+          "type": "string"
+         },
+         "KmsKey": {
+          "maxLength": 1224,
+          "minLength": 1,
+          "type": "string"
+         },
+         "LoggingConfiguration": {
+          "$ref": "#/components/schemas/LoggingConfigurationInput"
+         },
+         "MaxWebservers": {
+          "minimum": 1,
+          "type": "integer"
+         },
+         "MaxWorkers": {
+          "minimum": 1,
+          "type": "integer"
+         },
+         "MinWebservers": {
+          "minimum": 1,
+          "type": "integer"
+         },
+         "MinWorkers": {
+          "minimum": 1,
+          "type": "integer"
+         },
+         "NetworkConfiguration": {
+          "$ref": "#/components/schemas/NetworkConfiguration"
+         },
+         "PluginsS3ObjectVersion": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "type": "string"
+         },
+         "PluginsS3Path": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "type": "string"
+         },
+         "RequirementsS3ObjectVersion": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "type": "string"
+         },
+         "RequirementsS3Path": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "type": "string"
+         },
+         "Schedulers": {
+          "maximum": 5,
+          "type": "integer"
+         },
+         "SourceBucketArn": {
+          "maxLength": 1224,
+          "minLength": 1,
+          "type": "string"
+         },
+         "StartupScriptS3ObjectVersion": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "type": "string"
+         },
+         "StartupScriptS3Path": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "type": "string"
+         },
+         "Tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 1,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 1,
+          "type": "object"
+         },
+         "WebserverAccessMode": {
+          "enum": [
+           "PRIVATE_ONLY",
+           "PUBLIC_ONLY"
+          ],
+          "type": "string"
+         },
+         "WeeklyMaintenanceWindowStart": {
+          "maxLength": 9,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "DagS3Path",
+         "ExecutionRoleArn",
+         "NetworkConfiguration",
+         "SourceBucketArn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateEnvironmentOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateEnvironment",
+    "tags": [
+     "Amazon Managed Workflows for Apache Airflow"
+    ]
+   }
+  },
+  "/tags/{ResourceArn}": {
+   "delete": {
+    "operationId": "mwaaUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "airflow"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ResourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1224,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 50,
+       "minItems": 0,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UntagResourceOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "Amazon Managed Workflows for Apache Airflow"
+    ]
+   },
+   "get": {
+    "operationId": "mwaaListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "airflow"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ResourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1224,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListTagsForResourceOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "Amazon Managed Workflows for Apache Airflow"
+    ]
+   },
+   "post": {
+    "operationId": "mwaaTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "airflow"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ResourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1224,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 1,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 1,
+          "type": "object"
+         }
+        },
+        "required": [
+         "Tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/TagResourceOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "Amazon Managed Workflows for Apache Airflow"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AmazonMWAA API (2020-07-01). Every other official operation returns HTTP 501 UnknownOperationException. Environments are configuration metadata and stay CREATING: no Airflow scheduler, worker, web server, VPC endpoint or log group is provisioned, and DAG, plugin, requirement and startup-script paths in S3 are not read. CreateCliToken, CreateWebLoginToken, InvokeRestApi and PublishMetrics return UnknownOperationException with HTTP 501; no WebserverUrl or service-linked role is assigned. UpdateEnvironment cannot change NetworkConfiguration or WorkerReplacementStrategy. SDK clients must disable host-prefix injection (botocore inject_host_prefix=False) because the official api. host prefix cannot address the loopback endpoint.",
+   "name": "Amazon Managed Workflows for Apache Airflow"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/mwaa/2020-07-01/service-2.json",
+  "sha256": "98f506bb9e89c2e6fe3a540a3971ef2103132e131658ef3ff97021cfd5f9fe10",
+  "license": "Apache-2.0"
+ }
+}

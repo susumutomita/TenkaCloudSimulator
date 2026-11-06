@@ -1,0 +1,45 @@
+{
+ "client": "appconfig",
+ "steps": [
+  {"op": "create_application", "args": {"Name": "fixture-app", "Description": "fixture", "Tags": {"team": "a"}}, "save": {"app": "Id"}, "expect": {"Name": "fixture-app"}},
+  {"op": "get_application", "args": {"ApplicationId": "${app}"}, "expect": {"Description": "fixture"}},
+  {"op": "list_applications", "args": {}, "expect": {"Items#count": 1, "Items[0].Id": "${app}"}},
+  {"op": "update_application", "args": {"ApplicationId": "${app}", "Description": "updated"}, "expect": {"Description": "updated"}},
+  {"op": "create_environment", "args": {"ApplicationId": "${app}", "Name": "prod", "Monitors": [{"AlarmArn": "arn:aws:cloudwatch:us-east-1:000000000000:alarm:fixture"}]}, "save": {"env": "Id"}, "expect": {"State": "READY_FOR_DEPLOYMENT", "ApplicationId": "${app}"}},
+  {"op": "get_environment", "args": {"ApplicationId": "${app}", "EnvironmentId": "${env}"}, "expect": {"Name": "prod", "Monitors#count": 1}},
+  {"op": "list_environments", "args": {"ApplicationId": "${app}"}, "expect": {"Items#count": 1}},
+  {"op": "update_environment", "args": {"ApplicationId": "${app}", "EnvironmentId": "${env}", "Description": "production"}, "expect": {"Description": "production"}},
+  {"op": "create_configuration_profile", "args": {"ApplicationId": "${app}", "Name": "settings", "LocationUri": "hosted", "Type": "AWS.Freeform"}, "save": {"profile": "Id"}, "expect": {"LocationUri": "hosted"}},
+  {"op": "get_configuration_profile", "args": {"ApplicationId": "${app}", "ConfigurationProfileId": "${profile}"}, "expect": {"Name": "settings", "Type": "AWS.Freeform"}},
+  {"op": "list_configuration_profiles", "args": {"ApplicationId": "${app}", "Type": "AWS.Freeform"}, "expect": {"Items#count": 1, "Items[0].Name": "settings"}},
+  {"op": "list_configuration_profiles", "args": {"ApplicationId": "${app}", "Type": "AWS.AppConfig.FeatureFlags"}, "expect": {"Items#count": 0}},
+  {"op": "update_configuration_profile", "args": {"ApplicationId": "${app}", "ConfigurationProfileId": "${profile}", "Description": "feature settings"}, "expect": {"Description": "feature settings"}},
+  {"op": "create_configuration_profile", "args": {"ApplicationId": "${app}", "Name": "remote", "LocationUri": "s3://fixture-bucket/config.json"}, "error": "BadRequestException"},
+  {"op": "create_deployment_strategy", "args": {"Name": "quick", "DeploymentDurationInMinutes": 0, "GrowthFactor": 100.0, "FinalBakeTimeInMinutes": 0, "ReplicateTo": "NONE"}, "save": {"strategy": "Id"}, "expect": {"GrowthFactor": 100.0}},
+  {"op": "get_deployment_strategy", "args": {"DeploymentStrategyId": "${strategy}"}, "expect": {"Name": "quick"}},
+  {"op": "list_deployment_strategies", "args": {}, "expect": {"Items#count": 1}},
+  {"op": "update_deployment_strategy", "args": {"DeploymentStrategyId": "${strategy}", "GrowthType": "LINEAR", "DeploymentDurationInMinutes": 10}, "expect": {"DeploymentDurationInMinutes": 10, "GrowthType": "LINEAR"}},
+  {"op": "create_deployment_strategy", "args": {"Name": "replicated", "DeploymentDurationInMinutes": 0, "GrowthFactor": 100.0, "ReplicateTo": "SSM_DOCUMENT"}, "error": "BadRequestException"},
+  {"op": "tag_resource", "args": {"ResourceArn": "arn:aws:appconfig:us-east-1:000000000000:application/${app}", "Tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"ResourceArn": "arn:aws:appconfig:us-east-1:000000000000:application/${app}", "TagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "arn:aws:appconfig:us-east-1:000000000000:application/${app}"}, "expect": {"Tags": {"team": "a"}}},
+  {"op": "start_deployment", "args": {"ApplicationId": "${app}", "EnvironmentId": "${env}", "DeploymentStrategyId": "${strategy}", "ConfigurationProfileId": "${profile}", "ConfigurationVersion": "1"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "delete_application", "args": {"ApplicationId": "${app}"}, "error": "BadRequestException"},
+  {"op": "get_application", "args": {"ApplicationId": "zz99zz9"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_applications", "args": {}, "expect": {"Items#count": 0}},
+  {"op": "list_deployment_strategies", "args": {}, "expect": {"Items#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_environment", "args": {"ApplicationId": "${app}", "EnvironmentId": "${env}"}, "expect": {"Description": "production"}},
+  {"op": "get_deployment_strategy", "args": {"DeploymentStrategyId": "${strategy}"}, "expect": {"DeploymentDurationInMinutes": 10}}
+ ],
+ "cleanup": [
+  {"op": "delete_configuration_profile", "args": {"ApplicationId": "${app}", "ConfigurationProfileId": "${profile}"}},
+  {"op": "delete_environment", "args": {"ApplicationId": "${app}", "EnvironmentId": "${env}", "DeletionProtectionCheck": "BYPASS"}},
+  {"op": "delete_deployment_strategy", "args": {"DeploymentStrategyId": "${strategy}"}},
+  {"op": "delete_application", "args": {"ApplicationId": "${app}"}},
+  {"op": "list_applications", "args": {}, "expect": {"Items#count": 0}}
+ ]
+}

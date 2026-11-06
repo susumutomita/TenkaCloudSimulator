@@ -1,0 +1,649 @@
+{
+ "components": {
+  "schemas": {
+   "CreateResourceShareResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "clientToken": {
+      "type": "string"
+     },
+     "resourceShare": {
+      "$ref": "#/components/schemas/ResourceShare"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteResourceShareResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "clientToken": {
+      "type": "string"
+     },
+     "returnValue": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "GetResourceSharesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextToken": {
+      "type": "string"
+     },
+     "resourceShares": {
+      "items": {
+       "$ref": "#/components/schemas/ResourceShare"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ResourceShare": {
+    "additionalProperties": false,
+    "properties": {
+     "allowExternalPrincipals": {
+      "type": "boolean"
+     },
+     "creationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "featureSet": {
+      "enum": [
+       "CREATED_FROM_POLICY",
+       "PROMOTING_TO_STANDARD",
+       "STANDARD"
+      ],
+      "type": "string"
+     },
+     "lastUpdatedTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "name": {
+      "type": "string"
+     },
+     "owningAccountId": {
+      "type": "string"
+     },
+     "resourceShareArn": {
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "PENDING",
+       "ACTIVE",
+       "FAILED",
+       "DELETING",
+       "DELETED"
+      ],
+      "type": "string"
+     },
+     "statusMessage": {
+      "type": "string"
+     },
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "key": {
+      "type": "string"
+     },
+     "value": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TagFilter": {
+    "additionalProperties": false,
+    "properties": {
+     "tagKey": {
+      "type": "string"
+     },
+     "tagValues": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "TagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UntagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UpdateResourceShareResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "clientToken": {
+      "type": "string"
+     },
+     "resourceShare": {
+      "$ref": "#/components/schemas/ResourceShare"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS Resource Access Manager API (2018-01-04). Every other official operation returns HTTP 501 UnknownOperationException. Resource shares are configuration metadata owned by the simulator account: resourceArns, principals, sources and permissionArns are refused, so nothing is shared, no invitation is sent and no other account gains access. Associations, invitations, managed permissions, resource policies and organization sharing return UnknownOperationException with HTTP 501. GetResourceShares returns no shares for resourceOwner OTHER-ACCOUNTS. DeleteResourceShare removes the share immediately instead of keeping it in the DELETED state; clientToken members are refused.",
+  "title": "AWS Resource Access Manager (simulator catalog)",
+  "version": "2018-01-04"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/createresourceshare": {
+   "post": {
+    "operationId": "ramCreateResourceShare",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ram"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "allowExternalPrincipals": {
+          "type": "boolean"
+         },
+         "clientToken": {
+          "type": "string"
+         },
+         "name": {
+          "type": "string"
+         },
+         "permissionArns": {
+          "items": {
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "principals": {
+          "items": {
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "resourceArns": {
+          "items": {
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "sources": {
+          "items": {
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "type": "array"
+         }
+        },
+        "required": [
+         "name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateResourceShareResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateResourceShare",
+    "tags": [
+     "AWS Resource Access Manager"
+    ]
+   }
+  },
+  "/deleteresourceshare": {
+   "delete": {
+    "operationId": "ramDeleteResourceShare",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ram"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "clientToken",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "resourceShareArn",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DeleteResourceShareResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteResourceShare",
+    "tags": [
+     "AWS Resource Access Manager"
+    ]
+   }
+  },
+  "/getresourceshares": {
+   "post": {
+    "operationId": "ramGetResourceShares",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ram"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "maxResults": {
+          "maximum": 500,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "name": {
+          "type": "string"
+         },
+         "nextToken": {
+          "type": "string"
+         },
+         "permissionArn": {
+          "type": "string"
+         },
+         "permissionVersion": {
+          "type": "integer"
+         },
+         "resourceOwner": {
+          "enum": [
+           "SELF",
+           "OTHER-ACCOUNTS"
+          ],
+          "type": "string"
+         },
+         "resourceShareArns": {
+          "items": {
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "resourceShareStatus": {
+          "enum": [
+           "PENDING",
+           "ACTIVE",
+           "FAILED",
+           "DELETING",
+           "DELETED"
+          ],
+          "type": "string"
+         },
+         "tagFilters": {
+          "items": {
+           "$ref": "#/components/schemas/TagFilter"
+          },
+          "type": "array"
+         }
+        },
+        "required": [
+         "resourceOwner"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GetResourceSharesResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetResourceShares",
+    "tags": [
+     "AWS Resource Access Manager"
+    ]
+   }
+  },
+  "/tagresource": {
+   "post": {
+    "operationId": "ramTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ram"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "resourceArn": {
+          "type": "string"
+         },
+         "resourceShareArn": {
+          "type": "string"
+         },
+         "tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "type": "array"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/TagResourceResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "AWS Resource Access Manager"
+    ]
+   }
+  },
+  "/untagresource": {
+   "post": {
+    "operationId": "ramUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ram"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "resourceArn": {
+          "type": "string"
+         },
+         "resourceShareArn": {
+          "type": "string"
+         },
+         "tagKeys": {
+          "items": {
+           "type": "string"
+          },
+          "type": "array"
+         }
+        },
+        "required": [
+         "tagKeys"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UntagResourceResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "AWS Resource Access Manager"
+    ]
+   }
+  },
+  "/updateresourceshare": {
+   "post": {
+    "operationId": "ramUpdateResourceShare",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ram"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "allowExternalPrincipals": {
+          "type": "boolean"
+         },
+         "clientToken": {
+          "type": "string"
+         },
+         "name": {
+          "type": "string"
+         },
+         "resourceShareArn": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "resourceShareArn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UpdateResourceShareResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateResourceShare",
+    "tags": [
+     "AWS Resource Access Manager"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS Resource Access Manager API (2018-01-04). Every other official operation returns HTTP 501 UnknownOperationException. Resource shares are configuration metadata owned by the simulator account: resourceArns, principals, sources and permissionArns are refused, so nothing is shared, no invitation is sent and no other account gains access. Associations, invitations, managed permissions, resource policies and organization sharing return UnknownOperationException with HTTP 501. GetResourceShares returns no shares for resourceOwner OTHER-ACCOUNTS. DeleteResourceShare removes the share immediately instead of keeping it in the DELETED state; clientToken members are refused.",
+   "name": "AWS Resource Access Manager"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/ram/2018-01-04/service-2.json",
+  "sha256": "0b22dc67108504ba47c7d50b72b79f1067309e48d0e4d49c0d07f8c251ba4789",
+  "license": "Apache-2.0"
+ }
+}

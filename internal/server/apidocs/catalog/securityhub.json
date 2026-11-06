@@ -1,0 +1,1438 @@
+{
+ "components": {
+  "schemas": {
+   "ActionTarget": {
+    "additionalProperties": false,
+    "properties": {
+     "ActionTargetArn": {
+      "type": "string"
+     },
+     "Description": {
+      "type": "string"
+     },
+     "Name": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "ActionTargetArn",
+     "Name",
+     "Description"
+    ],
+    "type": "object"
+   },
+   "AwsSecurityFindingFilters": {
+    "additionalProperties": false,
+    "properties": {
+     "AwsAccountId": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "AwsAccountName": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "CompanyName": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "ComplianceAssociatedStandardsId": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "ComplianceSecurityControlId": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "ComplianceSecurityControlParametersName": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "ComplianceSecurityControlParametersValue": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "ComplianceStatus": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "Confidence": {
+      "items": {
+       "$ref": "#/components/schemas/NumberFilter"
+      },
+      "type": "array"
+     },
+     "CreatedAt": {
+      "items": {
+       "$ref": "#/components/schemas/DateFilter"
+      },
+      "type": "array"
+     },
+     "Criticality": {
+      "items": {
+       "$ref": "#/components/schemas/NumberFilter"
+      },
+      "type": "array"
+     },
+     "Description": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "FindingProviderFieldsConfidence": {
+      "items": {
+       "$ref": "#/components/schemas/NumberFilter"
+      },
+      "type": "array"
+     },
+     "FindingProviderFieldsCriticality": {
+      "items": {
+       "$ref": "#/components/schemas/NumberFilter"
+      },
+      "type": "array"
+     },
+     "FindingProviderFieldsRelatedFindingsId": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "FindingProviderFieldsRelatedFindingsProductArn": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "FindingProviderFieldsSeverityLabel": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "FindingProviderFieldsSeverityOriginal": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "FindingProviderFieldsTypes": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "FirstObservedAt": {
+      "items": {
+       "$ref": "#/components/schemas/DateFilter"
+      },
+      "type": "array"
+     },
+     "GeneratorId": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "Id": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "Keyword": {
+      "items": {
+       "$ref": "#/components/schemas/KeywordFilter"
+      },
+      "type": "array"
+     },
+     "LastObservedAt": {
+      "items": {
+       "$ref": "#/components/schemas/DateFilter"
+      },
+      "type": "array"
+     },
+     "MalwareName": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "MalwarePath": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "MalwareState": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "MalwareType": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "NetworkDestinationDomain": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "NetworkDestinationIpV4": {
+      "items": {
+       "$ref": "#/components/schemas/IpFilter"
+      },
+      "type": "array"
+     },
+     "NetworkDestinationIpV6": {
+      "items": {
+       "$ref": "#/components/schemas/IpFilter"
+      },
+      "type": "array"
+     },
+     "NetworkDestinationPort": {
+      "items": {
+       "$ref": "#/components/schemas/NumberFilter"
+      },
+      "type": "array"
+     },
+     "NetworkDirection": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "NetworkProtocol": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "NetworkSourceDomain": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "NetworkSourceIpV4": {
+      "items": {
+       "$ref": "#/components/schemas/IpFilter"
+      },
+      "type": "array"
+     },
+     "NetworkSourceIpV6": {
+      "items": {
+       "$ref": "#/components/schemas/IpFilter"
+      },
+      "type": "array"
+     },
+     "NetworkSourceMac": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "NetworkSourcePort": {
+      "items": {
+       "$ref": "#/components/schemas/NumberFilter"
+      },
+      "type": "array"
+     },
+     "NoteText": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "NoteUpdatedAt": {
+      "items": {
+       "$ref": "#/components/schemas/DateFilter"
+      },
+      "type": "array"
+     },
+     "NoteUpdatedBy": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "ProcessLaunchedAt": {
+      "items": {
+       "$ref": "#/components/schemas/DateFilter"
+      },
+      "type": "array"
+     },
+     "ProcessName": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "ProcessParentPid": {
+      "items": {
+       "$ref": "#/components/schemas/NumberFilter"
+      },
+      "type": "array"
+     },
+     "ProcessPath": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "ProcessPid": {
+      "items": {
+       "$ref": "#/components/schemas/NumberFilter"
+      },
+      "type": "array"
+     },
+     "ProcessTerminatedAt": {
+      "items": {
+       "$ref": "#/components/schemas/DateFilter"
+      },
+      "type": "array"
+     },
+     "ProductArn": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "ProductFields": {
+      "items": {
+       "$ref": "#/components/schemas/MapFilter"
+      },
+      "type": "array"
+     },
+     "ProductName": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "RecommendationText": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "RecordState": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "Region": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "RelatedFindingsId": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "RelatedFindingsProductArn": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "ResourceApplicationArn": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "ResourceApplicationName": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "ResourceAwsEc2InstanceIamInstanceProfileArn": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "ResourceAwsEc2InstanceImageId": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "ResourceAwsEc2InstanceIpV4Addresses": {
+      "items": {
+       "$ref": "#/components/schemas/IpFilter"
+      },
+      "type": "array"
+     },
+     "ResourceAwsEc2InstanceIpV6Addresses": {
+      "items": {
+       "$ref": "#/components/schemas/IpFilter"
+      },
+      "type": "array"
+     },
+     "ResourceAwsEc2InstanceKeyName": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "ResourceAwsEc2InstanceLaunchedAt": {
+      "items": {
+       "$ref": "#/components/schemas/DateFilter"
+      },
+      "type": "array"
+     },
+     "ResourceAwsEc2InstanceSubnetId": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "ResourceAwsEc2InstanceType": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "ResourceAwsEc2InstanceVpcId": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "ResourceAwsIamAccessKeyCreatedAt": {
+      "items": {
+       "$ref": "#/components/schemas/DateFilter"
+      },
+      "type": "array"
+     },
+     "ResourceAwsIamAccessKeyPrincipalName": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "ResourceAwsIamAccessKeyStatus": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "ResourceAwsIamAccessKeyUserName": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "ResourceAwsIamUserUserName": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "ResourceAwsS3BucketOwnerId": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "ResourceAwsS3BucketOwnerName": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "ResourceContainerImageId": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "ResourceContainerImageName": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "ResourceContainerLaunchedAt": {
+      "items": {
+       "$ref": "#/components/schemas/DateFilter"
+      },
+      "type": "array"
+     },
+     "ResourceContainerName": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "ResourceDetailsOther": {
+      "items": {
+       "$ref": "#/components/schemas/MapFilter"
+      },
+      "type": "array"
+     },
+     "ResourceId": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "ResourcePartition": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "ResourceRegion": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "ResourceTags": {
+      "items": {
+       "$ref": "#/components/schemas/MapFilter"
+      },
+      "type": "array"
+     },
+     "ResourceType": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "Sample": {
+      "items": {
+       "$ref": "#/components/schemas/BooleanFilter"
+      },
+      "type": "array"
+     },
+     "SeverityLabel": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "SeverityNormalized": {
+      "items": {
+       "$ref": "#/components/schemas/NumberFilter"
+      },
+      "type": "array"
+     },
+     "SeverityProduct": {
+      "items": {
+       "$ref": "#/components/schemas/NumberFilter"
+      },
+      "type": "array"
+     },
+     "SourceUrl": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "ThreatIntelIndicatorCategory": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "ThreatIntelIndicatorLastObservedAt": {
+      "items": {
+       "$ref": "#/components/schemas/DateFilter"
+      },
+      "type": "array"
+     },
+     "ThreatIntelIndicatorSource": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "ThreatIntelIndicatorSourceUrl": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "ThreatIntelIndicatorType": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "ThreatIntelIndicatorValue": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "Title": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "Type": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "UpdatedAt": {
+      "items": {
+       "$ref": "#/components/schemas/DateFilter"
+      },
+      "type": "array"
+     },
+     "UserDefinedFields": {
+      "items": {
+       "$ref": "#/components/schemas/MapFilter"
+      },
+      "type": "array"
+     },
+     "VerificationState": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "VulnerabilitiesExploitAvailable": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "VulnerabilitiesFixAvailable": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "WorkflowState": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     },
+     "WorkflowStatus": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "BooleanFilter": {
+    "additionalProperties": false,
+    "properties": {
+     "Value": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "CreateActionTargetResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "ActionTargetArn": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "ActionTargetArn"
+    ],
+    "type": "object"
+   },
+   "CreateInsightResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "InsightArn": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "InsightArn"
+    ],
+    "type": "object"
+   },
+   "DateFilter": {
+    "additionalProperties": false,
+    "properties": {
+     "DateRange": {
+      "$ref": "#/components/schemas/DateRange"
+     },
+     "End": {
+      "type": "string"
+     },
+     "Start": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DateRange": {
+    "additionalProperties": false,
+    "properties": {
+     "Unit": {
+      "enum": [
+       "DAYS"
+      ],
+      "type": "string"
+     },
+     "Value": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteActionTargetResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "ActionTargetArn": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "ActionTargetArn"
+    ],
+    "type": "object"
+   },
+   "DeleteInsightResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "InsightArn": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "InsightArn"
+    ],
+    "type": "object"
+   },
+   "DescribeActionTargetsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "ActionTargets": {
+      "items": {
+       "$ref": "#/components/schemas/ActionTarget"
+      },
+      "type": "array"
+     },
+     "NextToken": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "ActionTargets"
+    ],
+    "type": "object"
+   },
+   "GetInsightsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Insights": {
+      "items": {
+       "$ref": "#/components/schemas/Insight"
+      },
+      "type": "array"
+     },
+     "NextToken": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Insights"
+    ],
+    "type": "object"
+   },
+   "Insight": {
+    "additionalProperties": false,
+    "properties": {
+     "Filters": {
+      "$ref": "#/components/schemas/AwsSecurityFindingFilters"
+     },
+     "GroupByAttribute": {
+      "type": "string"
+     },
+     "InsightArn": {
+      "type": "string"
+     },
+     "Name": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "InsightArn",
+     "Name",
+     "Filters",
+     "GroupByAttribute"
+    ],
+    "type": "object"
+   },
+   "IpFilter": {
+    "additionalProperties": false,
+    "properties": {
+     "Cidr": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "KeywordFilter": {
+    "additionalProperties": false,
+    "properties": {
+     "Value": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "MapFilter": {
+    "additionalProperties": false,
+    "properties": {
+     "Comparison": {
+      "enum": [
+       "EQUALS",
+       "NOT_EQUALS",
+       "CONTAINS",
+       "NOT_CONTAINS"
+      ],
+      "type": "string"
+     },
+     "Key": {
+      "type": "string"
+     },
+     "Value": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NumberFilter": {
+    "additionalProperties": false,
+    "properties": {
+     "Eq": {
+      "type": "number"
+     },
+     "Gt": {
+      "type": "number"
+     },
+     "Gte": {
+      "type": "number"
+     },
+     "Lt": {
+      "type": "number"
+     },
+     "Lte": {
+      "type": "number"
+     }
+    },
+    "type": "object"
+   },
+   "StringFilter": {
+    "additionalProperties": false,
+    "properties": {
+     "Comparison": {
+      "enum": [
+       "EQUALS",
+       "PREFIX",
+       "NOT_EQUALS",
+       "PREFIX_NOT_EQUALS",
+       "CONTAINS",
+       "NOT_CONTAINS",
+       "CONTAINS_WORD"
+      ],
+      "type": "string"
+     },
+     "Value": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "UpdateActionTargetResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UpdateInsightResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS SecurityHub API (2018-10-26). Every other official operation returns HTTP 501 UnknownOperationException. Custom action targets and custom insights are configuration metadata that need no prior EnableSecurityHub call: no finding is ingested or sent to EventBridge, and insight results are never computed. Managed insights are not listed. Hub enablement, findings, standards, controls, automation rules, configuration policies, aggregators, members and tagging return UnknownOperationException with HTTP 501.",
+  "title": "AWS Security Hub (simulator catalog)",
+  "version": "2018-10-26"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/actionTargets": {
+   "post": {
+    "operationId": "securityhubCreateActionTarget",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "securityhub"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Description": {
+          "type": "string"
+         },
+         "Id": {
+          "type": "string"
+         },
+         "Name": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "Description",
+         "Id",
+         "Name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateActionTargetResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateActionTarget",
+    "tags": [
+     "AWS Security Hub"
+    ]
+   }
+  },
+  "/actionTargets/get": {
+   "post": {
+    "operationId": "securityhubDescribeActionTargets",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "securityhub"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "ActionTargetArns": {
+          "items": {
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "MaxResults": {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "NextToken": {
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DescribeActionTargetsResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeActionTargets",
+    "tags": [
+     "AWS Security Hub"
+    ]
+   }
+  },
+  "/actionTargets/{ActionTargetArn}": {
+   "delete": {
+    "operationId": "securityhubDeleteActionTarget",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "securityhub"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ActionTargetArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DeleteActionTargetResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteActionTarget",
+    "tags": [
+     "AWS Security Hub"
+    ]
+   },
+   "patch": {
+    "operationId": "securityhubUpdateActionTarget",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "securityhub"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ActionTargetArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Description": {
+          "type": "string"
+         },
+         "Name": {
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UpdateActionTargetResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateActionTarget",
+    "tags": [
+     "AWS Security Hub"
+    ]
+   }
+  },
+  "/insights": {
+   "post": {
+    "operationId": "securityhubCreateInsight",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "securityhub"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Filters": {
+          "$ref": "#/components/schemas/AwsSecurityFindingFilters"
+         },
+         "GroupByAttribute": {
+          "type": "string"
+         },
+         "Name": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "Filters",
+         "GroupByAttribute",
+         "Name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateInsightResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateInsight",
+    "tags": [
+     "AWS Security Hub"
+    ]
+   }
+  },
+  "/insights/get": {
+   "post": {
+    "operationId": "securityhubGetInsights",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "securityhub"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "InsightArns": {
+          "items": {
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "MaxResults": {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "NextToken": {
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GetInsightsResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetInsights",
+    "tags": [
+     "AWS Security Hub"
+    ]
+   }
+  },
+  "/insights/{InsightArn}": {
+   "delete": {
+    "operationId": "securityhubDeleteInsight",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "securityhub"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "InsightArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DeleteInsightResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteInsight",
+    "tags": [
+     "AWS Security Hub"
+    ]
+   },
+   "patch": {
+    "operationId": "securityhubUpdateInsight",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "securityhub"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "InsightArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Filters": {
+          "$ref": "#/components/schemas/AwsSecurityFindingFilters"
+         },
+         "GroupByAttribute": {
+          "type": "string"
+         },
+         "Name": {
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UpdateInsightResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateInsight",
+    "tags": [
+     "AWS Security Hub"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS SecurityHub API (2018-10-26). Every other official operation returns HTTP 501 UnknownOperationException. Custom action targets and custom insights are configuration metadata that need no prior EnableSecurityHub call: no finding is ingested or sent to EventBridge, and insight results are never computed. Managed insights are not listed. Hub enablement, findings, standards, controls, automation rules, configuration policies, aggregators, members and tagging return UnknownOperationException with HTTP 501.",
+   "name": "AWS Security Hub"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/securityhub/2018-10-26/service-2.json",
+  "sha256": "3755115dbff2abfd4324c6b8d760c3b4a68e6e4eabbc54fe5e78443074f2c2ae",
+  "license": "Apache-2.0"
+ }
+}

@@ -1,0 +1,175 @@
+{
+ "client": "entityresolution",
+ "steps": [
+  {
+   "op": "create_schema_mapping",
+   "args": {
+    "schemaName": "fixture-customers",
+    "description": "Customer records",
+    "mappedInputFields": [
+     {
+      "fieldName": "id",
+      "type": "UNIQUE_ID"
+     },
+     {
+      "fieldName": "email",
+      "type": "EMAIL_ADDRESS",
+      "matchKey": "email"
+     }
+    ],
+    "tags": {
+     "team": "a"
+    }
+   },
+   "save": {
+    "schema": "schemaArn"
+   },
+   "expect": {
+    "mappedInputFields#count": 2
+   }
+  },
+  {
+   "op": "get_schema_mapping",
+   "args": {
+    "schemaName": "fixture-customers"
+   },
+   "expect": {
+    "hasWorkflows": false,
+    "tags": {
+     "team": "a"
+    },
+    "description": "Customer records"
+   }
+  },
+  {
+   "op": "list_schema_mappings",
+   "args": {},
+   "expect": {
+    "schemaList#count": 1,
+    "schemaList[0].schemaArn": "${schema}"
+   }
+  },
+  {
+   "op": "update_schema_mapping",
+   "args": {
+    "schemaName": "fixture-customers",
+    "mappedInputFields": [
+     {
+      "fieldName": "id",
+      "type": "UNIQUE_ID"
+     },
+     {
+      "fieldName": "email",
+      "type": "EMAIL_ADDRESS",
+      "matchKey": "email"
+     },
+     {
+      "fieldName": "phone",
+      "type": "PHONE_NUMBER",
+      "matchKey": "phone"
+     }
+    ]
+   },
+   "expect": {
+    "mappedInputFields#count": 3
+   }
+  },
+  {
+   "op": "create_schema_mapping",
+   "args": {
+    "schemaName": "fixture-customers",
+    "mappedInputFields": [
+     {
+      "fieldName": "id",
+      "type": "UNIQUE_ID"
+     },
+     {
+      "fieldName": "name",
+      "type": "NAME"
+     }
+    ]
+   },
+   "error": "ConflictException"
+  },
+  {
+   "op": "tag_resource",
+   "args": {
+    "resourceArn": "${schema}",
+    "tags": {
+     "cost": "lab"
+    }
+   }
+  },
+  {
+   "op": "untag_resource",
+   "args": {
+    "resourceArn": "${schema}",
+    "tagKeys": [
+     "team"
+    ]
+   }
+  },
+  {
+   "op": "list_tags_for_resource",
+   "args": {
+    "resourceArn": "${schema}"
+   },
+   "expect": {
+    "tags": {
+     "cost": "lab"
+    }
+   }
+  },
+  {
+   "op": "list_matching_workflows",
+   "args": {},
+   "error": "UnknownOperationException",
+   "status": 501
+  },
+  {
+   "op": "get_schema_mapping",
+   "args": {
+    "schemaName": "fixture-missing"
+   },
+   "error": "ResourceNotFoundException"
+  }
+ ],
+ "isolation": [
+  {
+   "op": "list_schema_mappings",
+   "args": {},
+   "expect": {
+    "schemaList#count": 0
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "op": "get_schema_mapping",
+   "args": {
+    "schemaName": "fixture-customers"
+   },
+   "expect": {
+    "mappedInputFields#count": 3,
+    "tags": {
+     "cost": "lab"
+    }
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "op": "delete_schema_mapping",
+   "args": {
+    "schemaName": "fixture-customers"
+   }
+  },
+  {
+   "op": "list_schema_mappings",
+   "args": {},
+   "expect": {
+    "schemaList#count": 0
+   }
+  }
+ ]
+}

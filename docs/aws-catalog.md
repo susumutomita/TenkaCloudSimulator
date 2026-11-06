@@ -13,16 +13,19 @@ network, OAuth or real AWS call is executed or simulated.
 
 ## Services
 
-| Service | Issue | Protocol | Implemented operations | Bounds |
-| --- | --- | --- | --- | --- |
-| AWS CodeConnections | #297 | JSON 1.0 | Create/Get/List/DeleteConnection, Create/Get/List/Update/DeleteHost, Tag/Untag/ListTagsForResource | Connections and hosts stay `PENDING`; no OAuth or provider app installation; repository links and sync configurations are not implemented |
-| AWS Step Functions | #83 | JSON 1.0 | Create/Describe/List/Update/DeleteStateMachine, Create/Describe/List/DeleteActivity, Tag/Untag/ListTagsForResource | Definitions pass a structural ASL check; executions, versions, aliases and activity tasks are not run |
-| Amazon Elastic Container Registry | #111 | JSON 1.1 | CreateRepository, DescribeRepositories, PutImageTagMutability, PutImageScanningConfiguration, DeleteRepository, Tag/Untag/ListTagsForResource | No images, layers, registry tokens or scanning |
-| AWS Amplify | #147 | REST-JSON | Create/Get/List/Update/DeleteApp, Create/Get/List/Update/DeleteBranch, Tag/Untag/ListTagsForResource | No repository connection, build, deployment, hosting or domain; tokens and basic-auth credentials are refused; apps with branches cannot be deleted |
-
+The catalog serves 41 services. The [generated service table](aws-catalog-services.md)
+lists each service's Issues, protocol, implemented operations and bounds; it is
+checked against the reviewed specifications by `go test ./internal/aws/catalog`.
 The capability document lists the same services under `services.catalog`,
 including every implemented operation, the number of official operations, the
-model source hash and the bounds above.
+model source hash and the bounds.
+
+Services whose official API needs behavior the engine cannot express truthfully
+remain unimplemented rather than approximated, for example Amazon Data
+Firehose, Managed Service for Apache Flink, Amazon MSK, AWS Data Pipeline,
+Amazon MQ, Amazon SWF, AWS Batch, CodeStar Notifications, Amazon Managed
+Grafana, AWS Organizations, Service Quotas, Application Auto Scaling,
+GuardDuty, Amazon Cognito and AWS Network Firewall.
 
 ## Routing and authorization
 
@@ -59,9 +62,15 @@ document per service, generated from the same embedded official shapes.
   type and HTTP binding, specification and model consistency, storage faults,
   concurrency guards, budgets, pagination, client tokens and generated
   reference freshness.
-- `test/e2e/aws_catalog.py` runs every bound operation through boto3 against two
-  separate binaries, databases and token authorities, with participant policy
-  refusals, cross-team token refusal, restart persistence and cleanup.
+- `test/e2e/aws_catalog.py` runs every bound operation of the first four services
+  through boto3 against two separate binaries, databases and token authorities,
+  with participant policy refusals, cross-team token refusal, restart
+  persistence and cleanup.
+- `test/e2e/aws_catalog_fixtures.py` runs a reviewed native lifecycle for every
+  other service from `test/e2e/catalog_fixtures/`: each bound operation must
+  succeed at least once, an unpermitted participant is refused before any
+  change, a second team stays empty, state survives restart and cleanup leaves
+  nothing behind.
 - `test/e2e/aws_catalog_console.py` drives the console and reference in Chromium
   with axe at 1440 px and 390 px, checking shared native state.
 - `formal/CatalogResourceLifecycle.tla` checks bounded store invariants with 12

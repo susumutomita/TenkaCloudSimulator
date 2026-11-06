@@ -41,6 +41,9 @@ def lookup(value, path):
 
 def run_steps(team, fixture, steps, saved, called, token=None):
     client = team.client(fixture['client'], token)
+    if fixture.get('inject_host_prefix') is False:
+        # Official host prefixes (for example MWAA "api.") cannot address loopback.
+        client.meta.config.inject_host_prefix = False
     for step in steps:
         args = substitute(step.get('args', {}), saved)
         operation = client.meta.method_to_api_mapping[step['op']]

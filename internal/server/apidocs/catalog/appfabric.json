@@ -1,0 +1,1025 @@
+{
+ "components": {
+  "schemas": {
+   "AppBundle": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     },
+     "customerManagedKeyArn": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "arn"
+    ],
+    "type": "object"
+   },
+   "AppBundleSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "arn"
+    ],
+    "type": "object"
+   },
+   "CreateAppBundleResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "appBundle": {
+      "$ref": "#/components/schemas/AppBundle"
+     }
+    },
+    "required": [
+     "appBundle"
+    ],
+    "type": "object"
+   },
+   "CreateIngestionResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "ingestion": {
+      "$ref": "#/components/schemas/Ingestion"
+     }
+    },
+    "required": [
+     "ingestion"
+    ],
+    "type": "object"
+   },
+   "DeleteAppBundleResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DeleteIngestionResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "GetAppBundleResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "appBundle": {
+      "$ref": "#/components/schemas/AppBundle"
+     }
+    },
+    "required": [
+     "appBundle"
+    ],
+    "type": "object"
+   },
+   "GetIngestionResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "ingestion": {
+      "$ref": "#/components/schemas/Ingestion"
+     }
+    },
+    "required": [
+     "ingestion"
+    ],
+    "type": "object"
+   },
+   "Ingestion": {
+    "additionalProperties": false,
+    "properties": {
+     "app": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "appBundleArn": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     },
+     "arn": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "ingestionType": {
+      "enum": [
+       "auditLog"
+      ],
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "enabled",
+       "disabled"
+      ],
+      "type": "string"
+     },
+     "tenantId": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "updatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "arn",
+     "appBundleArn",
+     "app",
+     "tenantId",
+     "createdAt",
+     "updatedAt",
+     "state",
+     "ingestionType"
+    ],
+    "type": "object"
+   },
+   "IngestionSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "app": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "arn": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "enabled",
+       "disabled"
+      ],
+      "type": "string"
+     },
+     "tenantId": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "arn",
+     "app",
+     "tenantId",
+     "state"
+    ],
+    "type": "object"
+   },
+   "ListAppBundlesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "appBundleSummaryList": {
+      "items": {
+       "$ref": "#/components/schemas/AppBundleSummary"
+      },
+      "type": "array"
+     },
+     "nextToken": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "appBundleSummaryList"
+    ],
+    "type": "object"
+   },
+   "ListIngestionsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "ingestions": {
+      "items": {
+       "$ref": "#/components/schemas/IngestionSummary"
+      },
+      "type": "array"
+     },
+     "nextToken": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "ingestions"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "key": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "value": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "key",
+     "value"
+    ],
+    "type": "object"
+   },
+   "TagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UntagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AppFabric API (2023-05-19). Every other official operation returns HTTP 501 UnknownOperationException. App bundles and audit-log ingestions are configuration metadata: ingestions stay disabled because StartIngestion, StopIngestion and data collection are not implemented, and no SaaS application is contacted. App authorizations (OAuth and API-key credentials), ingestion destinations and user-access tasks return UnknownOperationException with HTTP 501. App bundles with ingestions cannot be deleted, and customer managed keys must be given as key ARNs; no encryption is performed.",
+  "title": "AWS AppFabric (simulator catalog)",
+  "version": "2023-05-19"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/appbundles": {
+   "get": {
+    "operationId": "appfabricListAppBundles",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appfabric"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListAppBundlesResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListAppBundles",
+    "tags": [
+     "AWS AppFabric"
+    ]
+   },
+   "post": {
+    "operationId": "appfabricCreateAppBundle",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appfabric"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "type": "string"
+         },
+         "customerManagedKeyIdentifier": {
+          "maxLength": 1011,
+          "minLength": 1,
+          "type": "string"
+         },
+         "tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "maxItems": 50,
+          "minItems": 0,
+          "type": "array"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateAppBundleResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateAppBundle",
+    "tags": [
+     "AWS AppFabric"
+    ]
+   }
+  },
+  "/appbundles/{appBundleIdentifier}": {
+   "delete": {
+    "operationId": "appfabricDeleteAppBundle",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appfabric"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "appBundleIdentifier",
+      "required": true,
+      "schema": {
+       "maxLength": 1011,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DeleteAppBundleResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteAppBundle",
+    "tags": [
+     "AWS AppFabric"
+    ]
+   },
+   "get": {
+    "operationId": "appfabricGetAppBundle",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appfabric"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "appBundleIdentifier",
+      "required": true,
+      "schema": {
+       "maxLength": 1011,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GetAppBundleResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetAppBundle",
+    "tags": [
+     "AWS AppFabric"
+    ]
+   }
+  },
+  "/appbundles/{appBundleIdentifier}/ingestions": {
+   "get": {
+    "operationId": "appfabricListIngestions",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appfabric"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "appBundleIdentifier",
+      "required": true,
+      "schema": {
+       "maxLength": 1011,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListIngestionsResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListIngestions",
+    "tags": [
+     "AWS AppFabric"
+    ]
+   },
+   "post": {
+    "operationId": "appfabricCreateIngestion",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appfabric"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "appBundleIdentifier",
+      "required": true,
+      "schema": {
+       "maxLength": 1011,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "app": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         },
+         "clientToken": {
+          "type": "string"
+         },
+         "ingestionType": {
+          "enum": [
+           "auditLog"
+          ],
+          "type": "string"
+         },
+         "tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "maxItems": 50,
+          "minItems": 0,
+          "type": "array"
+         },
+         "tenantId": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "app",
+         "ingestionType",
+         "tenantId"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateIngestionResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateIngestion",
+    "tags": [
+     "AWS AppFabric"
+    ]
+   }
+  },
+  "/appbundles/{appBundleIdentifier}/ingestions/{ingestionIdentifier}": {
+   "delete": {
+    "operationId": "appfabricDeleteIngestion",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appfabric"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "appBundleIdentifier",
+      "required": true,
+      "schema": {
+       "maxLength": 1011,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ingestionIdentifier",
+      "required": true,
+      "schema": {
+       "maxLength": 1011,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DeleteIngestionResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteIngestion",
+    "tags": [
+     "AWS AppFabric"
+    ]
+   },
+   "get": {
+    "operationId": "appfabricGetIngestion",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appfabric"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "appBundleIdentifier",
+      "required": true,
+      "schema": {
+       "maxLength": 1011,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ingestionIdentifier",
+      "required": true,
+      "schema": {
+       "maxLength": 1011,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GetIngestionResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetIngestion",
+    "tags": [
+     "AWS AppFabric"
+    ]
+   }
+  },
+  "/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "appfabricUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appfabric"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1011,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 200,
+       "minItems": 0,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UntagResourceResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "AWS AppFabric"
+    ]
+   },
+   "get": {
+    "operationId": "appfabricListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appfabric"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1011,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "AWS AppFabric"
+    ]
+   },
+   "post": {
+    "operationId": "appfabricTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appfabric"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1011,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "maxItems": 50,
+          "minItems": 0,
+          "type": "array"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/TagResourceResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "AWS AppFabric"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AppFabric API (2023-05-19). Every other official operation returns HTTP 501 UnknownOperationException. App bundles and audit-log ingestions are configuration metadata: ingestions stay disabled because StartIngestion, StopIngestion and data collection are not implemented, and no SaaS application is contacted. App authorizations (OAuth and API-key credentials), ingestion destinations and user-access tasks return UnknownOperationException with HTTP 501. App bundles with ingestions cannot be deleted, and customer managed keys must be given as key ARNs; no encryption is performed.",
+   "name": "AWS AppFabric"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/appfabric/2023-05-19/service-2.json",
+  "sha256": "60a5c9f210eb05d10a50eedb098107d2aecef80449efd2a0c4f6dad7dc6a753f",
+  "license": "Apache-2.0"
+ }
+}

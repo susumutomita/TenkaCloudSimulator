@@ -1,0 +1,24 @@
+{
+ "client": "managedblockchain",
+ "steps": [
+  {"op": "create_accessor", "args": {"AccessorType": "BILLING_TOKEN", "NetworkType": "ETHEREUM_MAINNET", "Tags": {"team": "a"}}, "save": {"accessor": "AccessorId", "token": "BillingToken"}, "expect": {"NetworkType": "ETHEREUM_MAINNET"}},
+  {"op": "get_accessor", "args": {"AccessorId": "${accessor}"}, "save": {"arn": "Accessor.Arn"}, "expect": {"Accessor.Id": "${accessor}", "Accessor.Type": "BILLING_TOKEN", "Accessor.Status": "AVAILABLE", "Accessor.BillingToken": "${token}", "Accessor.Tags.team": "a"}},
+  {"op": "list_accessors", "args": {"NetworkType": "ETHEREUM_MAINNET"}, "expect": {"Accessors#count": 1, "Accessors[0].Id": "${accessor}"}},
+  {"op": "list_accessors", "args": {"NetworkType": "POLYGON_MAINNET"}, "expect": {"Accessors#count": 0}},
+  {"op": "tag_resource", "args": {"ResourceArn": "${arn}", "Tags": {"stage": "dev"}}},
+  {"op": "untag_resource", "args": {"ResourceArn": "${arn}", "TagKeys": ["stage"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "${arn}"}, "expect": {"Tags": {"team": "a"}}},
+  {"op": "list_networks", "args": {}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_accessor", "args": {"AccessorId": "ac-missing"}, "error": "ResourceNotFoundException"}
+ ],
+ "isolation": [
+  {"op": "list_accessors", "args": {}, "expect": {"Accessors#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_accessor", "args": {"AccessorId": "${accessor}"}, "expect": {"Accessor.BillingToken": "${token}"}}
+ ],
+ "cleanup": [
+  {"op": "delete_accessor", "args": {"AccessorId": "${accessor}"}},
+  {"op": "list_accessors", "args": {}, "expect": {"Accessors#count": 0}}
+ ]
+}

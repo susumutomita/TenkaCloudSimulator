@@ -1,0 +1,152 @@
+{
+ "client": "eks",
+ "steps": [
+  {
+   "op": "create_cluster",
+   "args": {
+    "name": "fixture-eks",
+    "version": "1.31",
+    "roleArn": "arn:aws:iam::000000000000:role/fixture-eks",
+    "resourcesVpcConfig": {
+     "subnetIds": [
+      "subnet-0123456789abcdef0",
+      "subnet-0123456789abcdef1"
+     ],
+     "endpointPublicAccess": true
+    },
+    "tags": {
+     "team": "a"
+    }
+   },
+   "save": {
+    "cluster": "cluster.arn"
+   },
+   "expect": {
+    "cluster.status": "CREATING",
+    "cluster.arn": "arn:aws:eks:us-east-1:000000000000:cluster/fixture-eks"
+   }
+  },
+  {
+   "op": "describe_cluster",
+   "args": {
+    "name": "fixture-eks"
+   },
+   "expect": {
+    "cluster.version": "1.31",
+    "cluster.resourcesVpcConfig.subnetIds#count": 2,
+    "cluster.tags.team": "a"
+   }
+  },
+  {
+   "op": "list_clusters",
+   "args": {},
+   "expect": {
+    "clusters": [
+     "fixture-eks"
+    ]
+   }
+  },
+  {
+   "op": "create_cluster",
+   "args": {
+    "name": "fixture-protected",
+    "roleArn": "arn:aws:iam::000000000000:role/fixture-eks",
+    "resourcesVpcConfig": {},
+    "deletionProtection": true
+   },
+   "error": "InvalidParameterException"
+  },
+  {
+   "op": "create_cluster",
+   "args": {
+    "name": "fixture-eks",
+    "roleArn": "arn:aws:iam::000000000000:role/fixture-eks",
+    "resourcesVpcConfig": {}
+   },
+   "error": "ResourceInUseException"
+  },
+  {
+   "op": "tag_resource",
+   "args": {
+    "resourceArn": "${cluster}",
+    "tags": {
+     "k": "v"
+    }
+   }
+  },
+  {
+   "op": "untag_resource",
+   "args": {
+    "resourceArn": "${cluster}",
+    "tagKeys": [
+     "k"
+    ]
+   }
+  },
+  {
+   "op": "list_tags_for_resource",
+   "args": {
+    "resourceArn": "${cluster}"
+   },
+   "expect": {
+    "tags": {
+     "team": "a"
+    }
+   }
+  },
+  {
+   "op": "list_nodegroups",
+   "args": {
+    "clusterName": "fixture-eks"
+   },
+   "error": "UnknownOperationException",
+   "status": 501
+  },
+  {
+   "op": "describe_cluster",
+   "args": {
+    "name": "missing"
+   },
+   "error": "ResourceNotFoundException",
+   "status": 404
+  }
+ ],
+ "isolation": [
+  {
+   "op": "list_clusters",
+   "args": {},
+   "expect": {
+    "clusters#count": 0
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "op": "describe_cluster",
+   "args": {
+    "name": "fixture-eks"
+   },
+   "expect": {
+    "cluster.roleArn": "arn:aws:iam::000000000000:role/fixture-eks"
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "op": "delete_cluster",
+   "args": {
+    "name": "fixture-eks"
+   },
+   "expect": {
+    "cluster.status": "DELETING"
+   }
+  },
+  {
+   "op": "list_clusters",
+   "args": {},
+   "expect": {
+    "clusters#count": 0
+   }
+  }
+ ]
+}

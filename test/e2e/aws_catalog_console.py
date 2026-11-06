@@ -123,7 +123,7 @@ def run():
                 docs.goto(team.endpoint + '/_simulator/docs/catalog.html')
                 expect(docs.get_by_text('AWS Amplify (simulator catalog)')).to_be_visible(timeout=20000)
                 index = docs.evaluate("fetch('/_simulator/docs/catalog/index.json').then(r=>r.json())")
-                assert {s['model'] for s in index} == {'amplify', 'codeconnections', 'ecr', 'stepfunctions'}
+                assert {'amplify', 'codeconnections', 'ecr', 'stepfunctions'} <= {s['model'] for s in index}
                 document = docs.evaluate("fetch('/_simulator/docs/catalog/ecr.json').then(r=>r.json())")
                 targets = document['paths']['/']['post']['parameters'][0]['schema']['enum']
                 assert 'AmazonEC2ContainerRegistry_V20150921.CreateRepository' in targets
