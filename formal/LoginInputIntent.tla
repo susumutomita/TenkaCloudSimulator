@@ -68,7 +68,8 @@ Submit(s) == IF Ready(s)
 \* Unfocused native writes can be lost on a locale rerender. DOM is deliberately
 \* reset from controlled state here; the locale property does NOT promise otherwise.
 Locale(s) == [s EXCEPT !.locale = IF @ = "en" THEN "ja" ELSE "en", !.dom = s.token]
-Unmount(s) == [Invalidate(s) EXCEPT !.alive = FALSE, !.connected = FALSE]
+Unmount(s) == [s EXCEPT !.rev = @ + 1, !.pasteRev = 0, !.fileCurrent = 0,
+ !.alive = FALSE, !.connected = FALSE]
 NextState(s,e) == CASE e.op = "edit" -> Adopt(s,e.v)
  [] e.op = "native" -> [s EXCEPT !.dom = e.v]
  [] e.op = "paste" -> Capture(s,e.v)
