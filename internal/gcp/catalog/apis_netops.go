@@ -295,7 +295,7 @@ var networkSecurity = func() *API {
 			"Security profiles, profile groups, firewall endpoints and associations, mirroring and intercept deployment groups, deployments, endpoint groups and associations, gateway security policies and rules, URL lists, TLS inspection policies and address groups are configuration metadata.",
 			"No firewall engine, threat signature, packet mirroring, interception, TLS decryption or proxy data plane runs; no traffic is inspected, and referenced networks, forwarding rules, CA pools and profiles are recorded as given and not resolved.",
 			"Firewall endpoints, their associations and mirroring and intercept deployments are zonal (for example us-central1-a); other resources use the supported regions or global. Organization-level resources are not implemented.",
-			"A security profile configures exactly the profile matching its type at creation; patches do not re-check that match. Address group items must be IP addresses or ranges within the declared capacity.",
+			"A security profile configures exactly the profile matching its type at creation; patches do not re-check that match. Address group items must be IP addresses or ranges and fit a capacity sent in the same request; a patch of items alone is not checked against the stored capacity.",
 			"Long-running operations complete synchronously and remain readable through operations.get/list. The authorization, TLS, DNS threat detector and Secure Access Connect resources are not implemented.",
 		},
 	}
