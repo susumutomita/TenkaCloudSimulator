@@ -5542,6 +5542,143 @@
           "expect_invariant": "UnknownNeverStatic"
         }
       ]
+    },
+    {
+      "id": "LandingTopologyState",
+      "model": "formal/LandingTopologyState.tla",
+      "config": "formal/LandingTopologyState.cfg",
+      "bounds": "Literal nine nodes/three providers, two selections (including invalid input), at most two paint callbacks; capability and reduced-motion booleans; one module mount and one retirement.",
+      "properties": [
+        "TypeOK",
+        "ProviderSelectsDefault",
+        "NodeClickSelectsExact",
+        "InvalidInputPreservesSelection",
+        "DOMSelectionAgrees",
+        "CanonicalHTMLAvailable",
+        "MountUsesLatestSelection",
+        "UnsupportedCanvasHidden",
+        "RetiredCanvasHidden",
+        "PaintUsesLatestSelection",
+        "RetiredCallbackNoEffect"
+      ],
+      "source_scope": [
+        "internal/server/landing/landing.mjs",
+        "internal/server/landing/topology-data.mjs",
+        "internal/server/landing/topology-canvas.mjs"
+      ],
+      "limits": "Post-start semantic selection and optional decorative lifecycle safety only. Trusted source data and native feature/paint verdicts are assumed; no DOM/accessibility/layout/rendering/Chrome support/backend/route/network or JavaScript refinement proof. Reduced-motion has identical static transitions because implementation has no animation loop; no preference-detection proof. Timeout is an environment event, not wall-clock/liveness.",
+      "mutants": [
+        {
+          "id": "WrongProviderDefault",
+          "edits": [
+            {
+              "old": "p = \"gcp\" -> \"gcp-storage\"",
+              "new": "p = \"gcp\" -> \"gcp-object\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ProviderSelectsDefault"
+        },
+        {
+          "id": "ClickSelectsDifferentNode",
+          "edits": [
+            {
+              "old": "Select(\"node\",n,Owner(n),n)",
+              "new": "Select(\"node\",n,Owner(n),\"aws-lambda\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NodeClickSelectsExact"
+        },
+        {
+          "id": "AcceptInvalidSelection",
+          "edits": [
+            {
+              "old": "/\\ ui' = ui\n /\\ decoration' = decoration",
+              "new": "/\\ ui' = UI(\"aws\",\"aws-s3\")\n /\\ decoration' = decoration",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "InvalidInputPreservesSelection"
+        },
+        {
+          "id": "WrongDetailProjection",
+          "edits": [
+            {
+              "old": "/\\ ui' = UI(p,n)",
+              "new": "/\\ ui' = [UI(p,n) EXCEPT !.detail = \"aws-s3\"]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DOMSelectionAgrees"
+        },
+        {
+          "id": "HideCanonicalHTMLOnRetire",
+          "edits": [
+            {
+              "old": "/\\ last' = Event(reason,Absent)\n /\\ UNCHANGED <<ui, capability, reducedMotion, selections, paints>>",
+              "new": "/\\ last' = Event(reason,Absent)\n /\\ ui' = [ui EXCEPT !.available = FALSE]\n /\\ UNCHANGED <<capability, reducedMotion, selections, paints>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CanonicalHTMLAvailable"
+        },
+        {
+          "id": "MountCapturesInitialSelection",
+          "edits": [
+            {
+              "old": "!.provider = ui.provider, !.node = ui.node",
+              "new": "!.provider = \"aws\", !.node = \"aws-lambda\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MountUsesLatestSelection"
+        },
+        {
+          "id": "RevealUnsupportedCanvas",
+          "edits": [
+            {
+              "old": "ELSE [decoration EXCEPT !.phase = \"dead\", !.shown = FALSE, !.pending = FALSE]",
+              "new": "ELSE [decoration EXCEPT !.phase = \"dead\", !.shown = TRUE, !.pending = FALSE]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "UnsupportedCanvasHidden"
+        },
+        {
+          "id": "LeaveRetiredCanvasVisible",
+          "edits": [
+            {
+              "old": "/\\ decoration' = [decoration EXCEPT !.phase = \"dead\", !.shown = FALSE, !.pending = FALSE]",
+              "new": "/\\ decoration' = [decoration EXCEPT !.phase = \"dead\", !.shown = TRUE, !.pending = FALSE]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetiredCanvasHidden"
+        },
+        {
+          "id": "DrawInitialSelection",
+          "edits": [
+            {
+              "old": "!.drawnProvider = decoration.provider, !.drawnNode = decoration.node",
+              "new": "!.drawnProvider = \"aws\", !.drawnNode = \"aws-lambda\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PaintUsesLatestSelection"
+        },
+        {
+          "id": "LatePaintMutatesSurface",
+          "edits": [
+            {
+              "old": "/\\ decoration' = decoration\n /\\ paints' = paints + 1",
+              "new": "/\\ decoration' = [decoration EXCEPT !.drawn = ~@]\n /\\ paints' = paints + 1",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetiredCallbackNoEffect"
+        }
+      ]
     }
   ]
 }
