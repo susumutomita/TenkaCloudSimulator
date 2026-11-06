@@ -71,6 +71,14 @@ def submit(page):
  if dialog.is_visible():dialog.get_by_role('button').last.click()
  else:page.get_by_role('button',name=re.compile('^(Create bucket|Upload|Create parameter|Save changes)$')).last.click()
 class Conformance(unittest.TestCase):
+ def test_landing_topology_html_fallback_keyboard_and_public_navigation(self):
+  from landing_topology import run_landing_topology
+  # The fixture owns fresh dummy credentials for readiness only. The helper
+  # receives no token, browser authentication, native API state or user keys.
+  with running(authenticated=True) as (endpoint,_):
+   result=run_landing_topology(endpoint,REPORTS/'landing-topology')
+  self.assertEqual(result['cases'],8)
+  self.assertEqual(result['strictAxeStates'],6)
  def test_sakura_reference_real_examples_and_scalar_send(self):
   subprocess.run([sys.executable, str(Path(__file__).with_name('sakura_reference_live.py')), '--root', str(Path(__file__).resolve().parents[2]), '--binary', str(BINARY), '--reports', str(REPORTS/'sakura-reference-live'), '--browser'], check=True, timeout=180)
  def test_sakura_disk_console_real_native_state_and_scope(self):
