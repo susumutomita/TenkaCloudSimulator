@@ -28,6 +28,7 @@ type CollectionDescriptor struct {
 	Schema     string                      `json:"schema"`
 	Parent     string                      `json:"parent,omitempty"`
 	IDParam    string                      `json:"idParam,omitempty"`
+	IDField    string                      `json:"idField,omitempty"`
 	Limit      int                         `json:"limit"`
 	Mutable    []string                    `json:"mutable,omitempty"`
 	Permission string                      `json:"permission"`
@@ -61,7 +62,7 @@ func (e *Engine) Describe() []Descriptor {
 		}
 		sort.Strings(d.Methods)
 		for _, c := range b.api.Collections {
-			cd := CollectionDescriptor{ID: c.ID, Schema: c.Schema, Parent: c.Parent, IDParam: c.IDParam, Limit: c.Limit, Mutable: c.Mutable, Permission: c.Permission, Methods: map[string]MethodDescriptor{}}
+			cd := CollectionDescriptor{ID: c.ID, Schema: c.Schema, Parent: c.Parent, IDParam: c.IDParam, IDField: c.IDField, Limit: c.Limit, Mutable: c.Mutable, Permission: c.Permission, Methods: map[string]MethodDescriptor{}}
 			if cd.Limit == 0 {
 				cd.Limit = defaultLimit
 			}
@@ -85,9 +86,14 @@ func (e *Engine) Describe() []Descriptor {
 					}
 				}
 				if bound.Kind == Create {
-					cd.Fields = b.fields(m.Request, c)
+					cd.Fields = b.fields(m, c)
 				}
-				cd.Methods[string(bound.Kind)] = md
+				key := string(bound.Kind)
+				if bound.Kind == Set {
+					// Custom methods are keyed by their verb, such as "setLabels".
+					key = bound.Method[strings.LastIndex(bound.Method, ".")+1:]
+				}
+				cd.Methods[key] = md
 			}
 			d.Collections = append(d.Collections, cd)
 		}
@@ -97,12 +103,12 @@ func (e *Engine) Describe() []Descriptor {
 }
 
 // fields lists writable scalar fields a generic form can collect.
-func (b *binding) fields(schema string, c *Collection) []FieldDescriptor {
+func (b *binding) fields(m *Method, c *Collection) []FieldDescriptor {
 	relaxed := map[string]bool{}
 	for _, f := range c.Relax {
 		relaxed[f] = true
 	}
-	s := b.model.Schemas[schema]
+	s := b.model.Schemas[m.Request]
 	names := make([]string, 0, len(s.Properties))
 	for name := range s.Properties {
 		names = append(names, name)
@@ -115,7 +121,7 @@ func (b *binding) fields(schema string, c *Collection) []FieldDescriptor {
 			continue
 		}
 		if p.Type == "string" || p.Type == "boolean" || p.Type == "integer" {
-			out = append(out, FieldDescriptor{Name: name, Type: p.Type, Required: s.Properties[name].Required && !relaxed[name], Enum: withoutUnspecified(p.Enum)})
+			out = append(out, FieldDescriptor{Name: name, Type: p.Type, Required: b.requiredFor(s.Properties[name], m.ID) && !relaxed[name], Enum: withoutUnspecified(p.Enum)})
 		}
 	}
 	return out

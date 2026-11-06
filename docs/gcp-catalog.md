@@ -54,6 +54,39 @@ bounds above.
 - Errors use `google.rpc.Status` with the canonical HTTP mapping, for example
   `ALREADY_EXISTS` 409 and `FAILED_PRECONDITION` 400.
 
+### Flat APIs (Compute Engine style)
+
+APIs such as Compute Engine (`compute.v1`) address resources with separate
+path parameters (`projects/{project}/zones/{zone}/disks/{disk}`,
+`.../regions/{region}/...`, `.../global/...`) and take the resource name in
+the request body.
+
+- Zones are the published zones of the supported regions: `us-central1-a`,
+  `-b`, `-c`, `-f`; `us-east1-b`, `-c`, `-d`; `us-west1-a`, `-b`, `-c`;
+  `europe-west1-b`, `-c`, `-d`; and `asia-northeast1-a`, `-b`, `-c`. Other
+  zones and regions are refused with `INVALID_ARGUMENT`.
+- Created resources carry their official `kind`, a server-assigned 19-digit
+  `id`, `selfLink` (`https://www.googleapis.com/compute/v1/...`),
+  `creationTimestamp` and, where the schema has them, `zone` or `region`
+  URLs. `name` holds the short name.
+- Mutations return the API's own operation resource (for example
+  `compute#operation`) with `status: DONE`, `progress: 100`,
+  `operationType` (the method name, such as `insert` or `setLabels`),
+  `targetLink` and `targetId`. Operations are stored under the scope of the
+  resource and remain readable through `zoneOperations`, `regionOperations`
+  or `globalOperations` `get`, `list` and `wait`. `requestId` is echoed as
+  `clientOperationId` and replays the stored operation.
+- `patch` without `updateMask` applies a JSON merge patch (RFC 7396): nested
+  objects merge and arrays replace. `null` members are refused. Sending the
+  unchanged `name` back is accepted; a different `name` is refused.
+- Custom methods that set fields (for example `setLabels` or `resize`) write
+  every field of their request; an omitted field is cleared. A supplied
+  `fingerprint` or `labelFingerprint` must match the stored value
+  (`ABORTED` 409 otherwise, where Compute Engine returns 412) and is
+  regenerated after the change.
+- Lists page with `maxResults` (default 50, capped at 1,000) and
+  `pageToken`; `filter` and `orderBy` are refused when non-empty.
+
 ## Limits
 
 Requests are limited to 256 KiB, stored resource documents to 64 KiB and all

@@ -30,6 +30,8 @@ type Property struct {
 	Pattern    string               `json:"pattern"`
 	ReadOnly   bool                 `json:"readOnly"`
 	Required   bool                 `json:"required"`
+	RequiredBy []string             `json:"requiredBy"`
+	Default    string               `json:"default"`
 	Items      *Property            `json:"items"`
 	Additional *Property            `json:"additionalProperties"`
 	Properties map[string]*Property `json:"properties"`
@@ -108,6 +110,10 @@ func validateModel(m *Model) error {
 	}
 	for id, method := range m.Methods {
 		method.ID = id
+		if method.FlatPath == "" {
+			// Some discovery methods carry only "path".
+			method.FlatPath = method.Path
+		}
 		for _, ref := range []string{method.Request, method.Response} {
 			if ref != "" && m.Schemas[ref] == nil {
 				return fmt.Errorf("GCP catalog model %s method %s references missing schema %s", m.Key, id, ref)
