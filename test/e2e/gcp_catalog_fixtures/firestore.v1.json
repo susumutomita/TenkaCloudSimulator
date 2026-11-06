@@ -12,6 +12,11 @@
   {"call": "projects.databases.backupSchedules.list", "args": {"parent": "${database}"}, "expect": {"backupSchedules#count": 1}},
   {"call": "projects.databases.backupSchedules.patch", "args": {"name": "${schedule}", "updateMask": "retention"}, "body": {"retention": "1209600s"}},
   {"call": "projects.databases.backupSchedules.create", "args": {"parent": "${database}"}, "body": {"retention": "604800s"}, "error": "INVALID_ARGUMENT", "status": 400},
+  {"call": "projects.databases.collectionGroups.indexes.create", "args": {"parent": "${database}/collectionGroups/users"}, "body": {"queryScope": "COLLECTION", "fields": [{"fieldPath": "city", "order": "ASCENDING"}, {"fieldPath": "age", "order": "DESCENDING"}]}, "save": {"index": "response.name"}, "expect": {"response.state": "READY"}},
+  {"call": "projects.databases.collectionGroups.indexes.get", "args": {"name": "${index}"}, "expect": {"fields[1].fieldPath": "age"}},
+  {"call": "projects.databases.collectionGroups.indexes.list", "args": {"parent": "${database}/collectionGroups/users"}, "expect": {"indexes#count": 1}},
+  {"call": "projects.databases.collectionGroups.indexes.create", "args": {"parent": "${database}/collectionGroups/users"}, "body": {"fields": [{"fieldPath": "city", "order": "ASCENDING"}]}, "error": "INVALID_ARGUMENT", "status": 400},
+  {"call": "projects.databases.collectionGroups.fields.patch", "args": {"name": "${database}/collectionGroups/users/fields/city", "body": {"ttlConfig": {}}}, "error": "UNIMPLEMENTED", "status": 501},
   {"call": "projects.databases.delete", "args": {"name": "${database}"}, "error": "FAILED_PRECONDITION", "status": 400},
   {"call": "projects.databases.documents.get", "args": {"name": "${database}/documents/users/alice"}, "error": "UNIMPLEMENTED", "status": 501},
   {"call": "projects.databases.list", "args": {"parent": "projects/other-project"}, "error": "PERMISSION_DENIED", "status": 403}
@@ -24,6 +29,7 @@
   {"call": "projects.databases.backupSchedules.get", "args": {"name": "${schedule}"}, "expect": {"retention": "1209600s"}}
  ],
  "cleanup": [
+  {"call": "projects.databases.collectionGroups.indexes.delete", "args": {"name": "${index}"}},
   {"call": "projects.databases.backupSchedules.delete", "args": {"name": "${schedule}"}},
   {"call": "projects.databases.patch", "args": {"name": "${database}", "updateMask": "deleteProtectionState"}, "body": {"deleteProtectionState": "DELETE_PROTECTION_DISABLED"}},
   {"call": "projects.databases.delete", "args": {"name": "${database}"}},

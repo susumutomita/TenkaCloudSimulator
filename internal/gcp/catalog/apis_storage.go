@@ -210,18 +210,22 @@ var firestoreAdmin = &API{
 		{ID: "backupSchedules", Schema: "GoogleFirestoreAdminV1BackupSchedule", Message: "BackupSchedule", Parent: "databases", Limit: 2, Permission: "datastore.backupSchedules",
 			Generate: map[string]any{"createTime": "$now", "updateTime": "$now"},
 			Mutable:  []string{"retention"}},
+		{ID: "indexes", Schema: "GoogleFirestoreAdminV1Index", Message: "Index", Parent: "databases", Implicit: "collectionGroups", Limit: 50, Permission: "datastore.indexes",
+			ImplicitPattern: regexp.MustCompile(`^[A-Za-z0-9_-][A-Za-z0-9_.-]{0,99}$`), Operations: "databases",
+			Generate: map[string]any{"state": "READY"}},
 	},
 	Bindings: storageBindings(
 		storageCRUD("projects.databases", "databases", noTagBindings, nil),
 		storageCRUD("projects.databases.backupSchedules", "backupSchedules", backupRecurrence, nil),
+		storageCRUD("projects.databases.collectionGroups.indexes", "indexes", compositeIndex, nil, Create, Get, List, Delete),
 		[]Binding{
 			{Method: "projects.databases.operations.get", Kind: OperationGet, Permission: "datastore.operations.get"},
 			{Method: "projects.databases.operations.list", Kind: OperationList, Permission: "datastore.operations.list"},
 		},
 	),
 	Bounds: []string{
-		"Databases and backup schedules are configuration metadata: no document store, query engine, index build or backup exists. The documents, export, import, clone, restore, index, field and user credential methods remain unimplemented.",
-		"Deleting a database removes its backup schedules immediately and keeps no deleted database for showDeleted; deletion protection blocks delete. Tag bindings are refused. Operations complete synchronously under projects/{project}/databases/{database}/operations.",
+		"Databases, backup schedules and composite indexes are configuration metadata: no document store, query engine, index build or backup exists, and indexes report READY immediately without duplicate-definition checks; collection group IDs are limited to 100 letters, digits, underscores, hyphens and dots. The documents, export, import, clone, restore, field and user credential methods remain unimplemented.",
+		"Deleting a database removes its backup schedules and indexes immediately and keeps no deleted database for showDeleted; deletion protection blocks delete. Tag bindings are refused. Operations complete synchronously under projects/{project}/databases/{database}/operations.",
 	},
 }
 
@@ -454,6 +458,15 @@ var (
 func gkeCluster(body map[string]any) error {
 	if cluster, ok := body["cluster"].(string); ok && !gkeClusterName.MatchString(cluster) {
 		return invalid("Field 'cluster' must be projects/*/locations/*/clusters/* or projects/*/zones/*/clusters/*.")
+	}
+	return nil
+}
+
+// compositeIndex requires the 2 to 100 fields of a composite index; single
+// field indexes belong to the unimplemented fields methods.
+func compositeIndex(body map[string]any) error {
+	if fields, _ := body["fields"].([]any); len(fields) < 2 || len(fields) > 100 {
+		return invalid("Field 'fields' must list 2 to 100 index fields.")
 	}
 	return nil
 }

@@ -215,6 +215,23 @@ func TestFirestoreDatabasesBackupSchedulesAndOperations(t *testing.T) {
 	schedule, _ := storageCycle(t, h, api+db+"/backupSchedules", "", map[string]any{"retention": "604800s", "dailyRecurrence": map[string]any{}}, "backupSchedules", "retention", map[string]any{"retention": "86400s"})
 	storageRefused(t, h.call("owner", "POST", api+db+"/backupSchedules", map[string]any{"retention": "604800s"}), "dailyRecurrence")
 	storageRefused(t, h.call("owner", "POST", api+db+"/backupSchedules", map[string]any{"dailyRecurrence": map[string]any{}, "weeklyRecurrence": map[string]any{"day": "MONDAY"}}), "weeklyRecurrence")
+	indexes := api + db + "/collectionGroups/users/indexes"
+	fields := []any{map[string]any{"fieldPath": "city", "order": "ASCENDING"}, map[string]any{"fieldPath": "age", "order": "DESCENDING"}}
+	index := h.call("owner", "POST", indexes, map[string]any{"queryScope": "COLLECTION", "fields": fields})
+	expect(t, index, 200, "")
+	indexName := index.body["response"].(map[string]any)["name"].(string)
+	if !strings.HasPrefix(index.body["name"].(string), db+"/operations/") || !strings.HasPrefix(indexName, db+"/collectionGroups/users/indexes/") ||
+		index.body["response"].(map[string]any)["@type"] != "type.googleapis.com/google.firestore.admin.v1.Index" {
+		t.Fatalf("index operation %v", index.body)
+	}
+	expect(t, h.call("owner", "GET", api+indexName, nil), 200, "")
+	if items := h.call("owner", "GET", indexes, nil).body["indexes"].([]any); len(items) != 1 {
+		t.Fatalf("indexes %v", items)
+	}
+	storageRefused(t, h.call("owner", "POST", indexes, map[string]any{"fields": fields[:1]}), "fields")
+	expect(t, h.call("owner", "POST", api+db+"/collectionGroups/bad%20group/indexes", map[string]any{"fields": fields}), 400, "INVALID_ARGUMENT")
+	expect(t, h.call("owner", "POST", api+storageProject+"/databases/missing/collectionGroups/users/indexes", map[string]any{"fields": fields}), 404, "NOT_FOUND")
+	expect(t, h.call("owner", "PATCH", api+db+"/collectionGroups/users/fields/city", map[string]any{}), 501, "UNIMPLEMENTED")
 	expect(t, h.call("owner", "GET", api+db+"/documents/users/alice", nil), 501, "UNIMPLEMENTED")
 	if denied := h.call("intruder", "GET", api+db+"/operations", nil); !strings.Contains(denied.raw, "datastore.operations.list") {
 		t.Fatalf("operation permission %s", denied.raw)
@@ -227,6 +244,7 @@ func TestFirestoreDatabasesBackupSchedulesAndOperations(t *testing.T) {
 		t.Fatalf("delete operation %v", deleted.body)
 	}
 	expect(t, h.call("owner", "GET", api+schedule, nil), 404, "NOT_FOUND")
+	expect(t, h.call("owner", "GET", api+indexName, nil), 404, "NOT_FOUND")
 	recreated := h.call("owner", "POST", api+storageProject+"/databases?databaseId=orders", map[string]any{"locationId": "nam5", "type": "DATASTORE_MODE"})
 	expect(t, recreated, 200, "")
 	second, _ := storageCycle(t, h, api+storageProject+"/databases/orders/backupSchedules", "", map[string]any{"weeklyRecurrence": map[string]any{"day": "MONDAY"}}, "backupSchedules", "", nil)
