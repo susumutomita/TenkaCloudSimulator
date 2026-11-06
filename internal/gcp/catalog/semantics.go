@@ -83,8 +83,8 @@ func (q *request) execute() (any, error) {
 }
 
 func (q *request) find(name string) (row, error) {
-	r, err := findName(q.e.store.db, name)
-	if errors.Is(err, sql.ErrNoRows) || err == nil && r.API != q.b.model.Name {
+	r, err := findName(q.e.store.db, q.b.model.Name, name)
+	if errors.Is(err, sql.ErrNoRows) {
 		return row{}, &status{"NOT_FOUND", fmt.Sprintf("Resource '%s' was not found.", name)}
 	}
 	return r, err
@@ -313,7 +313,7 @@ func (q *request) create() (any, error) {
 			return nil, err
 		}
 		defer tx.Rollback()
-		if _, err := findName(tx, name); err == nil {
+		if _, err := findName(tx, q.b.model.Name, name); err == nil {
 			return nil, &status{"ALREADY_EXISTS", fmt.Sprintf("Resource '%s' already exists.", name)}
 		} else if !errors.Is(err, sql.ErrNoRows) {
 			return nil, err
@@ -484,7 +484,7 @@ func (q *request) patch() (any, error) {
 		}
 		defer tx.Rollback()
 		if q.params["validateOnly"] != true {
-			if err := exactlyOne(tx.Exec("UPDATE gcp_catalog_resources SET document=?, generation=generation+1 WHERE name=? AND generation=?", data, r.Name, r.Generation)); err != nil {
+			if err := exactlyOne(tx.Exec("UPDATE gcp_catalog_resources SET document=?, generation=generation+1 WHERE api=? AND name=? AND generation=?", data, r.API, r.Name, r.Generation)); err != nil {
 				return nil, err
 			}
 		}
@@ -513,17 +513,17 @@ func (q *request) remove() (any, error) {
 		}
 		defer tx.Rollback()
 		var children int
-		if err := tx.QueryRow("SELECT count(*) FROM gcp_catalog_resources WHERE name LIKE ? ESCAPE '\\'", escapeLike(r.Name)+"/%").Scan(&children); err != nil {
+		if err := tx.QueryRow("SELECT count(*) FROM gcp_catalog_resources WHERE api=? AND name LIKE ? ESCAPE '\\'", r.API, escapeLike(r.Name)+"/%").Scan(&children); err != nil {
 			return nil, err
 		}
 		if children > 0 && !(force && c.Cascade) {
 			return nil, &status{"FAILED_PRECONDITION", fmt.Sprintf("Resource '%s' still has child resources.", r.Name)}
 		}
 		if q.params["validateOnly"] != true {
-			if _, err := tx.Exec("DELETE FROM gcp_catalog_resources WHERE name LIKE ? ESCAPE '\\'", escapeLike(r.Name)+"/%"); err != nil {
+			if _, err := tx.Exec("DELETE FROM gcp_catalog_resources WHERE api=? AND name LIKE ? ESCAPE '\\'", r.API, escapeLike(r.Name)+"/%"); err != nil {
 				return nil, err
 			}
-			if err := exactlyOne(tx.Exec("DELETE FROM gcp_catalog_resources WHERE name=? AND generation=?", r.Name, r.Generation)); err != nil {
+			if err := exactlyOne(tx.Exec("DELETE FROM gcp_catalog_resources WHERE api=? AND name=? AND generation=?", r.API, r.Name, r.Generation)); err != nil {
 				return nil, err
 			}
 		}

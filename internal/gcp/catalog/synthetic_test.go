@@ -157,3 +157,31 @@ func TestFullNameIDsMessageTypesAndDeletedResources(t *testing.T) {
 	}
 	expect(t, h.call("owner", "DELETE", base+"/w1", nil), 404, "NOT_FOUND")
 }
+
+// Resource names are scoped by API: two services may each own
+// projects/p/.../widgets/w, as Looker and Data Fusion both own instances.
+func TestResourceNamesAreScopedByAPI(t *testing.T) {
+	h := newHarness(t)
+	for _, name := range []string{"synth", "other"} {
+		api, model := syntheticAPI(t)
+		api.Key, model.Key, model.Name, model.ServicePath = name+".v1", name+".v1", name, ""
+		api.Collections[0].IDField = "name"
+		b, err := bindAPI(api, model)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := h.engine.add(b); err != nil {
+			t.Fatal(err)
+		}
+	}
+	synth, other := "/synth/v1/projects/tenkacloud-local/widgets", "/other/v1/projects/tenkacloud-local/widgets"
+	expect(t, h.call("owner", "POST", synth, map[string]any{"name": "w", "note": "synth"}), 200, "")
+	expect(t, h.call("owner", "GET", other+"/w", nil), 404, "NOT_FOUND")
+	expect(t, h.call("owner", "POST", other, map[string]any{"name": "w", "note": "other"}), 200, "")
+	if got := h.call("owner", "GET", synth+"/w", nil); got.body["note"] != "synth" {
+		t.Fatalf("synth resource %v", got.body)
+	}
+	if got := h.call("owner", "GET", other+"/w", nil); got.body["note"] != "other" {
+		t.Fatalf("other resource %v", got.body)
+	}
+}

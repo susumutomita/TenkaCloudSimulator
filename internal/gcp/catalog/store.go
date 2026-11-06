@@ -35,8 +35,8 @@ func newStore(db *sql.DB) (*store, error) {
 		return nil, errors.New("the GCP catalog requires a provider database")
 	}
 	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS gcp_catalog_resources(
- api TEXT NOT NULL, name TEXT NOT NULL PRIMARY KEY, parent TEXT NOT NULL, collection TEXT NOT NULL,
- id TEXT NOT NULL, document TEXT NOT NULL, seq INTEGER NOT NULL, generation INTEGER NOT NULL);
+ api TEXT NOT NULL, name TEXT NOT NULL, parent TEXT NOT NULL, collection TEXT NOT NULL,
+ id TEXT NOT NULL, document TEXT NOT NULL, seq INTEGER NOT NULL, generation INTEGER NOT NULL, PRIMARY KEY(api, name));
 CREATE INDEX IF NOT EXISTS gcp_catalog_resources_parent ON gcp_catalog_resources(api, parent, collection, seq);
 CREATE TABLE IF NOT EXISTS gcp_catalog_operations(
  api TEXT NOT NULL, name TEXT NOT NULL PRIMARY KEY, scope TEXT NOT NULL, document TEXT NOT NULL, seq INTEGER NOT NULL);
@@ -74,8 +74,11 @@ func scanRow(s scanner) (row, error) {
 	return r, nil
 }
 
-func findName(q querier, name string) (row, error) {
-	return scanRow(q.QueryRow("SELECT "+columns+" FROM gcp_catalog_resources WHERE name=?", name))
+// findName looks up a resource name within one API: names such as
+// projects/p/locations/l/instances/i are scoped by service, as full
+// resource names (//looker.googleapis.com/...) are.
+func findName(q querier, api, name string) (row, error) {
+	return scanRow(q.QueryRow("SELECT "+columns+" FROM gcp_catalog_resources WHERE api=? AND name=?", api, name))
 }
 
 func listChildren(q querier, api, parent, collection string) ([]row, error) {
