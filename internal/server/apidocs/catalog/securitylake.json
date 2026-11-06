@@ -1,0 +1,283 @@
+{
+ "components": {
+  "schemas": {
+   "CreateDataLakeExceptionSubscriptionResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DeleteDataLakeExceptionSubscriptionResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "GetDataLakeExceptionSubscriptionResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "exceptionTimeToLive": {
+      "type": "integer"
+     },
+     "notificationEndpoint": {
+      "type": "string"
+     },
+     "subscriptionProtocol": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "UpdateDataLakeExceptionSubscriptionResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon Security Lake API (2018-05-10). Every other official operation returns HTTP 501 UnknownOperationException. Only the data lake exception subscription is served, as configuration metadata that needs no data lake: no AWS or custom log source is ingested, so no exception occurs and no notification is ever sent to the endpoint. GetDataLakeExceptionSubscription returns no members before a subscription exists, UpdateDataLakeExceptionSubscription stores a subscription even when none exists, and a second CreateDataLakeExceptionSubscription is refused with ConflictException. Data lakes, log sources, subscribers and subscriber notifications, organization configuration, delegated administrators, data lake exceptions and tagging return UnknownOperationException with HTTP 501.",
+  "title": "Amazon Security Lake (simulator catalog)",
+  "version": "2018-05-10"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/v1/datalake/exceptions/subscription": {
+   "delete": {
+    "operationId": "securitylakeDeleteDataLakeExceptionSubscription",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "securitylake"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DeleteDataLakeExceptionSubscriptionResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteDataLakeExceptionSubscription",
+    "tags": [
+     "Amazon Security Lake"
+    ]
+   },
+   "get": {
+    "operationId": "securitylakeGetDataLakeExceptionSubscription",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "securitylake"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GetDataLakeExceptionSubscriptionResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetDataLakeExceptionSubscription",
+    "tags": [
+     "Amazon Security Lake"
+    ]
+   },
+   "post": {
+    "operationId": "securitylakeCreateDataLakeExceptionSubscription",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "securitylake"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "exceptionTimeToLive": {
+          "minimum": 1,
+          "type": "integer"
+         },
+         "notificationEndpoint": {
+          "type": "string"
+         },
+         "subscriptionProtocol": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "notificationEndpoint",
+         "subscriptionProtocol"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateDataLakeExceptionSubscriptionResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateDataLakeExceptionSubscription",
+    "tags": [
+     "Amazon Security Lake"
+    ]
+   },
+   "put": {
+    "operationId": "securitylakeUpdateDataLakeExceptionSubscription",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "securitylake"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "exceptionTimeToLive": {
+          "minimum": 1,
+          "type": "integer"
+         },
+         "notificationEndpoint": {
+          "type": "string"
+         },
+         "subscriptionProtocol": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "notificationEndpoint",
+         "subscriptionProtocol"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UpdateDataLakeExceptionSubscriptionResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateDataLakeExceptionSubscription",
+    "tags": [
+     "Amazon Security Lake"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon Security Lake API (2018-05-10). Every other official operation returns HTTP 501 UnknownOperationException. Only the data lake exception subscription is served, as configuration metadata that needs no data lake: no AWS or custom log source is ingested, so no exception occurs and no notification is ever sent to the endpoint. GetDataLakeExceptionSubscription returns no members before a subscription exists, UpdateDataLakeExceptionSubscription stores a subscription even when none exists, and a second CreateDataLakeExceptionSubscription is refused with ConflictException. Data lakes, log sources, subscribers and subscriber notifications, organization configuration, delegated administrators, data lake exceptions and tagging return UnknownOperationException with HTTP 501.",
+   "name": "Amazon Security Lake"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/securitylake/2018-05-10/service-2.json",
+  "sha256": "c56a18b805dc0d8ded6cc405d4bed63e6a0ef8431ea57138c4364bbc41cfb6bd",
+  "license": "Apache-2.0"
+ }
+}

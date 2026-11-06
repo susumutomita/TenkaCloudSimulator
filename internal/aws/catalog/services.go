@@ -15,5 +15,7 @@ func Services() []*Service {
 		appConfig, awsConfig, cloudTrail, dataLifecycleManager, managedPrometheus, resourceGroups, serviceCatalog,
 		// Security, identity and compliance.
 		acm, acmPCA, detective, ram, securityHub, shield, signer, verifiedPermissions,
+		auditManager, cloudDirectory, firewallManager, guardDuty, identityCenter, inspector, macie, paymentCryptography,
+		securityIncidentResponse, securityLake,
 	}
 }

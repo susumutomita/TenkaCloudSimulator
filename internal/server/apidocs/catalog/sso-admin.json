@@ -1,0 +1,784 @@
+{
+ "components": {
+  "schemas": {
+   "CreateInstanceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ClientToken": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 255,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 75,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "CreateInstanceResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "InstanceArn": {
+      "maxLength": 1224,
+      "minLength": 10,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CreatePermissionSetRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Description": {
+      "maxLength": 700,
+      "minLength": 1,
+      "type": "string"
+     },
+     "InstanceArn": {
+      "maxLength": 1224,
+      "minLength": 10,
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 32,
+      "minLength": 1,
+      "type": "string"
+     },
+     "RelayState": {
+      "maxLength": 240,
+      "minLength": 1,
+      "type": "string"
+     },
+     "SessionDuration": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 75,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "Name",
+     "InstanceArn"
+    ],
+    "type": "object"
+   },
+   "CreatePermissionSetResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "PermissionSet": {
+      "$ref": "#/components/schemas/PermissionSet"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteInstanceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "InstanceArn": {
+      "maxLength": 1224,
+      "minLength": 10,
+      "type": "string"
+     }
+    },
+    "required": [
+     "InstanceArn"
+    ],
+    "type": "object"
+   },
+   "DeleteInstanceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DeletePermissionSetRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "InstanceArn": {
+      "maxLength": 1224,
+      "minLength": 10,
+      "type": "string"
+     },
+     "PermissionSetArn": {
+      "maxLength": 1224,
+      "minLength": 10,
+      "type": "string"
+     }
+    },
+    "required": [
+     "InstanceArn",
+     "PermissionSetArn"
+    ],
+    "type": "object"
+   },
+   "DeletePermissionSetResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DescribeInstanceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "InstanceArn": {
+      "maxLength": 1224,
+      "minLength": 10,
+      "type": "string"
+     }
+    },
+    "required": [
+     "InstanceArn"
+    ],
+    "type": "object"
+   },
+   "DescribeInstanceResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "CreatedDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "EncryptionConfigurationDetails": {
+      "$ref": "#/components/schemas/EncryptionConfigurationDetails"
+     },
+     "IdentityStoreId": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "InstanceArn": {
+      "maxLength": 1224,
+      "minLength": 10,
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 255,
+      "minLength": 0,
+      "type": "string"
+     },
+     "OwnerAccountId": {
+      "maxLength": 12,
+      "minLength": 12,
+      "type": "string"
+     },
+     "Status": {
+      "enum": [
+       "CREATE_IN_PROGRESS",
+       "CREATE_FAILED",
+       "DELETE_IN_PROGRESS",
+       "ACTIVE"
+      ],
+      "type": "string"
+     },
+     "StatusReason": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DescribePermissionSetRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "InstanceArn": {
+      "maxLength": 1224,
+      "minLength": 10,
+      "type": "string"
+     },
+     "PermissionSetArn": {
+      "maxLength": 1224,
+      "minLength": 10,
+      "type": "string"
+     }
+    },
+    "required": [
+     "InstanceArn",
+     "PermissionSetArn"
+    ],
+    "type": "object"
+   },
+   "DescribePermissionSetResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "PermissionSet": {
+      "$ref": "#/components/schemas/PermissionSet"
+     }
+    },
+    "type": "object"
+   },
+   "EncryptionConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "KeyType": {
+      "enum": [
+       "AWS_OWNED_KMS_KEY",
+       "CUSTOMER_MANAGED_KEY"
+      ],
+      "type": "string"
+     },
+     "KmsKeyArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     }
+    },
+    "required": [
+     "KeyType"
+    ],
+    "type": "object"
+   },
+   "EncryptionConfigurationDetails": {
+    "additionalProperties": false,
+    "properties": {
+     "EncryptionStatus": {
+      "enum": [
+       "UPDATING",
+       "ENABLED",
+       "UPDATE_FAILED"
+      ],
+      "type": "string"
+     },
+     "EncryptionStatusReason": {
+      "type": "string"
+     },
+     "KeyType": {
+      "enum": [
+       "AWS_OWNED_KMS_KEY",
+       "CUSTOMER_MANAGED_KEY"
+      ],
+      "type": "string"
+     },
+     "KmsKeyArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "InstanceMetadata": {
+    "additionalProperties": false,
+    "properties": {
+     "CreatedDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "IdentityStoreId": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "InstanceArn": {
+      "maxLength": 1224,
+      "minLength": 10,
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 255,
+      "minLength": 0,
+      "type": "string"
+     },
+     "OwnerAccountId": {
+      "maxLength": 12,
+      "minLength": 12,
+      "type": "string"
+     },
+     "Status": {
+      "enum": [
+       "CREATE_IN_PROGRESS",
+       "CREATE_FAILED",
+       "DELETE_IN_PROGRESS",
+       "ACTIVE"
+      ],
+      "type": "string"
+     },
+     "StatusReason": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListInstancesRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "MaxResults": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListInstancesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Instances": {
+      "items": {
+       "$ref": "#/components/schemas/InstanceMetadata"
+      },
+      "maxItems": 10,
+      "minItems": 0,
+      "type": "array"
+     },
+     "NextToken": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListPermissionSetsRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "InstanceArn": {
+      "maxLength": 1224,
+      "minLength": 10,
+      "type": "string"
+     },
+     "MaxResults": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "InstanceArn"
+    ],
+    "type": "object"
+   },
+   "ListPermissionSetsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "NextToken": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "PermissionSets": {
+      "items": {
+       "maxLength": 1224,
+       "minLength": 10,
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListTagsForResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "InstanceArn": {
+      "maxLength": 1224,
+      "minLength": 10,
+      "type": "string"
+     },
+     "NextToken": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "ResourceArn": {
+      "maxLength": 2048,
+      "minLength": 10,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ResourceArn"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "NextToken": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 75,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "PermissionSet": {
+    "additionalProperties": false,
+    "properties": {
+     "CreatedDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Description": {
+      "maxLength": 700,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 32,
+      "minLength": 1,
+      "type": "string"
+     },
+     "PermissionSetArn": {
+      "maxLength": 1224,
+      "minLength": 10,
+      "type": "string"
+     },
+     "RelayState": {
+      "maxLength": 240,
+      "minLength": 1,
+      "type": "string"
+     },
+     "SessionDuration": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "Key": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Value": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key",
+     "Value"
+    ],
+    "type": "object"
+   },
+   "TagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "InstanceArn": {
+      "maxLength": 1224,
+      "minLength": 10,
+      "type": "string"
+     },
+     "ResourceArn": {
+      "maxLength": 2048,
+      "minLength": 10,
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 75,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "ResourceArn",
+     "Tags"
+    ],
+    "type": "object"
+   },
+   "TagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UntagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "InstanceArn": {
+      "maxLength": 1224,
+      "minLength": 10,
+      "type": "string"
+     },
+     "ResourceArn": {
+      "maxLength": 2048,
+      "minLength": 10,
+      "type": "string"
+     },
+     "TagKeys": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 75,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "ResourceArn",
+     "TagKeys"
+    ],
+    "type": "object"
+   },
+   "UntagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UpdateInstanceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "EncryptionConfiguration": {
+      "$ref": "#/components/schemas/EncryptionConfiguration"
+     },
+     "InstanceArn": {
+      "maxLength": 1224,
+      "minLength": 10,
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 255,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "InstanceArn"
+    ],
+    "type": "object"
+   },
+   "UpdateInstanceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UpdatePermissionSetRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Description": {
+      "maxLength": 700,
+      "minLength": 1,
+      "type": "string"
+     },
+     "InstanceArn": {
+      "maxLength": 1224,
+      "minLength": 10,
+      "type": "string"
+     },
+     "PermissionSetArn": {
+      "maxLength": 1224,
+      "minLength": 10,
+      "type": "string"
+     },
+     "RelayState": {
+      "maxLength": 240,
+      "minLength": 1,
+      "type": "string"
+     },
+     "SessionDuration": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "InstanceArn",
+     "PermissionSetArn"
+    ],
+    "type": "object"
+   },
+   "UpdatePermissionSetResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS Single Sign-On Admin API (2020-07-20). Every other official operation returns HTTP 501 UnknownOperationException. Account instances and permission sets are configuration metadata: no identity store, user, group, AWS access portal, sign-in, token or session exists, so nobody can authenticate and IdentityStoreId is never returned. Each Region holds one ACTIVE account instance owned by the simulator account; organization instances and customer managed KMS encryption are not available, and deleting an instance deletes its permission sets. Permission sets carry a name, description, session duration (PT1H-PT12H, default PT1H) and relay state only: inline, AWS managed, customer managed and permissions boundary policies, provisioning and account assignments return UnknownOperationException with HTTP 501, so no IAM role is created in any account. Tagging operations refuse InstanceArn and NextToken; applications, application assignments, trusted token issuers and access control attributes return UnknownOperationException with HTTP 501.",
+  "title": "AWS IAM Identity Center (simulator catalog)",
+  "version": "2020-07-20"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/": {
+   "post": {
+    "description": "Choose the X-Amz-Target of one implemented operation. Request and response members follow the linked official input/output schemas.",
+    "operationId": "sso-adminJSONOperation",
+    "parameters": [
+     {
+      "in": "header",
+      "name": "X-Amz-Target",
+      "required": true,
+      "schema": {
+       "enum": [
+        "SWBExternalService.CreateInstance",
+        "SWBExternalService.CreatePermissionSet",
+        "SWBExternalService.DeleteInstance",
+        "SWBExternalService.DeletePermissionSet",
+        "SWBExternalService.DescribeInstance",
+        "SWBExternalService.DescribePermissionSet",
+        "SWBExternalService.ListInstances",
+        "SWBExternalService.ListPermissionSets",
+        "SWBExternalService.ListTagsForResource",
+        "SWBExternalService.TagResource",
+        "SWBExternalService.UntagResource",
+        "SWBExternalService.UpdateInstance",
+        "SWBExternalService.UpdatePermissionSet"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-amz-json-1.1": {
+       "examples": {
+        "CreateInstance": {
+         "summary": "X-Amz-Target: SWBExternalService.CreateInstance",
+         "value": {}
+        },
+        "CreatePermissionSet": {
+         "summary": "X-Amz-Target: SWBExternalService.CreatePermissionSet",
+         "value": {}
+        },
+        "DeleteInstance": {
+         "summary": "X-Amz-Target: SWBExternalService.DeleteInstance",
+         "value": {}
+        },
+        "DeletePermissionSet": {
+         "summary": "X-Amz-Target: SWBExternalService.DeletePermissionSet",
+         "value": {}
+        },
+        "DescribeInstance": {
+         "summary": "X-Amz-Target: SWBExternalService.DescribeInstance",
+         "value": {}
+        },
+        "DescribePermissionSet": {
+         "summary": "X-Amz-Target: SWBExternalService.DescribePermissionSet",
+         "value": {}
+        },
+        "ListInstances": {
+         "summary": "X-Amz-Target: SWBExternalService.ListInstances",
+         "value": {}
+        },
+        "ListPermissionSets": {
+         "summary": "X-Amz-Target: SWBExternalService.ListPermissionSets",
+         "value": {}
+        },
+        "ListTagsForResource": {
+         "summary": "X-Amz-Target: SWBExternalService.ListTagsForResource",
+         "value": {}
+        },
+        "TagResource": {
+         "summary": "X-Amz-Target: SWBExternalService.TagResource",
+         "value": {}
+        },
+        "UntagResource": {
+         "summary": "X-Amz-Target: SWBExternalService.UntagResource",
+         "value": {}
+        },
+        "UpdateInstance": {
+         "summary": "X-Amz-Target: SWBExternalService.UpdateInstance",
+         "value": {}
+        },
+        "UpdatePermissionSet": {
+         "summary": "X-Amz-Target: SWBExternalService.UpdatePermissionSet",
+         "value": {}
+        }
+       },
+       "schema": {
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/x-amz-json-1.1": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception in __type."
+     },
+     "403": {
+      "description": "AccessDeniedException from local identity policy evaluation."
+     },
+     "501": {
+      "description": "Official operation not implemented by the simulator."
+     }
+    },
+    "summary": "AWS IAM Identity Center JSON 1.1 operations",
+    "tags": [
+     "AWS IAM Identity Center"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS Single Sign-On Admin API (2020-07-20). Every other official operation returns HTTP 501 UnknownOperationException. Account instances and permission sets are configuration metadata: no identity store, user, group, AWS access portal, sign-in, token or session exists, so nobody can authenticate and IdentityStoreId is never returned. Each Region holds one ACTIVE account instance owned by the simulator account; organization instances and customer managed KMS encryption are not available, and deleting an instance deletes its permission sets. Permission sets carry a name, description, session duration (PT1H-PT12H, default PT1H) and relay state only: inline, AWS managed, customer managed and permissions boundary policies, provisioning and account assignments return UnknownOperationException with HTTP 501, so no IAM role is created in any account. Tagging operations refuse InstanceArn and NextToken; applications, application assignments, trusted token issuers and access control attributes return UnknownOperationException with HTTP 501.",
+   "name": "AWS IAM Identity Center"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/sso-admin/2020-07-20/service-2.json",
+  "sha256": "e7b26132d227f153d243eff5ec3c54d2734372946834c9c59c2cb6e5e60f573f",
+  "license": "Apache-2.0"
+ }
+}

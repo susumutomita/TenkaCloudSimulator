@@ -1,0 +1,27 @@
+{
+ "client": "clouddirectory",
+ "steps": [
+  {"op": "create_schema", "args": {"Name": "fixture_org"}, "save": {"schema": "SchemaArn"}, "expect": {"SchemaArn": "arn:aws:clouddirectory:us-east-1:000000000000:schema/development/fixture_org"}},
+  {"op": "list_development_schema_arns", "args": {}, "expect": {"SchemaArns": ["${schema}"]}},
+  {"op": "create_facet", "args": {"SchemaArn": "${schema}", "Name": "person", "ObjectType": "LEAF_NODE", "FacetStyle": "DYNAMIC"}},
+  {"op": "get_facet", "args": {"SchemaArn": "${schema}", "Name": "person"}, "expect": {"Facet.Name": "person", "Facet.ObjectType": "LEAF_NODE", "Facet.FacetStyle": "DYNAMIC"}},
+  {"op": "list_facet_names", "args": {"SchemaArn": "${schema}"}, "expect": {"FacetNames": ["person"]}},
+  {"op": "update_facet", "args": {"SchemaArn": "${schema}", "Name": "person", "ObjectType": "NODE"}},
+  {"op": "create_facet", "args": {"SchemaArn": "${schema}", "Name": "person", "ObjectType": "NODE"}, "error": "FacetAlreadyExistsException"},
+  {"op": "create_facet", "args": {"SchemaArn": "${schema}", "Name": "group", "ObjectType": "NODE", "Attributes": [{"Name": "title", "AttributeDefinition": {"Type": "STRING"}}]}, "error": "ValidationException"},
+  {"op": "create_schema", "args": {"Name": "fixture_org"}, "error": "SchemaAlreadyExistsException"},
+  {"op": "publish_schema", "args": {"DevelopmentSchemaArn": "${schema}", "Version": "1"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_facet", "args": {"SchemaArn": "${schema}", "Name": "missing"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_development_schema_arns", "args": {}, "expect": {"SchemaArns#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_facet", "args": {"SchemaArn": "${schema}", "Name": "person"}, "expect": {"Facet.ObjectType": "NODE"}}
+ ],
+ "cleanup": [
+  {"op": "delete_facet", "args": {"SchemaArn": "${schema}", "Name": "person"}},
+  {"op": "delete_schema", "args": {"SchemaArn": "${schema}"}, "expect": {"SchemaArn": "${schema}"}},
+  {"op": "list_development_schema_arns", "args": {}, "expect": {"SchemaArns#count": 0}}
+ ]
+}

@@ -121,6 +121,28 @@
     "UpdateDataCatalog",
     "UpdateWorkGroup"
   ],
+  "auditmanager": [
+    "CreateControl",
+    "DeleteControl",
+    "GetControl",
+    "GetSettings",
+    "ListControls",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateControl",
+    "UpdateSettings"
+  ],
+  "clouddirectory": [
+    "CreateFacet",
+    "CreateSchema",
+    "DeleteFacet",
+    "DeleteSchema",
+    "GetFacet",
+    "ListDevelopmentSchemaArns",
+    "ListFacetNames",
+    "UpdateFacet"
+  ],
   "cloudtrail": [
     "CreateTrail",
     "DeleteTrail",
@@ -314,6 +336,23 @@
     "UpdateConnection",
     "UpdateEventBus"
   ],
+  "fms": [
+    "DeleteAppsList",
+    "DeleteProtocolsList",
+    "DeleteResourceSet",
+    "GetAppsList",
+    "GetProtocolsList",
+    "GetResourceSet",
+    "ListAppsLists",
+    "ListProtocolsLists",
+    "ListResourceSets",
+    "ListTagsForResource",
+    "PutAppsList",
+    "PutProtocolsList",
+    "PutResourceSet",
+    "TagResource",
+    "UntagResource"
+  ],
   "glue": [
     "CreateCrawler",
     "CreateDatabase",
@@ -341,6 +380,21 @@
     "UpdateJob",
     "UpdateTable"
   ],
+  "guardduty": [
+    "CreateDetector",
+    "CreateFilter",
+    "DeleteDetector",
+    "DeleteFilter",
+    "GetDetector",
+    "GetFilter",
+    "ListDetectors",
+    "ListFilters",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateDetector",
+    "UpdateFilter"
+  ],
   "imagebuilder": [
     "CreateDistributionConfiguration",
     "CreateLifecyclePolicy",
@@ -356,6 +410,15 @@
     "UpdateDistributionConfiguration",
     "UpdateLifecyclePolicy"
   ],
+  "inspector2": [
+    "CreateFilter",
+    "DeleteFilter",
+    "ListFilters",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateFilter"
+  ],
   "kinesis": [
     "CreateStream",
     "DecreaseStreamRetentionPeriod",
@@ -369,6 +432,25 @@
     "TagResource",
     "UntagResource",
     "UpdateStreamMode"
+  ],
+  "macie2": [
+    "CreateAllowList",
+    "CreateCustomDataIdentifier",
+    "CreateFindingsFilter",
+    "DeleteAllowList",
+    "DeleteCustomDataIdentifier",
+    "DeleteFindingsFilter",
+    "GetAllowList",
+    "GetCustomDataIdentifier",
+    "GetFindingsFilter",
+    "ListAllowLists",
+    "ListCustomDataIdentifiers",
+    "ListFindingsFilters",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateAllowList",
+    "UpdateFindingsFilter"
   ],
   "managedblockchain": [
     "CreateAccessor",
@@ -394,6 +476,13 @@
     "DeleteDomain",
     "DescribeDomain",
     "ListDomainNames"
+  ],
+  "payment-cryptography": [
+    "CreateAlias",
+    "DeleteAlias",
+    "GetAlias",
+    "ListAliases",
+    "UpdateAlias"
   ],
   "pinpoint": [
     "CreateApp",
@@ -429,6 +518,16 @@
     "Untag",
     "UpdateGroup"
   ],
+  "security-ir": [
+    "CancelMembership",
+    "CreateMembership",
+    "GetMembership",
+    "ListMemberships",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateMembership"
+  ],
   "securityhub": [
     "CreateActionTarget",
     "CreateInsight",
@@ -438,6 +537,12 @@
     "GetInsights",
     "UpdateActionTarget",
     "UpdateInsight"
+  ],
+  "securitylake": [
+    "CreateDataLakeExceptionSubscription",
+    "DeleteDataLakeExceptionSubscription",
+    "GetDataLakeExceptionSubscription",
+    "UpdateDataLakeExceptionSubscription"
   ],
   "servicecatalog": [
     "CreatePortfolio",
@@ -486,6 +591,21 @@
     "PutSigningProfile",
     "TagResource",
     "UntagResource"
+  ],
+  "sso-admin": [
+    "CreateInstance",
+    "CreatePermissionSet",
+    "DeleteInstance",
+    "DeletePermissionSet",
+    "DescribeInstance",
+    "DescribePermissionSet",
+    "ListInstances",
+    "ListPermissionSets",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateInstance",
+    "UpdatePermissionSet"
   ],
   "stepfunctions": [
     "CreateActivity",
