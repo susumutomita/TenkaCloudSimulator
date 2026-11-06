@@ -390,15 +390,18 @@ var dataproc = &API{
 		{Method: "projects.locations.autoscalingPolicies.create", Kind: Create, Collection: "autoscalingPolicies", Check: dataprocAutoscaling},
 		{Method: "projects.locations.autoscalingPolicies.get", Kind: Get, Collection: "autoscalingPolicies"},
 		{Method: "projects.locations.autoscalingPolicies.list", Kind: List, Collection: "autoscalingPolicies"},
+		{Method: "projects.locations.autoscalingPolicies.update", Kind: Replace, Collection: "autoscalingPolicies", Check: dataprocAutoscaling},
 		{Method: "projects.locations.autoscalingPolicies.delete", Kind: Delete, Collection: "autoscalingPolicies"},
 		{Method: "projects.locations.sessionTemplates.create", Kind: Create, Collection: "sessionTemplates"},
 		{Method: "projects.locations.sessionTemplates.get", Kind: Get, Collection: "sessionTemplates"},
 		{Method: "projects.locations.sessionTemplates.list", Kind: List, Collection: "sessionTemplates"},
+		{Method: "projects.locations.sessionTemplates.patch", Kind: Replace, Collection: "sessionTemplates"},
 		{Method: "projects.locations.sessionTemplates.delete", Kind: Delete, Collection: "sessionTemplates"},
 	},
 	Bounds: []string{
 		"Autoscaling policies and session templates under projects.locations are configuration metadata (formerly Dataproc): no cluster, batch, session, Spark application or autoscaler runs, and no policy is attached to anything.",
-		"Clusters, jobs, batches, sessions and workflow templates run or describe workloads and are unimplemented, as are the projects.regions paths and the full-replacement update methods.",
+		"Updates replace the whole policy or template, as the official methods do, and cannot change its ID.",
+		"Clusters, jobs, batches, sessions and workflow templates run or describe workloads and are unimplemented, as are the projects.regions paths.",
 	},
 }
 

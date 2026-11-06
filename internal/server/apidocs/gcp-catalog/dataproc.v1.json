@@ -393,7 +393,7 @@
   }
  },
  "info": {
-  "description": "Bounded simulator subset of the official Cloud Dataproc API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Autoscaling policies and session templates under projects.locations are configuration metadata (formerly Dataproc): no cluster, batch, session, Spark application or autoscaler runs, and no policy is attached to anything. Clusters, jobs, batches, sessions and workflow templates run or describe workloads and are unimplemented, as are the projects.regions paths and the full-replacement update methods.",
+  "description": "Bounded simulator subset of the official Cloud Dataproc API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Autoscaling policies and session templates under projects.locations are configuration metadata (formerly Dataproc): no cluster, batch, session, Spark application or autoscaler runs, and no policy is attached to anything. Updates replace the whole policy or template, as the official methods do, and cannot change its ID. Clusters, jobs, batches, sessions and workflow templates run or describe workloads and are unimplemented, as are the projects.regions paths.",
   "title": "Managed Service for Apache Spark (simulator catalog)",
   "version": "v1"
  },
@@ -635,6 +635,72 @@
      }
     },
     "summary": "projects.locations.autoscalingPolicies.get",
+    "tags": [
+     "Managed Service for Apache Spark"
+    ]
+   },
+   "put": {
+    "operationId": "dataproc.projects.locations.autoscalingPolicies.update",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "autoscalingPoliciesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AutoscalingPolicy"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AutoscalingPolicy"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.autoscalingPolicies.update",
     "tags": [
      "Managed Service for Apache Spark"
     ]
@@ -887,6 +953,72 @@
     "tags": [
      "Managed Service for Apache Spark"
     ]
+   },
+   "patch": {
+    "operationId": "dataproc.projects.locations.sessionTemplates.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "sessionTemplatesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SessionTemplate"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SessionTemplate"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.sessionTemplates.patch",
+    "tags": [
+     "Managed Service for Apache Spark"
+    ]
    }
   }
  },
@@ -898,7 +1030,7 @@
  ],
  "tags": [
   {
-   "description": "Bounded simulator subset of the official Cloud Dataproc API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Autoscaling policies and session templates under projects.locations are configuration metadata (formerly Dataproc): no cluster, batch, session, Spark application or autoscaler runs, and no policy is attached to anything. Clusters, jobs, batches, sessions and workflow templates run or describe workloads and are unimplemented, as are the projects.regions paths and the full-replacement update methods.",
+   "description": "Bounded simulator subset of the official Cloud Dataproc API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Autoscaling policies and session templates under projects.locations are configuration metadata (formerly Dataproc): no cluster, batch, session, Spark application or autoscaler runs, and no policy is attached to anything. Updates replace the whole policy or template, as the official methods do, and cannot change its ID. Clusters, jobs, batches, sessions and workflow templates run or describe workloads and are unimplemented, as are the projects.regions paths.",
    "name": "Managed Service for Apache Spark"
   }
  ],

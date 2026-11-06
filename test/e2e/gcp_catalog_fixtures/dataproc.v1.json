@@ -8,7 +8,10 @@
   {"call": "projects.locations.sessionTemplates.get", "args": {"name": "${template}"}, "expect": {"runtimeConfig.version": "2.2"}},
   {"call": "projects.locations.sessionTemplates.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"sessionTemplates#count": 1}},
   {"call": "projects.locations.autoscalingPolicies.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "body": {"id": "broken", "workerConfig": {"minInstances": 2}}, "error": "INVALID_ARGUMENT", "status": 400},
-  {"call": "projects.locations.autoscalingPolicies.update", "args": {"name": "${policy}", "body": {"id": "fixture", "workerConfig": {"maxInstances": 20}}}, "error": "UNIMPLEMENTED", "status": 501},
+  {"call": "projects.locations.autoscalingPolicies.update", "args": {"name": "${policy}"}, "body": {"id": "fixture", "workerConfig": {"maxInstances": 20}, "basicAlgorithm": {"yarnConfig": {"gracefulDecommissionTimeout": "600s", "scaleUpFactor": 1.0, "scaleDownFactor": 1.0}}}, "expect": {"workerConfig.maxInstances": 20}},
+  {"call": "projects.locations.autoscalingPolicies.update", "args": {"name": "${policy}"}, "body": {"id": "renamed", "workerConfig": {"maxInstances": 20}}, "error": "INVALID_ARGUMENT", "status": 400},
+  {"call": "projects.locations.sessionTemplates.patch", "args": {"name": "${template}"}, "body": {"name": "${template}", "description": "Notebook", "runtimeConfig": {"version": "2.2"}, "jupyterSession": {"kernel": "PYTHON"}}, "expect": {"description": "Notebook"}},
+  {"call": "projects.locations.workflowTemplates.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "body": {"id": "wf", "placement": {"managedCluster": {"clusterName": "c", "config": {}}}, "jobs": []}}, "error": "UNIMPLEMENTED", "status": 501},
   {"call": "projects.locations.batches.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "batchId": "job", "body": {"sparkBatch": {"mainClass": "Main"}}}, "error": "UNIMPLEMENTED", "status": 501},
   {"call": "projects.regions.autoscalingPolicies.list", "args": {"parent": "projects/tenkacloud-local/regions/us-central1"}, "error": "UNIMPLEMENTED", "status": 501},
   {"call": "projects.locations.autoscalingPolicies.get", "args": {"name": "projects/tenkacloud-local/locations/us-central1/autoscalingPolicies/missing"}, "error": "NOT_FOUND", "status": 404},
@@ -18,7 +21,8 @@
   {"call": "projects.locations.autoscalingPolicies.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"policies#count": 0}}
  ],
  "after_restart": [
-  {"call": "projects.locations.sessionTemplates.get", "args": {"name": "${template}"}, "expect": {"jupyterSession.kernel": "PYTHON"}}
+  {"call": "projects.locations.sessionTemplates.get", "args": {"name": "${template}"}, "expect": {"jupyterSession.kernel": "PYTHON", "description": "Notebook"}},
+  {"call": "projects.locations.autoscalingPolicies.get", "args": {"name": "${policy}"}, "expect": {"workerConfig.maxInstances": 20}}
  ],
  "cleanup": [
   {"call": "projects.locations.sessionTemplates.delete", "args": {"name": "${template}"}},

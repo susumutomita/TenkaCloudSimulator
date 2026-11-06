@@ -413,7 +413,11 @@ func TestDataprocAutoscalingPoliciesAndSessionTemplates(t *testing.T) {
 	}
 	analyticsOK(t, h, "GET", base+"/autoscalingPolicies/scale-1", nil)
 	analyticsCount(t, h, base+"/autoscalingPolicies", "policies", 1)
-	expect(t, h.call("owner", "PUT", base+"/autoscalingPolicies/scale-1", map[string]any{"id": "scale-1", "workerConfig": map[string]any{"maxInstances": 20}}), 501, "UNIMPLEMENTED")
+	expect(t, h.call("owner", "PUT", base+"/autoscalingPolicies/scale-1", map[string]any{"id": "scale-2", "workerConfig": map[string]any{"maxInstances": 20}}), 400, "INVALID_ARGUMENT")
+	expect(t, h.call("owner", "PUT", base+"/autoscalingPolicies/scale-1", map[string]any{"id": "scale-1", "workerConfig": map[string]any{}}), 400, "INVALID_ARGUMENT")
+	if got := analyticsOK(t, h, "PUT", base+"/autoscalingPolicies/scale-1", map[string]any{"id": "scale-1", "workerConfig": map[string]any{"maxInstances": 20}}); got["basicAlgorithm"] != nil || got["name"] != analyticsScope+"/autoscalingPolicies/scale-1" {
+		t.Fatalf("replaced policy %v", got)
+	}
 	expect(t, h.call("owner", "GET", "/dataproc/v1/projects/tenkacloud-local/regions/us-central1/autoscalingPolicies", nil), 501, "UNIMPLEMENTED")
 	expect(t, h.call("owner", "POST", base+"/batches?batchId=b", map[string]any{}), 501, "UNIMPLEMENTED")
 	analyticsOK(t, h, "DELETE", base+"/autoscalingPolicies/scale-1", nil)
@@ -425,6 +429,10 @@ func TestDataprocAutoscalingPoliciesAndSessionTemplates(t *testing.T) {
 	}
 	analyticsOK(t, h, "GET", base+"/sessionTemplates/nb", nil)
 	analyticsCount(t, h, base+"/sessionTemplates", "sessionTemplates", 1)
+	expect(t, h.call("owner", "PATCH", base+"/sessionTemplates/nb", map[string]any{"name": analyticsScope + "/sessionTemplates/other"}), 400, "INVALID_ARGUMENT")
+	if got := analyticsOK(t, h, "PATCH", base+"/sessionTemplates/nb", map[string]any{"name": "projects/100000000001/locations/us-central1/sessionTemplates/nb", "description": "Notebook"}); got["description"] != "Notebook" || got["runtimeConfig"] != nil || got["uuid"] != tmpl["uuid"] {
+		t.Fatalf("replaced template %v", got)
+	}
 	analyticsOK(t, h, "DELETE", base+"/sessionTemplates/nb", nil)
 }
 

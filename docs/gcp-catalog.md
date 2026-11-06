@@ -30,7 +30,7 @@ Google Cloud call is executed or simulated.
 | Managed Service for Apache Airflow (`composer.v1`) | #403 | `projects.locations.environments.{create,get,list,patch,delete}`, `operations.{get,list}` | The ID is the full name in the create body. No Airflow, GKE cluster, bucket or database exists, and environments report `RUNNING` immediately. The `state` field is refused, and only `labels` can be updated (nested mask paths are refused). Airflow commands and snapshots return 501 |
 | Knowledge Catalog (`dataplex.v1`) | #400 | `projects.locations.lakes.{create,get,list,patch,delete}`, `lakes.zones.{create,get,list,patch,delete}`, `lakes.zones.assets.{create,get,list,patch,delete}`, `entryGroups`, `entryTypes` and `aspectTypes` `.{create,get,list,patch,delete}`, `operations.{get,list}` | No bucket, dataset or entry is read or published. Discovery, scans, tasks and metadata jobs never run, and asset references are not resolved. Delete assets before their zone and zones before their lake. Entries, glossaries, data products and taxonomies return 501 |
 | Lakehouse (`biglake.v1`) | #401 | `projects.locations.catalogs.{create,get,list,delete}`, `catalogs.databases.{create,get,list,patch,delete}`, `catalogs.databases.tables.{create,get,list,patch,delete}` | Hive-style metadata only: no storage, Iceberg file or query engine. Deletes return the deleted resource. Delete children before their parent. `tables.list` returns full tables for every view. Rename and the Iceberg REST catalog return 501 |
-| Managed Service for Apache Spark (`dataproc.v1`) | #404 | `projects.locations.autoscalingPolicies.{create,get,list,delete}`, `projects.locations.sessionTemplates.{create,get,list,delete}` | Configuration only: no cluster, batch, session or autoscaler runs. Clusters, jobs, batches, sessions and workflow templates return 501, as do `projects.regions.*` and the full-replacement updates |
+| Managed Service for Apache Spark (`dataproc.v1`) | #404 | `projects.locations.autoscalingPolicies.{create,get,list,update,delete}`, `projects.locations.sessionTemplates.{create,get,list,patch,delete}` | Configuration only: no cluster, batch, session or autoscaler runs. Updates replace the whole policy or template and cannot change its ID. Clusters, jobs, batches, sessions and workflow templates return 501, as does `projects.regions.*` |
 
 The capability document lists the same APIs under `gcpCatalog.apis`. Each
 entry includes every implemented method, the number of official methods,
@@ -60,7 +60,9 @@ bounds above.
   hours. A different request with the same `requestId` is refused.
   `validateOnly=true` validates and stores nothing.
 - `etag` guards patch and delete (`ABORTED` on mismatch). `updateMask`
-  restricts a patch to the reviewed mutable fields.
+  restricts a patch to the reviewed mutable fields. Full-replacement
+  updates (Dataproc `PUT` and mask-less `PATCH`) keep the ID and output
+  fields and clear the writable fields the body omits.
 - Resource names are scoped by API, so two services may each own
   `projects/p/locations/l/instances/i`. A delete whose official response is
   the resource, as in BigLake, returns the deleted resource.
