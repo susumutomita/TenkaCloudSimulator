@@ -160,6 +160,10 @@ func documentValue(raw any, at string, depth int, d *decoder) (any, error) {
 }
 
 func stringValue(p *Property, raw any, at string) (any, error) {
+	if _, number := raw.(json.Number); number && (p.Format == "int64" || p.Format == "uint64") {
+		// Proto3 JSON parsers accept 64-bit integers as numbers or strings.
+		return integerValue(p, raw, at)
+	}
 	text, ok := raw.(string)
 	if !ok {
 		return nil, invalid("Invalid value at '%s': expected a string.", at)

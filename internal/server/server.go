@@ -127,7 +127,8 @@ func NewWithProviders(path string, options ProviderConfig) (http.Handler, func()
 			return nil, nil, err
 		}
 	}
-	if err := registerCloudStorage(store.Database(), registry, cloudConfig); err != nil {
+	gcpCatalog, err := registerCloudStorage(store.Database(), registry, cloudConfig)
+	if err != nil {
 		_ = lambdas.Close()
 		_ = store.Close()
 		return nil, nil, err
@@ -154,7 +155,7 @@ func NewWithProviders(path string, options ProviderConfig) (http.Handler, func()
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(addSakuraCapabilities(map[string]any{"protocolVersion": "2026-11-03", "principal": r.Header.Get("X-Simulator-Principal"), "identitySelection": r.Header.Get("X-Simulator-Access-Role") != "participant", "simulatorVersion": "0.1.0", "providers": registry.Names(), "cloudStorage": cloudStorageCapabilities(cloudConfig), "persistence": func() string {
+		_ = json.NewEncoder(w).Encode(addSakuraCapabilities(map[string]any{"protocolVersion": "2026-11-03", "principal": r.Header.Get("X-Simulator-Principal"), "identitySelection": r.Header.Get("X-Simulator-Access-Role") != "participant", "simulatorVersion": "0.1.0", "providers": registry.Names(), "cloudStorage": cloudStorageCapabilities(cloudConfig), "gcpCatalog": gcpCatalogCapabilities(gcpCatalog, cloudConfig), "persistence": func() string {
 			if path == "" || path == ":memory:" {
 				return "memory"
 			}

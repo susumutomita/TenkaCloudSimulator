@@ -256,17 +256,16 @@ func (q *request) create() (any, error) {
 	if err := q.parentName(parent); err != nil {
 		return nil, err
 	}
-	id := ""
+	// Server-generated IDs are opaque; client-chosen IDs follow AIP-122.
+	id := randomHex(8)
 	if c.IDParam != "" {
 		id, _ = q.params[c.IDParam].(string)
 		if id == "" {
 			return nil, invalid("Query parameter %q is required.", c.IDParam)
 		}
-	} else {
-		id = randomHex(8)
-	}
-	if !resourceID.MatchString(id) {
-		return nil, invalid("Resource ID %q must match %s.", id, resourceID.String())
+		if !resourceID.MatchString(id) {
+			return nil, invalid("Resource ID %q must match %s.", id, resourceID.String())
+		}
 	}
 	if err := q.required(q.method.Request); err != nil {
 		return nil, err
