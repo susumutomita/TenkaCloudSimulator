@@ -1,5 +1,32 @@
 # Development roster
 
+## Current integration snapshot: login and published catalog, 2026-11-06
+
+PR [#437](https://github.com/susumutomita/TenkaCloudSimulator/pull/437) is being
+integrated with published main `b81496f73e31be6150fc237f4641d6369446cc38`
+(catalog PR #438). The catalog's Go code, model data, tests and notices are kept;
+the login input-capture fix and its original browser assertions are also kept.
+The combined inventory is **53 models / 429 controls / 482 executions**.
+
+| Owner / handoff | Exclusive scope and observed status |
+|---|---|
+| root | Merge coordination, applicability record, final commits and serialized execution; combined validation is pending |
+| lp_quality | Registry and formal-gate/test union resolved; source handoff complete |
+| formal_review | Independent model/policy union review complete; no combined runtime acceptance claimed |
+| docs_merge_b8 | Four documentation conflicts recovered and verified; source handoff complete |
+| assets_merge_b8 | Merged-source console rebuilt in local commit `5219eb1`; 1353 inputs and unchanged original package notices verified; combined CI remains pending |
+| catalog_compat_b8 | Read-only routing/authentication intersection review complete; Go and catalog fixtures kept byte-identical to incoming main |
+| ci_watch_b8 | Exact-SHA monitoring for prior login `8149cac` and incoming main; these results do not validate the combined tree |
+
+These are ownership and handoff entries, not a claim that seven workers are
+currently running. The ceiling remains seven including root. Completed reviewers
+can take the next independent task; heavy checks use one explicit local runtime
+lane. The prior login's 102 focused checks and all eleven hosted checks passed,
+but its base was `03060d4`. Actual Dia/1Password behavior remains unverified.
+The new combined HEAD must pass its own quality, browser and formal gates.
+
+The following catalog and IAM sections retain their original dated evidence.
+
 ## Current integration snapshot: AWS service catalog, 2026-11-06
 
 Root integrates the model-driven AWS catalog on branch

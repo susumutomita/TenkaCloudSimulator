@@ -6067,6 +6067,191 @@
      "expect_invariant": "FailureVisible"
     }
    ]
+  },
+  {
+   "id": "LoginInputIntent",
+   "model": "formal/LoginInputIntent.tla",
+   "config": "formal/LoginInputIntent.cfg",
+   "bounds": "18 explicitly scheduled interaction scenarios, two opaque nonempty labels plus Empty, revision0..3 without wrap, one outstanding paste/file read/request; at most2 recorded POST attempts and6 events per scenario. Terminal plans stutter; unfinished plans cannot stutter.",
+   "properties": [
+    "TypeOK",
+    "NoEmptyPOST",
+    "NoPOSTWhileBlocked",
+    "StaleFileCompletionFrame",
+    "SubmissionSelectionExact",
+    "AdoptedValueExact",
+    "IntentInvalidatesAsync",
+    "LocaleIntentFrame"
+   ],
+   "limits": "Scoped local 15-case checking at source 7bd15bf exhausted 83 distinct baseline states (101 generated, empty queue) and observed all 14 declared noninitial counterexamples. KeyDownSkipsNativeAdoption first violated AdoptedValueExact at state 5. Historical scoped 14-case checking at model source 5b270e9 exhausted 77 distinct states and observed its 13 controls, including FocusSkipsNativeAdoption. This is scoped evidence, not full current 482-case acceptance or JavaScript/React/1Password proof. Historical 13-case checking at 28d37d1 exhausted 73 states; Combined UnmountedFileCompletionPublishes first failed the file-edit scenario and establishes StaleFileCompletionFrame sensitivity, not an isolated unmount witness. Bounded committed-state input/intent safety correspondence only; not JavaScript/React/Cloudscape/DOM/OS/event scheduling refinement, actual1Password/Dia/Safari, arbitrary focused/unfocused rerenders, clipboard/undo/IME/selection bytes, file UTF8/MIME/size/parser, authentication/HTTP/cookie/crypto/server/browser sessions, liveness or arbitrary event sequences/revision horizons. Pending explicit paste has precedence over current connected DOM. Locale protects adopted control/intent state only; unfocused unadopted DOM may reset. Independent before-state oracles observe actual token/refs/POST records; no server accepts every nonempty label. Mutation sensitivity requires real noninitial named TLC counterexamples, not static anchor counts. Generated app.js scope is ONLY the compiled login-input intent projection. The local offline rebuild of source bd135b55c79b14239130dba8b4f6ca246367b5c5 produced asset commit 5219eb1349e597306b2ef125ebf41e76188908d9 with 1353 resolved inputs and retained original notices for 22 packages; exact asset digests and input metadata are committed under tools/console. Default hosted-CI build equivalence remains to be checked. Compiler/minifier correctness, React/DOM/native input APIs and backend behavior are not refinement-proved; this binding does not prove the rest of the bundle. The focus scenario explicitly assumes a possible controlled render after focus capture resets DOM from adopted controlled state. This explores a suspected ordering hazard, not an established explanation of the actual CI response timeout. The full current 482-case gate and real Dia/1Password acceptance remain unverified. The keyboard-capture extension adds one focused already-flushed-paste/native-clear/keydown/submit scenario. It explicitly assumes a possible controlled render after key capture resets DOM from the adopted token, without establishing the actual browser failure cause. Current-key pending-paste ordering is not covered by this additional scenario. The eight invariants protect bounded token/intent/POST safety; they do not establish empty-error DOM visibility. The unchanged empty-error and no-POST browser assertions remain separate required acceptance checks. Scoped 15-case success does not replace the pending current 482-case combined gate or the unchanged actual native-clear/Enter browser assertions. Integration with main catalog models requires a new immutable 53-model/429-control/482-case gate; historical scoped Login results do not establish that combined gate. On old-base head 8149cac, both complete 62-case browser suites passed the native-clear/Enter empty-error and no-POST checks. That historical success is not acceptance of this combined main-catalog tree, whose 65-case E2E and 482-case formal gates still require fresh immutable-HEAD verification.",
+   "source_scope": [
+    "tools/console/src/login.jsx",
+    "test/console/login-native-input.test.mjs",
+    "test/e2e/login_paste.py",
+    "test/e2e/login_token_file.py",
+    "internal/server/web/app.js"
+   ],
+   "mutants": [
+    {
+     "id": "NonemptyDOMUsesControlledState",
+     "edits": [
+      {
+       "old": "ELSE IF s.connected THEN s.dom ELSE s.token\nSync(s)",
+       "new": "ELSE IF s.connected /\\ s.dom = \"empty\" THEN s.dom ELSE s.token\nSync(s)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "SubmissionSelectionExact"
+    },
+    {
+     "id": "EmptyDOMReusesOldCredential",
+     "edits": [
+      {
+       "old": "ELSE IF s.connected THEN s.dom ELSE s.token\nSync(s)",
+       "new": "ELSE IF s.connected /\\ s.dom # \"empty\" THEN s.dom ELSE s.token\nSync(s)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoEmptyPOST"
+    },
+    {
+     "id": "FlushDoesNotAdoptNativeValue",
+     "edits": [
+      {
+       "old": "ELSE IF s.connected /\\ s.dom # s.token THEN Adopt(s,Selected(s))\n           ELSE [s EXCEPT !.pasteRev = 0]",
+       "new": "ELSE IF s.connected /\\ s.dom # s.token THEN [s EXCEPT !.pasteRev = 0]\n           ELSE [s EXCEPT !.pasteRev = 0]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdoptedValueExact"
+    },
+    {
+     "id": "NativeAdoptionSkipsNewIntent",
+     "edits": [
+      {
+       "old": "Sync(s) == IF s.connected /\\ s.dom # s.token THEN Adopt(s,s.dom) ELSE s",
+       "new": "Sync(s) == IF s.connected /\\ s.dom # s.token THEN [s EXCEPT !.token = s.dom] ELSE s",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "IntentInvalidatesAsync"
+    },
+    {
+     "id": "FileCompletionIgnoresRevision",
+     "edits": [
+      {
+       "old": "FileEligible(s) == s.alive /\\ s.jobRev # 0 /\\ s.jobRev = s.rev /\\ s.fileCurrent = s.jobRev",
+       "new": "FileEligible(s) == s.alive /\\ s.jobRev # 0",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "StaleFileCompletionFrame"
+    },
+    {
+     "id": "OldPasteSurvivesNewIntent",
+     "edits": [
+      {
+       "old": "!.pasteRev = 0, \\* NewIntentPasteCancel",
+       "new": "!.pasteRev = s.pasteRev, \\* NewIntentPasteCancel",
+       "count": 1
+      },
+      {
+       "old": "ActivePaste(s) == s.pasteRev # 0 /\\ s.pasteRev = s.rev /\\ s.pasteConnected",
+       "new": "ActivePaste(s) == s.pasteRev # 0 /\\ s.pasteConnected",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "IntentInvalidatesAsync"
+    },
+    {
+     "id": "SubmitIgnoresBusy",
+     "edits": [
+      {
+       "old": "\nReady(s) == ~s.busy /\\ s.fileCurrent = 0",
+       "new": "\nReady(s) == s.fileCurrent = 0",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoPOSTWhileBlocked"
+    },
+    {
+     "id": "SubmitIgnoresFileGate",
+     "edits": [
+      {
+       "old": "\nReady(s) == ~s.busy /\\ s.fileCurrent = 0",
+       "new": "\nReady(s) == ~s.busy",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoPOSTWhileBlocked"
+    },
+    {
+     "id": "LocaleClearsIntent",
+     "edits": [
+      {
+       "old": "Locale(s) == [s EXCEPT !.locale = IF @ = \"en\" THEN \"ja\" ELSE \"en\", !.dom = s.token]",
+       "new": "Locale(s) == [s EXCEPT !.locale = IF @ = \"en\" THEN \"ja\" ELSE \"en\", !.dom = s.token, !.token = \"empty\"]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "LocaleIntentFrame"
+    },
+    {
+     "id": "UnmountedFileCompletionPublishes",
+     "edits": [
+      {
+       "old": "FileEligible(s) == s.alive /\\ s.jobRev # 0 /\\ s.jobRev = s.rev /\\ s.fileCurrent = s.jobRev",
+       "new": "FileEligible(s) == s.jobRev # 0",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "StaleFileCompletionFrame"
+    },
+    {
+     "id": "CurrentFileErrorDiscarded",
+     "edits": [
+      {
+       "old": "ELSE [s EXCEPT !.jobRev = 0, !.fileCurrent = 0, !.fileState = \"idle\", !.error = TRUE]",
+       "new": "ELSE [s EXCEPT !.jobRev = 0, !.fileCurrent = 0, !.fileState = \"idle\", !.error = FALSE]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdoptedValueExact"
+    },
+    {
+     "id": "LocaleInvalidatesCurrentFile",
+     "edits": [
+      {
+       "old": "Locale(s) == [s EXCEPT !.locale = IF @ = \"en\" THEN \"ja\" ELSE \"en\", !.dom = s.token]",
+       "new": "Locale(s) == [s EXCEPT !.locale = IF @ = \"en\" THEN \"ja\" ELSE \"en\", !.dom = s.token, !.fileCurrent = 0]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "LocaleIntentFrame"
+    },
+    {
+     "id": "FocusSkipsNativeAdoption",
+     "edits": [
+      {
+       "old": "Focus(s) == LET adopted == Sync(s) IN [adopted EXCEPT !.dom = adopted.token]",
+       "new": "Focus(s) == LET adopted == s IN [adopted EXCEPT !.dom = adopted.token]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdoptedValueExact"
+    },
+    {
+     "id": "KeyDownSkipsNativeAdoption",
+     "edits": [
+      {
+       "old": "KeyDown(s) == LET adopted == Sync(s) IN [adopted EXCEPT !.dom = adopted.token]",
+       "new": "KeyDown(s) == LET adopted == s IN [adopted EXCEPT !.dom = adopted.token]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdoptedValueExact"
+    }
+   ]
   }
  ]
 }

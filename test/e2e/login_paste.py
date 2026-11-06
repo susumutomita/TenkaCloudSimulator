@@ -28,7 +28,7 @@ with running(authenticated=True) as (endpoint,token),sync_playwright() as p:
   if value:assert page.evaluate('(before)=>window.__pasteEvents.slice(before).some(e=>e.trusted&&e.plainAvailable)',before),'Missing actual trusted plain clipboard event'
  def check_value(page,expected):
   for _ in range(150):
-   if field(page).input_value()==expected:return
+   if page.locator('input[type=password]').input_value()==expected:return
    time.sleep(0.01)
   raise AssertionError('Clipboard/input value mismatch; values redacted')
  def submit(page,want,keyboard=False):
@@ -38,6 +38,143 @@ with running(authenticated=True) as (endpoint,token),sync_playwright() as p:
   assert pending.value.status==want,'Unexpected actual native login status'
  def success(page):
   expect(page.get_by_role('button',name='Account menu',exact=True)).to_be_visible();assert page.request.get(endpoint+'/_simulator/v1/capabilities').status==200
+ # First-party DOM-only interoperability fixtures, NOT real-extension proof.
+ # Use only this fixture's fresh dummy token, never a user's clipboard/file.
+ page=fresh();access=field(page)
+ assert access.get_attribute('data-1p-ignore')=='true' and access.get_attribute('data-op-ignore')=='true'
+ def native_write(page,value):
+  # Same setter/automation call; return only booleans, never token bytes/hash.
+  return field(page).evaluate("""(input,value)=>{
+   const snapshot=()=>({connected:input.isConnected,nonempty:input.value.length>0,active:document.activeElement===input});
+   const before=snapshot();Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,"value").set.call(input,value);
+   return {before,after:snapshot()};
+  }""",value)
+ # Observe only the first fixture. No focus/event injection, wait or retry; the
+ # original write -> Enter-submit -> success sequence and timeout stay intact.
+ first_snapshot=None;first_statuses=[]
+ first_counts={'requests':0,'responses':0};observer_errors={'count':0,'types':[]};observer_active={'value':True};registered=[]
+ def observer_error(failure):
+  observer_errors['count']=min(9,observer_errors['count']+1)
+  if len(observer_errors['types'])<4:observer_errors['types'].append(type(failure).__name__)
+ def first_request(request):
+  if not observer_active['value']:return
+  try:
+   if request.method=='POST'and request.url==endpoint+'/_simulator/login':
+    first_counts['requests']=min(9,first_counts['requests']+1)
+  except Exception as metadata_failure:observer_error(metadata_failure)
+ def first_response(response):
+  if not observer_active['value']:return
+  try:
+   if response.request.method=='POST'and response.url==endpoint+'/_simulator/login':
+    first_counts['responses']=min(9,first_counts['responses']+1)
+    status=response.status
+    if len(first_statuses)<8:first_statuses.append(status if isinstance(status,int)and 100<=status<=599 else 0)
+  except Exception as metadata_failure:observer_error(metadata_failure)
+ try:
+  for event,listener in [('request',first_request),('response',first_response)]:
+   try:
+    page.on(event,listener);registered.append((event,listener))
+   except Exception as registration_failure:
+    observer_error(registration_failure)
+    # Also attempt to detach the failed registration in case it attached before
+    # raising. This diagnostic problem must not replace the actual test outcome.
+    try:page.remove_listener(event,listener)
+    except Exception as detach_failure:observer_error(detach_failure)
+  first_snapshot=native_write(page,token);submit(page,303,True);success(page)
+ except Exception as failure:
+  diagnostic={'stage':'first-native-DOM-insertion-keyboard-submit','primaryExceptionType':type(failure).__name__,
+   'nativeWrite':first_snapshot,'loginPOSTRequests':first_counts['requests'],'loginPOSTResponses':first_counts['responses'],
+   'responseStatuses':list(first_statuses),'countsCappedAt9':True,'status0MeansOther':True,
+   'observerMetadataComplete':observer_errors['count']==0,
+   'scope':'Failure-only dummy fixture; no token values, hashes, bodies, headers or clipboard; no focus-cause or extension proof.'}
+  try:
+   diagnostic['afterFailure']=page.evaluate("""()=>{
+    const input=document.querySelector('input[type=password]');
+    return {connected:!!input?.isConnected,nonempty:!!input&&input.value.length>0,active:!!input&&document.activeElement===input,
+     knownEmptyInputError:!!document.body?.textContent.includes('Enter your access token. If paste left this blank, copy the token as plain text.')};
+   }""")
+  except Exception as capture_failure:diagnostic['captureFailureType']=type(capture_failure).__name__
+  try:(REPORTS/'login-first-native-failure.json').write_text(json.dumps(diagnostic,indent=2)+'\n')
+  except Exception:pass # Diagnostic I/O must never replace the original failure.
+  raise
+ finally:
+  observer_active['value']=False
+  for event,listener in registered:
+   try:page.remove_listener(event,listener)
+   except Exception as detach_failure:observer_error(detach_failure)
+  if observer_errors['count']:
+   # Incomplete diagnostics are separate from the original product assertions:
+   # do not turn a passing case into a failure or hide its original exception.
+   report['firstNativeDiagnosticObserverErrors']=dict(observer_errors)
+   try:(REPORTS/'login-first-native-observer-status.json').write_text(json.dumps({'status':'INCOMPLETE_PASSIVE_DIAGNOSTICS','errors':observer_errors},indent=2)+'\n')
+   except Exception:pass
+ report['nativeDOMWriteWithoutChangeEventAuthenticates']=True
+ page=fresh();paste(page,token);second_snapshot=native_write(page,'');posts=[]
+ page.on('request',lambda request:posts.append(True)if request.method=='POST'and request.url==endpoint+'/_simulator/login'else None)
+ # Passive failure-only metadata for this unchanged clear -> Enter sequence.
+ # Never record values, token hashes, request bodies, headers or clipboard.
+ second_counts={'requests':0,'responses':0};second_statuses=[]
+ second_observer_errors={'count':0,'types':[]};second_active={'value':True};second_registered=[]
+ def second_observer_error(failure):
+  second_observer_errors['count']=min(9,second_observer_errors['count']+1)
+  if len(second_observer_errors['types'])<4:second_observer_errors['types'].append(type(failure).__name__)
+ def second_request(request):
+  if not second_active['value']:return
+  try:
+   if request.method=='POST'and request.url==endpoint+'/_simulator/login':
+    second_counts['requests']=min(9,second_counts['requests']+1)
+  except Exception as metadata_failure:second_observer_error(metadata_failure)
+ def second_response(response):
+  if not second_active['value']:return
+  try:
+   if response.request.method=='POST'and response.url==endpoint+'/_simulator/login':
+    second_counts['responses']=min(9,second_counts['responses']+1)
+    status=response.status
+    if len(second_statuses)<8:second_statuses.append(status if isinstance(status,int)and 100<=status<=599 else 0)
+  except Exception as metadata_failure:second_observer_error(metadata_failure)
+ try:
+  for event,listener in [('request',second_request),('response',second_response)]:
+   try:
+    page.on(event,listener);second_registered.append((event,listener))
+   except Exception as registration_failure:
+    second_observer_error(registration_failure)
+    try:page.remove_listener(event,listener)
+    except Exception as detach_failure:second_observer_error(detach_failure)
+  field(page).press('Enter')
+  expect(page.get_by_text('Enter your access token. If paste left this blank, copy the token as plain text.',exact=True)).to_be_visible()
+  check_value(page,'') # Error rerender must not restore the old controlled value.
+  assert not posts and page.request.get(endpoint+'/_simulator/v1/capabilities').status==401
+ except Exception as failure:
+  diagnostic={'stage':'second-native-DOM-clear-keyboard-submit','primaryExceptionType':type(failure).__name__,
+   'nativeWrite':second_snapshot,'loginPOSTRequests':second_counts['requests'],'loginPOSTResponses':second_counts['responses'],
+   'responseStatuses':list(second_statuses),'countsCappedAt9':True,'status0MeansOther':True,
+   'observerMetadataComplete':second_observer_errors['count']==0,
+   'scope':'Failure-only dummy clear fixture; no token values, hashes, bodies, headers, cookies or clipboard; no focus-cause or extension proof.'}
+  try:
+   diagnostic['afterFailure']=page.evaluate("""()=>{
+    const input=document.querySelector('input[type=password]');
+    return {connected:!!input?.isConnected,nonempty:!!input&&input.value.length>0,active:!!input&&document.activeElement===input,
+     knownEmptyInputError:!!document.body?.textContent.includes('Enter your access token. If paste left this blank, copy the token as plain text.')};
+   }""")
+  except Exception as capture_failure:diagnostic['captureFailureType']=type(capture_failure).__name__
+  try:(REPORTS/'login-second-native-clear-failure.json').write_text(json.dumps(diagnostic,indent=2)+'\n')
+  except Exception:pass # Diagnostic I/O must never replace the original failure.
+  raise
+ finally:
+  second_active['value']=False
+  for event,listener in second_registered:
+   try:page.remove_listener(event,listener)
+   except Exception as detach_failure:second_observer_error(detach_failure)
+  if second_observer_errors['count']:
+   report['secondNativeDiagnosticObserverErrors']=dict(second_observer_errors)
+   try:(REPORTS/'login-second-native-clear-observer-status.json').write_text(json.dumps({'status':'INCOMPLETE_PASSIVE_DIAGNOSTICS','errors':second_observer_errors},indent=2)+'\n')
+   except Exception:pass
+ report['nativeDOMClearDoesNotSubmitStaleToken']=True
+ page=fresh();native_write(page,token);field(page).focus();page.get_by_role('button',name='日本語',exact=True).click()
+ expect(page.get_by_label('アクセストークン',exact=True)).to_be_visible();check_value(page,token)
+ page.get_by_role('button',name='English',exact=True).click();check_value(page,token);submit(page,303);success(page)
+ report['nativeDOMValueSurvivesBlurAndLocaleRerender']=True
+ report['actual1PasswordExtensionVerified']=False
  page=fresh();paste(page,token);check_value(page,token);page.keyboard.press('Control+Z');check_value(page,'');report['normalNativeUndo']=True
  # Partial selection replacement must preserve the unaffected prefix.
  before=token[:32]+'x'*32;page.keyboard.type(before);page.keyboard.press('End')

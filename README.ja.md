@@ -125,21 +125,24 @@ SDK、操作画面、再起動、チーム分離の受入検証は `make e2e` �
 
 CIはstatementと未フィルターsource-line coverageを両方90%以上に強制します。`make before-commit`単独のcoverage判定はstatementのみで、source-line判定はCIのCobertura生成後ステージと上記の2コマンドで行います。SDK/browser、license、依存security、埋込asset、形式検査も行います。cross compileは他OSでの実行成功を意味しません。開発用Python/Node/Javaはruntime依存ではありません。UI・Scalarの再生成は権利表記とlockを保持する[各build手順](tools/console/README.md)・[Scalar手順](tools/scalar/README.md)・[Python runtimeの権利・再生成手順](tools/python/README.md)に従います。
 
-現在のregistryは**52有限モデル・415の意図した欠陥検出（467実行）**です。
-以前の50モデル・398制御を保持し、サービスカタログの保存状態モデル（12制御）と画面モデル（5制御）を追加しています。
-その前の48モデル・381制御には、LPの限定的なアクセス受理と選択・装飾ライフサイクルの
-2モデル・17制御を追加しています。Sakura、DynamoDB画面、Secretsメタデータ画面も保持します。
+統合後のregistryは**53有限モデル・429制御（482実行）**を必須とし、新しいmainを取り込んだ
+固定HEADでの全体検証は未完了です。mainの52モデル・415制御を保持します。従来の50/398に
+サービスカタログの保存状態モデルCatalogResourceLifecycle（12制御）と画面モデル
+CatalogConsoleEpoch（5制御）を加え、LoginInputIntentの1モデル・14制御を統合します。
+以前の48/381に追加したLPの2モデル・17制御や、Sakura、DynamoDB画面、Secretsメタデータ画面も保持します。
 LPモデルは信頼済みのhost/origin/認証判定や閉じたノード入力を前提とし、URL解析、フォーカス、
 レイアウト、SVG線の位置、ブラウザー描画、Go/JavaScriptのrefinementは証明しません。
-SecretVersionListingは認可後のメタデータ一覧と限定cursor境界を対象とし、値の読取権限や
-完全な履歴画面を追加しません。有限モデル検査、実コード試験、固定HEADの全体検査は別の結果です。
+LoginInputIntentのfocus／keydown時の制御値リセットは限定モデルの仮定であり、実ブラウザーの原因や
+拡張機能の修復を証明しません。SecretVersionListingは認可後のメタデータ一覧と限定cursor境界を対象とし、
+値の読取権限や完全な履歴画面を追加しません。有限モデル検査、実コード試験、固定HEADの全体検査は別の結果です。
+`8149cac`の463実行や102件のpure検査の受領証は統合前の版に属し、新しい482実行の成功を意味しません。
 [形式検査](formal/README.md)、[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)。
 
 ## ライセンス
 
 本体は[MIT](LICENSE)。`/_simulator/licenses/`にGo・Cloudscape・Scalar・CPython/WASI等の原文LICENSE/NOTICEを同梱しています。再配布時も保持してください。AWS公式サービスではなく、AWSロゴは使用しません。[設計・引継ぎ資料](docs/handoff/README.md)。
 
-貼り付けが動かない場合はログイン画面の「トークンファイルを選択」で、主催者から受け取った小さなファイルを明示選択できます。値は隠したまま読み込み、サインイン操作時にサーバーが認証します。[形式・制限とDia未確認の境界](docs/login-token-file.md)。
+貼り付けが動かない場合はログイン画面の「トークンファイルを選択」で、主催者から受け取った小さなファイルを明示選択できます。値は隠したまま読み込み、サインイン操作時にサーバーが認証します。[形式・制限とDia未確認の境界](docs/login-token-file.md)。入力欄にはフィールド単位のパスワードマネージャー向け無視ヒントを付け、input／focus／keydownのcaptureとblurで接続中のnative入力値を取り込み、送信時にも現在値を確認します。意図的な空欄を尊重し、送信時には現在の明示的な貼り付けを先に処理します。取り込みは新しい入力意図として古い非同期処理を無効にします。拡張機能が原因という診断や、Dia／1Passwordでの修復確認ではありません。339c264では最初のnative入力ケースは成功しましたが、native clear後のEnterで空欄説明が出ないケースは失敗しました。keydown同期を追加した8149cacでは、62件のブラウザ試験が2回とも成功しました。その後のサービスカタログ統合版は別途、全体CIの確認が必要です。実際のDia／1Passwordや利用者のOSクリップボード動作は引き続き未確認です。[過去のCI結果と残検証](docs/login-token-file.md#dated-validation-and-current-candidate)を区別してください。
 
 
 ## Secrets Manager contract
@@ -174,7 +177,7 @@ combined 29-model/164-control formal gate (193 executions). These receipts apply
 to that revision. Every later change still requires its exact-HEAD CI, including
 the 45-case E2E suite; focused results do not replace whole-suite verification.
 
-現在の形式検査は52モデル・415制御（467実行）です。IAMモデルは4つの到達可能な初期状態から
+現在のカタログ・ログイン統合で必要な形式検査は53モデル・429制御（482実行）で、新しい統合HEADの全体成功は未確認です。IAMモデルは4つの到達可能な初期状態から
 各2要求の範囲で、4要求の試案はタイムアウトし未成功です。2026-11-06にLPの限定19実行が
 `4382ec4`で成功しましたが、その版の全448実行はDynamoDBAdmissionで失敗しました。
 `fad3b8a`のLPはPC・スマートフォンの8ブラウザーケースと6状態の厳格なアクセシビリティ検査に成功。
@@ -188,5 +191,5 @@ API資料ではクラウドを分け、Sakura Cloudの任意有効化するDisk�
 全Go race/build、同一profileのstatement94.94%・未除外source90.32%が成功しました。
 資料のみを変えた後続`414c902`では全61 E2E（980.726秒）・reflow・startが成功しました。
 「資料のみの追補」「実行コード等が同一」はその過去の版の説明であり、現在のLP実装を指しません。
-当時のhosted検査の留保もその版に属します。現在の全448実行の成功や、ホスト採点・SQL/Go refinement・
+当時のhosted検査の留保もその版に属します。現在の全482実行の成功や、ホスト採点・SQL/Go refinement・
 秘匿出力・全リソース物理削除の証明へ読み替えないでください。

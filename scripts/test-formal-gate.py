@@ -35,7 +35,7 @@ class FormalGateTests(unittest.TestCase):
 
     def test_complete_registry_and_exact_mutations(self):
         registry = load_registry(self.root)
-        self.assertEqual({model['id'] for model in registry['models']}, {'CFNPhysicalResourceACK', 'CFNConditionAdmission', 'CFNConditionMemoDepth', 'CFNFinalCleanupACK', 'SQSStorageBudget', 'SecretsRevealEpoch', 'AzureBlobState', 'ProjectAuthority', 'RESTRouteMatching', 'KMSAliasCatalog', 'SakuraDiskMetadata', 'SQSConsoleEpoch', 'ProviderActor', 'DynamoDBAdmission', 'IAMManagedPolicies', 'AzurePropertiesTarget', 'StartupTokenVisibility', 'RESTDeploymentSnapshot', 'KMSProtocolAdmission', 'KMSAliasesViewEpoch', 'NativeIAMOwnership', 'DynamoDBConsoleEpoch', 'SSMParameterState', 'AzurePropertiesEpoch', 'SecretMetadataViewEpoch', 'DynamoDBLifecycle', 'SakuraDiskAdmission', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'BrowserSessions', 'SecretVersionListing', 'SakuraDisksViewEpoch', 'KMSAliasCrypto', 'StackOwnership', 'SecretsDisclosureChannels', 'RESTProxyEventBoundary', 'NativeWireProjection', 'SQSLifecycle', 'BlobRange', 'KMSBootstrapTransaction', 'SecretsVersionLifecycle', 'ObjectStore', 'LandingAccessAdmission', 'LandingTopologyState', 'GCPStorageState', 'KMSKeyState', 'SakuraStartupAdmission', 'S3Versions', 'ProviderPath', 'SecretsMutationRefresh', 'CatalogResourceLifecycle', 'CatalogConsoleEpoch'})
+        self.assertEqual({model['id'] for model in registry['models']}, {'CFNPhysicalResourceACK', 'CFNConditionAdmission', 'CFNConditionMemoDepth', 'CFNFinalCleanupACK', 'SQSStorageBudget', 'SecretsRevealEpoch', 'AzureBlobState', 'ProjectAuthority', 'RESTRouteMatching', 'KMSAliasCatalog', 'SakuraDiskMetadata', 'SQSConsoleEpoch', 'ProviderActor', 'DynamoDBAdmission', 'IAMManagedPolicies', 'AzurePropertiesTarget', 'StartupTokenVisibility', 'RESTDeploymentSnapshot', 'KMSProtocolAdmission', 'KMSAliasesViewEpoch', 'NativeIAMOwnership', 'DynamoDBConsoleEpoch', 'SSMParameterState', 'AzurePropertiesEpoch', 'SecretMetadataViewEpoch', 'DynamoDBLifecycle', 'SakuraDiskAdmission', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'BrowserSessions', 'SecretVersionListing', 'SakuraDisksViewEpoch', 'KMSAliasCrypto', 'StackOwnership', 'SecretsDisclosureChannels', 'RESTProxyEventBoundary', 'NativeWireProjection', 'SQSLifecycle', 'BlobRange', 'KMSBootstrapTransaction', 'SecretsVersionLifecycle', 'ObjectStore', 'LandingAccessAdmission', 'LandingTopologyState', 'GCPStorageState', 'KMSKeyState', 'SakuraStartupAdmission', 'S3Versions', 'ProviderPath', 'SecretsMutationRefresh', 'CatalogResourceLifecycle', 'CatalogConsoleEpoch', 'LoginInputIntent'})
         for model in registry['models']:
             source = (self.root / model['model']).read_text()
             for mutant in model['mutants']:
@@ -660,7 +660,7 @@ class FormalGateTests(unittest.TestCase):
         original = path.read_text()
         registry = json.loads(original)
         self.assertEqual(set(REQUIRED_MUTANTS), BASE_MODELS)
-        self.assertEqual(sum(map(len, REQUIRED_MUTANTS.values())), 415)
+        self.assertEqual(sum(map(len, REQUIRED_MUTANTS.values())), 429)
         self.assertEqual({m['id']: {c['id'] for c in m['mutants']} for m in registry['models']}, REQUIRED_MUTANTS)
         for model in registry['models']:
             for mutant in model['mutants']:
@@ -677,7 +677,7 @@ class FormalGateTests(unittest.TestCase):
     def test_every_required_control_is_protected_against_single_removal(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
-        self.assertEqual(sum(len(v) for v in REQUIRED_MUTANTS.values()), 415)
+        self.assertEqual(sum(len(v) for v in REQUIRED_MUTANTS.values()), 429)
         for model_id, controls in REQUIRED_MUTANTS.items():
             for control in controls:
                 with self.subTest(model=model_id, control=control):
@@ -1606,6 +1606,126 @@ class FormalGateTests(unittest.TestCase):
                         validate_result(code, text, expected)
 
 
+
+
+    def test_login_input_required_model_properties_and_exact_scope(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'LoginInputIntent')
+        self.assertEqual(set(entry['source_scope']), {
+            'tools/console/src/login.jsx', 'test/console/login-native-input.test.mjs',
+            'test/e2e/login_paste.py', 'test/e2e/login_token_file.py',
+            'internal/server/web/app.js'})
+        tla, cfg = self.root / entry['model'], self.root / entry['config']
+        source, config = tla.read_bytes(), cfg.read_bytes()
+        changed = json.loads(original)
+        changed['models'] = [m for m in changed['models'] if m['id'] != entry['id']]
+        path.write_text(json.dumps(changed)); tla.unlink(); cfg.unlink()
+        with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+            load_registry(self.root)
+        tla.write_bytes(source); cfg.write_bytes(config)
+        # Remove each declaration AND its CFG/controls consistently: mandatory
+        # properties must refuse this, not merely an incidental CFG mismatch.
+        for prop in entry['properties']:
+            changed = json.loads(original)
+            target = next(m for m in changed['models'] if m['id'] == entry['id'])
+            target['properties'].remove(prop)
+            target['mutants'] = [m for m in target['mutants'] if m['expect_invariant'] != prop]
+            lines = config.decode().splitlines()
+            self.assertEqual(lines.count('INVARIANT '+prop), 1)
+            cfg.write_text('\n'.join(line for line in lines if line != 'INVARIANT '+prop)+'\n')
+            path.write_text(json.dumps(changed))
+            with self.subTest(property=prop), self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                load_registry(self.root)
+        cfg.write_bytes(config)
+        # Every exact path, including the compiled-login artifact, is required.
+        scopes = [[path for path in entry['source_scope'] if path != removed]
+                  for removed in entry['source_scope']]
+        scopes += [entry['source_scope']+['tools/console/src/main.jsx'],
+                   ['tools/console/src/main.jsx']]
+        for scope in scopes:
+            changed = json.loads(original)
+            next(m for m in changed['models'] if m['id'] == entry['id'])['source_scope'] = scope
+            path.write_text(json.dumps(changed))
+            with self.subTest(scope=scope), self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+                load_registry(self.root)
+        path.write_text(original)
+
+
+    def test_login_input_every_control_and_unambiguous_transition_anchor_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'LoginInputIntent')
+        self.assertEqual(len(entry['mutants']), 14)
+        for control in entry['mutants']:
+            changed = json.loads(original)
+            target = next(m for m in changed['models'] if m['id'] == entry['id'])
+            target['mutants'] = [m for m in target['mutants'] if m['id'] != control['id']]
+            path.write_text(json.dumps(changed))
+            with self.subTest(control=control['id']), self.assertRaisesRegex(GateError, 'required mutation control was removed'):
+                load_registry(self.root)
+        # The Ready suffix also occurs in ExpectedReady. Removing the reviewed
+        # leading newline must fail whole-source anchor validation, as caught
+        # during scoped-run preparation; a prefix-only fixture is insufficient.
+        for name in ('SubmitIgnoresBusy', 'SubmitIgnoresFileGate'):
+            changed = json.loads(original)
+            target = next(m for m in changed['models'] if m['id'] == entry['id'])
+            control = next(m for m in target['mutants'] if m['id'] == name)
+            control['edits'][0]['old'] = control['edits'][0]['old'].lstrip('\n')
+            path.write_text(json.dumps(changed))
+            with self.subTest(control=name), self.assertRaisesRegex(GateError, 'mutation anchor count mismatch'):
+                load_registry(self.root)
+        path.write_text(original)
+
+
+    def test_login_focus_control_preserves_independent_adoption_oracle(self):
+        registry = load_registry(self.root)
+        entry = next(m for m in registry['models'] if m['id'] == 'LoginInputIntent')
+        source = (self.root / entry['model']).read_text()
+        control = next(m for m in entry['mutants'] if m['id'] == 'FocusSkipsNativeAdoption')
+        self.assertEqual(control['expect_invariant'], 'AdoptedValueExact')
+        name, mutated = apply_mutant(source, entry['id'], control)
+        self.assertEqual(name, 'LoginInputIntent_FocusSkipsNativeAdoption')
+        self.assertIn('Focus(s) == LET adopted == s IN [adopted EXCEPT !.dom = adopted.token]', mutated)
+        # Mutation must touch the actual focus transition, not its independent
+        # before-state oracle or the unchanged ordinary Sync operation.
+        self.assertIn(' [] e.op = "focus" -> Focus(s)', mutated)
+        self.assertIn(' [] k = "native-focus-submit" -> <<Event("native","A"),Event("focus","empty"),Event("submit","empty")>>', mutated)
+        self.assertIn('Sync(s) == IF s.connected /\\ s.dom # s.token THEN Adopt(s,s.dom) ELSE s', mutated)
+        for before_state_oracle in (
+            '(Op \\in {"sync","focus","keydown"} /\\ Before.connected /\\ Before.dom # Before.token)',
+            'ELSE IF Op \\in {"sync","focus","keydown"} /\\ Before.connected THEN Before.dom',
+            '"edit","sync","focus","keydown","flush","submit","fileok","fileerr"',
+        ):
+            self.assertIn(before_state_oracle, mutated)
+
+
+
+    def test_login_keydown_native_clear_control_preserves_independent_oracles(self):
+        registry = load_registry(self.root)
+        entry = next(m for m in registry['models'] if m['id'] == 'LoginInputIntent')
+        old_controls = {'FlushDoesNotAdoptNativeValue', 'LocaleInvalidatesCurrentFile', 'EmptyDOMReusesOldCredential', 'OldPasteSurvivesNewIntent', 'LocaleClearsIntent', 'FocusSkipsNativeAdoption', 'NonemptyDOMUsesControlledState', 'NativeAdoptionSkipsNewIntent', 'FileCompletionIgnoresRevision', 'SubmitIgnoresFileGate', 'SubmitIgnoresBusy', 'UnmountedFileCompletionPublishes', 'CurrentFileErrorDiscarded'}
+        self.assertEqual({m['id'] for m in entry['mutants']},
+                         old_controls | {'KeyDownSkipsNativeAdoption'})
+        source = (self.root / entry['model']).read_text()
+        control = next(m for m in entry['mutants'] if m['id'] == 'KeyDownSkipsNativeAdoption')
+        self.assertEqual(control['expect_invariant'], 'AdoptedValueExact')
+        name, mutated = apply_mutant(source, entry['id'], control)
+        self.assertEqual(name, 'LoginInputIntent_KeyDownSkipsNativeAdoption')
+        self.assertIn('KeyDown(s) == LET adopted == s IN [adopted EXCEPT !.dom = adopted.token]', mutated)
+        self.assertNotIn('KeyDown(s) == LET adopted == Sync(s)', mutated)
+        self.assertIn(' [] e.op = "keydown" -> KeyDown(s)', mutated)
+        self.assertIn(' [] k = "focused-key-clear-submit" -> <<Event("paste","A"),Event("flush","empty"),Event("native","empty"),Event("keydown","empty"),Event("submit","empty")>>', mutated)
+        # The mutant changes the actual key capture, never the independent
+        # before-state oracle, ordinary input synchronization or focus guard.
+        for unchanged in (
+            'Sync(s) == IF s.connected /\\ s.dom # s.token THEN Adopt(s,s.dom) ELSE s',
+            'Focus(s) == LET adopted == Sync(s) IN [adopted EXCEPT !.dom = adopted.token]',
+            '(Op \\in {"sync","focus","keydown"} /\\ Before.connected /\\ Before.dom # Before.token)',
+            'ELSE IF Op \\in {"sync","focus","keydown"} /\\ Before.connected THEN Before.dom',
+            '"edit","sync","focus","keydown","flush","submit","fileok","fileerr"',
+        ):
+            self.assertIn(unchanged, mutated)
 
 
 if __name__ == '__main__':
