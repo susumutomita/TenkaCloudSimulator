@@ -126,10 +126,10 @@ SDK、操作画面、再起動、チーム分離の受入検証は `make e2e` �
 
 CIはstatementと未フィルターsource-line coverageを両方90%以上に強制します。`make before-commit`単独のcoverage判定はstatementのみで、source-line判定はCIのCobertura生成後ステージと上記の2コマンドで行います。SDK/browser、license、依存security、埋込asset、形式検査も行います。cross compileは他OSでの実行成功を意味しません。開発用Python/Node/Javaはruntime依存ではありません。UI・Scalarの再生成は権利表記とlockを保持する[各build手順](tools/console/README.md)・[Scalar手順](tools/scalar/README.md)・[Python runtimeの権利・再生成手順](tools/python/README.md)に従います。
 
-統合後のregistryは**55有限モデル・449制御（504実行）**を必須とし、新しいmainを取り込んだ
+統合後のregistryは**55有限モデル・450制御（505実行）**を必須とし、新しいmainを取り込んだ
 固定HEADでの全体検証は未完了です。mainの52モデル・415制御を保持します。従来の50/398に
 サービスカタログの保存状態モデルCatalogResourceLifecycle（12制御）と画面モデル
-CatalogConsoleEpoch（5制御）を加え、LoginInputIntentの1モデル・14制御と、SNSの有限受理・保存モデル2本・20制御を統合します。
+CatalogConsoleEpoch（5制御）を加え、LoginInputIntentの1モデル・14制御と、SNSの有限受理・保存モデル2本・21制御を統合します。
 SNSの検査はGo/SQLのrefinementや外部配信を証明しません。
 以前の48/381に追加したLPの2モデル・17制御や、Sakura、DynamoDB画面、Secretsメタデータ画面も保持します。
 LPモデルは信頼済みのhost/origin/認証判定や閉じたノード入力を前提とし、URL解析、フォーカス、
@@ -193,5 +193,5 @@ API資料ではクラウドを分け、Sakura Cloudの任意有効化するDisk�
 全Go race/build、同一profileのstatement94.94%・未除外source90.32%が成功しました。
 資料のみを変えた後続`414c902`では全61 E2E（980.726秒）・reflow・startが成功しました。
 「資料のみの追補」「実行コード等が同一」はその過去の版の説明であり、現在のLP実装を指しません。
-当時のhosted検査の留保もその版に属します。現在の全504実行の成功や、ホスト採点・SQL/Go refinement・
+当時のhosted検査の留保もその版に属します。現在の全505実行の成功や、ホスト採点・SQL/Go refinement・
 秘匿出力・全リソース物理削除の証明へ読み替えないでください。

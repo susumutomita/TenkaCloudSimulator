@@ -4,35 +4,35 @@
   "changes": [
     {
       "path": "README.ja.md",
-      "sha256": "aec196b4276c74066c4dc4374f0aada64b898b690391f385de0a2c104cb316de",
+      "sha256": "3c2d6c651c23f243615b6bcc8df20f4405e9edf4a3cc814e0c329713a7c3fc7a",
       "disposition": "documentation",
       "reason": "Document the bounded SNS SDK-only subset, atomic cleanup, quotas, verification scope and remaining limitations; no new runtime behavior in this file.",
       "models": []
     },
     {
       "path": "README.md",
-      "sha256": "439b7b3a7ab21730e0b25186b3ca5f0cade46e7936f786adfa0c42510d00ad19",
+      "sha256": "8dce971286e6f27dff991ec0c739bbe5acf1b8ea209ae084e370948872602e61",
       "disposition": "documentation",
       "reason": "Document the bounded SNS SDK-only subset, atomic cleanup, quotas, verification scope and remaining limitations; no new runtime behavior in this file.",
       "models": []
     },
     {
       "path": "docs/formal-validation.md",
-      "sha256": "7c5fc0b2928fff57c899687a1e34e8b9b0f0e4ff70250dcbe806eea8a200522e",
+      "sha256": "8101b0cfa71bbceb3b780465c7e64ac1604e507448018f721d18c5390c7354e5",
       "disposition": "documentation",
       "reason": "Document the bounded SNS SDK-only subset, atomic cleanup, quotas, verification scope and remaining limitations; no new runtime behavior in this file.",
       "models": []
     },
     {
       "path": "docs/sns.md",
-      "sha256": "b252a3677bcff54ca42def02a8a4467ac570ef7d7d1437b8258adcebf862734b",
+      "sha256": "03c429c24de32382d5c4dd33efada08dd3bf0fbcd67c3daeb095c076650e617b",
       "disposition": "documentation",
       "reason": "Document the bounded SNS SDK-only subset, atomic cleanup, quotas, verification scope and remaining limitations; no new runtime behavior in this file.",
       "models": []
     },
     {
       "path": "formal/README.md",
-      "sha256": "219f19b1f549bb1473e75308a99418eebf532d73ad3c631eed1d6fed58526c42",
+      "sha256": "c527b6c23eaf17c2789ec7d358286e791cb96072a14dd230e443c4b29af699bc",
       "disposition": "documentation",
       "reason": "Document the bounded SNS SDK-only subset, atomic cleanup, quotas, verification scope and remaining limitations; no new runtime behavior in this file.",
       "models": []
@@ -79,7 +79,7 @@
     },
     {
       "path": "formal/SNSLifecycle.cfg",
-      "sha256": "7e191e268dc9dfed9fb6b866f3b6e536113426b42d26afe4e8648588880ac7c4",
+      "sha256": "a6a35d388bc2784cafafefe237d2242569b71cc81f390ada4ef7813b57b44cd3",
       "disposition": "modeled",
       "reason": "SNS-only delta: admission, local-record persistence, guarded acknowledgement and topic-owned cleanup. Shared gateway/server edits compose SNS with existing providers; their other behavior is unchanged. Native SQLite fault, protocol and SDK tests remain separate implementation evidence.",
       "models": [
@@ -95,7 +95,8 @@
             "PublishRecipientsExact",
             "PeerFrame",
             "NoDanglingDeliveredMessage",
-            "DeleteAckEmpty"
+            "DeleteAckEmpty",
+            "DeleteRetryAcknowledged"
           ],
           "limits": "Finite two-topic/two-subscription/two-message atomic transition projection with abstract byte and delivery budgets, valid initialization and rollback assumed. No SQL/Go refinement, real SQS transport, host failure, cryptography or unbounded concurrency proof."
         }
@@ -103,7 +104,7 @@
     },
     {
       "path": "formal/SNSLifecycle.tla",
-      "sha256": "52f5bf1204503bbc3fb1f5e43d2f5009725b1b6b1bdda949219682a04a1090b0",
+      "sha256": "f15003d049b5b1097e97d2102dc39f2acf5ddac21c24bf3077013116d89e247c",
       "disposition": "modeled",
       "reason": "SNS-only delta: admission, local-record persistence, guarded acknowledgement and topic-owned cleanup. Shared gateway/server edits compose SNS with existing providers; their other behavior is unchanged. Native SQLite fault, protocol and SDK tests remain separate implementation evidence.",
       "models": [
@@ -119,7 +120,8 @@
             "PublishRecipientsExact",
             "PeerFrame",
             "NoDanglingDeliveredMessage",
-            "DeleteAckEmpty"
+            "DeleteAckEmpty",
+            "DeleteRetryAcknowledged"
           ],
           "limits": "Finite two-topic/two-subscription/two-message atomic transition projection with abstract byte and delivery budgets, valid initialization and rollback assumed. No SQL/Go refinement, real SQS transport, host failure, cryptography or unbounded concurrency proof."
         }
@@ -127,9 +129,9 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "cd1f28330a235aaaa7c91383509430ef5f42c9ffb87dcec82e5022ba5f6f4e0c",
+      "sha256": "5c302e620adbb1bc139db774fd15993cf79ddb8be822ab91995bf7929518d4d3",
       "disposition": "formal-infrastructure",
-      "reason": "Register two SNS models with twenty required mutation controls while retaining all prior model obligations and exact registry assertions. No validation threshold, source-binding or immutable-head gate is relaxed.",
+      "reason": "Register two SNS models with twenty-one required mutation controls while retaining all prior model obligations and exact registry assertions. No validation threshold, source-binding or immutable-head gate is relaxed.",
       "models": []
     },
     {
@@ -154,7 +156,27 @@
     },
     {
       "path": "internal/aws/sns.go",
-      "sha256": "e42cae4d438f3e4f156741ad6874bb9aa2693ae36046a9ab5a3ca7f756814125",
+      "sha256": "15e04d9a2da7720ed5686295797ef90802627f3412189dee20d85dbe0e08e409",
+      "disposition": "modeled",
+      "reason": "SNS-only delta: admission, local-record persistence, guarded acknowledgement and topic-owned cleanup. Shared gateway/server edits compose SNS with existing providers; their other behavior is unchanged. Native SQLite fault, protocol and SDK tests remain separate implementation evidence. Standard wire-code projection is verified separately with official SDK modeled exception classes; the normalized admission model does not prove XML or exception factory behavior.",
+      "models": [
+        {
+          "id": "SNSAdmission",
+          "properties": [
+            "TypeOK",
+            "NoUnauthorizedEffect",
+            "NoFIFOPublish",
+            "NoRegionMismatch",
+            "NoSuccessOnRefusal",
+            "NoRejectedMutation"
+          ],
+          "limits": "Finite normalized admission witnesses for six operation classes and Boolean guards. Does not execute Go parsers, UTF8, XML, IAM policy evaluation, pagination encoding or cryptography. Native refusal and isolation tests independently check implementation paths."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/sns_admission_regression_test.go",
+      "sha256": "b043823b8fe1b89e649f94bd37076a50f550f5e045a3a4e5dffadecbbce736ec",
       "disposition": "modeled",
       "reason": "SNS-only delta: admission, local-record persistence, guarded acknowledgement and topic-owned cleanup. Shared gateway/server edits compose SNS with existing providers; their other behavior is unchanged. Native SQLite fault, protocol and SDK tests remain separate implementation evidence.",
       "models": [
@@ -173,24 +195,11 @@
       ]
     },
     {
-      "path": "internal/aws/sns_admission_regression_test.go",
-      "sha256": "d22b7c4709f47b3afe2a440e6f9d10e83e06e80c0060f1912e4731f2045ab0b6",
-      "disposition": "modeled",
-      "reason": "SNS-only delta: admission, local-record persistence, guarded acknowledgement and topic-owned cleanup. Shared gateway/server edits compose SNS with existing providers; their other behavior is unchanged. Native SQLite fault, protocol and SDK tests remain separate implementation evidence.",
-      "models": [
-        {
-          "id": "SNSAdmission",
-          "properties": [
-            "TypeOK",
-            "NoUnauthorizedEffect",
-            "NoFIFOPublish",
-            "NoRegionMismatch",
-            "NoSuccessOnRefusal",
-            "NoRejectedMutation"
-          ],
-          "limits": "Finite normalized admission witnesses for six operation classes and Boolean guards. Does not execute Go parsers, UTF8, XML, IAM policy evaluation, pagination encoding or cryptography. Native refusal and isolation tests independently check implementation paths."
-        }
-      ]
+      "path": "internal/aws/sns_review_regression_test.go",
+      "sha256": "6981b0d1093a14570bdc2aaee6aa7a8e0b55b89cb9c5c1dbc5f64b0006f3d729",
+      "disposition": "test-support",
+      "reason": "Exercise native SNS protocol/persistence and actual binary SDK isolation; tests do not constitute a formal implementation refinement. Existing mandatory E2E cases remain required.",
+      "models": []
     },
     {
       "path": "internal/aws/sns_storage_faults_test.go",
@@ -217,7 +226,8 @@
             "PublishRecipientsExact",
             "PeerFrame",
             "NoDanglingDeliveredMessage",
-            "DeleteAckEmpty"
+            "DeleteAckEmpty",
+            "DeleteRetryAcknowledged"
           ],
           "limits": "Finite two-topic/two-subscription/two-message atomic transition projection with abstract byte and delivery budgets, valid initialization and rollback assumed. No SQL/Go refinement, real SQS transport, host failure, cryptography or unbounded concurrency proof."
         }
@@ -225,9 +235,9 @@
     },
     {
       "path": "internal/aws/sns_store.go",
-      "sha256": "1006715711254b44959e6897f24848b69856fb76a0cbb70c0538f694ed38121d",
+      "sha256": "98a8ca570566f83192de92ec07e9c2e9a1b22985c704a0a54da47d50999c474c",
       "disposition": "modeled",
-      "reason": "SNS-only delta: admission, local-record persistence, guarded acknowledgement and topic-owned cleanup. Shared gateway/server edits compose SNS with existing providers; their other behavior is unchanged. Native SQLite fault, protocol and SDK tests remain separate implementation evidence.",
+      "reason": "SNS-only delta: admission, local-record persistence, guarded acknowledgement and topic-owned cleanup. Shared gateway/server edits compose SNS with existing providers; their other behavior is unchanged. Native SQLite fault, protocol and SDK tests remain separate implementation evidence. DeleteRetryAcknowledged covers committed absent-topic no-ops; native SQL read/commit faults and exact row snapshots verify implementation separately.",
       "models": [
         {
           "id": "SNSLifecycle",
@@ -241,7 +251,8 @@
             "PublishRecipientsExact",
             "PeerFrame",
             "NoDanglingDeliveredMessage",
-            "DeleteAckEmpty"
+            "DeleteAckEmpty",
+            "DeleteRetryAcknowledged"
           ],
           "limits": "Finite two-topic/two-subscription/two-message atomic transition projection with abstract byte and delivery budgets, valid initialization and rollback assumed. No SQL/Go refinement, real SQS transport, host failure, cryptography or unbounded concurrency proof."
         }
@@ -249,7 +260,7 @@
     },
     {
       "path": "internal/aws/sns_test.go",
-      "sha256": "e96a1b4546358ab09b2c79391d69824eb28fea4d1e80dbcee080b6c0b05cbe83",
+      "sha256": "623ad6977405ddaca8f1ed4d356ab3899223583f56890a4ed5c05b5ee39c8094",
       "disposition": "modeled",
       "reason": "SNS-only delta: admission, local-record persistence, guarded acknowledgement and topic-owned cleanup. Shared gateway/server edits compose SNS with existing providers; their other behavior is unchanged. Native SQLite fault, protocol and SDK tests remain separate implementation evidence.",
       "models": [
@@ -265,7 +276,8 @@
             "PublishRecipientsExact",
             "PeerFrame",
             "NoDanglingDeliveredMessage",
-            "DeleteAckEmpty"
+            "DeleteAckEmpty",
+            "DeleteRetryAcknowledged"
           ],
           "limits": "Finite two-topic/two-subscription/two-message atomic transition projection with abstract byte and delivery budgets, valid initialization and rollback assumed. No SQL/Go refinement, real SQS transport, host failure, cryptography or unbounded concurrency proof."
         }
@@ -273,7 +285,7 @@
     },
     {
       "path": "internal/aws/sns_wire_boundaries_test.go",
-      "sha256": "322cb196953fcb366c576ec3e95c61d45edc0cce3293c96d9c3efdaa138a2df3",
+      "sha256": "f8e16cf98aeaea2f56a9ce7edc0e5b025cfcb2f9a2cec415127f5f33f8a37d84",
       "disposition": "test-support",
       "reason": "Exercise native SNS protocol/persistence and actual binary SDK isolation; tests do not constitute a formal implementation refinement. Existing mandatory E2E cases remain required.",
       "models": []
@@ -316,7 +328,8 @@
             "PublishRecipientsExact",
             "PeerFrame",
             "NoDanglingDeliveredMessage",
-            "DeleteAckEmpty"
+            "DeleteAckEmpty",
+            "DeleteRetryAcknowledged"
           ],
           "limits": "Finite two-topic/two-subscription/two-message atomic transition projection with abstract byte and delivery budgets, valid initialization and rollback assumed. No SQL/Go refinement, real SQS transport, host failure, cryptography or unbounded concurrency proof."
         },
@@ -352,7 +365,8 @@
             "PublishRecipientsExact",
             "PeerFrame",
             "NoDanglingDeliveredMessage",
-            "DeleteAckEmpty"
+            "DeleteAckEmpty",
+            "DeleteRetryAcknowledged"
           ],
           "limits": "Finite two-topic/two-subscription/two-message atomic transition projection with abstract byte and delivery budgets, valid initialization and rollback assumed. No SQL/Go refinement, real SQS transport, host failure, cryptography or unbounded concurrency proof."
         }
@@ -360,16 +374,16 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "8ccb05cfb111a8ea2537805435efb301e86f5ea35f5ace0312813a0da0380a99",
+      "sha256": "bb373cefead7ad715410d5162ab431308afafbbb6f5ee9fff3901bfbd6d2f8db",
       "disposition": "formal-infrastructure",
-      "reason": "Register two SNS models with twenty required mutation controls while retaining all prior model obligations and exact registry assertions. No validation threshold, source-binding or immutable-head gate is relaxed.",
+      "reason": "Register two SNS models with twenty-one required mutation controls while retaining all prior model obligations and exact registry assertions. No validation threshold, source-binding or immutable-head gate is relaxed.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "9129b2c605018aa9fd4800682c780ba4ce757009fde19d27b44ea992462926c8",
+      "sha256": "312cb55beacda0a40bffcf4aa82f3e5bef6efe558db47f8717a8dfc155cbad09",
       "disposition": "formal-infrastructure",
-      "reason": "Register two SNS models with twenty required mutation controls while retaining all prior model obligations and exact registry assertions. No validation threshold, source-binding or immutable-head gate is relaxed.",
+      "reason": "Register two SNS models with twenty-one required mutation controls while retaining all prior model obligations and exact registry assertions. No validation threshold, source-binding or immutable-head gate is relaxed.",
       "models": []
     },
     {
@@ -381,7 +395,7 @@
     },
     {
       "path": "test/e2e/sns_admission.py",
-      "sha256": "2acc495eebd0df4e6c868e6585d695fd8d5bcd3c698677680328c6ee8363aacd",
+      "sha256": "b642c178e6fa3310ea742649bd77ddd27683f595162344cedd82db8111229897",
       "disposition": "test-support",
       "reason": "Exercise native SNS protocol/persistence and actual binary SDK isolation; tests do not constitute a formal implementation refinement. Existing mandatory E2E cases remain required.",
       "models": []

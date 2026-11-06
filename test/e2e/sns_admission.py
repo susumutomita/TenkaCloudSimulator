@@ -47,13 +47,18 @@ def raw(endpoint, token, fields, want=200):
     return body
 
 
-def denied(code, operation):
+def denied(client, exception_name, operation):
+    expected = getattr(client.exceptions, exception_name)
+    wire_code = client.meta.service_model.shape_for(exception_name).metadata['error']['code']
     try:
         operation()
+    except expected as error:
+        assert type(error) is expected
+        assert error.response['Error']['Code'] == wire_code, error.response
     except ClientError as error:
-        assert error.response['Error']['Code'] == code, error.response
+        raise AssertionError('Expected modeled ' + exception_name + ', got ' + type(error).__name__) from error
     else:
-        raise AssertionError('Expected ' + code)
+        raise AssertionError('Expected ' + exception_name)
 
 
 with tempfile.TemporaryDirectory(prefix='sns-413-') as directory:
@@ -64,7 +69,8 @@ with tempfile.TemporaryDirectory(prefix='sns-413-') as directory:
         assert client.create_topic(Name='admission')['TopicArn'] == topic
         sub = client.subscribe(TopicArn=topic, Protocol='email', Endpoint='ops@example.com',
                                ReturnSubscriptionArn=True)['SubscriptionArn']
-        denied('NotFoundException', lambda: sdk(endpoint, operator, 'us-west-2').unsubscribe(SubscriptionArn=sub))
+        west = sdk(endpoint, operator, 'us-west-2')
+        denied(west, 'NotFoundException', lambda: west.unsubscribe(SubscriptionArn=sub))
         assert [row['SubscriptionArn'] for row in client.list_subscriptions_by_topic(TopicArn=topic)['Subscriptions']] == [sub]
         before = client.get_topic_attributes(TopicArn=topic)['Attributes']
         ns = [('Action', 'CreateTopic'), ('Version', '2010-03-31'), ('Name', 'rejected')]
@@ -85,10 +91,10 @@ with tempfile.TemporaryDirectory(prefix='sns-413-') as directory:
             ('TopicArn', topic), ('Protocol', 'email'), ('Endpoint', 'bad@example.com'),
             ('ReturnSubscriptionArn', 'perhaps')], 400)
         for subject in ('bad\nsubject', 'bad\x00subject', 'a' * 100):
-            denied('InvalidParameterException', lambda: client.publish(TopicArn=topic, Message='test', Subject=subject))
+            denied(client, 'InvalidParameterException', lambda: client.publish(TopicArn=topic, Message='test', Subject=subject))
         assert client.get_topic_attributes(TopicArn=topic)['Attributes'] == before
         control_headers = {'Content-Type': 'application/json', 'X-Simulator-Token': operator}
-        policy = {'Version': '2012-10-17', 'Statement': [{'Effect': 'Deny', 'Action': 'sns:Publish', 'Resource': topic}]}
+        policy = {'Version': '2012-10-17', 'Statement': [{'Effect': 'Deny', 'Action': ['sns:Publish', 'sns:DeleteTopic'], 'Resource': topic}]}
         opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
         request = urllib.request.Request(endpoint + '/_simulator/v1/iam/principals/sns-reader/policy', data=json.dumps(policy).encode(), headers=control_headers, method='PUT')
         with opener.open(request) as response:
@@ -96,7 +102,9 @@ with tempfile.TemporaryDirectory(prefix='sns-413-') as directory:
         request = urllib.request.Request(endpoint + '/_simulator/v1/access', data=json.dumps({'Principal': 'sns-reader'}).encode(), headers=control_headers)
         with opener.open(request) as response:
             reader_token = json.load(response)['AccessToken']
-        denied('AuthorizationErrorException', lambda: sdk(endpoint, reader_token).publish(TopicArn=topic, Message='denied'))
+        reader = sdk(endpoint, reader_token)
+        denied(reader, 'AuthorizationErrorException', lambda: reader.publish(TopicArn=topic, Message='denied'))
+        denied(reader, 'AuthorizationErrorException', lambda: reader.delete_topic(TopicArn='arn:aws:sns:us-east-1:000000000000:absent'))
         assert client.publish(TopicArn=topic, Message='actual UTF-8', Subject='日' * 99)['MessageId']
         raw(endpoint, operator, [('Action', 'CreateTopic'), ('Version', '2010-03-31'),
             ('Name', 'sparse'), ('Attributes.entry.2.key', 'DisplayName'),
@@ -104,11 +112,19 @@ with tempfile.TemporaryDirectory(prefix='sns-413-') as directory:
         sparse = 'arn:aws:sns:us-east-1:000000000000:sparse'
         assert client.get_topic_attributes(TopicArn=sparse)['Attributes']['DisplayName'] == '日' * 99
         fifo = client.create_topic(Name='events.fifo', Attributes={'FifoTopic': 'true'})['TopicArn']
-        denied('InvalidParameterException', lambda: client.publish(TopicArn=fifo, Message='unsupported'))
+        denied(client, 'InvalidParameterException', lambda: client.publish(TopicArn=fifo, Message='unsupported'))
         # These are separate real processes/DBs/token authorities, with no peer state.
         assert second.list_topics()['Topics'] == []
-        denied('NotFoundException', lambda: second.get_topic_attributes(TopicArn=topic))
+        denied(second, 'NotFoundException', lambda: second.get_topic_attributes(TopicArn=topic))
         raw(other, operator, [('Action', 'ListTopics'), ('Version', '2010-03-31')], 401)
+        retry = client.create_topic(Name='delete-retry')['TopicArn']
+        peer_retry = second.create_topic(Name='delete-retry', Attributes={'DisplayName': 'peer'})['TopicArn']
+        assert retry == peer_retry
+        client.delete_topic(TopicArn=retry)
+        client.delete_topic(TopicArn=retry)
+        assert second.get_topic_attributes(TopicArn=peer_retry)['Attributes']['DisplayName'] == 'peer'
+        second.delete_topic(TopicArn=peer_retry)
+        second.delete_topic(TopicArn=peer_retry)
     with sqlite3.connect('file:' + str(state) + '?mode=ro', uri=True) as database:
         assert database.execute('SELECT count(*) FROM aws_sns_messages').fetchone()[0] == 1
         assert database.execute('SELECT count(*) FROM aws_sns_deliveries').fetchone()[0] == 1
@@ -117,7 +133,9 @@ with tempfile.TemporaryDirectory(prefix='sns-413-') as directory:
         assert client.get_topic_attributes(TopicArn=sparse)['Attributes']['DisplayName'] == '日' * 99
         assert client.list_subscriptions_by_topic(TopicArn=topic)['Subscriptions'][0]['SubscriptionArn'] == sub
         client.unsubscribe(SubscriptionArn=sub)
+        denied(client, 'NotFoundException', lambda: client.unsubscribe(SubscriptionArn=sub))
         for arn in (topic, sparse, fifo):
+            client.delete_topic(TopicArn=arn)
             client.delete_topic(TopicArn=arn)
         assert client.list_topics()['Topics'] == []
     with sqlite3.connect('file:' + str(state) + '?mode=ro', uri=True) as database:
@@ -125,4 +143,4 @@ with tempfile.TemporaryDirectory(prefix='sns-413-') as directory:
             assert database.execute('SELECT count(*) FROM ' + table).fetchone()[0] == 0
 
 
-print('SNS real Query/boto3 admission, Unicode subject, regional deletion guard, two-host isolation, restart and cleanup passed.')
+print('SNS real Query/boto3 admission, Unicode subject, modeled exceptions, idempotent deletion, regional deletion guard, two-host isolation, restart and cleanup passed.')

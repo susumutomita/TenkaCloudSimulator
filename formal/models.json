@@ -6149,7 +6149,8 @@
     "PublishRecipientsExact",
     "PeerFrame",
     "NoDanglingDeliveredMessage",
-    "DeleteAckEmpty"
+    "DeleteAckEmpty",
+    "DeleteRetryAcknowledged"
    ],
    "limits": "Atomic state transitions assume transaction rollback and model validated existing state. Captured post-operation ACK and frozen-delete ownership, globally bounded count/abstract byte/delivery budgets and target/peer frames only. Not SQL/driver/crash/Go refinement, UUID allocation, schema migration, UTF-8 byte calculation, quotas at real cardinality, IAM or outbound delivery. Delivery audit may outlive Unsubscribe, but not its stored message or topic. Ignored/vanishing/late-reinsert native SQLite faults and two-host SDK checks are separate executable obligations.",
    "source_scope": [
@@ -6269,6 +6270,17 @@
       }
      ],
      "expect_invariant": "PublishRecipientsExact"
+    },
+    {
+     "id": "RejectAbsentDelete",
+     "edits": [
+      {
+       "old": "Delete(t,w) == LET ok == Committed(w)",
+       "new": "Delete(t,w) == LET ok == ParentExists(t) /\\ Committed(w)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DeleteRetryAcknowledged"
     }
    ]
   },

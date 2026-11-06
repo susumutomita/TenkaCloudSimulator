@@ -109,10 +109,12 @@ func snsError(w http.ResponseWriter, err error) {
 	if errors.As(err, &failure) {
 		code, message, status = failure.code, failure.message, 400
 		switch code {
+		case "InvalidParameterException":
+			code = "InvalidParameter"
 		case "NotFoundException":
-			status = 404
+			code, status = "NotFound", 404
 		case "AuthorizationErrorException":
-			status = 403
+			code, status = "AuthorizationError", 403
 		case "LimitExceededException":
 			status = 409
 		case "RequestEntityTooLarge":
@@ -441,7 +443,13 @@ func (g *Gateway) serveSNS(w http.ResponseWriter, r *http.Request) {
 		snsResponse(w, action, result)
 	case "DeleteTopic":
 		arn := form.Get("TopicArn")
-		if _, ok := topicByARN(arn); !ok {
+		parts := strings.Split(arn, ":")
+		if len(parts) != 6 || parts[0] != "arn" || parts[1] != "aws" || parts[2] != "sns" || parts[4] != "000000000000" || (!snsTopicName.MatchString(parts[5]) && !snsFIFOTopicName.MatchString(parts[5])) {
+			snsError(w, ssmFailure{"InvalidParameterException", "TopicArn must be a simulator SNS topic ARN."})
+			return
+		}
+		if parts[3] != region {
+			snsError(w, ssmFailure{"NotFoundException", "Topic does not exist in this region."})
 			return
 		}
 		if !authorize(arn) {

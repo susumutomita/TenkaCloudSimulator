@@ -134,7 +134,7 @@ func TestSNSFIFOCannotPublishWithoutImplementedSemantics(t *testing.T) {
 	var result struct {
 		Code string `xml:"Error>Code"`
 	}
-	if w.Code != 400 || xml.Unmarshal(w.Body.Bytes(), &result) != nil || result.Code != "InvalidParameterException" {
+	if w.Code != 400 || xml.Unmarshal(w.Body.Bytes(), &result) != nil || result.Code != "InvalidParameter" {
 		t.Errorf("FIFO publish must explicitly refuse unsupported semantics: %d %s", w.Code, w.Body.String())
 	}
 	messages, err := g.SNS.ListMessages(context.Background(), topic.ARN)

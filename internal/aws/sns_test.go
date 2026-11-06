@@ -45,8 +45,8 @@ func TestSNSLifecycleFanoutAndErrors(t *testing.T) {
 	snsCall(t, g, "", create, 200, "<TopicArn>"+topicArn+"</TopicArn>")
 	// CreateTopic is idempotent in real SNS.
 	snsCall(t, g, "", create, 200, "<TopicArn>"+topicArn+"</TopicArn>")
-	snsCall(t, g, "", url.Values{"Action": {"CreateTopic"}, "Name": {"bad name!"}}, 400, "InvalidParameterException")
-	snsCall(t, g, "", url.Values{"Action": {"CreateTopic"}, "Name": {"fifo-without-suffix"}, "Attributes.entry.1.key": {"FifoTopic"}, "Attributes.entry.1.value": {"true"}}, 400, "InvalidParameterException")
+	snsCall(t, g, "", url.Values{"Action": {"CreateTopic"}, "Name": {"bad name!"}}, 400, "InvalidParameter")
+	snsCall(t, g, "", url.Values{"Action": {"CreateTopic"}, "Name": {"fifo-without-suffix"}, "Attributes.entry.1.key": {"FifoTopic"}, "Attributes.entry.1.value": {"true"}}, 400, "InvalidParameter")
 	snsCall(t, g, "", url.Values{"Action": {"CreateTopic"}, "Name": {"events.fifo"}, "Attributes.entry.1.key": {"FifoTopic"}, "Attributes.entry.1.value": {"true"}}, 200, "events.fifo")
 	listed := snsCall(t, g, "", url.Values{"Action": {"ListTopics"}}, 200, topicArn)
 	var listDoc struct {
@@ -61,7 +61,7 @@ func TestSNSLifecycleFanoutAndErrors(t *testing.T) {
 	if !strings.Contains(attrs, "<value>Alerts</value>") || !strings.Contains(attrs, "<key>SubscriptionsConfirmed</key>") {
 		t.Fatal(attrs)
 	}
-	snsCall(t, g, "", url.Values{"Action": {"GetTopicAttributes"}, "TopicArn": {"arn:aws:sns:us-east-1:000000000000:missing"}}, 404, "NotFoundException")
+	snsCall(t, g, "", url.Values{"Action": {"GetTopicAttributes"}, "TopicArn": {"arn:aws:sns:us-east-1:000000000000:missing"}}, 404, "NotFound")
 	// SQS fanout is deliberately not integrated in this build.
 	snsCall(t, g, "", url.Values{"Action": {"Subscribe"}, "TopicArn": {topicArn}, "Protocol": {"sqs"}, "Endpoint": {"arn:aws:sqs:us-east-1:000000000000:q"}}, 400, "not integrated")
 	subBody := snsCall(t, g, "", url.Values{"Action": {"Subscribe"}, "TopicArn": {topicArn}, "Protocol": {"email"}, "Endpoint": {"team@example.com"}}, 200, "<SubscriptionArn>")
@@ -86,9 +86,9 @@ func TestSNSLifecycleFanoutAndErrors(t *testing.T) {
 	if err != nil || len(msgs) != 1 || msgs[0].Message != "hello" || msgs[0].Subject != "Hi" {
 		t.Fatalf("messages: %v %+v", err, msgs)
 	}
-	snsCall(t, g, "", url.Values{"Action": {"Publish"}, "TopicArn": {topicArn}}, 400, "InvalidParameterException")
+	snsCall(t, g, "", url.Values{"Action": {"Publish"}, "TopicArn": {topicArn}}, 400, "InvalidParameter")
 	snsCall(t, g, "", url.Values{"Action": {"Unsubscribe"}, "SubscriptionArn": {subArn}}, 200, "")
-	snsCall(t, g, "", url.Values{"Action": {"Unsubscribe"}, "SubscriptionArn": {subArn}}, 404, "NotFoundException")
+	snsCall(t, g, "", url.Values{"Action": {"Unsubscribe"}, "SubscriptionArn": {subArn}}, 404, "NotFound")
 	// After unsubscribing, publish records no new delivery.
 	snsCall(t, g, "", url.Values{"Action": {"Publish"}, "TopicArn": {topicArn}, "Message": {"second"}}, 200, "<MessageId>")
 	if n, _ := g.SNS.DeliveryCount(subArn); n != 1 {
@@ -97,8 +97,8 @@ func TestSNSLifecycleFanoutAndErrors(t *testing.T) {
 	// DeleteTopic cascades subscriptions.
 	snsCall(t, g, "", url.Values{"Action": {"Subscribe"}, "TopicArn": {topicArn}, "Protocol": {"https"}, "Endpoint": {"https://example.com/hook"}}, 200, "<SubscriptionArn>")
 	snsCall(t, g, "", url.Values{"Action": {"DeleteTopic"}, "TopicArn": {topicArn}}, 200, "")
-	snsCall(t, g, "", url.Values{"Action": {"ListSubscriptionsByTopic"}, "TopicArn": {topicArn}}, 404, "NotFoundException")
-	snsCall(t, g, "", url.Values{"Action": {"DeleteTopic"}, "TopicArn": {topicArn}}, 404, "NotFoundException")
+	snsCall(t, g, "", url.Values{"Action": {"ListSubscriptionsByTopic"}, "TopicArn": {topicArn}}, 404, "NotFound")
+	snsCall(t, g, "", url.Values{"Action": {"DeleteTopic"}, "TopicArn": {topicArn}}, 200, "DeleteTopicResponse")
 	snsCall(t, g, "", url.Values{"Action": {"SetTopicAttributes"}, "TopicArn": {topicArn}}, 400, "InvalidAction")
 }
 
@@ -115,8 +115,8 @@ func TestSNSAuthorization(t *testing.T) {
 		t.Fatal(err)
 	}
 	snsCall(t, g, "reader", url.Values{"Action": {"ListTopics"}}, 200, "<ListTopicsResponse")
-	snsCall(t, g, "reader", url.Values{"Action": {"CreateTopic"}, "Name": {"other"}}, 403, "AuthorizationErrorException")
-	snsCall(t, g, "reader", url.Values{"Action": {"Publish"}, "TopicArn": {"arn:aws:sns:us-east-1:000000000000:alerts"}, "Message": {"x"}}, 403, "AuthorizationErrorException")
+	snsCall(t, g, "reader", url.Values{"Action": {"CreateTopic"}, "Name": {"other"}}, 403, "AuthorizationError")
+	snsCall(t, g, "reader", url.Values{"Action": {"Publish"}, "TopicArn": {"arn:aws:sns:us-east-1:000000000000:alerts"}, "Message": {"x"}}, 403, "AuthorizationError")
 }
 
 type stubQueueFanout struct {
@@ -147,8 +147,8 @@ func TestSNStoSQSFanoutContract(t *testing.T) {
 	topicArn := "arn:aws:sns:us-east-1:000000000000:jobs-topic"
 	snsCall(t, g, "", url.Values{"Action": {"CreateTopic"}, "Name": {"jobs-topic"}}, 200, topicArn)
 	// Queue ARN in another region and a missing queue are rejected.
-	snsCall(t, g, "", url.Values{"Action": {"Subscribe"}, "TopicArn": {topicArn}, "Protocol": {"sqs"}, "Endpoint": {"arn:aws:sqs:eu-west-1:000000000000:jobs"}}, 400, "InvalidParameterException")
-	snsCall(t, g, "", url.Values{"Action": {"Subscribe"}, "TopicArn": {topicArn}, "Protocol": {"sqs"}, "Endpoint": {"arn:aws:sqs:us-east-1:000000000000:missing"}}, 404, "NotFoundException")
+	snsCall(t, g, "", url.Values{"Action": {"Subscribe"}, "TopicArn": {topicArn}, "Protocol": {"sqs"}, "Endpoint": {"arn:aws:sqs:eu-west-1:000000000000:jobs"}}, 400, "InvalidParameter")
+	snsCall(t, g, "", url.Values{"Action": {"Subscribe"}, "TopicArn": {topicArn}, "Protocol": {"sqs"}, "Endpoint": {"arn:aws:sqs:us-east-1:000000000000:missing"}}, 404, "NotFound")
 	snsCall(t, g, "", url.Values{"Action": {"Subscribe"}, "TopicArn": {topicArn}, "Protocol": {"sqs"}, "Endpoint": {"arn:aws:sqs:us-east-1:000000000000:jobs"}}, 200, "<SubscriptionArn>")
 	pub := snsCall(t, g, "", url.Values{"Action": {"Publish"}, "TopicArn": {topicArn}, "Message": {"run job"}, "Subject": {"Job"}}, 200, "<MessageId>")
 	var pubDoc struct {

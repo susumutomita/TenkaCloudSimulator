@@ -300,7 +300,7 @@ func TestSNSMissingTopicAndSubscriptionInputsAreRefused(t *testing.T) {
 		fields.Set("Version", "2010-03-31")
 		snsWire(t, g, "POST", "/", fields.Encode(), nil, 400)
 	}
-	for _, op := range []string{"Publish", "Subscribe", "DeleteTopic", "GetTopicAttributes", "ListSubscriptionsByTopic"} {
+	for _, op := range []string{"Publish", "Subscribe", "GetTopicAttributes", "ListSubscriptionsByTopic"} {
 		fields := url.Values{"Action": {op}, "Version": {"2010-03-31"}, "TopicArn": {"arn:aws:sns:us-east-1:000000000000:missing"}}
 		snsWire(t, g, "POST", "/", fields.Encode(), nil, 404)
 	}

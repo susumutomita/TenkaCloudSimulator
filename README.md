@@ -264,12 +264,12 @@ not binary runtime dependencies. Regeneration must preserve locks and original
 rights: [console](tools/console/README.md), [Scalar](tools/scalar/README.md),
 [Python/WASI runtime](tools/python/README.md).
 
-The combined catalog/login inventory requires **55 finite models and 449
-intentional defect controls (504 required executions)**; exact-HEAD whole-gate
+The combined catalog/login inventory requires **55 finite models and 450
+intentional defect controls (505 required executions)**; exact-HEAD whole-gate
 validation after this main integration is pending. Main's 52/415 inventory is
 preserved: the earlier 50/398 plus CatalogResourceLifecycle (12 controls) and
 CatalogConsoleEpoch (5). LoginInputIntent adds one model and 14 controls. SNSAdmission/SNSLifecycle
-add two finite normalized-admission/local-record models and twenty controls;
+add two finite normalized-admission/local-record models and twenty-one controls;
 these do not prove Go/SQL refinement or external delivery.
 The earlier landing, Sakura, Secrets metadata and DynamoDB console models remain
 registered. Any 463-execution or 102-pure-test receipt at `8149cac` belongs to

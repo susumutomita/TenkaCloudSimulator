@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"database/sql"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -243,6 +244,12 @@ func (s *SNSStore) DeleteTopic(arn string) error {
 	}
 	defer tx.Rollback()
 	if _, err = snsRequireTopic(tx, arn); err != nil {
+		var missing ssmFailure
+		if errors.As(err, &missing) && missing.code == "NotFoundException" {
+			// SNS deletion is idempotent. Even this read-only no-op must
+			// surface read/commit failures rather than acknowledge an error.
+			return tx.Commit()
+		}
 		return err
 	}
 	messages, err := snsIDs(tx, "SELECT id FROM aws_sns_messages WHERE topic_arn=?", arn)

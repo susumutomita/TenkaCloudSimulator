@@ -14,9 +14,9 @@ simulator runs with `--state`.
 | CreateTopic | Idempotent like real SNS. `Name` plus `Attributes.entry.N` for `DisplayName` and `FifoTopic` only. FIFO names must end in `.fifo`. |
 | ListTopics | Per region, scoped `NextToken` pagination bound to operation, region and topic (page size 100). |
 | GetTopicAttributes | TopicArn, Owner, DisplayName, subscription counts, FifoTopic. |
-| DeleteTopic | Removes the topic, subscriptions, messages and all delivery records in one transaction, including history from removed subscriptions. |
+| DeleteTopic | Removes the topic, subscriptions, messages and all delivery records in one transaction, including history from removed subscriptions. A valid, authorized deletion of an absent topic succeeds without changing state; retries are idempotent. |
 | Subscribe | Protocols: http, https, email, email-json, sms, lambda, application, firehose. Duplicate (topic, protocol, endpoint) returns the existing subscription. |
-| Unsubscribe | Unknown subscription ARN is `NotFoundException`. |
+| Unsubscribe | Unknown subscription ARN is `NotFound`. |
 | ListSubscriptions / ListSubscriptionsByTopic | `NextToken` pagination (page size 100). |
 | Publish | Message up to 256 KiB UTF-8, optional Subject (fewer than 100 Unicode characters; no line breaks or controls). Standard topics only; FIFO publication is explicitly refused. Returns a MessageId. |
 
@@ -37,9 +37,9 @@ error and roll back. A deleted topic snapshot cannot create new records.
 Startup rejects orphan/over-budget SNS state without deleting it. Older SNS PR
 databases containing audit messages for deleted topics require a fresh database.
 These are local simulator limits and do not claim AWS quotas or process RSS. Errors use the SNS Query `ErrorResponse` shape:
-`ValidationError`, `InvalidParameterException`, `InvalidAction` for
-unimplemented operations (HTTP 400), `NotFoundException` (404),
-`AuthorizationErrorException` (403), `LimitExceededException` (409).
+`ValidationError`, `InvalidParameter`, `InvalidAction` for
+unimplemented operations (HTTP 400), `NotFound` (404),
+`AuthorizationError` (403), `LimitExceededException` (409).
 
 ## Deliberate deviations — read before relying on behavior
 
@@ -61,7 +61,7 @@ unimplemented operations (HTTP 400), `NotFoundException` (404),
   not an atomic fanout integration. Keep it disabled in the standalone service. This behavior is covered by Go tests
   against a stub fanout. The standalone SNS branch wires no adapter
   (`Gateway.QueueFanout == nil`), so sqs subscriptions there are rejected
-  with `InvalidParameterException` saying fanout is not integrated in
+  with `InvalidParameter` saying fanout is not integrated in
   this build.
 
 - SNS-to-Lambda invocation is likewise not performed; `lambda` protocol
@@ -124,3 +124,11 @@ cleanup/peer frames. Native malformed Query, SQLite ignored/vanishing/late-write
 read/commit failures and exact-byte quota tests remain separate obligations.
 The models do not prove Go/SQL refinement, parsing, cryptography, UUID allocation,
 actual cloud behavior or the disabled SQS callback. See the registered bounds.
+
+SNS standard error codes use their wire names (`InvalidParameter`, `NotFound`,
+`AuthorizationError`), so official SDK clients raise their modeled exception
+classes (`InvalidParameterException`, `NotFoundException`,
+`AuthorizationErrorException`). `LimitExceededException` remains an explicitly
+local simulator quota error, not a modeled SNS error. DeleteTopic still validates
+ARN/region and IAM authorization for absent topics; storage read/commit errors
+remain failures. Unsubscribe retains its existing missing-subscription error.
