@@ -421,8 +421,10 @@ func (b *binding) errorCode(opName, kind string) (string, int) {
 					return name, b.status(name, kind)
 				}
 			}
+			// Authorization failures use only the exact modeled name, and
+			// errors about dependent KMS keys never stand for this resource.
 			for _, name := range official.Errors {
-				if strings.Contains(name, candidate) {
+				if kind != "denied" && !strings.HasPrefix(strings.ToLower(name), "kms") && strings.Contains(name, candidate) {
 					return name, b.status(name, kind)
 				}
 			}

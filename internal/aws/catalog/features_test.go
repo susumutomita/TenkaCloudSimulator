@@ -38,7 +38,7 @@ func featureSpec() *Service {
 				Generate: map[string]any{"Mode": "STANDARD", "Size": 1}},
 		},
 		Ops: []Op{
-			{Name: "PutRule", Kind: Put, Resource: "rule", Lookup: "Name"},
+			{Name: "PutRule", Kind: Put, Resource: "rule", Lookup: "Name", Touch: []string{"Modified"}, Set: map[string]any{"Revision": "$uuid"}},
 			{Name: "DescribeRules", Kind: List, Resource: "rule", Names: "Names", Failures: "Failures", FailureItem: map[string]any{"Arn": "$name", "Reason": "MISSING"}},
 			{Name: "GetSettings", Kind: Read, Resource: "settings"},
 			{Name: "UpdateSettings", Kind: Update, Resource: "settings", Fields: []string{"Mode", "Size"}},
@@ -88,9 +88,13 @@ func TestPutCreatesThenReplacesSuppliedMembers(t *testing.T) {
 	expect(t, h.json1("features", "PutRule", map[string]any{"Name": "nightly", "Mystery": "x"}), 400, "ValidationException")
 	many := []any{}
 	for i := 0; i < maxTagsPerResource; i++ {
-		many = append(many, map[string]any{"Key": string(rune('A' + i%26)) + string(rune('a'+i/26)), "Value": "v"})
+		many = append(many, map[string]any{"Key": string(rune('A'+i%26)) + string(rune('a'+i/26)), "Value": "v"})
 	}
 	expect(t, h.json1("features", "PutRule", map[string]any{"Name": "nightly", "Tags": many}), 400, "LimitExceededException")
+	inject(t, h.db, "CREATE TRIGGER fail_put BEFORE UPDATE ON aws_catalog_resources BEGIN SELECT RAISE(ABORT, 'x'); END")
+	expect(t, h.json1("features", "PutRule", map[string]any{"Name": "nightly", "State": "ENABLED"}), 500, "InternalFailure")
+	inject(t, h.db, "DROP TABLE aws_catalog_resources")
+	expect(t, h.json1("features", "PutRule", map[string]any{"Name": "nightly"}), 500, "InternalFailure")
 }
 
 func TestSingletonDefaultsAreReadableAndStoredOnWrite(t *testing.T) {

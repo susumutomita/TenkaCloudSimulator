@@ -88,15 +88,15 @@ def main(selected=None):
                 denied.pop('expect', None)
                 run_steps(a, fixture, [denied], {}, set(), token=nobody)
                 run_steps(a, fixture, fixture['steps'], saved, called)
-                missing = set(services[model]['operations']) - called
-                assert not missing, f'{model} bound operations were not exercised: {sorted(missing)}'
                 run_steps(b, fixture, fixture.get('isolation', []), {}, set())
-                states[model] = (fixture, saved)
+                states[model] = (fixture, saved, called)
             a.stop()
             a.start()
-            for model, (fixture, saved) in states.items():
-                run_steps(a, fixture, fixture.get('after_restart', []), saved, set())
-                run_steps(a, fixture, fixture.get('cleanup', []), saved, set())
+            for model, (fixture, saved, called) in states.items():
+                run_steps(a, fixture, fixture.get('after_restart', []), saved, called)
+                run_steps(a, fixture, fixture.get('cleanup', []), saved, called)
+                missing = set(services[model]['operations']) - called
+                assert not missing, f'{model} bound operations were not exercised: {sorted(missing)}'
         finally:
             for team in (a, b):
                 if team.process is not None:
