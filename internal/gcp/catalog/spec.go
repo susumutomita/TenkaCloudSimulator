@@ -22,6 +22,9 @@ type Binding struct {
 	Collection string
 	// Check validates semantic constraints the schema cannot express.
 	Check func(body map[string]any) error
+	// Refuse lists official query parameters the simulator does not
+	// implement; a request setting one to a non-default value is refused.
+	Refuse []string
 }
 
 // Collection is one resource collection in Google resource-name form.

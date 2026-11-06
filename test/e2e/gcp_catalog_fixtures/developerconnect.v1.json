@@ -1,0 +1,294 @@
+{
+ "api": "developerconnect.v1",
+ "steps": [
+  {
+   "call": "projects.locations.connections.create",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1",
+    "connectionId": "fixture-github"
+   },
+   "body": {
+    "githubConfig": {
+     "githubApp": "DEVELOPER_CONNECT",
+     "appInstallationId": "123",
+     "authorizerCredential": {
+      "oauthTokenSecretVersion": "projects/tenkacloud-local/secrets/github-token/versions/1"
+     }
+    }
+   },
+   "save": {
+    "op_connection": "name",
+    "connection": "response.name"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.connections.get",
+   "args": {
+    "name": "${connection}"
+   },
+   "expect": {
+    "githubConfig.authorizerCredential.oauthTokenSecretVersion": "projects/tenkacloud-local/secrets/github-token/versions/1"
+   }
+  },
+  {
+   "call": "projects.locations.connections.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "connections#count": 1
+   }
+  },
+  {
+   "call": "projects.locations.connections.patch",
+   "args": {
+    "name": "${connection}",
+    "updateMask": "labels"
+   },
+   "body": {
+    "labels": {
+     "team": "a"
+    }
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.connections.create",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1",
+    "connectionId": "leak"
+   },
+   "body": {
+    "githubConfig": {
+     "githubApp": "DEVELOPER_CONNECT",
+     "authorizerCredential": {
+      "oauthTokenSecretVersion": "ghp_raw_token"
+     }
+    }
+   },
+   "error": "INVALID_ARGUMENT",
+   "status": 400
+  },
+  {
+   "call": "projects.locations.connections.gitRepositoryLinks.create",
+   "args": {
+    "parent": "${connection}",
+    "gitRepositoryLinkId": "app"
+   },
+   "body": {
+    "cloneUri": "https://github.com/acme/app.git"
+   },
+   "save": {
+    "op_link": "name",
+    "link": "response.name"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.connections.gitRepositoryLinks.get",
+   "args": {
+    "name": "${link}"
+   },
+   "expect": {
+    "cloneUri": "https://github.com/acme/app.git"
+   }
+  },
+  {
+   "call": "projects.locations.connections.gitRepositoryLinks.list",
+   "args": {
+    "parent": "${connection}"
+   },
+   "expect": {
+    "gitRepositoryLinks#count": 1
+   }
+  },
+  {
+   "call": "projects.locations.connections.gitRepositoryLinks.fetchReadToken",
+   "args": {
+    "gitRepositoryLink": "${link}",
+    "body": {}
+   },
+   "error": "UNIMPLEMENTED",
+   "status": 501
+  },
+  {
+   "call": "projects.locations.connections.delete",
+   "args": {
+    "name": "${connection}"
+   },
+   "error": "FAILED_PRECONDITION",
+   "status": 400
+  },
+  {
+   "call": "projects.locations.accountConnectors.create",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1",
+    "accountConnectorId": "fixture-oauth"
+   },
+   "body": {
+    "providerOauthConfig": {
+     "systemProviderId": "GITHUB",
+     "scopes": [
+      "repo"
+     ]
+    }
+   },
+   "save": {
+    "op_account": "name",
+    "account": "response.name"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.accountConnectors.get",
+   "args": {
+    "name": "${account}"
+   },
+   "expect": {
+    "providerOauthConfig.systemProviderId": "GITHUB"
+   }
+  },
+  {
+   "call": "projects.locations.accountConnectors.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "accountConnectors#count": 1
+   }
+  },
+  {
+   "call": "projects.locations.accountConnectors.patch",
+   "args": {
+    "name": "${account}",
+    "updateMask": "annotations"
+   },
+   "body": {
+    "annotations": {
+     "owner": "fixture"
+    }
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.accountConnectors.create",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1",
+    "accountConnectorId": "custom"
+   },
+   "body": {
+    "customOauthConfig": {
+     "clientSecret": "plain"
+    }
+   },
+   "error": "INVALID_ARGUMENT",
+   "status": 400
+  },
+  {
+   "call": "projects.locations.operations.get",
+   "args": {
+    "name": "${op_link}"
+   },
+   "expect": {
+    "response.cloneUri": "https://github.com/acme/app.git"
+   }
+  },
+  {
+   "call": "projects.locations.operations.list",
+   "args": {
+    "name": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "operations#count": 5
+   }
+  },
+  {
+   "call": "projects.locations.connections.list",
+   "args": {
+    "parent": "projects/other-project/locations/us-central1"
+   },
+   "error": "PERMISSION_DENIED",
+   "status": 403
+  }
+ ],
+ "isolation": [
+  {
+   "call": "projects.locations.connections.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "connections#count": 0
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "call": "projects.locations.connections.get",
+   "args": {
+    "name": "${connection}"
+   },
+   "expect": {
+    "labels.team": "a"
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "call": "projects.locations.connections.gitRepositoryLinks.delete",
+   "args": {
+    "name": "${link}"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.connections.delete",
+   "args": {
+    "name": "${connection}"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.accountConnectors.delete",
+   "args": {
+    "name": "${account}"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.connections.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "connections#count": 0
+   }
+  },
+  {
+   "call": "projects.locations.accountConnectors.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "accountConnectors#count": 0
+   }
+  }
+ ]
+}

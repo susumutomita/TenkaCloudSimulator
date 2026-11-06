@@ -1,0 +1,1239 @@
+{
+ "components": {
+  "schemas": {
+   "BootDisk": {
+    "additionalProperties": false,
+    "properties": {
+     "sizeGb": {
+      "format": "int64",
+      "type": "string"
+     },
+     "type": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "BucketReference": {
+    "additionalProperties": false,
+    "properties": {
+     "bucket": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Cluster": {
+    "additionalProperties": false,
+    "properties": {
+     "computeResources": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/ComputeResource"
+      },
+      "type": "object"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "networkResources": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/NetworkResource"
+      },
+      "type": "object"
+     },
+     "orchestrator": {
+      "$ref": "#/components/schemas/Orchestrator"
+     },
+     "reconciling": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "storageResources": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/StorageResource"
+      },
+      "type": "object"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ComputeInstance": {
+    "additionalProperties": false,
+    "properties": {
+     "instance": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ComputeInstanceSlurmNodeSet": {
+    "additionalProperties": false,
+    "properties": {
+     "bootDisk": {
+      "$ref": "#/components/schemas/BootDisk"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "startupScript": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ComputeResource": {
+    "additionalProperties": false,
+    "properties": {
+     "config": {
+      "$ref": "#/components/schemas/ComputeResourceConfig"
+     }
+    },
+    "type": "object"
+   },
+   "ComputeResourceConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "newFlexStartInstances": {
+      "$ref": "#/components/schemas/NewFlexStartInstancesConfig"
+     },
+     "newOnDemandInstances": {
+      "$ref": "#/components/schemas/NewOnDemandInstancesConfig"
+     },
+     "newReservedInstances": {
+      "$ref": "#/components/schemas/NewReservedInstancesConfig"
+     },
+     "newSpotInstances": {
+      "$ref": "#/components/schemas/NewSpotInstancesConfig"
+     }
+    },
+    "type": "object"
+   },
+   "ExistingBucketConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "bucket": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ExistingFilestoreConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "filestore": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ExistingLustreConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "lustre": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ExistingNetworkConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "network": {
+      "type": "string"
+     },
+     "subnetwork": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "FileShareConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "capacityGb": {
+      "format": "int64",
+      "type": "string"
+     },
+     "fileShare": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "FilestoreReference": {
+    "additionalProperties": false,
+    "properties": {
+     "filestore": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GcsAutoclassConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     },
+     "terminalStorageClass": {
+      "enum": [
+       "TERMINAL_STORAGE_CLASS_UNSPECIFIED",
+       "NEARLINE",
+       "ARCHIVE"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GcsHierarchicalNamespaceConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "ListClustersResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "clusters": {
+      "items": {
+       "$ref": "#/components/schemas/Cluster"
+      },
+      "type": "array"
+     },
+     "nextPageToken": {
+      "type": "string"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListOperationsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "operations": {
+      "items": {
+       "$ref": "#/components/schemas/Operation"
+      },
+      "type": "array"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "LustreReference": {
+    "additionalProperties": false,
+    "properties": {
+     "lustre": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NetworkReference": {
+    "additionalProperties": false,
+    "properties": {
+     "network": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "subnetwork": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NetworkResource": {
+    "additionalProperties": false,
+    "properties": {
+     "config": {
+      "$ref": "#/components/schemas/NetworkResourceConfig"
+     },
+     "network": {
+      "$ref": "#/components/schemas/NetworkReference"
+     }
+    },
+    "type": "object"
+   },
+   "NetworkResourceConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "existingNetwork": {
+      "$ref": "#/components/schemas/ExistingNetworkConfig"
+     },
+     "newNetwork": {
+      "$ref": "#/components/schemas/NewNetworkConfig"
+     }
+    },
+    "type": "object"
+   },
+   "NewBucketConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "autoclass": {
+      "$ref": "#/components/schemas/GcsAutoclassConfig"
+     },
+     "bucket": {
+      "type": "string"
+     },
+     "hierarchicalNamespace": {
+      "$ref": "#/components/schemas/GcsHierarchicalNamespaceConfig"
+     },
+     "storageClass": {
+      "enum": [
+       "STORAGE_CLASS_UNSPECIFIED",
+       "STANDARD",
+       "NEARLINE",
+       "COLDLINE",
+       "ARCHIVE",
+       "RAPID"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NewFilestoreConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "description": {
+      "type": "string"
+     },
+     "fileShares": {
+      "items": {
+       "$ref": "#/components/schemas/FileShareConfig"
+      },
+      "type": "array"
+     },
+     "filestore": {
+      "type": "string"
+     },
+     "protocol": {
+      "enum": [
+       "PROTOCOL_UNSPECIFIED",
+       "NFSV3",
+       "NFSV41"
+      ],
+      "type": "string"
+     },
+     "tier": {
+      "enum": [
+       "TIER_UNSPECIFIED",
+       "ZONAL",
+       "REGIONAL"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NewFlexStartInstancesConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "machineType": {
+      "type": "string"
+     },
+     "maxDuration": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "zone": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NewLustreConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "capacityGb": {
+      "format": "int64",
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "filesystem": {
+      "type": "string"
+     },
+     "lustre": {
+      "type": "string"
+     },
+     "perUnitStorageThroughput": {
+      "format": "int64",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NewNetworkConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "description": {
+      "type": "string"
+     },
+     "network": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NewOnDemandInstancesConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "machineType": {
+      "type": "string"
+     },
+     "zone": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NewReservedInstancesConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "reservation": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NewSpotInstancesConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "machineType": {
+      "type": "string"
+     },
+     "terminationAction": {
+      "enum": [
+       "TERMINATION_ACTION_UNSPECIFIED",
+       "STOP",
+       "DELETE"
+      ],
+      "type": "string"
+     },
+     "zone": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Operation": {
+    "additionalProperties": false,
+    "properties": {
+     "done": {
+      "type": "boolean"
+     },
+     "error": {
+      "$ref": "#/components/schemas/Status"
+     },
+     "metadata": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "response": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "Orchestrator": {
+    "additionalProperties": false,
+    "properties": {
+     "slurm": {
+      "$ref": "#/components/schemas/SlurmOrchestrator"
+     }
+    },
+    "type": "object"
+   },
+   "SlurmLoginNodes": {
+    "additionalProperties": false,
+    "properties": {
+     "bootDisk": {
+      "$ref": "#/components/schemas/BootDisk"
+     },
+     "count": {
+      "format": "int64",
+      "type": "string"
+     },
+     "enableOsLogin": {
+      "type": "boolean"
+     },
+     "enablePublicIps": {
+      "type": "boolean"
+     },
+     "instances": {
+      "items": {
+       "$ref": "#/components/schemas/ComputeInstance"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "machineType": {
+      "type": "string"
+     },
+     "startupScript": {
+      "type": "string"
+     },
+     "storageConfigs": {
+      "items": {
+       "$ref": "#/components/schemas/StorageConfig"
+      },
+      "type": "array"
+     },
+     "zone": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SlurmNodeSet": {
+    "additionalProperties": false,
+    "properties": {
+     "computeId": {
+      "type": "string"
+     },
+     "computeInstance": {
+      "$ref": "#/components/schemas/ComputeInstanceSlurmNodeSet"
+     },
+     "id": {
+      "type": "string"
+     },
+     "maxDynamicNodeCount": {
+      "format": "int64",
+      "type": "string"
+     },
+     "staticNodeCount": {
+      "format": "int64",
+      "type": "string"
+     },
+     "storageConfigs": {
+      "items": {
+       "$ref": "#/components/schemas/StorageConfig"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "SlurmOrchestrator": {
+    "additionalProperties": false,
+    "properties": {
+     "defaultPartition": {
+      "type": "string"
+     },
+     "epilogBashScripts": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "loginNodes": {
+      "$ref": "#/components/schemas/SlurmLoginNodes"
+     },
+     "nodeSets": {
+      "items": {
+       "$ref": "#/components/schemas/SlurmNodeSet"
+      },
+      "type": "array"
+     },
+     "partitions": {
+      "items": {
+       "$ref": "#/components/schemas/SlurmPartition"
+      },
+      "type": "array"
+     },
+     "prologBashScripts": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "SlurmPartition": {
+    "additionalProperties": false,
+    "properties": {
+     "id": {
+      "type": "string"
+     },
+     "nodeSetIds": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Status": {
+    "additionalProperties": false,
+    "properties": {
+     "code": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "details": {
+      "items": {
+       "additionalProperties": {
+        "description": "Any JSON value"
+       },
+       "type": "object"
+      },
+      "type": "array"
+     },
+     "message": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "StorageConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "id": {
+      "type": "string"
+     },
+     "localMount": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "StorageResource": {
+    "additionalProperties": false,
+    "properties": {
+     "bucket": {
+      "$ref": "#/components/schemas/BucketReference"
+     },
+     "config": {
+      "$ref": "#/components/schemas/StorageResourceConfig"
+     },
+     "filestore": {
+      "$ref": "#/components/schemas/FilestoreReference"
+     },
+     "lustre": {
+      "$ref": "#/components/schemas/LustreReference"
+     }
+    },
+    "type": "object"
+   },
+   "StorageResourceConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "existingBucket": {
+      "$ref": "#/components/schemas/ExistingBucketConfig"
+     },
+     "existingFilestore": {
+      "$ref": "#/components/schemas/ExistingFilestoreConfig"
+     },
+     "existingLustre": {
+      "$ref": "#/components/schemas/ExistingLustreConfig"
+     },
+     "newBucket": {
+      "$ref": "#/components/schemas/NewBucketConfig"
+     },
+     "newFilestore": {
+      "$ref": "#/components/schemas/NewFilestoreConfig"
+     },
+     "newLustre": {
+      "$ref": "#/components/schemas/NewLustreConfig"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Cluster Director API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Clusters are configuration metadata: no VM, accelerator, network, storage or Slurm orchestrator is provisioned and no job runs. Only description and labels can be updated. Long-running operations complete synchronously and remain readable through operations.get/list.",
+  "title": "Cluster Director (simulator catalog)",
+  "version": "v1"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/v1/projects/{projectsId}/locations/{locationsId}/clusters": {
+   "get": {
+    "operationId": "hypercomputecluster.projects.locations.clusters.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListClustersResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.clusters.list",
+    "tags": [
+     "Cluster Director"
+    ]
+   },
+   "post": {
+    "operationId": "hypercomputecluster.projects.locations.clusters.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "clusterId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Cluster"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.clusters.create",
+    "tags": [
+     "Cluster Director"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/clusters/{clustersId}": {
+   "delete": {
+    "operationId": "hypercomputecluster.projects.locations.clusters.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "clustersId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.clusters.delete",
+    "tags": [
+     "Cluster Director"
+    ]
+   },
+   "get": {
+    "operationId": "hypercomputecluster.projects.locations.clusters.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "clustersId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Cluster"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.clusters.get",
+    "tags": [
+     "Cluster Director"
+    ]
+   },
+   "patch": {
+    "operationId": "hypercomputecluster.projects.locations.clusters.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "clustersId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Cluster"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.clusters.patch",
+    "tags": [
+     "Cluster Director"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/operations": {
+   "get": {
+    "operationId": "hypercomputecluster.projects.locations.operations.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "returnPartialSuccess",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListOperationsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.operations.list",
+    "tags": [
+     "Cluster Director"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}": {
+   "get": {
+    "operationId": "hypercomputecluster.projects.locations.operations.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "operationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.operations.get",
+    "tags": [
+     "Cluster Director"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/_simulator/providers/gcp/hypercomputecluster"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Cluster Director API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Clusters are configuration metadata: no VM, accelerator, network, storage or Slurm orchestrator is provisioned and no job runs. Only description and labels can be updated. Long-running operations complete synchronously and remain readable through operations.get/list.",
+   "name": "Cluster Director"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "google-api-python-client",
+  "version": "2.199.0",
+  "file": "googleapiclient/discovery_cache/documents/hypercomputecluster.v1.json",
+  "sha256": "3bfcb0f272ebf4f20d6c951276d2c52e856c5dddf5e43b24b2cbc2a62cb91583",
+  "license": "Apache-2.0",
+  "revision": "20260729"
+ }
+}

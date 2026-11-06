@@ -1,0 +1,2843 @@
+{
+ "components": {
+  "schemas": {
+   "ApprovalConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "approvalRequired": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "ApprovalResult": {
+    "additionalProperties": false,
+    "properties": {
+     "approvalTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "approverAccount": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "comment": {
+      "type": "string"
+     },
+     "decision": {
+      "enum": [
+       "DECISION_UNSPECIFIED",
+       "APPROVED",
+       "REJECTED"
+      ],
+      "type": "string"
+     },
+     "url": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ArtifactObjects": {
+    "additionalProperties": false,
+    "properties": {
+     "location": {
+      "type": "string"
+     },
+     "paths": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "timing": {
+      "$ref": "#/components/schemas/TimeSpan"
+     }
+    },
+    "type": "object"
+   },
+   "Artifacts": {
+    "additionalProperties": false,
+    "properties": {
+     "genericArtifacts": {
+      "items": {
+       "$ref": "#/components/schemas/GenericArtifact"
+      },
+      "type": "array"
+     },
+     "goModules": {
+      "items": {
+       "$ref": "#/components/schemas/GoModule"
+      },
+      "type": "array"
+     },
+     "images": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "mavenArtifacts": {
+      "items": {
+       "$ref": "#/components/schemas/MavenArtifact"
+      },
+      "type": "array"
+     },
+     "npmPackages": {
+      "items": {
+       "$ref": "#/components/schemas/NpmPackage"
+      },
+      "type": "array"
+     },
+     "objects": {
+      "$ref": "#/components/schemas/ArtifactObjects"
+     },
+     "oci": {
+      "items": {
+       "$ref": "#/components/schemas/Oci"
+      },
+      "type": "array"
+     },
+     "pythonPackages": {
+      "items": {
+       "$ref": "#/components/schemas/PythonPackage"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "BitbucketServerConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "apiKey": {
+      "type": "string"
+     },
+     "connectedRepositories": {
+      "items": {
+       "$ref": "#/components/schemas/BitbucketServerRepositoryId"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "type": "string"
+     },
+     "hostUri": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "peeredNetwork": {
+      "type": "string"
+     },
+     "peeredNetworkIpRange": {
+      "type": "string"
+     },
+     "secrets": {
+      "$ref": "#/components/schemas/BitbucketServerSecrets"
+     },
+     "sslCa": {
+      "type": "string"
+     },
+     "username": {
+      "type": "string"
+     },
+     "webhookKey": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "BitbucketServerRepositoryId": {
+    "additionalProperties": false,
+    "properties": {
+     "projectKey": {
+      "type": "string"
+     },
+     "repoSlug": {
+      "type": "string"
+     },
+     "webhookId": {
+      "format": "int32",
+      "readOnly": true,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "BitbucketServerSecrets": {
+    "additionalProperties": false,
+    "properties": {
+     "adminAccessTokenVersionName": {
+      "type": "string"
+     },
+     "readAccessTokenVersionName": {
+      "type": "string"
+     },
+     "webhookSecretVersionName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "BitbucketServerTriggerConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "bitbucketServerConfig": {
+      "$ref": "#/components/schemas/BitbucketServerConfig"
+     },
+     "bitbucketServerConfigResource": {
+      "type": "string"
+     },
+     "projectKey": {
+      "type": "string"
+     },
+     "pullRequest": {
+      "$ref": "#/components/schemas/PullRequestFilter"
+     },
+     "push": {
+      "$ref": "#/components/schemas/PushFilter"
+     },
+     "repoSlug": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Build": {
+    "additionalProperties": false,
+    "properties": {
+     "approval": {
+      "$ref": "#/components/schemas/BuildApproval"
+     },
+     "artifacts": {
+      "$ref": "#/components/schemas/Artifacts"
+     },
+     "availableSecrets": {
+      "$ref": "#/components/schemas/Secrets"
+     },
+     "buildTriggerId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "dependencies": {
+      "items": {
+       "$ref": "#/components/schemas/Dependency"
+      },
+      "type": "array"
+     },
+     "failureInfo": {
+      "$ref": "#/components/schemas/FailureInfo"
+     },
+     "finishTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "gitConfig": {
+      "$ref": "#/components/schemas/GitConfig"
+     },
+     "id": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "images": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "logUrl": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "logsBucket": {
+      "type": "string"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "options": {
+      "$ref": "#/components/schemas/BuildOptions"
+     },
+     "projectId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "queueTtl": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "results": {
+      "$ref": "#/components/schemas/Results"
+     },
+     "secrets": {
+      "items": {
+       "$ref": "#/components/schemas/Secret"
+      },
+      "type": "array"
+     },
+     "serviceAccount": {
+      "type": "string"
+     },
+     "source": {
+      "$ref": "#/components/schemas/Source"
+     },
+     "sourceProvenance": {
+      "$ref": "#/components/schemas/SourceProvenance"
+     },
+     "startTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "STATUS_UNKNOWN",
+       "PENDING",
+       "QUEUED",
+       "WORKING",
+       "SUCCESS",
+       "FAILURE",
+       "INTERNAL_ERROR",
+       "TIMEOUT",
+       "CANCELLED",
+       "EXPIRED"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "statusDetail": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "steps": {
+      "items": {
+       "$ref": "#/components/schemas/BuildStep"
+      },
+      "type": "array"
+     },
+     "substitutions": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "tags": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "timeout": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "timing": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/TimeSpan"
+      },
+      "readOnly": true,
+      "type": "object"
+     },
+     "warnings": {
+      "items": {
+       "$ref": "#/components/schemas/Warning"
+      },
+      "readOnly": true,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "BuildApproval": {
+    "additionalProperties": false,
+    "properties": {
+     "config": {
+      "$ref": "#/components/schemas/ApprovalConfig"
+     },
+     "result": {
+      "$ref": "#/components/schemas/ApprovalResult"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "PENDING",
+       "APPROVED",
+       "REJECTED",
+       "CANCELLED"
+      ],
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "BuildOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "automapSubstitutions": {
+      "type": "boolean"
+     },
+     "defaultLogsBucketBehavior": {
+      "enum": [
+       "DEFAULT_LOGS_BUCKET_BEHAVIOR_UNSPECIFIED",
+       "REGIONAL_USER_OWNED_BUCKET",
+       "LEGACY_BUCKET"
+      ],
+      "type": "string"
+     },
+     "diskSizeGb": {
+      "format": "int64",
+      "type": "string"
+     },
+     "dynamicSubstitutions": {
+      "type": "boolean"
+     },
+     "enableStructuredLogging": {
+      "type": "boolean"
+     },
+     "env": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "logStreamingOption": {
+      "enum": [
+       "STREAM_DEFAULT",
+       "STREAM_ON",
+       "STREAM_OFF"
+      ],
+      "type": "string"
+     },
+     "logging": {
+      "enum": [
+       "LOGGING_UNSPECIFIED",
+       "LEGACY",
+       "GCS_ONLY",
+       "STACKDRIVER_ONLY",
+       "CLOUD_LOGGING_ONLY",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "machineType": {
+      "enum": [
+       "UNSPECIFIED",
+       "N1_HIGHCPU_8",
+       "N1_HIGHCPU_32",
+       "E2_HIGHCPU_8",
+       "E2_HIGHCPU_32",
+       "E2_MEDIUM",
+       "E2_STANDARD_2"
+      ],
+      "type": "string"
+     },
+     "pool": {
+      "$ref": "#/components/schemas/PoolOption"
+     },
+     "pubsubTopic": {
+      "type": "string"
+     },
+     "requestedVerifyOption": {
+      "enum": [
+       "NOT_VERIFIED",
+       "VERIFIED"
+      ],
+      "type": "string"
+     },
+     "secretEnv": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "sourceProvenanceHash": {
+      "items": {
+       "enum": [
+        "NONE",
+        "SHA256",
+        "MD5",
+        "GO_MODULE_H1",
+        "SHA512",
+        "DIRSUM_SHA256"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "substitutionOption": {
+      "enum": [
+       "MUST_MATCH",
+       "ALLOW_LOOSE"
+      ],
+      "type": "string"
+     },
+     "volumes": {
+      "items": {
+       "$ref": "#/components/schemas/Volume"
+      },
+      "type": "array"
+     },
+     "workerPool": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "BuildStep": {
+    "additionalProperties": false,
+    "properties": {
+     "allowExitCodes": {
+      "items": {
+       "format": "int32",
+       "type": "integer"
+      },
+      "type": "array"
+     },
+     "allowFailure": {
+      "type": "boolean"
+     },
+     "args": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "automapSubstitutions": {
+      "type": "boolean"
+     },
+     "dir": {
+      "type": "string"
+     },
+     "entrypoint": {
+      "type": "string"
+     },
+     "env": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "exitCode": {
+      "format": "int32",
+      "readOnly": true,
+      "type": "integer"
+     },
+     "id": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "pullTiming": {
+      "$ref": "#/components/schemas/TimeSpan"
+     },
+     "results": {
+      "items": {
+       "$ref": "#/components/schemas/StepResult"
+      },
+      "type": "array"
+     },
+     "script": {
+      "type": "string"
+     },
+     "secretEnv": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "status": {
+      "enum": [
+       "STATUS_UNKNOWN",
+       "PENDING",
+       "QUEUED",
+       "WORKING",
+       "SUCCESS",
+       "FAILURE",
+       "INTERNAL_ERROR",
+       "TIMEOUT",
+       "CANCELLED",
+       "EXPIRED"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "timeout": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "timing": {
+      "$ref": "#/components/schemas/TimeSpan"
+     },
+     "volumes": {
+      "items": {
+       "$ref": "#/components/schemas/Volume"
+      },
+      "type": "array"
+     },
+     "waitFor": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "BuildStepResults": {
+    "additionalProperties": false,
+    "properties": {
+     "results": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "BuildTrigger": {
+    "additionalProperties": false,
+    "properties": {
+     "approvalConfig": {
+      "$ref": "#/components/schemas/ApprovalConfig"
+     },
+     "autodetect": {
+      "type": "boolean"
+     },
+     "bitbucketServerTriggerConfig": {
+      "$ref": "#/components/schemas/BitbucketServerTriggerConfig"
+     },
+     "build": {
+      "$ref": "#/components/schemas/Build"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "developerConnectEventConfig": {
+      "$ref": "#/components/schemas/DeveloperConnectEventConfig"
+     },
+     "disabled": {
+      "type": "boolean"
+     },
+     "eventType": {
+      "enum": [
+       "EVENT_TYPE_UNSPECIFIED",
+       "REPO",
+       "WEBHOOK",
+       "PUBSUB",
+       "MANUAL"
+      ],
+      "type": "string"
+     },
+     "filename": {
+      "type": "string"
+     },
+     "filter": {
+      "type": "string"
+     },
+     "gitFileSource": {
+      "$ref": "#/components/schemas/GitFileSource"
+     },
+     "github": {
+      "$ref": "#/components/schemas/GitHubEventsConfig"
+     },
+     "gitlabEnterpriseEventsConfig": {
+      "$ref": "#/components/schemas/GitLabEventsConfig"
+     },
+     "id": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "ignoredFiles": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "includeBuildLogs": {
+      "enum": [
+       "INCLUDE_BUILD_LOGS_UNSPECIFIED",
+       "INCLUDE_BUILD_LOGS_WITH_STATUS"
+      ],
+      "type": "string"
+     },
+     "includedFiles": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "name": {
+      "type": "string"
+     },
+     "pubsubConfig": {
+      "$ref": "#/components/schemas/PubsubConfig"
+     },
+     "repositoryEventConfig": {
+      "$ref": "#/components/schemas/RepositoryEventConfig"
+     },
+     "resourceName": {
+      "type": "string"
+     },
+     "serviceAccount": {
+      "type": "string"
+     },
+     "sourceToBuild": {
+      "$ref": "#/components/schemas/GitRepoSource"
+     },
+     "substitutions": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "tags": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "triggerTemplate": {
+      "$ref": "#/components/schemas/RepoSource"
+     },
+     "webhookConfig": {
+      "$ref": "#/components/schemas/WebhookConfig"
+     }
+    },
+    "type": "object"
+   },
+   "BuiltImage": {
+    "additionalProperties": false,
+    "properties": {
+     "artifactRegistryPackage": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "digest": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "ociMediaType": {
+      "enum": [
+       "OCI_MEDIA_TYPE_UNSPECIFIED",
+       "IMAGE_MANIFEST",
+       "IMAGE_INDEX"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "pushTiming": {
+      "$ref": "#/components/schemas/TimeSpan"
+     }
+    },
+    "type": "object"
+   },
+   "ConnectedRepository": {
+    "additionalProperties": false,
+    "properties": {
+     "dir": {
+      "type": "string"
+     },
+     "repository": {
+      "type": "string"
+     },
+     "revision": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Dependency": {
+    "additionalProperties": false,
+    "properties": {
+     "empty": {
+      "type": "boolean"
+     },
+     "genericArtifact": {
+      "$ref": "#/components/schemas/GenericArtifactDependency"
+     },
+     "gitSource": {
+      "$ref": "#/components/schemas/GitSourceDependency"
+     }
+    },
+    "type": "object"
+   },
+   "DeveloperConnectConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "dir": {
+      "type": "string"
+     },
+     "gitRepositoryLink": {
+      "type": "string"
+     },
+     "revision": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DeveloperConnectEventConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "gitRepositoryLink": {
+      "type": "string"
+     },
+     "gitRepositoryLinkType": {
+      "enum": [
+       "GIT_REPOSITORY_LINK_TYPE_UNSPECIFIED",
+       "GITHUB",
+       "GITHUB_ENTERPRISE",
+       "GITLAB",
+       "GITLAB_ENTERPRISE",
+       "BITBUCKET_DATA_CENTER",
+       "BITBUCKET_CLOUD"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "pullRequest": {
+      "$ref": "#/components/schemas/PullRequestFilter"
+     },
+     "push": {
+      "$ref": "#/components/schemas/PushFilter"
+     }
+    },
+    "type": "object"
+   },
+   "Empty": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "FailureInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "detail": {
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "FAILURE_TYPE_UNSPECIFIED",
+       "PUSH_FAILED",
+       "PUSH_IMAGE_NOT_FOUND",
+       "PUSH_NOT_AUTHORIZED",
+       "LOGGING_FAILURE",
+       "USER_BUILD_STEP",
+       "FETCH_SOURCE_FAILED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "FileHashes": {
+    "additionalProperties": false,
+    "properties": {
+     "fileHash": {
+      "items": {
+       "$ref": "#/components/schemas/Hash"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "GenericArtifact": {
+    "additionalProperties": false,
+    "properties": {
+     "folder": {
+      "type": "string"
+     },
+     "registryPath": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GenericArtifactDependency": {
+    "additionalProperties": false,
+    "properties": {
+     "destPath": {
+      "type": "string"
+     },
+     "resource": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GitConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "http": {
+      "$ref": "#/components/schemas/HttpConfig"
+     }
+    },
+    "type": "object"
+   },
+   "GitFileSource": {
+    "additionalProperties": false,
+    "properties": {
+     "bitbucketServerConfig": {
+      "type": "string"
+     },
+     "githubEnterpriseConfig": {
+      "type": "string"
+     },
+     "path": {
+      "type": "string"
+     },
+     "repoType": {
+      "enum": [
+       "UNKNOWN",
+       "CLOUD_SOURCE_REPOSITORIES",
+       "GITHUB",
+       "BITBUCKET_SERVER",
+       "GITLAB",
+       "BITBUCKET_CLOUD"
+      ],
+      "type": "string"
+     },
+     "repository": {
+      "type": "string"
+     },
+     "revision": {
+      "type": "string"
+     },
+     "uri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GitHubEventsConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "enterpriseConfigResourceName": {
+      "type": "string"
+     },
+     "installationId": {
+      "format": "int64",
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "owner": {
+      "type": "string"
+     },
+     "pullRequest": {
+      "$ref": "#/components/schemas/PullRequestFilter"
+     },
+     "push": {
+      "$ref": "#/components/schemas/PushFilter"
+     }
+    },
+    "type": "object"
+   },
+   "GitLabConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "connectedRepositories": {
+      "items": {
+       "$ref": "#/components/schemas/GitLabRepositoryId"
+      },
+      "type": "array"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "enterpriseConfig": {
+      "$ref": "#/components/schemas/GitLabEnterpriseConfig"
+     },
+     "name": {
+      "type": "string"
+     },
+     "secrets": {
+      "$ref": "#/components/schemas/GitLabSecrets"
+     },
+     "username": {
+      "type": "string"
+     },
+     "webhookKey": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GitLabEnterpriseConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "hostUri": {
+      "type": "string"
+     },
+     "serviceDirectoryConfig": {
+      "$ref": "#/components/schemas/ServiceDirectoryConfig"
+     },
+     "sslCa": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GitLabEventsConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "gitlabConfig": {
+      "$ref": "#/components/schemas/GitLabConfig"
+     },
+     "gitlabConfigResource": {
+      "type": "string"
+     },
+     "projectNamespace": {
+      "type": "string"
+     },
+     "pullRequest": {
+      "$ref": "#/components/schemas/PullRequestFilter"
+     },
+     "push": {
+      "$ref": "#/components/schemas/PushFilter"
+     }
+    },
+    "type": "object"
+   },
+   "GitLabRepositoryId": {
+    "additionalProperties": false,
+    "properties": {
+     "id": {
+      "type": "string"
+     },
+     "webhookId": {
+      "format": "int32",
+      "readOnly": true,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "GitLabSecrets": {
+    "additionalProperties": false,
+    "properties": {
+     "apiAccessTokenVersion": {
+      "type": "string"
+     },
+     "apiKeyVersion": {
+      "type": "string"
+     },
+     "readAccessTokenVersion": {
+      "type": "string"
+     },
+     "webhookSecretVersion": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GitRepoSource": {
+    "additionalProperties": false,
+    "properties": {
+     "bitbucketServerConfig": {
+      "type": "string"
+     },
+     "githubEnterpriseConfig": {
+      "type": "string"
+     },
+     "ref": {
+      "type": "string"
+     },
+     "repoType": {
+      "enum": [
+       "UNKNOWN",
+       "CLOUD_SOURCE_REPOSITORIES",
+       "GITHUB",
+       "BITBUCKET_SERVER",
+       "GITLAB",
+       "BITBUCKET_CLOUD"
+      ],
+      "type": "string"
+     },
+     "repository": {
+      "type": "string"
+     },
+     "uri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GitSource": {
+    "additionalProperties": false,
+    "properties": {
+     "dir": {
+      "type": "string"
+     },
+     "revision": {
+      "type": "string"
+     },
+     "url": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GitSourceDependency": {
+    "additionalProperties": false,
+    "properties": {
+     "depth": {
+      "format": "int64",
+      "type": "string"
+     },
+     "destPath": {
+      "type": "string"
+     },
+     "recurseSubmodules": {
+      "type": "boolean"
+     },
+     "repository": {
+      "$ref": "#/components/schemas/GitSourceRepository"
+     },
+     "revision": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GitSourceRepository": {
+    "additionalProperties": false,
+    "properties": {
+     "developerConnect": {
+      "type": "string"
+     },
+     "url": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoModule": {
+    "additionalProperties": false,
+    "properties": {
+     "modulePath": {
+      "type": "string"
+     },
+     "moduleVersion": {
+      "type": "string"
+     },
+     "repositoryLocation": {
+      "type": "string"
+     },
+     "repositoryName": {
+      "type": "string"
+     },
+     "repositoryProjectId": {
+      "type": "string"
+     },
+     "sourcePath": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Hash": {
+    "additionalProperties": false,
+    "properties": {
+     "type": {
+      "enum": [
+       "NONE",
+       "SHA256",
+       "MD5",
+       "GO_MODULE_H1",
+       "SHA512",
+       "DIRSUM_SHA256"
+      ],
+      "type": "string"
+     },
+     "value": {
+      "format": "byte",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "HttpConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "proxySecretVersionName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "InlineSecret": {
+    "additionalProperties": false,
+    "properties": {
+     "envMap": {
+      "additionalProperties": {
+       "format": "byte",
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "kmsKeyName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListBuildTriggersResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "triggers": {
+      "items": {
+       "$ref": "#/components/schemas/BuildTrigger"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListWorkerPoolsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "workerPools": {
+      "items": {
+       "$ref": "#/components/schemas/WorkerPool"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "MavenArtifact": {
+    "additionalProperties": false,
+    "properties": {
+     "artifactId": {
+      "type": "string"
+     },
+     "deployFolder": {
+      "type": "string"
+     },
+     "groupId": {
+      "type": "string"
+     },
+     "path": {
+      "type": "string"
+     },
+     "repository": {
+      "type": "string"
+     },
+     "version": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NetworkConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "egressOption": {
+      "enum": [
+       "EGRESS_OPTION_UNSPECIFIED",
+       "NO_PUBLIC_EGRESS",
+       "PUBLIC_EGRESS"
+      ],
+      "type": "string"
+     },
+     "peeredNetwork": {
+      "type": "string"
+     },
+     "peeredNetworkIpRange": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NpmPackage": {
+    "additionalProperties": false,
+    "properties": {
+     "packagePath": {
+      "type": "string"
+     },
+     "repository": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Oci": {
+    "additionalProperties": false,
+    "properties": {
+     "file": {
+      "type": "string"
+     },
+     "registryPath": {
+      "type": "string"
+     },
+     "tags": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Operation": {
+    "additionalProperties": false,
+    "properties": {
+     "done": {
+      "type": "boolean"
+     },
+     "error": {
+      "$ref": "#/components/schemas/Status"
+     },
+     "metadata": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "response": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "PoolOption": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PrivatePoolV1Config": {
+    "additionalProperties": false,
+    "properties": {
+     "networkConfig": {
+      "$ref": "#/components/schemas/NetworkConfig"
+     },
+     "privateServiceConnect": {
+      "$ref": "#/components/schemas/PrivateServiceConnect"
+     },
+     "workerConfig": {
+      "$ref": "#/components/schemas/WorkerConfig"
+     }
+    },
+    "type": "object"
+   },
+   "PrivateServiceConnect": {
+    "additionalProperties": false,
+    "properties": {
+     "networkAttachment": {
+      "type": "string"
+     },
+     "publicIpAddressDisabled": {
+      "type": "boolean"
+     },
+     "routeAllTraffic": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "PubsubConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "serviceAccountEmail": {
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "OK",
+       "SUBSCRIPTION_DELETED",
+       "TOPIC_DELETED",
+       "SUBSCRIPTION_MISCONFIGURED"
+      ],
+      "type": "string"
+     },
+     "subscription": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "topic": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PullRequestFilter": {
+    "additionalProperties": false,
+    "properties": {
+     "branch": {
+      "type": "string"
+     },
+     "commentControl": {
+      "enum": [
+       "COMMENTS_DISABLED",
+       "COMMENTS_ENABLED",
+       "COMMENTS_ENABLED_FOR_EXTERNAL_CONTRIBUTORS_ONLY"
+      ],
+      "type": "string"
+     },
+     "invertRegex": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "PushFilter": {
+    "additionalProperties": false,
+    "properties": {
+     "branch": {
+      "type": "string"
+     },
+     "invertRegex": {
+      "type": "boolean"
+     },
+     "tag": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PythonPackage": {
+    "additionalProperties": false,
+    "properties": {
+     "paths": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "repository": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "RepoSource": {
+    "additionalProperties": false,
+    "properties": {
+     "branchName": {
+      "type": "string"
+     },
+     "commitSha": {
+      "type": "string"
+     },
+     "dir": {
+      "type": "string"
+     },
+     "invertRegex": {
+      "type": "boolean"
+     },
+     "projectId": {
+      "type": "string"
+     },
+     "repoName": {
+      "type": "string"
+     },
+     "substitutions": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "tagName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "RepositoryEventConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "pullRequest": {
+      "$ref": "#/components/schemas/PullRequestFilter"
+     },
+     "push": {
+      "$ref": "#/components/schemas/PushFilter"
+     },
+     "repository": {
+      "type": "string"
+     },
+     "repositoryType": {
+      "enum": [
+       "REPOSITORY_TYPE_UNSPECIFIED",
+       "GITHUB",
+       "GITHUB_ENTERPRISE",
+       "GITLAB_ENTERPRISE",
+       "BITBUCKET_DATA_CENTER",
+       "BITBUCKET_CLOUD"
+      ],
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Results": {
+    "additionalProperties": false,
+    "properties": {
+     "artifactManifest": {
+      "type": "string"
+     },
+     "artifactTiming": {
+      "$ref": "#/components/schemas/TimeSpan"
+     },
+     "buildStepImages": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "buildStepOutputs": {
+      "items": {
+       "format": "byte",
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "buildStepResults": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/BuildStepResults"
+      },
+      "type": "object"
+     },
+     "genericArtifacts": {
+      "items": {
+       "$ref": "#/components/schemas/UploadedGenericArtifact"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "goModules": {
+      "items": {
+       "$ref": "#/components/schemas/UploadedGoModule"
+      },
+      "type": "array"
+     },
+     "images": {
+      "items": {
+       "$ref": "#/components/schemas/BuiltImage"
+      },
+      "type": "array"
+     },
+     "mavenArtifacts": {
+      "items": {
+       "$ref": "#/components/schemas/UploadedMavenArtifact"
+      },
+      "type": "array"
+     },
+     "npmPackages": {
+      "items": {
+       "$ref": "#/components/schemas/UploadedNpmPackage"
+      },
+      "type": "array"
+     },
+     "numArtifacts": {
+      "format": "int64",
+      "type": "string"
+     },
+     "pythonPackages": {
+      "items": {
+       "$ref": "#/components/schemas/UploadedPythonPackage"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Secret": {
+    "additionalProperties": false,
+    "properties": {
+     "kmsKeyName": {
+      "type": "string"
+     },
+     "secretEnv": {
+      "additionalProperties": {
+       "format": "byte",
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "SecretManagerSecret": {
+    "additionalProperties": false,
+    "properties": {
+     "env": {
+      "type": "string"
+     },
+     "versionName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Secrets": {
+    "additionalProperties": false,
+    "properties": {
+     "inline": {
+      "items": {
+       "$ref": "#/components/schemas/InlineSecret"
+      },
+      "type": "array"
+     },
+     "secretManager": {
+      "items": {
+       "$ref": "#/components/schemas/SecretManagerSecret"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ServiceDirectoryConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "service": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Source": {
+    "additionalProperties": false,
+    "properties": {
+     "connectedRepository": {
+      "$ref": "#/components/schemas/ConnectedRepository"
+     },
+     "developerConnectConfig": {
+      "$ref": "#/components/schemas/DeveloperConnectConfig"
+     },
+     "gitSource": {
+      "$ref": "#/components/schemas/GitSource"
+     },
+     "repoSource": {
+      "$ref": "#/components/schemas/RepoSource"
+     },
+     "storageSource": {
+      "$ref": "#/components/schemas/StorageSource"
+     },
+     "storageSourceManifest": {
+      "$ref": "#/components/schemas/StorageSourceManifest"
+     }
+    },
+    "type": "object"
+   },
+   "SourceProvenance": {
+    "additionalProperties": false,
+    "properties": {
+     "fileHashes": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/FileHashes"
+      },
+      "readOnly": true,
+      "type": "object"
+     },
+     "resolvedConnectedRepository": {
+      "$ref": "#/components/schemas/ConnectedRepository"
+     },
+     "resolvedGitSource": {
+      "$ref": "#/components/schemas/GitSource"
+     },
+     "resolvedRepoSource": {
+      "$ref": "#/components/schemas/RepoSource"
+     },
+     "resolvedStorageSource": {
+      "$ref": "#/components/schemas/StorageSource"
+     },
+     "resolvedStorageSourceManifest": {
+      "$ref": "#/components/schemas/StorageSourceManifest"
+     }
+    },
+    "type": "object"
+   },
+   "Status": {
+    "additionalProperties": false,
+    "properties": {
+     "code": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "details": {
+      "items": {
+       "additionalProperties": {
+        "description": "Any JSON value"
+       },
+       "type": "object"
+      },
+      "type": "array"
+     },
+     "message": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "StepResult": {
+    "additionalProperties": false,
+    "properties": {
+     "attestationContent": {
+      "type": "string"
+     },
+     "attestationType": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "StorageSource": {
+    "additionalProperties": false,
+    "properties": {
+     "bucket": {
+      "type": "string"
+     },
+     "generation": {
+      "format": "int64",
+      "type": "string"
+     },
+     "object": {
+      "type": "string"
+     },
+     "sourceFetcher": {
+      "enum": [
+       "SOURCE_FETCHER_UNSPECIFIED",
+       "GSUTIL",
+       "GCS_FETCHER"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "StorageSourceManifest": {
+    "additionalProperties": false,
+    "properties": {
+     "bucket": {
+      "type": "string"
+     },
+     "generation": {
+      "format": "int64",
+      "type": "string"
+     },
+     "object": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TimeSpan": {
+    "additionalProperties": false,
+    "properties": {
+     "endTime": {
+      "format": "google-datetime",
+      "type": "string"
+     },
+     "startTime": {
+      "format": "google-datetime",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "UploadedGenericArtifact": {
+    "additionalProperties": false,
+    "properties": {
+     "artifactFingerprint": {
+      "$ref": "#/components/schemas/FileHashes"
+     },
+     "artifactRegistryPackage": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "fileHashes": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/FileHashes"
+      },
+      "readOnly": true,
+      "type": "object"
+     },
+     "pushTiming": {
+      "$ref": "#/components/schemas/TimeSpan"
+     },
+     "uri": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "UploadedGoModule": {
+    "additionalProperties": false,
+    "properties": {
+     "artifactRegistryPackage": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "fileHashes": {
+      "$ref": "#/components/schemas/FileHashes"
+     },
+     "pushTiming": {
+      "$ref": "#/components/schemas/TimeSpan"
+     },
+     "uri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "UploadedMavenArtifact": {
+    "additionalProperties": false,
+    "properties": {
+     "artifactRegistryPackage": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "fileHashes": {
+      "$ref": "#/components/schemas/FileHashes"
+     },
+     "pushTiming": {
+      "$ref": "#/components/schemas/TimeSpan"
+     },
+     "uri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "UploadedNpmPackage": {
+    "additionalProperties": false,
+    "properties": {
+     "artifactRegistryPackage": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "fileHashes": {
+      "$ref": "#/components/schemas/FileHashes"
+     },
+     "pushTiming": {
+      "$ref": "#/components/schemas/TimeSpan"
+     },
+     "uri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "UploadedPythonPackage": {
+    "additionalProperties": false,
+    "properties": {
+     "artifactRegistryPackage": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "fileHashes": {
+      "$ref": "#/components/schemas/FileHashes"
+     },
+     "pushTiming": {
+      "$ref": "#/components/schemas/TimeSpan"
+     },
+     "uri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Volume": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "type": "string"
+     },
+     "path": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Warning": {
+    "additionalProperties": false,
+    "properties": {
+     "priority": {
+      "enum": [
+       "PRIORITY_UNSPECIFIED",
+       "INFO",
+       "WARNING",
+       "ALERT"
+      ],
+      "type": "string"
+     },
+     "text": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "WebhookConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "secret": {
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "OK",
+       "SECRET_DELETED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "WorkerConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "diskSizeGb": {
+      "format": "int64",
+      "type": "string"
+     },
+     "enableNestedVirtualization": {
+      "type": "boolean"
+     },
+     "machineType": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "WorkerPool": {
+    "additionalProperties": false,
+    "properties": {
+     "annotations": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "deleteTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "displayName": {
+      "type": "string"
+     },
+     "etag": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "privatePoolV1Config": {
+      "$ref": "#/components/schemas/PrivatePoolV1Config"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "CREATING",
+       "RUNNING",
+       "DELETING",
+       "DELETED",
+       "UPDATING"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "uid": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Cloud Build API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Build triggers and private worker pools are configuration metadata: no build runs, no webhook, Pub/Sub or repository event is received, no source repository is contacted and no worker VM is provisioned; worker pools report RUNNING immediately. A trigger's ID equals its name, so the resource name, id and name address the same trigger. The legacy projectId and triggerId query parameters are not consulted; the resource name decides. Secret Manager references are stored as names and never resolved; inline KMS-encrypted secrets (build.secrets, build.availableSecrets.inline) are refused. Cloud Build v2 connections are not served.",
+  "title": "Cloud Build (simulator catalog)",
+  "version": "v1"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/v1/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}": {
+   "get": {
+    "operationId": "cloudbuild.projects.locations.operations.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "operationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.operations.get",
+    "tags": [
+     "Cloud Build"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/triggers": {
+   "get": {
+    "operationId": "cloudbuild.projects.locations.triggers.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "projectId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListBuildTriggersResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.triggers.list",
+    "tags": [
+     "Cloud Build"
+    ]
+   },
+   "post": {
+    "operationId": "cloudbuild.projects.locations.triggers.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "projectId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/BuildTrigger"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/BuildTrigger"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.triggers.create",
+    "tags": [
+     "Cloud Build"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/triggers/{triggersId}": {
+   "delete": {
+    "operationId": "cloudbuild.projects.locations.triggers.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "triggersId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "projectId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "triggerId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Empty"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.triggers.delete",
+    "tags": [
+     "Cloud Build"
+    ]
+   },
+   "get": {
+    "operationId": "cloudbuild.projects.locations.triggers.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "triggersId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "projectId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "triggerId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/BuildTrigger"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.triggers.get",
+    "tags": [
+     "Cloud Build"
+    ]
+   },
+   "patch": {
+    "operationId": "cloudbuild.projects.locations.triggers.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "triggersId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "projectId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "triggerId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/BuildTrigger"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/BuildTrigger"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.triggers.patch",
+    "tags": [
+     "Cloud Build"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/workerPools": {
+   "get": {
+    "operationId": "cloudbuild.projects.locations.workerPools.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListWorkerPoolsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.workerPools.list",
+    "tags": [
+     "Cloud Build"
+    ]
+   },
+   "post": {
+    "operationId": "cloudbuild.projects.locations.workerPools.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     },
+     {
+      "in": "query",
+      "name": "workerPoolId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/WorkerPool"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.workerPools.create",
+    "tags": [
+     "Cloud Build"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/workerPools/{workerPoolsId}": {
+   "delete": {
+    "operationId": "cloudbuild.projects.locations.workerPools.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "workerPoolsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "allowMissing",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     },
+     {
+      "in": "query",
+      "name": "etag",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.workerPools.delete",
+    "tags": [
+     "Cloud Build"
+    ]
+   },
+   "get": {
+    "operationId": "cloudbuild.projects.locations.workerPools.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "workerPoolsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/WorkerPool"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.workerPools.get",
+    "tags": [
+     "Cloud Build"
+    ]
+   },
+   "patch": {
+    "operationId": "cloudbuild.projects.locations.workerPools.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "workerPoolsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/WorkerPool"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.workerPools.patch",
+    "tags": [
+     "Cloud Build"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/_simulator/providers/gcp/cloudbuild"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Cloud Build API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Build triggers and private worker pools are configuration metadata: no build runs, no webhook, Pub/Sub or repository event is received, no source repository is contacted and no worker VM is provisioned; worker pools report RUNNING immediately. A trigger's ID equals its name, so the resource name, id and name address the same trigger. The legacy projectId and triggerId query parameters are not consulted; the resource name decides. Secret Manager references are stored as names and never resolved; inline KMS-encrypted secrets (build.secrets, build.availableSecrets.inline) are refused. Cloud Build v2 connections are not served.",
+   "name": "Cloud Build"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "google-api-python-client",
+  "version": "2.199.0",
+  "file": "googleapiclient/discovery_cache/documents/cloudbuild.v1.json",
+  "sha256": "7cdd7fdec819b60d4a0e5605a071d89c14d1853896a2fc85f7da7179c8fecdae",
+  "license": "Apache-2.0",
+  "revision": "20260627"
+ }
+}

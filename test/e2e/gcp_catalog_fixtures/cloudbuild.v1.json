@@ -1,0 +1,267 @@
+{
+ "api": "cloudbuild.v1",
+ "steps": [
+  {
+   "call": "projects.locations.triggers.create",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "body": {
+    "name": "fixture-trigger",
+    "filename": "cloudbuild.yaml",
+    "github": {
+     "owner": "acme",
+     "name": "app",
+     "push": {
+      "branch": "^main$"
+     }
+    }
+   },
+   "save": {
+    "trigger": "resourceName"
+   },
+   "expect": {
+    "id": "fixture-trigger",
+    "name": "fixture-trigger"
+   }
+  },
+  {
+   "call": "projects.locations.triggers.get",
+   "args": {
+    "name": "${trigger}"
+   },
+   "expect": {
+    "github.owner": "acme"
+   }
+  },
+  {
+   "call": "projects.locations.triggers.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "triggers#count": 1
+   }
+  },
+  {
+   "call": "projects.locations.triggers.patch",
+   "args": {
+    "resourceName": "${trigger}",
+    "updateMask": "description"
+   },
+   "body": {
+    "description": "Fixture"
+   },
+   "expect": {
+    "description": "Fixture"
+   }
+  },
+  {
+   "call": "projects.locations.triggers.create",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "body": {
+    "name": "leak",
+    "webhookConfig": {
+     "secret": "raw-webhook-token"
+    }
+   },
+   "error": "INVALID_ARGUMENT",
+   "status": 400
+  },
+  {
+   "call": "projects.locations.triggers.create",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "body": {
+    "name": "kms",
+    "build": {
+     "secrets": [
+      {
+       "kmsKeyName": "k",
+       "secretEnv": {
+        "TOKEN": "YWJj"
+       }
+      }
+     ]
+    }
+   },
+   "error": "INVALID_ARGUMENT",
+   "status": 400
+  },
+  {
+   "call": "projects.locations.triggers.run",
+   "args": {
+    "name": "${trigger}",
+    "body": {}
+   },
+   "error": "UNIMPLEMENTED",
+   "status": 501
+  },
+  {
+   "call": "projects.locations.workerPools.create",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1",
+    "workerPoolId": "fixture-pool"
+   },
+   "body": {
+    "privatePoolV1Config": {
+     "workerConfig": {
+      "machineType": "e2-standard-4"
+     }
+    }
+   },
+   "save": {
+    "op_pool": "name",
+    "pool": "response.name"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.operations.get",
+   "args": {
+    "name": "${op_pool}"
+   },
+   "expect": {
+    "response.state": "RUNNING"
+   }
+  },
+  {
+   "call": "projects.locations.workerPools.get",
+   "args": {
+    "name": "${pool}"
+   },
+   "expect": {
+    "privatePoolV1Config.workerConfig.machineType": "e2-standard-4"
+   }
+  },
+  {
+   "call": "projects.locations.workerPools.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "workerPools#count": 1
+   }
+  },
+  {
+   "call": "projects.locations.workerPools.patch",
+   "args": {
+    "name": "${pool}",
+    "updateMask": "displayName"
+   },
+   "body": {
+    "displayName": "Fixture"
+   },
+   "expect": {
+    "done": true,
+    "response.displayName": "Fixture"
+   }
+  },
+  {
+   "call": "projects.locations.workerPools.delete",
+   "args": {
+    "name": "${pool}",
+    "allowMissing": true
+   },
+   "error": "INVALID_ARGUMENT",
+   "status": 400
+  },
+  {
+   "call": "projects.locations.builds.create",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1",
+    "body": {}
+   },
+   "error": "UNIMPLEMENTED",
+   "status": 501
+  },
+  {
+   "call": "projects.locations.triggers.list",
+   "args": {
+    "parent": "projects/other-project/locations/us-central1"
+   },
+   "error": "PERMISSION_DENIED",
+   "status": 403
+  }
+ ],
+ "isolation": [
+  {
+   "call": "projects.locations.triggers.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "triggers#count": 0
+   }
+  },
+  {
+   "call": "projects.locations.workerPools.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "workerPools#count": 0
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "call": "projects.locations.triggers.get",
+   "args": {
+    "name": "${trigger}"
+   },
+   "expect": {
+    "description": "Fixture"
+   }
+  },
+  {
+   "call": "projects.locations.workerPools.get",
+   "args": {
+    "name": "${pool}"
+   },
+   "expect": {
+    "displayName": "Fixture"
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "call": "projects.locations.triggers.delete",
+   "args": {
+    "name": "${trigger}"
+   }
+  },
+  {
+   "call": "projects.locations.workerPools.delete",
+   "args": {
+    "name": "${pool}"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.triggers.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "triggers#count": 0
+   }
+  },
+  {
+   "call": "projects.locations.workerPools.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "workerPools#count": 0
+   }
+  }
+ ]
+}
