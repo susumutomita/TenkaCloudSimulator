@@ -63,7 +63,7 @@ def client(team, fixture, token=None):
     # api_endpoint replaces rootUrl and servicePath, so it is the advertised
     # endpoint, for example /_simulator/providers/gcp/compute/compute/v1/.
     return build(name, version, static_discovery=True, http=TokenHttp(team, token or team.token),
-                 client_options={'api_endpoint': team.endpoint + fixture['endpoint']})
+                 client_options={'api_endpoint': team.endpoint + fixture.get('endpoint', f'/_simulator/providers/gcp/{name}/')})
 
 
 def run_steps(team, fixture, steps, saved, called, token=None):
