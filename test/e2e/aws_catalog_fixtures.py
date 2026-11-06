@@ -75,7 +75,8 @@ def main(selected=None):
         a.start()
         b.start()
         try:
-            services = {s['model']: s for s in a.control('GET', '/_simulator/v1/capabilities')['services']['catalog']['services']}
+            descriptors = a.control('GET', '/_simulator/v1/capabilities')['services']['catalog']['descriptors']
+            services = {s['model']: s for s in a.control('GET', descriptors)['services']}
             a.control('PUT', '/_simulator/v1/iam/principals/catalog-nobody/policy',
                       {'Version': '2012-10-17', 'Statement': [{'Effect': 'Allow', 'Action': 'sts:GetCallerIdentity', 'Resource': '*'}]})
             nobody = a.control('POST', '/_simulator/v1/access', {'Principal': 'catalog-nobody'})['AccessToken']

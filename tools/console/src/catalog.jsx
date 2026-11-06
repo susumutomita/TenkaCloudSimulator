@@ -57,17 +57,26 @@ const display=v=>typeof v==='number'&&v>1e9&&v<1e11?new Date(v*1000).toISOString
 
 export default function CatalogView({region,request,catalog,onSaving}){
  const {t}=useLocale();
- const services=catalog?.services||[];
- const [model,setModel]=useState(services[0]?.model||''),[kind,setKind]=useState('');
+ // Capabilities list compact summaries; the full native descriptors are
+ // served separately so the capability document stays bounded.
+ const [services,setServices]=useState(null),[descriptorError,setDescriptorError]=useState('');
+ const [model,setModel]=useState(''),[kind,setKind]=useState('');
  const [parents,setParents]=useState([]),[parent,setParent]=useState(''),[items,setItems]=useState([]),[next,setNext]=useState('');
  const [detail,setDetail]=useState(null),[tags,setTags]=useState(null),[mode,setMode]=useState('list'),[form,setForm]=useState({});
  const [loading,setLoading]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[confirm,setConfirm]=useState(null);
  const revision=useRef(0),alive=useRef(true);
- const service=services.find(s=>s.model===model);
+ const service=(services||[]).find(s=>s.model===model);
  const resource=service?.resources.find(r=>r.kind===kind)||service?.resources[0];
  const parentResource=resource?.parent?service.resources.find(r=>r.kind===resource.parent):null;
  const fresh=()=>++revision.current;const valid=epoch=>alive.current&&epoch===revision.current;
  useEffect(()=>()=>{alive.current=false;revision.current++},[]);
+ useEffect(()=>{
+  let live=true;const path=catalog?.descriptors;if(!path){setServices([]);return}
+  request(path).then(async r=>{if(!r.ok)throw Error(t('Catalog descriptors are unavailable','カタログ記述子を取得できません')+' ('+r.status+').');return r.json()})
+   .then(d=>{if(live){const list=d.services||[];setServices(list);setModel(m=>m||list[0]?.model||'')}})
+   .catch(e=>{if(live){setServices([]);setDescriptorError(e.message)}});
+  return ()=>{live=false};
+ },[catalog?.descriptors]);
  async function call(op,input){
   const {path,options}=buildCatalogRequest(service,op,input,region);
   const response=await request(path,options);const text=await response.text();return text?JSON.parse(text):{};
@@ -132,6 +141,8 @@ export default function CatalogView({region,request,catalog,onSaving}){
  const skipped=op=>new Set([op?.parent,'tags','Tags','ClientToken','clientToken','ClientRequestToken','clientRequestToken'].filter(Boolean));
  const createOp=resource?.operations.create;
  const fields=useMemo(()=>formMembers(createOp,skipped(createOp)),[createOp]);
+ if(descriptorError)return <Alert type="error">{descriptorError}</Alert>;
+ if(services===null)return <Box>{t('Loading','読み込み中')}</Box>;
  if(!services.length)return <Alert type="info">{t('No catalog services are enabled.','有効なカタログサービスはありません。')}</Alert>;
  const columns=[{id:'name',header:t('Name or identifier','名前または識別子'),cell:item=><Link onFollow={e=>{e.preventDefault();inspect(item)}} href="#">{item[resource.nameWire]||item[resource.idWire]||identity(item)}</Link>},
   {id:'arn',header:'ARN',cell:item=>item[resource.arnWire]||'-'}];
