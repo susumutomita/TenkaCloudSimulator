@@ -98,16 +98,32 @@ func (q *request) referenced(value string) (string, bool) {
 	return value, true
 }
 
-// resolveReferences checks and canonicalizes every reference of document
-// inside the writing transaction.
-func (q *request) resolveReferences(tx *sql.Tx, c *Collection, document map[string]any) error {
-	paths := make([]string, 0, len(c.References))
-	for path := range c.References {
+// all lists strong and weak reference paths.
+func (c *Collection) all() map[string][]string {
+	out := map[string][]string{}
+	for path, targets := range c.Weak {
+		out[path] = targets
+	}
+	for path, targets := range c.References {
+		out[path] = targets
+	}
+	return out
+}
+
+// resolveReferences checks and canonicalizes references of document inside
+// the writing transaction; weak references only when created.
+func (q *request) resolveReferences(tx *sql.Tx, c *Collection, document map[string]any, created bool) error {
+	refs := c.References
+	if created {
+		refs = c.all()
+	}
+	paths := make([]string, 0, len(refs))
+	for path := range refs {
 		paths = append(paths, path)
 	}
 	sort.Strings(paths)
 	for _, path := range paths {
-		targets := c.References[path]
+		targets := refs[path]
 		_, err := eachString(document, path, func(value string) (string, error) {
 			name, ok := q.referenced(value)
 			if !ok {
@@ -134,6 +150,43 @@ func (q *request) resolveReferences(tx *sql.Tx, c *Collection, document map[stri
 	return nil
 }
 
+// conflicts applies the collection's Conflict rule against every other
+// resource of the collection in this API.
+func (q *request) conflicts(tx *sql.Tx, c *Collection, name string, document map[string]any) error {
+	if c.Conflict == nil {
+		return nil
+	}
+	others, err := collectionRows(tx, q.b.model.Name, c.ID)
+	if err != nil {
+		return err
+	}
+	for _, other := range others {
+		if other.Name != name {
+			if err := c.Conflict(document, other.Document); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func collectionRows(tx *sql.Tx, api, collection string) ([]row, error) {
+	rows, err := tx.Query("SELECT "+columns+" FROM gcp_catalog_resources WHERE api=? AND collection=? ORDER BY seq", api, collection)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	out := []row{}
+	for rows.Next() {
+		r, err := scanRow(rows)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, r)
+	}
+	return out, rows.Err()
+}
+
 // referrer returns a resource that still references r, if any.
 func (q *request) referrer(tx *sql.Tx, r row) (string, error) {
 	want := q.canonical(r.Name)
@@ -149,21 +202,7 @@ func (q *request) referrer(tx *sql.Tx, r row) (string, error) {
 		if len(paths) == 0 {
 			continue
 		}
-		rows, err := tx.Query("SELECT "+columns+" FROM gcp_catalog_resources WHERE api=? AND collection=? ORDER BY seq", q.b.model.Name, c.ID)
-		if err != nil {
-			return "", err
-		}
-		users := []row{}
-		for rows.Next() {
-			user, err := scanRow(rows)
-			if err != nil {
-				rows.Close()
-				return "", err
-			}
-			users = append(users, user)
-		}
-		err = rows.Err()
-		rows.Close()
+		users, err := collectionRows(tx, q.b.model.Name, c.ID)
 		if err != nil {
 			return "", err
 		}

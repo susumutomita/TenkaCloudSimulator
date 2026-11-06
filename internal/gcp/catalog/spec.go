@@ -83,6 +83,14 @@ type Collection struct {
 	// name, and keeps that resource from being deleted
 	// (FAILED_PRECONDITION). Cascade children are not checked.
 	References map[string][]string
+	// Weak references are checked and canonicalized like References at
+	// creation only and do not keep their target from being deleted, as a
+	// snapshot outlives its source disk.
+	Weak map[string][]string
+	// Conflict refuses a created or updated resource that clashes with
+	// another resource of the same collection in this API, such as
+	// overlapping subnetwork ranges in one network.
+	Conflict func(candidate, other map[string]any) error
 }
 
 // API is a reviewed bounded specification of one official Google API.

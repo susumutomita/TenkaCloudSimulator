@@ -94,6 +94,11 @@ the request body.
   resource that another one still references cannot be deleted
   (`FAILED_PRECONDITION` 400, as Compute Engine's
   `resourceInUseByAnotherResource`).
+- Some references are checked only at creation and do not block deletion,
+  as a snapshot outlives its source disk. Reviewed conflict rules, such as
+  overlapping subnetwork ranges in one network, are checked against every
+  other resource of the collection on create and update.
+- A merge patch may restate an immutable field with its stored value.
 
 ## Limits
 

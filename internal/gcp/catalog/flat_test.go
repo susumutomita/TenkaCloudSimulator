@@ -90,7 +90,7 @@ func flatModel(t *testing.T) *Model {
 			"Subnetwork": common("flat#subnetwork", map[string]*Property{"region": str(), "fingerprint": {Type: "string", Format: "byte"}, "network": str(),
 				"peers":       {Type: "array", Items: &Property{Type: "object", Properties: map[string]*Property{"subnetwork": str(), "weight": {Type: "integer"}}}},
 				"ipCidrRange": {Type: "string", RequiredBy: []string{"flat.subnetworks.insert"}}}),
-			"Disk": common("flat#disk", map[string]*Property{"zone": out(), "region": out(), "sizeGb": {Type: "string", Format: "int64"},
+			"Disk": common("flat#disk", map[string]*Property{"zone": out(), "region": out(), "sizeGb": {Type: "string", Format: "int64"}, "sourceDisk": str(),
 				"labels": {Type: "object", Additional: &Property{Type: "string"}}, "labelFingerprint": {Type: "string", Format: "byte"}}),
 			"SetLabelsRequest": {Type: "object", Properties: map[string]*Property{"labels": {Type: "object", Additional: &Property{Type: "string"}},
 				"labelFingerprint": {Type: "string", Format: "byte"}, "kind": {Type: "string", ReadOnly: true}}},
@@ -125,9 +125,15 @@ func flatAPI() *API {
 		Collections: []*Collection{
 			{ID: "networks", Schema: "Network", IDField: "name", ShortName: true, IDPattern: name, Limit: 3, Permission: "flat.networks", Mutable: []string{"routingConfig", "mtu"}},
 			{ID: "subnetworks", Schema: "Subnetwork", IDField: "name", ShortName: true, Permission: "flat.subnetworks", Mutable: []string{"description", "peers"},
-				Generate: map[string]any{"fingerprint": "$fingerprint"}, References: map[string][]string{"network": {"networks"}, "peers[].subnetwork": {"subnetworks"}}},
+				Generate: map[string]any{"fingerprint": "$fingerprint"}, References: map[string][]string{"network": {"networks"}, "peers[].subnetwork": {"subnetworks"}},
+				Conflict: func(candidate, other map[string]any) error {
+					if candidate["ipCidrRange"] == other["ipCidrRange"] {
+						return invalid("The range overlaps.")
+					}
+					return nil
+				}},
 			{ID: "disks", Schema: "Disk", IDField: "name", ShortName: true, Permission: "flat.disks",
-				Generate: map[string]any{"labelFingerprint": "$fingerprint", "sizeGb": "10"}},
+				Generate: map[string]any{"labelFingerprint": "$fingerprint", "sizeGb": "10"}, Weak: map[string][]string{"sourceDisk": {"disks"}}},
 			{ID: "things", Schema: "Network", Permission: "flat.things"},
 		},
 		Bindings: []Binding{
@@ -406,8 +412,10 @@ func TestMergePatchFollowsRFC7396(t *testing.T) {
 func TestFlatReferencesResolveAndProtectDeletion(t *testing.T) {
 	h := flatHarness(t)
 	subnets := flatRoot + "/regions/us-central1/subnetworks"
+	ranges := 0
 	subnet := func(name, network string) reply {
-		return h.call("owner", "POST", subnets, map[string]any{"name": name, "ipCidrRange": "10.0.0.0/24", "network": network})
+		ranges++
+		return h.call("owner", "POST", subnets, map[string]any{"name": name, "ipCidrRange": "10.2." + strconv.Itoa(ranges) + ".0/24", "network": network})
 	}
 	expect(t, subnet("early", "global/networks/vpc"), 404, "NOT_FOUND")
 	expect(t, h.call("owner", "POST", flatRoot+"/global/networks", map[string]any{"name": "vpc"}), 200, "")
@@ -462,9 +470,42 @@ func TestFlatReferencesResolveAndProtectDeletion(t *testing.T) {
 		}
 	}
 	h.call("owner", "POST", flatRoot+"/global/networks", map[string]any{"name": "keep"})
-	h.call("owner", "POST", subnets, map[string]any{"name": "user", "ipCidrRange": "10.0.0.0/24", "network": "global/networks/keep"})
+	h.call("owner", "POST", subnets, map[string]any{"name": "user", "ipCidrRange": "10.9.0.0/24", "network": "global/networks/keep"})
 	if _, err := h.engine.store.db.Exec("UPDATE gcp_catalog_resources SET document='nope' WHERE id='user'"); err != nil {
 		t.Fatal(err)
 	}
 	expect(t, h.call("owner", "DELETE", flatRoot+"/global/networks/keep", nil), 500, "INTERNAL")
+}
+
+func TestFlatWeakReferencesConflictsAndRestatedFields(t *testing.T) {
+	h := flatHarness(t)
+	disks := flatRoot + "/zones/us-central1-a/disks"
+	expect(t, h.call("owner", "POST", disks, map[string]any{"name": "clone", "sourceDisk": "zones/us-central1-a/disks/origin"}), 404, "NOT_FOUND")
+	expect(t, h.call("owner", "POST", disks, map[string]any{"name": "origin"}), 200, "")
+	expect(t, h.call("owner", "POST", disks, map[string]any{"name": "clone", "sourceDisk": "zones/us-central1-a/disks/origin"}), 200, "")
+	if h.call("owner", "GET", disks+"/clone", nil).body["sourceDisk"] != "https://www.googleapis.com/flat/v1/projects/tenkacloud-local/zones/us-central1-a/disks/origin" {
+		t.Fatal("weak references are canonical")
+	}
+	// The source may be deleted; later updates do not re-check it.
+	if _, err := h.engine.store.db.Exec("DELETE FROM gcp_catalog_resources WHERE id='origin'"); err != nil {
+		t.Fatal(err)
+	}
+	expect(t, h.call("owner", "POST", disks+"/clone/resize", map[string]any{"sizeGb": "30"}), 200, "")
+
+	subnets := flatRoot + "/regions/us-central1/subnetworks"
+	expect(t, h.call("owner", "POST", subnets, map[string]any{"name": "a", "ipCidrRange": "10.0.0.0/24"}), 200, "")
+	expect(t, h.call("owner", "POST", subnets, map[string]any{"name": "b", "ipCidrRange": "10.0.0.0/24"}), 400, "INVALID_ARGUMENT")
+	expect(t, h.call("owner", "POST", subnets, map[string]any{"name": "b", "ipCidrRange": "10.0.1.0/24"}), 200, "")
+	// A resource never conflicts with itself; restated immutable fields are accepted.
+	b := h.call("owner", "GET", subnets+"/b", nil).body
+	expect(t, h.call("owner", "PATCH", subnets+"/b", map[string]any{"ipCidrRange": "10.0.1.0/24", "description": "same", "fingerprint": b["fingerprint"]}), 200, "")
+	expect(t, h.call("owner", "PATCH", subnets+"/b", map[string]any{"ipCidrRange": "10.0.9.0/24"}), 400, "INVALID_ARGUMENT")
+	if _, err := h.engine.store.db.Exec("UPDATE gcp_catalog_resources SET document=replace(document, '10.0.1.0', '10.0.0.0') WHERE id='b'"); err != nil {
+		t.Fatal(err)
+	}
+	expect(t, h.call("owner", "PATCH", subnets+"/b", map[string]any{"description": "again"}), 400, "INVALID_ARGUMENT")
+	if _, err := h.engine.store.db.Exec("UPDATE gcp_catalog_resources SET document='nope' WHERE id='a'"); err != nil {
+		t.Fatal(err)
+	}
+	expect(t, h.call("owner", "POST", subnets, map[string]any{"name": "c", "ipCidrRange": "10.0.2.0/24"}), 500, "INTERNAL")
 }

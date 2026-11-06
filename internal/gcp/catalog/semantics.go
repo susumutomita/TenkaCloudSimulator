@@ -339,8 +339,11 @@ func (q *request) create() (any, error) {
 			return nil, err
 		}
 		defer tx.Rollback()
-		if len(c.References) > 0 {
-			if err := q.resolveReferences(tx, c, document); err != nil {
+		if len(c.References)+len(c.Weak) > 0 || c.Conflict != nil {
+			if err := q.resolveReferences(tx, c, document, true); err != nil {
+				return nil, err
+			}
+			if err := q.conflicts(tx, c, name, document); err != nil {
 				return nil, err
 			}
 			if data, err = encode(document); err != nil {
@@ -516,6 +519,10 @@ func (q *request) patch() (any, error) {
 			// Sending the unchanged body ID back is not an update.
 			continue
 		}
+		if merge && !mutable[field] && mustJSON(q.body[field]) == mustJSON(r.Document[field]) {
+			// A merge patch may restate an immutable field unchanged.
+			continue
+		}
 		if !mutable[field] {
 			return nil, invalid("Field %q cannot be updated by the simulator.", field)
 		}
@@ -592,8 +599,11 @@ func (q *request) save(c *Collection, r row) (any, error) {
 			return nil, err
 		}
 		defer tx.Rollback()
-		if len(c.References) > 0 {
-			if err := q.resolveReferences(tx, c, r.Document); err != nil {
+		if len(c.References) > 0 || c.Conflict != nil {
+			if err := q.resolveReferences(tx, c, r.Document, false); err != nil {
+				return nil, err
+			}
+			if err := q.conflicts(tx, c, r.Name, r.Document); err != nil {
 				return nil, err
 			}
 			if data, err = encode(r.Document); err != nil {
