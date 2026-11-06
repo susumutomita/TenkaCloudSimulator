@@ -1,0 +1,30 @@
+{
+ "client": "rtbfabric",
+ "steps": [
+  {"op": "create_requester_gateway", "args": {"vpcId": "vpc-0123456789abcdef0", "subnetIds": ["subnet-0123456789abcdef0"], "securityGroupIds": ["sg-0123456789abcdef0"], "clientToken": "fixture-1", "description": "bidder", "tags": {"team": "a"}}, "save": {"req": "gatewayId"}, "expect": {"status": "ACTIVE"}},
+  {"op": "get_requester_gateway", "args": {"gatewayId": "${req}"}, "expect": {"vpcId": "vpc-0123456789abcdef0", "description": "bidder", "activeLinksCount": 0, "tags": {"team": "a"}}},
+  {"op": "list_requester_gateways", "args": {}, "expect": {"gatewayIds": ["${req}"]}},
+  {"op": "update_requester_gateway", "args": {"gatewayId": "${req}", "clientToken": "fixture-2", "description": "updated"}, "expect": {"gatewayId": "${req}", "status": "ACTIVE"}},
+  {"op": "create_responder_gateway", "args": {"vpcId": "vpc-0123456789abcdef0", "subnetIds": ["subnet-0123456789abcdef0"], "securityGroupIds": ["sg-0123456789abcdef0"], "port": 8080, "protocol": "HTTP", "domainName": "bids.example.com", "clientToken": "fixture-3"}, "save": {"resp": "gatewayId"}, "expect": {"status": "ACTIVE"}},
+  {"op": "get_responder_gateway", "args": {"gatewayId": "${resp}"}, "expect": {"port": 8080, "protocol": "HTTP", "domainName": "bids.example.com", "inboundLinksCount": 0}},
+  {"op": "list_responder_gateways", "args": {}, "expect": {"gatewayIds#count": 1}},
+  {"op": "update_responder_gateway", "args": {"gatewayId": "${resp}", "port": 8443, "protocol": "HTTPS", "clientToken": "fixture-4"}, "expect": {"status": "ACTIVE"}},
+  {"op": "get_requester_gateway", "args": {"gatewayId": "${resp}"}, "error": "ResourceNotFoundException", "status": 404},
+  {"op": "tag_resource", "args": {"resourceArn": "arn:aws:rtbfabric:us-east-1:000000000000:gateway/${req}", "tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"resourceArn": "arn:aws:rtbfabric:us-east-1:000000000000:gateway/${req}", "tagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "arn:aws:rtbfabric:us-east-1:000000000000:gateway/${req}"}, "expect": {"tags": {"team": "a"}}},
+  {"op": "create_link", "args": {"gatewayId": "${req}", "peerGatewayId": "${resp}", "logSettings": {"applicationLogs": {"sampling": {"errorLog": 1, "filterLog": 1}}}}, "error": "UnknownOperationException", "status": 501}
+ ],
+ "isolation": [
+  {"op": "list_requester_gateways", "args": {}, "expect": {"gatewayIds#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_requester_gateway", "args": {"gatewayId": "${req}"}, "expect": {"description": "updated"}},
+  {"op": "get_responder_gateway", "args": {"gatewayId": "${resp}"}, "expect": {"port": 8443}}
+ ],
+ "cleanup": [
+  {"op": "delete_requester_gateway", "args": {"gatewayId": "${req}"}, "expect": {"status": "DELETED"}},
+  {"op": "delete_responder_gateway", "args": {"gatewayId": "${resp}"}, "expect": {"status": "DELETED"}},
+  {"op": "list_responder_gateways", "args": {}, "expect": {"gatewayIds#count": 0}}
+ ]
+}

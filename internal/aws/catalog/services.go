@@ -17,5 +17,7 @@ func Services() []*Service {
 		acm, acmPCA, detective, ram, securityHub, shield, signer, verifiedPermissions,
 		auditManager, cloudDirectory, firewallManager, guardDuty, identityCenter, inspector, macie, paymentCryptography,
 		securityIncidentResponse, securityLake,
+		// Networking and content delivery, front-end web and mobile, and location.
+		appMesh, appSync, cloudMap, deviceFarm, globalAccelerator, location, networkManager, recoveryControl, rtbFabric, vpcLattice,
 	}
 }

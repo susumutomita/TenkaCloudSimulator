@@ -1,0 +1,1540 @@
+{
+ "components": {
+  "schemas": {
+   "AWSLocation": {
+    "additionalProperties": false,
+    "properties": {
+     "SubnetArn": {
+      "maxLength": 500,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Zone": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CreateDeviceResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Device": {
+      "$ref": "#/components/schemas/Device"
+     }
+    },
+    "type": "object"
+   },
+   "CreateGlobalNetworkResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "GlobalNetwork": {
+      "$ref": "#/components/schemas/GlobalNetwork"
+     }
+    },
+    "type": "object"
+   },
+   "CreateSiteResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Site": {
+      "$ref": "#/components/schemas/Site"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteDeviceResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Device": {
+      "$ref": "#/components/schemas/Device"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteGlobalNetworkResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "GlobalNetwork": {
+      "$ref": "#/components/schemas/GlobalNetwork"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteSiteResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Site": {
+      "$ref": "#/components/schemas/Site"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeGlobalNetworksResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "GlobalNetworks": {
+      "items": {
+       "$ref": "#/components/schemas/GlobalNetwork"
+      },
+      "type": "array"
+     },
+     "NextToken": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Device": {
+    "additionalProperties": false,
+    "properties": {
+     "AWSLocation": {
+      "$ref": "#/components/schemas/AWSLocation"
+     },
+     "CreatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Description": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     },
+     "DeviceArn": {
+      "maxLength": 500,
+      "minLength": 0,
+      "type": "string"
+     },
+     "DeviceId": {
+      "maxLength": 50,
+      "minLength": 0,
+      "type": "string"
+     },
+     "GlobalNetworkId": {
+      "maxLength": 50,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Location": {
+      "$ref": "#/components/schemas/Location"
+     },
+     "Model": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     },
+     "SerialNumber": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     },
+     "SiteId": {
+      "maxLength": 50,
+      "minLength": 0,
+      "type": "string"
+     },
+     "State": {
+      "enum": [
+       "PENDING",
+       "AVAILABLE",
+       "DELETING",
+       "UPDATING"
+      ],
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     },
+     "Type": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Vendor": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GetDevicesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Devices": {
+      "items": {
+       "$ref": "#/components/schemas/Device"
+      },
+      "type": "array"
+     },
+     "NextToken": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GetSitesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "NextToken": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Sites": {
+      "items": {
+       "$ref": "#/components/schemas/Site"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "GlobalNetwork": {
+    "additionalProperties": false,
+    "properties": {
+     "CreatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Description": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     },
+     "GlobalNetworkArn": {
+      "maxLength": 500,
+      "minLength": 0,
+      "type": "string"
+     },
+     "GlobalNetworkId": {
+      "maxLength": 50,
+      "minLength": 0,
+      "type": "string"
+     },
+     "State": {
+      "enum": [
+       "PENDING",
+       "AVAILABLE",
+       "DELETING",
+       "UPDATING"
+      ],
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListTagsForResourceResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "TagList": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Location": {
+    "additionalProperties": false,
+    "properties": {
+     "Address": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Latitude": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Longitude": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Site": {
+    "additionalProperties": false,
+    "properties": {
+     "CreatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Description": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     },
+     "GlobalNetworkId": {
+      "maxLength": 50,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Location": {
+      "$ref": "#/components/schemas/Location"
+     },
+     "SiteArn": {
+      "maxLength": 500,
+      "minLength": 0,
+      "type": "string"
+     },
+     "SiteId": {
+      "maxLength": 50,
+      "minLength": 0,
+      "type": "string"
+     },
+     "State": {
+      "enum": [
+       "PENDING",
+       "AVAILABLE",
+       "DELETING",
+       "UPDATING"
+      ],
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "Key": {
+      "maxLength": 10000000,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Value": {
+      "maxLength": 10000000,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UntagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UpdateDeviceResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Device": {
+      "$ref": "#/components/schemas/Device"
+     }
+    },
+    "type": "object"
+   },
+   "UpdateGlobalNetworkResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "GlobalNetwork": {
+      "$ref": "#/components/schemas/GlobalNetwork"
+     }
+    },
+    "type": "object"
+   },
+   "UpdateSiteResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Site": {
+      "$ref": "#/components/schemas/Site"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS Network Manager API (2019-07-05). Every other official operation returns HTTP 501 UnknownOperationException. Global networks, sites and devices are AVAILABLE global inventory metadata: no transit gateway is registered, no route, topology, event or monitoring data is collected, and AWS locations and subnet ARNs are stored without checks. Unknown identifiers in GlobalNetworkIds, SiteIds or DeviceIds are refused with ResourceNotFoundException. Devices cannot be placed at a site (SiteId is refused), because the simulator does not track site references; links, link and connection associations, connect peers, transit gateway registrations and Cloud WAN core networks, policies and attachments return UnknownOperationException with HTTP 501. Deleting a global network that still has sites or devices is refused.",
+  "title": "AWS Network Manager (simulator catalog)",
+  "version": "2019-07-05"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/global-networks": {
+   "get": {
+    "operationId": "networkmanagerDescribeGlobalNetworks",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "networkmanager"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "globalNetworkIds",
+      "schema": {
+       "items": {
+        "maxLength": 50,
+        "minLength": 0,
+        "type": "string"
+       },
+       "type": "array"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 500,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 0,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DescribeGlobalNetworksResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeGlobalNetworks",
+    "tags": [
+     "AWS Network Manager"
+    ]
+   },
+   "post": {
+    "operationId": "networkmanagerCreateGlobalNetwork",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "networkmanager"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Description": {
+          "maxLength": 256,
+          "minLength": 0,
+          "type": "string"
+         },
+         "Tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "type": "array"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateGlobalNetworkResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateGlobalNetwork",
+    "tags": [
+     "AWS Network Manager"
+    ]
+   }
+  },
+  "/global-networks/{globalNetworkId}": {
+   "delete": {
+    "operationId": "networkmanagerDeleteGlobalNetwork",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "networkmanager"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "globalNetworkId",
+      "required": true,
+      "schema": {
+       "maxLength": 50,
+       "minLength": 0,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DeleteGlobalNetworkResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteGlobalNetwork",
+    "tags": [
+     "AWS Network Manager"
+    ]
+   },
+   "patch": {
+    "operationId": "networkmanagerUpdateGlobalNetwork",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "networkmanager"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "globalNetworkId",
+      "required": true,
+      "schema": {
+       "maxLength": 50,
+       "minLength": 0,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Description": {
+          "maxLength": 256,
+          "minLength": 0,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UpdateGlobalNetworkResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateGlobalNetwork",
+    "tags": [
+     "AWS Network Manager"
+    ]
+   }
+  },
+  "/global-networks/{globalNetworkId}/devices": {
+   "get": {
+    "operationId": "networkmanagerGetDevices",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "networkmanager"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "deviceIds",
+      "schema": {
+       "items": {
+        "maxLength": 50,
+        "minLength": 0,
+        "type": "string"
+       },
+       "type": "array"
+      }
+     },
+     {
+      "in": "path",
+      "name": "globalNetworkId",
+      "required": true,
+      "schema": {
+       "maxLength": 50,
+       "minLength": 0,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 500,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 0,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "siteId",
+      "schema": {
+       "maxLength": 50,
+       "minLength": 0,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GetDevicesResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetDevices",
+    "tags": [
+     "AWS Network Manager"
+    ]
+   },
+   "post": {
+    "operationId": "networkmanagerCreateDevice",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "networkmanager"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "globalNetworkId",
+      "required": true,
+      "schema": {
+       "maxLength": 50,
+       "minLength": 0,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "AWSLocation": {
+          "$ref": "#/components/schemas/AWSLocation"
+         },
+         "Description": {
+          "maxLength": 256,
+          "minLength": 0,
+          "type": "string"
+         },
+         "Location": {
+          "$ref": "#/components/schemas/Location"
+         },
+         "Model": {
+          "maxLength": 256,
+          "minLength": 0,
+          "type": "string"
+         },
+         "SerialNumber": {
+          "maxLength": 256,
+          "minLength": 0,
+          "type": "string"
+         },
+         "SiteId": {
+          "maxLength": 50,
+          "minLength": 0,
+          "type": "string"
+         },
+         "Tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "type": "array"
+         },
+         "Type": {
+          "maxLength": 256,
+          "minLength": 0,
+          "type": "string"
+         },
+         "Vendor": {
+          "maxLength": 256,
+          "minLength": 0,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateDeviceResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateDevice",
+    "tags": [
+     "AWS Network Manager"
+    ]
+   }
+  },
+  "/global-networks/{globalNetworkId}/devices/{deviceId}": {
+   "delete": {
+    "operationId": "networkmanagerDeleteDevice",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "networkmanager"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "deviceId",
+      "required": true,
+      "schema": {
+       "maxLength": 50,
+       "minLength": 0,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "globalNetworkId",
+      "required": true,
+      "schema": {
+       "maxLength": 50,
+       "minLength": 0,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DeleteDeviceResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteDevice",
+    "tags": [
+     "AWS Network Manager"
+    ]
+   },
+   "patch": {
+    "operationId": "networkmanagerUpdateDevice",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "networkmanager"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "deviceId",
+      "required": true,
+      "schema": {
+       "maxLength": 50,
+       "minLength": 0,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "globalNetworkId",
+      "required": true,
+      "schema": {
+       "maxLength": 50,
+       "minLength": 0,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "AWSLocation": {
+          "$ref": "#/components/schemas/AWSLocation"
+         },
+         "Description": {
+          "maxLength": 256,
+          "minLength": 0,
+          "type": "string"
+         },
+         "Location": {
+          "$ref": "#/components/schemas/Location"
+         },
+         "Model": {
+          "maxLength": 256,
+          "minLength": 0,
+          "type": "string"
+         },
+         "SerialNumber": {
+          "maxLength": 256,
+          "minLength": 0,
+          "type": "string"
+         },
+         "SiteId": {
+          "maxLength": 50,
+          "minLength": 0,
+          "type": "string"
+         },
+         "Type": {
+          "maxLength": 256,
+          "minLength": 0,
+          "type": "string"
+         },
+         "Vendor": {
+          "maxLength": 256,
+          "minLength": 0,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UpdateDeviceResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateDevice",
+    "tags": [
+     "AWS Network Manager"
+    ]
+   }
+  },
+  "/global-networks/{globalNetworkId}/sites": {
+   "get": {
+    "operationId": "networkmanagerGetSites",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "networkmanager"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "globalNetworkId",
+      "required": true,
+      "schema": {
+       "maxLength": 50,
+       "minLength": 0,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 500,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 0,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "siteIds",
+      "schema": {
+       "items": {
+        "maxLength": 50,
+        "minLength": 0,
+        "type": "string"
+       },
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GetSitesResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetSites",
+    "tags": [
+     "AWS Network Manager"
+    ]
+   },
+   "post": {
+    "operationId": "networkmanagerCreateSite",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "networkmanager"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "globalNetworkId",
+      "required": true,
+      "schema": {
+       "maxLength": 50,
+       "minLength": 0,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Description": {
+          "maxLength": 256,
+          "minLength": 0,
+          "type": "string"
+         },
+         "Location": {
+          "$ref": "#/components/schemas/Location"
+         },
+         "Tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "type": "array"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateSiteResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateSite",
+    "tags": [
+     "AWS Network Manager"
+    ]
+   }
+  },
+  "/global-networks/{globalNetworkId}/sites/{siteId}": {
+   "delete": {
+    "operationId": "networkmanagerDeleteSite",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "networkmanager"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "globalNetworkId",
+      "required": true,
+      "schema": {
+       "maxLength": 50,
+       "minLength": 0,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "siteId",
+      "required": true,
+      "schema": {
+       "maxLength": 50,
+       "minLength": 0,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DeleteSiteResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteSite",
+    "tags": [
+     "AWS Network Manager"
+    ]
+   },
+   "patch": {
+    "operationId": "networkmanagerUpdateSite",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "networkmanager"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "globalNetworkId",
+      "required": true,
+      "schema": {
+       "maxLength": 50,
+       "minLength": 0,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "siteId",
+      "required": true,
+      "schema": {
+       "maxLength": 50,
+       "minLength": 0,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Description": {
+          "maxLength": 256,
+          "minLength": 0,
+          "type": "string"
+         },
+         "Location": {
+          "$ref": "#/components/schemas/Location"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UpdateSiteResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateSite",
+    "tags": [
+     "AWS Network Manager"
+    ]
+   }
+  },
+  "/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "networkmanagerUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "networkmanager"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1500,
+       "minLength": 0,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 10000000,
+        "minLength": 0,
+        "type": "string"
+       },
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UntagResourceResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "AWS Network Manager"
+    ]
+   },
+   "get": {
+    "operationId": "networkmanagerListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "networkmanager"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1500,
+       "minLength": 0,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "AWS Network Manager"
+    ]
+   },
+   "post": {
+    "operationId": "networkmanagerTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "networkmanager"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1500,
+       "minLength": 0,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "type": "array"
+         }
+        },
+        "required": [
+         "Tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/TagResourceResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "AWS Network Manager"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS Network Manager API (2019-07-05). Every other official operation returns HTTP 501 UnknownOperationException. Global networks, sites and devices are AVAILABLE global inventory metadata: no transit gateway is registered, no route, topology, event or monitoring data is collected, and AWS locations and subnet ARNs are stored without checks. Unknown identifiers in GlobalNetworkIds, SiteIds or DeviceIds are refused with ResourceNotFoundException. Devices cannot be placed at a site (SiteId is refused), because the simulator does not track site references; links, link and connection associations, connect peers, transit gateway registrations and Cloud WAN core networks, policies and attachments return UnknownOperationException with HTTP 501. Deleting a global network that still has sites or devices is refused.",
+   "name": "AWS Network Manager"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/networkmanager/2019-07-05/service-2.json",
+  "sha256": "e17ae6b249f5b41b9ccfff15db83a1d00177d5118d00f4ed6f8046290a85262f",
+  "license": "Apache-2.0"
+ }
+}

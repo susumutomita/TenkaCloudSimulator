@@ -1,0 +1,36 @@
+{
+ "client": "networkmanager",
+ "steps": [
+  {"op": "create_global_network", "args": {"Description": "fixture network", "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"gn": "GlobalNetwork.GlobalNetworkId", "gnArn": "GlobalNetwork.GlobalNetworkArn"}, "expect": {"GlobalNetwork.State": "AVAILABLE", "GlobalNetwork.Description": "fixture network"}},
+  {"op": "describe_global_networks", "args": {"GlobalNetworkIds": ["${gn}"]}, "expect": {"GlobalNetworks#count": 1, "GlobalNetworks[0].GlobalNetworkArn": "${gnArn}"}},
+  {"op": "describe_global_networks", "args": {}, "expect": {"GlobalNetworks#count": 1}},
+  {"op": "update_global_network", "args": {"GlobalNetworkId": "${gn}", "Description": "updated"}, "expect": {"GlobalNetwork.Description": "updated"}},
+  {"op": "create_site", "args": {"GlobalNetworkId": "${gn}", "Description": "Tokyo", "Location": {"Address": "Tokyo", "Latitude": "35.68", "Longitude": "139.76"}}, "save": {"site": "Site.SiteId", "siteArn": "Site.SiteArn"}, "expect": {"Site.GlobalNetworkId": "${gn}", "Site.State": "AVAILABLE"}},
+  {"op": "get_sites", "args": {"GlobalNetworkId": "${gn}"}, "expect": {"Sites#count": 1, "Sites[0].Location.Address": "Tokyo"}},
+  {"op": "get_sites", "args": {"GlobalNetworkId": "${gn}", "SiteIds": ["${site}"]}, "expect": {"Sites#count": 1}},
+  {"op": "update_site", "args": {"GlobalNetworkId": "${gn}", "SiteId": "${site}", "Description": "Tokyo office"}, "expect": {"Site.Description": "Tokyo office"}},
+  {"op": "create_device", "args": {"GlobalNetworkId": "${gn}", "Description": "edge router", "Vendor": "example", "Model": "r1", "SerialNumber": "s-1"}, "save": {"device": "Device.DeviceId"}, "expect": {"Device.Vendor": "example", "Device.State": "AVAILABLE"}},
+  {"op": "create_device", "args": {"GlobalNetworkId": "${gn}", "SiteId": "${site}"}, "error": "ValidationException"},
+  {"op": "get_devices", "args": {"GlobalNetworkId": "${gn}", "DeviceIds": ["${device}"]}, "expect": {"Devices#count": 1, "Devices[0].Model": "r1"}},
+  {"op": "get_devices", "args": {"GlobalNetworkId": "${gn}", "SiteId": "${site}"}, "expect": {"Devices#count": 0}},
+  {"op": "update_device", "args": {"GlobalNetworkId": "${gn}", "DeviceId": "${device}", "Model": "r2"}, "expect": {"Device.Model": "r2"}},
+  {"op": "tag_resource", "args": {"ResourceArn": "${siteArn}", "Tags": [{"Key": "k", "Value": "v"}]}},
+  {"op": "untag_resource", "args": {"ResourceArn": "${siteArn}", "TagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "${gnArn}"}, "expect": {"TagList": [{"Key": "team", "Value": "a"}]}},
+  {"op": "create_link", "args": {"GlobalNetworkId": "${gn}", "SiteId": "${site}", "Bandwidth": {"UploadSpeed": 10, "DownloadSpeed": 10}}, "error": "UnknownOperationException", "status": 501},
+  {"op": "delete_global_network", "args": {"GlobalNetworkId": "${gn}"}, "error": "ConflictException"},
+  {"op": "get_sites", "args": {"GlobalNetworkId": "global-network-00000000000000000"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "describe_global_networks", "args": {}, "expect": {"GlobalNetworks#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_devices", "args": {"GlobalNetworkId": "${gn}"}, "expect": {"Devices[0].Model": "r2"}}
+ ],
+ "cleanup": [
+  {"op": "delete_device", "args": {"GlobalNetworkId": "${gn}", "DeviceId": "${device}"}, "expect": {"Device.State": "DELETING"}},
+  {"op": "delete_site", "args": {"GlobalNetworkId": "${gn}", "SiteId": "${site}"}, "expect": {"Site.State": "DELETING"}},
+  {"op": "delete_global_network", "args": {"GlobalNetworkId": "${gn}"}, "expect": {"GlobalNetwork.State": "DELETING"}},
+  {"op": "describe_global_networks", "args": {}, "expect": {"GlobalNetworks#count": 0}}
+ ]
+}

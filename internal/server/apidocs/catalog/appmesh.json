@@ -1,0 +1,4481 @@
+{
+ "components": {
+  "schemas": {
+   "AccessLog": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "file": {
+      "$ref": "#/components/schemas/FileAccessLog"
+     }
+    },
+    "type": "object"
+   },
+   "AwsCloudMapInstanceAttribute": {
+    "additionalProperties": false,
+    "properties": {
+     "key": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "value": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "key",
+     "value"
+    ],
+    "type": "object"
+   },
+   "AwsCloudMapServiceDiscovery": {
+    "additionalProperties": false,
+    "properties": {
+     "attributes": {
+      "items": {
+       "$ref": "#/components/schemas/AwsCloudMapInstanceAttribute"
+      },
+      "type": "array"
+     },
+     "ipPreference": {
+      "enum": [
+       "IPv6_PREFERRED",
+       "IPv4_PREFERRED",
+       "IPv4_ONLY",
+       "IPv6_ONLY"
+      ],
+      "type": "string"
+     },
+     "namespaceName": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "serviceName": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "namespaceName",
+     "serviceName"
+    ],
+    "type": "object"
+   },
+   "Backend": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "virtualService": {
+      "$ref": "#/components/schemas/VirtualServiceBackend"
+     }
+    },
+    "type": "object"
+   },
+   "BackendDefaults": {
+    "additionalProperties": false,
+    "properties": {
+     "clientPolicy": {
+      "$ref": "#/components/schemas/ClientPolicy"
+     }
+    },
+    "type": "object"
+   },
+   "ClientPolicy": {
+    "additionalProperties": false,
+    "properties": {
+     "tls": {
+      "$ref": "#/components/schemas/ClientPolicyTls"
+     }
+    },
+    "type": "object"
+   },
+   "ClientPolicyTls": {
+    "additionalProperties": false,
+    "properties": {
+     "certificate": {
+      "$ref": "#/components/schemas/ClientTlsCertificate"
+     },
+     "enforce": {
+      "type": "boolean"
+     },
+     "ports": {
+      "items": {
+       "maximum": 65535,
+       "minimum": 1,
+       "type": "integer"
+      },
+      "type": "array"
+     },
+     "validation": {
+      "$ref": "#/components/schemas/TlsValidationContext"
+     }
+    },
+    "required": [
+     "validation"
+    ],
+    "type": "object"
+   },
+   "ClientTlsCertificate": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "file": {
+      "$ref": "#/components/schemas/ListenerTlsFileCertificate"
+     },
+     "sds": {
+      "$ref": "#/components/schemas/ListenerTlsSdsCertificate"
+     }
+    },
+    "type": "object"
+   },
+   "CreateMeshOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "mesh": {
+      "$ref": "#/components/schemas/MeshData"
+     }
+    },
+    "required": [
+     "mesh"
+    ],
+    "type": "object"
+   },
+   "CreateVirtualGatewayOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "virtualGateway": {
+      "$ref": "#/components/schemas/VirtualGatewayData"
+     }
+    },
+    "required": [
+     "virtualGateway"
+    ],
+    "type": "object"
+   },
+   "CreateVirtualNodeOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "virtualNode": {
+      "$ref": "#/components/schemas/VirtualNodeData"
+     }
+    },
+    "required": [
+     "virtualNode"
+    ],
+    "type": "object"
+   },
+   "CreateVirtualRouterOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "virtualRouter": {
+      "$ref": "#/components/schemas/VirtualRouterData"
+     }
+    },
+    "required": [
+     "virtualRouter"
+    ],
+    "type": "object"
+   },
+   "CreateVirtualServiceOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "virtualService": {
+      "$ref": "#/components/schemas/VirtualServiceData"
+     }
+    },
+    "required": [
+     "virtualService"
+    ],
+    "type": "object"
+   },
+   "DeleteMeshOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "mesh": {
+      "$ref": "#/components/schemas/MeshData"
+     }
+    },
+    "required": [
+     "mesh"
+    ],
+    "type": "object"
+   },
+   "DeleteVirtualGatewayOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "virtualGateway": {
+      "$ref": "#/components/schemas/VirtualGatewayData"
+     }
+    },
+    "required": [
+     "virtualGateway"
+    ],
+    "type": "object"
+   },
+   "DeleteVirtualNodeOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "virtualNode": {
+      "$ref": "#/components/schemas/VirtualNodeData"
+     }
+    },
+    "required": [
+     "virtualNode"
+    ],
+    "type": "object"
+   },
+   "DeleteVirtualRouterOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "virtualRouter": {
+      "$ref": "#/components/schemas/VirtualRouterData"
+     }
+    },
+    "required": [
+     "virtualRouter"
+    ],
+    "type": "object"
+   },
+   "DeleteVirtualServiceOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "virtualService": {
+      "$ref": "#/components/schemas/VirtualServiceData"
+     }
+    },
+    "required": [
+     "virtualService"
+    ],
+    "type": "object"
+   },
+   "DescribeMeshOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "mesh": {
+      "$ref": "#/components/schemas/MeshData"
+     }
+    },
+    "required": [
+     "mesh"
+    ],
+    "type": "object"
+   },
+   "DescribeVirtualGatewayOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "virtualGateway": {
+      "$ref": "#/components/schemas/VirtualGatewayData"
+     }
+    },
+    "required": [
+     "virtualGateway"
+    ],
+    "type": "object"
+   },
+   "DescribeVirtualNodeOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "virtualNode": {
+      "$ref": "#/components/schemas/VirtualNodeData"
+     }
+    },
+    "required": [
+     "virtualNode"
+    ],
+    "type": "object"
+   },
+   "DescribeVirtualRouterOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "virtualRouter": {
+      "$ref": "#/components/schemas/VirtualRouterData"
+     }
+    },
+    "required": [
+     "virtualRouter"
+    ],
+    "type": "object"
+   },
+   "DescribeVirtualServiceOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "virtualService": {
+      "$ref": "#/components/schemas/VirtualServiceData"
+     }
+    },
+    "required": [
+     "virtualService"
+    ],
+    "type": "object"
+   },
+   "DnsServiceDiscovery": {
+    "additionalProperties": false,
+    "properties": {
+     "hostname": {
+      "type": "string"
+     },
+     "ipPreference": {
+      "enum": [
+       "IPv6_PREFERRED",
+       "IPv4_PREFERRED",
+       "IPv4_ONLY",
+       "IPv6_ONLY"
+      ],
+      "type": "string"
+     },
+     "responseType": {
+      "enum": [
+       "LOADBALANCER",
+       "ENDPOINTS"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "hostname"
+    ],
+    "type": "object"
+   },
+   "Duration": {
+    "additionalProperties": false,
+    "properties": {
+     "unit": {
+      "enum": [
+       "s",
+       "ms"
+      ],
+      "type": "string"
+     },
+     "value": {
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "EgressFilter": {
+    "additionalProperties": false,
+    "properties": {
+     "type": {
+      "enum": [
+       "ALLOW_ALL",
+       "DROP_ALL"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "type"
+    ],
+    "type": "object"
+   },
+   "FileAccessLog": {
+    "additionalProperties": false,
+    "properties": {
+     "format": {
+      "$ref": "#/components/schemas/LoggingFormat"
+     },
+     "path": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "path"
+    ],
+    "type": "object"
+   },
+   "GrpcTimeout": {
+    "additionalProperties": false,
+    "properties": {
+     "idle": {
+      "$ref": "#/components/schemas/Duration"
+     },
+     "perRequest": {
+      "$ref": "#/components/schemas/Duration"
+     }
+    },
+    "type": "object"
+   },
+   "HealthCheckPolicy": {
+    "additionalProperties": false,
+    "properties": {
+     "healthyThreshold": {
+      "maximum": 10,
+      "minimum": 2,
+      "type": "integer"
+     },
+     "intervalMillis": {
+      "maximum": 300000,
+      "minimum": 5000,
+      "type": "integer"
+     },
+     "path": {
+      "type": "string"
+     },
+     "port": {
+      "maximum": 65535,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "protocol": {
+      "enum": [
+       "http",
+       "tcp",
+       "http2",
+       "grpc"
+      ],
+      "type": "string"
+     },
+     "timeoutMillis": {
+      "maximum": 60000,
+      "minimum": 2000,
+      "type": "integer"
+     },
+     "unhealthyThreshold": {
+      "maximum": 10,
+      "minimum": 2,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "healthyThreshold",
+     "intervalMillis",
+     "protocol",
+     "timeoutMillis",
+     "unhealthyThreshold"
+    ],
+    "type": "object"
+   },
+   "HttpTimeout": {
+    "additionalProperties": false,
+    "properties": {
+     "idle": {
+      "$ref": "#/components/schemas/Duration"
+     },
+     "perRequest": {
+      "$ref": "#/components/schemas/Duration"
+     }
+    },
+    "type": "object"
+   },
+   "JsonFormatRef": {
+    "additionalProperties": false,
+    "properties": {
+     "key": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "value": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "key",
+     "value"
+    ],
+    "type": "object"
+   },
+   "ListMeshesOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "meshes": {
+      "items": {
+       "$ref": "#/components/schemas/MeshRef"
+      },
+      "type": "array"
+     },
+     "nextToken": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "meshes"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "nextToken": {
+      "type": "string"
+     },
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/TagRef"
+      },
+      "maxItems": 50,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "tags"
+    ],
+    "type": "object"
+   },
+   "ListVirtualGatewaysOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "nextToken": {
+      "type": "string"
+     },
+     "virtualGateways": {
+      "items": {
+       "$ref": "#/components/schemas/VirtualGatewayRef"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "virtualGateways"
+    ],
+    "type": "object"
+   },
+   "ListVirtualNodesOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "nextToken": {
+      "type": "string"
+     },
+     "virtualNodes": {
+      "items": {
+       "$ref": "#/components/schemas/VirtualNodeRef"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "virtualNodes"
+    ],
+    "type": "object"
+   },
+   "ListVirtualRoutersOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "nextToken": {
+      "type": "string"
+     },
+     "virtualRouters": {
+      "items": {
+       "$ref": "#/components/schemas/VirtualRouterRef"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "virtualRouters"
+    ],
+    "type": "object"
+   },
+   "ListVirtualServicesOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "nextToken": {
+      "type": "string"
+     },
+     "virtualServices": {
+      "items": {
+       "$ref": "#/components/schemas/VirtualServiceRef"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "virtualServices"
+    ],
+    "type": "object"
+   },
+   "Listener": {
+    "additionalProperties": false,
+    "properties": {
+     "connectionPool": {
+      "$ref": "#/components/schemas/VirtualNodeConnectionPool"
+     },
+     "healthCheck": {
+      "$ref": "#/components/schemas/HealthCheckPolicy"
+     },
+     "outlierDetection": {
+      "$ref": "#/components/schemas/OutlierDetection"
+     },
+     "portMapping": {
+      "$ref": "#/components/schemas/PortMapping"
+     },
+     "timeout": {
+      "$ref": "#/components/schemas/ListenerTimeout"
+     },
+     "tls": {
+      "$ref": "#/components/schemas/ListenerTls"
+     }
+    },
+    "required": [
+     "portMapping"
+    ],
+    "type": "object"
+   },
+   "ListenerTimeout": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "grpc": {
+      "$ref": "#/components/schemas/GrpcTimeout"
+     },
+     "http": {
+      "$ref": "#/components/schemas/HttpTimeout"
+     },
+     "http2": {
+      "$ref": "#/components/schemas/HttpTimeout"
+     },
+     "tcp": {
+      "$ref": "#/components/schemas/TcpTimeout"
+     }
+    },
+    "type": "object"
+   },
+   "ListenerTls": {
+    "additionalProperties": false,
+    "properties": {
+     "certificate": {
+      "$ref": "#/components/schemas/ListenerTlsCertificate"
+     },
+     "mode": {
+      "enum": [
+       "STRICT",
+       "PERMISSIVE",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "validation": {
+      "$ref": "#/components/schemas/ListenerTlsValidationContext"
+     }
+    },
+    "required": [
+     "certificate",
+     "mode"
+    ],
+    "type": "object"
+   },
+   "ListenerTlsAcmCertificate": {
+    "additionalProperties": false,
+    "properties": {
+     "certificateArn": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "certificateArn"
+    ],
+    "type": "object"
+   },
+   "ListenerTlsCertificate": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "acm": {
+      "$ref": "#/components/schemas/ListenerTlsAcmCertificate"
+     },
+     "file": {
+      "$ref": "#/components/schemas/ListenerTlsFileCertificate"
+     },
+     "sds": {
+      "$ref": "#/components/schemas/ListenerTlsSdsCertificate"
+     }
+    },
+    "type": "object"
+   },
+   "ListenerTlsFileCertificate": {
+    "additionalProperties": false,
+    "properties": {
+     "certificateChain": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "privateKey": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "certificateChain",
+     "privateKey"
+    ],
+    "type": "object"
+   },
+   "ListenerTlsSdsCertificate": {
+    "additionalProperties": false,
+    "properties": {
+     "secretName": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "secretName"
+    ],
+    "type": "object"
+   },
+   "ListenerTlsValidationContext": {
+    "additionalProperties": false,
+    "properties": {
+     "subjectAlternativeNames": {
+      "$ref": "#/components/schemas/SubjectAlternativeNames"
+     },
+     "trust": {
+      "$ref": "#/components/schemas/ListenerTlsValidationContextTrust"
+     }
+    },
+    "required": [
+     "trust"
+    ],
+    "type": "object"
+   },
+   "ListenerTlsValidationContextTrust": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "file": {
+      "$ref": "#/components/schemas/TlsValidationContextFileTrust"
+     },
+     "sds": {
+      "$ref": "#/components/schemas/TlsValidationContextSdsTrust"
+     }
+    },
+    "type": "object"
+   },
+   "Logging": {
+    "additionalProperties": false,
+    "properties": {
+     "accessLog": {
+      "$ref": "#/components/schemas/AccessLog"
+     }
+    },
+    "type": "object"
+   },
+   "LoggingFormat": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "json": {
+      "items": {
+       "$ref": "#/components/schemas/JsonFormatRef"
+      },
+      "type": "array"
+     },
+     "text": {
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "MeshData": {
+    "additionalProperties": false,
+    "properties": {
+     "meshName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "metadata": {
+      "$ref": "#/components/schemas/ResourceMetadata"
+     },
+     "spec": {
+      "$ref": "#/components/schemas/MeshSpec"
+     },
+     "status": {
+      "$ref": "#/components/schemas/MeshStatus"
+     }
+    },
+    "required": [
+     "meshName",
+     "metadata",
+     "spec",
+     "status"
+    ],
+    "type": "object"
+   },
+   "MeshRef": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "lastUpdatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "meshName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "meshOwner": {
+      "maxLength": 12,
+      "minLength": 12,
+      "type": "string"
+     },
+     "resourceOwner": {
+      "maxLength": 12,
+      "minLength": 12,
+      "type": "string"
+     },
+     "version": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "arn",
+     "createdAt",
+     "lastUpdatedAt",
+     "meshName",
+     "meshOwner",
+     "resourceOwner",
+     "version"
+    ],
+    "type": "object"
+   },
+   "MeshServiceDiscovery": {
+    "additionalProperties": false,
+    "properties": {
+     "ipPreference": {
+      "enum": [
+       "IPv6_PREFERRED",
+       "IPv4_PREFERRED",
+       "IPv4_ONLY",
+       "IPv6_ONLY"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "MeshSpec": {
+    "additionalProperties": false,
+    "properties": {
+     "egressFilter": {
+      "$ref": "#/components/schemas/EgressFilter"
+     },
+     "serviceDiscovery": {
+      "$ref": "#/components/schemas/MeshServiceDiscovery"
+     }
+    },
+    "type": "object"
+   },
+   "MeshStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "status": {
+      "enum": [
+       "ACTIVE",
+       "INACTIVE",
+       "DELETED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "OutlierDetection": {
+    "additionalProperties": false,
+    "properties": {
+     "baseEjectionDuration": {
+      "$ref": "#/components/schemas/Duration"
+     },
+     "interval": {
+      "$ref": "#/components/schemas/Duration"
+     },
+     "maxEjectionPercent": {
+      "maximum": 100,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "maxServerErrors": {
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "baseEjectionDuration",
+     "interval",
+     "maxEjectionPercent",
+     "maxServerErrors"
+    ],
+    "type": "object"
+   },
+   "PortMapping": {
+    "additionalProperties": false,
+    "properties": {
+     "port": {
+      "maximum": 65535,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "protocol": {
+      "enum": [
+       "http",
+       "tcp",
+       "http2",
+       "grpc"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "port",
+     "protocol"
+    ],
+    "type": "object"
+   },
+   "ResourceMetadata": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "lastUpdatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "meshOwner": {
+      "maxLength": 12,
+      "minLength": 12,
+      "type": "string"
+     },
+     "resourceOwner": {
+      "maxLength": 12,
+      "minLength": 12,
+      "type": "string"
+     },
+     "uid": {
+      "type": "string"
+     },
+     "version": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "arn",
+     "createdAt",
+     "lastUpdatedAt",
+     "meshOwner",
+     "resourceOwner",
+     "uid",
+     "version"
+    ],
+    "type": "object"
+   },
+   "ServiceDiscovery": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "awsCloudMap": {
+      "$ref": "#/components/schemas/AwsCloudMapServiceDiscovery"
+     },
+     "dns": {
+      "$ref": "#/components/schemas/DnsServiceDiscovery"
+     }
+    },
+    "type": "object"
+   },
+   "SubjectAlternativeNameMatchers": {
+    "additionalProperties": false,
+    "properties": {
+     "exact": {
+      "items": {
+       "maxLength": 254,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "exact"
+    ],
+    "type": "object"
+   },
+   "SubjectAlternativeNames": {
+    "additionalProperties": false,
+    "properties": {
+     "match": {
+      "$ref": "#/components/schemas/SubjectAlternativeNameMatchers"
+     }
+    },
+    "required": [
+     "match"
+    ],
+    "type": "object"
+   },
+   "TagRef": {
+    "additionalProperties": false,
+    "properties": {
+     "key": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "value": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "key",
+     "value"
+    ],
+    "type": "object"
+   },
+   "TagResourceOutput": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "TcpTimeout": {
+    "additionalProperties": false,
+    "properties": {
+     "idle": {
+      "$ref": "#/components/schemas/Duration"
+     }
+    },
+    "type": "object"
+   },
+   "TlsValidationContext": {
+    "additionalProperties": false,
+    "properties": {
+     "subjectAlternativeNames": {
+      "$ref": "#/components/schemas/SubjectAlternativeNames"
+     },
+     "trust": {
+      "$ref": "#/components/schemas/TlsValidationContextTrust"
+     }
+    },
+    "required": [
+     "trust"
+    ],
+    "type": "object"
+   },
+   "TlsValidationContextAcmTrust": {
+    "additionalProperties": false,
+    "properties": {
+     "certificateAuthorityArns": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 3,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "certificateAuthorityArns"
+    ],
+    "type": "object"
+   },
+   "TlsValidationContextFileTrust": {
+    "additionalProperties": false,
+    "properties": {
+     "certificateChain": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "certificateChain"
+    ],
+    "type": "object"
+   },
+   "TlsValidationContextSdsTrust": {
+    "additionalProperties": false,
+    "properties": {
+     "secretName": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "secretName"
+    ],
+    "type": "object"
+   },
+   "TlsValidationContextTrust": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "acm": {
+      "$ref": "#/components/schemas/TlsValidationContextAcmTrust"
+     },
+     "file": {
+      "$ref": "#/components/schemas/TlsValidationContextFileTrust"
+     },
+     "sds": {
+      "$ref": "#/components/schemas/TlsValidationContextSdsTrust"
+     }
+    },
+    "type": "object"
+   },
+   "UntagResourceOutput": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UpdateMeshOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "mesh": {
+      "$ref": "#/components/schemas/MeshData"
+     }
+    },
+    "required": [
+     "mesh"
+    ],
+    "type": "object"
+   },
+   "UpdateVirtualGatewayOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "virtualGateway": {
+      "$ref": "#/components/schemas/VirtualGatewayData"
+     }
+    },
+    "required": [
+     "virtualGateway"
+    ],
+    "type": "object"
+   },
+   "UpdateVirtualNodeOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "virtualNode": {
+      "$ref": "#/components/schemas/VirtualNodeData"
+     }
+    },
+    "required": [
+     "virtualNode"
+    ],
+    "type": "object"
+   },
+   "UpdateVirtualRouterOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "virtualRouter": {
+      "$ref": "#/components/schemas/VirtualRouterData"
+     }
+    },
+    "required": [
+     "virtualRouter"
+    ],
+    "type": "object"
+   },
+   "UpdateVirtualServiceOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "virtualService": {
+      "$ref": "#/components/schemas/VirtualServiceData"
+     }
+    },
+    "required": [
+     "virtualService"
+    ],
+    "type": "object"
+   },
+   "VirtualGatewayAccessLog": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "file": {
+      "$ref": "#/components/schemas/VirtualGatewayFileAccessLog"
+     }
+    },
+    "type": "object"
+   },
+   "VirtualGatewayBackendDefaults": {
+    "additionalProperties": false,
+    "properties": {
+     "clientPolicy": {
+      "$ref": "#/components/schemas/VirtualGatewayClientPolicy"
+     }
+    },
+    "type": "object"
+   },
+   "VirtualGatewayClientPolicy": {
+    "additionalProperties": false,
+    "properties": {
+     "tls": {
+      "$ref": "#/components/schemas/VirtualGatewayClientPolicyTls"
+     }
+    },
+    "type": "object"
+   },
+   "VirtualGatewayClientPolicyTls": {
+    "additionalProperties": false,
+    "properties": {
+     "certificate": {
+      "$ref": "#/components/schemas/VirtualGatewayClientTlsCertificate"
+     },
+     "enforce": {
+      "type": "boolean"
+     },
+     "ports": {
+      "items": {
+       "maximum": 65535,
+       "minimum": 1,
+       "type": "integer"
+      },
+      "type": "array"
+     },
+     "validation": {
+      "$ref": "#/components/schemas/VirtualGatewayTlsValidationContext"
+     }
+    },
+    "required": [
+     "validation"
+    ],
+    "type": "object"
+   },
+   "VirtualGatewayClientTlsCertificate": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "file": {
+      "$ref": "#/components/schemas/VirtualGatewayListenerTlsFileCertificate"
+     },
+     "sds": {
+      "$ref": "#/components/schemas/VirtualGatewayListenerTlsSdsCertificate"
+     }
+    },
+    "type": "object"
+   },
+   "VirtualGatewayConnectionPool": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "grpc": {
+      "$ref": "#/components/schemas/VirtualGatewayGrpcConnectionPool"
+     },
+     "http": {
+      "$ref": "#/components/schemas/VirtualGatewayHttpConnectionPool"
+     },
+     "http2": {
+      "$ref": "#/components/schemas/VirtualGatewayHttp2ConnectionPool"
+     }
+    },
+    "type": "object"
+   },
+   "VirtualGatewayData": {
+    "additionalProperties": false,
+    "properties": {
+     "meshName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "metadata": {
+      "$ref": "#/components/schemas/ResourceMetadata"
+     },
+     "spec": {
+      "$ref": "#/components/schemas/VirtualGatewaySpec"
+     },
+     "status": {
+      "$ref": "#/components/schemas/VirtualGatewayStatus"
+     },
+     "virtualGatewayName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "meshName",
+     "metadata",
+     "spec",
+     "status",
+     "virtualGatewayName"
+    ],
+    "type": "object"
+   },
+   "VirtualGatewayFileAccessLog": {
+    "additionalProperties": false,
+    "properties": {
+     "format": {
+      "$ref": "#/components/schemas/LoggingFormat"
+     },
+     "path": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "path"
+    ],
+    "type": "object"
+   },
+   "VirtualGatewayGrpcConnectionPool": {
+    "additionalProperties": false,
+    "properties": {
+     "maxRequests": {
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "maxRequests"
+    ],
+    "type": "object"
+   },
+   "VirtualGatewayHealthCheckPolicy": {
+    "additionalProperties": false,
+    "properties": {
+     "healthyThreshold": {
+      "maximum": 10,
+      "minimum": 2,
+      "type": "integer"
+     },
+     "intervalMillis": {
+      "maximum": 300000,
+      "minimum": 5000,
+      "type": "integer"
+     },
+     "path": {
+      "type": "string"
+     },
+     "port": {
+      "maximum": 65535,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "protocol": {
+      "enum": [
+       "http",
+       "http2",
+       "grpc"
+      ],
+      "type": "string"
+     },
+     "timeoutMillis": {
+      "maximum": 60000,
+      "minimum": 2000,
+      "type": "integer"
+     },
+     "unhealthyThreshold": {
+      "maximum": 10,
+      "minimum": 2,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "healthyThreshold",
+     "intervalMillis",
+     "protocol",
+     "timeoutMillis",
+     "unhealthyThreshold"
+    ],
+    "type": "object"
+   },
+   "VirtualGatewayHttp2ConnectionPool": {
+    "additionalProperties": false,
+    "properties": {
+     "maxRequests": {
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "maxRequests"
+    ],
+    "type": "object"
+   },
+   "VirtualGatewayHttpConnectionPool": {
+    "additionalProperties": false,
+    "properties": {
+     "maxConnections": {
+      "minimum": 1,
+      "type": "integer"
+     },
+     "maxPendingRequests": {
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "maxConnections"
+    ],
+    "type": "object"
+   },
+   "VirtualGatewayListener": {
+    "additionalProperties": false,
+    "properties": {
+     "connectionPool": {
+      "$ref": "#/components/schemas/VirtualGatewayConnectionPool"
+     },
+     "healthCheck": {
+      "$ref": "#/components/schemas/VirtualGatewayHealthCheckPolicy"
+     },
+     "portMapping": {
+      "$ref": "#/components/schemas/VirtualGatewayPortMapping"
+     },
+     "tls": {
+      "$ref": "#/components/schemas/VirtualGatewayListenerTls"
+     }
+    },
+    "required": [
+     "portMapping"
+    ],
+    "type": "object"
+   },
+   "VirtualGatewayListenerTls": {
+    "additionalProperties": false,
+    "properties": {
+     "certificate": {
+      "$ref": "#/components/schemas/VirtualGatewayListenerTlsCertificate"
+     },
+     "mode": {
+      "enum": [
+       "STRICT",
+       "PERMISSIVE",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "validation": {
+      "$ref": "#/components/schemas/VirtualGatewayListenerTlsValidationContext"
+     }
+    },
+    "required": [
+     "certificate",
+     "mode"
+    ],
+    "type": "object"
+   },
+   "VirtualGatewayListenerTlsAcmCertificate": {
+    "additionalProperties": false,
+    "properties": {
+     "certificateArn": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "certificateArn"
+    ],
+    "type": "object"
+   },
+   "VirtualGatewayListenerTlsCertificate": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "acm": {
+      "$ref": "#/components/schemas/VirtualGatewayListenerTlsAcmCertificate"
+     },
+     "file": {
+      "$ref": "#/components/schemas/VirtualGatewayListenerTlsFileCertificate"
+     },
+     "sds": {
+      "$ref": "#/components/schemas/VirtualGatewayListenerTlsSdsCertificate"
+     }
+    },
+    "type": "object"
+   },
+   "VirtualGatewayListenerTlsFileCertificate": {
+    "additionalProperties": false,
+    "properties": {
+     "certificateChain": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "privateKey": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "certificateChain",
+     "privateKey"
+    ],
+    "type": "object"
+   },
+   "VirtualGatewayListenerTlsSdsCertificate": {
+    "additionalProperties": false,
+    "properties": {
+     "secretName": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "secretName"
+    ],
+    "type": "object"
+   },
+   "VirtualGatewayListenerTlsValidationContext": {
+    "additionalProperties": false,
+    "properties": {
+     "subjectAlternativeNames": {
+      "$ref": "#/components/schemas/SubjectAlternativeNames"
+     },
+     "trust": {
+      "$ref": "#/components/schemas/VirtualGatewayListenerTlsValidationContextTrust"
+     }
+    },
+    "required": [
+     "trust"
+    ],
+    "type": "object"
+   },
+   "VirtualGatewayListenerTlsValidationContextTrust": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "file": {
+      "$ref": "#/components/schemas/VirtualGatewayTlsValidationContextFileTrust"
+     },
+     "sds": {
+      "$ref": "#/components/schemas/VirtualGatewayTlsValidationContextSdsTrust"
+     }
+    },
+    "type": "object"
+   },
+   "VirtualGatewayLogging": {
+    "additionalProperties": false,
+    "properties": {
+     "accessLog": {
+      "$ref": "#/components/schemas/VirtualGatewayAccessLog"
+     }
+    },
+    "type": "object"
+   },
+   "VirtualGatewayPortMapping": {
+    "additionalProperties": false,
+    "properties": {
+     "port": {
+      "maximum": 65535,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "protocol": {
+      "enum": [
+       "http",
+       "http2",
+       "grpc"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "port",
+     "protocol"
+    ],
+    "type": "object"
+   },
+   "VirtualGatewayRef": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "lastUpdatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "meshName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "meshOwner": {
+      "maxLength": 12,
+      "minLength": 12,
+      "type": "string"
+     },
+     "resourceOwner": {
+      "maxLength": 12,
+      "minLength": 12,
+      "type": "string"
+     },
+     "version": {
+      "type": "integer"
+     },
+     "virtualGatewayName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "arn",
+     "createdAt",
+     "lastUpdatedAt",
+     "meshName",
+     "meshOwner",
+     "resourceOwner",
+     "version",
+     "virtualGatewayName"
+    ],
+    "type": "object"
+   },
+   "VirtualGatewaySpec": {
+    "additionalProperties": false,
+    "properties": {
+     "backendDefaults": {
+      "$ref": "#/components/schemas/VirtualGatewayBackendDefaults"
+     },
+     "listeners": {
+      "items": {
+       "$ref": "#/components/schemas/VirtualGatewayListener"
+      },
+      "type": "array"
+     },
+     "logging": {
+      "$ref": "#/components/schemas/VirtualGatewayLogging"
+     }
+    },
+    "required": [
+     "listeners"
+    ],
+    "type": "object"
+   },
+   "VirtualGatewayStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "status": {
+      "enum": [
+       "ACTIVE",
+       "INACTIVE",
+       "DELETED"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "status"
+    ],
+    "type": "object"
+   },
+   "VirtualGatewayTlsValidationContext": {
+    "additionalProperties": false,
+    "properties": {
+     "subjectAlternativeNames": {
+      "$ref": "#/components/schemas/SubjectAlternativeNames"
+     },
+     "trust": {
+      "$ref": "#/components/schemas/VirtualGatewayTlsValidationContextTrust"
+     }
+    },
+    "required": [
+     "trust"
+    ],
+    "type": "object"
+   },
+   "VirtualGatewayTlsValidationContextAcmTrust": {
+    "additionalProperties": false,
+    "properties": {
+     "certificateAuthorityArns": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 3,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "certificateAuthorityArns"
+    ],
+    "type": "object"
+   },
+   "VirtualGatewayTlsValidationContextFileTrust": {
+    "additionalProperties": false,
+    "properties": {
+     "certificateChain": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "certificateChain"
+    ],
+    "type": "object"
+   },
+   "VirtualGatewayTlsValidationContextSdsTrust": {
+    "additionalProperties": false,
+    "properties": {
+     "secretName": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "secretName"
+    ],
+    "type": "object"
+   },
+   "VirtualGatewayTlsValidationContextTrust": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "acm": {
+      "$ref": "#/components/schemas/VirtualGatewayTlsValidationContextAcmTrust"
+     },
+     "file": {
+      "$ref": "#/components/schemas/VirtualGatewayTlsValidationContextFileTrust"
+     },
+     "sds": {
+      "$ref": "#/components/schemas/VirtualGatewayTlsValidationContextSdsTrust"
+     }
+    },
+    "type": "object"
+   },
+   "VirtualNodeConnectionPool": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "grpc": {
+      "$ref": "#/components/schemas/VirtualNodeGrpcConnectionPool"
+     },
+     "http": {
+      "$ref": "#/components/schemas/VirtualNodeHttpConnectionPool"
+     },
+     "http2": {
+      "$ref": "#/components/schemas/VirtualNodeHttp2ConnectionPool"
+     },
+     "tcp": {
+      "$ref": "#/components/schemas/VirtualNodeTcpConnectionPool"
+     }
+    },
+    "type": "object"
+   },
+   "VirtualNodeData": {
+    "additionalProperties": false,
+    "properties": {
+     "meshName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "metadata": {
+      "$ref": "#/components/schemas/ResourceMetadata"
+     },
+     "spec": {
+      "$ref": "#/components/schemas/VirtualNodeSpec"
+     },
+     "status": {
+      "$ref": "#/components/schemas/VirtualNodeStatus"
+     },
+     "virtualNodeName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "meshName",
+     "metadata",
+     "spec",
+     "status",
+     "virtualNodeName"
+    ],
+    "type": "object"
+   },
+   "VirtualNodeGrpcConnectionPool": {
+    "additionalProperties": false,
+    "properties": {
+     "maxRequests": {
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "maxRequests"
+    ],
+    "type": "object"
+   },
+   "VirtualNodeHttp2ConnectionPool": {
+    "additionalProperties": false,
+    "properties": {
+     "maxRequests": {
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "maxRequests"
+    ],
+    "type": "object"
+   },
+   "VirtualNodeHttpConnectionPool": {
+    "additionalProperties": false,
+    "properties": {
+     "maxConnections": {
+      "minimum": 1,
+      "type": "integer"
+     },
+     "maxPendingRequests": {
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "maxConnections"
+    ],
+    "type": "object"
+   },
+   "VirtualNodeRef": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "lastUpdatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "meshName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "meshOwner": {
+      "maxLength": 12,
+      "minLength": 12,
+      "type": "string"
+     },
+     "resourceOwner": {
+      "maxLength": 12,
+      "minLength": 12,
+      "type": "string"
+     },
+     "version": {
+      "type": "integer"
+     },
+     "virtualNodeName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "arn",
+     "createdAt",
+     "lastUpdatedAt",
+     "meshName",
+     "meshOwner",
+     "resourceOwner",
+     "version",
+     "virtualNodeName"
+    ],
+    "type": "object"
+   },
+   "VirtualNodeServiceProvider": {
+    "additionalProperties": false,
+    "properties": {
+     "virtualNodeName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "virtualNodeName"
+    ],
+    "type": "object"
+   },
+   "VirtualNodeSpec": {
+    "additionalProperties": false,
+    "properties": {
+     "backendDefaults": {
+      "$ref": "#/components/schemas/BackendDefaults"
+     },
+     "backends": {
+      "items": {
+       "$ref": "#/components/schemas/Backend"
+      },
+      "type": "array"
+     },
+     "listeners": {
+      "items": {
+       "$ref": "#/components/schemas/Listener"
+      },
+      "type": "array"
+     },
+     "logging": {
+      "$ref": "#/components/schemas/Logging"
+     },
+     "serviceDiscovery": {
+      "$ref": "#/components/schemas/ServiceDiscovery"
+     }
+    },
+    "type": "object"
+   },
+   "VirtualNodeStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "status": {
+      "enum": [
+       "ACTIVE",
+       "INACTIVE",
+       "DELETED"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "status"
+    ],
+    "type": "object"
+   },
+   "VirtualNodeTcpConnectionPool": {
+    "additionalProperties": false,
+    "properties": {
+     "maxConnections": {
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "maxConnections"
+    ],
+    "type": "object"
+   },
+   "VirtualRouterData": {
+    "additionalProperties": false,
+    "properties": {
+     "meshName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "metadata": {
+      "$ref": "#/components/schemas/ResourceMetadata"
+     },
+     "spec": {
+      "$ref": "#/components/schemas/VirtualRouterSpec"
+     },
+     "status": {
+      "$ref": "#/components/schemas/VirtualRouterStatus"
+     },
+     "virtualRouterName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "meshName",
+     "metadata",
+     "spec",
+     "status",
+     "virtualRouterName"
+    ],
+    "type": "object"
+   },
+   "VirtualRouterListener": {
+    "additionalProperties": false,
+    "properties": {
+     "portMapping": {
+      "$ref": "#/components/schemas/PortMapping"
+     }
+    },
+    "required": [
+     "portMapping"
+    ],
+    "type": "object"
+   },
+   "VirtualRouterRef": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "lastUpdatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "meshName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "meshOwner": {
+      "maxLength": 12,
+      "minLength": 12,
+      "type": "string"
+     },
+     "resourceOwner": {
+      "maxLength": 12,
+      "minLength": 12,
+      "type": "string"
+     },
+     "version": {
+      "type": "integer"
+     },
+     "virtualRouterName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "arn",
+     "createdAt",
+     "lastUpdatedAt",
+     "meshName",
+     "meshOwner",
+     "resourceOwner",
+     "version",
+     "virtualRouterName"
+    ],
+    "type": "object"
+   },
+   "VirtualRouterServiceProvider": {
+    "additionalProperties": false,
+    "properties": {
+     "virtualRouterName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "virtualRouterName"
+    ],
+    "type": "object"
+   },
+   "VirtualRouterSpec": {
+    "additionalProperties": false,
+    "properties": {
+     "listeners": {
+      "items": {
+       "$ref": "#/components/schemas/VirtualRouterListener"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "VirtualRouterStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "status": {
+      "enum": [
+       "ACTIVE",
+       "INACTIVE",
+       "DELETED"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "status"
+    ],
+    "type": "object"
+   },
+   "VirtualServiceBackend": {
+    "additionalProperties": false,
+    "properties": {
+     "clientPolicy": {
+      "$ref": "#/components/schemas/ClientPolicy"
+     },
+     "virtualServiceName": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "virtualServiceName"
+    ],
+    "type": "object"
+   },
+   "VirtualServiceData": {
+    "additionalProperties": false,
+    "properties": {
+     "meshName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "metadata": {
+      "$ref": "#/components/schemas/ResourceMetadata"
+     },
+     "spec": {
+      "$ref": "#/components/schemas/VirtualServiceSpec"
+     },
+     "status": {
+      "$ref": "#/components/schemas/VirtualServiceStatus"
+     },
+     "virtualServiceName": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "meshName",
+     "metadata",
+     "spec",
+     "status",
+     "virtualServiceName"
+    ],
+    "type": "object"
+   },
+   "VirtualServiceProvider": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "virtualNode": {
+      "$ref": "#/components/schemas/VirtualNodeServiceProvider"
+     },
+     "virtualRouter": {
+      "$ref": "#/components/schemas/VirtualRouterServiceProvider"
+     }
+    },
+    "type": "object"
+   },
+   "VirtualServiceRef": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "lastUpdatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "meshName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "meshOwner": {
+      "maxLength": 12,
+      "minLength": 12,
+      "type": "string"
+     },
+     "resourceOwner": {
+      "maxLength": 12,
+      "minLength": 12,
+      "type": "string"
+     },
+     "version": {
+      "type": "integer"
+     },
+     "virtualServiceName": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "arn",
+     "createdAt",
+     "lastUpdatedAt",
+     "meshName",
+     "meshOwner",
+     "resourceOwner",
+     "version",
+     "virtualServiceName"
+    ],
+    "type": "object"
+   },
+   "VirtualServiceSpec": {
+    "additionalProperties": false,
+    "properties": {
+     "provider": {
+      "$ref": "#/components/schemas/VirtualServiceProvider"
+     }
+    },
+    "type": "object"
+   },
+   "VirtualServiceStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "status": {
+      "enum": [
+       "ACTIVE",
+       "INACTIVE",
+       "DELETED"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "status"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS App Mesh API (2019-01-25). Every other official operation returns HTTP 501 UnknownOperationException. Meshes, virtual nodes, virtual routers, virtual services and virtual gateways are configuration metadata: no Envoy proxy configuration is served, no traffic is routed, and service discovery, backend, listener and TLS settings are stored without resolving DNS names, AWS Cloud Map services, certificates or files. Routes and gateway routes are not implemented because they are nested two levels below a mesh; CreateRoute, CreateGatewayRoute and their other operations return UnknownOperationException with HTTP 501. Virtual services therefore refuse a provider, which would name a virtual node or router. Each resource keeps metadata version 1 and its creation time as lastUpdatedAt after updates. Meshes are owned by the simulator account: meshOwner must be that account, so shared meshes are not available. Deleting a mesh that still has virtual resources is refused. Update client tokens are accepted but not recorded. ListTagsForResource returns every tag and refuses limit and nextToken.",
+  "title": "AWS App Mesh (simulator catalog)",
+  "version": "2019-01-25"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/v20190125/meshes": {
+   "get": {
+    "operationId": "appmeshListMeshes",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appmesh"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "limit",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListMeshesOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListMeshes",
+    "tags": [
+     "AWS App Mesh"
+    ]
+   },
+   "put": {
+    "operationId": "appmeshCreateMesh",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appmesh"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "type": "string"
+         },
+         "meshName": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         },
+         "spec": {
+          "$ref": "#/components/schemas/MeshSpec"
+         },
+         "tags": {
+          "items": {
+           "$ref": "#/components/schemas/TagRef"
+          },
+          "maxItems": 50,
+          "minItems": 0,
+          "type": "array"
+         }
+        },
+        "required": [
+         "meshName"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateMeshOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateMesh",
+    "tags": [
+     "AWS App Mesh"
+    ]
+   }
+  },
+  "/v20190125/meshes/{meshName}": {
+   "delete": {
+    "operationId": "appmeshDeleteMesh",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appmesh"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "meshName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DeleteMeshOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteMesh",
+    "tags": [
+     "AWS App Mesh"
+    ]
+   },
+   "get": {
+    "operationId": "appmeshDescribeMesh",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appmesh"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "meshName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "meshOwner",
+      "schema": {
+       "maxLength": 12,
+       "minLength": 12,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DescribeMeshOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeMesh",
+    "tags": [
+     "AWS App Mesh"
+    ]
+   },
+   "put": {
+    "operationId": "appmeshUpdateMesh",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appmesh"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "meshName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "type": "string"
+         },
+         "spec": {
+          "$ref": "#/components/schemas/MeshSpec"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UpdateMeshOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateMesh",
+    "tags": [
+     "AWS App Mesh"
+    ]
+   }
+  },
+  "/v20190125/meshes/{meshName}/virtualGateways": {
+   "get": {
+    "operationId": "appmeshListVirtualGateways",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appmesh"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "limit",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "path",
+      "name": "meshName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "meshOwner",
+      "schema": {
+       "maxLength": 12,
+       "minLength": 12,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListVirtualGatewaysOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListVirtualGateways",
+    "tags": [
+     "AWS App Mesh"
+    ]
+   },
+   "put": {
+    "operationId": "appmeshCreateVirtualGateway",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appmesh"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "meshName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "meshOwner",
+      "schema": {
+       "maxLength": 12,
+       "minLength": 12,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "type": "string"
+         },
+         "spec": {
+          "$ref": "#/components/schemas/VirtualGatewaySpec"
+         },
+         "tags": {
+          "items": {
+           "$ref": "#/components/schemas/TagRef"
+          },
+          "maxItems": 50,
+          "minItems": 0,
+          "type": "array"
+         },
+         "virtualGatewayName": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "spec",
+         "virtualGatewayName"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateVirtualGatewayOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateVirtualGateway",
+    "tags": [
+     "AWS App Mesh"
+    ]
+   }
+  },
+  "/v20190125/meshes/{meshName}/virtualGateways/{virtualGatewayName}": {
+   "delete": {
+    "operationId": "appmeshDeleteVirtualGateway",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appmesh"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "meshName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "meshOwner",
+      "schema": {
+       "maxLength": 12,
+       "minLength": 12,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "virtualGatewayName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DeleteVirtualGatewayOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteVirtualGateway",
+    "tags": [
+     "AWS App Mesh"
+    ]
+   },
+   "get": {
+    "operationId": "appmeshDescribeVirtualGateway",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appmesh"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "meshName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "meshOwner",
+      "schema": {
+       "maxLength": 12,
+       "minLength": 12,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "virtualGatewayName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DescribeVirtualGatewayOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeVirtualGateway",
+    "tags": [
+     "AWS App Mesh"
+    ]
+   },
+   "put": {
+    "operationId": "appmeshUpdateVirtualGateway",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appmesh"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "meshName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "meshOwner",
+      "schema": {
+       "maxLength": 12,
+       "minLength": 12,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "virtualGatewayName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "type": "string"
+         },
+         "spec": {
+          "$ref": "#/components/schemas/VirtualGatewaySpec"
+         }
+        },
+        "required": [
+         "spec"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UpdateVirtualGatewayOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateVirtualGateway",
+    "tags": [
+     "AWS App Mesh"
+    ]
+   }
+  },
+  "/v20190125/meshes/{meshName}/virtualNodes": {
+   "get": {
+    "operationId": "appmeshListVirtualNodes",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appmesh"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "limit",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "path",
+      "name": "meshName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "meshOwner",
+      "schema": {
+       "maxLength": 12,
+       "minLength": 12,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListVirtualNodesOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListVirtualNodes",
+    "tags": [
+     "AWS App Mesh"
+    ]
+   },
+   "put": {
+    "operationId": "appmeshCreateVirtualNode",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appmesh"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "meshName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "meshOwner",
+      "schema": {
+       "maxLength": 12,
+       "minLength": 12,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "type": "string"
+         },
+         "spec": {
+          "$ref": "#/components/schemas/VirtualNodeSpec"
+         },
+         "tags": {
+          "items": {
+           "$ref": "#/components/schemas/TagRef"
+          },
+          "maxItems": 50,
+          "minItems": 0,
+          "type": "array"
+         },
+         "virtualNodeName": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "spec",
+         "virtualNodeName"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateVirtualNodeOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateVirtualNode",
+    "tags": [
+     "AWS App Mesh"
+    ]
+   }
+  },
+  "/v20190125/meshes/{meshName}/virtualNodes/{virtualNodeName}": {
+   "delete": {
+    "operationId": "appmeshDeleteVirtualNode",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appmesh"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "meshName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "meshOwner",
+      "schema": {
+       "maxLength": 12,
+       "minLength": 12,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "virtualNodeName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DeleteVirtualNodeOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteVirtualNode",
+    "tags": [
+     "AWS App Mesh"
+    ]
+   },
+   "get": {
+    "operationId": "appmeshDescribeVirtualNode",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appmesh"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "meshName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "meshOwner",
+      "schema": {
+       "maxLength": 12,
+       "minLength": 12,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "virtualNodeName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DescribeVirtualNodeOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeVirtualNode",
+    "tags": [
+     "AWS App Mesh"
+    ]
+   },
+   "put": {
+    "operationId": "appmeshUpdateVirtualNode",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appmesh"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "meshName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "meshOwner",
+      "schema": {
+       "maxLength": 12,
+       "minLength": 12,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "virtualNodeName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "type": "string"
+         },
+         "spec": {
+          "$ref": "#/components/schemas/VirtualNodeSpec"
+         }
+        },
+        "required": [
+         "spec"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UpdateVirtualNodeOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateVirtualNode",
+    "tags": [
+     "AWS App Mesh"
+    ]
+   }
+  },
+  "/v20190125/meshes/{meshName}/virtualRouters": {
+   "get": {
+    "operationId": "appmeshListVirtualRouters",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appmesh"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "limit",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "path",
+      "name": "meshName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "meshOwner",
+      "schema": {
+       "maxLength": 12,
+       "minLength": 12,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListVirtualRoutersOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListVirtualRouters",
+    "tags": [
+     "AWS App Mesh"
+    ]
+   },
+   "put": {
+    "operationId": "appmeshCreateVirtualRouter",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appmesh"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "meshName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "meshOwner",
+      "schema": {
+       "maxLength": 12,
+       "minLength": 12,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "type": "string"
+         },
+         "spec": {
+          "$ref": "#/components/schemas/VirtualRouterSpec"
+         },
+         "tags": {
+          "items": {
+           "$ref": "#/components/schemas/TagRef"
+          },
+          "maxItems": 50,
+          "minItems": 0,
+          "type": "array"
+         },
+         "virtualRouterName": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "spec",
+         "virtualRouterName"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateVirtualRouterOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateVirtualRouter",
+    "tags": [
+     "AWS App Mesh"
+    ]
+   }
+  },
+  "/v20190125/meshes/{meshName}/virtualRouters/{virtualRouterName}": {
+   "delete": {
+    "operationId": "appmeshDeleteVirtualRouter",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appmesh"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "meshName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "meshOwner",
+      "schema": {
+       "maxLength": 12,
+       "minLength": 12,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "virtualRouterName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DeleteVirtualRouterOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteVirtualRouter",
+    "tags": [
+     "AWS App Mesh"
+    ]
+   },
+   "get": {
+    "operationId": "appmeshDescribeVirtualRouter",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appmesh"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "meshName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "meshOwner",
+      "schema": {
+       "maxLength": 12,
+       "minLength": 12,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "virtualRouterName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DescribeVirtualRouterOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeVirtualRouter",
+    "tags": [
+     "AWS App Mesh"
+    ]
+   },
+   "put": {
+    "operationId": "appmeshUpdateVirtualRouter",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appmesh"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "meshName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "meshOwner",
+      "schema": {
+       "maxLength": 12,
+       "minLength": 12,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "virtualRouterName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "type": "string"
+         },
+         "spec": {
+          "$ref": "#/components/schemas/VirtualRouterSpec"
+         }
+        },
+        "required": [
+         "spec"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UpdateVirtualRouterOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateVirtualRouter",
+    "tags": [
+     "AWS App Mesh"
+    ]
+   }
+  },
+  "/v20190125/meshes/{meshName}/virtualServices": {
+   "get": {
+    "operationId": "appmeshListVirtualServices",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appmesh"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "limit",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "path",
+      "name": "meshName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "meshOwner",
+      "schema": {
+       "maxLength": 12,
+       "minLength": 12,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListVirtualServicesOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListVirtualServices",
+    "tags": [
+     "AWS App Mesh"
+    ]
+   },
+   "put": {
+    "operationId": "appmeshCreateVirtualService",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appmesh"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "meshName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "meshOwner",
+      "schema": {
+       "maxLength": 12,
+       "minLength": 12,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "type": "string"
+         },
+         "spec": {
+          "$ref": "#/components/schemas/VirtualServiceSpec"
+         },
+         "tags": {
+          "items": {
+           "$ref": "#/components/schemas/TagRef"
+          },
+          "maxItems": 50,
+          "minItems": 0,
+          "type": "array"
+         },
+         "virtualServiceName": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "spec",
+         "virtualServiceName"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateVirtualServiceOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateVirtualService",
+    "tags": [
+     "AWS App Mesh"
+    ]
+   }
+  },
+  "/v20190125/meshes/{meshName}/virtualServices/{virtualServiceName}": {
+   "delete": {
+    "operationId": "appmeshDeleteVirtualService",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appmesh"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "meshName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "meshOwner",
+      "schema": {
+       "maxLength": 12,
+       "minLength": 12,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "virtualServiceName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DeleteVirtualServiceOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteVirtualService",
+    "tags": [
+     "AWS App Mesh"
+    ]
+   },
+   "get": {
+    "operationId": "appmeshDescribeVirtualService",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appmesh"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "meshName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "meshOwner",
+      "schema": {
+       "maxLength": 12,
+       "minLength": 12,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "virtualServiceName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DescribeVirtualServiceOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeVirtualService",
+    "tags": [
+     "AWS App Mesh"
+    ]
+   },
+   "put": {
+    "operationId": "appmeshUpdateVirtualService",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appmesh"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "meshName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "meshOwner",
+      "schema": {
+       "maxLength": 12,
+       "minLength": 12,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "virtualServiceName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "type": "string"
+         },
+         "spec": {
+          "$ref": "#/components/schemas/VirtualServiceSpec"
+         }
+        },
+        "required": [
+         "spec"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UpdateVirtualServiceOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateVirtualService",
+    "tags": [
+     "AWS App Mesh"
+    ]
+   }
+  },
+  "/v20190125/tag": {
+   "put": {
+    "operationId": "appmeshTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appmesh"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "resourceArn",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "items": {
+           "$ref": "#/components/schemas/TagRef"
+          },
+          "maxItems": 50,
+          "minItems": 0,
+          "type": "array"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/TagResourceOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "AWS App Mesh"
+    ]
+   }
+  },
+  "/v20190125/tags": {
+   "get": {
+    "operationId": "appmeshListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appmesh"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "limit",
+      "schema": {
+       "maximum": 50,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "resourceArn",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListTagsForResourceOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "AWS App Mesh"
+    ]
+   }
+  },
+  "/v20190125/untag": {
+   "put": {
+    "operationId": "appmeshUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appmesh"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "resourceArn",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tagKeys": {
+          "items": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "maxItems": 50,
+          "minItems": 0,
+          "type": "array"
+         }
+        },
+        "required": [
+         "tagKeys"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UntagResourceOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "AWS App Mesh"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS App Mesh API (2019-01-25). Every other official operation returns HTTP 501 UnknownOperationException. Meshes, virtual nodes, virtual routers, virtual services and virtual gateways are configuration metadata: no Envoy proxy configuration is served, no traffic is routed, and service discovery, backend, listener and TLS settings are stored without resolving DNS names, AWS Cloud Map services, certificates or files. Routes and gateway routes are not implemented because they are nested two levels below a mesh; CreateRoute, CreateGatewayRoute and their other operations return UnknownOperationException with HTTP 501. Virtual services therefore refuse a provider, which would name a virtual node or router. Each resource keeps metadata version 1 and its creation time as lastUpdatedAt after updates. Meshes are owned by the simulator account: meshOwner must be that account, so shared meshes are not available. Deleting a mesh that still has virtual resources is refused. Update client tokens are accepted but not recorded. ListTagsForResource returns every tag and refuses limit and nextToken.",
+   "name": "AWS App Mesh"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/appmesh/2019-01-25/service-2.json",
+  "sha256": "75ec1ee2829500308d677fe8a73368e84f91f6d6b1c125299a60f53d3362cab7",
+  "license": "Apache-2.0"
+ }
+}

@@ -1,0 +1,3049 @@
+{
+ "components": {
+  "schemas": {
+   "CreateGeofenceCollectionResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "CollectionArn": {
+      "maxLength": 1600,
+      "minLength": 0,
+      "type": "string"
+     },
+     "CollectionName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "CreateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "CollectionName",
+     "CollectionArn",
+     "CreateTime"
+    ],
+    "type": "object"
+   },
+   "CreateMapResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "CreateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "MapArn": {
+      "maxLength": 1600,
+      "minLength": 0,
+      "type": "string"
+     },
+     "MapName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "MapName",
+     "MapArn",
+     "CreateTime"
+    ],
+    "type": "object"
+   },
+   "CreatePlaceIndexResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "CreateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "IndexArn": {
+      "maxLength": 1600,
+      "minLength": 0,
+      "type": "string"
+     },
+     "IndexName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "IndexName",
+     "IndexArn",
+     "CreateTime"
+    ],
+    "type": "object"
+   },
+   "CreateRouteCalculatorResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "CalculatorArn": {
+      "maxLength": 1600,
+      "minLength": 0,
+      "type": "string"
+     },
+     "CalculatorName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "CreateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "CalculatorName",
+     "CalculatorArn",
+     "CreateTime"
+    ],
+    "type": "object"
+   },
+   "CreateTrackerResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "CreateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "TrackerArn": {
+      "maxLength": 1600,
+      "minLength": 0,
+      "type": "string"
+     },
+     "TrackerName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "TrackerName",
+     "TrackerArn",
+     "CreateTime"
+    ],
+    "type": "object"
+   },
+   "DataSourceConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "IntendedUse": {
+      "enum": [
+       "SingleUse",
+       "Storage"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteGeofenceCollectionResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DeleteMapResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DeletePlaceIndexResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DeleteRouteCalculatorResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DeleteTrackerResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DescribeGeofenceCollectionResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "CollectionArn": {
+      "maxLength": 1600,
+      "minLength": 0,
+      "type": "string"
+     },
+     "CollectionName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "CreateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Description": {
+      "maxLength": 1000,
+      "minLength": 0,
+      "type": "string"
+     },
+     "GeofenceCount": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "KmsKeyId": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "PricingPlan": {
+      "enum": [
+       "RequestBasedUsage",
+       "MobileAssetTracking",
+       "MobileAssetManagement"
+      ],
+      "type": "string"
+     },
+     "PricingPlanDataSource": {
+      "type": "string"
+     },
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     },
+     "UpdateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "CollectionName",
+     "CollectionArn",
+     "Description",
+     "CreateTime",
+     "UpdateTime"
+    ],
+    "type": "object"
+   },
+   "DescribeMapResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Configuration": {
+      "$ref": "#/components/schemas/MapConfiguration"
+     },
+     "CreateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "DataSource": {
+      "type": "string"
+     },
+     "Description": {
+      "maxLength": 1000,
+      "minLength": 0,
+      "type": "string"
+     },
+     "MapArn": {
+      "maxLength": 1600,
+      "minLength": 0,
+      "type": "string"
+     },
+     "MapName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "PricingPlan": {
+      "enum": [
+       "RequestBasedUsage",
+       "MobileAssetTracking",
+       "MobileAssetManagement"
+      ],
+      "type": "string"
+     },
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     },
+     "UpdateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "MapName",
+     "MapArn",
+     "DataSource",
+     "Configuration",
+     "Description",
+     "CreateTime",
+     "UpdateTime"
+    ],
+    "type": "object"
+   },
+   "DescribePlaceIndexResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "CreateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "DataSource": {
+      "type": "string"
+     },
+     "DataSourceConfiguration": {
+      "$ref": "#/components/schemas/DataSourceConfiguration"
+     },
+     "Description": {
+      "maxLength": 1000,
+      "minLength": 0,
+      "type": "string"
+     },
+     "IndexArn": {
+      "maxLength": 1600,
+      "minLength": 0,
+      "type": "string"
+     },
+     "IndexName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "PricingPlan": {
+      "enum": [
+       "RequestBasedUsage",
+       "MobileAssetTracking",
+       "MobileAssetManagement"
+      ],
+      "type": "string"
+     },
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     },
+     "UpdateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "IndexName",
+     "IndexArn",
+     "Description",
+     "CreateTime",
+     "UpdateTime",
+     "DataSource",
+     "DataSourceConfiguration"
+    ],
+    "type": "object"
+   },
+   "DescribeRouteCalculatorResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "CalculatorArn": {
+      "maxLength": 1600,
+      "minLength": 0,
+      "type": "string"
+     },
+     "CalculatorName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "CreateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "DataSource": {
+      "type": "string"
+     },
+     "Description": {
+      "maxLength": 1000,
+      "minLength": 0,
+      "type": "string"
+     },
+     "PricingPlan": {
+      "enum": [
+       "RequestBasedUsage",
+       "MobileAssetTracking",
+       "MobileAssetManagement"
+      ],
+      "type": "string"
+     },
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     },
+     "UpdateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "CalculatorName",
+     "CalculatorArn",
+     "Description",
+     "CreateTime",
+     "UpdateTime",
+     "DataSource"
+    ],
+    "type": "object"
+   },
+   "DescribeTrackerResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "CreateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Description": {
+      "maxLength": 1000,
+      "minLength": 0,
+      "type": "string"
+     },
+     "EventBridgeEnabled": {
+      "type": "boolean"
+     },
+     "KmsKeyEnableGeospatialQueries": {
+      "type": "boolean"
+     },
+     "KmsKeyId": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "PositionFiltering": {
+      "enum": [
+       "TimeBased",
+       "DistanceBased",
+       "AccuracyBased"
+      ],
+      "type": "string"
+     },
+     "PricingPlan": {
+      "enum": [
+       "RequestBasedUsage",
+       "MobileAssetTracking",
+       "MobileAssetManagement"
+      ],
+      "type": "string"
+     },
+     "PricingPlanDataSource": {
+      "type": "string"
+     },
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     },
+     "TrackerArn": {
+      "maxLength": 1600,
+      "minLength": 0,
+      "type": "string"
+     },
+     "TrackerName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "UpdateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "TrackerName",
+     "TrackerArn",
+     "Description",
+     "CreateTime",
+     "UpdateTime"
+    ],
+    "type": "object"
+   },
+   "ListGeofenceCollectionsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Entries": {
+      "items": {
+       "$ref": "#/components/schemas/ListGeofenceCollectionsResponseEntry"
+      },
+      "type": "array"
+     },
+     "NextToken": {
+      "maxLength": 2000,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Entries"
+    ],
+    "type": "object"
+   },
+   "ListGeofenceCollectionsResponseEntry": {
+    "additionalProperties": false,
+    "properties": {
+     "CollectionName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "CreateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Description": {
+      "maxLength": 1000,
+      "minLength": 0,
+      "type": "string"
+     },
+     "PricingPlan": {
+      "enum": [
+       "RequestBasedUsage",
+       "MobileAssetTracking",
+       "MobileAssetManagement"
+      ],
+      "type": "string"
+     },
+     "PricingPlanDataSource": {
+      "type": "string"
+     },
+     "UpdateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "CollectionName",
+     "Description",
+     "CreateTime",
+     "UpdateTime"
+    ],
+    "type": "object"
+   },
+   "ListMapsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Entries": {
+      "items": {
+       "$ref": "#/components/schemas/ListMapsResponseEntry"
+      },
+      "type": "array"
+     },
+     "NextToken": {
+      "maxLength": 2000,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Entries"
+    ],
+    "type": "object"
+   },
+   "ListMapsResponseEntry": {
+    "additionalProperties": false,
+    "properties": {
+     "CreateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "DataSource": {
+      "type": "string"
+     },
+     "Description": {
+      "maxLength": 1000,
+      "minLength": 0,
+      "type": "string"
+     },
+     "MapName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "PricingPlan": {
+      "enum": [
+       "RequestBasedUsage",
+       "MobileAssetTracking",
+       "MobileAssetManagement"
+      ],
+      "type": "string"
+     },
+     "UpdateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "MapName",
+     "Description",
+     "DataSource",
+     "CreateTime",
+     "UpdateTime"
+    ],
+    "type": "object"
+   },
+   "ListPlaceIndexesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Entries": {
+      "items": {
+       "$ref": "#/components/schemas/ListPlaceIndexesResponseEntry"
+      },
+      "type": "array"
+     },
+     "NextToken": {
+      "maxLength": 2000,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Entries"
+    ],
+    "type": "object"
+   },
+   "ListPlaceIndexesResponseEntry": {
+    "additionalProperties": false,
+    "properties": {
+     "CreateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "DataSource": {
+      "type": "string"
+     },
+     "Description": {
+      "maxLength": 1000,
+      "minLength": 0,
+      "type": "string"
+     },
+     "IndexName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "PricingPlan": {
+      "enum": [
+       "RequestBasedUsage",
+       "MobileAssetTracking",
+       "MobileAssetManagement"
+      ],
+      "type": "string"
+     },
+     "UpdateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "IndexName",
+     "Description",
+     "DataSource",
+     "CreateTime",
+     "UpdateTime"
+    ],
+    "type": "object"
+   },
+   "ListRouteCalculatorsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Entries": {
+      "items": {
+       "$ref": "#/components/schemas/ListRouteCalculatorsResponseEntry"
+      },
+      "type": "array"
+     },
+     "NextToken": {
+      "maxLength": 2000,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Entries"
+    ],
+    "type": "object"
+   },
+   "ListRouteCalculatorsResponseEntry": {
+    "additionalProperties": false,
+    "properties": {
+     "CalculatorName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "CreateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "DataSource": {
+      "type": "string"
+     },
+     "Description": {
+      "maxLength": 1000,
+      "minLength": 0,
+      "type": "string"
+     },
+     "PricingPlan": {
+      "enum": [
+       "RequestBasedUsage",
+       "MobileAssetTracking",
+       "MobileAssetManagement"
+      ],
+      "type": "string"
+     },
+     "UpdateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "CalculatorName",
+     "Description",
+     "DataSource",
+     "CreateTime",
+     "UpdateTime"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "ListTrackersResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Entries": {
+      "items": {
+       "$ref": "#/components/schemas/ListTrackersResponseEntry"
+      },
+      "type": "array"
+     },
+     "NextToken": {
+      "maxLength": 2000,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Entries"
+    ],
+    "type": "object"
+   },
+   "ListTrackersResponseEntry": {
+    "additionalProperties": false,
+    "properties": {
+     "CreateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Description": {
+      "maxLength": 1000,
+      "minLength": 0,
+      "type": "string"
+     },
+     "PricingPlan": {
+      "enum": [
+       "RequestBasedUsage",
+       "MobileAssetTracking",
+       "MobileAssetManagement"
+      ],
+      "type": "string"
+     },
+     "PricingPlanDataSource": {
+      "type": "string"
+     },
+     "TrackerName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "UpdateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "TrackerName",
+     "Description",
+     "CreateTime",
+     "UpdateTime"
+    ],
+    "type": "object"
+   },
+   "MapConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "CustomLayers": {
+      "items": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 0,
+      "type": "array"
+     },
+     "PoliticalView": {
+      "maxLength": 3,
+      "minLength": 3,
+      "type": "string"
+     },
+     "Style": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Style"
+    ],
+    "type": "object"
+   },
+   "MapConfigurationUpdate": {
+    "additionalProperties": false,
+    "properties": {
+     "CustomLayers": {
+      "items": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 0,
+      "type": "array"
+     },
+     "PoliticalView": {
+      "maxLength": 3,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UntagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UpdateGeofenceCollectionResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "CollectionArn": {
+      "maxLength": 1600,
+      "minLength": 0,
+      "type": "string"
+     },
+     "CollectionName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "UpdateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "CollectionName",
+     "CollectionArn",
+     "UpdateTime"
+    ],
+    "type": "object"
+   },
+   "UpdateMapResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "MapArn": {
+      "maxLength": 1600,
+      "minLength": 0,
+      "type": "string"
+     },
+     "MapName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "UpdateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "MapName",
+     "MapArn",
+     "UpdateTime"
+    ],
+    "type": "object"
+   },
+   "UpdatePlaceIndexResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "IndexArn": {
+      "maxLength": 1600,
+      "minLength": 0,
+      "type": "string"
+     },
+     "IndexName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "UpdateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "IndexName",
+     "IndexArn",
+     "UpdateTime"
+    ],
+    "type": "object"
+   },
+   "UpdateRouteCalculatorResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "CalculatorArn": {
+      "maxLength": 1600,
+      "minLength": 0,
+      "type": "string"
+     },
+     "CalculatorName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "UpdateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "CalculatorName",
+     "CalculatorArn",
+     "UpdateTime"
+    ],
+    "type": "object"
+   },
+   "UpdateTrackerResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "TrackerArn": {
+      "maxLength": 1600,
+      "minLength": 0,
+      "type": "string"
+     },
+     "TrackerName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "UpdateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "TrackerName",
+     "TrackerArn",
+     "UpdateTime"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon Location Service API (2020-11-19). Every other official operation returns HTTP 501 UnknownOperationException. Maps, place indexes, route calculators, trackers and geofence collections are configuration metadata: no map tile, style, glyph, sprite, geocode, place, route, matrix, device position or geofence evaluation is produced, no data provider is contacted, and KMS keys are stored without checks. GetMapTile, SearchPlaceIndexForText, CalculateRoute, BatchUpdateDevicePosition, PutGeofence and the other data-plane APIs return UnknownOperationException with HTTP 501. Map styles must name the Esri, HERE, Grab or Open Data provider, which is reported as DataSource; place indexes and route calculators accept the Esri, Grab and Here data sources. PricingPlan is no longer used: it is reported as RequestBasedUsage, the only value accepted. UpdateMap refuses ConfigurationUpdate. Geofence collections hold no geofences, so GeofenceCount stays 0. API keys and tracker consumers are not implemented. SDK clients must disable host-prefix injection (botocore inject_host_prefix=False) because the official cp.maps., cp.places., cp.routes., cp.tracking. and cp.geofencing. host prefixes cannot address the loopback endpoint.",
+  "title": "Amazon Location Service (simulator catalog)",
+  "version": "2020-11-19"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/geofencing/v0/collections": {
+   "post": {
+    "operationId": "locationCreateGeofenceCollection",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "geo"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "CollectionName": {
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+         },
+         "Description": {
+          "maxLength": 1000,
+          "minLength": 0,
+          "type": "string"
+         },
+         "KmsKeyId": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "type": "string"
+         },
+         "PricingPlan": {
+          "enum": [
+           "RequestBasedUsage",
+           "MobileAssetTracking",
+           "MobileAssetManagement"
+          ],
+          "type": "string"
+         },
+         "PricingPlanDataSource": {
+          "type": "string"
+         },
+         "Tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "CollectionName"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateGeofenceCollectionResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateGeofenceCollection",
+    "tags": [
+     "Amazon Location Service"
+    ]
+   }
+  },
+  "/geofencing/v0/collections/{CollectionName}": {
+   "delete": {
+    "operationId": "locationDeleteGeofenceCollection",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "geo"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "CollectionName",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DeleteGeofenceCollectionResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteGeofenceCollection",
+    "tags": [
+     "Amazon Location Service"
+    ]
+   },
+   "get": {
+    "operationId": "locationDescribeGeofenceCollection",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "geo"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "CollectionName",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DescribeGeofenceCollectionResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeGeofenceCollection",
+    "tags": [
+     "Amazon Location Service"
+    ]
+   },
+   "patch": {
+    "operationId": "locationUpdateGeofenceCollection",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "geo"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "CollectionName",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Description": {
+          "maxLength": 1000,
+          "minLength": 0,
+          "type": "string"
+         },
+         "PricingPlan": {
+          "enum": [
+           "RequestBasedUsage",
+           "MobileAssetTracking",
+           "MobileAssetManagement"
+          ],
+          "type": "string"
+         },
+         "PricingPlanDataSource": {
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UpdateGeofenceCollectionResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateGeofenceCollection",
+    "tags": [
+     "Amazon Location Service"
+    ]
+   }
+  },
+  "/geofencing/v0/list-collections": {
+   "post": {
+    "operationId": "locationListGeofenceCollections",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "geo"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "MaxResults": {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "NextToken": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListGeofenceCollectionsResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListGeofenceCollections",
+    "tags": [
+     "Amazon Location Service"
+    ]
+   }
+  },
+  "/maps/v0/list-maps": {
+   "post": {
+    "operationId": "locationListMaps",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "geo"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "MaxResults": {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "NextToken": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListMapsResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListMaps",
+    "tags": [
+     "Amazon Location Service"
+    ]
+   }
+  },
+  "/maps/v0/maps": {
+   "post": {
+    "operationId": "locationCreateMap",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "geo"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Configuration": {
+          "$ref": "#/components/schemas/MapConfiguration"
+         },
+         "Description": {
+          "maxLength": 1000,
+          "minLength": 0,
+          "type": "string"
+         },
+         "MapName": {
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+         },
+         "PricingPlan": {
+          "enum": [
+           "RequestBasedUsage",
+           "MobileAssetTracking",
+           "MobileAssetManagement"
+          ],
+          "type": "string"
+         },
+         "Tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "Configuration",
+         "MapName"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateMapResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateMap",
+    "tags": [
+     "Amazon Location Service"
+    ]
+   }
+  },
+  "/maps/v0/maps/{MapName}": {
+   "delete": {
+    "operationId": "locationDeleteMap",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "geo"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "MapName",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DeleteMapResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteMap",
+    "tags": [
+     "Amazon Location Service"
+    ]
+   },
+   "get": {
+    "operationId": "locationDescribeMap",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "geo"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "MapName",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DescribeMapResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeMap",
+    "tags": [
+     "Amazon Location Service"
+    ]
+   },
+   "patch": {
+    "operationId": "locationUpdateMap",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "geo"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "MapName",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "ConfigurationUpdate": {
+          "$ref": "#/components/schemas/MapConfigurationUpdate"
+         },
+         "Description": {
+          "maxLength": 1000,
+          "minLength": 0,
+          "type": "string"
+         },
+         "PricingPlan": {
+          "enum": [
+           "RequestBasedUsage",
+           "MobileAssetTracking",
+           "MobileAssetManagement"
+          ],
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UpdateMapResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateMap",
+    "tags": [
+     "Amazon Location Service"
+    ]
+   }
+  },
+  "/places/v0/indexes": {
+   "post": {
+    "operationId": "locationCreatePlaceIndex",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "geo"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "DataSource": {
+          "type": "string"
+         },
+         "DataSourceConfiguration": {
+          "$ref": "#/components/schemas/DataSourceConfiguration"
+         },
+         "Description": {
+          "maxLength": 1000,
+          "minLength": 0,
+          "type": "string"
+         },
+         "IndexName": {
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+         },
+         "PricingPlan": {
+          "enum": [
+           "RequestBasedUsage",
+           "MobileAssetTracking",
+           "MobileAssetManagement"
+          ],
+          "type": "string"
+         },
+         "Tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "DataSource",
+         "IndexName"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CreatePlaceIndexResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreatePlaceIndex",
+    "tags": [
+     "Amazon Location Service"
+    ]
+   }
+  },
+  "/places/v0/indexes/{IndexName}": {
+   "delete": {
+    "operationId": "locationDeletePlaceIndex",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "geo"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "IndexName",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DeletePlaceIndexResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeletePlaceIndex",
+    "tags": [
+     "Amazon Location Service"
+    ]
+   },
+   "get": {
+    "operationId": "locationDescribePlaceIndex",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "geo"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "IndexName",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DescribePlaceIndexResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribePlaceIndex",
+    "tags": [
+     "Amazon Location Service"
+    ]
+   },
+   "patch": {
+    "operationId": "locationUpdatePlaceIndex",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "geo"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "IndexName",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "DataSourceConfiguration": {
+          "$ref": "#/components/schemas/DataSourceConfiguration"
+         },
+         "Description": {
+          "maxLength": 1000,
+          "minLength": 0,
+          "type": "string"
+         },
+         "PricingPlan": {
+          "enum": [
+           "RequestBasedUsage",
+           "MobileAssetTracking",
+           "MobileAssetManagement"
+          ],
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UpdatePlaceIndexResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdatePlaceIndex",
+    "tags": [
+     "Amazon Location Service"
+    ]
+   }
+  },
+  "/places/v0/list-indexes": {
+   "post": {
+    "operationId": "locationListPlaceIndexes",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "geo"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "MaxResults": {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "NextToken": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListPlaceIndexesResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListPlaceIndexes",
+    "tags": [
+     "Amazon Location Service"
+    ]
+   }
+  },
+  "/routes/v0/calculators": {
+   "post": {
+    "operationId": "locationCreateRouteCalculator",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "geo"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "CalculatorName": {
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+         },
+         "DataSource": {
+          "type": "string"
+         },
+         "Description": {
+          "maxLength": 1000,
+          "minLength": 0,
+          "type": "string"
+         },
+         "PricingPlan": {
+          "enum": [
+           "RequestBasedUsage",
+           "MobileAssetTracking",
+           "MobileAssetManagement"
+          ],
+          "type": "string"
+         },
+         "Tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "CalculatorName",
+         "DataSource"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateRouteCalculatorResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateRouteCalculator",
+    "tags": [
+     "Amazon Location Service"
+    ]
+   }
+  },
+  "/routes/v0/calculators/{CalculatorName}": {
+   "delete": {
+    "operationId": "locationDeleteRouteCalculator",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "geo"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "CalculatorName",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DeleteRouteCalculatorResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteRouteCalculator",
+    "tags": [
+     "Amazon Location Service"
+    ]
+   },
+   "get": {
+    "operationId": "locationDescribeRouteCalculator",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "geo"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "CalculatorName",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DescribeRouteCalculatorResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeRouteCalculator",
+    "tags": [
+     "Amazon Location Service"
+    ]
+   },
+   "patch": {
+    "operationId": "locationUpdateRouteCalculator",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "geo"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "CalculatorName",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Description": {
+          "maxLength": 1000,
+          "minLength": 0,
+          "type": "string"
+         },
+         "PricingPlan": {
+          "enum": [
+           "RequestBasedUsage",
+           "MobileAssetTracking",
+           "MobileAssetManagement"
+          ],
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UpdateRouteCalculatorResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateRouteCalculator",
+    "tags": [
+     "Amazon Location Service"
+    ]
+   }
+  },
+  "/routes/v0/list-calculators": {
+   "post": {
+    "operationId": "locationListRouteCalculators",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "geo"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "MaxResults": {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "NextToken": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListRouteCalculatorsResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListRouteCalculators",
+    "tags": [
+     "Amazon Location Service"
+    ]
+   }
+  },
+  "/tags/{ResourceArn}": {
+   "delete": {
+    "operationId": "locationUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "geo"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ResourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1600,
+       "minLength": 0,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "type": "string"
+       },
+       "maxItems": 50,
+       "minItems": 1,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UntagResourceResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "Amazon Location Service"
+    ]
+   },
+   "get": {
+    "operationId": "locationListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "geo"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ResourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1600,
+       "minLength": 0,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "Amazon Location Service"
+    ]
+   },
+   "post": {
+    "operationId": "locationTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "geo"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ResourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1600,
+       "minLength": 0,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "Tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/TagResourceResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "Amazon Location Service"
+    ]
+   }
+  },
+  "/tracking/v0/list-trackers": {
+   "post": {
+    "operationId": "locationListTrackers",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "geo"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "MaxResults": {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "NextToken": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListTrackersResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTrackers",
+    "tags": [
+     "Amazon Location Service"
+    ]
+   }
+  },
+  "/tracking/v0/trackers": {
+   "post": {
+    "operationId": "locationCreateTracker",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "geo"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Description": {
+          "maxLength": 1000,
+          "minLength": 0,
+          "type": "string"
+         },
+         "EventBridgeEnabled": {
+          "type": "boolean"
+         },
+         "KmsKeyEnableGeospatialQueries": {
+          "type": "boolean"
+         },
+         "KmsKeyId": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "type": "string"
+         },
+         "PositionFiltering": {
+          "enum": [
+           "TimeBased",
+           "DistanceBased",
+           "AccuracyBased"
+          ],
+          "type": "string"
+         },
+         "PricingPlan": {
+          "enum": [
+           "RequestBasedUsage",
+           "MobileAssetTracking",
+           "MobileAssetManagement"
+          ],
+          "type": "string"
+         },
+         "PricingPlanDataSource": {
+          "type": "string"
+         },
+         "Tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         },
+         "TrackerName": {
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "TrackerName"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateTrackerResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateTracker",
+    "tags": [
+     "Amazon Location Service"
+    ]
+   }
+  },
+  "/tracking/v0/trackers/{TrackerName}": {
+   "delete": {
+    "operationId": "locationDeleteTracker",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "geo"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "TrackerName",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DeleteTrackerResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteTracker",
+    "tags": [
+     "Amazon Location Service"
+    ]
+   },
+   "get": {
+    "operationId": "locationDescribeTracker",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "geo"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "TrackerName",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DescribeTrackerResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeTracker",
+    "tags": [
+     "Amazon Location Service"
+    ]
+   },
+   "patch": {
+    "operationId": "locationUpdateTracker",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "geo"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "TrackerName",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Description": {
+          "maxLength": 1000,
+          "minLength": 0,
+          "type": "string"
+         },
+         "EventBridgeEnabled": {
+          "type": "boolean"
+         },
+         "KmsKeyEnableGeospatialQueries": {
+          "type": "boolean"
+         },
+         "PositionFiltering": {
+          "enum": [
+           "TimeBased",
+           "DistanceBased",
+           "AccuracyBased"
+          ],
+          "type": "string"
+         },
+         "PricingPlan": {
+          "enum": [
+           "RequestBasedUsage",
+           "MobileAssetTracking",
+           "MobileAssetManagement"
+          ],
+          "type": "string"
+         },
+         "PricingPlanDataSource": {
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UpdateTrackerResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateTracker",
+    "tags": [
+     "Amazon Location Service"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon Location Service API (2020-11-19). Every other official operation returns HTTP 501 UnknownOperationException. Maps, place indexes, route calculators, trackers and geofence collections are configuration metadata: no map tile, style, glyph, sprite, geocode, place, route, matrix, device position or geofence evaluation is produced, no data provider is contacted, and KMS keys are stored without checks. GetMapTile, SearchPlaceIndexForText, CalculateRoute, BatchUpdateDevicePosition, PutGeofence and the other data-plane APIs return UnknownOperationException with HTTP 501. Map styles must name the Esri, HERE, Grab or Open Data provider, which is reported as DataSource; place indexes and route calculators accept the Esri, Grab and Here data sources. PricingPlan is no longer used: it is reported as RequestBasedUsage, the only value accepted. UpdateMap refuses ConfigurationUpdate. Geofence collections hold no geofences, so GeofenceCount stays 0. API keys and tracker consumers are not implemented. SDK clients must disable host-prefix injection (botocore inject_host_prefix=False) because the official cp.maps., cp.places., cp.routes., cp.tracking. and cp.geofencing. host prefixes cannot address the loopback endpoint.",
+   "name": "Amazon Location Service"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/location/2020-11-19/service-2.json",
+  "sha256": "0a0a842147eeae99dec120b657444f15f60b48fd927342ac381815f82c644a9e",
+  "license": "Apache-2.0"
+ }
+}
