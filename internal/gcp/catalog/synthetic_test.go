@@ -120,7 +120,9 @@ func referenceAPI(t *testing.T) (*API, *Model) {
 	methods := map[string]*Method{
 		"projects.pools.create":          {HTTPMethod: "POST", FlatPath: "v1/projects/{projectsId}/pools", Request: "SynthPool", Response: "Operation", Parameters: map[string]Parameter{"poolId": {Type: "string", Location: "query"}}},
 		"projects.pools.patch":           {HTTPMethod: "PATCH", FlatPath: pool, Request: "SynthPool", Response: "Operation", Parameters: map[string]Parameter{"updateMask": {Type: "string", Location: "query"}}},
-		"projects.pools.delete":          {HTTPMethod: "DELETE", FlatPath: pool, Response: "Operation"},
+		"projects.pools.delete":          {HTTPMethod: "DELETE", FlatPath: pool, Response: "Operation", Parameters: map[string]Parameter{"ignoreReferences": {Type: "boolean", Location: "query"}}},
+		"projects.pools.members.create":  {HTTPMethod: "POST", FlatPath: pool + "/members", Request: "Volume", Response: "Volume"},
+		"projects.pools.members.get":     {HTTPMethod: "GET", FlatPath: pool + "/members/{membersId}", Response: "Volume"},
 		"projects.pools.operations.get":  {HTTPMethod: "GET", FlatPath: pool + "/operations/{operationsId}", Response: "Operation"},
 		"projects.pools.operations.list": {HTTPMethod: "GET", FlatPath: pool + "/operations", Response: "ListOperationsResponse"},
 		"projects.volumes.create":        {HTTPMethod: "POST", FlatPath: "v1/projects/{projectsId}/volumes", Request: "Volume", Response: "Volume", Parameters: map[string]Parameter{"volumeId": {Type: "string", Location: "query"}}},
@@ -144,14 +146,18 @@ func referenceAPI(t *testing.T) (*API, *Model) {
 	}
 	api := &API{Key: "refs.v1", Title: "References", Issues: []int{1}, Scope: "project", TypeURL: "type.googleapis.com/test.", Bounds: []string{"test"},
 		Collections: []*Collection{
-			{ID: "pools", Schema: "SynthPool", Message: "Pool", IDParam: "poolId", Permission: "refs.pools", Operations: "pools", Mutable: []string{"protected", "note"}, Protection: map[string]any{"protected": true}},
+			{ID: "pools", Schema: "SynthPool", Message: "type.googleapis.com/other.Pool", IDParam: "poolId", Permission: "refs.pools", Operations: "pools", Cascade: true, Mutable: []string{"protected", "note"}, Protection: map[string]any{"protected": true}},
+			{ID: "members", Schema: "Volume", Parent: "pools", Permission: "refs.members"},
 			{ID: "volumes", Schema: "Volume", IDParam: "volumeId", Permission: "refs.volumes", Mutable: []string{"origin", "note"},
-				References: map[string]Reference{"pool": {Collection: "pools", Blocks: true}, "origin": {Collection: "pools"}}},
+				References: map[string]Reference{"pool": {Collection: "pools", Blocks: true, Override: "ignoreReferences"}, "origin": {Collection: "pools"}}},
 		}}
 	for id := range methods {
 		kind, collection := Kind(id[strings.LastIndex(id, ".")+1:]), "volumes"
 		if strings.HasPrefix(id, "projects.pools.") {
 			collection = "pools"
+		}
+		if strings.HasPrefix(id, "projects.pools.members.") {
+			collection = "members"
 		}
 		if strings.Contains(id, ".operations.") {
 			kind, collection = OperationGet, ""
@@ -177,7 +183,7 @@ func TestReferencesProtectionAndOperationAnchors(t *testing.T) {
 	base := "/refs/v1/projects/tenkacloud-local"
 	created := h.call("owner", "POST", base+"/pools?poolId=a", map[string]any{})
 	expect(t, created, 200, "")
-	if !strings.HasPrefix(created.body["name"].(string), "projects/tenkacloud-local/pools/a/operations/operation-") || created.body["response"].(map[string]any)["@type"] != "type.googleapis.com/test.Pool" {
+	if !strings.HasPrefix(created.body["name"].(string), "projects/tenkacloud-local/pools/a/operations/operation-") || created.body["response"].(map[string]any)["@type"] != "type.googleapis.com/other.Pool" {
 		t.Fatalf("anchored operation %v", created.body)
 	}
 	expect(t, h.call("owner", "GET", "/refs/v1/"+created.body["name"].(string), nil), 200, "")
@@ -201,6 +207,15 @@ func TestReferencesProtectionAndOperationAnchors(t *testing.T) {
 	expect(t, h.call("owner", "DELETE", base+"/pools/a", nil), 400, "FAILED_PRECONDITION")
 	expect(t, h.call("owner", "PATCH", base+"/pools/a?updateMask=protected", map[string]any{"protected": false}), 200, "")
 	expect(t, h.call("owner", "DELETE", base+"/pools/a", nil), 200, "")
+	// A delete method without a force parameter cascades, and its override
+	// parameter lifts a blocking reference.
+	h.call("owner", "POST", base+"/pools?poolId=d", map[string]any{})
+	member := h.call("owner", "POST", base+"/pools/d/members", map[string]any{"note": "child"})
+	expect(t, member, 200, "")
+	h.call("owner", "POST", base+"/volumes?volumeId=z", map[string]any{"pool": "projects/tenkacloud-local/pools/d"})
+	expect(t, h.call("owner", "DELETE", base+"/pools/d", nil), 400, "FAILED_PRECONDITION")
+	expect(t, h.call("owner", "DELETE", base+"/pools/d?ignoreReferences=true", nil), 200, "")
+	expect(t, h.call("owner", "GET", "/refs/v1/"+member.body["name"].(string), nil), 404, "NOT_FOUND")
 	h.call("owner", "POST", base+"/pools?poolId=c", map[string]any{})
 	h.call("owner", "POST", base+"/volumes?volumeId=x", map[string]any{"pool": "projects/tenkacloud-local/pools/c"})
 	for _, statement := range []string{"UPDATE gcp_catalog_resources SET document='nope' WHERE id='x'", "DROP TABLE gcp_catalog_resources"} {
@@ -213,7 +228,7 @@ func TestReferencesProtectionAndOperationAnchors(t *testing.T) {
 	for name, broken := range map[string]func(*API){
 		"reference field":      func(a *API) { a.Collections[1].References = map[string]Reference{"nope": {Collection: "pools"}} },
 		"reference collection": func(a *API) { a.Collections[1].References = map[string]Reference{"pool": {Collection: "nope"}} },
-		"operations anchor":    func(a *API) { a.Collections[1].Operations = "pools" },
+		"operations anchor":    func(a *API) { a.Collections[2].Operations = "pools" },
 	} {
 		api, model := referenceAPI(t)
 		broken(api)

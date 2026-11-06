@@ -219,6 +219,9 @@ func (q *request) respond(result map[string]any, typeName string, tx *sql.Tx) (a
 	response := map[string]any{"@type": "type.googleapis.com/google.protobuf.Empty"}
 	if typeName != "" {
 		response = map[string]any{"@type": q.b.api.TypeURL + typeName}
+		if strings.HasPrefix(typeName, "type.googleapis.com/") {
+			response["@type"] = typeName
+		}
 		for k, v := range result {
 			response[k] = v
 		}
@@ -293,7 +296,7 @@ func (q *request) referenced(tx *sql.Tx, target row) (string, error) {
 	for _, c := range q.b.api.Collections {
 		fields := make([]string, 0, len(c.References))
 		for field, ref := range c.References {
-			if ref.Blocks && ref.Collection == target.Collection {
+			if ref.Blocks && ref.Collection == target.Collection && !(ref.Override != "" && q.params[ref.Override] == true) {
 				fields = append(fields, field)
 			}
 		}
@@ -589,7 +592,8 @@ func (q *request) remove() (any, error) {
 			return nil, &status{"FAILED_PRECONDITION", fmt.Sprintf("Resource '%s' is protected by '%s'; disable it before deleting.", r.Name, field)}
 		}
 	}
-	force := q.params["force"] == true
+	_, optional := q.method.Parameters["force"]
+	force := q.params["force"] == true || !optional
 	q.target = r.Name
 	return q.idempotent(func() (any, error) {
 		tx, err := q.e.store.db.Begin()

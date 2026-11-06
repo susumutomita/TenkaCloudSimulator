@@ -56,8 +56,10 @@ type Collection struct {
 	// Relax lists fields whose official "Required." marker is superseded
 	// by an alternative field; a Check hook then enforces the alternative.
 	Relax []string
-	// Cascade lets delete with force=true remove children; otherwise
-	// deleting a parent with children fails with FAILED_PRECONDITION.
+	// Cascade lets delete remove children: with force=true when the
+	// official delete method has a force parameter, and always when it has
+	// none. Otherwise deleting a parent with children fails with
+	// FAILED_PRECONDITION.
 	Cascade bool
 	// References maps top-level fields to the same-API collection whose
 	// existing resource they must name at create and update.
@@ -70,8 +72,9 @@ type Collection struct {
 	// as in projects/{project}/databases/{database}/operations/{operation}.
 	// "" places them under the API scope root.
 	Operations string
-	// Message is the operation response type name when it differs from
-	// Schema, for discovery schemas such as GoogleFirestoreAdminV1Database.
+	// Message is the operation response type when it differs from Schema,
+	// for discovery schemas such as GoogleFirestoreAdminV1Database: a name
+	// under the API TypeURL or a full type.googleapis.com/ URL.
 	Message string
 }
 
@@ -80,6 +83,9 @@ type Reference struct {
 	Collection string
 	// Blocks refuses deleting the referenced resource while it is named.
 	Blocks bool
+	// Override is a delete query parameter that lifts Blocks when true,
+	// such as ignoreBackupPlanReferences.
+	Override string
 }
 
 func (c *Collection) message() string {
