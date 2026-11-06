@@ -11,7 +11,7 @@ The navigation groups reference material under **AWS**, **Google Cloud**, **Azur
 **Sakura Cloud**, and a separate **Simulator** control section. These are OpenAPI
 `x-tagGroups`; they do not register providers, grant permission, create endpoints
 or change SDK semantics. Existing paths, operation IDs, operation tags, headers,
-schemas, statuses and static request/response examples are preserved.
+schemas, statuses and static request/response examples are preserved by closed extension checks. The Metrics addition below extends only the existing shared AWS operation.
 
 ## AWS services and the shared endpoint
 
@@ -35,6 +35,23 @@ XML/bytes from static examples. Inspect actual returned IDs, QueueUrls,
 ReceiptHandles and ciphertext before reusing them; placeholders are not real
 resources.
 
+## CloudWatch Metrics forms
+
+The **CloudWatch Metrics** section documents three native URL-encoded Query
+actions on the existing root POST: `PutMetricData`, `ListMetrics` and
+`GetMetricStatistics`, all with `Version=2010-08-01`. Set
+`X-Simulator-Service: monitoring`, choose a supported Region and clear stale
+`X-Amz-Target` or another service's Authorization value. Selecting a body example
+does not update these headers or grant IAM permission. The actual operation still
+requires a local session/token and the corresponding `cloudwatch:*` action.
+
+Three named form examples and XML result/error examples are static, never the
+current stored metric. Replace the statistics time-window placeholders before
+Send. Reads share the same local state as the native client and console. See the
+[bounded Metrics contract, steps, limits and acceptance status](cloudwatch-metrics.md).
+This reference change does not claim that the currently blocked strict Scalar
+accessibility flow passes.
+
 ## Other clouds and unavailable services
 
 GCP and Azure retain their separately implemented provider paths and synthetic
@@ -56,7 +73,7 @@ format and authentication boundaries](sakura.md).
 Issue [#421](https://github.com/susumutomita/TenkaCloudSimulator/issues/421)
 tracks the original navigation increment. The current detector requires66
 operation IDs and36 paths, preserving the original61 operation IDs/34 paths and
-adding only the five Sakura operations/two paths. Static tests preserve all old
+adding only the five Sakura operations/two paths. Metrics keeps those 66/36 identities and adds three schemas to the root POST, for 121 schemas. Its exact inverse must recover the complete pinned public baseline; there is no prefix-based exclusion or changed old-field allowance. Static tests preserve all old
 schemas, examples and operation assignments. The original `--baseline` comparison
 still rejects a native-surface change; the approved Sakura addition has its own
 strict original-projection preservation checks, not an ignored difference.

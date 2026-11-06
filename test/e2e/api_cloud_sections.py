@@ -109,13 +109,15 @@ def run():
                     assert status_region.get_by_role('button', name=re.compile(r'^Test Request')).count() == 0
                     palette = page.evaluate("""() => {
                       const root = getComputedStyle(document.querySelector('#reference'));
-                      const variables = ['--scalar-color-3','--scalar-sidebar-search-color','--scalar-color-green','--scalar-color-red','--scalar-color-orange'];
+                      const variables = ['--scalar-color-3','--scalar-sidebar-search-color','--scalar-color-green','--scalar-color-red','--scalar-color-orange','--scalar-color-yellow'];
                       return {light: Object.fromEntries(variables.map(name => [name,root.getPropertyValue(name).trim()])),
-                        nestedRed: [...document.querySelectorAll('#reference .request-card.dark-mode')].map(node => getComputedStyle(node).getPropertyValue('--scalar-color-red').trim())};
+                        nestedRed: [...document.querySelectorAll('#reference .request-card.dark-mode')].map(node => getComputedStyle(node).getPropertyValue('--scalar-color-red').trim()),
+                        nestedYellow: [...document.querySelectorAll('#reference .request-card.dark-mode')].map(node => getComputedStyle(node).getPropertyValue('--scalar-color-yellow').trim())};
                     }""")
                     assert palette['light'] == {'--scalar-color-3': '#595959', '--scalar-sidebar-search-color': '#595959',
-                        '--scalar-color-green': '#006644', '--scalar-color-red': '#b42318', '--scalar-color-orange': '#9c3b00'}
+                        '--scalar-color-green': '#006644', '--scalar-color-red': '#b42318', '--scalar-color-orange': '#9c3b00', '--scalar-color-yellow': '#8a5d00'}
                     assert palette['nestedRed'] and set(palette['nestedRed']) == {'#ff8a80'}
+                    assert palette['nestedYellow'] and set(palette['nestedYellow']) == {'#f6bc00'}
                     computed_palettes.append({'width': width, **palette})
                     assert_reflow(page)
                     page.evaluate(axe.read_text())

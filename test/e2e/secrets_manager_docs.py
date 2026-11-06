@@ -117,12 +117,15 @@ EXPECTED_PATHS = frozenset({
 })
 
 
+from metrics_openapi import preserved_metrics_reference
+
 def run():
     with running(authenticated=True) as (endpoint, token):
         req = urllib.request.Request(endpoint+"/_simulator/docs/openapi.json",
                                      headers={"X-Simulator-Token": token})
         with urllib.request.urlopen(req, timeout=5) as response:
             spec = json.load(response)
+        preserved_metrics_reference(spec)
         root = spec["paths"]["/"]["post"]
         assert root["operationId"] == "awsRegionalOperation"
         ids = [entry["operationId"] for path in spec["paths"].values()

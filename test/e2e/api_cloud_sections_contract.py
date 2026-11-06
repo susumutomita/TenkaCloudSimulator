@@ -9,6 +9,7 @@ from pathlib import Path
 import unittest
 
 from test_sakura_openapi import NEW_IDS, COLLECTION, ITEM
+from metrics_openapi import preserved_metrics_reference
 
 METHODS = {'get', 'head', 'put', 'post', 'delete', 'patch', 'options'}
 GROUPS = ['AWS', 'Google Cloud', 'Azure', 'Sakura Cloud', 'Simulator']
@@ -47,7 +48,13 @@ def compare_native(document, baseline):
         'headers, statuses, security or another non-navigation field')
 
 
+def validated_main_projection(document):
+    # Admit the exact three Metrics form branches before observing immutable public66/36.
+    return preserved_metrics_reference(document)
+
+
 def validate_document(document):
+    document = validated_main_projection(document)
     assert document['openapi'] == '3.1.0'
     tags = document['tags']
     names = [tag['name'] for tag in tags]
@@ -161,6 +168,94 @@ class ContractTests(unittest.TestCase):
         changed['paths']['/']['post']['tags'] = ['IAM roles']
         with self.assertRaises(AssertionError):
             compare_native(changed, self.document)
+
+
+class ClosedMetricsExtensionTests(unittest.TestCase):
+    """Both real reader guards must refuse changed documents without incidental errors."""
+    def setUp(self):
+        from sqs_docs import validate_reference_inventory
+        self.document = json.loads(Path('internal/server/apidocs/openapi.json').read_text())
+        self.guards = (validate_document, validate_reference_inventory)
+
+    def reject_both(self, change):
+        for guard in self.guards:
+            bad = copy.deepcopy(self.document)
+            change(bad)
+            unchanged = copy.deepcopy(bad)
+            with self.subTest(guard=guard.__name__):
+                with self.assertRaises(AssertionError):
+                    guard(bad)
+                self.assertEqual(bad, unchanged)
+
+    def test_exact_inverse_and_counts(self):
+        import hashlib
+        from metrics_openapi import canonical, contract
+        before = copy.deepcopy(self.document)
+        self.assertEqual((len(operations(self.document)), len(self.document['paths']),
+                          len(self.document['components']['schemas'])), (66, 36, 121))
+        for guard in self.guards:
+            guard(self.document)
+        original = preserved_metrics_reference(self.document)
+        self.assertEqual(hashlib.sha256(canonical(original).encode()).hexdigest(), contract()['base66CanonicalSHA256'])
+        self.assertEqual(self.document, before)
+
+    def test_each_missing_old_operation_rejected(self):
+        for path, method, _ in operations(preserved_metrics_reference(self.document)):
+            with self.subTest(path=path, method=method):
+                self.reject_both(lambda d: d['paths'][path].pop(method))
+
+    def test_missing_root_post_rejected(self):
+        self.reject_both(lambda d: d['paths']['/'].pop('post'))
+
+    def test_extra_operation_rejected(self):
+        self.reject_both(lambda d: d['paths'].update({'/unexpected': {'get': copy.deepcopy(d['paths']['/']['get'])}}))
+
+    def test_duplicate_operation_rejected(self):
+        self.reject_both(lambda d: d['paths']['/']['get'].update(operationId='awsRegionalOperation'))
+
+    def test_old_method_id_mapping_swap_rejected(self):
+        def change(d):
+            a,b = d['paths']['/']['get'],d['paths']['/']['post']
+            a['operationId'],b['operationId'] = b['operationId'],a['operationId']
+        self.reject_both(change)
+
+    def test_moved_old_path_rejected(self):
+        self.reject_both(lambda d: d['paths'].update({'/renamed-functions': d['paths'].pop('/2015-03-31/functions')}))
+
+    def test_missing_unknown_duplicate_aws_group_rejected(self):
+        def missing(d): d['x-tagGroups'][:] = [g for g in d['x-tagGroups'] if g['name']!='AWS']
+        def unknown(d): next(g for g in d['x-tagGroups'] if g['name']=='AWS')['name']='Another cloud'
+        def duplicate(d): d['x-tagGroups'].append(copy.deepcopy(next(g for g in d['x-tagGroups'] if g['name']=='AWS')))
+        for edit in (missing,unknown,duplicate): self.reject_both(edit)
+
+    def test_metrics_provider_assignment_rejected(self):
+        def change(d):
+            next(g for g in d['x-tagGroups'] if g['name']=='AWS')['tags'].remove('CloudWatch Metrics')
+            next(g for g in d['x-tagGroups'] if g['name']=='Azure')['tags'].append('CloudWatch Metrics')
+        self.reject_both(change)
+
+    def test_each_metrics_example_and_schema_required(self):
+        from metrics_openapi import contract, MEDIA
+        for name in contract()['examples']:
+            self.reject_both(lambda d: d['paths']['/']['post']['requestBody']['content'][MEDIA]['examples'].pop(name))
+        for name in contract()['schemaNames']:
+            self.reject_both(lambda d: d['components']['schemas'].pop(name))
+
+    def test_metric_version_and_routing_drift_rejected(self):
+        from metrics_openapi import MEDIA
+        self.reject_both(lambda d: d['paths']['/']['post']['requestBody']['content'][MEDIA]['examples']['CloudWatchPutMetricData']['value'].update(Version='wrong'))
+        def routing(d):
+            next(p for p in d['paths']['/']['post']['parameters'] if p.get('name')=='X-Simulator-Service')['schema']['enum'].remove('monitoring')
+        self.reject_both(routing)
+
+    def test_auth_reference_required(self):
+        def change(d):
+            parameters=d['paths']['/']['post']['parameters']
+            parameters[:]=[p for p in parameters if p.get('$ref')!='#/components/parameters/SimulatorToken']
+        self.reject_both(change)
+
+    def test_unknown_schema_rejected(self):
+        self.reject_both(lambda d: d['components']['schemas'].update(Unexpected={'type':'string'}))
 
 
 if __name__ == '__main__':

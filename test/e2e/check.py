@@ -70,6 +70,33 @@ def submit(page):
  dialog=page.get_by_role('dialog')
  if dialog.is_visible():dialog.get_by_role('button').last.click()
  else:page.get_by_role('button',name=re.compile('^(Create bucket|Upload|Create parameter|Save changes)$')).last.click()
+def _metrics_acceptance_receipt(script_name, reports_prefix, timeout, sdk=False, receipt_name="result.json"):
+ assert Path(sys.executable).is_absolute(), 'Use the selected development interpreter'
+ helper=Path(__file__).resolve().with_name(script_name)
+ binary_sha=hashlib.sha256(BINARY.read_bytes()).hexdigest()
+ helper_sha=hashlib.sha256(helper.read_bytes()).hexdigest()
+ parent=Path(tempfile.mkdtemp(prefix=reports_prefix+'-',dir=str(REPORTS)))
+ reports=parent/'helper'
+ assert not reports.exists(), 'Helper leaf must be fresh and absent before launch'
+ env={**os.environ,'SIMULATOR_BINARY':str(BINARY),'SIMULATOR_REPORTS':str(reports),'SIMULATOR_BINARY_SHA256':binary_sha}
+ command=[sys.executable,'-B',str(helper)]
+ if sdk:command+=['--binary',str(BINARY),'--binary-sha256',binary_sha,'--reports',str(reports)]
+ subprocess.run(command,check=True,timeout=timeout,env=env)
+ result=json.loads((reports/receipt_name).read_text())
+ assert result['status']=='PASS', 'The actual helper did not finish successfully'
+ assert result['binarySHA256']==binary_sha and result['helperSHA256']==helper_sha
+ assert result['binaryPostExact'] is True and result['helperPostExact'] is True
+ assert hashlib.sha256(BINARY.read_bytes()).hexdigest()==binary_sha
+ assert hashlib.sha256(helper.read_bytes()).hexdigest()==helper_sha
+ if sdk:assert result['cleanup']=='allclientsclosed/CLIsexited0reaped/ownedDB+tokenfilesremoved'
+ else:assert result['cleanup'] is True
+ return result
+
+def _metrics_exact_counts(actual, expected):
+ assert isinstance(actual,dict) and set(actual)==set(expected)
+ for key,value in expected.items():
+  assert type(actual[key]) is int and actual[key]==value, 'Actual Metrics case counter differs: '+key
+
 class Conformance(unittest.TestCase):
  def test_landing_topology_html_fallback_keyboard_and_public_navigation(self):
   from landing_topology import run_landing_topology
@@ -622,5 +649,73 @@ def handler(event,context):
  def test_cloudformation_original_crypto_template_native_sdk_lifecycle(self):
   subprocess.run([sys.executable, str(Path(__file__).with_name('cloudformation_crypto.py'))], check=True, timeout=180)
 
+
+ def test_cloudwatch_metrics_native_sdk_two_clis_current_policy_and_restart(self):
+  result=_metrics_acceptance_receipt('cloudwatch_metrics.py','metrics-sdk',180,sdk=True)
+  _metrics_exact_counts(result['caseCounters'],{'groups':5,'calls':41,'sends':41,'responses':41,'controls':3})
+  self.assertEqual(result['SDKModelSHA256'],'855d223991b77b224ac0a4079a75a17bd51fa7df57a89d9ab2979fbf6738539a')
+  self.assertEqual(len(result['checks']),5)
+  self.assertEqual(len(result['controlCalls']),3)
+  self.assertEqual(len(result['SDKCounters']),15)
+  for counter in result['SDKCounters']:
+   for key in ('calls','sends','responses'):self.assertIs(type(counter[key]),int)
+   self.assertGreater(counter['calls'],0)
+   self.assertEqual(counter['calls'],counter['sends'])
+   self.assertEqual(counter['sends'],counter['responses'])
+  self.assertEqual(sum(counter['calls']for counter in result['SDKCounters']),41)
+  self.assertTrue(any(status==200 and encoding=='gzip'for counter in result['SDKCounters']for status,encoding in zip(counter['statuses'],counter['encoding'])))
+
+ def test_cloudwatch_metrics_console_native_statistics_context_and_boundaries(self):
+  result=_metrics_acceptance_receipt('cloudwatch_metrics_console.py','metrics-console',240,receipt_name='cloudwatch-metrics-a11y.json')
+  self.assertEqual({screen['width']for screen in result['screens']},{1440,390})
+  self.assertEqual(len(result['screens']),2)
+  for screen in result['screens']:
+   self.assertIs(type(screen['width']),int)
+   self.assertEqual(screen['violations'],[])
+   self.assertIs(type(screen['passes']),int)
+   self.assertGreater(screen['passes'],0)
+  _metrics_exact_counts(result['caseCounters'],{'lateXMLCompletions':3,'crossTokens401':2,'paginationSeries':501,
+    'nativeAcceptedPoints':1440,'syntheticRejectedPoints':1441,'nativeRejectedGroups':1441,
+    'countRecoveryPoints':720,'period120RecoveryPoints':721,'transportFetches':1,'transportFulfills':1,'desktopMobileWidths':2})
+  _metrics_exact_counts({key:result[key]for key in ('nativeCalls','nativeResponses','labelledTransportFaultFulfillments')},
+    {'nativeCalls':17,'nativeResponses':17,'labelledTransportFaultFulfillments':1})
+  _metrics_exact_counts(result['nativeOperations'],{'PutMetricData':9,'ListMetrics':2,'GetMetricStatistics':5,'HostPolicySetup':1})
+  self.assertIs(result['capabilityOrPresentationFulfillmentUsed'],False)
+  self.assertEqual(set(result['cleanupDetails']),{'contextA','peerContext','browser','cliA','cliB','playwright','temporaryDirectory'})
+  for value in result['cleanupDetails'].values():self.assertIs(value,True)
+  self.assertEqual(result['secondaryCleanupTypes'],[])
+  # The large-point cases are desktop only; two widths refer to the retained
+  # ordinary console audits. Synthetic1441 is a labelled decoder transport fault.
+  self.assertEqual(result['strengthened']['lateXMLCompletions'],3)
+  self.assertEqual(result['strengthened']['crossTokens401'],2)
+  self.assertEqual(result['strengthened']['paginationSeries'],501)
+
+ def test_cloudwatch_metrics_served_scalar_query_examples_and_native_state(self):
+  result=_metrics_acceptance_receipt('cloudwatch_metrics_reference.py','metrics-reference',240)
+  self.assertIs(result['specPostExact'],True)
+  self.assertEqual(result['specSHA256'],hashlib.sha256(Path('internal/server/apidocs/openapi.json').read_bytes()).hexdigest())
+  self.assertEqual(len(result['sends']),12)
+  self.assertEqual(len(result['audits']),8)
+  self.assertEqual(len(result['browserCounts']),2)
+  for width in (1440,390):
+   sent=[row for row in result['sends']if row['width']==width]
+   self.assertEqual([row['action']for row in sent],['PutMetricData','ListMetrics','GetMetricStatistics','GetMetricStatistics','PutMetricData','ListMetrics'])
+   self.assertEqual([row['status']for row in sent],[200,200,400,200,403,200])
+   audits=[row for row in result['audits']if row['width']==width]
+   self.assertEqual({row['state']for row in audits},{'put-form','invalid-time','statistics','reader-denied'})
+   for row in audits:
+    self.assertEqual(row['violations'],[])
+    self.assertIs(type(row['passes']),int)
+    self.assertGreater(row['passes'],0)
+   counts=[row for row in result['browserCounts']if row['width']==width]
+   self.assertEqual(len(counts),1)
+   _metrics_exact_counts({key:counts[0][key]for key in ('nativePOSTResponses','outside','pageErrors')},{'nativePOSTResponses':6,'outside':0,'pageErrors':0})
+  self.assertEqual(len(result['SDKCounters']),6)
+  for counter in result['SDKCounters']:
+   for key in ('calls','sends','responses'):self.assertIs(type(counter[key]),int)
+   self.assertGreater(counter['calls'],0)
+   self.assertEqual(counter['calls'],counter['sends'])
+   self.assertEqual(counter['sends'],counter['responses'])
+  self.assertEqual(sum(counter['calls']for counter in result['SDKCounters']),10)
 
 if __name__=='__main__':unittest.main(verbosity=2)

@@ -11,12 +11,14 @@
   --scalar-color-green: #006644;
   --scalar-color-red: #b42318;
   --scalar-color-orange: #9c3b00;
+  --scalar-color-yellow: #8a5d00;
 }
 
 /* Scalar nests dark request cards inside its light reference. Their own red
- * token needs a lighter shade against the measured #1a1a1a card background.
+ * and yellow tokens need light shades against the measured dark background.
  * This leaves the rest of the dark palette and other pages unchanged.
  */
 .light-mode #reference .request-card.dark-mode {
   --scalar-color-red: #ff8a80;
+  --scalar-color-yellow: #f6bc00;
 }

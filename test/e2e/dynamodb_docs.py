@@ -14,6 +14,8 @@ from test_sakura_openapi import OLD_IDS,NEW_IDS,COLLECTION,ITEM
 OPERATIONS=('CreateTable','ListTables','DescribeTable','PutItem','GetItem','DeleteItem','DeleteTable')
 
 
+from metrics_openapi import preserved_metrics_reference
+
 def run():
     REPORTS.mkdir(parents=True,exist_ok=True)
     counts={'calls':0,'responses':0};executed=[]
@@ -39,6 +41,7 @@ def run():
                     return result
             spec=request('/_simulator/docs/openapi.json')
             assert spec==json.loads(Path('internal/server/apidocs/openapi.json').read_text()),'Embedded/source reference mismatch'
+            preserved_metrics_reference(spec)
             schema_examples=validate_json10_examples(spec)
             ids=[v['operationId'] for p in spec['paths'].values() for m,v in p.items() if m in ('get','post','put','head','delete')]
             assert len(ids)==len(set(ids))==66 and set(ids)==OLD_IDS|NEW_IDS and len(spec['paths'])==36 and {COLLECTION,ITEM} <= set(spec['paths']),'Main API paths/IDs changed'

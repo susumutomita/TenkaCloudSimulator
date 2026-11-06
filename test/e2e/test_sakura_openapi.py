@@ -11,6 +11,7 @@ import unittest
 
 from jsonschema import ValidationError
 from openapi_json10 import validator
+from metrics_openapi import preserved_metrics_reference
 
 ROOT = Path(__file__).resolve().parents[2]
 COLLECTION = '/_simulator/providers/sakura/cloud/zone/{zone}/api/cloud/1.1/disk'
@@ -30,6 +31,7 @@ def operations(spec):
 
 
 def preserved(spec):
+    spec = preserved_metrics_reference(spec)
     # Exact incoming main e8efc54 projections include the four KMS alias templates.
     # These independent pinned baseline hashes exclude only Sakura additions.
     original_paths = {path:value for path,value in spec['paths'].items() if path not in (COLLECTION,ITEM)}

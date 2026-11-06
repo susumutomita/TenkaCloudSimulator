@@ -27,6 +27,15 @@ MAIN_PATHS=('/', '/2015-03-31/functions', '/2015-03-31/functions/{FunctionName}'
 REPORTS=Path(os.environ.get('SIMULATOR_REPORTS','reports')).resolve()
 
 
+from metrics_openapi import preserved_metrics_reference
+
+def validate_reference_inventory(document):
+ spec=preserved_metrics_reference(document)
+ ids=[value['operationId'] for path in spec['paths'].values() for method,value in path.items() if method in ('get','post','put','head','delete')]
+ assert len(ids)==len(set(ids))==66 and set(ids)==set(MAIN_OPERATION_IDS)|NEW_IDS
+ assert set(spec['paths'])==set(MAIN_PATHS)|{COLLECTION,ITEM} and len(spec['paths'])==36
+ return spec
+
 def run():
  REPORTS.mkdir(parents=True,exist_ok=True)
  http_counts={'calls':0,'responses':0};sdk_counts={'calls':0,'sends':0,'responses':0}
@@ -53,6 +62,7 @@ def run():
    spec=wire('/_simulator/docs/openapi.json');caps=wire('/_simulator/v1/capabilities')
    source=json.loads(Path('internal/server/apidocs/openapi.json').read_text());assert spec==source,'Embedded served spec differs from source'
    validate_json10_examples(spec)
+   validate_reference_inventory(spec)
    ids=[value['operationId'] for path in spec['paths'].values() for method,value in path.items() if method in ('get','post','put','head','delete')]
    assert len(ids)==66 and len(set(ids))==66 and set(ids)==set(MAIN_OPERATION_IDS)|NEW_IDS
    assert set(spec['paths'])==set(MAIN_PATHS)|{COLLECTION,ITEM} and len(spec['paths'])==36

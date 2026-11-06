@@ -18,6 +18,8 @@ from openapi_parameters import validate_parameter_lists
 from test_sakura_openapi import OLD_IDS, NEW_IDS, COLLECTION, ITEM
 
 
+from metrics_openapi import preserved_metrics_reference
+
 def run_scalar_s3_docs():
     validate_parameter_lists(json.loads(Path('internal/server/apidocs/openapi.json').read_text()))
     with running(authenticated=True) as (endpoint, token), sync_playwright() as p:
@@ -37,6 +39,7 @@ def run_scalar_s3_docs():
         native('PUT', '/practice-bucket?tagging', tags, {'Content-MD5': base64.b64encode(hashlib.md5(tags).digest()).decode()})
         _, raw_spec = native('GET', '/_simulator/docs/openapi.json')
         spec = json.loads(raw_spec)
+        preserved_metrics_reference(spec)
         validate_parameter_lists(spec)
         assert spec == json.loads(Path('internal/server/apidocs/openapi.json').read_text()), 'Must exercise the actual embedded candidate spec'
         operations = [op['operationId'] for item in spec['paths'].values() for op in item.values() if isinstance(op, dict) and 'operationId' in op]

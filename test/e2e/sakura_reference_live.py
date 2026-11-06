@@ -16,6 +16,8 @@ import tempfile
 import urllib.request
 
 
+from metrics_openapi import preserved_metrics_reference
+
 def run(root, binary, reports, browser=False):
     sys.path.insert(0, str(root/'test/e2e'))
     from sakura_cli import CLI, BASE, BASIC, create, frame
@@ -37,6 +39,7 @@ def run(root, binary, reports, browser=False):
             spec=json.loads(raw)
         assert spec==json.loads((root/'internal/server/apidocs/openapi.json').read_text()), 'served candidate spec differs'
         operations={op['operationId']:(path,method,op) for path,item in spec['paths'].items() for method,op in item.items() if isinstance(op,dict) and 'operationId' in op}
+        preserved_metrics_reference(spec)
         assert len(operations)==66
         names={'SakuraListDisks','SakuraCreateDisk','SakuraGetDisk','SakuraUpdateDisk','SakuraDeleteDisk'}
         assert names<=set(operations)

@@ -1,0 +1,448 @@
+{
+  "tag": {
+    "name": "CloudWatch Metrics",
+    "description": "Bounded local raw custom Metrics: three Query/XML actions; no alarms, automatic AWS delivery or full CloudWatch claim. Native data and responses require actual local state/permission."
+  },
+  "descriptionAppend": "\n\n**CloudWatch Metrics \u2014 bounded native Query/XML:** select application/x-www-form-urlencoded, X-Simulator-Service: monitoring and X-Simulator-Region: us-east-1 (or another listed local Region). CLEAR X-Amz-Target and any stale Authorization value from a previous service before Send; alternatively use a dummy TCSIM SigV4 scope for service monitoring whose Region agrees. Example selection does not change headers automatically. Keep the signed-in local session or host-issued X-Simulator-Token; routing/signature metadata is not authentication. The selected exercise identity needs exact cloudwatch:PutMetricData, cloudwatch:ListMetrics or cloudwatch:GetMetricStatistics on Resource *. Operator credentials do not bypass a selected reader's policy; explicit Deny wins.\n\nVersion2010-08-01; only PutMetricData, ListMetrics, GetMetricStatistics. Put raw Value only,1\u20131000 records/30 dimensions, optional standard StorageResolution60, finite bounded values (zero/negative supported), timestamp14days past through2hours future. Omitted Timestamp uses trusted current time. List up to500/page with10 subset dimension filters and opaque NextToken; immediate local visibility only for series ingested within14days and having a point retained within15days of the captured page time. This discovery window differs from raw-sample retention. GetMetricStatistics requires exact complete dimensions, basic SampleCount/Sum/Minimum/Maximum/Average, minute-rounded inclusive start/exclusive end, period multiple60 and at most1440 requested buckets. Omitted Unit preserves separate recorded-unit streams; no conversion or invented zero for missing data.\n\nStatic examples are documentation, not live saved values. Put publishes one sample in Simulator/Reference. Replace REPLACE_START_TIME_RFC3339 and REPLACE_END_TIME_RFC3339 with a recent UTC/offset time window before Send. Unsubstituted placeholders are invalid400. Result XML examples and RequestId are illustrative, not current state.\n\nPhysical wire and expanded Query bodies each have a local1MiB inclusive cap, output2MiB. One gzip member accepted; malformed/truncated/CRC-invalid/concatenated/trailing data and other encodings fail. Go1.26's10000 raw form-token guard also applies. These are explicit local bounds, not a proof of AWS decompression behavior. Native XML errors include400 MissingParameter/InvalidParameterValue/InvalidParameterCombination/SimulatorQuotaExceeded,403 AccessDenied,404 UnknownOperationException,413 RequestEntityTooLargeException and500 InternalServiceError. Outer local Access401 can be JSON before native Query parsing.\n\nLocal15day raw retention/no AWS long-term rollups; reads never GC. Only an authorized committed Put can atomically collect strictly expired rows in its own Region/namespace; peer expired rows still consume physical budget. Default simulator budgets1000series/100000samples/64MiB logical payload/64Regions, not AWS quotas. Continuation binds Region/options/revision/asOf/position, expires1hour, survives sameDB restart, and becomes stale after a successful Put in that Region.\n\nUnsupported: JSON/X-Amz-Target Metrics transport (current AWS docs also show JSON; this pinned local slice uses Query), Values/Counts arrays, statistic sets, entities, high resolution, AWS/ namespace emission, linked-account filters, RecentlyActive, GetMetricData/Insights, percentiles, metric math, alarms, automatic service delivery, rollups, CloudFormation Metrics or DeleteMetric. The actual41-call original-SDK acceptance uses two regular local CLIs/Access/native IAM/default compression; it is not full AWS/Google-cloud compatibility or authenticated cloud-console parity. Served Scalar/reference acceptance on this source is still pending; capability verification flags are not changed here.",
+  "serviceDescriptionAppend": " Metrics uses monitoring with Query Version2010-08-01; clear X-Amz-Target. This selects a protocol only and grants no authority.",
+  "schemaNames": [
+    "CloudWatchPutMetricDataQuery",
+    "CloudWatchListMetricsQuery",
+    "CloudWatchGetMetricStatisticsQuery"
+  ],
+  "schemas": {
+    "CloudWatchPutMetricDataQuery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "Action",
+        "Version",
+        "Namespace",
+        "MetricData.member.1.MetricName",
+        "MetricData.member.1.Value"
+      ],
+      "properties": {
+        "Action": {
+          "type": "string",
+          "const": "PutMetricData"
+        },
+        "Version": {
+          "type": "string",
+          "const": "2010-08-01"
+        },
+        "Namespace": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "MetricData.member.1.MetricName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "MetricData.member.1.Value": {
+          "type": "number"
+        }
+      },
+      "patternProperties": {
+        "^MetricData\\.member\\.(?:[1-9][0-9]{0,2}|1000)\\.MetricName$": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "^MetricData\\.member\\.(?:[1-9][0-9]{0,2}|1000)\\.Value$": {
+          "type": "number"
+        },
+        "^MetricData\\.member\\.(?:[1-9][0-9]{0,2}|1000)\\.Timestamp$": {
+          "type": "string",
+          "description": "RFC3339 timestamp,14days past through2hours future; omit for trusted current time."
+        },
+        "^MetricData\\.member\\.(?:[1-9][0-9]{0,2}|1000)\\.Unit$": {
+          "type": "string",
+          "enum": [
+            "Seconds",
+            "Microseconds",
+            "Milliseconds",
+            "Bytes",
+            "Kilobytes",
+            "Megabytes",
+            "Gigabytes",
+            "Terabytes",
+            "Bits",
+            "Kilobits",
+            "Megabits",
+            "Gigabits",
+            "Terabits",
+            "Percent",
+            "Count",
+            "Bytes/Second",
+            "Kilobytes/Second",
+            "Megabytes/Second",
+            "Gigabytes/Second",
+            "Terabytes/Second",
+            "Bits/Second",
+            "Kilobits/Second",
+            "Megabits/Second",
+            "Gigabits/Second",
+            "Terabits/Second",
+            "Count/Second",
+            "None"
+          ]
+        },
+        "^MetricData\\.member\\.(?:[1-9][0-9]{0,2}|1000)\\.StorageResolution$": {
+          "type": "integer",
+          "const": 60
+        },
+        "^MetricData\\.member\\.(?:[1-9][0-9]{0,2}|1000)\\.Dimensions\\.member\\.(?:[1-9]|[12][0-9]|30)\\.Name$": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "^MetricData\\.member\\.(?:[1-9][0-9]{0,2}|1000)\\.Dimensions\\.member\\.(?:[1-9]|[12][0-9]|30)\\.Value$": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        }
+      },
+      "description": "Flat native Query fields. Contiguous member indexes, complete dimension pairs, finite values, Unicode/control rules, current time windows and cross-field constraints remain authoritative native checks; this schema is not their proof."
+    },
+    "CloudWatchListMetricsQuery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "Action",
+        "Version"
+      ],
+      "properties": {
+        "Action": {
+          "type": "string",
+          "const": "ListMetrics"
+        },
+        "Version": {
+          "type": "string",
+          "const": "2010-08-01"
+        },
+        "Namespace": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "MetricName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "NextToken": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        }
+      },
+      "patternProperties": {
+        "^Dimensions\\.member\\.(?:[1-9]|10)\\.Name$": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "^Dimensions\\.member\\.(?:[1-9]|10)\\.Value$": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        }
+      },
+      "description": "Flat native Query fields. Contiguous member indexes, complete dimension pairs, finite values, Unicode/control rules, current time windows and cross-field constraints remain authoritative native checks; this schema is not their proof."
+    },
+    "CloudWatchGetMetricStatisticsQuery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "Action",
+        "Version",
+        "Namespace",
+        "MetricName",
+        "StartTime",
+        "EndTime",
+        "Period",
+        "Statistics.member.1"
+      ],
+      "properties": {
+        "Action": {
+          "type": "string",
+          "const": "GetMetricStatistics"
+        },
+        "Version": {
+          "type": "string",
+          "const": "2010-08-01"
+        },
+        "Namespace": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "MetricName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "StartTime": {
+          "type": "string",
+          "description": "Replace REPLACE_START_TIME_RFC3339 with recent UTC time; native start rounds down to minute."
+        },
+        "EndTime": {
+          "type": "string",
+          "description": "Replace REPLACE_END_TIME_RFC3339 with later exclusive UTC time."
+        },
+        "Period": {
+          "type": "integer",
+          "minimum": 60,
+          "maximum": 1296000,
+          "multipleOf": 60
+        },
+        "Statistics.member.1": {
+          "type": "string",
+          "enum": [
+            "SampleCount",
+            "Sum",
+            "Minimum",
+            "Maximum",
+            "Average"
+          ]
+        },
+        "Unit": {
+          "type": "string",
+          "enum": [
+            "Seconds",
+            "Microseconds",
+            "Milliseconds",
+            "Bytes",
+            "Kilobytes",
+            "Megabytes",
+            "Gigabytes",
+            "Terabytes",
+            "Bits",
+            "Kilobits",
+            "Megabits",
+            "Gigabits",
+            "Terabits",
+            "Percent",
+            "Count",
+            "Bytes/Second",
+            "Kilobytes/Second",
+            "Megabytes/Second",
+            "Gigabytes/Second",
+            "Terabytes/Second",
+            "Bits/Second",
+            "Kilobits/Second",
+            "Megabits/Second",
+            "Gigabits/Second",
+            "Terabits/Second",
+            "Count/Second",
+            "None"
+          ]
+        }
+      },
+      "patternProperties": {
+        "^Dimensions\\.member\\.(?:[1-9]|[12][0-9]|30)\\.Name$": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "^Dimensions\\.member\\.(?:[1-9]|[12][0-9]|30)\\.Value$": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "^Statistics\\.member\\.[1-5]$": {
+          "type": "string",
+          "enum": [
+            "SampleCount",
+            "Sum",
+            "Minimum",
+            "Maximum",
+            "Average"
+          ]
+        }
+      },
+      "description": "Flat native Query fields. Contiguous member indexes, complete dimension pairs, finite values, Unicode/control rules, current time windows and cross-field constraints remain authoritative native checks; this schema is not their proof."
+    }
+  },
+  "examples": {
+    "CloudWatchPutMetricData": {
+      "summary": "Static custom raw-value request; publishes one local datum, not live state",
+      "value": {
+        "Action": "PutMetricData",
+        "Version": "2010-08-01",
+        "Namespace": "Simulator/Reference",
+        "MetricData.member.1.MetricName": "Requests",
+        "MetricData.member.1.Value": 7,
+        "MetricData.member.1.Unit": "Count",
+        "MetricData.member.1.Dimensions.member.1.Name": "Stage",
+        "MetricData.member.1.Dimensions.member.1.Value": "local"
+      }
+    },
+    "CloudWatchListMetrics": {
+      "summary": "Static exact namespace/name request; results depend on current local state",
+      "value": {
+        "Action": "ListMetrics",
+        "Version": "2010-08-01",
+        "Namespace": "Simulator/Reference",
+        "MetricName": "Requests",
+        "Dimensions.member.1.Name": "Stage",
+        "Dimensions.member.1.Value": "local"
+      }
+    },
+    "CloudWatchGetMetricStatistics": {
+      "summary": "Static time placeholders must be replaced before Send; no fabricated live datapoint",
+      "value": {
+        "Action": "GetMetricStatistics",
+        "Version": "2010-08-01",
+        "Namespace": "Simulator/Reference",
+        "MetricName": "Requests",
+        "Dimensions.member.1.Name": "Stage",
+        "Dimensions.member.1.Value": "local",
+        "StartTime": "REPLACE_START_TIME_RFC3339",
+        "EndTime": "REPLACE_END_TIME_RFC3339",
+        "Period": 60,
+        "Statistics.member.1": "SampleCount",
+        "Statistics.member.2": "Sum",
+        "Statistics.member.3": "Minimum",
+        "Statistics.member.4": "Maximum",
+        "Statistics.member.5": "Average",
+        "Unit": "Count"
+      }
+    }
+  },
+  "oneOfAppend": [
+    {
+      "$ref": "#/components/schemas/CloudWatchPutMetricDataQuery"
+    },
+    {
+      "$ref": "#/components/schemas/CloudWatchListMetricsQuery"
+    },
+    {
+      "$ref": "#/components/schemas/CloudWatchGetMetricStatisticsQuery"
+    }
+  ],
+  "responseMedia": {
+    "200": {
+      "schema": {
+        "type": "string",
+        "description": "Native CloudWatch Query XML; examples are static illustrations, not saved responses."
+      },
+      "examples": {
+        "CloudWatchPutMetricData": {
+          "summary": "Static XML ACK illustration; not the last request",
+          "value": "<PutMetricDataResponse xmlns=\"http://monitoring.amazonaws.com/doc/2010-08-01/\"><ResponseMetadata><RequestId>static-example-not-a-live-request</RequestId></ResponseMetadata></PutMetricDataResponse>"
+        },
+        "CloudWatchListMetrics": {
+          "summary": "Static XML list illustration; current results may be empty or differ",
+          "value": "<ListMetricsResponse xmlns=\"http://monitoring.amazonaws.com/doc/2010-08-01/\"><ListMetricsResult><Metrics><member><Namespace>Simulator/Reference</Namespace><MetricName>Requests</MetricName><Dimensions><member><Name>Stage</Name><Value>local</Value></member></Dimensions></member></Metrics></ListMetricsResult><ResponseMetadata><RequestId>static-example-not-a-live-request</RequestId></ResponseMetadata></ListMetricsResponse>"
+        },
+        "CloudWatchGetMetricStatistics": {
+          "summary": "Static XML selected-field example; not live statistics",
+          "value": "<GetMetricStatisticsResponse xmlns=\"http://monitoring.amazonaws.com/doc/2010-08-01/\"><GetMetricStatisticsResult><Label>Requests</Label><Datapoints><member><Timestamp>2026-11-06T00:00:00Z</Timestamp><SampleCount>1</SampleCount><Average>7</Average><Sum>7</Sum><Minimum>7</Minimum><Maximum>7</Maximum><Unit>Count</Unit></member></Datapoints></GetMetricStatisticsResult><ResponseMetadata><RequestId>static-example-not-a-live-request</RequestId></ResponseMetadata></GetMetricStatisticsResponse>"
+        }
+      }
+    },
+    "400": {
+      "schema": {
+        "type": "string",
+        "description": "Native CloudWatch Query XML; examples are static illustrations, not saved responses."
+      },
+      "examples": {
+        "CloudWatchMissingParameter": {
+          "summary": "Static native XML error illustration; no saved state",
+          "value": "<ErrorResponse xmlns=\"http://monitoring.amazonaws.com/doc/2010-08-01/\"><Error><Type>Sender</Type><Code>MissingParameter</Code><Message>A required metric parameter is missing.</Message></Error><RequestId>static-example-not-a-live-request</RequestId></ErrorResponse>"
+        },
+        "CloudWatchInvalidValue": {
+          "summary": "Static native XML error illustration; no saved state",
+          "value": "<ErrorResponse xmlns=\"http://monitoring.amazonaws.com/doc/2010-08-01/\"><Error><Type>Sender</Type><Code>InvalidParameterValue</Code><Message>A raw metric Value must be numeric.</Message></Error><RequestId>static-example-not-a-live-request</RequestId></ErrorResponse>"
+        },
+        "CloudWatchUnsupportedField": {
+          "summary": "Static native XML error illustration; no saved state",
+          "value": "<ErrorResponse xmlns=\"http://monitoring.amazonaws.com/doc/2010-08-01/\"><Error><Type>Sender</Type><Code>InvalidParameterCombination</Code><Message>An unsupported metric parameter was supplied.</Message></Error><RequestId>static-example-not-a-live-request</RequestId></ErrorResponse>"
+        },
+        "CloudWatchLocalQuota": {
+          "summary": "Static native XML error illustration; no saved state",
+          "value": "<ErrorResponse xmlns=\"http://monitoring.amazonaws.com/doc/2010-08-01/\"><Error><Type>Sender</Type><Code>SimulatorQuotaExceeded</Code><Message>The local metric storage budget is exhausted.</Message></Error><RequestId>static-example-not-a-live-request</RequestId></ErrorResponse>"
+        }
+      }
+    },
+    "403": {
+      "schema": {
+        "type": "string",
+        "description": "Native CloudWatch Query XML; examples are static illustrations, not saved responses."
+      },
+      "examples": {
+        "CloudWatchDenied": {
+          "summary": "Static native XML error illustration; no saved state",
+          "value": "<ErrorResponse xmlns=\"http://monitoring.amazonaws.com/doc/2010-08-01/\"><Error><Type>Sender</Type><Code>AccessDenied</Code><Message>The selected identity is not authorized for this metric action.</Message></Error><RequestId>static-example-not-a-live-request</RequestId></ErrorResponse>"
+        }
+      }
+    },
+    "404": {
+      "schema": {
+        "type": "string",
+        "description": "Native CloudWatch Query XML; examples are static illustrations, not saved responses."
+      },
+      "examples": {
+        "CloudWatchUnknownAction": {
+          "summary": "Static native XML error illustration; no saved state",
+          "value": "<ErrorResponse xmlns=\"http://monitoring.amazonaws.com/doc/2010-08-01/\"><Error><Type>Sender</Type><Code>UnknownOperationException</Code><Message>This metric operation is not implemented.</Message></Error><RequestId>static-example-not-a-live-request</RequestId></ErrorResponse>"
+        }
+      }
+    },
+    "413": {
+      "schema": {
+        "type": "string",
+        "description": "Native CloudWatch Query XML; examples are static illustrations, not saved responses."
+      },
+      "examples": {
+        "CloudWatchBodyLimit": {
+          "summary": "Static native XML error illustration; no saved state",
+          "value": "<ErrorResponse xmlns=\"http://monitoring.amazonaws.com/doc/2010-08-01/\"><Error><Type>Sender</Type><Code>RequestEntityTooLargeException</Code><Message>Metric wire or expanded request exceeds the local body limit.</Message></Error><RequestId>static-example-not-a-live-request</RequestId></ErrorResponse>"
+        }
+      }
+    },
+    "500": {
+      "schema": {
+        "type": "string",
+        "description": "Native CloudWatch Query XML; examples are static illustrations, not saved responses."
+      },
+      "examples": {
+        "CloudWatchStorageFailure": {
+          "summary": "Static native XML error illustration; no saved state",
+          "value": "<ErrorResponse xmlns=\"http://monitoring.amazonaws.com/doc/2010-08-01/\"><Error><Type>Receiver</Type><Code>InternalServiceError</Code><Message>Local metric storage operation failed.</Message></Error><RequestId>static-example-not-a-live-request</RequestId></ErrorResponse>"
+        }
+      }
+    }
+  },
+  "oldGenericActionEnum": [
+    "CreateStack",
+    "DescribeStacks",
+    "DeleteStack",
+    "CreateRole",
+    "GetRole",
+    "ListRoles",
+    "DeleteRole",
+    "PutRolePolicy",
+    "GetRolePolicy",
+    "DeleteRolePolicy",
+    "ListRolePolicies",
+    "UpdateAssumeRolePolicy"
+  ],
+  "metricsActions": [
+    "PutMetricData",
+    "ListMetrics",
+    "GetMetricStatistics"
+  ],
+  "originalResponseContentPresent": {
+    "200": true,
+    "400": true,
+    "403": true,
+    "404": false,
+    "413": false,
+    "500": true
+  },
+  "base66CanonicalSHA256": "ee2b5e523d2576325fb41a477322d63fdf6bd9e579aa3b858d61a847da663917"
+}

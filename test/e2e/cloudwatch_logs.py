@@ -9,6 +9,8 @@ from pathlib import Path
 from check import Config, ClientError, boto3, running
 
 
+from metrics_openapi import preserved_metrics_reference
+
 def client(endpoint, token, region="us-east-1", audit=None):
     result = boto3.client("logs", endpoint_url=endpoint, region_name=region,
                           aws_access_key_id="TCSIMLOGS", aws_secret_access_key="dummy",
@@ -66,6 +68,7 @@ def verify_served_reference(endpoint, token, sdk):
             assert response.status == 200
             return json.load(response)
     spec = read("/_simulator/docs/openapi.json")
+    preserved_metrics_reference(spec)
     identities = [item["operationId"] for path in spec["paths"].values() for item in path.values()
                   if isinstance(item, dict) and "operationId" in item]
     assert len(identities) == len(set(identities)) == 66, "Duplicated/missing operation ID"
