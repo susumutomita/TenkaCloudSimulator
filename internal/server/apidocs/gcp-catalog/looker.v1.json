@@ -1,0 +1,1093 @@
+{
+ "components": {
+  "schemas": {
+   "AdminSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "allowedEmailDomains": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ControlledEgressConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "egressFqdns": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "marketplaceEnabled": {
+      "type": "boolean"
+     },
+     "webProxyIps": {
+      "items": {
+       "type": "string"
+      },
+      "readOnly": true,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "CustomDomain": {
+    "additionalProperties": false,
+    "properties": {
+     "domain": {
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "CUSTOM_DOMAIN_STATE_UNSPECIFIED",
+       "UNVERIFIED",
+       "VERIFIED",
+       "MODIFYING",
+       "AVAILABLE",
+       "UNAVAILABLE",
+       "UNKNOWN"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Date": {
+    "additionalProperties": false,
+    "properties": {
+     "day": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "month": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "year": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "DenyMaintenancePeriod": {
+    "additionalProperties": false,
+    "properties": {
+     "endDate": {
+      "$ref": "#/components/schemas/Date"
+     },
+     "startDate": {
+      "$ref": "#/components/schemas/Date"
+     },
+     "time": {
+      "$ref": "#/components/schemas/TimeOfDay"
+     }
+    },
+    "type": "object"
+   },
+   "EncryptionConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "kmsKeyName": {
+      "type": "string"
+     },
+     "kmsKeyNameVersion": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "kmsKeyState": {
+      "enum": [
+       "KMS_KEY_STATE_UNSPECIFIED",
+       "VALID",
+       "REVOKED"
+      ],
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "IngressIpAllowlistConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "allowlistRules": {
+      "items": {
+       "$ref": "#/components/schemas/IngressIpAllowlistRule"
+      },
+      "type": "array"
+     },
+     "enabled": {
+      "type": "boolean"
+     },
+     "googleServicesEnabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "IngressIpAllowlistRule": {
+    "additionalProperties": false,
+    "properties": {
+     "description": {
+      "type": "string"
+     },
+     "ipRange": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Instance": {
+    "additionalProperties": false,
+    "properties": {
+     "acceleratedSecurityPatchEnabled": {
+      "type": "boolean"
+     },
+     "adminSettings": {
+      "$ref": "#/components/schemas/AdminSettings"
+     },
+     "catalogIntegrationOptOut": {
+      "type": "boolean"
+     },
+     "classType": {
+      "enum": [
+       "CLASS_TYPE_UNSPECIFIED",
+       "R1",
+       "P1"
+      ],
+      "type": "string"
+     },
+     "consumerNetwork": {
+      "type": "string"
+     },
+     "controlledEgressConfig": {
+      "$ref": "#/components/schemas/ControlledEgressConfig"
+     },
+     "controlledEgressEnabled": {
+      "type": "boolean"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "customDomain": {
+      "$ref": "#/components/schemas/CustomDomain"
+     },
+     "denyMaintenancePeriod": {
+      "$ref": "#/components/schemas/DenyMaintenancePeriod"
+     },
+     "egressPublicIp": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "encryptionConfig": {
+      "$ref": "#/components/schemas/EncryptionConfig"
+     },
+     "fipsEnabled": {
+      "type": "boolean"
+     },
+     "geminiEnabled": {
+      "type": "boolean"
+     },
+     "ingressIpAllowlistConfig": {
+      "$ref": "#/components/schemas/IngressIpAllowlistConfig"
+     },
+     "ingressPrivateIp": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "ingressPublicIp": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "lastDenyMaintenancePeriod": {
+      "$ref": "#/components/schemas/DenyMaintenancePeriod"
+     },
+     "linkedLspProjectNumber": {
+      "format": "int64",
+      "type": "string"
+     },
+     "lookerUri": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "lookerVersion": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "maintenanceSchedule": {
+      "$ref": "#/components/schemas/MaintenanceSchedule"
+     },
+     "maintenanceWindow": {
+      "$ref": "#/components/schemas/MaintenanceWindow"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "oauthConfig": {
+      "$ref": "#/components/schemas/OAuthConfig"
+     },
+     "periodicExportConfig": {
+      "$ref": "#/components/schemas/PeriodicExportConfig"
+     },
+     "platformEdition": {
+      "enum": [
+       "PLATFORM_EDITION_UNSPECIFIED",
+       "LOOKER_CORE_TRIAL",
+       "LOOKER_CORE_STANDARD",
+       "LOOKER_CORE_STANDARD_ANNUAL",
+       "LOOKER_CORE_ENTERPRISE_ANNUAL",
+       "LOOKER_CORE_EMBED_ANNUAL",
+       "LOOKER_CORE_NONPROD_STANDARD_ANNUAL",
+       "LOOKER_CORE_NONPROD_ENTERPRISE_ANNUAL",
+       "LOOKER_CORE_NONPROD_EMBED_ANNUAL",
+       "LOOKER_CORE_TRIAL_STANDARD",
+       "LOOKER_CORE_TRIAL_ENTERPRISE",
+       "LOOKER_CORE_TRIAL_EMBED"
+      ],
+      "type": "string"
+     },
+     "privateIpEnabled": {
+      "type": "boolean"
+     },
+     "pscConfig": {
+      "$ref": "#/components/schemas/PscConfig"
+     },
+     "pscEnabled": {
+      "type": "boolean"
+     },
+     "publicIpEnabled": {
+      "type": "boolean"
+     },
+     "releaseChannel": {
+      "enum": [
+       "RELEASE_CHANNEL_UNSPECIFIED",
+       "RAPID",
+       "REGULAR",
+       "STABLE"
+      ],
+      "type": "string"
+     },
+     "reservedRange": {
+      "type": "string"
+     },
+     "satisfiesPzi": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "satisfiesPzs": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "softDeleteReason": {
+      "enum": [
+       "SOFT_DELETE_REASON_UNSPECIFIED",
+       "BILLING_ACCOUNT_ISSUE",
+       "TRIAL_EXPIRED",
+       "CUSTOMER_REQUEST"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "ACTIVE",
+       "CREATING",
+       "FAILED",
+       "SUSPENDED",
+       "UPDATING",
+       "DELETING",
+       "EXPORTING",
+       "IMPORTING"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "suspendedTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "userMetadata": {
+      "$ref": "#/components/schemas/UserMetadata"
+     }
+    },
+    "type": "object"
+   },
+   "ListInstancesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "instances": {
+      "items": {
+       "$ref": "#/components/schemas/Instance"
+      },
+      "type": "array"
+     },
+     "nextPageToken": {
+      "type": "string"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListOperationsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "operations": {
+      "items": {
+       "$ref": "#/components/schemas/Operation"
+      },
+      "type": "array"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "MaintenanceSchedule": {
+    "additionalProperties": false,
+    "properties": {
+     "endTime": {
+      "format": "google-datetime",
+      "type": "string"
+     },
+     "startTime": {
+      "format": "google-datetime",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "MaintenanceWindow": {
+    "additionalProperties": false,
+    "properties": {
+     "dayOfWeek": {
+      "enum": [
+       "DAY_OF_WEEK_UNSPECIFIED",
+       "MONDAY",
+       "TUESDAY",
+       "WEDNESDAY",
+       "THURSDAY",
+       "FRIDAY",
+       "SATURDAY",
+       "SUNDAY"
+      ],
+      "type": "string"
+     },
+     "startTime": {
+      "$ref": "#/components/schemas/TimeOfDay"
+     }
+    },
+    "type": "object"
+   },
+   "OAuthConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "clientId": {
+      "type": "string"
+     },
+     "clientSecret": {
+      "type": "string"
+     },
+     "sharedOauthClientEnabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "Operation": {
+    "additionalProperties": false,
+    "properties": {
+     "done": {
+      "type": "boolean"
+     },
+     "error": {
+      "$ref": "#/components/schemas/Status"
+     },
+     "metadata": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "response": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "PeriodicExportConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "gcsUri": {
+      "type": "string"
+     },
+     "kmsKey": {
+      "type": "string"
+     },
+     "startTime": {
+      "$ref": "#/components/schemas/TimeOfDay"
+     }
+    },
+    "type": "object"
+   },
+   "PscConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "allowedVpcs": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "lookerServiceAttachmentUri": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "serviceAttachments": {
+      "items": {
+       "$ref": "#/components/schemas/ServiceAttachment"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ServiceAttachment": {
+    "additionalProperties": false,
+    "properties": {
+     "connectionStatus": {
+      "enum": [
+       "UNKNOWN",
+       "ACCEPTED",
+       "PENDING",
+       "REJECTED",
+       "NEEDS_ATTENTION",
+       "CLOSED"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "failureReason": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "localFqdn": {
+      "type": "string"
+     },
+     "localFqdns": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "targetServiceAttachmentUri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Status": {
+    "additionalProperties": false,
+    "properties": {
+     "code": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "details": {
+      "items": {
+       "additionalProperties": {
+        "description": "Any JSON value"
+       },
+       "type": "object"
+      },
+      "type": "array"
+     },
+     "message": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TimeOfDay": {
+    "additionalProperties": false,
+    "properties": {
+     "hours": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "minutes": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "nanos": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "seconds": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "UserMetadata": {
+    "additionalProperties": false,
+    "properties": {
+     "additionalDeveloperUserCount": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "additionalStandardUserCount": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "additionalViewerUserCount": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Looker (Google Cloud core) API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Instances are configuration metadata: no Looker application, URI, IP address, database or custom domain certificate exists, and instances report ACTIVE immediately. OAuth client secrets are refused and never stored. Deletion is immediate rather than soft, so showDeleted lists nothing extra; undelete, restart, import, export, restore and backups are unimplemented.",
+  "title": "Looker (Google Cloud core) (simulator catalog)",
+  "version": "v1"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/v1/projects/{projectsId}/locations/{locationsId}/instances": {
+   "get": {
+    "operationId": "looker.projects.locations.instances.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "showDeleted",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListInstancesResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.instances.list",
+    "tags": [
+     "Looker (Google Cloud core)"
+    ]
+   },
+   "post": {
+    "operationId": "looker.projects.locations.instances.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "instanceId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Instance"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.instances.create",
+    "tags": [
+     "Looker (Google Cloud core)"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/instances/{instancesId}": {
+   "delete": {
+    "operationId": "looker.projects.locations.instances.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "instancesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "force",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.instances.delete",
+    "tags": [
+     "Looker (Google Cloud core)"
+    ]
+   },
+   "get": {
+    "operationId": "looker.projects.locations.instances.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "instancesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Instance"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.instances.get",
+    "tags": [
+     "Looker (Google Cloud core)"
+    ]
+   },
+   "patch": {
+    "operationId": "looker.projects.locations.instances.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "instancesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Instance"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.instances.patch",
+    "tags": [
+     "Looker (Google Cloud core)"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/operations": {
+   "get": {
+    "operationId": "looker.projects.locations.operations.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "returnPartialSuccess",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListOperationsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.operations.list",
+    "tags": [
+     "Looker (Google Cloud core)"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}": {
+   "get": {
+    "operationId": "looker.projects.locations.operations.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "operationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.operations.get",
+    "tags": [
+     "Looker (Google Cloud core)"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/_simulator/providers/gcp/looker"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Looker (Google Cloud core) API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Instances are configuration metadata: no Looker application, URI, IP address, database or custom domain certificate exists, and instances report ACTIVE immediately. OAuth client secrets are refused and never stored. Deletion is immediate rather than soft, so showDeleted lists nothing extra; undelete, restart, import, export, restore and backups are unimplemented.",
+   "name": "Looker (Google Cloud core)"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "google-api-python-client",
+  "version": "2.199.0",
+  "file": "googleapiclient/discovery_cache/documents/looker.v1.json",
+  "sha256": "2a7d7890aafce3bfc283c84b13cd339935c3035f42b930ccc943bc25d740b7b4",
+  "license": "Apache-2.0",
+  "revision": "20260806"
+ }
+}

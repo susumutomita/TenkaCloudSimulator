@@ -1,0 +1,913 @@
+{
+ "components": {
+  "schemas": {
+   "AuthenticationConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "userWorkloadAuthenticationType": {
+      "enum": [
+       "AUTHENTICATION_TYPE_UNSPECIFIED",
+       "SERVICE_ACCOUNT",
+       "END_USER_CREDENTIALS"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "AutoscalingPolicy": {
+    "additionalProperties": false,
+    "properties": {
+     "basicAlgorithm": {
+      "$ref": "#/components/schemas/BasicAutoscalingAlgorithm"
+     },
+     "clusterType": {
+      "enum": [
+       "CLUSTER_TYPE_UNSPECIFIED",
+       "STANDARD",
+       "ZERO_SCALE"
+      ],
+      "type": "string"
+     },
+     "id": {
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "secondaryWorkerConfig": {
+      "$ref": "#/components/schemas/InstanceGroupAutoscalingPolicyConfig"
+     },
+     "workerConfig": {
+      "$ref": "#/components/schemas/InstanceGroupAutoscalingPolicyConfig"
+     }
+    },
+    "type": "object"
+   },
+   "AutotuningConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "scenarios": {
+      "items": {
+       "enum": [
+        "SCENARIO_UNSPECIFIED",
+        "SCALING",
+        "BROADCAST_HASH_JOIN",
+        "MEMORY",
+        "NONE",
+        "AUTO"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "BasicAutoscalingAlgorithm": {
+    "additionalProperties": false,
+    "properties": {
+     "cooldownPeriod": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "sparkStandaloneConfig": {
+      "$ref": "#/components/schemas/SparkStandaloneAutoscalingConfig"
+     },
+     "yarnConfig": {
+      "$ref": "#/components/schemas/BasicYarnAutoscalingConfig"
+     }
+    },
+    "type": "object"
+   },
+   "BasicYarnAutoscalingConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "gracefulDecommissionTimeout": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "scaleDownFactor": {
+      "format": "double",
+      "type": "number"
+     },
+     "scaleDownMinWorkerFraction": {
+      "format": "double",
+      "type": "number"
+     },
+     "scaleUpFactor": {
+      "format": "double",
+      "type": "number"
+     },
+     "scaleUpMinWorkerFraction": {
+      "format": "double",
+      "type": "number"
+     }
+    },
+    "type": "object"
+   },
+   "Empty": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "EnvironmentConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "executionConfig": {
+      "$ref": "#/components/schemas/ExecutionConfig"
+     },
+     "peripheralsConfig": {
+      "$ref": "#/components/schemas/PeripheralsConfig"
+     }
+    },
+    "type": "object"
+   },
+   "ExecutionConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "authenticationConfig": {
+      "$ref": "#/components/schemas/AuthenticationConfig"
+     },
+     "idleTtl": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "kmsKey": {
+      "type": "string"
+     },
+     "networkTags": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "networkUri": {
+      "type": "string"
+     },
+     "resourceManagerTags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "serviceAccount": {
+      "type": "string"
+     },
+     "stagingBucket": {
+      "type": "string"
+     },
+     "subnetworkUri": {
+      "type": "string"
+     },
+     "ttl": {
+      "format": "google-duration",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "InstanceGroupAutoscalingPolicyConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "maxInstances": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "minInstances": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "weight": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "JupyterConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "displayName": {
+      "type": "string"
+     },
+     "kernel": {
+      "enum": [
+       "KERNEL_UNSPECIFIED",
+       "PYTHON",
+       "SCALA"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListAutoscalingPoliciesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "policies": {
+      "items": {
+       "$ref": "#/components/schemas/AutoscalingPolicy"
+      },
+      "readOnly": true,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListSessionTemplatesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "sessionTemplates": {
+      "items": {
+       "$ref": "#/components/schemas/SessionTemplate"
+      },
+      "readOnly": true,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "PeripheralsConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "metastoreService": {
+      "type": "string"
+     },
+     "sparkHistoryServerConfig": {
+      "$ref": "#/components/schemas/SparkHistoryServerConfig"
+     }
+    },
+    "type": "object"
+   },
+   "PyPiRepositoryConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "pypiRepository": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "RepositoryConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "pypiRepositoryConfig": {
+      "$ref": "#/components/schemas/PyPiRepositoryConfig"
+     }
+    },
+    "type": "object"
+   },
+   "RuntimeConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "autotuningConfig": {
+      "$ref": "#/components/schemas/AutotuningConfig"
+     },
+     "cohort": {
+      "type": "string"
+     },
+     "containerImage": {
+      "type": "string"
+     },
+     "properties": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "repositoryConfig": {
+      "$ref": "#/components/schemas/RepositoryConfig"
+     },
+     "version": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SessionTemplate": {
+    "additionalProperties": false,
+    "properties": {
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "creator": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "environmentConfig": {
+      "$ref": "#/components/schemas/EnvironmentConfig"
+     },
+     "jupyterSession": {
+      "$ref": "#/components/schemas/JupyterConfig"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "runtimeConfig": {
+      "$ref": "#/components/schemas/RuntimeConfig"
+     },
+     "sparkConnectSession": {
+      "$ref": "#/components/schemas/SparkConnectConfig"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "uuid": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SparkConnectConfig": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "SparkHistoryServerConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "dataprocCluster": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SparkStandaloneAutoscalingConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "gracefulDecommissionTimeout": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "removeOnlyIdleWorkers": {
+      "type": "boolean"
+     },
+     "scaleDownFactor": {
+      "format": "double",
+      "type": "number"
+     },
+     "scaleDownMinWorkerFraction": {
+      "format": "double",
+      "type": "number"
+     },
+     "scaleUpFactor": {
+      "format": "double",
+      "type": "number"
+     },
+     "scaleUpMinWorkerFraction": {
+      "format": "double",
+      "type": "number"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Cloud Dataproc API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Autoscaling policies and session templates under projects.locations are configuration metadata (formerly Dataproc): no cluster, batch, session, Spark application or autoscaler runs, and no policy is attached to anything. Clusters, jobs, batches, sessions and workflow templates run or describe workloads and are unimplemented, as are the projects.regions paths and the full-replacement update methods.",
+  "title": "Managed Service for Apache Spark (simulator catalog)",
+  "version": "v1"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/v1/projects/{projectsId}/locations/{locationsId}/autoscalingPolicies": {
+   "get": {
+    "operationId": "dataproc.projects.locations.autoscalingPolicies.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListAutoscalingPoliciesResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.autoscalingPolicies.list",
+    "tags": [
+     "Managed Service for Apache Spark"
+    ]
+   },
+   "post": {
+    "operationId": "dataproc.projects.locations.autoscalingPolicies.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AutoscalingPolicy"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AutoscalingPolicy"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.autoscalingPolicies.create",
+    "tags": [
+     "Managed Service for Apache Spark"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/autoscalingPolicies/{autoscalingPoliciesId}": {
+   "delete": {
+    "operationId": "dataproc.projects.locations.autoscalingPolicies.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "autoscalingPoliciesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Empty"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.autoscalingPolicies.delete",
+    "tags": [
+     "Managed Service for Apache Spark"
+    ]
+   },
+   "get": {
+    "operationId": "dataproc.projects.locations.autoscalingPolicies.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "autoscalingPoliciesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AutoscalingPolicy"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.autoscalingPolicies.get",
+    "tags": [
+     "Managed Service for Apache Spark"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/sessionTemplates": {
+   "get": {
+    "operationId": "dataproc.projects.locations.sessionTemplates.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListSessionTemplatesResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.sessionTemplates.list",
+    "tags": [
+     "Managed Service for Apache Spark"
+    ]
+   },
+   "post": {
+    "operationId": "dataproc.projects.locations.sessionTemplates.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SessionTemplate"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SessionTemplate"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.sessionTemplates.create",
+    "tags": [
+     "Managed Service for Apache Spark"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/sessionTemplates/{sessionTemplatesId}": {
+   "delete": {
+    "operationId": "dataproc.projects.locations.sessionTemplates.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "sessionTemplatesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Empty"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.sessionTemplates.delete",
+    "tags": [
+     "Managed Service for Apache Spark"
+    ]
+   },
+   "get": {
+    "operationId": "dataproc.projects.locations.sessionTemplates.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "sessionTemplatesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SessionTemplate"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.sessionTemplates.get",
+    "tags": [
+     "Managed Service for Apache Spark"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/_simulator/providers/gcp/dataproc"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Cloud Dataproc API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Autoscaling policies and session templates under projects.locations are configuration metadata (formerly Dataproc): no cluster, batch, session, Spark application or autoscaler runs, and no policy is attached to anything. Clusters, jobs, batches, sessions and workflow templates run or describe workloads and are unimplemented, as are the projects.regions paths and the full-replacement update methods.",
+   "name": "Managed Service for Apache Spark"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "google-api-python-client",
+  "version": "2.199.0",
+  "file": "googleapiclient/discovery_cache/documents/dataproc.v1.json",
+  "sha256": "859ccca8665acf8f8746e1d067f86f1fa456c7e7e3fffd8cc2ce7343debb9116",
+  "license": "Apache-2.0",
+  "revision": "20260715"
+ }
+}

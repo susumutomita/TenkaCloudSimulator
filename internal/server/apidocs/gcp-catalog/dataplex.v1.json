@@ -1,0 +1,3432 @@
+{
+ "components": {
+  "schemas": {
+   "GoogleCloudDataplexV1AspectType": {
+    "additionalProperties": false,
+    "properties": {
+     "authorization": {
+      "$ref": "#/components/schemas/GoogleCloudDataplexV1AspectTypeAuthorization"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "dataClassification": {
+      "enum": [
+       "DATA_CLASSIFICATION_UNSPECIFIED",
+       "METADATA_AND_DATA"
+      ],
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "displayName": {
+      "type": "string"
+     },
+     "etag": {
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "metadataTemplate": {
+      "$ref": "#/components/schemas/GoogleCloudDataplexV1AspectTypeMetadataTemplate"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "transferStatus": {
+      "enum": [
+       "TRANSFER_STATUS_UNSPECIFIED",
+       "TRANSFER_STATUS_MIGRATED",
+       "TRANSFER_STATUS_TRANSFERRED"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "uid": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleCloudDataplexV1AspectTypeAuthorization": {
+    "additionalProperties": false,
+    "properties": {
+     "alternateUsePermission": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleCloudDataplexV1AspectTypeMetadataTemplate": {
+    "additionalProperties": false,
+    "properties": {
+     "annotations": {
+      "$ref": "#/components/schemas/GoogleCloudDataplexV1AspectTypeMetadataTemplateAnnotations"
+     },
+     "arrayItems": {
+      "$ref": "#/components/schemas/GoogleCloudDataplexV1AspectTypeMetadataTemplate"
+     },
+     "constraints": {
+      "$ref": "#/components/schemas/GoogleCloudDataplexV1AspectTypeMetadataTemplateConstraints"
+     },
+     "enumValues": {
+      "items": {
+       "$ref": "#/components/schemas/GoogleCloudDataplexV1AspectTypeMetadataTemplateEnumValue"
+      },
+      "type": "array"
+     },
+     "index": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "mapItems": {
+      "$ref": "#/components/schemas/GoogleCloudDataplexV1AspectTypeMetadataTemplate"
+     },
+     "name": {
+      "type": "string"
+     },
+     "recordFields": {
+      "items": {
+       "$ref": "#/components/schemas/GoogleCloudDataplexV1AspectTypeMetadataTemplate"
+      },
+      "type": "array"
+     },
+     "type": {
+      "type": "string"
+     },
+     "typeId": {
+      "type": "string"
+     },
+     "typeRef": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleCloudDataplexV1AspectTypeMetadataTemplateAnnotations": {
+    "additionalProperties": false,
+    "properties": {
+     "deprecated": {
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "displayName": {
+      "type": "string"
+     },
+     "displayOrder": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "stringType": {
+      "type": "string"
+     },
+     "stringValues": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleCloudDataplexV1AspectTypeMetadataTemplateConstraints": {
+    "additionalProperties": false,
+    "properties": {
+     "required": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleCloudDataplexV1AspectTypeMetadataTemplateEnumValue": {
+    "additionalProperties": false,
+    "properties": {
+     "deprecated": {
+      "type": "string"
+     },
+     "index": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "name": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleCloudDataplexV1Asset": {
+    "additionalProperties": false,
+    "properties": {
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "discoverySpec": {
+      "$ref": "#/components/schemas/GoogleCloudDataplexV1AssetDiscoverySpec"
+     },
+     "discoveryStatus": {
+      "$ref": "#/components/schemas/GoogleCloudDataplexV1AssetDiscoveryStatus"
+     },
+     "displayName": {
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "resourceSpec": {
+      "$ref": "#/components/schemas/GoogleCloudDataplexV1AssetResourceSpec"
+     },
+     "resourceStatus": {
+      "$ref": "#/components/schemas/GoogleCloudDataplexV1AssetResourceStatus"
+     },
+     "securityStatus": {
+      "$ref": "#/components/schemas/GoogleCloudDataplexV1AssetSecurityStatus"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "ACTIVE",
+       "CREATING",
+       "DELETING",
+       "ACTION_REQUIRED"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "uid": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleCloudDataplexV1AssetDiscoverySpec": {
+    "additionalProperties": false,
+    "properties": {
+     "csvOptions": {
+      "$ref": "#/components/schemas/GoogleCloudDataplexV1AssetDiscoverySpecCsvOptions"
+     },
+     "enabled": {
+      "type": "boolean"
+     },
+     "excludePatterns": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "includePatterns": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "jsonOptions": {
+      "$ref": "#/components/schemas/GoogleCloudDataplexV1AssetDiscoverySpecJsonOptions"
+     },
+     "schedule": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleCloudDataplexV1AssetDiscoverySpecCsvOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "delimiter": {
+      "type": "string"
+     },
+     "disableTypeInference": {
+      "type": "boolean"
+     },
+     "encoding": {
+      "type": "string"
+     },
+     "headerRows": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleCloudDataplexV1AssetDiscoverySpecJsonOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "disableTypeInference": {
+      "type": "boolean"
+     },
+     "encoding": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleCloudDataplexV1AssetDiscoveryStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "lastRunDuration": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "lastRunTime": {
+      "format": "google-datetime",
+      "type": "string"
+     },
+     "message": {
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "SCHEDULED",
+       "IN_PROGRESS",
+       "PAUSED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "stats": {
+      "$ref": "#/components/schemas/GoogleCloudDataplexV1AssetDiscoveryStatusStats"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleCloudDataplexV1AssetDiscoveryStatusStats": {
+    "additionalProperties": false,
+    "properties": {
+     "dataItems": {
+      "format": "int64",
+      "type": "string"
+     },
+     "dataSize": {
+      "format": "int64",
+      "type": "string"
+     },
+     "filesets": {
+      "format": "int64",
+      "type": "string"
+     },
+     "tables": {
+      "format": "int64",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleCloudDataplexV1AssetResourceSpec": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "type": "string"
+     },
+     "readAccessMode": {
+      "enum": [
+       "ACCESS_MODE_UNSPECIFIED",
+       "DIRECT",
+       "MANAGED"
+      ],
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "TYPE_UNSPECIFIED",
+       "STORAGE_BUCKET",
+       "BIGQUERY_DATASET"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleCloudDataplexV1AssetResourceStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "managedAccessIdentity": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "message": {
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "READY",
+       "ERROR"
+      ],
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleCloudDataplexV1AssetSecurityStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "message": {
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "READY",
+       "APPLYING",
+       "ERROR"
+      ],
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleCloudDataplexV1AssetStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "activeAssets": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "securityPolicyApplyingAssets": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleCloudDataplexV1EntryGroup": {
+    "additionalProperties": false,
+    "properties": {
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "displayName": {
+      "type": "string"
+     },
+     "etag": {
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "transferStatus": {
+      "enum": [
+       "TRANSFER_STATUS_UNSPECIFIED",
+       "TRANSFER_STATUS_MIGRATED",
+       "TRANSFER_STATUS_TRANSFERRED"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "uid": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleCloudDataplexV1EntryType": {
+    "additionalProperties": false,
+    "properties": {
+     "authorization": {
+      "$ref": "#/components/schemas/GoogleCloudDataplexV1EntryTypeAuthorization"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "displayName": {
+      "type": "string"
+     },
+     "etag": {
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "platform": {
+      "type": "string"
+     },
+     "requiredAspects": {
+      "items": {
+       "$ref": "#/components/schemas/GoogleCloudDataplexV1EntryTypeAspectInfo"
+      },
+      "type": "array"
+     },
+     "system": {
+      "type": "string"
+     },
+     "typeAliases": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "uid": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleCloudDataplexV1EntryTypeAspectInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "type": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleCloudDataplexV1EntryTypeAuthorization": {
+    "additionalProperties": false,
+    "properties": {
+     "alternateUsePermission": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleCloudDataplexV1Lake": {
+    "additionalProperties": false,
+    "properties": {
+     "assetStatus": {
+      "$ref": "#/components/schemas/GoogleCloudDataplexV1AssetStatus"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "displayName": {
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "metastore": {
+      "$ref": "#/components/schemas/GoogleCloudDataplexV1LakeMetastore"
+     },
+     "metastoreStatus": {
+      "$ref": "#/components/schemas/GoogleCloudDataplexV1LakeMetastoreStatus"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "serviceAccount": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "ACTIVE",
+       "CREATING",
+       "DELETING",
+       "ACTION_REQUIRED"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "uid": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleCloudDataplexV1LakeMetastore": {
+    "additionalProperties": false,
+    "properties": {
+     "service": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleCloudDataplexV1LakeMetastoreStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "endpoint": {
+      "type": "string"
+     },
+     "message": {
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "NONE",
+       "READY",
+       "UPDATING",
+       "ERROR"
+      ],
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleCloudDataplexV1ListAspectTypesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "aspectTypes": {
+      "items": {
+       "$ref": "#/components/schemas/GoogleCloudDataplexV1AspectType"
+      },
+      "type": "array"
+     },
+     "nextPageToken": {
+      "type": "string"
+     },
+     "unreachableLocations": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleCloudDataplexV1ListAssetsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "assets": {
+      "items": {
+       "$ref": "#/components/schemas/GoogleCloudDataplexV1Asset"
+      },
+      "type": "array"
+     },
+     "nextPageToken": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleCloudDataplexV1ListEntryGroupsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "entryGroups": {
+      "items": {
+       "$ref": "#/components/schemas/GoogleCloudDataplexV1EntryGroup"
+      },
+      "type": "array"
+     },
+     "nextPageToken": {
+      "type": "string"
+     },
+     "unreachableLocations": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleCloudDataplexV1ListEntryTypesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "entryTypes": {
+      "items": {
+       "$ref": "#/components/schemas/GoogleCloudDataplexV1EntryType"
+      },
+      "type": "array"
+     },
+     "nextPageToken": {
+      "type": "string"
+     },
+     "unreachableLocations": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleCloudDataplexV1ListLakesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "lakes": {
+      "items": {
+       "$ref": "#/components/schemas/GoogleCloudDataplexV1Lake"
+      },
+      "type": "array"
+     },
+     "nextPageToken": {
+      "type": "string"
+     },
+     "unreachableLocations": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleCloudDataplexV1ListZonesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "zones": {
+      "items": {
+       "$ref": "#/components/schemas/GoogleCloudDataplexV1Zone"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleCloudDataplexV1Zone": {
+    "additionalProperties": false,
+    "properties": {
+     "assetStatus": {
+      "$ref": "#/components/schemas/GoogleCloudDataplexV1AssetStatus"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "discoverySpec": {
+      "$ref": "#/components/schemas/GoogleCloudDataplexV1ZoneDiscoverySpec"
+     },
+     "displayName": {
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "resourceSpec": {
+      "$ref": "#/components/schemas/GoogleCloudDataplexV1ZoneResourceSpec"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "ACTIVE",
+       "CREATING",
+       "DELETING",
+       "ACTION_REQUIRED"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "TYPE_UNSPECIFIED",
+       "RAW",
+       "CURATED"
+      ],
+      "type": "string"
+     },
+     "uid": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleCloudDataplexV1ZoneDiscoverySpec": {
+    "additionalProperties": false,
+    "properties": {
+     "csvOptions": {
+      "$ref": "#/components/schemas/GoogleCloudDataplexV1ZoneDiscoverySpecCsvOptions"
+     },
+     "enabled": {
+      "type": "boolean"
+     },
+     "excludePatterns": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "includePatterns": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "jsonOptions": {
+      "$ref": "#/components/schemas/GoogleCloudDataplexV1ZoneDiscoverySpecJsonOptions"
+     },
+     "schedule": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleCloudDataplexV1ZoneDiscoverySpecCsvOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "delimiter": {
+      "type": "string"
+     },
+     "disableTypeInference": {
+      "type": "boolean"
+     },
+     "encoding": {
+      "type": "string"
+     },
+     "headerRows": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleCloudDataplexV1ZoneDiscoverySpecJsonOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "disableTypeInference": {
+      "type": "boolean"
+     },
+     "encoding": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleCloudDataplexV1ZoneResourceSpec": {
+    "additionalProperties": false,
+    "properties": {
+     "locationType": {
+      "enum": [
+       "LOCATION_TYPE_UNSPECIFIED",
+       "SINGLE_REGION",
+       "MULTI_REGION"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleLongrunningListOperationsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "operations": {
+      "items": {
+       "$ref": "#/components/schemas/GoogleLongrunningOperation"
+      },
+      "type": "array"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleLongrunningOperation": {
+    "additionalProperties": false,
+    "properties": {
+     "done": {
+      "type": "boolean"
+     },
+     "error": {
+      "$ref": "#/components/schemas/GoogleRpcStatus"
+     },
+     "metadata": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "response": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleRpcStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "code": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "details": {
+      "items": {
+       "additionalProperties": {
+        "description": "Any JSON value"
+       },
+       "type": "object"
+      },
+      "type": "array"
+     },
+     "message": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Cloud Dataplex API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Lakes, zones, assets, entry groups, entry types and aspect types are configuration metadata (formerly Dataplex Universal Catalog): no bucket, dataset, metastore or entry is read, created or published, and lakes, zones and assets report ACTIVE immediately. Discovery, data scans, tasks and metadata jobs never run; asset resource references are not resolved and zone IDs are unique only within their lake. Delete zones before their lake and assets before their zone, as Dataplex requires. Entries, entry links, glossaries, data products and taxonomies are unimplemented.",
+  "title": "Knowledge Catalog (simulator catalog)",
+  "version": "v1"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/v1/projects/{projectsId}/locations/{locationsId}/aspectTypes": {
+   "get": {
+    "operationId": "dataplex.projects.locations.aspectTypes.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleCloudDataplexV1ListAspectTypesResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.aspectTypes.list",
+    "tags": [
+     "Knowledge Catalog"
+    ]
+   },
+   "post": {
+    "operationId": "dataplex.projects.locations.aspectTypes.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "aspectTypeId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/GoogleCloudDataplexV1AspectType"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.aspectTypes.create",
+    "tags": [
+     "Knowledge Catalog"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/aspectTypes/{aspectTypesId}": {
+   "delete": {
+    "operationId": "dataplex.projects.locations.aspectTypes.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "aspectTypesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "etag",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.aspectTypes.delete",
+    "tags": [
+     "Knowledge Catalog"
+    ]
+   },
+   "get": {
+    "operationId": "dataplex.projects.locations.aspectTypes.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "aspectTypesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleCloudDataplexV1AspectType"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.aspectTypes.get",
+    "tags": [
+     "Knowledge Catalog"
+    ]
+   },
+   "patch": {
+    "operationId": "dataplex.projects.locations.aspectTypes.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "aspectTypesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/GoogleCloudDataplexV1AspectType"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.aspectTypes.patch",
+    "tags": [
+     "Knowledge Catalog"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/entryGroups": {
+   "get": {
+    "operationId": "dataplex.projects.locations.entryGroups.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleCloudDataplexV1ListEntryGroupsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.entryGroups.list",
+    "tags": [
+     "Knowledge Catalog"
+    ]
+   },
+   "post": {
+    "operationId": "dataplex.projects.locations.entryGroups.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "entryGroupId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/GoogleCloudDataplexV1EntryGroup"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.entryGroups.create",
+    "tags": [
+     "Knowledge Catalog"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/entryGroups/{entryGroupsId}": {
+   "delete": {
+    "operationId": "dataplex.projects.locations.entryGroups.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "entryGroupsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "etag",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.entryGroups.delete",
+    "tags": [
+     "Knowledge Catalog"
+    ]
+   },
+   "get": {
+    "operationId": "dataplex.projects.locations.entryGroups.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "entryGroupsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleCloudDataplexV1EntryGroup"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.entryGroups.get",
+    "tags": [
+     "Knowledge Catalog"
+    ]
+   },
+   "patch": {
+    "operationId": "dataplex.projects.locations.entryGroups.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "entryGroupsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/GoogleCloudDataplexV1EntryGroup"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.entryGroups.patch",
+    "tags": [
+     "Knowledge Catalog"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/entryTypes": {
+   "get": {
+    "operationId": "dataplex.projects.locations.entryTypes.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleCloudDataplexV1ListEntryTypesResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.entryTypes.list",
+    "tags": [
+     "Knowledge Catalog"
+    ]
+   },
+   "post": {
+    "operationId": "dataplex.projects.locations.entryTypes.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "entryTypeId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/GoogleCloudDataplexV1EntryType"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.entryTypes.create",
+    "tags": [
+     "Knowledge Catalog"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/entryTypes/{entryTypesId}": {
+   "delete": {
+    "operationId": "dataplex.projects.locations.entryTypes.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "entryTypesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "etag",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.entryTypes.delete",
+    "tags": [
+     "Knowledge Catalog"
+    ]
+   },
+   "get": {
+    "operationId": "dataplex.projects.locations.entryTypes.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "entryTypesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleCloudDataplexV1EntryType"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.entryTypes.get",
+    "tags": [
+     "Knowledge Catalog"
+    ]
+   },
+   "patch": {
+    "operationId": "dataplex.projects.locations.entryTypes.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "entryTypesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/GoogleCloudDataplexV1EntryType"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.entryTypes.patch",
+    "tags": [
+     "Knowledge Catalog"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/lakes": {
+   "get": {
+    "operationId": "dataplex.projects.locations.lakes.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleCloudDataplexV1ListLakesResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.lakes.list",
+    "tags": [
+     "Knowledge Catalog"
+    ]
+   },
+   "post": {
+    "operationId": "dataplex.projects.locations.lakes.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "lakeId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/GoogleCloudDataplexV1Lake"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.lakes.create",
+    "tags": [
+     "Knowledge Catalog"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/lakes/{lakesId}": {
+   "delete": {
+    "operationId": "dataplex.projects.locations.lakes.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "lakesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.lakes.delete",
+    "tags": [
+     "Knowledge Catalog"
+    ]
+   },
+   "get": {
+    "operationId": "dataplex.projects.locations.lakes.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "lakesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleCloudDataplexV1Lake"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.lakes.get",
+    "tags": [
+     "Knowledge Catalog"
+    ]
+   },
+   "patch": {
+    "operationId": "dataplex.projects.locations.lakes.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "lakesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/GoogleCloudDataplexV1Lake"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.lakes.patch",
+    "tags": [
+     "Knowledge Catalog"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/lakes/{lakesId}/zones": {
+   "get": {
+    "operationId": "dataplex.projects.locations.lakes.zones.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "lakesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleCloudDataplexV1ListZonesResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.lakes.zones.list",
+    "tags": [
+     "Knowledge Catalog"
+    ]
+   },
+   "post": {
+    "operationId": "dataplex.projects.locations.lakes.zones.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "lakesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     },
+     {
+      "in": "query",
+      "name": "zoneId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/GoogleCloudDataplexV1Zone"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.lakes.zones.create",
+    "tags": [
+     "Knowledge Catalog"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/lakes/{lakesId}/zones/{zonesId}": {
+   "delete": {
+    "operationId": "dataplex.projects.locations.lakes.zones.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "lakesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "zonesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.lakes.zones.delete",
+    "tags": [
+     "Knowledge Catalog"
+    ]
+   },
+   "get": {
+    "operationId": "dataplex.projects.locations.lakes.zones.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "lakesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "zonesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleCloudDataplexV1Zone"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.lakes.zones.get",
+    "tags": [
+     "Knowledge Catalog"
+    ]
+   },
+   "patch": {
+    "operationId": "dataplex.projects.locations.lakes.zones.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "lakesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "zonesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/GoogleCloudDataplexV1Zone"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.lakes.zones.patch",
+    "tags": [
+     "Knowledge Catalog"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/lakes/{lakesId}/zones/{zonesId}/assets": {
+   "get": {
+    "operationId": "dataplex.projects.locations.lakes.zones.assets.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "lakesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "zonesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleCloudDataplexV1ListAssetsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.lakes.zones.assets.list",
+    "tags": [
+     "Knowledge Catalog"
+    ]
+   },
+   "post": {
+    "operationId": "dataplex.projects.locations.lakes.zones.assets.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "lakesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "zonesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "assetId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/GoogleCloudDataplexV1Asset"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.lakes.zones.assets.create",
+    "tags": [
+     "Knowledge Catalog"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/lakes/{lakesId}/zones/{zonesId}/assets/{assetsId}": {
+   "delete": {
+    "operationId": "dataplex.projects.locations.lakes.zones.assets.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "lakesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "zonesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "assetsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.lakes.zones.assets.delete",
+    "tags": [
+     "Knowledge Catalog"
+    ]
+   },
+   "get": {
+    "operationId": "dataplex.projects.locations.lakes.zones.assets.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "lakesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "zonesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "assetsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleCloudDataplexV1Asset"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.lakes.zones.assets.get",
+    "tags": [
+     "Knowledge Catalog"
+    ]
+   },
+   "patch": {
+    "operationId": "dataplex.projects.locations.lakes.zones.assets.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "lakesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "zonesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "assetsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/GoogleCloudDataplexV1Asset"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.lakes.zones.assets.patch",
+    "tags": [
+     "Knowledge Catalog"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/operations": {
+   "get": {
+    "operationId": "dataplex.projects.locations.operations.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "returnPartialSuccess",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningListOperationsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.operations.list",
+    "tags": [
+     "Knowledge Catalog"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}": {
+   "get": {
+    "operationId": "dataplex.projects.locations.operations.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "operationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.operations.get",
+    "tags": [
+     "Knowledge Catalog"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/_simulator/providers/gcp/dataplex"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Cloud Dataplex API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Lakes, zones, assets, entry groups, entry types and aspect types are configuration metadata (formerly Dataplex Universal Catalog): no bucket, dataset, metastore or entry is read, created or published, and lakes, zones and assets report ACTIVE immediately. Discovery, data scans, tasks and metadata jobs never run; asset resource references are not resolved and zone IDs are unique only within their lake. Delete zones before their lake and assets before their zone, as Dataplex requires. Entries, entry links, glossaries, data products and taxonomies are unimplemented.",
+   "name": "Knowledge Catalog"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "google-api-python-client",
+  "version": "2.199.0",
+  "file": "googleapiclient/discovery_cache/documents/dataplex.v1.json",
+  "sha256": "31c8cb81ce77978664b1ead68d7b93f5de8875d2fe5f8d69e644287f1366e2a2",
+  "license": "Apache-2.0",
+  "revision": "20260804"
+ }
+}

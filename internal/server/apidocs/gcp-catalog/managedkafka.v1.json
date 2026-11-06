@@ -1,0 +1,1728 @@
+{
+ "components": {
+  "schemas": {
+   "AccessConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "networkConfigs": {
+      "items": {
+       "$ref": "#/components/schemas/NetworkConfig"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "BrokerDetails": {
+    "additionalProperties": false,
+    "properties": {
+     "brokerIndex": {
+      "format": "int64",
+      "readOnly": true,
+      "type": "string"
+     },
+     "nodeId": {
+      "format": "int64",
+      "readOnly": true,
+      "type": "string"
+     },
+     "rack": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CapacityConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "memoryBytes": {
+      "format": "int64",
+      "type": "string"
+     },
+     "vcpuCount": {
+      "format": "int64",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CertificateAuthorityServiceConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "caPool": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Cluster": {
+    "additionalProperties": false,
+    "properties": {
+     "brokerDetails": {
+      "items": {
+       "$ref": "#/components/schemas/BrokerDetails"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "capacityConfig": {
+      "$ref": "#/components/schemas/CapacityConfig"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "gcpConfig": {
+      "$ref": "#/components/schemas/GcpConfig"
+     },
+     "kafkaVersion": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "rebalanceConfig": {
+      "$ref": "#/components/schemas/RebalanceConfig"
+     },
+     "satisfiesPzi": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "satisfiesPzs": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "CREATING",
+       "ACTIVE",
+       "DELETING",
+       "UPDATING"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "tlsConfig": {
+      "$ref": "#/components/schemas/TlsConfig"
+     },
+     "updateOptions": {
+      "$ref": "#/components/schemas/UpdateOptions"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ConnectAccessConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "networkConfigs": {
+      "items": {
+       "$ref": "#/components/schemas/ConnectNetworkConfig"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ConnectCluster": {
+    "additionalProperties": false,
+    "properties": {
+     "capacityConfig": {
+      "$ref": "#/components/schemas/CapacityConfig"
+     },
+     "config": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "gcpConfig": {
+      "$ref": "#/components/schemas/ConnectGcpConfig"
+     },
+     "kafkaCluster": {
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "satisfiesPzi": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "satisfiesPzs": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "CREATING",
+       "ACTIVE",
+       "DELETING",
+       "DETACHED"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ConnectGcpConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "accessConfig": {
+      "$ref": "#/components/schemas/ConnectAccessConfig"
+     },
+     "secretPaths": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ConnectNetworkConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "additionalSubnets": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "dnsDomainNames": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "primarySubnet": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Empty": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "GcpConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "accessConfig": {
+      "$ref": "#/components/schemas/AccessConfig"
+     },
+     "kmsKey": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListClustersResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "clusters": {
+      "items": {
+       "$ref": "#/components/schemas/Cluster"
+      },
+      "type": "array"
+     },
+     "nextPageToken": {
+      "type": "string"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListConnectClustersResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "connectClusters": {
+      "items": {
+       "$ref": "#/components/schemas/ConnectCluster"
+      },
+      "type": "array"
+     },
+     "nextPageToken": {
+      "type": "string"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListOperationsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "operations": {
+      "items": {
+       "$ref": "#/components/schemas/Operation"
+      },
+      "type": "array"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListTopicsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "topics": {
+      "items": {
+       "$ref": "#/components/schemas/Topic"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "NetworkConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "subnet": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Operation": {
+    "additionalProperties": false,
+    "properties": {
+     "done": {
+      "type": "boolean"
+     },
+     "error": {
+      "$ref": "#/components/schemas/Status"
+     },
+     "metadata": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "response": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "RebalanceConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "mode": {
+      "enum": [
+       "MODE_UNSPECIFIED",
+       "NO_REBALANCE",
+       "AUTO_REBALANCE_ON_SCALE_UP"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Status": {
+    "additionalProperties": false,
+    "properties": {
+     "code": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "details": {
+      "items": {
+       "additionalProperties": {
+        "description": "Any JSON value"
+       },
+       "type": "object"
+      },
+      "type": "array"
+     },
+     "message": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TlsConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "sslPrincipalMappingRules": {
+      "type": "string"
+     },
+     "trustConfig": {
+      "$ref": "#/components/schemas/TrustConfig"
+     }
+    },
+    "type": "object"
+   },
+   "Topic": {
+    "additionalProperties": false,
+    "properties": {
+     "configs": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "partitionCount": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "replicationFactor": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "TrustConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "casConfigs": {
+      "items": {
+       "$ref": "#/components/schemas/CertificateAuthorityServiceConfig"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "UpdateOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "allowBrokerDownscaleOnClusterUpscale": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Managed Service for Apache Kafka API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Clusters, topics and Connect clusters are configuration metadata: no Kafka broker, bootstrap address, partition, message, consumer group, connector or network endpoint exists, and clusters report ACTIVE immediately. Capacity is validated against the documented minimums (3 vCPUs, 3 GiB, 1 to 8 GiB per vCPU) but nothing is provisioned; view=FULL returns no broker details or Kafka version. Topic partition counts cannot be changed by the simulator, Connect cluster kafkaCluster references are not resolved, and the reserved Connect worker config is refused. Delete topics before their cluster: deleting a cluster that still has topics fails with FAILED_PRECONDITION. ACLs, consumer groups, connectors and schema registries are unimplemented.",
+  "title": "Managed Service for Apache Kafka (simulator catalog)",
+  "version": "v1"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/v1/projects/{projectsId}/locations/{locationsId}/clusters": {
+   "get": {
+    "operationId": "managedkafka.projects.locations.clusters.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListClustersResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.clusters.list",
+    "tags": [
+     "Managed Service for Apache Kafka"
+    ]
+   },
+   "post": {
+    "operationId": "managedkafka.projects.locations.clusters.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "clusterId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Cluster"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.clusters.create",
+    "tags": [
+     "Managed Service for Apache Kafka"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/clusters/{clustersId}": {
+   "delete": {
+    "operationId": "managedkafka.projects.locations.clusters.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "clustersId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.clusters.delete",
+    "tags": [
+     "Managed Service for Apache Kafka"
+    ]
+   },
+   "get": {
+    "operationId": "managedkafka.projects.locations.clusters.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "clustersId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "view",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Cluster"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.clusters.get",
+    "tags": [
+     "Managed Service for Apache Kafka"
+    ]
+   },
+   "patch": {
+    "operationId": "managedkafka.projects.locations.clusters.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "clustersId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Cluster"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.clusters.patch",
+    "tags": [
+     "Managed Service for Apache Kafka"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/clusters/{clustersId}/topics": {
+   "get": {
+    "operationId": "managedkafka.projects.locations.clusters.topics.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "clustersId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListTopicsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.clusters.topics.list",
+    "tags": [
+     "Managed Service for Apache Kafka"
+    ]
+   },
+   "post": {
+    "operationId": "managedkafka.projects.locations.clusters.topics.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "clustersId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "topicId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Topic"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Topic"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.clusters.topics.create",
+    "tags": [
+     "Managed Service for Apache Kafka"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/clusters/{clustersId}/topics/{topicsId}": {
+   "delete": {
+    "operationId": "managedkafka.projects.locations.clusters.topics.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "clustersId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "topicsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Empty"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.clusters.topics.delete",
+    "tags": [
+     "Managed Service for Apache Kafka"
+    ]
+   },
+   "get": {
+    "operationId": "managedkafka.projects.locations.clusters.topics.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "clustersId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "topicsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Topic"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.clusters.topics.get",
+    "tags": [
+     "Managed Service for Apache Kafka"
+    ]
+   },
+   "patch": {
+    "operationId": "managedkafka.projects.locations.clusters.topics.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "clustersId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "topicsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Topic"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Topic"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.clusters.topics.patch",
+    "tags": [
+     "Managed Service for Apache Kafka"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/connectClusters": {
+   "get": {
+    "operationId": "managedkafka.projects.locations.connectClusters.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListConnectClustersResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.connectClusters.list",
+    "tags": [
+     "Managed Service for Apache Kafka"
+    ]
+   },
+   "post": {
+    "operationId": "managedkafka.projects.locations.connectClusters.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "connectClusterId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ConnectCluster"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.connectClusters.create",
+    "tags": [
+     "Managed Service for Apache Kafka"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/connectClusters/{connectClustersId}": {
+   "delete": {
+    "operationId": "managedkafka.projects.locations.connectClusters.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "connectClustersId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.connectClusters.delete",
+    "tags": [
+     "Managed Service for Apache Kafka"
+    ]
+   },
+   "get": {
+    "operationId": "managedkafka.projects.locations.connectClusters.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "connectClustersId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ConnectCluster"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.connectClusters.get",
+    "tags": [
+     "Managed Service for Apache Kafka"
+    ]
+   },
+   "patch": {
+    "operationId": "managedkafka.projects.locations.connectClusters.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "connectClustersId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ConnectCluster"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.connectClusters.patch",
+    "tags": [
+     "Managed Service for Apache Kafka"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/operations": {
+   "get": {
+    "operationId": "managedkafka.projects.locations.operations.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "returnPartialSuccess",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListOperationsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.operations.list",
+    "tags": [
+     "Managed Service for Apache Kafka"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}": {
+   "get": {
+    "operationId": "managedkafka.projects.locations.operations.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "operationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.operations.get",
+    "tags": [
+     "Managed Service for Apache Kafka"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/_simulator/providers/gcp/managedkafka"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Managed Service for Apache Kafka API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Clusters, topics and Connect clusters are configuration metadata: no Kafka broker, bootstrap address, partition, message, consumer group, connector or network endpoint exists, and clusters report ACTIVE immediately. Capacity is validated against the documented minimums (3 vCPUs, 3 GiB, 1 to 8 GiB per vCPU) but nothing is provisioned; view=FULL returns no broker details or Kafka version. Topic partition counts cannot be changed by the simulator, Connect cluster kafkaCluster references are not resolved, and the reserved Connect worker config is refused. Delete topics before their cluster: deleting a cluster that still has topics fails with FAILED_PRECONDITION. ACLs, consumer groups, connectors and schema registries are unimplemented.",
+   "name": "Managed Service for Apache Kafka"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "google-api-python-client",
+  "version": "2.199.0",
+  "file": "googleapiclient/discovery_cache/documents/managedkafka.v1.json",
+  "sha256": "d47a63191520f850a613c42f6eed34ba7097234904d7a16ea8a25ddf837b062f",
+  "license": "Apache-2.0",
+  "revision": "20260507"
+ }
+}
