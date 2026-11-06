@@ -68,7 +68,7 @@ connected native value during input/focus capture or blur, and snapshots it at
 submission, including an intentional clear. Submission flushes a current explicit
 paste first; adoption is a new intent that cancels older asynchronous input work.
 These are compatibility measures, not proof of an extension cause or a confirmed
-Dia/1Password repair. The latest focus-capture candidate is not built or
+Dia/1Password repair. The latest focus-capture candidate has a verified local offline UI build, but is not
 browser-verified; real extension and user-device clipboard behavior remain unverified.
 See the [dated login CI result and remaining checks](docs/login-token-file.md#dated-validation-and-current-candidate).
 

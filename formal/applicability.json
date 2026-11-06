@@ -1,350 +1,307 @@
 {
   "version": 1,
-  "base_sha": "d166f569772de7f45d98e31e9971eeb33b903763",
+  "base_sha": "03060d44f2c7c6e52aaf8799f4bacf21a22cd6bc",
   "changes": [
     {
       "path": ".github/workflows/ci.yml",
-      "sha256": "65da562eb251f69f5504e993147c326c7824c8b9d3fd4f4729ae3b825a3d4e86",
+      "sha256": "cea1c9a3173005803de84ae88221d4fb3ef4308a78374b72e2fd3455b17f7e3d",
       "disposition": "formal-infrastructure",
-      "reason": "Retain existing anonymous landing E2E audit outputs in the existing 14-day artifact; no new execution, action, permission, threshold or state semantics.",
+      "reason": "Mandatory policy or CI validation wiring; original models, invariants, controls and check behavior retained.",
       "models": []
     },
     {
       "path": "README.ja.md",
-      "sha256": "faed0f49fcc47a04d7d3833f5d3ecc8cf94756872c82be613fb9b920e7029cb3",
+      "sha256": "aa077afd1236cd0e501e6e0f2209cb0d7d203253b3465323e5346da858455385",
       "disposition": "documentation",
-      "reason": "Correct current 50-model/398-control inventory and distinguish dated historical receipts, bounded LP properties and unverified conditions. No new runtime guarantee.",
+      "reason": "Login/CI documentation only; no runtime authorization or proof claim.",
       "models": []
     },
     {
       "path": "README.md",
-      "sha256": "7bf76f1f0a9c785b86f4cd9aa0837283e3c74f677a459545b42add8f70c2b44e",
+      "sha256": "e84db0ca6b9d560b10e81a7305d8abb2384c08337fb7d41514e9fdefa713f9d8",
       "disposition": "documentation",
-      "reason": "LP-only documentation, validation policy or tests; preserves SDK root, old checks and existing model values. No browser or implementation proof claim.",
+      "reason": "Login/CI documentation only; no runtime authorization or proof claim.",
       "models": []
     },
     {
       "path": "docs/ci.md",
-      "sha256": "028fa57dbd4fb9f6dad30f1b7b7c57d50e0575f5d64d45769584f0347e127637",
+      "sha256": "69f8970528fd5e72a86e039fa30f087e07b9c01598d01b58973b83b7c4711e5e",
       "disposition": "documentation",
-      "reason": "Describe the existing anonymous landing audit output scope and retention accurately; no release or native browser-support claim.",
+      "reason": "Login/CI documentation only; no runtime authorization or proof claim.",
       "models": []
     },
     {
       "path": "docs/formal-validation.md",
-      "sha256": "31cd732a385f414cbd935e33ebdb0add95a8ceb8ae8f1748ebdc61b8ee8c1812",
+      "sha256": "8e9b80a64442fd9fb06fa48c128b083805416367a73ce26b6b27a32b51a62ad8",
       "disposition": "documentation",
-      "reason": "Correct current 50-model/398-control inventory and distinguish dated historical receipts, bounded LP properties and unverified conditions. No new runtime guarantee.",
+      "reason": "Login/CI documentation only; no runtime authorization or proof claim.",
       "models": []
     },
     {
-      "path": "docs/landing.md",
-      "sha256": "bfaaa806b87a45548abcf59ea1264ded73e1dbf6f777c97c5b8faecb7cffa5bf",
+      "path": "docs/login-token-file.md",
+      "sha256": "44184bbe4c19dd6faab0b4c182e1bfef0e07c144b3e689e2cef9fb7946f01b80",
       "disposition": "documentation",
-      "reason": "LP-only documentation, validation policy or tests; preserves SDK root, old checks and existing model values. No browser or implementation proof claim.",
+      "reason": "Login/CI documentation only; no runtime authorization or proof claim.",
       "models": []
     },
     {
-      "path": "formal/LandingAccessAdmission.cfg",
-      "sha256": "0fbb0c27f5dfdf7bcc8779e44063454cd52027991d9917b907066d05fe9402ca",
+      "path": "formal/LoginInputIntent.cfg",
+      "sha256": "7d32b58320c5f67308bbe66657f1fbe55b389c09a99d91cbbbc8b473d7863297",
       "disposition": "modeled",
-      "reason": "Original bounded landing admission or stored-selection projection for the changed scope. HTTP, DOM, accessibility, native Chrome rendering and JavaScript/Go refinement require independent tests.",
+      "reason": "Declared finite state and guard projection with named safety invariants; actual implementation, build and browser checks remain separate obligations.",
       "models": [
         {
-          "id": "LandingAccessAdmission",
+          "id": "LoginInputIntent",
           "properties": [
-            "TypeOK",
-            "ExternalBoundary",
-            "PublicResponse",
-            "TokenBoundary",
-            "UnknownNeverStatic"
+            "NoEmptyPOST",
+            "NoPOSTWhileBlocked",
+            "StaleFileCompletionFrame",
+            "SubmissionSelectionExact",
+            "AdoptedValueExact",
+            "IntentInvalidatesAsync",
+            "LocaleIntentFrame"
           ],
-          "limits": "Original finite admission contract only. Host/origin and authentication results are trusted inputs from existing middleware; no token, browser session, DNS, URL decoding, HTTP parser, ServeMux canonicalization, filesystem, SQLite, rendering, JavaScript, or Chrome feature proof. Exact HTTP composition and negative path cases are separate Go tests. Only fixed static product assets are public; no service credentials or exercise state are represented."
+          "limits": "Scoped local 14-case checking at model source 5b270e9 exhausted 77 baseline states and observed all 13 declared noninitial counterexamples, including FocusSkipsNativeAdoption. This is scoped evidence, not full current 462-case acceptance or JavaScript/React/1Password proof. Historical 13-case checking at 28d37d1 exhausted 73 states; Combined UnmountedFileCompletionPublishes first failed the file-edit scenario and establishes StaleFileCompletionFrame sensitivity, not an isolated unmount witness. Bounded committed-state input/intent safety correspondence only; not JavaScript/React/Cloudscape/DOM/OS/event scheduling refinement, actual1Password/Dia/Safari, arbitrary focused/unfocused rerenders, clipboard/undo/IME/selection bytes, file UTF8/MIME/size/parser, authentication/HTTP/cookie/crypto/server/browser sessions, liveness or arbitrary event sequences/revision horizons. Pending explicit paste has precedence over current connected DOM. Locale protects adopted control/intent state only; unfocused unadopted DOM may reset. Independent before-state oracles observe actual token/refs/POST records; no server accepts every nonempty label. Mutation sensitivity requires real noninitial named TLC counterexamples, not static anchor counts. Generated app.js scope is ONLY the compiled login-input intent projection. The local offline rebuild of source 21054448a4400adad6bcc7dfb0aa726c58b07aaf produced asset commit 310a7994b3b727e4346d8c94d4f7d836d7304704 with 1352 resolved inputs and retained original notices for 22 packages; exact asset digests and input metadata are committed under tools/console. Default hosted-CI build equivalence remains to be checked. Compiler/minifier correctness, React/DOM/native input APIs and backend behavior are not refinement-proved; this binding does not prove the rest of the bundle. The focus scenario explicitly assumes a possible controlled render after focus capture resets DOM from adopted controlled state. This explores a suspected ordering hazard, not an established explanation of the actual CI response timeout. The full current 462-case gate and real Dia/1Password acceptance remain unverified."
         }
       ]
     },
     {
-      "path": "formal/LandingAccessAdmission.tla",
-      "sha256": "e9f24998b1c2387b0128854904f8e0a69e7edab2a89e67804964355a89f32071",
+      "path": "formal/LoginInputIntent.tla",
+      "sha256": "fce0cee2c829f2e9fc7cccf5fdac62881f336c1855586425aa5ba76ae1959d46",
       "disposition": "modeled",
-      "reason": "Original bounded landing admission or stored-selection projection for the changed scope. HTTP, DOM, accessibility, native Chrome rendering and JavaScript/Go refinement require independent tests.",
+      "reason": "Declared finite state and guard projection with named safety invariants; actual implementation, build and browser checks remain separate obligations.",
       "models": [
         {
-          "id": "LandingAccessAdmission",
+          "id": "LoginInputIntent",
           "properties": [
-            "TypeOK",
-            "ExternalBoundary",
-            "PublicResponse",
-            "TokenBoundary",
-            "UnknownNeverStatic"
+            "NoEmptyPOST",
+            "NoPOSTWhileBlocked",
+            "StaleFileCompletionFrame",
+            "SubmissionSelectionExact",
+            "AdoptedValueExact",
+            "IntentInvalidatesAsync",
+            "LocaleIntentFrame"
           ],
-          "limits": "Original finite admission contract only. Host/origin and authentication results are trusted inputs from existing middleware; no token, browser session, DNS, URL decoding, HTTP parser, ServeMux canonicalization, filesystem, SQLite, rendering, JavaScript, or Chrome feature proof. Exact HTTP composition and negative path cases are separate Go tests. Only fixed static product assets are public; no service credentials or exercise state are represented."
-        }
-      ]
-    },
-    {
-      "path": "formal/LandingTopologyState.cfg",
-      "sha256": "ece267cec9d9146294f44ef045d28ee87ca2d3772e4e9bcaef1d2c49e2863b78",
-      "disposition": "modeled",
-      "reason": "Original bounded landing admission or stored-selection projection for the changed scope. HTTP, DOM, accessibility, native Chrome rendering and JavaScript/Go refinement require independent tests.",
-      "models": [
-        {
-          "id": "LandingTopologyState",
-          "properties": [
-            "TypeOK",
-            "ProviderSelectsDefault",
-            "NodeClickSelectsExact",
-            "InvalidInputPreservesSelection",
-            "DOMSelectionAgrees",
-            "CanonicalHTMLAvailable",
-            "MountUsesLatestSelection",
-            "UnsupportedCanvasHidden",
-            "RetiredCanvasHidden",
-            "PaintUsesLatestSelection",
-            "RetiredCallbackNoEffect",
-            "InitialFragmentSelection"
-          ],
-          "limits": "Post-start semantic selection and optional decorative lifecycle safety only. Trusted source data and native feature/paint verdicts are assumed; no DOM/accessibility/layout/rendering/Chrome support/backend/route/network or JavaScript refinement proof. Reduced-motion has identical static transitions because implementation has no animation loop; no preference-detection proof. Timeout is an environment event, not wall-clock/liveness. Initial fragment choice is a trusted closed node ID or absent input; URL parsing, encoding, browser scroll and history are outside this model."
-        }
-      ]
-    },
-    {
-      "path": "formal/LandingTopologyState.tla",
-      "sha256": "67599e8c1742dd8455492ae0a6eb533a0ec5324b864a0564105e69557567ebe2",
-      "disposition": "modeled",
-      "reason": "Original bounded landing admission or stored-selection projection for the changed scope. HTTP, DOM, accessibility, native Chrome rendering and JavaScript/Go refinement require independent tests.",
-      "models": [
-        {
-          "id": "LandingTopologyState",
-          "properties": [
-            "TypeOK",
-            "ProviderSelectsDefault",
-            "NodeClickSelectsExact",
-            "InvalidInputPreservesSelection",
-            "DOMSelectionAgrees",
-            "CanonicalHTMLAvailable",
-            "MountUsesLatestSelection",
-            "UnsupportedCanvasHidden",
-            "RetiredCanvasHidden",
-            "PaintUsesLatestSelection",
-            "RetiredCallbackNoEffect",
-            "InitialFragmentSelection"
-          ],
-          "limits": "Post-start semantic selection and optional decorative lifecycle safety only. Trusted source data and native feature/paint verdicts are assumed; no DOM/accessibility/layout/rendering/Chrome support/backend/route/network or JavaScript refinement proof. Reduced-motion has identical static transitions because implementation has no animation loop; no preference-detection proof. Timeout is an environment event, not wall-clock/liveness. Initial fragment choice is a trusted closed node ID or absent input; URL parsing, encoding, browser scroll and history are outside this model."
+          "limits": "Scoped local 14-case checking at model source 5b270e9 exhausted 77 baseline states and observed all 13 declared noninitial counterexamples, including FocusSkipsNativeAdoption. This is scoped evidence, not full current 462-case acceptance or JavaScript/React/1Password proof. Historical 13-case checking at 28d37d1 exhausted 73 states; Combined UnmountedFileCompletionPublishes first failed the file-edit scenario and establishes StaleFileCompletionFrame sensitivity, not an isolated unmount witness. Bounded committed-state input/intent safety correspondence only; not JavaScript/React/Cloudscape/DOM/OS/event scheduling refinement, actual1Password/Dia/Safari, arbitrary focused/unfocused rerenders, clipboard/undo/IME/selection bytes, file UTF8/MIME/size/parser, authentication/HTTP/cookie/crypto/server/browser sessions, liveness or arbitrary event sequences/revision horizons. Pending explicit paste has precedence over current connected DOM. Locale protects adopted control/intent state only; unfocused unadopted DOM may reset. Independent before-state oracles observe actual token/refs/POST records; no server accepts every nonempty label. Mutation sensitivity requires real noninitial named TLC counterexamples, not static anchor counts. Generated app.js scope is ONLY the compiled login-input intent projection. The local offline rebuild of source 21054448a4400adad6bcc7dfb0aa726c58b07aaf produced asset commit 310a7994b3b727e4346d8c94d4f7d836d7304704 with 1352 resolved inputs and retained original notices for 22 packages; exact asset digests and input metadata are committed under tools/console. Default hosted-CI build equivalence remains to be checked. Compiler/minifier correctness, React/DOM/native input APIs and backend behavior are not refinement-proved; this binding does not prove the rest of the bundle. The focus scenario explicitly assumes a possible controlled render after focus capture resets DOM from adopted controlled state. This explores a suspected ordering hazard, not an established explanation of the actual CI response timeout. The full current 462-case gate and real Dia/1Password acceptance remain unverified."
         }
       ]
     },
     {
       "path": "formal/README.md",
-      "sha256": "e8ef9e6dbe57ee0f3884dcb152c8987cf74b879b6202cd4f84916ed8228581a3",
+      "sha256": "d5b981f0bfa7aecfee01da1b388bf4b6eb2419cd0c1abfac1174acdd5f06013a",
       "disposition": "documentation",
-      "reason": "Correct current 50-model/398-control inventory and distinguish dated historical receipts, bounded LP properties and unverified conditions. No new runtime guarantee.",
+      "reason": "Login/CI documentation only; no runtime authorization or proof claim.",
       "models": []
     },
     {
       "path": "formal/models.json",
-      "sha256": "8ccc156c16b0def0f1cf560ceb4a0c7f529ba2cb65eb975dab38c565ee43bbc2",
+      "sha256": "95d6e7d88e5c031225e2ee9c30a20123f816ced1b6f2e576633c17d4d9898f20",
       "disposition": "formal-infrastructure",
-      "reason": "LP-only documentation, validation policy or tests; preserves SDK root, old checks and existing model values. No browser or implementation proof claim.",
+      "reason": "Mandatory policy or CI validation wiring; original models, invariants, controls and check behavior retained.",
       "models": []
     },
     {
-      "path": "internal/server/access.go",
-      "sha256": "efb3916ee5ca9efdd738a4a8fa5ac1a3a376406b5d5dcf44b255c7dcc019cf88",
+      "path": "internal/server/web/app.js",
+      "sha256": "6acff728a68a199afb78a070e014aced2c4a671c7d27768fbf06a588935e8342",
       "disposition": "modeled",
-      "reason": "Original bounded landing admission or stored-selection projection for the changed scope. HTTP, DOM, accessibility, native Chrome rendering and JavaScript/Go refinement require independent tests.",
+      "reason": "Declared finite state and guard projection with named safety invariants; actual implementation, build and browser checks remain separate obligations.",
       "models": [
         {
-          "id": "LandingAccessAdmission",
+          "id": "SecretsRevealEpoch",
           "properties": [
-            "TypeOK",
-            "ExternalBoundary",
-            "PublicResponse",
-            "TokenBoundary",
-            "UnknownNeverStatic"
+            "NoUnmountedDisplay",
+            "FreshEmissionHistory",
+            "ReturnedARNMatches",
+            "VisibleContextMatches"
           ],
-          "limits": "Original finite admission contract only. Host/origin and authentication results are trusted inputs from existing middleware; no token, browser session, DNS, URL decoding, HTTP parser, ServeMux canonicalization, filesystem, SQLite, rendering, JavaScript, or Chrome feature proof. Exact HTTP composition and negative path cases are separate Go tests. Only fixed static product assets are public; no service credentials or exercise state are represented."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/landing.go",
-      "sha256": "0cd577ac98daf80c6df95a98ca2f4960d0c3c1b641e76e4bd30fc885fdfc52ed",
-      "disposition": "modeled",
-      "reason": "Original bounded landing admission or stored-selection projection for the changed scope. HTTP, DOM, accessibility, native Chrome rendering and JavaScript/Go refinement require independent tests.",
-      "models": [
+          "limits": "Finite explicit-retrieve/display model, not React, DOM, AbortController, memory zeroization or implementation refinement. Only the successful response path is modeled; native store/IAM must authorize before returning any secret. A returned ARN can differ and must be rejected. Retrieve, Hide and navigation invalidate epochs; unmount also clears visible state. Parent must remount on region/principal changes. Emission history captures the context at each acceptance so later Hide/navigation cannot relabel an earlier stale acceptance. Draft entry, mutation atomicity and form layout are outside this model. Parent main.jsx scope binds only Secrets routing/remount key (region/principal/navigation); the generated app.js binding is the canonical compiled artifact of those source inputs, independently checked by bundle/asset hashes. It does not model unrelated existing console services or prove JavaScript compilation. Compiled bundle binding covers only this declared state/guard projection, not unrelated bundle code or a compiler refinement proof."
+        },
         {
-          "id": "LandingAccessAdmission",
+          "id": "SakuraDisksViewEpoch",
           "properties": [
-            "TypeOK",
-            "ExternalBoundary",
-            "PublicResponse",
-            "TokenBoundary",
-            "UnknownNeverStatic"
+            "AcceptedReadScope",
+            "SuccessfulReadOnly",
+            "RenderedScopeBound",
+            "RenderedResourceBound",
+            "StaleReadFrame",
+            "StaleWriteFrame",
+            "NavigationACKFrame",
+            "AckClosesForm",
+            "AckClearsDraft",
+            "ReadRetryOnly",
+            "SingleWriteSend",
+            "LocaleFrame",
+            "CancelDraftClear"
           ],
-          "limits": "Original finite admission contract only. Host/origin and authentication results are trusted inputs from existing middleware; no token, browser session, DNS, URL decoding, HTTP parser, ServeMux canonicalization, filesystem, SQLite, rendering, JavaScript, or Chrome feature proof. Exact HTTP composition and negative path cases are separate Go tests. Only fixed static product assets are public; no service credentials or exercise state are represented."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/landing/index.html",
-      "sha256": "85001f0cb04d56674f587cdfadd70d370c6c6baf55899c90cf7c4401b16c3940",
-      "disposition": "presentation",
-      "reason": "Static HTML and CSS only; runtime landing JS still requires model bindings. Real browser, keyboard, accessibility and fallback checks are separate.",
-      "models": []
-    },
-    {
-      "path": "internal/server/landing/landing.css",
-      "sha256": "4cdef2c1fac60a9bc52f7ffea99ed12ca9876f6d13d37ae3cd93548db25ef1da",
-      "disposition": "presentation",
-      "reason": "Static HTML and CSS only; runtime landing JS still requires model bindings. Real browser, keyboard, accessibility and fallback checks are separate.",
-      "models": []
-    },
-    {
-      "path": "internal/server/landing/landing.mjs",
-      "sha256": "6fe5ec36d350724930a0ea4f18ec09965be15bb0e19606ae58f1d29385afa000",
-      "disposition": "modeled",
-      "reason": "Original bounded landing admission or stored-selection projection for the changed scope. HTTP, DOM, accessibility, native Chrome rendering and JavaScript/Go refinement require independent tests.",
-      "models": [
+          "limits": "Original bounded UI safety projection only, not React/JS/AbortController scheduling or server/SQL/IAM/token authority proof. Opaque scope combines trusted principal/session/globalnavigation/endpoint; actualcredential/contextKey production remainstrustedcaller. Read responses may complete afterabort/headers, no zero-network/body-cancel guarantee. No orphan-loading/liveness/hungread promise. ACK is actual2xxresponse beforeCreatebody/metadata, not serverrollback/idempotency underunknownnetworkoutcome. Two opens/onewriteintent excludearbitrarynew-sessionwrite concurrency. Independent request/frame snapshots monitoractualpublishedview changes, not ghost-only mutations. Nativepayloadbytes/schema/confirmation/keyentropy/quota/APIwire/SDK andauthenticatedcloudvisualparity areoutside. Shared main scope is ONLY Sakura fixedcapabilityconfiguration/contextKey+request mount, notAWS/GCP/Azure behavior; shell/CSS/neutralcatalogstate not proved. The generated app.js scope binds only the canonical compiled artifact of this separately declared Sakura child/mount projection; it does not prove bundler/compiler correctness or unrelated AWS/GCP/Azure behavior. Compiled bundle binding covers only this declared state/guard projection, not unrelated bundle code or a compiler refinement proof."
+        },
         {
-          "id": "LandingTopologyState",
+          "id": "DynamoDBConsoleEpoch",
           "properties": [
-            "TypeOK",
-            "ProviderSelectsDefault",
-            "NodeClickSelectsExact",
-            "InvalidInputPreservesSelection",
-            "DOMSelectionAgrees",
-            "CanonicalHTMLAvailable",
-            "MountUsesLatestSelection",
-            "UnsupportedCanvasHidden",
-            "RetiredCanvasHidden",
-            "PaintUsesLatestSelection",
-            "RetiredCallbackNoEffect",
-            "InitialFragmentSelection"
+            "NoStalePublication",
+            "ReadGenerationVerified",
+            "DisplayedKeyBound",
+            "CancelNoOrphanLoading",
+            "AckClosesDraft",
+            "AckBelongsToCurrentView",
+            "ReadRetryNeverWrites",
+            "SingleSendBeforeACK",
+            "LocalePreservesDraft"
           ],
-          "limits": "Post-start semantic selection and optional decorative lifecycle safety only. Trusted source data and native feature/paint verdicts are assumed; no DOM/accessibility/layout/rendering/Chrome support/backend/route/network or JavaScript refinement proof. Reduced-motion has identical static transitions because implementation has no animation loop; no preference-detection proof. Timeout is an environment event, not wall-clock/liveness. Initial fragment choice is a trusted closed node ID or absent input; URL parsing, encoding, browser scroll and history are outside this model."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/landing/topology-canvas.mjs",
-      "sha256": "0d829770900e15cb8d260da83d56afa0e10e16a4943bb216fdb8ba06c64879fb",
-      "disposition": "modeled",
-      "reason": "Original bounded landing admission or stored-selection projection for the changed scope. HTTP, DOM, accessibility, native Chrome rendering and JavaScript/Go refinement require independent tests.",
-      "models": [
+          "limits": "UI finite safety abstraction only, not JS/React/AbortController scheduling refinement, native protocol/JSON/IAM/auth/SQLite state/number/binary/size/capacity proof. TableId checks establish agreement at item-read acceptance only, not freshness after later native changes or atomic TableId-CAS on mutation; official TableName writes remain subject to recreation between preflight and send. Combined context labels abstract principal/region/remount, not credentials/tenant isolation. Stutter observation admits no liveness/hung-read progress claim. One write intent only; symbolic ACK/no automatic replay, not server rollback when an aborted request already committed. No concrete item values, missing-item/delete-confirmation semantics or arbitrary pagination. Main caller scope is limited to the DynamoDB route and its region|principal|navigation mount key/reset; embedded app.js is the canonical derived component/caller artifact. Neither binding proves other shell/components, compiler/bundler correctness or JavaScript refinement. Compiled bundle binding covers only this declared state/guard projection, not unrelated bundle code or a compiler refinement proof."
+        },
         {
-          "id": "LandingTopologyState",
+          "id": "SecretMetadataViewEpoch",
           "properties": [
-            "TypeOK",
-            "ProviderSelectsDefault",
-            "NodeClickSelectsExact",
-            "InvalidInputPreservesSelection",
-            "DOMSelectionAgrees",
-            "CanonicalHTMLAvailable",
-            "MountUsesLatestSelection",
-            "UnsupportedCanvasHidden",
-            "RetiredCanvasHidden",
-            "PaintUsesLatestSelection",
-            "RetiredCallbackNoEffect",
-            "InitialFragmentSelection"
+            "MetadataRequestsOnly",
+            "CursorRequestBound",
+            "NoStaleCallbackAcceptance",
+            "NoStaleRenderedMetadata",
+            "NoStaleRenderedError",
+            "LoadingTracksLatest",
+            "PendingClearsMetadata",
+            "NoRowsOnError",
+            "ValidatedMetadataOnly",
+            "CurrentPageOnly",
+            "LocalePreservesQuery",
+            "ParentRevealClearedForMetadata"
           ],
-          "limits": "Post-start semantic selection and optional decorative lifecycle safety only. Trusted source data and native feature/paint verdicts are assumed; no DOM/accessibility/layout/rendering/Chrome support/backend/route/network or JavaScript refinement proof. Reduced-motion has identical static transitions because implementation has no animation loop; no preference-detection proof. Timeout is an environment event, not wall-clock/liveness. Initial fragment choice is a trusted closed node ID or absent input; URL parsing, encoding, browser scroll and history are outside this model."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/landing/topology-data.mjs",
-      "sha256": "0b7febcfca1a5fd5040b6448568fb31ea97a48a6f65d146a3029a8896530568f",
-      "disposition": "modeled",
-      "reason": "Original bounded landing admission or stored-selection projection for the changed scope. HTTP, DOM, accessibility, native Chrome rendering and JavaScript/Go refinement require independent tests.",
-      "models": [
+          "limits": "Scoped metadata-child contract and the parent tab-change invalidate call only. A prior-parent-reveal Boolean models clearing visible state on entry, not pending GetSecretValue replies, byte erasure, old asyncRetrieve, disclosure channels or SQL. Opaque cursor provenance is an annotation, not decoding or HMAC validation. A valid-response Boolean abstracts the concrete metadata parser. Host callback identity/remount and active scope are assumptions, not main navigation/authentication proofs. Abort leaves callbacks schedulable to check guards; actual browser Abort may prevent JavaScript delivery. Locale transitions preserve query state, not arbitrary React scheduling. Finite safety projection only: no stable history snapshot, page completeness, backend/JSON/IAM refinement, whole React proof or liveness. Source scope on the parent and bundle is limited to this tab and child projection; unrelated retrieval/mutation code is excluded. Compiled bundle binding covers only this declared state/guard projection, not unrelated bundle code or a compiler refinement proof."
+        },
         {
-          "id": "LandingTopologyState",
+          "id": "KMSAliasesViewEpoch",
           "properties": [
-            "TypeOK",
-            "ProviderSelectsDefault",
-            "NodeClickSelectsExact",
-            "InvalidInputPreservesSelection",
-            "DOMSelectionAgrees",
-            "CanonicalHTMLAvailable",
-            "MountUsesLatestSelection",
-            "UnsupportedCanvasHidden",
-            "RetiredCanvasHidden",
-            "PaintUsesLatestSelection",
-            "RetiredCallbackNoEffect",
-            "InitialFragmentSelection"
+            "CurrentListOutcome",
+            "NoCachedRowsOnFailure",
+            "CurrentTargetMetadata",
+            "ClosedFormHasNoTarget",
+            "AckClosesForm",
+            "AckClearsDraft",
+            "ReadRetryNeverWrites",
+            "OnlyVerifiedTargetSubmitted",
+            "DeleteRequiresExactConfirmation",
+            "LocalePreservesIntent"
           ],
-          "limits": "Post-start semantic selection and optional decorative lifecycle safety only. Trusted source data and native feature/paint verdicts are assumed; no DOM/accessibility/layout/rendering/Chrome support/backend/route/network or JavaScript refinement proof. Reduced-motion has identical static transitions because implementation has no animation loop; no preference-detection proof. Timeout is an environment event, not wall-clock/liveness. Initial fragment choice is a trusted closed node ID or absent input; URL parsing, encoding, browser scroll and history are outside this model."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/landing_test.go",
-      "sha256": "65a342777f94b6bcbfc7047de3989730cba30d54298305ea909b96162226b781",
-      "disposition": "test-support",
-      "reason": "LP-only documentation, validation policy or tests; preserves SDK root, old checks and existing model values. No browser or implementation proof claim.",
-      "models": []
-    },
-    {
-      "path": "internal/server/server.go",
-      "sha256": "40e5f8d94e53ebf612ef39479d0d09877273e107161c6a6a9844c695f612174d",
-      "disposition": "modeled",
-      "reason": "Original bounded landing admission or stored-selection projection for the changed scope. HTTP, DOM, accessibility, native Chrome rendering and JavaScript/Go refinement require independent tests.",
-      "models": [
+          "limits": "Finite UI protocol abstraction, not JS/React/Cloudscape/HTTP/SQL/IAM/crypto refinement or liveness. Initial key-list/Describe lookup completion is abstracted because actual source disables selection until it finishes; later target reads may overlap. Target/list revisions normalized after these reads. Excludes all parser/format/pagination/permission semantics, arbitrary key sets, repeated forms beyond bound, network ambiguity without ACK and full AWS console parity. Current list outcome and target metadata are stored fields, not derived tautologies. Retired-list mutation jointly bypasses redundant captured-object/active/abort checks; submit-target mutation abstracts both button and handler defenses. Retry mutant creates actual second pending write plus request counter, not a ghost-only edit. Root parent context key/principal binding is assumed; locale frame is only this model state, not the locale provider. Parent kms.jsx/main.jsx declarations bind only the Aliases mount and supplied region/principal/key identity; other KMS/general services remain outside. app.js is the canonical compiled correspondence artifact of that component/mount, independently checked by bundle hashes, not a proof of compilation or unrelated UI. Compiled bundle binding covers only this declared state/guard projection, not unrelated bundle code or a compiler refinement proof."
+        },
         {
-          "id": "LandingAccessAdmission",
+          "id": "LoginInputIntent",
           "properties": [
-            "TypeOK",
-            "ExternalBoundary",
-            "PublicResponse",
-            "TokenBoundary",
-            "UnknownNeverStatic"
+            "NoEmptyPOST",
+            "NoPOSTWhileBlocked",
+            "StaleFileCompletionFrame",
+            "SubmissionSelectionExact",
+            "AdoptedValueExact",
+            "IntentInvalidatesAsync",
+            "LocaleIntentFrame"
           ],
-          "limits": "Original finite admission contract only. Host/origin and authentication results are trusted inputs from existing middleware; no token, browser session, DNS, URL decoding, HTTP parser, ServeMux canonicalization, filesystem, SQLite, rendering, JavaScript, or Chrome feature proof. Exact HTTP composition and negative path cases are separate Go tests. Only fixed static product assets are public; no service credentials or exercise state are represented."
+          "limits": "Scoped local 14-case checking at model source 5b270e9 exhausted 77 baseline states and observed all 13 declared noninitial counterexamples, including FocusSkipsNativeAdoption. This is scoped evidence, not full current 462-case acceptance or JavaScript/React/1Password proof. Historical 13-case checking at 28d37d1 exhausted 73 states; Combined UnmountedFileCompletionPublishes first failed the file-edit scenario and establishes StaleFileCompletionFrame sensitivity, not an isolated unmount witness. Bounded committed-state input/intent safety correspondence only; not JavaScript/React/Cloudscape/DOM/OS/event scheduling refinement, actual1Password/Dia/Safari, arbitrary focused/unfocused rerenders, clipboard/undo/IME/selection bytes, file UTF8/MIME/size/parser, authentication/HTTP/cookie/crypto/server/browser sessions, liveness or arbitrary event sequences/revision horizons. Pending explicit paste has precedence over current connected DOM. Locale protects adopted control/intent state only; unfocused unadopted DOM may reset. Independent before-state oracles observe actual token/refs/POST records; no server accepts every nonempty label. Mutation sensitivity requires real noninitial named TLC counterexamples, not static anchor counts. Generated app.js scope is ONLY the compiled login-input intent projection. The local offline rebuild of source 21054448a4400adad6bcc7dfb0aa726c58b07aaf produced asset commit 310a7994b3b727e4346d8c94d4f7d836d7304704 with 1352 resolved inputs and retained original notices for 22 packages; exact asset digests and input metadata are committed under tools/console. Default hosted-CI build equivalence remains to be checked. Compiler/minifier correctness, React/DOM/native input APIs and backend behavior are not refinement-proved; this binding does not prove the rest of the bundle. The focus scenario explicitly assumes a possible controlled render after focus capture resets DOM from adopted controlled state. This explores a suspected ordering hazard, not an established explanation of the actual CI response timeout. The full current 462-case gate and real Dia/1Password acceptance remain unverified. Compiled bundle binding covers only this declared state/guard projection, not unrelated bundle code or a compiler refinement proof."
         }
       ]
-    },
-    {
-      "path": "scripts/formal_applicability.py",
-      "sha256": "8df7b6abda070050a372d76352e926119c5c48cf6b657070670e604a226a82e1",
-      "disposition": "formal-infrastructure",
-      "reason": "LP-only documentation, validation policy or tests; preserves SDK root, old checks and existing model values. No browser or implementation proof claim.",
-      "models": []
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "79d0468319f1dd55e660c4e523f32f5dcd6e68cad3db20bf0ed1d64876fd821d",
+      "sha256": "ed5a37a092900a4273cc7aa64202c7c5f70eab023706a450e47571c4d3740da5",
       "disposition": "formal-infrastructure",
-      "reason": "Preserves TLC bounds, deadlines, exit failure and mutation oracles; retains process-failure stream/type/errno/elapsed diagnostics and requires the two existing LP models, properties, controls and exact source scopes. Injected tool-failure and removal tests are not TLC or implementation proof.",
-      "models": []
-    },
-    {
-      "path": "scripts/test-formal-applicability.py",
-      "sha256": "24e4980e242cdf9cc64362aabf0e86dddca389f270c9889f0a469fe9eb961ab0",
-      "disposition": "formal-infrastructure",
-      "reason": "LP-only documentation, validation policy or tests; preserves SDK root, old checks and existing model values. No browser or implementation proof claim.",
+      "reason": "Mandatory policy or CI validation wiring; original models, invariants, controls and check behavior retained.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "aa5cb599d2885d901243cf648ab6be6ad0ad43884f29764cd46a3e17f21635a8",
+      "sha256": "f079f759d454e5441d9ca656890ba1adaab47610f9bdb8b3f15ed81ca7ea0fa0",
       "disposition": "formal-infrastructure",
-      "reason": "Preserves TLC bounds, deadlines, exit failure and mutation oracles; retains process-failure stream/type/errno/elapsed diagnostics and requires the two existing LP models, properties, controls and exact source scopes. Injected tool-failure and removal tests are not TLC or implementation proof.",
+      "reason": "Mandatory policy or CI validation wiring; original models, invariants, controls and check behavior retained.",
       "models": []
     },
     {
-      "path": "test/e2e/check.py",
-      "sha256": "c3aae6053226c5d5774eac684d0afa238eaffe0c54476f2342e27bdf87ee8c32",
-      "disposition": "test-support",
-      "reason": "Persist anonymous landing desktop/mobile, fallback, keyboard/native-link, strict accessibility and source-asset checks using the existing isolated dummy CLI fixture. No production authority or model-refinement claim.",
+      "path": "test/console/login-native-input.test.mjs",
+      "sha256": "c2f067382e7cf9d0d40025fefbeefe409add4b33cab7a8a7cc204747496b33b5",
+      "disposition": "modeled",
+      "reason": "Declared finite state and guard projection with named safety invariants; actual implementation, build and browser checks remain separate obligations.",
+      "models": [
+        {
+          "id": "LoginInputIntent",
+          "properties": [
+            "NoEmptyPOST",
+            "NoPOSTWhileBlocked",
+            "StaleFileCompletionFrame",
+            "SubmissionSelectionExact",
+            "AdoptedValueExact",
+            "IntentInvalidatesAsync",
+            "LocaleIntentFrame"
+          ],
+          "limits": "Scoped local 14-case checking at model source 5b270e9 exhausted 77 baseline states and observed all 13 declared noninitial counterexamples, including FocusSkipsNativeAdoption. This is scoped evidence, not full current 462-case acceptance or JavaScript/React/1Password proof. Historical 13-case checking at 28d37d1 exhausted 73 states; Combined UnmountedFileCompletionPublishes first failed the file-edit scenario and establishes StaleFileCompletionFrame sensitivity, not an isolated unmount witness. Bounded committed-state input/intent safety correspondence only; not JavaScript/React/Cloudscape/DOM/OS/event scheduling refinement, actual1Password/Dia/Safari, arbitrary focused/unfocused rerenders, clipboard/undo/IME/selection bytes, file UTF8/MIME/size/parser, authentication/HTTP/cookie/crypto/server/browser sessions, liveness or arbitrary event sequences/revision horizons. Pending explicit paste has precedence over current connected DOM. Locale protects adopted control/intent state only; unfocused unadopted DOM may reset. Independent before-state oracles observe actual token/refs/POST records; no server accepts every nonempty label. Mutation sensitivity requires real noninitial named TLC counterexamples, not static anchor counts. Generated app.js scope is ONLY the compiled login-input intent projection. The local offline rebuild of source 21054448a4400adad6bcc7dfb0aa726c58b07aaf produced asset commit 310a7994b3b727e4346d8c94d4f7d836d7304704 with 1352 resolved inputs and retained original notices for 22 packages; exact asset digests and input metadata are committed under tools/console. Default hosted-CI build equivalence remains to be checked. Compiler/minifier correctness, React/DOM/native input APIs and backend behavior are not refinement-proved; this binding does not prove the rest of the bundle. The focus scenario explicitly assumes a possible controlled render after focus capture resets DOM from adopted controlled state. This explores a suspected ordering hazard, not an established explanation of the actual CI response timeout. The full current 462-case gate and real Dia/1Password acceptance remain unverified."
+        }
+      ]
+    },
+    {
+      "path": "test/e2e/login_paste.py",
+      "sha256": "be97aff3a005725b59a3ecf6acaf9a044460c7e2f96e6dbfd17557e62b94a99a",
+      "disposition": "modeled",
+      "reason": "Declared finite state and guard projection with named safety invariants; actual implementation, build and browser checks remain separate obligations.",
+      "models": [
+        {
+          "id": "LoginInputIntent",
+          "properties": [
+            "NoEmptyPOST",
+            "NoPOSTWhileBlocked",
+            "StaleFileCompletionFrame",
+            "SubmissionSelectionExact",
+            "AdoptedValueExact",
+            "IntentInvalidatesAsync",
+            "LocaleIntentFrame"
+          ],
+          "limits": "Scoped local 14-case checking at model source 5b270e9 exhausted 77 baseline states and observed all 13 declared noninitial counterexamples, including FocusSkipsNativeAdoption. This is scoped evidence, not full current 462-case acceptance or JavaScript/React/1Password proof. Historical 13-case checking at 28d37d1 exhausted 73 states; Combined UnmountedFileCompletionPublishes first failed the file-edit scenario and establishes StaleFileCompletionFrame sensitivity, not an isolated unmount witness. Bounded committed-state input/intent safety correspondence only; not JavaScript/React/Cloudscape/DOM/OS/event scheduling refinement, actual1Password/Dia/Safari, arbitrary focused/unfocused rerenders, clipboard/undo/IME/selection bytes, file UTF8/MIME/size/parser, authentication/HTTP/cookie/crypto/server/browser sessions, liveness or arbitrary event sequences/revision horizons. Pending explicit paste has precedence over current connected DOM. Locale protects adopted control/intent state only; unfocused unadopted DOM may reset. Independent before-state oracles observe actual token/refs/POST records; no server accepts every nonempty label. Mutation sensitivity requires real noninitial named TLC counterexamples, not static anchor counts. Generated app.js scope is ONLY the compiled login-input intent projection. The local offline rebuild of source 21054448a4400adad6bcc7dfb0aa726c58b07aaf produced asset commit 310a7994b3b727e4346d8c94d4f7d836d7304704 with 1352 resolved inputs and retained original notices for 22 packages; exact asset digests and input metadata are committed under tools/console. Default hosted-CI build equivalence remains to be checked. Compiler/minifier correctness, React/DOM/native input APIs and backend behavior are not refinement-proved; this binding does not prove the rest of the bundle. The focus scenario explicitly assumes a possible controlled render after focus capture resets DOM from adopted controlled state. This explores a suspected ordering hazard, not an established explanation of the actual CI response timeout. The full current 462-case gate and real Dia/1Password acceptance remain unverified."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "3a5c38542ffe55a760855b40a3a48023a564881a529d5e7ce288b653690622cd",
+      "disposition": "presentation",
+      "reason": "Generated build input/digest metadata only; final rebuilt exact hashes and canonical build provenance remain pending.",
       "models": []
     },
     {
-      "path": "test/e2e/landing_topology.py",
-      "sha256": "d64c1318f677cdbd0df5ea133f9dfe52c8740bc70ea9a796e4674da0132a7bfa",
-      "disposition": "test-support",
-      "reason": "Persist anonymous landing desktop/mobile, fallback, keyboard/native-link, strict accessibility and source-asset checks using the existing isolated dummy CLI fixture. No production authority or model-refinement claim.",
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "f20701e57884747616c148cc90860c31830c0a885319e738acbcee1bfc5ffaf7",
+      "disposition": "presentation",
+      "reason": "Generated build input/digest metadata only; final rebuilt exact hashes and canonical build provenance remain pending.",
       "models": []
+    },
+    {
+      "path": "tools/console/src/login.jsx",
+      "sha256": "00e029a9ae83256e5e4cbfb6aa94deaa3b2e5e632923c625d37460eddb769eb5",
+      "disposition": "modeled",
+      "reason": "Declared finite state and guard projection with named safety invariants; actual implementation, build and browser checks remain separate obligations.",
+      "models": [
+        {
+          "id": "BrowserSessions",
+          "properties": [
+            "RevokedCookiesDenied",
+            "AcceptedOnlyLiveParent",
+            "SDKAuthorityPreserved",
+            "UnrelatedSessionsPreserved",
+            "NoRawSDKCookie",
+            "NoBrowserSDKAuthority",
+            "ParentLifetimeBound"
+          ],
+          "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them."
+        },
+        {
+          "id": "LoginInputIntent",
+          "properties": [
+            "NoEmptyPOST",
+            "NoPOSTWhileBlocked",
+            "StaleFileCompletionFrame",
+            "SubmissionSelectionExact",
+            "AdoptedValueExact",
+            "IntentInvalidatesAsync",
+            "LocaleIntentFrame"
+          ],
+          "limits": "Scoped local 14-case checking at model source 5b270e9 exhausted 77 baseline states and observed all 13 declared noninitial counterexamples, including FocusSkipsNativeAdoption. This is scoped evidence, not full current 462-case acceptance or JavaScript/React/1Password proof. Historical 13-case checking at 28d37d1 exhausted 73 states; Combined UnmountedFileCompletionPublishes first failed the file-edit scenario and establishes StaleFileCompletionFrame sensitivity, not an isolated unmount witness. Bounded committed-state input/intent safety correspondence only; not JavaScript/React/Cloudscape/DOM/OS/event scheduling refinement, actual1Password/Dia/Safari, arbitrary focused/unfocused rerenders, clipboard/undo/IME/selection bytes, file UTF8/MIME/size/parser, authentication/HTTP/cookie/crypto/server/browser sessions, liveness or arbitrary event sequences/revision horizons. Pending explicit paste has precedence over current connected DOM. Locale protects adopted control/intent state only; unfocused unadopted DOM may reset. Independent before-state oracles observe actual token/refs/POST records; no server accepts every nonempty label. Mutation sensitivity requires real noninitial named TLC counterexamples, not static anchor counts. Generated app.js scope is ONLY the compiled login-input intent projection. The local offline rebuild of source 21054448a4400adad6bcc7dfb0aa726c58b07aaf produced asset commit 310a7994b3b727e4346d8c94d4f7d836d7304704 with 1352 resolved inputs and retained original notices for 22 packages; exact asset digests and input metadata are committed under tools/console. Default hosted-CI build equivalence remains to be checked. Compiler/minifier correctness, React/DOM/native input APIs and backend behavior are not refinement-proved; this binding does not prove the rest of the bundle. The focus scenario explicitly assumes a possible controlled render after focus capture resets DOM from adopted controlled state. This explores a suspected ordering hazard, not an established explanation of the actual CI response timeout. The full current 462-case gate and real Dia/1Password acceptance remain unverified."
+        }
+      ]
     }
   ]
 }

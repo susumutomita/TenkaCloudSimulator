@@ -135,8 +135,13 @@ not execute**. These outcomes must not be described as successful CI.
 The current focus-capture candidate preserves the failing assertion, order and
 timeout. Its optional failure-only diagnostics record booleans and bounded HTTP
 counts/statuses, not credentials; diagnostic observer errors are marked separately
-as incomplete and cannot replace the product failure. The candidate is not yet
-built or browser-verified. Current-head full gates, a real focused login rerun,
+as incomplete and cannot replace the product failure. Source `21054448` was rebuilt
+locally into asset commit `310a7994`, preserving 1352 resolved inputs and original
+notices for 22 packages. The bounded build completed with verified process cleanup;
+its registered Node/compiler RSS peaked at 186,232,832 bytes with a maximum live
+sampling gap of 26.2 ms. This trusted compiler instrumentation is not generic
+process containment. Default hosted-CI asset equivalence and the new embedded
+binary's browser behavior remain unverified. Current-head full gates, a real focused login rerun,
 and separate approved 1Password/Dia/Safari checks remain required.
 
 ## Input-scoped verification

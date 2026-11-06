@@ -139,7 +139,7 @@ refinementは証明しません。LoginInputIntentもfocus時の制御値リセ�
 
 本体は[MIT](LICENSE)。`/_simulator/licenses/`にGo・Cloudscape・Scalar・CPython/WASI等の原文LICENSE/NOTICEを同梱しています。再配布時も保持してください。AWS公式サービスではなく、AWSロゴは使用しません。[設計・引継ぎ資料](docs/handoff/README.md)。
 
-貼り付けが動かない場合はログイン画面の「トークンファイルを選択」で、主催者から受け取った小さなファイルを明示選択できます。値は隠したまま読み込み、サインイン操作時にサーバーが認証します。[形式・制限とDia未確認の境界](docs/login-token-file.md)。入力欄にはフィールド単位のパスワードマネージャー向け無視ヒントを付け、input／focusのcaptureとblurで接続中のnative入力値を取り込み、送信時にも現在値を確認します。意図的な空欄を尊重し、送信時には現在の明示的な貼り付けを先に処理します。取り込みは新しい入力意図として古い非同期処理を無効にします。拡張機能が原因という診断や、Dia／1Passwordでの修復確認ではありません。最新のfocus-capture候補は未ビルド・ブラウザ未検証で、実拡張機能や利用者のOSクリップボード動作も未確認です。[過去のCI結果と残検証](docs/login-token-file.md#dated-validation-and-current-candidate)を区別してください。
+貼り付けが動かない場合はログイン画面の「トークンファイルを選択」で、主催者から受け取った小さなファイルを明示選択できます。値は隠したまま読み込み、サインイン操作時にサーバーが認証します。[形式・制限とDia未確認の境界](docs/login-token-file.md)。入力欄にはフィールド単位のパスワードマネージャー向け無視ヒントを付け、input／focusのcaptureとblurで接続中のnative入力値を取り込み、送信時にも現在値を確認します。意図的な空欄を尊重し、送信時には現在の明示的な貼り付けを先に処理します。取り込みは新しい入力意図として古い非同期処理を無効にします。拡張機能が原因という診断や、Dia／1Passwordでの修復確認ではありません。最新のfocus-capture候補はローカルのUIビルドと終了確認が成功していますが、通常CIとの生成物一致・ブラウザ動作は未検証で、実拡張機能や利用者のOSクリップボード動作も未確認です。[過去のCI結果と残検証](docs/login-token-file.md#dated-validation-and-current-candidate)を区別してください。
 
 
 ## Secrets Manager contract
