@@ -26,6 +26,15 @@ type OpDescriptor struct {
 	Wrapper string `json:"wrapper,omitempty"`
 	// Items is the serialized output key of a list operation's items.
 	Items string `json:"items,omitempty"`
+	// ValueItems is the serialized output key of a list that returns plain
+	// identifiers (ARNs or names) instead of resource structures, and
+	// ValueMember the serialized resource key those identifiers fill.
+	ValueItems  string `json:"valueItems,omitempty"`
+	ValueMember string `json:"valueMember,omitempty"`
+	// Names is the input member of a list that describes named resources
+	// (for example ECS DescribeClusters "clusters"); clients use it to
+	// describe one resource when no read operation exists.
+	Names string `json:"names,omitempty"`
 	// InputToken is an input member name; OutputToken a serialized key.
 	InputToken  string `json:"inputToken,omitempty"`
 	OutputToken string `json:"outputToken,omitempty"`
@@ -98,7 +107,17 @@ func (b *binding) describe() Descriptor {
 		for i := range b.spec.Ops {
 			op := &b.spec.Ops[i]
 			if op.Resource == res.Kind {
-				rd.Ops[string(op.Kind)] = b.describeOp(op, res)
+				od := b.describeOp(op, res)
+				if op.Kind == List && op.Names != "" {
+					od.Names = op.Names
+					rd.Ops["describe"] = od
+				}
+				// Clients list with the most useful official list: structures
+				// over plain identifiers, and never one that needs identifiers.
+				if existing, ok := rd.Ops[string(op.Kind)]; ok && op.Kind == List && listRank(b.spec, existing) >= listRank(b.spec, od) {
+					continue
+				}
+				rd.Ops[string(op.Kind)] = od
 			}
 		}
 		d.Resources = append(d.Resources, rd)
@@ -147,6 +166,17 @@ func (b *binding) describeOp(op *Op, res *Resource) OpDescriptor {
 			}
 		}
 	}
+	if op.Kind == List && od.Items == "" && op.ListValue != "" {
+		if output := b.model.Shapes[official.Output]; output != nil {
+			for _, name := range output.sortedMembers() {
+				member := output.Members[name]
+				if shape := b.model.shape(member.Shape); shape.Type == "list" && b.model.shape(shape.Member.Shape).Type == "string" {
+					od.ValueItems, od.ValueMember = member.wire(name), b.resourceWire(res, op.ListValue)
+					break
+				}
+			}
+		}
+	}
 	if op.Kind == List {
 		q := &request{b: b, official: official}
 		od.InputToken, od.OutputToken, _ = q.pagination()
@@ -169,4 +199,22 @@ func (b *binding) resourceWire(res *Resource, name string) string {
 		}
 	}
 	return name
+}
+
+// listRank orders list operations for first-party clients: a structured
+// list that needs no identifiers, then an identifier-only list, then a
+// list that only describes named resources.
+func listRank(spec *Service, od OpDescriptor) int {
+	for i := range spec.Ops {
+		if spec.Ops[i].Name == od.Name && spec.Ops[i].Names != "" {
+			return 0
+		}
+	}
+	if od.Items != "" {
+		return 2
+	}
+	if od.ValueItems != "" {
+		return 1
+	}
+	return 0
 }

@@ -113,6 +113,27 @@ def run():
                 assert sorted(c['Name'] for c in configurations) == ['console-config', 'sdk-config'], configurations
                 for configuration in configurations:
                     broker.delete_configuration(ConfigurationId=configuration['Id'])
+                # Identifier-only lists: ECS ListClusters and ListTaskDefinitions
+                # return ARNs; each opens through its describe operation.
+                containers = team.client('ecs')
+                containers.create_cluster(clusterName='sdk-cluster')
+                task = containers.register_task_definition(
+                    family='sdk-web', requiresCompatibilities=['FARGATE'], networkMode='awsvpc', cpu='256', memory='512',
+                    containerDefinitions=[{'name': 'web', 'image': 'public.ecr.aws/nginx/nginx:latest', 'essential': True}])['taskDefinition']['taskDefinitionArn']
+                page.get_by_role('button', name=re.compile('^Catalog service')).click()
+                page.get_by_role('option', name=re.compile('^Amazon Elastic Container Service')).click()
+                cluster = containers.describe_clusters(clusters=['sdk-cluster'])['clusters'][0]['clusterArn']
+                expect(page.get_by_role('link', name=cluster)).to_be_visible()
+                page.get_by_role('link', name=cluster).click()
+                expect(page.get_by_text('sdk-cluster', exact=True).first).to_be_visible()
+                page.get_by_role('button', name='Back to list').click()
+                page.get_by_role('tab', name='taskDefinition').click()
+                expect(page.get_by_role('link', name=task)).to_be_visible()
+                page.get_by_role('link', name=task).click()
+                expect(page.get_by_text('sdk-web', exact=True).first).to_be_visible()
+                page.get_by_role('button', name='Back to list').click()
+                containers.deregister_task_definition(taskDefinition=task)
+                containers.delete_cluster(cluster='sdk-cluster')
                 # A REST-JSON parent and child through the same generic view.
                 page.get_by_role('button', name=re.compile('^Catalog service')).click()
                 page.get_by_role('option', name=re.compile('^AWS Amplify')).click()

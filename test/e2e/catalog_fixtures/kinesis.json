@@ -6,6 +6,7 @@
   {"op": "create_stream", "args": {"StreamName": "fixture-events", "StreamModeDetails": {"StreamMode": "ON_DEMAND"}}},
   {"op": "create_stream", "args": {"StreamName": "fixture-unsized"}, "error": "InvalidArgumentException"},
   {"op": "list_streams", "args": {}, "expect": {"StreamNames": ["fixture-clicks", "fixture-events"], "StreamSummaries#count": 2}},
+  {"op": "list_streams", "args": {"Limit": 1}, "expect": {"HasMoreStreams": true, "StreamNames#count": 1}},
   {"op": "increase_stream_retention_period", "args": {"StreamName": "fixture-clicks", "RetentionPeriodHours": 72}},
   {"op": "decrease_stream_retention_period", "args": {"StreamARN": "${stream}", "RetentionPeriodHours": 48}},
   {"op": "increase_stream_retention_period", "args": {"StreamName": "fixture-clicks", "RetentionPeriodHours": 9000}, "error": "InvalidArgumentException"},

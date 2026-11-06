@@ -180,7 +180,7 @@ var kinesis = &Service{
 	Ops: []Op{
 		{Name: "CreateStream", Kind: Create, Resource: "stream", Check: kinesisCapacity},
 		{Name: "DescribeStreamSummary", Kind: Read, Resource: "stream", Lookup: "StreamName", Check: kinesisStream},
-		{Name: "ListStreams", Kind: List, Resource: "stream", ListValue: "StreamName"},
+		{Name: "ListStreams", Kind: List, Resource: "stream", ListValue: "StreamName", HasMore: "HasMoreStreams"},
 		{Name: "DeleteStream", Kind: Delete, Resource: "stream", Lookup: "StreamName", Accept: []string{"EnforceConsumerDeletion"}, Check: kinesisStream},
 		{Name: "IncreaseStreamRetentionPeriod", Kind: Update, Resource: "stream", Lookup: "StreamName", Fields: []string{"RetentionPeriodHours"}, Check: kinesisRetention},
 		{Name: "DecreaseStreamRetentionPeriod", Kind: Update, Resource: "stream", Lookup: "StreamName", Fields: []string{"RetentionPeriodHours"}, Check: kinesisRetention},

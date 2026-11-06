@@ -85,13 +85,16 @@ export default function CatalogView({region,request,catalog,onSaving}){
  const identity=item=>item?.[resource?.nameWire]||item?.[resource?.idWire]||item?.[resource?.arnWire]||'';
  const lookupValue=(item,op)=>{
   const member=op.lookup;if(member===resource.arnMember||/arn$/i.test(member))return item[resource.arnWire]||item[member];
-  if(member===resource.idMember)return item[resource.idWire];return item[resource.nameWire]||item[member]||item[resource.idWire];
+  if(member===resource.idMember)return item[resource.idWire];return item[resource.nameWire]||item[member]||item[resource.idWire]||item[resource.arnWire];
  };
  const parentInput=op=>op?.parent&&parent?{[op.parent]:parent}:{};
+ // Some official lists return plain ARNs or names; each becomes an item
+ // carrying that one identifying key.
+ const listRows=(list,page)=>list.items?page[list.items]||[]:list.valueItems?(page[list.valueItems]||[]).map(value=>({[list.valueMember]:value})):[];
  async function loadParents(epoch,preferred){
   const list=parentResource?.operations.list;if(!list)return '';
   const page=await call(list,{});if(!valid(epoch))return '';
-  const rows=page[list.items]||[];setParents(rows);
+  const rows=listRows(list,page);setParents(rows);
   const keep=rows.some(r=>(r[parentResource.idWire]||r[parentResource.nameWire])===preferred)?preferred:(rows[0]?.[parentResource.idWire]||rows[0]?.[parentResource.nameWire]||'');
   setParent(keep);return keep;
  }
@@ -103,15 +106,22 @@ export default function CatalogView({region,request,catalog,onSaving}){
    let scope=preferred;if(parentResource){scope=await loadParents(epoch,preferred);if(!valid(epoch))return;if(!scope){setItems([]);setNext('');return}}
    const list=resource.operations.list;if(!list){setItems([]);return}
    const page=await call(list,{...(list.parent&&scope?{[list.parent]:scope}:{}),...(token&&list.inputToken?{[list.inputToken]:token}:{})});
-   if(valid(epoch)){setItems(page[list.items]||[]);setNext(list.outputToken?page[list.outputToken]||'':'')}
+   if(valid(epoch)){setItems(listRows(list,page));setNext(list.outputToken?page[list.outputToken]||'':'')}
   }catch(e){if(valid(epoch)){setItems([]);setError(e.message)}}finally{if(valid(epoch))setLoading(false)}
  }
  useEffect(()=>{load()},[model,kind,region]);
  async function inspect(item){
   const read=resource.operations.read;const epoch=fresh();setError('');setMode('detail');setTags(null);
-  // Services without a read operation describe resources only through their
-  // official list output, so the listed projection is the detail view.
-  if(!read){setDetail(item);setLoading(false);return}
+  // Without a read operation, a list that describes named resources gives
+  // the details; otherwise the listed projection is the detail view.
+  if(!read){
+   const describe=resource.operations.describe,list=resource.operations.list;
+   if(!describe||!list?.valueItems){setDetail(item);setLoading(false);return}
+   setLoading(true);setDetail(null);
+   try{const page=await call(describe,{...parentInput(describe),[describe.names]:[item[list.valueMember]]});if(valid(epoch))setDetail((page[describe.items]||[])[0]||item)}
+   catch(e){if(valid(epoch))setError(e.message)}finally{if(valid(epoch))setLoading(false)}
+   return;
+  }
   setLoading(true);setDetail(null);
   try{
    const out=await call(read,{...parentInput(read),[read.lookup]:lookupValue(item,read)});if(!valid(epoch))return;

@@ -143,3 +143,39 @@ func TestDescriptorsAndReferenceUseWireNames(t *testing.T) {
 		t.Fatal("the reference must document wire names")
 	}
 }
+
+// Kinesis signals more pages with the required HasMoreStreams flag that the
+// official paginator follows.
+func TestKinesisListStreamsReportsHasMoreStreams(t *testing.T) {
+	h := newHarness(t, kinesis)
+	for _, name := range []string{"a", "b"} {
+		expect(t, h.json1("kinesis", "CreateStream", map[string]any{"StreamName": name, "ShardCount": 1}), 200, "")
+	}
+	page := h.json1("kinesis", "ListStreams", map[string]any{"Limit": 1})
+	if page.body["HasMoreStreams"] != true || len(page.body["StreamNames"].([]any)) != 1 {
+		t.Fatalf("first page %v", page.body)
+	}
+	if last := h.json1("kinesis", "ListStreams", map[string]any{"Limit": 5}); last.body["HasMoreStreams"] != false {
+		t.Fatalf("complete page %v", last.body)
+	}
+}
+
+// Descriptors prefer structured lists and describe identifier-only lists,
+// so the console can show ECS clusters and task definitions.
+func TestDescriptorsServeStructuredAndIdentifierLists(t *testing.T) {
+	h := newHarness(t, ecs)
+	lists, describes := map[string]OpDescriptor{}, map[string]OpDescriptor{}
+	for _, r := range h.engine.Describe()[0].Resources {
+		lists[r.Kind], describes[r.Kind] = r.Ops["list"], r.Ops["describe"]
+	}
+	if d := describes["cluster"]; d.Name != "DescribeClusters" || d.Names != "clusters" || d.Items != "clusters" {
+		t.Fatalf("cluster describe %+v", d)
+	}
+	// DescribeClusters needs cluster names, so ListClusters lists them.
+	if c := lists["cluster"]; c.Name != "ListClusters" || c.ValueItems != "clusterArns" || c.ValueMember != "clusterArn" {
+		t.Fatalf("cluster list %+v", c)
+	}
+	if d := lists["taskDefinition"]; d.Name != "ListTaskDefinitions" || d.ValueItems != "taskDefinitionArns" || d.ValueMember != "taskDefinitionArn" {
+		t.Fatalf("task definition list %+v", d)
+	}
+}
