@@ -22,6 +22,19 @@ The retained Scalar diagnostic remains a real acceptance blocker; a source adapt
 or isolated formal success is not a rebuilt/validated reference. Actual Dia and
 1Password remain unverified. Previously held actions remain held.
 
+Source integration is saved locally in `cac87fb`; the four generated console
+assets were rebuilt in `cc95ae4` from 1486 inputs, with the original notices for
+24 packages retained. Two earlier build attempts remain failed records; the
+later accepted build does not retroactively pass them or establish their cause.
+The additional 55 source-level checks and read-only formatting of 24 changed Go
+files passed. Go compilation/tests, actual SDK/browser/Scalar acceptance, the
+649-case gate, and 68 E2E cases remain outstanding. No private Metrics branch
+was pushed or published.
+
+Published login PR437 is merged as `3a9b0ce`: its exact pre-merge head passed all
+11 checks, and its merged commit passed all seven checks, including 65 E2E cases
+and 482 model outcomes. Those results do not validate this private Metrics tree.
+
 ## Historical main snapshot: login and published catalog, 2026-11-06
 
 PR [#437](https://github.com/susumutomita/TenkaCloudSimulator/pull/437) is being
