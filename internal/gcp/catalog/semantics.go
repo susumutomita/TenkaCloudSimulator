@@ -95,7 +95,7 @@ func (q *request) parentName(parent string) error {
 	c := q.collection()
 	if c.Parent == "" {
 		root := "projects/" + q.e.cfg.Project
-		if q.b.api.Scope == "location" {
+		if q.location != "" {
 			root += "/locations/" + q.location
 		}
 		if parent != root {
@@ -508,7 +508,7 @@ func (q *request) remove() (any, error) {
 		if err := tx.QueryRow("SELECT count(*) FROM gcp_catalog_resources WHERE name LIKE ? ESCAPE '\\'", escapeLike(r.Name)+"/%").Scan(&children); err != nil {
 			return nil, err
 		}
-		if children > 0 && !(force && c.Cascade) {
+		if children > 0 && !(force && c.Cascade) && !c.Recursive {
 			return nil, &status{"FAILED_PRECONDITION", fmt.Sprintf("Resource '%s' still has child resources.", r.Name)}
 		}
 		if q.params["validateOnly"] != true {

@@ -237,7 +237,11 @@ func (e *Engine) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, out)
 }
 
+// match finds the official binding of a path. Overlapping bindings, such as
+// Cloud Logging's {+parent} aliases of projects/{project} paths, resolve to
+// the template with the most literal segments.
 func (b *binding) match(method string, segments []string) (route, bool) {
+	best, literals := route{}, -1
 	for _, rt := range b.routes {
 		if b.model.Routes[rt.method].HTTPMethod != method || len(rt.segments) != len(segments) {
 			continue
@@ -268,11 +272,20 @@ func (b *binding) match(method string, segments []string) (route, bool) {
 				break
 			}
 		}
-		if matched {
-			return rt, true
+		if !matched {
+			continue
+		}
+		n := 0
+		for _, template := range rt.segments {
+			if !strings.HasPrefix(template, "{") {
+				n++
+			}
+		}
+		if n > literals {
+			best, literals = rt, n
 		}
 	}
-	return route{}, false
+	return best, literals >= 0
 }
 
 // prepare authenticates, authorizes the project and decodes the request.
@@ -371,12 +384,27 @@ func (e *Engine) authorize(q *request) error {
 		return &status{"PERMISSION_DENIED", fmt.Sprintf("Permission '%s' denied on resource '%s' (or it may not exist).", permission, q.path)}
 	}
 	if q.location != "" {
+		regional, zonal := true, false
+		if q.bound.Kind == OperationGet || q.bound.Kind == OperationList {
+			for _, c := range q.b.api.Collections {
+				zonal = zonal || c.Zonal
+			}
+		} else {
+			zonal = q.collection().Zonal
+			regional = !zonal
+		}
 		for _, l := range e.cfg.Locations {
-			if l == q.location {
+			if regional && l == q.location || zonal && l != "global" && isZone(q.location, l) {
 				return nil
 			}
 		}
 		return invalid("Location %q is not supported by the simulator.", q.location)
 	}
 	return nil
+}
+
+// isZone reports whether location is a zone such as us-central1-a of region.
+func isZone(location, region string) bool {
+	zone, ok := strings.CutPrefix(location, region+"-")
+	return ok && len(zone) == 1 && zone[0] >= 'a' && zone[0] <= 'z'
 }

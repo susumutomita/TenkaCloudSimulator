@@ -59,6 +59,12 @@ type Collection struct {
 	// Cascade lets delete with force=true remove children; otherwise
 	// deleting a parent with children fails with FAILED_PRECONDITION.
 	Cascade bool
+	// Recursive makes delete always remove children, for official methods
+	// that delete them without a force parameter (Service Directory).
+	Recursive bool
+	// Zonal places the collection in zones of the supported regions, such
+	// as us-central1-a, instead of the regions and global themselves.
+	Zonal bool
 }
 
 // API is a reviewed bounded specification of one official Google API.
@@ -71,6 +77,8 @@ type API struct {
 	// for example "type.googleapis.com/google.cloud.alloydb.v1.".
 	TypeURL string
 	// Scope is "location" or "project": the root under which collections live.
+	// A project-scope collection whose official path names a location (as
+	// Cloud Logging buckets do) lives under that location.
 	Scope       string
 	Collections []*Collection
 	Bindings    []Binding
