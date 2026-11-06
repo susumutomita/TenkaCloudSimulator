@@ -3,7 +3,7 @@
 The Google API catalog serves bounded configuration metadata for additional
 Google Cloud services through each API's own REST paths. Contracts come from
 documentation-free subsets of the discovery documents pinned by
-google-api-python-client 2.170.0 (`googleapiclient/discovery_cache/documents`).
+google-api-python-client 2.199.0 (`googleapiclient/discovery_cache/documents`).
 The extraction tool is `tools/gcpmodels/extract.py`, and the reviewed method
 list is `internal/gcp/catalog/selection.json`. The original license ships as
 [`third_party/GOOGLE-DISCOVERY-NOTICES.txt`](../third_party/GOOGLE-DISCOVERY-NOTICES.txt)

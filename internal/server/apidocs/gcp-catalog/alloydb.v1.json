@@ -44,6 +44,68 @@
     },
     "type": "object"
    },
+   "BackupDrBackupSource": {
+    "additionalProperties": false,
+    "properties": {
+     "backup": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "BackupDrEnabledWindow": {
+    "additionalProperties": false,
+    "properties": {
+     "automatedBackupPreviouslyEnabled": {
+      "type": "boolean"
+     },
+     "backupPlanAssociation": {
+      "type": "string"
+     },
+     "continuousBackupPreviousRecoveryWindowDays": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "continuousBackupPreviouslyEnabled": {
+      "type": "boolean"
+     },
+     "continuousBackupPreviouslyEnabledTime": {
+      "format": "google-datetime",
+      "type": "string"
+     },
+     "dataSource": {
+      "type": "string"
+     },
+     "disabledTime": {
+      "format": "google-datetime",
+      "type": "string"
+     },
+     "enabledTime": {
+      "format": "google-datetime",
+      "type": "string"
+     },
+     "logRetentionPeriod": {
+      "format": "google-duration",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "BackupDrInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "currentWindow": {
+      "$ref": "#/components/schemas/BackupDrEnabledWindow"
+     },
+     "previousWindows": {
+      "items": {
+       "$ref": "#/components/schemas/BackupDrEnabledWindow"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
    "BackupSource": {
     "additionalProperties": false,
     "properties": {
@@ -100,6 +162,12 @@
      "backupSource": {
       "$ref": "#/components/schemas/BackupSource"
      },
+     "backupdrBackupSource": {
+      "$ref": "#/components/schemas/BackupDrBackupSource"
+     },
+     "backupdrInfo": {
+      "$ref": "#/components/schemas/BackupDrInfo"
+     },
      "cloudsqlBackupRunSource": {
       "$ref": "#/components/schemas/CloudSQLBackupRunSource"
      },
@@ -129,9 +197,14 @@
        "POSTGRES_13",
        "POSTGRES_14",
        "POSTGRES_15",
-       "POSTGRES_16"
+       "POSTGRES_16",
+       "POSTGRES_17",
+       "POSTGRES_18"
       ],
       "type": "string"
+     },
+     "dataplexConfig": {
+      "$ref": "#/components/schemas/DataplexConfig"
      },
      "deleteTime": {
       "format": "google-datetime",
@@ -164,6 +237,14 @@
      },
      "maintenanceUpdatePolicy": {
       "$ref": "#/components/schemas/MaintenanceUpdatePolicy"
+     },
+     "maintenanceVersionSelectionPolicy": {
+      "enum": [
+       "MAINTENANCE_VERSION_SELECTION_POLICY_UNSPECIFIED",
+       "MAINTENANCE_VERSION_SELECTION_POLICY_LATEST",
+       "MAINTENANCE_VERSION_SELECTION_POLICY_DEFAULT"
+      ],
+      "type": "string"
      },
      "migrationSource": {
       "$ref": "#/components/schemas/MigrationSource"
@@ -209,7 +290,8 @@
        "FAILED",
        "BOOTSTRAPPING",
        "MAINTENANCE",
-       "PROMOTING"
+       "PROMOTING",
+       "SWITCHOVER"
       ],
       "readOnly": true,
       "type": "string"
@@ -238,6 +320,49 @@
      "updateTime": {
       "format": "google-datetime",
       "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ConnectionPoolConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "authproxyPoolerCount": {
+      "format": "int32",
+      "readOnly": true,
+      "type": "integer"
+     },
+     "authproxyPoolerScalingType": {
+      "enum": [
+       "POOLER_SCALING_TYPE_UNSPECIFIED",
+       "POOLER_NONE",
+       "POOLER_MACHINE_SIZED",
+       "POOLER_MANUAL_OVERRIDE"
+      ],
+      "type": "string"
+     },
+     "enabled": {
+      "type": "boolean"
+     },
+     "flags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "poolerCount": {
+      "format": "int32",
+      "readOnly": true,
+      "type": "integer"
+     },
+     "poolerScalingType": {
+      "enum": [
+       "POOLER_SCALING_TYPE_UNSPECIFIED",
+       "POOLER_NONE",
+       "POOLER_MACHINE_SIZED",
+       "POOLER_MANUAL_OVERRIDE"
+      ],
       "type": "string"
      }
     },
@@ -291,6 +416,15 @@
       },
       "readOnly": true,
       "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "DataplexConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "enabled": {
+      "type": "boolean"
      }
     },
     "type": "object"
@@ -414,9 +548,20 @@
      "clientConnectionConfig": {
       "$ref": "#/components/schemas/ClientConnectionConfig"
      },
+     "connectionPoolConfig": {
+      "$ref": "#/components/schemas/ConnectionPoolConfig"
+     },
      "createTime": {
       "format": "google-datetime",
       "readOnly": true,
+      "type": "string"
+     },
+     "dataApiAccess": {
+      "enum": [
+       "DEFAULT_DATA_API_ENABLED_FOR_GOOGLE_CLOUD_SERVICES",
+       "DISABLED",
+       "ENABLED"
+      ],
       "type": "string"
      },
      "databaseFlags": {
@@ -460,6 +605,10 @@
      },
      "machineConfig": {
       "$ref": "#/components/schemas/MachineConfig"
+     },
+     "maintenanceVersionName": {
+      "readOnly": true,
+      "type": "string"
      },
      "name": {
       "readOnly": true,
@@ -516,7 +665,10 @@
        "MAINTENANCE",
        "FAILED",
        "BOOTSTRAPPING",
-       "PROMOTING"
+       "PROMOTING",
+       "SWITCHOVER",
+       "STOPPING",
+       "STARTING"
       ],
       "readOnly": true,
       "type": "string"
@@ -612,6 +764,12 @@
      "operations": {
       "items": {
        "$ref": "#/components/schemas/Operation"
+      },
+      "type": "array"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
       },
       "type": "array"
      }
@@ -747,6 +905,10 @@
      "ip": {
       "readOnly": true,
       "type": "string"
+     },
+     "isHotStandby": {
+      "readOnly": true,
+      "type": "boolean"
      },
      "state": {
       "readOnly": true,
@@ -2465,6 +2627,14 @@
       "schema": {
        "type": "string"
       }
+     },
+     {
+      "in": "query",
+      "name": "returnPartialSuccess",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
      }
     ],
     "responses": {
@@ -2571,10 +2741,10 @@
  ],
  "x-simulator-source": {
   "package": "google-api-python-client",
-  "version": "2.170.0",
+  "version": "2.199.0",
   "file": "googleapiclient/discovery_cache/documents/alloydb.v1.json",
-  "sha256": "bf990f8e020e7bbd22c200adb1cb37c41ecce6c0db0b168ae80873eaef89695e",
+  "sha256": "ae8c61ad90eaf4d09c9a3aa5bc04669d52a6092eb84dc3ec7b648d17e047010f",
   "license": "Apache-2.0",
-  "revision": "20250508"
+  "revision": "20260730"
  }
 }

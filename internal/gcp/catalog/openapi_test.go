@@ -66,7 +66,7 @@ func TestDiscoveryNoticesAreMirroredForRedistribution(t *testing.T) {
 	if err != nil || !bytes.Equal(original, served) {
 		t.Fatal("the served discovery notices must equal third_party/GOOGLE-DISCOVERY-NOTICES.txt")
 	}
-	for _, needle := range []string{"Apache License", "google-api-python-client 2.170.0", "internal/gcp/catalog/models"} {
+	for _, needle := range []string{"Apache License", "google-api-python-client 2.199.0", "internal/gcp/catalog/models"} {
 		if !bytes.Contains(original, []byte(needle)) {
 			t.Fatalf("notice lacks %q", needle)
 		}

@@ -21,7 +21,7 @@ import googleapiclient
 ROOT = Path(__file__).resolve().parents[2]
 SELECTION = ROOT / 'internal/gcp/catalog/selection.json'
 OUTPUT = ROOT / 'internal/gcp/catalog/models'
-PINNED = '2.170.0'
+PINNED = '2.199.0'
 DOCUMENTS = Path(googleapiclient.__file__).parent / 'discovery_cache' / 'documents'
 
 
