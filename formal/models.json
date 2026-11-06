@@ -5691,6 +5691,1974 @@
           "expect_invariant": "InitialFragmentSelection"
         }
       ]
+    },
+    {
+      "id": "CloudWatchMetricsRawLedger",
+      "model": "formal/CloudWatchMetricsRawLedger.tla",
+      "config": "formal/CloudWatchMetricsRawLedger.cfg",
+      "bounds": "Two Regions, two namespaces, two singleton dimension identities, one metric name, two units None/Count; values -1/0/2; three clock classes, two requests after14 justified seeds, page1. Physical raw-point/catalog/abstract-byte caps3/2/6.",
+      "properties": [
+        "TypeOK",
+        "NoOrphans",
+        "DeniedNoDisclosure",
+        "DeniedFrame",
+        "InvalidFrame",
+        "ReadDurableFrame",
+        "FailedPutFrame",
+        "PeerFrame",
+        "PhysicalRowBudget",
+        "SeriesBudget",
+        "PhysicalByteBudget",
+        "PutRowsExact",
+        "PutCatalogExact",
+        "RevisionExact",
+        "RegionInitializationExact",
+        "StatisticsExact",
+        "CursorAdmission",
+        "ListExact",
+        "ErrorNoDisclosure"
+      ],
+      "limits": "Original finite ledger/response safety only. Independent literal batch/statistics/list/page oracles. Scope/auth/invalid/fault verdicts assumed; no Query/Unicode/numeric/XML parsing, actual UTF8bytes/IEEE754/rounding, HMAC/JSON cryptography, constructor/regional quota, SQL/Go/concurrency/crash/refinement/liveness or real AWS timing/rollup proof. Valid admission completeness is not proved. Raw physical data/foreign expired rows remain charged; only valid Put collects own namespace.",
+      "source_scope": [
+        "internal/aws/metrics/store.go",
+        "internal/aws/metrics/query.go"
+      ],
+      "mutants": [
+        {
+          "id": "InitializeRegionOnDenial",
+          "expect_invariant": "DeniedFrame",
+          "edits": [
+            {
+              "old": "disk'=IF commit THEN c ELSE disk \\* CONTROL",
+              "new": "disk'=IF q.kind=\"Denied\" THEN [disk EXCEPT !.initialized=@ \\cup {q.r}] ELSE IF commit THEN c ELSE disk \\* CONTROL",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "SkipPutAuthorization",
+          "expect_invariant": "DeniedNoDisclosure",
+          "edits": [
+            {
+              "old": "permitted == q.kind#\"Denied\"",
+              "new": "permitted == TRUE",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "DropSecondBatchSample",
+          "expect_invariant": "PutRowsExact",
+          "edits": [
+            {
+              "old": "ps == collected \\o Batch(Key(r,n,d),style)",
+              "new": "ps == collected \\o SubSeq(Batch(Key(r,n,d),style),1,1)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "PublishWithoutDurableCommit",
+          "expect_invariant": "PutRowsExact",
+          "edits": [
+            {
+              "old": "disk'=IF commit THEN c ELSE disk \\* CONTROL",
+              "new": "disk'=disk \\* CONTROL",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "CommitFailedPutCandidate",
+          "expect_invariant": "FailedPutFrame",
+          "edits": [
+            {
+              "old": "disk'=IF commit THEN c ELSE disk \\* CONTROL",
+              "new": "disk'=IF commit \\/ q.kind=\"Fault\" THEN c ELSE disk \\* CONTROL",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "OmitPhysicalRowCap",
+          "expect_invariant": "PhysicalRowBudget",
+          "edits": [
+            {
+              "old": "fits == Fits(c.rows,c.catalog)",
+              "new": "fits == Cardinality(Present(c.catalog))<=MaxSeries /\\ Bytes(c.rows,c.catalog)<=MaxBytes",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "OmitCatalogCap",
+          "expect_invariant": "SeriesBudget",
+          "edits": [
+            {
+              "old": "fits == Fits(c.rows,c.catalog)",
+              "new": "fits == Len(c.rows)<=MaxRows /\\ Bytes(c.rows,c.catalog)<=MaxBytes",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "OmitPayloadBudget",
+          "expect_invariant": "PhysicalByteBudget",
+          "edits": [
+            {
+              "old": "fits == Fits(c.rows,c.catalog)",
+              "new": "fits == Len(c.rows)<=MaxRows /\\ Cardinality(Present(c.catalog))<=MaxSeries",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "IgnoreForeignExpiredPhysicalRows",
+          "expect_invariant": "PhysicalRowBudget",
+          "edits": [
+            {
+              "old": "fits == Fits(c.rows,c.catalog)",
+              "new": "fits == Len(Keep(c.rows,{p \\in AsSet(c.rows):Live(p,clock)}))<=MaxRows /\\ Cardinality(Present(c.catalog))<=MaxSeries /\\ Bytes(c.rows,c.catalog)<=MaxBytes",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "CollectForeignScope",
+          "expect_invariant": "PeerFrame",
+          "edits": [
+            {
+              "old": "R(p.key)#r \\/ N(p.key)#n \\/ Live(p,t)",
+              "new": "Live(p,t)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "CollectEqualCutoff",
+          "expect_invariant": "PutRowsExact",
+          "edits": [
+            {
+              "old": "R(p.key)#r \\/ N(p.key)#n \\/ Live(p,t)",
+              "new": "R(p.key)#r \\/ N(p.key)#n \\/ p.stamp>=0",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "ReadCollectsOwnRows",
+          "expect_invariant": "ReadDurableFrame",
+          "edits": [
+            {
+              "old": "disk'=disk \\* CONTROL ReadDurableWrite",
+              "new": "disk'=IF q.kind=\"Success\" THEN [disk EXCEPT !.rows=Purge(@,q.r,q.n,clock)] ELSE disk \\* CONTROL ReadDurableWrite",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "ReturnExpiredStatistics",
+          "expect_invariant": "StatisticsExact",
+          "edits": [
+            {
+              "old": "/\\ RangeOK(p,range) /\\ Live(p,t)",
+              "new": "/\\ RangeOK(p,range)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "MergeRecordedUnits",
+          "expect_invariant": "StatisticsExact",
+          "edits": [
+            {
+              "old": "ps == Samples(disk,Key(q.r,q.n,q.d),q.unit,q.range,clock)",
+              "new": "original == Samples(disk,Key(q.r,q.n,q.d),q.unit,q.range,clock)\n        ps == [i \\in 1..Len(original) |-> [original[i] EXCEPT !.unit=\"None\"]]",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "DeduplicateSampleCount",
+          "expect_invariant": "StatisticsExact",
+          "edits": [
+            {
+              "old": "bucket |-> g[2],count |-> Len(group)",
+              "new": "bucket |-> g[2],count |-> Cardinality(AsSet(group))",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "IgnoreExactDimensions",
+          "expect_invariant": "StatisticsExact",
+          "edits": [
+            {
+              "old": "{p \\in AsSet(b.rows):p.key=k",
+              "new": "{p \\in AsSet(b.rows):R(p.key)=R(k) /\\ N(p.key)=N(k)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "MintWrongRevision",
+          "expect_invariant": "ListExact",
+          "edits": [
+            {
+              "old": "THEN Token(TRUE,q.r,q.n,q.d,disk.revision[q.r],at,Head(first))",
+              "new": "THEN Token(TRUE,q.r,q.n,q.d,disk.revision[q.r]+1,at,Head(first))",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "AcceptStaleRevision",
+          "expect_invariant": "CursorAdmission",
+          "edits": [
+            {
+              "old": "/\\ saved.revision=disk.revision[q.r] \\* CONTROL",
+              "new": "/\\ TRUE \\* CONTROL",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "AcceptTamperedToken",
+          "expect_invariant": "CursorAdmission",
+          "edits": [
+            {
+              "old": "cursorOK == saved.present /\\ q.mac",
+              "new": "cursorOK == saved.present",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "AcceptWrongFilter",
+          "expect_invariant": "CursorAdmission",
+          "edits": [
+            {
+              "old": "/\\ saved.ns=q.n /\\ saved.dim=q.d",
+              "new": "/\\ saved.dim=q.d",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "UseLiveClockForContinuation",
+          "expect_invariant": "ListExact",
+          "edits": [
+            {
+              "old": "at == IF q.resume THEN saved.at ELSE clock \\* CONTROL",
+              "new": "at == clock \\* CONTROL",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "ChangeSubmittedUnit",
+          "expect_invariant": "PutRowsExact",
+          "edits": [
+            {
+              "old": "style=4 -> <<Point(k,\"None\",1,2),Point(k,\"Count\",1,2)>>",
+              "new": "style=4 -> <<Point(k,\"None\",1,2),Point(k,\"None\",1,2)>>",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "ChooseWrongPagePosition",
+          "expect_invariant": "ListExact",
+          "edits": [
+            {
+              "old": "Page(s) == IF s={} THEN <<>> ELSE <<Minimum(s)>>",
+              "new": "Page(s) == IF s={} THEN <<>> ELSE <<CHOOSE k \\in s: \\A j \\in s:k>=j>>",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "IgnoreListDimensionFilter",
+          "expect_invariant": "ListExact",
+          "edits": [
+            {
+              "old": "Options(k,r,n,d) == R(k)=r /\\ (n=0 \\/ N(k)=n) /\\ (d=0 \\/ D(k)=d)",
+              "new": "Options(k,r,n,d) == R(k)=r /\\ (n=0 \\/ N(k)=n)",
+              "count": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "MetricsHTTPAdmission",
+      "model": "formal/MetricsHTTPAdmission.tla",
+      "config": "formal/MetricsHTTPAdmission.cfg",
+      "properties": [
+        "TypeOK",
+        "ScopeBeforeBody",
+        "EnvelopeBeforeBody",
+        "BodyAdmissionExact",
+        "QueryAdmissionExact",
+        "AuthorizationBeforeSchema",
+        "NoPrematureEffect",
+        "FailureFrame",
+        "ReadFrame",
+        "PeerAndCursorFrame",
+        "CommitRequiresAdmission",
+        "SuccessfulEffectExact",
+        "ReplyAfterCommit",
+        "StatusExact"
+      ],
+      "mutants": [
+        {
+          "id": "BypassTrustedScope",
+          "edits": [
+            {
+              "old": "ScopeOK == q.scope=\"valid\"",
+              "new": "ScopeOK == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopeBeforeBody"
+        },
+        {
+          "id": "BypassMethod",
+          "edits": [
+            {
+              "old": "EnvelopeOK == q.method /\\ q.path",
+              "new": "EnvelopeOK == TRUE /\\ q.path",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EnvelopeBeforeBody"
+        },
+        {
+          "id": "BypassContentType",
+          "edits": [
+            {
+              "old": "q.path /\\ q.media /\\ q.route",
+              "new": "q.path /\\ TRUE /\\ q.route",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EnvelopeBeforeBody"
+        },
+        {
+          "id": "BypassRouteMetadata",
+          "edits": [
+            {
+              "old": "q.media /\\ q.route",
+              "new": "q.media /\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EnvelopeBeforeBody"
+        },
+        {
+          "id": "BypassEncoding",
+          "edits": [
+            {
+              "old": "q.encoding \\in {\"identity\",\"gzip\"} \\* CONTROL",
+              "new": "TRUE \\* CONTROL",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EnvelopeBeforeBody"
+        },
+        {
+          "id": "BypassWireCap",
+          "edits": [
+            {
+              "old": "WireOK == q.wire#\"over\"",
+              "new": "WireOK == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BodyAdmissionExact"
+        },
+        {
+          "id": "BypassGzipHeader",
+          "edits": [
+            {
+              "old": "HeaderOK == q.header",
+              "new": "HeaderOK == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BodyAdmissionExact"
+        },
+        {
+          "id": "BypassExpandedCap",
+          "edits": [
+            {
+              "old": "ExpandedOK == q.expanded#\"over\"",
+              "new": "ExpandedOK == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BodyAdmissionExact"
+        },
+        {
+          "id": "IgnoreCRC",
+          "edits": [
+            {
+              "old": "CodecOK == q.codec=\"good\"",
+              "new": "CodecOK == q.codec \\in {\"good\",\"crc\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BodyAdmissionExact"
+        },
+        {
+          "id": "IgnoreTruncation",
+          "edits": [
+            {
+              "old": "CodecOK == q.codec=\"good\"",
+              "new": "CodecOK == q.codec \\in {\"good\",\"truncated\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BodyAdmissionExact"
+        },
+        {
+          "id": "IgnoreTrailing",
+          "edits": [
+            {
+              "old": "CodecOK == q.codec=\"good\"",
+              "new": "CodecOK == q.codec \\in {\"good\",\"trailing\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BodyAdmissionExact"
+        },
+        {
+          "id": "IgnoreSecondMember",
+          "edits": [
+            {
+              "old": "CodecOK == q.codec=\"good\"",
+              "new": "CodecOK == q.codec \\in {\"good\",\"members\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BodyAdmissionExact"
+        },
+        {
+          "id": "BypassFormShape",
+          "edits": [
+            {
+              "old": "FormOK == q.form",
+              "new": "FormOK == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "QueryAdmissionExact"
+        },
+        {
+          "id": "BypassVersion",
+          "edits": [
+            {
+              "old": "VersionOK == q.version",
+              "new": "VersionOK == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "QueryAdmissionExact"
+        },
+        {
+          "id": "BypassUnknownAction",
+          "edits": [
+            {
+              "old": "ActionKnown == q.action \\in {\"put\",\"read\"}",
+              "new": "ActionKnown == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "QueryAdmissionExact"
+        },
+        {
+          "id": "BypassActionPermission",
+          "edits": [
+            {
+              "old": "AuthOK == q.auth=\"allow\"",
+              "new": "AuthOK == q.auth \\in {\"allow\",\"deny\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AuthorizationBeforeSchema"
+        },
+        {
+          "id": "SchemaBeforeActionAuthorization",
+          "edits": [
+            {
+              "old": "queryAccepted'=TRUE /\\ phase'=\"auth\"",
+              "new": "queryAccepted'=TRUE /\\ phase'=\"schema\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AuthorizationBeforeSchema"
+        },
+        {
+          "id": "BypassSemanticSchema",
+          "edits": [
+            {
+              "old": "SchemaOK == q.schema",
+              "new": "SchemaOK == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CommitRequiresAdmission"
+        },
+        {
+          "id": "BypassResponsePreparation",
+          "edits": [
+            {
+              "old": "ResponseOK == q.response",
+              "new": "ResponseOK == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CommitRequiresAdmission"
+        },
+        {
+          "id": "AcknowledgeFailedCommit",
+          "edits": [
+            {
+              "old": "CommitOK == q.commit",
+              "new": "CommitOK == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CommitRequiresAdmission"
+        },
+        {
+          "id": "ReplyBeforeCommit",
+          "edits": [
+            {
+              "old": "Prepare == /\\ prepared'=TRUE /\\ phase'=\"commit\"",
+              "new": "Prepare == /\\ prepared'=TRUE /\\ phase'=\"reply\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReplyAfterCommit"
+        },
+        {
+          "id": "WriteOnRejectedRequest",
+          "edits": [
+            {
+              "old": "disk'=disk \\* CONTROL RejectedDurableWrite",
+              "new": "disk'=[disk EXCEPT !.revision=@+1] \\* CONTROL RejectedDurableWrite",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoPrematureEffect"
+        },
+        {
+          "id": "WrongCommittedSample",
+          "edits": [
+            {
+              "old": "!.rows=Append(@,9), !.revision=@+1",
+              "new": "!.rows=Append(@,8), !.revision=@+1",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SuccessfulEffectExact"
+        },
+        {
+          "id": "MutateReadRevision",
+          "edits": [
+            {
+              "old": "!.revision=@+1] ELSE d",
+              "new": "!.revision=@+1] ELSE [d EXCEPT !.revision=@+1]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadFrame"
+        }
+      ],
+      "bounds": "41 closed HTTP admission fixtures crossed with2 nonempty durable-frame seeds; each request follows finite phase pipeline, no numeric byte enumeration. Identity/gzip sizes below/equal/over the explicit local1MiB threshold; assumed codec/UTF8/form verdicts.",
+      "limits": "Original bounded admission projection only. Trusted host scope/codec/UTF8/form/size verdicts are assumed inputs, not token/IAM/gzip/CRC/Go-memory/parser/SQL/concurrency/refinement proofs. Action authorization-before-semantic-decode modeled; store candidate/commit atomicity assumed, response preparation failure abstracted. No metrics aggregation/retention/cursor cryptography/AWS parity or liveness proof. Per-request diagnostic RequestID counter is not a durable DB frame.",
+      "source_scope": [
+        "internal/aws/metrics/http.go",
+        "internal/aws/metrics/store.go"
+      ]
+    },
+    {
+      "id": "MetricsRequestAdmission",
+      "model": "formal/MetricsRequestAdmission.tla",
+      "config": "formal/MetricsRequestAdmission.cfg",
+      "bounds": "71 closed request categories, one pure decoder/normalizer invocation per valuation. Index token projection1/2/3/noncanonical; long-list count/index-bound classes assume native cardinality results. Actual dimension sequences2/10/11/30/31 with stable name-rank sorting; finite unit/value/time/name/UTF8-size/range classes; period0/1/60/61/1296000/1296001.",
+      "properties": [
+        "TypeOK",
+        "InputPreserved",
+        "NoEarlyPublication",
+        "DecodedAdmissionExact",
+        "AdmissionExact",
+        "NoRejectedPublication",
+        "DimensionOrderExact",
+        "DimensionValuesExact",
+        "NameIdentityExact",
+        "UnitExact",
+        "ScalarValueExact",
+        "TimestampExact",
+        "StartNormalizationExact",
+        "StatisticOrderExact",
+        "MetricIdentityExact",
+        "CountClassExact",
+        "PeriodExact"
+      ],
+      "mutants": [
+        {
+          "id": "BypassRequiredMultiplicity",
+          "edits": [
+            {
+              "old": "FieldsOK(r) == r.required /\\ r.single",
+              "new": "FieldsOK(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DecodedAdmissionExact"
+        },
+        {
+          "id": "IgnoreUnknownFields",
+          "edits": [
+            {
+              "old": "ClosedOK(r) == r.closed",
+              "new": "ClosedOK(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DecodedAdmissionExact"
+        },
+        {
+          "id": "AcceptNoncanonicalIndex",
+          "edits": [
+            {
+              "old": "CanonicalIndexes(r) == r.indexes \\subseteq {\"1\",\"2\",\"3\"}",
+              "new": "CanonicalIndexes(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DecodedAdmissionExact"
+        },
+        {
+          "id": "AcceptIndexGap",
+          "edits": [
+            {
+              "old": "ContiguousIndexes(r) == Numbers(r.indexes)=1..Cardinality(Numbers(r.indexes))",
+              "new": "ContiguousIndexes(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DecodedAdmissionExact"
+        },
+        {
+          "id": "IgnoreIndexLimitClass",
+          "edits": [
+            {
+              "old": "IndexBoundOK(r) == r.indexBound",
+              "new": "IndexBoundOK(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DecodedAdmissionExact"
+        },
+        {
+          "id": "IgnoreScalarParseVerdict",
+          "edits": [
+            {
+              "old": "ParseOK(r) == r.parsed",
+              "new": "ParseOK(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DecodedAdmissionExact"
+        },
+        {
+          "id": "IgnoreDatumCount",
+          "edits": [
+            {
+              "old": "CountOK(r) == r.count \\in {\"under\",\"equal\"}",
+              "new": "CountOK(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionExact"
+        },
+        {
+          "id": "IgnoreNameClasses",
+          "edits": [
+            {
+              "old": "NamesOK(r) == r.names",
+              "new": "NamesOK(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionExact"
+        },
+        {
+          "id": "IgnoreDimensionCount",
+          "edits": [
+            {
+              "old": "DimensionsOK(r) == Len(r.dims)<=(IF r.op=\"list\" THEN 10 ELSE 30)",
+              "new": "DimensionsOK(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionExact"
+        },
+        {
+          "id": "AllowDuplicateDimensionNames",
+          "edits": [
+            {
+              "old": "UniqueNames(r) == Cardinality({r.dims[j].name:j \\in 1..Len(r.dims)})=Len(r.dims)",
+              "new": "UniqueNames(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionExact"
+        },
+        {
+          "id": "IgnoreAllowedUnit",
+          "edits": [
+            {
+              "old": "UnitOK(r) == r.unit \\in {\"absent\",\"None\",\"Count\",\"Seconds\"}",
+              "new": "UnitOK(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionExact"
+        },
+        {
+          "id": "IgnoreStorageResolution",
+          "edits": [
+            {
+              "old": "ResolutionOK(r) == r.resolution \\in {0,60}",
+              "new": "ResolutionOK(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionExact"
+        },
+        {
+          "id": "IgnoreFiniteMagnitude",
+          "edits": [
+            {
+              "old": "FiniteOK(r) == r.finite",
+              "new": "FiniteOK(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionExact"
+        },
+        {
+          "id": "IgnoreTimestampWindow",
+          "edits": [
+            {
+              "old": "TimeOK(r) == r.nano /\\ r.ingest",
+              "new": "TimeOK(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionExact"
+        },
+        {
+          "id": "IgnorePeriodPolicy",
+          "edits": [
+            {
+              "old": "PeriodOK(r) == r.period>=60 /\\ r.period<=1296000 /\\ r.period%60=0",
+              "new": "PeriodOK(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionExact"
+        },
+        {
+          "id": "IgnoreQueryTimeRange",
+          "edits": [
+            {
+              "old": "RangeOK(r) == r.range",
+              "new": "RangeOK(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionExact"
+        },
+        {
+          "id": "IgnoreStatisticSet",
+          "edits": [
+            {
+              "old": "StatisticsOK(r) == Len(r.stats)>=1 /\\ Len(r.stats)<=5\n /\\ Cardinality({r.stats[j]:j \\in 1..Len(r.stats)})=Len(r.stats)\n /\\ \\A j \\in 1..Len(r.stats):r.stats[j] \\in {\"SampleCount\",\"Sum\",\"Minimum\",\"Maximum\",\"Average\"}",
+              "new": "StatisticsOK(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionExact"
+        },
+        {
+          "id": "IgnoreInvalidLaterDatum",
+          "edits": [
+            {
+              "old": "/\\ TimeOK(r) /\\ r.allDatums",
+              "new": "/\\ TimeOK(r) /\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionExact"
+        },
+        {
+          "id": "KeepUnsortedDimensions",
+          "edits": [
+            {
+              "old": "dims |-> Sorted(r.dims),",
+              "new": "dims |-> r.dims,",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DimensionOrderExact"
+        },
+        {
+          "id": "DefaultOmittedReadUnitToNone",
+          "edits": [
+            {
+              "old": "unit |-> IF r.op=\"put\" /\\ r.unit=\"absent\" THEN \"None\" ELSE r.unit,",
+              "new": "unit |-> IF r.unit=\"absent\" THEN \"None\" ELSE r.unit,",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "UnitExact"
+        },
+        {
+          "id": "RewriteZeroValueClass",
+          "edits": [
+            {
+              "old": "value |-> IF r.op=\"put\" THEN r.value ELSE \"notApplicable\",",
+              "new": "value |-> IF r.op=\"put\" THEN \"positive\" ELSE \"notApplicable\",",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScalarValueExact"
+        },
+        {
+          "id": "LoseDefaultTimestamp",
+          "edits": [
+            {
+              "old": "ELSE IF r.stamp=\"absent\" THEN \"now\" ELSE r.stamp,",
+              "new": "ELSE r.stamp,",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TimestampExact"
+        },
+        {
+          "id": "RoundStartUp",
+          "edits": [
+            {
+              "old": "THEN r.start-(r.start%60) ELSE 0,",
+              "new": "THEN r.start-(r.start%60)+60 ELSE 0,",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StartNormalizationExact"
+        },
+        {
+          "id": "ReverseStatisticOrder",
+          "edits": [
+            {
+              "old": "stats |-> IF r.op=\"stats\" THEN r.stats ELSE <<>>,",
+              "new": "stats |-> IF r.op=\"stats\" THEN [j \\in 1..Len(r.stats) |-> r.stats[Len(r.stats)-j+1]] ELSE <<>>,",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StatisticOrderExact"
+        },
+        {
+          "id": "IncludeUnitInMetricIdentity",
+          "edits": [
+            {
+              "old": "key |-> <<r.ns,r.name,Sorted(r.dims)>>,",
+              "new": "key |-> <<r.ns,r.name,Sorted(r.dims),r.unit>>,",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MetricIdentityExact"
+        },
+        {
+          "id": "SortCallerOwnedDimensions",
+          "edits": [
+            {
+              "old": "request'=request \\* CONTROL CallerCopy",
+              "new": "request'=[request EXCEPT !.dims=Sorted(@)] \\* CONTROL CallerCopy",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "InputPreserved"
+        },
+        {
+          "id": "PublishRejectedPartialPlan",
+          "edits": [
+            {
+              "old": "ELSE /\\ published'=NoResult /\\ status'=\"rejected\") \\* CONTROL RefusalPublication",
+              "new": "ELSE /\\ published'=Plan(working) /\\ status'=\"rejected\") \\* CONTROL RefusalPublication",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoRejectedPublication"
+        },
+        {
+          "id": "PublishBeforeNormalization",
+          "edits": [
+            {
+              "old": "published'=NoResult \\* CONTROL EarlyPublish",
+              "new": "published'=Plan(request) \\* CONTROL EarlyPublish",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoEarlyPublication"
+        },
+        {
+          "id": "LoseCountBoundaryClass",
+          "edits": [
+            {
+              "old": "count |-> IF r.op=\"put\" THEN r.count ELSE \"notApplicable\"]",
+              "new": "count |-> IF r.op=\"put\" THEN \"under\" ELSE \"notApplicable\"]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CountClassExact"
+        },
+        {
+          "id": "RewriteAcceptedPeriod",
+          "edits": [
+            {
+              "old": "period |-> IF r.op=\"stats\" THEN r.period ELSE 0,",
+              "new": "period |-> IF r.op=\"stats\" THEN 60 ELSE 0,",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PeriodExact"
+        }
+      ],
+      "source_scope": [
+        "internal/aws/metrics/request.go",
+        "internal/aws/metrics/types.go"
+      ],
+      "limits": "Independent literal accepted-ID and expected normalized-result oracles. Pure successful-decoder/normalized-publication projection only, not raw partial DTO zero-on-error. Primitive number/date lexing, UTF8/rune/byte-size/name/range verdicts and long-list cardinality/index-limit classes assumed, not Go algorithms/IEEE754/time arithmetic/codec/SQL/IAM/refinement/liveness. Name ranks quotient ASCII comparison; omitted filter values/units use disjoint sentinels. Identity carrier is an abstract Metric/filter tuple, not SHA/JSON. Native HTTP/authorization effects belong separate models/tests. The regionOK and persisted strictDocument helpers are excluded; abstract normalized output is a field/template projection, not full native DTO or a zero-on-error return guarantee. Typed normalizer fixtures enter directly; only wire fixtures exercise decoder, so empty/overlong typed batches are not claimed reachable through successful Query decode. Decoder admission tracks an explicit decoded flag, not partial Go result structs."
+    },
+    {
+      "id": "MetricsTrustedScope",
+      "model": "formal/MetricsTrustedScope.tla",
+      "config": "formal/MetricsTrustedScope.cfg",
+      "properties": [
+        "TypeOK",
+        "ActorBeforeBody",
+        "MetadataAdmissionExact",
+        "DecisionExact",
+        "NoNestedPolicyTransaction",
+        "BorrowedPolicySource",
+        "CurrentPolicyRevision",
+        "DecisionSubjectExact",
+        "FailureFrame",
+        "NoPolicyWrite",
+        "PeerFrame",
+        "EffectRequiresPermission",
+        "ReadFrame",
+        "ReadReplyExact",
+        "SuccessfulScopeExact",
+        "SuccessfulEffectExact",
+        "NoErrorDisclosure",
+        "StatusExact"
+      ],
+      "mutants": [
+        {
+          "id": "BypassSameDatabaseFactory",
+          "edits": [
+            {
+              "old": "FactoryBound(r) == r.storeDB#\"none\" /\\ r.authorityDB#\"none\" /\\ r.storeDB=r.authorityDB",
+              "new": "FactoryBound(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StatusExact"
+        },
+        {
+          "id": "MissingHandlerFallsBack",
+          "edits": [
+            {
+              "old": "ELSE IF ~q.handler THEN Finish(\"501\")",
+              "new": "ELSE IF ~q.handler THEN Finish(\"fallback\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StatusExact"
+        },
+        {
+          "id": "LoseDuplicateMonitoringIntent",
+          "edits": [
+            {
+              "old": "r.service \\in {\"monitoring\",\"duplicate\",\"comma\",\"folded\"}",
+              "new": "r.service \\in {\"monitoring\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StatusExact"
+        },
+        {
+          "id": "SignatureSubstringSelectsMetrics",
+          "edits": [
+            {
+              "old": "\\/ (r.auth#\"none\" /\\ r.signedService) \\* CONTROL Intent",
+              "new": "\\/ r.auth=\"signatureOnly\" \\/ (r.auth#\"none\" /\\ r.signedService) \\* CONTROL Intent",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StatusExact"
+        },
+        {
+          "id": "BypassPrivateActor",
+          "edits": [
+            {
+              "old": "PrivateActorOK(r) == r.actor",
+              "new": "PrivateActorOK(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StatusExact"
+        },
+        {
+          "id": "DummySignatureGrantsActor",
+          "edits": [
+            {
+              "old": "PrivateActorOK(r) == r.actor",
+              "new": "PrivateActorOK(r) == r.actor \\/ (r.auth=\"dummy\" /\\ r.service=\"monitoring\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ActorBeforeBody"
+        },
+        {
+          "id": "UseCredentialIdentity",
+          "edits": [
+            {
+              "old": "CaptureSubject(r) == r.exercise",
+              "new": "CaptureSubject(r) == r.credential",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DecisionExact"
+        },
+        {
+          "id": "OperatorRoleGrantsDataAdmin",
+          "edits": [
+            {
+              "old": "CaptureSubject(r) == r.exercise",
+              "new": "CaptureSubject(r) == IF r.role=\"operator\" THEN \"admin\" ELSE r.exercise",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DecisionExact"
+        },
+        {
+          "id": "WirePrincipalGrantsAuthority",
+          "edits": [
+            {
+              "old": "PolicySubject == subject",
+              "new": "PolicySubject == IF wirePrincipal#\"absent\" THEN wirePrincipal ELSE subject",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DecisionExact"
+        },
+        {
+          "id": "AcceptDuplicateService",
+          "edits": [
+            {
+              "old": "ServiceOK(r) == r.service \\in {\"absent\",\"monitoring\"}",
+              "new": "ServiceOK(r) == r.service \\in {\"absent\",\"monitoring\",\"duplicate\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MetadataAdmissionExact"
+        },
+        {
+          "id": "AcceptCommaService",
+          "edits": [
+            {
+              "old": "ServiceOK(r) == r.service \\in {\"absent\",\"monitoring\"}",
+              "new": "ServiceOK(r) == r.service \\in {\"absent\",\"monitoring\",\"comma\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MetadataAdmissionExact"
+        },
+        {
+          "id": "AcceptRepeatedRegion",
+          "edits": [
+            {
+              "old": "RegionSingle(r) == r.regionSingle",
+              "new": "RegionSingle(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MetadataAdmissionExact"
+        },
+        {
+          "id": "AcceptRepeatedAuthorization",
+          "edits": [
+            {
+              "old": "AuthSingle(r) == r.authSingle",
+              "new": "AuthSingle(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MetadataAdmissionExact"
+        },
+        {
+          "id": "AcceptSessionCredentials",
+          "edits": [
+            {
+              "old": "SessionAbsent(r) == ~r.session",
+              "new": "SessionAbsent(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MetadataAdmissionExact"
+        },
+        {
+          "id": "AcceptRealCredentialMetadata",
+          "edits": [
+            {
+              "old": "DummyFormat(r) == r.auth \\in {\"none\",\"dummy\"}",
+              "new": "DummyFormat(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MetadataAdmissionExact"
+        },
+        {
+          "id": "IgnoreCredentialDateDigits",
+          "edits": [
+            {
+              "old": "DateOK(r) == r.date",
+              "new": "DateOK(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MetadataAdmissionExact"
+        },
+        {
+          "id": "DefaultSignedEmptyRegion",
+          "edits": [
+            {
+              "old": "SignedRegionOK(r) == r.auth#\"dummy\" \\/ r.signedRegion#\"absent\"",
+              "new": "SignedRegionOK(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MetadataAdmissionExact"
+        },
+        {
+          "id": "AcceptSignedOtherService",
+          "edits": [
+            {
+              "old": "SignedServiceOK(r) == r.auth#\"dummy\" \\/ r.signedService",
+              "new": "SignedServiceOK(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MetadataAdmissionExact"
+        },
+        {
+          "id": "AcceptConflictingRegions",
+          "edits": [
+            {
+              "old": "RegionsAgree(r) == r.auth#\"dummy\" \\/ r.region=\"absent\" \\/ r.region=r.signedRegion",
+              "new": "RegionsAgree(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MetadataAdmissionExact"
+        },
+        {
+          "id": "AcceptUnsupportedRegion",
+          "edits": [
+            {
+              "old": "ELSE IF CandidateRegion(r) \\notin Regions THEN \"400\" ELSE \"OK\"",
+              "new": "ELSE \"OK\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MetadataAdmissionExact"
+        },
+        {
+          "id": "DefaultUnsignedToWrongRegion",
+          "edits": [
+            {
+              "old": "ELSE IF r.region=\"absent\" THEN \"east\" ELSE r.region",
+              "new": "ELSE IF r.region=\"absent\" THEN \"west\" ELSE r.region",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadReplyExact"
+        },
+        {
+          "id": "RereadRegionAfterBody",
+          "edits": [
+            {
+              "old": "NativeRegion == region",
+              "new": "NativeRegion == IF wireRegion#\"absent\" THEN wireRegion ELSE region",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SuccessfulScopeExact"
+        },
+        {
+          "id": "UsePreBodyPolicySnapshot",
+          "edits": [
+            {
+              "old": "IF PolicySource#\"other\" THEN Lookup(frame,PolicySubject)",
+              "new": "IF PolicySource#\"other\" THEN (IF PolicySubject=\"reader\" THEN Row(q.initialPolicy,0) ELSE Lookup(frame,PolicySubject))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DecisionExact"
+        },
+        {
+          "id": "ReadPeerPolicyDatabase",
+          "edits": [
+            {
+              "old": "PolicySource == \"borrowed\"",
+              "new": "PolicySource == \"other\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DecisionExact"
+        },
+        {
+          "id": "OpenNestedPolicyTransaction",
+          "edits": [
+            {
+              "old": "PolicySource == \"borrowed\"",
+              "new": "PolicySource == \"nested\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoNestedPolicyTransaction"
+        },
+        {
+          "id": "MissingPolicyAllowsAction",
+          "edits": [
+            {
+              "old": "doc=\"allowAll\" \\/ (doc=\"reader\" /\\ action \\in {\"List\",\"Get\"})",
+              "new": "doc \\in {\"allowAll\",\"missing\"} \\/ (doc=\"reader\" /\\ action \\in {\"List\",\"Get\"})",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DecisionExact"
+        },
+        {
+          "id": "IgnoreExplicitDeny",
+          "edits": [
+            {
+              "old": "doc=\"allowAll\" \\/ (doc=\"reader\" /\\ action \\in {\"List\",\"Get\"})",
+              "new": "doc \\in {\"allowAll\",\"mixed\",\"deny\"} \\/ (doc=\"reader\" /\\ action \\in {\"List\",\"Get\"})",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DecisionExact"
+        },
+        {
+          "id": "PolicyInfrastructureBecomesDeny",
+          "edits": [
+            {
+              "old": "THEN \"error\"\n ELSE IF doc=\"allowAll\"",
+              "new": "THEN \"implicitDeny\"\n ELSE IF doc=\"allowAll\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DecisionExact"
+        },
+        {
+          "id": "IgnoreCallbackContract",
+          "edits": [
+            {
+              "old": "CallbackOK(r) == r.callbackContract",
+              "new": "CallbackOK(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DecisionExact"
+        },
+        {
+          "id": "EvaluateReadActionForPut",
+          "edits": [
+            {
+              "old": "PolicyAction == q.action",
+              "new": "PolicyAction == \"List\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DecisionExact"
+        },
+        {
+          "id": "DisclosePolicyOnFailure",
+          "edits": [
+            {
+              "old": "output'=NoOutput \\* CONTROL ErrorDisclosure",
+              "new": "output'=PolicyOutput \\* CONTROL ErrorDisclosure",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoErrorDisclosure"
+        },
+        {
+          "id": "ConflateGetWithListPermission",
+          "edits": [
+            {
+              "old": "PolicyAction == q.action",
+              "new": "PolicyAction == IF q.action=\"Get\" THEN \"List\" ELSE q.action",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DecisionExact"
+        },
+        {
+          "id": "AcceptFoldedStrictSelector",
+          "edits": [
+            {
+              "old": "ServiceOK(r) == r.service \\in {\"absent\",\"monitoring\"}",
+              "new": "ServiceOK(r) == r.service \\in {\"absent\",\"monitoring\",\"folded\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MetadataAdmissionExact"
+        }
+      ],
+      "source_scope": [
+        "internal/aws/metrics_dispatch.go",
+        "internal/aws/s3.go",
+        "internal/aws/ssm.go"
+      ],
+      "bounds": "58 closed request/factory/callback categories \u00d72 nonempty DB-frame seeds. Four allowed region labels, two exercised regions; explicit role/credential/exercise inputs, metadata classes, same-Tx policy document versions0/1 and separate peer version2. One bounded policy change before transaction, one of3 native action classes; no change within transaction.",
+      "limits": "Independent literal decisions/status/scope/read-result and full-frame oracles. Private getter validity, metadata lexer and core policy document verdicts assumed; no token/signature/IAM grammar/crypto/SQL/OS/transaction isolation/Go refinement/liveness proof. Policy versions are document provenance, not actual schema columns. Native effect/rollback assumed from separate models/tests. Factory is NewMetricsGateway pointer binding only, not global constructor atomicity. Fallback means delegation attempt, not fake S3 success; callback-contract fixture is a trusted internal port, not public HTTP reachability. Read results carry actual region-selected catalog/statistics marker sequences, not only ghost scope labels. Nested policy source is an operational transaction-handle choice (same DB), not a measured SQL deadlock; versions are provenance only. Native result/rollback behavior remains assumed from separate leaf models. Additional callers ONLY optional CloudWatchMetrics handler field in Gateway and early monitoring-intent\u2192serveMetrics branch before existing AWS dispatch. RouteStep covers handler-present/fallback attempt, not arbitrary original S3/SSM behavior or token authentication. These additional source-scope declarations are bounded caller correspondence, not a theorem about all native source. Broad BypassPrivateActor is an auth-before-invalid-metadata priority fault: its declared StatusExact witness is NOT body-read sensitivity. DummySignatureGrantsActor intentionally specializes the injected operational fault to dummy auth plus canonical monitoring service; baseline/domain is unchanged. Body-read sensitivity claims require exact-source actual first ActorBeforeBody/bodyRead TRUE evidence; this declaration alone is not execution evidence."
+    },
+    {
+      "id": "MetricsConsoleEpoch",
+      "model": "formal/MetricsConsoleEpoch.tla",
+      "config": "formal/MetricsConsoleEpoch.cfg",
+      "bounds": "{\"channels\": 2, \"dimensionNames\": 1, \"dimensionValues\": 2, \"locales\": [\"en\", \"ja\"], \"maxEvents\": 7, \"metricNames\": 1, \"namespaces\": 2, \"principals\": 2, \"reactInstances\": 2, \"regions\": 2, \"relativeEpochs\": \"0..6\", \"requestReferences\": 2, \"requestSlots\": 3, \"scenarioPlans\": 37, \"timeWindows\": 2, \"units\": [\"Count\", \"Bytes\"]}",
+      "properties": [
+        "TypeOK",
+        "ListSuccessGuarded",
+        "StatisticsSuccessGuarded",
+        "ListCurrentResult",
+        "StatisticsCurrentResult",
+        "StatisticsSnapshotBound",
+        "StaleErrorGuarded",
+        "CurrentErrorVisible",
+        "StaleFinallyGuarded",
+        "CurrentFinallySettles",
+        "QueryEditClearsStatistics",
+        "BeginSnapshotClears",
+        "StatisticsBeginClears",
+        "BrowseClearsViews",
+        "ScopeResetClears",
+        "LocaleFrame",
+        "InvalidInputNoWire",
+        "CaptureMatchesIntent"
+      ],
+      "limits": "Selected bounded UI input/callback workflows only, with independent literal result/capture oracles. Initial completed-list/selection prelude; atomic callback success-or-nonAbort-error plus finally. A separate React-instance delivery boundary remains in all controls. Same-instance prop-update cases may be masked by the parent production keyed-remount defense; request identity does not select DB/data. No arbitrary schedules/liveness, React/JS/AbortController refinement, host auth/IAM/isolation, Query/XML/value/timestamp/byte parser, actual metric arithmetic, cursor/HMAC, backend/native Go/SQL, graph/pixel, SDK or full AWS compatibility proof. Source helper1445 counterpart mapping contains explicit gaps. Main scope is ONLY Metrics keyed retirement/raw Response caller: key binds auth revision/principal/region/service/navigation and excludes locale; props preserve actual Response callback. React key delivery/remount semantics are assumed, not proved. No other main/auth/provider behavior or catalog predicate is included; the generated asset declaration is limited to the explicit Metrics epoch projection below. Source-only caller binding is new; prior56 scoped phases ran unchanged TLA, not the new main or current1440 response guard. Current source also adds graph-focus refs/effect and dimension-aware aria labels; these DOM focus/accessibility behaviors and response decoder/numerical 1440 boundary are excluded from the unchanged epoch abstraction. The old56 phases are not a run of this current source or helper. Compiled app.js scope is ONLY the actual canonical-derived Metrics epoch projection, tied to accepted e3e/23e6 build provenance and current d671 output hash. Compiler/minifier/React correctness is assumed; DOM focus/aria, response decoder/1440 math, other components, whole bundle behavior and refinement are not proved.",
+      "source_scope": [
+        "tools/console/src/cloudwatch-metrics.jsx",
+        "tools/console/src/main.jsx",
+        "internal/server/web/app.js"
+      ],
+      "mutants": [
+        {
+          "id": "DropListSuccessScope",
+          "edits": [
+            {
+              "old": "listSuccessScope == scopeCurrent (* ListSuccessScope *)",
+              "new": "listSuccessScope == TRUE (* ListSuccessScope *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListSuccessGuarded"
+        },
+        {
+          "id": "DropListErrorScope",
+          "edits": [
+            {
+              "old": "listErrorScope == scopeCurrent (* ListErrorScope *)",
+              "new": "listErrorScope == TRUE (* ListErrorScope *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StaleErrorGuarded"
+        },
+        {
+          "id": "DropListFinallyScope",
+          "edits": [
+            {
+              "old": "listFinallyScope == scopeCurrent (* ListFinallyScope *)",
+              "new": "listFinallyScope == TRUE (* ListFinallyScope *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StaleFinallyGuarded"
+        },
+        {
+          "id": "DropStatsSuccessScope",
+          "edits": [
+            {
+              "old": "statsSuccessScope == scopeCurrent (* StatsSuccessScope *)",
+              "new": "statsSuccessScope == TRUE (* StatsSuccessScope *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StatisticsSuccessGuarded"
+        },
+        {
+          "id": "DropStatsSuccessRevision",
+          "edits": [
+            {
+              "old": "statsSuccessRevision == revisionCurrent (* StatsSuccessRevision *)",
+              "new": "statsSuccessRevision == TRUE (* StatsSuccessRevision *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StatisticsSuccessGuarded"
+        },
+        {
+          "id": "DropStatsErrorScope",
+          "edits": [
+            {
+              "old": "statsErrorScope == scopeCurrent (* StatsErrorScope *)",
+              "new": "statsErrorScope == TRUE (* StatsErrorScope *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StaleErrorGuarded"
+        },
+        {
+          "id": "DropStatsErrorRevision",
+          "edits": [
+            {
+              "old": "statsErrorRevision == revisionCurrent (* StatsErrorRevision *)",
+              "new": "statsErrorRevision == TRUE (* StatsErrorRevision *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StaleErrorGuarded"
+        },
+        {
+          "id": "DropStatsFinallyScope",
+          "edits": [
+            {
+              "old": "statsFinallyScope == scopeCurrent (* StatsFinallyScope *)",
+              "new": "statsFinallyScope == TRUE (* StatsFinallyScope *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StaleFinallyGuarded"
+        },
+        {
+          "id": "DropStatsFinallyRevision",
+          "edits": [
+            {
+              "old": "statsFinallyRevision == revisionCurrent (* StatsFinallyRevision *)",
+              "new": "statsFinallyRevision == TRUE (* StatsFinallyRevision *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StaleFinallyGuarded"
+        },
+        {
+          "id": "RetainListAtBrowseStart",
+          "edits": [
+            {
+              "old": "listRows == IF ch=\"list\" THEN {} ELSE ui.rows.list (* ListStartClear *)",
+              "new": "listRows == IF ch=\"list\" THEN ui.rows.list ELSE ui.rows.list (* ListStartClear *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BrowseClearsViews"
+        },
+        {
+          "id": "RetainStatsAtStatisticsStart",
+          "edits": [
+            {
+              "old": "statRows == IF ch=\"list\" THEN {} ELSE {} (* StatisticsStartClear *)",
+              "new": "statRows == IF ch=\"list\" THEN {} ELSE ui.rows.statistics (* StatisticsStartClear *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StatisticsBeginClears"
+        },
+        {
+          "id": "RetainStatsAtBrowseStart",
+          "edits": [
+            {
+              "old": "statRows == IF ch=\"list\" THEN {} ELSE {} (* StatisticsStartClear *)",
+              "new": "statRows == IF ch=\"list\" THEN ui.rows.statistics ELSE {} (* StatisticsStartClear *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BrowseClearsViews"
+        },
+        {
+          "id": "RetainLoadedSnapshot",
+          "edits": [
+            {
+              "old": "loaded == None (* BeginSnapshotClear *)",
+              "new": "loaded == ui.loaded (* BeginSnapshotClear *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BeginSnapshotClears"
+        },
+        {
+          "id": "RetainStatsOnQueryEdit",
+          "edits": [
+            {
+              "old": "!.rows.statistics={},!.loaded=None,!.busy.statistics=FALSE] (* QueryEditClear *)",
+              "new": "!.rows.statistics=ui.rows.statistics,!.loaded=None,!.busy.statistics=FALSE] (* QueryEditClear *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "QueryEditClearsStatistics"
+        },
+        {
+          "id": "RetainViewsOnScopeReset",
+          "edits": [
+            {
+              "old": "scopeRows == [list |-> {},statistics |-> {}] (* ScopeClear *)",
+              "new": "scopeRows == ui.rows (* ScopeClear *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopeResetClears"
+        },
+        {
+          "id": "ClearDataOnLocaleChange",
+          "edits": [
+            {
+              "old": "after == [ui EXCEPT !.locale=(IF @=\"en\" THEN \"ja\" ELSE \"en\")] (* LocaleOnly *)",
+              "new": "after == [ui EXCEPT !.locale=(IF @=\"en\" THEN \"ja\" ELSE \"en\"),!.rows.statistics={},!.loaded=None] (* LocaleOnly *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "LocaleFrame"
+        },
+        {
+          "id": "SwallowCurrentListError",
+          "edits": [
+            {
+              "old": "errorValue == (IF ch=\"list\" THEN \"failed\" ELSE \"failed\") (* VisibleReadError *)",
+              "new": "errorValue == (IF ch=\"list\" THEN \"none\" ELSE \"failed\") (* VisibleReadError *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CurrentErrorVisible"
+        },
+        {
+          "id": "SwallowCurrentStatisticsError",
+          "edits": [
+            {
+              "old": "errorValue == (IF ch=\"list\" THEN \"failed\" ELSE \"failed\") (* VisibleReadError *)",
+              "new": "errorValue == (IF ch=\"list\" THEN \"failed\" ELSE \"none\") (* VisibleReadError *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CurrentErrorVisible"
+        },
+        {
+          "id": "KeepCurrentListBusy",
+          "edits": [
+            {
+              "old": "settle == (IF ch=\"list\" THEN FALSE ELSE FALSE) (* CurrentFinally *)",
+              "new": "settle == (IF ch=\"list\" THEN TRUE ELSE FALSE) (* CurrentFinally *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CurrentFinallySettles"
+        },
+        {
+          "id": "KeepCurrentStatisticsBusy",
+          "edits": [
+            {
+              "old": "settle == (IF ch=\"list\" THEN FALSE ELSE FALSE) (* CurrentFinally *)",
+              "new": "settle == (IF ch=\"list\" THEN FALSE ELSE TRUE) (* CurrentFinally *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CurrentFinallySettles"
+        },
+        {
+          "id": "WrongCapturedUnit",
+          "edits": [
+            {
+              "old": "capturedQuery == query (* CaptureQuery *)",
+              "new": "capturedQuery == [query EXCEPT !.unit=(IF @=\"Count\" THEN \"Bytes\" ELSE \"Count\")] (* CaptureQuery *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CaptureMatchesIntent"
+        },
+        {
+          "id": "WrongCapturedDimension",
+          "edits": [
+            {
+              "old": "capturedQuery == query (* CaptureQuery *)",
+              "new": "capturedQuery == [query EXCEPT !.dimension=(IF @=\"selected\" THEN \"other\" ELSE \"selected\")] (* CaptureQuery *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CaptureMatchesIntent"
+        },
+        {
+          "id": "WrongCapturedNamespace",
+          "edits": [
+            {
+              "old": "capturedQuery == query (* CaptureQuery *)",
+              "new": "capturedQuery == [query EXCEPT !.namespace=(IF @=\"A\" THEN \"B\" ELSE \"A\")] (* CaptureQuery *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CaptureMatchesIntent"
+        },
+        {
+          "id": "WrongCapturedWindow",
+          "edits": [
+            {
+              "old": "capturedQuery == query (* CaptureQuery *)",
+              "new": "capturedQuery == [query EXCEPT !.window=(IF @=\"first\" THEN \"second\" ELSE \"first\")] (* CaptureQuery *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CaptureMatchesIntent"
+        },
+        {
+          "id": "WrongCapturedListFilter",
+          "edits": [
+            {
+              "old": "capturedFilter == (IF ch=\"list\" THEN e.arg ELSE \"all\") (* CaptureListFilter *)",
+              "new": "capturedFilter == (IF ch=\"list\" THEN (IF e.arg=\"a\" THEN \"b\" ELSE \"a\") ELSE \"all\") (* CaptureListFilter *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CaptureMatchesIntent"
+        },
+        {
+          "id": "IssueInvalidStatisticsRequest",
+          "edits": [
+            {
+              "old": "valid == ch=\"list\" \\/ query.valid (* FrontendValidation *)",
+              "new": "valid == TRUE (* FrontendValidation *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "InvalidInputNoWire"
+        },
+        {
+          "id": "KeepPendingEpochOnQueryEdit",
+          "edits": [
+            {
+              "old": "!.revision.statistics=@+1, (* QueryEditRetire *)",
+              "new": "!.revision.statistics=@, (* QueryEditRetire *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StatisticsCurrentResult"
+        }
+      ]
+    },
+    {
+      "id": "CapabilityProjection",
+      "model": "formal/CapabilityProjection.tla",
+      "config": "formal/CapabilityProjection.cfg",
+      "bounds": "32 producer configurations \u00d723 closed consumer classes =736initials; Project then Consume once; no new producer bounds",
+      "properties": [
+        "TypeOK",
+        "HostReadyBeforePublication",
+        "AvailableOnlyWhenReady",
+        "ExactSupportedOperations",
+        "ExactProtocol",
+        "ExactVersion",
+        "ExactProvider",
+        "ExactSelector",
+        "ConsoleRequiresQualification",
+        "ReferenceRequiresQualification",
+        "SDKRequiresQualification",
+        "PeerPreserved",
+        "ConsumerTypeOK",
+        "CatalogVisibilityExact",
+        "MalformedDescriptorHidden",
+        "QualifiedProducedVisibility",
+        "KnownValidDescriptorVisible",
+        "SearchExact"
+      ],
+      "limits": "Not JSON serialization/type/marshal/HTTP/refinement/artifact/build/source proof No data rows or authorization algorithms modeled; descriptiveavailability is not callerpermission No claimSDKcompatibility fromqualificationbooleans; actual41calls separate native proof Currentcompiledconsoletrue means source-wiredcandidate, SDK/referencefalse; booleans areexplicitqualificationinputs notruntimeproof No liveness/arbitraryregistration/otherprovidersemantics modeled Provider label abstracts literal providerEndpoint category only; outer providers may contain multiple providers; no endpoint parser/registry routing proof. Primitive tags assume JSONfieldkind/verdict mappings; no JavaScript/JSON/React/serializer/refinement proof Arbitrary external valid-lookingdescriptor may showUI while backendfalse; consumer is discovery only and cannotauthenticate/grantnative authority No claims for other15servicegates or NFKC/locale/searchstringalgorithms; only fixedknownmatchingMetrics search MaincallerAuth/Region/navigation remount remains separateMetricsConsoleEpoch narrowprojection, notthismodel Only server.go successful-constructor capability publication caller projection; backendReady is assumed, not a constructor/schema/rollback/atomicity theorem.",
+      "source_scope": [
+        "internal/server/metrics_capabilities.go",
+        "tools/console/src/console-navigation.mjs",
+        "internal/server/server.go"
+      ],
+      "mutants": [
+        {
+          "id": "BypassHostReady",
+          "edits": [
+            {
+              "old": "present |-> backendReady,",
+              "new": "present |-> TRUE,",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "HostReadyBeforePublication"
+        },
+        {
+          "id": "PrematureAvailable",
+          "edits": [
+            {
+              "old": "available |-> backendReady,",
+              "new": "available |-> TRUE,",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AvailableOnlyWhenReady"
+        },
+        {
+          "id": "AdvertiseUnsupportedOperation",
+          "edits": [
+            {
+              "old": "THEN Operations ELSE {}",
+              "new": "THEN Operations \\cup {\"GetMetricData\"} ELSE {}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactSupportedOperations"
+        },
+        {
+          "id": "OmitSupportedOperation",
+          "edits": [
+            {
+              "old": "THEN Operations ELSE {}",
+              "new": "THEN {\"PutMetricData\", \"ListMetrics\"} ELSE {}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactSupportedOperations"
+        },
+        {
+          "id": "WrongProtocol",
+          "edits": [
+            {
+              "old": "THEN \"Query\" ELSE \"\"",
+              "new": "THEN \"JSON\" ELSE \"\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactProtocol"
+        },
+        {
+          "id": "WrongVersion",
+          "edits": [
+            {
+              "old": "THEN \"2010-08-01\" ELSE \"\"",
+              "new": "THEN \"future\" ELSE \"\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactVersion"
+        },
+        {
+          "id": "WrongProvider",
+          "edits": [
+            {
+              "old": "THEN \"aws\" ELSE \"\"",
+              "new": "THEN \"gcp\" ELSE \"\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactProvider"
+        },
+        {
+          "id": "WrongSelector",
+          "edits": [
+            {
+              "old": "THEN \"monitoring\" ELSE \"\"",
+              "new": "THEN \"logs\" ELSE \"\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactSelector"
+        },
+        {
+          "id": "UnqualifiedConsole",
+          "edits": [
+            {
+              "old": "console |-> backendReady /\\ qualified.console",
+              "new": "console |-> backendReady",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ConsoleRequiresQualification"
+        },
+        {
+          "id": "UnqualifiedReference",
+          "edits": [
+            {
+              "old": "reference |-> backendReady /\\ qualified.reference",
+              "new": "reference |-> backendReady",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReferenceRequiresQualification"
+        },
+        {
+          "id": "UnqualifiedSDK",
+          "edits": [
+            {
+              "old": "sdk |-> backendReady /\\ qualified.sdk",
+              "new": "sdk |-> backendReady",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SDKRequiresQualification"
+        },
+        {
+          "id": "ClobberExistingPeer",
+          "edits": [
+            {
+              "old": "peer' = peer",
+              "new": "peer' = <<\"Logs metrics enabled\", \"KMS12\">>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PeerPreserved"
+        },
+        {
+          "id": "ConsumerIgnoreAvailable",
+          "edits": [
+            {
+              "old": " /\\ x.available = \"bool-true\"",
+              "new": " /\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CatalogVisibilityExact"
+        },
+        {
+          "id": "ConsumerIgnoreConsole",
+          "edits": [
+            {
+              "old": " /\\ x.console = \"bool-true\"",
+              "new": " /\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CatalogVisibilityExact"
+        },
+        {
+          "id": "ConsumerIgnoreVersion",
+          "edits": [
+            {
+              "old": " /\\ x.version = \"2010-08-01\"",
+              "new": " /\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CatalogVisibilityExact"
+        },
+        {
+          "id": "ConsumerIgnoreProtocol",
+          "edits": [
+            {
+              "old": " /\\ x.protocol = \"Query\"",
+              "new": " /\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CatalogVisibilityExact"
+        },
+        {
+          "id": "ConsumerIgnoreSelector",
+          "edits": [
+            {
+              "old": " /\\ x.selector = \"monitoring\"",
+              "new": " /\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CatalogVisibilityExact"
+        },
+        {
+          "id": "ConsumerIgnoreLength",
+          "edits": [
+            {
+              "old": " /\\ Len(x.operations) = 3",
+              "new": " /\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CatalogVisibilityExact"
+        },
+        {
+          "id": "ConsumerRequireCanonicalOrder",
+          "edits": [
+            {
+              "old": " /\\ \\A operation \\in {\"PutMetricData\", \"ListMetrics\", \"GetMetricStatistics\"} :\n      \\E i \\in 1..Len(x.operations) : x.operations[i] = operation",
+              "new": " /\\ x.operations = WireOperations",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CatalogVisibilityExact"
+        },
+        {
+          "id": "ConsumerAlwaysHide",
+          "edits": [
+            {
+              "old": "visible' = ConsumerGate(ConsumerInput(consumerCase))",
+              "new": "visible' = FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CatalogVisibilityExact"
+        },
+        {
+          "id": "SearchBypassesAvailability",
+          "edits": [
+            {
+              "old": "searchResult' = (IF ConsumerGate(ConsumerInput(consumerCase))\n                       THEN <<\"cloudwatch-metrics\">> ELSE <<>>)",
+              "new": "searchResult' = <<\"cloudwatch-metrics\">>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SearchExact"
+        },
+        {
+          "id": "ConsumerIgnoreOperationValidation",
+          "edits": [
+            {
+              "old": " /\\ x.operationsKind = \"array\"\n /\\ Len(x.operations) = 3\n /\\ Cardinality({x.operations[i] : i \\in 1..Len(x.operations)}) = 3\n /\\ \\A operation \\in {\"PutMetricData\", \"ListMetrics\", \"GetMetricStatistics\"} :\n      \\E i \\in 1..Len(x.operations) : x.operations[i] = operation",
+              "new": " /\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CatalogVisibilityExact"
+        },
+        {
+          "id": "ConsumerDropDistinctAndMembership",
+          "edits": [
+            {
+              "old": " /\\ Cardinality({x.operations[i] : i \\in 1..Len(x.operations)}) = 3\n /\\ \\A operation \\in {\"PutMetricData\", \"ListMetrics\", \"GetMetricStatistics\"} :\n      \\E i \\in 1..Len(x.operations) : x.operations[i] = operation",
+              "new": " /\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CatalogVisibilityExact"
+        }
+      ]
     }
   ]
 }

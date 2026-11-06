@@ -35,7 +35,7 @@ class FormalGateTests(unittest.TestCase):
 
     def test_complete_registry_and_exact_mutations(self):
         registry = load_registry(self.root)
-        self.assertEqual({model['id'] for model in registry['models']}, {'CFNPhysicalResourceACK', 'CFNConditionAdmission', 'CFNConditionMemoDepth', 'CFNFinalCleanupACK', 'SQSStorageBudget', 'SecretsRevealEpoch', 'AzureBlobState', 'ProjectAuthority', 'RESTRouteMatching', 'KMSAliasCatalog', 'SakuraDiskMetadata', 'SQSConsoleEpoch', 'ProviderActor', 'DynamoDBAdmission', 'IAMManagedPolicies', 'AzurePropertiesTarget', 'StartupTokenVisibility', 'RESTDeploymentSnapshot', 'KMSProtocolAdmission', 'KMSAliasesViewEpoch', 'NativeIAMOwnership', 'DynamoDBConsoleEpoch', 'SSMParameterState', 'AzurePropertiesEpoch', 'SecretMetadataViewEpoch', 'DynamoDBLifecycle', 'SakuraDiskAdmission', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'BrowserSessions', 'SecretVersionListing', 'SakuraDisksViewEpoch', 'KMSAliasCrypto', 'StackOwnership', 'SecretsDisclosureChannels', 'RESTProxyEventBoundary', 'NativeWireProjection', 'SQSLifecycle', 'BlobRange', 'KMSBootstrapTransaction', 'SecretsVersionLifecycle', 'ObjectStore', 'LandingAccessAdmission', 'LandingTopologyState', 'GCPStorageState', 'KMSKeyState', 'SakuraStartupAdmission', 'S3Versions', 'ProviderPath', 'SecretsMutationRefresh'})
+        self.assertEqual({model['id'] for model in registry['models']}, {'CFNPhysicalResourceACK', 'CFNConditionAdmission', 'CFNConditionMemoDepth', 'CFNFinalCleanupACK', 'SQSStorageBudget', 'SecretsRevealEpoch', 'AzureBlobState', 'ProjectAuthority', 'RESTRouteMatching', 'KMSAliasCatalog', 'SakuraDiskMetadata', 'SQSConsoleEpoch', 'ProviderActor', 'DynamoDBAdmission', 'IAMManagedPolicies', 'AzurePropertiesTarget', 'StartupTokenVisibility', 'RESTDeploymentSnapshot', 'KMSProtocolAdmission', 'KMSAliasesViewEpoch', 'NativeIAMOwnership', 'DynamoDBConsoleEpoch', 'SSMParameterState', 'AzurePropertiesEpoch', 'SecretMetadataViewEpoch', 'DynamoDBLifecycle', 'SakuraDiskAdmission', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'BrowserSessions', 'SecretVersionListing', 'SakuraDisksViewEpoch', 'KMSAliasCrypto', 'StackOwnership', 'SecretsDisclosureChannels', 'RESTProxyEventBoundary', 'NativeWireProjection', 'SQSLifecycle', 'BlobRange', 'KMSBootstrapTransaction', 'SecretsVersionLifecycle', 'ObjectStore', 'LandingAccessAdmission', 'LandingTopologyState', 'GCPStorageState', 'KMSKeyState', 'SakuraStartupAdmission', 'S3Versions', 'ProviderPath', 'SecretsMutationRefresh', 'CloudWatchMetricsRawLedger', 'MetricsHTTPAdmission', 'MetricsRequestAdmission', 'MetricsTrustedScope', 'MetricsConsoleEpoch', 'CapabilityProjection'})
         for model in registry['models']:
             source = (self.root / model['model']).read_text()
             for mutant in model['mutants']:
@@ -660,7 +660,7 @@ class FormalGateTests(unittest.TestCase):
         original = path.read_text()
         registry = json.loads(original)
         self.assertEqual(set(REQUIRED_MUTANTS), BASE_MODELS)
-        self.assertEqual(sum(map(len, REQUIRED_MUTANTS.values())), 398)
+        self.assertEqual(sum(map(len, REQUIRED_MUTANTS.values())), 559)
         self.assertEqual({m['id']: {c['id'] for c in m['mutants']} for m in registry['models']}, REQUIRED_MUTANTS)
         for model in registry['models']:
             for mutant in model['mutants']:
@@ -677,7 +677,7 @@ class FormalGateTests(unittest.TestCase):
     def test_every_required_control_is_protected_against_single_removal(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
-        self.assertEqual(sum(len(v) for v in REQUIRED_MUTANTS.values()), 398)
+        self.assertEqual(sum(len(v) for v in REQUIRED_MUTANTS.values()), 559)
         for model_id, controls in REQUIRED_MUTANTS.items():
             for control in controls:
                 with self.subTest(model=model_id, control=control):
@@ -1607,6 +1607,75 @@ class FormalGateTests(unittest.TestCase):
 
 
 
+
+    def test_metrics_models_properties_scopes_and_each_control_are_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        for name in ('CloudWatchMetricsRawLedger', 'MetricsHTTPAdmission', 'MetricsRequestAdmission', 'MetricsTrustedScope', 'MetricsConsoleEpoch', 'CapabilityProjection'):
+            entry = next(m for m in json.loads(original)['models'] if m['id'] == name)
+            config = self.root / entry['config']
+            config_original = config.read_text()
+            try:
+                for prop in entry['properties']:
+                    registry = json.loads(original)
+                    model = next(m for m in registry['models'] if m['id'] == name)
+                    model['properties'].remove(prop)
+                    model['mutants'] = [m for m in model['mutants'] if m['expect_invariant'] != prop]
+                    config.write_text(config_original.replace('INVARIANT ' + prop + '\n', ''))
+                    path.write_text(json.dumps(registry))
+                    with self.subTest(model=name, property=prop), self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                        load_registry(self.root)
+                config.write_text(config_original)
+                for scope in entry['source_scope']:
+                    registry = json.loads(original)
+                    next(m for m in registry['models'] if m['id'] == name)['source_scope'].remove(scope)
+                    path.write_text(json.dumps(registry))
+                    with self.subTest(model=name, scope=scope), self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+                        load_registry(self.root)
+                for control in entry['mutants']:
+                    for kind in ('removed', 'noop'):
+                        registry = json.loads(original)
+                        model = next(m for m in registry['models'] if m['id'] == name)
+                        if kind == 'removed':
+                            model['mutants'] = [m for m in model['mutants'] if m['id'] != control['id']]
+                        else:
+                            edit = next(m for m in model['mutants'] if m['id'] == control['id'])['edits'][0]
+                            edit['new'] = edit['old']
+                        path.write_text(json.dumps(registry))
+                        with self.subTest(model=name, control=control['id'], kind=kind), self.assertRaises(GateError):
+                            load_registry(self.root)
+                path.write_text(original)
+                for artifact in (entry['model'], entry['config']):
+                    file = self.root / artifact
+                    saved = file.read_bytes()
+                    file.unlink()
+                    try:
+                        with self.subTest(model=name, artifact=artifact), self.assertRaises(GateError):
+                            load_registry(self.root)
+                    finally:
+                        file.write_bytes(saved)
+                registry = json.loads(original)
+                registry['models'] = [m for m in registry['models'] if m['id'] != name]
+                path.write_text(json.dumps(registry))
+                with self.subTest(model=name, omission='registered-entry'), self.assertRaisesRegex(GateError, 'required existing model was removed'):
+                    load_registry(self.root)
+            finally:
+                config.write_text(config_original)
+                path.write_text(original)
+
+    def test_metrics_exact_scope_rejects_unproved_parser_or_host_binding(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        try:
+            for name in ('CloudWatchMetricsRawLedger', 'MetricsHTTPAdmission', 'MetricsRequestAdmission', 'MetricsTrustedScope', 'MetricsConsoleEpoch', 'CapabilityProjection'):
+                for scope in ('internal/core/store.go', 'internal/aws/cloudformation.go'):
+                    registry = json.loads(original)
+                    next(m for m in registry['models'] if m['id'] == name)['source_scope'].append(scope)
+                    path.write_text(json.dumps(registry))
+                    with self.subTest(model=name, foreignScope=scope), self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+                        load_registry(self.root)
+        finally:
+            path.write_text(original)
 
 if __name__ == '__main__':
     unittest.main()
