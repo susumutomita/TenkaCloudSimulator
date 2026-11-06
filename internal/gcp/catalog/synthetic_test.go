@@ -110,3 +110,50 @@ func TestBodyIDsPatternsAndShortNames(t *testing.T) {
 		}
 	}
 }
+
+// Full resource names in create bodies, protobuf message names that differ
+// from discovery schema names and deletes that return the deleted resource
+// serve APIs such as Cloud Composer, Dataplex and BigLake.
+func TestFullNameIDsMessageTypesAndDeletedResources(t *testing.T) {
+	h := newHarness(t)
+	widget := &Property{Type: "object", Properties: map[string]*Property{"name": {Type: "string"}, "note": {Type: "string"}}}
+	operation := &Property{Type: "object", Properties: map[string]*Property{"name": {Type: "string"}, "done": {Type: "boolean"}, "response": {Type: "object"}}}
+	flat := "v1/projects/{projectsId}/locations/{locationsId}/widgets"
+	model := &Model{Key: "synth.v1", Name: "synth", Version: "v1", Title: "Synthetic",
+		Source: Source{Package: "google-api-python-client", SHA256: "test", License: "Apache-2.0"},
+		Routes: map[string]Route{"projects.locations.widgets.create": {HTTPMethod: "POST", FlatPath: flat}, "projects.locations.widgets.delete": {HTTPMethod: "DELETE", FlatPath: flat + "/{widgetsId}"}},
+		Methods: map[string]*Method{
+			"projects.locations.widgets.create": {HTTPMethod: "POST", FlatPath: flat, Request: "SynthV1Widget", Response: "Operation"},
+			"projects.locations.widgets.delete": {HTTPMethod: "DELETE", FlatPath: flat + "/{widgetsId}", Response: "SynthV1Widget"},
+		},
+		Schemas: map[string]*Property{"SynthV1Widget": widget, "Operation": operation}}
+	if err := validateModel(model); err != nil {
+		t.Fatal(err)
+	}
+	api := &API{Key: "synth.v1", Title: "Synthetic", Issues: []int{1}, Scope: "location", TypeURL: "type.googleapis.com/test.v1.", Bounds: []string{"test"},
+		Collections: []*Collection{{ID: "widgets", Schema: "SynthV1Widget", Type: "Widget", IDField: "name", FullName: true, Permission: "synth.widgets"}},
+		Bindings:    []Binding{{Method: "projects.locations.widgets.create", Kind: Create, Collection: "widgets"}, {Method: "projects.locations.widgets.delete", Kind: Delete, Collection: "widgets"}}}
+	b, err := bindAPI(api, model)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := h.engine.add(b); err != nil {
+		t.Fatal(err)
+	}
+	base := "/synth/v1/projects/tenkacloud-local/locations/us-central1/widgets"
+	expect(t, h.call("owner", "POST", base, map[string]any{"name": "w1"}), 400, "INVALID_ARGUMENT")
+	expect(t, h.call("owner", "POST", base, map[string]any{"name": "projects/tenkacloud-local/locations/asia-northeast1/widgets/w1"}), 400, "INVALID_ARGUMENT")
+	expect(t, h.call("owner", "POST", base, map[string]any{"name": "projects/tenkacloud-local/locations/us-central1/widgets/Bad/x"}), 400, "INVALID_ARGUMENT")
+	created := h.call("owner", "POST", base, map[string]any{"name": "projects/100000000001/locations/us-central1/widgets/w1", "note": "n"})
+	expect(t, created, 200, "")
+	response := created.body["response"].(map[string]any)
+	if response["@type"] != "type.googleapis.com/test.v1.Widget" || response["name"] != "projects/tenkacloud-local/locations/us-central1/widgets/w1" {
+		t.Fatalf("operation response %v", created.body)
+	}
+	deleted := h.call("owner", "DELETE", base+"/w1", nil)
+	expect(t, deleted, 200, "")
+	if deleted.body["name"] != "projects/tenkacloud-local/locations/us-central1/widgets/w1" || deleted.body["note"] != "n" {
+		t.Fatalf("delete must return the deleted resource: %v", deleted.body)
+	}
+	expect(t, h.call("owner", "DELETE", base+"/w1", nil), 404, "NOT_FOUND")
+}

@@ -44,6 +44,14 @@ type Collection struct {
 	// ShortName stores the ID rather than the full resource name in the
 	// "name" field, as APIs such as Cloud Logging sinks do.
 	ShortName bool
+	// FullName means IDField carries the full resource name
+	// (parent/collection/ID) rather than the bare ID, as Cloud Composer
+	// environments do; the named parent must be the request parent.
+	FullName bool
+	// Type is the protobuf message name used in response @type values when
+	// the discovery schema name differs, for example "Lake" for the
+	// schema GoogleCloudDataplexV1Lake. Empty means Schema.
+	Type string
 	// Limit bounds live resources per parent.
 	Limit int
 	// Generate assigns output fields at creation: $name, $now, $uid,
@@ -75,6 +83,14 @@ type API struct {
 	Collections []*Collection
 	Bindings    []Binding
 	Bounds      []string
+}
+
+// message is the protobuf message name of the collection's resource.
+func (c *Collection) message() string {
+	if c.Type != "" {
+		return c.Type
+	}
+	return c.Schema
 }
 
 func (a *API) collection(id string) *Collection {

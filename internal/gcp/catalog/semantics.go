@@ -266,6 +266,14 @@ func (q *request) create() (any, error) {
 			}
 		} else if id, _ = q.body[c.IDField].(string); id == "" {
 			return nil, invalid("Field '%s' is required.", c.IDField)
+		} else if c.FullName {
+			full := id
+			if strings.HasPrefix(full, "projects/"+q.e.cfg.ProjectNumber+"/") {
+				full = "projects/" + q.e.cfg.Project + strings.TrimPrefix(full, "projects/"+q.e.cfg.ProjectNumber)
+			}
+			if id = strings.TrimPrefix(full, parent+"/"+c.ID+"/"); id == full {
+				return nil, invalid("Field '%s' must name a resource under %s/%s.", c.IDField, parent, c.ID)
+			}
 		}
 		pattern := resourceID
 		if c.IDPattern != nil {
@@ -337,7 +345,7 @@ func (q *request) create() (any, error) {
 				return nil, err
 			}
 		}
-		out, err := q.respond(document, c.Schema, tx)
+		out, err := q.respond(document, c.message(), tx)
 		if err != nil {
 			return nil, err
 		}
@@ -480,7 +488,7 @@ func (q *request) patch() (any, error) {
 				return nil, err
 			}
 		}
-		out, err := q.respond(r.Document, c.Schema, tx)
+		out, err := q.respond(r.Document, c.message(), tx)
 		if err != nil {
 			return nil, err
 		}
@@ -519,7 +527,12 @@ func (q *request) remove() (any, error) {
 				return nil, err
 			}
 		}
-		out, err := q.respond(map[string]any{}, "", tx)
+		// Methods such as BigLake catalogs.delete return the deleted resource.
+		deleted := map[string]any{}
+		if q.method.Response == c.Schema {
+			deleted = r.Document
+		}
+		out, err := q.respond(deleted, "", tx)
 		if err != nil {
 			return nil, err
 		}
