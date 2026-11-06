@@ -22,6 +22,13 @@ type Binding struct {
 	Collection string
 	// Check validates semantic constraints the schema cannot express.
 	Check func(body map[string]any) error
+	// Unwrap maps a request body that wraps or derives the resource, such
+	// as Spanner's CreateInstanceRequest, to the resource and its key: the
+	// new resource ID for create, the update mask for patch.
+	Unwrap func(body map[string]any) (resource map[string]any, key string, err error)
+	// Permission overrides the derived IAM permission, for APIs whose
+	// operation permissions use another prefix.
+	Permission string
 }
 
 // Collection is one resource collection in Google resource-name form.

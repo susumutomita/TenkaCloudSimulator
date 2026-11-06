@@ -37,6 +37,9 @@ func (q *request) collection() *Collection { return q.b.api.collection(q.bound.C
 
 func (q *request) permission() string {
 	verbs := map[Kind]string{Create: "create", Get: "get", List: "list", Patch: "update", Delete: "delete", OperationGet: "get", OperationList: "list"}
+	if q.bound.Permission != "" {
+		return q.bound.Permission
+	}
 	if q.bound.Kind == OperationGet || q.bound.Kind == OperationList {
 		return q.b.model.Name + ".operations." + verbs[q.bound.Kind]
 	}
@@ -337,15 +340,23 @@ func (q *request) create() (any, error) {
 		return nil, err
 	}
 	// Server-generated IDs are opaque; client-chosen IDs follow AIP-122.
-	id := randomHex(8)
-	if c.IDParam != "" || c.IDField != "" {
-		if c.IDParam != "" {
+	id, body := randomHex(8), q.body
+	if q.bound.Unwrap != nil {
+		var err error
+		if body, id, err = q.bound.Unwrap(q.body); err != nil {
+			return nil, err
+		}
+	}
+	if c.IDParam != "" || c.IDField != "" || q.bound.Unwrap != nil {
+		if c.IDParam != "" && q.bound.Unwrap == nil {
 			id, _ = q.params[c.IDParam].(string)
 			if id == "" {
 				return nil, invalid("Query parameter %q is required.", c.IDParam)
 			}
-		} else if id, _ = q.body[c.IDField].(string); id == "" {
-			return nil, invalid("Field '%s' is required.", c.IDField)
+		} else if c.IDField != "" && q.bound.Unwrap == nil {
+			if id, _ = q.body[c.IDField].(string); id == "" {
+				return nil, invalid("Field '%s' is required.", c.IDField)
+			}
 		}
 		pattern := resourceID
 		if c.IDPattern != nil {
@@ -360,7 +371,7 @@ func (q *request) create() (any, error) {
 	}
 	name := parent + "/" + c.ID + "/" + id
 	document := map[string]any{}
-	for k, v := range q.body {
+	for k, v := range body {
 		document[k] = v
 	}
 	document["name"] = name
@@ -518,7 +529,13 @@ func (q *request) patch() (any, error) {
 		mutable[f] = true
 	}
 	fields := []string{}
-	if mask, _ := q.params["updateMask"].(string); mask != "" {
+	mask, _ := q.params["updateMask"].(string)
+	if q.bound.Unwrap != nil {
+		if q.body, mask, err = q.bound.Unwrap(q.body); err != nil {
+			return nil, err
+		}
+	}
+	if mask != "" {
 		fields = strings.Split(mask, ",")
 	} else {
 		for key := range q.body {
@@ -587,10 +604,8 @@ func (q *request) remove() (any, error) {
 	if etag, ok := q.params["etag"].(string); ok && etag != "" && etag != r.Document["etag"] {
 		return nil, &status{"ABORTED", "The etag does not match the current resource."}
 	}
-	for field, value := range c.Protection {
-		if r.Document[field] == value {
-			return nil, &status{"FAILED_PRECONDITION", fmt.Sprintf("Resource '%s' is protected by '%s'; disable it before deleting.", r.Name, field)}
-		}
+	if field := protectedBy(c, r.Document); field != "" {
+		return nil, &status{"FAILED_PRECONDITION", fmt.Sprintf("Resource '%s' is protected by '%s'; disable it before deleting.", r.Name, field)}
 	}
 	_, optional := q.method.Parameters["force"]
 	force := q.params["force"] == true || !optional
@@ -613,6 +628,13 @@ func (q *request) remove() (any, error) {
 		if children > 0 && !(force && c.Cascade) {
 			return nil, &status{"FAILED_PRECONDITION", fmt.Sprintf("Resource '%s' still has child resources.", r.Name)}
 		}
+		if children > 0 {
+			if child, err := q.protectedChild(tx, r); err != nil {
+				return nil, err
+			} else if child != "" {
+				return nil, &status{"FAILED_PRECONDITION", fmt.Sprintf("Resource '%s' has the protected child '%s'.", r.Name, child)}
+			}
+		}
 		if q.params["validateOnly"] != true {
 			if _, err := tx.Exec("DELETE FROM gcp_catalog_resources WHERE api=? AND name LIKE ? ESCAPE '\\'", r.API, escapeLike(r.Name)+"/%"); err != nil {
 				return nil, err
@@ -627,6 +649,40 @@ func (q *request) remove() (any, error) {
 		}
 		return out, tx.Commit()
 	})
+}
+
+// protectedBy names the field whose stored value protects a resource.
+func protectedBy(c *Collection, document map[string]any) string {
+	fields := make([]string, 0, len(c.Protection))
+	for field := range c.Protection {
+		fields = append(fields, field)
+	}
+	sort.Strings(fields)
+	for _, field := range fields {
+		if document[field] == c.Protection[field] {
+			return field
+		}
+	}
+	return ""
+}
+
+// protectedChild names a protected resource that a cascade would remove.
+func (q *request) protectedChild(tx *sql.Tx, target row) (string, error) {
+	rows, err := tx.Query("SELECT "+columns+" FROM gcp_catalog_resources WHERE api=? AND name LIKE ? ESCAPE '\\' ORDER BY seq", target.API, escapeLike(target.Name)+"/%")
+	if err != nil {
+		return "", err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		child, err := scanRow(rows)
+		if err != nil {
+			return "", err
+		}
+		if c := q.b.api.collection(child.Collection); c != nil && protectedBy(c, child.Document) != "" {
+			return child.Name, nil
+		}
+	}
+	return "", rows.Err()
 }
 
 func escapeLike(s string) string {
