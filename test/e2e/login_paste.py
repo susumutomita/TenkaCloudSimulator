@@ -43,8 +43,48 @@ with running(authenticated=True) as (endpoint,token),sync_playwright() as p:
  page=fresh();access=field(page)
  assert access.get_attribute('data-1p-ignore')=='true' and access.get_attribute('data-op-ignore')=='true'
  def native_write(page,value):
-  field(page).evaluate('(input,value)=>Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,"value").set.call(input,value)',value)
- native_write(page,token);submit(page,303,True);success(page)
+  # Same setter/automation call; return only booleans, never token bytes/hash.
+  return field(page).evaluate("""(input,value)=>{
+   const snapshot=()=>({connected:input.isConnected,nonempty:input.value.length>0,active:document.activeElement===input});
+   const before=snapshot();Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,"value").set.call(input,value);
+   return {before,after:snapshot()};
+  }""",value)
+ # Observe only the first fixture. No focus/event injection, wait or retry; the
+ # original write -> Enter-submit -> success sequence and timeout stay intact.
+ first_snapshot=None;first_statuses=[]
+ def first_request(request):
+  if request.method=='POST'and request.url==endpoint+'/_simulator/login':
+   first_counts['requests']=min(9,first_counts['requests']+1)
+ def first_response(response):
+  if response.request.method=='POST'and response.url==endpoint+'/_simulator/login':
+   first_counts['responses']=min(9,first_counts['responses']+1)
+   if len(first_statuses)<8:first_statuses.append(response.status if isinstance(response.status,int)and 100<=response.status<=599 else 0)
+ first_counts={'requests':0,'responses':0}
+ page.on('request',first_request);page.on('response',first_response)
+ try:
+  first_snapshot=native_write(page,token);submit(page,303,True);success(page)
+ except Exception as failure:
+  diagnostic={'stage':'first-native-DOM-insertion-keyboard-submit','primaryExceptionType':type(failure).__name__,
+   'nativeWrite':first_snapshot,'loginPOSTRequests':first_counts['requests'],'loginPOSTResponses':first_counts['responses'],
+   'responseStatuses':list(first_statuses),'countsCappedAt9':True,'status0MeansOther':True,
+   'scope':'Failure-only dummy fixture; no token values, hashes, bodies, headers or clipboard; no focus-cause or extension proof.'}
+  try:
+   diagnostic['afterFailure']=page.evaluate("""()=>{
+    const input=document.querySelector('input[type=password]');
+    return {connected:!!input?.isConnected,nonempty:!!input&&input.value.length>0,active:!!input&&document.activeElement===input,
+     knownEmptyInputError:!!document.body?.textContent.includes('Enter your access token. If paste left this blank, copy the token as plain text.')};
+   }""")
+  except Exception as capture_failure:diagnostic['captureFailureType']=type(capture_failure).__name__
+  try:(REPORTS/'login-first-native-failure.json').write_text(json.dumps(diagnostic,indent=2)+'\n')
+  except Exception:pass # Diagnostic I/O must never replace the original failure.
+  raise
+ finally:
+  unwinding=sys.exc_info()[0] is not None
+  detach_errors=[]
+  for event,listener in [('request',first_request),('response',first_response)]:
+   try:page.remove_listener(event,listener)
+   except Exception as detach_failure:detach_errors.append(type(detach_failure).__name__)
+  if detach_errors and not unwinding:raise AssertionError('First-fixture diagnostic observers did not detach')
  report['nativeDOMWriteWithoutChangeEventAuthenticates']=True
  page=fresh();paste(page,token);native_write(page,'');posts=[]
  page.on('request',lambda request:posts.append(True)if request.method=='POST'and request.url==endpoint+'/_simulator/login'else None)
