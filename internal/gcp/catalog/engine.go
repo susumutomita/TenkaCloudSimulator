@@ -122,6 +122,11 @@ func bindAPI(api *API, model *Model) (*binding, error) {
 		default:
 			return nil, fmt.Errorf("GCP catalog %s method %s has an unknown kind", api.Key, bound.Method)
 		}
+		for _, name := range bound.Refuse {
+			if method.Parameters[name].Location != "query" {
+				return nil, fmt.Errorf("GCP catalog %s method %s refuses unknown query parameter %s", api.Key, bound.Method, name)
+			}
+		}
 		b.bindings[bound.Method] = bound
 	}
 	for id := range model.Methods {
@@ -325,6 +330,11 @@ func (e *Engine) prepare(w http.ResponseWriter, r *http.Request, b *binding, rt 
 			return nil, err
 		}
 		q.params[key] = value
+	}
+	for _, name := range bound.Refuse {
+		if value, set := q.params[name]; set && value != "" && value != false && value != int64(0) {
+			return nil, invalid("Parameter %q is not supported by the simulator.", name)
+		}
 	}
 	if err := e.authorize(q); err != nil {
 		return nil, err
