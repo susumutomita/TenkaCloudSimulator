@@ -40,6 +40,16 @@ source view and Markdown summary for 14 days. Evidence is retained even after a
 failed threshold check; uploading an artifact does not change the failed result.
 Missing evidence cannot make generation or validation succeed.
 
+The existing safe-audit artifact also retains `reports/landing-topology/**` for
+14 days, including after a failed E2E step. These are public landing-page
+screenshots, layout/keyboard observations, pinned asset hashes and strict axe
+findings from eight fresh anonymous desktop/mobile contexts. The helper receives
+only a loopback endpoint, blocks API and external requests, and records no access
+token, cookie value, request header or user resource data. Failure screenshots
+mask editable fields; diagnostic errors retain their types rather than messages.
+This is test evidence, not a release binary or certification of native
+HTML-in-Canvas support. Artifact retention does not make a failed check pass.
+
 A later near-floor pass does not repair an earlier below-floor result. Add
 meaningful native contract tests for uncovered behavior and verify a new single
 full-module profile without exclusions or a lower floor. The DynamoDB storage

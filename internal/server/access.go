@@ -128,6 +128,12 @@ func (a *Access) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Cross-site request rejected", 403)
 		return
 	}
+	// Public product information is an exact asset allowlist. Host/origin checks
+	// above still apply; API paths and console authentication remain protected.
+	if isLandingPath(r.URL.Path) {
+		a.next.ServeHTTP(w, r)
+		return
+	}
 	if r.URL.Path == "/_simulator/logout" {
 		if r.Method != "POST" {
 			w.Header().Set("Allow", "POST")

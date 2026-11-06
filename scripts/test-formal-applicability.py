@@ -17,6 +17,19 @@ from formal_applicability import GateError, RECORD, changes, disposition, git, i
 ROOT = Path(__file__).resolve().parents[1]
 
 
+class LandingPresentationBoundaryTests(unittest.TestCase):
+    def test_only_named_static_landing_documents_are_presentation(self):
+        for path in ('internal/server/landing/index.html', 'internal/server/landing/landing.css'):
+            self.assertEqual(disposition(path), 'presentation')
+        for path in ('internal/server/landing/landing.mjs',
+                     'internal/server/landing/topology-canvas.mjs',
+                     'internal/server/landing/topology-data.mjs',
+                     'internal/server/landing/unknown.html',
+                     'internal/server/landing/unknown.css',
+                     'internal/server/landing.go'):
+            self.assertIsNone(disposition(path), path)
+
+
 class ApplicabilityTests(unittest.TestCase):
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory(prefix='formal-applicability-unit-')

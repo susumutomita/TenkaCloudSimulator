@@ -7,6 +7,7 @@ import shutil
 import stat
 import subprocess
 import tempfile
+import time
 from pathlib import Path
 
 BASE_MODELS = {'AzureBlobState',
@@ -57,6 +58,7 @@ BASE_MODELS = {'AzureBlobState',
  'SecretsVersionLifecycle',
  'StackOwnership',
  'StartupTokenVisibility',
+ 'LandingTopologyState', 'LandingAccessAdmission',
  'LoginInputIntent'}
 BASE_INVARIANTS = {'AzureBlobState': {'BudgetBounded',
                     'ConditionEnforced',
@@ -452,14 +454,24 @@ BASE_INVARIANTS = {'AzureBlobState': {'BudgetBounded',
                             'HistoryVisibility',
                             'InvalidFileNeverEmits',
                             'TypeOK'},
- 'LoginInputIntent': {'AdoptedValueExact',
- 'IntentInvalidatesAsync',
- 'LocaleIntentFrame',
- 'NoEmptyPOST',
- 'NoPOSTWhileBlocked',
- 'StaleFileCompletionFrame',
- 'SubmissionSelectionExact',
- 'TypeOK'}}
+ 'LandingAccessAdmission': {'ExternalBoundary',
+                            'PublicResponse',
+                            'TokenBoundary',
+                            'TypeOK',
+                            'UnknownNeverStatic'},
+ 'LandingTopologyState': {'CanonicalHTMLAvailable',
+                          'DOMSelectionAgrees',
+                          'InitialFragmentSelection',
+                          'InvalidInputPreservesSelection',
+                          'MountUsesLatestSelection',
+                          'NodeClickSelectsExact',
+                          'PaintUsesLatestSelection',
+                          'ProviderSelectsDefault',
+                          'RetiredCallbackNoEffect',
+                          'RetiredCanvasHidden',
+                          'TypeOK',
+                          'UnsupportedCanvasHidden'},
+ 'LoginInputIntent': {'LocaleIntentFrame', 'NoEmptyPOST', 'IntentInvalidatesAsync', 'TypeOK', 'SubmissionSelectionExact', 'NoPOSTWhileBlocked', 'StaleFileCompletionFrame', 'AdoptedValueExact'}}
 # Established controls require an explicit gate-policy change before retirement.
 REQUIRED_MUTANTS = {'AzureBlobState': {'ContainerDeleteErasesPeer',
                     'ContainerDeleteLeavesBlobs',
@@ -837,19 +849,24 @@ REQUIRED_MUTANTS = {'AzureBlobState': {'ContainerDeleteErasesPeer',
                              'RetainPreviousLabelOnPromote'},
  'StackOwnership': {'ReclaimDriftedResource'},
  'StartupTokenVisibility': {'OmittedCIGuard', 'OverwriteExistingToken', 'OmittedTTYGuard'},
- 'LoginInputIntent': {'CurrentFileErrorDiscarded',
- 'FocusSkipsNativeAdoption',
- 'EmptyDOMReusesOldCredential',
- 'FileCompletionIgnoresRevision',
- 'FlushDoesNotAdoptNativeValue',
- 'LocaleClearsIntent',
- 'LocaleInvalidatesCurrentFile',
- 'NativeAdoptionSkipsNewIntent',
- 'NonemptyDOMUsesControlledState',
- 'OldPasteSurvivesNewIntent',
- 'SubmitIgnoresBusy',
- 'SubmitIgnoresFileGate',
- 'UnmountedFileCompletionPublishes'}}
+ 'LandingAccessAdmission': {'IgnoreHostBoundary',
+                            'IgnoreOriginBoundary',
+                            'MakeEveryPathPublic',
+                            'RequireTokenForProductInformation',
+                            'ServeNonReadMethod',
+                            'ServeUnknownResource'},
+ 'LandingTopologyState': {'AcceptInvalidSelection',
+                          'ClickSelectsDifferentNode',
+                          'DrawInitialSelection',
+                          'HideCanonicalHTMLOnRetire',
+                          'LatePaintMutatesSurface',
+                          'LeaveRetiredCanvasVisible',
+                          'MountCapturesInitialSelection',
+                          'ResetInitialFragmentSelectionOnMount',
+                          'RevealUnsupportedCanvas',
+                          'WrongDetailProjection',
+                          'WrongProviderDefault'},
+ 'LoginInputIntent': {'FileCompletionIgnoresRevision', 'NonemptyDOMUsesControlledState', 'UnmountedFileCompletionPublishes', 'LocaleClearsIntent', 'LocaleInvalidatesCurrentFile', 'SubmitIgnoresBusy', 'CurrentFileErrorDiscarded', 'FlushDoesNotAdoptNativeValue', 'NativeAdoptionSkipsNewIntent', 'EmptyDOMReusesOldCredential', 'OldPasteSurvivesNewIntent', 'SubmitIgnoresFileGate', 'FocusSkipsNativeAdoption'}}
 REQUIRED_SOURCE_SCOPES = {'CFNConditionAdmission': {'internal/aws/cloudformation.go',
                            'internal/aws/cloudformation_conditions.go',
                            'internal/aws/cloudformation_conditions_link.go'},
@@ -882,11 +899,13 @@ REQUIRED_SOURCE_SCOPES = {'CFNConditionAdmission': {'internal/aws/cloudformation
                           'internal/aws/secrets_manager_versions.go',
                           'internal/aws/secrets_manager_versions_http_test.go',
                           'internal/aws/secrets_manager_versions_test.go'},
- 'LoginInputIntent': {'test/console/login-native-input.test.mjs',
- 'test/e2e/login_paste.py',
- 'test/e2e/login_token_file.py',
- 'tools/console/src/login.jsx',
-                      'internal/server/web/app.js'}}
+ 'LandingAccessAdmission': {'internal/server/access.go',
+                            'internal/server/landing.go',
+                            'internal/server/server.go'},
+ 'LandingTopologyState': {'internal/server/landing/landing.mjs',
+                          'internal/server/landing/topology-canvas.mjs',
+                          'internal/server/landing/topology-data.mjs'},
+ 'LoginInputIntent': {'tools/console/src/login.jsx', 'test/e2e/login_paste.py', 'test/console/login-native-input.test.mjs', 'internal/server/web/app.js', 'test/e2e/login_token_file.py'}}
 IDENTIFIER = re.compile(r'^[A-Za-z][A-Za-z0-9_]*$')
 
 # TLC1.7.4 ModelConfig.ALL_KEYWORDS. A directive cannot masquerade as a
@@ -1118,9 +1137,43 @@ def run_suite(root, jar, reports, registry_path='formal/models.json', timeout=60
                     tla.write_text(candidate)
                     cfg.write_text(config)
                     command = [java, '-cp', str(pinned_jar), 'tlc2.TLC', '-workers', '1', '-metadir', str(temp / (name + '-states')), '-config', str(cfg), str(tla)]
+                    started = time.monotonic()
                     try:
                         result = subprocess.run(command, capture_output=True, text=True, timeout=timeout, check=False, cwd=temp)
                     except (OSError, subprocess.TimeoutExpired) as error:
+                        # TimeoutExpired can retain bytes even with text=True.
+                        # Keep exact partial streams separately; never log the
+                        # exception message/command/environment as diagnostics.
+                        failure = {'model': model['id'], 'case': name, 'success': False,
+                                   'exception_type': type(error).__name__,
+                                   'exit_code': None,
+                                   'exit_code_status': 'unavailable_from_process_exception',
+                                   'errno': getattr(error, 'errno', None),
+                                   'timeout_seconds': getattr(error, 'timeout', None),
+                                   'deadline_seconds': timeout,
+                                   'elapsed_seconds': time.monotonic() - started,
+                                   'model_sha256': digest(candidate.encode()),
+                                   'config_sha256': digest(config.encode())}
+                        evidence['failure'] = failure
+                        for channel in ('stdout', 'stderr'):
+                            output = getattr(error, channel, None)
+                            raw = output if isinstance(output, bytes) else output.encode('utf-8', errors='surrogatepass') if isinstance(output, str) else b''
+                            filename = name + '.failure.' + channel + '.bin'
+                            stream = {'path': filename, 'sha256': digest(raw),
+                                      'bytes': len(raw), 'available': output is not None,
+                                      'source_type': type(output).__name__, 'retained': False}
+                            failure[channel] = stream
+                            try:
+                                (reports / filename).write_bytes(raw)
+                                stream['retained'] = True
+                            except OSError as diagnostic_error:
+                                stream['write_error_type'] = type(diagnostic_error).__name__
+                                stream['write_errno'] = diagnostic_error.errno
+                        try:
+                            (reports / (name + '.failure.json')).write_text(json.dumps(failure, indent=2) + '\n')
+                        except OSError as diagnostic_error:
+                            failure['metadata_write_error_type'] = type(diagnostic_error).__name__
+                            failure['metadata_write_errno'] = diagnostic_error.errno
                         raise GateError('TLC could not finish: ' + name) from error
                     text = result.stdout + result.stderr
                     (reports / (name + '.txt')).write_text(text)

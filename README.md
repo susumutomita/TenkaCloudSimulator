@@ -35,6 +35,11 @@ describes the reviewed scope; it is not a clean-room or legal certification.
 
 ## Start locally
 
+The embedded [interactive architecture page](docs/landing.md) is available at
+`http://127.0.0.1:4566/_simulator/` after startup. Its HTML descriptions explain
+the supported local subsets; optional HTML-in-Canvas drawing requires a browser
+with the current API. The SDK endpoint `/` remains unchanged.
+
 Building from source requires Go 1.26; CI pins Go 1.26.10.
 
 ```sh
@@ -255,10 +260,12 @@ not binary runtime dependencies. Regeneration must preserve locks and original
 rights: [console](tools/console/README.md), [Scalar](tools/scalar/README.md),
 [Python/WASI runtime](tools/python/README.md).
 
-This login integration requires 49 finite models and 394 deliberate defect controls
-(443 required model/check executions); the combined exact-HEAD gate is pending.
-The previous 48-model/381-control inventory is preserved, including four Sakura metadata/admission/startup/view
-models, the Secrets metadata view and the preserved DynamoDB console model. Registration is not an integrated-revision execution receipt. The new IAM scenario checks two requests
+The combined landing/login integration requires **51 finite models and 411
+intentional defect controls (462 required executions)**; its exact-HEAD whole gate
+is pending. It preserves main's 50/398 inventory, including the two bounded landing
+models and their 17 controls, and adds LoginInputIntent with 13 controls. The older
+48/381 inventory, including the Sakura, Secrets metadata and DynamoDB console
+models, remains preserved. Registration is not an execution receipt. The IAM scenario checks two requests
 from each of four reachable seeds. A broader four-request trial timed out and
 is not claimed as verified. TLC examines bounded safety properties and checks
 that targeted mutants produce real counterexamples. It does not prove Go/JS
@@ -268,9 +275,27 @@ See [formal validation](formal/README.md), [CI](docs/ci.md),
 [backlog acceptance](docs/acceptance/backlog-services.md), and the
 [standalone architecture](docs/design/0001-go-standalone.md).
 
-The CFN condition model adds a bounded compile-plan projection. Its isolated SANY/baseline/fourteen controls passed at `f69fb46`; that 365-case source preparation is historical. The full 429-case gate passed at `c298972`; the later docs-only `414c902` passed all 61 E2E/start checks. Exact-head hosted gates for this publication candidate remain pending. The original crypto fixture also passed the regular two-CLI SDK helper at `2d76646` (73 SDK calls/responses and 9 auxiliary HTTP pairs across four CLI incarnations). That verifies local provisioning and permissions, not host coordination, scoring or NoEcho secrecy.
+On 2026-11-06, the two landing models passed their scoped 19 executions at
+`4382ec4`; the full 448-case attempt at that revision failed at DynamoDBAdmission.
+The embedded landing page passed eight desktop/mobile HTML and fallback browser
+cases at `fad3b8a`, including six strict accessibility audits. Installed Chromium
+154 lacks the current HTML-in-Canvas API: this verifies ordinary HTML/fallback,
+not Chrome 157 drawing, other engines or a complete simulator release. These
+dated results do not replace later exact-head Go, E2E, formal or hosted checks.
+The admission model trusts host/origin/authentication verdicts; the selection
+model excludes URL parsing, focus, layout, SVG geometry and JavaScript refinement.
 
-At `c298972`, all 48 finite models and 381 controls (429 executions) passed, as did fresh full-module Go race/build and one-profile statement/source coverage of 94.94%/90.32%. The later docs-only `414c902` passed all 61 E2E cases in 980.726 seconds, reflow and start checks. Exact-head hosted CI for this publication candidate remains pending. That historical follow-up changed documentation and applicability hashes only, with runtime, model and test bytes identical to `c298972`; its results do not cover the current login changes. Current exact-head hosted gates must still pass. Separate models cover final stack/claim acknowledgement and selected SSM/S3 SQLite-row absence after all cleanup writes. These checks do not prove host scoring, output secrecy, native S3 DeleteBucket, every resource type or Go/SQL refinement.
+Historical CFN evidence: the isolated condition SANY/baseline/fourteen controls
+passed at `f69fb46`; its 365-case source preparation is historical. At `c298972`,
+all 48 models/381 controls (429 executions), full Go race/build and one-profile
+statement/source coverage of 94.94%/90.32% passed. Its documentation-only successor
+`414c902` passed all 61 E2E cases in 980.726 seconds, reflow and start checks.
+“Documentation-only” describes that historical successor, not the current landing
+implementation. These receipts and their then-pending hosted checks belong to
+those revisions. The original crypto fixture also passed the two-CLI SDK helper
+at `2d76646` (73 SDK calls/responses and nine auxiliary HTTP pairs across four CLI
+incarnations). None proves host scoring, output secrecy, every physical resource
+deletion, Go/SQL refinement or success of the current 462-case combined gate.
 
 ## License and attribution
 

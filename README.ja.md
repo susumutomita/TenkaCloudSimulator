@@ -22,6 +22,10 @@ AWS の公開仕様に基づく独自実装へ置き換えています。歴史�
 
 ## 起動する
 
+起動後の <http://127.0.0.1:4566/_simulator/> には、対応範囲を説明する
+[触れる構成図の紹介ページ](docs/landing.md)があります。基本の説明と操作は通常のHTMLで使えます。
+HTML-in-Canvasの装飾は対応ブラウザーだけで追加し、SDKのルート `/` とコンソールの認証は維持します。
+
 ソースからの起動にはGo 1.26が必要です（CIは1.26.10）。
 
 ```sh
@@ -120,7 +124,16 @@ SDK、操作画面、再起動、チーム分離の受入検証は `make e2e` �
 
 CIはstatementと未フィルターsource-line coverageを両方90%以上に強制します。`make before-commit`単独のcoverage判定はstatementのみで、source-line判定はCIのCobertura生成後ステージと上記の2コマンドで行います。SDK/browser、license、依存security、埋込asset、形式検査も行います。cross compileは他OSでの実行成功を意味しません。開発用Python/Node/Javaはruntime依存ではありません。UI・Scalarの再生成は権利表記とlockを保持する[各build手順](tools/console/README.md)・[Scalar手順](tools/scalar/README.md)・[Python runtimeの権利・再生成手順](tools/python/README.md)に従います。
 
-今回のログイン統合では49有限モデル・394の意図した欠陥検出（基準モデルと陰性検査で443ケース）を必須とし、統合後の固定HEAD全体検査は未完了です。従来の48モデル・381制御は保持します。Sakuraの4つの限定モデル、DynamoDB画面、Secretsメタデータ画面の登録を保持します。SecretVersionListingは保存済みARNの認可後に行うメタデータ一覧と限定的なcursor境界を対象とし、値の読取許可や完全な履歴画面を追加しません。追加モデルの有限検査結果と統合後の固定HEAD検査は区別します。TLCは限定した状態空間の安全条件と意図したmutantの反例を検査し、Go実装のrefinement、暗号、全AWS仕様・実AWSとの一致を証明するものではありません。[形式検査](formal/README.md)、[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)。
+LPとログインを合わせた統合では**51有限モデル・411制御（462実行）**を必須とし、
+統合後の固定HEAD全体検査は未完了です。mainの50モデル・398制御（旧48/381とLPの2モデル・
+17制御）を保持し、LoginInputIntentの1モデル・13制御を追加します。Sakura、DynamoDB画面、
+Secretsメタデータ画面も保持します。LPモデルは信頼済みのhost/origin/認証判定や閉じたノード入力を
+前提とし、URL解析、フォーカス、レイアウト、SVG線の位置、ブラウザー描画、Go/JavaScriptの
+refinementは証明しません。LoginInputIntentもfocus時の制御値リセットを仮定した限定モデルで、
+実ブラウザーの原因や拡張機能の修復を証明しません。SecretVersionListingは認可後のメタデータ一覧と
+限定cursor境界を対象とし、値の読取権限や完全な履歴画面を追加しません。有限モデル検査、実コード試験、
+固定HEADの全体検査は別の結果です。[形式検査](formal/README.md)、[CI](docs/ci.md)、
+[設計](docs/design/0001-go-standalone.md)。
 
 ## ライセンス
 
@@ -161,6 +174,19 @@ combined 29-model/164-control formal gate (193 executions). These receipts apply
 to that revision. Every later change still requires its exact-HEAD CI, including
 the 45-case E2E suite; focused results do not replace whole-suite verification.
 
-今回のログイン統合で必要な形式検査は49モデル・394制御（443実行）です。全体の成功は未確認で、過去の48モデル・381制御の結果とは区別します。IAMの追加モデルは4つの到達可能な初期状態から各2要求の範囲で、4要求の試案はタイムアウトし未成功です。上の過去の受領証とは区別し、最新HEADで全ゲートを実行してください。API資料はAWS・Google Cloud・Azureを分け、Sakura Cloudでは任意有効化するDisk構成の画面と5つのnative APIを扱います。他のSakuraサービスや実ストレージに対応したという意味ではありません。[ナビゲーション](docs/api-reference.md)を参照してください。
+現在のLP・ログイン統合で必要な形式検査は51モデル・411制御（462実行）で、全体成功は未確認です。IAMモデルは4つの到達可能な初期状態から
+各2要求の範囲で、4要求の試案はタイムアウトし未成功です。2026-11-06にLPの限定19実行が
+`4382ec4`で成功しましたが、その版の全448実行はDynamoDBAdmissionで失敗しました。
+`fad3b8a`のLPはPC・スマートフォンの8ブラウザーケースと6状態の厳格なアクセシビリティ検査に成功。
+使用したChromium 154には現行HTML-in-Canvas APIがなく、通常HTMLとフォールバックの結果です。
+Chrome 157の描画や他エンジン、後続HEADのGo・E2E・形式検査・hosted CIの成功を意味しません。
+API資料ではクラウドを分け、Sakura Cloudの任意有効化するDisk構成画面と5つのnative APIを扱います。
+他のSakuraサービスや実ストレージへの対応ではありません。[ナビゲーション](docs/api-reference.md)。
 
-現在のCFN候補は条件の受理、メモ化したグラフ高さ、最終スタック・所有権行ACK、および選択したSSM/S3物理行ACKの限定モデルを追加し、mainの44モデルを保持します。`c298972`で全48モデル・381制御（429実行）、fresh全Go race/build、同一profileのstatement94.94%・未除外source90.32%を確認しました。資料のみを変えた後続`414c902`で全61 E2E（980.726秒）・reflow・startを実行し成功しました。今回公開する資料追補自身のexact HEAD hosted CIは未実施です。 その過去の追補は資料とapplicabilityハッシュのみを変更し、実行コード・モデル・テストは`c298972`と同一でした。今回のログイン変更を検証した結果ではなく、現在のexact HEAD hosted検査は別途必要です。過去の単体結果で代用せず、ホスト採点・SQL/Go refinement・秘匿出力・全リソース物理削除の証明とは扱いません。
+過去のCFN受領証：`c298972`では44の旧mainモデルを保持して、条件の受理・メモ化グラフ高さ・
+最終スタック／所有権行ACK・選択したSSM/S3物理行ACKを検査し、全48モデル・381制御（429実行）、
+全Go race/build、同一profileのstatement94.94%・未除外source90.32%が成功しました。
+資料のみを変えた後続`414c902`では全61 E2E（980.726秒）・reflow・startが成功しました。
+「資料のみの追補」「実行コード等が同一」はその過去の版の説明であり、現在のLP実装を指しません。
+当時のhosted検査の留保もその版に属します。現在の全462実行の成功や、ホスト採点・SQL/Go refinement・
+秘匿出力・全リソース物理削除の証明へ読み替えないでください。

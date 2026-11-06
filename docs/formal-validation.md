@@ -15,24 +15,38 @@ machine-discovered semantic coverage. A newly added implementation file is not
 covered merely because an existing model passes: its exact path must have an
 appropriate reviewed scope mapping and property argument.
 
-The login integration requires 49 baselines/394 required named mutation controls
-(443 required executions), with the combined exact-HEAD gate pending. It preserves
-the earlier 48 baselines/381 controls and adds LoginInputIntent with 13 controls.
-The historical `28d37d1` 13-case run explored 73 distinct states before focus capture.
-The scoped `5b270e9` 14-case run explored 77 distinct states (94 generated, empty
-queue) and all 13 declared noninitial counterexamples, including the new focus
-control at state 3. Its assumed controlled reset on focus is not an established
-browser cause or implementation refinement proof.
-[Input correspondence and limits](login-token-file.md#bounded-input-intent-model)
-and the [dated CI failure](login-token-file.md#dated-validation-and-current-candidate)
-separate these finite checks from combined validation and actual browser behavior. All 44 main `139eb82` model entries and 347 controls are
-preserved. CFNConditionAdmission adds a finite compile-plan projection with 14
-controls, scoped at `f69fb46`; the complete 429-case registered gate of this
-combined candidate passed at `c298972`. The docs-only `414c902` subsequently passed all 61 E2E/start checks; exact-head hosted CI for the publication candidate remains pending. SecretMetadataViewEpoch from main is preserved byte-for-byte. Numeric/regex/parser correctness, actual resource
-provisioning and NoEcho/output secrecy are not proved by this model.
-The new IAM scope is four API-reachable seeds and at most two subsequent requests;
+The combined landing/login integration requires **51 baselines/411 required
+named mutation controls (462 executions)**; its exact-HEAD whole gate is pending.
+It preserves main's 50/398 inventory: the earlier 48/381 plus LandingAccessAdmission
+(six controls) and LandingTopologyState (eleven). LoginInputIntent adds one model
+with 13 controls. Historical `28d37d1` checked 13 cases/73 distinct states before
+focus capture; scoped `5b270e9` checked 14 cases/77 distinct states (94 generated,
+empty queue) and all 13 declared noninitial counterexamples, including the focus
+control at state 3. The controlled reset on focus is an explicit assumption, not
+an established browser cause or implementation refinement proof.
+[Input correspondence](login-token-file.md#bounded-input-intent-model) and the
+[dated login CI failure](login-token-file.md#dated-validation-and-current-candidate)
+remain distinct from combined acceptance. SecretMetadataViewEpoch and the existing
+CFN, Sakura and DynamoDB scopes remain. Numeric/regex/parser correctness, actual
+resource provisioning and NoEcho/output secrecy are not proved by registration.
+The IAM scope is four API-reachable seeds and at most two subsequent requests;
 the broader four-request exploratory candidate timed out and is not claimed.
 Registration and Python guards are not a successful immutable TLC execution.
+
+New models must be registered in `formal/models.json` **and** added to the
+mandatory `BASE_MODELS`, `BASE_INVARIANTS`, `REQUIRED_MUTANTS` and
+`REQUIRED_SOURCE_SCOPES` policy in `scripts/formal_model_gate.py`. Preserve the
+established entries and add removal/scope detector tests. Merely listing a model
+without protecting its identity, properties, controls and implementation paths
+does not establish the intended mandatory merge check.
+
+Historical receipts are separate: the 429-case gate at `c298972` and its
+documentation-only successor `414c902` (61 E2E/start checks) describe those
+revisions, not this landing implementation. On 2026-11-06, the two landing models
+passed scoped 19-case checking at `4382ec4`, but that revision's full 448-case
+attempt failed at DynamoDBAdmission. The eight landing browser cases passed at
+`fad3b8a` on Chromium 154; its missing current canvas API means this is HTML and
+fallback evidence, not native Chrome 157 rendering or successful full-gate CI.
 
 | Model | Finite contract | Important exclusions |
 |---|---|---|
@@ -47,6 +61,8 @@ Registration and Python guards are not a successful immutable TLC execution.
 | RESTRouteMatching | finite template/carrier choices; arity, captures and literal specificity | concrete byte scanner, general paths, method selection, Go refinement |
 | RESTProxyEventBoundary | fixed input samples, projected application data, excluded transport authority and abstract event budget | concrete HTTP authentication, UTF-8/JSON parser, case-fold implementation, real memory bounds |
 | NativeWireProjection | three ordered fields, six value kinds and provider-selected omission; complete output or error | JSON escaping/parser, XML, exact AWS schemas, Go refinement |
+| LandingAccessAdmission | ten literal paths, GET/HEAD/POST and trusted host/origin/auth verdicts; one request/response transition | concrete middleware/token/session/URL/HTTP/ServeMux implementation, service authority |
+| LandingTopologyState | nine nodes/three providers; known or absent initial fragment; two selections/two callbacks, one mount/retirement | URL parsing/history, focus/Tab, DOM/layout/SVG geometry, native canvas rendering, JavaScript refinement or liveness |
 
 All registered models run even for documentation-only changes. The supported CFG
 grammar is deliberately restricted to named invariants, init/next/specification,
@@ -70,6 +86,17 @@ and verified jar. Reports under `reports/formal/`
 include actual process logs, input/config hashes, bounds, limitations and a JSON
 success/failure result. Controlled-process Python unit tests validate failure
 handling; they are not TLC/model evidence.
+
+For a process exception, `<case>.failure.json` and `evidence.json` retain the
+model/case, exception type, errno when available, deadline/timeout, elapsed time,
+model/config hashes and explicit unavailable exit code (`null`). Partial stdout
+and stderr are retained as separate `.failure.stdout.bin` and
+`.failure.stderr.bin` files with availability/type/byte-count/SHA256 metadata.
+Missing output is distinguished from an empty stream. A diagnostic write failure
+is recorded without replacing the original failure. Exception messages,
+environment values and commands are not copied into this metadata. A timeout or
+partial progress remains a failed check, never an invariant counterexample;
+models, bounds, the 60-second default and all required executions stay unchanged.
 
 No Poteto configuration/toolchain was found in the tracked baseline instructions
 or files. No Poteto, proof-assistant, implementation-refinement or complete

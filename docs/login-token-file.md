@@ -109,8 +109,9 @@ JavaScript/React/Cloudscape/DOM refinement proof, OS/extension test, file-parser
 proof, cryptographic/authentication guarantee, liveness proof or full event-space
 exploration. No real tokens are represented.
 
-This login integration adds 14 checks to the preserved 429-check inventory:
-**49 models / 394 controls / 443 required executions**. The combined exact-HEAD
+This combined landing/login integration adds 14 login checks to main's preserved
+448-check inventory (50 models/398 controls): **51 models / 411 controls / 462
+required executions**. The combined exact-HEAD
 formal gate and new embedded-binary browser/E2E checks remain pending; the scoped
 result does not substitute for them.
 
