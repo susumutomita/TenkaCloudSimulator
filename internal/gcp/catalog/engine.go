@@ -106,6 +106,9 @@ func bindAPI(api *API, model *Model) (*binding, error) {
 		if c.IDParam != "" && c.IDField != "" || c.IDField != "" && model.Schemas[c.Schema].Properties[c.IDField] == nil {
 			return nil, fmt.Errorf("GCP catalog %s collection %s needs one ID source that names a schema field", api.Key, c.ID)
 		}
+		if c.FullName && (c.IDField == "" || c.ShortName) {
+			return nil, fmt.Errorf("GCP catalog %s collection %s carries a full name without a body ID field or with a short name", api.Key, c.ID)
+		}
 		for field, ref := range c.References {
 			if model.Schemas[c.Schema].Properties[field] == nil || api.collection(ref.Collection) == nil {
 				return nil, fmt.Errorf("GCP catalog %s collection %s references an unknown field or collection", api.Key, c.ID)
@@ -126,7 +129,7 @@ func bindAPI(api *API, model *Model) (*binding, error) {
 			return nil, fmt.Errorf("GCP catalog %s method %s is missing or bound twice", api.Key, bound.Method)
 		}
 		switch bound.Kind {
-		case Create, Get, List, Patch, Delete:
+		case Create, Get, List, Patch, Replace, Delete:
 			if api.collection(bound.Collection) == nil {
 				return nil, fmt.Errorf("GCP catalog %s method %s names an unknown collection", api.Key, bound.Method)
 			}

@@ -10,6 +10,7 @@ const (
 	Get           Kind = "get"
 	List          Kind = "list"
 	Patch         Kind = "patch"
+	Replace       Kind = "replace" // full-resource update: PUT, or PATCH without a mask
 	Delete        Kind = "delete"
 	OperationGet  Kind = "operation-get"
 	OperationList Kind = "operation-list"
@@ -60,6 +61,10 @@ type Collection struct {
 	// ShortName stores the ID rather than the full resource name in the
 	// "name" field, as APIs such as Cloud Logging sinks do.
 	ShortName bool
+	// FullName means IDField carries the full resource name
+	// (parent/collection/ID) rather than the bare ID, as Cloud Composer
+	// environments do; the named parent must be the request parent.
+	FullName bool
 	// Limit bounds live resources per parent.
 	Limit int
 	// Generate assigns output fields at creation: $name, $now, $uid,
@@ -88,8 +93,9 @@ type Collection struct {
 	// as in projects/{project}/databases/{database}/operations/{operation}.
 	// "" places them under the API scope root.
 	Operations string
-	// Message is the operation response type when it differs from Schema,
-	// for discovery schemas such as GoogleFirestoreAdminV1Database: a name
+	// Message is the protobuf message name in response @type values when it
+	// differs from Schema, as for discovery schemas such as
+	// GoogleFirestoreAdminV1Database or GoogleCloudDataplexV1Lake: a name
 	// under the API TypeURL or a full type.googleapis.com/ URL.
 	Message string
 }
@@ -104,6 +110,7 @@ type Reference struct {
 	Override string
 }
 
+// message is the protobuf message name of the collection's resource.
 func (c *Collection) message() string {
 	if c.Message != "" {
 		return c.Message

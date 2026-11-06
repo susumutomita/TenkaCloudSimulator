@@ -1,0 +1,37 @@
+{
+ "api": "metastore.v1",
+ "steps": [
+  {"call": "projects.locations.services.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "serviceId": "fixture"}, "body": {"tier": "DEVELOPER", "hiveMetastoreConfig": {"version": "3.1.2"}, "labels": {"team": "a"}}, "save": {"op": "name", "service": "response.name"}, "expect": {"done": true}},
+  {"call": "projects.locations.operations.get", "args": {"name": "${op}"}, "expect": {"response.state": "ACTIVE"}},
+  {"call": "projects.locations.operations.list", "args": {"name": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"operations#count": 1}},
+  {"call": "projects.locations.services.get", "args": {"name": "${service}"}, "expect": {"tier": "DEVELOPER"}},
+  {"call": "projects.locations.services.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"services#count": 1}},
+  {"call": "projects.locations.services.patch", "args": {"name": "${service}", "updateMask": "labels"}, "body": {"labels": {"team": "a", "env": "dev"}}},
+  {"call": "projects.locations.services.backups.create", "args": {"parent": "${service}", "backupId": "nightly"}, "body": {"description": "Before upgrade"}, "save": {"backup": "response.name"}},
+  {"call": "projects.locations.services.backups.get", "args": {"name": "${backup}"}, "expect": {"state": "ACTIVE"}},
+  {"call": "projects.locations.services.backups.list", "args": {"parent": "${service}"}, "expect": {"backups#count": 1}},
+  {"call": "projects.locations.federations.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "federationId": "fed"}, "body": {"version": "3.1.2", "backendMetastores": {"1": {"name": "${service}", "metastoreType": "DATAPROC_METASTORE"}}}, "save": {"fed": "response.name"}},
+  {"call": "projects.locations.federations.get", "args": {"name": "${fed}"}, "expect": {"state": "ACTIVE"}},
+  {"call": "projects.locations.federations.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"federations#count": 1}},
+  {"call": "projects.locations.federations.patch", "args": {"name": "${fed}", "updateMask": "labels"}, "body": {"labels": {"team": "a"}}},
+  {"call": "projects.locations.services.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "serviceId": "guarded"}, "body": {"deletionProtection": true}, "error": "INVALID_ARGUMENT", "status": 400},
+  {"call": "projects.locations.services.delete", "args": {"name": "${service}"}, "error": "FAILED_PRECONDITION", "status": 400},
+  {"call": "projects.locations.services.restore", "args": {"service": "${service}", "body": {"backup": "${backup}"}}, "error": "UNIMPLEMENTED", "status": 501},
+  {"call": "projects.locations.services.get", "args": {"name": "projects/tenkacloud-local/locations/us-central1/services/missing"}, "error": "NOT_FOUND", "status": 404},
+  {"call": "projects.locations.services.list", "args": {"parent": "projects/other-project/locations/us-central1"}, "error": "PERMISSION_DENIED", "status": 403}
+ ],
+ "isolation": [
+  {"call": "projects.locations.services.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"services#count": 0}}
+ ],
+ "after_restart": [
+  {"call": "projects.locations.services.get", "args": {"name": "${service}"}, "expect": {"labels.env": "dev"}},
+  {"call": "projects.locations.services.backups.get", "args": {"name": "${backup}"}, "expect": {"description": "Before upgrade"}}
+ ],
+ "cleanup": [
+  {"call": "projects.locations.federations.delete", "args": {"name": "${fed}"}},
+  {"call": "projects.locations.services.backups.delete", "args": {"name": "${backup}"}},
+  {"call": "projects.locations.services.delete", "args": {"name": "${service}"}},
+  {"call": "projects.locations.services.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"services#count": 0}},
+  {"call": "projects.locations.federations.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"federations#count": 0}}
+ ]
+}

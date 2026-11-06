@@ -36,7 +36,7 @@ type request struct {
 func (q *request) collection() *Collection { return q.b.api.collection(q.bound.Collection) }
 
 func (q *request) permission() string {
-	verbs := map[Kind]string{Create: "create", Get: "get", List: "list", Patch: "update", Delete: "delete", OperationGet: "get", OperationList: "list"}
+	verbs := map[Kind]string{Create: "create", Get: "get", List: "list", Patch: "update", Replace: "update", Delete: "delete", OperationGet: "get", OperationList: "list"}
 	if q.bound.Permission != "" {
 		return q.bound.Permission
 	}
@@ -74,7 +74,7 @@ func (q *request) execute() (any, error) {
 		return r.Document, nil
 	case List:
 		return q.list()
-	case Patch:
+	case Patch, Replace:
 		return q.patch()
 	case Delete:
 		return q.remove()
@@ -341,6 +341,53 @@ func (q *request) longRunning() bool {
 	return done && response
 }
 
+// newID returns the new resource and its ID. An Unwrap hook may derive
+// both from a wrapped request; without a derived key the ID comes from
+// IDParam, or from IDField of the (unwrapped) resource, which carries the
+// full resource name under the request parent when FullName is set.
+// Server-generated IDs are opaque; client-chosen IDs follow AIP-122 unless
+// IDPattern replaces it.
+func (q *request) newID(parent string) (string, map[string]any, error) {
+	c := q.collection()
+	id, body := "", q.body
+	if q.bound.Unwrap != nil {
+		var err error
+		if body, id, err = q.bound.Unwrap(q.body); err != nil {
+			return "", nil, err
+		}
+	}
+	if id == "" {
+		switch {
+		case c.IDParam != "":
+			if id, _ = q.params[c.IDParam].(string); id == "" {
+				return "", nil, invalid("Query parameter %q is required.", c.IDParam)
+			}
+		case c.IDField != "":
+			if id, _ = body[c.IDField].(string); id == "" {
+				return "", nil, invalid("Field '%s' is required.", c.IDField)
+			}
+			if c.FullName {
+				full := q.e.normalize(id)
+				if id = strings.TrimPrefix(full, parent+"/"+c.ID+"/"); id == full {
+					return "", nil, invalid("Field '%s' must name a resource under %s/%s.", c.IDField, parent, c.ID)
+				}
+			}
+		case q.bound.Unwrap != nil:
+			return "", nil, invalid("The request does not name the new %s ID.", c.ID)
+		default:
+			return randomHex(8), body, nil
+		}
+	}
+	pattern := resourceID
+	if c.IDPattern != nil {
+		pattern = c.IDPattern
+	}
+	if !pattern.MatchString(id) {
+		return "", nil, invalid("Resource ID %q must match %s.", id, pattern.String())
+	}
+	return id, body, nil
+}
+
 func (q *request) create() (any, error) {
 	c := q.collection()
 	parent := q.path
@@ -351,32 +398,9 @@ func (q *request) create() (any, error) {
 	if err := q.parentName(parent); err != nil {
 		return nil, err
 	}
-	// Server-generated IDs are opaque; client-chosen IDs follow AIP-122.
-	id, body := randomHex(8), q.body
-	if q.bound.Unwrap != nil {
-		var err error
-		if body, id, err = q.bound.Unwrap(q.body); err != nil {
-			return nil, err
-		}
-	}
-	if c.IDParam != "" || c.IDField != "" || q.bound.Unwrap != nil {
-		if c.IDParam != "" && q.bound.Unwrap == nil {
-			id, _ = q.params[c.IDParam].(string)
-			if id == "" {
-				return nil, invalid("Query parameter %q is required.", c.IDParam)
-			}
-		} else if c.IDField != "" && q.bound.Unwrap == nil {
-			if id, _ = q.body[c.IDField].(string); id == "" {
-				return nil, invalid("Field '%s' is required.", c.IDField)
-			}
-		}
-		pattern := resourceID
-		if c.IDPattern != nil {
-			pattern = c.IDPattern
-		}
-		if !pattern.MatchString(id) {
-			return nil, invalid("Resource ID %q must match %s.", id, pattern.String())
-		}
+	id, body, err := q.newID(parent)
+	if err != nil {
+		return nil, err
 	}
 	if err := q.required(q.method.Request); err != nil {
 		return nil, err
@@ -385,6 +409,9 @@ func (q *request) create() (any, error) {
 	document := map[string]any{}
 	for k, v := range body {
 		document[k] = v
+	}
+	if c.FullName {
+		document[c.IDField] = name
 	}
 	document["name"] = name
 	if c.ShortName {
@@ -550,7 +577,34 @@ func (q *request) patch() (any, error) {
 			return nil, err
 		}
 	}
-	if mask != "" {
+	replace := q.bound.Kind == Replace
+	if replace {
+		// A full replacement keeps the resource ID and output fields and
+		// replaces every writable field, clearing those the body omits. It
+		// takes no update mask, whether as a parameter or a wrapped field.
+		if mask != "" {
+			return nil, invalid("A full replacement does not take an update mask.")
+		}
+		if given, ok := q.body[c.IDField].(string); ok && c.IDField != "" {
+			if given = q.e.normalize(given); given != r.Document[c.IDField] {
+				return nil, invalid("Field '%s' cannot change the resource ID.", c.IDField)
+			}
+		}
+		// A wrapped replacement carries the resource, not the request schema.
+		schema := q.method.Request
+		if q.bound.Unwrap != nil {
+			schema = c.Schema
+		}
+		if err := q.required(schema); err != nil {
+			return nil, err
+		}
+		for key, p := range q.b.model.Schemas[c.Schema].Properties {
+			if !p.ReadOnly && key != "name" && key != "etag" && key != c.IDField {
+				fields = append(fields, key)
+			}
+		}
+		sort.Strings(fields)
+	} else if mask != "" {
 		fields = strings.Split(mask, ",")
 	} else {
 		for key := range q.body {
@@ -567,7 +621,7 @@ func (q *request) patch() (any, error) {
 		if field == "etag" {
 			continue
 		}
-		if !mutable[field] {
+		if !replace && !mutable[field] {
 			return nil, invalid("Field %q cannot be updated by the simulator.", field)
 		}
 		written[field] = true
@@ -661,7 +715,12 @@ func (q *request) remove() (any, error) {
 				return nil, err
 			}
 		}
-		out, err := q.respond(map[string]any{}, "", tx)
+		// Methods such as BigLake catalogs.delete return the deleted resource.
+		deleted := map[string]any{}
+		if q.method.Response == c.Schema {
+			deleted = r.Document
+		}
+		out, err := q.respond(deleted, "", tx)
 		if err != nil {
 			return nil, err
 		}

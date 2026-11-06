@@ -1,0 +1,1932 @@
+{
+ "components": {
+  "schemas": {
+   "CodeCompilationConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "assertionSchema": {
+      "type": "string"
+     },
+     "builtinAssertionNamePrefix": {
+      "type": "string"
+     },
+     "databaseSuffix": {
+      "type": "string"
+     },
+     "defaultDatabase": {
+      "type": "string"
+     },
+     "defaultLocation": {
+      "type": "string"
+     },
+     "defaultNotebookRuntimeOptions": {
+      "$ref": "#/components/schemas/NotebookRuntimeOptions"
+     },
+     "defaultSchema": {
+      "type": "string"
+     },
+     "pipelineConfig": {
+      "$ref": "#/components/schemas/PipelineConfig"
+     },
+     "schemaSuffix": {
+      "type": "string"
+     },
+     "tablePrefix": {
+      "type": "string"
+     },
+     "vars": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "DataEncryptionState": {
+    "additionalProperties": false,
+    "properties": {
+     "kmsKeyVersionName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Empty": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "GcsRepositorySnapshotDestination": {
+    "additionalProperties": false,
+    "properties": {
+     "repositorySnapshotUri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GitRemoteSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "authenticationTokenSecretVersion": {
+      "type": "string"
+     },
+     "defaultBranch": {
+      "type": "string"
+     },
+     "effectiveDefaultBranch": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "gitRepositoryLink": {
+      "type": "string"
+     },
+     "sshAuthenticationConfig": {
+      "$ref": "#/components/schemas/SshAuthenticationConfig"
+     },
+     "tokenStatus": {
+      "enum": [
+       "TOKEN_STATUS_UNSPECIFIED",
+       "NOT_FOUND",
+       "INVALID",
+       "VALID"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "url": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "InvocationConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "fullyRefreshIncrementalTablesEnabled": {
+      "type": "boolean"
+     },
+     "includedTags": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "includedTargets": {
+      "items": {
+       "$ref": "#/components/schemas/Target"
+      },
+      "type": "array"
+     },
+     "queryPriority": {
+      "enum": [
+       "QUERY_PRIORITY_UNSPECIFIED",
+       "INTERACTIVE",
+       "BATCH"
+      ],
+      "type": "string"
+     },
+     "serviceAccount": {
+      "type": "string"
+     },
+     "transitiveDependenciesIncluded": {
+      "type": "boolean"
+     },
+     "transitiveDependentsIncluded": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "ListReleaseConfigsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "releaseConfigs": {
+      "items": {
+       "$ref": "#/components/schemas/ReleaseConfig"
+      },
+      "type": "array"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListRepositoriesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "repositories": {
+      "items": {
+       "$ref": "#/components/schemas/Repository"
+      },
+      "type": "array"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListWorkflowConfigsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "workflowConfigs": {
+      "items": {
+       "$ref": "#/components/schemas/WorkflowConfig"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListWorkspacesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "workspaces": {
+      "items": {
+       "$ref": "#/components/schemas/Workspace"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "NotebookRuntimeOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "aiPlatformNotebookRuntimeTemplate": {
+      "type": "string"
+     },
+     "gcsOutputBucket": {
+      "type": "string"
+     },
+     "gcsRepositorySnapshotDestination": {
+      "$ref": "#/components/schemas/GcsRepositorySnapshotDestination"
+     }
+    },
+    "type": "object"
+   },
+   "PipelineConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "path": {
+      "type": "string"
+     },
+     "pipelineType": {
+      "enum": [
+       "PIPELINE_TYPE_UNSPECIFIED",
+       "DATAFORM",
+       "SQL",
+       "NOTEBOOK"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PrivateResourceMetadata": {
+    "additionalProperties": false,
+    "properties": {
+     "userScoped": {
+      "readOnly": true,
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "ReleaseConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "codeCompilationConfig": {
+      "$ref": "#/components/schemas/CodeCompilationConfig"
+     },
+     "cronSchedule": {
+      "type": "string"
+     },
+     "disabled": {
+      "type": "boolean"
+     },
+     "gitCommitish": {
+      "type": "string"
+     },
+     "internalMetadata": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "recentScheduledReleaseRecords": {
+      "items": {
+       "$ref": "#/components/schemas/ScheduledReleaseRecord"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "releaseCompilationResult": {
+      "type": "string"
+     },
+     "timeZone": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Repository": {
+    "additionalProperties": false,
+    "properties": {
+     "containingFolder": {
+      "type": "string"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "dataEncryptionState": {
+      "$ref": "#/components/schemas/DataEncryptionState"
+     },
+     "displayName": {
+      "type": "string"
+     },
+     "gitRemoteSettings": {
+      "$ref": "#/components/schemas/GitRemoteSettings"
+     },
+     "internalMetadata": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "kmsKeyName": {
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "npmrcEnvironmentVariablesSecretVersion": {
+      "type": "string"
+     },
+     "serviceAccount": {
+      "type": "string"
+     },
+     "setAuthenticatedUserAdmin": {
+      "type": "boolean"
+     },
+     "teamFolderName": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "workspaceCompilationOverrides": {
+      "$ref": "#/components/schemas/WorkspaceCompilationOverrides"
+     }
+    },
+    "type": "object"
+   },
+   "ScheduledExecutionRecord": {
+    "additionalProperties": false,
+    "properties": {
+     "errorStatus": {
+      "$ref": "#/components/schemas/Status"
+     },
+     "executionTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "workflowInvocation": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ScheduledReleaseRecord": {
+    "additionalProperties": false,
+    "properties": {
+     "compilationResult": {
+      "type": "string"
+     },
+     "errorStatus": {
+      "$ref": "#/components/schemas/Status"
+     },
+     "releaseTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SshAuthenticationConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "hostPublicKey": {
+      "type": "string"
+     },
+     "userPrivateKeySecretVersion": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Status": {
+    "additionalProperties": false,
+    "properties": {
+     "code": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "details": {
+      "items": {
+       "additionalProperties": {
+        "description": "Any JSON value"
+       },
+       "type": "object"
+      },
+      "type": "array"
+     },
+     "message": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Target": {
+    "additionalProperties": false,
+    "properties": {
+     "database": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "schema": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "WorkflowConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "cronSchedule": {
+      "type": "string"
+     },
+     "disabled": {
+      "type": "boolean"
+     },
+     "internalMetadata": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "invocationConfig": {
+      "$ref": "#/components/schemas/InvocationConfig"
+     },
+     "name": {
+      "type": "string"
+     },
+     "recentScheduledExecutionRecords": {
+      "items": {
+       "$ref": "#/components/schemas/ScheduledExecutionRecord"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "releaseConfig": {
+      "type": "string"
+     },
+     "timeZone": {
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Workspace": {
+    "additionalProperties": false,
+    "properties": {
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "dataEncryptionState": {
+      "$ref": "#/components/schemas/DataEncryptionState"
+     },
+     "disableMoves": {
+      "type": "boolean"
+     },
+     "internalMetadata": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "privateResourceMetadata": {
+      "$ref": "#/components/schemas/PrivateResourceMetadata"
+     }
+    },
+    "type": "object"
+   },
+   "WorkspaceCompilationOverrides": {
+    "additionalProperties": false,
+    "properties": {
+     "defaultDatabase": {
+      "type": "string"
+     },
+     "schemaSuffix": {
+      "type": "string"
+     },
+     "tablePrefix": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Dataform API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Repositories, workspaces, release configs and workflow configs are configuration metadata: no Git repository, file, commit, remote, npm package or BigQuery job exists. Compilation and invocation never happen: cron schedules never fire, compilation results and workflow invocations are unimplemented, and release compilation results are refused. Folders and the input-only admin grant are refused; a repository with workspaces, release configs or workflow configs cannot be deleted, as in Dataform, even with force=true.",
+  "title": "Dataform (simulator catalog)",
+  "version": "v1"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/v1/projects/{projectsId}/locations/{locationsId}/repositories": {
+   "get": {
+    "operationId": "dataform.projects.locations.repositories.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListRepositoriesResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.repositories.list",
+    "tags": [
+     "Dataform"
+    ]
+   },
+   "post": {
+    "operationId": "dataform.projects.locations.repositories.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "repositoryId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Repository"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Repository"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.repositories.create",
+    "tags": [
+     "Dataform"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/repositories/{repositoriesId}": {
+   "delete": {
+    "operationId": "dataform.projects.locations.repositories.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "repositoriesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "force",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Empty"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.repositories.delete",
+    "tags": [
+     "Dataform"
+    ]
+   },
+   "get": {
+    "operationId": "dataform.projects.locations.repositories.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "repositoriesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Repository"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.repositories.get",
+    "tags": [
+     "Dataform"
+    ]
+   },
+   "patch": {
+    "operationId": "dataform.projects.locations.repositories.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "repositoriesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Repository"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Repository"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.repositories.patch",
+    "tags": [
+     "Dataform"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/repositories/{repositoriesId}/releaseConfigs": {
+   "get": {
+    "operationId": "dataform.projects.locations.repositories.releaseConfigs.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "repositoriesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListReleaseConfigsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.repositories.releaseConfigs.list",
+    "tags": [
+     "Dataform"
+    ]
+   },
+   "post": {
+    "operationId": "dataform.projects.locations.repositories.releaseConfigs.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "repositoriesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "releaseConfigId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ReleaseConfig"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ReleaseConfig"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.repositories.releaseConfigs.create",
+    "tags": [
+     "Dataform"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/repositories/{repositoriesId}/releaseConfigs/{releaseConfigsId}": {
+   "delete": {
+    "operationId": "dataform.projects.locations.repositories.releaseConfigs.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "repositoriesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "releaseConfigsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Empty"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.repositories.releaseConfigs.delete",
+    "tags": [
+     "Dataform"
+    ]
+   },
+   "get": {
+    "operationId": "dataform.projects.locations.repositories.releaseConfigs.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "repositoriesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "releaseConfigsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ReleaseConfig"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.repositories.releaseConfigs.get",
+    "tags": [
+     "Dataform"
+    ]
+   },
+   "patch": {
+    "operationId": "dataform.projects.locations.repositories.releaseConfigs.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "repositoriesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "releaseConfigsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ReleaseConfig"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ReleaseConfig"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.repositories.releaseConfigs.patch",
+    "tags": [
+     "Dataform"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/repositories/{repositoriesId}/workflowConfigs": {
+   "get": {
+    "operationId": "dataform.projects.locations.repositories.workflowConfigs.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "repositoriesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListWorkflowConfigsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.repositories.workflowConfigs.list",
+    "tags": [
+     "Dataform"
+    ]
+   },
+   "post": {
+    "operationId": "dataform.projects.locations.repositories.workflowConfigs.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "repositoriesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "workflowConfigId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/WorkflowConfig"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/WorkflowConfig"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.repositories.workflowConfigs.create",
+    "tags": [
+     "Dataform"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/repositories/{repositoriesId}/workflowConfigs/{workflowConfigsId}": {
+   "delete": {
+    "operationId": "dataform.projects.locations.repositories.workflowConfigs.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "repositoriesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "workflowConfigsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Empty"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.repositories.workflowConfigs.delete",
+    "tags": [
+     "Dataform"
+    ]
+   },
+   "get": {
+    "operationId": "dataform.projects.locations.repositories.workflowConfigs.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "repositoriesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "workflowConfigsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/WorkflowConfig"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.repositories.workflowConfigs.get",
+    "tags": [
+     "Dataform"
+    ]
+   },
+   "patch": {
+    "operationId": "dataform.projects.locations.repositories.workflowConfigs.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "repositoriesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "workflowConfigsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/WorkflowConfig"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/WorkflowConfig"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.repositories.workflowConfigs.patch",
+    "tags": [
+     "Dataform"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/repositories/{repositoriesId}/workspaces": {
+   "get": {
+    "operationId": "dataform.projects.locations.repositories.workspaces.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "repositoriesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListWorkspacesResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.repositories.workspaces.list",
+    "tags": [
+     "Dataform"
+    ]
+   },
+   "post": {
+    "operationId": "dataform.projects.locations.repositories.workspaces.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "repositoriesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "workspaceId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Workspace"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Workspace"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.repositories.workspaces.create",
+    "tags": [
+     "Dataform"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/repositories/{repositoriesId}/workspaces/{workspacesId}": {
+   "delete": {
+    "operationId": "dataform.projects.locations.repositories.workspaces.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "repositoriesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "workspacesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Empty"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.repositories.workspaces.delete",
+    "tags": [
+     "Dataform"
+    ]
+   },
+   "get": {
+    "operationId": "dataform.projects.locations.repositories.workspaces.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "repositoriesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "workspacesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Workspace"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.repositories.workspaces.get",
+    "tags": [
+     "Dataform"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/_simulator/providers/gcp/dataform"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Dataform API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Repositories, workspaces, release configs and workflow configs are configuration metadata: no Git repository, file, commit, remote, npm package or BigQuery job exists. Compilation and invocation never happen: cron schedules never fire, compilation results and workflow invocations are unimplemented, and release compilation results are refused. Folders and the input-only admin grant are refused; a repository with workspaces, release configs or workflow configs cannot be deleted, as in Dataform, even with force=true.",
+   "name": "Dataform"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "google-api-python-client",
+  "version": "2.199.0",
+  "file": "googleapiclient/discovery_cache/documents/dataform.v1.json",
+  "sha256": "c3dbac73b27989062b26515ce74ffeb85cad66b0c579c7e4dc5ca98ba0acd0b5",
+  "license": "Apache-2.0",
+  "revision": "20260802"
+ }
+}
