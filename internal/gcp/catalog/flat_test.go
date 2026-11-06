@@ -185,7 +185,7 @@ func TestFlatResourcesAndOperations(t *testing.T) {
 		op["selfLink"] != "https://www.googleapis.com/flat/v1/projects/tenkacloud-local/global/operations/"+op["name"].(string) {
 		t.Fatalf("operation %v", op)
 	}
-	if h.engine.Describe()[1].Name != "flat" {
+	if d := h.engine.Describe(); d[len(d)-1].Name != "flat" {
 		t.Fatal("flat API registered")
 	}
 	replay := h.call("owner", "POST", flatRoot+"/global/networks?requestId=r-1", map[string]any{"name": "vpc", "mtu": 1460, "routingConfig": map[string]any{"routingMode": "REGIONAL", "bgpAlways": "x"}})

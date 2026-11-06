@@ -1,0 +1,6732 @@
+{
+ "components": {
+  "schemas": {
+   "AcceleratorConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "acceleratorCount": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "acceleratorType": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "AccessConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "externalIpv6": {
+      "type": "string"
+     },
+     "externalIpv6PrefixLength": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "kind": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "natIP": {
+      "type": "string"
+     },
+     "networkTier": {
+      "enum": [
+       "FIXED_STANDARD",
+       "PREMIUM",
+       "STANDARD",
+       "STANDARD_OVERRIDES_FIXED_STANDARD"
+      ],
+      "type": "string"
+     },
+     "publicPtrDomainName": {
+      "type": "string"
+     },
+     "securityPolicy": {
+      "type": "string"
+     },
+     "setPublicPtr": {
+      "type": "boolean"
+     },
+     "type": {
+      "enum": [
+       "DIRECT_IPV6",
+       "ONE_TO_ONE_NAT"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "AdvancedMachineFeatures": {
+    "additionalProperties": false,
+    "properties": {
+     "enableNestedVirtualization": {
+      "type": "boolean"
+     },
+     "enableUefiNetworking": {
+      "type": "boolean"
+     },
+     "performanceMonitoringUnit": {
+      "enum": [
+       "ARCHITECTURAL",
+       "ENHANCED",
+       "PERFORMANCE_MONITORING_UNIT_UNSPECIFIED",
+       "STANDARD"
+      ],
+      "type": "string"
+     },
+     "threadsPerCore": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "turboMode": {
+      "type": "string"
+     },
+     "visibleCoreCount": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "AliasIpRange": {
+    "additionalProperties": false,
+    "properties": {
+     "ipCidrRange": {
+      "type": "string"
+     },
+     "subnetworkRangeName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "AttachedDisk": {
+    "additionalProperties": false,
+    "properties": {
+     "architecture": {
+      "enum": [
+       "ARCHITECTURE_UNSPECIFIED",
+       "ARM64",
+       "X86_64"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "autoDelete": {
+      "type": "boolean"
+     },
+     "boot": {
+      "type": "boolean"
+     },
+     "deviceName": {
+      "type": "string"
+     },
+     "diskEncryptionKey": {
+      "$ref": "#/components/schemas/CustomerEncryptionKey"
+     },
+     "diskSizeGb": {
+      "format": "int64",
+      "type": "string"
+     },
+     "forceAttach": {
+      "type": "boolean"
+     },
+     "guestOsFeatures": {
+      "items": {
+       "$ref": "#/components/schemas/GuestOsFeature"
+      },
+      "type": "array"
+     },
+     "index": {
+      "format": "int32",
+      "readOnly": true,
+      "type": "integer"
+     },
+     "initializeParams": {
+      "$ref": "#/components/schemas/AttachedDiskInitializeParams"
+     },
+     "interface": {
+      "enum": [
+       "NVME",
+       "SCSI"
+      ],
+      "type": "string"
+     },
+     "kind": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "licenses": {
+      "items": {
+       "type": "string"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "mode": {
+      "enum": [
+       "READ_ONLY",
+       "READ_WRITE"
+      ],
+      "type": "string"
+     },
+     "savedState": {
+      "enum": [
+       "DISK_SAVED_STATE_UNSPECIFIED",
+       "PRESERVED"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "shieldedInstanceInitialState": {
+      "$ref": "#/components/schemas/InitialStateConfig"
+     },
+     "source": {
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "PERSISTENT",
+       "SCRATCH"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "AttachedDiskInitializeParams": {
+    "additionalProperties": false,
+    "properties": {
+     "architecture": {
+      "enum": [
+       "ARCHITECTURE_UNSPECIFIED",
+       "ARM64",
+       "X86_64"
+      ],
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "diskName": {
+      "type": "string"
+     },
+     "diskSizeGb": {
+      "format": "int64",
+      "type": "string"
+     },
+     "diskType": {
+      "type": "string"
+     },
+     "enableConfidentialCompute": {
+      "type": "boolean"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "licenses": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "onUpdateAction": {
+      "enum": [
+       "RECREATE_DISK",
+       "RECREATE_DISK_IF_SOURCE_CHANGED",
+       "USE_EXISTING_DISK"
+      ],
+      "type": "string"
+     },
+     "provisionedIops": {
+      "format": "int64",
+      "type": "string"
+     },
+     "provisionedThroughput": {
+      "format": "int64",
+      "type": "string"
+     },
+     "replicaZones": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "resourceManagerTags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "resourcePolicies": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "sourceImage": {
+      "type": "string"
+     },
+     "sourceImageEncryptionKey": {
+      "$ref": "#/components/schemas/CustomerEncryptionKey"
+     },
+     "sourceSnapshot": {
+      "type": "string"
+     },
+     "sourceSnapshotEncryptionKey": {
+      "$ref": "#/components/schemas/CustomerEncryptionKey"
+     },
+     "storagePool": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "BulkInsertOperationStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "createdVmCount": {
+      "format": "int32",
+      "readOnly": true,
+      "type": "integer"
+     },
+     "deletedVmCount": {
+      "format": "int32",
+      "readOnly": true,
+      "type": "integer"
+     },
+     "failedToCreateVmCount": {
+      "format": "int32",
+      "readOnly": true,
+      "type": "integer"
+     },
+     "status": {
+      "enum": [
+       "CREATING",
+       "DONE",
+       "ROLLING_BACK",
+       "STATUS_UNSPECIFIED"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "targetVmCount": {
+      "format": "int32",
+      "readOnly": true,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "ConfidentialInstanceConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "confidentialInstanceType": {
+      "enum": [
+       "CCA",
+       "CONFIDENTIAL_INSTANCE_TYPE_UNSPECIFIED",
+       "SEV",
+       "SEV_SNP",
+       "TDX"
+      ],
+      "type": "string"
+     },
+     "enableConfidentialCompute": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "CustomerEncryptionKey": {
+    "additionalProperties": false,
+    "properties": {
+     "kmsKeyName": {
+      "type": "string"
+     },
+     "kmsKeyServiceAccount": {
+      "type": "string"
+     },
+     "rawKey": {
+      "type": "string"
+     },
+     "rsaEncryptedKey": {
+      "type": "string"
+     },
+     "sha256": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Disk": {
+    "additionalProperties": false,
+    "properties": {
+     "accessMode": {
+      "enum": [
+       "READ_ONLY_MANY",
+       "READ_WRITE_MANY",
+       "READ_WRITE_SINGLE"
+      ],
+      "type": "string"
+     },
+     "architecture": {
+      "enum": [
+       "ARCHITECTURE_UNSPECIFIED",
+       "ARM64",
+       "X86_64"
+      ],
+      "type": "string"
+     },
+     "asyncPrimaryDisk": {
+      "$ref": "#/components/schemas/DiskAsyncReplication"
+     },
+     "asyncSecondaryDisks": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/DiskAsyncReplicationList"
+      },
+      "readOnly": true,
+      "type": "object"
+     },
+     "creationTimestamp": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "diskEncryptionKey": {
+      "$ref": "#/components/schemas/CustomerEncryptionKey"
+     },
+     "enableConfidentialCompute": {
+      "type": "boolean"
+     },
+     "guestOsFeatures": {
+      "items": {
+       "$ref": "#/components/schemas/GuestOsFeature"
+      },
+      "type": "array"
+     },
+     "id": {
+      "format": "uint64",
+      "readOnly": true,
+      "type": "string"
+     },
+     "kind": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "labelFingerprint": {
+      "format": "byte",
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "lastAttachTimestamp": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "lastDetachTimestamp": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "licenseCodes": {
+      "items": {
+       "format": "int64",
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "licenses": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "locationHint": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "options": {
+      "type": "string"
+     },
+     "params": {
+      "$ref": "#/components/schemas/DiskParams"
+     },
+     "physicalBlockSizeBytes": {
+      "format": "int64",
+      "type": "string"
+     },
+     "provisionedIops": {
+      "format": "int64",
+      "type": "string"
+     },
+     "provisionedThroughput": {
+      "format": "int64",
+      "type": "string"
+     },
+     "region": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "replicaZones": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "resourcePolicies": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "resourceStatus": {
+      "$ref": "#/components/schemas/DiskResourceStatus"
+     },
+     "satisfiesPzi": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "satisfiesPzs": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "selfLink": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "sizeGb": {
+      "format": "int64",
+      "type": "string"
+     },
+     "sourceConsistencyGroupPolicy": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "sourceConsistencyGroupPolicyId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "sourceDisk": {
+      "type": "string"
+     },
+     "sourceDiskId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "sourceImage": {
+      "type": "string"
+     },
+     "sourceImageEncryptionKey": {
+      "$ref": "#/components/schemas/CustomerEncryptionKey"
+     },
+     "sourceImageId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "sourceInstantSnapshot": {
+      "type": "string"
+     },
+     "sourceInstantSnapshotId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "sourceSnapshot": {
+      "type": "string"
+     },
+     "sourceSnapshotEncryptionKey": {
+      "$ref": "#/components/schemas/CustomerEncryptionKey"
+     },
+     "sourceSnapshotId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "sourceStorageObject": {
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "CREATING",
+       "DELETING",
+       "FAILED",
+       "READY",
+       "RESTORING",
+       "UNAVAILABLE"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "storagePool": {
+      "type": "string"
+     },
+     "type": {
+      "type": "string"
+     },
+     "users": {
+      "items": {
+       "type": "string"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "zone": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DiskAsyncReplication": {
+    "additionalProperties": false,
+    "properties": {
+     "consistencyGroupPolicy": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "consistencyGroupPolicyId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "disk": {
+      "type": "string"
+     },
+     "diskId": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DiskAsyncReplicationList": {
+    "additionalProperties": false,
+    "properties": {
+     "asyncReplicationDisk": {
+      "$ref": "#/components/schemas/DiskAsyncReplication"
+     }
+    },
+    "type": "object"
+   },
+   "DiskInstantiationConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "autoDelete": {
+      "type": "boolean"
+     },
+     "customImage": {
+      "type": "string"
+     },
+     "deviceName": {
+      "type": "string"
+     },
+     "instantiateFrom": {
+      "enum": [
+       "ATTACH_READ_ONLY",
+       "BLANK",
+       "CUSTOM_IMAGE",
+       "DEFAULT",
+       "DO_NOT_INCLUDE",
+       "SOURCE_IMAGE",
+       "SOURCE_IMAGE_FAMILY"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DiskList": {
+    "additionalProperties": false,
+    "properties": {
+     "id": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/Disk"
+      },
+      "type": "array"
+     },
+     "kind": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "nextPageToken": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "selfLink": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "warning": {
+      "additionalProperties": false,
+      "properties": {
+       "code": {
+        "enum": [
+         "CLEANUP_FAILED",
+         "DEPRECATED_RESOURCE_USED",
+         "DEPRECATED_TYPE_USED",
+         "DISK_SIZE_LARGER_THAN_IMAGE_SIZE",
+         "EXPERIMENTAL_TYPE_USED",
+         "EXTERNAL_API_WARNING",
+         "FIELD_VALUE_OVERRIDEN",
+         "INJECTED_KERNELS_DEPRECATED",
+         "INVALID_HEALTH_CHECK_FOR_DYNAMIC_WIEGHTED_LB",
+         "LARGE_DEPLOYMENT_WARNING",
+         "LIST_OVERHEAD_QUOTA_EXCEED",
+         "MISSING_TYPE_DEPENDENCY",
+         "NEXT_HOP_ADDRESS_NOT_ASSIGNED",
+         "NEXT_HOP_CANNOT_IP_FORWARD",
+         "NEXT_HOP_INSTANCE_HAS_NO_IPV6_INTERFACE",
+         "NEXT_HOP_INSTANCE_NOT_FOUND",
+         "NEXT_HOP_INSTANCE_NOT_ON_NETWORK",
+         "NEXT_HOP_NOT_RUNNING",
+         "NOT_CRITICAL_ERROR",
+         "NO_RESULTS_ON_PAGE",
+         "PARTIAL_SUCCESS",
+         "QUOTA_INFO_UNAVAILABLE",
+         "REQUIRED_TOS_AGREEMENT",
+         "RESOURCE_IN_USE_BY_OTHER_RESOURCE_WARNING",
+         "RESOURCE_NOT_DELETED",
+         "SCHEMA_VALIDATION_IGNORED",
+         "SINGLE_INSTANCE_PROPERTY_TEMPLATE",
+         "UNDECLARED_PROPERTIES",
+         "UNREACHABLE"
+        ],
+        "readOnly": true,
+        "type": "string"
+       },
+       "data": {
+        "items": {
+         "additionalProperties": false,
+         "properties": {
+          "key": {
+           "readOnly": true,
+           "type": "string"
+          },
+          "value": {
+           "readOnly": true,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        },
+        "readOnly": true,
+        "type": "array"
+       },
+       "message": {
+        "readOnly": true,
+        "type": "string"
+       }
+      },
+      "readOnly": true,
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "DiskParams": {
+    "additionalProperties": false,
+    "properties": {
+     "resourceManagerTags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "DiskResourceStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "asyncPrimaryDisk": {
+      "$ref": "#/components/schemas/DiskResourceStatusAsyncReplicationStatus"
+     },
+     "asyncSecondaryDisks": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/DiskResourceStatusAsyncReplicationStatus"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "DiskResourceStatusAsyncReplicationStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "state": {
+      "enum": [
+       "ACTIVE",
+       "CREATED",
+       "STARTING",
+       "STATE_UNSPECIFIED",
+       "STOPPED",
+       "STOPPING"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DisksResizeRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "sizeGb": {
+      "format": "int64",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Duration": {
+    "additionalProperties": false,
+    "properties": {
+     "nanos": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "seconds": {
+      "format": "int64",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ErrorInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "domain": {
+      "type": "string"
+     },
+     "metadatas": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "reason": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "FileContentBuffer": {
+    "additionalProperties": false,
+    "properties": {
+     "content": {
+      "format": "byte",
+      "type": "string"
+     },
+     "fileType": {
+      "enum": [
+       "BIN",
+       "UNDEFINED",
+       "X509"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Firewall": {
+    "additionalProperties": false,
+    "properties": {
+     "allowed": {
+      "items": {
+       "additionalProperties": false,
+       "properties": {
+        "IPProtocol": {
+         "type": "string"
+        },
+        "ports": {
+         "items": {
+          "type": "string"
+         },
+         "type": "array"
+        }
+       },
+       "type": "object"
+      },
+      "type": "array"
+     },
+     "creationTimestamp": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "denied": {
+      "items": {
+       "additionalProperties": false,
+       "properties": {
+        "IPProtocol": {
+         "type": "string"
+        },
+        "ports": {
+         "items": {
+          "type": "string"
+         },
+         "type": "array"
+        }
+       },
+       "type": "object"
+      },
+      "type": "array"
+     },
+     "description": {
+      "type": "string"
+     },
+     "destinationRanges": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "direction": {
+      "enum": [
+       "EGRESS",
+       "INGRESS"
+      ],
+      "type": "string"
+     },
+     "disabled": {
+      "type": "boolean"
+     },
+     "id": {
+      "format": "uint64",
+      "readOnly": true,
+      "type": "string"
+     },
+     "kind": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "logConfig": {
+      "$ref": "#/components/schemas/FirewallLogConfig"
+     },
+     "name": {
+      "type": "string"
+     },
+     "network": {
+      "type": "string"
+     },
+     "params": {
+      "$ref": "#/components/schemas/FirewallParams"
+     },
+     "priority": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "selfLink": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "sourceRanges": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "sourceServiceAccounts": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "sourceTags": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "targetServiceAccounts": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "targetTags": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "FirewallList": {
+    "additionalProperties": false,
+    "properties": {
+     "id": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/Firewall"
+      },
+      "type": "array"
+     },
+     "kind": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "nextPageToken": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "selfLink": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "warning": {
+      "additionalProperties": false,
+      "properties": {
+       "code": {
+        "enum": [
+         "CLEANUP_FAILED",
+         "DEPRECATED_RESOURCE_USED",
+         "DEPRECATED_TYPE_USED",
+         "DISK_SIZE_LARGER_THAN_IMAGE_SIZE",
+         "EXPERIMENTAL_TYPE_USED",
+         "EXTERNAL_API_WARNING",
+         "FIELD_VALUE_OVERRIDEN",
+         "INJECTED_KERNELS_DEPRECATED",
+         "INVALID_HEALTH_CHECK_FOR_DYNAMIC_WIEGHTED_LB",
+         "LARGE_DEPLOYMENT_WARNING",
+         "LIST_OVERHEAD_QUOTA_EXCEED",
+         "MISSING_TYPE_DEPENDENCY",
+         "NEXT_HOP_ADDRESS_NOT_ASSIGNED",
+         "NEXT_HOP_CANNOT_IP_FORWARD",
+         "NEXT_HOP_INSTANCE_HAS_NO_IPV6_INTERFACE",
+         "NEXT_HOP_INSTANCE_NOT_FOUND",
+         "NEXT_HOP_INSTANCE_NOT_ON_NETWORK",
+         "NEXT_HOP_NOT_RUNNING",
+         "NOT_CRITICAL_ERROR",
+         "NO_RESULTS_ON_PAGE",
+         "PARTIAL_SUCCESS",
+         "QUOTA_INFO_UNAVAILABLE",
+         "REQUIRED_TOS_AGREEMENT",
+         "RESOURCE_IN_USE_BY_OTHER_RESOURCE_WARNING",
+         "RESOURCE_NOT_DELETED",
+         "SCHEMA_VALIDATION_IGNORED",
+         "SINGLE_INSTANCE_PROPERTY_TEMPLATE",
+         "UNDECLARED_PROPERTIES",
+         "UNREACHABLE"
+        ],
+        "readOnly": true,
+        "type": "string"
+       },
+       "data": {
+        "items": {
+         "additionalProperties": false,
+         "properties": {
+          "key": {
+           "readOnly": true,
+           "type": "string"
+          },
+          "value": {
+           "readOnly": true,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        },
+        "readOnly": true,
+        "type": "array"
+       },
+       "message": {
+        "readOnly": true,
+        "type": "string"
+       }
+      },
+      "readOnly": true,
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "FirewallLogConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "enable": {
+      "type": "boolean"
+     },
+     "metadata": {
+      "enum": [
+       "EXCLUDE_ALL_METADATA",
+       "INCLUDE_ALL_METADATA"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "FirewallParams": {
+    "additionalProperties": false,
+    "properties": {
+     "resourceManagerTags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "GetVersionOperationMetadata": {
+    "additionalProperties": false,
+    "properties": {
+     "inlineSbomInfo": {
+      "$ref": "#/components/schemas/GetVersionOperationMetadataSbomInfo"
+     }
+    },
+    "type": "object"
+   },
+   "GetVersionOperationMetadataSbomInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "currentComponentVersions": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "targetComponentVersions": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "GlobalSetLabelsRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "labelFingerprint": {
+      "format": "byte",
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "GuestOsFeature": {
+    "additionalProperties": false,
+    "properties": {
+     "type": {
+      "enum": [
+       "BARE_METAL_LINUX_COMPATIBLE",
+       "CCA_CAPABLE",
+       "FEATURE_TYPE_UNSPECIFIED",
+       "GVNIC",
+       "IDPF",
+       "MULTI_IP_SUBNET",
+       "SECURE_BOOT",
+       "SEV_CAPABLE",
+       "SEV_LIVE_MIGRATABLE",
+       "SEV_LIVE_MIGRATABLE_V2",
+       "SEV_SNP_CAPABLE",
+       "SNP_SVSM_CAPABLE",
+       "TDX_CAPABLE",
+       "UEFI_COMPATIBLE",
+       "VIRTIO_SCSI_MULTIQUEUE",
+       "WINDOWS"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Help": {
+    "additionalProperties": false,
+    "properties": {
+     "links": {
+      "items": {
+       "$ref": "#/components/schemas/HelpLink"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "HelpLink": {
+    "additionalProperties": false,
+    "properties": {
+     "description": {
+      "type": "string"
+     },
+     "url": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "InitialStateConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "dbs": {
+      "items": {
+       "$ref": "#/components/schemas/FileContentBuffer"
+      },
+      "type": "array"
+     },
+     "dbxs": {
+      "items": {
+       "$ref": "#/components/schemas/FileContentBuffer"
+      },
+      "type": "array"
+     },
+     "keks": {
+      "items": {
+       "$ref": "#/components/schemas/FileContentBuffer"
+      },
+      "type": "array"
+     },
+     "pk": {
+      "$ref": "#/components/schemas/FileContentBuffer"
+     }
+    },
+    "type": "object"
+   },
+   "InstanceProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "advancedMachineFeatures": {
+      "$ref": "#/components/schemas/AdvancedMachineFeatures"
+     },
+     "canIpForward": {
+      "type": "boolean"
+     },
+     "confidentialInstanceConfig": {
+      "$ref": "#/components/schemas/ConfidentialInstanceConfig"
+     },
+     "description": {
+      "type": "string"
+     },
+     "disks": {
+      "items": {
+       "$ref": "#/components/schemas/AttachedDisk"
+      },
+      "type": "array"
+     },
+     "guestAccelerators": {
+      "items": {
+       "$ref": "#/components/schemas/AcceleratorConfig"
+      },
+      "type": "array"
+     },
+     "keyRevocationActionType": {
+      "enum": [
+       "KEY_REVOCATION_ACTION_TYPE_UNSPECIFIED",
+       "NONE",
+       "STOP"
+      ],
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "localSsdEncryptionMode": {
+      "enum": [
+       "EPHEMERAL_KEY_ENCRYPTION",
+       "LOCAL_SSD_ENCRYPTION_MODE_UNSPECIFIED",
+       "STANDARD_ENCRYPTION"
+      ],
+      "type": "string"
+     },
+     "machineType": {
+      "type": "string"
+     },
+     "metadata": {
+      "$ref": "#/components/schemas/Metadata"
+     },
+     "minCpuPlatform": {
+      "type": "string"
+     },
+     "networkInterfaces": {
+      "items": {
+       "$ref": "#/components/schemas/NetworkInterface"
+      },
+      "type": "array"
+     },
+     "networkPerformanceConfig": {
+      "$ref": "#/components/schemas/NetworkPerformanceConfig"
+     },
+     "privateIpv6GoogleAccess": {
+      "enum": [
+       "ENABLE_BIDIRECTIONAL_ACCESS_TO_GOOGLE",
+       "ENABLE_OUTBOUND_VM_ACCESS_TO_GOOGLE",
+       "INHERIT_FROM_SUBNETWORK"
+      ],
+      "type": "string"
+     },
+     "reservationAffinity": {
+      "$ref": "#/components/schemas/ReservationAffinity"
+     },
+     "resourceManagerTags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "resourcePolicies": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "scheduling": {
+      "$ref": "#/components/schemas/Scheduling"
+     },
+     "serviceAccounts": {
+      "items": {
+       "$ref": "#/components/schemas/ServiceAccount"
+      },
+      "type": "array"
+     },
+     "shieldedInstanceConfig": {
+      "$ref": "#/components/schemas/ShieldedInstanceConfig"
+     },
+     "tags": {
+      "$ref": "#/components/schemas/Tags"
+     },
+     "workloadIdentityConfig": {
+      "$ref": "#/components/schemas/WorkloadIdentityConfig"
+     }
+    },
+    "type": "object"
+   },
+   "InstanceTemplate": {
+    "additionalProperties": false,
+    "properties": {
+     "creationTimestamp": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "id": {
+      "format": "uint64",
+      "readOnly": true,
+      "type": "string"
+     },
+     "kind": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/InstanceProperties"
+     },
+     "region": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "selfLink": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "sourceInstance": {
+      "type": "string"
+     },
+     "sourceInstanceParams": {
+      "$ref": "#/components/schemas/SourceInstanceParams"
+     }
+    },
+    "type": "object"
+   },
+   "InstanceTemplateList": {
+    "additionalProperties": false,
+    "properties": {
+     "id": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/InstanceTemplate"
+      },
+      "type": "array"
+     },
+     "kind": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "nextPageToken": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "selfLink": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "warning": {
+      "additionalProperties": false,
+      "properties": {
+       "code": {
+        "enum": [
+         "CLEANUP_FAILED",
+         "DEPRECATED_RESOURCE_USED",
+         "DEPRECATED_TYPE_USED",
+         "DISK_SIZE_LARGER_THAN_IMAGE_SIZE",
+         "EXPERIMENTAL_TYPE_USED",
+         "EXTERNAL_API_WARNING",
+         "FIELD_VALUE_OVERRIDEN",
+         "INJECTED_KERNELS_DEPRECATED",
+         "INVALID_HEALTH_CHECK_FOR_DYNAMIC_WIEGHTED_LB",
+         "LARGE_DEPLOYMENT_WARNING",
+         "LIST_OVERHEAD_QUOTA_EXCEED",
+         "MISSING_TYPE_DEPENDENCY",
+         "NEXT_HOP_ADDRESS_NOT_ASSIGNED",
+         "NEXT_HOP_CANNOT_IP_FORWARD",
+         "NEXT_HOP_INSTANCE_HAS_NO_IPV6_INTERFACE",
+         "NEXT_HOP_INSTANCE_NOT_FOUND",
+         "NEXT_HOP_INSTANCE_NOT_ON_NETWORK",
+         "NEXT_HOP_NOT_RUNNING",
+         "NOT_CRITICAL_ERROR",
+         "NO_RESULTS_ON_PAGE",
+         "PARTIAL_SUCCESS",
+         "QUOTA_INFO_UNAVAILABLE",
+         "REQUIRED_TOS_AGREEMENT",
+         "RESOURCE_IN_USE_BY_OTHER_RESOURCE_WARNING",
+         "RESOURCE_NOT_DELETED",
+         "SCHEMA_VALIDATION_IGNORED",
+         "SINGLE_INSTANCE_PROPERTY_TEMPLATE",
+         "UNDECLARED_PROPERTIES",
+         "UNREACHABLE"
+        ],
+        "readOnly": true,
+        "type": "string"
+       },
+       "data": {
+        "items": {
+         "additionalProperties": false,
+         "properties": {
+          "key": {
+           "readOnly": true,
+           "type": "string"
+          },
+          "value": {
+           "readOnly": true,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        },
+        "readOnly": true,
+        "type": "array"
+       },
+       "message": {
+        "readOnly": true,
+        "type": "string"
+       }
+      },
+      "readOnly": true,
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "InstancesBulkInsertOperationMetadata": {
+    "additionalProperties": false,
+    "properties": {
+     "perLocationStatus": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/BulkInsertOperationStatus"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "LocalizedMessage": {
+    "additionalProperties": false,
+    "properties": {
+     "locale": {
+      "type": "string"
+     },
+     "message": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Metadata": {
+    "additionalProperties": false,
+    "properties": {
+     "fingerprint": {
+      "format": "byte",
+      "type": "string"
+     },
+     "items": {
+      "items": {
+       "additionalProperties": false,
+       "properties": {
+        "key": {
+         "type": "string"
+        },
+        "value": {
+         "type": "string"
+        }
+       },
+       "type": "object"
+      },
+      "type": "array"
+     },
+     "kind": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Network": {
+    "additionalProperties": false,
+    "properties": {
+     "IPv4Range": {
+      "type": "string"
+     },
+     "autoCreateSubnetworks": {
+      "type": "boolean"
+     },
+     "creationTimestamp": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "enableUlaInternalIpv6": {
+      "type": "boolean"
+     },
+     "firewallPolicy": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "gatewayIPv4": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "id": {
+      "format": "uint64",
+      "readOnly": true,
+      "type": "string"
+     },
+     "internalIpv6Range": {
+      "type": "string"
+     },
+     "kind": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "mtu": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "name": {
+      "type": "string"
+     },
+     "networkFirewallPolicyEnforcementOrder": {
+      "enum": [
+       "AFTER_CLASSIC_FIREWALL",
+       "BEFORE_CLASSIC_FIREWALL"
+      ],
+      "type": "string"
+     },
+     "networkProfile": {
+      "type": "string"
+     },
+     "params": {
+      "$ref": "#/components/schemas/NetworkParams"
+     },
+     "peerings": {
+      "items": {
+       "$ref": "#/components/schemas/NetworkPeering"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "routingConfig": {
+      "$ref": "#/components/schemas/NetworkRoutingConfig"
+     },
+     "selfLink": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "selfLinkWithId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "subnetworks": {
+      "items": {
+       "type": "string"
+      },
+      "readOnly": true,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "NetworkInterface": {
+    "additionalProperties": false,
+    "properties": {
+     "accessConfigs": {
+      "items": {
+       "$ref": "#/components/schemas/AccessConfig"
+      },
+      "type": "array"
+     },
+     "aliasIpRanges": {
+      "items": {
+       "$ref": "#/components/schemas/AliasIpRange"
+      },
+      "type": "array"
+     },
+     "aliasIpv6Ranges": {
+      "items": {
+       "$ref": "#/components/schemas/AliasIpRange"
+      },
+      "type": "array"
+     },
+     "enableVpcScopedDns": {
+      "type": "boolean"
+     },
+     "fingerprint": {
+      "format": "byte",
+      "type": "string"
+     },
+     "igmpQuery": {
+      "enum": [
+       "IGMP_QUERY_DISABLED",
+       "IGMP_QUERY_V2"
+      ],
+      "type": "string"
+     },
+     "internalIpv6PrefixLength": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "ipv6AccessConfigs": {
+      "items": {
+       "$ref": "#/components/schemas/AccessConfig"
+      },
+      "type": "array"
+     },
+     "ipv6AccessType": {
+      "enum": [
+       "EXTERNAL",
+       "INTERNAL"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "ipv6Address": {
+      "type": "string"
+     },
+     "kind": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "network": {
+      "type": "string"
+     },
+     "networkAttachment": {
+      "type": "string"
+     },
+     "networkIP": {
+      "type": "string"
+     },
+     "nicType": {
+      "enum": [
+       "GVNIC",
+       "IDPF",
+       "IRDMA",
+       "MRDMA",
+       "UNSPECIFIED_NIC_TYPE",
+       "VIRTIO_NET"
+      ],
+      "type": "string"
+     },
+     "parentNicName": {
+      "type": "string"
+     },
+     "queueCount": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "serviceClassId": {
+      "type": "string"
+     },
+     "stackType": {
+      "enum": [
+       "IPV4_IPV6",
+       "IPV4_ONLY",
+       "IPV6_ONLY"
+      ],
+      "type": "string"
+     },
+     "subnetwork": {
+      "type": "string"
+     },
+     "vlan": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "NetworkList": {
+    "additionalProperties": false,
+    "properties": {
+     "id": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/Network"
+      },
+      "type": "array"
+     },
+     "kind": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "nextPageToken": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "selfLink": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "warning": {
+      "additionalProperties": false,
+      "properties": {
+       "code": {
+        "enum": [
+         "CLEANUP_FAILED",
+         "DEPRECATED_RESOURCE_USED",
+         "DEPRECATED_TYPE_USED",
+         "DISK_SIZE_LARGER_THAN_IMAGE_SIZE",
+         "EXPERIMENTAL_TYPE_USED",
+         "EXTERNAL_API_WARNING",
+         "FIELD_VALUE_OVERRIDEN",
+         "INJECTED_KERNELS_DEPRECATED",
+         "INVALID_HEALTH_CHECK_FOR_DYNAMIC_WIEGHTED_LB",
+         "LARGE_DEPLOYMENT_WARNING",
+         "LIST_OVERHEAD_QUOTA_EXCEED",
+         "MISSING_TYPE_DEPENDENCY",
+         "NEXT_HOP_ADDRESS_NOT_ASSIGNED",
+         "NEXT_HOP_CANNOT_IP_FORWARD",
+         "NEXT_HOP_INSTANCE_HAS_NO_IPV6_INTERFACE",
+         "NEXT_HOP_INSTANCE_NOT_FOUND",
+         "NEXT_HOP_INSTANCE_NOT_ON_NETWORK",
+         "NEXT_HOP_NOT_RUNNING",
+         "NOT_CRITICAL_ERROR",
+         "NO_RESULTS_ON_PAGE",
+         "PARTIAL_SUCCESS",
+         "QUOTA_INFO_UNAVAILABLE",
+         "REQUIRED_TOS_AGREEMENT",
+         "RESOURCE_IN_USE_BY_OTHER_RESOURCE_WARNING",
+         "RESOURCE_NOT_DELETED",
+         "SCHEMA_VALIDATION_IGNORED",
+         "SINGLE_INSTANCE_PROPERTY_TEMPLATE",
+         "UNDECLARED_PROPERTIES",
+         "UNREACHABLE"
+        ],
+        "readOnly": true,
+        "type": "string"
+       },
+       "data": {
+        "items": {
+         "additionalProperties": false,
+         "properties": {
+          "key": {
+           "readOnly": true,
+           "type": "string"
+          },
+          "value": {
+           "readOnly": true,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        },
+        "readOnly": true,
+        "type": "array"
+       },
+       "message": {
+        "readOnly": true,
+        "type": "string"
+       }
+      },
+      "readOnly": true,
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "NetworkParams": {
+    "additionalProperties": false,
+    "properties": {
+     "resourceManagerTags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "NetworkPeering": {
+    "additionalProperties": false,
+    "properties": {
+     "autoCreateRoutes": {
+      "type": "boolean"
+     },
+     "connectionStatus": {
+      "$ref": "#/components/schemas/NetworkPeeringConnectionStatus"
+     },
+     "exchangeSubnetRoutes": {
+      "type": "boolean"
+     },
+     "exportCustomRoutes": {
+      "type": "boolean"
+     },
+     "exportSubnetRoutesWithPublicIp": {
+      "type": "boolean"
+     },
+     "importCustomRoutes": {
+      "type": "boolean"
+     },
+     "importSubnetRoutesWithPublicIp": {
+      "type": "boolean"
+     },
+     "name": {
+      "type": "string"
+     },
+     "network": {
+      "type": "string"
+     },
+     "peerMtu": {
+      "format": "int32",
+      "readOnly": true,
+      "type": "integer"
+     },
+     "stackType": {
+      "enum": [
+       "IPV4_IPV6",
+       "IPV4_ONLY"
+      ],
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "ACTIVE",
+       "INACTIVE"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "stateDetails": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "updateStrategy": {
+      "enum": [
+       "CONSENSUS",
+       "INDEPENDENT",
+       "UNSPECIFIED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NetworkPeeringConnectionStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "consensusState": {
+      "$ref": "#/components/schemas/NetworkPeeringConnectionStatusConsensusState"
+     },
+     "trafficConfiguration": {
+      "$ref": "#/components/schemas/NetworkPeeringConnectionStatusTrafficConfiguration"
+     },
+     "updateStrategy": {
+      "enum": [
+       "CONSENSUS",
+       "INDEPENDENT",
+       "UNSPECIFIED"
+      ],
+      "type": "string"
+     }
+    },
+    "readOnly": true,
+    "type": "object"
+   },
+   "NetworkPeeringConnectionStatusConsensusState": {
+    "additionalProperties": false,
+    "properties": {
+     "deleteStatus": {
+      "enum": [
+       "DELETE_ACKNOWLEDGED",
+       "DELETE_STATUS_UNSPECIFIED",
+       "LOCAL_CANCEL_REQUESTED",
+       "LOCAL_DELETE_REQUESTED",
+       "PEER_CANCEL_REQUESTED",
+       "PEER_DELETE_REQUESTED"
+      ],
+      "type": "string"
+     },
+     "updateStatus": {
+      "enum": [
+       "IN_SYNC",
+       "PENDING_LOCAL_ACKNOWLEDMENT",
+       "PENDING_PEER_ACKNOWLEDGEMENT",
+       "UPDATE_STATUS_UNSPECIFIED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NetworkPeeringConnectionStatusTrafficConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "exportCustomRoutesToPeer": {
+      "type": "boolean"
+     },
+     "exportSubnetRoutesWithPublicIpToPeer": {
+      "type": "boolean"
+     },
+     "importCustomRoutesFromPeer": {
+      "type": "boolean"
+     },
+     "importSubnetRoutesWithPublicIpFromPeer": {
+      "type": "boolean"
+     },
+     "stackType": {
+      "enum": [
+       "IPV4_IPV6",
+       "IPV4_ONLY"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NetworkPerformanceConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "totalEgressBandwidthTier": {
+      "enum": [
+       "DEFAULT",
+       "TIER_1"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NetworkRoutingConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "bgpAlwaysCompareMed": {
+      "type": "boolean"
+     },
+     "bgpBestPathSelectionMode": {
+      "enum": [
+       "LEGACY",
+       "STANDARD"
+      ],
+      "type": "string"
+     },
+     "bgpInterRegionCost": {
+      "enum": [
+       "ADD_COST_TO_MED",
+       "DEFAULT"
+      ],
+      "type": "string"
+     },
+     "effectiveBgpAlwaysCompareMed": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "effectiveBgpInterRegionCost": {
+      "enum": [
+       "ADD_COST_TO_MED",
+       "DEFAULT"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "routingMode": {
+      "enum": [
+       "GLOBAL",
+       "REGIONAL"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Operation": {
+    "additionalProperties": false,
+    "properties": {
+     "clientOperationId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "creationTimestamp": {
+      "type": "string"
+     },
+     "description": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "endTime": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "error": {
+      "additionalProperties": false,
+      "properties": {
+       "errors": {
+        "items": {
+         "additionalProperties": false,
+         "properties": {
+          "code": {
+           "readOnly": true,
+           "type": "string"
+          },
+          "errorDetails": {
+           "items": {
+            "additionalProperties": false,
+            "properties": {
+             "errorInfo": {
+              "$ref": "#/components/schemas/ErrorInfo"
+             },
+             "help": {
+              "$ref": "#/components/schemas/Help"
+             },
+             "localizedMessage": {
+              "$ref": "#/components/schemas/LocalizedMessage"
+             },
+             "quotaInfo": {
+              "$ref": "#/components/schemas/QuotaExceededInfo"
+             }
+            },
+            "type": "object"
+           },
+           "readOnly": true,
+           "type": "array"
+          },
+          "location": {
+           "readOnly": true,
+           "type": "string"
+          },
+          "message": {
+           "readOnly": true,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        },
+        "readOnly": true,
+        "type": "array"
+       }
+      },
+      "readOnly": true,
+      "type": "object"
+     },
+     "getVersionOperationMetadata": {
+      "$ref": "#/components/schemas/GetVersionOperationMetadata"
+     },
+     "httpErrorMessage": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "httpErrorStatusCode": {
+      "format": "int32",
+      "readOnly": true,
+      "type": "integer"
+     },
+     "id": {
+      "format": "uint64",
+      "readOnly": true,
+      "type": "string"
+     },
+     "insertTime": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "instancesBulkInsertOperationMetadata": {
+      "$ref": "#/components/schemas/InstancesBulkInsertOperationMetadata"
+     },
+     "kind": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "operationGroupId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "operationType": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "progress": {
+      "format": "int32",
+      "readOnly": true,
+      "type": "integer"
+     },
+     "region": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "selfLink": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "setCommonInstanceMetadataOperationMetadata": {
+      "$ref": "#/components/schemas/SetCommonInstanceMetadataOperationMetadata"
+     },
+     "startTime": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "DONE",
+       "PENDING",
+       "RUNNING"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "statusMessage": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "targetId": {
+      "format": "uint64",
+      "readOnly": true,
+      "type": "string"
+     },
+     "targetLink": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "user": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "warnings": {
+      "items": {
+       "additionalProperties": false,
+       "properties": {
+        "code": {
+         "enum": [
+          "CLEANUP_FAILED",
+          "DEPRECATED_RESOURCE_USED",
+          "DEPRECATED_TYPE_USED",
+          "DISK_SIZE_LARGER_THAN_IMAGE_SIZE",
+          "EXPERIMENTAL_TYPE_USED",
+          "EXTERNAL_API_WARNING",
+          "FIELD_VALUE_OVERRIDEN",
+          "INJECTED_KERNELS_DEPRECATED",
+          "INVALID_HEALTH_CHECK_FOR_DYNAMIC_WIEGHTED_LB",
+          "LARGE_DEPLOYMENT_WARNING",
+          "LIST_OVERHEAD_QUOTA_EXCEED",
+          "MISSING_TYPE_DEPENDENCY",
+          "NEXT_HOP_ADDRESS_NOT_ASSIGNED",
+          "NEXT_HOP_CANNOT_IP_FORWARD",
+          "NEXT_HOP_INSTANCE_HAS_NO_IPV6_INTERFACE",
+          "NEXT_HOP_INSTANCE_NOT_FOUND",
+          "NEXT_HOP_INSTANCE_NOT_ON_NETWORK",
+          "NEXT_HOP_NOT_RUNNING",
+          "NOT_CRITICAL_ERROR",
+          "NO_RESULTS_ON_PAGE",
+          "PARTIAL_SUCCESS",
+          "QUOTA_INFO_UNAVAILABLE",
+          "REQUIRED_TOS_AGREEMENT",
+          "RESOURCE_IN_USE_BY_OTHER_RESOURCE_WARNING",
+          "RESOURCE_NOT_DELETED",
+          "SCHEMA_VALIDATION_IGNORED",
+          "SINGLE_INSTANCE_PROPERTY_TEMPLATE",
+          "UNDECLARED_PROPERTIES",
+          "UNREACHABLE"
+         ],
+         "readOnly": true,
+         "type": "string"
+        },
+        "data": {
+         "items": {
+          "additionalProperties": false,
+          "properties": {
+           "key": {
+            "readOnly": true,
+            "type": "string"
+           },
+           "value": {
+            "readOnly": true,
+            "type": "string"
+           }
+          },
+          "type": "object"
+         },
+         "readOnly": true,
+         "type": "array"
+        },
+        "message": {
+         "readOnly": true,
+         "type": "string"
+        }
+       },
+       "type": "object"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "zone": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "OperationList": {
+    "additionalProperties": false,
+    "properties": {
+     "id": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/Operation"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "kind": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "nextPageToken": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "selfLink": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "warning": {
+      "additionalProperties": false,
+      "properties": {
+       "code": {
+        "enum": [
+         "CLEANUP_FAILED",
+         "DEPRECATED_RESOURCE_USED",
+         "DEPRECATED_TYPE_USED",
+         "DISK_SIZE_LARGER_THAN_IMAGE_SIZE",
+         "EXPERIMENTAL_TYPE_USED",
+         "EXTERNAL_API_WARNING",
+         "FIELD_VALUE_OVERRIDEN",
+         "INJECTED_KERNELS_DEPRECATED",
+         "INVALID_HEALTH_CHECK_FOR_DYNAMIC_WIEGHTED_LB",
+         "LARGE_DEPLOYMENT_WARNING",
+         "LIST_OVERHEAD_QUOTA_EXCEED",
+         "MISSING_TYPE_DEPENDENCY",
+         "NEXT_HOP_ADDRESS_NOT_ASSIGNED",
+         "NEXT_HOP_CANNOT_IP_FORWARD",
+         "NEXT_HOP_INSTANCE_HAS_NO_IPV6_INTERFACE",
+         "NEXT_HOP_INSTANCE_NOT_FOUND",
+         "NEXT_HOP_INSTANCE_NOT_ON_NETWORK",
+         "NEXT_HOP_NOT_RUNNING",
+         "NOT_CRITICAL_ERROR",
+         "NO_RESULTS_ON_PAGE",
+         "PARTIAL_SUCCESS",
+         "QUOTA_INFO_UNAVAILABLE",
+         "REQUIRED_TOS_AGREEMENT",
+         "RESOURCE_IN_USE_BY_OTHER_RESOURCE_WARNING",
+         "RESOURCE_NOT_DELETED",
+         "SCHEMA_VALIDATION_IGNORED",
+         "SINGLE_INSTANCE_PROPERTY_TEMPLATE",
+         "UNDECLARED_PROPERTIES",
+         "UNREACHABLE"
+        ],
+        "readOnly": true,
+        "type": "string"
+       },
+       "data": {
+        "items": {
+         "additionalProperties": false,
+         "properties": {
+          "key": {
+           "readOnly": true,
+           "type": "string"
+          },
+          "value": {
+           "readOnly": true,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        },
+        "readOnly": true,
+        "type": "array"
+       },
+       "message": {
+        "readOnly": true,
+        "type": "string"
+       }
+      },
+      "readOnly": true,
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "QuotaExceededInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "dimensions": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "futureLimit": {
+      "format": "double",
+      "type": "number"
+     },
+     "limit": {
+      "format": "double",
+      "type": "number"
+     },
+     "limitName": {
+      "type": "string"
+     },
+     "metricName": {
+      "type": "string"
+     },
+     "rolloutStatus": {
+      "enum": [
+       "IN_PROGRESS",
+       "ROLLOUT_STATUS_UNSPECIFIED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ReservationAffinity": {
+    "additionalProperties": false,
+    "properties": {
+     "consumeReservationType": {
+      "enum": [
+       "ANY_RESERVATION",
+       "NO_RESERVATION",
+       "SPECIFIC_RESERVATION",
+       "UNSPECIFIED"
+      ],
+      "type": "string"
+     },
+     "key": {
+      "type": "string"
+     },
+     "values": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Route": {
+    "additionalProperties": false,
+    "properties": {
+     "asPaths": {
+      "items": {
+       "$ref": "#/components/schemas/RouteAsPath"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "creationTimestamp": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "destRange": {
+      "type": "string"
+     },
+     "id": {
+      "format": "uint64",
+      "readOnly": true,
+      "type": "string"
+     },
+     "kind": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "network": {
+      "type": "string"
+     },
+     "nextHopGateway": {
+      "type": "string"
+     },
+     "nextHopHub": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "nextHopIlb": {
+      "type": "string"
+     },
+     "nextHopInstance": {
+      "type": "string"
+     },
+     "nextHopInterRegionCost": {
+      "format": "uint32",
+      "readOnly": true,
+      "type": "integer"
+     },
+     "nextHopInterconnectAttachment": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "nextHopIp": {
+      "type": "string"
+     },
+     "nextHopMed": {
+      "format": "uint32",
+      "readOnly": true,
+      "type": "integer"
+     },
+     "nextHopNetwork": {
+      "type": "string"
+     },
+     "nextHopOrigin": {
+      "enum": [
+       "EGP",
+       "IGP",
+       "INCOMPLETE"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "nextHopPeering": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "nextHopVpnTunnel": {
+      "type": "string"
+     },
+     "params": {
+      "$ref": "#/components/schemas/RouteParams"
+     },
+     "priority": {
+      "format": "uint32",
+      "type": "integer"
+     },
+     "routeStatus": {
+      "enum": [
+       "ACTIVE",
+       "DROPPED",
+       "INACTIVE",
+       "PENDING"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "routeType": {
+      "enum": [
+       "BGP",
+       "STATIC",
+       "SUBNET",
+       "TRANSIT"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "selfLink": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "tags": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "warnings": {
+      "items": {
+       "additionalProperties": false,
+       "properties": {
+        "code": {
+         "enum": [
+          "CLEANUP_FAILED",
+          "DEPRECATED_RESOURCE_USED",
+          "DEPRECATED_TYPE_USED",
+          "DISK_SIZE_LARGER_THAN_IMAGE_SIZE",
+          "EXPERIMENTAL_TYPE_USED",
+          "EXTERNAL_API_WARNING",
+          "FIELD_VALUE_OVERRIDEN",
+          "INJECTED_KERNELS_DEPRECATED",
+          "INVALID_HEALTH_CHECK_FOR_DYNAMIC_WIEGHTED_LB",
+          "LARGE_DEPLOYMENT_WARNING",
+          "LIST_OVERHEAD_QUOTA_EXCEED",
+          "MISSING_TYPE_DEPENDENCY",
+          "NEXT_HOP_ADDRESS_NOT_ASSIGNED",
+          "NEXT_HOP_CANNOT_IP_FORWARD",
+          "NEXT_HOP_INSTANCE_HAS_NO_IPV6_INTERFACE",
+          "NEXT_HOP_INSTANCE_NOT_FOUND",
+          "NEXT_HOP_INSTANCE_NOT_ON_NETWORK",
+          "NEXT_HOP_NOT_RUNNING",
+          "NOT_CRITICAL_ERROR",
+          "NO_RESULTS_ON_PAGE",
+          "PARTIAL_SUCCESS",
+          "QUOTA_INFO_UNAVAILABLE",
+          "REQUIRED_TOS_AGREEMENT",
+          "RESOURCE_IN_USE_BY_OTHER_RESOURCE_WARNING",
+          "RESOURCE_NOT_DELETED",
+          "SCHEMA_VALIDATION_IGNORED",
+          "SINGLE_INSTANCE_PROPERTY_TEMPLATE",
+          "UNDECLARED_PROPERTIES",
+          "UNREACHABLE"
+         ],
+         "readOnly": true,
+         "type": "string"
+        },
+        "data": {
+         "items": {
+          "additionalProperties": false,
+          "properties": {
+           "key": {
+            "readOnly": true,
+            "type": "string"
+           },
+           "value": {
+            "readOnly": true,
+            "type": "string"
+           }
+          },
+          "type": "object"
+         },
+         "readOnly": true,
+         "type": "array"
+        },
+        "message": {
+         "readOnly": true,
+         "type": "string"
+        }
+       },
+       "type": "object"
+      },
+      "readOnly": true,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "RouteAsPath": {
+    "additionalProperties": false,
+    "properties": {
+     "asLists": {
+      "items": {
+       "format": "uint32",
+       "type": "integer"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "pathSegmentType": {
+      "enum": [
+       "AS_CONFED_SEQUENCE",
+       "AS_CONFED_SET",
+       "AS_SEQUENCE",
+       "AS_SET"
+      ],
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "RouteList": {
+    "additionalProperties": false,
+    "properties": {
+     "id": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/Route"
+      },
+      "type": "array"
+     },
+     "kind": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "nextPageToken": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "selfLink": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "warning": {
+      "additionalProperties": false,
+      "properties": {
+       "code": {
+        "enum": [
+         "CLEANUP_FAILED",
+         "DEPRECATED_RESOURCE_USED",
+         "DEPRECATED_TYPE_USED",
+         "DISK_SIZE_LARGER_THAN_IMAGE_SIZE",
+         "EXPERIMENTAL_TYPE_USED",
+         "EXTERNAL_API_WARNING",
+         "FIELD_VALUE_OVERRIDEN",
+         "INJECTED_KERNELS_DEPRECATED",
+         "INVALID_HEALTH_CHECK_FOR_DYNAMIC_WIEGHTED_LB",
+         "LARGE_DEPLOYMENT_WARNING",
+         "LIST_OVERHEAD_QUOTA_EXCEED",
+         "MISSING_TYPE_DEPENDENCY",
+         "NEXT_HOP_ADDRESS_NOT_ASSIGNED",
+         "NEXT_HOP_CANNOT_IP_FORWARD",
+         "NEXT_HOP_INSTANCE_HAS_NO_IPV6_INTERFACE",
+         "NEXT_HOP_INSTANCE_NOT_FOUND",
+         "NEXT_HOP_INSTANCE_NOT_ON_NETWORK",
+         "NEXT_HOP_NOT_RUNNING",
+         "NOT_CRITICAL_ERROR",
+         "NO_RESULTS_ON_PAGE",
+         "PARTIAL_SUCCESS",
+         "QUOTA_INFO_UNAVAILABLE",
+         "REQUIRED_TOS_AGREEMENT",
+         "RESOURCE_IN_USE_BY_OTHER_RESOURCE_WARNING",
+         "RESOURCE_NOT_DELETED",
+         "SCHEMA_VALIDATION_IGNORED",
+         "SINGLE_INSTANCE_PROPERTY_TEMPLATE",
+         "UNDECLARED_PROPERTIES",
+         "UNREACHABLE"
+        ],
+        "readOnly": true,
+        "type": "string"
+       },
+       "data": {
+        "items": {
+         "additionalProperties": false,
+         "properties": {
+          "key": {
+           "readOnly": true,
+           "type": "string"
+          },
+          "value": {
+           "readOnly": true,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        },
+        "readOnly": true,
+        "type": "array"
+       },
+       "message": {
+        "readOnly": true,
+        "type": "string"
+       }
+      },
+      "readOnly": true,
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "RouteParams": {
+    "additionalProperties": false,
+    "properties": {
+     "resourceManagerTags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "Scheduling": {
+    "additionalProperties": false,
+    "properties": {
+     "automaticRestart": {
+      "type": "boolean"
+     },
+     "availabilityDomain": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "gracefulShutdown": {
+      "$ref": "#/components/schemas/SchedulingGracefulShutdown"
+     },
+     "hostErrorTimeoutSeconds": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "instanceTerminationAction": {
+      "enum": [
+       "DELETE",
+       "INSTANCE_TERMINATION_ACTION_UNSPECIFIED",
+       "STOP"
+      ],
+      "type": "string"
+     },
+     "localSsdRecoveryTimeout": {
+      "$ref": "#/components/schemas/Duration"
+     },
+     "locationHint": {
+      "type": "string"
+     },
+     "maxRunDuration": {
+      "$ref": "#/components/schemas/Duration"
+     },
+     "minNodeCpus": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "nodeAffinities": {
+      "items": {
+       "$ref": "#/components/schemas/SchedulingNodeAffinity"
+      },
+      "type": "array"
+     },
+     "onHostMaintenance": {
+      "enum": [
+       "MIGRATE",
+       "TERMINATE"
+      ],
+      "type": "string"
+     },
+     "onInstanceStopAction": {
+      "$ref": "#/components/schemas/SchedulingOnInstanceStopAction"
+     },
+     "preemptible": {
+      "type": "boolean"
+     },
+     "preemptionNoticeDuration": {
+      "$ref": "#/components/schemas/Duration"
+     },
+     "provisioningModel": {
+      "enum": [
+       "FLEX_START",
+       "RESERVATION_BOUND",
+       "SPOT",
+       "STANDARD"
+      ],
+      "type": "string"
+     },
+     "skipGuestOsShutdown": {
+      "type": "boolean"
+     },
+     "terminationTime": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SchedulingGracefulShutdown": {
+    "additionalProperties": false,
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     },
+     "maxDuration": {
+      "$ref": "#/components/schemas/Duration"
+     }
+    },
+    "type": "object"
+   },
+   "SchedulingNodeAffinity": {
+    "additionalProperties": false,
+    "properties": {
+     "key": {
+      "type": "string"
+     },
+     "operator": {
+      "enum": [
+       "IN",
+       "NOT_IN",
+       "OPERATOR_UNSPECIFIED"
+      ],
+      "type": "string"
+     },
+     "values": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "SchedulingOnInstanceStopAction": {
+    "additionalProperties": false,
+    "properties": {
+     "discardLocalSsd": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "ServiceAccount": {
+    "additionalProperties": false,
+    "properties": {
+     "email": {
+      "type": "string"
+     },
+     "scopes": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "SetCommonInstanceMetadataOperationMetadata": {
+    "additionalProperties": false,
+    "properties": {
+     "clientOperationId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "perLocationOperations": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/SetCommonInstanceMetadataOperationMetadataPerLocationOperationInfo"
+      },
+      "readOnly": true,
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "SetCommonInstanceMetadataOperationMetadataPerLocationOperationInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "error": {
+      "$ref": "#/components/schemas/Status"
+     },
+     "state": {
+      "enum": [
+       "ABANDONED",
+       "DONE",
+       "FAILED",
+       "PROPAGATED",
+       "PROPAGATING",
+       "UNSPECIFIED"
+      ],
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ShieldedInstanceConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "enableIntegrityMonitoring": {
+      "type": "boolean"
+     },
+     "enableSecureBoot": {
+      "type": "boolean"
+     },
+     "enableVtpm": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "Snapshot": {
+    "additionalProperties": false,
+    "properties": {
+     "architecture": {
+      "enum": [
+       "ARCHITECTURE_UNSPECIFIED",
+       "ARM64",
+       "X86_64"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "autoCreated": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "chainName": {
+      "type": "string"
+     },
+     "creationSizeBytes": {
+      "format": "int64",
+      "readOnly": true,
+      "type": "string"
+     },
+     "creationTimestamp": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "diskSizeGb": {
+      "format": "int64",
+      "readOnly": true,
+      "type": "string"
+     },
+     "downloadBytes": {
+      "format": "int64",
+      "readOnly": true,
+      "type": "string"
+     },
+     "enableConfidentialCompute": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "guestFlush": {
+      "type": "boolean"
+     },
+     "guestOsFeatures": {
+      "items": {
+       "$ref": "#/components/schemas/GuestOsFeature"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "id": {
+      "format": "uint64",
+      "readOnly": true,
+      "type": "string"
+     },
+     "kind": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "labelFingerprint": {
+      "format": "byte",
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "licenseCodes": {
+      "items": {
+       "format": "int64",
+       "type": "string"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "licenses": {
+      "items": {
+       "type": "string"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "locationHint": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "params": {
+      "$ref": "#/components/schemas/SnapshotParams"
+     },
+     "region": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "satisfiesPzi": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "satisfiesPzs": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "selfLink": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "snapshotEncryptionKey": {
+      "$ref": "#/components/schemas/CustomerEncryptionKey"
+     },
+     "snapshotGroupId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "snapshotGroupName": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "snapshotType": {
+      "enum": [
+       "ARCHIVE",
+       "STANDARD"
+      ],
+      "type": "string"
+     },
+     "sourceDisk": {
+      "type": "string"
+     },
+     "sourceDiskEncryptionKey": {
+      "$ref": "#/components/schemas/CustomerEncryptionKey"
+     },
+     "sourceDiskForRecoveryCheckpoint": {
+      "type": "string"
+     },
+     "sourceDiskId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "sourceInstantSnapshot": {
+      "type": "string"
+     },
+     "sourceInstantSnapshotEncryptionKey": {
+      "$ref": "#/components/schemas/CustomerEncryptionKey"
+     },
+     "sourceInstantSnapshotId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "sourceSnapshotSchedulePolicy": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "sourceSnapshotSchedulePolicyId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "CREATING",
+       "DELETING",
+       "FAILED",
+       "READY",
+       "UPLOADING"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "storageBytes": {
+      "format": "int64",
+      "readOnly": true,
+      "type": "string"
+     },
+     "storageBytesStatus": {
+      "enum": [
+       "UPDATING",
+       "UP_TO_DATE"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "storageLocations": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "SnapshotList": {
+    "additionalProperties": false,
+    "properties": {
+     "id": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/Snapshot"
+      },
+      "type": "array"
+     },
+     "kind": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "nextPageToken": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "selfLink": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "warning": {
+      "additionalProperties": false,
+      "properties": {
+       "code": {
+        "enum": [
+         "CLEANUP_FAILED",
+         "DEPRECATED_RESOURCE_USED",
+         "DEPRECATED_TYPE_USED",
+         "DISK_SIZE_LARGER_THAN_IMAGE_SIZE",
+         "EXPERIMENTAL_TYPE_USED",
+         "EXTERNAL_API_WARNING",
+         "FIELD_VALUE_OVERRIDEN",
+         "INJECTED_KERNELS_DEPRECATED",
+         "INVALID_HEALTH_CHECK_FOR_DYNAMIC_WIEGHTED_LB",
+         "LARGE_DEPLOYMENT_WARNING",
+         "LIST_OVERHEAD_QUOTA_EXCEED",
+         "MISSING_TYPE_DEPENDENCY",
+         "NEXT_HOP_ADDRESS_NOT_ASSIGNED",
+         "NEXT_HOP_CANNOT_IP_FORWARD",
+         "NEXT_HOP_INSTANCE_HAS_NO_IPV6_INTERFACE",
+         "NEXT_HOP_INSTANCE_NOT_FOUND",
+         "NEXT_HOP_INSTANCE_NOT_ON_NETWORK",
+         "NEXT_HOP_NOT_RUNNING",
+         "NOT_CRITICAL_ERROR",
+         "NO_RESULTS_ON_PAGE",
+         "PARTIAL_SUCCESS",
+         "QUOTA_INFO_UNAVAILABLE",
+         "REQUIRED_TOS_AGREEMENT",
+         "RESOURCE_IN_USE_BY_OTHER_RESOURCE_WARNING",
+         "RESOURCE_NOT_DELETED",
+         "SCHEMA_VALIDATION_IGNORED",
+         "SINGLE_INSTANCE_PROPERTY_TEMPLATE",
+         "UNDECLARED_PROPERTIES",
+         "UNREACHABLE"
+        ],
+        "readOnly": true,
+        "type": "string"
+       },
+       "data": {
+        "items": {
+         "additionalProperties": false,
+         "properties": {
+          "key": {
+           "readOnly": true,
+           "type": "string"
+          },
+          "value": {
+           "readOnly": true,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        },
+        "readOnly": true,
+        "type": "array"
+       },
+       "message": {
+        "readOnly": true,
+        "type": "string"
+       }
+      },
+      "readOnly": true,
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "SnapshotParams": {
+    "additionalProperties": false,
+    "properties": {
+     "resourceManagerTags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "SourceInstanceParams": {
+    "additionalProperties": false,
+    "properties": {
+     "diskConfigs": {
+      "items": {
+       "$ref": "#/components/schemas/DiskInstantiationConfig"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Status": {
+    "additionalProperties": false,
+    "properties": {
+     "code": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "details": {
+      "items": {
+       "additionalProperties": {
+        "description": "Any JSON value"
+       },
+       "type": "object"
+      },
+      "type": "array"
+     },
+     "message": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Subnetwork": {
+    "additionalProperties": false,
+    "properties": {
+     "allowSubnetCidrRoutesOverlap": {
+      "type": "boolean"
+     },
+     "creationTimestamp": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "enableFlowLogs": {
+      "type": "boolean"
+     },
+     "externalIpv6Prefix": {
+      "type": "string"
+     },
+     "fingerprint": {
+      "format": "byte",
+      "type": "string"
+     },
+     "gatewayAddress": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "id": {
+      "format": "uint64",
+      "readOnly": true,
+      "type": "string"
+     },
+     "internalIpv6Prefix": {
+      "type": "string"
+     },
+     "ipCidrRange": {
+      "type": "string"
+     },
+     "ipCollection": {
+      "type": "string"
+     },
+     "ipv6AccessType": {
+      "enum": [
+       "EXTERNAL",
+       "INTERNAL"
+      ],
+      "type": "string"
+     },
+     "ipv6CidrRange": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "ipv6GceEndpoint": {
+      "enum": [
+       "VM_AND_FR",
+       "VM_ONLY"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "kind": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "logConfig": {
+      "$ref": "#/components/schemas/SubnetworkLogConfig"
+     },
+     "name": {
+      "type": "string"
+     },
+     "network": {
+      "type": "string"
+     },
+     "params": {
+      "$ref": "#/components/schemas/SubnetworkParams"
+     },
+     "privateIpGoogleAccess": {
+      "type": "boolean"
+     },
+     "privateIpv6GoogleAccess": {
+      "enum": [
+       "DISABLE_GOOGLE_ACCESS",
+       "ENABLE_BIDIRECTIONAL_ACCESS_TO_GOOGLE",
+       "ENABLE_OUTBOUND_VM_ACCESS_TO_GOOGLE"
+      ],
+      "type": "string"
+     },
+     "purpose": {
+      "enum": [
+       "GLOBAL_MANAGED_PROXY",
+       "INTERNAL_HTTPS_LOAD_BALANCER",
+       "PEER_MIGRATION",
+       "PRIVATE",
+       "PRIVATE_NAT",
+       "PRIVATE_RFC_1918",
+       "PRIVATE_SERVICE_CONNECT",
+       "REGIONAL_MANAGED_PROXY"
+      ],
+      "type": "string"
+     },
+     "region": {
+      "type": "string"
+     },
+     "reservedInternalRange": {
+      "type": "string"
+     },
+     "resolveSubnetMask": {
+      "enum": [
+       "ARP_ALL_RANGES",
+       "ARP_PRIMARY_RANGE"
+      ],
+      "type": "string"
+     },
+     "role": {
+      "enum": [
+       "ACTIVE",
+       "BACKUP"
+      ],
+      "type": "string"
+     },
+     "secondaryIpRanges": {
+      "items": {
+       "$ref": "#/components/schemas/SubnetworkSecondaryRange"
+      },
+      "type": "array"
+     },
+     "selfLink": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "stackType": {
+      "enum": [
+       "IPV4_IPV6",
+       "IPV4_ONLY",
+       "IPV6_ONLY"
+      ],
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "DRAINING",
+       "READY"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "systemReservedExternalIpv6Ranges": {
+      "items": {
+       "type": "string"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "systemReservedInternalIpv6Ranges": {
+      "items": {
+       "type": "string"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "utilizationDetails": {
+      "$ref": "#/components/schemas/SubnetworkUtilizationDetails"
+     }
+    },
+    "type": "object"
+   },
+   "SubnetworkList": {
+    "additionalProperties": false,
+    "properties": {
+     "id": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/Subnetwork"
+      },
+      "type": "array"
+     },
+     "kind": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "nextPageToken": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "selfLink": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "warning": {
+      "additionalProperties": false,
+      "properties": {
+       "code": {
+        "enum": [
+         "CLEANUP_FAILED",
+         "DEPRECATED_RESOURCE_USED",
+         "DEPRECATED_TYPE_USED",
+         "DISK_SIZE_LARGER_THAN_IMAGE_SIZE",
+         "EXPERIMENTAL_TYPE_USED",
+         "EXTERNAL_API_WARNING",
+         "FIELD_VALUE_OVERRIDEN",
+         "INJECTED_KERNELS_DEPRECATED",
+         "INVALID_HEALTH_CHECK_FOR_DYNAMIC_WIEGHTED_LB",
+         "LARGE_DEPLOYMENT_WARNING",
+         "LIST_OVERHEAD_QUOTA_EXCEED",
+         "MISSING_TYPE_DEPENDENCY",
+         "NEXT_HOP_ADDRESS_NOT_ASSIGNED",
+         "NEXT_HOP_CANNOT_IP_FORWARD",
+         "NEXT_HOP_INSTANCE_HAS_NO_IPV6_INTERFACE",
+         "NEXT_HOP_INSTANCE_NOT_FOUND",
+         "NEXT_HOP_INSTANCE_NOT_ON_NETWORK",
+         "NEXT_HOP_NOT_RUNNING",
+         "NOT_CRITICAL_ERROR",
+         "NO_RESULTS_ON_PAGE",
+         "PARTIAL_SUCCESS",
+         "QUOTA_INFO_UNAVAILABLE",
+         "REQUIRED_TOS_AGREEMENT",
+         "RESOURCE_IN_USE_BY_OTHER_RESOURCE_WARNING",
+         "RESOURCE_NOT_DELETED",
+         "SCHEMA_VALIDATION_IGNORED",
+         "SINGLE_INSTANCE_PROPERTY_TEMPLATE",
+         "UNDECLARED_PROPERTIES",
+         "UNREACHABLE"
+        ],
+        "readOnly": true,
+        "type": "string"
+       },
+       "data": {
+        "items": {
+         "additionalProperties": false,
+         "properties": {
+          "key": {
+           "readOnly": true,
+           "type": "string"
+          },
+          "value": {
+           "readOnly": true,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        },
+        "readOnly": true,
+        "type": "array"
+       },
+       "message": {
+        "readOnly": true,
+        "type": "string"
+       }
+      },
+      "readOnly": true,
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "SubnetworkLogConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "aggregationInterval": {
+      "enum": [
+       "INTERVAL_10_MIN",
+       "INTERVAL_15_MIN",
+       "INTERVAL_1_MIN",
+       "INTERVAL_30_SEC",
+       "INTERVAL_5_MIN",
+       "INTERVAL_5_SEC"
+      ],
+      "type": "string"
+     },
+     "enable": {
+      "type": "boolean"
+     },
+     "filterExpr": {
+      "type": "string"
+     },
+     "flowSampling": {
+      "format": "float",
+      "type": "number"
+     },
+     "metadata": {
+      "enum": [
+       "CUSTOM_METADATA",
+       "EXCLUDE_ALL_METADATA",
+       "INCLUDE_ALL_METADATA"
+      ],
+      "type": "string"
+     },
+     "metadataFields": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "SubnetworkParams": {
+    "additionalProperties": false,
+    "properties": {
+     "resourceManagerTags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "SubnetworkSecondaryRange": {
+    "additionalProperties": false,
+    "properties": {
+     "ipCidrRange": {
+      "type": "string"
+     },
+     "ipCollection": {
+      "type": "string"
+     },
+     "ipVersion": {
+      "enum": [
+       "IPV4",
+       "IPV6",
+       "IP_VERSION_UNSPECIFIED"
+      ],
+      "type": "string"
+     },
+     "rangeName": {
+      "type": "string"
+     },
+     "reservedInternalRange": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SubnetworkUtilizationDetails": {
+    "additionalProperties": false,
+    "properties": {
+     "externalIpv6InstanceUtilization": {
+      "$ref": "#/components/schemas/SubnetworkUtilizationDetailsIPV6Utilization"
+     },
+     "externalIpv6LbUtilization": {
+      "$ref": "#/components/schemas/SubnetworkUtilizationDetailsIPV6Utilization"
+     },
+     "internalIpv6Utilization": {
+      "$ref": "#/components/schemas/SubnetworkUtilizationDetailsIPV6Utilization"
+     },
+     "ipv4Utilizations": {
+      "items": {
+       "$ref": "#/components/schemas/SubnetworkUtilizationDetailsIPV4Utilization"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "SubnetworkUtilizationDetailsIPV4Utilization": {
+    "additionalProperties": false,
+    "properties": {
+     "rangeName": {
+      "type": "string"
+     },
+     "totalAllocatedIp": {
+      "format": "int64",
+      "type": "string"
+     },
+     "totalFreeIp": {
+      "format": "int64",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SubnetworkUtilizationDetailsIPV6Utilization": {
+    "additionalProperties": false,
+    "properties": {
+     "totalAllocatedIp": {
+      "$ref": "#/components/schemas/Uint128"
+     },
+     "totalFreeIp": {
+      "$ref": "#/components/schemas/Uint128"
+     }
+    },
+    "type": "object"
+   },
+   "SubnetworksExpandIpCidrRangeRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ipCidrRange": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SubnetworksSetPrivateIpGoogleAccessRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "privateIpGoogleAccess": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "Tags": {
+    "additionalProperties": false,
+    "properties": {
+     "fingerprint": {
+      "format": "byte",
+      "type": "string"
+     },
+     "items": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Uint128": {
+    "additionalProperties": false,
+    "properties": {
+     "high": {
+      "format": "uint64",
+      "type": "string"
+     },
+     "low": {
+      "format": "uint64",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "WorkloadIdentityConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "identity": {
+      "type": "string"
+     },
+     "identityCertificateEnabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "ZoneSetLabelsRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "labelFingerprint": {
+      "format": "byte",
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Compute Engine API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Networks, subnetworks, firewall rules, routes, disks, snapshots and instance templates are configuration metadata: no packet is routed or filtered, no VM runs and no block storage exists. Only custom mode VPC networks are accepted (autoCreateSubnetworks=false); no default computeNetwork, default internet route or subnet route is created, and Network.subnetworks and peerings are not maintained. Disks and snapshots hold no data: sizes are recorded as given (blank disks default to 500 GB), a disk created from a source must state sizeGb, snapshots report storageBytes 0 and do not copy the source size, and customer-supplied encryption keys are refused. Instances are not simulated: instances.insert and every other instance method return UNIMPLEMENTED, because inserting an instance boots a VM; instance templates store the configuration only. References must name existing resources of this project; a network still used by a computeSubnetwork, firewall rule, route or instance template cannot be deleted, and subnetwork ranges may not overlap within a network. Operations complete synchronously with status DONE and remain readable through zoneOperations, regionOperations and globalOperations get, list and wait.",
+  "title": "Compute Engine (simulator catalog)",
+  "version": "v1"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/compute/v1/projects/{project}/global/firewalls": {
+   "get": {
+    "operationId": "compute.firewalls.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "returnPartialSuccess",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/FirewallList"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "firewalls.list",
+    "tags": [
+     "Compute Engine"
+    ]
+   },
+   "post": {
+    "operationId": "compute.firewalls.insert",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Firewall"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "firewalls.insert",
+    "tags": [
+     "Compute Engine"
+    ]
+   }
+  },
+  "/compute/v1/projects/{project}/global/firewalls/{firewall}": {
+   "delete": {
+    "operationId": "compute.firewalls.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "firewall",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "firewalls.delete",
+    "tags": [
+     "Compute Engine"
+    ]
+   },
+   "get": {
+    "operationId": "compute.firewalls.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "firewall",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Firewall"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "firewalls.get",
+    "tags": [
+     "Compute Engine"
+    ]
+   },
+   "patch": {
+    "operationId": "compute.firewalls.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "firewall",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Firewall"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "firewalls.patch",
+    "tags": [
+     "Compute Engine"
+    ]
+   }
+  },
+  "/compute/v1/projects/{project}/global/instanceTemplates": {
+   "get": {
+    "operationId": "compute.instanceTemplates.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "returnPartialSuccess",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/InstanceTemplateList"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "instanceTemplates.list",
+    "tags": [
+     "Compute Engine"
+    ]
+   },
+   "post": {
+    "operationId": "compute.instanceTemplates.insert",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/InstanceTemplate"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "instanceTemplates.insert",
+    "tags": [
+     "Compute Engine"
+    ]
+   }
+  },
+  "/compute/v1/projects/{project}/global/instanceTemplates/{instanceTemplate}": {
+   "delete": {
+    "operationId": "compute.instanceTemplates.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "instanceTemplate",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "instanceTemplates.delete",
+    "tags": [
+     "Compute Engine"
+    ]
+   },
+   "get": {
+    "operationId": "compute.instanceTemplates.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "instanceTemplate",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/InstanceTemplate"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "instanceTemplates.get",
+    "tags": [
+     "Compute Engine"
+    ]
+   }
+  },
+  "/compute/v1/projects/{project}/global/networks": {
+   "get": {
+    "operationId": "compute.networks.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "returnPartialSuccess",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/NetworkList"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "networks.list",
+    "tags": [
+     "Compute Engine"
+    ]
+   },
+   "post": {
+    "operationId": "compute.networks.insert",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Network"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "networks.insert",
+    "tags": [
+     "Compute Engine"
+    ]
+   }
+  },
+  "/compute/v1/projects/{project}/global/networks/{network}": {
+   "delete": {
+    "operationId": "compute.networks.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "network",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "networks.delete",
+    "tags": [
+     "Compute Engine"
+    ]
+   },
+   "get": {
+    "operationId": "compute.networks.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "network",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Network"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "networks.get",
+    "tags": [
+     "Compute Engine"
+    ]
+   },
+   "patch": {
+    "operationId": "compute.networks.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "network",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Network"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "networks.patch",
+    "tags": [
+     "Compute Engine"
+    ]
+   }
+  },
+  "/compute/v1/projects/{project}/global/operations": {
+   "get": {
+    "operationId": "compute.globalOperations.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "returnPartialSuccess",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/OperationList"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "globalOperations.list",
+    "tags": [
+     "Compute Engine"
+    ]
+   }
+  },
+  "/compute/v1/projects/{project}/global/operations/{operation}": {
+   "get": {
+    "operationId": "compute.globalOperations.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "operation",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "globalOperations.get",
+    "tags": [
+     "Compute Engine"
+    ]
+   }
+  },
+  "/compute/v1/projects/{project}/global/operations/{operation}/wait": {
+   "post": {
+    "operationId": "compute.globalOperations.wait",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "operation",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "globalOperations.wait",
+    "tags": [
+     "Compute Engine"
+    ]
+   }
+  },
+  "/compute/v1/projects/{project}/global/routes": {
+   "get": {
+    "operationId": "compute.routes.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "returnPartialSuccess",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RouteList"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "routes.list",
+    "tags": [
+     "Compute Engine"
+    ]
+   },
+   "post": {
+    "operationId": "compute.routes.insert",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Route"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "routes.insert",
+    "tags": [
+     "Compute Engine"
+    ]
+   }
+  },
+  "/compute/v1/projects/{project}/global/routes/{route}": {
+   "delete": {
+    "operationId": "compute.routes.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "route",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "routes.delete",
+    "tags": [
+     "Compute Engine"
+    ]
+   },
+   "get": {
+    "operationId": "compute.routes.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "route",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Route"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "routes.get",
+    "tags": [
+     "Compute Engine"
+    ]
+   }
+  },
+  "/compute/v1/projects/{project}/global/snapshots": {
+   "get": {
+    "operationId": "compute.snapshots.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "returnPartialSuccess",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SnapshotList"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "snapshots.list",
+    "tags": [
+     "Compute Engine"
+    ]
+   },
+   "post": {
+    "operationId": "compute.snapshots.insert",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Snapshot"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "snapshots.insert",
+    "tags": [
+     "Compute Engine"
+    ]
+   }
+  },
+  "/compute/v1/projects/{project}/global/snapshots/{resource}/setLabels": {
+   "post": {
+    "operationId": "compute.snapshots.setLabels",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resource",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/GlobalSetLabelsRequest"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "snapshots.setLabels",
+    "tags": [
+     "Compute Engine"
+    ]
+   }
+  },
+  "/compute/v1/projects/{project}/global/snapshots/{snapshot}": {
+   "delete": {
+    "operationId": "compute.snapshots.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "snapshot",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "snapshots.delete",
+    "tags": [
+     "Compute Engine"
+    ]
+   },
+   "get": {
+    "operationId": "compute.snapshots.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "snapshot",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Snapshot"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "snapshots.get",
+    "tags": [
+     "Compute Engine"
+    ]
+   }
+  },
+  "/compute/v1/projects/{project}/regions/{region}/operations": {
+   "get": {
+    "operationId": "compute.regionOperations.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "region",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "returnPartialSuccess",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/OperationList"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "regionOperations.list",
+    "tags": [
+     "Compute Engine"
+    ]
+   }
+  },
+  "/compute/v1/projects/{project}/regions/{region}/operations/{operation}": {
+   "get": {
+    "operationId": "compute.regionOperations.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "region",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "operation",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "regionOperations.get",
+    "tags": [
+     "Compute Engine"
+    ]
+   }
+  },
+  "/compute/v1/projects/{project}/regions/{region}/operations/{operation}/wait": {
+   "post": {
+    "operationId": "compute.regionOperations.wait",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "region",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "operation",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "regionOperations.wait",
+    "tags": [
+     "Compute Engine"
+    ]
+   }
+  },
+  "/compute/v1/projects/{project}/regions/{region}/subnetworks": {
+   "get": {
+    "operationId": "compute.subnetworks.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "region",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "returnPartialSuccess",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     },
+     {
+      "in": "query",
+      "name": "views",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SubnetworkList"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "subnetworks.list",
+    "tags": [
+     "Compute Engine"
+    ]
+   },
+   "post": {
+    "operationId": "compute.subnetworks.insert",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "region",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Subnetwork"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "subnetworks.insert",
+    "tags": [
+     "Compute Engine"
+    ]
+   }
+  },
+  "/compute/v1/projects/{project}/regions/{region}/subnetworks/{subnetwork}": {
+   "delete": {
+    "operationId": "compute.subnetworks.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "region",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subnetwork",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "subnetworks.delete",
+    "tags": [
+     "Compute Engine"
+    ]
+   },
+   "get": {
+    "operationId": "compute.subnetworks.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "region",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subnetwork",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "views",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Subnetwork"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "subnetworks.get",
+    "tags": [
+     "Compute Engine"
+    ]
+   },
+   "patch": {
+    "operationId": "compute.subnetworks.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "region",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subnetwork",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "drainTimeoutSeconds",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Subnetwork"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "subnetworks.patch",
+    "tags": [
+     "Compute Engine"
+    ]
+   }
+  },
+  "/compute/v1/projects/{project}/regions/{region}/subnetworks/{subnetwork}/expandIpCidrRange": {
+   "post": {
+    "operationId": "compute.subnetworks.expandIpCidrRange",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "region",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subnetwork",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SubnetworksExpandIpCidrRangeRequest"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "subnetworks.expandIpCidrRange",
+    "tags": [
+     "Compute Engine"
+    ]
+   }
+  },
+  "/compute/v1/projects/{project}/regions/{region}/subnetworks/{subnetwork}/setPrivateIpGoogleAccess": {
+   "post": {
+    "operationId": "compute.subnetworks.setPrivateIpGoogleAccess",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "region",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subnetwork",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SubnetworksSetPrivateIpGoogleAccessRequest"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "subnetworks.setPrivateIpGoogleAccess",
+    "tags": [
+     "Compute Engine"
+    ]
+   }
+  },
+  "/compute/v1/projects/{project}/zones/{zone}/disks": {
+   "get": {
+    "operationId": "compute.disks.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "zone",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "returnPartialSuccess",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DiskList"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "disks.list",
+    "tags": [
+     "Compute Engine"
+    ]
+   },
+   "post": {
+    "operationId": "compute.disks.insert",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "zone",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "sourceImage",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Disk"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "disks.insert",
+    "tags": [
+     "Compute Engine"
+    ]
+   }
+  },
+  "/compute/v1/projects/{project}/zones/{zone}/disks/{disk}": {
+   "delete": {
+    "operationId": "compute.disks.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "zone",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "disk",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "disks.delete",
+    "tags": [
+     "Compute Engine"
+    ]
+   },
+   "get": {
+    "operationId": "compute.disks.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "zone",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "disk",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Disk"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "disks.get",
+    "tags": [
+     "Compute Engine"
+    ]
+   }
+  },
+  "/compute/v1/projects/{project}/zones/{zone}/disks/{disk}/resize": {
+   "post": {
+    "operationId": "compute.disks.resize",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "zone",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "disk",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DisksResizeRequest"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "disks.resize",
+    "tags": [
+     "Compute Engine"
+    ]
+   }
+  },
+  "/compute/v1/projects/{project}/zones/{zone}/disks/{resource}/setLabels": {
+   "post": {
+    "operationId": "compute.disks.setLabels",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "zone",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resource",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ZoneSetLabelsRequest"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "disks.setLabels",
+    "tags": [
+     "Compute Engine"
+    ]
+   }
+  },
+  "/compute/v1/projects/{project}/zones/{zone}/operations": {
+   "get": {
+    "operationId": "compute.zoneOperations.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "zone",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "returnPartialSuccess",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/OperationList"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "zoneOperations.list",
+    "tags": [
+     "Compute Engine"
+    ]
+   }
+  },
+  "/compute/v1/projects/{project}/zones/{zone}/operations/{operation}": {
+   "get": {
+    "operationId": "compute.zoneOperations.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "zone",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "operation",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "zoneOperations.get",
+    "tags": [
+     "Compute Engine"
+    ]
+   }
+  },
+  "/compute/v1/projects/{project}/zones/{zone}/operations/{operation}/wait": {
+   "post": {
+    "operationId": "compute.zoneOperations.wait",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "project",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "zone",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "operation",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "zoneOperations.wait",
+    "tags": [
+     "Compute Engine"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/_simulator/providers/gcp/compute"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Compute Engine API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Networks, subnetworks, firewall rules, routes, disks, snapshots and instance templates are configuration metadata: no packet is routed or filtered, no VM runs and no block storage exists. Only custom mode VPC networks are accepted (autoCreateSubnetworks=false); no default computeNetwork, default internet route or subnet route is created, and Network.subnetworks and peerings are not maintained. Disks and snapshots hold no data: sizes are recorded as given (blank disks default to 500 GB), a disk created from a source must state sizeGb, snapshots report storageBytes 0 and do not copy the source size, and customer-supplied encryption keys are refused. Instances are not simulated: instances.insert and every other instance method return UNIMPLEMENTED, because inserting an instance boots a VM; instance templates store the configuration only. References must name existing resources of this project; a network still used by a computeSubnetwork, firewall rule, route or instance template cannot be deleted, and subnetwork ranges may not overlap within a network. Operations complete synchronously with status DONE and remain readable through zoneOperations, regionOperations and globalOperations get, list and wait.",
+   "name": "Compute Engine"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "google-api-python-client",
+  "version": "2.199.0",
+  "file": "googleapiclient/discovery_cache/documents/compute.v1.json",
+  "sha256": "452f7ab73a7e77964085f97bc659cbb963e340b9b9ba6329b5dc3b22c756036d",
+  "license": "Apache-2.0",
+  "revision": "20260807"
+ }
+}

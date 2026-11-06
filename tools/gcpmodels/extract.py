@@ -31,7 +31,7 @@ def flags(prop):
     text = (prop.get('description') or '').lstrip()
     out = {k: prop[k] for k in ('type', 'format', 'enum', '$ref', 'pattern', 'default') if k in prop}
     # AIP documents say "Output only."; Compute-style documents say "[Output Only]".
-    if prop.get('readOnly') or text.startswith('Output only') or text.startswith('[Output Only]'):
+    if prop.get('readOnly') or text.startswith('Output only') or text.lower().startswith('[output only]'):
         out['readOnly'] = True
     if text.startswith('Required') or '(Required)' in text[:40]:
         out['required'] = True

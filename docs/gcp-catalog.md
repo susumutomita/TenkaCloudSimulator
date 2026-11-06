@@ -21,6 +21,7 @@ Google Cloud call is executed or simulated.
 | API | Issue | Implemented methods | Bounds |
 | --- | --- | --- | --- |
 | AlloyDB for PostgreSQL (`alloydb.v1`) | #336 | `projects.locations.clusters.{create,get,list,patch,delete}`, `clusters.instances.{create,get,list,patch,delete}`, `clusters.users.{create,get,list,patch,delete}`, `operations.{get,list}` | Clusters, instances and users are configuration metadata. No PostgreSQL engine, endpoint, storage or backup exists, and instances report `READY` immediately. User passwords are refused and never stored. Deleting a cluster with children requires `force=true` |
+| Compute Engine (`compute.v1`): Virtual Private Cloud, Persistent Disk, instance templates | #371, #322, #332 | `networks.{insert,get,list,patch,delete}`, `subnetworks.{insert,get,list,patch,delete,expandIpCidrRange,setPrivateIpGoogleAccess}`, `firewalls.{insert,get,list,patch,delete}`, `routes.{insert,get,list,delete}`, `disks.{insert,get,list,delete,setLabels,resize}`, `snapshots.{insert,get,list,delete,setLabels}`, `instanceTemplates.{insert,get,list,delete}`, `globalOperations`/`regionOperations`/`zoneOperations` `.{get,list,wait}` | Configuration metadata only: no packet is routed or filtered, no VM runs and no block storage exists. Only custom mode networks (`autoCreateSubnetworks=false`); no default network or system routes are created. Subnetwork ranges may not overlap within a network, and a network in use cannot be deleted. Disks and snapshots hold no data; customer-supplied encryption keys are refused. Instances are not simulated (`instances.insert` returns `UNIMPLEMENTED`) because inserting an instance boots a VM |
 
 The capability document lists the same APIs under `gcpCatalog.apis`. Each
 entry includes every implemented method, the number of official methods,
@@ -31,7 +32,11 @@ bounds above.
 
 - Requests use `/_simulator/providers/gcp/<api>/<official path>`, for example
   `/_simulator/providers/gcp/alloydb/v1/projects/tenkacloud-local/locations/us-central1/clusters`.
-  Set the client's `api_endpoint` to `/_simulator/providers/gcp/<api>/`.
+  Set the client's `api_endpoint` to the advertised `endpoint`, which is
+  `/_simulator/providers/gcp/<api>/` followed by the API's service path, for
+  example `/_simulator/providers/gcp/alloydb/` or
+  `/_simulator/providers/gcp/compute/compute/v1/` (the official client
+  replaces both the root URL and the service path with it).
 - The configured project ID or project number is accepted. Only the
   configured project owner (`--cloud-storage-owner`, default
   `simulator-admin`) may call a method. Any other subject or project receives
