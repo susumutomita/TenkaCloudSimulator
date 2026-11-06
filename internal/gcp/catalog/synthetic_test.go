@@ -240,3 +240,32 @@ func TestReferencesProtectionAndOperationAnchors(t *testing.T) {
 		t.Fatal("an unknown anchor keeps the resource name")
 	}
 }
+
+// Resource names are unique per API: two services may each hold the same
+// projects/{project}/.../widgets/{id} name.
+func TestResourceNamesAreScopedPerAPI(t *testing.T) {
+	h := newHarness(t)
+	for _, name := range []string{"synth", "twin"} {
+		api, model := syntheticAPI(t)
+		model.Key, model.Name, api.Key = name+".v1", name, name+".v1"
+		api.Collections[0].IDField = "name"
+		b, err := bindAPI(api, model)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := h.engine.add(b); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for _, api := range []string{"synth", "twin"} {
+		created := h.call("owner", "POST", "/"+api+"/synth/v1/projects/tenkacloud-local/widgets", map[string]any{"name": "same", "note": api})
+		expect(t, created, 200, "")
+	}
+	for _, api := range []string{"synth", "twin"} {
+		got := h.call("owner", "GET", "/"+api+"/synth/v1/projects/tenkacloud-local/widgets/same", nil)
+		expect(t, got, 200, "")
+		if got.body["note"] != api {
+			t.Fatalf("%s read another API's resource: %v", api, got.body)
+		}
+	}
+}

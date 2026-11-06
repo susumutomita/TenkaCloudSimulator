@@ -90,8 +90,8 @@ func (e *Engine) normalize(name string) string {
 }
 
 func (q *request) find(name string) (row, error) {
-	r, err := findName(q.e.store.db, name)
-	if errors.Is(err, sql.ErrNoRows) || err == nil && r.API != q.b.model.Name {
+	r, err := findName(q.e.store.db, q.b.model.Name, name)
+	if errors.Is(err, sql.ErrNoRows) {
 		return row{}, &status{"NOT_FOUND", fmt.Sprintf("Resource '%s' was not found.", name)}
 	}
 	return r, err
@@ -279,8 +279,8 @@ func (q *request) references(tx *sql.Tx, document map[string]any, written map[st
 		}
 		value = q.e.normalize(value)
 		document[field] = value
-		r, err := findName(tx, value)
-		if errors.Is(err, sql.ErrNoRows) || err == nil && (r.API != q.b.model.Name || r.Collection != q.collection().References[field].Collection) {
+		r, err := findName(tx, q.b.model.Name, value)
+		if errors.Is(err, sql.ErrNoRows) || err == nil && r.Collection != q.collection().References[field].Collection {
 			return &status{"NOT_FOUND", fmt.Sprintf("Referenced resource '%s' in field '%s' was not found.", value, field)}
 		}
 		if err != nil {
@@ -389,7 +389,7 @@ func (q *request) create() (any, error) {
 		if err != nil {
 			return nil, err
 		}
-		if _, err := findName(tx, name); err == nil {
+		if _, err := findName(tx, q.b.model.Name, name); err == nil {
 			return nil, &status{"ALREADY_EXISTS", fmt.Sprintf("Resource '%s' already exists.", name)}
 		} else if !errors.Is(err, sql.ErrNoRows) {
 			return nil, err
@@ -566,7 +566,7 @@ func (q *request) patch() (any, error) {
 			return nil, err
 		}
 		if q.params["validateOnly"] != true {
-			if err := exactlyOne(tx.Exec("UPDATE gcp_catalog_resources SET document=?, generation=generation+1 WHERE name=? AND generation=?", data, r.Name, r.Generation)); err != nil {
+			if err := exactlyOne(tx.Exec("UPDATE gcp_catalog_resources SET document=?, generation=generation+1 WHERE api=? AND name=? AND generation=?", data, r.API, r.Name, r.Generation)); err != nil {
 				return nil, err
 			}
 		}
@@ -607,17 +607,17 @@ func (q *request) remove() (any, error) {
 			return nil, &status{"FAILED_PRECONDITION", fmt.Sprintf("Resource '%s' is still referenced by '%s'.", r.Name, holder)}
 		}
 		var children int
-		if err := tx.QueryRow("SELECT count(*) FROM gcp_catalog_resources WHERE name LIKE ? ESCAPE '\\'", escapeLike(r.Name)+"/%").Scan(&children); err != nil {
+		if err := tx.QueryRow("SELECT count(*) FROM gcp_catalog_resources WHERE api=? AND name LIKE ? ESCAPE '\\'", r.API, escapeLike(r.Name)+"/%").Scan(&children); err != nil {
 			return nil, err
 		}
 		if children > 0 && !(force && c.Cascade) {
 			return nil, &status{"FAILED_PRECONDITION", fmt.Sprintf("Resource '%s' still has child resources.", r.Name)}
 		}
 		if q.params["validateOnly"] != true {
-			if _, err := tx.Exec("DELETE FROM gcp_catalog_resources WHERE name LIKE ? ESCAPE '\\'", escapeLike(r.Name)+"/%"); err != nil {
+			if _, err := tx.Exec("DELETE FROM gcp_catalog_resources WHERE api=? AND name LIKE ? ESCAPE '\\'", r.API, escapeLike(r.Name)+"/%"); err != nil {
 				return nil, err
 			}
-			if err := exactlyOne(tx.Exec("DELETE FROM gcp_catalog_resources WHERE name=? AND generation=?", r.Name, r.Generation)); err != nil {
+			if err := exactlyOne(tx.Exec("DELETE FROM gcp_catalog_resources WHERE api=? AND name=? AND generation=?", r.API, r.Name, r.Generation)); err != nil {
 				return nil, err
 			}
 		}
