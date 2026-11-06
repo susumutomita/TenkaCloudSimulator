@@ -74,8 +74,13 @@ LatePaint ==
  /\ paints' = paints + 1
  /\ last' = Event("latePaint",Absent)
  /\ UNCHANGED <<ui, capability, reducedMotion, selections>>
+(* The finite horizon is complete only after retirement/unsupported mount,
+   both bounded selections, and both bounded paint callbacks. Preserve last:
+   completion must not erase the immediately preceding invariant oracle. *)
+Done == /\ decoration.phase = "dead" /\ selections = 2 /\ paints = 2
+Complete == /\ Done /\ UNCHANGED vars
 Next == ProviderSelect \/ NodeSelect \/ InvalidSelect \/ Mount \/ Paint
-        \/ (\E reason \in {"error","destroy","timeout"} : Retire(reason)) \/ LatePaint
+        \/ (\E reason \in {"error","destroy","timeout"} : Retire(reason)) \/ LatePaint \/ Complete
 Spec == Init /\ [][Next]_vars
 TypeOK == /\ ui \in [provider:Providers,node:Nodes,group:Providers,pressed:Providers,
                        current:Nodes,detail:Nodes,available:BOOLEAN]
