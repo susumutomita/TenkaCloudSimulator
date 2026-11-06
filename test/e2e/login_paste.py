@@ -28,7 +28,7 @@ with running(authenticated=True) as (endpoint,token),sync_playwright() as p:
   if value:assert page.evaluate('(before)=>window.__pasteEvents.slice(before).some(e=>e.trusted&&e.plainAvailable)',before),'Missing actual trusted plain clipboard event'
  def check_value(page,expected):
   for _ in range(150):
-   if field(page).input_value()==expected:return
+   if page.locator('input[type=password]').input_value()==expected:return
    time.sleep(0.01)
   raise AssertionError('Clipboard/input value mismatch; values redacted')
  def submit(page,want,keyboard=False):
@@ -54,7 +54,7 @@ with running(authenticated=True) as (endpoint,token),sync_playwright() as p:
  assert not posts and page.request.get(endpoint+'/_simulator/v1/capabilities').status==401
  report['nativeDOMClearDoesNotSubmitStaleToken']=True
  page=fresh();native_write(page,token);field(page).focus();page.get_by_role('button',name='日本語',exact=True).click()
- expect(page.get_by_label('アクセストークン',exact=True)).to_have_value(token)
+ expect(page.get_by_label('アクセストークン',exact=True)).to_be_visible();check_value(page,token)
  page.get_by_role('button',name='English',exact=True).click();check_value(page,token);submit(page,303);success(page)
  report['nativeDOMValueSurvivesBlurAndLocaleRerender']=True
  report['actual1PasswordExtensionVerified']=False
