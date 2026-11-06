@@ -100,6 +100,7 @@ adapter, or Challenge integration.
 | [Lambda](docs/lambda.md) | CreateFunction, ListFunctions, GetFunctionConfiguration, UpdateFunctionCode, Invoke, DeleteFunction, AddPermission/GetPolicy/RemovePermission; Python ZIP execution through CPython 3.12.16/WASI and a bounded S3/SSM SDK bridge | Other languages, asynchronous invocation, Function URLs, arbitrary networking; 128 MiB and 1–30 second timeout |
 | [CloudFormation](docs/cloudformation-rest.md) | CreateStack, DescribeStacks, DeleteStack; S3 Bucket, SSM Parameter, inline Python Lambda, bounded IAM Role, 5 API Gateway resource types and Lambda Permission; bounded Ref/Sub/GetAtt/DependsOn, String/Number constraints, Equals/condition aliases, resource/output Condition and If/NoValue selection | UpdateStack, And/Or/Not, NoEcho secrecy, general resource types, full AWS asynchronous lifecycle, dedicated CloudFormation service roles |
 | [API Gateway](docs/apigateway.md) | 16 Regional REST management operations, resources/methods/integrations, immutable deployments, new stages and local Lambda proxy execution | HTTP/WebSocket APIs, authorizers, API keys, editing existing stages, public endpoints |
+| [Service catalog](docs/aws-catalog.md) | Model-driven configuration metadata for CodeConnections, Step Functions, ECR and Amplify through their native JSON or REST-JSON protocols, with one generic console view and per-service reference | Executions, images, builds, hosting, OAuth and every unlisted official operation (HTTP 501) |
 
 AWS regions are `us-east-1`, `us-west-2`, `ap-northeast-1`, and `eu-west-1`.
 Local limits include 8 MiB per S3 object, 64 MiB across retained object versions,
@@ -262,12 +263,15 @@ not binary runtime dependencies. Regeneration must preserve locks and original
 rights: [console](tools/console/README.md), [Scalar](tools/scalar/README.md),
 [Python/WASI runtime](tools/python/README.md).
 
-The combined landing/login integration requires **51 finite models and 412
-intentional defect controls (463 required executions)**; its exact-HEAD whole gate
-is pending. It preserves main's 50/398 inventory, including the two bounded landing
-models and their 17 controls, and adds LoginInputIntent with 14 controls. The older
-48/381 inventory, including the Sakura, Secrets metadata and DynamoDB console
-models, remains preserved. Registration is not an execution receipt. The IAM scenario checks two requests
+The combined catalog/login inventory requires **53 finite models and 429
+intentional defect controls (482 required executions)**; exact-HEAD whole-gate
+validation after this main integration is pending. Main's 52/415 inventory is
+preserved: the earlier 50/398 plus CatalogResourceLifecycle (12 controls) and
+CatalogConsoleEpoch (5). LoginInputIntent adds one model and 14 controls.
+The earlier landing, Sakura, Secrets metadata and DynamoDB console models remain
+registered. Any 463-execution or 102-pure-test receipt at `8149cac` belongs to
+that pre-merge base and does not validate this combined revision. Registration
+is not an execution receipt. The IAM scenario checks two requests
 from each of four reachable seeds. A broader four-request trial timed out and
 is not claimed as verified. TLC examines bounded safety properties and checks
 that targeted mutants produce real counterexamples. It does not prove Go/JS
@@ -297,7 +301,7 @@ implementation. These receipts and their then-pending hosted checks belong to
 those revisions. The original crypto fixture also passed the two-CLI SDK helper
 at `2d76646` (73 SDK calls/responses and nine auxiliary HTTP pairs across four CLI
 incarnations). None proves host scoring, output secrecy, every physical resource
-deletion, Go/SQL refinement or success of the current 463-case combined gate.
+deletion, Go/SQL refinement or success of the current 482-case combined gate.
 
 ## License and attribution
 

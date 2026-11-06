@@ -15,15 +15,23 @@ machine-discovered semantic coverage. A newly added implementation file is not
 covered merely because an existing model passes: its exact path must have an
 appropriate reviewed scope mapping and property argument.
 
-The combined landing/login integration requires **51 baselines/412 required
-named mutation controls (463 executions)**; its exact-HEAD whole gate is pending.
-It preserves main's 50/398 inventory: the earlier 48/381 plus LandingAccessAdmission
-(six controls) and LandingTopologyState (eleven). LoginInputIntent adds one model
-with 14 controls. Historical `28d37d1` checked 13 cases/73 distinct states before
-focus capture; scoped `5b270e9` checked 14 cases/77 distinct states (94 generated,
+The combined registry requires **53 baselines/429 required named mutation
+controls (482 executions)**. Main's 52/415 inventory is preserved: the earlier
+50/398 plus CatalogResourceLifecycle (twelve controls) and CatalogConsoleEpoch
+(five). LoginInputIntent adds one model and fourteen controls. The earlier
+pre-landing 48/381 inventory gained LandingAccessAdmission (six controls) and
+LandingTopologyState (eleven). Exact-HEAD whole-gate validation after this main
+integration is pending; pre-merge `8149cac` receipts for 463 executions or 102
+pure tests do not establish acceptance of the new combined base.
+
+Historical `28d37d1` checked 13 input cases/73 distinct states before focus
+capture; scoped `5b270e9` checked 14 cases/77 distinct states (94 generated,
 empty queue) and all 13 declared noninitial counterexamples, including the focus
-control at state 3. The controlled reset on focus is an explicit assumption, not
-an established browser cause or implementation refinement proof.
+control at state 3. Scoped keyboard source `7bd15bf` checked 15 cases, 83 distinct
+baseline states (101 generated, empty queue) and all fourteen required noninitial
+counterexamples; the keyboard control first violated AdoptedValueExact at state 5.
+The controlled reset on focus/keydown is an explicit assumption, not an
+established browser cause or implementation refinement proof.
 [Input correspondence](login-token-file.md#bounded-input-intent-model) and the
 [dated login CI failure](login-token-file.md#dated-validation-and-current-candidate)
 remain distinct from combined acceptance. SecretMetadataViewEpoch and the existing
@@ -50,6 +58,8 @@ fallback evidence, not native Chrome 157 rendering or successful full-gate CI.
 
 | Model | Finite contract | Important exclusions |
 |---|---|---|
+| [CatalogResourceLifecycle](aws-catalog.md) | two service/region scopes, three IDs/names, quota two, two child slots, one client token and three steps; twelve controls | official shape/wire validation, pagination/tag/ARN encoding, SQL/locking/crashes and Go refinement |
+| [CatalogConsoleEpoch](aws-catalog.md) | two services, epochs 0..3, one mounted view with unmount and defective overlapping writes; five controls | native requests, DOM/focus/accessibility, form conversion and React scheduling |
 | ObjectStore | two buckets/two keys; parent integrity, abstract allow/deny | concrete IAM, HTTP, SQL, crashes |
 | CFNConditionAdmission | 234 finite input witnesses; defaults/supplied admission, all conditions/declarations, branch choice, NoValue pruning, pure resource/output plan | real parser/numeric/regex/graph evaluation, exact error ordering, raw-link/dependency completeness, SQL, resource mutation, grants, privacy and host grading |
 | [LoginInputIntent](login-token-file.md#bounded-input-intent-model) | 18 scheduled input/focus/keyboard/paste/file/submit/locale scenarios, revision 0..3, at most six events and two POST snapshots; eight invariant families | arbitrary interleavings, React/DOM refinement, clipboard/extension behavior, file parser, server authentication and liveness |

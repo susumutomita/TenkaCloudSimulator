@@ -3,303 +3,987 @@
   "base_sha": "03060d44f2c7c6e52aaf8799f4bacf21a22cd6bc",
   "changes": [
     {
-      "path": ".github/workflows/ci.yml",
-      "sha256": "8972043a53d2e865878c1d44e18ec21f079bd17d95d1009f39b2a22570545963",
-      "disposition": "formal-infrastructure",
-      "reason": "Mandatory policy or CI validation wiring; original models, invariants, controls and check behavior retained.",
-      "models": []
-    },
-    {
       "path": "README.ja.md",
-      "sha256": "8dcd3a1f8ba6b51044ea744572d0060a6be01bd215ea89a6b54de11ec08cef62",
+      "sha256": "67460f364886260809403d613e5434f3e939940372a9deda4c16fead8a1fc93b",
       "disposition": "documentation",
-      "reason": "Login/CI documentation only; no runtime authorization or proof claim.",
+      "reason": "Documents the bounded catalog scope, evidence and limits or mirrors original third-party notices; no runtime guarantee is added.",
       "models": []
     },
     {
       "path": "README.md",
-      "sha256": "2a258cdf89b4722c956ab21007062c8bb3bd0ef63dea8e57cf63f5e4505ed3ba",
+      "sha256": "a5e639fd3752f10e04e5a1e2fc997ac81cd69e734889890bc4da82554eecc91e",
       "disposition": "documentation",
-      "reason": "Login/CI documentation only; no runtime authorization or proof claim.",
+      "reason": "Documents the bounded catalog scope, evidence and limits or mirrors original third-party notices; no runtime guarantee is added.",
       "models": []
     },
     {
-      "path": "docs/ci.md",
-      "sha256": "69f8970528fd5e72a86e039fa30f087e07b9c01598d01b58973b83b7c4711e5e",
+      "path": "docs/aws-catalog.md",
+      "sha256": "4af3d1efc925a584dcbd75c79776a0e1dc6ed7394ba919e7b647b42aab3009f4",
       "disposition": "documentation",
-      "reason": "Login/CI documentation only; no runtime authorization or proof claim.",
+      "reason": "Documents the bounded catalog scope, evidence and limits or mirrors original third-party notices; no runtime guarantee is added.",
+      "models": []
+    },
+    {
+      "path": "docs/design/0007-model-driven-aws-catalog.md",
+      "sha256": "c7f725b0867f36bf5f397117e2fdc0d7e5fc059bc5441312b71d645824855037",
+      "disposition": "documentation",
+      "reason": "Documents the bounded catalog scope, evidence and limits or mirrors original third-party notices; no runtime guarantee is added.",
+      "models": []
+    },
+    {
+      "path": "docs/development-status.md",
+      "sha256": "d9f07503d46e4914bbb18a387436b3c7b20ed5562742deb6da9ca20e7482deb2",
+      "disposition": "documentation",
+      "reason": "Documents the bounded catalog scope, evidence and limits or mirrors original third-party notices; no runtime guarantee is added.",
       "models": []
     },
     {
       "path": "docs/formal-validation.md",
-      "sha256": "879a9c012c0ec20e8ea8ec9a4b22ed18fd6a58f20ada3083c5988e0d4652b620",
+      "sha256": "82ed2603111aedecd262adc433fb4affed35c12d4f77eeac2f1600b7a90895e0",
       "disposition": "documentation",
-      "reason": "Login/CI documentation only; no runtime authorization or proof claim.",
+      "reason": "Documents the bounded catalog scope, evidence and limits or mirrors original third-party notices; no runtime guarantee is added.",
       "models": []
     },
     {
-      "path": "docs/login-token-file.md",
-      "sha256": "8fc1f5a7923db822f8c7a34e9c18bb56e42267465ce4147645ec0cac396a975f",
-      "disposition": "documentation",
-      "reason": "Login/CI documentation only; no runtime authorization or proof claim.",
-      "models": []
-    },
-    {
-      "path": "formal/LoginInputIntent.cfg",
-      "sha256": "7d32b58320c5f67308bbe66657f1fbe55b389c09a99d91cbbbc8b473d7863297",
+      "path": "formal/CatalogConsoleEpoch.cfg",
+      "sha256": "f7290e947d18d405136bea77132a7c98c07dea7cb99c3cb4fff1ab37d45dffe7",
       "disposition": "modeled",
-      "reason": "Declared finite state and guard projection with named safety invariants; actual implementation, build and browser checks remain separate obligations.",
+      "reason": "Catalog console view source or its embedded bundle; view acceptance, single-write sequencing and failure visibility are projected by CatalogConsoleEpoch; rendering and native results are covered by browser tests.",
       "models": [
         {
-          "id": "LoginInputIntent",
+          "id": "CatalogConsoleEpoch",
           "properties": [
-            "NoEmptyPOST",
-            "NoPOSTWhileBlocked",
-            "StaleFileCompletionFrame",
-            "SubmissionSelectionExact",
-            "AdoptedValueExact",
-            "IntentInvalidatesAsync",
-            "LocaleIntentFrame"
+            "NoUnmountedAcceptance",
+            "OnlyCurrentReplies",
+            "SingleWriter",
+            "ReloadOnlyAfterAck",
+            "FailureVisible"
           ],
-          "limits": "Scoped local 15-case checking at source 7bd15bf exhausted 83 distinct baseline states (101 generated, empty queue) and observed all 14 declared noninitial counterexamples. KeyDownSkipsNativeAdoption first violated AdoptedValueExact at state 5. Historical scoped 14-case checking at model source 5b270e9 exhausted 77 distinct states and observed its 13 controls, including FocusSkipsNativeAdoption. This is scoped evidence, not full current 463-case acceptance or JavaScript/React/1Password proof. Historical 13-case checking at 28d37d1 exhausted 73 states; Combined UnmountedFileCompletionPublishes first failed the file-edit scenario and establishes StaleFileCompletionFrame sensitivity, not an isolated unmount witness. Bounded committed-state input/intent safety correspondence only; not JavaScript/React/Cloudscape/DOM/OS/event scheduling refinement, actual1Password/Dia/Safari, arbitrary focused/unfocused rerenders, clipboard/undo/IME/selection bytes, file UTF8/MIME/size/parser, authentication/HTTP/cookie/crypto/server/browser sessions, liveness or arbitrary event sequences/revision horizons. Pending explicit paste has precedence over current connected DOM. Locale protects adopted control/intent state only; unfocused unadopted DOM may reset. Independent before-state oracles observe actual token/refs/POST records; no server accepts every nonempty label. Mutation sensitivity requires real noninitial named TLC counterexamples, not static anchor counts. Generated app.js scope is ONLY the compiled login-input intent projection. The local offline rebuild of source f9f22313824d39410a4fbc2533886ea340bb163b produced asset commit 7bd15bf55d209a46ff9a733746dc6e2db1fbf262 with 1352 resolved inputs and retained original notices for 22 packages; exact asset digests and input metadata are committed under tools/console. Default hosted-CI build equivalence remains to be checked. Compiler/minifier correctness, React/DOM/native input APIs and backend behavior are not refinement-proved; this binding does not prove the rest of the bundle. The focus scenario explicitly assumes a possible controlled render after focus capture resets DOM from adopted controlled state. This explores a suspected ordering hazard, not an established explanation of the actual CI response timeout. The full current 463-case gate and real Dia/1Password acceptance remain unverified. The keyboard-capture extension adds one focused already-flushed-paste/native-clear/keydown/submit scenario. It explicitly assumes a possible controlled render after key capture resets DOM from the adopted token, without establishing the actual browser failure cause. Current-key pending-paste ordering is not covered by this additional scenario. The eight invariants protect bounded token/intent/POST safety; they do not establish empty-error DOM visibility. The unchanged empty-error and no-POST browser assertions remain separate required acceptance checks. Scoped 15-case success does not replace the pending current 463-case combined gate or the unchanged actual native-clear/Enter browser assertions."
+          "limits": "View sequencing only: no DOM rendering, accessibility, React scheduling, form conversion or native response correctness is modeled."
         }
       ]
     },
     {
-      "path": "formal/LoginInputIntent.tla",
-      "sha256": "ceacbdba0324f66335c0a77dd6ad7bdb6ce97c6d474f891cfd8518e1dc684eaa",
+      "path": "formal/CatalogConsoleEpoch.tla",
+      "sha256": "37f002918e1916e752fb779f896829d42b2da8ad242fa1eb7ce774fcddff1c7c",
       "disposition": "modeled",
-      "reason": "Declared finite state and guard projection with named safety invariants; actual implementation, build and browser checks remain separate obligations.",
+      "reason": "Catalog console view source or its embedded bundle; view acceptance, single-write sequencing and failure visibility are projected by CatalogConsoleEpoch; rendering and native results are covered by browser tests.",
       "models": [
         {
-          "id": "LoginInputIntent",
+          "id": "CatalogConsoleEpoch",
           "properties": [
-            "NoEmptyPOST",
-            "NoPOSTWhileBlocked",
-            "StaleFileCompletionFrame",
-            "SubmissionSelectionExact",
-            "AdoptedValueExact",
-            "IntentInvalidatesAsync",
-            "LocaleIntentFrame"
+            "NoUnmountedAcceptance",
+            "OnlyCurrentReplies",
+            "SingleWriter",
+            "ReloadOnlyAfterAck",
+            "FailureVisible"
           ],
-          "limits": "Scoped local 15-case checking at source 7bd15bf exhausted 83 distinct baseline states (101 generated, empty queue) and observed all 14 declared noninitial counterexamples. KeyDownSkipsNativeAdoption first violated AdoptedValueExact at state 5. Historical scoped 14-case checking at model source 5b270e9 exhausted 77 distinct states and observed its 13 controls, including FocusSkipsNativeAdoption. This is scoped evidence, not full current 463-case acceptance or JavaScript/React/1Password proof. Historical 13-case checking at 28d37d1 exhausted 73 states; Combined UnmountedFileCompletionPublishes first failed the file-edit scenario and establishes StaleFileCompletionFrame sensitivity, not an isolated unmount witness. Bounded committed-state input/intent safety correspondence only; not JavaScript/React/Cloudscape/DOM/OS/event scheduling refinement, actual1Password/Dia/Safari, arbitrary focused/unfocused rerenders, clipboard/undo/IME/selection bytes, file UTF8/MIME/size/parser, authentication/HTTP/cookie/crypto/server/browser sessions, liveness or arbitrary event sequences/revision horizons. Pending explicit paste has precedence over current connected DOM. Locale protects adopted control/intent state only; unfocused unadopted DOM may reset. Independent before-state oracles observe actual token/refs/POST records; no server accepts every nonempty label. Mutation sensitivity requires real noninitial named TLC counterexamples, not static anchor counts. Generated app.js scope is ONLY the compiled login-input intent projection. The local offline rebuild of source f9f22313824d39410a4fbc2533886ea340bb163b produced asset commit 7bd15bf55d209a46ff9a733746dc6e2db1fbf262 with 1352 resolved inputs and retained original notices for 22 packages; exact asset digests and input metadata are committed under tools/console. Default hosted-CI build equivalence remains to be checked. Compiler/minifier correctness, React/DOM/native input APIs and backend behavior are not refinement-proved; this binding does not prove the rest of the bundle. The focus scenario explicitly assumes a possible controlled render after focus capture resets DOM from adopted controlled state. This explores a suspected ordering hazard, not an established explanation of the actual CI response timeout. The full current 463-case gate and real Dia/1Password acceptance remain unverified. The keyboard-capture extension adds one focused already-flushed-paste/native-clear/keydown/submit scenario. It explicitly assumes a possible controlled render after key capture resets DOM from the adopted token, without establishing the actual browser failure cause. Current-key pending-paste ordering is not covered by this additional scenario. The eight invariants protect bounded token/intent/POST safety; they do not establish empty-error DOM visibility. The unchanged empty-error and no-POST browser assertions remain separate required acceptance checks. Scoped 15-case success does not replace the pending current 463-case combined gate or the unchanged actual native-clear/Enter browser assertions."
+          "limits": "View sequencing only: no DOM rendering, accessibility, React scheduling, form conversion or native response correctness is modeled."
+        }
+      ]
+    },
+    {
+      "path": "formal/CatalogResourceLifecycle.cfg",
+      "sha256": "97da995ade93d4d31b8fdfdd6e9e8f1df83fa4ed66b58dd34407fbd3f47adf66",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "formal/CatalogResourceLifecycle.tla",
+      "sha256": "e8fb59ac8add5b17e9eec40d5dcfe369c82cda5b0b9530e71a32f63c1e320787",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
         }
       ]
     },
     {
       "path": "formal/README.md",
-      "sha256": "12159928942575121e2d1d62d70e7c6937d813b761ebe4c25a17c5c07eac053d",
+      "sha256": "b0daf478aab4bd7cdbfaa1d8cfe76aa020805c01bf30eab0bc30a58cf7b8a7d2",
       "disposition": "documentation",
-      "reason": "Login/CI documentation only; no runtime authorization or proof claim.",
+      "reason": "Documents the bounded catalog scope, evidence and limits or mirrors original third-party notices; no runtime guarantee is added.",
       "models": []
     },
     {
       "path": "formal/models.json",
-      "sha256": "e4afc1bae5734c168fdae375afc6ad854e463c6a513cddf7760d03f90e22dd59",
+      "sha256": "1d8b94ccafa22b82a57aaa3e69a805eb246bf071d9df58b6943e4a82e6ba75fe",
       "disposition": "formal-infrastructure",
-      "reason": "Mandatory policy or CI validation wiring; original models, invariants, controls and check behavior retained.",
+      "reason": "Registers the bounded catalog store model and its twelve protected mutation controls without relaxing any existing model, invariant, control, deadline or applicability rule.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/catalog/describe.go",
+      "sha256": "636f945f39a04eb10ba12ddeffa605d4d68473a06ae022449ee20d8cfbd74da9",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/edges_test.go",
+      "sha256": "55079879caf52a62ea053ea486b000b2108ecdb88055006b2bd171596b9dfef1",
+      "disposition": "test-support",
+      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/catalog/engine.go",
+      "sha256": "a7bea45729903d3a598a8f12a2a26183dfaf66257ab030bb51c2e5c3016f1239",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/engine_test.go",
+      "sha256": "608df08afb8517dc6429d5136d006b1a7a89c5e56898362025518a690ca75998",
+      "disposition": "test-support",
+      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/catalog/faults_test.go",
+      "sha256": "d6d631a2a81fca50a6e50213f01f905ed4387de40a49a5434e4e17fb809c7dd9",
+      "disposition": "test-support",
+      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/catalog/features_test.go",
+      "sha256": "07185d5137d8fdab41a428251fc02e17602976876608b7e52f672fbab96b93d6",
+      "disposition": "test-support",
+      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/catalog/model.go",
+      "sha256": "4a1604c720d9e7352b3218363f3332333e5496375c1ad0dc9490e1421d5c616e",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/models/amplify.json",
+      "sha256": "289eb24f3e5d1ad22ca54c222aced31f86d31cb50fdc80c3796fe8a3a10e07da",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/models/codeconnections.json",
+      "sha256": "0f2556c58a4fec6289f89f6b1dab074eb3c75cc2d7511ac5ceacd3da2c5c7feb",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/models/ecr.json",
+      "sha256": "f3f316a77682410b75b9bd5ff0d350a25087fb1cbfc3f81c07973a548de64543",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/models/stepfunctions.json",
+      "sha256": "2ad60bf02769a647ccd7b2e5677778cd69c2070f500624f21c6a428eed5e79a9",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/openapi.go",
+      "sha256": "b0a3bd0d2938c289d06f400fb05ac0030ad7b4e7767e69f893125f2599127b92",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/openapi_test.go",
+      "sha256": "e13d35594f4a16d6cfeceb0c6f7028ad276539ed8a851d3a9dc705e94ccaf672",
+      "disposition": "test-support",
+      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/catalog/protocol.go",
+      "sha256": "c6e50c50b021f3d13d167114848f575da94e43ba59ce3b31f5459b7d919cdc01",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/rest_test.go",
+      "sha256": "0dab8d72b3ab2830bd45c3245615a3c93b40a4677b17696084c6271fba15cc42",
+      "disposition": "test-support",
+      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/catalog/selection.json",
+      "sha256": "a6b8fa263e550730e1f300b9733662aaf387f167332005beac92d3c8f823a4c5",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/selection_test.go",
+      "sha256": "5a195f41fd815b9daca631cc0c753a2e029e09d94e5586edbfccf2d39e7ef323",
+      "disposition": "test-support",
+      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/catalog/semantics.go",
+      "sha256": "b1d3f12e52eff20b85c3357133ee9d8bb2282e20e0503b3550d89368482f0479",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/services.go",
+      "sha256": "790e466ea84ac9a9154efdf090104f6fd734f6cf81716cf55ff1fd292b2156e5",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/services_developer.go",
+      "sha256": "b2157fab181689dd5a618b3cbe4d2c5347c2b92da35f53f7dd19e3690e6da4ba",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/spec.go",
+      "sha256": "36bbbd4b30bb357fc0f75ed448948ab416274a1c70df2a7b7061b377e20fcf3f",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/store.go",
+      "sha256": "59317020269f238ca828f794be5990f205919288ed160989cd82e218a86e3812",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/synthetic_test.go",
+      "sha256": "42af848d375bf9700581a2345b1fad344b78efd25cb0f1b587cdf8f6cdf5aa8c",
+      "disposition": "test-support",
+      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/catalog/value.go",
+      "sha256": "ff751446f809678bd441645027f23b0a2bea6d88f53fe8283fbec214e8920262",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/s3.go",
+      "sha256": "7471118fc0141cc3509f8e7f44247e8ded61f32dcd2e79a8078c8583ea3e21e4",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ssm.go",
+      "sha256": "50b398b149ba1fc481c853a5c89cc8004eb45a880a871018d9503ae75eb7d99c",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/legal/assets/BOTOCORE-NOTICES.txt",
+      "sha256": "ebbaefdc18a708be91ee626c15350b5f35912f607545a3594ca9c07b57489a78",
+      "disposition": "documentation",
+      "reason": "Documents the bounded catalog scope, evidence and limits or mirrors original third-party notices; no runtime guarantee is added.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/catalog-init.js",
+      "sha256": "e977c30cfe998dbedc85fbd2dfc6eef1eac016522242144426eefd96ad02362f",
+      "disposition": "presentation",
+      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/catalog.html",
+      "sha256": "edcff805e89b0476e19f5fec480be1d42bf31405619f8c70c014e812799084b5",
+      "disposition": "presentation",
+      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/catalog/amplify.json",
+      "sha256": "e55cb1e6d2409365a04e6d5157b0df023af44b23e4f371e1fb0df2a726868ea7",
+      "disposition": "presentation",
+      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/catalog/codeconnections.json",
+      "sha256": "98b46f98dfc80baea1037aa75ef05ac0724062a30225ac76c1c14dbd12095231",
+      "disposition": "presentation",
+      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/catalog/ecr.json",
+      "sha256": "50254d501fe2966ecddaeeef8df79ebdb399abd40b6e48fbaf34b1d0956f6f6a",
+      "disposition": "presentation",
+      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/catalog/index.json",
+      "sha256": "760dad5f6293866e4fb85e1c7e6ed09792fc7ae806d4183940e584972b212b31",
+      "disposition": "presentation",
+      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/catalog/stepfunctions.json",
+      "sha256": "a436ebf496ac21ef5c6dca59a4a536ad0390222506bfed4378a740a6a9aae39a",
+      "disposition": "presentation",
+      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
+      "models": []
+    },
+    {
+      "path": "internal/server/aws_catalog.go",
+      "sha256": "f74f3665e95c480f878c4fc2c2976fb153ee795dfa92f11945059c92b07f5334",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "2c60defd32d3eb66d8352bd293865898667805a042ecd9b002142c6f891e02c2",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/web/app.css",
+      "sha256": "efd069b1fcf1dfe187fb2d87fd6d875b220c32cd45d18fd8e4d4b0bd8ef36705",
+      "disposition": "presentation",
+      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
       "models": []
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "a28922e3f3ee9a3aa6c9749da7d848624d5922d31295370170f4888cc40402a2",
+      "sha256": "6db8367ece1fd081cc1c24666678b13fa8f77fdf36d2106da41e69a07fb28c24",
       "disposition": "modeled",
-      "reason": "Declared finite state and guard projection with named safety invariants; actual implementation, build and browser checks remain separate obligations.",
+      "reason": "Catalog console view source or its embedded bundle; view acceptance, single-write sequencing and failure visibility are projected by CatalogConsoleEpoch; rendering and native results are covered by browser tests.",
       "models": [
         {
-          "id": "SecretsRevealEpoch",
+          "id": "CatalogConsoleEpoch",
           "properties": [
-            "NoUnmountedDisplay",
-            "FreshEmissionHistory",
-            "ReturnedARNMatches",
-            "VisibleContextMatches"
+            "NoUnmountedAcceptance",
+            "OnlyCurrentReplies",
+            "SingleWriter",
+            "ReloadOnlyAfterAck",
+            "FailureVisible"
           ],
-          "limits": "Finite explicit-retrieve/display model, not React, DOM, AbortController, memory zeroization or implementation refinement. Only the successful response path is modeled; native store/IAM must authorize before returning any secret. A returned ARN can differ and must be rejected. Retrieve, Hide and navigation invalidate epochs; unmount also clears visible state. Parent must remount on region/principal changes. Emission history captures the context at each acceptance so later Hide/navigation cannot relabel an earlier stale acceptance. Draft entry, mutation atomicity and form layout are outside this model. Parent main.jsx scope binds only Secrets routing/remount key (region/principal/navigation); the generated app.js binding is the canonical compiled artifact of those source inputs, independently checked by bundle/asset hashes. It does not model unrelated existing console services or prove JavaScript compilation. Compiled bundle binding covers only this declared state/guard projection, not unrelated bundle code or a compiler refinement proof."
-        },
-        {
-          "id": "SakuraDisksViewEpoch",
-          "properties": [
-            "AcceptedReadScope",
-            "SuccessfulReadOnly",
-            "RenderedScopeBound",
-            "RenderedResourceBound",
-            "StaleReadFrame",
-            "StaleWriteFrame",
-            "NavigationACKFrame",
-            "AckClosesForm",
-            "AckClearsDraft",
-            "ReadRetryOnly",
-            "SingleWriteSend",
-            "LocaleFrame",
-            "CancelDraftClear"
-          ],
-          "limits": "Original bounded UI safety projection only, not React/JS/AbortController scheduling or server/SQL/IAM/token authority proof. Opaque scope combines trusted principal/session/globalnavigation/endpoint; actualcredential/contextKey production remainstrustedcaller. Read responses may complete afterabort/headers, no zero-network/body-cancel guarantee. No orphan-loading/liveness/hungread promise. ACK is actual2xxresponse beforeCreatebody/metadata, not serverrollback/idempotency underunknownnetworkoutcome. Two opens/onewriteintent excludearbitrarynew-sessionwrite concurrency. Independent request/frame snapshots monitoractualpublishedview changes, not ghost-only mutations. Nativepayloadbytes/schema/confirmation/keyentropy/quota/APIwire/SDK andauthenticatedcloudvisualparity areoutside. Shared main scope is ONLY Sakura fixedcapabilityconfiguration/contextKey+request mount, notAWS/GCP/Azure behavior; shell/CSS/neutralcatalogstate not proved. The generated app.js scope binds only the canonical compiled artifact of this separately declared Sakura child/mount projection; it does not prove bundler/compiler correctness or unrelated AWS/GCP/Azure behavior. Compiled bundle binding covers only this declared state/guard projection, not unrelated bundle code or a compiler refinement proof."
-        },
-        {
-          "id": "DynamoDBConsoleEpoch",
-          "properties": [
-            "NoStalePublication",
-            "ReadGenerationVerified",
-            "DisplayedKeyBound",
-            "CancelNoOrphanLoading",
-            "AckClosesDraft",
-            "AckBelongsToCurrentView",
-            "ReadRetryNeverWrites",
-            "SingleSendBeforeACK",
-            "LocalePreservesDraft"
-          ],
-          "limits": "UI finite safety abstraction only, not JS/React/AbortController scheduling refinement, native protocol/JSON/IAM/auth/SQLite state/number/binary/size/capacity proof. TableId checks establish agreement at item-read acceptance only, not freshness after later native changes or atomic TableId-CAS on mutation; official TableName writes remain subject to recreation between preflight and send. Combined context labels abstract principal/region/remount, not credentials/tenant isolation. Stutter observation admits no liveness/hung-read progress claim. One write intent only; symbolic ACK/no automatic replay, not server rollback when an aborted request already committed. No concrete item values, missing-item/delete-confirmation semantics or arbitrary pagination. Main caller scope is limited to the DynamoDB route and its region|principal|navigation mount key/reset; embedded app.js is the canonical derived component/caller artifact. Neither binding proves other shell/components, compiler/bundler correctness or JavaScript refinement. Compiled bundle binding covers only this declared state/guard projection, not unrelated bundle code or a compiler refinement proof."
-        },
-        {
-          "id": "SecretMetadataViewEpoch",
-          "properties": [
-            "MetadataRequestsOnly",
-            "CursorRequestBound",
-            "NoStaleCallbackAcceptance",
-            "NoStaleRenderedMetadata",
-            "NoStaleRenderedError",
-            "LoadingTracksLatest",
-            "PendingClearsMetadata",
-            "NoRowsOnError",
-            "ValidatedMetadataOnly",
-            "CurrentPageOnly",
-            "LocalePreservesQuery",
-            "ParentRevealClearedForMetadata"
-          ],
-          "limits": "Scoped metadata-child contract and the parent tab-change invalidate call only. A prior-parent-reveal Boolean models clearing visible state on entry, not pending GetSecretValue replies, byte erasure, old asyncRetrieve, disclosure channels or SQL. Opaque cursor provenance is an annotation, not decoding or HMAC validation. A valid-response Boolean abstracts the concrete metadata parser. Host callback identity/remount and active scope are assumptions, not main navigation/authentication proofs. Abort leaves callbacks schedulable to check guards; actual browser Abort may prevent JavaScript delivery. Locale transitions preserve query state, not arbitrary React scheduling. Finite safety projection only: no stable history snapshot, page completeness, backend/JSON/IAM refinement, whole React proof or liveness. Source scope on the parent and bundle is limited to this tab and child projection; unrelated retrieval/mutation code is excluded. Compiled bundle binding covers only this declared state/guard projection, not unrelated bundle code or a compiler refinement proof."
-        },
-        {
-          "id": "KMSAliasesViewEpoch",
-          "properties": [
-            "CurrentListOutcome",
-            "NoCachedRowsOnFailure",
-            "CurrentTargetMetadata",
-            "ClosedFormHasNoTarget",
-            "AckClosesForm",
-            "AckClearsDraft",
-            "ReadRetryNeverWrites",
-            "OnlyVerifiedTargetSubmitted",
-            "DeleteRequiresExactConfirmation",
-            "LocalePreservesIntent"
-          ],
-          "limits": "Finite UI protocol abstraction, not JS/React/Cloudscape/HTTP/SQL/IAM/crypto refinement or liveness. Initial key-list/Describe lookup completion is abstracted because actual source disables selection until it finishes; later target reads may overlap. Target/list revisions normalized after these reads. Excludes all parser/format/pagination/permission semantics, arbitrary key sets, repeated forms beyond bound, network ambiguity without ACK and full AWS console parity. Current list outcome and target metadata are stored fields, not derived tautologies. Retired-list mutation jointly bypasses redundant captured-object/active/abort checks; submit-target mutation abstracts both button and handler defenses. Retry mutant creates actual second pending write plus request counter, not a ghost-only edit. Root parent context key/principal binding is assumed; locale frame is only this model state, not the locale provider. Parent kms.jsx/main.jsx declarations bind only the Aliases mount and supplied region/principal/key identity; other KMS/general services remain outside. app.js is the canonical compiled correspondence artifact of that component/mount, independently checked by bundle hashes, not a proof of compilation or unrelated UI. Compiled bundle binding covers only this declared state/guard projection, not unrelated bundle code or a compiler refinement proof."
-        },
-        {
-          "id": "LoginInputIntent",
-          "properties": [
-            "NoEmptyPOST",
-            "NoPOSTWhileBlocked",
-            "StaleFileCompletionFrame",
-            "SubmissionSelectionExact",
-            "AdoptedValueExact",
-            "IntentInvalidatesAsync",
-            "LocaleIntentFrame"
-          ],
-          "limits": "Scoped local 15-case checking at source 7bd15bf exhausted 83 distinct baseline states (101 generated, empty queue) and observed all 14 declared noninitial counterexamples. KeyDownSkipsNativeAdoption first violated AdoptedValueExact at state 5. Historical scoped 14-case checking at model source 5b270e9 exhausted 77 distinct states and observed its 13 controls, including FocusSkipsNativeAdoption. This is scoped evidence, not full current 463-case acceptance or JavaScript/React/1Password proof. Historical 13-case checking at 28d37d1 exhausted 73 states; Combined UnmountedFileCompletionPublishes first failed the file-edit scenario and establishes StaleFileCompletionFrame sensitivity, not an isolated unmount witness. Bounded committed-state input/intent safety correspondence only; not JavaScript/React/Cloudscape/DOM/OS/event scheduling refinement, actual1Password/Dia/Safari, arbitrary focused/unfocused rerenders, clipboard/undo/IME/selection bytes, file UTF8/MIME/size/parser, authentication/HTTP/cookie/crypto/server/browser sessions, liveness or arbitrary event sequences/revision horizons. Pending explicit paste has precedence over current connected DOM. Locale protects adopted control/intent state only; unfocused unadopted DOM may reset. Independent before-state oracles observe actual token/refs/POST records; no server accepts every nonempty label. Mutation sensitivity requires real noninitial named TLC counterexamples, not static anchor counts. Generated app.js scope is ONLY the compiled login-input intent projection. The local offline rebuild of source f9f22313824d39410a4fbc2533886ea340bb163b produced asset commit 7bd15bf55d209a46ff9a733746dc6e2db1fbf262 with 1352 resolved inputs and retained original notices for 22 packages; exact asset digests and input metadata are committed under tools/console. Default hosted-CI build equivalence remains to be checked. Compiler/minifier correctness, React/DOM/native input APIs and backend behavior are not refinement-proved; this binding does not prove the rest of the bundle. The focus scenario explicitly assumes a possible controlled render after focus capture resets DOM from adopted controlled state. This explores a suspected ordering hazard, not an established explanation of the actual CI response timeout. The full current 463-case gate and real Dia/1Password acceptance remain unverified. The keyboard-capture extension adds one focused already-flushed-paste/native-clear/keydown/submit scenario. It explicitly assumes a possible controlled render after key capture resets DOM from the adopted token, without establishing the actual browser failure cause. Current-key pending-paste ordering is not covered by this additional scenario. The eight invariants protect bounded token/intent/POST safety; they do not establish empty-error DOM visibility. The unchanged empty-error and no-POST browser assertions remain separate required acceptance checks. Scoped 15-case success does not replace the pending current 463-case combined gate or the unchanged actual native-clear/Enter browser assertions. Compiled bundle binding covers only this declared state/guard projection, not unrelated bundle code or a compiler refinement proof."
+          "limits": "View sequencing only: no DOM rendering, accessibility, React scheduling, form conversion or native response correctness is modeled."
         }
       ]
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "99e2f0a912f5e13f74555f84a093c50d4df2f07cfe59cc5ac9021027d33846d3",
+      "sha256": "7e2eb2be2eb4bb5254bd4cbb6aa9ce2b8700ce0cb8f8f76fe6639975f4ff0c57",
       "disposition": "formal-infrastructure",
-      "reason": "Mandatory policy or CI validation wiring; original models, invariants, controls and check behavior retained.",
+      "reason": "Registers the bounded catalog store model and its twelve protected mutation controls without relaxing any existing model, invariant, control, deadline or applicability rule.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "ce2e1bbf5aa50b118ac672362c3fed10a97db6370d9eb3a41f120c3b0c6a0cfe",
+      "sha256": "70b0900561a85cb8ed7b00e7a6530f990b9ed63028d1eb33f39f15fc56c8629b",
       "disposition": "formal-infrastructure",
-      "reason": "Mandatory policy or CI validation wiring; original models, invariants, controls and check behavior retained.",
+      "reason": "Registers the bounded catalog store model and its twelve protected mutation controls without relaxing any existing model, invariant, control, deadline or applicability rule.",
       "models": []
     },
     {
-      "path": "test/console/login-native-input.test.mjs",
-      "sha256": "c2f067382e7cf9d0d40025fefbeefe409add4b33cab7a8a7cc204747496b33b5",
+      "path": "test/console/navigation.test.mjs",
+      "sha256": "a9f7a9099459e7e6842e9a73462ec9cdadf43482b465cb0b65f66f6735e42d7c",
+      "disposition": "test-support",
+      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/aws_catalog.py",
+      "sha256": "6abd28c7088985ced6c500a1aac1f6d52c78ca1fe40fff3260defc8cdbbdae71",
+      "disposition": "test-support",
+      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/aws_catalog_console.py",
+      "sha256": "2f6296d00c245afdf99f6d8be907f0f7f2ff7c27c283ea734132b6971f5386f4",
+      "disposition": "test-support",
+      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/aws_catalog_fixtures.py",
+      "sha256": "863e2d58634b2e30c5df9269fb5a1f99b6bac2c2538713124d992fa4197c739e",
+      "disposition": "test-support",
+      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/catalog_fixtures/stepfunctions.json",
+      "sha256": "455b2ed968ad0c8727da7840792566ef1cb9d05bb17021cdcda554b83efb2bc3",
+      "disposition": "test-support",
+      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/check.py",
+      "sha256": "d2e4a1b431ca3de1a2dc77999c6cb7522047f50c1997bd9e785c183bc2611da8",
+      "disposition": "test-support",
+      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "models": []
+    },
+    {
+      "path": "third_party/BOTOCORE-NOTICES.txt",
+      "sha256": "ebbaefdc18a708be91ee626c15350b5f35912f607545a3594ca9c07b57489a78",
+      "disposition": "documentation",
+      "reason": "Documents the bounded catalog scope, evidence and limits or mirrors original third-party notices; no runtime guarantee is added.",
+      "models": []
+    },
+    {
+      "path": "tools/awsmodels/draft.py",
+      "sha256": "76b8f67c75b9b0eb78d0b99de4038b7de3ebf1136141f50b3a16acf2bb7fd959",
       "disposition": "modeled",
-      "reason": "Declared finite state and guard projection with named safety invariants; actual implementation, build and browser checks remain separate obligations.",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
       "models": [
         {
-          "id": "LoginInputIntent",
+          "id": "CatalogResourceLifecycle",
           "properties": [
-            "NoEmptyPOST",
-            "NoPOSTWhileBlocked",
-            "StaleFileCompletionFrame",
-            "SubmissionSelectionExact",
-            "AdoptedValueExact",
-            "IntentInvalidatesAsync",
-            "LocaleIntentFrame"
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
           ],
-          "limits": "Scoped local 15-case checking at source 7bd15bf exhausted 83 distinct baseline states (101 generated, empty queue) and observed all 14 declared noninitial counterexamples. KeyDownSkipsNativeAdoption first violated AdoptedValueExact at state 5. Historical scoped 14-case checking at model source 5b270e9 exhausted 77 distinct states and observed its 13 controls, including FocusSkipsNativeAdoption. This is scoped evidence, not full current 463-case acceptance or JavaScript/React/1Password proof. Historical 13-case checking at 28d37d1 exhausted 73 states; Combined UnmountedFileCompletionPublishes first failed the file-edit scenario and establishes StaleFileCompletionFrame sensitivity, not an isolated unmount witness. Bounded committed-state input/intent safety correspondence only; not JavaScript/React/Cloudscape/DOM/OS/event scheduling refinement, actual1Password/Dia/Safari, arbitrary focused/unfocused rerenders, clipboard/undo/IME/selection bytes, file UTF8/MIME/size/parser, authentication/HTTP/cookie/crypto/server/browser sessions, liveness or arbitrary event sequences/revision horizons. Pending explicit paste has precedence over current connected DOM. Locale protects adopted control/intent state only; unfocused unadopted DOM may reset. Independent before-state oracles observe actual token/refs/POST records; no server accepts every nonempty label. Mutation sensitivity requires real noninitial named TLC counterexamples, not static anchor counts. Generated app.js scope is ONLY the compiled login-input intent projection. The local offline rebuild of source f9f22313824d39410a4fbc2533886ea340bb163b produced asset commit 7bd15bf55d209a46ff9a733746dc6e2db1fbf262 with 1352 resolved inputs and retained original notices for 22 packages; exact asset digests and input metadata are committed under tools/console. Default hosted-CI build equivalence remains to be checked. Compiler/minifier correctness, React/DOM/native input APIs and backend behavior are not refinement-proved; this binding does not prove the rest of the bundle. The focus scenario explicitly assumes a possible controlled render after focus capture resets DOM from adopted controlled state. This explores a suspected ordering hazard, not an established explanation of the actual CI response timeout. The full current 463-case gate and real Dia/1Password acceptance remain unverified. The keyboard-capture extension adds one focused already-flushed-paste/native-clear/keydown/submit scenario. It explicitly assumes a possible controlled render after key capture resets DOM from the adopted token, without establishing the actual browser failure cause. Current-key pending-paste ordering is not covered by this additional scenario. The eight invariants protect bounded token/intent/POST safety; they do not establish empty-error DOM visibility. The unchanged empty-error and no-POST browser assertions remain separate required acceptance checks. Scoped 15-case success does not replace the pending current 463-case combined gate or the unchanged actual native-clear/Enter browser assertions."
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
         }
       ]
     },
     {
-      "path": "test/e2e/login_paste.py",
-      "sha256": "f1e5657c21bf5d71434927846a0e4b35f150508539ff38adfbc12824c72a07d7",
+      "path": "tools/awsmodels/extract.py",
+      "sha256": "1ba557f540c00eca6e1911b34e27b2d8677812625dbab4c08dd5efcbe721610f",
       "disposition": "modeled",
-      "reason": "Declared finite state and guard projection with named safety invariants; actual implementation, build and browser checks remain separate obligations.",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
       "models": [
         {
-          "id": "LoginInputIntent",
+          "id": "CatalogResourceLifecycle",
           "properties": [
-            "NoEmptyPOST",
-            "NoPOSTWhileBlocked",
-            "StaleFileCompletionFrame",
-            "SubmissionSelectionExact",
-            "AdoptedValueExact",
-            "IntentInvalidatesAsync",
-            "LocaleIntentFrame"
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
           ],
-          "limits": "Scoped local 15-case checking at source 7bd15bf exhausted 83 distinct baseline states (101 generated, empty queue) and observed all 14 declared noninitial counterexamples. KeyDownSkipsNativeAdoption first violated AdoptedValueExact at state 5. Historical scoped 14-case checking at model source 5b270e9 exhausted 77 distinct states and observed its 13 controls, including FocusSkipsNativeAdoption. This is scoped evidence, not full current 463-case acceptance or JavaScript/React/1Password proof. Historical 13-case checking at 28d37d1 exhausted 73 states; Combined UnmountedFileCompletionPublishes first failed the file-edit scenario and establishes StaleFileCompletionFrame sensitivity, not an isolated unmount witness. Bounded committed-state input/intent safety correspondence only; not JavaScript/React/Cloudscape/DOM/OS/event scheduling refinement, actual1Password/Dia/Safari, arbitrary focused/unfocused rerenders, clipboard/undo/IME/selection bytes, file UTF8/MIME/size/parser, authentication/HTTP/cookie/crypto/server/browser sessions, liveness or arbitrary event sequences/revision horizons. Pending explicit paste has precedence over current connected DOM. Locale protects adopted control/intent state only; unfocused unadopted DOM may reset. Independent before-state oracles observe actual token/refs/POST records; no server accepts every nonempty label. Mutation sensitivity requires real noninitial named TLC counterexamples, not static anchor counts. Generated app.js scope is ONLY the compiled login-input intent projection. The local offline rebuild of source f9f22313824d39410a4fbc2533886ea340bb163b produced asset commit 7bd15bf55d209a46ff9a733746dc6e2db1fbf262 with 1352 resolved inputs and retained original notices for 22 packages; exact asset digests and input metadata are committed under tools/console. Default hosted-CI build equivalence remains to be checked. Compiler/minifier correctness, React/DOM/native input APIs and backend behavior are not refinement-proved; this binding does not prove the rest of the bundle. The focus scenario explicitly assumes a possible controlled render after focus capture resets DOM from adopted controlled state. This explores a suspected ordering hazard, not an established explanation of the actual CI response timeout. The full current 463-case gate and real Dia/1Password acceptance remain unverified. The keyboard-capture extension adds one focused already-flushed-paste/native-clear/keydown/submit scenario. It explicitly assumes a possible controlled render after key capture resets DOM from the adopted token, without establishing the actual browser failure cause. Current-key pending-paste ordering is not covered by this additional scenario. The eight invariants protect bounded token/intent/POST safety; they do not establish empty-error DOM visibility. The unchanged empty-error and no-POST browser assertions remain separate required acceptance checks. Scoped 15-case success does not replace the pending current 463-case combined gate or the unchanged actual native-clear/Enter browser assertions."
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
         }
       ]
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "7959a3e4629556d3a0fdcecbdfb75a8fb2bdd37500b53580d4e07803bfdcc07f",
+      "sha256": "917c35075a1a291b6e06366769904dea52eb6eaf7124f1b3ee79963f412ec54c",
       "disposition": "presentation",
-      "reason": "Generated build input/digest metadata only; final rebuilt exact hashes and canonical build provenance remain pending.",
+      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "b60e57af94a40e2ff84049f8d5fc8bf6ef306bf2900706b581216ac5729e1d25",
+      "sha256": "9ff334d453792721fd971e1c679b58ad993ffe68437ee696a68dfb8e6ccf67d7",
       "disposition": "presentation",
-      "reason": "Generated build input/digest metadata only; final rebuilt exact hashes and canonical build provenance remain pending.",
+      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
       "models": []
     },
     {
-      "path": "tools/console/src/login.jsx",
-      "sha256": "28a06d99aa801b01e414ea56110ba7812d36deb2927c86fb873be696eedcd9ae",
+      "path": "tools/console/src/catalog.jsx",
+      "sha256": "474942eaf69f943e79f06755bc8e52f86340205ddc951fc525c91dbb9d898edd",
       "disposition": "modeled",
-      "reason": "Declared finite state and guard projection with named safety invariants; actual implementation, build and browser checks remain separate obligations.",
+      "reason": "Catalog console view source or its embedded bundle; view acceptance, single-write sequencing and failure visibility are projected by CatalogConsoleEpoch; rendering and native results are covered by browser tests.",
       "models": [
         {
-          "id": "BrowserSessions",
+          "id": "CatalogConsoleEpoch",
           "properties": [
-            "RevokedCookiesDenied",
-            "AcceptedOnlyLiveParent",
-            "SDKAuthorityPreserved",
-            "UnrelatedSessionsPreserved",
-            "NoRawSDKCookie",
-            "NoBrowserSDKAuthority",
-            "ParentLifetimeBound"
+            "NoUnmountedAcceptance",
+            "OnlyCurrentReplies",
+            "SingleWriter",
+            "ReloadOnlyAfterAck",
+            "FailureVisible"
           ],
-          "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them."
-        },
+          "limits": "View sequencing only: no DOM rendering, accessibility, React scheduling, form conversion or native response correctness is modeled."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/console-navigation.mjs",
+      "sha256": "0ac36bddfd0c3b4da513ebe9a8aa859e6b5dd71f03271b1cdc840c89d1e985a3",
+      "disposition": "presentation",
+      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/console.css",
+      "sha256": "3b3836368799d25d08553394e1e6423582490941ddea5b3404536c38f0b08a42",
+      "disposition": "presentation",
+      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/main.jsx",
+      "sha256": "f58680dca831da41791ea080bf4acb25b4be7df8e591229958ef16a8bda73272",
+      "disposition": "modeled",
+      "reason": "Catalog console view source or its embedded bundle; view acceptance, single-write sequencing and failure visibility are projected by CatalogConsoleEpoch; rendering and native results are covered by browser tests.",
+      "models": [
         {
-          "id": "LoginInputIntent",
+          "id": "CatalogConsoleEpoch",
           "properties": [
-            "NoEmptyPOST",
-            "NoPOSTWhileBlocked",
-            "StaleFileCompletionFrame",
-            "SubmissionSelectionExact",
-            "AdoptedValueExact",
-            "IntentInvalidatesAsync",
-            "LocaleIntentFrame"
+            "NoUnmountedAcceptance",
+            "OnlyCurrentReplies",
+            "SingleWriter",
+            "ReloadOnlyAfterAck",
+            "FailureVisible"
           ],
-          "limits": "Scoped local 15-case checking at source 7bd15bf exhausted 83 distinct baseline states (101 generated, empty queue) and observed all 14 declared noninitial counterexamples. KeyDownSkipsNativeAdoption first violated AdoptedValueExact at state 5. Historical scoped 14-case checking at model source 5b270e9 exhausted 77 distinct states and observed its 13 controls, including FocusSkipsNativeAdoption. This is scoped evidence, not full current 463-case acceptance or JavaScript/React/1Password proof. Historical 13-case checking at 28d37d1 exhausted 73 states; Combined UnmountedFileCompletionPublishes first failed the file-edit scenario and establishes StaleFileCompletionFrame sensitivity, not an isolated unmount witness. Bounded committed-state input/intent safety correspondence only; not JavaScript/React/Cloudscape/DOM/OS/event scheduling refinement, actual1Password/Dia/Safari, arbitrary focused/unfocused rerenders, clipboard/undo/IME/selection bytes, file UTF8/MIME/size/parser, authentication/HTTP/cookie/crypto/server/browser sessions, liveness or arbitrary event sequences/revision horizons. Pending explicit paste has precedence over current connected DOM. Locale protects adopted control/intent state only; unfocused unadopted DOM may reset. Independent before-state oracles observe actual token/refs/POST records; no server accepts every nonempty label. Mutation sensitivity requires real noninitial named TLC counterexamples, not static anchor counts. Generated app.js scope is ONLY the compiled login-input intent projection. The local offline rebuild of source f9f22313824d39410a4fbc2533886ea340bb163b produced asset commit 7bd15bf55d209a46ff9a733746dc6e2db1fbf262 with 1352 resolved inputs and retained original notices for 22 packages; exact asset digests and input metadata are committed under tools/console. Default hosted-CI build equivalence remains to be checked. Compiler/minifier correctness, React/DOM/native input APIs and backend behavior are not refinement-proved; this binding does not prove the rest of the bundle. The focus scenario explicitly assumes a possible controlled render after focus capture resets DOM from adopted controlled state. This explores a suspected ordering hazard, not an established explanation of the actual CI response timeout. The full current 463-case gate and real Dia/1Password acceptance remain unverified. The keyboard-capture extension adds one focused already-flushed-paste/native-clear/keydown/submit scenario. It explicitly assumes a possible controlled render after key capture resets DOM from the adopted token, without establishing the actual browser failure cause. Current-key pending-paste ordering is not covered by this additional scenario. The eight invariants protect bounded token/intent/POST safety; they do not establish empty-error DOM visibility. The unchanged empty-error and no-POST browser assertions remain separate required acceptance checks. Scoped 15-case success does not replace the pending current 463-case combined gate or the unchanged actual native-clear/Enter browser assertions."
+          "limits": "View sequencing only: no DOM rendering, accessibility, React scheduling, form conversion or native response correctness is modeled."
         }
       ]
     }

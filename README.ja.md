@@ -61,6 +61,7 @@ make build
 | [Lambda](docs/lambda.md) | CreateFunction、ListFunctions、GetFunctionConfiguration、UpdateFunctionCode、Invoke、DeleteFunction、AddPermission/GetPolicy/RemovePermission。固定CPython 3.12.16/WASIによるPython ZIP実行、限定S3/SSM SDK bridge | 他言語、非同期実行、Function URL、任意network。128 MiB・timeout 1–30秒 |
 | [CloudFormation](docs/cloudformation-rest.md) | CreateStack、DescribeStacks、DeleteStack。S3 Bucket、SSM Parameter、inline Python Lambda、限定IAM Role、API Gateway 5 resource types・Lambda Permission、限定Ref/Sub/GetAtt/DependsOn、String/Number制約、Equals/条件alias、resource/outputのCondition、If/NoValue選択 | UpdateStack、And/Or/Not、NoEcho秘匿、一般resource types、実AWS相当の非同期lifecycle、CFN専用service role |
 | [API Gateway](docs/apigateway.md) | Regional REST管理16操作。API/resource/method/integration、immutable deployment、新規stage、ローカルLambda proxy実行 | HTTP/WebSocket API、authorizer、API key、既存stage編集、public endpoint |
+| [サービスカタログ](docs/aws-catalog.md) | CodeConnections、Step Functions、ECR、Amplify の設定メタデータを、各サービスのネイティブ JSON または REST-JSON で扱います。汎用コンソール画面とサービス別 API リファレンスを含みます | 実行、イメージ、ビルド、ホスティング、OAuth、一覧にない公式操作（HTTP 501） |
 
 対応regionは`us-east-1`、`us-west-2`、`ap-northeast-1`、`eu-west-1`。S3 objectは8 MiB、保持version合計64 MiB、SSM値4096 UTF-8 bytes、CFN TemplateBody51200 bytesなどの上限があります。全フィールド・エラー・quotaの範囲は各サービス資料を確認してください。 1プロセスの上限は1000 buckets、10000 objects/versions/delete markers、1000 parameters/identities、100 stacks、100 resources/stackです。これらはプロセスメモリ全体の上限ではありません。
 
@@ -124,16 +125,18 @@ SDK、操作画面、再起動、チーム分離の受入検証は `make e2e` �
 
 CIはstatementと未フィルターsource-line coverageを両方90%以上に強制します。`make before-commit`単独のcoverage判定はstatementのみで、source-line判定はCIのCobertura生成後ステージと上記の2コマンドで行います。SDK/browser、license、依存security、埋込asset、形式検査も行います。cross compileは他OSでの実行成功を意味しません。開発用Python/Node/Javaはruntime依存ではありません。UI・Scalarの再生成は権利表記とlockを保持する[各build手順](tools/console/README.md)・[Scalar手順](tools/scalar/README.md)・[Python runtimeの権利・再生成手順](tools/python/README.md)に従います。
 
-LPとログインを合わせた統合では**51有限モデル・412制御（463実行）**を必須とし、
-統合後の固定HEAD全体検査は未完了です。mainの50モデル・398制御（旧48/381とLPの2モデル・
-17制御）を保持し、LoginInputIntentの1モデル・13制御を追加します。Sakura、DynamoDB画面、
-Secretsメタデータ画面も保持します。LPモデルは信頼済みのhost/origin/認証判定や閉じたノード入力を
-前提とし、URL解析、フォーカス、レイアウト、SVG線の位置、ブラウザー描画、Go/JavaScriptの
-refinementは証明しません。LoginInputIntentもfocus時の制御値リセットを仮定した限定モデルで、
-実ブラウザーの原因や拡張機能の修復を証明しません。SecretVersionListingは認可後のメタデータ一覧と
-限定cursor境界を対象とし、値の読取権限や完全な履歴画面を追加しません。有限モデル検査、実コード試験、
-固定HEADの全体検査は別の結果です。[形式検査](formal/README.md)、[CI](docs/ci.md)、
-[設計](docs/design/0001-go-standalone.md)。
+統合後のregistryは**53有限モデル・429制御（482実行）**を必須とし、新しいmainを取り込んだ
+固定HEADでの全体検証は未完了です。mainの52モデル・415制御を保持します。従来の50/398に
+サービスカタログの保存状態モデルCatalogResourceLifecycle（12制御）と画面モデル
+CatalogConsoleEpoch（5制御）を加え、LoginInputIntentの1モデル・14制御を統合します。
+以前の48/381に追加したLPの2モデル・17制御や、Sakura、DynamoDB画面、Secretsメタデータ画面も保持します。
+LPモデルは信頼済みのhost/origin/認証判定や閉じたノード入力を前提とし、URL解析、フォーカス、
+レイアウト、SVG線の位置、ブラウザー描画、Go/JavaScriptのrefinementは証明しません。
+LoginInputIntentのfocus／keydown時の制御値リセットは限定モデルの仮定であり、実ブラウザーの原因や
+拡張機能の修復を証明しません。SecretVersionListingは認可後のメタデータ一覧と限定cursor境界を対象とし、
+値の読取権限や完全な履歴画面を追加しません。有限モデル検査、実コード試験、固定HEADの全体検査は別の結果です。
+`8149cac`の463実行や102件のpure検査の受領証は統合前の版に属し、新しい482実行の成功を意味しません。
+[形式検査](formal/README.md)、[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)。
 
 ## ライセンス
 
@@ -174,7 +177,7 @@ combined 29-model/164-control formal gate (193 executions). These receipts apply
 to that revision. Every later change still requires its exact-HEAD CI, including
 the 45-case E2E suite; focused results do not replace whole-suite verification.
 
-現在のLP・ログイン統合で必要な形式検査は51モデル・412制御（463実行）で、全体成功は未確認です。IAMモデルは4つの到達可能な初期状態から
+現在のカタログ・ログイン統合で必要な形式検査は53モデル・429制御（482実行）で、新しい統合HEADの全体成功は未確認です。IAMモデルは4つの到達可能な初期状態から
 各2要求の範囲で、4要求の試案はタイムアウトし未成功です。2026-11-06にLPの限定19実行が
 `4382ec4`で成功しましたが、その版の全448実行はDynamoDBAdmissionで失敗しました。
 `fad3b8a`のLPはPC・スマートフォンの8ブラウザーケースと6状態の厳格なアクセシビリティ検査に成功。
@@ -188,5 +191,5 @@ API資料ではクラウドを分け、Sakura Cloudの任意有効化するDisk�
 全Go race/build、同一profileのstatement94.94%・未除外source90.32%が成功しました。
 資料のみを変えた後続`414c902`では全61 E2E（980.726秒）・reflow・startが成功しました。
 「資料のみの追補」「実行コード等が同一」はその過去の版の説明であり、現在のLP実装を指しません。
-当時のhosted検査の留保もその版に属します。現在の全463実行の成功や、ホスト採点・SQL/Go refinement・
+当時のhosted検査の留保もその版に属します。現在の全482実行の成功や、ホスト採点・SQL/Go refinement・
 秘匿出力・全リソース物理削除の証明へ読み替えないでください。
