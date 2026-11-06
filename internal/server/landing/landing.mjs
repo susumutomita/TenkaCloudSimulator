@@ -1,5 +1,21 @@
 // Original semantic HTML controller. Canvas is optional and grants no authority.
 import {TOPOLOGY} from './topology-data.mjs';
+// Decorative SVG strokes stop at actual card borders, never their text centers.
+function connectorPath(from, to, frame) {
+  const valid = rect => rect && ['left', 'top', 'right', 'bottom'].every(key => Number.isFinite(rect[key]))
+    && rect.right > rect.left && rect.bottom > rect.top;
+  if (![from, to, frame].every(valid)) return '';
+  const centerX = rect => (rect.left + rect.right) / 2;
+  const centerY = rect => (rect.top + rect.bottom) / 2;
+  let start, end;
+  if (from.right < to.left) start = [from.right, centerY(from)], end = [to.left, centerY(to)];
+  else if (to.right < from.left) start = [from.left, centerY(from)], end = [to.right, centerY(to)];
+  else if (from.bottom < to.top) start = [centerX(from), from.bottom], end = [centerX(to), to.top];
+  else if (to.bottom < from.top) start = [centerX(from), from.top], end = [centerX(to), to.bottom];
+  else return ''; // Overlapping/touching cards have no safe exterior gap.
+  const project = ([x, y]) => `${(x - frame.left) * 1000 / (frame.right - frame.left)} ${(y - frame.top) * 360 / (frame.bottom - frame.top)}`;
+  return `M ${project(start)} L ${project(end)}`;
+}
 const root = document.querySelector('[data-cloud-topology]');
 function start() {
   if (!root) return;
@@ -15,6 +31,21 @@ function start() {
     || links.some(link => !ids.has(link.dataset.nodeId))
     || details.some(detail => !ids.has(detail.dataset.nodeDetail))) return;
   let provider = 'aws', selectedId = 'aws-lambda';
+  function routeEdges() {
+    const group = groups.find(item => !item.hidden && item.dataset.providerGroup === provider);
+    const svg = group?.querySelector?.('svg.topology-lines');
+    if (!svg) return;
+    const paths = [...svg.querySelectorAll('path')];
+    const edges = TOPOLOGY.edges.filter(edge => edge.provider === provider);
+    const frame = svg.getBoundingClientRect();
+    paths.forEach((path, index) => {
+      const edge = edges[index];
+      const from = links.find(link => link.dataset.nodeId === edge?.from);
+      const to = links.find(link => link.dataset.nodeId === edge?.to);
+      path.setAttribute('d', paths.length === edges.length && from && to
+        ? connectorPath(from.getBoundingClientRect(), to.getBoundingClientRect(), frame) : '');
+    });
+  }
   function nodeFromFragment(hash) {
     if (!hash.startsWith('#detail-')) return null;
     const id = hash.slice('#detail-'.length);
@@ -32,6 +63,7 @@ function start() {
     }
     for (const detail of details) detail.hidden = detail.dataset.nodeDetail !== selectedId;
     if (status) status.textContent = `${node.title} の役割と制限`;
+    routeEdges();
     root.dispatchEvent(new CustomEvent('topology:change', {detail: Object.freeze({provider, selectedId})}));
   }
   for (const link of links) link.addEventListener('click', event => {
@@ -52,6 +84,8 @@ function start() {
     if (id) select(id);
   });
   select(nodeFromFragment(window.location.hash) || selectedId);
+  window.addEventListener('resize', routeEdges);
+  document.fonts?.ready.then(routeEdges).catch(() => {});
   if (!canvas || !status) return;
   // Only this decorative projection is generated. The readable HTML above is
   // already present, and remains the authoritative keyboard/content interface.
