@@ -1,0 +1,166 @@
+{
+ "api": "artifactregistry.v1",
+ "steps": [
+  {
+   "call": "projects.locations.repositories.create",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1",
+    "repositoryId": "fixture-docker"
+   },
+   "body": {
+    "format": "DOCKER",
+    "labels": {
+     "team": "a"
+    }
+   },
+   "save": {
+    "op_repo": "name",
+    "repo": "response.name"
+   },
+   "expect": {
+    "done": true,
+    "response.mode": "STANDARD_REPOSITORY"
+   }
+  },
+  {
+   "call": "projects.locations.operations.get",
+   "args": {
+    "name": "${op_repo}"
+   },
+   "expect": {
+    "response.sizeBytes": "0"
+   }
+  },
+  {
+   "call": "projects.locations.repositories.get",
+   "args": {
+    "name": "${repo}"
+   },
+   "expect": {
+    "labels.team": "a",
+    "format": "DOCKER"
+   }
+  },
+  {
+   "call": "projects.locations.repositories.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "repositories#count": 1
+   }
+  },
+  {
+   "call": "projects.locations.repositories.patch",
+   "args": {
+    "name": "${repo}",
+    "updateMask": "description"
+   },
+   "body": {
+    "description": "Fixture"
+   },
+   "expect": {
+    "description": "Fixture"
+   }
+  },
+  {
+   "call": "projects.locations.repositories.create",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1",
+    "repositoryId": "leak"
+   },
+   "body": {
+    "format": "NPM",
+    "mode": "REMOTE_REPOSITORY",
+    "remoteRepositoryConfig": {
+     "upstreamCredentials": {
+      "usernamePasswordCredentials": {
+       "username": "u",
+       "passwordSecretVersion": "hunter2"
+      }
+     }
+    }
+   },
+   "error": "INVALID_ARGUMENT",
+   "status": 400
+  },
+  {
+   "call": "projects.locations.repositories.patch",
+   "args": {
+    "name": "${repo}",
+    "updateMask": "format"
+   },
+   "body": {
+    "format": "MAVEN"
+   },
+   "error": "INVALID_ARGUMENT",
+   "status": 400
+  },
+  {
+   "call": "projects.locations.repositories.packages.list",
+   "args": {
+    "parent": "${repo}"
+   },
+   "error": "UNIMPLEMENTED",
+   "status": 501
+  },
+  {
+   "call": "projects.locations.repositories.get",
+   "args": {
+    "name": "projects/tenkacloud-local/locations/us-central1/repositories/missing"
+   },
+   "error": "NOT_FOUND",
+   "status": 404
+  },
+  {
+   "call": "projects.locations.repositories.list",
+   "args": {
+    "parent": "projects/other-project/locations/us-central1"
+   },
+   "error": "PERMISSION_DENIED",
+   "status": 403
+  }
+ ],
+ "isolation": [
+  {
+   "call": "projects.locations.repositories.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "repositories#count": 0
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "call": "projects.locations.repositories.get",
+   "args": {
+    "name": "${repo}"
+   },
+   "expect": {
+    "description": "Fixture"
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "call": "projects.locations.repositories.delete",
+   "args": {
+    "name": "${repo}"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.repositories.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "repositories#count": 0
+   }
+  }
+ ]
+}

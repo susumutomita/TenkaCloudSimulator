@@ -1,0 +1,262 @@
+{
+ "api": "workstations.v1",
+ "steps": [
+  {
+   "call": "projects.locations.workstationClusters.create",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1",
+    "workstationClusterId": "fixture-dev"
+   },
+   "body": {
+    "network": "projects/tenkacloud-local/global/networks/default",
+    "subnetwork": "projects/tenkacloud-local/regions/us-central1/subnetworks/default"
+   },
+   "save": {
+    "op_cluster": "name",
+    "cluster": "response.name"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.workstationClusters.get",
+   "args": {
+    "name": "${cluster}"
+   },
+   "expect": {
+    "degraded": false
+   }
+  },
+  {
+   "call": "projects.locations.workstationClusters.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "workstationClusters#count": 1
+   }
+  },
+  {
+   "call": "projects.locations.workstationClusters.patch",
+   "args": {
+    "name": "${cluster}",
+    "updateMask": "displayName"
+   },
+   "body": {
+    "displayName": "Fixture"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.workstationClusters.workstationConfigs.create",
+   "args": {
+    "parent": "${cluster}",
+    "workstationConfigId": "standard"
+   },
+   "body": {
+    "host": {
+     "gceInstance": {
+      "machineType": "e2-standard-4"
+     }
+    },
+    "idleTimeout": "1200s"
+   },
+   "save": {
+    "op_config": "name",
+    "config": "response.name"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.workstationClusters.workstationConfigs.get",
+   "args": {
+    "name": "${config}"
+   },
+   "expect": {
+    "idleTimeout": "1200s"
+   }
+  },
+  {
+   "call": "projects.locations.workstationClusters.workstationConfigs.list",
+   "args": {
+    "parent": "${cluster}"
+   },
+   "expect": {
+    "workstationConfigs#count": 1
+   }
+  },
+  {
+   "call": "projects.locations.workstationClusters.workstationConfigs.patch",
+   "args": {
+    "name": "${config}",
+    "updateMask": "runningTimeout"
+   },
+   "body": {
+    "runningTimeout": "43200s"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.workstationClusters.workstationConfigs.workstations.create",
+   "args": {
+    "parent": "${config}",
+    "workstationId": "alice"
+   },
+   "body": {
+    "env": {
+     "EDITOR": "vim"
+    }
+   },
+   "save": {
+    "op_workstation": "name",
+    "workstation": "response.name"
+   },
+   "expect": {
+    "done": true,
+    "response.state": "STATE_STOPPED"
+   }
+  },
+  {
+   "call": "projects.locations.workstationClusters.workstationConfigs.workstations.get",
+   "args": {
+    "name": "${workstation}"
+   },
+   "expect": {
+    "state": "STATE_STOPPED",
+    "env.EDITOR": "vim"
+   }
+  },
+  {
+   "call": "projects.locations.workstationClusters.workstationConfigs.workstations.list",
+   "args": {
+    "parent": "${config}"
+   },
+   "expect": {
+    "workstations#count": 1
+   }
+  },
+  {
+   "call": "projects.locations.workstationClusters.workstationConfigs.workstations.patch",
+   "args": {
+    "name": "${workstation}",
+    "updateMask": "displayName"
+   },
+   "body": {
+    "displayName": "Alice"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.operations.get",
+   "args": {
+    "name": "${op_workstation}"
+   },
+   "expect": {
+    "response.state": "STATE_STOPPED"
+   }
+  },
+  {
+   "call": "projects.locations.operations.list",
+   "args": {
+    "name": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "operations#count": 6
+   }
+  },
+  {
+   "call": "projects.locations.workstationClusters.workstationConfigs.workstations.start",
+   "args": {
+    "name": "${workstation}",
+    "body": {}
+   },
+   "error": "UNIMPLEMENTED",
+   "status": 501
+  },
+  {
+   "call": "projects.locations.workstationClusters.delete",
+   "args": {
+    "name": "${cluster}"
+   },
+   "error": "FAILED_PRECONDITION",
+   "status": 400
+  },
+  {
+   "call": "projects.locations.workstationClusters.list",
+   "args": {
+    "parent": "projects/other-project/locations/us-central1"
+   },
+   "error": "PERMISSION_DENIED",
+   "status": 403
+  }
+ ],
+ "isolation": [
+  {
+   "call": "projects.locations.workstationClusters.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "workstationClusters#count": 0
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "call": "projects.locations.workstationClusters.workstationConfigs.workstations.get",
+   "args": {
+    "name": "${workstation}"
+   },
+   "expect": {
+    "displayName": "Alice"
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "call": "projects.locations.workstationClusters.workstationConfigs.workstations.delete",
+   "args": {
+    "name": "${workstation}"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.workstationClusters.workstationConfigs.delete",
+   "args": {
+    "name": "${config}"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.workstationClusters.delete",
+   "args": {
+    "name": "${cluster}"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.workstationClusters.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "workstationClusters#count": 0
+   }
+  }
+ ]
+}

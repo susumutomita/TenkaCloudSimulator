@@ -1,0 +1,156 @@
+{
+ "api": "firebaseapphosting.v1",
+ "steps": [
+  {
+   "call": "projects.locations.backends.create",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1",
+    "backendId": "fixture-web"
+   },
+   "body": {
+    "serviceAccount": "apphosting@tenkacloud-local.iam.gserviceaccount.com",
+    "servingLocality": "GLOBAL_ACCESS",
+    "labels": {
+     "team": "a"
+    }
+   },
+   "save": {
+    "op_backend": "name",
+    "backend": "response.name"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.backends.get",
+   "args": {
+    "name": "${backend}"
+   },
+   "expect": {
+    "servingLocality": "GLOBAL_ACCESS"
+   }
+  },
+  {
+   "call": "projects.locations.backends.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "backends#count": 1
+   }
+  },
+  {
+   "call": "projects.locations.backends.patch",
+   "args": {
+    "name": "${backend}",
+    "updateMask": "displayName"
+   },
+   "body": {
+    "displayName": "Fixture"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.backends.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1",
+    "showDeleted": true
+   },
+   "error": "INVALID_ARGUMENT",
+   "status": 400
+  },
+  {
+   "call": "projects.locations.backends.create",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1",
+    "backendId": "nosa"
+   },
+   "body": {
+    "servingLocality": "GLOBAL_ACCESS"
+   },
+   "error": "INVALID_ARGUMENT",
+   "status": 400
+  },
+  {
+   "call": "projects.locations.backends.builds.create",
+   "args": {
+    "parent": "${backend}",
+    "buildId": "b1",
+    "body": {}
+   },
+   "error": "UNIMPLEMENTED",
+   "status": 501
+  },
+  {
+   "call": "projects.locations.operations.get",
+   "args": {
+    "name": "${op_backend}"
+   },
+   "expect": {
+    "response.labels.team": "a"
+   }
+  },
+  {
+   "call": "projects.locations.operations.list",
+   "args": {
+    "name": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "operations#count": 2
+   }
+  },
+  {
+   "call": "projects.locations.backends.list",
+   "args": {
+    "parent": "projects/other-project/locations/us-central1"
+   },
+   "error": "PERMISSION_DENIED",
+   "status": 403
+  }
+ ],
+ "isolation": [
+  {
+   "call": "projects.locations.backends.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "backends#count": 0
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "call": "projects.locations.backends.get",
+   "args": {
+    "name": "${backend}"
+   },
+   "expect": {
+    "displayName": "Fixture"
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "call": "projects.locations.backends.delete",
+   "args": {
+    "name": "${backend}"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.backends.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "backends#count": 0
+   }
+  }
+ ]
+}
