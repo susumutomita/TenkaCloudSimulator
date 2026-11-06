@@ -39,7 +39,7 @@
     },
     {
       "path": "internal/aws/catalog/describe.go",
-      "sha256": "99b6fe664b197ec8e86371f22ae69f3cee3851e17bc695149eeca3772ea9f8e8",
+      "sha256": "bad27cf9d7df8fe2f84d622271bd46599574b34b44afbc14996264570ee344fa",
       "disposition": "modeled",
       "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
       "models": [
@@ -2991,7 +2991,7 @@
     },
     {
       "path": "internal/aws/catalog/review_test.go",
-      "sha256": "178a2436b2433c9241480f2c4e913f172eb9cb90e231eabb43b8b3a278afac27",
+      "sha256": "42be48e0e617e544d036d2ed686c82b96760cde57efff9e588852889ebcb3def",
       "disposition": "test-support",
       "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
       "models": []
@@ -3076,7 +3076,7 @@
     },
     {
       "path": "internal/aws/catalog/services_analytics.go",
-      "sha256": "a11cb81d842b46dc212927e2cbb53907b36233d71fc7ebcfab9c488141b85aa9",
+      "sha256": "af840cf07da2d76a0500d2ffc6795f6bfcd493d49f77669d0f0de1a020e5ce7d",
       "disposition": "modeled",
       "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
       "models": [
@@ -4372,7 +4372,7 @@
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "6e0f9815d65a168cea90cd6ff24fe1bb6b9d917fd599f1775f2a83c61b104a3c",
+      "sha256": "d3ec7cf47b7853fe1938cc95fa5f008e701bb429e973033c824a0664a37eb30d",
       "disposition": "modeled",
       "reason": "Catalog console view source or its embedded bundle; view acceptance, single-write sequencing and failure visibility are projected by CatalogConsoleEpoch; rendering and native results are covered by browser tests.",
       "models": [
@@ -4398,7 +4398,7 @@
     },
     {
       "path": "test/e2e/aws_catalog_console.py",
-      "sha256": "a4cb2ea18c4dec1fab94e636e8c0e2f3ed360d25d0058861cf3495a2fb8f576a",
+      "sha256": "b60def5358728833919589fde27fa65190ee9ad26512510a694fde989eb3b362",
       "disposition": "test-support",
       "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
       "models": []
@@ -4825,7 +4825,7 @@
     },
     {
       "path": "test/e2e/catalog_fixtures/kinesis.json",
-      "sha256": "28aa3f0d00ef35c684a57031d67c1d1afffcb8f4fa40e566b75c77cda8f40dd4",
+      "sha256": "5998916bddd0d9a5f4057fd8207a90f30dec06b6ff373ad6f0c46a518c0e48de",
       "disposition": "test-support",
       "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
       "models": []
@@ -5168,21 +5168,21 @@
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "065d8ab98e5c0bbb4a01337392aa214d5bb43ffd40b4249881c2323b0a71bc21",
+      "sha256": "5739cd3e5fbc0c70ba3e03d6708fcad84d04597cb34476ba9bc18a6feef3ceeb",
       "disposition": "presentation",
       "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "5903b2afa9924ce61b9c1333e5f2cb3dedb40da1e9604115c48ac2865e503073",
+      "sha256": "8751ba25ae468d47b638d0a1d9625d0daa7315dec88abe9b41783d32549bcca6",
       "disposition": "presentation",
       "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
       "models": []
     },
     {
       "path": "tools/console/src/catalog.jsx",
-      "sha256": "8e0a609d9f4bd36cff2ddfca6ef7438a9e6a8606e02397ec3b78f8327e7ca6d3",
+      "sha256": "1b158dcb8e68d917596cfa2a722124b001e35d31ead1c57601bfa3955fa83805",
       "disposition": "modeled",
       "reason": "Catalog console view source or its embedded bundle; view acceptance, single-write sequencing and failure visibility are projected by CatalogConsoleEpoch; rendering and native results are covered by browser tests.",
       "models": [
