@@ -1,0 +1,49 @@
+"use strict";
+// One OpenAPI document per catalog service, generated from the embedded
+// official botocore subsets. Requests stay on this simulator origin.
+fetch("/_simulator/docs/catalog/index.json", { credentials: "same-origin" })
+  .then((response) => {
+    if (!response.ok) throw new Error("Catalog reference index unavailable.");
+    return response.json();
+  })
+  .then((services) => {
+    Scalar.createApiReference("#reference", {
+      sources: services.map((service, index) => ({
+        title: service.title,
+        slug: service.model,
+        url: "/_simulator/docs/catalog/" + service.model + ".json",
+        default: index === 0,
+      })),
+      withDefaultFonts: false,
+      theme: "default",
+      darkMode: false,
+      hideDarkModeToggle: true,
+      hideClientButton: true,
+      showDeveloperTools: "never",
+      telemetry: false,
+      agent: { disabled: true },
+      proxyUrl: "",
+      persistAuth: false,
+      customFetch: (input, init) => {
+        const url = new URL(
+          typeof input === "string"
+            ? input
+            : input instanceof URL
+              ? input.href
+              : input.url,
+          location.href,
+        );
+        if (url.origin !== location.origin)
+          return Promise.reject(
+            new Error("Only this simulator origin is allowed."),
+          );
+        return fetch(input, init);
+      },
+    });
+  })
+  .catch((error) => {
+    const message = document.createElement("p");
+    message.setAttribute("role", "alert");
+    message.textContent = error.message;
+    document.getElementById("reference").append(message);
+  });

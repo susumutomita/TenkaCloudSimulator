@@ -122,3 +122,18 @@ test('DynamoDB is a capability-gated AWS console with English/Japanese table nav
   assert.equal(serviceFromHash('#/dynamodb-fake'),null);
   assert.equal(JSON.stringify(capabilities),before);
 });
+
+test('the catalog route is capability-gated and its service titles are searchable',()=>{
+  const catalog={services:[{model:'ecr',title:'Amazon Elastic Container Registry',serviceId:'ECR'},{model:'amplify',title:'AWS Amplify',serviceId:'Amplify'}]};
+  const enabled={...capabilities,services:{...capabilities.services,catalog}};
+  assert.equal(serviceAvailable('catalog',capabilities),false);
+  assert.equal(serviceAvailable('catalog',enabled),true);
+  assert.equal(servicesForProvider('aws',enabled).length,12);
+  assert.deepEqual(servicesForProvider('aws',enabled,'container registry').map(s=>s.id),['catalog']);
+  assert.deepEqual(servicesForProvider('aws',enabled,'amplify').map(s=>s.id),['catalog']);
+  assert.deepEqual(servicesForProvider('aws',enabled,'カタログ').map(s=>s.id),['catalog']);
+  assert.deepEqual(servicesForProvider('gcp',enabled,'amplify'),[]);
+  assert.deepEqual(servicesForProvider('aws',{...capabilities,services:{...capabilities.services,catalog:{services:'x'}}},'amplify'),[]);
+  assert.equal(serviceFromHash('#/catalog'),'catalog');
+  assert.equal(hashForService('catalog'),'/catalog');
+});

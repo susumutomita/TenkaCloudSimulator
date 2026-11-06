@@ -15,9 +15,10 @@ machine-discovered semantic coverage. A newly added implementation file is not
 covered merely because an existing model passes: its exact path must have an
 appropriate reviewed scope mapping and property argument.
 
-The current registry has **50 baselines/398 required named mutation controls
-(448 required executions)**. It preserves the pre-landing 48/381 inventory and
-adds LandingAccessAdmission (six controls) and LandingTopologyState (eleven).
+The current registry has **51 baselines/410 required named mutation controls
+(461 required executions)**. It preserves the 50/398 inventory and adds
+CatalogResourceLifecycle (twelve controls). The earlier pre-landing 48/381
+inventory gained LandingAccessAdmission (six controls) and LandingTopologyState (eleven).
 SecretMetadataViewEpoch and the existing CFN, Sakura and DynamoDB scopes remain.
 Numeric/regex/parser correctness, actual resource provisioning and NoEcho/output
 secrecy are not proved by registration. The IAM scope is four API-reachable seeds and at most two subsequent requests;

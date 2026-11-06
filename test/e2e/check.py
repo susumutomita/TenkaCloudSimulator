@@ -622,5 +622,11 @@ def handler(event,context):
  def test_cloudformation_original_crypto_template_native_sdk_lifecycle(self):
   subprocess.run([sys.executable, str(Path(__file__).with_name('cloudformation_crypto.py'))], check=True, timeout=180)
 
+ def test_aws_catalog_native_sdk_two_teams_policy_restart_and_cleanup(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('aws_catalog.py'))], check=True, timeout=240)
+
+ def test_aws_catalog_console_reference_and_shared_native_state(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('aws_catalog_console.py'))], check=True, timeout=300)
+
 
 if __name__=='__main__':unittest.main(verbosity=2)
