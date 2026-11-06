@@ -136,3 +136,16 @@ func storedBytes(tx *sql.Tx) (int64, error) {
 	err := tx.QueryRow("SELECT sum(length(document)) FROM gcp_catalog_resources").Scan(&total)
 	return total.Int64, err
 }
+
+// withinBudget enforces the aggregate metadata budget after a write inside
+// its transaction, so insertions and replacements alike roll back.
+func withinBudget(tx *sql.Tx) error {
+	total, err := storedBytes(tx)
+	if err != nil {
+		return err
+	}
+	if total > maxStoredBytes {
+		return &status{"RESOURCE_EXHAUSTED", "The simulator catalog metadata budget is exhausted."}
+	}
+	return nil
+}

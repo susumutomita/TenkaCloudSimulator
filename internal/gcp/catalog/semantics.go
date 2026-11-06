@@ -321,12 +321,12 @@ func (q *request) create() (any, error) {
 		if count >= limit {
 			return nil, &status{"RESOURCE_EXHAUSTED", fmt.Sprintf("The simulator allows at most %d %s per parent.", limit, c.ID)}
 		}
-		total, err := storedBytes(tx)
-		if err != nil {
-			return nil, err
-		}
-		if total > maxStoredBytes {
-			return nil, &status{"RESOURCE_EXHAUSTED", "The simulator catalog metadata budget is exhausted."}
+		// The parent read before authorization must still exist when the
+		// child is inserted, so a concurrent delete cannot orphan it.
+		if c.Parent != "" {
+			if err := liveParent(tx, parent); err != nil {
+				return nil, err
+			}
 		}
 		if q.params["validateOnly"] != true {
 			seq, err := nextSeq(tx)
@@ -334,6 +334,9 @@ func (q *request) create() (any, error) {
 				return nil, err
 			}
 			if err := exactlyOne(tx.Exec("INSERT INTO gcp_catalog_resources VALUES(?,?,?,?,?,?,?,1)", q.b.model.Name, name, parent, c.ID, id, data, seq)); err != nil {
+				return nil, err
+			}
+			if err := withinBudget(tx); err != nil {
 				return nil, err
 			}
 		}
@@ -479,6 +482,9 @@ func (q *request) patch() (any, error) {
 			if err := exactlyOne(tx.Exec("UPDATE gcp_catalog_resources SET document=?, generation=generation+1 WHERE name=? AND generation=?", data, r.Name, r.Generation)); err != nil {
 				return nil, err
 			}
+			if err := withinBudget(tx); err != nil {
+				return nil, err
+			}
 		}
 		out, err := q.respond(r.Document, c.Schema, tx)
 		if err != nil {
@@ -573,4 +579,14 @@ func (q *request) operations() (any, error) {
 		return nil, err
 	}
 	return map[string]any{"operations": items}, nil
+}
+
+// liveParent reports whether a parent resource still exists inside tx.
+func liveParent(tx *sql.Tx, parent string) error {
+	if _, err := findName(tx, parent); errors.Is(err, sql.ErrNoRows) {
+		return &status{"NOT_FOUND", fmt.Sprintf("Parent '%s' no longer exists.", parent)}
+	} else if err != nil {
+		return err
+	}
+	return nil
 }
