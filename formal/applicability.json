@@ -3,6 +3,13 @@
   "base_sha": "30ec082bfb34d7202dc1740ef55668522c275e4c",
   "changes": [
     {
+      "path": "Makefile",
+      "sha256": "2e248f923e1ec8ca35a429ea8e165f85f526e0fc752ede85581eb90c8ced5126",
+      "disposition": "build-metadata",
+      "reason": "Require the new pure Metrics receipt/schema/locator negative units in make e2e before all existing reflow, native65 conformance and start checks. No failed result is ignored and no runtime/model bound or threshold changes.",
+      "models": []
+    },
+    {
       "path": "README.ja.md",
       "sha256": "1e0a2028a8886ffaac2080d6c12ad72cbf24bfb7e8d8bbab43d8192ef8d74ada",
       "disposition": "documentation",
@@ -415,7 +422,7 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "b85c9649ed720cad04f4b175fbcf36501fd50334ec45b63dafaeb20107414c4c",
+      "sha256": "3248c6e5ec3f6dcb8142c9c268e7aa9e87f9737cd736161baf5b42de38b9393c",
       "disposition": "formal-infrastructure",
       "reason": "Append/protect six Metrics models and161 controls; preserve all public50 model objects, properties/scopes and existing gate behavior/LP/diagnostic rules. Must execute policy units and positives/negatives on final integrated source.",
       "models": []
