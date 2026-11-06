@@ -51,6 +51,14 @@ bounds above.
   `validateOnly=true` validates and stores nothing.
 - `etag` guards patch and delete (`ABORTED` on mismatch). `updateMask`
   restricts a patch to the reviewed mutable fields.
+- Operations are named under the scope the official operations methods use,
+  such as `projects/{project}/locations/{location}/operations` or, for APIs
+  that keep them per resource, `projects/{project}/databases/{database}/operations`.
+- Reviewed reference fields must name an existing resource of the same API
+  (`NOT_FOUND` otherwise). Where the official service refuses it, a resource
+  that is still referenced cannot be deleted (`FAILED_PRECONDITION`).
+  Deletion protection fields block delete with `FAILED_PRECONDITION` until a
+  patch clears them.
 - Errors use `google.rpc.Status` with the canonical HTTP mapping, for example
   `ALREADY_EXISTS` 409 and `FAILED_PRECONDITION` 400.
 

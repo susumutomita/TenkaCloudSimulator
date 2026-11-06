@@ -59,6 +59,34 @@ type Collection struct {
 	// Cascade lets delete with force=true remove children; otherwise
 	// deleting a parent with children fails with FAILED_PRECONDITION.
 	Cascade bool
+	// References maps top-level fields to the same-API collection whose
+	// existing resource they must name at create and update.
+	References map[string]Reference
+	// Protection lists stored field values, such as a deletion protection
+	// flag, that make delete fail with FAILED_PRECONDITION.
+	Protection map[string]any
+	// Operations names the collection (this one or an ancestor) whose
+	// resource name prefixes this collection's long-running operations,
+	// as in projects/{project}/databases/{database}/operations/{operation}.
+	// "" places them under the API scope root.
+	Operations string
+	// Message is the operation response type name when it differs from
+	// Schema, for discovery schemas such as GoogleFirestoreAdminV1Database.
+	Message string
+}
+
+// Reference is a field that names another resource of the same API.
+type Reference struct {
+	Collection string
+	// Blocks refuses deleting the referenced resource while it is named.
+	Blocks bool
+}
+
+func (c *Collection) message() string {
+	if c.Message != "" {
+		return c.Message
+	}
+	return c.Schema
 }
 
 // API is a reviewed bounded specification of one official Google API.

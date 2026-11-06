@@ -106,6 +106,18 @@ func bindAPI(api *API, model *Model) (*binding, error) {
 		if c.IDParam != "" && c.IDField != "" || c.IDField != "" && model.Schemas[c.Schema].Properties[c.IDField] == nil {
 			return nil, fmt.Errorf("GCP catalog %s collection %s needs one ID source that names a schema field", api.Key, c.ID)
 		}
+		for field, ref := range c.References {
+			if model.Schemas[c.Schema].Properties[field] == nil || api.collection(ref.Collection) == nil {
+				return nil, fmt.Errorf("GCP catalog %s collection %s references an unknown field or collection", api.Key, c.ID)
+			}
+		}
+		anchor := c
+		for anchor != nil && c.Operations != "" && anchor.ID != c.Operations {
+			anchor = api.collection(anchor.Parent)
+		}
+		if anchor == nil {
+			return nil, fmt.Errorf("GCP catalog %s collection %s places operations under a collection that is not an ancestor", api.Key, c.ID)
+		}
 	}
 	for i := range api.Bindings {
 		bound := &api.Bindings[i]

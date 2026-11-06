@@ -30,6 +30,7 @@ type request struct {
 	location string
 	params   map[string]any
 	body     map[string]any
+	target   string // the resource a create, patch or delete acts on
 }
 
 func (q *request) collection() *Collection { return q.b.api.collection(q.bound.Collection) }
@@ -58,9 +59,7 @@ func uuid() string {
 }
 
 func (q *request) execute() (any, error) {
-	if strings.HasPrefix(q.path, "projects/"+q.e.cfg.ProjectNumber+"/") {
-		q.path = "projects/" + q.e.cfg.Project + strings.TrimPrefix(q.path, "projects/"+q.e.cfg.ProjectNumber)
-	}
+	q.path = q.e.normalize(q.path)
 	switch q.bound.Kind {
 	case Create:
 		return q.create()
@@ -80,6 +79,14 @@ func (q *request) execute() (any, error) {
 		return q.operation()
 	}
 	return q.operations()
+}
+
+// normalize names the configured project by ID rather than number.
+func (e *Engine) normalize(name string) string {
+	if strings.HasPrefix(name, "projects/"+e.cfg.ProjectNumber+"/") {
+		return "projects/" + e.cfg.Project + strings.TrimPrefix(name, "projects/"+e.cfg.ProjectNumber)
+	}
+	return name
 }
 
 func (q *request) find(name string) (row, error) {
@@ -205,6 +212,9 @@ func (q *request) respond(result map[string]any, typeName string, tx *sql.Tx) (a
 	if q.location != "" {
 		scope += "/locations/" + q.location
 	}
+	if anchor := q.collection().Operations; anchor != "" {
+		scope = ancestor(q.target, anchor)
+	}
 	opName := scope + "/operations/operation-" + randomHex(10)
 	response := map[string]any{"@type": "type.googleapis.com/google.protobuf.Empty"}
 	if typeName != "" {
@@ -234,6 +244,73 @@ func (q *request) respond(result map[string]any, typeName string, tx *sql.Tx) (a
 		return nil, err
 	}
 	return op, nil
+}
+
+// ancestor returns the prefix of a resource name that ends with an ID of
+// the named collection; collection segments sit at even positions.
+func ancestor(name, collection string) string {
+	segments := strings.Split(name, "/")
+	for i := len(segments) - 2; i >= 0; i -= 2 {
+		if segments[i] == collection {
+			return strings.Join(segments[:i+2], "/")
+		}
+	}
+	return name
+}
+
+// references requires every written reference field (all when written is
+// nil) to name an existing resource of its collection, normalizing project
+// numbers to the project ID.
+func (q *request) references(tx *sql.Tx, document map[string]any, written map[string]bool) error {
+	fields := make([]string, 0, len(q.collection().References))
+	for field := range q.collection().References {
+		if written == nil || written[field] {
+			fields = append(fields, field)
+		}
+	}
+	sort.Strings(fields)
+	for _, field := range fields {
+		value, ok := document[field].(string)
+		if !ok {
+			continue
+		}
+		value = q.e.normalize(value)
+		document[field] = value
+		r, err := findName(tx, value)
+		if errors.Is(err, sql.ErrNoRows) || err == nil && (r.API != q.b.model.Name || r.Collection != q.collection().References[field].Collection) {
+			return &status{"NOT_FOUND", fmt.Sprintf("Referenced resource '%s' in field '%s' was not found.", value, field)}
+		}
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// referenced finds a resource outside the deleted subtree that still names
+// the target through a blocking reference.
+func (q *request) referenced(tx *sql.Tx, target row) (string, error) {
+	for _, c := range q.b.api.Collections {
+		fields := make([]string, 0, len(c.References))
+		for field, ref := range c.References {
+			if ref.Blocks && ref.Collection == target.Collection {
+				fields = append(fields, field)
+			}
+		}
+		sort.Strings(fields)
+		for _, field := range fields {
+			var name string
+			err := tx.QueryRow("SELECT name FROM gcp_catalog_resources WHERE api=? AND collection=? AND json_extract(document, '$.' || ?)=? AND name NOT LIKE ? ESCAPE '\\' ORDER BY seq LIMIT 1",
+				q.b.model.Name, c.ID, field, target.Name, escapeLike(target.Name)+"/%").Scan(&name)
+			if err == nil {
+				return name, nil
+			}
+			if !errors.Is(err, sql.ErrNoRows) {
+				return "", err
+			}
+		}
+	}
+	return "", nil
 }
 
 func (q *request) longRunning() bool {
@@ -295,16 +372,20 @@ func (q *request) create() (any, error) {
 			document[key] = generated
 		}
 	}
-	data, err := encode(document)
-	if err != nil {
-		return nil, err
-	}
+	q.target = name
 	return q.idempotent(func() (any, error) {
 		tx, err := q.e.store.db.Begin()
 		if err != nil {
 			return nil, err
 		}
 		defer tx.Rollback()
+		if err := q.references(tx, document, nil); err != nil {
+			return nil, err
+		}
+		data, err := encode(document)
+		if err != nil {
+			return nil, err
+		}
 		if _, err := findName(tx, name); err == nil {
 			return nil, &status{"ALREADY_EXISTS", fmt.Sprintf("Resource '%s' already exists.", name)}
 		} else if !errors.Is(err, sql.ErrNoRows) {
@@ -337,7 +418,7 @@ func (q *request) create() (any, error) {
 				return nil, err
 			}
 		}
-		out, err := q.respond(document, c.Schema, tx)
+		out, err := q.respond(document, c.message(), tx)
 		if err != nil {
 			return nil, err
 		}
@@ -445,6 +526,7 @@ func (q *request) patch() (any, error) {
 	if etag, ok := q.body["etag"].(string); ok && r.Document["etag"] != nil && etag != r.Document["etag"] {
 		return nil, &status{"ABORTED", "The etag does not match the current resource."}
 	}
+	written := map[string]bool{}
 	for _, field := range fields {
 		field = strings.TrimSpace(field)
 		if field == "etag" {
@@ -453,6 +535,7 @@ func (q *request) patch() (any, error) {
 		if !mutable[field] {
 			return nil, invalid("Field %q cannot be updated by the simulator.", field)
 		}
+		written[field] = true
 		if value, ok := q.body[field]; ok {
 			r.Document[field] = value
 		} else {
@@ -465,22 +548,26 @@ func (q *request) patch() (any, error) {
 	if _, ok := r.Document["etag"]; ok {
 		r.Document["etag"] = randomHex(8)
 	}
-	data, err := encode(r.Document)
-	if err != nil {
-		return nil, err
-	}
+	q.target = r.Name
 	return q.idempotent(func() (any, error) {
 		tx, err := q.e.store.db.Begin()
 		if err != nil {
 			return nil, err
 		}
 		defer tx.Rollback()
+		if err := q.references(tx, r.Document, written); err != nil {
+			return nil, err
+		}
+		data, err := encode(r.Document)
+		if err != nil {
+			return nil, err
+		}
 		if q.params["validateOnly"] != true {
 			if err := exactlyOne(tx.Exec("UPDATE gcp_catalog_resources SET document=?, generation=generation+1 WHERE name=? AND generation=?", data, r.Name, r.Generation)); err != nil {
 				return nil, err
 			}
 		}
-		out, err := q.respond(r.Document, c.Schema, tx)
+		out, err := q.respond(r.Document, c.message(), tx)
 		if err != nil {
 			return nil, err
 		}
@@ -497,13 +584,24 @@ func (q *request) remove() (any, error) {
 	if etag, ok := q.params["etag"].(string); ok && etag != "" && etag != r.Document["etag"] {
 		return nil, &status{"ABORTED", "The etag does not match the current resource."}
 	}
+	for field, value := range c.Protection {
+		if r.Document[field] == value {
+			return nil, &status{"FAILED_PRECONDITION", fmt.Sprintf("Resource '%s' is protected by '%s'; disable it before deleting.", r.Name, field)}
+		}
+	}
 	force := q.params["force"] == true
+	q.target = r.Name
 	return q.idempotent(func() (any, error) {
 		tx, err := q.e.store.db.Begin()
 		if err != nil {
 			return nil, err
 		}
 		defer tx.Rollback()
+		if holder, err := q.referenced(tx, r); err != nil {
+			return nil, err
+		} else if holder != "" {
+			return nil, &status{"FAILED_PRECONDITION", fmt.Sprintf("Resource '%s' is still referenced by '%s'.", r.Name, holder)}
+		}
 		var children int
 		if err := tx.QueryRow("SELECT count(*) FROM gcp_catalog_resources WHERE name LIKE ? ESCAPE '\\'", escapeLike(r.Name)+"/%").Scan(&children); err != nil {
 			return nil, err
