@@ -15,11 +15,11 @@ machine-discovered semantic coverage. A newly added implementation file is not
 covered merely because an existing model passes: its exact path must have an
 appropriate reviewed scope mapping and property argument.
 
-The combined landing/login integration requires **51 baselines/411 required
-named mutation controls (462 executions)**; its exact-HEAD whole gate is pending.
+The combined landing/login integration requires **51 baselines/412 required
+named mutation controls (463 executions)**; its exact-HEAD whole gate is pending.
 It preserves main's 50/398 inventory: the earlier 48/381 plus LandingAccessAdmission
 (six controls) and LandingTopologyState (eleven). LoginInputIntent adds one model
-with 13 controls. Historical `28d37d1` checked 13 cases/73 distinct states before
+with 14 controls. Historical `28d37d1` checked 13 cases/73 distinct states before
 focus capture; scoped `5b270e9` checked 14 cases/77 distinct states (94 generated,
 empty queue) and all 13 declared noninitial counterexamples, including the focus
 control at state 3. The controlled reset on focus is an explicit assumption, not
@@ -52,7 +52,7 @@ fallback evidence, not native Chrome 157 rendering or successful full-gate CI.
 |---|---|---|
 | ObjectStore | two buckets/two keys; parent integrity, abstract allow/deny | concrete IAM, HTTP, SQL, crashes |
 | CFNConditionAdmission | 234 finite input witnesses; defaults/supplied admission, all conditions/declarations, branch choice, NoValue pruning, pure resource/output plan | real parser/numeric/regex/graph evaluation, exact error ordering, raw-link/dependency completeness, SQL, resource mutation, grants, privacy and host grading |
-| [LoginInputIntent](login-token-file.md#bounded-input-intent-model) | 17 scheduled input/focus/paste/file/submit/locale scenarios, revision 0..3, at most six events and two POST snapshots; eight invariant families | arbitrary interleavings, React/DOM refinement, clipboard/extension behavior, file parser, server authentication and liveness |
+| [LoginInputIntent](login-token-file.md#bounded-input-intent-model) | 18 scheduled input/focus/keyboard/paste/file/submit/locale scenarios, revision 0..3, at most six events and two POST snapshots; eight invariant families | arbitrary interleavings, React/DOM refinement, clipboard/extension behavior, file parser, server authentication and liveness |
 | StackOwnership | two owners/two names; retained drift reservations | authentication, callback recovery, full CFN |
 | S3Versions | one bucket/two keys; at most three history entries per key | suspended versions, byte quotas, SQL |
 | NativeIAMOwnership | two case-folded names; native/legacy exclusivity | trust parsing, full IAM, process isolation |

@@ -64,12 +64,13 @@ Git, logs, terminal recordings, and screen sharing. If paste is unavailable, use
 it, and the server authenticates when you submit. See the
 [token-file format and unverified browser boundaries](docs/login-token-file.md).
 The masked field includes per-field password-manager ignore hints. It adopts a
-connected native value during input/focus capture or blur, and snapshots it at
+connected native value during input/focus/keyboard capture or blur, and snapshots it at
 submission, including an intentional clear. Submission flushes a current explicit
 paste first; adoption is a new intent that cancels older asynchronous input work.
 These are compatibility measures, not proof of an extension cause or a confirmed
-Dia/1Password repair. The latest focus-capture candidate has a verified local offline UI build, but is not
-browser-verified; real extension and user-device clipboard behavior remain unverified.
+Dia/1Password repair. At `339c264`, the first native-input browser case passed,
+but the native-clear/Enter case failed. The keyboard-capture follow-up still needs
+its own build and browser validation; real extension and user-device clipboard behavior remain unverified.
 See the [dated login CI result and remaining checks](docs/login-token-file.md#dated-validation-and-current-candidate).
 
 Press Ctrl+C to stop. Restarting with the same state and token files reuses them.
@@ -260,10 +261,10 @@ not binary runtime dependencies. Regeneration must preserve locks and original
 rights: [console](tools/console/README.md), [Scalar](tools/scalar/README.md),
 [Python/WASI runtime](tools/python/README.md).
 
-The combined landing/login integration requires **51 finite models and 411
-intentional defect controls (462 required executions)**; its exact-HEAD whole gate
+The combined landing/login integration requires **51 finite models and 412
+intentional defect controls (463 required executions)**; its exact-HEAD whole gate
 is pending. It preserves main's 50/398 inventory, including the two bounded landing
-models and their 17 controls, and adds LoginInputIntent with 13 controls. The older
+models and their 17 controls, and adds LoginInputIntent with 14 controls. The older
 48/381 inventory, including the Sakura, Secrets metadata and DynamoDB console
 models, remains preserved. Registration is not an execution receipt. The IAM scenario checks two requests
 from each of four reachable seeds. A broader four-request trial timed out and
@@ -295,7 +296,7 @@ implementation. These receipts and their then-pending hosted checks belong to
 those revisions. The original crypto fixture also passed the two-CLI SDK helper
 at `2d76646` (73 SDK calls/responses and nine auxiliary HTTP pairs across four CLI
 incarnations). None proves host scoring, output secrecy, every physical resource
-deletion, Go/SQL refinement or success of the current 462-case combined gate.
+deletion, Go/SQL refinement or success of the current 463-case combined gate.
 
 ## License and attribution
 

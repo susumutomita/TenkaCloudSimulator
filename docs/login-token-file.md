@@ -50,9 +50,9 @@ an extension, establish its behavior, or diagnose the cause of a failed paste.
 There is no recommendation to disable browser protection as a permanent fix.
 
 A connected native input may differ from React's controlled value after an
-external/native write. Input capture, **focus capture**, and blur adopt that value
-as a new intent. The parent focus-capture handler runs before descendant focus
-processing; it does not force focus, inject an input event, or block native editing.
+external/native write. Input, **focus and keyboard capture**, and blur adopt that value
+as a new intent. Parent capture handlers run before descendant processing; they
+do not force focus, inject an input event, or block native editing.
 Submission also reads the connected control, including an intentional empty value
 rather than falling back to an older credential. Submission flushes a still-current
 explicit paste first; adoption itself is a new intent that invalidates older file
@@ -66,17 +66,18 @@ wait failure below is not established; focus-related controlled restoration is a
 hypothesis, not a diagnosis of Cloudscape, React, Dia or a password manager.
 
 Actual 1Password/Dia/Safari behavior, screenshot/image interpretation, and the
-user's OS clipboard remain unverified. The latest focus-capture integration has
-not been built or exercised in a browser. Existing source, earlier hosted checks
+user's OS clipboard remain unverified. The focus-capture integration at `339c264`
+passed its first native-input browser case but failed native clear followed by
+Enter. The keyboard-capture follow-up is not yet built or browser-validated. Earlier hosted checks
 and scoped model evidence must not be presented as current device-level acceptance.
 
 ## Bounded input-intent model
 
 [`LoginInputIntent.tla`](../formal/LoginInputIntent.tla) and its
 [configuration](../formal/LoginInputIntent.cfg) describe committed input outcomes
-using two opaque nonempty values and Empty, not real credentials. Seventeen scheduled
-scenarios cover native insertion/clear, focus capture before a modeled controlled
-reset, explicit paste precedence, disconnected fallback, blur then locale,
+using two opaque nonempty values and Empty, not real credentials. Eighteen scheduled
+scenarios cover native insertion/clear, focus and keyboard capture before an
+assumed controlled reset, explicit paste precedence, disconnected fallback, blur then locale,
 current/stale file completion, busy/file submit gates and unmount. Revisions range from 0 to 3 without wrap, with at most six events and
 two recorded POST attempts. These finite traces do not cover arbitrary event order.
 
@@ -84,7 +85,7 @@ The eight invariant families are TypeOK, NoEmptyPOST, NoPOSTWhileBlocked,
 StaleFileCompletionFrame, SubmissionSelectionExact, AdoptedValueExact,
 IntentInvalidatesAsync and LocaleIntentFrame. The transition functions model
 selection, new-intent invalidation and publication; independent before-state
-oracles check actual token/ref fields and POST records. The 13 mutation controls
+oracles check actual token/ref fields and POST records. The 14 mutation controls
 change those transitions, leaving the oracles unchanged. The locale frame covers
 adopted controlled intent, not unadopted DOM contents. The existing BrowserSessions
 model covers its separate server-session boundary and does not prove input behavior.
@@ -109,13 +110,35 @@ JavaScript/React/Cloudscape/DOM refinement proof, OS/extension test, file-parser
 proof, cryptographic/authentication guarantee, liveness proof or full event-space
 exploration. No real tokens are represented.
 
-This combined landing/login integration adds 14 login checks to main's preserved
-448-check inventory (50 models/398 controls): **51 models / 411 controls / 462
+This combined landing/login integration adds 15 login checks to main's preserved
+448-check inventory (50 models/398 controls): **51 models / 412 controls / 463
 required executions**. The combined exact-HEAD
 formal gate and new embedded-binary browser/E2E checks remain pending; the scoped
 result does not substitute for them.
 
 ## Dated validation and current candidate
+
+At `339c264`, both complete E2E runs had 61 successes and one error out of 62.
+The first native insertion/Enter case passed; the next, already-focused native
+clear/Enter case failed to show the empty-input explanation. Its later empty-value,
+no-POST and unauthenticated assertions were not reached. Both Japanese UI jobs
+were cancelled during Ubuntu font downloads, before actual UI checks. Normal CI
+installed the same dependencies in 22–36 seconds; the Japanese acquisitions ran
+for about ten minutes. This fits the existing job budget, but logs do not identify
+the definitive cancellation actor or establish a general mirror outage.
+
+That immutable HEAD passed all 51 model baselines and 411 required controls
+(462 outcomes), the 18-file applicability check, asset reproducibility and the
+Go/race/cross-build, security and unchanged coverage gates. These successful
+checks do not replace the failed browser case. The keyboard-capture follow-up
+adds one model control, requiring 463 combined outcomes; its own gate is pending.
+
+The new `focused-key-clear-submit` model scenario assumes an intermediate
+controlled render during Enter handling after paste has settled. Its
+`KeyDownSkipsNativeAdoption` control must fail `AdoptedValueExact` in a noninitial
+state. The scenario is a safety exploration, not a proven browser cause; the
+eight invariant families do not assert DOM error-message visibility. The original
+E2E assertions and five-second timeout remain mandatory and unchanged.
 
 The earlier `6b249e6` [push CI run](https://github.com/susumutomita/TenkaCloudSimulator/actions/runs/42234615389)
 rebuilt the embedded assets and passed Go quality, supported-target compilation,
@@ -132,7 +155,7 @@ configured budget, but the cancellation cause is not confirmed. The overall run
 was cancelled, the main CI job failed, and the later **442-case formal step did
 not execute**. These outcomes must not be described as successful CI.
 
-The current focus-capture candidate preserves the failing assertion, order and
+The earlier focus-capture candidate preserved the failing assertion, order and
 timeout. Its optional failure-only diagnostics record booleans and bounded HTTP
 counts/statuses, not credentials; diagnostic observer errors are marked separately
 as incomplete and cannot replace the product failure. Source `21054448` was rebuilt
@@ -141,7 +164,8 @@ notices for 22 packages. The bounded build completed with verified process clean
 its registered Node/compiler RSS peaked at 186,232,832 bytes with a maximum live
 sampling gap of 26.2 ms. This trusted compiler instrumentation is not generic
 process containment. Default hosted-CI asset equivalence and the new embedded
-binary's browser behavior remain unverified. Current-head full gates, a real focused login rerun,
+binary's browser behavior were still unverified at that build receipt. The later
+`339c264` results above supersede that status. Current-head full gates, a real focused login rerun,
 and separate approved 1Password/Dia/Safari checks remain required.
 
 ## Input-scoped verification

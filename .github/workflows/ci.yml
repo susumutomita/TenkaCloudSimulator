@@ -110,6 +110,8 @@ jobs:
             reports/landing-topology/**
             reports/login-first-native-failure.json
             reports/login-first-native-observer-status.json
+            reports/login-second-native-clear-failure.json
+            reports/login-second-native-clear-observer-status.json
           if-no-files-found: warn
           retention-days: 14
       - name: Run the actual platform hello-world lifecycle and participant browser

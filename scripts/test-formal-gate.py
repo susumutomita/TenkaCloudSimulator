@@ -660,7 +660,7 @@ class FormalGateTests(unittest.TestCase):
         original = path.read_text()
         registry = json.loads(original)
         self.assertEqual(set(REQUIRED_MUTANTS), BASE_MODELS)
-        self.assertEqual(sum(map(len, REQUIRED_MUTANTS.values())), 411)
+        self.assertEqual(sum(map(len, REQUIRED_MUTANTS.values())), 412)
         self.assertEqual({m['id']: {c['id'] for c in m['mutants']} for m in registry['models']}, REQUIRED_MUTANTS)
         for model in registry['models']:
             for mutant in model['mutants']:
@@ -677,7 +677,7 @@ class FormalGateTests(unittest.TestCase):
     def test_every_required_control_is_protected_against_single_removal(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
-        self.assertEqual(sum(len(v) for v in REQUIRED_MUTANTS.values()), 411)
+        self.assertEqual(sum(len(v) for v in REQUIRED_MUTANTS.values()), 412)
         for model_id, controls in REQUIRED_MUTANTS.items():
             for control in controls:
                 with self.subTest(model=model_id, control=control):
@@ -1656,7 +1656,7 @@ class FormalGateTests(unittest.TestCase):
         path = self.root / 'formal/models.json'
         original = path.read_text()
         entry = next(m for m in json.loads(original)['models'] if m['id'] == 'LoginInputIntent')
-        self.assertEqual(len(entry['mutants']), 13)
+        self.assertEqual(len(entry['mutants']), 14)
         for control in entry['mutants']:
             changed = json.loads(original)
             target = next(m for m in changed['models'] if m['id'] == entry['id'])
@@ -1693,12 +1693,39 @@ class FormalGateTests(unittest.TestCase):
         self.assertIn(' [] k = "native-focus-submit" -> <<Event("native","A"),Event("focus","empty"),Event("submit","empty")>>', mutated)
         self.assertIn('Sync(s) == IF s.connected /\\ s.dom # s.token THEN Adopt(s,s.dom) ELSE s', mutated)
         for before_state_oracle in (
-            '(Op \\in {"sync","focus"} /\\ Before.connected /\\ Before.dom # Before.token)',
-            'ELSE IF Op \\in {"sync","focus"} /\\ Before.connected THEN Before.dom',
-            '"edit","sync","focus","flush","submit","fileok","fileerr"',
+            '(Op \\in {"sync","focus","keydown"} /\\ Before.connected /\\ Before.dom # Before.token)',
+            'ELSE IF Op \\in {"sync","focus","keydown"} /\\ Before.connected THEN Before.dom',
+            '"edit","sync","focus","keydown","flush","submit","fileok","fileerr"',
         ):
             self.assertIn(before_state_oracle, mutated)
 
+
+
+    def test_login_keydown_native_clear_control_preserves_independent_oracles(self):
+        registry = load_registry(self.root)
+        entry = next(m for m in registry['models'] if m['id'] == 'LoginInputIntent')
+        old_controls = {'FlushDoesNotAdoptNativeValue', 'LocaleInvalidatesCurrentFile', 'EmptyDOMReusesOldCredential', 'OldPasteSurvivesNewIntent', 'LocaleClearsIntent', 'FocusSkipsNativeAdoption', 'NonemptyDOMUsesControlledState', 'NativeAdoptionSkipsNewIntent', 'FileCompletionIgnoresRevision', 'SubmitIgnoresFileGate', 'SubmitIgnoresBusy', 'UnmountedFileCompletionPublishes', 'CurrentFileErrorDiscarded'}
+        self.assertEqual({m['id'] for m in entry['mutants']},
+                         old_controls | {'KeyDownSkipsNativeAdoption'})
+        source = (self.root / entry['model']).read_text()
+        control = next(m for m in entry['mutants'] if m['id'] == 'KeyDownSkipsNativeAdoption')
+        self.assertEqual(control['expect_invariant'], 'AdoptedValueExact')
+        name, mutated = apply_mutant(source, entry['id'], control)
+        self.assertEqual(name, 'LoginInputIntent_KeyDownSkipsNativeAdoption')
+        self.assertIn('KeyDown(s) == LET adopted == s IN [adopted EXCEPT !.dom = adopted.token]', mutated)
+        self.assertNotIn('KeyDown(s) == LET adopted == Sync(s)', mutated)
+        self.assertIn(' [] e.op = "keydown" -> KeyDown(s)', mutated)
+        self.assertIn(' [] k = "focused-key-clear-submit" -> <<Event("paste","A"),Event("flush","empty"),Event("native","empty"),Event("keydown","empty"),Event("submit","empty")>>', mutated)
+        # The mutant changes the actual key capture, never the independent
+        # before-state oracle, ordinary input synchronization or focus guard.
+        for unchanged in (
+            'Sync(s) == IF s.connected /\\ s.dom # s.token THEN Adopt(s,s.dom) ELSE s',
+            'Focus(s) == LET adopted == Sync(s) IN [adopted EXCEPT !.dom = adopted.token]',
+            '(Op \\in {"sync","focus","keydown"} /\\ Before.connected /\\ Before.dom # Before.token)',
+            'ELSE IF Op \\in {"sync","focus","keydown"} /\\ Before.connected THEN Before.dom',
+            '"edit","sync","focus","keydown","flush","submit","fileok","fileerr"',
+        ):
+            self.assertIn(unchanged, mutated)
 
 
 if __name__ == '__main__':

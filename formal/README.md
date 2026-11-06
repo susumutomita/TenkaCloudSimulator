@@ -1,9 +1,9 @@
 # Finite state models
 
-Combined landing/login inventory: **51 models / 411 literal-protected controls
-(462 required executions)**. Its exact-HEAD whole gate is pending. Main's 50/398
+Combined landing/login inventory: **51 models / 412 literal-protected controls
+(463 required executions)**. Its exact-HEAD whole gate is pending. Main's 50/398
 inventory (the older 48/381 plus two landing models/17 controls) is preserved;
-LoginInputIntent adds one baseline and 13 controls. Required inventory and exact
+LoginInputIntent adds one baseline and 14 controls. Required inventory and exact
 source bindings live in `models.json` and the protected policy in
 `scripts/formal_model_gate.py`.
 
@@ -11,7 +11,7 @@ Historical `28d37d1` checked 13 input cases/73 distinct states before focus capt
 Scoped `5b270e9` checked 14 cases: 77 distinct states, 94 generated, empty queue,
 and all 13 declared noninitial counterexamples. The focus control failed at state
 3 under a controlled-reset assumption, not an established cause of the hosted
-login failure. This is not a combined 462-case or browser proof.
+login failure. This is not a combined 463-case or browser proof.
 See [input correspondence](../docs/login-token-file.md#bounded-input-intent-model)
 and the [dated failed login CI](../docs/login-token-file.md#dated-validation-and-current-candidate).
 
@@ -57,7 +57,7 @@ On 2026-11-06, scoped 19-case checking passed at `4382ec4`; that revision's full
 cases at `fad3b8a` passed on Chromium 154, including six strict accessibility
 audits. These are dated, separate results. Chromium 154 lacks the current
 HTML-in-Canvas API, so native Chrome 157 drawing and other engines are unverified.
-No successful combined 462-case or later exact-head acceptance is claimed here.
+No successful combined 463-case or later exact-head acceptance is claimed here.
 
 CFNConditionAdmission adds fourteen invariants and fourteen semantic controls over
 234 immutable inputs. Its isolated `f69fb46` SANY/baseline/control run passed
@@ -95,8 +95,8 @@ CFNPhysicalResourceACK adds five properties and seven controls for selected SSM/
 The required `Formal validation` job reserves 30 minutes for checkout, the gate
 negative controls, exact-blob applicability and the complete serial registry.
 Each TLC case retains its 60-second default deadline and existing per-model
-settings; all 462 combined baseline/counterexample runs and failure requirements
-remain mandatory, including the preserved 448 main checks and 14 login checks. This is an aggregate execution budget, not a model-bound,
+settings; all 463 combined baseline/counterexample runs and failure requirements
+remain mandatory, including the preserved 448 main checks and 15 login checks. This is an aggregate execution budget, not a model-bound,
 acceptance, permission or per-case timeout change.
 
 The earlier 15-minute job on `8bb8a3d` ended cancelled after roughly 15 minutes;
@@ -109,7 +109,7 @@ historical scoped receipt does not replace it.
 Legacy integration sections below retain historical counts and status statements
 for traceability. Their word “current” refers to the recorded integration, not
 today's registry. The combined landing/login inventory above requires 51 models /
-411 controls (462 executions), with the exact-HEAD whole gate pending. Historical
+412 controls (463 executions), with the exact-HEAD whole gate pending. Historical
 48/381 results retain their recorded revision; source-specific landing and login
 results do not substitute for combined acceptance.
 

@@ -124,7 +124,7 @@ SDK、操作画面、再起動、チーム分離の受入検証は `make e2e` �
 
 CIはstatementと未フィルターsource-line coverageを両方90%以上に強制します。`make before-commit`単独のcoverage判定はstatementのみで、source-line判定はCIのCobertura生成後ステージと上記の2コマンドで行います。SDK/browser、license、依存security、埋込asset、形式検査も行います。cross compileは他OSでの実行成功を意味しません。開発用Python/Node/Javaはruntime依存ではありません。UI・Scalarの再生成は権利表記とlockを保持する[各build手順](tools/console/README.md)・[Scalar手順](tools/scalar/README.md)・[Python runtimeの権利・再生成手順](tools/python/README.md)に従います。
 
-LPとログインを合わせた統合では**51有限モデル・411制御（462実行）**を必須とし、
+LPとログインを合わせた統合では**51有限モデル・412制御（463実行）**を必須とし、
 統合後の固定HEAD全体検査は未完了です。mainの50モデル・398制御（旧48/381とLPの2モデル・
 17制御）を保持し、LoginInputIntentの1モデル・13制御を追加します。Sakura、DynamoDB画面、
 Secretsメタデータ画面も保持します。LPモデルは信頼済みのhost/origin/認証判定や閉じたノード入力を
@@ -139,7 +139,7 @@ refinementは証明しません。LoginInputIntentもfocus時の制御値リセ�
 
 本体は[MIT](LICENSE)。`/_simulator/licenses/`にGo・Cloudscape・Scalar・CPython/WASI等の原文LICENSE/NOTICEを同梱しています。再配布時も保持してください。AWS公式サービスではなく、AWSロゴは使用しません。[設計・引継ぎ資料](docs/handoff/README.md)。
 
-貼り付けが動かない場合はログイン画面の「トークンファイルを選択」で、主催者から受け取った小さなファイルを明示選択できます。値は隠したまま読み込み、サインイン操作時にサーバーが認証します。[形式・制限とDia未確認の境界](docs/login-token-file.md)。入力欄にはフィールド単位のパスワードマネージャー向け無視ヒントを付け、input／focusのcaptureとblurで接続中のnative入力値を取り込み、送信時にも現在値を確認します。意図的な空欄を尊重し、送信時には現在の明示的な貼り付けを先に処理します。取り込みは新しい入力意図として古い非同期処理を無効にします。拡張機能が原因という診断や、Dia／1Passwordでの修復確認ではありません。最新のfocus-capture候補はローカルのUIビルドと終了確認が成功していますが、通常CIとの生成物一致・ブラウザ動作は未検証で、実拡張機能や利用者のOSクリップボード動作も未確認です。[過去のCI結果と残検証](docs/login-token-file.md#dated-validation-and-current-candidate)を区別してください。
+貼り付けが動かない場合はログイン画面の「トークンファイルを選択」で、主催者から受け取った小さなファイルを明示選択できます。値は隠したまま読み込み、サインイン操作時にサーバーが認証します。[形式・制限とDia未確認の境界](docs/login-token-file.md)。入力欄にはフィールド単位のパスワードマネージャー向け無視ヒントを付け、input／focus／keydownのcaptureとblurで接続中のnative入力値を取り込み、送信時にも現在値を確認します。意図的な空欄を尊重し、送信時には現在の明示的な貼り付けを先に処理します。取り込みは新しい入力意図として古い非同期処理を無効にします。拡張機能が原因という診断や、Dia／1Passwordでの修復確認ではありません。339c264では最初のnative入力ケースは成功しましたが、native clear後のEnterで空欄説明が出ないケースは失敗しました。keydown同期の追加候補はビルドとブラウザ検証が未完了で、実拡張機能や利用者のOSクリップボード動作も未確認です。[過去のCI結果と残検証](docs/login-token-file.md#dated-validation-and-current-candidate)を区別してください。
 
 
 ## Secrets Manager contract
@@ -174,7 +174,7 @@ combined 29-model/164-control formal gate (193 executions). These receipts apply
 to that revision. Every later change still requires its exact-HEAD CI, including
 the 45-case E2E suite; focused results do not replace whole-suite verification.
 
-現在のLP・ログイン統合で必要な形式検査は51モデル・411制御（462実行）で、全体成功は未確認です。IAMモデルは4つの到達可能な初期状態から
+現在のLP・ログイン統合で必要な形式検査は51モデル・412制御（463実行）で、全体成功は未確認です。IAMモデルは4つの到達可能な初期状態から
 各2要求の範囲で、4要求の試案はタイムアウトし未成功です。2026-11-06にLPの限定19実行が
 `4382ec4`で成功しましたが、その版の全448実行はDynamoDBAdmissionで失敗しました。
 `fad3b8a`のLPはPC・スマートフォンの8ブラウザーケースと6状態の厳格なアクセシビリティ検査に成功。
@@ -188,5 +188,5 @@ API資料ではクラウドを分け、Sakura Cloudの任意有効化するDisk�
 全Go race/build、同一profileのstatement94.94%・未除外source90.32%が成功しました。
 資料のみを変えた後続`414c902`では全61 E2E（980.726秒）・reflow・startが成功しました。
 「資料のみの追補」「実行コード等が同一」はその過去の版の説明であり、現在のLP実装を指しません。
-当時のhosted検査の留保もその版に属します。現在の全462実行の成功や、ホスト採点・SQL/Go refinement・
+当時のhosted検査の留保もその版に属します。現在の全463実行の成功や、ホスト採点・SQL/Go refinement・
 秘匿出力・全リソース物理削除の証明へ読み替えないでください。

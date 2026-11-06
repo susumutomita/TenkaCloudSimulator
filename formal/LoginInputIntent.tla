@@ -6,7 +6,7 @@ Values == {"empty", "A", "B"}
 Scenarios == {"dom-insert", "dom-clear", "paste-priority", "disconnected",
  "blur-locale", "file-native", "file-edit", "file-paste", "file-current",
  "file-error", "file-stale-error", "paste-edit", "busy-request", "busy-file",
- "unmount-file", "file-locale-error", "native-focus-submit"}
+ "unmount-file", "file-locale-error", "native-focus-submit", "focused-key-clear-submit"}
 Event(op,v) == [op |-> op, v |-> v]
 Plan(k) == CASE
  k = "dom-insert" -> <<Event("native","A"),Event("submit","empty")>>
@@ -25,6 +25,7 @@ Plan(k) == CASE
  [] k = "busy-file" -> <<Event("filebegin","A"),Event("native","B"),Event("submit","empty"),Event("fileok","empty")>>
  [] k = "unmount-file" -> <<Event("filebegin","A"),Event("unmount","empty"),Event("fileok","empty")>>
  [] k = "native-focus-submit" -> <<Event("native","A"),Event("focus","empty"),Event("submit","empty")>>
+ [] k = "focused-key-clear-submit" -> <<Event("paste","A"),Event("flush","empty"),Event("native","empty"),Event("keydown","empty"),Event("submit","empty")>>
  [] k = "file-locale-error" -> <<Event("filebegin","A"),Event("locale","empty"),Event("fileerr","empty"),Event("locale","empty")>>
 
 InitialState == [token |-> "empty", dom |-> "empty", connected |-> TRUE,
@@ -49,6 +50,9 @@ Sync(s) == IF s.connected /\ s.dom # s.token THEN Adopt(s,s.dom) ELSE s
 \* focus may trigger a controlled render that resets DOM to the adopted token.
 \* Capture must observe/adopt the connected native value before that reset.
 Focus(s) == LET adopted == Sync(s) IN [adopted EXCEPT !.dom = adopted.token]
+\* Assumed controlled reset after a focused keydown capture, not established
+\* browser/extension causality. Adopt native clear BEFORE this reset.
+KeyDown(s) == LET adopted == Sync(s) IN [adopted EXCEPT !.dom = adopted.token]
 Flush(s) == IF ActivePaste(s) THEN Adopt(s,Selected(s))
            ELSE IF s.connected /\ s.dom # s.token THEN Adopt(s,Selected(s))
            ELSE [s EXCEPT !.pasteRev = 0]
@@ -80,6 +84,7 @@ NextState(s,e) == CASE e.op = "edit" -> Adopt(s,e.v)
  [] e.op = "paste" -> Capture(s,e.v)
  [] e.op = "sync" -> Sync(s)
  [] e.op = "focus" -> Focus(s)
+ [] e.op = "keydown" -> KeyDown(s)
  [] e.op = "flush" -> Flush(s)
  [] e.op = "filebegin" -> BeginFile(s,e.v)
  [] e.op = "fileok" -> CompleteFile(s,TRUE)
@@ -106,11 +111,11 @@ ExpectedFile(s) == s.alive /\ s.jobRev # 0 /\ s.jobRev = s.rev /\ s.fileCurrent 
 Before == observation.before
 Op == observation.op
 Flushing == Op = "flush" \/ (Op = "submit" /\ ExpectedReady(Before))
-NeedsAdoption == (Op \in {"sync","focus"} /\ Before.connected /\ Before.dom # Before.token)
+NeedsAdoption == (Op \in {"sync","focus","keydown"} /\ Before.connected /\ Before.dom # Before.token)
  \/ (Flushing /\ ((Before.pasteRev # 0 /\ Before.pasteRev = Before.rev /\ Before.pasteConnected)
                   \/ (Before.connected /\ Before.dom # Before.token)))
 ExpectedToken == IF Op = "edit" THEN Plan(scenario)[pc-1].v
- ELSE IF Op \in {"sync","focus"} /\ Before.connected THEN Before.dom
+ ELSE IF Op \in {"sync","focus","keydown"} /\ Before.connected THEN Before.dom
  ELSE IF Flushing THEN ExpectedSelected(Before)
  ELSE IF Op = "fileok" /\ ExpectedFile(Before) THEN Before.fileVal
  ELSE Before.token
@@ -128,7 +133,7 @@ SubmissionSelectionExact ==
  IF ExpectedSelected(Before) = "empty" THEN state.posts = Before.posts
  ELSE state.posts = Append(Before.posts,ExpectedSelected(Before))
 AdoptedValueExact ==
- /\ ((Op \in {"edit","sync","focus","flush","submit","fileok","fileerr"}) =>
+ /\ ((Op \in {"edit","sync","focus","keydown","flush","submit","fileok","fileerr"}) =>
       state.token = ExpectedToken)
  /\ ((Op = "fileok" /\ ExpectedFile(Before)) =>
       /\ state.fileState = "loaded" /\ state.jobRev = 0)
