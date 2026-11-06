@@ -15,10 +15,10 @@ func TestParentIsRecheckedInsideTheInsertTransaction(t *testing.T) {
 	}
 	defer tx.Rollback()
 	name := "projects/tenkacloud-local/locations/us-central1/clusters/c1"
-	if err := liveParent(tx, name); err != nil {
+	if err := liveParent(tx, "alloydb", name); err != nil {
 		t.Fatalf("a live parent must pass: %v", err)
 	}
-	if err := liveParent(tx, name+"-gone"); err == nil || err.(*status).code != "NOT_FOUND" {
+	if err := liveParent(tx, "alloydb", name+"-gone"); err == nil || err.(*status).code != "NOT_FOUND" {
 		t.Fatalf("a deleted parent must be refused: %v", err)
 	}
 }

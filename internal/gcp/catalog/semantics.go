@@ -324,7 +324,7 @@ func (q *request) create() (any, error) {
 		// The parent read before authorization must still exist when the
 		// child is inserted, so a concurrent delete cannot orphan it.
 		if c.Parent != "" {
-			if err := liveParent(tx, parent); err != nil {
+			if err := liveParent(tx, q.b.model.Name, parent); err != nil {
 				return nil, err
 			}
 		}
@@ -582,8 +582,8 @@ func (q *request) operations() (any, error) {
 }
 
 // liveParent reports whether a parent resource still exists inside tx.
-func liveParent(tx *sql.Tx, parent string) error {
-	if _, err := findName(tx, parent); errors.Is(err, sql.ErrNoRows) {
+func liveParent(tx *sql.Tx, api, parent string) error {
+	if _, err := findName(tx, api, parent); errors.Is(err, sql.ErrNoRows) {
 		return &status{"NOT_FOUND", fmt.Sprintf("Parent '%s' no longer exists.", parent)}
 	} else if err != nil {
 		return err
