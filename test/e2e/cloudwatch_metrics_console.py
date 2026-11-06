@@ -400,6 +400,28 @@ def exercise_lifetimes(page, context, browser, native, peer, directory, namespac
     read_values(page,start,end,'Count')
     literal_row(values,'Count',['3','6','2','4','2'])
     # Locale changes presentation only; actual captured identifiers/query survive.
+    # Observe actual browser requests, not native fixture counters: changing only
+    # labels must not silently reload either Metrics channel or publish data.
+    locale_metric_requests=[]
+    def observe_locale_request(request):
+        parsed=urlsplit(request.url)
+        if (parsed.scheme+'://'+parsed.netloc==native.origin and parsed.path=='/'
+                and request.method=='POST'):
+            action=parse_qs(request.post_data or '').get('Action')
+            if action in (['ListMetrics'],['GetMetricStatistics'],['PutMetricData']):
+                if len(locale_metric_requests)<4:
+                    locale_metric_requests.append(action[0])
+    def settled_locale_frame():
+        page.evaluate("() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))")
+    english_headers=['Timestamp (UTC)','Unit','Average','Sum','Minimum','Maximum','SampleCount']
+    japanese_headers=['タイムスタンプ（UTC）','単位','平均 (Average)','合計 (Sum)','最小 (Minimum)','最大 (Maximum)','サンプル数 (SampleCount)']
+    expect(values.get_by_role('columnheader')).to_have_text(english_headers)
+    expect(page.get_by_label('Unit filter',exact=True)).to_contain_text('Count')
+    expect(page.get_by_label('Graph statistic',exact=True)).to_contain_text('Average')
+    english_chart=page.get_by_label('Metric statistic by UTC time and unit',exact=True)
+    expect(english_chart).to_be_visible()
+    expect(english_chart).to_contain_text('Average')
+    page.on('request',observe_locale_request)
     page.get_by_label('Language',exact=True).select_option('ja')
     expect(page.get_by_role('tab',name='グラフ化したメトリクス',exact=True)).to_have_attribute('aria-selected','true')
     expect(page.get_by_label('開始日時（UTC/オフセット付き ISO8601）',exact=True)).to_have_value(start)
@@ -407,6 +429,14 @@ def exercise_lifetimes(page, context, browser, native, peer, directory, namespac
     expect(page.get_by_label('期間（秒、60の倍数）',exact=True)).to_have_value('60')
     japanese_values=page.get_by_role('table',name='ネイティブ統計値',exact=True)
     literal_row(japanese_values,'Count',['3','6','2','4','2'])
+    expect(japanese_values.get_by_role('columnheader')).to_have_text(japanese_headers)
+    expect(page.get_by_label('単位フィルター',exact=True)).to_contain_text('Count')
+    expect(page.get_by_label('グラフの統計',exact=True)).to_contain_text('平均 (Average)')
+    japanese_chart=page.get_by_label('UTC 時刻・単位ごとのメトリクス統計',exact=True)
+    expect(japanese_chart).to_be_visible()
+    expect(japanese_chart).to_contain_text('平均 (Average)')
+    settled_locale_frame()
+    assert locale_metric_requests==[], 'English to Japanese presentation issued a Metrics HTTP request'
     japanese_audits=[]
     for width in (1440,390):
         page.set_viewport_size({'width':width,'height':1000});assert_reflow(page);page.evaluate(axe)
@@ -415,6 +445,20 @@ def exercise_lifetimes(page, context, browser, native, peer, directory, namespac
         japanese_audits.append({'width':width,**result})
         page.screenshot(path=str(REPORTS/('cloudwatch-metrics-ja-%s.png'%width)),full_page=True)
     page.get_by_label('言語',exact=True).select_option('en')
+    expect(page.get_by_role('tab',name='Graphed metrics',exact=True)).to_have_attribute('aria-selected','true')
+    expect(page.get_by_label('Start time (ISO8601 with UTC/offset)',exact=True)).to_have_value(start)
+    expect(page.get_by_label('End time (exclusive, ISO8601)',exact=True)).to_have_value(end)
+    expect(page.get_by_label('Period (seconds, multiple of 60)',exact=True)).to_have_value('60')
+    english_values=page.get_by_role('table',name='Native statistic values',exact=True)
+    literal_row(english_values,'Count',['3','6','2','4','2'])
+    expect(english_values.get_by_role('columnheader')).to_have_text(english_headers)
+    expect(page.get_by_label('Unit filter',exact=True)).to_contain_text('Count')
+    expect(page.get_by_label('Graph statistic',exact=True)).to_contain_text('Average')
+    expect(english_chart).to_be_visible()
+    expect(english_chart).to_contain_text('Average')
+    settled_locale_frame()
+    assert locale_metric_requests==[], 'Loaded EN/JA/EN presentation issued a Metrics HTTP request'
+    page.remove_listener('request',observe_locale_request)
     # Peer browser has distinct session/origin and real data, not an empty list.
     peer_context=browser.new_context(viewport={'width':1440,'height':1000})
     peer_primary=None
@@ -454,7 +498,7 @@ def exercise_lifetimes(page, context, browser, native, peer, directory, namespac
             'sameMountUnitGuard':True,'regionDistinctResult':True,'principalListAllowedStatisticsDenied':True,
             'crossTokens401':2,'distinctTwoDBUIRead':True,'namespaceDimensionIdentity':True,
             'unitsNeverMerged':True,'actualZeroSample':True,'absentUnitNotZero':True,'paginationSeries':501,
-            'jaQueryPreserved':True,'japaneseAudits':japanese_audits,'fixtureFulfillment':False,'fixtureFulfillmentScope':'original lifecycle path only; labelled boundary transport fault recorded separately'}
+            'jaQueryPreserved':True,'loadedLocaleRoundTripPreserved':True,'localeMetricHTTPRequests':len(locale_metric_requests),'japaneseAudits':japanese_audits,'fixtureFulfillment':False,'fixtureFulfillmentScope':'original lifecycle path only; labelled boundary transport fault recorded separately'}
 
 
 def exercise_point_boundary(page, native, directory, failures):
