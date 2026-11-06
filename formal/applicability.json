@@ -277,10 +277,24 @@
       "models": []
     },
     {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "79d0468319f1dd55e660c4e523f32f5dcd6e68cad3db20bf0ed1d64876fd821d",
+      "disposition": "formal-infrastructure",
+      "reason": "Preserves TLC bounds, deadlines, exit failure and mutation oracles; retains process-failure stream/type/errno/elapsed diagnostics and requires the two existing LP models, properties, controls and exact source scopes. Injected tool-failure and removal tests are not TLC or implementation proof.",
+      "models": []
+    },
+    {
       "path": "scripts/test-formal-applicability.py",
       "sha256": "24e4980e242cdf9cc64362aabf0e86dddca389f270c9889f0a469fe9eb961ab0",
       "disposition": "formal-infrastructure",
       "reason": "LP-only documentation, validation policy or tests; preserves SDK root, old checks and existing model values. No browser or implementation proof claim.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "aa5cb599d2885d901243cf648ab6be6ad0ad43884f29764cd46a3e17f21635a8",
+      "disposition": "formal-infrastructure",
+      "reason": "Preserves TLC bounds, deadlines, exit failure and mutation oracles; retains process-failure stream/type/errno/elapsed diagnostics and requires the two existing LP models, properties, controls and exact source scopes. Injected tool-failure and removal tests are not TLC or implementation proof.",
       "models": []
     }
   ]
