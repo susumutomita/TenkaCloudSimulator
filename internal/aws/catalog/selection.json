@@ -187,6 +187,25 @@
     "UpdateControl",
     "UpdateSettings"
   ],
+  "backup": [
+    "CreateBackupVault",
+    "CreateFramework",
+    "CreateReportPlan",
+    "DeleteBackupVault",
+    "DeleteFramework",
+    "DeleteReportPlan",
+    "DescribeBackupVault",
+    "DescribeFramework",
+    "DescribeReportPlan",
+    "ListBackupVaults",
+    "ListFrameworks",
+    "ListReportPlans",
+    "ListTags",
+    "TagResource",
+    "UntagResource",
+    "UpdateFramework",
+    "UpdateReportPlan"
+  ],
   "clouddirectory": [
     "CreateFacet",
     "CreateSchema",
@@ -344,6 +363,16 @@
     "UntagResource",
     "UpdateLifecyclePolicy"
   ],
+  "dsql": [
+    "CreateCluster",
+    "DeleteCluster",
+    "GetCluster",
+    "ListClusters",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateCluster"
+  ],
   "ecr": [
     "CreateRepository",
     "DeleteRepository",
@@ -369,6 +398,17 @@
     "UntagResource",
     "UpdateCluster",
     "UpdateClusterSettings"
+  ],
+  "efs": [
+    "CreateFileSystem",
+    "DeleteFileSystem",
+    "DescribeAccountPreferences",
+    "DescribeFileSystems",
+    "ListTagsForResource",
+    "PutAccountPreferences",
+    "TagResource",
+    "UntagResource",
+    "UpdateFileSystem"
   ],
   "eks": [
     "CreateCluster",
@@ -415,6 +455,14 @@
     "UpdateConnection",
     "UpdateEventBus"
   ],
+  "firehose": [
+    "CreateDeliveryStream",
+    "DeleteDeliveryStream",
+    "DescribeDeliveryStream",
+    "ListDeliveryStreams",
+    "StartDeliveryStreamEncryption",
+    "StopDeliveryStreamEncryption"
+  ],
   "fms": [
     "DeleteAppsList",
     "DeleteProtocolsList",
@@ -431,6 +479,25 @@
     "PutResourceSet",
     "TagResource",
     "UntagResource"
+  ],
+  "fsx": [
+    "CreateFileCache",
+    "CreateFileSystem",
+    "DeleteFileCache",
+    "DeleteFileSystem",
+    "DescribeFileCaches",
+    "DescribeFileSystems",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource"
+  ],
+  "glacier": [
+    "CreateVault",
+    "DeleteVault",
+    "DescribeVault",
+    "GetDataRetrievalPolicy",
+    "ListVaults",
+    "SetDataRetrievalPolicy"
   ],
   "globalaccelerator": [
     "CreateAccelerator",
@@ -518,6 +585,15 @@
     "UntagResource",
     "UpdateFilter"
   ],
+  "kafka": [
+    "CreateCluster",
+    "DeleteCluster",
+    "DescribeCluster",
+    "ListClusters",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource"
+  ],
   "kinesis": [
     "CreateStream",
     "DecreaseStreamRetentionPeriod",
@@ -590,6 +666,31 @@
     "TagResource",
     "UntagResource"
   ],
+  "memorydb": [
+    "CreateParameterGroup",
+    "CreateSubnetGroup",
+    "CreateUser",
+    "DeleteParameterGroup",
+    "DeleteSubnetGroup",
+    "DeleteUser",
+    "DescribeParameterGroups",
+    "DescribeSubnetGroups",
+    "DescribeUsers",
+    "ListTags",
+    "TagResource",
+    "UntagResource",
+    "UpdateSubnetGroup",
+    "UpdateUser"
+  ],
+  "mq": [
+    "CreateConfiguration",
+    "CreateTags",
+    "DeleteConfiguration",
+    "DeleteTags",
+    "DescribeConfiguration",
+    "ListConfigurations",
+    "ListTags"
+  ],
   "mwaa": [
     "CreateEnvironment",
     "DeleteEnvironment",
@@ -616,6 +717,21 @@
     "UpdateDevice",
     "UpdateGlobalNetwork",
     "UpdateSite"
+  ],
+  "odb": [
+    "CreateCloudExadataInfrastructure",
+    "CreateOdbNetwork",
+    "DeleteCloudExadataInfrastructure",
+    "DeleteOdbNetwork",
+    "GetCloudExadataInfrastructure",
+    "GetOdbNetwork",
+    "ListCloudExadataInfrastructures",
+    "ListOdbNetworks",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateCloudExadataInfrastructure",
+    "UpdateOdbNetwork"
   ],
   "opensearch": [
     "CreateDomain",
@@ -801,6 +917,29 @@
     "TagResource",
     "UntagResource",
     "UpdateStateMachine"
+  ],
+  "storagegateway": [
+    "AddTagsToResource",
+    "CreateTapePool",
+    "DeleteTapePool",
+    "ListTagsForResource",
+    "ListTapePools",
+    "RemoveTagsFromResource"
+  ],
+  "timestream-write": [
+    "CreateDatabase",
+    "CreateTable",
+    "DeleteDatabase",
+    "DeleteTable",
+    "DescribeDatabase",
+    "DescribeTable",
+    "ListDatabases",
+    "ListTables",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateDatabase",
+    "UpdateTable"
   ],
   "verifiedpermissions": [
     "CreatePolicyStore",

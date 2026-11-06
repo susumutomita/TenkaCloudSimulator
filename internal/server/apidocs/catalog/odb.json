@@ -1,0 +1,1668 @@
+{
+ "components": {
+  "schemas": {
+   "CloudExadataInfrastructure": {
+    "additionalProperties": false,
+    "properties": {
+     "activatedStorageCount": {
+      "type": "integer"
+     },
+     "additionalStorageCount": {
+      "type": "integer"
+     },
+     "availabilityZone": {
+      "type": "string"
+     },
+     "availabilityZoneId": {
+      "type": "string"
+     },
+     "availableStorageSizeInGBs": {
+      "type": "integer"
+     },
+     "cloudExadataInfrastructureArn": {
+      "type": "string"
+     },
+     "cloudExadataInfrastructureId": {
+      "maxLength": 2048,
+      "minLength": 6,
+      "type": "string"
+     },
+     "computeCount": {
+      "type": "integer"
+     },
+     "computeModel": {
+      "enum": [
+       "ECPU",
+       "OCPU"
+      ],
+      "type": "string"
+     },
+     "cpuCount": {
+      "type": "integer"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "customerContactsToSendToOCI": {
+      "items": {
+       "$ref": "#/components/schemas/CustomerContact"
+      },
+      "type": "array"
+     },
+     "dataStorageSizeInTBs": {
+      "type": "number"
+     },
+     "databaseServerType": {
+      "type": "string"
+     },
+     "dbNodeStorageSizeInGBs": {
+      "type": "integer"
+     },
+     "dbServerVersion": {
+      "type": "string"
+     },
+     "displayName": {
+      "type": "string"
+     },
+     "lastMaintenanceRunId": {
+      "type": "string"
+     },
+     "maintenanceWindow": {
+      "$ref": "#/components/schemas/MaintenanceWindow"
+     },
+     "maxCpuCount": {
+      "type": "integer"
+     },
+     "maxDataStorageInTBs": {
+      "type": "number"
+     },
+     "maxDbNodeStorageSizeInGBs": {
+      "type": "integer"
+     },
+     "maxMemoryInGBs": {
+      "type": "integer"
+     },
+     "memorySizeInGBs": {
+      "type": "integer"
+     },
+     "monthlyDbServerVersion": {
+      "type": "string"
+     },
+     "monthlyStorageServerVersion": {
+      "type": "string"
+     },
+     "nextMaintenanceRunId": {
+      "type": "string"
+     },
+     "ociResourceAnchorName": {
+      "type": "string"
+     },
+     "ociUrl": {
+      "type": "string"
+     },
+     "ocid": {
+      "type": "string"
+     },
+     "percentProgress": {
+      "type": "number"
+     },
+     "shape": {
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "AVAILABLE",
+       "FAILED",
+       "PROVISIONING",
+       "TERMINATED",
+       "TERMINATING",
+       "UPDATING",
+       "MAINTENANCE_IN_PROGRESS"
+      ],
+      "type": "string"
+     },
+     "statusReason": {
+      "type": "string"
+     },
+     "storageCount": {
+      "type": "integer"
+     },
+     "storageServerType": {
+      "type": "string"
+     },
+     "storageServerVersion": {
+      "type": "string"
+     },
+     "totalStorageSizeInGBs": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "cloudExadataInfrastructureId"
+    ],
+    "type": "object"
+   },
+   "CloudExadataInfrastructureSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "activatedStorageCount": {
+      "type": "integer"
+     },
+     "additionalStorageCount": {
+      "type": "integer"
+     },
+     "availabilityZone": {
+      "type": "string"
+     },
+     "availabilityZoneId": {
+      "type": "string"
+     },
+     "availableStorageSizeInGBs": {
+      "type": "integer"
+     },
+     "cloudExadataInfrastructureArn": {
+      "type": "string"
+     },
+     "cloudExadataInfrastructureId": {
+      "maxLength": 2048,
+      "minLength": 6,
+      "type": "string"
+     },
+     "computeCount": {
+      "type": "integer"
+     },
+     "computeModel": {
+      "enum": [
+       "ECPU",
+       "OCPU"
+      ],
+      "type": "string"
+     },
+     "cpuCount": {
+      "type": "integer"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "customerContactsToSendToOCI": {
+      "items": {
+       "$ref": "#/components/schemas/CustomerContact"
+      },
+      "type": "array"
+     },
+     "dataStorageSizeInTBs": {
+      "type": "number"
+     },
+     "databaseServerType": {
+      "type": "string"
+     },
+     "dbNodeStorageSizeInGBs": {
+      "type": "integer"
+     },
+     "dbServerVersion": {
+      "type": "string"
+     },
+     "displayName": {
+      "type": "string"
+     },
+     "lastMaintenanceRunId": {
+      "type": "string"
+     },
+     "maintenanceWindow": {
+      "$ref": "#/components/schemas/MaintenanceWindow"
+     },
+     "maxCpuCount": {
+      "type": "integer"
+     },
+     "maxDataStorageInTBs": {
+      "type": "number"
+     },
+     "maxDbNodeStorageSizeInGBs": {
+      "type": "integer"
+     },
+     "maxMemoryInGBs": {
+      "type": "integer"
+     },
+     "memorySizeInGBs": {
+      "type": "integer"
+     },
+     "monthlyDbServerVersion": {
+      "type": "string"
+     },
+     "monthlyStorageServerVersion": {
+      "type": "string"
+     },
+     "nextMaintenanceRunId": {
+      "type": "string"
+     },
+     "ociResourceAnchorName": {
+      "type": "string"
+     },
+     "ociUrl": {
+      "type": "string"
+     },
+     "ocid": {
+      "type": "string"
+     },
+     "percentProgress": {
+      "type": "number"
+     },
+     "shape": {
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "AVAILABLE",
+       "FAILED",
+       "PROVISIONING",
+       "TERMINATED",
+       "TERMINATING",
+       "UPDATING",
+       "MAINTENANCE_IN_PROGRESS"
+      ],
+      "type": "string"
+     },
+     "statusReason": {
+      "type": "string"
+     },
+     "storageCount": {
+      "type": "integer"
+     },
+     "storageServerType": {
+      "type": "string"
+     },
+     "storageServerVersion": {
+      "type": "string"
+     },
+     "totalStorageSizeInGBs": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "cloudExadataInfrastructureId"
+    ],
+    "type": "object"
+   },
+   "CreateCloudExadataInfrastructureInput": {
+    "additionalProperties": false,
+    "properties": {
+     "availabilityZone": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "availabilityZoneId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "clientToken": {
+      "maxLength": 64,
+      "minLength": 8,
+      "type": "string"
+     },
+     "computeCount": {
+      "type": "integer"
+     },
+     "customerContactsToSendToOCI": {
+      "items": {
+       "$ref": "#/components/schemas/CustomerContact"
+      },
+      "type": "array"
+     },
+     "databaseServerType": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "displayName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "maintenanceWindow": {
+      "$ref": "#/components/schemas/MaintenanceWindow"
+     },
+     "shape": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "storageCount": {
+      "type": "integer"
+     },
+     "storageServerType": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 200,
+      "minProperties": 1,
+      "type": "object"
+     }
+    },
+    "required": [
+     "displayName",
+     "shape",
+     "computeCount",
+     "storageCount"
+    ],
+    "type": "object"
+   },
+   "CreateCloudExadataInfrastructureOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "cloudExadataInfrastructureId": {
+      "type": "string"
+     },
+     "displayName": {
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "AVAILABLE",
+       "FAILED",
+       "PROVISIONING",
+       "TERMINATED",
+       "TERMINATING",
+       "UPDATING",
+       "MAINTENANCE_IN_PROGRESS"
+      ],
+      "type": "string"
+     },
+     "statusReason": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "cloudExadataInfrastructureId"
+    ],
+    "type": "object"
+   },
+   "CreateOdbNetworkInput": {
+    "additionalProperties": false,
+    "properties": {
+     "availabilityZone": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "availabilityZoneId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "backupSubnetCidr": {
+      "maxLength": 43,
+      "minLength": 1,
+      "type": "string"
+     },
+     "clientSubnetCidr": {
+      "maxLength": 43,
+      "minLength": 1,
+      "type": "string"
+     },
+     "clientToken": {
+      "maxLength": 64,
+      "minLength": 8,
+      "type": "string"
+     },
+     "crossRegionS3RestoreSourcesToEnable": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1024,
+      "minItems": 1,
+      "type": "array"
+     },
+     "customDomainName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "defaultDnsPrefix": {
+      "maxLength": 15,
+      "minLength": 1,
+      "type": "string"
+     },
+     "displayName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "kmsAccess": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "kmsPolicyDocument": {
+      "maxLength": 20480,
+      "minLength": 3,
+      "type": "string"
+     },
+     "s3Access": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "s3PolicyDocument": {
+      "maxLength": 20480,
+      "minLength": 3,
+      "type": "string"
+     },
+     "stsAccess": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "stsPolicyDocument": {
+      "maxLength": 20480,
+      "minLength": 3,
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 200,
+      "minProperties": 1,
+      "type": "object"
+     },
+     "zeroEtlAccess": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "displayName",
+     "clientSubnetCidr"
+    ],
+    "type": "object"
+   },
+   "CreateOdbNetworkOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "displayName": {
+      "type": "string"
+     },
+     "odbNetworkId": {
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "AVAILABLE",
+       "FAILED",
+       "PROVISIONING",
+       "TERMINATED",
+       "TERMINATING",
+       "UPDATING",
+       "MAINTENANCE_IN_PROGRESS"
+      ],
+      "type": "string"
+     },
+     "statusReason": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "odbNetworkId"
+    ],
+    "type": "object"
+   },
+   "CrossRegionS3RestoreSourcesAccess": {
+    "additionalProperties": false,
+    "properties": {
+     "ipv4Addresses": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1024,
+      "minItems": 1,
+      "type": "array"
+     },
+     "region": {
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "ENABLED",
+       "ENABLING",
+       "DISABLED",
+       "DISABLING"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CustomerContact": {
+    "additionalProperties": false,
+    "properties": {
+     "email": {
+      "maxLength": 320,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DayOfWeek": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "enum": [
+       "MONDAY",
+       "TUESDAY",
+       "WEDNESDAY",
+       "THURSDAY",
+       "FRIDAY",
+       "SATURDAY",
+       "SUNDAY"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteCloudExadataInfrastructureInput": {
+    "additionalProperties": false,
+    "properties": {
+     "cloudExadataInfrastructureId": {
+      "maxLength": 2048,
+      "minLength": 6,
+      "type": "string"
+     }
+    },
+    "required": [
+     "cloudExadataInfrastructureId"
+    ],
+    "type": "object"
+   },
+   "DeleteCloudExadataInfrastructureOutput": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DeleteOdbNetworkInput": {
+    "additionalProperties": false,
+    "properties": {
+     "deleteAssociatedResources": {
+      "type": "boolean"
+     },
+     "odbNetworkId": {
+      "maxLength": 2048,
+      "minLength": 6,
+      "type": "string"
+     }
+    },
+    "required": [
+     "odbNetworkId",
+     "deleteAssociatedResources"
+    ],
+    "type": "object"
+   },
+   "DeleteOdbNetworkOutput": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "GetCloudExadataInfrastructureInput": {
+    "additionalProperties": false,
+    "properties": {
+     "cloudExadataInfrastructureId": {
+      "maxLength": 2048,
+      "minLength": 6,
+      "type": "string"
+     }
+    },
+    "required": [
+     "cloudExadataInfrastructureId"
+    ],
+    "type": "object"
+   },
+   "GetCloudExadataInfrastructureOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "cloudExadataInfrastructure": {
+      "$ref": "#/components/schemas/CloudExadataInfrastructure"
+     }
+    },
+    "type": "object"
+   },
+   "GetOdbNetworkInput": {
+    "additionalProperties": false,
+    "properties": {
+     "odbNetworkId": {
+      "maxLength": 2048,
+      "minLength": 6,
+      "type": "string"
+     }
+    },
+    "required": [
+     "odbNetworkId"
+    ],
+    "type": "object"
+   },
+   "GetOdbNetworkOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "odbNetwork": {
+      "$ref": "#/components/schemas/OdbNetwork"
+     }
+    },
+    "type": "object"
+   },
+   "KmsAccess": {
+    "additionalProperties": false,
+    "properties": {
+     "domainName": {
+      "type": "string"
+     },
+     "ipv4Addresses": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1024,
+      "minItems": 1,
+      "type": "array"
+     },
+     "kmsPolicyDocument": {
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "ENABLED",
+       "ENABLING",
+       "DISABLED",
+       "DISABLING"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListCloudExadataInfrastructuresInput": {
+    "additionalProperties": false,
+    "properties": {
+     "maxResults": {
+      "maximum": 1000,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "nextToken": {
+      "maxLength": 8192,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListCloudExadataInfrastructuresOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "cloudExadataInfrastructures": {
+      "items": {
+       "$ref": "#/components/schemas/CloudExadataInfrastructureSummary"
+      },
+      "type": "array"
+     },
+     "nextToken": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "cloudExadataInfrastructures"
+    ],
+    "type": "object"
+   },
+   "ListOdbNetworksInput": {
+    "additionalProperties": false,
+    "properties": {
+     "maxResults": {
+      "maximum": 1000,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "nextToken": {
+      "maxLength": 8192,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListOdbNetworksOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "nextToken": {
+      "type": "string"
+     },
+     "odbNetworks": {
+      "items": {
+       "$ref": "#/components/schemas/OdbNetworkSummary"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "odbNetworks"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "resourceArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     }
+    },
+    "required": [
+     "resourceArn"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 200,
+      "minProperties": 0,
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "MaintenanceWindow": {
+    "additionalProperties": false,
+    "properties": {
+     "customActionTimeoutInMins": {
+      "maximum": 120,
+      "minimum": 15,
+      "type": "integer"
+     },
+     "daysOfWeek": {
+      "items": {
+       "$ref": "#/components/schemas/DayOfWeek"
+      },
+      "type": "array"
+     },
+     "hoursOfDay": {
+      "items": {
+       "type": "integer"
+      },
+      "type": "array"
+     },
+     "isCustomActionTimeoutEnabled": {
+      "type": "boolean"
+     },
+     "leadTimeInWeeks": {
+      "maximum": 4,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "months": {
+      "items": {
+       "$ref": "#/components/schemas/Month"
+      },
+      "type": "array"
+     },
+     "patchingMode": {
+      "enum": [
+       "ROLLING",
+       "NONROLLING"
+      ],
+      "type": "string"
+     },
+     "preference": {
+      "enum": [
+       "NO_PREFERENCE",
+       "CUSTOM_PREFERENCE"
+      ],
+      "type": "string"
+     },
+     "skipRu": {
+      "type": "boolean"
+     },
+     "weeksOfMonth": {
+      "items": {
+       "type": "integer"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ManagedS3BackupAccess": {
+    "additionalProperties": false,
+    "properties": {
+     "ipv4Addresses": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1024,
+      "minItems": 1,
+      "type": "array"
+     },
+     "status": {
+      "enum": [
+       "ENABLED",
+       "ENABLING",
+       "DISABLED",
+       "DISABLING"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ManagedServices": {
+    "additionalProperties": false,
+    "properties": {
+     "crossRegionS3RestoreSourcesAccess": {
+      "items": {
+       "$ref": "#/components/schemas/CrossRegionS3RestoreSourcesAccess"
+      },
+      "type": "array"
+     },
+     "kmsAccess": {
+      "$ref": "#/components/schemas/KmsAccess"
+     },
+     "managedS3BackupAccess": {
+      "$ref": "#/components/schemas/ManagedS3BackupAccess"
+     },
+     "managedServicesIpv4Cidrs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1024,
+      "minItems": 1,
+      "type": "array"
+     },
+     "resourceGatewayArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "s3Access": {
+      "$ref": "#/components/schemas/S3Access"
+     },
+     "serviceNetworkArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "serviceNetworkEndpoint": {
+      "$ref": "#/components/schemas/ServiceNetworkEndpoint"
+     },
+     "stsAccess": {
+      "$ref": "#/components/schemas/StsAccess"
+     },
+     "zeroEtlAccess": {
+      "$ref": "#/components/schemas/ZeroEtlAccess"
+     }
+    },
+    "type": "object"
+   },
+   "Month": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "enum": [
+       "JANUARY",
+       "FEBRUARY",
+       "MARCH",
+       "APRIL",
+       "MAY",
+       "JUNE",
+       "JULY",
+       "AUGUST",
+       "SEPTEMBER",
+       "OCTOBER",
+       "NOVEMBER",
+       "DECEMBER"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "OciDnsForwardingConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "domainName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ociDnsListenerIp": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "OdbNetwork": {
+    "additionalProperties": false,
+    "properties": {
+     "availabilityZone": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "availabilityZoneId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "backupSubnetCidr": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "clientSubnetCidr": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "customDomainName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "defaultDnsPrefix": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "displayName": {
+      "type": "string"
+     },
+     "managedServices": {
+      "$ref": "#/components/schemas/ManagedServices"
+     },
+     "ociDnsForwardingConfigs": {
+      "items": {
+       "$ref": "#/components/schemas/OciDnsForwardingConfig"
+      },
+      "type": "array"
+     },
+     "ociNetworkAnchorId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ociNetworkAnchorUrl": {
+      "type": "string"
+     },
+     "ociResourceAnchorName": {
+      "type": "string"
+     },
+     "ociVcnId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ociVcnUrl": {
+      "type": "string"
+     },
+     "odbNetworkArn": {
+      "type": "string"
+     },
+     "odbNetworkId": {
+      "maxLength": 2048,
+      "minLength": 6,
+      "type": "string"
+     },
+     "peeredCidrs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1024,
+      "minItems": 1,
+      "type": "array"
+     },
+     "percentProgress": {
+      "type": "number"
+     },
+     "status": {
+      "enum": [
+       "AVAILABLE",
+       "FAILED",
+       "PROVISIONING",
+       "TERMINATED",
+       "TERMINATING",
+       "UPDATING",
+       "MAINTENANCE_IN_PROGRESS"
+      ],
+      "type": "string"
+     },
+     "statusReason": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "odbNetworkId"
+    ],
+    "type": "object"
+   },
+   "OdbNetworkSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "availabilityZone": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "availabilityZoneId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "backupSubnetCidr": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "clientSubnetCidr": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "customDomainName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "defaultDnsPrefix": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "displayName": {
+      "type": "string"
+     },
+     "managedServices": {
+      "$ref": "#/components/schemas/ManagedServices"
+     },
+     "ociDnsForwardingConfigs": {
+      "items": {
+       "$ref": "#/components/schemas/OciDnsForwardingConfig"
+      },
+      "type": "array"
+     },
+     "ociNetworkAnchorId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ociNetworkAnchorUrl": {
+      "type": "string"
+     },
+     "ociResourceAnchorName": {
+      "type": "string"
+     },
+     "ociVcnId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ociVcnUrl": {
+      "type": "string"
+     },
+     "odbNetworkArn": {
+      "type": "string"
+     },
+     "odbNetworkId": {
+      "maxLength": 2048,
+      "minLength": 6,
+      "type": "string"
+     },
+     "peeredCidrs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1024,
+      "minItems": 1,
+      "type": "array"
+     },
+     "percentProgress": {
+      "type": "number"
+     },
+     "status": {
+      "enum": [
+       "AVAILABLE",
+       "FAILED",
+       "PROVISIONING",
+       "TERMINATED",
+       "TERMINATING",
+       "UPDATING",
+       "MAINTENANCE_IN_PROGRESS"
+      ],
+      "type": "string"
+     },
+     "statusReason": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "odbNetworkId"
+    ],
+    "type": "object"
+   },
+   "S3Access": {
+    "additionalProperties": false,
+    "properties": {
+     "domainName": {
+      "type": "string"
+     },
+     "ipv4Addresses": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1024,
+      "minItems": 1,
+      "type": "array"
+     },
+     "s3PolicyDocument": {
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "ENABLED",
+       "ENABLING",
+       "DISABLED",
+       "DISABLING"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ServiceNetworkEndpoint": {
+    "additionalProperties": false,
+    "properties": {
+     "vpcEndpointId": {
+      "type": "string"
+     },
+     "vpcEndpointType": {
+      "enum": [
+       "SERVICENETWORK"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "StsAccess": {
+    "additionalProperties": false,
+    "properties": {
+     "domainName": {
+      "type": "string"
+     },
+     "ipv4Addresses": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1024,
+      "minItems": 1,
+      "type": "array"
+     },
+     "status": {
+      "enum": [
+       "ENABLED",
+       "ENABLING",
+       "DISABLED",
+       "DISABLING"
+      ],
+      "type": "string"
+     },
+     "stsPolicyDocument": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "resourceArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 200,
+      "minProperties": 1,
+      "type": "object"
+     }
+    },
+    "required": [
+     "resourceArn",
+     "tags"
+    ],
+    "type": "object"
+   },
+   "TagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UntagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "resourceArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "tagKeys": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 200,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "resourceArn",
+     "tagKeys"
+    ],
+    "type": "object"
+   },
+   "UntagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UpdateCloudExadataInfrastructureInput": {
+    "additionalProperties": false,
+    "properties": {
+     "cloudExadataInfrastructureId": {
+      "maxLength": 2048,
+      "minLength": 6,
+      "type": "string"
+     },
+     "maintenanceWindow": {
+      "$ref": "#/components/schemas/MaintenanceWindow"
+     }
+    },
+    "required": [
+     "cloudExadataInfrastructureId"
+    ],
+    "type": "object"
+   },
+   "UpdateCloudExadataInfrastructureOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "cloudExadataInfrastructureId": {
+      "type": "string"
+     },
+     "displayName": {
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "AVAILABLE",
+       "FAILED",
+       "PROVISIONING",
+       "TERMINATED",
+       "TERMINATING",
+       "UPDATING",
+       "MAINTENANCE_IN_PROGRESS"
+      ],
+      "type": "string"
+     },
+     "statusReason": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "cloudExadataInfrastructureId"
+    ],
+    "type": "object"
+   },
+   "UpdateOdbNetworkInput": {
+    "additionalProperties": false,
+    "properties": {
+     "crossRegionS3RestoreSourcesToDisable": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1024,
+      "minItems": 1,
+      "type": "array"
+     },
+     "crossRegionS3RestoreSourcesToEnable": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1024,
+      "minItems": 1,
+      "type": "array"
+     },
+     "displayName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "kmsAccess": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "kmsPolicyDocument": {
+      "maxLength": 20480,
+      "minLength": 3,
+      "type": "string"
+     },
+     "odbNetworkId": {
+      "maxLength": 2048,
+      "minLength": 6,
+      "type": "string"
+     },
+     "peeredCidrsToBeAdded": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1024,
+      "minItems": 1,
+      "type": "array"
+     },
+     "peeredCidrsToBeRemoved": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1024,
+      "minItems": 1,
+      "type": "array"
+     },
+     "s3Access": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "s3PolicyDocument": {
+      "maxLength": 20480,
+      "minLength": 3,
+      "type": "string"
+     },
+     "stsAccess": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "stsPolicyDocument": {
+      "maxLength": 20480,
+      "minLength": 3,
+      "type": "string"
+     },
+     "zeroEtlAccess": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "odbNetworkId"
+    ],
+    "type": "object"
+   },
+   "UpdateOdbNetworkOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "displayName": {
+      "type": "string"
+     },
+     "odbNetworkId": {
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "AVAILABLE",
+       "FAILED",
+       "PROVISIONING",
+       "TERMINATED",
+       "TERMINATING",
+       "UPDATING",
+       "MAINTENANCE_IN_PROGRESS"
+      ],
+      "type": "string"
+     },
+     "statusReason": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "odbNetworkId"
+    ],
+    "type": "object"
+   },
+   "ZeroEtlAccess": {
+    "additionalProperties": false,
+    "properties": {
+     "cidr": {
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "ENABLED",
+       "ENABLING",
+       "DISABLED",
+       "DISABLING"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official odb API (2024-08-20). Every other official operation returns HTTP 501 UnknownOperationException. ODB networks and Exadata infrastructures are configuration records that stay PROVISIONING: nothing is provisioned in Oracle Cloud Infrastructure, no OCI identifier, URL, capacity or maintenance run is reported, and customer contacts are stored without being sent to OCI. Marketplace registration and OCI onboarding are not modeled and not required. VM clusters, Autonomous VM clusters, database servers and nodes, peering connections, IAM role association and the shape, version and onboarding status APIs (ListDbSystemShapes, ListGiVersions, ListSystemVersions, GetOciOnboardingStatus) return UnknownOperationException with HTTP 501. Managed service access (S3, Zero-ETL, STS, KMS and their policy documents), cross-Region restore sources and peered CIDR changes are refused. Client subnet CIDRs must parse, avoid the OCI reserved ranges and not overlap the backup subnet. ODB network deletion accepts deleteAssociatedResources because no associated resource exists.",
+  "title": "Oracle Database@AWS (simulator catalog)",
+  "version": "2024-08-20"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/": {
+   "post": {
+    "description": "Choose the X-Amz-Target of one implemented operation. Request and response members follow the linked official input/output schemas.",
+    "operationId": "odbJSONOperation",
+    "parameters": [
+     {
+      "in": "header",
+      "name": "X-Amz-Target",
+      "required": true,
+      "schema": {
+       "enum": [
+        "Odb.CreateCloudExadataInfrastructure",
+        "Odb.CreateOdbNetwork",
+        "Odb.DeleteCloudExadataInfrastructure",
+        "Odb.DeleteOdbNetwork",
+        "Odb.GetCloudExadataInfrastructure",
+        "Odb.GetOdbNetwork",
+        "Odb.ListCloudExadataInfrastructures",
+        "Odb.ListOdbNetworks",
+        "Odb.ListTagsForResource",
+        "Odb.TagResource",
+        "Odb.UntagResource",
+        "Odb.UpdateCloudExadataInfrastructure",
+        "Odb.UpdateOdbNetwork"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-amz-json-1.0": {
+       "examples": {
+        "CreateCloudExadataInfrastructure": {
+         "summary": "X-Amz-Target: Odb.CreateCloudExadataInfrastructure",
+         "value": {}
+        },
+        "CreateOdbNetwork": {
+         "summary": "X-Amz-Target: Odb.CreateOdbNetwork",
+         "value": {}
+        },
+        "DeleteCloudExadataInfrastructure": {
+         "summary": "X-Amz-Target: Odb.DeleteCloudExadataInfrastructure",
+         "value": {}
+        },
+        "DeleteOdbNetwork": {
+         "summary": "X-Amz-Target: Odb.DeleteOdbNetwork",
+         "value": {}
+        },
+        "GetCloudExadataInfrastructure": {
+         "summary": "X-Amz-Target: Odb.GetCloudExadataInfrastructure",
+         "value": {}
+        },
+        "GetOdbNetwork": {
+         "summary": "X-Amz-Target: Odb.GetOdbNetwork",
+         "value": {}
+        },
+        "ListCloudExadataInfrastructures": {
+         "summary": "X-Amz-Target: Odb.ListCloudExadataInfrastructures",
+         "value": {}
+        },
+        "ListOdbNetworks": {
+         "summary": "X-Amz-Target: Odb.ListOdbNetworks",
+         "value": {}
+        },
+        "ListTagsForResource": {
+         "summary": "X-Amz-Target: Odb.ListTagsForResource",
+         "value": {}
+        },
+        "TagResource": {
+         "summary": "X-Amz-Target: Odb.TagResource",
+         "value": {}
+        },
+        "UntagResource": {
+         "summary": "X-Amz-Target: Odb.UntagResource",
+         "value": {}
+        },
+        "UpdateCloudExadataInfrastructure": {
+         "summary": "X-Amz-Target: Odb.UpdateCloudExadataInfrastructure",
+         "value": {}
+        },
+        "UpdateOdbNetwork": {
+         "summary": "X-Amz-Target: Odb.UpdateOdbNetwork",
+         "value": {}
+        }
+       },
+       "schema": {
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/x-amz-json-1.0": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception in __type."
+     },
+     "403": {
+      "description": "AccessDeniedException from local identity policy evaluation."
+     },
+     "501": {
+      "description": "Official operation not implemented by the simulator."
+     }
+    },
+    "summary": "Oracle Database@AWS JSON 1.0 operations",
+    "tags": [
+     "Oracle Database@AWS"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official odb API (2024-08-20). Every other official operation returns HTTP 501 UnknownOperationException. ODB networks and Exadata infrastructures are configuration records that stay PROVISIONING: nothing is provisioned in Oracle Cloud Infrastructure, no OCI identifier, URL, capacity or maintenance run is reported, and customer contacts are stored without being sent to OCI. Marketplace registration and OCI onboarding are not modeled and not required. VM clusters, Autonomous VM clusters, database servers and nodes, peering connections, IAM role association and the shape, version and onboarding status APIs (ListDbSystemShapes, ListGiVersions, ListSystemVersions, GetOciOnboardingStatus) return UnknownOperationException with HTTP 501. Managed service access (S3, Zero-ETL, STS, KMS and their policy documents), cross-Region restore sources and peered CIDR changes are refused. Client subnet CIDRs must parse, avoid the OCI reserved ranges and not overlap the backup subnet. ODB network deletion accepts deleteAssociatedResources because no associated resource exists.",
+   "name": "Oracle Database@AWS"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/odb/2024-08-20/service-2.json",
+  "sha256": "22d955dc9f3bd7dbf2b36ebc53e41142650d146c8766a05f77a4d5aea30b128b",
+  "license": "Apache-2.0"
+ }
+}

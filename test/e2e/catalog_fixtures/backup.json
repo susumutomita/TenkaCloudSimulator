@@ -1,0 +1,36 @@
+{
+ "client": "backup",
+ "steps": [
+  {"op": "create_backup_vault", "args": {"BackupVaultName": "fixture-vault", "BackupVaultTags": {"team": "a"}}, "save": {"vault": "BackupVaultArn"}, "expect": {"BackupVaultName": "fixture-vault"}},
+  {"op": "describe_backup_vault", "args": {"BackupVaultName": "fixture-vault"}, "expect": {"BackupVaultArn": "${vault}", "VaultType": "BACKUP_VAULT", "NumberOfRecoveryPoints": 0, "Locked": false}},
+  {"op": "list_backup_vaults", "args": {"ByVaultType": "BACKUP_VAULT"}, "expect": {"BackupVaultList#count": 1}},
+  {"op": "create_framework", "args": {"FrameworkName": "fixture_framework", "FrameworkDescription": "fixture", "FrameworkControls": [{"ControlName": "BACKUP_RECOVERY_POINT_ENCRYPTED"}], "FrameworkTags": {"team": "a"}}, "save": {"framework": "FrameworkArn"}},
+  {"op": "describe_framework", "args": {"FrameworkName": "fixture_framework"}, "expect": {"FrameworkArn": "${framework}", "FrameworkStatus": "INACTIVE", "FrameworkControls#count": 1}},
+  {"op": "update_framework", "args": {"FrameworkName": "fixture_framework", "FrameworkDescription": "updated"}, "expect": {"FrameworkArn": "${framework}"}},
+  {"op": "list_frameworks", "args": {}, "expect": {"Frameworks#count": 1, "Frameworks[0].FrameworkDescription": "updated"}},
+  {"op": "create_report_plan", "args": {"ReportPlanName": "fixture_report", "ReportDeliveryChannel": {"S3BucketName": "fixture-reports"}, "ReportSetting": {"ReportTemplate": "BACKUP_JOB_REPORT"}}, "save": {"report": "ReportPlanArn"}},
+  {"op": "describe_report_plan", "args": {"ReportPlanName": "fixture_report"}, "expect": {"ReportPlan.ReportPlanArn": "${report}", "ReportPlan.ReportDeliveryChannel.Formats": ["CSV"]}},
+  {"op": "update_report_plan", "args": {"ReportPlanName": "fixture_report", "ReportDeliveryChannel": {"S3BucketName": "fixture-reports", "Formats": ["JSON"]}}, "expect": {"ReportPlanArn": "${report}"}},
+  {"op": "list_report_plans", "args": {}, "expect": {"ReportPlans#count": 1, "ReportPlans[0].ReportDeliveryChannel.Formats": ["JSON"]}},
+  {"op": "create_report_plan", "args": {"ReportPlanName": "fixture_bad", "ReportDeliveryChannel": {"S3BucketName": "fixture-reports"}, "ReportSetting": {"ReportTemplate": "UNKNOWN"}}, "error": "InvalidParameterValueException"},
+  {"op": "tag_resource", "args": {"ResourceArn": "${framework}", "Tags": {"stage": "dev"}}},
+  {"op": "untag_resource", "args": {"ResourceArn": "${framework}", "TagKeyList": ["stage"]}},
+  {"op": "list_tags", "args": {"ResourceArn": "${vault}"}, "expect": {"Tags": {"team": "a"}}},
+  {"op": "start_backup_job", "args": {"BackupVaultName": "fixture-vault", "ResourceArn": "arn:aws:ec2:us-east-1:000000000000:volume/vol-0a1b2c3d", "IamRoleArn": "arn:aws:iam::000000000000:role/backup"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "describe_backup_vault", "args": {"BackupVaultName": "missing-vault"}, "error": "ResourceNotFoundException"}
+ ],
+ "isolation": [
+  {"op": "list_backup_vaults", "args": {}, "expect": {"BackupVaultList#count": 0}},
+  {"op": "list_frameworks", "args": {}, "expect": {"Frameworks#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_framework", "args": {"FrameworkName": "fixture_framework"}, "expect": {"FrameworkDescription": "updated"}}
+ ],
+ "cleanup": [
+  {"op": "delete_report_plan", "args": {"ReportPlanName": "fixture_report"}},
+  {"op": "delete_framework", "args": {"FrameworkName": "fixture_framework"}},
+  {"op": "delete_backup_vault", "args": {"BackupVaultName": "fixture-vault"}},
+  {"op": "list_backup_vaults", "args": {}, "expect": {"BackupVaultList#count": 0}},
+  {"op": "list_report_plans", "args": {}, "expect": {"ReportPlans#count": 0}}
+ ]
+}

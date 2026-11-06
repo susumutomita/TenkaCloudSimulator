@@ -1,0 +1,1708 @@
+{
+ "components": {
+  "schemas": {
+   "BackupVaultListMember": {
+    "additionalProperties": false,
+    "properties": {
+     "BackupVaultArn": {
+      "type": "string"
+     },
+     "BackupVaultName": {
+      "type": "string"
+     },
+     "CreationDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "CreatorRequestId": {
+      "type": "string"
+     },
+     "EncryptionKeyArn": {
+      "type": "string"
+     },
+     "EncryptionKeyType": {
+      "enum": [
+       "AWS_OWNED_KMS_KEY",
+       "CUSTOMER_MANAGED_KMS_KEY"
+      ],
+      "type": "string"
+     },
+     "LockDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Locked": {
+      "type": "boolean"
+     },
+     "MaxRetentionDays": {
+      "type": "integer"
+     },
+     "MinRetentionDays": {
+      "type": "integer"
+     },
+     "NumberOfRecoveryPoints": {
+      "type": "integer"
+     },
+     "VaultState": {
+      "enum": [
+       "CREATING",
+       "AVAILABLE",
+       "FAILED"
+      ],
+      "type": "string"
+     },
+     "VaultType": {
+      "enum": [
+       "BACKUP_VAULT",
+       "LOGICALLY_AIR_GAPPED_BACKUP_VAULT",
+       "RESTORE_ACCESS_BACKUP_VAULT"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ControlInputParameter": {
+    "additionalProperties": false,
+    "properties": {
+     "ParameterName": {
+      "type": "string"
+     },
+     "ParameterValue": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ControlScope": {
+    "additionalProperties": false,
+    "properties": {
+     "ComplianceResourceIds": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "type": "array"
+     },
+     "ComplianceResourceTypes": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "Tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "CreateBackupVaultOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "BackupVaultArn": {
+      "type": "string"
+     },
+     "BackupVaultName": {
+      "type": "string"
+     },
+     "CreationDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "type": "object"
+   },
+   "CreateFrameworkOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "FrameworkArn": {
+      "type": "string"
+     },
+     "FrameworkName": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CreateReportPlanOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "CreationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "ReportPlanArn": {
+      "type": "string"
+     },
+     "ReportPlanName": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeBackupVaultOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "BackupVaultArn": {
+      "type": "string"
+     },
+     "BackupVaultName": {
+      "type": "string"
+     },
+     "CreationDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "CreatorRequestId": {
+      "type": "string"
+     },
+     "EncryptionKeyArn": {
+      "type": "string"
+     },
+     "EncryptionKeyType": {
+      "enum": [
+       "AWS_OWNED_KMS_KEY",
+       "CUSTOMER_MANAGED_KMS_KEY"
+      ],
+      "type": "string"
+     },
+     "LatestMpaApprovalTeamUpdate": {
+      "$ref": "#/components/schemas/LatestMpaApprovalTeamUpdate"
+     },
+     "LockDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Locked": {
+      "type": "boolean"
+     },
+     "MaxRetentionDays": {
+      "type": "integer"
+     },
+     "MinRetentionDays": {
+      "type": "integer"
+     },
+     "MpaApprovalTeamArn": {
+      "type": "string"
+     },
+     "MpaSessionArn": {
+      "type": "string"
+     },
+     "NumberOfRecoveryPoints": {
+      "type": "integer"
+     },
+     "SourceBackupVaultArn": {
+      "type": "string"
+     },
+     "VaultState": {
+      "enum": [
+       "CREATING",
+       "AVAILABLE",
+       "FAILED"
+      ],
+      "type": "string"
+     },
+     "VaultType": {
+      "enum": [
+       "BACKUP_VAULT",
+       "LOGICALLY_AIR_GAPPED_BACKUP_VAULT",
+       "RESTORE_ACCESS_BACKUP_VAULT"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeFrameworkOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "CreationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "DeploymentStatus": {
+      "type": "string"
+     },
+     "FrameworkArn": {
+      "type": "string"
+     },
+     "FrameworkControls": {
+      "items": {
+       "$ref": "#/components/schemas/FrameworkControl"
+      },
+      "type": "array"
+     },
+     "FrameworkDescription": {
+      "maxLength": 1024,
+      "minLength": 0,
+      "type": "string"
+     },
+     "FrameworkName": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "FrameworkStatus": {
+      "type": "string"
+     },
+     "IdempotencyToken": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeReportPlanOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "ReportPlan": {
+      "$ref": "#/components/schemas/ReportPlan"
+     }
+    },
+    "type": "object"
+   },
+   "Framework": {
+    "additionalProperties": false,
+    "properties": {
+     "CreationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "DeploymentStatus": {
+      "type": "string"
+     },
+     "FrameworkArn": {
+      "type": "string"
+     },
+     "FrameworkDescription": {
+      "maxLength": 1024,
+      "minLength": 0,
+      "type": "string"
+     },
+     "FrameworkName": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "NumberOfControls": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "FrameworkControl": {
+    "additionalProperties": false,
+    "properties": {
+     "ControlInputParameters": {
+      "items": {
+       "$ref": "#/components/schemas/ControlInputParameter"
+      },
+      "type": "array"
+     },
+     "ControlName": {
+      "type": "string"
+     },
+     "ControlScope": {
+      "$ref": "#/components/schemas/ControlScope"
+     }
+    },
+    "required": [
+     "ControlName"
+    ],
+    "type": "object"
+   },
+   "LatestMpaApprovalTeamUpdate": {
+    "additionalProperties": false,
+    "properties": {
+     "ExpiryDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "InitiationDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "MpaSessionArn": {
+      "type": "string"
+     },
+     "Status": {
+      "enum": [
+       "PENDING",
+       "APPROVED",
+       "FAILED"
+      ],
+      "type": "string"
+     },
+     "StatusMessage": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListBackupVaultsOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "BackupVaultList": {
+      "items": {
+       "$ref": "#/components/schemas/BackupVaultListMember"
+      },
+      "type": "array"
+     },
+     "NextToken": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListFrameworksOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "Frameworks": {
+      "items": {
+       "$ref": "#/components/schemas/Framework"
+      },
+      "type": "array"
+     },
+     "NextToken": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListReportPlansOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "NextToken": {
+      "type": "string"
+     },
+     "ReportPlans": {
+      "items": {
+       "$ref": "#/components/schemas/ReportPlan"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListTagsOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "NextToken": {
+      "type": "string"
+     },
+     "Tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "ReportDeliveryChannel": {
+    "additionalProperties": false,
+    "properties": {
+     "Formats": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "S3BucketName": {
+      "type": "string"
+     },
+     "S3KeyPrefix": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "S3BucketName"
+    ],
+    "type": "object"
+   },
+   "ReportPlan": {
+    "additionalProperties": false,
+    "properties": {
+     "CreationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "DeploymentStatus": {
+      "type": "string"
+     },
+     "LastAttemptedExecutionTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "LastSuccessfulExecutionTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "ReportDeliveryChannel": {
+      "$ref": "#/components/schemas/ReportDeliveryChannel"
+     },
+     "ReportPlanArn": {
+      "type": "string"
+     },
+     "ReportPlanDescription": {
+      "maxLength": 1024,
+      "minLength": 0,
+      "type": "string"
+     },
+     "ReportPlanName": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ReportSetting": {
+      "$ref": "#/components/schemas/ReportSetting"
+     }
+    },
+    "type": "object"
+   },
+   "ReportSetting": {
+    "additionalProperties": false,
+    "properties": {
+     "Accounts": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "FrameworkArns": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "NumberOfFrameworks": {
+      "type": "integer"
+     },
+     "OrganizationUnits": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "Regions": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "ReportTemplate": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "ReportTemplate"
+    ],
+    "type": "object"
+   },
+   "UpdateFrameworkOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "CreationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "FrameworkArn": {
+      "type": "string"
+     },
+     "FrameworkName": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "UpdateReportPlanOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "CreationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "ReportPlanArn": {
+      "type": "string"
+     },
+     "ReportPlanName": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS Backup API (2018-11-15). Every other official operation returns HTTP 501 UnknownOperationException. Backup vaults, audit frameworks and report plans are stored configuration: no backup, copy, restore, scan or report job runs, vaults never hold recovery points, and StartBackupJob, StartRestoreJob, StartReportJob and the other job APIs return UnknownOperationException with HTTP 501. Backup plans and selections, legal holds, restore testing, logically air-gapped and restore access vaults, vault access policies, notifications and Vault Lock, and global and Region settings are not implemented. Encryption keys are stored without contacting KMS, and the AWS managed backup key is not reported when EncryptionKeyArn is omitted. Frameworks report FrameworkStatus INACTIVE and no DeploymentStatus or NumberOfControls because no AWS Config rule is deployed or evaluated. Report plans store their S3 delivery channel without writing to it, ReportDeliveryChannel.Formats defaults to CSV, and framework ARNs in report settings are not checked. CreatorRequestId and IdempotencyToken are client tokens and are not echoed.",
+  "title": "AWS Backup (simulator catalog)",
+  "version": "2018-11-15"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/audit/frameworks": {
+   "get": {
+    "operationId": "backupListFrameworks",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "backup"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "MaxResults",
+      "schema": {
+       "maximum": 1000,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "NextToken",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListFrameworksOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListFrameworks",
+    "tags": [
+     "AWS Backup"
+    ]
+   },
+   "post": {
+    "operationId": "backupCreateFramework",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "backup"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "FrameworkControls": {
+          "items": {
+           "$ref": "#/components/schemas/FrameworkControl"
+          },
+          "type": "array"
+         },
+         "FrameworkDescription": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+         },
+         "FrameworkName": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+         },
+         "FrameworkTags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         },
+         "IdempotencyToken": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "FrameworkControls",
+         "FrameworkName"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateFrameworkOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateFramework",
+    "tags": [
+     "AWS Backup"
+    ]
+   }
+  },
+  "/audit/frameworks/{frameworkName}": {
+   "delete": {
+    "operationId": "backupDeleteFramework",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "backup"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "frameworkName",
+      "required": true,
+      "schema": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteFramework",
+    "tags": [
+     "AWS Backup"
+    ]
+   },
+   "get": {
+    "operationId": "backupDescribeFramework",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "backup"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "frameworkName",
+      "required": true,
+      "schema": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DescribeFrameworkOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeFramework",
+    "tags": [
+     "AWS Backup"
+    ]
+   },
+   "put": {
+    "operationId": "backupUpdateFramework",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "backup"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "frameworkName",
+      "required": true,
+      "schema": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "FrameworkControls": {
+          "items": {
+           "$ref": "#/components/schemas/FrameworkControl"
+          },
+          "type": "array"
+         },
+         "FrameworkDescription": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+         },
+         "IdempotencyToken": {
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UpdateFrameworkOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateFramework",
+    "tags": [
+     "AWS Backup"
+    ]
+   }
+  },
+  "/audit/report-plans": {
+   "get": {
+    "operationId": "backupListReportPlans",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "backup"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "MaxResults",
+      "schema": {
+       "maximum": 1000,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "NextToken",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListReportPlansOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListReportPlans",
+    "tags": [
+     "AWS Backup"
+    ]
+   },
+   "post": {
+    "operationId": "backupCreateReportPlan",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "backup"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "IdempotencyToken": {
+          "type": "string"
+         },
+         "ReportDeliveryChannel": {
+          "$ref": "#/components/schemas/ReportDeliveryChannel"
+         },
+         "ReportPlanDescription": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+         },
+         "ReportPlanName": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+         },
+         "ReportPlanTags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         },
+         "ReportSetting": {
+          "$ref": "#/components/schemas/ReportSetting"
+         }
+        },
+        "required": [
+         "ReportDeliveryChannel",
+         "ReportPlanName",
+         "ReportSetting"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateReportPlanOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateReportPlan",
+    "tags": [
+     "AWS Backup"
+    ]
+   }
+  },
+  "/audit/report-plans/{reportPlanName}": {
+   "delete": {
+    "operationId": "backupDeleteReportPlan",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "backup"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "reportPlanName",
+      "required": true,
+      "schema": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteReportPlan",
+    "tags": [
+     "AWS Backup"
+    ]
+   },
+   "get": {
+    "operationId": "backupDescribeReportPlan",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "backup"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "reportPlanName",
+      "required": true,
+      "schema": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DescribeReportPlanOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeReportPlan",
+    "tags": [
+     "AWS Backup"
+    ]
+   },
+   "put": {
+    "operationId": "backupUpdateReportPlan",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "backup"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "reportPlanName",
+      "required": true,
+      "schema": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "IdempotencyToken": {
+          "type": "string"
+         },
+         "ReportDeliveryChannel": {
+          "$ref": "#/components/schemas/ReportDeliveryChannel"
+         },
+         "ReportPlanDescription": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+         },
+         "ReportSetting": {
+          "$ref": "#/components/schemas/ReportSetting"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UpdateReportPlanOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateReportPlan",
+    "tags": [
+     "AWS Backup"
+    ]
+   }
+  },
+  "/backup-vaults/": {
+   "get": {
+    "operationId": "backupListBackupVaults",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "backup"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "shared",
+      "schema": {
+       "type": "boolean"
+      }
+     },
+     {
+      "in": "query",
+      "name": "vaultType",
+      "schema": {
+       "enum": [
+        "BACKUP_VAULT",
+        "LOGICALLY_AIR_GAPPED_BACKUP_VAULT",
+        "RESTORE_ACCESS_BACKUP_VAULT"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 1000,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListBackupVaultsOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListBackupVaults",
+    "tags": [
+     "AWS Backup"
+    ]
+   }
+  },
+  "/backup-vaults/{backupVaultName}": {
+   "delete": {
+    "operationId": "backupDeleteBackupVault",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "backup"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "backupVaultName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteBackupVault",
+    "tags": [
+     "AWS Backup"
+    ]
+   },
+   "get": {
+    "operationId": "backupDescribeBackupVault",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "backup"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "backupVaultAccountId",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "backupVaultName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DescribeBackupVaultOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeBackupVault",
+    "tags": [
+     "AWS Backup"
+    ]
+   },
+   "put": {
+    "operationId": "backupCreateBackupVault",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "backup"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "backupVaultName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "BackupVaultTags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         },
+         "CreatorRequestId": {
+          "type": "string"
+         },
+         "EncryptionKeyArn": {
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateBackupVaultOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateBackupVault",
+    "tags": [
+     "AWS Backup"
+    ]
+   }
+  },
+  "/tags/{resourceArn}": {
+   "post": {
+    "operationId": "backupTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "backup"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "Tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "AWS Backup"
+    ]
+   }
+  },
+  "/tags/{resourceArn}/": {
+   "get": {
+    "operationId": "backupListTags",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "backup"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 1000,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListTagsOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTags",
+    "tags": [
+     "AWS Backup"
+    ]
+   }
+  },
+  "/untag/{resourceArn}": {
+   "post": {
+    "operationId": "backupUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "backup"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "TagKeyList": {
+          "items": {
+           "type": "string"
+          },
+          "type": "array"
+         }
+        },
+        "required": [
+         "TagKeyList"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "AWS Backup"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS Backup API (2018-11-15). Every other official operation returns HTTP 501 UnknownOperationException. Backup vaults, audit frameworks and report plans are stored configuration: no backup, copy, restore, scan or report job runs, vaults never hold recovery points, and StartBackupJob, StartRestoreJob, StartReportJob and the other job APIs return UnknownOperationException with HTTP 501. Backup plans and selections, legal holds, restore testing, logically air-gapped and restore access vaults, vault access policies, notifications and Vault Lock, and global and Region settings are not implemented. Encryption keys are stored without contacting KMS, and the AWS managed backup key is not reported when EncryptionKeyArn is omitted. Frameworks report FrameworkStatus INACTIVE and no DeploymentStatus or NumberOfControls because no AWS Config rule is deployed or evaluated. Report plans store their S3 delivery channel without writing to it, ReportDeliveryChannel.Formats defaults to CSV, and framework ARNs in report settings are not checked. CreatorRequestId and IdempotencyToken are client tokens and are not echoed.",
+   "name": "AWS Backup"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/backup/2018-11-15/service-2.json",
+  "sha256": "fa3acd55927d601b274dc0b90a5c891b023d824b0e158109580cedca5cdd5200",
+  "license": "Apache-2.0"
+ }
+}

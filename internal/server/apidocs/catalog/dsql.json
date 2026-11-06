@@ -1,0 +1,842 @@
+{
+ "components": {
+  "schemas": {
+   "ClusterSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "identifier": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "identifier",
+     "arn"
+    ],
+    "type": "object"
+   },
+   "CreateClusterOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "creationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "deletionProtectionEnabled": {
+      "type": "boolean"
+     },
+     "encryptionDetails": {
+      "$ref": "#/components/schemas/EncryptionDetails"
+     },
+     "endpoint": {
+      "type": "string"
+     },
+     "identifier": {
+      "type": "string"
+     },
+     "multiRegionProperties": {
+      "$ref": "#/components/schemas/MultiRegionProperties"
+     },
+     "status": {
+      "enum": [
+       "CREATING",
+       "ACTIVE",
+       "IDLE",
+       "INACTIVE",
+       "UPDATING",
+       "DELETING",
+       "DELETED",
+       "FAILED",
+       "PENDING_SETUP",
+       "PENDING_DELETE"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "identifier",
+     "arn",
+     "status",
+     "creationTime",
+     "deletionProtectionEnabled"
+    ],
+    "type": "object"
+   },
+   "DeleteClusterOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "creationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "identifier": {
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "CREATING",
+       "ACTIVE",
+       "IDLE",
+       "INACTIVE",
+       "UPDATING",
+       "DELETING",
+       "DELETED",
+       "FAILED",
+       "PENDING_SETUP",
+       "PENDING_DELETE"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "identifier",
+     "arn",
+     "status",
+     "creationTime"
+    ],
+    "type": "object"
+   },
+   "EncryptionDetails": {
+    "additionalProperties": false,
+    "properties": {
+     "encryptionStatus": {
+      "enum": [
+       "ENABLED",
+       "UPDATING",
+       "KMS_KEY_INACCESSIBLE",
+       "ENABLING"
+      ],
+      "type": "string"
+     },
+     "encryptionType": {
+      "enum": [
+       "AWS_OWNED_KMS_KEY",
+       "CUSTOMER_MANAGED_KMS_KEY"
+      ],
+      "type": "string"
+     },
+     "kmsKeyArn": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "encryptionType",
+     "encryptionStatus"
+    ],
+    "type": "object"
+   },
+   "GetClusterOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "creationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "deletionProtectionEnabled": {
+      "type": "boolean"
+     },
+     "encryptionDetails": {
+      "$ref": "#/components/schemas/EncryptionDetails"
+     },
+     "endpoint": {
+      "type": "string"
+     },
+     "identifier": {
+      "type": "string"
+     },
+     "multiRegionProperties": {
+      "$ref": "#/components/schemas/MultiRegionProperties"
+     },
+     "status": {
+      "enum": [
+       "CREATING",
+       "ACTIVE",
+       "IDLE",
+       "INACTIVE",
+       "UPDATING",
+       "DELETING",
+       "DELETED",
+       "FAILED",
+       "PENDING_SETUP",
+       "PENDING_DELETE"
+      ],
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 200,
+      "minProperties": 0,
+      "type": "object"
+     }
+    },
+    "required": [
+     "identifier",
+     "arn",
+     "status",
+     "creationTime",
+     "deletionProtectionEnabled"
+    ],
+    "type": "object"
+   },
+   "ListClustersOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "clusters": {
+      "items": {
+       "$ref": "#/components/schemas/ClusterSummary"
+      },
+      "type": "array"
+     },
+     "nextToken": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "clusters"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 200,
+      "minProperties": 0,
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "MultiRegionProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "clusters": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "witnessRegion": {
+      "maxLength": 50,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "UpdateClusterOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "creationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "identifier": {
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "CREATING",
+       "ACTIVE",
+       "IDLE",
+       "INACTIVE",
+       "UPDATING",
+       "DELETING",
+       "DELETED",
+       "FAILED",
+       "PENDING_SETUP",
+       "PENDING_DELETE"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "identifier",
+     "arn",
+     "status",
+     "creationTime"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon Aurora DSQL API (2018-05-10). Every other official operation returns HTTP 501 UnknownOperationException. Clusters are configuration records that stay CREATING: no PostgreSQL-compatible database, endpoint, connection, authentication token or VPC endpoint exists, endpoint is never returned, and GetVpcEndpointServiceName returns UnknownOperationException with HTTP 501. Deletion protection is not enforced, so CreateCluster requires deletionProtectionEnabled false and enabling it is refused. Multi-Region peering (multiRegionProperties) and resource-based policies (policy, PutClusterPolicy, GetClusterPolicy and DeleteClusterPolicy) are not implemented. kmsEncryptionKey accepts AWS_OWNED_KMS_KEY or a KMS key ARN, stored in encryptionDetails without contacting KMS; key IDs and aliases are refused. Client tokens on UpdateCluster and DeleteCluster are accepted without replaying earlier responses.",
+  "title": "Amazon Aurora DSQL (simulator catalog)",
+  "version": "2018-05-10"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/cluster": {
+   "get": {
+    "operationId": "dsqlListClusters",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "dsql"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "max-results",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "next-token",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListClustersOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListClusters",
+    "tags": [
+     "Amazon Aurora DSQL"
+    ]
+   },
+   "post": {
+    "operationId": "dsqlCreateCluster",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "dsql"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "bypassPolicyLockoutSafetyCheck": {
+          "type": "boolean"
+         },
+         "clientToken": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         },
+         "deletionProtectionEnabled": {
+          "type": "boolean"
+         },
+         "kmsEncryptionKey": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "type": "string"
+         },
+         "multiRegionProperties": {
+          "$ref": "#/components/schemas/MultiRegionProperties"
+         },
+         "policy": {
+          "maxLength": 20480,
+          "minLength": 1,
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 200,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateClusterOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateCluster",
+    "tags": [
+     "Amazon Aurora DSQL"
+    ]
+   }
+  },
+  "/cluster/{identifier}": {
+   "delete": {
+    "operationId": "dsqlDeleteCluster",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "dsql"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "client-token",
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "identifier",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DeleteClusterOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteCluster",
+    "tags": [
+     "Amazon Aurora DSQL"
+    ]
+   },
+   "get": {
+    "operationId": "dsqlGetCluster",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "dsql"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "identifier",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GetClusterOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetCluster",
+    "tags": [
+     "Amazon Aurora DSQL"
+    ]
+   },
+   "post": {
+    "operationId": "dsqlUpdateCluster",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "dsql"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "identifier",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         },
+         "deletionProtectionEnabled": {
+          "type": "boolean"
+         },
+         "kmsEncryptionKey": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "type": "string"
+         },
+         "multiRegionProperties": {
+          "$ref": "#/components/schemas/MultiRegionProperties"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UpdateClusterOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateCluster",
+    "tags": [
+     "Amazon Aurora DSQL"
+    ]
+   }
+  },
+  "/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "dsqlUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "dsql"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1011,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 200,
+       "minItems": 0,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "Amazon Aurora DSQL"
+    ]
+   },
+   "get": {
+    "operationId": "dsqlListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "dsql"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1011,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListTagsForResourceOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "Amazon Aurora DSQL"
+    ]
+   },
+   "post": {
+    "operationId": "dsqlTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "dsql"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1011,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 200,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "Amazon Aurora DSQL"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon Aurora DSQL API (2018-05-10). Every other official operation returns HTTP 501 UnknownOperationException. Clusters are configuration records that stay CREATING: no PostgreSQL-compatible database, endpoint, connection, authentication token or VPC endpoint exists, endpoint is never returned, and GetVpcEndpointServiceName returns UnknownOperationException with HTTP 501. Deletion protection is not enforced, so CreateCluster requires deletionProtectionEnabled false and enabling it is refused. Multi-Region peering (multiRegionProperties) and resource-based policies (policy, PutClusterPolicy, GetClusterPolicy and DeleteClusterPolicy) are not implemented. kmsEncryptionKey accepts AWS_OWNED_KMS_KEY or a KMS key ARN, stored in encryptionDetails without contacting KMS; key IDs and aliases are refused. Client tokens on UpdateCluster and DeleteCluster are accepted without replaying earlier responses.",
+   "name": "Amazon Aurora DSQL"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/dsql/2018-05-10/service-2.json",
+  "sha256": "642d514a7beb43d9a3934653b5798a980657ad36552954e7d5311ffca9a9599f",
+  "license": "Apache-2.0"
+ }
+}

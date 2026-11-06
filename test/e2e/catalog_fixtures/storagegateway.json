@@ -1,0 +1,26 @@
+{
+ "client": "storagegateway",
+ "steps": [
+  {"op": "create_tape_pool", "args": {"PoolName": "fixture-pool", "StorageClass": "DEEP_ARCHIVE", "RetentionLockType": "GOVERNANCE", "RetentionLockTimeInDays": 30, "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"pool": "PoolARN"}},
+  {"op": "list_tape_pools", "args": {"PoolARNs": ["${pool}"]}, "expect": {"PoolInfos#count": 1, "PoolInfos[0].PoolName": "fixture-pool", "PoolInfos[0].PoolStatus": "ACTIVE", "PoolInfos[0].RetentionLockTimeInDays": 30}},
+  {"op": "create_tape_pool", "args": {"PoolName": "fixture-unlocked", "StorageClass": "GLACIER"}, "save": {"plain": "PoolARN"}},
+  {"op": "list_tape_pools", "args": {"Limit": 1}, "expect": {"PoolInfos#count": 1}},
+  {"op": "create_tape_pool", "args": {"PoolName": "fixture-bad", "StorageClass": "GLACIER", "RetentionLockType": "COMPLIANCE"}, "error": "InvalidGatewayRequestException"},
+  {"op": "add_tags_to_resource", "args": {"ResourceARN": "${plain}", "Tags": [{"Key": "stage", "Value": "dev"}]}},
+  {"op": "remove_tags_from_resource", "args": {"ResourceARN": "${plain}", "TagKeys": ["stage"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceARN": "${pool}"}, "expect": {"Tags": [{"Key": "team", "Value": "a"}]}},
+  {"op": "list_gateways", "args": {}, "error": "UnknownOperationException", "status": 501},
+  {"op": "delete_tape_pool", "args": {"PoolARN": "arn:aws:storagegateway:us-east-1:000000000000:tapepool/pool-00000000"}, "error": "ResourceNotFoundException"}
+ ],
+ "isolation": [
+  {"op": "list_tape_pools", "args": {}, "expect": {"PoolInfos#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "list_tape_pools", "args": {}, "expect": {"PoolInfos#count": 2, "PoolInfos[0].RetentionLockType": "GOVERNANCE"}}
+ ],
+ "cleanup": [
+  {"op": "delete_tape_pool", "args": {"PoolARN": "${pool}"}, "expect": {"PoolARN": "${pool}"}},
+  {"op": "delete_tape_pool", "args": {"PoolARN": "${plain}"}},
+  {"op": "list_tape_pools", "args": {}, "expect": {"PoolInfos#count": 0}}
+ ]
+}
