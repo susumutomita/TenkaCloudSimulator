@@ -108,6 +108,8 @@ jobs:
             reports/secrets-metadata-*.png
             reports/secrets-a11y-summary.json
             reports/landing-topology/**
+            reports/login-first-native-failure.json
+            reports/login-first-native-observer-status.json
           if-no-files-found: warn
           retention-days: 14
       - name: Run the actual platform hello-world lifecycle and participant browser

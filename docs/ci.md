@@ -50,6 +50,14 @@ mask editable fields; diagnostic errors retain their types rather than messages.
 This is test evidence, not a release binary or certification of native
 HTML-in-Canvas support. Artifact retention does not make a failed check pass.
 
+The same artifact retains the login test's failure-only native-input report and
+incomplete-observer status, when produced. This test starts its own disposable
+instance with a fresh dummy token. Reports contain field-state booleans, bounded
+request/response counts, HTTP status codes and exception types; they contain no
+token value or hash, clipboard content, body, header, cookie or real user file.
+Observer problems are reported separately and never replace the original test
+failure. Diagnostic collection is not a real 1Password or Dia reproduction.
+
 A later near-floor pass does not repair an earlier below-floor result. Add
 meaningful native contract tests for uncovered behavior and verify a new single
 full-module profile without exclusions or a lower floor. The DynamoDB storage
