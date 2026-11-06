@@ -25,10 +25,10 @@ function fixture(value='',state=''){
 }
 test('submit snapshots native insertion when no component change event was delivered',()=>{
   const dummy='d'.repeat(64),f=fixture(dummy,'');
-  assert.equal(f.call.flush(),dummy);assert.equal(f.call.read().token,'');
+  assert.equal(f.call.flush(),dummy);assert.equal(f.call.read().token,dummy);
 });
 test('an intentionally empty native field never replays stale controlled credentials',()=>{
-  const f=fixture('','d'.repeat(64));assert.equal(f.call.flush(),'');
+  const f=fixture('','d'.repeat(64));assert.equal(f.call.flush(),'');assert.equal(f.call.read().token,'');
 });
 test('capture/blur synchronization adopts native editing and invalidates pending file intent',()=>{
   const dummy='n'.repeat(64),f=fixture(dummy,'old');f.call.sync();

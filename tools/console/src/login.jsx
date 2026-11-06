@@ -38,7 +38,11 @@ export default function Login(){
     clearPendingPaste();
     // Submit the visible native control, including an intentional clear. A
     // password-manager/autofill write need not have updated React state.
-    return tokenInput.current?.isConnected?tokenInput.current.value:token;
+    const input=tokenInput.current;
+    if(input?.isConnected){
+      const value=input.value;if(value!==token)changeToken(value);return value;
+    }
+    return token;
   }
   function capturePaste(event){
     const input=event.target;

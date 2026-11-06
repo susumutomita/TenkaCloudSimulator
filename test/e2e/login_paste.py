@@ -48,8 +48,9 @@ with running(authenticated=True) as (endpoint,token),sync_playwright() as p:
  report['nativeDOMWriteWithoutChangeEventAuthenticates']=True
  page=fresh();paste(page,token);native_write(page,'');posts=[]
  page.on('request',lambda request:posts.append(True)if request.method=='POST'and request.url==endpoint+'/_simulator/login'else None)
- page.get_by_role('button',name='Open sandbox',exact=True).click()
+ field(page).press('Enter')
  expect(page.get_by_text('Enter your access token. If paste left this blank, copy the token as plain text.',exact=True)).to_be_visible()
+ check_value(page,'') # Error rerender must not restore the old controlled value.
  assert not posts and page.request.get(endpoint+'/_simulator/v1/capabilities').status==401
  report['nativeDOMClearDoesNotSubmitStaleToken']=True
  page=fresh();native_write(page,token);field(page).focus();page.get_by_role('button',name='日本語',exact=True).click()
