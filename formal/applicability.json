@@ -3,6 +3,13 @@
   "base_sha": "d166f569772de7f45d98e31e9971eeb33b903763",
   "changes": [
     {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "8d78f38035ef68a6cd8430f7ac4a96cc438ba297d409aa950e66bc1d80c9955e",
+      "disposition": "formal-infrastructure",
+      "reason": "Run the four existing native token input regression cases as a mandatory Node test step after the existing Cloudscape build. Node is already required; no action, permission, dependency, threshold, model setting or existing check is removed or relaxed.",
+      "models": []
+    },
+    {
       "path": "README.ja.md",
       "sha256": "d71a501d98ec9e9f17222789fc5ff14b604c630fb0d640ba9ec3fdcd17e185c1",
       "disposition": "documentation",
@@ -11,7 +18,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "8cf15ef7cf1551cf5e5e8b108e8ad6a82c9ceaa0d62b6ad72532bacaf6cf9520",
+      "sha256": "d6f26b86e2b99df40eda1a3d31000967247bb137a963bd759df6aa422f1c128a",
       "disposition": "documentation",
       "reason": "Login-specific documentation, mandatory validation policy or canonical-build provenance metadata. Existing server authentication, all prior models, runtime dependencies and rights notices are preserved. Scoped checks and source provenance do not establish whole442 or real1Password/Dia compatibility.",
       "models": []
