@@ -4985,6 +4985,476 @@
         }
       ],
       "limits": "Intended HTTP transaction seam; base eb03 has confirmed constructor persistence bug; repaired c4d412f source inspected separately, not refinement-proven. Trusted host public NewKMSAliasStore explicitly initializes state and is EXCLUDED from denied HTTP no-write contract. Two regions, one request, optional global logical schema and per-region cursor-row membership; region data is one abstract operation effect bit, not alias CRUD/crypto correctness. Action/alias/key Boolean requirements model bounded operations requiring all three; ListAliases only-action projection is represented by other permissions TRUE, not assertion all operations require alias and key authorization. valid is early wire admission; lateValid is separate target/marker admission after tentative initialization and authorization; no byte/JSON/marker-MAC/SQLite/DDL/Go/HTTP-auth refinement. Captured immutable pure policy, single transaction; no adversarial policy mutation or authorization-before-target-lookup promise. Schema frame is logical table/row state, not WAL/page-byte identity or zero SQL syscall guarantee. Scoped SANY+baseline+13 controls passed at6278443; native Go validation belongs to independent author receipts, not model refinement. Native repair c4d412f source seam independently reviewed; early/late validation order is abstract, not native error-precedence refinement. Scoped627 proof is independent, not canonical current registry proof."
+    },
+    {
+      "id": "CFNConditionAdmission",
+      "model": "formal/CFNConditionAdmission.tla",
+      "config": "formal/CFNConditionAdmission.cfg",
+      "bounds": "13 defect scenarios \u00d7 2 equality results \u00d7 3 then arms \u00d7 3 else arms = 234 immutable inputs; 6 deterministic compilation phases, no request loops",
+      "properties": [
+        "TypeOK",
+        "ParameterAdmission",
+        "AllConditionsValidated",
+        "DisabledDeclarationsValidated",
+        "BothBranchesValidated",
+        "SelectedLinkValidated",
+        "NoResultOnInvalid",
+        "NoEarlyPublication",
+        "SelectedBranchExact",
+        "MapNoValuePruned",
+        "ListNoValuePruned",
+        "DisabledResourcesAbsent",
+        "ConditionalOutputsAbsent",
+        "PlanExact"
+      ],
+      "mutants": [
+        {
+          "id": "DefaultOverrideBypass",
+          "edits": [
+            {
+              "old": "{\"definition\", \"default\", \"supplied\", \"missing\", \"unknownParameter\"}",
+              "new": "{\"definition\", \"supplied\", \"missing\", \"unknownParameter\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ParameterAdmission"
+        },
+        {
+          "id": "InvalidSuppliedAccepted",
+          "edits": [
+            {
+              "old": "{\"definition\", \"default\", \"supplied\", \"missing\", \"unknownParameter\"}",
+              "new": "{\"definition\", \"default\", \"missing\", \"unknownParameter\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ParameterAdmission"
+        },
+        {
+          "id": "UnknownParameterAccepted",
+          "edits": [
+            {
+              "old": "{\"definition\", \"default\", \"supplied\", \"missing\", \"unknownParameter\"}",
+              "new": "{\"definition\", \"default\", \"supplied\", \"missing\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ParameterAdmission"
+        },
+        {
+          "id": "CycleAccepted",
+          "edits": [
+            {
+              "old": "ConditionsOK(i) == i.defect \\notin {\"cycle\", \"unknownCondition\", \"conditionSyntax\"}",
+              "new": "ConditionsOK(i) == i.defect \\notin {\"unknownCondition\", \"conditionSyntax\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AllConditionsValidated"
+        },
+        {
+          "id": "DisabledDeclarationBypass",
+          "edits": [
+            {
+              "old": "DeclarationsOK(i) == i.defect # \"disabledDeclaration\"",
+              "new": "DeclarationsOK(i) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DisabledDeclarationsValidated"
+        },
+        {
+          "id": "UnusedElseSyntaxBypass",
+          "edits": [
+            {
+              "old": "BranchesOK(i) == i.defect \\notin {\"thenSyntax\", \"elseSyntax\"}",
+              "new": "BranchesOK(i) == i.defect # \"thenSyntax\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BothBranchesValidated"
+        },
+        {
+          "id": "SelectedLinkBypass",
+          "edits": [
+            {
+              "old": "LinksOK(i) == i.defect # \"selectedLink\"",
+              "new": "LinksOK(i) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SelectedLinkValidated"
+        },
+        {
+          "id": "WrongSelectedArm",
+          "edits": [
+            {
+              "old": "Arm(i) == IF i.enabled THEN i.thenValue ELSE i.elseValue",
+              "new": "Arm(i) == IF i.enabled THEN i.elseValue ELSE i.thenValue",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SelectedBranchExact"
+        },
+        {
+          "id": "MapNoValueRetained",
+          "edits": [
+            {
+              "old": "mapValue |-> Keep(v), listValue |-> Keep(v)",
+              "new": "mapValue |-> <<v>>, listValue |-> Keep(v)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MapNoValuePruned"
+        },
+        {
+          "id": "ListNoValueRetained",
+          "edits": [
+            {
+              "old": "mapValue |-> Keep(v), listValue |-> Keep(v)",
+              "new": "mapValue |-> Keep(v), listValue |-> <<v>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListNoValuePruned"
+        },
+        {
+          "id": "DisabledResourceIncluded",
+          "edits": [
+            {
+              "old": "ResourceSet(i) == IF i.enabled THEN {\"BaseRole\", \"ScoreItem\"} ELSE {\"BaseRole\"}",
+              "new": "ResourceSet(i) == {\"BaseRole\", \"ScoreItem\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DisabledResourcesAbsent"
+        },
+        {
+          "id": "DisabledOutputIncluded",
+          "edits": [
+            {
+              "old": "OutputSet(i) == IF i.enabled THEN {\"Public\", \"Coordination\"} ELSE {\"Public\"}",
+              "new": "OutputSet(i) == {\"Public\", \"Coordination\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ConditionalOutputsAbsent"
+        },
+        {
+          "id": "FailedResultPublished",
+          "edits": [
+            {
+              "old": "CheckLink == /\\ phase=\"Link\"\n /\\ phase'=(IF LinksOK(input) THEN \"Publish\" ELSE \"Failed\")\n /\\ UNCHANGED <<input,selected,result>>",
+              "new": "CheckLink == /\\ phase=\"Link\"\n /\\ phase'=(IF LinksOK(input) THEN \"Publish\" ELSE \"Failed\")\n /\\ result'=(IF LinksOK(input) THEN result ELSE Plan(input,selected))\n /\\ UNCHANGED <<input,selected>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoResultOnInvalid"
+        },
+        {
+          "id": "EarlyResultPublished",
+          "edits": [
+            {
+              "old": "Select == /\\ phase=\"Select\" /\\ selected'=Arm(input) /\\ phase'=\"Link\"\n /\\ UNCHANGED <<input,result>>",
+              "new": "Select == /\\ phase=\"Select\" /\\ selected'=Arm(input) /\\ phase'=\"Link\"\n /\\ result'=Plan(input,Arm(input)) /\\ UNCHANGED input",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoEarlyPublication"
+        }
+      ],
+      "source_scope": [
+        "internal/aws/cloudformation_conditions.go",
+        "internal/aws/cloudformation.go",
+        "internal/aws/cloudformation_conditions_link.go"
+      ],
+      "limits": "Finite validation witnesses, not real Go constraint evaluation, rational arithmetic, regex, UTF8/byte limits, YAML/JSON parser or graph recursion refinement. Condition equality is an immutable Boolean input; alias/cycle/unknown graphs are abstract witnesses, not evaluated graph nodes. Chosen symbol-link validity is abstract; frozen4177 compiler preparation now has a separately reviewed limited source correspondence, not a full linker/dependency refinement. Unused branch syntax is validated; resource linking is distinct. No SQL, transaction, runtime provisioning, policy grant, output privacy/NoEcho, grader execution, VM or host authority proof. selectedLink witness is an unconditional BaseRole link, independent of the optional map/list arm; NoValue can prune that optional arm while BaseRole linking still fails. Exact compiler4177 correspondence is a bounded plan-admission projection only: outer declaration validation actually precedes parameters, unlike the model phase order. Both-arm raw Ref/GetAtt/Sub validation, active-disabled dependency graph, resource schema allowlists/copies/ordering are separate native obligations, not modeled individually. Resource/output sets represent a pure StackRecord plan, not SQL/resource allocation, rollback, grant, NoEcho/private-output filtering or host grading. File scope covers only these named compile preparation contracts, not every behavior in cloudformation.go."
+    },
+    {
+      "id": "CFNFinalCleanupACK",
+      "model": "formal/CFNFinalCleanupACK.tla",
+      "config": "formal/CFNFinalCleanupACK.cfg",
+      "bounds": "1selectedstack/1ownedresource+claim/1abstractpeer;4faultmodes Normal/IgnoreStack/ReinsertStack/IgnoreClaims;5phases",
+      "properties": [
+        "TypeOK",
+        "NoFalseFinalRecordACK",
+        "FailureAtomic",
+        "PeerFramePreserved",
+        "PendingFrameUnchanged"
+      ],
+      "limits": "Final selectedstack/ownedclaim record cleanup only. Physicalresource handler success is ASSUMED, not independentlyACKchecked or proved bythismodel. RealretainedFKclaim makes ExecSucceeded false independentlyofmutableACK; IgnoreFinalCleanupACK canwitnessonlyIgnoreStack/ReinsertStack, notIgnoreClaims. Fullrollback/peerframe abstractions, no Go/SQL/auth/provisioning refinement.",
+      "source_scope": [
+        "internal/aws/cloudformation.go",
+        "internal/aws/cloudformation_cleanup_ack_test.go"
+      ],
+      "mutants": [
+        {
+          "id": "IgnoreFinalCleanupACK",
+          "expect_invariant": "NoFalseFinalRecordACK",
+          "edits": [
+            {
+              "old": "CleanupAccepted == affected=1 /\\ ~work.stack /\\ ~work.claim (* FinalCleanupACK *)",
+              "new": "CleanupAccepted == TRUE (* FinalCleanupACK *)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "CommitPartialAfterRefusal",
+          "expect_invariant": "FailureAtomic",
+          "edits": [
+            {
+              "old": "data'=data (* RollbackFrame *)",
+              "new": "data'=work (* RollbackFrame *)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "DeletePeerResource",
+          "expect_invariant": "PeerFramePreserved",
+          "edits": [
+            {
+              "old": "work'=[work EXCEPT !.resource=FALSE] (* DeleteOwnedResource *)",
+              "new": "work'=[work EXCEPT !.resource=FALSE, !.peer=FALSE] (* DeleteOwnedResource *)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "PublishBeforeCleanup",
+          "expect_invariant": "PendingFrameUnchanged",
+          "edits": [
+            {
+              "old": "/\\ phase'=\"ResourceDeleted\"\n                  /\\ UNCHANGED <<fault,data,affected,outcome>>",
+              "new": "/\\ phase'=\"ResourceDeleted\"\n                  /\\ data'=work' /\\ UNCHANGED <<fault,affected,outcome>>",
+              "count": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CFNConditionMemoDepth",
+      "model": "formal/CFNConditionMemoDepth.tla",
+      "config": "formal/CFNConditionMemoDepth.cfg",
+      "bounds": "3nameddefinitions;7choices/name(leafTRUE/FALSE,alias0unknown/1..3,malformed);343graphs;all6definitionorders;depthbound2or3;4116initialcombinations;three root evaluations maximum;single-childaliases and normalized Fn::Equals truthvalues. Native32/33 boundarytests separate.",
+      "properties": [
+        "TypeOK",
+        "RejectedPublishesNoValues",
+        "AllDefinitionsValidated",
+        "NoInvalidGraphAccepted",
+        "NoOverDepthAccepted",
+        "NoCycleMemoized",
+        "NoUnknownMemoized",
+        "NoMalformedMemoized",
+        "MemoHeightsExact",
+        "MemoValuesExact",
+        "PublishedValuesExact",
+        "AdmissionExact"
+      ],
+      "limits": "Independent finite source-correspondence abstraction, not Go/JSON/parser/parameterRefs/SQLite/CFNresource/IAM/refinement/liveness or unbounded32depth proof. All-or-nil public return only; private scratch maps on error are not claimed restored. One-expression malformed class represents native refusal, not all malformed syntax. Every node is defined; unknown0 only referenced. All6orders represent renamed sorted native order, not runtime nondeterministic map iteration. Visiting-as-completed is a semantic false-ACK change, not an isolated missing-visiting-guard detector; depth refusal alone remains redundant cycle defense. Scoped SANY/baseline/nine named-invariant controls actually passed at cca79267; the combined registered suite remains pending. This dated scoped run is not Go refinement or unbounded-depth proof.",
+      "source_scope": [
+        "internal/aws/cloudformation_conditions.go"
+      ],
+      "mutants": [
+        {
+          "id": "CachedReturnIgnoresStructuralHeight",
+          "edits": [
+            {
+              "old": "depth+h[n]-1<=bound (* CachedDepthAdmission *)",
+              "new": "TRUE (* CachedDepthAdmission *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoOverDepthAccepted"
+        },
+        {
+          "id": "CachedDepthOffByOne",
+          "edits": [
+            {
+              "old": "depth+h[n]-1<=bound (* CachedDepthAdmission *)",
+              "new": "depth+h[n]-1<=bound+1 (* CachedDepthAdmission *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoOverDepthAccepted"
+        },
+        {
+          "id": "SkipUnusedDefinitions",
+          "edits": [
+            {
+              "old": "state.index+1=3 (* ValidateEveryDefinition *)",
+              "new": "state.index+1=1 (* ValidateEveryDefinition *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AllDefinitionsValidated"
+        },
+        {
+          "id": "CacheAliasHeightAsLeaf",
+          "edits": [
+            {
+              "old": "height==1+child.height (* AliasStructuralHeight *)",
+              "new": "height==1 (* AliasStructuralHeight *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MemoHeightsExact"
+        },
+        {
+          "id": "TreatVisitingAsCompleted",
+          "edits": [
+            {
+              "old": "n \\in visiting THEN Failure(h,v) (* VisitingRefusal *)",
+              "new": "n \\in visiting THEN Outcome(TRUE,h,v,1,FALSE) (* VisitingRefusal *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoCycleMemoized"
+        },
+        {
+          "id": "TreatUnknownAsFalse",
+          "edits": [
+            {
+              "old": "n \\notin Nodes THEN Failure(h,v) (* UnknownRefusal *)",
+              "new": "n \\notin Nodes THEN Outcome(TRUE,h,v,1,FALSE) (* UnknownRefusal *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoUnknownMemoized"
+        },
+        {
+          "id": "TreatMalformedAsFalse",
+          "edits": [
+            {
+              "old": "g[n].kind=\"Malformed\" THEN Failure(h,v) (* MalformedRefusal *)",
+              "new": "g[n].kind=\"Malformed\" THEN Outcome(TRUE,[h EXCEPT ![n]=1],v,1,FALSE) (* MalformedRefusal *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoMalformedMemoized"
+        },
+        {
+          "id": "InvertMemoizedValue",
+          "edits": [
+            {
+              "old": "Outcome(TRUE,h,v,h[n],v[n]) (* CachedValue *)",
+              "new": "Outcome(TRUE,h,v,h[n],~v[n]) (* CachedValue *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MemoValuesExact"
+        },
+        {
+          "id": "PublishPartialValuesOnFailure",
+          "edits": [
+            {
+              "old": "IF finished /\\ result.ok THEN result.values ELSE AbsentCondition",
+              "new": "IF finished THEN result.values ELSE AbsentCondition",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RejectedPublishesNoValues"
+        }
+      ]
+    },
+    {
+      "id": "CFNPhysicalResourceACK",
+      "model": "formal/CFNPhysicalResourceACK.tla",
+      "config": "formal/CFNPhysicalResourceACK.cfg",
+      "bounds": "2selectedphysicalresources(abstractSSM/S3),1peerframe,1stack/claimframe;9initialfaultmodes;6phases. MissingA preservesalreadymissingcleanup; AbortB occursafterfirstresourceeffect. No unboundedconcurrency.",
+      "properties": [
+        "TypeOK",
+        "SuccessPhysicalAbsent",
+        "FailureAtomic",
+        "PeerFramePreserved",
+        "PendingFrameUnchanged"
+      ],
+      "limits": "Onlyend-of-Tx selectedSSM/S3physicalabsence+rollback/peerframe contract. ActualSQLhandler effects abstracted bydeliveredrowbits withIGNORE/reinsert/lateclaim/latestack/crosscleanup faults. Independentfinalpredicate readsactualworkingrows, notackflag. earlyOK usedonlymutant torepresentwrongearlycheck. NoSQL/Go/auth/parser/fullCFNrefinement or otherresourceACKproof. Success doesnotimplyfinalstack/claimACK (separatemodel).",
+      "source_scope": [
+        "internal/aws/cloudformation.go",
+        "internal/aws/cloudformation_physical_delete_ack_test.go"
+      ],
+      "mutants": [
+        {
+          "id": "OmitFinalPhysicalCheck",
+          "expect_invariant": "SuccessPhysicalAbsent",
+          "edits": [
+            {
+              "old": "PhysicalAccepted == ~work.a /\\ ~work.b (* FinalPhysicalAbsence *)",
+              "new": "PhysicalAccepted == TRUE (* FinalPhysicalAbsence *)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "ReadBeforeLateCleanup",
+          "expect_invariant": "SuccessPhysicalAbsent",
+          "edits": [
+            {
+              "old": "PhysicalAccepted == ~work.a /\\ ~work.b (* FinalPhysicalAbsence *)",
+              "new": "PhysicalAccepted == earlyOK (* FinalPhysicalAbsence *)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "SkipSecondResource",
+          "expect_invariant": "SuccessPhysicalAbsent",
+          "edits": [
+            {
+              "old": "PhysicalAccepted == ~work.a /\\ ~work.b (* FinalPhysicalAbsence *)",
+              "new": "PhysicalAccepted == ~work.a (* FinalPhysicalAbsence *)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "CommitFailedPostcondition",
+          "expect_invariant": "FailureAtomic",
+          "edits": [
+            {
+              "old": "data'=data (* RollbackAfterPostcondition *)",
+              "new": "data'=work (* RollbackAfterPostcondition *)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "CommitSQLExecFailure",
+          "expect_invariant": "FailureAtomic",
+          "edits": [
+            {
+              "old": "data'=data (* RollbackAfterExecFailure *)",
+              "new": "data'=work (* RollbackAfterExecFailure *)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "DeletePeerPhysicalResource",
+          "expect_invariant": "PeerFramePreserved",
+          "edits": [
+            {
+              "old": "work'=[work EXCEPT !.a=(fault \\in {\"IgnoreA\",\"ReinsertA\"})] (* SelectedDeleteA *)",
+              "new": "work'=[work EXCEPT !.a=(fault \\in {\"IgnoreA\",\"ReinsertA\"}), !.peer=FALSE] (* SelectedDeleteA *)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "PublishBeforeFinalRead",
+          "expect_invariant": "PendingFrameUnchanged",
+          "edits": [
+            {
+              "old": "/\\ phase'=\"FinalRead\"\n               /\\ UNCHANGED <<fault,data,earlyOK,outcome>>",
+              "new": "/\\ phase'=\"FinalRead\"\n               /\\ data'=work' /\\ UNCHANGED <<fault,earlyOK,outcome>>",
+              "count": 1
+            }
+          ]
+        }
+      ]
     }
   ]
 }

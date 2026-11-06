@@ -83,7 +83,7 @@ adapter, or Challenge integration.
 | [DynamoDB](docs/dynamodb.md) | Seven JSON 1.0 APIs: CreateTable, ListTables, DescribeTable, DeleteTable, PutItem, GetItem, DeleteItem; Cloudscape table list/create/details/delete and exact-key item writes/reads/deletes. S/N/B keys, optional sort key, partition-key attribute_exists/attribute_not_exists conditions | Query, Scan, item listing, indexes, Streams, CloudFormation, Challenge integration |
 | [IAM](docs/iam.md) | 21 role/inline/trust and customer-managed policy/version/role-attachment Query operations; shared permission union with Deny priority | AWS-managed catalog, user/group attachments, STS, general Conditions, permissions boundaries, SCPs |
 | [Lambda](docs/lambda.md) | CreateFunction, ListFunctions, GetFunctionConfiguration, UpdateFunctionCode, Invoke, DeleteFunction, AddPermission/GetPolicy/RemovePermission; Python ZIP execution through CPython 3.12.16/WASI and a bounded S3/SSM SDK bridge | Other languages, asynchronous invocation, Function URLs, arbitrary networking; 128 MiB and 1–30 second timeout |
-| [CloudFormation](docs/cloudformation-rest.md) | CreateStack, DescribeStacks, DeleteStack; S3 Bucket, SSM Parameter, inline Python Lambda, bounded IAM Role, 5 API Gateway resource types and Lambda Permission; bounded Ref/Sub/GetAtt/DependsOn | UpdateStack, general resource types, full AWS asynchronous lifecycle, dedicated CloudFormation service roles |
+| [CloudFormation](docs/cloudformation-rest.md) | CreateStack, DescribeStacks, DeleteStack; S3 Bucket, SSM Parameter, inline Python Lambda, bounded IAM Role, 5 API Gateway resource types and Lambda Permission; bounded Ref/Sub/GetAtt/DependsOn, String/Number constraints, Equals/condition aliases, resource/output Condition and If/NoValue selection | UpdateStack, And/Or/Not, NoEcho secrecy, general resource types, full AWS asynchronous lifecycle, dedicated CloudFormation service roles |
 | [API Gateway](docs/apigateway.md) | 16 Regional REST management operations, resources/methods/integrations, immutable deployments, new stages and local Lambda proxy execution | HTTP/WebSocket APIs, authorizers, API keys, editing existing stages, public endpoints |
 
 AWS regions are `us-east-1`, `us-west-2`, `ap-northeast-1`, and `eu-west-1`.
@@ -247,8 +247,8 @@ not binary runtime dependencies. Regeneration must preserve locks and original
 rights: [console](tools/console/README.md), [Scalar](tools/scalar/README.md),
 [Python/WASI runtime](tools/python/README.md).
 
-The registry contains 44 finite models and 347 deliberate defect controls
-(391 required model/check executions), including four Sakura metadata/admission/startup/view
+The registry contains 48 finite models and 381 deliberate defect controls
+(429 required model/check executions), including four Sakura metadata/admission/startup/view
 models, the Secrets metadata view and the preserved DynamoDB console model. Registration is not an integrated-revision execution receipt. The new IAM scenario checks two requests
 from each of four reachable seeds. A broader four-request trial timed out and
 is not claimed as verified. TLC examines bounded safety properties and checks
@@ -258,6 +258,10 @@ parity. Historical receipts and combined exact-revision results are separate.
 See [formal validation](formal/README.md), [CI](docs/ci.md),
 [backlog acceptance](docs/acceptance/backlog-services.md), and the
 [standalone architecture](docs/design/0001-go-standalone.md).
+
+The CFN condition model adds a bounded compile-plan projection. Its isolated SANY/baseline/fourteen controls passed at `f69fb46`; that 365-case source preparation is historical. The full 429-case gate passed at `c298972`; the later docs-only `414c902` passed all 61 E2E/start checks. Exact-head hosted gates for this publication candidate remain pending. The original crypto fixture also passed the regular two-CLI SDK helper at `2d76646` (73 SDK calls/responses and 9 auxiliary HTTP pairs across four CLI incarnations). That verifies local provisioning and permissions, not host coordination, scoring or NoEcho secrecy.
+
+At `c298972`, all 48 finite models and 381 controls (429 executions) passed, as did fresh full-module Go race/build and one-profile statement/source coverage of 94.94%/90.32%. The later docs-only `414c902` passed all 61 E2E cases in 980.726 seconds, reflow and start checks. Exact-head hosted CI for this publication candidate remains pending. This follow-up changes documentation and applicability hashes only; runtime, model and test bytes remain identical to `c298972`. Its exact-head hosted gates must still pass. Separate models cover final stack/claim acknowledgement and selected SSM/S3 SQLite-row absence after all cleanup writes. These checks do not prove host scoring, output secrecy, native S3 DeleteBucket, every resource type or Go/SQL refinement.
 
 ## License and attribution
 

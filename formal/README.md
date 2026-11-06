@@ -1,12 +1,11 @@
 # Finite state models
 
-Current registry: 44 models / 347 literal-protected controls
-(391 required executions). All incoming main40 model objects, TLA/CFG bytes, properties
-and295 controls are preserved. Sakura metadata/admission/startup add35 controls;
+Current registry: 48 models / 381 literal-protected controls
+(429 required executions). All incoming main44 model objects, TLA/CFG bytes, properties
+and347 controls are preserved. Sakura metadata/admission/startup add35 controls;
 SakuraDisksViewEpoch adds17 more for request scope/sequence, stale frames,
 ACK/form exit, read-only retry and locale continuity. These four scoped baselines
-and52 controls passed separately. The integrated immutable391-case gate remains
-pending; registrations and independent source review do not substitute for it.
+and52 controls passed separately. The combined immutable 429-case gate passed at `c298972` (48 baselines and 381 named controls). The docs-only `414c902` subsequently passed all 61 E2E/start checks; exact-head hosted CI for the publication candidate remains pending. Registration alone and source review do not substitute for actual execution.
 The initial Startup enumeration failure and UI wrong-first-invariant attempt
 remain recorded. The UI retains its original15 faults and adds two targeted
 publication controls; all14 UI properties and bounds remain unchanged.
@@ -20,12 +19,42 @@ Registration is source evidence, not itself evidence of successful execution. Da
 refer to their recorded inputs; later revisions require their own checks. These
 finite models do not prove Go/SQL/HTTP/UI refinement or complete cloud compatibility.
 
+CFNConditionAdmission adds fourteen invariants and fourteen semantic controls over
+234 immutable inputs. Its isolated `f69fb46` SANY/baseline/control run passed
+(792 reachable states); the initial ungrouped IF assignment produced exit75,
+was corrected without changing bounds/properties, and that failure is retained.
+This is historical scoped evidence, not the combined historical 365-case candidate gate.
+
+The CFN binding covers only named pure parameter/condition/selection and
+compile-plan admission contracts in `cloudformation_conditions.go`,
+`cloudformation_conditions_link.go` and `cloudformation.go`. Equality and invalid
+syntax/graph/link are finite witnesses, not Go evaluator/parser/number/regex/UTF8
+proofs. Both-arm raw symbols, dependency ordering, actual resource allowlists,
+SQL/lifecycle/grants and output privacy remain native test obligations. The
+compiler validates outer declarations before parameters; the abstract phase
+order makes no error-priority claim. See [CFN boundaries](../docs/cloudformation-rest.md#parameters-and-conditions).
+
+CFNFinalCleanupACK adds five properties and four controls for final selected
+stack/owned-claim acknowledgement and rollback/peer-frame abstraction. Its source
+and native regression are imported from standalone `7d56d9d`; the combined registered gate passed at `c298972`. Physical resource handler success
+is assumed, not proved: this is not an all-resource DELETE acknowledgement model.
+CFNConditionMemoDepth adds twelve properties and nine controls for the condition
+cache, independently bounded graph validity/height and root-order admission.
+Its exact `cca79267` source passed scoped SANY, baseline and nine named-invariant
+counterexamples (10,608 states, 4,116 initial configurations); the old-cache
+mutation has a concrete over-depth witness. This finite three-name/bound2-or3
+check is not a Go/unbounded-depth/SQL/parser proof. The native32/33 regressions
+remain separate; the earlier 365-case source preparation is historical; the current 429-case gate passed at `c298972`.
+
+
+CFNPhysicalResourceACK adds five properties and seven controls for selected SSM/S3 SQLite-row absence after all cleanup writes, rollback and peer frames. Its 196 scoped source run passed 8 SANY and 8 TLC phases; the canonical CFG formatting passed a fresh 16-phase SANY/TLC run at `c298972`. It does not prove native S3 deletion, other resource handlers, cloud hardware, SQL/Go refinement or host scoring. The combined current 429-execution gate passed at `c298972`; the later docs-only `414c902` passed all 61 E2E/start checks. Exact-head hosted gates for this publication candidate remain pending.
+
 ## Aggregate CI execution capacity
 
 The required `Formal validation` job reserves 30 minutes for checkout, the gate
 negative controls, exact-blob applicability and the complete serial registry.
 Each TLC case retains its 60-second default deadline and existing per-model
-settings; all 391 baseline/counterexample runs and failure requirements
+settings; all 429 baseline/counterexample runs and failure requirements
 remain mandatory. This is an aggregate execution budget, not a model-bound,
 acceptance, permission or per-case timeout change.
 
@@ -38,7 +67,7 @@ historical scoped receipt does not replace it.
 
 Legacy integration sections below retain historical counts and status statements
 for traceability. Their word “current” refers to the recorded integration, not
-today's registry. The authoritative current inventory is the 44/347 registry
+today's registry. The authoritative current inventory is the 48/381 registry
 above; proof claims always require evidence for the exact revision.
 
 `ObjectStore.tla` models two buckets and two keys, shared object ownership, create/put/delete transitions, and an abstract identity decision `allow /\ ~deny`. `ObjectStore.cfg` checks type correctness, no orphan objects, no unauthorized mutation, and explicit-deny precedence.

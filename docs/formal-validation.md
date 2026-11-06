@@ -15,10 +15,12 @@ machine-discovered semantic coverage. A newly added implementation file is not
 covered merely because an existing model passes: its exact path must have an
 appropriate reviewed scope mapping and property argument.
 
-The current registry has 33 baselines/197 required named mutation controls
-(230 required executions). The previous30/175 entries and controls are preserved;
-RESTRouteMatching, RESTProxyEventBoundary and NativeWireProjection add three
-bounded contracts and22 semantic defect controls.
+The current registry has 48 baselines/381 required named mutation controls
+(429 required executions). All 44 main `139eb82` model entries and 347 controls are
+preserved. CFNConditionAdmission adds a finite compile-plan projection with 14
+controls, scoped at `f69fb46`; the complete 429-case registered gate of this
+combined candidate passed at `c298972`. The docs-only `414c902` subsequently passed all 61 E2E/start checks; exact-head hosted CI for the publication candidate remains pending. SecretMetadataViewEpoch from main is preserved byte-for-byte. Numeric/regex/parser correctness, actual resource
+provisioning and NoEcho/output secrecy are not proved by this model.
 The new IAM scope is four API-reachable seeds and at most two subsequent requests;
 the broader four-request exploratory candidate timed out and is not claimed.
 Registration and Python guards are not a successful immutable TLC execution.
@@ -26,6 +28,7 @@ Registration and Python guards are not a successful immutable TLC execution.
 | Model | Finite contract | Important exclusions |
 |---|---|---|
 | ObjectStore | two buckets/two keys; parent integrity, abstract allow/deny | concrete IAM, HTTP, SQL, crashes |
+| CFNConditionAdmission | 234 finite input witnesses; defaults/supplied admission, all conditions/declarations, branch choice, NoValue pruning, pure resource/output plan | real parser/numeric/regex/graph evaluation, exact error ordering, raw-link/dependency completeness, SQL, resource mutation, grants, privacy and host grading |
 | StackOwnership | two owners/two names; retained drift reservations | authentication, callback recovery, full CFN |
 | S3Versions | one bucket/two keys; at most three history entries per key | suspended versions, byte quotas, SQL |
 | NativeIAMOwnership | two case-folded names; native/legacy exclusivity | trust parsing, full IAM, process isolation |
@@ -213,3 +216,5 @@ semantic counterexamples. Registration plus this scoped result is not a full
 [Source correspondence and limits](formal-azure-properties-target.md) explain
 ghost capture provenance, the separately checked lifecycle/epoch assumptions and
 concrete native/browser obligations.
+
+The physical-row model is limited to the selected SSM/S3 SQLite rows after all cleanup writes. It is distinct from the final stack/claim model, which assumes physical handler success. Canonical CFG formatting preserves its five properties and nine fault modes; both combined 429-case and fresh scoped execution passed at `c298972`; later revisions require their own immutable checks.

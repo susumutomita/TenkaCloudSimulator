@@ -611,4 +611,8 @@ def handler(event,context):
  def test_dynamodb_console_native_state_keys_context_locale_and_cancellation(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('dynamodb_console.py'))],check=True,timeout=240)
 
+ def test_cloudformation_original_crypto_template_native_sdk_lifecycle(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('cloudformation_crypto.py'))], check=True, timeout=180)
+
+
 if __name__=='__main__':unittest.main(verbosity=2)

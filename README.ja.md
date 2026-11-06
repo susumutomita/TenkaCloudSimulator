@@ -55,7 +55,7 @@ make build
 | [DynamoDB](docs/dynamodb.md) | JSON 1.0 の7操作: CreateTable/ListTables/DescribeTable/DeleteTable、PutItem/GetItem/DeleteItem。Cloudscapeでテーブル一覧・作成・詳細・削除、完全キーによる項目の書き込み・取得・削除 | S/N/Bキーと任意sort key、条件はpartition-key attribute_(not_)existsのみ。Query/Scan・項目一覧・indexes・Streams・CFN・Challenge連携は未対応 |
 | [IAM](docs/iam.md) | Create/Get/List/DeleteRole、inline/trust、customer policy CRUD・version/default・ロールへのAttach/Detach。inlineと既定managed policyを合成、Deny優先 | AWS-managed catalog、STS、user/group attachments、一般Condition・permissions boundary・SCP |
 | [Lambda](docs/lambda.md) | CreateFunction、ListFunctions、GetFunctionConfiguration、UpdateFunctionCode、Invoke、DeleteFunction、AddPermission/GetPolicy/RemovePermission。固定CPython 3.12.16/WASIによるPython ZIP実行、限定S3/SSM SDK bridge | 他言語、非同期実行、Function URL、任意network。128 MiB・timeout 1–30秒 |
-| [CloudFormation](docs/cloudformation-rest.md) | CreateStack、DescribeStacks、DeleteStack。S3 Bucket、SSM Parameter、inline Python Lambda、限定IAM Role、API Gateway 5 resource types・Lambda Permission、限定Ref/Sub/GetAtt/DependsOn | UpdateStack、一般resource types、実AWS相当の非同期lifecycle、CFN専用service role |
+| [CloudFormation](docs/cloudformation-rest.md) | CreateStack、DescribeStacks、DeleteStack。S3 Bucket、SSM Parameter、inline Python Lambda、限定IAM Role、API Gateway 5 resource types・Lambda Permission、限定Ref/Sub/GetAtt/DependsOn、String/Number制約、Equals/条件alias、resource/outputのCondition、If/NoValue選択 | UpdateStack、And/Or/Not、NoEcho秘匿、一般resource types、実AWS相当の非同期lifecycle、CFN専用service role |
 | [API Gateway](docs/apigateway.md) | Regional REST管理16操作。API/resource/method/integration、immutable deployment、新規stage、ローカルLambda proxy実行 | HTTP/WebSocket API、authorizer、API key、既存stage編集、public endpoint |
 
 対応regionは`us-east-1`、`us-west-2`、`ap-northeast-1`、`eu-west-1`。S3 objectは8 MiB、保持version合計64 MiB、SSM値4096 UTF-8 bytes、CFN TemplateBody51200 bytesなどの上限があります。全フィールド・エラー・quotaの範囲は各サービス資料を確認してください。 1プロセスの上限は1000 buckets、10000 objects/versions/delete markers、1000 parameters/identities、100 stacks、100 resources/stackです。これらはプロセスメモリ全体の上限ではありません。
@@ -120,7 +120,7 @@ SDK、操作画面、再起動、チーム分離の受入検証は `make e2e` �
 
 CIはstatementと未フィルターsource-line coverageを両方90%以上に強制します。`make before-commit`単独のcoverage判定はstatementのみで、source-line判定はCIのCobertura生成後ステージと上記の2コマンドで行います。SDK/browser、license、依存security、埋込asset、形式検査も行います。cross compileは他OSでの実行成功を意味しません。開発用Python/Node/Javaはruntime依存ではありません。UI・Scalarの再生成は権利表記とlockを保持する[各build手順](tools/console/README.md)・[Scalar手順](tools/scalar/README.md)・[Python runtimeの権利・再生成手順](tools/python/README.md)に従います。
 
-形式検査はregistryに44有限モデル・347の意図した欠陥検出を登録しています（基準モデルと陰性検査で391ケース）。Sakuraの4つの限定モデル、DynamoDB画面、Secretsメタデータ画面の登録を保持します。SecretVersionListingは保存済みARNの認可後に行うメタデータ一覧と限定的なcursor境界を対象とし、値の読取許可や完全な履歴画面を追加しません。追加モデルの有限検査結果と統合後の固定HEAD検査は区別します。TLCは限定した状態空間の安全条件と意図したmutantの反例を検査し、Go実装のrefinement、暗号、全AWS仕様・実AWSとの一致を証明するものではありません。[形式検査](formal/README.md)、[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)。
+形式検査はregistryに48有限モデル・381の意図した欠陥検出を登録しています（基準モデルと陰性検査で429ケース）。Sakuraの4つの限定モデル、DynamoDB画面、Secretsメタデータ画面の登録を保持します。SecretVersionListingは保存済みARNの認可後に行うメタデータ一覧と限定的なcursor境界を対象とし、値の読取許可や完全な履歴画面を追加しません。追加モデルの有限検査結果と統合後の固定HEAD検査は区別します。TLCは限定した状態空間の安全条件と意図したmutantの反例を検査し、Go実装のrefinement、暗号、全AWS仕様・実AWSとの一致を証明するものではありません。[形式検査](formal/README.md)、[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)。
 
 ## ライセンス
 
@@ -161,4 +161,6 @@ combined 29-model/164-control formal gate (193 executions). These receipts apply
 to that revision. Every later change still requires its exact-HEAD CI, including
 the 45-case E2E suite; focused results do not replace whole-suite verification.
 
-現在の形式検査の登録は44モデル・347制御（391実行）です。IAMの追加モデルは4つの到達可能な初期状態から各2要求の範囲で、4要求の試案はタイムアウトし未成功です。上の過去の受領証とは区別し、最新HEADで全ゲートを実行してください。API資料はAWS・Google Cloud・Azureを分け、Sakura Cloudでは任意有効化するDisk構成の画面と5つのnative APIを扱います。他のSakuraサービスや実ストレージに対応したという意味ではありません。[ナビゲーション](docs/api-reference.md)を参照してください。
+現在の形式検査の登録は48モデル・381制御（429実行）です。IAMの追加モデルは4つの到達可能な初期状態から各2要求の範囲で、4要求の試案はタイムアウトし未成功です。上の過去の受領証とは区別し、最新HEADで全ゲートを実行してください。API資料はAWS・Google Cloud・Azureを分け、Sakura Cloudでは任意有効化するDisk構成の画面と5つのnative APIを扱います。他のSakuraサービスや実ストレージに対応したという意味ではありません。[ナビゲーション](docs/api-reference.md)を参照してください。
+
+現在のCFN候補は条件の受理、メモ化したグラフ高さ、最終スタック・所有権行ACK、および選択したSSM/S3物理行ACKの限定モデルを追加し、mainの44モデルを保持します。`c298972`で全48モデル・381制御（429実行）、fresh全Go race/build、同一profileのstatement94.94%・未除外source90.32%を確認しました。資料のみを変えた後続`414c902`で全61 E2E（980.726秒）・reflow・startを実行し成功しました。今回公開する資料追補自身のexact HEAD hosted CIは未実施です。 この追補は資料とapplicabilityハッシュのみの変更で、実行コード・モデル・テストは`c298972`と同一です。追補自身のexact HEAD hosted検査は別途必要です。過去の単体結果で代用せず、ホスト採点・SQL/Go refinement・秘匿出力・全リソース物理削除の証明とは扱いません。
