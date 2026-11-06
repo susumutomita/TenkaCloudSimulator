@@ -1,335 +1,1177 @@
 {
   "version": 1,
-  "base_sha": "d166f569772de7f45d98e31e9971eeb33b903763",
+  "base_sha": "30ec082bfb34d7202dc1740ef55668522c275e4c",
   "changes": [
     {
       "path": "README.ja.md",
-      "sha256": "faed0f49fcc47a04d7d3833f5d3ecc8cf94756872c82be613fb9b920e7029cb3",
+      "sha256": "1e0a2028a8886ffaac2080d6c12ad72cbf24bfb7e8d8bbab43d8192ef8d74ada",
       "disposition": "documentation",
-      "reason": "Correct current 50-model/398-control inventory and distinguish dated historical receipts, bounded LP properties and unverified conditions. No new runtime guarantee.",
+      "reason": "Metrics-only contract documentation, source/test support or original embedded reference presentation. Preserve public baseline behavior and existing assertions; separate native, SDK, UI and strict Scalar acceptance remain required. No semantic refinement or full cloud compatibility claim.",
       "models": []
     },
     {
       "path": "README.md",
-      "sha256": "7bf76f1f0a9c785b86f4cd9aa0837283e3c74f677a459545b42add8f70c2b44e",
+      "sha256": "42a3b3746de0d4622ff29eb5a41645ad8293c9a926ab88149d5562164445d660",
       "disposition": "documentation",
-      "reason": "LP-only documentation, validation policy or tests; preserves SDK root, old checks and existing model values. No browser or implementation proof claim.",
+      "reason": "Metrics-only contract documentation, source/test support or original embedded reference presentation. Preserve public baseline behavior and existing assertions; separate native, SDK, UI and strict Scalar acceptance remain required. No semantic refinement or full cloud compatibility claim.",
+      "models": []
+    },
+    {
+      "path": "docs/api-reference.md",
+      "sha256": "8480fbf4e85e2f59c9a76d624e5ead1969f5a66529f2306360f7a969de4feff2",
+      "disposition": "documentation",
+      "reason": "Metrics-only contract documentation, source/test support or original embedded reference presentation. Preserve public baseline behavior and existing assertions; separate native, SDK, UI and strict Scalar acceptance remain required. No semantic refinement or full cloud compatibility claim.",
+      "models": []
+    },
+    {
+      "path": "docs/cloudwatch-metrics.md",
+      "sha256": "be6dc8f60915e655ebfe749c9c425b616aa8a13cbfaf39aa0e7ef58bcbbcfabf",
+      "disposition": "documentation",
+      "reason": "Metrics-only contract documentation, source/test support or original embedded reference presentation. Preserve public baseline behavior and existing assertions; separate native, SDK, UI and strict Scalar acceptance remain required. No semantic refinement or full cloud compatibility claim.",
+      "models": []
+    },
+    {
+      "path": "docs/development-status.md",
+      "sha256": "5de8c4da91c9725ac57a957846d37e442408c9dd1d2a65775eb0c7a2dc947681",
+      "disposition": "documentation",
+      "reason": "Roster or original third-party notice/inventory record; preserve authorship and validate actual regenerated graph. A rights record is not execution proof.",
       "models": []
     },
     {
       "path": "docs/formal-validation.md",
-      "sha256": "31cd732a385f414cbd935e33ebdb0add95a8ceb8ae8f1748ebdc61b8ee8c1812",
+      "sha256": "99dc646e6d31ea847d6cf51a9a5b22d3624d94ce5f9f1cfc48eb936771e7b180",
       "disposition": "documentation",
-      "reason": "Correct current 50-model/398-control inventory and distinguish dated historical receipts, bounded LP properties and unverified conditions. No new runtime guarantee.",
+      "reason": "Metrics-only contract documentation, source/test support or original embedded reference presentation. Preserve public baseline behavior and existing assertions; separate native, SDK, UI and strict Scalar acceptance remain required. No semantic refinement or full cloud compatibility claim.",
       "models": []
     },
     {
-      "path": "docs/landing.md",
-      "sha256": "bfaaa806b87a45548abcf59ea1264ded73e1dbf6f777c97c5b8faecb7cffa5bf",
-      "disposition": "documentation",
-      "reason": "LP-only documentation, validation policy or tests; preserves SDK root, old checks and existing model values. No browser or implementation proof claim.",
-      "models": []
-    },
-    {
-      "path": "formal/LandingAccessAdmission.cfg",
-      "sha256": "0fbb0c27f5dfdf7bcc8779e44063454cd52027991d9917b907066d05fe9402ca",
+      "path": "formal/CapabilityProjection.cfg",
+      "sha256": "96c8d97164619009d011377489efe378321a8f032b89a23810d5da57badc290d",
       "disposition": "modeled",
-      "reason": "Original bounded landing admission or stored-selection projection for the changed scope. HTTP, DOM, accessibility, native Chrome rendering and JavaScript/Go refinement require independent tests.",
+      "reason": "New Metrics finite specification/configuration; binds only its declared invariants and operational mutation sensitivity, not implementation refinement.",
       "models": [
         {
-          "id": "LandingAccessAdmission",
+          "id": "CapabilityProjection",
           "properties": [
-            "TypeOK",
-            "ExternalBoundary",
-            "PublicResponse",
-            "TokenBoundary",
-            "UnknownNeverStatic"
+            "HostReadyBeforePublication",
+            "AvailableOnlyWhenReady",
+            "ExactSupportedOperations",
+            "ExactProtocol",
+            "ExactVersion",
+            "ExactProvider",
+            "ExactSelector",
+            "ConsoleRequiresQualification",
+            "ReferenceRequiresQualification",
+            "SDKRequiresQualification",
+            "PeerPreserved",
+            "CatalogVisibilityExact",
+            "MalformedDescriptorHidden",
+            "QualifiedProducedVisibility",
+            "KnownValidDescriptorVisible",
+            "SearchExact"
           ],
-          "limits": "Original finite admission contract only. Host/origin and authentication results are trusted inputs from existing middleware; no token, browser session, DNS, URL decoding, HTTP parser, ServeMux canonicalization, filesystem, SQLite, rendering, JavaScript, or Chrome feature proof. Exact HTTP composition and negative path cases are separate Go tests. Only fixed static product assets are public; no service credentials or exercise state are represented."
+          "limits": "Not JSON serialization/type/marshal/HTTP/refinement/artifact/build/source proof No data rows or authorization algorithms modeled; descriptiveavailability is not callerpermission No claimSDKcompatibility fromqualificationbooleans; actual41calls separate native proof Currentcompiledconsoletrue means source-wiredcandidate, SDK/referencefalse; booleans areexplicitqualificationinputs notruntimeproof No liveness/arbitraryregistration/otherprovidersemantics modeled Provider label abstracts literal providerEndpoint category only; outer providers may contain multiple providers; no endpoint parser/registry routing proof. Primitive tags assume JSONfieldkind/verdict mappings; no JavaScript/JSON/React/serializer/refinement proof Arbitrary external valid-lookingdescriptor may showUI while backendfalse; consumer is discovery only and cannotauthenticate/grantnative authority No claims for other15servicegates or NFKC/locale/searchstringalgorithms; only fixedknownmatchingMetrics search MaincallerAuth/Region/navigation remount remains separateMetricsConsoleEpoch narrowprojection, notthismodel Only server.go successful-constructor capability publication caller projection; backendReady is assumed, not a constructor/schema/rollback/atomicity theorem."
         }
       ]
     },
     {
-      "path": "formal/LandingAccessAdmission.tla",
-      "sha256": "e9f24998b1c2387b0128854904f8e0a69e7edab2a89e67804964355a89f32071",
+      "path": "formal/CapabilityProjection.tla",
+      "sha256": "8d6cbe367413850520fc0eed225a608211d059bdee10da83c8c7419f461ed040",
       "disposition": "modeled",
-      "reason": "Original bounded landing admission or stored-selection projection for the changed scope. HTTP, DOM, accessibility, native Chrome rendering and JavaScript/Go refinement require independent tests.",
+      "reason": "New Metrics finite specification/configuration; binds only its declared invariants and operational mutation sensitivity, not implementation refinement.",
       "models": [
         {
-          "id": "LandingAccessAdmission",
+          "id": "CapabilityProjection",
           "properties": [
-            "TypeOK",
-            "ExternalBoundary",
-            "PublicResponse",
-            "TokenBoundary",
-            "UnknownNeverStatic"
+            "HostReadyBeforePublication",
+            "AvailableOnlyWhenReady",
+            "ExactSupportedOperations",
+            "ExactProtocol",
+            "ExactVersion",
+            "ExactProvider",
+            "ExactSelector",
+            "ConsoleRequiresQualification",
+            "ReferenceRequiresQualification",
+            "SDKRequiresQualification",
+            "PeerPreserved",
+            "CatalogVisibilityExact",
+            "MalformedDescriptorHidden",
+            "QualifiedProducedVisibility",
+            "KnownValidDescriptorVisible",
+            "SearchExact"
           ],
-          "limits": "Original finite admission contract only. Host/origin and authentication results are trusted inputs from existing middleware; no token, browser session, DNS, URL decoding, HTTP parser, ServeMux canonicalization, filesystem, SQLite, rendering, JavaScript, or Chrome feature proof. Exact HTTP composition and negative path cases are separate Go tests. Only fixed static product assets are public; no service credentials or exercise state are represented."
+          "limits": "Not JSON serialization/type/marshal/HTTP/refinement/artifact/build/source proof No data rows or authorization algorithms modeled; descriptiveavailability is not callerpermission No claimSDKcompatibility fromqualificationbooleans; actual41calls separate native proof Currentcompiledconsoletrue means source-wiredcandidate, SDK/referencefalse; booleans areexplicitqualificationinputs notruntimeproof No liveness/arbitraryregistration/otherprovidersemantics modeled Provider label abstracts literal providerEndpoint category only; outer providers may contain multiple providers; no endpoint parser/registry routing proof. Primitive tags assume JSONfieldkind/verdict mappings; no JavaScript/JSON/React/serializer/refinement proof Arbitrary external valid-lookingdescriptor may showUI while backendfalse; consumer is discovery only and cannotauthenticate/grantnative authority No claims for other15servicegates or NFKC/locale/searchstringalgorithms; only fixedknownmatchingMetrics search MaincallerAuth/Region/navigation remount remains separateMetricsConsoleEpoch narrowprojection, notthismodel Only server.go successful-constructor capability publication caller projection; backendReady is assumed, not a constructor/schema/rollback/atomicity theorem."
         }
       ]
     },
     {
-      "path": "formal/LandingTopologyState.cfg",
-      "sha256": "ece267cec9d9146294f44ef045d28ee87ca2d3772e4e9bcaef1d2c49e2863b78",
+      "path": "formal/CloudWatchMetricsRawLedger.cfg",
+      "sha256": "ac76ed950e243b9aa173c6380a7dc1274f9163b099ce724a46902b7c2df91f5e",
       "disposition": "modeled",
-      "reason": "Original bounded landing admission or stored-selection projection for the changed scope. HTTP, DOM, accessibility, native Chrome rendering and JavaScript/Go refinement require independent tests.",
+      "reason": "New Metrics finite specification/configuration; binds only its declared invariants and operational mutation sensitivity, not implementation refinement.",
       "models": [
         {
-          "id": "LandingTopologyState",
+          "id": "CloudWatchMetricsRawLedger",
           "properties": [
-            "TypeOK",
-            "ProviderSelectsDefault",
-            "NodeClickSelectsExact",
-            "InvalidInputPreservesSelection",
-            "DOMSelectionAgrees",
-            "CanonicalHTMLAvailable",
-            "MountUsesLatestSelection",
-            "UnsupportedCanvasHidden",
-            "RetiredCanvasHidden",
-            "PaintUsesLatestSelection",
-            "RetiredCallbackNoEffect",
-            "InitialFragmentSelection"
+            "NoOrphans",
+            "DeniedNoDisclosure",
+            "DeniedFrame",
+            "InvalidFrame",
+            "ReadDurableFrame",
+            "FailedPutFrame",
+            "PeerFrame",
+            "PhysicalRowBudget",
+            "SeriesBudget",
+            "PhysicalByteBudget",
+            "PutRowsExact",
+            "PutCatalogExact",
+            "RevisionExact",
+            "RegionInitializationExact",
+            "StatisticsExact",
+            "CursorAdmission",
+            "ListExact",
+            "ErrorNoDisclosure"
           ],
-          "limits": "Post-start semantic selection and optional decorative lifecycle safety only. Trusted source data and native feature/paint verdicts are assumed; no DOM/accessibility/layout/rendering/Chrome support/backend/route/network or JavaScript refinement proof. Reduced-motion has identical static transitions because implementation has no animation loop; no preference-detection proof. Timeout is an environment event, not wall-clock/liveness. Initial fragment choice is a trusted closed node ID or absent input; URL parsing, encoding, browser scroll and history are outside this model."
+          "limits": "Original finite ledger/response safety only. Independent literal batch/statistics/list/page oracles. Scope/auth/invalid/fault verdicts assumed; no Query/Unicode/numeric/XML parsing, actual UTF8bytes/IEEE754/rounding, HMAC/JSON cryptography, constructor/regional quota, SQL/Go/concurrency/crash/refinement/liveness or real AWS timing/rollup proof. Valid admission completeness is not proved. Raw physical data/foreign expired rows remain charged; only valid Put collects own namespace."
         }
       ]
     },
     {
-      "path": "formal/LandingTopologyState.tla",
-      "sha256": "67599e8c1742dd8455492ae0a6eb533a0ec5324b864a0564105e69557567ebe2",
+      "path": "formal/CloudWatchMetricsRawLedger.tla",
+      "sha256": "8d4a91415f404d559db9a3e9c26d3b2278542fbd850030dbdbf7392505bb6170",
       "disposition": "modeled",
-      "reason": "Original bounded landing admission or stored-selection projection for the changed scope. HTTP, DOM, accessibility, native Chrome rendering and JavaScript/Go refinement require independent tests.",
+      "reason": "New Metrics finite specification/configuration; binds only its declared invariants and operational mutation sensitivity, not implementation refinement.",
       "models": [
         {
-          "id": "LandingTopologyState",
+          "id": "CloudWatchMetricsRawLedger",
           "properties": [
-            "TypeOK",
-            "ProviderSelectsDefault",
-            "NodeClickSelectsExact",
-            "InvalidInputPreservesSelection",
-            "DOMSelectionAgrees",
-            "CanonicalHTMLAvailable",
-            "MountUsesLatestSelection",
-            "UnsupportedCanvasHidden",
-            "RetiredCanvasHidden",
-            "PaintUsesLatestSelection",
-            "RetiredCallbackNoEffect",
-            "InitialFragmentSelection"
+            "NoOrphans",
+            "DeniedNoDisclosure",
+            "DeniedFrame",
+            "InvalidFrame",
+            "ReadDurableFrame",
+            "FailedPutFrame",
+            "PeerFrame",
+            "PhysicalRowBudget",
+            "SeriesBudget",
+            "PhysicalByteBudget",
+            "PutRowsExact",
+            "PutCatalogExact",
+            "RevisionExact",
+            "RegionInitializationExact",
+            "StatisticsExact",
+            "CursorAdmission",
+            "ListExact",
+            "ErrorNoDisclosure"
           ],
-          "limits": "Post-start semantic selection and optional decorative lifecycle safety only. Trusted source data and native feature/paint verdicts are assumed; no DOM/accessibility/layout/rendering/Chrome support/backend/route/network or JavaScript refinement proof. Reduced-motion has identical static transitions because implementation has no animation loop; no preference-detection proof. Timeout is an environment event, not wall-clock/liveness. Initial fragment choice is a trusted closed node ID or absent input; URL parsing, encoding, browser scroll and history are outside this model."
+          "limits": "Original finite ledger/response safety only. Independent literal batch/statistics/list/page oracles. Scope/auth/invalid/fault verdicts assumed; no Query/Unicode/numeric/XML parsing, actual UTF8bytes/IEEE754/rounding, HMAC/JSON cryptography, constructor/regional quota, SQL/Go/concurrency/crash/refinement/liveness or real AWS timing/rollup proof. Valid admission completeness is not proved. Raw physical data/foreign expired rows remain charged; only valid Put collects own namespace."
+        }
+      ]
+    },
+    {
+      "path": "formal/MetricsConsoleEpoch.cfg",
+      "sha256": "b2f57542c4bce7c666a5e6a1c4aebe81f6b771d6048a6a6fbbaa470da56e62c6",
+      "disposition": "modeled",
+      "reason": "New Metrics finite specification/configuration; binds only its declared invariants and operational mutation sensitivity, not implementation refinement.",
+      "models": [
+        {
+          "id": "MetricsConsoleEpoch",
+          "properties": [
+            "ListSuccessGuarded",
+            "StatisticsSuccessGuarded",
+            "ListCurrentResult",
+            "StatisticsCurrentResult",
+            "StatisticsSnapshotBound",
+            "StaleErrorGuarded",
+            "CurrentErrorVisible",
+            "StaleFinallyGuarded",
+            "CurrentFinallySettles",
+            "QueryEditClearsStatistics",
+            "BeginSnapshotClears",
+            "StatisticsBeginClears",
+            "BrowseClearsViews",
+            "ScopeResetClears",
+            "LocaleFrame",
+            "InvalidInputNoWire",
+            "CaptureMatchesIntent"
+          ],
+          "limits": "Selected bounded UI input/callback workflows only, with independent literal result/capture oracles. Initial completed-list/selection prelude; atomic callback success-or-nonAbort-error plus finally. A separate React-instance delivery boundary remains in all controls. Same-instance prop-update cases may be masked by the parent production keyed-remount defense; request identity does not select DB/data. No arbitrary schedules/liveness, React/JS/AbortController refinement, host auth/IAM/isolation, Query/XML/value/timestamp/byte parser, actual metric arithmetic, cursor/HMAC, backend/native Go/SQL, graph/pixel, SDK or full AWS compatibility proof. Source helper1445 counterpart mapping contains explicit gaps. Main scope is ONLY Metrics keyed retirement/raw Response caller: key binds auth revision/principal/region/service/navigation and excludes locale; props preserve actual Response callback. React key delivery/remount semantics are assumed, not proved. No other main/auth/provider behavior or catalog predicate is included; the generated asset declaration is limited to the explicit Metrics epoch projection below. Source-only caller binding is new; prior56 scoped phases ran unchanged TLA, not the new main or current1440 response guard. Current source also adds graph-focus refs/effect and dimension-aware aria labels; these DOM focus/accessibility behaviors and response decoder/numerical 1440 boundary are excluded from the unchanged epoch abstraction. The old56 phases are not a run of this current source or helper. Compiled app.js scope is ONLY the actual canonical-derived Metrics epoch projection, tied to accepted e3e/23e6 build provenance and current d671 output hash. Compiler/minifier/React correctness is assumed; DOM focus/aria, response decoder/1440 math, other components, whole bundle behavior and refinement are not proved."
+        }
+      ]
+    },
+    {
+      "path": "formal/MetricsConsoleEpoch.tla",
+      "sha256": "e81506c495a64f81c3d2f396be3d97be90c218f07e0c845c2264bb47745e026c",
+      "disposition": "modeled",
+      "reason": "New Metrics finite specification/configuration; binds only its declared invariants and operational mutation sensitivity, not implementation refinement.",
+      "models": [
+        {
+          "id": "MetricsConsoleEpoch",
+          "properties": [
+            "ListSuccessGuarded",
+            "StatisticsSuccessGuarded",
+            "ListCurrentResult",
+            "StatisticsCurrentResult",
+            "StatisticsSnapshotBound",
+            "StaleErrorGuarded",
+            "CurrentErrorVisible",
+            "StaleFinallyGuarded",
+            "CurrentFinallySettles",
+            "QueryEditClearsStatistics",
+            "BeginSnapshotClears",
+            "StatisticsBeginClears",
+            "BrowseClearsViews",
+            "ScopeResetClears",
+            "LocaleFrame",
+            "InvalidInputNoWire",
+            "CaptureMatchesIntent"
+          ],
+          "limits": "Selected bounded UI input/callback workflows only, with independent literal result/capture oracles. Initial completed-list/selection prelude; atomic callback success-or-nonAbort-error plus finally. A separate React-instance delivery boundary remains in all controls. Same-instance prop-update cases may be masked by the parent production keyed-remount defense; request identity does not select DB/data. No arbitrary schedules/liveness, React/JS/AbortController refinement, host auth/IAM/isolation, Query/XML/value/timestamp/byte parser, actual metric arithmetic, cursor/HMAC, backend/native Go/SQL, graph/pixel, SDK or full AWS compatibility proof. Source helper1445 counterpart mapping contains explicit gaps. Main scope is ONLY Metrics keyed retirement/raw Response caller: key binds auth revision/principal/region/service/navigation and excludes locale; props preserve actual Response callback. React key delivery/remount semantics are assumed, not proved. No other main/auth/provider behavior or catalog predicate is included; the generated asset declaration is limited to the explicit Metrics epoch projection below. Source-only caller binding is new; prior56 scoped phases ran unchanged TLA, not the new main or current1440 response guard. Current source also adds graph-focus refs/effect and dimension-aware aria labels; these DOM focus/accessibility behaviors and response decoder/numerical 1440 boundary are excluded from the unchanged epoch abstraction. The old56 phases are not a run of this current source or helper. Compiled app.js scope is ONLY the actual canonical-derived Metrics epoch projection, tied to accepted e3e/23e6 build provenance and current d671 output hash. Compiler/minifier/React correctness is assumed; DOM focus/aria, response decoder/1440 math, other components, whole bundle behavior and refinement are not proved."
+        }
+      ]
+    },
+    {
+      "path": "formal/MetricsHTTPAdmission.cfg",
+      "sha256": "f7662b12c126c412f77357a211f1127c68defdc2dfa8ebeff67312126bf8cfc2",
+      "disposition": "modeled",
+      "reason": "New Metrics finite specification/configuration; binds only its declared invariants and operational mutation sensitivity, not implementation refinement.",
+      "models": [
+        {
+          "id": "MetricsHTTPAdmission",
+          "properties": [
+            "ScopeBeforeBody",
+            "EnvelopeBeforeBody",
+            "BodyAdmissionExact",
+            "QueryAdmissionExact",
+            "AuthorizationBeforeSchema",
+            "NoPrematureEffect",
+            "FailureFrame",
+            "ReadFrame",
+            "PeerAndCursorFrame",
+            "CommitRequiresAdmission",
+            "SuccessfulEffectExact",
+            "ReplyAfterCommit",
+            "StatusExact"
+          ],
+          "limits": "Original bounded admission projection only. Trusted host scope/codec/UTF8/form/size verdicts are assumed inputs, not token/IAM/gzip/CRC/Go-memory/parser/SQL/concurrency/refinement proofs. Action authorization-before-semantic-decode modeled; store candidate/commit atomicity assumed, response preparation failure abstracted. No metrics aggregation/retention/cursor cryptography/AWS parity or liveness proof. Per-request diagnostic RequestID counter is not a durable DB frame."
+        }
+      ]
+    },
+    {
+      "path": "formal/MetricsHTTPAdmission.tla",
+      "sha256": "c8c77a12851cafb67816d42b21dc6ca813683b91929fde02e60f181fa8678953",
+      "disposition": "modeled",
+      "reason": "New Metrics finite specification/configuration; binds only its declared invariants and operational mutation sensitivity, not implementation refinement.",
+      "models": [
+        {
+          "id": "MetricsHTTPAdmission",
+          "properties": [
+            "ScopeBeforeBody",
+            "EnvelopeBeforeBody",
+            "BodyAdmissionExact",
+            "QueryAdmissionExact",
+            "AuthorizationBeforeSchema",
+            "NoPrematureEffect",
+            "FailureFrame",
+            "ReadFrame",
+            "PeerAndCursorFrame",
+            "CommitRequiresAdmission",
+            "SuccessfulEffectExact",
+            "ReplyAfterCommit",
+            "StatusExact"
+          ],
+          "limits": "Original bounded admission projection only. Trusted host scope/codec/UTF8/form/size verdicts are assumed inputs, not token/IAM/gzip/CRC/Go-memory/parser/SQL/concurrency/refinement proofs. Action authorization-before-semantic-decode modeled; store candidate/commit atomicity assumed, response preparation failure abstracted. No metrics aggregation/retention/cursor cryptography/AWS parity or liveness proof. Per-request diagnostic RequestID counter is not a durable DB frame."
+        }
+      ]
+    },
+    {
+      "path": "formal/MetricsRequestAdmission.cfg",
+      "sha256": "bd3f8bb0493f7fcc194c955373c4678c71df17f2970db378ca67236ede5ce489",
+      "disposition": "modeled",
+      "reason": "New Metrics finite specification/configuration; binds only its declared invariants and operational mutation sensitivity, not implementation refinement.",
+      "models": [
+        {
+          "id": "MetricsRequestAdmission",
+          "properties": [
+            "InputPreserved",
+            "NoEarlyPublication",
+            "DecodedAdmissionExact",
+            "AdmissionExact",
+            "NoRejectedPublication",
+            "DimensionOrderExact",
+            "DimensionValuesExact",
+            "NameIdentityExact",
+            "UnitExact",
+            "ScalarValueExact",
+            "TimestampExact",
+            "StartNormalizationExact",
+            "StatisticOrderExact",
+            "MetricIdentityExact",
+            "CountClassExact",
+            "PeriodExact"
+          ],
+          "limits": "Independent literal accepted-ID and expected normalized-result oracles. Pure successful-decoder/normalized-publication projection only, not raw partial DTO zero-on-error. Primitive number/date lexing, UTF8/rune/byte-size/name/range verdicts and long-list cardinality/index-limit classes assumed, not Go algorithms/IEEE754/time arithmetic/codec/SQL/IAM/refinement/liveness. Name ranks quotient ASCII comparison; omitted filter values/units use disjoint sentinels. Identity carrier is an abstract Metric/filter tuple, not SHA/JSON. Native HTTP/authorization effects belong separate models/tests. The regionOK and persisted strictDocument helpers are excluded; abstract normalized output is a field/template projection, not full native DTO or a zero-on-error return guarantee. Typed normalizer fixtures enter directly; only wire fixtures exercise decoder, so empty/overlong typed batches are not claimed reachable through successful Query decode. Decoder admission tracks an explicit decoded flag, not partial Go result structs."
+        }
+      ]
+    },
+    {
+      "path": "formal/MetricsRequestAdmission.tla",
+      "sha256": "22c63c6581ceac907c4148dd28c9ef89e6287aba99012b1188a5a109cd26ea52",
+      "disposition": "modeled",
+      "reason": "New Metrics finite specification/configuration; binds only its declared invariants and operational mutation sensitivity, not implementation refinement.",
+      "models": [
+        {
+          "id": "MetricsRequestAdmission",
+          "properties": [
+            "InputPreserved",
+            "NoEarlyPublication",
+            "DecodedAdmissionExact",
+            "AdmissionExact",
+            "NoRejectedPublication",
+            "DimensionOrderExact",
+            "DimensionValuesExact",
+            "NameIdentityExact",
+            "UnitExact",
+            "ScalarValueExact",
+            "TimestampExact",
+            "StartNormalizationExact",
+            "StatisticOrderExact",
+            "MetricIdentityExact",
+            "CountClassExact",
+            "PeriodExact"
+          ],
+          "limits": "Independent literal accepted-ID and expected normalized-result oracles. Pure successful-decoder/normalized-publication projection only, not raw partial DTO zero-on-error. Primitive number/date lexing, UTF8/rune/byte-size/name/range verdicts and long-list cardinality/index-limit classes assumed, not Go algorithms/IEEE754/time arithmetic/codec/SQL/IAM/refinement/liveness. Name ranks quotient ASCII comparison; omitted filter values/units use disjoint sentinels. Identity carrier is an abstract Metric/filter tuple, not SHA/JSON. Native HTTP/authorization effects belong separate models/tests. The regionOK and persisted strictDocument helpers are excluded; abstract normalized output is a field/template projection, not full native DTO or a zero-on-error return guarantee. Typed normalizer fixtures enter directly; only wire fixtures exercise decoder, so empty/overlong typed batches are not claimed reachable through successful Query decode. Decoder admission tracks an explicit decoded flag, not partial Go result structs."
+        }
+      ]
+    },
+    {
+      "path": "formal/MetricsTrustedScope.cfg",
+      "sha256": "3ef4354adeff7d675ebc2fced052dad0b644ebb2bd187c00ba072aaab750351e",
+      "disposition": "modeled",
+      "reason": "New Metrics finite specification/configuration; binds only its declared invariants and operational mutation sensitivity, not implementation refinement.",
+      "models": [
+        {
+          "id": "MetricsTrustedScope",
+          "properties": [
+            "ActorBeforeBody",
+            "MetadataAdmissionExact",
+            "DecisionExact",
+            "NoNestedPolicyTransaction",
+            "BorrowedPolicySource",
+            "CurrentPolicyRevision",
+            "DecisionSubjectExact",
+            "FailureFrame",
+            "NoPolicyWrite",
+            "PeerFrame",
+            "EffectRequiresPermission",
+            "ReadFrame",
+            "ReadReplyExact",
+            "SuccessfulScopeExact",
+            "SuccessfulEffectExact",
+            "NoErrorDisclosure",
+            "StatusExact"
+          ],
+          "limits": "Independent literal decisions/status/scope/read-result and full-frame oracles. Private getter validity, metadata lexer and core policy document verdicts assumed; no token/signature/IAM grammar/crypto/SQL/OS/transaction isolation/Go refinement/liveness proof. Policy versions are document provenance, not actual schema columns. Native effect/rollback assumed from separate models/tests. Factory is NewMetricsGateway pointer binding only, not global constructor atomicity. Fallback means delegation attempt, not fake S3 success; callback-contract fixture is a trusted internal port, not public HTTP reachability. Read results carry actual region-selected catalog/statistics marker sequences, not only ghost scope labels. Nested policy source is an operational transaction-handle choice (same DB), not a measured SQL deadlock; versions are provenance only. Native result/rollback behavior remains assumed from separate leaf models. Additional callers ONLY optional CloudWatchMetrics handler field in Gateway and early monitoring-intent\u2192serveMetrics branch before existing AWS dispatch. RouteStep covers handler-present/fallback attempt, not arbitrary original S3/SSM behavior or token authentication. These additional source-scope declarations are bounded caller correspondence, not a theorem about all native source. Broad BypassPrivateActor is an auth-before-invalid-metadata priority fault: its declared StatusExact witness is NOT body-read sensitivity. DummySignatureGrantsActor intentionally specializes the injected operational fault to dummy auth plus canonical monitoring service; baseline/domain is unchanged. Body-read sensitivity claims require exact-source actual first ActorBeforeBody/bodyRead TRUE evidence; this declaration alone is not execution evidence."
+        }
+      ]
+    },
+    {
+      "path": "formal/MetricsTrustedScope.tla",
+      "sha256": "6ea35e6a37d473e83155130b0f833c028c15b1be0f916d4d5dd5e0d7e489feda",
+      "disposition": "modeled",
+      "reason": "New Metrics finite specification/configuration; binds only its declared invariants and operational mutation sensitivity, not implementation refinement.",
+      "models": [
+        {
+          "id": "MetricsTrustedScope",
+          "properties": [
+            "ActorBeforeBody",
+            "MetadataAdmissionExact",
+            "DecisionExact",
+            "NoNestedPolicyTransaction",
+            "BorrowedPolicySource",
+            "CurrentPolicyRevision",
+            "DecisionSubjectExact",
+            "FailureFrame",
+            "NoPolicyWrite",
+            "PeerFrame",
+            "EffectRequiresPermission",
+            "ReadFrame",
+            "ReadReplyExact",
+            "SuccessfulScopeExact",
+            "SuccessfulEffectExact",
+            "NoErrorDisclosure",
+            "StatusExact"
+          ],
+          "limits": "Independent literal decisions/status/scope/read-result and full-frame oracles. Private getter validity, metadata lexer and core policy document verdicts assumed; no token/signature/IAM grammar/crypto/SQL/OS/transaction isolation/Go refinement/liveness proof. Policy versions are document provenance, not actual schema columns. Native effect/rollback assumed from separate models/tests. Factory is NewMetricsGateway pointer binding only, not global constructor atomicity. Fallback means delegation attempt, not fake S3 success; callback-contract fixture is a trusted internal port, not public HTTP reachability. Read results carry actual region-selected catalog/statistics marker sequences, not only ghost scope labels. Nested policy source is an operational transaction-handle choice (same DB), not a measured SQL deadlock; versions are provenance only. Native result/rollback behavior remains assumed from separate leaf models. Additional callers ONLY optional CloudWatchMetrics handler field in Gateway and early monitoring-intent\u2192serveMetrics branch before existing AWS dispatch. RouteStep covers handler-present/fallback attempt, not arbitrary original S3/SSM behavior or token authentication. These additional source-scope declarations are bounded caller correspondence, not a theorem about all native source. Broad BypassPrivateActor is an auth-before-invalid-metadata priority fault: its declared StatusExact witness is NOT body-read sensitivity. DummySignatureGrantsActor intentionally specializes the injected operational fault to dummy auth plus canonical monitoring service; baseline/domain is unchanged. Body-read sensitivity claims require exact-source actual first ActorBeforeBody/bodyRead TRUE evidence; this declaration alone is not execution evidence."
         }
       ]
     },
     {
       "path": "formal/README.md",
-      "sha256": "e8ef9e6dbe57ee0f3884dcb152c8987cf74b879b6202cd4f84916ed8228581a3",
+      "sha256": "0bf0e9dd681ac1c55658e023af54aeec32309cd2983e7d81987d39627acef3ce",
       "disposition": "documentation",
-      "reason": "Correct current 50-model/398-control inventory and distinguish dated historical receipts, bounded LP properties and unverified conditions. No new runtime guarantee.",
+      "reason": "Metrics-only contract documentation, source/test support or original embedded reference presentation. Preserve public baseline behavior and existing assertions; separate native, SDK, UI and strict Scalar acceptance remain required. No semantic refinement or full cloud compatibility claim.",
       "models": []
     },
     {
       "path": "formal/models.json",
-      "sha256": "8ccc156c16b0def0f1cf560ceb4a0c7f529ba2cb65eb975dab38c565ee43bbc2",
+      "sha256": "b85c9649ed720cad04f4b175fbcf36501fd50334ec45b63dafaeb20107414c4c",
       "disposition": "formal-infrastructure",
-      "reason": "LP-only documentation, validation policy or tests; preserves SDK root, old checks and existing model values. No browser or implementation proof claim.",
+      "reason": "Append/protect six Metrics models and161 controls; preserve all public50 model objects, properties/scopes and existing gate behavior/LP/diagnostic rules. Must execute policy units and positives/negatives on final integrated source.",
       "models": []
     },
     {
-      "path": "internal/server/access.go",
-      "sha256": "efb3916ee5ca9efdd738a4a8fa5ac1a3a376406b5d5dcf44b255c7dcc019cf88",
-      "disposition": "modeled",
-      "reason": "Original bounded landing admission or stored-selection projection for the changed scope. HTTP, DOM, accessibility, native Chrome rendering and JavaScript/Go refinement require independent tests.",
-      "models": [
-        {
-          "id": "LandingAccessAdmission",
-          "properties": [
-            "TypeOK",
-            "ExternalBoundary",
-            "PublicResponse",
-            "TokenBoundary",
-            "UnknownNeverStatic"
-          ],
-          "limits": "Original finite admission contract only. Host/origin and authentication results are trusted inputs from existing middleware; no token, browser session, DNS, URL decoding, HTTP parser, ServeMux canonicalization, filesystem, SQLite, rendering, JavaScript, or Chrome feature proof. Exact HTTP composition and negative path cases are separate Go tests. Only fixed static product assets are public; no service credentials or exercise state are represented."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/landing.go",
-      "sha256": "0cd577ac98daf80c6df95a98ca2f4960d0c3c1b641e76e4bd30fc885fdfc52ed",
-      "disposition": "modeled",
-      "reason": "Original bounded landing admission or stored-selection projection for the changed scope. HTTP, DOM, accessibility, native Chrome rendering and JavaScript/Go refinement require independent tests.",
-      "models": [
-        {
-          "id": "LandingAccessAdmission",
-          "properties": [
-            "TypeOK",
-            "ExternalBoundary",
-            "PublicResponse",
-            "TokenBoundary",
-            "UnknownNeverStatic"
-          ],
-          "limits": "Original finite admission contract only. Host/origin and authentication results are trusted inputs from existing middleware; no token, browser session, DNS, URL decoding, HTTP parser, ServeMux canonicalization, filesystem, SQLite, rendering, JavaScript, or Chrome feature proof. Exact HTTP composition and negative path cases are separate Go tests. Only fixed static product assets are public; no service credentials or exercise state are represented."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/landing/index.html",
-      "sha256": "85001f0cb04d56674f587cdfadd70d370c6c6baf55899c90cf7c4401b16c3940",
-      "disposition": "presentation",
-      "reason": "Static HTML and CSS only; runtime landing JS still requires model bindings. Real browser, keyboard, accessibility and fallback checks are separate.",
-      "models": []
-    },
-    {
-      "path": "internal/server/landing/landing.css",
-      "sha256": "4cdef2c1fac60a9bc52f7ffea99ed12ca9876f6d13d37ae3cd93548db25ef1da",
-      "disposition": "presentation",
-      "reason": "Static HTML and CSS only; runtime landing JS still requires model bindings. Real browser, keyboard, accessibility and fallback checks are separate.",
-      "models": []
-    },
-    {
-      "path": "internal/server/landing/landing.mjs",
-      "sha256": "6fe5ec36d350724930a0ea4f18ec09965be15bb0e19606ae58f1d29385afa000",
-      "disposition": "modeled",
-      "reason": "Original bounded landing admission or stored-selection projection for the changed scope. HTTP, DOM, accessibility, native Chrome rendering and JavaScript/Go refinement require independent tests.",
-      "models": [
-        {
-          "id": "LandingTopologyState",
-          "properties": [
-            "TypeOK",
-            "ProviderSelectsDefault",
-            "NodeClickSelectsExact",
-            "InvalidInputPreservesSelection",
-            "DOMSelectionAgrees",
-            "CanonicalHTMLAvailable",
-            "MountUsesLatestSelection",
-            "UnsupportedCanvasHidden",
-            "RetiredCanvasHidden",
-            "PaintUsesLatestSelection",
-            "RetiredCallbackNoEffect",
-            "InitialFragmentSelection"
-          ],
-          "limits": "Post-start semantic selection and optional decorative lifecycle safety only. Trusted source data and native feature/paint verdicts are assumed; no DOM/accessibility/layout/rendering/Chrome support/backend/route/network or JavaScript refinement proof. Reduced-motion has identical static transitions because implementation has no animation loop; no preference-detection proof. Timeout is an environment event, not wall-clock/liveness. Initial fragment choice is a trusted closed node ID or absent input; URL parsing, encoding, browser scroll and history are outside this model."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/landing/topology-canvas.mjs",
-      "sha256": "0d829770900e15cb8d260da83d56afa0e10e16a4943bb216fdb8ba06c64879fb",
-      "disposition": "modeled",
-      "reason": "Original bounded landing admission or stored-selection projection for the changed scope. HTTP, DOM, accessibility, native Chrome rendering and JavaScript/Go refinement require independent tests.",
-      "models": [
-        {
-          "id": "LandingTopologyState",
-          "properties": [
-            "TypeOK",
-            "ProviderSelectsDefault",
-            "NodeClickSelectsExact",
-            "InvalidInputPreservesSelection",
-            "DOMSelectionAgrees",
-            "CanonicalHTMLAvailable",
-            "MountUsesLatestSelection",
-            "UnsupportedCanvasHidden",
-            "RetiredCanvasHidden",
-            "PaintUsesLatestSelection",
-            "RetiredCallbackNoEffect",
-            "InitialFragmentSelection"
-          ],
-          "limits": "Post-start semantic selection and optional decorative lifecycle safety only. Trusted source data and native feature/paint verdicts are assumed; no DOM/accessibility/layout/rendering/Chrome support/backend/route/network or JavaScript refinement proof. Reduced-motion has identical static transitions because implementation has no animation loop; no preference-detection proof. Timeout is an environment event, not wall-clock/liveness. Initial fragment choice is a trusted closed node ID or absent input; URL parsing, encoding, browser scroll and history are outside this model."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/landing/topology-data.mjs",
-      "sha256": "0b7febcfca1a5fd5040b6448568fb31ea97a48a6f65d146a3029a8896530568f",
-      "disposition": "modeled",
-      "reason": "Original bounded landing admission or stored-selection projection for the changed scope. HTTP, DOM, accessibility, native Chrome rendering and JavaScript/Go refinement require independent tests.",
-      "models": [
-        {
-          "id": "LandingTopologyState",
-          "properties": [
-            "TypeOK",
-            "ProviderSelectsDefault",
-            "NodeClickSelectsExact",
-            "InvalidInputPreservesSelection",
-            "DOMSelectionAgrees",
-            "CanonicalHTMLAvailable",
-            "MountUsesLatestSelection",
-            "UnsupportedCanvasHidden",
-            "RetiredCanvasHidden",
-            "PaintUsesLatestSelection",
-            "RetiredCallbackNoEffect",
-            "InitialFragmentSelection"
-          ],
-          "limits": "Post-start semantic selection and optional decorative lifecycle safety only. Trusted source data and native feature/paint verdicts are assumed; no DOM/accessibility/layout/rendering/Chrome support/backend/route/network or JavaScript refinement proof. Reduced-motion has identical static transitions because implementation has no animation loop; no preference-detection proof. Timeout is an environment event, not wall-clock/liveness. Initial fragment choice is a trusted closed node ID or absent input; URL parsing, encoding, browser scroll and history are outside this model."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/landing_test.go",
-      "sha256": "65a342777f94b6bcbfc7047de3989730cba30d54298305ea909b96162226b781",
+      "path": "internal/aws/metrics/compression_test.go",
+      "sha256": "08db8c29ab8e89d7df4f54419bfb211a3d9e0dfba10d356888eb73238b4cc86c",
       "disposition": "test-support",
-      "reason": "LP-only documentation, validation policy or tests; preserves SDK root, old checks and existing model values. No browser or implementation proof claim.",
+      "reason": "Metrics regression/contract fixtures; tests do not grant runtime authority and require actual selected and whole-suite execution at final HEAD.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/metrics/http.go",
+      "sha256": "b0e0ceccb065851cff56abf7d7e10b6f5f6c46faa0cca0337676b04195b120ff",
+      "disposition": "modeled",
+      "reason": "Trusted-scope and envelope-before-body Query pipeline, bounded gzip class verdicts, authorization-before-datum, response preparation before commit/reply. Codec/parser bytes and host auth are independent native tests.",
+      "models": [
+        {
+          "id": "MetricsHTTPAdmission",
+          "properties": [
+            "ScopeBeforeBody",
+            "EnvelopeBeforeBody",
+            "BodyAdmissionExact",
+            "QueryAdmissionExact",
+            "AuthorizationBeforeSchema",
+            "NoPrematureEffect",
+            "FailureFrame",
+            "ReadFrame",
+            "PeerAndCursorFrame",
+            "CommitRequiresAdmission",
+            "SuccessfulEffectExact",
+            "ReplyAfterCommit",
+            "StatusExact"
+          ],
+          "limits": "Original bounded admission projection only. Trusted host scope/codec/UTF8/form/size verdicts are assumed inputs, not token/IAM/gzip/CRC/Go-memory/parser/SQL/concurrency/refinement proofs. Action authorization-before-semantic-decode modeled; store candidate/commit atomicity assumed, response preparation failure abstracted. No metrics aggregation/retention/cursor cryptography/AWS parity or liveness proof. Per-request diagnostic RequestID counter is not a durable DB frame."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/metrics/http_boundary_test.go",
+      "sha256": "894b7f48904d834eacc30024ffe652b9c54a308b7396d2f299c83bd951dfd0e3",
+      "disposition": "test-support",
+      "reason": "Metrics regression/contract fixtures; tests do not grant runtime authority and require actual selected and whole-suite execution at final HEAD.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/metrics/http_test.go",
+      "sha256": "05763f796359e623d6131705523b3b7377756c85f8557eca978da833af6ab3e1",
+      "disposition": "test-support",
+      "reason": "Metrics regression/contract fixtures; tests do not grant runtime authority and require actual selected and whole-suite execution at final HEAD.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/metrics/query.go",
+      "sha256": "696bcc94d6c6bbe2119358e84683e0a149f944ac90ca4662ecd905b7c7d6a6de",
+      "disposition": "modeled",
+      "reason": "Readonly List/Get projection, exact dimension/unit aggregation and scoped revision/captured-time cursor behavior. No real HMAC/JSON/float/time/SQL algorithm proof.",
+      "models": [
+        {
+          "id": "CloudWatchMetricsRawLedger",
+          "properties": [
+            "NoOrphans",
+            "DeniedNoDisclosure",
+            "DeniedFrame",
+            "InvalidFrame",
+            "ReadDurableFrame",
+            "FailedPutFrame",
+            "PeerFrame",
+            "PhysicalRowBudget",
+            "SeriesBudget",
+            "PhysicalByteBudget",
+            "PutRowsExact",
+            "PutCatalogExact",
+            "RevisionExact",
+            "RegionInitializationExact",
+            "StatisticsExact",
+            "CursorAdmission",
+            "ListExact",
+            "ErrorNoDisclosure"
+          ],
+          "limits": "Original finite ledger/response safety only. Independent literal batch/statistics/list/page oracles. Scope/auth/invalid/fault verdicts assumed; no Query/Unicode/numeric/XML parsing, actual UTF8bytes/IEEE754/rounding, HMAC/JSON cryptography, constructor/regional quota, SQL/Go/concurrency/crash/refinement/liveness or real AWS timing/rollup proof. Valid admission completeness is not proved. Raw physical data/foreign expired rows remain charged; only valid Put collects own namespace."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/metrics/query_coverage_test.go",
+      "sha256": "ee2121306579b0d199152484b7a77b5a4a1c3e211f765b62622f8f917cf7b06b",
+      "disposition": "test-support",
+      "reason": "Metrics regression/contract fixtures; tests do not grant runtime authority and require actual selected and whole-suite execution at final HEAD.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/metrics/request.go",
+      "sha256": "86f7b61417739091b34d316c5d5244a77cfb312ea33c08655301862685059f89",
+      "disposition": "modeled",
+      "reason": "Finite successful decoder publication and normalization categories; strict multiplicity/index/unknown fields and normalized field identity. Not full partial DTO or concrete lexer proof.",
+      "models": [
+        {
+          "id": "MetricsRequestAdmission",
+          "properties": [
+            "InputPreserved",
+            "NoEarlyPublication",
+            "DecodedAdmissionExact",
+            "AdmissionExact",
+            "NoRejectedPublication",
+            "DimensionOrderExact",
+            "DimensionValuesExact",
+            "NameIdentityExact",
+            "UnitExact",
+            "ScalarValueExact",
+            "TimestampExact",
+            "StartNormalizationExact",
+            "StatisticOrderExact",
+            "MetricIdentityExact",
+            "CountClassExact",
+            "PeriodExact"
+          ],
+          "limits": "Independent literal accepted-ID and expected normalized-result oracles. Pure successful-decoder/normalized-publication projection only, not raw partial DTO zero-on-error. Primitive number/date lexing, UTF8/rune/byte-size/name/range verdicts and long-list cardinality/index-limit classes assumed, not Go algorithms/IEEE754/time arithmetic/codec/SQL/IAM/refinement/liveness. Name ranks quotient ASCII comparison; omitted filter values/units use disjoint sentinels. Identity carrier is an abstract Metric/filter tuple, not SHA/JSON. Native HTTP/authorization effects belong separate models/tests. The regionOK and persisted strictDocument helpers are excluded; abstract normalized output is a field/template projection, not full native DTO or a zero-on-error return guarantee. Typed normalizer fixtures enter directly; only wire fixtures exercise decoder, so empty/overlong typed batches are not claimed reachable through successful Query decode. Decoder admission tracks an explicit decoded flag, not partial Go result structs."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/metrics/request_coverage_test.go",
+      "sha256": "395359d8d876cf41e8eea86e15e8dade6dbca76cb4017b4fa63dbecaf7717882",
+      "disposition": "test-support",
+      "reason": "Metrics regression/contract fixtures; tests do not grant runtime authority and require actual selected and whole-suite execution at final HEAD.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/metrics/store.go",
+      "sha256": "1fe881b0940436dcaf294cd73a53d75ef0fc9ca297ebad5213b671b274053a24",
+      "disposition": "modeled",
+      "reason": "Own SQLite schema/admission, transactional Put ledger/quotas/expiry/revision, plus HTTP response preparation/commit boundary. Models project frames and assumed success/fault verdicts; native corruption/ACK/concurrency tests remain necessary.",
+      "models": [
+        {
+          "id": "CloudWatchMetricsRawLedger",
+          "properties": [
+            "NoOrphans",
+            "DeniedNoDisclosure",
+            "DeniedFrame",
+            "InvalidFrame",
+            "ReadDurableFrame",
+            "FailedPutFrame",
+            "PeerFrame",
+            "PhysicalRowBudget",
+            "SeriesBudget",
+            "PhysicalByteBudget",
+            "PutRowsExact",
+            "PutCatalogExact",
+            "RevisionExact",
+            "RegionInitializationExact",
+            "StatisticsExact",
+            "CursorAdmission",
+            "ListExact",
+            "ErrorNoDisclosure"
+          ],
+          "limits": "Original finite ledger/response safety only. Independent literal batch/statistics/list/page oracles. Scope/auth/invalid/fault verdicts assumed; no Query/Unicode/numeric/XML parsing, actual UTF8bytes/IEEE754/rounding, HMAC/JSON cryptography, constructor/regional quota, SQL/Go/concurrency/crash/refinement/liveness or real AWS timing/rollup proof. Valid admission completeness is not proved. Raw physical data/foreign expired rows remain charged; only valid Put collects own namespace."
+        },
+        {
+          "id": "MetricsHTTPAdmission",
+          "properties": [
+            "ScopeBeforeBody",
+            "EnvelopeBeforeBody",
+            "BodyAdmissionExact",
+            "QueryAdmissionExact",
+            "AuthorizationBeforeSchema",
+            "NoPrematureEffect",
+            "FailureFrame",
+            "ReadFrame",
+            "PeerAndCursorFrame",
+            "CommitRequiresAdmission",
+            "SuccessfulEffectExact",
+            "ReplyAfterCommit",
+            "StatusExact"
+          ],
+          "limits": "Original bounded admission projection only. Trusted host scope/codec/UTF8/form/size verdicts are assumed inputs, not token/IAM/gzip/CRC/Go-memory/parser/SQL/concurrency/refinement proofs. Action authorization-before-semantic-decode modeled; store candidate/commit atomicity assumed, response preparation failure abstracted. No metrics aggregation/retention/cursor cryptography/AWS parity or liveness proof. Per-request diagnostic RequestID counter is not a durable DB frame."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/metrics/store_coverage_test.go",
+      "sha256": "bbf5685ef088b9926e92502dc949a16ba1b00edf027200f292a0d884bb519b6b",
+      "disposition": "test-support",
+      "reason": "Metrics regression/contract fixtures; tests do not grant runtime authority and require actual selected and whole-suite execution at final HEAD.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/metrics/store_test.go",
+      "sha256": "2e4f9bf56e1cbff9a76da802c917f21c0da098b0529f230ebcabf0bb89d196ea",
+      "disposition": "test-support",
+      "reason": "Metrics regression/contract fixtures; tests do not grant runtime authority and require actual selected and whole-suite execution at final HEAD.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/metrics/types.go",
+      "sha256": "961c1993f633d6e91aa7b32b36ae834c458dc1e5755535597d408fdd09523920",
+      "disposition": "modeled",
+      "reason": "Finite normalization/default/identity/order/time/period classes. Concrete name/float/time/regionOK/strictDocument algorithms are excluded and require native boundary tests; mapping does not certify these helpers.",
+      "models": [
+        {
+          "id": "MetricsRequestAdmission",
+          "properties": [
+            "InputPreserved",
+            "NoEarlyPublication",
+            "DecodedAdmissionExact",
+            "AdmissionExact",
+            "NoRejectedPublication",
+            "DimensionOrderExact",
+            "DimensionValuesExact",
+            "NameIdentityExact",
+            "UnitExact",
+            "ScalarValueExact",
+            "TimestampExact",
+            "StartNormalizationExact",
+            "StatisticOrderExact",
+            "MetricIdentityExact",
+            "CountClassExact",
+            "PeriodExact"
+          ],
+          "limits": "Independent literal accepted-ID and expected normalized-result oracles. Pure successful-decoder/normalized-publication projection only, not raw partial DTO zero-on-error. Primitive number/date lexing, UTF8/rune/byte-size/name/range verdicts and long-list cardinality/index-limit classes assumed, not Go algorithms/IEEE754/time arithmetic/codec/SQL/IAM/refinement/liveness. Name ranks quotient ASCII comparison; omitted filter values/units use disjoint sentinels. Identity carrier is an abstract Metric/filter tuple, not SHA/JSON. Native HTTP/authorization effects belong separate models/tests. The regionOK and persisted strictDocument helpers are excluded; abstract normalized output is a field/template projection, not full native DTO or a zero-on-error return guarantee. Typed normalizer fixtures enter directly; only wire fixtures exercise decoder, so empty/overlong typed batches are not claimed reachable through successful Query decode. Decoder admission tracks an explicit decoded flag, not partial Go result structs."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/metrics/types_coverage_test.go",
+      "sha256": "db991f571ed0d4d2334f422d3eb874fd7efc433c78c5486a99106b56e29720bc",
+      "disposition": "test-support",
+      "reason": "Metrics regression/contract fixtures; tests do not grant runtime authority and require actual selected and whole-suite execution at final HEAD.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/metrics_dispatch.go",
+      "sha256": "3b6e339e3ecad339558805381025e970edcb316b5a5bba1cf772a660cdea3826",
+      "disposition": "modeled",
+      "reason": "Same-DB adapter binding, private actor capture before metadata/body, strict monitoring metadata, captured region/identity and current caller-transaction policy. Policy and lexer verdicts assumed; no token/signature/SQL isolation proof.",
+      "models": [
+        {
+          "id": "MetricsTrustedScope",
+          "properties": [
+            "ActorBeforeBody",
+            "MetadataAdmissionExact",
+            "DecisionExact",
+            "NoNestedPolicyTransaction",
+            "BorrowedPolicySource",
+            "CurrentPolicyRevision",
+            "DecisionSubjectExact",
+            "FailureFrame",
+            "NoPolicyWrite",
+            "PeerFrame",
+            "EffectRequiresPermission",
+            "ReadFrame",
+            "ReadReplyExact",
+            "SuccessfulScopeExact",
+            "SuccessfulEffectExact",
+            "NoErrorDisclosure",
+            "StatusExact"
+          ],
+          "limits": "Independent literal decisions/status/scope/read-result and full-frame oracles. Private getter validity, metadata lexer and core policy document verdicts assumed; no token/signature/IAM grammar/crypto/SQL/OS/transaction isolation/Go refinement/liveness proof. Policy versions are document provenance, not actual schema columns. Native effect/rollback assumed from separate models/tests. Factory is NewMetricsGateway pointer binding only, not global constructor atomicity. Fallback means delegation attempt, not fake S3 success; callback-contract fixture is a trusted internal port, not public HTTP reachability. Read results carry actual region-selected catalog/statistics marker sequences, not only ghost scope labels. Nested policy source is an operational transaction-handle choice (same DB), not a measured SQL deadlock; versions are provenance only. Native result/rollback behavior remains assumed from separate leaf models. Additional callers ONLY optional CloudWatchMetrics handler field in Gateway and early monitoring-intent\u2192serveMetrics branch before existing AWS dispatch. RouteStep covers handler-present/fallback attempt, not arbitrary original S3/SSM behavior or token authentication. These additional source-scope declarations are bounded caller correspondence, not a theorem about all native source. Broad BypassPrivateActor is an auth-before-invalid-metadata priority fault: its declared StatusExact witness is NOT body-read sensitivity. DummySignatureGrantsActor intentionally specializes the injected operational fault to dummy auth plus canonical monitoring service; baseline/domain is unchanged. Body-read sensitivity claims require exact-source actual first ActorBeforeBody/bodyRead TRUE evidence; this declaration alone is not execution evidence."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/metrics_dispatch_authority_order_test.go",
+      "sha256": "90cc0f4cceb1a621cc98c13a23f785c67fca86bdc88bd98cb05bd696ae191fa4",
+      "disposition": "test-support",
+      "reason": "Metrics regression/contract fixtures; tests do not grant runtime authority and require actual selected and whole-suite execution at final HEAD.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/metrics_dispatch_policy_epoch_test.go",
+      "sha256": "14f949497ac3419342a863d2e7ca8d281fd59a12f47ae95faa1243a93129f3de",
+      "disposition": "test-support",
+      "reason": "Metrics regression/contract fixtures; tests do not grant runtime authority and require actual selected and whole-suite execution at final HEAD.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/metrics_dispatch_test.go",
+      "sha256": "a4a6e72a561ae216fd27dfd0ca1693c2a1559b515711130cf0bc6abdacc0dd48",
+      "disposition": "test-support",
+      "reason": "Metrics regression/contract fixtures; tests do not grant runtime authority and require actual selected and whole-suite execution at final HEAD.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/s3.go",
+      "sha256": "d9648a7c76269853dd03e5c40ba22d0ae527a8bd3241263634e2b5378232de2a",
+      "disposition": "modeled",
+      "reason": "ONLY new optional Gateway.CloudWatchMetrics handler field; existing S3 behavior unchanged. TrustedScope covers bounded caller/handler-presence correspondence, not S3 operations.",
+      "models": [
+        {
+          "id": "MetricsTrustedScope",
+          "properties": [
+            "ActorBeforeBody",
+            "MetadataAdmissionExact",
+            "DecisionExact",
+            "NoNestedPolicyTransaction",
+            "BorrowedPolicySource",
+            "CurrentPolicyRevision",
+            "DecisionSubjectExact",
+            "FailureFrame",
+            "NoPolicyWrite",
+            "PeerFrame",
+            "EffectRequiresPermission",
+            "ReadFrame",
+            "ReadReplyExact",
+            "SuccessfulScopeExact",
+            "SuccessfulEffectExact",
+            "NoErrorDisclosure",
+            "StatusExact"
+          ],
+          "limits": "Independent literal decisions/status/scope/read-result and full-frame oracles. Private getter validity, metadata lexer and core policy document verdicts assumed; no token/signature/IAM grammar/crypto/SQL/OS/transaction isolation/Go refinement/liveness proof. Policy versions are document provenance, not actual schema columns. Native effect/rollback assumed from separate models/tests. Factory is NewMetricsGateway pointer binding only, not global constructor atomicity. Fallback means delegation attempt, not fake S3 success; callback-contract fixture is a trusted internal port, not public HTTP reachability. Read results carry actual region-selected catalog/statistics marker sequences, not only ghost scope labels. Nested policy source is an operational transaction-handle choice (same DB), not a measured SQL deadlock; versions are provenance only. Native result/rollback behavior remains assumed from separate leaf models. Additional callers ONLY optional CloudWatchMetrics handler field in Gateway and early monitoring-intent\u2192serveMetrics branch before existing AWS dispatch. RouteStep covers handler-present/fallback attempt, not arbitrary original S3/SSM behavior or token authentication. These additional source-scope declarations are bounded caller correspondence, not a theorem about all native source. Broad BypassPrivateActor is an auth-before-invalid-metadata priority fault: its declared StatusExact witness is NOT body-read sensitivity. DummySignatureGrantsActor intentionally specializes the injected operational fault to dummy auth plus canonical monitoring service; baseline/domain is unchanged. Body-read sensitivity claims require exact-source actual first ActorBeforeBody/bodyRead TRUE evidence; this declaration alone is not execution evidence."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ssm.go",
+      "sha256": "58c78daaab429d096d1f46ea0322f836250a6a1f9aefe2250a8ec6a404213fa2",
+      "disposition": "modeled",
+      "reason": "ONLY early monitoring-intent\u2192serveMetrics return before unchanged provider fallback. TrustedScope covers metadata intent/missing-handler/fallback-attempt categories, not existing SSM/S3 implementation.",
+      "models": [
+        {
+          "id": "MetricsTrustedScope",
+          "properties": [
+            "ActorBeforeBody",
+            "MetadataAdmissionExact",
+            "DecisionExact",
+            "NoNestedPolicyTransaction",
+            "BorrowedPolicySource",
+            "CurrentPolicyRevision",
+            "DecisionSubjectExact",
+            "FailureFrame",
+            "NoPolicyWrite",
+            "PeerFrame",
+            "EffectRequiresPermission",
+            "ReadFrame",
+            "ReadReplyExact",
+            "SuccessfulScopeExact",
+            "SuccessfulEffectExact",
+            "NoErrorDisclosure",
+            "StatusExact"
+          ],
+          "limits": "Independent literal decisions/status/scope/read-result and full-frame oracles. Private getter validity, metadata lexer and core policy document verdicts assumed; no token/signature/IAM grammar/crypto/SQL/OS/transaction isolation/Go refinement/liveness proof. Policy versions are document provenance, not actual schema columns. Native effect/rollback assumed from separate models/tests. Factory is NewMetricsGateway pointer binding only, not global constructor atomicity. Fallback means delegation attempt, not fake S3 success; callback-contract fixture is a trusted internal port, not public HTTP reachability. Read results carry actual region-selected catalog/statistics marker sequences, not only ghost scope labels. Nested policy source is an operational transaction-handle choice (same DB), not a measured SQL deadlock; versions are provenance only. Native result/rollback behavior remains assumed from separate leaf models. Additional callers ONLY optional CloudWatchMetrics handler field in Gateway and early monitoring-intent\u2192serveMetrics branch before existing AWS dispatch. RouteStep covers handler-present/fallback attempt, not arbitrary original S3/SSM behavior or token authentication. These additional source-scope declarations are bounded caller correspondence, not a theorem about all native source. Broad BypassPrivateActor is an auth-before-invalid-metadata priority fault: its declared StatusExact witness is NOT body-read sensitivity. DummySignatureGrantsActor intentionally specializes the injected operational fault to dummy auth plus canonical monitoring service; baseline/domain is unchanged. Body-read sensitivity claims require exact-source actual first ActorBeforeBody/bodyRead TRUE evidence; this declaration alone is not execution evidence."
+        }
+      ]
+    },
+    {
+      "path": "internal/legal/assets/CONSOLE-NOTICES.txt",
+      "sha256": "e2ab0afb8a28fc3cd80b7415c9786a2904ec54dfbb205981e922351076cdfa68",
+      "disposition": "documentation",
+      "reason": "Roster or original third-party notice/inventory record; preserve authorship and validate actual regenerated graph. A rights record is not execution proof.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/openapi.json",
+      "sha256": "49229e49e7ba4a9d5add329a556c4724c135f0808a51640ab3b1f66fae5ad0a7",
+      "disposition": "presentation",
+      "reason": "Metrics-only contract documentation, source/test support or original embedded reference presentation. Preserve public baseline behavior and existing assertions; separate native, SDK, UI and strict Scalar acceptance remain required. No semantic refinement or full cloud compatibility claim.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/reference-theme.css",
+      "sha256": "a271e42336f660afd74a6991b41b18f18bdcd089248675f451382f2396de6d46",
+      "disposition": "presentation",
+      "reason": "Metrics-only contract documentation, source/test support or original embedded reference presentation. Preserve public baseline behavior and existing assertions; separate native, SDK, UI and strict Scalar acceptance remain required. No semantic refinement or full cloud compatibility claim.",
+      "models": []
+    },
+    {
+      "path": "internal/server/metrics_capabilities.go",
+      "sha256": "91eb85aaf005cabc13c5e74da1cee3b93b93996651b670dec09f23984f488217",
+      "disposition": "modeled",
+      "reason": "Exact bounded Metrics descriptor operation set/Query/version/selector/availability/qualification and peer preservation. Qualification inputs do not prove actual UI/SDK/reference readiness.",
+      "models": [
+        {
+          "id": "CapabilityProjection",
+          "properties": [
+            "HostReadyBeforePublication",
+            "AvailableOnlyWhenReady",
+            "ExactSupportedOperations",
+            "ExactProtocol",
+            "ExactVersion",
+            "ExactProvider",
+            "ExactSelector",
+            "ConsoleRequiresQualification",
+            "ReferenceRequiresQualification",
+            "SDKRequiresQualification",
+            "PeerPreserved",
+            "CatalogVisibilityExact",
+            "MalformedDescriptorHidden",
+            "QualifiedProducedVisibility",
+            "KnownValidDescriptorVisible",
+            "SearchExact"
+          ],
+          "limits": "Not JSON serialization/type/marshal/HTTP/refinement/artifact/build/source proof No data rows or authorization algorithms modeled; descriptiveavailability is not callerpermission No claimSDKcompatibility fromqualificationbooleans; actual41calls separate native proof Currentcompiledconsoletrue means source-wiredcandidate, SDK/referencefalse; booleans areexplicitqualificationinputs notruntimeproof No liveness/arbitraryregistration/otherprovidersemantics modeled Provider label abstracts literal providerEndpoint category only; outer providers may contain multiple providers; no endpoint parser/registry routing proof. Primitive tags assume JSONfieldkind/verdict mappings; no JavaScript/JSON/React/serializer/refinement proof Arbitrary external valid-lookingdescriptor may showUI while backendfalse; consumer is discovery only and cannotauthenticate/grantnative authority No claims for other15servicegates or NFKC/locale/searchstringalgorithms; only fixedknownmatchingMetrics search MaincallerAuth/Region/navigation remount remains separateMetricsConsoleEpoch narrowprojection, notthismodel Only server.go successful-constructor capability publication caller projection; backendReady is assumed, not a constructor/schema/rollback/atomicity theorem."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/metrics_capabilities_test.go",
+      "sha256": "35dce7c7bf3cb4c6e85b940572c3d2a51201138a73b54aa65f5ebccec5e60a34",
+      "disposition": "test-support",
+      "reason": "Metrics regression/contract fixtures; tests do not grant runtime authority and require actual selected and whole-suite execution at final HEAD.",
+      "models": []
+    },
+    {
+      "path": "internal/server/metrics_integration_test.go",
+      "sha256": "008b0a5a77f94011284df35c4fde4139c75df48ecd245e1e649af65d5aa28a08",
+      "disposition": "test-support",
+      "reason": "Metrics regression/contract fixtures; tests do not grant runtime authority and require actual selected and whole-suite execution at final HEAD.",
       "models": []
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "40e5f8d94e53ebf612ef39479d0d09877273e107161c6a6a9844c695f612174d",
+      "sha256": "e6316317504750523ae9c9539554e8646331f3815d447959d5099525c6696e56",
       "disposition": "modeled",
-      "reason": "Original bounded landing admission or stored-selection projection for the changed scope. HTTP, DOM, accessibility, native Chrome rendering and JavaScript/Go refinement require independent tests.",
+      "reason": "ONLY Metrics same-DB store/handler startup wiring and capability producer wrapper around unchanged Sakura projection. CapabilityProjection models publication after assumed successful startup; schema initialization/constructor rollback need native tests. Public LP access/routes/auth/other providers remain unchanged.",
       "models": [
         {
-          "id": "LandingAccessAdmission",
+          "id": "CapabilityProjection",
           "properties": [
-            "TypeOK",
-            "ExternalBoundary",
-            "PublicResponse",
-            "TokenBoundary",
-            "UnknownNeverStatic"
+            "HostReadyBeforePublication",
+            "AvailableOnlyWhenReady",
+            "ExactSupportedOperations",
+            "ExactProtocol",
+            "ExactVersion",
+            "ExactProvider",
+            "ExactSelector",
+            "ConsoleRequiresQualification",
+            "ReferenceRequiresQualification",
+            "SDKRequiresQualification",
+            "PeerPreserved",
+            "CatalogVisibilityExact",
+            "MalformedDescriptorHidden",
+            "QualifiedProducedVisibility",
+            "KnownValidDescriptorVisible",
+            "SearchExact"
           ],
-          "limits": "Original finite admission contract only. Host/origin and authentication results are trusted inputs from existing middleware; no token, browser session, DNS, URL decoding, HTTP parser, ServeMux canonicalization, filesystem, SQLite, rendering, JavaScript, or Chrome feature proof. Exact HTTP composition and negative path cases are separate Go tests. Only fixed static product assets are public; no service credentials or exercise state are represented."
+          "limits": "Not JSON serialization/type/marshal/HTTP/refinement/artifact/build/source proof No data rows or authorization algorithms modeled; descriptiveavailability is not callerpermission No claimSDKcompatibility fromqualificationbooleans; actual41calls separate native proof Currentcompiledconsoletrue means source-wiredcandidate, SDK/referencefalse; booleans areexplicitqualificationinputs notruntimeproof No liveness/arbitraryregistration/otherprovidersemantics modeled Provider label abstracts literal providerEndpoint category only; outer providers may contain multiple providers; no endpoint parser/registry routing proof. Primitive tags assume JSONfieldkind/verdict mappings; no JavaScript/JSON/React/serializer/refinement proof Arbitrary external valid-lookingdescriptor may showUI while backendfalse; consumer is discovery only and cannotauthenticate/grantnative authority No claims for other15servicegates or NFKC/locale/searchstringalgorithms; only fixedknownmatchingMetrics search MaincallerAuth/Region/navigation remount remains separateMetricsConsoleEpoch narrowprojection, notthismodel Only server.go successful-constructor capability publication caller projection; backendReady is assumed, not a constructor/schema/rollback/atomicity theorem."
         }
       ]
     },
     {
-      "path": "scripts/formal_applicability.py",
-      "sha256": "8df7b6abda070050a372d76352e926119c5c48cf6b657070670e604a226a82e1",
-      "disposition": "formal-infrastructure",
-      "reason": "LP-only documentation, validation policy or tests; preserves SDK root, old checks and existing model values. No browser or implementation proof claim.",
+      "path": "internal/server/web/app.css",
+      "sha256": "d11e0fea2a93ecc173533d285940b74f9f22902cb2c4340dbe72ca27c6d14e7a",
+      "disposition": "presentation",
+      "reason": "Generated console CSS or build input/output metadata. Exact source/toolchain/rights provenance and asset verification required; not additional request/state logic or formal runtime/refinement evidence.",
       "models": []
+    },
+    {
+      "path": "internal/server/web/app.js",
+      "sha256": "61989202f97a65fefd0632862ced08f00721b6b0cab6020ed1ff69eaa74f211b",
+      "disposition": "modeled",
+      "reason": "Generated Metrics epoch projection from reviewed source and pinned input graph; compiler/minifier/React delivery assumed. It also includes presentation/navigation/decoder behavior outside epoch abstraction: no whole-bundle or new-ARIA proof is implied.",
+      "models": [
+        {
+          "id": "MetricsConsoleEpoch",
+          "properties": [
+            "ListSuccessGuarded",
+            "StatisticsSuccessGuarded",
+            "ListCurrentResult",
+            "StatisticsCurrentResult",
+            "StatisticsSnapshotBound",
+            "StaleErrorGuarded",
+            "CurrentErrorVisible",
+            "StaleFinallyGuarded",
+            "CurrentFinallySettles",
+            "QueryEditClearsStatistics",
+            "BeginSnapshotClears",
+            "StatisticsBeginClears",
+            "BrowseClearsViews",
+            "ScopeResetClears",
+            "LocaleFrame",
+            "InvalidInputNoWire",
+            "CaptureMatchesIntent"
+          ],
+          "limits": "Selected bounded UI input/callback workflows only, with independent literal result/capture oracles. Initial completed-list/selection prelude; atomic callback success-or-nonAbort-error plus finally. A separate React-instance delivery boundary remains in all controls. Same-instance prop-update cases may be masked by the parent production keyed-remount defense; request identity does not select DB/data. No arbitrary schedules/liveness, React/JS/AbortController refinement, host auth/IAM/isolation, Query/XML/value/timestamp/byte parser, actual metric arithmetic, cursor/HMAC, backend/native Go/SQL, graph/pixel, SDK or full AWS compatibility proof. Source helper1445 counterpart mapping contains explicit gaps. Main scope is ONLY Metrics keyed retirement/raw Response caller: key binds auth revision/principal/region/service/navigation and excludes locale; props preserve actual Response callback. React key delivery/remount semantics are assumed, not proved. No other main/auth/provider behavior or catalog predicate is included; the generated asset declaration is limited to the explicit Metrics epoch projection below. Source-only caller binding is new; prior56 scoped phases ran unchanged TLA, not the new main or current1440 response guard. Current source also adds graph-focus refs/effect and dimension-aware aria labels; these DOM focus/accessibility behaviors and response decoder/numerical 1440 boundary are excluded from the unchanged epoch abstraction. The old56 phases are not a run of this current source or helper. Compiled app.js scope is ONLY the actual canonical-derived Metrics epoch projection, tied to accepted e3e/23e6 build provenance and current d671 output hash. Compiler/minifier/React correctness is assumed; DOM focus/aria, response decoder/1440 math, other components, whole bundle behavior and refinement are not proved."
+        }
+      ]
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "79d0468319f1dd55e660c4e523f32f5dcd6e68cad3db20bf0ed1d64876fd821d",
+      "sha256": "1dbb3ced70a6a58075033bbfca7ac24eee6823af8cb3a591319a5e8ea583dd6c",
       "disposition": "formal-infrastructure",
-      "reason": "Preserves TLC bounds, deadlines, exit failure and mutation oracles; retains process-failure stream/type/errno/elapsed diagnostics and requires the two existing LP models, properties, controls and exact source scopes. Injected tool-failure and removal tests are not TLC or implementation proof.",
-      "models": []
-    },
-    {
-      "path": "scripts/test-formal-applicability.py",
-      "sha256": "24e4980e242cdf9cc64362aabf0e86dddca389f270c9889f0a469fe9eb961ab0",
-      "disposition": "formal-infrastructure",
-      "reason": "LP-only documentation, validation policy or tests; preserves SDK root, old checks and existing model values. No browser or implementation proof claim.",
+      "reason": "Append/protect six Metrics models and161 controls; preserve all public50 model objects, properties/scopes and existing gate behavior/LP/diagnostic rules. Must execute policy units and positives/negatives on final integrated source.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "aa5cb599d2885d901243cf648ab6be6ad0ad43884f29764cd46a3e17f21635a8",
+      "sha256": "13a5618c717138842bc2089af9d68b3753d776df2ffec0b201b080103712fd9c",
       "disposition": "formal-infrastructure",
-      "reason": "Preserves TLC bounds, deadlines, exit failure and mutation oracles; retains process-failure stream/type/errno/elapsed diagnostics and requires the two existing LP models, properties, controls and exact source scopes. Injected tool-failure and removal tests are not TLC or implementation proof.",
+      "reason": "Append/protect six Metrics models and161 controls; preserve all public50 model objects, properties/scopes and existing gate behavior/LP/diagnostic rules. Must execute policy units and positives/negatives on final integrated source.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-metrics-e2e-receipts.py",
+      "sha256": "9b88bb3d655ec6132944bbe4b81381cfd790f97be4af1c2c1fa176137120710d",
+      "disposition": "test-support",
+      "reason": "Metrics-only contract documentation, source/test support or original embedded reference presentation. Preserve public baseline behavior and existing assertions; separate native, SDK, UI and strict Scalar acceptance remain required. No semantic refinement or full cloud compatibility claim.",
+      "models": []
+    },
+    {
+      "path": "test/console/metrics-navigation.test.mjs",
+      "sha256": "0ae524d1850eae894a7438abf5a8c6c3dfb0c313f9e1bf43a1b43366062cabbc",
+      "disposition": "test-support",
+      "reason": "Metrics regression/contract fixtures; tests do not grant runtime authority and require actual selected and whole-suite execution at final HEAD.",
+      "models": []
+    },
+    {
+      "path": "test/console/metrics-presentation.test.mjs",
+      "sha256": "22488653c4774b8c18d0b6c6abcebc77a0c67f09005c247d80dfa0507192f959",
+      "disposition": "test-support",
+      "reason": "Metrics regression/contract fixtures; tests do not grant runtime authority and require actual selected and whole-suite execution at final HEAD.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/api_cloud_sections.py",
+      "sha256": "9245a63b5267dcac0a1a93a659f8bec72fae15e25f0598de6f1d302fffec9d99",
+      "disposition": "test-support",
+      "reason": "Metrics-only contract documentation, source/test support or original embedded reference presentation. Preserve public baseline behavior and existing assertions; separate native, SDK, UI and strict Scalar acceptance remain required. No semantic refinement or full cloud compatibility claim.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/api_cloud_sections_contract.py",
+      "sha256": "9b13c88a07c6d917bbc1ef97eeb92941bc27340d034fd854270721387b56f2de",
+      "disposition": "test-support",
+      "reason": "Metrics-only contract documentation, source/test support or original embedded reference presentation. Preserve public baseline behavior and existing assertions; separate native, SDK, UI and strict Scalar acceptance remain required. No semantic refinement or full cloud compatibility claim.",
       "models": []
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "c3aae6053226c5d5774eac684d0afa238eaffe0c54476f2342e27bdf87ee8c32",
+      "sha256": "aad2412a5104a93d80cae1e9a1a7ec02e4b28e2324093051027305c8c7e4f156",
       "disposition": "test-support",
-      "reason": "Persist anonymous landing desktop/mobile, fallback, keyboard/native-link, strict accessibility and source-asset checks using the existing isolated dummy CLI fixture. No production authority or model-refinement claim.",
+      "reason": "Metrics-only contract documentation, source/test support or original embedded reference presentation. Preserve public baseline behavior and existing assertions; separate native, SDK, UI and strict Scalar acceptance remain required. No semantic refinement or full cloud compatibility claim.",
       "models": []
     },
     {
-      "path": "test/e2e/landing_topology.py",
-      "sha256": "d64c1318f677cdbd0df5ea133f9dfe52c8740bc70ea9a796e4674da0132a7bfa",
+      "path": "test/e2e/cloudwatch_logs.py",
+      "sha256": "90b445ea0396724d81bc6d375460bff573887133eca39359458cbec3b6986326",
       "disposition": "test-support",
-      "reason": "Persist anonymous landing desktop/mobile, fallback, keyboard/native-link, strict accessibility and source-asset checks using the existing isolated dummy CLI fixture. No production authority or model-refinement claim.",
+      "reason": "Metrics-only contract documentation, source/test support or original embedded reference presentation. Preserve public baseline behavior and existing assertions; separate native, SDK, UI and strict Scalar acceptance remain required. No semantic refinement or full cloud compatibility claim.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/cloudwatch_metrics.py",
+      "sha256": "c1a5214639840c9a818b2c8fe1afb30a3e7a6cbb7c7ad7f380e8fb6657d7cec6",
+      "disposition": "test-support",
+      "reason": "Metrics-only contract documentation, source/test support or original embedded reference presentation. Preserve public baseline behavior and existing assertions; separate native, SDK, UI and strict Scalar acceptance remain required. No semantic refinement or full cloud compatibility claim.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/cloudwatch_metrics_console.py",
+      "sha256": "2206aafaaf01503257d0902591fc8b656398d9079412c971a8f852bf5389ccf7",
+      "disposition": "test-support",
+      "reason": "Metrics-only contract documentation, source/test support or original embedded reference presentation. Preserve public baseline behavior and existing assertions; separate native, SDK, UI and strict Scalar acceptance remain required. No semantic refinement or full cloud compatibility claim.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/cloudwatch_metrics_openapi_contract.json",
+      "sha256": "46a55b0d7a0c03405621d71e21d6cbd64e44f95b8f6e182bf861ec21a7603ea5",
+      "disposition": "test-support",
+      "reason": "Metrics-only contract documentation, source/test support or original embedded reference presentation. Preserve public baseline behavior and existing assertions; separate native, SDK, UI and strict Scalar acceptance remain required. No semantic refinement or full cloud compatibility claim.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/cloudwatch_metrics_reference.py",
+      "sha256": "233e76acac01c4076969e8ebdde724ae4f1b814c6ca4c1be75a5a4771d458365",
+      "disposition": "test-support",
+      "reason": "Metrics-only contract documentation, source/test support or original embedded reference presentation. Preserve public baseline behavior and existing assertions; separate native, SDK, UI and strict Scalar acceptance remain required. No semantic refinement or full cloud compatibility claim.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/dynamodb_docs.py",
+      "sha256": "afa80a3c5af8bcafdb514838831011aae9648831839dcb9fa32dee671d20cd0c",
+      "disposition": "test-support",
+      "reason": "Metrics-only contract documentation, source/test support or original embedded reference presentation. Preserve public baseline behavior and existing assertions; separate native, SDK, UI and strict Scalar acceptance remain required. No semantic refinement or full cloud compatibility claim.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/metrics_openapi.py",
+      "sha256": "c59d5b0c14f0dd78b0964eb67c21b754c11eff0fd8c35fe36b95a0d61f889b45",
+      "disposition": "test-support",
+      "reason": "Metrics-only contract documentation, source/test support or original embedded reference presentation. Preserve public baseline behavior and existing assertions; separate native, SDK, UI and strict Scalar acceptance remain required. No semantic refinement or full cloud compatibility claim.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/sakura_reference_live.py",
+      "sha256": "2526aca465f8fb31a67ae6d1037650dd3c1f2143beb4142e77fecc65ede9de2b",
+      "disposition": "test-support",
+      "reason": "Metrics-only contract documentation, source/test support or original embedded reference presentation. Preserve public baseline behavior and existing assertions; separate native, SDK, UI and strict Scalar acceptance remain required. No semantic refinement or full cloud compatibility claim.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/scalar_s3_docs.py",
+      "sha256": "509150b1e816aafb480a1d3078d24db33634d4b37054fb03013c4c7a0a99a703",
+      "disposition": "test-support",
+      "reason": "Metrics-only contract documentation, source/test support or original embedded reference presentation. Preserve public baseline behavior and existing assertions; separate native, SDK, UI and strict Scalar acceptance remain required. No semantic refinement or full cloud compatibility claim.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/secrets_manager_docs.py",
+      "sha256": "3615b6e32c6e8b0f6df291c97fb5dfc6b04c7a86a7a0784af7e4579c833ba04d",
+      "disposition": "test-support",
+      "reason": "Metrics-only contract documentation, source/test support or original embedded reference presentation. Preserve public baseline behavior and existing assertions; separate native, SDK, UI and strict Scalar acceptance remain required. No semantic refinement or full cloud compatibility claim.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/sqs_docs.py",
+      "sha256": "291dc3625d7a6483bf0dec789a668ac7297e4a45afa8fc2e6001b04d1098eeff",
+      "disposition": "test-support",
+      "reason": "Metrics-only contract documentation, source/test support or original embedded reference presentation. Preserve public baseline behavior and existing assertions; separate native, SDK, UI and strict Scalar acceptance remain required. No semantic refinement or full cloud compatibility claim.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_metrics_openapi.py",
+      "sha256": "d4a89bdbd52f912788743cf76c59c56ba3fc56fba6fec05a756509937113e821",
+      "disposition": "test-support",
+      "reason": "Metrics-only contract documentation, source/test support or original embedded reference presentation. Preserve public baseline behavior and existing assertions; separate native, SDK, UI and strict Scalar acceptance remain required. No semantic refinement or full cloud compatibility claim.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_metrics_reference_locators.py",
+      "sha256": "43875fbabee99dfe79d9f313a797685cb0831144e273eaa5e7718453161eeb5d",
+      "disposition": "test-support",
+      "reason": "Metrics-only contract documentation, source/test support or original embedded reference presentation. Preserve public baseline behavior and existing assertions; separate native, SDK, UI and strict Scalar acceptance remain required. No semantic refinement or full cloud compatibility claim.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_sakura_openapi.py",
+      "sha256": "497fde05593ed7ed41669008a82264e054119f3a7b20b9512797e12e4aa30184",
+      "disposition": "test-support",
+      "reason": "Metrics-only contract documentation, source/test support or original embedded reference presentation. Preserve public baseline behavior and existing assertions; separate native, SDK, UI and strict Scalar acceptance remain required. No semantic refinement or full cloud compatibility claim.",
+      "models": []
+    },
+    {
+      "path": "third_party/CONSOLE-NOTICES.txt",
+      "sha256": "e2ab0afb8a28fc3cd80b7415c9786a2904ec54dfbb205981e922351076cdfa68",
+      "disposition": "documentation",
+      "reason": "Roster or original third-party notice/inventory record; preserve authorship and validate actual regenerated graph. A rights record is not execution proof.",
+      "models": []
+    },
+    {
+      "path": "third_party/console-packages.json",
+      "sha256": "2f278cd6b4744706fe76bad5d05623ba419f4e96dc30759f6c5b0a29818515d3",
+      "disposition": "documentation",
+      "reason": "Roster or original third-party notice/inventory record; preserve authorship and validate actual regenerated graph. A rights record is not execution proof.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "eb8c43ff411ee1da26a237263b06fc0048297b8585665bc95bfa92d838dd7729",
+      "disposition": "presentation",
+      "reason": "Generated console CSS or build input/output metadata. Exact source/toolchain/rights provenance and asset verification required; not additional request/state logic or formal runtime/refinement evidence.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "397d817f90a33844a4ffe23916df8c7cf989d9b1aa409f9dc5d196eb4f084cfb",
+      "disposition": "presentation",
+      "reason": "Generated console CSS or build input/output metadata. Exact source/toolchain/rights provenance and asset verification required; not additional request/state logic or formal runtime/refinement evidence.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/cloudwatch-metrics.jsx",
+      "sha256": "d92bd5f2d091cd48ddd14538f1c9cf06be560ef2a151a7acaee6e077fe2b0ad6",
+      "disposition": "modeled",
+      "reason": "Native readonly list/statistics request snapshots and lifetime/epoch guards; stale result/error/finally suppression, view clearing/locale frame. Response decoder1440/DOMfocus/ARIA/graphs and localization rendering excluded from model, independently tested.",
+      "models": [
+        {
+          "id": "MetricsConsoleEpoch",
+          "properties": [
+            "ListSuccessGuarded",
+            "StatisticsSuccessGuarded",
+            "ListCurrentResult",
+            "StatisticsCurrentResult",
+            "StatisticsSnapshotBound",
+            "StaleErrorGuarded",
+            "CurrentErrorVisible",
+            "StaleFinallyGuarded",
+            "CurrentFinallySettles",
+            "QueryEditClearsStatistics",
+            "BeginSnapshotClears",
+            "StatisticsBeginClears",
+            "BrowseClearsViews",
+            "ScopeResetClears",
+            "LocaleFrame",
+            "InvalidInputNoWire",
+            "CaptureMatchesIntent"
+          ],
+          "limits": "Selected bounded UI input/callback workflows only, with independent literal result/capture oracles. Initial completed-list/selection prelude; atomic callback success-or-nonAbort-error plus finally. A separate React-instance delivery boundary remains in all controls. Same-instance prop-update cases may be masked by the parent production keyed-remount defense; request identity does not select DB/data. No arbitrary schedules/liveness, React/JS/AbortController refinement, host auth/IAM/isolation, Query/XML/value/timestamp/byte parser, actual metric arithmetic, cursor/HMAC, backend/native Go/SQL, graph/pixel, SDK or full AWS compatibility proof. Source helper1445 counterpart mapping contains explicit gaps. Main scope is ONLY Metrics keyed retirement/raw Response caller: key binds auth revision/principal/region/service/navigation and excludes locale; props preserve actual Response callback. React key delivery/remount semantics are assumed, not proved. No other main/auth/provider behavior or catalog predicate is included; the generated asset declaration is limited to the explicit Metrics epoch projection below. Source-only caller binding is new; prior56 scoped phases ran unchanged TLA, not the new main or current1440 response guard. Current source also adds graph-focus refs/effect and dimension-aware aria labels; these DOM focus/accessibility behaviors and response decoder/numerical 1440 boundary are excluded from the unchanged epoch abstraction. The old56 phases are not a run of this current source or helper. Compiled app.js scope is ONLY the actual canonical-derived Metrics epoch projection, tied to accepted e3e/23e6 build provenance and current d671 output hash. Compiler/minifier/React correctness is assumed; DOM focus/aria, response decoder/1440 math, other components, whole bundle behavior and refinement are not proved."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/console-navigation.mjs",
+      "sha256": "f8c0930f95b2551d4656ccacb4b843c3c91911c665ddfadd9d084ca87c0bc562",
+      "disposition": "modeled",
+      "reason": "ONLY Metrics descriptor row/search and exact protocol/version/selector/three distinct operations availability gate. Other service gates/search locale algorithms unchanged and unmodeled.",
+      "models": [
+        {
+          "id": "CapabilityProjection",
+          "properties": [
+            "HostReadyBeforePublication",
+            "AvailableOnlyWhenReady",
+            "ExactSupportedOperations",
+            "ExactProtocol",
+            "ExactVersion",
+            "ExactProvider",
+            "ExactSelector",
+            "ConsoleRequiresQualification",
+            "ReferenceRequiresQualification",
+            "SDKRequiresQualification",
+            "PeerPreserved",
+            "CatalogVisibilityExact",
+            "MalformedDescriptorHidden",
+            "QualifiedProducedVisibility",
+            "KnownValidDescriptorVisible",
+            "SearchExact"
+          ],
+          "limits": "Not JSON serialization/type/marshal/HTTP/refinement/artifact/build/source proof No data rows or authorization algorithms modeled; descriptiveavailability is not callerpermission No claimSDKcompatibility fromqualificationbooleans; actual41calls separate native proof Currentcompiledconsoletrue means source-wiredcandidate, SDK/referencefalse; booleans areexplicitqualificationinputs notruntimeproof No liveness/arbitraryregistration/otherprovidersemantics modeled Provider label abstracts literal providerEndpoint category only; outer providers may contain multiple providers; no endpoint parser/registry routing proof. Primitive tags assume JSONfieldkind/verdict mappings; no JavaScript/JSON/React/serializer/refinement proof Arbitrary external valid-lookingdescriptor may showUI while backendfalse; consumer is discovery only and cannotauthenticate/grantnative authority No claims for other15servicegates or NFKC/locale/searchstringalgorithms; only fixedknownmatchingMetrics search MaincallerAuth/Region/navigation remount remains separateMetricsConsoleEpoch narrowprojection, notthismodel Only server.go successful-constructor capability publication caller projection; backendReady is assumed, not a constructor/schema/rollback/atomicity theorem."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/main.jsx",
+      "sha256": "1ae7cf6cefbe76a99e0179917670cccf3b90eb373513d8a4464db041f99413b4",
+      "disposition": "modeled",
+      "reason": "ONLY Metrics raw-response caller/keyed retirement with auth revision/principal/region/navigation identity (locale excluded), discovery mount and generic-load bypass; existing public GCP/Azure/Sakura/auth/LP paths preserved. Remount/compiler semantics assumed.",
+      "models": [
+        {
+          "id": "MetricsConsoleEpoch",
+          "properties": [
+            "ListSuccessGuarded",
+            "StatisticsSuccessGuarded",
+            "ListCurrentResult",
+            "StatisticsCurrentResult",
+            "StatisticsSnapshotBound",
+            "StaleErrorGuarded",
+            "CurrentErrorVisible",
+            "StaleFinallyGuarded",
+            "CurrentFinallySettles",
+            "QueryEditClearsStatistics",
+            "BeginSnapshotClears",
+            "StatisticsBeginClears",
+            "BrowseClearsViews",
+            "ScopeResetClears",
+            "LocaleFrame",
+            "InvalidInputNoWire",
+            "CaptureMatchesIntent"
+          ],
+          "limits": "Selected bounded UI input/callback workflows only, with independent literal result/capture oracles. Initial completed-list/selection prelude; atomic callback success-or-nonAbort-error plus finally. A separate React-instance delivery boundary remains in all controls. Same-instance prop-update cases may be masked by the parent production keyed-remount defense; request identity does not select DB/data. No arbitrary schedules/liveness, React/JS/AbortController refinement, host auth/IAM/isolation, Query/XML/value/timestamp/byte parser, actual metric arithmetic, cursor/HMAC, backend/native Go/SQL, graph/pixel, SDK or full AWS compatibility proof. Source helper1445 counterpart mapping contains explicit gaps. Main scope is ONLY Metrics keyed retirement/raw Response caller: key binds auth revision/principal/region/service/navigation and excludes locale; props preserve actual Response callback. React key delivery/remount semantics are assumed, not proved. No other main/auth/provider behavior or catalog predicate is included; the generated asset declaration is limited to the explicit Metrics epoch projection below. Source-only caller binding is new; prior56 scoped phases ran unchanged TLA, not the new main or current1440 response guard. Current source also adds graph-focus refs/effect and dimension-aware aria labels; these DOM focus/accessibility behaviors and response decoder/numerical 1440 boundary are excluded from the unchanged epoch abstraction. The old56 phases are not a run of this current source or helper. Compiled app.js scope is ONLY the actual canonical-derived Metrics epoch projection, tied to accepted e3e/23e6 build provenance and current d671 output hash. Compiler/minifier/React correctness is assumed; DOM focus/aria, response decoder/1440 math, other components, whole bundle behavior and refinement are not proved."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/metrics-presentation.mjs",
+      "sha256": "09eceffb9eddc9787cf735c59c7a6eea2d337490ab0f926e5b44347271151cc3",
+      "disposition": "presentation",
+      "reason": "Pure five-key Japanese label lookup; return strings only, no fetch/storage/auth/event mutation. Callers preserve selected canonical statistic values and native datapoint lookup keys. No MetricsConsoleEpoch.LocaleFrame or locale-runtime proof claimed; three source tests/current UI acceptance remain separate.",
       "models": []
     }
   ]
