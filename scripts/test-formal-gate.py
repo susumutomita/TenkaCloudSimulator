@@ -35,7 +35,7 @@ class FormalGateTests(unittest.TestCase):
 
     def test_complete_registry_and_exact_mutations(self):
         registry = load_registry(self.root)
-        self.assertEqual({model['id'] for model in registry['models']}, {'CFNPhysicalResourceACK', 'CFNConditionAdmission', 'CFNConditionMemoDepth', 'CFNFinalCleanupACK', 'SQSStorageBudget', 'SecretsRevealEpoch', 'AzureBlobState', 'ProjectAuthority', 'RESTRouteMatching', 'KMSAliasCatalog', 'SakuraDiskMetadata', 'SQSConsoleEpoch', 'ProviderActor', 'DynamoDBAdmission', 'IAMManagedPolicies', 'AzurePropertiesTarget', 'StartupTokenVisibility', 'RESTDeploymentSnapshot', 'KMSProtocolAdmission', 'KMSAliasesViewEpoch', 'NativeIAMOwnership', 'DynamoDBConsoleEpoch', 'SSMParameterState', 'AzurePropertiesEpoch', 'SecretMetadataViewEpoch', 'DynamoDBLifecycle', 'SakuraDiskAdmission', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'BrowserSessions', 'SecretVersionListing', 'SakuraDisksViewEpoch', 'KMSAliasCrypto', 'StackOwnership', 'SecretsDisclosureChannels', 'RESTProxyEventBoundary', 'NativeWireProjection', 'SQSLifecycle', 'BlobRange', 'KMSBootstrapTransaction', 'SecretsVersionLifecycle', 'ObjectStore', 'GCPStorageState', 'KMSKeyState', 'SakuraStartupAdmission', 'S3Versions', 'ProviderPath', 'SecretsMutationRefresh'})
+        self.assertEqual({model['id'] for model in registry['models']}, {'CFNPhysicalResourceACK', 'CFNConditionAdmission', 'CFNConditionMemoDepth', 'CFNFinalCleanupACK', 'SQSStorageBudget', 'SecretsRevealEpoch', 'AzureBlobState', 'ProjectAuthority', 'RESTRouteMatching', 'KMSAliasCatalog', 'SakuraDiskMetadata', 'SQSConsoleEpoch', 'ProviderActor', 'DynamoDBAdmission', 'IAMManagedPolicies', 'AzurePropertiesTarget', 'StartupTokenVisibility', 'RESTDeploymentSnapshot', 'KMSProtocolAdmission', 'KMSAliasesViewEpoch', 'NativeIAMOwnership', 'DynamoDBConsoleEpoch', 'SSMParameterState', 'AzurePropertiesEpoch', 'SecretMetadataViewEpoch', 'DynamoDBLifecycle', 'SakuraDiskAdmission', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'BrowserSessions', 'SecretVersionListing', 'SakuraDisksViewEpoch', 'KMSAliasCrypto', 'StackOwnership', 'SecretsDisclosureChannels', 'RESTProxyEventBoundary', 'NativeWireProjection', 'SQSLifecycle', 'BlobRange', 'KMSBootstrapTransaction', 'SecretsVersionLifecycle', 'ObjectStore', 'GCPStorageState', 'KMSKeyState', 'SakuraStartupAdmission', 'S3Versions', 'ProviderPath', 'SecretsMutationRefresh', 'LoginInputIntent'})
         for model in registry['models']:
             source = (self.root / model['model']).read_text()
             for mutant in model['mutants']:
@@ -503,7 +503,7 @@ class FormalGateTests(unittest.TestCase):
         original = path.read_text()
         registry = json.loads(original)
         self.assertEqual(set(REQUIRED_MUTANTS), BASE_MODELS)
-        self.assertEqual(sum(map(len, REQUIRED_MUTANTS.values())), 381)
+        self.assertEqual(sum(map(len, REQUIRED_MUTANTS.values())), 393)
         self.assertEqual({m['id']: {c['id'] for c in m['mutants']} for m in registry['models']}, REQUIRED_MUTANTS)
         for model in registry['models']:
             for mutant in model['mutants']:
@@ -520,7 +520,7 @@ class FormalGateTests(unittest.TestCase):
     def test_every_required_control_is_protected_against_single_removal(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
-        self.assertEqual(sum(len(v) for v in REQUIRED_MUTANTS.values()), 381)
+        self.assertEqual(sum(len(v) for v in REQUIRED_MUTANTS.values()), 393)
         for model_id, controls in REQUIRED_MUTANTS.items():
             for control in controls:
                 with self.subTest(model=model_id, control=control):
@@ -1449,6 +1449,69 @@ class FormalGateTests(unittest.TestCase):
                         validate_result(code, text, expected)
 
 
+
+
+    def test_login_input_required_model_properties_and_exact_scope(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'LoginInputIntent')
+        tla, cfg = self.root / entry['model'], self.root / entry['config']
+        source, config = tla.read_bytes(), cfg.read_bytes()
+        changed = json.loads(original)
+        changed['models'] = [m for m in changed['models'] if m['id'] != entry['id']]
+        path.write_text(json.dumps(changed)); tla.unlink(); cfg.unlink()
+        with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+            load_registry(self.root)
+        tla.write_bytes(source); cfg.write_bytes(config)
+        # Remove each declaration AND its CFG/controls consistently: mandatory
+        # properties must refuse this, not merely an incidental CFG mismatch.
+        for prop in entry['properties']:
+            changed = json.loads(original)
+            target = next(m for m in changed['models'] if m['id'] == entry['id'])
+            target['properties'].remove(prop)
+            target['mutants'] = [m for m in target['mutants'] if m['expect_invariant'] != prop]
+            lines = config.decode().splitlines()
+            self.assertEqual(lines.count('INVARIANT '+prop), 1)
+            cfg.write_text('\n'.join(line for line in lines if line != 'INVARIANT '+prop)+'\n')
+            path.write_text(json.dumps(changed))
+            with self.subTest(property=prop), self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                load_registry(self.root)
+        cfg.write_bytes(config)
+        scopes = [entry['source_scope'][:-1],
+                  entry['source_scope']+['tools/console/src/main.jsx'],
+                  ['tools/console/src/main.jsx']]
+        for scope in scopes:
+            changed = json.loads(original)
+            next(m for m in changed['models'] if m['id'] == entry['id'])['source_scope'] = scope
+            path.write_text(json.dumps(changed))
+            with self.subTest(scope=scope), self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+                load_registry(self.root)
+        path.write_text(original)
+
+    def test_login_input_every_control_and_unambiguous_transition_anchor_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'LoginInputIntent')
+        self.assertEqual(len(entry['mutants']), 12)
+        for control in entry['mutants']:
+            changed = json.loads(original)
+            target = next(m for m in changed['models'] if m['id'] == entry['id'])
+            target['mutants'] = [m for m in target['mutants'] if m['id'] != control['id']]
+            path.write_text(json.dumps(changed))
+            with self.subTest(control=control['id']), self.assertRaisesRegex(GateError, 'required mutation control was removed'):
+                load_registry(self.root)
+        # The Ready suffix also occurs in ExpectedReady. Removing the reviewed
+        # leading newline must fail whole-source anchor validation, as caught
+        # during scoped-run preparation; a prefix-only fixture is insufficient.
+        for name in ('SubmitIgnoresBusy', 'SubmitIgnoresFileGate'):
+            changed = json.loads(original)
+            target = next(m for m in changed['models'] if m['id'] == entry['id'])
+            control = next(m for m in target['mutants'] if m['id'] == name)
+            control['edits'][0]['old'] = control['edits'][0]['old'].lstrip('\n')
+            path.write_text(json.dumps(changed))
+            with self.subTest(control=name), self.assertRaisesRegex(GateError, 'mutation anchor count mismatch'):
+                load_registry(self.root)
+        path.write_text(original)
 
 
 if __name__ == '__main__':

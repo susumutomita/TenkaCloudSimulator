@@ -56,7 +56,8 @@ BASE_MODELS = {'AzureBlobState',
  'SecretsRevealEpoch',
  'SecretsVersionLifecycle',
  'StackOwnership',
- 'StartupTokenVisibility'}
+ 'StartupTokenVisibility',
+ 'LoginInputIntent'}
 BASE_INVARIANTS = {'AzureBlobState': {'BudgetBounded',
                     'ConditionEnforced',
                     'FailureAtomic',
@@ -450,7 +451,15 @@ BASE_INVARIANTS = {'AzureBlobState': {'BudgetBounded',
                             'FileIdentityFrozen',
                             'HistoryVisibility',
                             'InvalidFileNeverEmits',
-                            'TypeOK'}}
+                            'TypeOK'},
+ 'LoginInputIntent': {'AdoptedValueExact',
+ 'IntentInvalidatesAsync',
+ 'LocaleIntentFrame',
+ 'NoEmptyPOST',
+ 'NoPOSTWhileBlocked',
+ 'StaleFileCompletionFrame',
+ 'SubmissionSelectionExact',
+ 'TypeOK'}}
 # Established controls require an explicit gate-policy change before retirement.
 REQUIRED_MUTANTS = {'AzureBlobState': {'ContainerDeleteErasesPeer',
                     'ContainerDeleteLeavesBlobs',
@@ -827,7 +836,19 @@ REQUIRED_MUTANTS = {'AzureBlobState': {'ContainerDeleteErasesPeer',
                              'RetainDeletedVersions',
                              'RetainPreviousLabelOnPromote'},
  'StackOwnership': {'ReclaimDriftedResource'},
- 'StartupTokenVisibility': {'OmittedCIGuard', 'OverwriteExistingToken', 'OmittedTTYGuard'}}
+ 'StartupTokenVisibility': {'OmittedCIGuard', 'OverwriteExistingToken', 'OmittedTTYGuard'},
+ 'LoginInputIntent': {'CurrentFileErrorDiscarded',
+ 'EmptyDOMReusesOldCredential',
+ 'FileCompletionIgnoresRevision',
+ 'FlushDoesNotAdoptNativeValue',
+ 'LocaleClearsIntent',
+ 'LocaleInvalidatesCurrentFile',
+ 'NativeAdoptionSkipsNewIntent',
+ 'NonemptyDOMUsesControlledState',
+ 'OldPasteSurvivesNewIntent',
+ 'SubmitIgnoresBusy',
+ 'SubmitIgnoresFileGate',
+ 'UnmountedFileCompletionPublishes'}}
 REQUIRED_SOURCE_SCOPES = {'CFNConditionAdmission': {'internal/aws/cloudformation.go',
                            'internal/aws/cloudformation_conditions.go',
                            'internal/aws/cloudformation_conditions_link.go'},
@@ -859,7 +880,11 @@ REQUIRED_SOURCE_SCOPES = {'CFNConditionAdmission': {'internal/aws/cloudformation
  'SecretVersionListing': {'internal/aws/secret_http.go',
                           'internal/aws/secrets_manager_versions.go',
                           'internal/aws/secrets_manager_versions_http_test.go',
-                          'internal/aws/secrets_manager_versions_test.go'}}
+                          'internal/aws/secrets_manager_versions_test.go'},
+ 'LoginInputIntent': {'test/console/login-native-input.test.mjs',
+ 'test/e2e/login_paste.py',
+ 'test/e2e/login_token_file.py',
+ 'tools/console/src/login.jsx'}}
 IDENTIFIER = re.compile(r'^[A-Za-z][A-Za-z0-9_]*$')
 
 # TLC1.7.4 ModelConfig.ALL_KEYWORDS. A directive cannot masquerade as a
