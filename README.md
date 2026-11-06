@@ -35,6 +35,11 @@ describes the reviewed scope; it is not a clean-room or legal certification.
 
 ## Start locally
 
+The embedded [interactive architecture page](docs/landing.md) is available at
+`http://127.0.0.1:4566/_simulator/` after startup. Its HTML descriptions explain
+the supported local subsets; optional HTML-in-Canvas drawing requires a browser
+with the current API. The SDK endpoint `/` remains unchanged.
+
 Building from source requires Go 1.26; CI pins Go 1.26.10.
 
 ```sh

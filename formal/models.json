@@ -452,7 +452,7 @@
       "id": "SQSStorageBudget",
       "model": "formal/SQSStorageBudget.tla",
       "config": "formal/SQSStorageBudget.cfg",
-      "bounds": "Two trusted queue scopes; three possible pre-existing row IDs plus one additional fresh ID; each row weight1\u20132 abstract payload units. MaxRows2/MaxBytes3. Initial unique-ID row sets include legacy states with3rows and up to6units, beyond either cap. Initial enumeration uses the exact729 unique-ID assignments, not a powerset filter. No time transition: expiry is a pre-existing Boolean classification.",
+      "bounds": "Two trusted queue scopes; three possible pre-existing row IDs plus one additional fresh ID; each row weight1–2 abstract payload units. MaxRows2/MaxBytes3. Initial unique-ID row sets include legacy states with3rows and up to6units, beyond either cap. Initial enumeration uses the exact729 unique-ID assignments, not a powerset filter. No time transition: expiry is a pre-existing Boolean classification.",
       "properties": [
         "TypeOK",
         "FailedSendPreservesRows",
@@ -644,7 +644,7 @@
       "id": "ProviderActor",
       "model": "formal/ProviderActor.tla",
       "config": "formal/ProviderActor.cfg",
-      "bounds": "64 request combinations: authentication2 \u00d7 credential roles2 \u00d7 exercise selections4 \u00d7 spoofed wire roles2 \u00d7 capabilities2; captured emission includes original request; uniform tagged records distinguish absent/attached actors without TLC heterogeneous equality;65 reachable emissions expected, to be verified",
+      "bounds": "64 request combinations: authentication2 × credential roles2 × exercise selections4 × spoofed wire roles2 × capabilities2; captured emission includes original request; uniform tagged records distinguish absent/attached actors without TLC heterogeneous equality;65 reachable emissions expected, to be verified",
       "properties": [
         "TypeOK",
         "NoActorOnRejected",
@@ -848,7 +848,7 @@
       "id": "AzureBlobState",
       "model": "formal/AzureBlobState.tla",
       "config": "formal/AzureBlobState.cfg",
-      "bounds": "Two account/environment scopes with one container each, two distinct abstract keys and payload values1\u20132, at most three accepted puts, rowcap2 and abstractbytecap3. Context trust and two fixed owner subjects modeled explicitly. Three-write frontier is an exploration bound, not an API quota.",
+      "bounds": "Two account/environment scopes with one container each, two distinct abstract keys and payload values1–2, at most three accepted puts, rowcap2 and abstractbytecap3. Context trust and two fixed owner subjects modeled explicitly. Three-write frontier is an exploration bound, not an API quota.",
       "properties": [
         "TypeOK",
         "NoUnauthorizedMutation",
@@ -4373,7 +4373,7 @@
       "id": "KMSAliasesViewEpoch",
       "model": "formal/KMSAliasesViewEpoch.tla",
       "config": "formal/KMSAliasesViewEpoch.cfg",
-      "bounds": "Two context incarnations A\u2192B/unmount; two known customer keys per context; one alias; initial successful list and initial picker lookup normalized as reachable seed/completion. At most two subsequent ListAliases requests and two selected-target metadata requests, one form intent per context, one submitted write, one acknowledged read-only retry. Native backend outcomes abstract Success/Failure. No second normal write; request count0..2 admits replay mutant.",
+      "bounds": "Two context incarnations A→B/unmount; two known customer keys per context; one alias; initial successful list and initial picker lookup normalized as reachable seed/completion. At most two subsequent ListAliases requests and two selected-target metadata requests, one form intent per context, one submitted write, one acknowledged read-only retry. Native backend outcomes abstract Success/Failure. No second normal write; request count0..2 admits replay mutant.",
       "properties": [
         "TypeOK",
         "CurrentListOutcome",
@@ -4990,7 +4990,7 @@
       "id": "CFNConditionAdmission",
       "model": "formal/CFNConditionAdmission.tla",
       "config": "formal/CFNConditionAdmission.cfg",
-      "bounds": "13 defect scenarios \u00d7 2 equality results \u00d7 3 then arms \u00d7 3 else arms = 234 immutable inputs; 6 deterministic compilation phases, no request loops",
+      "bounds": "13 defect scenarios × 2 equality results × 3 then arms × 3 else arms = 234 immutable inputs; 6 deterministic compilation phases, no request loops",
       "properties": [
         "TypeOK",
         "ParameterAdmission",
@@ -5453,6 +5453,93 @@
               "count": 1
             }
           ]
+        }
+      ]
+    },
+    {
+      "id": "LandingAccessAdmission",
+      "model": "formal/LandingAccessAdmission.tla",
+      "config": "formal/LandingAccessAdmission.cfg",
+      "bounds": "Ten literal paths (five public assets, three API paths, two unknown paths), GET/HEAD/POST, two values each for trusted host/origin/authentication results, one request/response transition.",
+      "properties": [
+        "TypeOK",
+        "ExternalBoundary",
+        "PublicResponse",
+        "TokenBoundary",
+        "UnknownNeverStatic"
+      ],
+      "limits": "Original finite admission contract only. Host/origin and authentication results are trusted inputs from existing middleware; no token, browser session, DNS, URL decoding, HTTP parser, ServeMux canonicalization, filesystem, SQLite, rendering, JavaScript, or Chrome feature proof. Exact HTTP composition and negative path cases are separate Go tests. Only fixed static product assets are public; no service credentials or exercise state are represented.",
+      "source_scope": [
+        "internal/server/landing.go",
+        "internal/server/access.go",
+        "internal/server/server.go"
+      ],
+      "mutants": [
+        {
+          "id": "IgnoreHostBoundary",
+          "edits": [
+            {
+              "old": "~r.hostOK \\/ ~r.originOK",
+              "new": "FALSE \\/ ~r.originOK",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExternalBoundary"
+        },
+        {
+          "id": "IgnoreOriginBoundary",
+          "edits": [
+            {
+              "old": "~r.hostOK \\/ ~r.originOK",
+              "new": "~r.hostOK \\/ FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExternalBoundary"
+        },
+        {
+          "id": "MakeEveryPathPublic",
+          "edits": [
+            {
+              "old": "PublicMatch(r) == r.path \\in PublicPaths",
+              "new": "PublicMatch(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TokenBoundary"
+        },
+        {
+          "id": "ServeNonReadMethod",
+          "edits": [
+            {
+              "old": "THEN IF r.method \\in ReadMethods THEN \"Static\" ELSE \"Method\"",
+              "new": "THEN IF TRUE THEN \"Static\" ELSE \"Method\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PublicResponse"
+        },
+        {
+          "id": "RequireTokenForProductInformation",
+          "edits": [
+            {
+              "old": "PublicMatch(r) == r.path \\in PublicPaths",
+              "new": "PublicMatch(r) == r.path \\in PublicPaths /\\ r.authorized",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PublicResponse"
+        },
+        {
+          "id": "ServeUnknownResource",
+          "edits": [
+            {
+              "old": "ELSE IF r.path \\in APIPaths THEN \"API\" ELSE \"NotFound\"",
+              "new": "ELSE IF r.path \\in APIPaths THEN \"API\" ELSE \"Static\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "UnknownNeverStatic"
         }
       ]
     }
