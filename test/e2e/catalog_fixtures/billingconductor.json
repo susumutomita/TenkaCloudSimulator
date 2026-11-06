@@ -1,0 +1,23 @@
+{
+ "client": "billingconductor",
+ "steps": [
+  {"op": "create_pricing_rule", "args": {"Name": "fixture-markup", "Scope": "GLOBAL", "Type": "MARKUP", "ModifierPercentage": 10, "Tags": {"team": "a"}}, "save": {"rule": "Arn"}},
+  {"op": "list_pricing_rules", "args": {}, "expect": {"PricingRules#count": 1, "PricingRules[0].Arn": "${rule}", "PricingRules[0].AssociatedPricingPlanCount": 0}},
+  {"op": "update_pricing_rule", "args": {"Arn": "${rule}", "ModifierPercentage": 12.5, "Description": "Partner markup"}, "expect": {"ModifierPercentage": 12.5, "Scope": "GLOBAL"}},
+  {"op": "tag_resource", "args": {"ResourceArn": "${rule}", "Tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"ResourceArn": "${rule}", "TagKeys": ["team"]}},
+  {"op": "create_pricing_rule", "args": {"Name": "fixture-service", "Scope": "SERVICE", "Type": "DISCOUNT", "ModifierPercentage": 5}, "error": "ValidationException", "status": 400},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "${rule}"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "update_pricing_rule", "args": {"Arn": "arn:aws:billingconductor::000000000000:pricingrule/abcdefghij", "Name": "missing"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_pricing_rules", "args": {}, "expect": {"PricingRules#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "list_pricing_rules", "args": {}, "expect": {"PricingRules[0].Description": "Partner markup", "PricingRules[0].ModifierPercentage": 12.5}}
+ ],
+ "cleanup": [
+  {"op": "delete_pricing_rule", "args": {"Arn": "${rule}"}, "expect": {"Arn": "${rule}"}},
+  {"op": "list_pricing_rules", "args": {}, "expect": {"PricingRules#count": 0}}
+ ]
+}

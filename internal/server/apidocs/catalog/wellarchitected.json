@@ -1,0 +1,1363 @@
+{
+ "components": {
+  "schemas": {
+   "AccountJiraConfigurationInput": {
+    "additionalProperties": false,
+    "properties": {
+     "IntegrationStatus": {
+      "enum": [
+       "NOT_CONFIGURED"
+      ],
+      "type": "string"
+     },
+     "IssueManagementStatus": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "IssueManagementType": {
+      "enum": [
+       "AUTO",
+       "MANUAL"
+      ],
+      "type": "string"
+     },
+     "JiraProjectKey": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "AccountJiraConfigurationOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "IntegrationStatus": {
+      "enum": [
+       "CONFIGURED",
+       "NOT_CONFIGURED"
+      ],
+      "type": "string"
+     },
+     "IssueManagementStatus": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "IssueManagementType": {
+      "enum": [
+       "AUTO",
+       "MANUAL"
+      ],
+      "type": "string"
+     },
+     "JiraProjectKey": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "StatusMessage": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Subdomain": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CreateWorkloadOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "WorkloadArn": {
+      "type": "string"
+     },
+     "WorkloadId": {
+      "maxLength": 32,
+      "minLength": 32,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GetGlobalSettingsOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "DiscoveryIntegrationStatus": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "JiraConfiguration": {
+      "$ref": "#/components/schemas/AccountJiraConfigurationOutput"
+     },
+     "OrganizationSharingStatus": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GetWorkloadOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "Workload": {
+      "$ref": "#/components/schemas/Workload"
+     }
+    },
+    "type": "object"
+   },
+   "ListTagsForResourceOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 1,
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "ListWorkloadsOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "NextToken": {
+      "type": "string"
+     },
+     "WorkloadSummaries": {
+      "items": {
+       "$ref": "#/components/schemas/WorkloadSummary"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "TagResourceOutput": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UntagResourceOutput": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UpdateWorkloadOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "Workload": {
+      "$ref": "#/components/schemas/Workload"
+     }
+    },
+    "type": "object"
+   },
+   "Workload": {
+    "additionalProperties": false,
+    "properties": {
+     "AccountIds": {
+      "items": {
+       "maxLength": 12,
+       "minLength": 12,
+       "type": "string"
+      },
+      "maxItems": 100,
+      "type": "array"
+     },
+     "Applications": {
+      "items": {
+       "maxLength": 2084,
+       "type": "string"
+      },
+      "maxItems": 1,
+      "type": "array"
+     },
+     "ArchitecturalDesign": {
+      "maxLength": 2048,
+      "type": "string"
+     },
+     "AwsRegions": {
+      "items": {
+       "maxLength": 100,
+       "type": "string"
+      },
+      "maxItems": 50,
+      "type": "array"
+     },
+     "Description": {
+      "maxLength": 250,
+      "minLength": 3,
+      "type": "string"
+     },
+     "DiscoveryConfig": {
+      "$ref": "#/components/schemas/WorkloadDiscoveryConfig"
+     },
+     "Environment": {
+      "enum": [
+       "PRODUCTION",
+       "PREPRODUCTION"
+      ],
+      "type": "string"
+     },
+     "ImprovementStatus": {
+      "enum": [
+       "NOT_APPLICABLE",
+       "NOT_STARTED",
+       "IN_PROGRESS",
+       "COMPLETE",
+       "RISK_ACKNOWLEDGED"
+      ],
+      "type": "string"
+     },
+     "Industry": {
+      "maxLength": 100,
+      "type": "string"
+     },
+     "IndustryType": {
+      "maxLength": 100,
+      "type": "string"
+     },
+     "IsReviewOwnerUpdateAcknowledged": {
+      "type": "boolean"
+     },
+     "JiraConfiguration": {
+      "$ref": "#/components/schemas/WorkloadJiraConfigurationOutput"
+     },
+     "Lenses": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "NonAwsRegions": {
+      "items": {
+       "maxLength": 25,
+       "minLength": 3,
+       "type": "string"
+      },
+      "maxItems": 5,
+      "type": "array"
+     },
+     "Notes": {
+      "maxLength": 2084,
+      "type": "string"
+     },
+     "Owner": {
+      "maxLength": 12,
+      "minLength": 12,
+      "type": "string"
+     },
+     "PillarPriorities": {
+      "items": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "PrioritizedRiskCounts": {
+      "additionalProperties": {
+       "minimum": 0,
+       "type": "integer"
+      },
+      "type": "object"
+     },
+     "Profiles": {
+      "items": {
+       "$ref": "#/components/schemas/WorkloadProfile"
+      },
+      "maxItems": 1,
+      "type": "array"
+     },
+     "ReviewOwner": {
+      "maxLength": 255,
+      "minLength": 3,
+      "type": "string"
+     },
+     "ReviewRestrictionDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "RiskCounts": {
+      "additionalProperties": {
+       "minimum": 0,
+       "type": "integer"
+      },
+      "type": "object"
+     },
+     "ShareInvitationId": {
+      "type": "string"
+     },
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 1,
+      "type": "object"
+     },
+     "UpdatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "WorkloadArn": {
+      "type": "string"
+     },
+     "WorkloadId": {
+      "maxLength": 32,
+      "minLength": 32,
+      "type": "string"
+     },
+     "WorkloadName": {
+      "maxLength": 100,
+      "minLength": 3,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "WorkloadDiscoveryConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "TrustedAdvisorIntegrationStatus": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "WorkloadResourceDefinition": {
+      "items": {
+       "enum": [
+        "WORKLOAD_METADATA",
+        "APP_REGISTRY"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "WorkloadJiraConfigurationInput": {
+    "additionalProperties": false,
+    "properties": {
+     "IssueManagementStatus": {
+      "enum": [
+       "ENABLED",
+       "DISABLED",
+       "INHERIT"
+      ],
+      "type": "string"
+     },
+     "IssueManagementType": {
+      "enum": [
+       "AUTO",
+       "MANUAL"
+      ],
+      "type": "string"
+     },
+     "JiraProjectKey": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "WorkloadJiraConfigurationOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "IssueManagementStatus": {
+      "enum": [
+       "ENABLED",
+       "DISABLED",
+       "INHERIT"
+      ],
+      "type": "string"
+     },
+     "IssueManagementType": {
+      "enum": [
+       "AUTO",
+       "MANUAL"
+      ],
+      "type": "string"
+     },
+     "JiraProjectKey": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "StatusMessage": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "WorkloadProfile": {
+    "additionalProperties": false,
+    "properties": {
+     "ProfileArn": {
+      "maxLength": 2084,
+      "type": "string"
+     },
+     "ProfileVersion": {
+      "maxLength": 32,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "WorkloadSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "ImprovementStatus": {
+      "enum": [
+       "NOT_APPLICABLE",
+       "NOT_STARTED",
+       "IN_PROGRESS",
+       "COMPLETE",
+       "RISK_ACKNOWLEDGED"
+      ],
+      "type": "string"
+     },
+     "Lenses": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "Owner": {
+      "maxLength": 12,
+      "minLength": 12,
+      "type": "string"
+     },
+     "PrioritizedRiskCounts": {
+      "additionalProperties": {
+       "minimum": 0,
+       "type": "integer"
+      },
+      "type": "object"
+     },
+     "Profiles": {
+      "items": {
+       "$ref": "#/components/schemas/WorkloadProfile"
+      },
+      "maxItems": 1,
+      "type": "array"
+     },
+     "RiskCounts": {
+      "additionalProperties": {
+       "minimum": 0,
+       "type": "integer"
+      },
+      "type": "object"
+     },
+     "UpdatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "WorkloadArn": {
+      "type": "string"
+     },
+     "WorkloadId": {
+      "maxLength": 32,
+      "minLength": 32,
+      "type": "string"
+     },
+     "WorkloadName": {
+      "maxLength": 100,
+      "minLength": 3,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS Well-Architected Tool API (2020-03-31). Every other official operation returns HTTP 501 UnknownOperationException. Workloads are stored metadata: lens aliases are stored without loading any lens, so no lens review, question, answer, improvement plan, risk count, milestone or report is produced, and AWS Trusted Advisor, AppRegistry and Jira are never contacted. Jira configuration and Trusted Advisor discovery are refused, profiles and review templates cannot be attached, ListWorkloads refuses WorkloadNamePrefix, and the delete client token is accepted without replay. Global settings stay DISABLED because the simulator account is not in an organization and discovery integration needs Trusted Advisor. Lenses, lens reviews, answers, milestones, profiles, review templates, shares and notifications return UnknownOperationException with HTTP 501.",
+  "title": "AWS Well-Architected Tool (simulator catalog)",
+  "version": "2020-03-31"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/global-settings": {
+   "get": {
+    "operationId": "wellarchitectedGetGlobalSettings",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "wellarchitected"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GetGlobalSettingsOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetGlobalSettings",
+    "tags": [
+     "AWS Well-Architected Tool"
+    ]
+   },
+   "patch": {
+    "operationId": "wellarchitectedUpdateGlobalSettings",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "wellarchitected"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "DiscoveryIntegrationStatus": {
+          "enum": [
+           "ENABLED",
+           "DISABLED"
+          ],
+          "type": "string"
+         },
+         "JiraConfiguration": {
+          "$ref": "#/components/schemas/AccountJiraConfigurationInput"
+         },
+         "OrganizationSharingStatus": {
+          "enum": [
+           "ENABLED",
+           "DISABLED"
+          ],
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateGlobalSettings",
+    "tags": [
+     "AWS Well-Architected Tool"
+    ]
+   }
+  },
+  "/tags/{WorkloadArn}": {
+   "delete": {
+    "operationId": "wellarchitectedUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "wellarchitected"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 50,
+       "minItems": 1,
+       "type": "array"
+      }
+     },
+     {
+      "in": "path",
+      "name": "WorkloadArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UntagResourceOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "AWS Well-Architected Tool"
+    ]
+   },
+   "get": {
+    "operationId": "wellarchitectedListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "wellarchitected"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "WorkloadArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListTagsForResourceOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "AWS Well-Architected Tool"
+    ]
+   },
+   "post": {
+    "operationId": "wellarchitectedTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "wellarchitected"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "WorkloadArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 1,
+          "type": "object"
+         }
+        },
+        "required": [
+         "Tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/TagResourceOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "AWS Well-Architected Tool"
+    ]
+   }
+  },
+  "/workloads": {
+   "post": {
+    "operationId": "wellarchitectedCreateWorkload",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "wellarchitected"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "AccountIds": {
+          "items": {
+           "maxLength": 12,
+           "minLength": 12,
+           "type": "string"
+          },
+          "maxItems": 100,
+          "type": "array"
+         },
+         "Applications": {
+          "items": {
+           "maxLength": 2084,
+           "type": "string"
+          },
+          "maxItems": 1,
+          "type": "array"
+         },
+         "ArchitecturalDesign": {
+          "maxLength": 2048,
+          "type": "string"
+         },
+         "AwsRegions": {
+          "items": {
+           "maxLength": 100,
+           "type": "string"
+          },
+          "maxItems": 50,
+          "type": "array"
+         },
+         "ClientRequestToken": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "type": "string"
+         },
+         "Description": {
+          "maxLength": 250,
+          "minLength": 3,
+          "type": "string"
+         },
+         "DiscoveryConfig": {
+          "$ref": "#/components/schemas/WorkloadDiscoveryConfig"
+         },
+         "Environment": {
+          "enum": [
+           "PRODUCTION",
+           "PREPRODUCTION"
+          ],
+          "type": "string"
+         },
+         "Industry": {
+          "maxLength": 100,
+          "type": "string"
+         },
+         "IndustryType": {
+          "maxLength": 100,
+          "type": "string"
+         },
+         "JiraConfiguration": {
+          "$ref": "#/components/schemas/WorkloadJiraConfigurationInput"
+         },
+         "Lenses": {
+          "items": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "NonAwsRegions": {
+          "items": {
+           "maxLength": 25,
+           "minLength": 3,
+           "type": "string"
+          },
+          "maxItems": 5,
+          "type": "array"
+         },
+         "Notes": {
+          "maxLength": 2084,
+          "type": "string"
+         },
+         "PillarPriorities": {
+          "items": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "ProfileArns": {
+          "items": {
+           "maxLength": 2084,
+           "type": "string"
+          },
+          "maxItems": 1,
+          "type": "array"
+         },
+         "ReviewOwner": {
+          "maxLength": 255,
+          "minLength": 3,
+          "type": "string"
+         },
+         "ReviewTemplateArns": {
+          "items": {
+           "maxLength": 250,
+           "minLength": 50,
+           "type": "string"
+          },
+          "maxItems": 1,
+          "type": "array"
+         },
+         "Tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 1,
+          "type": "object"
+         },
+         "WorkloadName": {
+          "maxLength": 100,
+          "minLength": 3,
+          "type": "string"
+         }
+        },
+        "required": [
+         "ClientRequestToken",
+         "Description",
+         "Environment",
+         "Lenses",
+         "WorkloadName"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateWorkloadOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateWorkload",
+    "tags": [
+     "AWS Well-Architected Tool"
+    ]
+   }
+  },
+  "/workloads/{WorkloadId}": {
+   "delete": {
+    "operationId": "wellarchitectedDeleteWorkload",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "wellarchitected"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "ClientRequestToken",
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "WorkloadId",
+      "required": true,
+      "schema": {
+       "maxLength": 32,
+       "minLength": 32,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteWorkload",
+    "tags": [
+     "AWS Well-Architected Tool"
+    ]
+   },
+   "get": {
+    "operationId": "wellarchitectedGetWorkload",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "wellarchitected"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "WorkloadId",
+      "required": true,
+      "schema": {
+       "maxLength": 32,
+       "minLength": 32,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GetWorkloadOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetWorkload",
+    "tags": [
+     "AWS Well-Architected Tool"
+    ]
+   },
+   "patch": {
+    "operationId": "wellarchitectedUpdateWorkload",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "wellarchitected"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "WorkloadId",
+      "required": true,
+      "schema": {
+       "maxLength": 32,
+       "minLength": 32,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "AccountIds": {
+          "items": {
+           "maxLength": 12,
+           "minLength": 12,
+           "type": "string"
+          },
+          "maxItems": 100,
+          "type": "array"
+         },
+         "Applications": {
+          "items": {
+           "maxLength": 2084,
+           "type": "string"
+          },
+          "maxItems": 1,
+          "type": "array"
+         },
+         "ArchitecturalDesign": {
+          "maxLength": 2048,
+          "type": "string"
+         },
+         "AwsRegions": {
+          "items": {
+           "maxLength": 100,
+           "type": "string"
+          },
+          "maxItems": 50,
+          "type": "array"
+         },
+         "Description": {
+          "maxLength": 250,
+          "minLength": 3,
+          "type": "string"
+         },
+         "DiscoveryConfig": {
+          "$ref": "#/components/schemas/WorkloadDiscoveryConfig"
+         },
+         "Environment": {
+          "enum": [
+           "PRODUCTION",
+           "PREPRODUCTION"
+          ],
+          "type": "string"
+         },
+         "ImprovementStatus": {
+          "enum": [
+           "NOT_APPLICABLE",
+           "NOT_STARTED",
+           "IN_PROGRESS",
+           "COMPLETE",
+           "RISK_ACKNOWLEDGED"
+          ],
+          "type": "string"
+         },
+         "Industry": {
+          "maxLength": 100,
+          "type": "string"
+         },
+         "IndustryType": {
+          "maxLength": 100,
+          "type": "string"
+         },
+         "IsReviewOwnerUpdateAcknowledged": {
+          "type": "boolean"
+         },
+         "JiraConfiguration": {
+          "$ref": "#/components/schemas/WorkloadJiraConfigurationInput"
+         },
+         "NonAwsRegions": {
+          "items": {
+           "maxLength": 25,
+           "minLength": 3,
+           "type": "string"
+          },
+          "maxItems": 5,
+          "type": "array"
+         },
+         "Notes": {
+          "maxLength": 2084,
+          "type": "string"
+         },
+         "PillarPriorities": {
+          "items": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "ReviewOwner": {
+          "maxLength": 255,
+          "minLength": 3,
+          "type": "string"
+         },
+         "WorkloadName": {
+          "maxLength": 100,
+          "minLength": 3,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UpdateWorkloadOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateWorkload",
+    "tags": [
+     "AWS Well-Architected Tool"
+    ]
+   }
+  },
+  "/workloadsSummaries": {
+   "post": {
+    "operationId": "wellarchitectedListWorkloads",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "wellarchitected"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "MaxResults": {
+          "maximum": 50,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "NextToken": {
+          "type": "string"
+         },
+         "WorkloadNamePrefix": {
+          "maxLength": 100,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListWorkloadsOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListWorkloads",
+    "tags": [
+     "AWS Well-Architected Tool"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS Well-Architected Tool API (2020-03-31). Every other official operation returns HTTP 501 UnknownOperationException. Workloads are stored metadata: lens aliases are stored without loading any lens, so no lens review, question, answer, improvement plan, risk count, milestone or report is produced, and AWS Trusted Advisor, AppRegistry and Jira are never contacted. Jira configuration and Trusted Advisor discovery are refused, profiles and review templates cannot be attached, ListWorkloads refuses WorkloadNamePrefix, and the delete client token is accepted without replay. Global settings stay DISABLED because the simulator account is not in an organization and discovery integration needs Trusted Advisor. Lenses, lens reviews, answers, milestones, profiles, review templates, shares and notifications return UnknownOperationException with HTTP 501.",
+   "name": "AWS Well-Architected Tool"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/wellarchitected/2020-03-31/service-2.json",
+  "sha256": "924acaf63e0e5b6172fd252709df88a10380cb80d496598a5575fe48befd85c2",
+  "license": "Apache-2.0"
+ }
+}

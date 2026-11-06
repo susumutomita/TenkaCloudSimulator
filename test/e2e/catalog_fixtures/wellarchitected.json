@@ -1,0 +1,27 @@
+{
+ "client": "wellarchitected",
+ "steps": [
+  {"op": "create_workload", "args": {"WorkloadName": "fixture-shop", "Description": "Fixture web shop", "Environment": "PREPRODUCTION", "Lenses": ["wellarchitected"], "AwsRegions": ["us-east-1"], "Tags": {"team": "a"}}, "save": {"workload": "WorkloadId", "workloadArn": "WorkloadArn"}},
+  {"op": "get_workload", "args": {"WorkloadId": "${workload}"}, "expect": {"Workload.WorkloadName": "fixture-shop", "Workload.Owner": "000000000000", "Workload.WorkloadArn": "arn:aws:wellarchitected:us-east-1:000000000000:workload/${workload}"}},
+  {"op": "list_workloads", "args": {}, "expect": {"WorkloadSummaries#count": 1}},
+  {"op": "update_workload", "args": {"WorkloadId": "${workload}", "Notes": "Reviewed with the team"}, "expect": {"Workload.Notes": "Reviewed with the team"}},
+  {"op": "get_global_settings", "args": {}, "expect": {"OrganizationSharingStatus": "DISABLED", "DiscoveryIntegrationStatus": "DISABLED"}},
+  {"op": "update_global_settings", "args": {"DiscoveryIntegrationStatus": "DISABLED"}},
+  {"op": "tag_resource", "args": {"WorkloadArn": "${workloadArn}", "Tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"WorkloadArn": "${workloadArn}", "TagKeys": ["team"]}},
+  {"op": "list_tags_for_resource", "args": {"WorkloadArn": "${workloadArn}"}, "expect": {"Tags": {"k": "v"}}},
+  {"op": "update_global_settings", "args": {"OrganizationSharingStatus": "ENABLED"}, "error": "ValidationException", "status": 400},
+  {"op": "list_lens_reviews", "args": {"WorkloadId": "${workload}"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_workload", "args": {"WorkloadId": "00000000000000000000000000000000"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_workloads", "args": {}, "expect": {"WorkloadSummaries#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_workload", "args": {"WorkloadId": "${workload}"}, "expect": {"Workload.Notes": "Reviewed with the team", "Workload.Tags": {"k": "v"}}}
+ ],
+ "cleanup": [
+  {"op": "delete_workload", "args": {"WorkloadId": "${workload}"}},
+  {"op": "list_workloads", "args": {}, "expect": {"WorkloadSummaries#count": 0}}
+ ]
+}

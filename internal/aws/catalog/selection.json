@@ -1,4 +1,9 @@
 {
+  "account": [
+    "DeleteAlternateContact",
+    "GetAlternateContact",
+    "PutAlternateContact"
+  ],
   "acm": [
     "AddTagsToCertificate",
     "DeleteCertificate",
@@ -251,6 +256,50 @@
     "UntagResource",
     "UpdateWorkloadIdentity"
   ],
+  "billingconductor": [
+    "CreatePricingRule",
+    "DeletePricingRule",
+    "ListPricingRules",
+    "TagResource",
+    "UntagResource",
+    "UpdatePricingRule"
+  ],
+  "budgets": [
+    "CreateBudget",
+    "DeleteBudget",
+    "DescribeBudget",
+    "DescribeBudgets",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateBudget"
+  ],
+  "chatbot": [
+    "CreateChimeWebhookConfiguration",
+    "CreateCustomAction",
+    "DeleteChimeWebhookConfiguration",
+    "DeleteCustomAction",
+    "DescribeChimeWebhookConfigurations",
+    "GetAccountPreferences",
+    "GetCustomAction",
+    "ListCustomActions",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateAccountPreferences",
+    "UpdateChimeWebhookConfiguration",
+    "UpdateCustomAction"
+  ],
+  "cloud9": [
+    "CreateEnvironmentEC2",
+    "DeleteEnvironment",
+    "DescribeEnvironments",
+    "ListEnvironments",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateEnvironment"
+  ],
   "clouddirectory": [
     "CreateFacet",
     "CreateSchema",
@@ -361,6 +410,12 @@
     "PutStoredQuery",
     "TagResource",
     "UntagResource"
+  ],
+  "cur": [
+    "DeleteReportDefinition",
+    "DescribeReportDefinitions",
+    "ModifyReportDefinition",
+    "PutReportDefinition"
   ],
   "dataexchange": [
     "CreateDataSet",
@@ -516,6 +571,16 @@
     "ListDeliveryStreams",
     "StartDeliveryStreamEncryption",
     "StopDeliveryStreamEncryption"
+  ],
+  "fis": [
+    "CreateExperimentTemplate",
+    "DeleteExperimentTemplate",
+    "GetExperimentTemplate",
+    "ListExperimentTemplates",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateExperimentTemplate"
   ],
   "fms": [
     "DeleteAppsList",
@@ -816,6 +881,16 @@
     "UpdateBot",
     "UpdateBotLocale"
   ],
+  "license-manager": [
+    "CreateLicenseConfiguration",
+    "DeleteLicenseConfiguration",
+    "GetLicenseConfiguration",
+    "ListLicenseConfigurations",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateLicenseConfiguration"
+  ],
   "location": [
     "CreateGeofenceCollection",
     "CreateMap",
@@ -926,6 +1001,16 @@
     "UpdateGlobalNetwork",
     "UpdateSite"
   ],
+  "notifications": [
+    "CreateNotificationConfiguration",
+    "DeleteNotificationConfiguration",
+    "GetNotificationConfiguration",
+    "ListNotificationConfigurations",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateNotificationConfiguration"
+  ],
   "odb": [
     "CreateCloudExadataInfrastructure",
     "CreateOdbNetwork",
@@ -976,6 +1061,21 @@
     "ListLexicons",
     "PutLexicon"
   ],
+  "proton": [
+    "CreateEnvironmentTemplate",
+    "CreateServiceTemplate",
+    "DeleteEnvironmentTemplate",
+    "DeleteServiceTemplate",
+    "GetEnvironmentTemplate",
+    "GetServiceTemplate",
+    "ListEnvironmentTemplates",
+    "ListServiceTemplates",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateEnvironmentTemplate",
+    "UpdateServiceTemplate"
+  ],
   "ram": [
     "CreateResourceShare",
     "DeleteResourceShare",
@@ -994,6 +1094,36 @@
     "ListTagsForResource",
     "TagResource",
     "UntagResource"
+  ],
+  "resiliencehub": [
+    "CreateApp",
+    "CreateResiliencyPolicy",
+    "DeleteApp",
+    "DeleteResiliencyPolicy",
+    "DescribeApp",
+    "DescribeResiliencyPolicy",
+    "ListApps",
+    "ListResiliencyPolicies",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateApp",
+    "UpdateResiliencyPolicy"
+  ],
+  "resource-explorer-2": [
+    "BatchGetView",
+    "CreateIndex",
+    "CreateView",
+    "DeleteIndex",
+    "DeleteView",
+    "GetView",
+    "ListIndexes",
+    "ListTagsForResource",
+    "ListViews",
+    "TagResource",
+    "UntagResource",
+    "UpdateIndexType",
+    "UpdateView"
   ],
   "resource-groups": [
     "CreateGroup",
@@ -1141,6 +1271,16 @@
     "TagResource",
     "UntagResource"
   ],
+  "ssm-incidents": [
+    "CreateResponsePlan",
+    "DeleteResponsePlan",
+    "GetResponsePlan",
+    "ListResponsePlans",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateResponsePlan"
+  ],
   "sso-admin": [
     "CreateInstance",
     "CreatePermissionSet",
@@ -1202,6 +1342,21 @@
     "UntagResource",
     "UpdateDatabase",
     "UpdateTable"
+  ],
+  "tnb": [
+    "CreateSolFunctionPackage",
+    "CreateSolNetworkPackage",
+    "DeleteSolFunctionPackage",
+    "DeleteSolNetworkPackage",
+    "GetSolFunctionPackage",
+    "GetSolNetworkPackage",
+    "ListSolFunctionPackages",
+    "ListSolNetworkPackages",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateSolFunctionPackage",
+    "UpdateSolNetworkPackage"
   ],
   "transcribe": [
     "CreateVocabulary",
@@ -1265,6 +1420,18 @@
     "UpdateService",
     "UpdateServiceNetwork"
   ],
+  "wellarchitected": [
+    "CreateWorkload",
+    "DeleteWorkload",
+    "GetGlobalSettings",
+    "GetWorkload",
+    "ListTagsForResource",
+    "ListWorkloads",
+    "TagResource",
+    "UntagResource",
+    "UpdateGlobalSettings",
+    "UpdateWorkload"
+  ],
   "workspaces": [
     "CreateConnectionAlias",
     "CreateIpGroup",
@@ -1313,5 +1480,15 @@
     "UpdateNetworkSettings",
     "UpdatePortal",
     "UpdateUserSettings"
+  ],
+  "xray": [
+    "CreateGroup",
+    "DeleteGroup",
+    "GetGroup",
+    "GetGroups",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateGroup"
   ]
 }

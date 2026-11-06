@@ -1,0 +1,24 @@
+{
+ "client": "license-manager",
+ "steps": [
+  {"op": "create_license_configuration", "args": {"Name": "fixture-sql", "LicenseCountingType": "vCPU", "LicenseCount": 16, "LicenseCountHardLimit": true, "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"config": "LicenseConfigurationArn"}},
+  {"op": "get_license_configuration", "args": {"LicenseConfigurationArn": "${config}"}, "expect": {"Status": "AVAILABLE", "ConsumedLicenses": 0, "OwnerAccountId": "000000000000", "LicenseCount": 16}},
+  {"op": "list_license_configurations", "args": {}, "expect": {"LicenseConfigurations#count": 1}},
+  {"op": "update_license_configuration", "args": {"LicenseConfigurationArn": "${config}", "Description": "SQL Server cores", "LicenseCount": 32}},
+  {"op": "tag_resource", "args": {"ResourceArn": "${config}", "Tags": [{"Key": "k", "Value": "v"}]}},
+  {"op": "untag_resource", "args": {"ResourceArn": "${config}", "TagKeys": ["team"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "${config}"}, "expect": {"Tags": [{"Key": "k", "Value": "v"}]}},
+  {"op": "get_service_settings", "args": {}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_license_configuration", "args": {"LicenseConfigurationArn": "arn:aws:license-manager:us-east-1:000000000000:license-configuration:lic-00000000000000000000000000000000"}, "error": "InvalidParameterValueException"}
+ ],
+ "isolation": [
+  {"op": "list_license_configurations", "args": {}, "expect": {"LicenseConfigurations#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_license_configuration", "args": {"LicenseConfigurationArn": "${config}"}, "expect": {"LicenseCount": 32, "Description": "SQL Server cores"}}
+ ],
+ "cleanup": [
+  {"op": "delete_license_configuration", "args": {"LicenseConfigurationArn": "${config}"}},
+  {"op": "list_license_configurations", "args": {}, "expect": {"LicenseConfigurations#count": 0}}
+ ]
+}

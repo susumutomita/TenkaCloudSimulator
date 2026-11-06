@@ -1,0 +1,33 @@
+{
+ "client": "tnb",
+ "steps": [
+  {"op": "create_sol_function_package", "args": {"tags": {"team": "a"}}, "save": {"fp": "id", "fpArn": "arn"}, "expect": {"onboardingState": "CREATED", "operationalState": "DISABLED", "usageState": "NOT_IN_USE"}},
+  {"op": "get_sol_function_package", "args": {"vnfPkgId": "${fp}"}, "expect": {"arn": "${fpArn}", "onboardingState": "CREATED"}},
+  {"op": "list_sol_function_packages", "args": {}, "expect": {"functionPackages#count": 1}},
+  {"op": "update_sol_function_package", "args": {"vnfPkgId": "${fp}", "operationalState": "DISABLED"}, "expect": {"operationalState": "DISABLED"}},
+  {"op": "create_sol_network_package", "args": {}, "save": {"np": "id"}, "expect": {"nsdOnboardingState": "CREATED"}},
+  {"op": "get_sol_network_package", "args": {"nsdInfoId": "${np}"}, "expect": {"nsdOperationalState": "DISABLED"}},
+  {"op": "list_sol_network_packages", "args": {}, "expect": {"networkPackages#count": 1}},
+  {"op": "update_sol_network_package", "args": {"nsdInfoId": "${np}", "nsdOperationalState": "DISABLED"}},
+  {"op": "tag_resource", "args": {"resourceArn": "${fpArn}", "tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"resourceArn": "${fpArn}", "tagKeys": ["team"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${fpArn}"}, "expect": {"tags": {"k": "v"}}},
+  {"op": "update_sol_function_package", "args": {"vnfPkgId": "${fp}", "operationalState": "ENABLED"}, "error": "ValidationException", "status": 400},
+  {"op": "get_sol_function_package_descriptor", "args": {"vnfPkgId": "${fp}", "accept": "text/plain"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_sol_function_package", "args": {"vnfPkgId": "fp-00000000000000000"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_sol_function_packages", "args": {}, "expect": {"functionPackages#count": 0}},
+  {"op": "list_sol_network_packages", "args": {}, "expect": {"networkPackages#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_sol_function_package", "args": {"vnfPkgId": "${fp}"}, "expect": {"tags": {"k": "v"}}},
+  {"op": "get_sol_network_package", "args": {"nsdInfoId": "${np}"}, "expect": {"nsdUsageState": "NOT_IN_USE"}}
+ ],
+ "cleanup": [
+  {"op": "delete_sol_function_package", "args": {"vnfPkgId": "${fp}"}},
+  {"op": "delete_sol_network_package", "args": {"nsdInfoId": "${np}"}},
+  {"op": "list_sol_function_packages", "args": {}, "expect": {"functionPackages#count": 0}},
+  {"op": "list_sol_network_packages", "args": {}, "expect": {"networkPackages#count": 0}}
+ ]
+}

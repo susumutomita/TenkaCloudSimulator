@@ -1,0 +1,24 @@
+{
+ "client": "xray",
+ "steps": [
+  {"op": "create_group", "args": {"GroupName": "fixture-errors", "FilterExpression": "fault = true", "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"group": "Group.GroupARN"}, "expect": {"Group.GroupName": "fixture-errors"}},
+  {"op": "get_group", "args": {"GroupName": "fixture-errors"}, "expect": {"Group.FilterExpression": "fault = true", "Group.GroupARN": "${group}"}},
+  {"op": "get_groups", "args": {}, "expect": {"Groups#count": 1}},
+  {"op": "update_group", "args": {"GroupARN": "${group}", "FilterExpression": "error = true", "InsightsConfiguration": {"InsightsEnabled": true}}, "expect": {"Group.FilterExpression": "error = true"}},
+  {"op": "tag_resource", "args": {"ResourceARN": "${group}", "Tags": [{"Key": "k", "Value": "v"}]}},
+  {"op": "untag_resource", "args": {"ResourceARN": "${group}", "TagKeys": ["team"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceARN": "${group}"}, "expect": {"Tags": [{"Key": "k", "Value": "v"}]}},
+  {"op": "get_encryption_config", "args": {}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_group", "args": {"GroupName": "missing"}, "error": "InvalidRequestException", "status": 400}
+ ],
+ "isolation": [
+  {"op": "get_groups", "args": {}, "expect": {"Groups#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_group", "args": {"GroupARN": "${group}"}, "expect": {"Group.InsightsConfiguration.InsightsEnabled": true}}
+ ],
+ "cleanup": [
+  {"op": "delete_group", "args": {"GroupName": "fixture-errors"}},
+  {"op": "get_groups", "args": {}, "expect": {"Groups#count": 0}}
+ ]
+}

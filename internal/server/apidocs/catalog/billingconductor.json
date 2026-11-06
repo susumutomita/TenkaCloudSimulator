@@ -1,0 +1,795 @@
+{
+ "components": {
+  "schemas": {
+   "CreateFreeTierConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "Activated": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "Activated"
+    ],
+    "type": "object"
+   },
+   "CreatePricingRuleOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CreateTieringInput": {
+    "additionalProperties": false,
+    "properties": {
+     "FreeTier": {
+      "$ref": "#/components/schemas/CreateFreeTierConfig"
+     }
+    },
+    "required": [
+     "FreeTier"
+    ],
+    "type": "object"
+   },
+   "DeletePricingRuleOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "FreeTierConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "Activated": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "Activated"
+    ],
+    "type": "object"
+   },
+   "ListPricingRulesFilter": {
+    "additionalProperties": false,
+    "properties": {
+     "Arns": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListPricingRulesOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "BillingPeriod": {
+      "type": "string"
+     },
+     "NextToken": {
+      "type": "string"
+     },
+     "PricingRules": {
+      "items": {
+       "$ref": "#/components/schemas/PricingRuleListElement"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "PricingRuleListElement": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "type": "string"
+     },
+     "AssociatedPricingPlanCount": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "BillingEntity": {
+      "type": "string"
+     },
+     "CreationTime": {
+      "type": "integer"
+     },
+     "Description": {
+      "maxLength": 1024,
+      "minLength": 0,
+      "type": "string"
+     },
+     "LastModifiedTime": {
+      "type": "integer"
+     },
+     "ModifierPercentage": {
+      "minimum": 0,
+      "type": "number"
+     },
+     "Name": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Operation": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Scope": {
+      "enum": [
+       "GLOBAL",
+       "SERVICE",
+       "BILLING_ENTITY",
+       "SKU"
+      ],
+      "type": "string"
+     },
+     "Service": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Tiering": {
+      "$ref": "#/components/schemas/Tiering"
+     },
+     "Type": {
+      "enum": [
+       "MARKUP",
+       "DISCOUNT",
+       "TIERING"
+      ],
+      "type": "string"
+     },
+     "UsageType": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "Tiering": {
+    "additionalProperties": false,
+    "properties": {
+     "FreeTier": {
+      "$ref": "#/components/schemas/FreeTierConfig"
+     }
+    },
+    "required": [
+     "FreeTier"
+    ],
+    "type": "object"
+   },
+   "UntagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UpdateFreeTierConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "Activated": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "Activated"
+    ],
+    "type": "object"
+   },
+   "UpdatePricingRuleOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "type": "string"
+     },
+     "AssociatedPricingPlanCount": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "BillingEntity": {
+      "type": "string"
+     },
+     "Description": {
+      "maxLength": 1024,
+      "minLength": 0,
+      "type": "string"
+     },
+     "LastModifiedTime": {
+      "type": "integer"
+     },
+     "ModifierPercentage": {
+      "minimum": 0,
+      "type": "number"
+     },
+     "Name": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Operation": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Scope": {
+      "enum": [
+       "GLOBAL",
+       "SERVICE",
+       "BILLING_ENTITY",
+       "SKU"
+      ],
+      "type": "string"
+     },
+     "Service": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Tiering": {
+      "$ref": "#/components/schemas/UpdateTieringInput"
+     },
+     "Type": {
+      "enum": [
+       "MARKUP",
+       "DISCOUNT",
+       "TIERING"
+      ],
+      "type": "string"
+     },
+     "UsageType": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "UpdateTieringInput": {
+    "additionalProperties": false,
+    "properties": {
+     "FreeTier": {
+      "$ref": "#/components/schemas/UpdateFreeTierConfig"
+     }
+    },
+    "required": [
+     "FreeTier"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWSBillingConductor API (2021-07-30). Every other official operation returns HTTP 501 UnknownOperationException. Pricing rules are stored metadata that need no AWS Organizations management account: no pricing plan, billing group or pro forma cost is computed and no billing data is read, so AssociatedPricingPlanCount stays 0 and creation and modification times are not reported. ListPricingRules lists every stored rule and refuses BillingPeriod and Filters. ListTagsForResource is not implemented because its official HTTP 204 response cannot carry the Tags body, so tags are written by CreatePricingRule, TagResource and UntagResource only. Pricing plans, billing groups, account associations, custom line items and cost reports return UnknownOperationException with HTTP 501.",
+  "title": "AWS Billing Conductor (simulator catalog)",
+  "version": "2021-07-30"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/create-pricing-rule": {
+   "post": {
+    "operationId": "billingconductorCreatePricingRule",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "billingconductor"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "header",
+      "name": "X-Amzn-Client-Token",
+      "schema": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "BillingEntity": {
+          "type": "string"
+         },
+         "Description": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+         },
+         "ModifierPercentage": {
+          "minimum": 0,
+          "type": "number"
+         },
+         "Name": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         },
+         "Operation": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+         },
+         "Scope": {
+          "enum": [
+           "GLOBAL",
+           "SERVICE",
+           "BILLING_ENTITY",
+           "SKU"
+          ],
+          "type": "string"
+         },
+         "Service": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         },
+         "Tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 200,
+          "minProperties": 1,
+          "type": "object"
+         },
+         "Tiering": {
+          "$ref": "#/components/schemas/CreateTieringInput"
+         },
+         "Type": {
+          "enum": [
+           "MARKUP",
+           "DISCOUNT",
+           "TIERING"
+          ],
+          "type": "string"
+         },
+         "UsageType": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "Name",
+         "Scope",
+         "Type"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CreatePricingRuleOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreatePricingRule",
+    "tags": [
+     "AWS Billing Conductor"
+    ]
+   }
+  },
+  "/delete-pricing-rule": {
+   "post": {
+    "operationId": "billingconductorDeletePricingRule",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "billingconductor"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Arn": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "Arn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DeletePricingRuleOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeletePricingRule",
+    "tags": [
+     "AWS Billing Conductor"
+    ]
+   }
+  },
+  "/list-pricing-rules": {
+   "post": {
+    "operationId": "billingconductorListPricingRules",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "billingconductor"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "BillingPeriod": {
+          "type": "string"
+         },
+         "Filters": {
+          "$ref": "#/components/schemas/ListPricingRulesFilter"
+         },
+         "MaxResults": {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "NextToken": {
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListPricingRulesOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListPricingRules",
+    "tags": [
+     "AWS Billing Conductor"
+    ]
+   }
+  },
+  "/tags/{ResourceArn}": {
+   "delete": {
+    "operationId": "billingconductorUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "billingconductor"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ResourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 0,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 200,
+       "minItems": 1,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UntagResourceResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "AWS Billing Conductor"
+    ]
+   },
+   "post": {
+    "operationId": "billingconductorTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "billingconductor"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ResourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 0,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 200,
+          "minProperties": 1,
+          "type": "object"
+         }
+        },
+        "required": [
+         "Tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/TagResourceResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "AWS Billing Conductor"
+    ]
+   }
+  },
+  "/update-pricing-rule": {
+   "put": {
+    "operationId": "billingconductorUpdatePricingRule",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "billingconductor"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Arn": {
+          "type": "string"
+         },
+         "Description": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+         },
+         "ModifierPercentage": {
+          "minimum": 0,
+          "type": "number"
+         },
+         "Name": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         },
+         "Tiering": {
+          "$ref": "#/components/schemas/UpdateTieringInput"
+         },
+         "Type": {
+          "enum": [
+           "MARKUP",
+           "DISCOUNT",
+           "TIERING"
+          ],
+          "type": "string"
+         }
+        },
+        "required": [
+         "Arn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UpdatePricingRuleOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdatePricingRule",
+    "tags": [
+     "AWS Billing Conductor"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWSBillingConductor API (2021-07-30). Every other official operation returns HTTP 501 UnknownOperationException. Pricing rules are stored metadata that need no AWS Organizations management account: no pricing plan, billing group or pro forma cost is computed and no billing data is read, so AssociatedPricingPlanCount stays 0 and creation and modification times are not reported. ListPricingRules lists every stored rule and refuses BillingPeriod and Filters. ListTagsForResource is not implemented because its official HTTP 204 response cannot carry the Tags body, so tags are written by CreatePricingRule, TagResource and UntagResource only. Pricing plans, billing groups, account associations, custom line items and cost reports return UnknownOperationException with HTTP 501.",
+   "name": "AWS Billing Conductor"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/billingconductor/2021-07-30/service-2.json",
+  "sha256": "4a802286c5a8616e71f434aa15bcacd7878be42b5694329fa9823e6d18c14028",
+  "license": "Apache-2.0"
+ }
+}

@@ -1,0 +1,370 @@
+{
+ "components": {
+  "schemas": {
+   "DeleteReportDefinitionRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ReportName": {
+      "maxLength": 256,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ReportName"
+    ],
+    "type": "object"
+   },
+   "DeleteReportDefinitionResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "ResponseMessage": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeReportDefinitionsRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "MaxResults": {
+      "maximum": 5,
+      "minimum": 5,
+      "type": "integer"
+     },
+     "NextToken": {
+      "maxLength": 256,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeReportDefinitionsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "NextToken": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "ReportDefinitions": {
+      "items": {
+       "$ref": "#/components/schemas/ReportDefinition"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ModifyReportDefinitionRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ReportDefinition": {
+      "$ref": "#/components/schemas/ReportDefinition"
+     },
+     "ReportName": {
+      "maxLength": 256,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ReportName",
+     "ReportDefinition"
+    ],
+    "type": "object"
+   },
+   "ModifyReportDefinitionResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "PutReportDefinitionRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ReportDefinition": {
+      "$ref": "#/components/schemas/ReportDefinition"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "ReportDefinition"
+    ],
+    "type": "object"
+   },
+   "PutReportDefinitionResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "ReportDefinition": {
+    "additionalProperties": false,
+    "properties": {
+     "AdditionalArtifacts": {
+      "items": {
+       "enum": [
+        "REDSHIFT",
+        "QUICKSIGHT",
+        "ATHENA"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "AdditionalSchemaElements": {
+      "items": {
+       "enum": [
+        "RESOURCES",
+        "SPLIT_COST_ALLOCATION_DATA",
+        "MANUAL_DISCOUNT_COMPATIBILITY"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "BillingViewArn": {
+      "maxLength": 128,
+      "type": "string"
+     },
+     "Compression": {
+      "enum": [
+       "ZIP",
+       "GZIP",
+       "Parquet"
+      ],
+      "type": "string"
+     },
+     "Format": {
+      "enum": [
+       "textORcsv",
+       "Parquet"
+      ],
+      "type": "string"
+     },
+     "RefreshClosedReports": {
+      "type": "boolean"
+     },
+     "ReportName": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "ReportStatus": {
+      "$ref": "#/components/schemas/ReportStatus"
+     },
+     "ReportVersioning": {
+      "enum": [
+       "CREATE_NEW_REPORT",
+       "OVERWRITE_REPORT"
+      ],
+      "type": "string"
+     },
+     "S3Bucket": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "S3Prefix": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "S3Region": {
+      "enum": [
+       "af-south-1",
+       "ap-east-1",
+       "ap-south-1",
+       "ap-south-2",
+       "ap-southeast-1",
+       "ap-southeast-2",
+       "ap-southeast-3",
+       "ap-northeast-1",
+       "ap-northeast-2",
+       "ap-northeast-3",
+       "ca-central-1",
+       "eu-central-1",
+       "eu-central-2",
+       "eu-west-1",
+       "eu-west-2",
+       "eu-west-3",
+       "eu-north-1",
+       "eu-south-1",
+       "eu-south-2",
+       "me-central-1",
+       "me-south-1",
+       "sa-east-1",
+       "us-east-1",
+       "us-east-2",
+       "us-west-1",
+       "us-west-2",
+       "cn-north-1",
+       "cn-northwest-1"
+      ],
+      "type": "string"
+     },
+     "TimeUnit": {
+      "enum": [
+       "HOURLY",
+       "DAILY",
+       "MONTHLY"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "ReportName",
+     "TimeUnit",
+     "Format",
+     "Compression",
+     "AdditionalSchemaElements",
+     "S3Bucket",
+     "S3Prefix",
+     "S3Region"
+    ],
+    "type": "object"
+   },
+   "ReportStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "lastDelivery": {
+      "maxLength": 20,
+      "minLength": 16,
+      "type": "string"
+     },
+     "lastStatus": {
+      "enum": [
+       "SUCCESS",
+       "ERROR_PERMISSIONS",
+       "ERROR_NO_BUCKET"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "Key": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Value": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key",
+     "Value"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS Cost and Usage Report Service API (2017-01-06). Every other official operation returns HTTP 501 UnknownOperationException. Report definitions are stored configuration: no cost or usage report is generated or refreshed, nothing is written to the named Amazon S3 bucket, which is not checked, and no Athena, Amazon Redshift or Amazon QuickSight artifact is produced. ReportStatus and BillingViewArn are refused; report definitions are kept per simulator Region although AWS serves this API from us-east-1 only. Tags supplied at creation are stored, but TagResource, UntagResource and ListTagsForResource are not implemented because they identify the report by name rather than ARN.",
+  "title": "AWS Cost and Usage Report Service (simulator catalog)",
+  "version": "2017-01-06"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/": {
+   "post": {
+    "description": "Choose the X-Amz-Target of one implemented operation. Request and response members follow the linked official input/output schemas.",
+    "operationId": "curJSONOperation",
+    "parameters": [
+     {
+      "in": "header",
+      "name": "X-Amz-Target",
+      "required": true,
+      "schema": {
+       "enum": [
+        "AWSOrigamiServiceGatewayService.DeleteReportDefinition",
+        "AWSOrigamiServiceGatewayService.DescribeReportDefinitions",
+        "AWSOrigamiServiceGatewayService.ModifyReportDefinition",
+        "AWSOrigamiServiceGatewayService.PutReportDefinition"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-amz-json-1.1": {
+       "examples": {
+        "DeleteReportDefinition": {
+         "summary": "X-Amz-Target: AWSOrigamiServiceGatewayService.DeleteReportDefinition",
+         "value": {}
+        },
+        "DescribeReportDefinitions": {
+         "summary": "X-Amz-Target: AWSOrigamiServiceGatewayService.DescribeReportDefinitions",
+         "value": {}
+        },
+        "ModifyReportDefinition": {
+         "summary": "X-Amz-Target: AWSOrigamiServiceGatewayService.ModifyReportDefinition",
+         "value": {}
+        },
+        "PutReportDefinition": {
+         "summary": "X-Amz-Target: AWSOrigamiServiceGatewayService.PutReportDefinition",
+         "value": {}
+        }
+       },
+       "schema": {
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/x-amz-json-1.1": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception in __type."
+     },
+     "403": {
+      "description": "AccessDeniedException from local identity policy evaluation."
+     },
+     "501": {
+      "description": "Official operation not implemented by the simulator."
+     }
+    },
+    "summary": "AWS Cost and Usage Report Service JSON 1.1 operations",
+    "tags": [
+     "AWS Cost and Usage Report Service"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS Cost and Usage Report Service API (2017-01-06). Every other official operation returns HTTP 501 UnknownOperationException. Report definitions are stored configuration: no cost or usage report is generated or refreshed, nothing is written to the named Amazon S3 bucket, which is not checked, and no Athena, Amazon Redshift or Amazon QuickSight artifact is produced. ReportStatus and BillingViewArn are refused; report definitions are kept per simulator Region although AWS serves this API from us-east-1 only. Tags supplied at creation are stored, but TagResource, UntagResource and ListTagsForResource are not implemented because they identify the report by name rather than ARN.",
+   "name": "AWS Cost and Usage Report Service"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/cur/2017-01-06/service-2.json",
+  "sha256": "73177e91ed597265ebdf0884e8b1c71bbe7fcf6b6c04239a61eda93ef0475b0f",
+  "license": "Apache-2.0"
+ }
+}

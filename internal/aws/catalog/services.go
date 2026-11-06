@@ -26,5 +26,8 @@ func Services() []*Service {
 		// End-user computing, game technology and IoT.
 		appStream, gameLift, gameLiftStreams, greengrassV2, iotCore, iotFleetWise, iotSiteWise, iotTwinMaker, iotWireless,
 		secureBrowser, thinClient, workSpaces,
+		// Operations, governance, billing configuration and resilience.
+		accountManagement, billingConductor, budgets, chatbot, cloud9, costUsageReports, faultInjection, incidentManager, licenseManager,
+		proton, resilienceHub, resourceExplorer, telcoNetworkBuilder, userNotifications, wellArchitected, xray,
 	}
 }

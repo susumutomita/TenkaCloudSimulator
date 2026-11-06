@@ -1,0 +1,1445 @@
+{
+ "components": {
+  "schemas": {
+   "CreateExperimentTemplateActionInput": {
+    "additionalProperties": false,
+    "properties": {
+     "actionId": {
+      "maxLength": 128,
+      "type": "string"
+     },
+     "description": {
+      "maxLength": 512,
+      "type": "string"
+     },
+     "parameters": {
+      "additionalProperties": {
+       "maxLength": 1024,
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "startAfter": {
+      "items": {
+       "maxLength": 64,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "targets": {
+      "additionalProperties": {
+       "maxLength": 64,
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "required": [
+     "actionId"
+    ],
+    "type": "object"
+   },
+   "CreateExperimentTemplateExperimentOptionsInput": {
+    "additionalProperties": false,
+    "properties": {
+     "accountTargeting": {
+      "enum": [
+       "single-account",
+       "multi-account"
+      ],
+      "type": "string"
+     },
+     "emptyTargetResolutionMode": {
+      "enum": [
+       "fail",
+       "skip"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CreateExperimentTemplateLogConfigurationInput": {
+    "additionalProperties": false,
+    "properties": {
+     "cloudWatchLogsConfiguration": {
+      "$ref": "#/components/schemas/ExperimentTemplateCloudWatchLogsLogConfigurationInput"
+     },
+     "logSchemaVersion": {
+      "type": "integer"
+     },
+     "s3Configuration": {
+      "$ref": "#/components/schemas/ExperimentTemplateS3LogConfigurationInput"
+     }
+    },
+    "required": [
+     "logSchemaVersion"
+    ],
+    "type": "object"
+   },
+   "CreateExperimentTemplateReportConfigurationInput": {
+    "additionalProperties": false,
+    "properties": {
+     "dataSources": {
+      "$ref": "#/components/schemas/ExperimentTemplateReportConfigurationDataSourcesInput"
+     },
+     "outputs": {
+      "$ref": "#/components/schemas/ExperimentTemplateReportConfigurationOutputsInput"
+     },
+     "postExperimentDuration": {
+      "maxLength": 32,
+      "type": "string"
+     },
+     "preExperimentDuration": {
+      "maxLength": 32,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CreateExperimentTemplateResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "experimentTemplate": {
+      "$ref": "#/components/schemas/ExperimentTemplate"
+     }
+    },
+    "type": "object"
+   },
+   "CreateExperimentTemplateStopConditionInput": {
+    "additionalProperties": false,
+    "properties": {
+     "source": {
+      "maxLength": 64,
+      "type": "string"
+     },
+     "value": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     }
+    },
+    "required": [
+     "source"
+    ],
+    "type": "object"
+   },
+   "CreateExperimentTemplateTargetInput": {
+    "additionalProperties": false,
+    "properties": {
+     "filters": {
+      "items": {
+       "$ref": "#/components/schemas/ExperimentTemplateTargetInputFilter"
+      },
+      "type": "array"
+     },
+     "parameters": {
+      "additionalProperties": {
+       "maxLength": 1024,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "resourceArns": {
+      "items": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      },
+      "maxItems": 5,
+      "type": "array"
+     },
+     "resourceTags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "type": "object"
+     },
+     "resourceType": {
+      "maxLength": 128,
+      "type": "string"
+     },
+     "selectionMode": {
+      "maxLength": 64,
+      "type": "string"
+     }
+    },
+    "required": [
+     "resourceType",
+     "selectionMode"
+    ],
+    "type": "object"
+   },
+   "DeleteExperimentTemplateResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "experimentTemplate": {
+      "$ref": "#/components/schemas/ExperimentTemplate"
+     }
+    },
+    "type": "object"
+   },
+   "ExperimentTemplate": {
+    "additionalProperties": false,
+    "properties": {
+     "actions": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/ExperimentTemplateAction"
+      },
+      "type": "object"
+     },
+     "arn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "creationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "description": {
+      "maxLength": 512,
+      "type": "string"
+     },
+     "experimentOptions": {
+      "$ref": "#/components/schemas/ExperimentTemplateExperimentOptions"
+     },
+     "experimentReportConfiguration": {
+      "$ref": "#/components/schemas/ExperimentTemplateReportConfiguration"
+     },
+     "id": {
+      "maxLength": 64,
+      "type": "string"
+     },
+     "lastUpdateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "logConfiguration": {
+      "$ref": "#/components/schemas/ExperimentTemplateLogConfiguration"
+     },
+     "roleArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "stopConditions": {
+      "items": {
+       "$ref": "#/components/schemas/ExperimentTemplateStopCondition"
+      },
+      "type": "array"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "type": "object"
+     },
+     "targetAccountConfigurationsCount": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "targets": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/ExperimentTemplateTarget"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "ExperimentTemplateAction": {
+    "additionalProperties": false,
+    "properties": {
+     "actionId": {
+      "maxLength": 128,
+      "type": "string"
+     },
+     "description": {
+      "maxLength": 512,
+      "type": "string"
+     },
+     "parameters": {
+      "additionalProperties": {
+       "maxLength": 1024,
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "startAfter": {
+      "items": {
+       "maxLength": 64,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "targets": {
+      "additionalProperties": {
+       "maxLength": 64,
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "ExperimentTemplateCloudWatchLogsLogConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "logGroupArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ExperimentTemplateCloudWatchLogsLogConfigurationInput": {
+    "additionalProperties": false,
+    "properties": {
+     "logGroupArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     }
+    },
+    "required": [
+     "logGroupArn"
+    ],
+    "type": "object"
+   },
+   "ExperimentTemplateExperimentOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "accountTargeting": {
+      "enum": [
+       "single-account",
+       "multi-account"
+      ],
+      "type": "string"
+     },
+     "emptyTargetResolutionMode": {
+      "enum": [
+       "fail",
+       "skip"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ExperimentTemplateLogConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "cloudWatchLogsConfiguration": {
+      "$ref": "#/components/schemas/ExperimentTemplateCloudWatchLogsLogConfiguration"
+     },
+     "logSchemaVersion": {
+      "type": "integer"
+     },
+     "s3Configuration": {
+      "$ref": "#/components/schemas/ExperimentTemplateS3LogConfiguration"
+     }
+    },
+    "type": "object"
+   },
+   "ExperimentTemplateReportConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "dataSources": {
+      "$ref": "#/components/schemas/ExperimentTemplateReportConfigurationDataSources"
+     },
+     "outputs": {
+      "$ref": "#/components/schemas/ExperimentTemplateReportConfigurationOutputs"
+     },
+     "postExperimentDuration": {
+      "maxLength": 32,
+      "type": "string"
+     },
+     "preExperimentDuration": {
+      "maxLength": 32,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ExperimentTemplateReportConfigurationCloudWatchDashboard": {
+    "additionalProperties": false,
+    "properties": {
+     "dashboardIdentifier": {
+      "maxLength": 512,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ExperimentTemplateReportConfigurationDataSources": {
+    "additionalProperties": false,
+    "properties": {
+     "cloudWatchDashboards": {
+      "items": {
+       "$ref": "#/components/schemas/ExperimentTemplateReportConfigurationCloudWatchDashboard"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ExperimentTemplateReportConfigurationDataSourcesInput": {
+    "additionalProperties": false,
+    "properties": {
+     "cloudWatchDashboards": {
+      "items": {
+       "$ref": "#/components/schemas/ReportConfigurationCloudWatchDashboardInput"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ExperimentTemplateReportConfigurationOutputs": {
+    "additionalProperties": false,
+    "properties": {
+     "s3Configuration": {
+      "$ref": "#/components/schemas/ReportConfigurationS3Output"
+     }
+    },
+    "type": "object"
+   },
+   "ExperimentTemplateReportConfigurationOutputsInput": {
+    "additionalProperties": false,
+    "properties": {
+     "s3Configuration": {
+      "$ref": "#/components/schemas/ReportConfigurationS3OutputInput"
+     }
+    },
+    "type": "object"
+   },
+   "ExperimentTemplateS3LogConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "bucketName": {
+      "maxLength": 63,
+      "minLength": 3,
+      "type": "string"
+     },
+     "prefix": {
+      "maxLength": 700,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ExperimentTemplateS3LogConfigurationInput": {
+    "additionalProperties": false,
+    "properties": {
+     "bucketName": {
+      "maxLength": 63,
+      "minLength": 3,
+      "type": "string"
+     },
+     "prefix": {
+      "maxLength": 700,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "bucketName"
+    ],
+    "type": "object"
+   },
+   "ExperimentTemplateStopCondition": {
+    "additionalProperties": false,
+    "properties": {
+     "source": {
+      "maxLength": 64,
+      "type": "string"
+     },
+     "value": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ExperimentTemplateSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "creationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "description": {
+      "maxLength": 512,
+      "type": "string"
+     },
+     "id": {
+      "maxLength": 64,
+      "type": "string"
+     },
+     "lastUpdateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "ExperimentTemplateTarget": {
+    "additionalProperties": false,
+    "properties": {
+     "filters": {
+      "items": {
+       "$ref": "#/components/schemas/ExperimentTemplateTargetFilter"
+      },
+      "type": "array"
+     },
+     "parameters": {
+      "additionalProperties": {
+       "maxLength": 1024,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "resourceArns": {
+      "items": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      },
+      "maxItems": 5,
+      "type": "array"
+     },
+     "resourceTags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "type": "object"
+     },
+     "resourceType": {
+      "maxLength": 128,
+      "type": "string"
+     },
+     "selectionMode": {
+      "maxLength": 64,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ExperimentTemplateTargetFilter": {
+    "additionalProperties": false,
+    "properties": {
+     "path": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "values": {
+      "items": {
+       "maxLength": 128,
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ExperimentTemplateTargetInputFilter": {
+    "additionalProperties": false,
+    "properties": {
+     "path": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "values": {
+      "items": {
+       "maxLength": 128,
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "path",
+     "values"
+    ],
+    "type": "object"
+   },
+   "GetExperimentTemplateResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "experimentTemplate": {
+      "$ref": "#/components/schemas/ExperimentTemplate"
+     }
+    },
+    "type": "object"
+   },
+   "ListExperimentTemplatesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "experimentTemplates": {
+      "items": {
+       "$ref": "#/components/schemas/ExperimentTemplateSummary"
+      },
+      "type": "array"
+     },
+     "nextToken": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListTagsForResourceResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "ReportConfigurationCloudWatchDashboardInput": {
+    "additionalProperties": false,
+    "properties": {
+     "dashboardIdentifier": {
+      "maxLength": 512,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ReportConfigurationS3Output": {
+    "additionalProperties": false,
+    "properties": {
+     "bucketName": {
+      "maxLength": 63,
+      "minLength": 3,
+      "type": "string"
+     },
+     "prefix": {
+      "maxLength": 256,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ReportConfigurationS3OutputInput": {
+    "additionalProperties": false,
+    "properties": {
+     "bucketName": {
+      "maxLength": 63,
+      "minLength": 3,
+      "type": "string"
+     },
+     "prefix": {
+      "maxLength": 256,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UntagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UpdateExperimentTemplateActionInputItem": {
+    "additionalProperties": false,
+    "properties": {
+     "actionId": {
+      "maxLength": 128,
+      "type": "string"
+     },
+     "description": {
+      "maxLength": 512,
+      "type": "string"
+     },
+     "parameters": {
+      "additionalProperties": {
+       "maxLength": 1024,
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "startAfter": {
+      "items": {
+       "maxLength": 64,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "targets": {
+      "additionalProperties": {
+       "maxLength": 64,
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "UpdateExperimentTemplateExperimentOptionsInput": {
+    "additionalProperties": false,
+    "properties": {
+     "emptyTargetResolutionMode": {
+      "enum": [
+       "fail",
+       "skip"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "UpdateExperimentTemplateLogConfigurationInput": {
+    "additionalProperties": false,
+    "properties": {
+     "cloudWatchLogsConfiguration": {
+      "$ref": "#/components/schemas/ExperimentTemplateCloudWatchLogsLogConfigurationInput"
+     },
+     "logSchemaVersion": {
+      "type": "integer"
+     },
+     "s3Configuration": {
+      "$ref": "#/components/schemas/ExperimentTemplateS3LogConfigurationInput"
+     }
+    },
+    "type": "object"
+   },
+   "UpdateExperimentTemplateReportConfigurationInput": {
+    "additionalProperties": false,
+    "properties": {
+     "dataSources": {
+      "$ref": "#/components/schemas/ExperimentTemplateReportConfigurationDataSourcesInput"
+     },
+     "outputs": {
+      "$ref": "#/components/schemas/ExperimentTemplateReportConfigurationOutputsInput"
+     },
+     "postExperimentDuration": {
+      "maxLength": 32,
+      "type": "string"
+     },
+     "preExperimentDuration": {
+      "maxLength": 32,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "UpdateExperimentTemplateResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "experimentTemplate": {
+      "$ref": "#/components/schemas/ExperimentTemplate"
+     }
+    },
+    "type": "object"
+   },
+   "UpdateExperimentTemplateStopConditionInput": {
+    "additionalProperties": false,
+    "properties": {
+     "source": {
+      "maxLength": 64,
+      "type": "string"
+     },
+     "value": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     }
+    },
+    "required": [
+     "source"
+    ],
+    "type": "object"
+   },
+   "UpdateExperimentTemplateTargetInput": {
+    "additionalProperties": false,
+    "properties": {
+     "filters": {
+      "items": {
+       "$ref": "#/components/schemas/ExperimentTemplateTargetInputFilter"
+      },
+      "type": "array"
+     },
+     "parameters": {
+      "additionalProperties": {
+       "maxLength": 1024,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "resourceArns": {
+      "items": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      },
+      "maxItems": 5,
+      "type": "array"
+     },
+     "resourceTags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "type": "object"
+     },
+     "resourceType": {
+      "maxLength": 128,
+      "type": "string"
+     },
+     "selectionMode": {
+      "maxLength": 64,
+      "type": "string"
+     }
+    },
+    "required": [
+     "resourceType",
+     "selectionMode"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS Fault Injection Simulator API (2020-12-01). Every other official operation returns HTTP 501 UnknownOperationException. Experiment templates are stored metadata: StartExperiment, StopExperiment and every experiment, action, target resource type and safety lever operation return UnknownOperationException with HTTP 501, so no fault is ever injected, no target is resolved, no role is assumed and no log or report is written. Action identifiers, target resource types, selection modes, filters and alarm ARNs are stored without checking the AWS action catalog or the named resources; experiment options default to single-account targeting and the fail empty-target mode. Multi-account targeting and target account configurations are refused, and UpdateExperimentTemplate refuses experimentOptions.",
+  "title": "AWS Fault Injection Service (simulator catalog)",
+  "version": "2020-12-01"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/experimentTemplates": {
+   "get": {
+    "operationId": "fisListExperimentTemplates",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "fis"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 1024,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListExperimentTemplatesResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListExperimentTemplates",
+    "tags": [
+     "AWS Fault Injection Service"
+    ]
+   },
+   "post": {
+    "operationId": "fisCreateExperimentTemplate",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "fis"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "actions": {
+          "additionalProperties": {
+           "$ref": "#/components/schemas/CreateExperimentTemplateActionInput"
+          },
+          "type": "object"
+         },
+         "clientToken": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "type": "string"
+         },
+         "description": {
+          "maxLength": 512,
+          "type": "string"
+         },
+         "experimentOptions": {
+          "$ref": "#/components/schemas/CreateExperimentTemplateExperimentOptionsInput"
+         },
+         "experimentReportConfiguration": {
+          "$ref": "#/components/schemas/CreateExperimentTemplateReportConfigurationInput"
+         },
+         "logConfiguration": {
+          "$ref": "#/components/schemas/CreateExperimentTemplateLogConfigurationInput"
+         },
+         "roleArn": {
+          "maxLength": 2048,
+          "minLength": 20,
+          "type": "string"
+         },
+         "stopConditions": {
+          "items": {
+           "$ref": "#/components/schemas/CreateExperimentTemplateStopConditionInput"
+          },
+          "type": "array"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "type": "object"
+         },
+         "targets": {
+          "additionalProperties": {
+           "$ref": "#/components/schemas/CreateExperimentTemplateTargetInput"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "actions",
+         "clientToken",
+         "description",
+         "roleArn",
+         "stopConditions"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateExperimentTemplateResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateExperimentTemplate",
+    "tags": [
+     "AWS Fault Injection Service"
+    ]
+   }
+  },
+  "/experimentTemplates/{id}": {
+   "delete": {
+    "operationId": "fisDeleteExperimentTemplate",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "fis"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {
+       "maxLength": 64,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DeleteExperimentTemplateResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteExperimentTemplate",
+    "tags": [
+     "AWS Fault Injection Service"
+    ]
+   },
+   "get": {
+    "operationId": "fisGetExperimentTemplate",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "fis"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {
+       "maxLength": 64,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GetExperimentTemplateResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetExperimentTemplate",
+    "tags": [
+     "AWS Fault Injection Service"
+    ]
+   },
+   "patch": {
+    "operationId": "fisUpdateExperimentTemplate",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "fis"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {
+       "maxLength": 64,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "actions": {
+          "additionalProperties": {
+           "$ref": "#/components/schemas/UpdateExperimentTemplateActionInputItem"
+          },
+          "type": "object"
+         },
+         "description": {
+          "maxLength": 512,
+          "type": "string"
+         },
+         "experimentOptions": {
+          "$ref": "#/components/schemas/UpdateExperimentTemplateExperimentOptionsInput"
+         },
+         "experimentReportConfiguration": {
+          "$ref": "#/components/schemas/UpdateExperimentTemplateReportConfigurationInput"
+         },
+         "logConfiguration": {
+          "$ref": "#/components/schemas/UpdateExperimentTemplateLogConfigurationInput"
+         },
+         "roleArn": {
+          "maxLength": 2048,
+          "minLength": 20,
+          "type": "string"
+         },
+         "stopConditions": {
+          "items": {
+           "$ref": "#/components/schemas/UpdateExperimentTemplateStopConditionInput"
+          },
+          "type": "array"
+         },
+         "targets": {
+          "additionalProperties": {
+           "$ref": "#/components/schemas/UpdateExperimentTemplateTargetInput"
+          },
+          "type": "object"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UpdateExperimentTemplateResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateExperimentTemplate",
+    "tags": [
+     "AWS Fault Injection Service"
+    ]
+   }
+  },
+  "/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "fisUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "fis"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "type": "string"
+       },
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UntagResourceResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "AWS Fault Injection Service"
+    ]
+   },
+   "get": {
+    "operationId": "fisListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "fis"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "AWS Fault Injection Service"
+    ]
+   },
+   "post": {
+    "operationId": "fisTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "fis"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/TagResourceResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "AWS Fault Injection Service"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS Fault Injection Simulator API (2020-12-01). Every other official operation returns HTTP 501 UnknownOperationException. Experiment templates are stored metadata: StartExperiment, StopExperiment and every experiment, action, target resource type and safety lever operation return UnknownOperationException with HTTP 501, so no fault is ever injected, no target is resolved, no role is assumed and no log or report is written. Action identifiers, target resource types, selection modes, filters and alarm ARNs are stored without checking the AWS action catalog or the named resources; experiment options default to single-account targeting and the fail empty-target mode. Multi-account targeting and target account configurations are refused, and UpdateExperimentTemplate refuses experimentOptions.",
+   "name": "AWS Fault Injection Service"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/fis/2020-12-01/service-2.json",
+  "sha256": "1c0faad607be8bd7b72b79e46b056edee4c3c33f9c7ad499e9ae69acedf1b317",
+  "license": "Apache-2.0"
+ }
+}
