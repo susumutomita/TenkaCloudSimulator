@@ -18,16 +18,27 @@ const maxTokenFileBytes=512,tokenPattern=/^[A-Za-z0-9_-]{32,256}$/;
 export default function Login(){
   const {locale,setLocale,t}=useLocale();
   const [token,setToken]=useState(''),[error,setError]=useState(null),[busy,setBusy]=useState(false),[fileState,setFileState]=useState('');
+  const tokenInput=useRef(null);
   const inputRevision=useRef(0),pendingPaste=useRef(null),pasteTimer=useRef(null),fileRevision=useRef(null),alive=useRef(true),submitting=useRef(false);
   function showError(en,ja){setError({en,ja})}
   function clearPendingPaste(){clearTimeout(pasteTimer.current);pasteTimer.current=null;pendingPaste.current=null}
   useEffect(()=>{alive.current=true;return()=>{alive.current=false;inputRevision.current++;fileRevision.current=null;clearPendingPaste()}},[]);
   function newIntent(){inputRevision.current++;clearPendingPaste();fileRevision.current=null;setFileState('');return inputRevision.current}
   function changeToken(value){newIntent();setToken(value);setError(null)}
+  function synchronizeNativeInput(){
+    const input=tokenInput.current;
+    // Third-party/native input events can update the element without the
+    // component's change callback. Adopt that value before blur-triggered UI
+    // updates; never log it or interpret routing metadata as authentication.
+    if(input?.isConnected&&input.value!==token)changeToken(input.value);
+  }
   function flushPendingPaste(){
     const pending=pendingPaste.current;
     if(pending&&pending.revision===inputRevision.current&&pending.input.isConnected){changeToken(pending.value);return pending.value}
-    clearPendingPaste();return token;
+    clearPendingPaste();
+    // Submit the visible native control, including an intentional clear. A
+    // password-manager/autofill write need not have updated React state.
+    return tokenInput.current?.isConnected?tokenInput.current.value:token;
   }
   function capturePaste(event){
     const input=event.target;
@@ -105,7 +116,7 @@ export default function Login(){
         <SpaceBetween direction="horizontal" size="xs"><Button formAction="none" disabled={locale==='en'} onClick={()=>setLocale('en')}>English</Button><Button formAction="none" disabled={locale==='ja'} onClick={()=>setLocale('ja')}>日本語</Button></SpaceBetween>
         <Alert type="info">{t('Use the access token supplied by your host. This is an independent local simulator.','主催者から受け取ったアクセストークンを使ってください。これは独立したローカルシミュレーターです。')}</Alert>
         <FormField label={t('Access token','アクセストークン')} description={t('Paste the token itself as plain text. It stays hidden; do not include a command or label.','トークンだけをテキストとして貼り付けてください。入力は隠されます。コマンドやラベルは含めないでください。')}>
-          <div onPasteCapture={capturePaste}><Input value={token} type="password" onChange={({detail})=>changeToken(detail.value)} autoComplete="off"/></div>
+          <div onPasteCapture={capturePaste} onInputCapture={synchronizeNativeInput}><Input value={token} type="password" onChange={({detail})=>changeToken(detail.value)} onBlur={synchronizeNativeInput} autoComplete="off" disableBrowserAutocorrect spellcheck={false} nativeInputAttributes={{ref:tokenInput,name:'simulator-access-token','data-1p-ignore':'true','data-op-ignore':'true'}}/></div>
         </FormField>
         <FormField label={t('Token file – optional','トークンファイル（任意）')} description={t('If paste does not work, explicitly choose the token file supplied by your host. Only one UTF-8 token line, at most 512 bytes. The file is read locally, not uploaded.','貼り付けできない場合は、主催者から受け取ったトークンファイルを選べます。512バイト以下のUTF-8テキスト1行だけを使います。ファイルはブラウザー内で読み取り、アップロードしません。')}>
           <fieldset disabled={busy} onKeyDown={fileKeyDown} aria-label={t('Choose a local token file','ローカルのトークンファイルを選択')} style={{border:0,padding:0,margin:0}}><FileInput value={[]} multiple={false} onChange={({detail})=>chooseTokenFile(detail.value)}>{t('Choose token file','トークンファイルを選択')}</FileInput></fieldset>

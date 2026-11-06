@@ -38,6 +38,25 @@ with running(authenticated=True) as (endpoint,token),sync_playwright() as p:
   assert pending.value.status==want,'Unexpected actual native login status'
  def success(page):
   expect(page.get_by_role('button',name='Account menu',exact=True)).to_be_visible();assert page.request.get(endpoint+'/_simulator/v1/capabilities').status==200
+ # First-party DOM-only interoperability fixtures, NOT real-extension proof.
+ # Use only this fixture's fresh dummy token, never a user's clipboard/file.
+ page=fresh();access=field(page)
+ assert access.get_attribute('data-1p-ignore')=='true' and access.get_attribute('data-op-ignore')=='true'
+ def native_write(page,value):
+  field(page).evaluate('(input,value)=>Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,"value").set.call(input,value)',value)
+ native_write(page,token);submit(page,303,True);success(page)
+ report['nativeDOMWriteWithoutChangeEventAuthenticates']=True
+ page=fresh();paste(page,token);native_write(page,'');posts=[]
+ page.on('request',lambda request:posts.append(True)if request.method=='POST'and request.url==endpoint+'/_simulator/login'else None)
+ page.get_by_role('button',name='Open sandbox',exact=True).click()
+ expect(page.get_by_text('Enter your access token. If paste left this blank, copy the token as plain text.',exact=True)).to_be_visible()
+ assert not posts and page.request.get(endpoint+'/_simulator/v1/capabilities').status==401
+ report['nativeDOMClearDoesNotSubmitStaleToken']=True
+ page=fresh();native_write(page,token);field(page).focus();page.get_by_role('button',name='日本語',exact=True).click()
+ expect(page.get_by_label('アクセストークン',exact=True)).to_have_value(token)
+ page.get_by_role('button',name='English',exact=True).click();check_value(page,token);submit(page,303);success(page)
+ report['nativeDOMValueSurvivesBlurAndLocaleRerender']=True
+ report['actual1PasswordExtensionVerified']=False
  page=fresh();paste(page,token);check_value(page,token);page.keyboard.press('Control+Z');check_value(page,'');report['normalNativeUndo']=True
  # Partial selection replacement must preserve the unaffected prefix.
  before=token[:32]+'x'*32;page.keyboard.type(before);page.keyboard.press('End')
