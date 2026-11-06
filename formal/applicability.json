@@ -5,9 +5,20 @@
     {
       "path": "Makefile",
       "sha256": "2e248f923e1ec8ca35a429ea8e165f85f526e0fc752ede85581eb90c8ced5126",
-      "disposition": "build-metadata",
-      "reason": "Require the new pure Metrics receipt/schema/locator negative units in make e2e before all existing reflow, native65 conformance and start checks. No failed result is ignored and no runtime/model bound or threshold changes.",
-      "models": []
+      "disposition": "modeled",
+      "reason": "Preserve the existing StartupTokenVisibility source-scope obligation for Makefile; startup targets and token-display logic are unchanged. Three added mandatory pure detector commands precede the unchanged E2E chain and are separately executed; this model is not a proof of Make or detector behavior.",
+      "models": [
+        {
+          "id": "StartupTokenVisibility",
+          "properties": [
+            "FileIdentityFrozen",
+            "CreatedFilePrivate",
+            "HistoryVisibility",
+            "InvalidFileNeverEmits"
+          ],
+          "limits": "Finite safety only; abstract validated file state and terminal context, not OS permissions/syscalls/randomness/crash-write atomicity, build freshness, process shutdown, liveness or Go refinement. One fixed file path; manual deletion/path changes/rotation are outside the model. Darwin/Windows helpers are not claimed executed by Linux PTY tests. This change only adds e2e validation commands; the unchanged startup projection is retained, not claimed to model receipt/schema/locator checks or Make execution."
+        }
+      ]
     },
     {
       "path": "README.ja.md",
