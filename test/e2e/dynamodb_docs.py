@@ -41,7 +41,8 @@ def run():
             assert spec==json.loads(Path('internal/server/apidocs/openapi.json').read_text()),'Embedded/source reference mismatch'
             schema_examples=validate_json10_examples(spec)
             ids=[v['operationId'] for p in spec['paths'].values() for m,v in p.items() if m in ('get','post','put','head','delete')]
-            assert len(ids)==len(set(ids))==66 and set(ids)==OLD_IDS|NEW_IDS and len(spec['paths'])==36 and {COLLECTION,ITEM} <= set(spec['paths']),'Main API paths/IDs changed'
+            assert len(ids)==len(set(ids))==67 and set(ids)==OLD_IDS|NEW_IDS|{'S3MultipartUpload'} and len(spec['paths'])==36 and {COLLECTION,ITEM} <= set(spec['paths']),'Main API paths/IDs changed'
+            assert spec['paths']['/{bucket}/{key}']['post']['operationId']=='S3MultipartUpload','Multipart addition moved from the native S3 object route'
             caps=request('/_simulator/v1/capabilities');assert set(caps['services']['dynamodb']['operations'])==set(OPERATIONS)
             examples=spec['paths']['/']['post']['requestBody']['content']['application/x-amz-json-1.0']['examples']
             sdk=client(team);put=examples['DynamoDBPutItem']['value'];name=put['TableName'];key=examples['DynamoDBGetItem']['value']['Key']
@@ -57,7 +58,7 @@ def run():
             assert tuple(executed)==OPERATIONS and counts=={'calls':7,'responses':7}
             assert COUNTS['calls']==COUNTS['sends']==COUNTS['responses']>0
             report={'servedSevenTemplates':executed,'nativeHTTPCounts':counts,'SDKCounts':COUNTS,
-                'sharedSQLiteConfirmed':True,'sourceEqualsServed':True,'mainOperationIDs':66,'mainPaths':36,
+                'sharedSQLiteConfirmed':True,'sourceEqualsServed':True,'mainOperationIDs':67,'mainPaths':36,
                 'schemaValidatedSharedTemplates':schema_examples,'schemaValidatedNativeResponses':counts['responses'],
                 'staticExamplesNotLiveState':True,'cleanup':'DELETED','realAWS':False,'DynamoDBConsole':'unsupported'}
             (REPORTS/'dynamodb-reference.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report))

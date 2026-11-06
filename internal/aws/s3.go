@@ -69,9 +69,9 @@ func fail(w http.ResponseWriter, r *http.Request, code, message string) {
 	switch code {
 	case "InternalError":
 		status = 500
-	case "NoSuchBucket", "NoSuchKey", "NoSuchVersion", "NoSuchPublicAccessBlockConfiguration", "NoSuchTagSet":
+	case "NoSuchBucket", "NoSuchKey", "NoSuchVersion", "NoSuchUpload", "NoSuchPublicAccessBlockConfiguration", "NoSuchTagSet":
 		status = 404
-	case "BucketNotEmpty", "BucketAlreadyExists", "BucketAlreadyOwnedByYou":
+	case "BucketNotEmpty", "BucketAlreadyExists", "BucketAlreadyOwnedByYou", "ConditionalRequestConflict":
 		status = 409
 	case "NotImplemented":
 		status = 501
@@ -132,7 +132,7 @@ func (g *Gateway) serveS3(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		switch k {
-		case "list-type", "prefix", "delimiter", "max-keys", "continuation-token", "start-after", "encoding-type", "location", "x-id", "versioning", "publicAccessBlock", "versions", "versionId", "key-marker", "version-id-marker", "tagging":
+		case "uploads", "uploadId", "partNumber", "max-parts", "part-number-marker", "max-uploads", "upload-id-marker", "list-type", "prefix", "delimiter", "max-keys", "continuation-token", "start-after", "encoding-type", "location", "x-id", "versioning", "publicAccessBlock", "versions", "versionId", "key-marker", "version-id-marker", "tagging":
 		default:
 			fail(w, r, "NotImplemented", "Unsupported S3 query: "+k)
 			return
@@ -204,6 +204,10 @@ func (g *Gateway) serveS3(w http.ResponseWriter, r *http.Request) {
 			fail(w, r, "InvalidArgument", "Object keys must be valid printable UTF-8, at most 1024 bytes.")
 			return
 		}
+		if multipartIntent(r.URL.Query()) {
+			g.multipart(w, r, name, key)
+			return
+		}
 		for k := range r.URL.Query() {
 			if k != "x-id" && k != "versionId" {
 				fail(w, r, "NotImplemented", "Unsupported object query: "+k)
@@ -215,6 +219,10 @@ func (g *Gateway) serveS3(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		g.object(w, r, name, key)
+		return
+	}
+	if multipartIntent(r.URL.Query()) {
+		g.multipart(w, r, name, "")
 		return
 	}
 	for _, kind := range []string{"versioning", "publicAccessBlock", "versions", "tagging"} {
@@ -574,6 +582,15 @@ func permission(r *http.Request) (string, string) {
 	resource := "arn:aws:s3:::" + name
 	if object && key != "" {
 		resource += "/" + key
+		if multipartIntent(r.URL.Query()) {
+			if r.Method == "DELETE" {
+				return "s3:AbortMultipartUpload", resource
+			}
+			if r.Method == "GET" {
+				return "s3:ListMultipartUploadParts", resource
+			}
+			return "s3:PutObject", resource
+		}
 		switch r.Method {
 		case "PUT":
 			return "s3:PutObject", resource
@@ -588,6 +605,9 @@ func permission(r *http.Request) (string, string) {
 			}
 			return "s3:GetObject", resource
 		}
+	}
+	if r.URL.Query().Has("uploads") {
+		return "s3:ListBucketMultipartUploads", resource
 	}
 	if r.URL.Query().Has("tagging") {
 		if r.Method == "GET" {

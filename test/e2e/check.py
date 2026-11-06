@@ -71,6 +71,10 @@ def submit(page):
  if dialog.is_visible():dialog.get_by_role('button').last.click()
  else:page.get_by_role('button',name=re.compile('^(Create bucket|Upload|Create parameter|Save changes)$')).last.click()
 class Conformance(unittest.TestCase):
+ def test_s3_multipart_served_reference_examples(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('s3_multipart_docs.py'))],check=True,timeout=120)
+ def test_s3_multipart_native_persistence_and_console(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('s3_multipart.py'))],check=True)
  def test_sakura_reference_real_examples_and_scalar_send(self):
   subprocess.run([sys.executable, str(Path(__file__).with_name('sakura_reference_live.py')), '--root', str(Path(__file__).resolve().parents[2]), '--binary', str(BINARY), '--reports', str(REPORTS/'sakura-reference-live'), '--browser'], check=True, timeout=180)
  def test_sakura_disk_console_real_native_state_and_scope(self):

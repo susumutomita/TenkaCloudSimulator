@@ -9,7 +9,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-BASE_MODELS = {'AzureBlobState',
+BASE_MODELS = {'S3MultipartState', 'AzureBlobState',
  'AzurePropertiesEpoch',
  'AzurePropertiesTarget',
  'BlobRange',
@@ -57,7 +57,8 @@ BASE_MODELS = {'AzureBlobState',
  'SecretsVersionLifecycle',
  'StackOwnership',
  'StartupTokenVisibility'}
-BASE_INVARIANTS = {'AzureBlobState': {'BudgetBounded',
+BASE_INVARIANTS = {
+    'S3MultipartState': {'TypeOK','Budget','NoOrphans','Cleanup','RefusalAtomic'},'AzureBlobState': {'BudgetBounded',
                     'ConditionEnforced',
                     'FailureAtomic',
                     'FreshWriteIdentity',
@@ -452,7 +453,8 @@ BASE_INVARIANTS = {'AzureBlobState': {'BudgetBounded',
                             'InvalidFileNeverEmits',
                             'TypeOK'}}
 # Established controls require an explicit gate-policy change before retirement.
-REQUIRED_MUTANTS = {'AzureBlobState': {'ContainerDeleteErasesPeer',
+REQUIRED_MUTANTS = {
+    'S3MultipartState': {'OmitPartBudget','OmitUploadParent','RetainCompletedParts','PartialFailure','OmitUploadBinding'},'AzureBlobState': {'ContainerDeleteErasesPeer',
                     'ContainerDeleteLeavesBlobs',
                     'FailedPutCommits',
                     'IgnoreAccountOwner',

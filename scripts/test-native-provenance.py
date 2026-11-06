@@ -243,7 +243,24 @@ class NativeProvenanceTests(unittest.TestCase):
         self.assertEqual(prefix.count(extension), 1, "Exact approved five-ID extension is required once")
         self.assertEqual(prefix.count(extended_assert), 1, "Exact approved closed union is required once")
         prefix = prefix.replace(extension, "", 1).replace(extended_assert, original_assert, 1)
+        # Multipart adds one reviewed operation to the same closed native set.
+        # Normalize only this exact literal; all original guard bytes stay pinned.
+        multipart = "expected_legacy={'S3MultipartUpload',"
+        self.assertEqual(prefix.count(multipart), 1, "Exact approved multipart operation is required once")
+        prefix = prefix.replace(multipart, "expected_legacy={", 1)
         self.assertEqual(hashlib.sha256(prefix.encode()).hexdigest(), "331cc7e21fd3a30aa72b690846cf60c04f06ea19c0035ac73ea13f629334d685")
+
+    def test_asset_prefix_rejects_changed_duplicate_or_missing_multipart_extension(self):
+        source = (REPO / "scripts/check-assets.py").read_text()
+        approved = "expected_legacy={'S3MultipartUpload',"
+        for modified in (
+            source.replace(approved, "expected_legacy={'S3MultipartAnything',", 1),
+            source.replace(approved, "expected_legacy={'S3MultipartUpload','S3MultipartUpload',", 1),
+            source.replace(approved, "expected_legacy={", 1),
+        ):
+            with self.subTest(modified_sha256=hashlib.sha256(modified.encode()).hexdigest()):
+                with self.assertRaises(AssertionError):
+                    self._assert_original_asset_prefix(modified)
 
     def test_asset_prefix_rejects_unrelated_strict_check_weakening(self):
         source = (REPO / "scripts/check-assets.py").read_text()

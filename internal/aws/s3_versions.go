@@ -26,7 +26,10 @@ func NewS3Store(db *sql.DB) (*S3Store, error) {
 	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS aws_s3_config(bucket TEXT PRIMARY KEY REFERENCES buckets(name) ON DELETE CASCADE,status TEXT NOT NULL CHECK(status IN ('','Enabled','Suspended')),public_access TEXT);
  CREATE TABLE IF NOT EXISTS aws_s3_versions(seq INTEGER PRIMARY KEY AUTOINCREMENT,bucket TEXT NOT NULL REFERENCES buckets(name) ON DELETE RESTRICT,key TEXT NOT NULL,version TEXT NOT NULL,marker INTEGER NOT NULL CHECK(marker IN (0,1)),content_type TEXT NOT NULL,etag TEXT NOT NULL,modified TEXT NOT NULL,data BLOB NOT NULL,UNIQUE(bucket,key,version));
  CREATE TABLE IF NOT EXISTS aws_s3_tags(bucket TEXT PRIMARY KEY REFERENCES buckets(name) ON DELETE CASCADE,document TEXT NOT NULL);
- CREATE INDEX IF NOT EXISTS aws_s3_version_keys ON aws_s3_versions(bucket,key,seq DESC);`)
+ CREATE INDEX IF NOT EXISTS aws_s3_version_keys ON aws_s3_versions(bucket,key,seq DESC);
+ CREATE TABLE IF NOT EXISTS aws_s3_uploads(id TEXT PRIMARY KEY,bucket TEXT NOT NULL REFERENCES buckets(name) ON DELETE RESTRICT,key TEXT NOT NULL,content_type TEXT NOT NULL,initiated TEXT NOT NULL);
+ CREATE INDEX IF NOT EXISTS aws_s3_upload_keys ON aws_s3_uploads(bucket,key,id);
+ CREATE TABLE IF NOT EXISTS aws_s3_parts(upload TEXT NOT NULL REFERENCES aws_s3_uploads(id) ON DELETE CASCADE,number INTEGER NOT NULL CHECK(number BETWEEN 1 AND 10000),etag TEXT NOT NULL,modified TEXT NOT NULL,data BLOB NOT NULL,PRIMARY KEY(upload,number));`)
 	return &S3Store{db}, err
 }
 func s3BucketExists(tx s3Query, bucket string) error {
@@ -51,8 +54,19 @@ func s3State(tx s3Query, bucket string) (string, error) {
 
 // Import the original unversioned object lazily, preserving existing state files.
 func s3Import(tx s3Query, bucket, key string) error {
-	_, err := tx.Exec(`INSERT INTO aws_s3_versions(bucket,key,version,marker,content_type,etag,modified,data)
+	var expected int64
+	if err := tx.QueryRow(`SELECT count(*) FROM objects o WHERE bucket=? AND key=? AND NOT EXISTS(SELECT 1 FROM aws_s3_versions v WHERE v.bucket=o.bucket AND v.key=o.key)`, bucket, key).Scan(&expected); err != nil {
+		return err
+	}
+	result, err := tx.Exec(`INSERT INTO aws_s3_versions(bucket,key,version,marker,content_type,etag,modified,data)
  SELECT bucket,key,'null',0,content_type,etag,modified,data FROM objects o WHERE bucket=? AND key=? AND NOT EXISTS(SELECT 1 FROM aws_s3_versions v WHERE v.bucket=o.bucket AND v.key=o.key)`, bucket, key)
+	if err != nil {
+		return err
+	}
+	n, err := result.RowsAffected()
+	if err == nil && n != expected {
+		return core.Fail("InternalError", "Legacy S3 history import was not acknowledged.")
+	}
 	return err
 }
 func s3Scan(row interface{ Scan(...any) error }, key string) (S3Version, error) {
@@ -81,7 +95,7 @@ func s3Refresh(tx s3Query, bucket, key string) error {
 	if err != nil {
 		return err
 	}
-	_, err = tx.Exec(`INSERT INTO objects(bucket,key,content_type,etag,modified,data) VALUES(?,?,?,?,?,?) ON CONFLICT(bucket,key) DO UPDATE SET content_type=excluded.content_type,etag=excluded.etag,modified=excluded.modified,data=excluded.data`, bucket, key, v.ContentType, v.ETag, v.Modified.Format(time.RFC3339Nano), v.Data)
+	err = mpWrite(tx, `INSERT INTO objects(bucket,key,content_type,etag,modified,data) VALUES(?,?,?,?,?,?) ON CONFLICT(bucket,key) DO UPDATE SET content_type=excluded.content_type,etag=excluded.etag,modified=excluded.modified,data=excluded.data`, bucket, key, v.ContentType, v.ETag, v.Modified.Format(time.RFC3339Nano), v.Data)
 	return err
 }
 
@@ -90,8 +104,8 @@ func s3Refresh(tx s3Query, bucket, key string) error {
 func s3Quota(tx s3Query, bytes, count int) error {
 	var stored, versions int
 	err := tx.QueryRow(`SELECT
- (SELECT coalesce(sum(length(data)),0) FROM aws_s3_versions)+(SELECT coalesce(sum(length(data)),0) FROM objects o WHERE NOT EXISTS(SELECT 1 FROM aws_s3_versions v WHERE v.bucket=o.bucket AND v.key=o.key)),
- (SELECT count(*) FROM aws_s3_versions)+(SELECT count(*) FROM objects o WHERE NOT EXISTS(SELECT 1 FROM aws_s3_versions v WHERE v.bucket=o.bucket AND v.key=o.key))`).Scan(&stored, &versions)
+ (SELECT coalesce(sum(length(data)),0) FROM aws_s3_parts)+(SELECT coalesce(sum(length(data)),0) FROM aws_s3_versions)+(SELECT coalesce(sum(length(data)),0) FROM objects o WHERE NOT EXISTS(SELECT 1 FROM aws_s3_versions v WHERE v.bucket=o.bucket AND v.key=o.key)),
+ (SELECT count(*) FROM aws_s3_parts)+(SELECT count(*) FROM aws_s3_versions)+(SELECT count(*) FROM objects o WHERE NOT EXISTS(SELECT 1 FROM aws_s3_versions v WHERE v.bucket=o.bucket AND v.key=o.key))`).Scan(&stored, &versions)
 	if err != nil {
 		return err
 	}
@@ -120,6 +134,17 @@ func (s *S3Store) PutContext(ctx context.Context, bucket, key, contentType strin
 		return S3Version{}, err
 	}
 	defer tx.Rollback()
+	sum := md5.Sum(data)
+	v, err := s3PutTx(tx, bucket, key, contentType, data, match, none, `"`+hex.EncodeToString(sum[:])+`"`)
+	if err == nil {
+		err = tx.Commit()
+	}
+	return v, err
+}
+
+// The native PUT and multipart completion share version/quota/current-view logic.
+// The caller owns the transaction, so part release and object creation are atomic.
+func s3PutTx(tx s3Query, bucket, key, contentType string, data []byte, match, none, etag string) (S3Version, error) {
 	state, err := s3State(tx, bucket)
 	if err != nil {
 		return S3Version{}, err
@@ -155,18 +180,14 @@ func (s *S3Store) PutContext(ctx context.Context, bucket, key, contentType strin
 	if err = s3Quota(tx, len(data), 1); err != nil {
 		return S3Version{}, err
 	}
-	sum := md5.Sum(data)
-	v := S3Version{Object: core.Object{Key: key, Size: len(data), ETag: `"` + hex.EncodeToString(sum[:]) + `"`, Modified: time.Now().UTC(), ContentType: contentType, Data: data}, ID: id, Latest: true}
+	v := S3Version{Object: core.Object{Key: key, Size: len(data), ETag: etag, Modified: time.Now().UTC(), ContentType: contentType, Data: data}, ID: id, Latest: true}
 	if v.Data == nil {
 		v.Data = []byte{}
 	}
-	if _, err = tx.Exec("INSERT INTO aws_s3_versions(bucket,key,version,marker,content_type,etag,modified,data) VALUES(?,?,?,0,?,?,?,?)", bucket, key, id, v.ContentType, v.ETag, v.Modified.Format(time.RFC3339Nano), v.Data); err != nil {
+	if err = mpWrite(tx, "INSERT INTO aws_s3_versions(bucket,key,version,marker,content_type,etag,modified,data) VALUES(?,?,?,0,?,?,?,?)", bucket, key, id, v.ContentType, v.ETag, v.Modified.Format(time.RFC3339Nano), v.Data); err != nil {
 		return S3Version{}, err
 	}
 	if err = s3Refresh(tx, bucket, key); err != nil {
-		return S3Version{}, err
-	}
-	if err = tx.Commit(); err != nil {
 		return S3Version{}, err
 	}
 	if state == "" {
@@ -290,11 +311,11 @@ func s3DeleteBucket(tx s3Query, bucket string) error {
 		return err
 	}
 	var count int
-	if err := tx.QueryRow("SELECT (SELECT count(*) FROM objects WHERE bucket=?)+(SELECT count(*) FROM aws_s3_versions WHERE bucket=?)", bucket, bucket).Scan(&count); err != nil {
+	if err := tx.QueryRow("SELECT (SELECT count(*) FROM objects WHERE bucket=?)+(SELECT count(*) FROM aws_s3_versions WHERE bucket=?)+(SELECT count(*) FROM aws_s3_uploads WHERE bucket=?)", bucket, bucket, bucket).Scan(&count); err != nil {
 		return err
 	}
 	if count != 0 {
-		return core.Fail("BucketNotEmpty", "Delete all objects, versions and delete markers first.")
+		return core.Fail("BucketNotEmpty", "Delete all objects, versions, delete markers and abort multipart uploads first.")
 	}
 	if _, err := tx.Exec("DELETE FROM buckets WHERE name=?", bucket); err != nil {
 		return err

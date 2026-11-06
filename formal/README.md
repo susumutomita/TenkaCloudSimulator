@@ -539,3 +539,12 @@ and SQLite transactions/DDL/commit are abstract; actual cold known-policy403,
 real SQLite failure/rollback and SDK tests independently check the native seam.
 Catalog/crypto/UI remain separate; no raw JSON/IAM/HMAC/SQL or Go refinement,
 unbounded concurrency, liveness or full AWS behavior is inferred.
+
+## S3 multipart increment
+
+`S3MultipartState` adds a bounded upload/part/object budget, parent, cleanup and
+refusal-state model with five required controls. Its source correspondence and
+limits are in `formal/models.json` and [the multipart contract](../docs/s3-multipart.md).
+SANY and limited seeded simulation/control checks passed locally; exhaustive BFS
+could not start because the sandbox denies TLC RMI listeners. Exact-HEAD hosted
+validation remains required. It does not prove Go/SQLite/React refinement.

@@ -1,3 +1,16 @@
+# S3 multipart active integration — Issue51
+
+Owner: Codex root, branch feat/s3-multipart-51. Normal merge of public main
+`d166f569772de7f45d98e31e9971eeb33b903763` is being resolved. All current providers,
+IAM/CFN state, 48 existing models and 381 controls are retained. Multipart adds six
+native APIs, Management UI, exact67-operation API reference and one bounded model
+with five controls. SQL/native focused tests and model simulation passed; full
+HTTP/browser/BFS/race/dual90/hosted acceptance is pending. Local socket listeners
+are denied by sandbox; public source was read through the connected GitHub API.
+No merge or whole-test success is claimed. Other service owners remain unchanged.
+
+---
+
 # Development roster
 
 ## Current integration snapshot: IAM53, 2026-11-05
