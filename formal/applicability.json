@@ -3,10 +3,24 @@
   "base_sha": "d166f569772de7f45d98e31e9971eeb33b903763",
   "changes": [
     {
+      "path": "README.ja.md",
+      "sha256": "faed0f49fcc47a04d7d3833f5d3ecc8cf94756872c82be613fb9b920e7029cb3",
+      "disposition": "documentation",
+      "reason": "Correct current 50-model/398-control inventory and distinguish dated historical receipts, bounded LP properties and unverified conditions. No new runtime guarantee.",
+      "models": []
+    },
+    {
       "path": "README.md",
-      "sha256": "1a2840ce849068671916d7835964555cc0657be53a15ef69b498ac18a5a7efdc",
+      "sha256": "7bf76f1f0a9c785b86f4cd9aa0837283e3c74f677a459545b42add8f70c2b44e",
       "disposition": "documentation",
       "reason": "LP-only documentation, validation policy or tests; preserves SDK root, old checks and existing model values. No browser or implementation proof claim.",
+      "models": []
+    },
+    {
+      "path": "docs/formal-validation.md",
+      "sha256": "31cd732a385f414cbd935e33ebdb0add95a8ceb8ae8f1748ebdc61b8ee8c1812",
+      "disposition": "documentation",
+      "reason": "Correct current 50-model/398-control inventory and distinguish dated historical receipts, bounded LP properties and unverified conditions. No new runtime guarantee.",
       "models": []
     },
     {
@@ -105,6 +119,13 @@
           "limits": "Post-start semantic selection and optional decorative lifecycle safety only. Trusted source data and native feature/paint verdicts are assumed; no DOM/accessibility/layout/rendering/Chrome support/backend/route/network or JavaScript refinement proof. Reduced-motion has identical static transitions because implementation has no animation loop; no preference-detection proof. Timeout is an environment event, not wall-clock/liveness. Initial fragment choice is a trusted closed node ID or absent input; URL parsing, encoding, browser scroll and history are outside this model."
         }
       ]
+    },
+    {
+      "path": "formal/README.md",
+      "sha256": "e8ef9e6dbe57ee0f3884dcb152c8987cf74b879b6202cd4f84916ed8228581a3",
+      "disposition": "documentation",
+      "reason": "Correct current 50-model/398-control inventory and distinguish dated historical receipts, bounded LP properties and unverified conditions. No new runtime guarantee.",
+      "models": []
     },
     {
       "path": "formal/models.json",
@@ -295,6 +316,20 @@
       "sha256": "aa5cb599d2885d901243cf648ab6be6ad0ad43884f29764cd46a3e17f21635a8",
       "disposition": "formal-infrastructure",
       "reason": "Preserves TLC bounds, deadlines, exit failure and mutation oracles; retains process-failure stream/type/errno/elapsed diagnostics and requires the two existing LP models, properties, controls and exact source scopes. Injected tool-failure and removal tests are not TLC or implementation proof.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/check.py",
+      "sha256": "c3aae6053226c5d5774eac684d0afa238eaffe0c54476f2342e27bdf87ee8c32",
+      "disposition": "test-support",
+      "reason": "Persist anonymous landing desktop/mobile, fallback, keyboard/native-link, strict accessibility and source-asset checks using the existing isolated dummy CLI fixture. No production authority or model-refinement claim.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/landing_topology.py",
+      "sha256": "d64c1318f677cdbd0df5ea133f9dfe52c8740bc70ea9a796e4674da0132a7bfa",
+      "disposition": "test-support",
+      "reason": "Persist anonymous landing desktop/mobile, fallback, keyboard/native-link, strict accessibility and source-asset checks using the existing isolated dummy CLI fixture. No production authority or model-refinement claim.",
       "models": []
     }
   ]
