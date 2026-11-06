@@ -4312,8 +4312,67 @@
       "models": []
     },
     {
+      "path": "internal/server/aws_catalog.go",
+      "sha256": "4c1840423b6dfb0d2ebd9f50de0c3680e17407854ff9c641975f95dd0857e53c",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/aws_catalog_test.go",
+      "sha256": "67e508cb1a574c824b649a631cb9b7a1b91f2f98ddbc1f55790fa981e9301064",
+      "disposition": "test-support",
+      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "models": []
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "7524c4e05d43801c5d98b53f6f349cf912559ce1e788fcfe1d7854294c18e5d7",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
       "path": "internal/server/web/app.js",
-      "sha256": "c1f90a045d3198ae5d175c5f1db35a1b27a0ef29b597381b3e2572b49134c131",
+      "sha256": "6e0f9815d65a168cea90cd6ff24fe1bb6b9d917fd599f1775f2a83c61b104a3c",
       "disposition": "modeled",
       "reason": "Catalog console view source or its embedded bundle; view acceptance, single-write sequencing and failure visibility are projected by CatalogConsoleEpoch; rendering and native results are covered by browser tests.",
       "models": [
@@ -4332,7 +4391,7 @@
     },
     {
       "path": "test/e2e/aws_catalog.py",
-      "sha256": "0498971476d016baa256c171598537f7ca82a504f3092932a822141bac5c3ed8",
+      "sha256": "4aa2e40f0385a774feecba334e8a5c1956a28a509686b69b29d1761b5452b885",
       "disposition": "test-support",
       "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
       "models": []
@@ -4346,7 +4405,7 @@
     },
     {
       "path": "test/e2e/aws_catalog_fixtures.py",
-      "sha256": "187161e72ce7c2f7cbd33565abda68057f0a4702e3978bf221acf29f3e8d88aa",
+      "sha256": "e0820925dab4dabe9c51e7f248c5f38293cdefbf004651c2fa8604aa97d7d085",
       "disposition": "test-support",
       "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
       "models": []
@@ -5109,21 +5168,21 @@
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "99f173a524b158b8957162d250137c89b4b7cc44c1a4cbc4d0b6457fb2ccc86c",
+      "sha256": "065d8ab98e5c0bbb4a01337392aa214d5bb43ffd40b4249881c2323b0a71bc21",
       "disposition": "presentation",
       "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "20a8f9726f4dfb54802d17d0cf163b608eff3e3f0887ba67d087279681eeb96f",
+      "sha256": "5903b2afa9924ce61b9c1333e5f2cb3dedb40da1e9604115c48ac2865e503073",
       "disposition": "presentation",
       "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
       "models": []
     },
     {
       "path": "tools/console/src/catalog.jsx",
-      "sha256": "18b5f4494d7f330aa71dbe13b3d728709bbfaac079fc578b900965d4705b6154",
+      "sha256": "8e0a609d9f4bd36cff2ddfca6ef7438a9e6a8606e02397ec3b78f8327e7ca6d3",
       "disposition": "modeled",
       "reason": "Catalog console view source or its embedded bundle; view acceptance, single-write sequencing and failure visibility are projected by CatalogConsoleEpoch; rendering and native results are covered by browser tests.",
       "models": [
