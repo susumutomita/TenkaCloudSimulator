@@ -1,0 +1,806 @@
+{
+ "components": {
+  "schemas": {
+   "BlockchainNode": {
+    "additionalProperties": false,
+    "properties": {
+     "blockchainType": {
+      "enum": [
+       "BLOCKCHAIN_TYPE_UNSPECIFIED",
+       "ETHEREUM"
+      ],
+      "type": "string"
+     },
+     "connectionInfo": {
+      "$ref": "#/components/schemas/ConnectionInfo"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "ethereumDetails": {
+      "$ref": "#/components/schemas/EthereumDetails"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "privateServiceConnectEnabled": {
+      "type": "boolean"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "CREATING",
+       "DELETING",
+       "RUNNING",
+       "ERROR",
+       "UPDATING",
+       "REPAIRING",
+       "RECONCILING",
+       "SYNCING"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ConnectionInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "endpointInfo": {
+      "$ref": "#/components/schemas/EndpointInfo"
+     },
+     "serviceAttachment": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "EndpointInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "jsonRpcApiEndpoint": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "websocketsApiEndpoint": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "EthereumDetails": {
+    "additionalProperties": false,
+    "properties": {
+     "additionalEndpoints": {
+      "$ref": "#/components/schemas/EthereumEndpoints"
+     },
+     "apiEnableAdmin": {
+      "type": "boolean"
+     },
+     "apiEnableDebug": {
+      "type": "boolean"
+     },
+     "consensusClient": {
+      "enum": [
+       "CONSENSUS_CLIENT_UNSPECIFIED",
+       "LIGHTHOUSE",
+       "ERIGON_EMBEDDED_CONSENSUS_LAYER"
+      ],
+      "type": "string"
+     },
+     "executionClient": {
+      "enum": [
+       "EXECUTION_CLIENT_UNSPECIFIED",
+       "GETH",
+       "ERIGON"
+      ],
+      "type": "string"
+     },
+     "gethDetails": {
+      "$ref": "#/components/schemas/GethDetails"
+     },
+     "network": {
+      "enum": [
+       "NETWORK_UNSPECIFIED",
+       "MAINNET",
+       "TESTNET_GOERLI_PRATER",
+       "TESTNET_SEPOLIA",
+       "TESTNET_HOLESKY"
+      ],
+      "type": "string"
+     },
+     "nodeType": {
+      "enum": [
+       "NODE_TYPE_UNSPECIFIED",
+       "LIGHT",
+       "FULL",
+       "ARCHIVE"
+      ],
+      "type": "string"
+     },
+     "validatorConfig": {
+      "$ref": "#/components/schemas/ValidatorConfig"
+     }
+    },
+    "type": "object"
+   },
+   "EthereumEndpoints": {
+    "additionalProperties": false,
+    "properties": {
+     "beaconApiEndpoint": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "beaconPrometheusMetricsApiEndpoint": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "executionClientPrometheusMetricsApiEndpoint": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GethDetails": {
+    "additionalProperties": false,
+    "properties": {
+     "garbageCollectionMode": {
+      "enum": [
+       "GARBAGE_COLLECTION_MODE_UNSPECIFIED",
+       "FULL",
+       "ARCHIVE"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListBlockchainNodesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "blockchainNodes": {
+      "items": {
+       "$ref": "#/components/schemas/BlockchainNode"
+      },
+      "type": "array"
+     },
+     "nextPageToken": {
+      "type": "string"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListOperationsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "operations": {
+      "items": {
+       "$ref": "#/components/schemas/Operation"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Operation": {
+    "additionalProperties": false,
+    "properties": {
+     "done": {
+      "type": "boolean"
+     },
+     "error": {
+      "$ref": "#/components/schemas/Status"
+     },
+     "metadata": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "response": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "Status": {
+    "additionalProperties": false,
+    "properties": {
+     "code": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "details": {
+      "items": {
+       "additionalProperties": {
+        "description": "Any JSON value"
+       },
+       "type": "object"
+      },
+      "type": "array"
+     },
+     "message": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ValidatorConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "beaconFeeRecipient": {
+      "type": "string"
+     },
+     "managedValidatorClient": {
+      "type": "boolean"
+     },
+     "mevRelayUrls": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Blockchain Node Engine API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Blockchain nodes are configuration metadata: no Ethereum execution, consensus or validator client, storage or endpoint runs; connection information is not reported and nodes report RUNNING immediately. Only labels can be updated. Long-running operations complete synchronously and remain readable through operations.get/list.",
+  "title": "Blockchain Node Engine (simulator catalog)",
+  "version": "v1"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/v1/projects/{projectsId}/locations/{locationsId}/blockchainNodes": {
+   "get": {
+    "operationId": "blockchainnodeengine.projects.locations.blockchainNodes.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListBlockchainNodesResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.blockchainNodes.list",
+    "tags": [
+     "Blockchain Node Engine"
+    ]
+   },
+   "post": {
+    "operationId": "blockchainnodeengine.projects.locations.blockchainNodes.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "blockchainNodeId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/BlockchainNode"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.blockchainNodes.create",
+    "tags": [
+     "Blockchain Node Engine"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/blockchainNodes/{blockchainNodesId}": {
+   "delete": {
+    "operationId": "blockchainnodeengine.projects.locations.blockchainNodes.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "blockchainNodesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.blockchainNodes.delete",
+    "tags": [
+     "Blockchain Node Engine"
+    ]
+   },
+   "get": {
+    "operationId": "blockchainnodeengine.projects.locations.blockchainNodes.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "blockchainNodesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/BlockchainNode"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.blockchainNodes.get",
+    "tags": [
+     "Blockchain Node Engine"
+    ]
+   },
+   "patch": {
+    "operationId": "blockchainnodeengine.projects.locations.blockchainNodes.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "blockchainNodesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/BlockchainNode"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.blockchainNodes.patch",
+    "tags": [
+     "Blockchain Node Engine"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/operations": {
+   "get": {
+    "operationId": "blockchainnodeengine.projects.locations.operations.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListOperationsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.operations.list",
+    "tags": [
+     "Blockchain Node Engine"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}": {
+   "get": {
+    "operationId": "blockchainnodeengine.projects.locations.operations.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "operationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.operations.get",
+    "tags": [
+     "Blockchain Node Engine"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/_simulator/providers/gcp/blockchainnodeengine"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Blockchain Node Engine API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Blockchain nodes are configuration metadata: no Ethereum execution, consensus or validator client, storage or endpoint runs; connection information is not reported and nodes report RUNNING immediately. Only labels can be updated. Long-running operations complete synchronously and remain readable through operations.get/list.",
+   "name": "Blockchain Node Engine"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "google-api-python-client",
+  "version": "2.199.0",
+  "file": "googleapiclient/discovery_cache/documents/blockchainnodeengine.v1.json",
+  "sha256": "6b539f8f7719915d1381d6e450df3c14a98605e0d85a0e7da2baabd1e2e32036",
+  "license": "Apache-2.0",
+  "revision": "20250416"
+ }
+}
