@@ -59,7 +59,7 @@ Git, logs, terminal recordings, and screen sharing. If paste is unavailable, use
 it, and the server authenticates when you submit. See the
 [token-file format and unverified browser boundaries](docs/login-token-file.md).
 The masked field includes per-field password-manager ignore hints and adopts a
-connected native input value before blur or submission, including an intentional
+connected native input value on input capture or blur, and before submission, including an intentional
 clear. A current explicit paste retains precedence. These are compatibility
 measures, not proof of an extension cause or a confirmed Dia/1Password repair.
 Actual extension, OS clipboard and new embedded-binary browser checks remain pending.
