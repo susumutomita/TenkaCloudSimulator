@@ -1,12 +1,15 @@
 # Finite state models
 
-Login integration inventory: 49 models / 393 literal-protected controls
-(442 required executions). The combined exact-HEAD gate is pending; the existing
+Login integration inventory: 49 models / 394 literal-protected controls
+(443 required executions). The combined exact-HEAD gate is pending; the existing
 48 models / 381 controls are preserved. LoginInputIntent adds one baseline and
-12 controls. Its isolated `28d37d1` model run passed: 73 distinct states, empty
-queue, and all 12 declared noninitial counterexamples. This scoped result is
-not a combined 442-case or browser/implementation proof.
-See [login input correspondence and limits](../docs/login-token-file.md#bounded-input-intent-model). All incoming main44 model objects, TLA/CFG bytes, properties
+13 controls. Historical `28d37d1` checked 13 cases/73 distinct states before focus
+capture. Scoped `5b270e9` checked 14 cases: 77 distinct states, 94 generated, empty
+queue and all 13 declared noninitial counterexamples. The focus control failed at
+state 3 under an explicit controlled-reset assumption, not an established cause
+of the hosted login failure. This is not a combined 443-case or browser proof.
+See [login input correspondence and limits](../docs/login-token-file.md#bounded-input-intent-model)
+and the [dated failed CI result](../docs/login-token-file.md#dated-validation-and-current-candidate). All incoming main44 model objects, TLA/CFG bytes, properties
 and347 controls are preserved. Sakura metadata/admission/startup add35 controls;
 SakuraDisksViewEpoch adds17 more for request scope/sequence, stale frames,
 ACK/form exit, read-only retry and locale continuity. These four scoped baselines
@@ -72,7 +75,7 @@ historical scoped receipt does not replace it.
 
 Legacy integration sections below retain historical counts and status statements
 for traceability. Their word “current” refers to the recorded integration, not
-today's registry. The login integration inventory is 49/393 (442 required runs),
+today's registry. The login integration inventory is 49/394 (443 required runs),
 with the combined exact-HEAD gate pending. Historical 48/381 results remain
 dated evidence; proof claims always require evidence for the exact revision.
 

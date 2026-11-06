@@ -58,11 +58,14 @@ Git, logs, terminal recordings, and screen sharing. If paste is unavailable, use
 **Choose token file**: the browser reads a bounded local file without uploading
 it, and the server authenticates when you submit. See the
 [token-file format and unverified browser boundaries](docs/login-token-file.md).
-The masked field includes per-field password-manager ignore hints and adopts a
-connected native input value on input capture or blur, and before submission, including an intentional
-clear. A current explicit paste retains precedence. These are compatibility
-measures, not proof of an extension cause or a confirmed Dia/1Password repair.
-Actual extension, OS clipboard and new embedded-binary browser checks remain pending.
+The masked field includes per-field password-manager ignore hints. It adopts a
+connected native value during input/focus capture or blur, and snapshots it at
+submission, including an intentional clear. Submission flushes a current explicit
+paste first; adoption is a new intent that cancels older asynchronous input work.
+These are compatibility measures, not proof of an extension cause or a confirmed
+Dia/1Password repair. The latest focus-capture candidate is not built or
+browser-verified; real extension and user-device clipboard behavior remain unverified.
+See the [dated login CI result and remaining checks](docs/login-token-file.md#dated-validation-and-current-candidate).
 
 Press Ctrl+C to stop. Restarting with the same state and token files reuses them.
 Omitting `--state` when invoking the CLI creates a fresh in-memory database.
@@ -252,8 +255,8 @@ not binary runtime dependencies. Regeneration must preserve locks and original
 rights: [console](tools/console/README.md), [Scalar](tools/scalar/README.md),
 [Python/WASI runtime](tools/python/README.md).
 
-This login integration requires 49 finite models and 393 deliberate defect controls
-(442 required model/check executions); the combined exact-HEAD gate is pending.
+This login integration requires 49 finite models and 394 deliberate defect controls
+(443 required model/check executions); the combined exact-HEAD gate is pending.
 The previous 48-model/381-control inventory is preserved, including four Sakura metadata/admission/startup/view
 models, the Secrets metadata view and the preserved DynamoDB console model. Registration is not an integrated-revision execution receipt. The new IAM scenario checks two requests
 from each of four reachable seeds. A broader four-request trial timed out and

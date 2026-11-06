@@ -120,13 +120,13 @@ SDK、操作画面、再起動、チーム分離の受入検証は `make e2e` �
 
 CIはstatementと未フィルターsource-line coverageを両方90%以上に強制します。`make before-commit`単独のcoverage判定はstatementのみで、source-line判定はCIのCobertura生成後ステージと上記の2コマンドで行います。SDK/browser、license、依存security、埋込asset、形式検査も行います。cross compileは他OSでの実行成功を意味しません。開発用Python/Node/Javaはruntime依存ではありません。UI・Scalarの再生成は権利表記とlockを保持する[各build手順](tools/console/README.md)・[Scalar手順](tools/scalar/README.md)・[Python runtimeの権利・再生成手順](tools/python/README.md)に従います。
 
-今回のログイン統合では49有限モデル・393の意図した欠陥検出（基準モデルと陰性検査で442ケース）を必須とし、統合後の固定HEAD全体検査は未完了です。従来の48モデル・381制御は保持します。Sakuraの4つの限定モデル、DynamoDB画面、Secretsメタデータ画面の登録を保持します。SecretVersionListingは保存済みARNの認可後に行うメタデータ一覧と限定的なcursor境界を対象とし、値の読取許可や完全な履歴画面を追加しません。追加モデルの有限検査結果と統合後の固定HEAD検査は区別します。TLCは限定した状態空間の安全条件と意図したmutantの反例を検査し、Go実装のrefinement、暗号、全AWS仕様・実AWSとの一致を証明するものではありません。[形式検査](formal/README.md)、[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)。
+今回のログイン統合では49有限モデル・394の意図した欠陥検出（基準モデルと陰性検査で443ケース）を必須とし、統合後の固定HEAD全体検査は未完了です。従来の48モデル・381制御は保持します。Sakuraの4つの限定モデル、DynamoDB画面、Secretsメタデータ画面の登録を保持します。SecretVersionListingは保存済みARNの認可後に行うメタデータ一覧と限定的なcursor境界を対象とし、値の読取許可や完全な履歴画面を追加しません。追加モデルの有限検査結果と統合後の固定HEAD検査は区別します。TLCは限定した状態空間の安全条件と意図したmutantの反例を検査し、Go実装のrefinement、暗号、全AWS仕様・実AWSとの一致を証明するものではありません。[形式検査](formal/README.md)、[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)。
 
 ## ライセンス
 
 本体は[MIT](LICENSE)。`/_simulator/licenses/`にGo・Cloudscape・Scalar・CPython/WASI等の原文LICENSE/NOTICEを同梱しています。再配布時も保持してください。AWS公式サービスではなく、AWSロゴは使用しません。[設計・引継ぎ資料](docs/handoff/README.md)。
 
-貼り付けが動かない場合はログイン画面の「トークンファイルを選択」で、主催者から受け取った小さなファイルを明示選択できます。値は隠したまま読み込み、サインイン操作時にサーバーが認証します。[形式・制限とDia未確認の境界](docs/login-token-file.md)。入力欄にはフィールド単位のパスワードマネージャー向け無視ヒントを付け、blurと送信前に接続中のnative入力値を取り込みます。意図的な空欄も尊重し、現在の明示的な貼り付けは優先します。拡張機能が原因という診断や、Dia／1Passwordでの修復確認ではありません。実拡張機能・OSクリップボード・新しい埋込バイナリでのブラウザ確認は未実施です。
+貼り付けが動かない場合はログイン画面の「トークンファイルを選択」で、主催者から受け取った小さなファイルを明示選択できます。値は隠したまま読み込み、サインイン操作時にサーバーが認証します。[形式・制限とDia未確認の境界](docs/login-token-file.md)。入力欄にはフィールド単位のパスワードマネージャー向け無視ヒントを付け、input／focusのcaptureとblurで接続中のnative入力値を取り込み、送信時にも現在値を確認します。意図的な空欄を尊重し、送信時には現在の明示的な貼り付けを先に処理します。取り込みは新しい入力意図として古い非同期処理を無効にします。拡張機能が原因という診断や、Dia／1Passwordでの修復確認ではありません。最新のfocus-capture候補は未ビルド・ブラウザ未検証で、実拡張機能や利用者のOSクリップボード動作も未確認です。[過去のCI結果と残検証](docs/login-token-file.md#dated-validation-and-current-candidate)を区別してください。
 
 
 ## Secrets Manager contract
@@ -161,6 +161,6 @@ combined 29-model/164-control formal gate (193 executions). These receipts apply
 to that revision. Every later change still requires its exact-HEAD CI, including
 the 45-case E2E suite; focused results do not replace whole-suite verification.
 
-今回のログイン統合で必要な形式検査は49モデル・393制御（442実行）です。全体の成功は未確認で、過去の48モデル・381制御の結果とは区別します。IAMの追加モデルは4つの到達可能な初期状態から各2要求の範囲で、4要求の試案はタイムアウトし未成功です。上の過去の受領証とは区別し、最新HEADで全ゲートを実行してください。API資料はAWS・Google Cloud・Azureを分け、Sakura Cloudでは任意有効化するDisk構成の画面と5つのnative APIを扱います。他のSakuraサービスや実ストレージに対応したという意味ではありません。[ナビゲーション](docs/api-reference.md)を参照してください。
+今回のログイン統合で必要な形式検査は49モデル・394制御（443実行）です。全体の成功は未確認で、過去の48モデル・381制御の結果とは区別します。IAMの追加モデルは4つの到達可能な初期状態から各2要求の範囲で、4要求の試案はタイムアウトし未成功です。上の過去の受領証とは区別し、最新HEADで全ゲートを実行してください。API資料はAWS・Google Cloud・Azureを分け、Sakura Cloudでは任意有効化するDisk構成の画面と5つのnative APIを扱います。他のSakuraサービスや実ストレージに対応したという意味ではありません。[ナビゲーション](docs/api-reference.md)を参照してください。
 
 現在のCFN候補は条件の受理、メモ化したグラフ高さ、最終スタック・所有権行ACK、および選択したSSM/S3物理行ACKの限定モデルを追加し、mainの44モデルを保持します。`c298972`で全48モデル・381制御（429実行）、fresh全Go race/build、同一profileのstatement94.94%・未除外source90.32%を確認しました。資料のみを変えた後続`414c902`で全61 E2E（980.726秒）・reflow・startを実行し成功しました。今回公開する資料追補自身のexact HEAD hosted CIは未実施です。 その過去の追補は資料とapplicabilityハッシュのみを変更し、実行コード・モデル・テストは`c298972`と同一でした。今回のログイン変更を検証した結果ではなく、現在のexact HEAD hosted検査は別途必要です。過去の単体結果で代用せず、ホスト採点・SQL/Go refinement・秘匿出力・全リソース物理削除の証明とは扱いません。

@@ -15,13 +15,17 @@ machine-discovered semantic coverage. A newly added implementation file is not
 covered merely because an existing model passes: its exact path must have an
 appropriate reviewed scope mapping and property argument.
 
-The login integration requires 49 baselines/393 required named mutation controls
-(442 required executions), with the combined exact-HEAD gate pending. It preserves
-the earlier 48 baselines/381 controls and adds LoginInputIntent with 12 controls.
-Its isolated `28d37d1` run passed 73 distinct states with an empty queue and all
-12 named noninitial counterexamples; this does not establish global acceptance.
+The login integration requires 49 baselines/394 required named mutation controls
+(443 required executions), with the combined exact-HEAD gate pending. It preserves
+the earlier 48 baselines/381 controls and adds LoginInputIntent with 13 controls.
+The historical `28d37d1` 13-case run explored 73 distinct states before focus capture.
+The scoped `5b270e9` 14-case run explored 77 distinct states (94 generated, empty
+queue) and all 13 declared noninitial counterexamples, including the new focus
+control at state 3. Its assumed controlled reset on focus is not an established
+browser cause or implementation refinement proof.
 [Input correspondence and limits](login-token-file.md#bounded-input-intent-model)
-separate this finite state model from actual browser and authentication behavior. All 44 main `139eb82` model entries and 347 controls are
+and the [dated CI failure](login-token-file.md#dated-validation-and-current-candidate)
+separate these finite checks from combined validation and actual browser behavior. All 44 main `139eb82` model entries and 347 controls are
 preserved. CFNConditionAdmission adds a finite compile-plan projection with 14
 controls, scoped at `f69fb46`; the complete 429-case registered gate of this
 combined candidate passed at `c298972`. The docs-only `414c902` subsequently passed all 61 E2E/start checks; exact-head hosted CI for the publication candidate remains pending. SecretMetadataViewEpoch from main is preserved byte-for-byte. Numeric/regex/parser correctness, actual resource
@@ -34,7 +38,7 @@ Registration and Python guards are not a successful immutable TLC execution.
 |---|---|---|
 | ObjectStore | two buckets/two keys; parent integrity, abstract allow/deny | concrete IAM, HTTP, SQL, crashes |
 | CFNConditionAdmission | 234 finite input witnesses; defaults/supplied admission, all conditions/declarations, branch choice, NoValue pruning, pure resource/output plan | real parser/numeric/regex/graph evaluation, exact error ordering, raw-link/dependency completeness, SQL, resource mutation, grants, privacy and host grading |
-| [LoginInputIntent](login-token-file.md#bounded-input-intent-model) | 16 scheduled input/paste/file/submit/locale scenarios, revision 0..3, at most six events and two POST snapshots; eight invariant families | arbitrary interleavings, React/DOM refinement, clipboard/extension behavior, file parser, server authentication and liveness |
+| [LoginInputIntent](login-token-file.md#bounded-input-intent-model) | 17 scheduled input/focus/paste/file/submit/locale scenarios, revision 0..3, at most six events and two POST snapshots; eight invariant families | arbitrary interleavings, React/DOM refinement, clipboard/extension behavior, file parser, server authentication and liveness |
 | StackOwnership | two owners/two names; retained drift reservations | authentication, callback recovery, full CFN |
 | S3Versions | one bucket/two keys; at most three history entries per key | suspended versions, byte quotas, SQL |
 | NativeIAMOwnership | two case-folded names; native/legacy exclusivity | trust parsing, full IAM, process isolation |
