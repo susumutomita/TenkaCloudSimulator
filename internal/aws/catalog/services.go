@@ -21,5 +21,7 @@ func Services() []*Service {
 		appMesh, appSync, cloudMap, deviceFarm, globalAccelerator, location, networkManager, recoveryControl, rtbFabric, vpcLattice,
 		// Databases, storage, backup, archive, streaming and messaging.
 		auroraDSQL, awsBackup, efs, firehose, fsx, glacier, amazonMQ, memoryDB, msk, oracleDatabaseAtAWS, storageGateway, timestreamWrite,
+		// Machine learning and AI.
+		bedrock, bedrockAgentCore, comprehend, kendra, lexModels, polly, rekognition, sageMaker, textract, transcribe, translate,
 	}
 }

@@ -1,0 +1,27 @@
+{
+ "client": "rekognition",
+ "steps": [
+  {"op": "create_collection", "args": {"CollectionId": "fixture-faces", "Tags": {"team": "a"}}, "save": {"collection": "CollectionArn"}, "expect": {"StatusCode": 200, "FaceModelVersion": "7.0"}},
+  {"op": "describe_collection", "args": {"CollectionId": "fixture-faces"}, "expect": {"FaceCount": 0, "UserCount": 0, "CollectionARN": "${collection}"}},
+  {"op": "create_project", "args": {"ProjectName": "fixture-project", "Tags": {"team": "a"}}, "save": {"project": "ProjectArn"}, "expect": {"ProjectArn": "arn:aws:rekognition:us-east-1:000000000000:project/fixture-project/1"}},
+  {"op": "describe_projects", "args": {"ProjectNames": ["fixture-project"]}, "expect": {"ProjectDescriptions#count": 1, "ProjectDescriptions[0].Status": "CREATED", "ProjectDescriptions[0].Feature": "CUSTOM_LABELS"}},
+  {"op": "tag_resource", "args": {"ResourceArn": "${collection}", "Tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"ResourceArn": "${collection}", "TagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "${collection}"}, "expect": {"Tags": {"team": "a"}}},
+  {"op": "create_project", "args": {"ProjectName": "refused-project", "AutoUpdate": "ENABLED"}, "error": "InvalidParameterException", "status": 400},
+  {"op": "list_collections", "args": {}, "error": "UnknownOperationException", "status": 501},
+  {"op": "describe_collection", "args": {"CollectionId": "missing-faces"}, "error": "ResourceNotFoundException", "status": 400}
+ ],
+ "isolation": [
+  {"op": "describe_projects", "args": {}, "expect": {"ProjectDescriptions#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_collection", "args": {"CollectionId": "fixture-faces"}, "expect": {"FaceModelVersion": "7.0"}},
+  {"op": "describe_projects", "args": {}, "expect": {"ProjectDescriptions[0].ProjectArn": "${project}"}}
+ ],
+ "cleanup": [
+  {"op": "delete_project", "args": {"ProjectArn": "${project}"}, "expect": {"Status": "DELETING"}},
+  {"op": "delete_collection", "args": {"CollectionId": "fixture-faces"}, "expect": {"StatusCode": 200}},
+  {"op": "describe_projects", "args": {}, "expect": {"ProjectDescriptions#count": 0}}
+ ]
+}

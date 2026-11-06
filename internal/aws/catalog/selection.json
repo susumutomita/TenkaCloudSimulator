@@ -206,6 +206,35 @@
     "UpdateFramework",
     "UpdateReportPlan"
   ],
+  "bedrock": [
+    "CreateGuardrail",
+    "CreateInferenceProfile",
+    "DeleteGuardrail",
+    "DeleteInferenceProfile",
+    "DeleteModelInvocationLoggingConfiguration",
+    "GetGuardrail",
+    "GetInferenceProfile",
+    "GetModelInvocationLoggingConfiguration",
+    "ListGuardrails",
+    "ListInferenceProfiles",
+    "ListTagsForResource",
+    "PutModelInvocationLoggingConfiguration",
+    "TagResource",
+    "UntagResource",
+    "UpdateGuardrail"
+  ],
+  "bedrock-agentcore-control": [
+    "CreateWorkloadIdentity",
+    "DeleteWorkloadIdentity",
+    "GetTokenVault",
+    "GetWorkloadIdentity",
+    "ListTagsForResource",
+    "ListWorkloadIdentities",
+    "SetTokenVaultCMK",
+    "TagResource",
+    "UntagResource",
+    "UpdateWorkloadIdentity"
+  ],
   "clouddirectory": [
     "CreateFacet",
     "CreateSchema",
@@ -295,6 +324,15 @@
     "ListTagsForResource",
     "TagResource",
     "UntagResource"
+  ],
+  "comprehend": [
+    "CreateFlywheel",
+    "DeleteFlywheel",
+    "DescribeFlywheel",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateFlywheel"
   ],
   "config": [
     "DeleteRetentionConfiguration",
@@ -594,6 +632,21 @@
     "TagResource",
     "UntagResource"
   ],
+  "kendra": [
+    "CreateDataSource",
+    "CreateIndex",
+    "DeleteDataSource",
+    "DeleteIndex",
+    "DescribeDataSource",
+    "DescribeIndex",
+    "ListDataSources",
+    "ListIndices",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateDataSource",
+    "UpdateIndex"
+  ],
   "kinesis": [
     "CreateStream",
     "DecreaseStreamRetentionPeriod",
@@ -607,6 +660,21 @@
     "TagResource",
     "UntagResource",
     "UpdateStreamMode"
+  ],
+  "lexv2-models": [
+    "CreateBot",
+    "CreateBotLocale",
+    "DeleteBot",
+    "DeleteBotLocale",
+    "DescribeBot",
+    "DescribeBotLocale",
+    "ListBotLocales",
+    "ListBots",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateBot",
+    "UpdateBotLocale"
   ],
   "location": [
     "CreateGeofenceCollection",
@@ -762,6 +830,12 @@
     "TagResource",
     "UntagResource"
   ],
+  "polly": [
+    "DeleteLexicon",
+    "GetLexicon",
+    "ListLexicons",
+    "PutLexicon"
+  ],
   "ram": [
     "CreateResourceShare",
     "DeleteResourceShare",
@@ -769,6 +843,17 @@
     "TagResource",
     "UntagResource",
     "UpdateResourceShare"
+  ],
+  "rekognition": [
+    "CreateCollection",
+    "CreateProject",
+    "DeleteCollection",
+    "DeleteProject",
+    "DescribeCollection",
+    "DescribeProjects",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource"
   ],
   "resource-groups": [
     "CreateGroup",
@@ -804,6 +889,33 @@
     "UntagResource",
     "UpdateRequesterGateway",
     "UpdateResponderGateway"
+  ],
+  "sagemaker": [
+    "AddTags",
+    "CreateCodeRepository",
+    "CreateExperiment",
+    "CreateFlowDefinition",
+    "CreateHumanTaskUi",
+    "CreateNotebookInstanceLifecycleConfig",
+    "DeleteCodeRepository",
+    "DeleteExperiment",
+    "DeleteFlowDefinition",
+    "DeleteHumanTaskUi",
+    "DeleteNotebookInstanceLifecycleConfig",
+    "DeleteTags",
+    "DescribeCodeRepository",
+    "DescribeExperiment",
+    "DescribeFlowDefinition",
+    "DescribeHumanTaskUi",
+    "DescribeNotebookInstanceLifecycleConfig",
+    "ListCodeRepositories",
+    "ListExperiments",
+    "ListFlowDefinitions",
+    "ListHumanTaskUis",
+    "ListNotebookInstanceLifecycleConfigs",
+    "ListTags",
+    "UpdateExperiment",
+    "UpdateNotebookInstanceLifecycleConfig"
   ],
   "security-ir": [
     "CancelMembership",
@@ -926,6 +1038,16 @@
     "ListTapePools",
     "RemoveTagsFromResource"
   ],
+  "textract": [
+    "CreateAdapter",
+    "DeleteAdapter",
+    "GetAdapter",
+    "ListAdapters",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateAdapter"
+  ],
   "timestream-write": [
     "CreateDatabase",
     "CreateTable",
@@ -940,6 +1062,34 @@
     "UntagResource",
     "UpdateDatabase",
     "UpdateTable"
+  ],
+  "transcribe": [
+    "CreateVocabulary",
+    "CreateVocabularyFilter",
+    "DeleteVocabulary",
+    "DeleteVocabularyFilter",
+    "GetVocabulary",
+    "GetVocabularyFilter",
+    "ListTagsForResource",
+    "ListVocabularies",
+    "ListVocabularyFilters",
+    "TagResource",
+    "UntagResource",
+    "UpdateVocabulary",
+    "UpdateVocabularyFilter"
+  ],
+  "translate": [
+    "CreateParallelData",
+    "DeleteParallelData",
+    "DeleteTerminology",
+    "GetParallelData",
+    "GetTerminology",
+    "ImportTerminology",
+    "ListParallelData",
+    "ListTagsForResource",
+    "ListTerminologies",
+    "TagResource",
+    "UntagResource"
   ],
   "verifiedpermissions": [
     "CreatePolicyStore",

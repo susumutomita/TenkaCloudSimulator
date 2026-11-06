@@ -1,0 +1,390 @@
+{
+ "components": {
+  "schemas": {
+   "DeleteLexiconOutput": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "GetLexiconOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "Lexicon": {
+      "$ref": "#/components/schemas/Lexicon"
+     },
+     "LexiconAttributes": {
+      "$ref": "#/components/schemas/LexiconAttributes"
+     }
+    },
+    "type": "object"
+   },
+   "Lexicon": {
+    "additionalProperties": false,
+    "properties": {
+     "Content": {
+      "type": "string"
+     },
+     "Name": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "LexiconAttributes": {
+    "additionalProperties": false,
+    "properties": {
+     "Alphabet": {
+      "type": "string"
+     },
+     "LanguageCode": {
+      "enum": [
+       "arb",
+       "cmn-CN",
+       "cy-GB",
+       "da-DK",
+       "de-DE",
+       "en-AU",
+       "en-GB",
+       "en-GB-WLS",
+       "en-IN",
+       "en-US",
+       "es-ES",
+       "es-MX",
+       "es-US",
+       "fr-CA",
+       "fr-FR",
+       "is-IS",
+       "it-IT",
+       "ja-JP",
+       "hi-IN",
+       "ko-KR",
+       "nb-NO",
+       "nl-NL",
+       "pl-PL",
+       "pt-BR",
+       "pt-PT",
+       "ro-RO",
+       "ru-RU",
+       "sv-SE",
+       "tr-TR",
+       "en-NZ",
+       "en-ZA",
+       "ca-ES",
+       "de-AT",
+       "yue-CN",
+       "ar-AE",
+       "fi-FI",
+       "en-IE",
+       "nl-BE",
+       "fr-BE",
+       "cs-CZ",
+       "de-CH",
+       "en-SG"
+      ],
+      "type": "string"
+     },
+     "LastModified": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "LexemesCount": {
+      "type": "integer"
+     },
+     "LexiconArn": {
+      "type": "string"
+     },
+     "Size": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "LexiconDescription": {
+    "additionalProperties": false,
+    "properties": {
+     "Attributes": {
+      "$ref": "#/components/schemas/LexiconAttributes"
+     },
+     "Name": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListLexiconsOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "Lexicons": {
+      "items": {
+       "$ref": "#/components/schemas/LexiconDescription"
+      },
+      "type": "array"
+     },
+     "NextToken": {
+      "maxLength": 4096,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PutLexiconOutput": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon Polly API (2016-06-10). Every other official operation returns HTTP 501 UnknownOperationException. Pronunciation lexicons are stored PLS documents that are never applied: SynthesizeSpeech, speech synthesis tasks and DescribeVoices return UnknownOperationException with HTTP 501. PutLexicon checks that Content is a PLS lexicon element with an ipa or x-sampa alphabet, a supported xml:lang, at most 4,000 characters and lexemes of at most 100 characters; it creates or replaces the lexicon. Lexicon attributes report LexiconArn and LastModified but not Alphabet, LanguageCode, LexemesCount or Size.",
+  "title": "Amazon Polly (simulator catalog)",
+  "version": "2016-06-10"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/v1/lexicons": {
+   "get": {
+    "operationId": "pollyListLexicons",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "polly"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "NextToken",
+      "schema": {
+       "maxLength": 4096,
+       "minLength": 0,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListLexiconsOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListLexicons",
+    "tags": [
+     "Amazon Polly"
+    ]
+   }
+  },
+  "/v1/lexicons/{LexiconName}": {
+   "delete": {
+    "operationId": "pollyDeleteLexicon",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "polly"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "LexiconName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DeleteLexiconOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteLexicon",
+    "tags": [
+     "Amazon Polly"
+    ]
+   },
+   "get": {
+    "operationId": "pollyGetLexicon",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "polly"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "LexiconName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GetLexiconOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetLexicon",
+    "tags": [
+     "Amazon Polly"
+    ]
+   },
+   "put": {
+    "operationId": "pollyPutLexicon",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "polly"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "LexiconName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Content": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "Content"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PutLexiconOutput"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "PutLexicon",
+    "tags": [
+     "Amazon Polly"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon Polly API (2016-06-10). Every other official operation returns HTTP 501 UnknownOperationException. Pronunciation lexicons are stored PLS documents that are never applied: SynthesizeSpeech, speech synthesis tasks and DescribeVoices return UnknownOperationException with HTTP 501. PutLexicon checks that Content is a PLS lexicon element with an ipa or x-sampa alphabet, a supported xml:lang, at most 4,000 characters and lexemes of at most 100 characters; it creates or replaces the lexicon. Lexicon attributes report LexiconArn and LastModified but not Alphabet, LanguageCode, LexemesCount or Size.",
+   "name": "Amazon Polly"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/polly/2016-06-10/service-2.json",
+  "sha256": "d7d3dea761c4b76162d45d877b25ebb3e7d6471ed66dfb3fdafd844a08f82133",
+  "license": "Apache-2.0"
+ }
+}
