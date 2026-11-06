@@ -1,10 +1,28 @@
 # Finite state models
 
-Current registry: **52 models / 415 literal-protected controls
-(467 required executions)**. The previous 50/398 inventory is preserved; the
-catalog store and console models add 12 and 5 controls, after the two landing models added 17 to
-the 48/381 inventory. Required inventory and exact source bindings live
-in `models.json` and the protected policy in `scripts/formal_model_gate.py`.
+Combined catalog/login inventory: **53 models / 429 literal-protected controls
+(482 required executions)**. Exact-HEAD whole-gate validation after this main
+integration is pending. Main's 52/415 inventory is preserved: the previous
+50/398 plus CatalogResourceLifecycle (twelve controls) and CatalogConsoleEpoch
+(five). LoginInputIntent adds one baseline and fourteen controls. The two landing
+models retain their 17 controls added to the older 48/381 inventory. Required
+inventory and exact source bindings live in `models.json` and the protected
+policy in `scripts/formal_model_gate.py`.
+
+Historical `28d37d1` checked 13 input cases/73 distinct states before focus capture.
+Scoped `5b270e9` checked 14 cases: 77 distinct states, 94 generated, empty queue,
+and all 13 declared noninitial counterexamples. The focus control failed at state
+3 under a controlled-reset assumption, not an established cause of the hosted
+login failure. This is not a combined 482-case or browser proof.
+Scoped keyboard source `7bd15bf` subsequently checked 15 cases: 83 distinct
+baseline states (101 generated, empty queue) and all 14 required noninitial
+counterexamples. The keyboard control first violated `AdoptedValueExact` at
+state 5. The controlled reset remains an explicit assumption; the original
+empty-error/no-POST browser assertions are independent required checks.
+Any 463-execution or 102-pure-test receipt at `8149cac` applies to the pre-merge
+base, not this new 482-execution inventory.
+See [input correspondence](../docs/login-token-file.md#bounded-input-intent-model)
+and the [dated failed login CI](../docs/login-token-file.md#dated-validation-and-current-candidate).
 
 Historical evidence: the complete 48-baseline/381-control gate (429 executions)
 passed at `c298972`. Its documentation-only successor `414c902` passed all 61
@@ -27,6 +45,22 @@ Registration is source evidence, not itself evidence of successful execution. Da
 refer to their recorded inputs; later revisions require their own checks. These
 finite models do not prove Go/SQL/HTTP/UI refinement or complete cloud compatibility.
 
+## Bounded service catalog
+
+`CatalogResourceLifecycle` checks two service/region scopes, IDs 1..3, three
+names, quota two, two child slots, one client token and three steps. Its twelve
+controls cover the abstract authorization/commit, allocation, generation, child
+reference and replay boundaries. Official shape and wire validation, pagination,
+tags, ARNs, SQL/locking/crashes and Go refinement are outside this finite model.
+
+`CatalogConsoleEpoch` checks two services, epochs 0..3, one mounted view and
+unmount, with five controls for accepted view state and write sequencing. Native
+requests, DOM rendering, keyboard focus, accessibility, form conversion and React
+scheduling remain independent test obligations. The
+[service catalog](../docs/aws-catalog.md) implements bounded configuration
+metadata for CodeConnections, Step Functions, ECR and Amplify; this is not workload
+execution, image storage, hosting, OAuth or all-service AWS compatibility.
+
 ## Landing admission and selection
 
 `LandingAccessAdmission` checks ten literal paths, three methods and trusted
@@ -48,7 +82,7 @@ On 2026-11-06, scoped 19-case checking passed at `4382ec4`; that revision's full
 cases at `fad3b8a` passed on Chromium 154, including six strict accessibility
 audits. These are dated, separate results. Chromium 154 lacks the current
 HTML-in-Canvas API, so native Chrome 157 drawing and other engines are unverified.
-No successful current full-448 or later exact-head acceptance is claimed here.
+No successful combined 482-case or later exact-head acceptance is claimed here.
 
 CFNConditionAdmission adds fourteen invariants and fourteen semantic controls over
 234 immutable inputs. Its isolated `f69fb46` SANY/baseline/control run passed
@@ -86,8 +120,8 @@ CFNPhysicalResourceACK adds five properties and seven controls for selected SSM/
 The required `Formal validation` job reserves 30 minutes for checkout, the gate
 negative controls, exact-blob applicability and the complete serial registry.
 Each TLC case retains its 60-second default deadline and existing per-model
-settings; all 448 baseline/counterexample runs and failure requirements
-remain mandatory. This is an aggregate execution budget, not a model-bound,
+settings; all 482 combined baseline/counterexample runs and failure requirements
+remain mandatory, including the preserved 467 main checks and 15 login checks. This is an aggregate execution budget, not a model-bound,
 acceptance, permission or per-case timeout change.
 
 The earlier 15-minute job on `8bb8a3d` ended cancelled after roughly 15 minutes;
@@ -99,8 +133,10 @@ historical scoped receipt does not replace it.
 
 Legacy integration sections below retain historical counts and status statements
 for traceability. Their word “current” refers to the recorded integration, not
-today's registry. The authoritative current inventory is the 50/398 registry
-above; proof claims always require evidence for the exact revision.
+today's registry. The combined catalog/login inventory above requires 53 models /
+429 controls (482 executions), with the new exact-HEAD whole gate pending. Historical
+48/381 results retain their recorded revision; source-specific landing and login
+results do not substitute for combined acceptance.
 
 `ObjectStore.tla` models two buckets and two keys, shared object ownership, create/put/delete transitions, and an abstract identity decision `allow /\ ~deny`. `ObjectStore.cfg` checks type correctness, no orphan objects, no unauthorized mutation, and explicit-deny precedence.
 
