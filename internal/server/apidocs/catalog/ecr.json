@@ -1,0 +1,548 @@
+{
+ "components": {
+  "schemas": {
+   "CreateRepositoryRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "encryptionConfiguration": {
+      "$ref": "#/components/schemas/EncryptionConfiguration"
+     },
+     "imageScanningConfiguration": {
+      "$ref": "#/components/schemas/ImageScanningConfiguration"
+     },
+     "imageTagMutability": {
+      "enum": [
+       "MUTABLE",
+       "IMMUTABLE",
+       "IMMUTABLE_WITH_EXCLUSION",
+       "MUTABLE_WITH_EXCLUSION"
+      ],
+      "type": "string"
+     },
+     "imageTagMutabilityExclusionFilters": {
+      "items": {
+       "$ref": "#/components/schemas/ImageTagMutabilityExclusionFilter"
+      },
+      "maxItems": 5,
+      "minItems": 1,
+      "type": "array"
+     },
+     "registryId": {
+      "type": "string"
+     },
+     "repositoryName": {
+      "maxLength": 256,
+      "minLength": 2,
+      "type": "string"
+     },
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "repositoryName"
+    ],
+    "type": "object"
+   },
+   "CreateRepositoryResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "repository": {
+      "$ref": "#/components/schemas/Repository"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteRepositoryRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "force": {
+      "type": "boolean"
+     },
+     "registryId": {
+      "type": "string"
+     },
+     "repositoryName": {
+      "maxLength": 256,
+      "minLength": 2,
+      "type": "string"
+     }
+    },
+    "required": [
+     "repositoryName"
+    ],
+    "type": "object"
+   },
+   "DeleteRepositoryResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "repository": {
+      "$ref": "#/components/schemas/Repository"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeRepositoriesRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "maxResults": {
+      "maximum": 1000,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "nextToken": {
+      "type": "string"
+     },
+     "registryId": {
+      "type": "string"
+     },
+     "repositoryNames": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 2,
+       "type": "string"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeRepositoriesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextToken": {
+      "type": "string"
+     },
+     "repositories": {
+      "items": {
+       "$ref": "#/components/schemas/Repository"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "EncryptionConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "encryptionType": {
+      "enum": [
+       "AES256",
+       "KMS",
+       "KMS_DSSE"
+      ],
+      "type": "string"
+     },
+     "kmsKey": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "encryptionType"
+    ],
+    "type": "object"
+   },
+   "ImageScanningConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "scanOnPush": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "ImageTagMutabilityExclusionFilter": {
+    "additionalProperties": false,
+    "properties": {
+     "filter": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "filterType": {
+      "enum": [
+       "WILDCARD"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "filterType",
+     "filter"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "resourceArn": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "resourceArn"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "PutImageScanningConfigurationRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "imageScanningConfiguration": {
+      "$ref": "#/components/schemas/ImageScanningConfiguration"
+     },
+     "registryId": {
+      "type": "string"
+     },
+     "repositoryName": {
+      "maxLength": 256,
+      "minLength": 2,
+      "type": "string"
+     }
+    },
+    "required": [
+     "repositoryName",
+     "imageScanningConfiguration"
+    ],
+    "type": "object"
+   },
+   "PutImageScanningConfigurationResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "imageScanningConfiguration": {
+      "$ref": "#/components/schemas/ImageScanningConfiguration"
+     },
+     "registryId": {
+      "type": "string"
+     },
+     "repositoryName": {
+      "maxLength": 256,
+      "minLength": 2,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PutImageTagMutabilityRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "imageTagMutability": {
+      "enum": [
+       "MUTABLE",
+       "IMMUTABLE",
+       "IMMUTABLE_WITH_EXCLUSION",
+       "MUTABLE_WITH_EXCLUSION"
+      ],
+      "type": "string"
+     },
+     "imageTagMutabilityExclusionFilters": {
+      "items": {
+       "$ref": "#/components/schemas/ImageTagMutabilityExclusionFilter"
+      },
+      "maxItems": 5,
+      "minItems": 1,
+      "type": "array"
+     },
+     "registryId": {
+      "type": "string"
+     },
+     "repositoryName": {
+      "maxLength": 256,
+      "minLength": 2,
+      "type": "string"
+     }
+    },
+    "required": [
+     "repositoryName",
+     "imageTagMutability"
+    ],
+    "type": "object"
+   },
+   "PutImageTagMutabilityResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "imageTagMutability": {
+      "enum": [
+       "MUTABLE",
+       "IMMUTABLE",
+       "IMMUTABLE_WITH_EXCLUSION",
+       "MUTABLE_WITH_EXCLUSION"
+      ],
+      "type": "string"
+     },
+     "imageTagMutabilityExclusionFilters": {
+      "items": {
+       "$ref": "#/components/schemas/ImageTagMutabilityExclusionFilter"
+      },
+      "maxItems": 5,
+      "minItems": 1,
+      "type": "array"
+     },
+     "registryId": {
+      "type": "string"
+     },
+     "repositoryName": {
+      "maxLength": 256,
+      "minLength": 2,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Repository": {
+    "additionalProperties": false,
+    "properties": {
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "encryptionConfiguration": {
+      "$ref": "#/components/schemas/EncryptionConfiguration"
+     },
+     "imageScanningConfiguration": {
+      "$ref": "#/components/schemas/ImageScanningConfiguration"
+     },
+     "imageTagMutability": {
+      "enum": [
+       "MUTABLE",
+       "IMMUTABLE",
+       "IMMUTABLE_WITH_EXCLUSION",
+       "MUTABLE_WITH_EXCLUSION"
+      ],
+      "type": "string"
+     },
+     "imageTagMutabilityExclusionFilters": {
+      "items": {
+       "$ref": "#/components/schemas/ImageTagMutabilityExclusionFilter"
+      },
+      "maxItems": 5,
+      "minItems": 1,
+      "type": "array"
+     },
+     "registryId": {
+      "type": "string"
+     },
+     "repositoryArn": {
+      "type": "string"
+     },
+     "repositoryName": {
+      "maxLength": 256,
+      "minLength": 2,
+      "type": "string"
+     },
+     "repositoryUri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "Key": {
+      "type": "string"
+     },
+     "Value": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key",
+     "Value"
+    ],
+    "type": "object"
+   },
+   "TagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "resourceArn": {
+      "type": "string"
+     },
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "resourceArn",
+     "tags"
+    ],
+    "type": "object"
+   },
+   "TagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UntagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "resourceArn": {
+      "type": "string"
+     },
+     "tagKeys": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "resourceArn",
+     "tagKeys"
+    ],
+    "type": "object"
+   },
+   "UntagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon Elastic Container Registry API (2015-09-21). Every other official operation returns HTTP 501 UnknownOperationException. Repositories hold no images: image push/pull, layers, registry authorization tokens and scanning are not implemented; force therefore has no further effect.",
+  "title": "Amazon Elastic Container Registry (simulator catalog)",
+  "version": "2015-09-21"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/": {
+   "post": {
+    "description": "Choose the X-Amz-Target of one implemented operation. Request and response members follow the linked official input/output schemas.",
+    "operationId": "ecrJSONOperation",
+    "parameters": [
+     {
+      "in": "header",
+      "name": "X-Amz-Target",
+      "required": true,
+      "schema": {
+       "enum": [
+        "AmazonEC2ContainerRegistry_V20150921.CreateRepository",
+        "AmazonEC2ContainerRegistry_V20150921.DeleteRepository",
+        "AmazonEC2ContainerRegistry_V20150921.DescribeRepositories",
+        "AmazonEC2ContainerRegistry_V20150921.ListTagsForResource",
+        "AmazonEC2ContainerRegistry_V20150921.PutImageScanningConfiguration",
+        "AmazonEC2ContainerRegistry_V20150921.PutImageTagMutability",
+        "AmazonEC2ContainerRegistry_V20150921.TagResource",
+        "AmazonEC2ContainerRegistry_V20150921.UntagResource"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-amz-json-1.1": {
+       "examples": {
+        "CreateRepository": {
+         "summary": "X-Amz-Target: AmazonEC2ContainerRegistry_V20150921.CreateRepository",
+         "value": {}
+        },
+        "DeleteRepository": {
+         "summary": "X-Amz-Target: AmazonEC2ContainerRegistry_V20150921.DeleteRepository",
+         "value": {}
+        },
+        "DescribeRepositories": {
+         "summary": "X-Amz-Target: AmazonEC2ContainerRegistry_V20150921.DescribeRepositories",
+         "value": {}
+        },
+        "ListTagsForResource": {
+         "summary": "X-Amz-Target: AmazonEC2ContainerRegistry_V20150921.ListTagsForResource",
+         "value": {}
+        },
+        "PutImageScanningConfiguration": {
+         "summary": "X-Amz-Target: AmazonEC2ContainerRegistry_V20150921.PutImageScanningConfiguration",
+         "value": {}
+        },
+        "PutImageTagMutability": {
+         "summary": "X-Amz-Target: AmazonEC2ContainerRegistry_V20150921.PutImageTagMutability",
+         "value": {}
+        },
+        "TagResource": {
+         "summary": "X-Amz-Target: AmazonEC2ContainerRegistry_V20150921.TagResource",
+         "value": {}
+        },
+        "UntagResource": {
+         "summary": "X-Amz-Target: AmazonEC2ContainerRegistry_V20150921.UntagResource",
+         "value": {}
+        }
+       },
+       "schema": {
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/x-amz-json-1.1": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception in __type."
+     },
+     "403": {
+      "description": "AccessDeniedException from local identity policy evaluation."
+     },
+     "501": {
+      "description": "Official operation not implemented by the simulator."
+     }
+    },
+    "summary": "Amazon Elastic Container Registry JSON 1.1 operations",
+    "tags": [
+     "Amazon Elastic Container Registry"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon Elastic Container Registry API (2015-09-21). Every other official operation returns HTTP 501 UnknownOperationException. Repositories hold no images: image push/pull, layers, registry authorization tokens and scanning are not implemented; force therefore has no further effect.",
+   "name": "Amazon Elastic Container Registry"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/ecr/2015-09-21/service-2.json",
+  "sha256": "6d0949a8353d74260494d22b105d0a852e5de43504f0793cd41997993bc7727f",
+  "license": "Apache-2.0"
+ }
+}

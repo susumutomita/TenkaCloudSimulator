@@ -90,6 +90,7 @@ adapter, or Challenge integration.
 | [Lambda](docs/lambda.md) | CreateFunction, ListFunctions, GetFunctionConfiguration, UpdateFunctionCode, Invoke, DeleteFunction, AddPermission/GetPolicy/RemovePermission; Python ZIP execution through CPython 3.12.16/WASI and a bounded S3/SSM SDK bridge | Other languages, asynchronous invocation, Function URLs, arbitrary networking; 128 MiB and 1–30 second timeout |
 | [CloudFormation](docs/cloudformation-rest.md) | CreateStack, DescribeStacks, DeleteStack; S3 Bucket, SSM Parameter, inline Python Lambda, bounded IAM Role, 5 API Gateway resource types and Lambda Permission; bounded Ref/Sub/GetAtt/DependsOn, String/Number constraints, Equals/condition aliases, resource/output Condition and If/NoValue selection | UpdateStack, And/Or/Not, NoEcho secrecy, general resource types, full AWS asynchronous lifecycle, dedicated CloudFormation service roles |
 | [API Gateway](docs/apigateway.md) | 16 Regional REST management operations, resources/methods/integrations, immutable deployments, new stages and local Lambda proxy execution | HTTP/WebSocket APIs, authorizers, API keys, editing existing stages, public endpoints |
+| [Service catalog](docs/aws-catalog.md) | Model-driven configuration metadata for CodeConnections, Step Functions, ECR and Amplify through their native JSON or REST-JSON protocols, with one generic console view and per-service reference | Executions, images, builds, hosting, OAuth and every unlisted official operation (HTTP 501) |
 
 AWS regions are `us-east-1`, `us-west-2`, `ap-northeast-1`, and `eu-west-1`.
 Local limits include 8 MiB per S3 object, 64 MiB across retained object versions,
@@ -252,9 +253,9 @@ not binary runtime dependencies. Regeneration must preserve locks and original
 rights: [console](tools/console/README.md), [Scalar](tools/scalar/README.md),
 [Python/WASI runtime](tools/python/README.md).
 
-The registry contains **50 finite models and 398 deliberate defect controls**
-(448 required model/check executions). This preserves the earlier 48/381 inventory
-and adds bounded landing admission and selection/lifecycle models with 17 controls.
+The registry contains **52 finite models and 415 deliberate defect controls**
+(467 required model/check executions). This preserves the earlier 50/398 inventory
+and adds the bounded catalog store model (12 controls) and catalog console view model (5 controls).
 The Sakura, Secrets metadata and DynamoDB console models remain registered.
 Registration is not an integrated-revision execution receipt. The IAM scenario checks two requests
 from each of four reachable seeds. A broader four-request trial timed out and

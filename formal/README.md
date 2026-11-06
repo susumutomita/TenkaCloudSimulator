@@ -1,8 +1,9 @@
 # Finite state models
 
-Current registry: **50 models / 398 literal-protected controls
-(448 required executions)**. The previous 48/381 inventory is preserved; the two
-landing models add 17 controls. Required inventory and exact source bindings live
+Current registry: **52 models / 415 literal-protected controls
+(467 required executions)**. The previous 50/398 inventory is preserved; the
+catalog store and console models add 12 and 5 controls, after the two landing models added 17 to
+the 48/381 inventory. Required inventory and exact source bindings live
 in `models.json` and the protected policy in `scripts/formal_model_gate.py`.
 
 Historical evidence: the complete 48-baseline/381-control gate (429 executions)

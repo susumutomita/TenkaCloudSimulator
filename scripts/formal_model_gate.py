@@ -11,6 +11,8 @@ import time
 from pathlib import Path
 
 BASE_MODELS = {'AzureBlobState',
+ 'CatalogConsoleEpoch',
+ 'CatalogResourceLifecycle',
  'AzurePropertiesEpoch',
  'AzurePropertiesTarget',
  'BlobRange',
@@ -59,7 +61,9 @@ BASE_MODELS = {'AzureBlobState',
  'StackOwnership',
  'StartupTokenVisibility',
  'LandingTopologyState', 'LandingAccessAdmission'}
-BASE_INVARIANTS = {'AzureBlobState': {'BudgetBounded',
+BASE_INVARIANTS = {'CatalogConsoleEpoch': {'TypeOK', 'NoUnmountedAcceptance', 'ReloadOnlyAfterAck', 'OnlyCurrentReplies', 'FailureVisible', 'SingleWriter'},
+ 'CatalogResourceLifecycle': {'PeerFrame', 'QuotaBound', 'FailureFrame', 'FreshIDs', 'TokenOnce', 'GenerationAdvances', 'ChildGuard', 'StaleWriteRejected', 'AuthorizationFirst', 'TokenBinding', 'UniqueNames', 'TypeOK', 'ReplayNoDuplicate'},
+ 'AzureBlobState': {'BudgetBounded',
                     'ConditionEnforced',
                     'FailureAtomic',
                     'FreshWriteIdentity',
@@ -471,7 +475,9 @@ BASE_INVARIANTS = {'AzureBlobState': {'BudgetBounded',
                           'TypeOK',
                           'UnsupportedCanvasHidden'}}
 # Established controls require an explicit gate-policy change before retirement.
-REQUIRED_MUTANTS = {'AzureBlobState': {'ContainerDeleteErasesPeer',
+REQUIRED_MUTANTS = {'CatalogConsoleEpoch': {'OmitReplyEpochGuard', 'DropFailureError', 'ReloadAfterFailedWrite', 'AcceptAfterUnmount', 'AllowConcurrentWrites'},
+ 'CatalogResourceLifecycle': {'AllowDuplicateNames', 'ReplayCommits', 'IgnoreGeneration', 'TokenToFutureID', 'UpdateKeepsGeneration', 'ReplayCreatesRow', 'WritePeerScope', 'ReuseDeletedID', 'IgnoreQuota', 'DeleteParentWithChildren', 'FaultCommits', 'DeniedCommits'},
+ 'AzureBlobState': {'ContainerDeleteErasesPeer',
                     'ContainerDeleteLeavesBlobs',
                     'FailedPutCommits',
                     'IgnoreAccountOwner',

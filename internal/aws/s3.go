@@ -49,6 +49,11 @@ type Gateway struct {
 	Lambdas           *LambdaStore
 	Roles             *IAMRoleStore
 	DynamoDB          *DynamoDBStore
+	// Catalog serves model-driven bounded control-plane services. It owns
+	// only its registered JSON targets and REST signing scopes.
+	Catalog http.Handler
+	// CatalogOwns reports whether a request belongs to Catalog.
+	CatalogOwns func(*http.Request) bool
 }
 type failure struct {
 	XMLName   xml.Name `xml:"Error"`
