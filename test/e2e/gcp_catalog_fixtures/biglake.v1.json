@@ -1,0 +1,34 @@
+{
+ "api": "biglake.v1",
+ "steps": [
+  {"call": "projects.locations.catalogs.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "catalogId": "fixture_catalog"}, "body": {}, "save": {"catalog": "name"}, "expect": {"name": "projects/tenkacloud-local/locations/us-central1/catalogs/fixture_catalog"}},
+  {"call": "projects.locations.catalogs.get", "args": {"name": "${catalog}"}},
+  {"call": "projects.locations.catalogs.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"catalogs#count": 1}},
+  {"call": "projects.locations.catalogs.databases.create", "args": {"parent": "${catalog}", "databaseId": "orders_db"}, "body": {"type": "HIVE", "hiveOptions": {"locationUri": "gs://raw/orders"}}, "save": {"database": "name"}},
+  {"call": "projects.locations.catalogs.databases.get", "args": {"name": "${database}"}, "expect": {"hiveOptions.locationUri": "gs://raw/orders"}},
+  {"call": "projects.locations.catalogs.databases.list", "args": {"parent": "${catalog}"}, "expect": {"databases#count": 1}},
+  {"call": "projects.locations.catalogs.databases.patch", "args": {"name": "${database}", "updateMask": "hiveOptions"}, "body": {"hiveOptions": {"locationUri": "gs://curated/orders", "parameters": {"owner": "sales"}}}},
+  {"call": "projects.locations.catalogs.databases.tables.create", "args": {"parent": "${database}", "tableId": "orders"}, "body": {"type": "HIVE", "hiveOptions": {"tableType": "EXTERNAL_TABLE"}}, "save": {"table": "name", "etag": "etag"}},
+  {"call": "projects.locations.catalogs.databases.tables.get", "args": {"name": "${table}"}, "expect": {"hiveOptions.tableType": "EXTERNAL_TABLE"}},
+  {"call": "projects.locations.catalogs.databases.tables.list", "args": {"parent": "${database}", "view": "FULL"}, "expect": {"tables#count": 1}},
+  {"call": "projects.locations.catalogs.databases.tables.patch", "args": {"name": "${table}", "updateMask": "hiveOptions"}, "body": {"hiveOptions": {"tableType": "MANAGED_TABLE"}, "etag": "${etag}"}},
+  {"call": "projects.locations.catalogs.databases.tables.patch", "args": {"name": "${table}", "updateMask": "hiveOptions"}, "body": {"hiveOptions": {"tableType": "EXTERNAL_TABLE"}, "etag": "${etag}"}, "error": "ABORTED", "status": 409},
+  {"call": "projects.locations.catalogs.delete", "args": {"name": "${catalog}"}, "error": "FAILED_PRECONDITION", "status": 400},
+  {"call": "projects.locations.catalogs.databases.tables.rename", "args": {"name": "${table}", "body": {"newName": "${database}/tables/orders2"}}, "error": "UNIMPLEMENTED", "status": 501},
+  {"call": "projects.locations.catalogs.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "catalogId": "bad.id"}, "body": {}, "error": "INVALID_ARGUMENT", "status": 400},
+  {"call": "projects.locations.catalogs.get", "args": {"name": "projects/tenkacloud-local/locations/us-central1/catalogs/missing"}, "error": "NOT_FOUND", "status": 404},
+  {"call": "projects.locations.catalogs.list", "args": {"parent": "projects/other-project/locations/us-central1"}, "error": "PERMISSION_DENIED", "status": 403}
+ ],
+ "isolation": [
+  {"call": "projects.locations.catalogs.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"catalogs#count": 0}}
+ ],
+ "after_restart": [
+  {"call": "projects.locations.catalogs.databases.tables.get", "args": {"name": "${table}"}, "expect": {"hiveOptions.tableType": "MANAGED_TABLE"}}
+ ],
+ "cleanup": [
+  {"call": "projects.locations.catalogs.databases.tables.delete", "args": {"name": "${table}"}, "expect": {"name": "${table}"}},
+  {"call": "projects.locations.catalogs.databases.delete", "args": {"name": "${database}"}, "expect": {"name": "${database}"}},
+  {"call": "projects.locations.catalogs.delete", "args": {"name": "${catalog}"}, "expect": {"name": "${catalog}"}},
+  {"call": "projects.locations.catalogs.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"catalogs#count": 0}}
+ ]
+}

@@ -1,0 +1,54 @@
+{
+ "api": "dataplex.v1",
+ "steps": [
+  {"call": "projects.locations.lakes.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "lakeId": "fixture"}, "body": {"displayName": "Fixture lake", "labels": {"team": "a"}}, "save": {"op": "name", "lake": "response.name"}, "expect": {"done": true, "response.state": "ACTIVE"}},
+  {"call": "projects.locations.operations.get", "args": {"name": "${op}"}, "expect": {"response.displayName": "Fixture lake"}},
+  {"call": "projects.locations.operations.list", "args": {"name": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"operations#count": 1}},
+  {"call": "projects.locations.lakes.get", "args": {"name": "${lake}"}, "expect": {"labels.team": "a"}},
+  {"call": "projects.locations.lakes.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"lakes#count": 1}},
+  {"call": "projects.locations.lakes.patch", "args": {"name": "${lake}", "updateMask": "description"}, "body": {"description": "Sales data"}},
+  {"call": "projects.locations.lakes.zones.create", "args": {"parent": "${lake}", "zoneId": "raw"}, "body": {"type": "RAW", "resourceSpec": {"locationType": "SINGLE_REGION"}, "discoverySpec": {"enabled": false}}, "save": {"zone": "response.name"}},
+  {"call": "projects.locations.lakes.zones.get", "args": {"name": "${zone}"}, "expect": {"type": "RAW"}},
+  {"call": "projects.locations.lakes.zones.list", "args": {"parent": "${lake}"}, "expect": {"zones#count": 1}},
+  {"call": "projects.locations.lakes.zones.patch", "args": {"name": "${zone}", "updateMask": "displayName"}, "body": {"displayName": "Raw zone"}},
+  {"call": "projects.locations.lakes.zones.assets.create", "args": {"parent": "${zone}", "assetId": "bucket"}, "body": {"resourceSpec": {"type": "STORAGE_BUCKET", "name": "projects/tenkacloud-local/buckets/raw"}}, "save": {"asset": "response.name"}},
+  {"call": "projects.locations.lakes.zones.assets.get", "args": {"name": "${asset}"}, "expect": {"resourceSpec.type": "STORAGE_BUCKET"}},
+  {"call": "projects.locations.lakes.zones.assets.list", "args": {"parent": "${zone}"}, "expect": {"assets#count": 1}},
+  {"call": "projects.locations.lakes.zones.assets.patch", "args": {"name": "${asset}", "updateMask": "labels"}, "body": {"labels": {"tier": "raw"}}},
+  {"call": "projects.locations.entryGroups.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "entryGroupId": "crm"}, "body": {"displayName": "CRM"}, "save": {"group": "response.name"}},
+  {"call": "projects.locations.entryGroups.get", "args": {"name": "${group}"}, "save": {"etag": "etag"}},
+  {"call": "projects.locations.entryGroups.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"entryGroups#count": 1}},
+  {"call": "projects.locations.entryGroups.patch", "args": {"name": "${group}", "updateMask": "description"}, "body": {"description": "CRM systems", "etag": "${etag}"}},
+  {"call": "projects.locations.aspectTypes.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "aspectTypeId": "owner"}, "body": {"metadataTemplate": {"name": "owner", "type": "record", "recordFields": [{"name": "email", "type": "string", "index": 1}]}}, "save": {"aspect": "response.name"}},
+  {"call": "projects.locations.aspectTypes.get", "args": {"name": "${aspect}"}, "expect": {"metadataTemplate.recordFields[0].name": "email"}},
+  {"call": "projects.locations.aspectTypes.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"aspectTypes#count": 1}},
+  {"call": "projects.locations.aspectTypes.patch", "args": {"name": "${aspect}", "updateMask": "description"}, "body": {"description": "Data owner"}},
+  {"call": "projects.locations.entryTypes.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "entryTypeId": "table"}, "body": {"system": "crm", "requiredAspects": [{"type": "${aspect}"}]}, "save": {"entryType": "response.name"}},
+  {"call": "projects.locations.entryTypes.get", "args": {"name": "${entryType}"}, "expect": {"requiredAspects[0].type": "${aspect}"}},
+  {"call": "projects.locations.entryTypes.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"entryTypes#count": 1}},
+  {"call": "projects.locations.entryTypes.patch", "args": {"name": "${entryType}", "updateMask": "typeAliases"}, "body": {"typeAliases": ["TABLE"]}},
+  {"call": "projects.locations.lakes.zones.create", "args": {"parent": "${lake}", "zoneId": "curated"}, "body": {"type": "CURATED", "resourceSpec": {}}, "error": "INVALID_ARGUMENT", "status": 400},
+  {"call": "projects.locations.lakes.delete", "args": {"name": "${lake}"}, "error": "FAILED_PRECONDITION", "status": 400},
+  {"call": "projects.locations.dataScans.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "dataScanId": "quality", "body": {"data": {"resource": "//bigquery.googleapis.com/projects/tenkacloud-local/datasets/d/tables/t"}}}, "error": "UNIMPLEMENTED", "status": 501},
+  {"call": "projects.locations.lakes.get", "args": {"name": "projects/tenkacloud-local/locations/us-central1/lakes/missing"}, "error": "NOT_FOUND", "status": 404},
+  {"call": "projects.locations.lakes.list", "args": {"parent": "projects/other-project/locations/us-central1"}, "error": "PERMISSION_DENIED", "status": 403}
+ ],
+ "isolation": [
+  {"call": "projects.locations.lakes.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"lakes#count": 0}},
+  {"call": "projects.locations.entryGroups.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"entryGroups#count": 0}}
+ ],
+ "after_restart": [
+  {"call": "projects.locations.lakes.zones.assets.get", "args": {"name": "${asset}"}, "expect": {"labels.tier": "raw"}},
+  {"call": "projects.locations.entryGroups.get", "args": {"name": "${group}"}, "expect": {"description": "CRM systems"}}
+ ],
+ "cleanup": [
+  {"call": "projects.locations.lakes.zones.assets.delete", "args": {"name": "${asset}"}},
+  {"call": "projects.locations.lakes.zones.delete", "args": {"name": "${zone}"}},
+  {"call": "projects.locations.lakes.delete", "args": {"name": "${lake}"}},
+  {"call": "projects.locations.entryTypes.delete", "args": {"name": "${entryType}"}},
+  {"call": "projects.locations.aspectTypes.delete", "args": {"name": "${aspect}"}},
+  {"call": "projects.locations.entryGroups.delete", "args": {"name": "${group}"}},
+  {"call": "projects.locations.lakes.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"lakes#count": 0}},
+  {"call": "projects.locations.entryGroups.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"entryGroups#count": 0}}
+ ]
+}

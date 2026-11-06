@@ -1,0 +1,29 @@
+{
+ "api": "dataproc.v1",
+ "steps": [
+  {"call": "projects.locations.autoscalingPolicies.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "body": {"id": "fixture", "workerConfig": {"maxInstances": 10}, "basicAlgorithm": {"yarnConfig": {"gracefulDecommissionTimeout": "3600s", "scaleUpFactor": 0.5, "scaleDownFactor": 0.5}}}, "save": {"policy": "name"}, "expect": {"name": "projects/tenkacloud-local/locations/us-central1/autoscalingPolicies/fixture"}},
+  {"call": "projects.locations.autoscalingPolicies.get", "args": {"name": "${policy}"}, "expect": {"workerConfig.maxInstances": 10}},
+  {"call": "projects.locations.autoscalingPolicies.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"policies#count": 1}},
+  {"call": "projects.locations.sessionTemplates.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "body": {"name": "projects/tenkacloud-local/locations/us-central1/sessionTemplates/fixture", "runtimeConfig": {"version": "2.2"}, "jupyterSession": {"kernel": "PYTHON"}}, "save": {"template": "name"}},
+  {"call": "projects.locations.sessionTemplates.get", "args": {"name": "${template}"}, "expect": {"runtimeConfig.version": "2.2"}},
+  {"call": "projects.locations.sessionTemplates.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"sessionTemplates#count": 1}},
+  {"call": "projects.locations.autoscalingPolicies.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "body": {"id": "broken", "workerConfig": {"minInstances": 2}}, "error": "INVALID_ARGUMENT", "status": 400},
+  {"call": "projects.locations.autoscalingPolicies.update", "args": {"name": "${policy}", "body": {"id": "fixture", "workerConfig": {"maxInstances": 20}}}, "error": "UNIMPLEMENTED", "status": 501},
+  {"call": "projects.locations.batches.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "batchId": "job", "body": {"sparkBatch": {"mainClass": "Main"}}}, "error": "UNIMPLEMENTED", "status": 501},
+  {"call": "projects.regions.autoscalingPolicies.list", "args": {"parent": "projects/tenkacloud-local/regions/us-central1"}, "error": "UNIMPLEMENTED", "status": 501},
+  {"call": "projects.locations.autoscalingPolicies.get", "args": {"name": "projects/tenkacloud-local/locations/us-central1/autoscalingPolicies/missing"}, "error": "NOT_FOUND", "status": 404},
+  {"call": "projects.locations.autoscalingPolicies.list", "args": {"parent": "projects/other-project/locations/us-central1"}, "error": "PERMISSION_DENIED", "status": 403}
+ ],
+ "isolation": [
+  {"call": "projects.locations.autoscalingPolicies.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"policies#count": 0}}
+ ],
+ "after_restart": [
+  {"call": "projects.locations.sessionTemplates.get", "args": {"name": "${template}"}, "expect": {"jupyterSession.kernel": "PYTHON"}}
+ ],
+ "cleanup": [
+  {"call": "projects.locations.sessionTemplates.delete", "args": {"name": "${template}"}},
+  {"call": "projects.locations.autoscalingPolicies.delete", "args": {"name": "${policy}"}},
+  {"call": "projects.locations.autoscalingPolicies.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"policies#count": 0}},
+  {"call": "projects.locations.sessionTemplates.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"sessionTemplates#count": 0}}
+ ]
+}
