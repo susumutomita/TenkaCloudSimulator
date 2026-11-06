@@ -97,7 +97,12 @@ def run():
                 page.get_by_role('button', name='Back to list').click()
                 # A child collection resolves its parent from the native list.
                 page.get_by_label('Resource type').select_option('instances')
+                # Choosing another parent keeps the choice and lists its children.
+                page.get_by_label('clusters', exact=True).select_option(label='sdk-cluster')
+                expect(page.get_by_label('clusters', exact=True)).to_have_value(PROJECT + '/clusters/sdk-cluster')
+                expect(page.get_by_text('No resources')).to_be_visible()
                 page.get_by_label('clusters', exact=True).select_option(label='ui-cluster')
+                expect(page.get_by_label('clusters', exact=True)).to_have_value(PROJECT + '/clusters/ui-cluster')
                 page.get_by_label('instanceId', exact=True).fill('primary')
                 page.get_by_label(re.compile('^instanceType')).select_option('PRIMARY')
                 page.get_by_role('button', name='Create', exact=True).click()

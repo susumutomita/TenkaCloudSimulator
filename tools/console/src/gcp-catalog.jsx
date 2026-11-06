@@ -38,7 +38,9 @@ export default function GCPCatalogView({request, catalog}) {
     const text = await response.text();
     return text ? JSON.parse(text) : {};
   }
-  async function load() {
+  // A parent selection passes its value explicitly: the state update is not
+  // yet visible to this render's closure.
+  async function load(preferred = parent) {
     if (!api || !collection) return;
     const epoch = fresh(); setLoading(true); setError(''); setDetail(null);
     try {
@@ -51,7 +53,7 @@ export default function GCPCatalogView({request, catalog}) {
         if (!valid(epoch)) return;
         const rows = page[list.items] || [];
         setParents(rows);
-        scope = rows.some(r => r.name === parent) ? parent : (rows[0]?.name || '');
+        scope = rows.some(r => r.name === preferred) ? preferred : (rows[0]?.name || '');
         setParent(scope);
         if (!scope) { setItems([]); return; }
       }
@@ -112,7 +114,7 @@ export default function GCPCatalogView({request, catalog}) {
         {api?.collections.map(c => <option key={c.id} value={c.id}>{c.id}</option>)}
       </select>
       {chain.length > 0 && <><label htmlFor={ids + 'parent'}>{chain[chain.length - 1].id}</label>
-        <select id={ids + 'parent'} value={parent} disabled={busy || !parents.length} onChange={e => { setParent(e.target.value); setTimeout(load, 0); }}>
+        <select id={ids + 'parent'} value={parent} disabled={busy || !parents.length} onChange={e => { setParent(e.target.value); load(e.target.value); }}>
           {parents.map(p => <option key={p.name} value={p.name}>{short(p.name)}</option>)}
         </select></>}
     </div>
