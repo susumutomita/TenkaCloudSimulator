@@ -1,109 +1,6 @@
 {
  "components": {
   "schemas": {
-   "CreateWorkloadIdentityResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "allowedResourceOauth2ReturnUrls": {
-      "items": {
-       "maxLength": 2048,
-       "minLength": 1,
-       "type": "string"
-      },
-      "type": "array"
-     },
-     "name": {
-      "maxLength": 255,
-      "minLength": 3,
-      "type": "string"
-     },
-     "workloadIdentityArn": {
-      "maxLength": 1024,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "required": [
-     "name",
-     "workloadIdentityArn"
-    ],
-    "type": "object"
-   },
-   "DeleteWorkloadIdentityResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "GetTokenVaultResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "kmsConfiguration": {
-      "$ref": "#/components/schemas/KmsConfiguration"
-     },
-     "lastModifiedDate": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "tokenVaultId": {
-      "maxLength": 64,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "required": [
-     "tokenVaultId",
-     "kmsConfiguration",
-     "lastModifiedDate"
-    ],
-    "type": "object"
-   },
-   "GetWorkloadIdentityResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "allowedResourceOauth2ReturnUrls": {
-      "items": {
-       "maxLength": 2048,
-       "minLength": 1,
-       "type": "string"
-      },
-      "type": "array"
-     },
-     "createdTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "lastUpdatedTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "name": {
-      "maxLength": 255,
-      "minLength": 3,
-      "type": "string"
-     },
-     "workloadIdentityArn": {
-      "maxLength": 1024,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "required": [
-     "name",
-     "workloadIdentityArn",
-     "createdTime",
-     "lastUpdatedTime"
-    ],
-    "type": "object"
-   },
    "KmsConfiguration": {
     "additionalProperties": false,
     "properties": {
@@ -122,120 +19,6 @@
     },
     "required": [
      "keyType"
-    ],
-    "type": "object"
-   },
-   "ListTagsForResourceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxProperties": 50,
-      "minProperties": 0,
-      "type": "object"
-     }
-    },
-    "type": "object"
-   },
-   "ListWorkloadIdentitiesResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "nextToken": {
-      "type": "string"
-     },
-     "workloadIdentities": {
-      "items": {
-       "$ref": "#/components/schemas/WorkloadIdentityType"
-      },
-      "type": "array"
-     }
-    },
-    "required": [
-     "workloadIdentities"
-    ],
-    "type": "object"
-   },
-   "SetTokenVaultCMKResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "kmsConfiguration": {
-      "$ref": "#/components/schemas/KmsConfiguration"
-     },
-     "lastModifiedDate": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "tokenVaultId": {
-      "maxLength": 64,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "required": [
-     "tokenVaultId",
-     "kmsConfiguration",
-     "lastModifiedDate"
-    ],
-    "type": "object"
-   },
-   "TagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UntagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UpdateWorkloadIdentityResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "allowedResourceOauth2ReturnUrls": {
-      "items": {
-       "maxLength": 2048,
-       "minLength": 1,
-       "type": "string"
-      },
-      "type": "array"
-     },
-     "createdTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "lastUpdatedTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "name": {
-      "maxLength": 255,
-      "minLength": 3,
-      "type": "string"
-     },
-     "workloadIdentityArn": {
-      "maxLength": 1024,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "required": [
-     "name",
-     "workloadIdentityArn",
-     "createdTime",
-     "lastUpdatedTime"
     ],
     "type": "object"
    },
@@ -327,7 +110,27 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateWorkloadIdentityResponse"
+         "properties": {
+          "allowedResourceOauth2ReturnUrls": {
+           "items": {
+            "maxLength": 2048,
+            "minLength": 1,
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "name": {
+           "maxLength": 255,
+           "minLength": 3,
+           "type": "string"
+          },
+          "workloadIdentityArn": {
+           "maxLength": 1024,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -390,7 +193,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteWorkloadIdentityResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -453,7 +257,41 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetWorkloadIdentityResponse"
+         "properties": {
+          "allowedResourceOauth2ReturnUrls": {
+           "items": {
+            "maxLength": 2048,
+            "minLength": 1,
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "createdTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "lastUpdatedTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "name": {
+           "maxLength": 255,
+           "minLength": 3,
+           "type": "string"
+          },
+          "workloadIdentityArn": {
+           "maxLength": 1024,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -516,7 +354,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListWorkloadIdentitiesResponse"
+         "properties": {
+          "nextToken": {
+           "type": "string"
+          },
+          "workloadIdentities": {
+           "items": {
+            "$ref": "#/components/schemas/WorkloadIdentityType"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -587,7 +436,41 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateWorkloadIdentityResponse"
+         "properties": {
+          "allowedResourceOauth2ReturnUrls": {
+           "items": {
+            "maxLength": 2048,
+            "minLength": 1,
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "createdTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "lastUpdatedTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "name": {
+           "maxLength": 255,
+           "minLength": 3,
+           "type": "string"
+          },
+          "workloadIdentityArn": {
+           "maxLength": 1024,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -647,7 +530,24 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetTokenVaultResponse"
+         "properties": {
+          "kmsConfiguration": {
+           "$ref": "#/components/schemas/KmsConfiguration"
+          },
+          "lastModifiedDate": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "tokenVaultId": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -713,7 +613,24 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/SetTokenVaultCMKResponse"
+         "properties": {
+          "kmsConfiguration": {
+           "$ref": "#/components/schemas/KmsConfiguration"
+          },
+          "lastModifiedDate": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "tokenVaultId": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -781,7 +698,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -833,7 +751,19 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -909,7 +839,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },

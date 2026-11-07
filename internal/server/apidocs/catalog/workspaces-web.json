@@ -107,152 +107,6 @@
     ],
     "type": "object"
    },
-   "CreateBrowserSettingsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "browserSettingsArn": {
-      "maxLength": 2048,
-      "minLength": 20,
-      "type": "string"
-     }
-    },
-    "required": [
-     "browserSettingsArn"
-    ],
-    "type": "object"
-   },
-   "CreateIpAccessSettingsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "ipAccessSettingsArn": {
-      "maxLength": 2048,
-      "minLength": 20,
-      "type": "string"
-     }
-    },
-    "required": [
-     "ipAccessSettingsArn"
-    ],
-    "type": "object"
-   },
-   "CreateNetworkSettingsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "networkSettingsArn": {
-      "maxLength": 2048,
-      "minLength": 20,
-      "type": "string"
-     }
-    },
-    "required": [
-     "networkSettingsArn"
-    ],
-    "type": "object"
-   },
-   "CreatePortalResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "portalArn": {
-      "maxLength": 2048,
-      "minLength": 20,
-      "type": "string"
-     },
-     "portalEndpoint": {
-      "maxLength": 253,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "required": [
-     "portalArn",
-     "portalEndpoint"
-    ],
-    "type": "object"
-   },
-   "CreateUserSettingsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "userSettingsArn": {
-      "maxLength": 2048,
-      "minLength": 20,
-      "type": "string"
-     }
-    },
-    "required": [
-     "userSettingsArn"
-    ],
-    "type": "object"
-   },
-   "DeleteBrowserSettingsResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "DeleteIpAccessSettingsResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "DeleteNetworkSettingsResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "DeletePortalResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "DeleteUserSettingsResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "GetBrowserSettingsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "browserSettings": {
-      "$ref": "#/components/schemas/BrowserSettings"
-     }
-    },
-    "type": "object"
-   },
-   "GetIpAccessSettingsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "ipAccessSettings": {
-      "$ref": "#/components/schemas/IpAccessSettings"
-     }
-    },
-    "type": "object"
-   },
-   "GetNetworkSettingsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "networkSettings": {
-      "$ref": "#/components/schemas/NetworkSettings"
-     }
-    },
-    "type": "object"
-   },
-   "GetPortalResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "portal": {
-      "$ref": "#/components/schemas/Portal"
-     }
-    },
-    "type": "object"
-   },
-   "GetUserSettingsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "userSettings": {
-      "$ref": "#/components/schemas/UserSettings"
-     }
-    },
-    "type": "object"
-   },
    "IpAccessSettings": {
     "additionalProperties": false,
     "properties": {
@@ -359,105 +213,6 @@
     "required": [
      "ipRange"
     ],
-    "type": "object"
-   },
-   "ListBrowserSettingsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "browserSettings": {
-      "items": {
-       "$ref": "#/components/schemas/BrowserSettingsSummary"
-      },
-      "type": "array"
-     },
-     "nextToken": {
-      "maxLength": 2048,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListIpAccessSettingsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "ipAccessSettings": {
-      "items": {
-       "$ref": "#/components/schemas/IpAccessSettingsSummary"
-      },
-      "type": "array"
-     },
-     "nextToken": {
-      "maxLength": 2048,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListNetworkSettingsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "networkSettings": {
-      "items": {
-       "$ref": "#/components/schemas/NetworkSettingsSummary"
-      },
-      "type": "array"
-     },
-     "nextToken": {
-      "maxLength": 2048,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListPortalsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "nextToken": {
-      "maxLength": 2048,
-      "minLength": 1,
-      "type": "string"
-     },
-     "portals": {
-      "items": {
-       "$ref": "#/components/schemas/PortalSummary"
-      },
-      "type": "array"
-     }
-    },
-    "type": "object"
-   },
-   "ListTagsForResourceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "tags": {
-      "items": {
-       "$ref": "#/components/schemas/Tag"
-      },
-      "maxItems": 200,
-      "minItems": 0,
-      "type": "array"
-     }
-    },
-    "type": "object"
-   },
-   "ListUserSettingsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "nextToken": {
-      "maxLength": 2048,
-      "minLength": 1,
-      "type": "string"
-     },
-     "userSettings": {
-      "items": {
-       "$ref": "#/components/schemas/UserSettingsSummary"
-      },
-      "type": "array"
-     }
-    },
     "type": "object"
    },
    "NetworkSettings": {
@@ -786,11 +541,6 @@
     ],
     "type": "object"
    },
-   "TagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
    "ToolbarConfiguration": {
     "additionalProperties": false,
     "properties": {
@@ -835,68 +585,6 @@
       "type": "string"
      }
     },
-    "type": "object"
-   },
-   "UntagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UpdateBrowserSettingsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "browserSettings": {
-      "$ref": "#/components/schemas/BrowserSettings"
-     }
-    },
-    "required": [
-     "browserSettings"
-    ],
-    "type": "object"
-   },
-   "UpdateIpAccessSettingsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "ipAccessSettings": {
-      "$ref": "#/components/schemas/IpAccessSettings"
-     }
-    },
-    "required": [
-     "ipAccessSettings"
-    ],
-    "type": "object"
-   },
-   "UpdateNetworkSettingsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "networkSettings": {
-      "$ref": "#/components/schemas/NetworkSettings"
-     }
-    },
-    "required": [
-     "networkSettings"
-    ],
-    "type": "object"
-   },
-   "UpdatePortalResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "portal": {
-      "$ref": "#/components/schemas/Portal"
-     }
-    },
-    "type": "object"
-   },
-   "UpdateUserSettingsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "userSettings": {
-      "$ref": "#/components/schemas/UserSettings"
-     }
-    },
-    "required": [
-     "userSettings"
-    ],
     "type": "object"
    },
    "UserSettings": {
@@ -1171,7 +859,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListBrowserSettingsResponse"
+         "properties": {
+          "browserSettings": {
+           "items": {
+            "$ref": "#/components/schemas/BrowserSettingsSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1258,7 +959,14 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateBrowserSettingsResponse"
+         "properties": {
+          "browserSettingsArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1312,7 +1020,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteBrowserSettingsResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1364,7 +1073,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetBrowserSettingsResponse"
+         "properties": {
+          "browserSettings": {
+           "$ref": "#/components/schemas/BrowserSettings"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1440,7 +1154,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateBrowserSettingsResponse"
+         "properties": {
+          "browserSettings": {
+           "$ref": "#/components/schemas/BrowserSettings"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1501,7 +1220,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListIpAccessSettingsResponse"
+         "properties": {
+          "ipAccessSettings": {
+           "items": {
+            "$ref": "#/components/schemas/IpAccessSettingsSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1601,7 +1333,14 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateIpAccessSettingsResponse"
+         "properties": {
+          "ipAccessSettingsArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1655,7 +1394,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteIpAccessSettingsResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1707,7 +1447,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetIpAccessSettingsResponse"
+         "properties": {
+          "ipAccessSettings": {
+           "$ref": "#/components/schemas/IpAccessSettings"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1793,7 +1538,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateIpAccessSettingsResponse"
+         "properties": {
+          "ipAccessSettings": {
+           "$ref": "#/components/schemas/IpAccessSettings"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1854,7 +1604,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListNetworkSettingsResponse"
+         "properties": {
+          "networkSettings": {
+           "items": {
+            "$ref": "#/components/schemas/NetworkSettingsSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1950,7 +1713,14 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateNetworkSettingsResponse"
+         "properties": {
+          "networkSettingsArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2004,7 +1774,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteNetworkSettingsResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -2056,7 +1827,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetNetworkSettingsResponse"
+         "properties": {
+          "networkSettings": {
+           "$ref": "#/components/schemas/NetworkSettings"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2149,7 +1925,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateNetworkSettingsResponse"
+         "properties": {
+          "networkSettings": {
+           "$ref": "#/components/schemas/NetworkSettings"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2210,7 +1991,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListPortalsResponse"
+         "properties": {
+          "nextToken": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          },
+          "portals": {
+           "items": {
+            "$ref": "#/components/schemas/PortalSummary"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2314,7 +2108,19 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreatePortalResponse"
+         "properties": {
+          "portalArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "portalEndpoint": {
+           "maxLength": 253,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2368,7 +2174,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeletePortalResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -2420,7 +2227,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetPortalResponse"
+         "properties": {
+          "portal": {
+           "$ref": "#/components/schemas/Portal"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2508,7 +2320,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdatePortalResponse"
+         "properties": {
+          "portal": {
+           "$ref": "#/components/schemas/Portal"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2576,7 +2393,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -2628,7 +2446,17 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+         "properties": {
+          "tags": {
+           "items": {
+            "$ref": "#/components/schemas/Tag"
+           },
+           "maxItems": 200,
+           "minItems": 0,
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2707,7 +2535,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -2768,7 +2597,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListUserSettingsResponse"
+         "properties": {
+          "nextToken": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          },
+          "userSettings": {
+           "items": {
+            "$ref": "#/components/schemas/UserSettingsSummary"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2912,7 +2754,14 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateUserSettingsResponse"
+         "properties": {
+          "userSettingsArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2966,7 +2815,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteUserSettingsResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -3018,7 +2868,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetUserSettingsResponse"
+         "properties": {
+          "userSettings": {
+           "$ref": "#/components/schemas/UserSettings"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -3144,7 +2999,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateUserSettingsResponse"
+         "properties": {
+          "userSettings": {
+           "$ref": "#/components/schemas/UserSettings"
+          }
+         },
+         "type": "object"
         }
        }
       },

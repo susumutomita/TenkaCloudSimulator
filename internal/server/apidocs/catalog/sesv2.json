@@ -28,21 +28,6 @@
     },
     "type": "object"
    },
-   "CreateConfigurationSetResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "CreateContactListResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "CreateEmailTemplateResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
    "DashboardOptions": {
     "additionalProperties": false,
     "properties": {
@@ -54,21 +39,6 @@
       "type": "string"
      }
     },
-    "type": "object"
-   },
-   "DeleteConfigurationSetResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "DeleteContactListResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "DeleteEmailTemplateResponse": {
-    "additionalProperties": false,
-    "properties": {},
     "type": "object"
    },
    "DeliveryOptions": {
@@ -124,97 +94,6 @@
     },
     "type": "object"
    },
-   "GetConfigurationSetResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "ArchivingOptions": {
-      "$ref": "#/components/schemas/ArchivingOptions"
-     },
-     "ConfigurationSetName": {
-      "type": "string"
-     },
-     "DeliveryOptions": {
-      "$ref": "#/components/schemas/DeliveryOptions"
-     },
-     "ReputationOptions": {
-      "$ref": "#/components/schemas/ReputationOptions"
-     },
-     "SendingOptions": {
-      "$ref": "#/components/schemas/SendingOptions"
-     },
-     "SuppressionOptions": {
-      "$ref": "#/components/schemas/SuppressionOptions"
-     },
-     "Tags": {
-      "items": {
-       "$ref": "#/components/schemas/Tag"
-      },
-      "type": "array"
-     },
-     "TrackingOptions": {
-      "$ref": "#/components/schemas/TrackingOptions"
-     },
-     "VdmOptions": {
-      "$ref": "#/components/schemas/VdmOptions"
-     }
-    },
-    "type": "object"
-   },
-   "GetContactListResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "ContactListName": {
-      "type": "string"
-     },
-     "CreatedTimestamp": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "Description": {
-      "type": "string"
-     },
-     "LastUpdatedTimestamp": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "Tags": {
-      "items": {
-       "$ref": "#/components/schemas/Tag"
-      },
-      "type": "array"
-     },
-     "Topics": {
-      "items": {
-       "$ref": "#/components/schemas/Topic"
-      },
-      "type": "array"
-     }
-    },
-    "type": "object"
-   },
-   "GetEmailTemplateResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "TemplateContent": {
-      "$ref": "#/components/schemas/EmailTemplateContent"
-     },
-     "TemplateName": {
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "required": [
-     "TemplateName",
-     "TemplateContent"
-    ],
-    "type": "object"
-   },
    "GuardianOptions": {
     "additionalProperties": false,
     "properties": {
@@ -226,66 +105,6 @@
       "type": "string"
      }
     },
-    "type": "object"
-   },
-   "ListConfigurationSetsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "ConfigurationSets": {
-      "items": {
-       "type": "string"
-      },
-      "type": "array"
-     },
-     "NextToken": {
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListContactListsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "ContactLists": {
-      "items": {
-       "$ref": "#/components/schemas/ContactList"
-      },
-      "type": "array"
-     },
-     "NextToken": {
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListEmailTemplatesResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "NextToken": {
-      "type": "string"
-     },
-     "TemplatesMetadata": {
-      "items": {
-       "$ref": "#/components/schemas/EmailTemplateMetadata"
-      },
-      "type": "array"
-     }
-    },
-    "type": "object"
-   },
-   "ListTagsForResourceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "Tags": {
-      "items": {
-       "$ref": "#/components/schemas/Tag"
-      },
-      "type": "array"
-     }
-    },
-    "required": [
-     "Tags"
-    ],
     "type": "object"
    },
    "ReputationOptions": {
@@ -345,11 +164,6 @@
     ],
     "type": "object"
    },
-   "TagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
    "Topic": {
     "additionalProperties": false,
     "properties": {
@@ -395,21 +209,6 @@
     "required": [
      "CustomRedirectDomain"
     ],
-    "type": "object"
-   },
-   "UntagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UpdateContactListResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UpdateEmailTemplateResponse": {
-    "additionalProperties": false,
-    "properties": {},
     "type": "object"
    },
    "VdmOptions": {
@@ -469,7 +268,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListConfigurationSetsResponse"
+         "properties": {
+          "ConfigurationSets": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -555,7 +365,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateConfigurationSetResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -607,7 +418,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteConfigurationSetResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -657,7 +469,39 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetConfigurationSetResponse"
+         "properties": {
+          "ArchivingOptions": {
+           "$ref": "#/components/schemas/ArchivingOptions"
+          },
+          "ConfigurationSetName": {
+           "type": "string"
+          },
+          "DeliveryOptions": {
+           "$ref": "#/components/schemas/DeliveryOptions"
+          },
+          "ReputationOptions": {
+           "$ref": "#/components/schemas/ReputationOptions"
+          },
+          "SendingOptions": {
+           "$ref": "#/components/schemas/SendingOptions"
+          },
+          "SuppressionOptions": {
+           "$ref": "#/components/schemas/SuppressionOptions"
+          },
+          "Tags": {
+           "items": {
+            "$ref": "#/components/schemas/Tag"
+           },
+           "type": "array"
+          },
+          "TrackingOptions": {
+           "$ref": "#/components/schemas/TrackingOptions"
+          },
+          "VdmOptions": {
+           "$ref": "#/components/schemas/VdmOptions"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -715,7 +559,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListContactListsResponse"
+         "properties": {
+          "ContactLists": {
+           "items": {
+            "$ref": "#/components/schemas/ContactList"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -789,7 +644,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateContactListResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -841,7 +697,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteContactListResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -891,7 +748,41 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetContactListResponse"
+         "properties": {
+          "ContactListName": {
+           "type": "string"
+          },
+          "CreatedTimestamp": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "Description": {
+           "type": "string"
+          },
+          "LastUpdatedTimestamp": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "Tags": {
+           "items": {
+            "$ref": "#/components/schemas/Tag"
+           },
+           "type": "array"
+          },
+          "Topics": {
+           "items": {
+            "$ref": "#/components/schemas/Topic"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -961,7 +852,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateContactListResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1023,7 +915,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1073,7 +966,15 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+         "properties": {
+          "Tags": {
+           "items": {
+            "$ref": "#/components/schemas/Tag"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1140,7 +1041,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1198,7 +1100,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListEmailTemplatesResponse"
+         "properties": {
+          "NextToken": {
+           "type": "string"
+          },
+          "TemplatesMetadata": {
+           "items": {
+            "$ref": "#/components/schemas/EmailTemplateMetadata"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1262,7 +1175,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateEmailTemplateResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1315,7 +1229,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteEmailTemplateResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1366,7 +1281,16 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetEmailTemplateResponse"
+         "properties": {
+          "TemplateContent": {
+           "$ref": "#/components/schemas/EmailTemplateContent"
+          },
+          "TemplateName": {
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1434,7 +1358,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateEmailTemplateResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },

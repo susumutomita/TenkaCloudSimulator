@@ -74,102 +74,6 @@
     },
     "type": "object"
    },
-   "CreateWorkloadOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "WorkloadArn": {
-      "type": "string"
-     },
-     "WorkloadId": {
-      "maxLength": 32,
-      "minLength": 32,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "GetGlobalSettingsOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "DiscoveryIntegrationStatus": {
-      "enum": [
-       "ENABLED",
-       "DISABLED"
-      ],
-      "type": "string"
-     },
-     "JiraConfiguration": {
-      "$ref": "#/components/schemas/AccountJiraConfigurationOutput"
-     },
-     "OrganizationSharingStatus": {
-      "enum": [
-       "ENABLED",
-       "DISABLED"
-      ],
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "GetWorkloadOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "Workload": {
-      "$ref": "#/components/schemas/Workload"
-     }
-    },
-    "type": "object"
-   },
-   "ListTagsForResourceOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "Tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxProperties": 50,
-      "minProperties": 1,
-      "type": "object"
-     }
-    },
-    "type": "object"
-   },
-   "ListWorkloadsOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "NextToken": {
-      "type": "string"
-     },
-     "WorkloadSummaries": {
-      "items": {
-       "$ref": "#/components/schemas/WorkloadSummary"
-      },
-      "type": "array"
-     }
-    },
-    "type": "object"
-   },
-   "TagResourceOutput": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UntagResourceOutput": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UpdateWorkloadOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "Workload": {
-      "$ref": "#/components/schemas/Workload"
-     }
-    },
-    "type": "object"
-   },
    "Workload": {
     "additionalProperties": false,
     "properties": {
@@ -540,7 +444,26 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetGlobalSettingsOutput"
+         "properties": {
+          "DiscoveryIntegrationStatus": {
+           "enum": [
+            "ENABLED",
+            "DISABLED"
+           ],
+           "type": "string"
+          },
+          "JiraConfiguration": {
+           "$ref": "#/components/schemas/AccountJiraConfigurationOutput"
+          },
+          "OrganizationSharingStatus": {
+           "enum": [
+            "ENABLED",
+            "DISABLED"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -669,7 +592,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceOutput"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -719,7 +643,19 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceOutput"
+         "properties": {
+          "Tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 1,
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -793,7 +729,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceOutput"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -981,7 +918,17 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateWorkloadOutput"
+         "properties": {
+          "WorkloadArn": {
+           "type": "string"
+          },
+          "WorkloadId": {
+           "maxLength": 32,
+           "minLength": 32,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1089,7 +1036,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetWorkloadOutput"
+         "properties": {
+          "Workload": {
+           "$ref": "#/components/schemas/Workload"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1251,7 +1203,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateWorkloadOutput"
+         "properties": {
+          "Workload": {
+           "$ref": "#/components/schemas/Workload"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1318,7 +1275,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListWorkloadsOutput"
+         "properties": {
+          "NextToken": {
+           "type": "string"
+          },
+          "WorkloadSummaries": {
+           "items": {
+            "$ref": "#/components/schemas/WorkloadSummary"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },

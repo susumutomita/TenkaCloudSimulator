@@ -500,36 +500,6 @@
     ],
     "type": "object"
    },
-   "CreateDomainResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "DomainStatus": {
-      "$ref": "#/components/schemas/DomainStatus"
-     }
-    },
-    "type": "object"
-   },
-   "DeleteDomainResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "DomainStatus": {
-      "$ref": "#/components/schemas/DomainStatus"
-     }
-    },
-    "type": "object"
-   },
-   "DescribeDomainResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "DomainStatus": {
-      "$ref": "#/components/schemas/DomainStatus"
-     }
-    },
-    "required": [
-     "DomainStatus"
-    ],
-    "type": "object"
-   },
    "DomainEndpointOptions": {
     "additionalProperties": false,
     "properties": {
@@ -927,18 +897,6 @@
      },
      "SubjectKey": {
       "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListDomainNamesResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "DomainNames": {
-      "items": {
-       "$ref": "#/components/schemas/DomainInfo"
-      },
-      "type": "array"
      }
     },
     "type": "object"
@@ -1479,7 +1437,15 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListDomainNamesResponse"
+         "properties": {
+          "DomainNames": {
+           "items": {
+            "$ref": "#/components/schemas/DomainInfo"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1619,7 +1585,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateDomainResponse"
+         "properties": {
+          "DomainStatus": {
+           "$ref": "#/components/schemas/DomainStatus"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1673,7 +1644,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteDomainResponse"
+         "properties": {
+          "DomainStatus": {
+           "$ref": "#/components/schemas/DomainStatus"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1725,7 +1701,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DescribeDomainResponse"
+         "properties": {
+          "DomainStatus": {
+           "$ref": "#/components/schemas/DomainStatus"
+          }
+         },
+         "type": "object"
         }
        }
       },

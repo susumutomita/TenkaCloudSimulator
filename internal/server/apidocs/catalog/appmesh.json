@@ -136,186 +136,6 @@
     },
     "type": "object"
    },
-   "CreateMeshOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "mesh": {
-      "$ref": "#/components/schemas/MeshData"
-     }
-    },
-    "required": [
-     "mesh"
-    ],
-    "type": "object"
-   },
-   "CreateVirtualGatewayOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "virtualGateway": {
-      "$ref": "#/components/schemas/VirtualGatewayData"
-     }
-    },
-    "required": [
-     "virtualGateway"
-    ],
-    "type": "object"
-   },
-   "CreateVirtualNodeOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "virtualNode": {
-      "$ref": "#/components/schemas/VirtualNodeData"
-     }
-    },
-    "required": [
-     "virtualNode"
-    ],
-    "type": "object"
-   },
-   "CreateVirtualRouterOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "virtualRouter": {
-      "$ref": "#/components/schemas/VirtualRouterData"
-     }
-    },
-    "required": [
-     "virtualRouter"
-    ],
-    "type": "object"
-   },
-   "CreateVirtualServiceOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "virtualService": {
-      "$ref": "#/components/schemas/VirtualServiceData"
-     }
-    },
-    "required": [
-     "virtualService"
-    ],
-    "type": "object"
-   },
-   "DeleteMeshOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "mesh": {
-      "$ref": "#/components/schemas/MeshData"
-     }
-    },
-    "required": [
-     "mesh"
-    ],
-    "type": "object"
-   },
-   "DeleteVirtualGatewayOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "virtualGateway": {
-      "$ref": "#/components/schemas/VirtualGatewayData"
-     }
-    },
-    "required": [
-     "virtualGateway"
-    ],
-    "type": "object"
-   },
-   "DeleteVirtualNodeOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "virtualNode": {
-      "$ref": "#/components/schemas/VirtualNodeData"
-     }
-    },
-    "required": [
-     "virtualNode"
-    ],
-    "type": "object"
-   },
-   "DeleteVirtualRouterOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "virtualRouter": {
-      "$ref": "#/components/schemas/VirtualRouterData"
-     }
-    },
-    "required": [
-     "virtualRouter"
-    ],
-    "type": "object"
-   },
-   "DeleteVirtualServiceOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "virtualService": {
-      "$ref": "#/components/schemas/VirtualServiceData"
-     }
-    },
-    "required": [
-     "virtualService"
-    ],
-    "type": "object"
-   },
-   "DescribeMeshOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "mesh": {
-      "$ref": "#/components/schemas/MeshData"
-     }
-    },
-    "required": [
-     "mesh"
-    ],
-    "type": "object"
-   },
-   "DescribeVirtualGatewayOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "virtualGateway": {
-      "$ref": "#/components/schemas/VirtualGatewayData"
-     }
-    },
-    "required": [
-     "virtualGateway"
-    ],
-    "type": "object"
-   },
-   "DescribeVirtualNodeOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "virtualNode": {
-      "$ref": "#/components/schemas/VirtualNodeData"
-     }
-    },
-    "required": [
-     "virtualNode"
-    ],
-    "type": "object"
-   },
-   "DescribeVirtualRouterOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "virtualRouter": {
-      "$ref": "#/components/schemas/VirtualRouterData"
-     }
-    },
-    "required": [
-     "virtualRouter"
-    ],
-    "type": "object"
-   },
-   "DescribeVirtualServiceOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "virtualService": {
-      "$ref": "#/components/schemas/VirtualServiceData"
-     }
-    },
-    "required": [
-     "virtualService"
-    ],
-    "type": "object"
-   },
    "DnsServiceDiscovery": {
     "additionalProperties": false,
     "properties": {
@@ -485,116 +305,6 @@
     "required": [
      "key",
      "value"
-    ],
-    "type": "object"
-   },
-   "ListMeshesOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "meshes": {
-      "items": {
-       "$ref": "#/components/schemas/MeshRef"
-      },
-      "type": "array"
-     },
-     "nextToken": {
-      "type": "string"
-     }
-    },
-    "required": [
-     "meshes"
-    ],
-    "type": "object"
-   },
-   "ListTagsForResourceOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "nextToken": {
-      "type": "string"
-     },
-     "tags": {
-      "items": {
-       "$ref": "#/components/schemas/TagRef"
-      },
-      "maxItems": 50,
-      "minItems": 0,
-      "type": "array"
-     }
-    },
-    "required": [
-     "tags"
-    ],
-    "type": "object"
-   },
-   "ListVirtualGatewaysOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "nextToken": {
-      "type": "string"
-     },
-     "virtualGateways": {
-      "items": {
-       "$ref": "#/components/schemas/VirtualGatewayRef"
-      },
-      "type": "array"
-     }
-    },
-    "required": [
-     "virtualGateways"
-    ],
-    "type": "object"
-   },
-   "ListVirtualNodesOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "nextToken": {
-      "type": "string"
-     },
-     "virtualNodes": {
-      "items": {
-       "$ref": "#/components/schemas/VirtualNodeRef"
-      },
-      "type": "array"
-     }
-    },
-    "required": [
-     "virtualNodes"
-    ],
-    "type": "object"
-   },
-   "ListVirtualRoutersOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "nextToken": {
-      "type": "string"
-     },
-     "virtualRouters": {
-      "items": {
-       "$ref": "#/components/schemas/VirtualRouterRef"
-      },
-      "type": "array"
-     }
-    },
-    "required": [
-     "virtualRouters"
-    ],
-    "type": "object"
-   },
-   "ListVirtualServicesOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "nextToken": {
-      "type": "string"
-     },
-     "virtualServices": {
-      "items": {
-       "$ref": "#/components/schemas/VirtualServiceRef"
-      },
-      "type": "array"
-     }
-    },
-    "required": [
-     "virtualServices"
     ],
     "type": "object"
    },
@@ -1066,11 +776,6 @@
     ],
     "type": "object"
    },
-   "TagResourceOutput": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
    "TcpTimeout": {
     "additionalProperties": false,
     "properties": {
@@ -1153,71 +858,6 @@
       "$ref": "#/components/schemas/TlsValidationContextSdsTrust"
      }
     },
-    "type": "object"
-   },
-   "UntagResourceOutput": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UpdateMeshOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "mesh": {
-      "$ref": "#/components/schemas/MeshData"
-     }
-    },
-    "required": [
-     "mesh"
-    ],
-    "type": "object"
-   },
-   "UpdateVirtualGatewayOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "virtualGateway": {
-      "$ref": "#/components/schemas/VirtualGatewayData"
-     }
-    },
-    "required": [
-     "virtualGateway"
-    ],
-    "type": "object"
-   },
-   "UpdateVirtualNodeOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "virtualNode": {
-      "$ref": "#/components/schemas/VirtualNodeData"
-     }
-    },
-    "required": [
-     "virtualNode"
-    ],
-    "type": "object"
-   },
-   "UpdateVirtualRouterOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "virtualRouter": {
-      "$ref": "#/components/schemas/VirtualRouterData"
-     }
-    },
-    "required": [
-     "virtualRouter"
-    ],
-    "type": "object"
-   },
-   "UpdateVirtualServiceOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "virtualService": {
-      "$ref": "#/components/schemas/VirtualServiceData"
-     }
-    },
-    "required": [
-     "virtualService"
-    ],
     "type": "object"
    },
    "VirtualGatewayAccessLog": {
@@ -2334,7 +1974,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListMeshesOutput"
+         "properties": {
+          "meshes": {
+           "items": {
+            "$ref": "#/components/schemas/MeshRef"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2409,7 +2060,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateMeshOutput"
+         "$ref": "#/components/schemas/MeshData"
         }
        }
       },
@@ -2463,7 +2114,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteMeshOutput"
+         "$ref": "#/components/schemas/MeshData"
         }
        }
       },
@@ -2524,7 +2175,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DescribeMeshOutput"
+         "$ref": "#/components/schemas/MeshData"
         }
        }
       },
@@ -2593,7 +2244,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateMeshOutput"
+         "$ref": "#/components/schemas/MeshData"
         }
        }
       },
@@ -2672,7 +2323,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListVirtualGatewaysOutput"
+         "properties": {
+          "nextToken": {
+           "type": "string"
+          },
+          "virtualGateways": {
+           "items": {
+            "$ref": "#/components/schemas/VirtualGatewayRef"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2767,7 +2429,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateVirtualGatewayOutput"
+         "$ref": "#/components/schemas/VirtualGatewayData"
         }
        }
       },
@@ -2840,7 +2502,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteVirtualGatewayOutput"
+         "$ref": "#/components/schemas/VirtualGatewayData"
         }
        }
       },
@@ -2911,7 +2573,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DescribeVirtualGatewayOutput"
+         "$ref": "#/components/schemas/VirtualGatewayData"
         }
        }
       },
@@ -3002,7 +2664,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateVirtualGatewayOutput"
+         "$ref": "#/components/schemas/VirtualGatewayData"
         }
        }
       },
@@ -3081,7 +2743,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListVirtualNodesOutput"
+         "properties": {
+          "nextToken": {
+           "type": "string"
+          },
+          "virtualNodes": {
+           "items": {
+            "$ref": "#/components/schemas/VirtualNodeRef"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -3176,7 +2849,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateVirtualNodeOutput"
+         "$ref": "#/components/schemas/VirtualNodeData"
         }
        }
       },
@@ -3249,7 +2922,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteVirtualNodeOutput"
+         "$ref": "#/components/schemas/VirtualNodeData"
         }
        }
       },
@@ -3320,7 +2993,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DescribeVirtualNodeOutput"
+         "$ref": "#/components/schemas/VirtualNodeData"
         }
        }
       },
@@ -3411,7 +3084,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateVirtualNodeOutput"
+         "$ref": "#/components/schemas/VirtualNodeData"
         }
        }
       },
@@ -3490,7 +3163,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListVirtualRoutersOutput"
+         "properties": {
+          "nextToken": {
+           "type": "string"
+          },
+          "virtualRouters": {
+           "items": {
+            "$ref": "#/components/schemas/VirtualRouterRef"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -3585,7 +3269,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateVirtualRouterOutput"
+         "$ref": "#/components/schemas/VirtualRouterData"
         }
        }
       },
@@ -3658,7 +3342,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteVirtualRouterOutput"
+         "$ref": "#/components/schemas/VirtualRouterData"
         }
        }
       },
@@ -3729,7 +3413,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DescribeVirtualRouterOutput"
+         "$ref": "#/components/schemas/VirtualRouterData"
         }
        }
       },
@@ -3820,7 +3504,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateVirtualRouterOutput"
+         "$ref": "#/components/schemas/VirtualRouterData"
         }
        }
       },
@@ -3899,7 +3583,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListVirtualServicesOutput"
+         "properties": {
+          "nextToken": {
+           "type": "string"
+          },
+          "virtualServices": {
+           "items": {
+            "$ref": "#/components/schemas/VirtualServiceRef"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -3992,7 +3687,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateVirtualServiceOutput"
+         "$ref": "#/components/schemas/VirtualServiceData"
         }
        }
       },
@@ -4063,7 +3758,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteVirtualServiceOutput"
+         "$ref": "#/components/schemas/VirtualServiceData"
         }
        }
       },
@@ -4132,7 +3827,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DescribeVirtualServiceOutput"
+         "$ref": "#/components/schemas/VirtualServiceData"
         }
        }
       },
@@ -4221,7 +3916,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateVirtualServiceOutput"
+         "$ref": "#/components/schemas/VirtualServiceData"
         }
        }
       },
@@ -4294,7 +3989,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceOutput"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -4361,7 +4057,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceOutput"
+         "properties": {
+          "nextToken": {
+           "type": "string"
+          },
+          "tags": {
+           "items": {
+            "$ref": "#/components/schemas/TagRef"
+           },
+           "maxItems": 50,
+           "minItems": 0,
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -4436,7 +4145,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceOutput"
+         "properties": {},
+         "type": "object"
         }
        }
       },

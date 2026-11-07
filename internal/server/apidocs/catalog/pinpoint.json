@@ -30,18 +30,6 @@
     ],
     "type": "object"
    },
-   "CreateAppResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "ApplicationResponse": {
-      "$ref": "#/components/schemas/ApplicationResponse"
-     }
-    },
-    "required": [
-     "ApplicationResponse"
-    ],
-    "type": "object"
-   },
    "CreateApplicationRequest": {
     "additionalProperties": false,
     "properties": {
@@ -57,30 +45,6 @@
     },
     "required": [
      "Name"
-    ],
-    "type": "object"
-   },
-   "DeleteAppResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "ApplicationResponse": {
-      "$ref": "#/components/schemas/ApplicationResponse"
-     }
-    },
-    "required": [
-     "ApplicationResponse"
-    ],
-    "type": "object"
-   },
-   "GetAppResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "ApplicationResponse": {
-      "$ref": "#/components/schemas/ApplicationResponse"
-     }
-    },
-    "required": [
-     "ApplicationResponse"
     ],
     "type": "object"
    }
@@ -114,15 +78,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "properties": {
-         "CreateApplicationRequest": {
-          "$ref": "#/components/schemas/CreateApplicationRequest"
-         }
-        },
-        "required": [
-         "CreateApplicationRequest"
-        ],
-        "type": "object"
+        "$ref": "#/components/schemas/CreateApplicationRequest"
        }
       }
      }
@@ -132,7 +88,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateAppResponse"
+         "$ref": "#/components/schemas/ApplicationResponse"
         }
        }
       },
@@ -184,7 +140,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteAppResponse"
+         "$ref": "#/components/schemas/ApplicationResponse"
         }
        }
       },
@@ -234,7 +190,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetAppResponse"
+         "$ref": "#/components/schemas/ApplicationResponse"
         }
        }
       },

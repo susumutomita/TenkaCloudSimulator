@@ -1,20 +1,6 @@
 {
  "components": {
   "schemas": {
-   "CreateEnvironmentResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "environment": {
-      "$ref": "#/components/schemas/EnvironmentSummary"
-     }
-    },
-    "type": "object"
-   },
-   "DeleteEnvironmentResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
    "Environment": {
     "additionalProperties": false,
     "properties": {
@@ -198,44 +184,6 @@
     },
     "type": "object"
    },
-   "GetEnvironmentResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "environment": {
-      "$ref": "#/components/schemas/Environment"
-     }
-    },
-    "type": "object"
-   },
-   "ListEnvironmentsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "environments": {
-      "items": {
-       "$ref": "#/components/schemas/EnvironmentSummary"
-      },
-      "type": "array"
-     },
-     "nextToken": {
-      "maxLength": 2048,
-      "minLength": 0,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListTagsForResourceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "tags": {
-      "additionalProperties": {
-       "type": "string"
-      },
-      "type": "object"
-     }
-    },
-    "type": "object"
-   },
    "MaintenanceWindow": {
     "additionalProperties": false,
     "properties": {
@@ -295,25 +243,6 @@
      "type"
     ],
     "type": "object"
-   },
-   "TagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UntagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UpdateEnvironmentResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "environment": {
-      "$ref": "#/components/schemas/EnvironmentSummary"
-     }
-    },
-    "type": "object"
    }
   }
  },
@@ -364,7 +293,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListEnvironmentsResponse"
+         "properties": {
+          "environments": {
+           "items": {
+            "$ref": "#/components/schemas/EnvironmentSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 2048,
+           "minLength": 0,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -481,7 +423,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateEnvironmentResponse"
+         "properties": {
+          "environment": {
+           "$ref": "#/components/schemas/EnvironmentSummary"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -542,7 +489,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteEnvironmentResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -592,7 +540,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetEnvironmentResponse"
+         "properties": {
+          "environment": {
+           "$ref": "#/components/schemas/Environment"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -698,7 +651,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateEnvironmentResponse"
+         "properties": {
+          "environment": {
+           "$ref": "#/components/schemas/EnvironmentSummary"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -760,7 +718,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -810,7 +769,15 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -880,7 +847,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },

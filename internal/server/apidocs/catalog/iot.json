@@ -107,328 +107,6 @@
     },
     "type": "object"
    },
-   "CreatePolicyResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "policyArn": {
-      "type": "string"
-     },
-     "policyDocument": {
-      "maxLength": 404600,
-      "minLength": 0,
-      "type": "string"
-     },
-     "policyName": {
-      "maxLength": 128,
-      "minLength": 1,
-      "type": "string"
-     },
-     "policyVersionId": {
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "CreateSecurityProfileResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "securityProfileArn": {
-      "type": "string"
-     },
-     "securityProfileName": {
-      "maxLength": 128,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "CreateThingGroupResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "thingGroupArn": {
-      "type": "string"
-     },
-     "thingGroupId": {
-      "maxLength": 128,
-      "minLength": 1,
-      "type": "string"
-     },
-     "thingGroupName": {
-      "maxLength": 128,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "CreateThingResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "thingArn": {
-      "type": "string"
-     },
-     "thingId": {
-      "type": "string"
-     },
-     "thingName": {
-      "maxLength": 128,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "CreateThingTypeResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "thingTypeArn": {
-      "type": "string"
-     },
-     "thingTypeId": {
-      "type": "string"
-     },
-     "thingTypeName": {
-      "maxLength": 128,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "DeleteSecurityProfileResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "DeleteThingGroupResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "DeleteThingResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "DeleteThingTypeResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "DescribeSecurityProfileResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "additionalMetricsToRetain": {
-      "items": {
-       "type": "string"
-      },
-      "type": "array"
-     },
-     "additionalMetricsToRetainV2": {
-      "items": {
-       "$ref": "#/components/schemas/MetricToRetain"
-      },
-      "type": "array"
-     },
-     "alertTargets": {
-      "additionalProperties": {
-       "$ref": "#/components/schemas/AlertTarget"
-      },
-      "type": "object"
-     },
-     "behaviors": {
-      "items": {
-       "$ref": "#/components/schemas/Behavior"
-      },
-      "maxItems": 100,
-      "type": "array"
-     },
-     "creationDate": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "lastModifiedDate": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "metricsExportConfig": {
-      "$ref": "#/components/schemas/MetricsExportConfig"
-     },
-     "securityProfileArn": {
-      "type": "string"
-     },
-     "securityProfileDescription": {
-      "maxLength": 1000,
-      "type": "string"
-     },
-     "securityProfileName": {
-      "maxLength": 128,
-      "minLength": 1,
-      "type": "string"
-     },
-     "version": {
-      "type": "integer"
-     }
-    },
-    "type": "object"
-   },
-   "DescribeThingGroupResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "indexName": {
-      "maxLength": 128,
-      "minLength": 1,
-      "type": "string"
-     },
-     "queryString": {
-      "minLength": 1,
-      "type": "string"
-     },
-     "queryVersion": {
-      "type": "string"
-     },
-     "status": {
-      "enum": [
-       "ACTIVE",
-       "BUILDING",
-       "REBUILDING"
-      ],
-      "type": "string"
-     },
-     "thingGroupArn": {
-      "type": "string"
-     },
-     "thingGroupId": {
-      "maxLength": 128,
-      "minLength": 1,
-      "type": "string"
-     },
-     "thingGroupMetadata": {
-      "$ref": "#/components/schemas/ThingGroupMetadata"
-     },
-     "thingGroupName": {
-      "maxLength": 128,
-      "minLength": 1,
-      "type": "string"
-     },
-     "thingGroupProperties": {
-      "$ref": "#/components/schemas/ThingGroupProperties"
-     },
-     "version": {
-      "type": "integer"
-     }
-    },
-    "type": "object"
-   },
-   "DescribeThingResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "attributes": {
-      "additionalProperties": {
-       "maxLength": 800,
-       "type": "string"
-      },
-      "type": "object"
-     },
-     "billingGroupName": {
-      "maxLength": 128,
-      "minLength": 1,
-      "type": "string"
-     },
-     "defaultClientId": {
-      "type": "string"
-     },
-     "thingArn": {
-      "type": "string"
-     },
-     "thingId": {
-      "type": "string"
-     },
-     "thingName": {
-      "maxLength": 128,
-      "minLength": 1,
-      "type": "string"
-     },
-     "thingTypeName": {
-      "maxLength": 128,
-      "minLength": 1,
-      "type": "string"
-     },
-     "version": {
-      "type": "integer"
-     }
-    },
-    "type": "object"
-   },
-   "DescribeThingTypeResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "thingTypeArn": {
-      "type": "string"
-     },
-     "thingTypeId": {
-      "type": "string"
-     },
-     "thingTypeMetadata": {
-      "$ref": "#/components/schemas/ThingTypeMetadata"
-     },
-     "thingTypeName": {
-      "maxLength": 128,
-      "minLength": 1,
-      "type": "string"
-     },
-     "thingTypeProperties": {
-      "$ref": "#/components/schemas/ThingTypeProperties"
-     }
-    },
-    "type": "object"
-   },
-   "GetPolicyResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "creationDate": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "defaultVersionId": {
-      "type": "string"
-     },
-     "generationId": {
-      "type": "string"
-     },
-     "lastModifiedDate": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "policyArn": {
-      "type": "string"
-     },
-     "policyDocument": {
-      "maxLength": 404600,
-      "minLength": 0,
-      "type": "string"
-     },
-     "policyName": {
-      "maxLength": 128,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
    "GroupNameAndArn": {
     "additionalProperties": false,
     "properties": {
@@ -439,97 +117,6 @@
       "maxLength": 128,
       "minLength": 1,
       "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListPoliciesResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "nextMarker": {
-      "maxLength": 1024,
-      "type": "string"
-     },
-     "policies": {
-      "items": {
-       "$ref": "#/components/schemas/Policy"
-      },
-      "type": "array"
-     }
-    },
-    "type": "object"
-   },
-   "ListSecurityProfilesResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "nextToken": {
-      "type": "string"
-     },
-     "securityProfileIdentifiers": {
-      "items": {
-       "$ref": "#/components/schemas/SecurityProfileIdentifier"
-      },
-      "type": "array"
-     }
-    },
-    "type": "object"
-   },
-   "ListTagsForResourceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "nextToken": {
-      "type": "string"
-     },
-     "tags": {
-      "items": {
-       "$ref": "#/components/schemas/Tag"
-      },
-      "type": "array"
-     }
-    },
-    "type": "object"
-   },
-   "ListThingGroupsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "nextToken": {
-      "type": "string"
-     },
-     "thingGroups": {
-      "items": {
-       "$ref": "#/components/schemas/GroupNameAndArn"
-      },
-      "type": "array"
-     }
-    },
-    "type": "object"
-   },
-   "ListThingTypesResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "nextToken": {
-      "type": "string"
-     },
-     "thingTypes": {
-      "items": {
-       "$ref": "#/components/schemas/ThingTypeDefinition"
-      },
-      "type": "array"
-     }
-    },
-    "type": "object"
-   },
-   "ListThingsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "nextToken": {
-      "type": "string"
-     },
-     "things": {
-      "items": {
-       "$ref": "#/components/schemas/ThingAttribute"
-      },
-      "type": "array"
      }
     },
     "type": "object"
@@ -741,11 +328,6 @@
     ],
     "type": "object"
    },
-   "TagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
    "ThingAttribute": {
     "additionalProperties": false,
     "properties": {
@@ -874,93 +456,6 @@
      }
     },
     "type": "object"
-   },
-   "UntagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UpdateSecurityProfileResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "additionalMetricsToRetain": {
-      "items": {
-       "type": "string"
-      },
-      "type": "array"
-     },
-     "additionalMetricsToRetainV2": {
-      "items": {
-       "$ref": "#/components/schemas/MetricToRetain"
-      },
-      "type": "array"
-     },
-     "alertTargets": {
-      "additionalProperties": {
-       "$ref": "#/components/schemas/AlertTarget"
-      },
-      "type": "object"
-     },
-     "behaviors": {
-      "items": {
-       "$ref": "#/components/schemas/Behavior"
-      },
-      "maxItems": 100,
-      "type": "array"
-     },
-     "creationDate": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "lastModifiedDate": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "metricsExportConfig": {
-      "$ref": "#/components/schemas/MetricsExportConfig"
-     },
-     "securityProfileArn": {
-      "type": "string"
-     },
-     "securityProfileDescription": {
-      "maxLength": 1000,
-      "type": "string"
-     },
-     "securityProfileName": {
-      "maxLength": 128,
-      "minLength": 1,
-      "type": "string"
-     },
-     "version": {
-      "type": "integer"
-     }
-    },
-    "type": "object"
-   },
-   "UpdateThingGroupResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "version": {
-      "type": "integer"
-     }
-    },
-    "type": "object"
-   },
-   "UpdateThingResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UpdateThingTypeResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
    }
   }
  },
@@ -1017,7 +512,19 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListPoliciesResponse"
+         "properties": {
+          "nextMarker": {
+           "maxLength": 1024,
+           "type": "string"
+          },
+          "policies": {
+           "items": {
+            "$ref": "#/components/schemas/Policy"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1116,7 +623,42 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetPolicyResponse"
+         "properties": {
+          "creationDate": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "defaultVersionId": {
+           "type": "string"
+          },
+          "generationId": {
+           "type": "string"
+          },
+          "lastModifiedDate": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "policyArn": {
+           "type": "string"
+          },
+          "policyDocument": {
+           "maxLength": 404600,
+           "minLength": 0,
+           "type": "string"
+          },
+          "policyName": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1193,7 +735,25 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreatePolicyResponse"
+         "properties": {
+          "policyArn": {
+           "type": "string"
+          },
+          "policyDocument": {
+           "maxLength": 404600,
+           "minLength": 0,
+           "type": "string"
+          },
+          "policyName": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "policyVersionId": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1271,7 +831,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListSecurityProfilesResponse"
+         "properties": {
+          "nextToken": {
+           "type": "string"
+          },
+          "securityProfileIdentifiers": {
+           "items": {
+            "$ref": "#/components/schemas/SecurityProfileIdentifier"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1332,7 +903,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteSecurityProfileResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1384,7 +956,66 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DescribeSecurityProfileResponse"
+         "properties": {
+          "additionalMetricsToRetain": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "additionalMetricsToRetainV2": {
+           "items": {
+            "$ref": "#/components/schemas/MetricToRetain"
+           },
+           "type": "array"
+          },
+          "alertTargets": {
+           "additionalProperties": {
+            "$ref": "#/components/schemas/AlertTarget"
+           },
+           "type": "object"
+          },
+          "behaviors": {
+           "items": {
+            "$ref": "#/components/schemas/Behavior"
+           },
+           "maxItems": 100,
+           "type": "array"
+          },
+          "creationDate": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "lastModifiedDate": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "metricsExportConfig": {
+           "$ref": "#/components/schemas/MetricsExportConfig"
+          },
+          "securityProfileArn": {
+           "type": "string"
+          },
+          "securityProfileDescription": {
+           "maxLength": 1000,
+           "type": "string"
+          },
+          "securityProfileName": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "version": {
+           "type": "integer"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1498,7 +1129,66 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateSecurityProfileResponse"
+         "properties": {
+          "additionalMetricsToRetain": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "additionalMetricsToRetainV2": {
+           "items": {
+            "$ref": "#/components/schemas/MetricToRetain"
+           },
+           "type": "array"
+          },
+          "alertTargets": {
+           "additionalProperties": {
+            "$ref": "#/components/schemas/AlertTarget"
+           },
+           "type": "object"
+          },
+          "behaviors": {
+           "items": {
+            "$ref": "#/components/schemas/Behavior"
+           },
+           "maxItems": 100,
+           "type": "array"
+          },
+          "creationDate": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "lastModifiedDate": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "metricsExportConfig": {
+           "$ref": "#/components/schemas/MetricsExportConfig"
+          },
+          "securityProfileArn": {
+           "type": "string"
+          },
+          "securityProfileDescription": {
+           "maxLength": 1000,
+           "type": "string"
+          },
+          "securityProfileName": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "version": {
+           "type": "integer"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1599,7 +1289,17 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateSecurityProfileResponse"
+         "properties": {
+          "securityProfileArn": {
+           "type": "string"
+          },
+          "securityProfileName": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1657,7 +1357,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+         "properties": {
+          "nextToken": {
+           "type": "string"
+          },
+          "tags": {
+           "items": {
+            "$ref": "#/components/schemas/Tag"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1723,7 +1434,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1808,7 +1520,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListThingGroupsResponse"
+         "properties": {
+          "nextToken": {
+           "type": "string"
+          },
+          "thingGroups": {
+           "items": {
+            "$ref": "#/components/schemas/GroupNameAndArn"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1869,7 +1592,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteThingGroupResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1921,7 +1645,51 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DescribeThingGroupResponse"
+         "properties": {
+          "indexName": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "queryString": {
+           "minLength": 1,
+           "type": "string"
+          },
+          "queryVersion": {
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "ACTIVE",
+            "BUILDING",
+            "REBUILDING"
+           ],
+           "type": "string"
+          },
+          "thingGroupArn": {
+           "type": "string"
+          },
+          "thingGroupId": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "thingGroupMetadata": {
+           "$ref": "#/components/schemas/ThingGroupMetadata"
+          },
+          "thingGroupName": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "thingGroupProperties": {
+           "$ref": "#/components/schemas/ThingGroupProperties"
+          },
+          "version": {
+           "type": "integer"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1993,7 +1761,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateThingGroupResponse"
+         "properties": {
+          "version": {
+           "type": "integer"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2070,7 +1843,22 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateThingGroupResponse"
+         "properties": {
+          "thingGroupArn": {
+           "type": "string"
+          },
+          "thingGroupId": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "thingGroupName": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2139,7 +1927,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListThingTypesResponse"
+         "properties": {
+          "nextToken": {
+           "type": "string"
+          },
+          "thingTypes": {
+           "items": {
+            "$ref": "#/components/schemas/ThingTypeDefinition"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2193,7 +1992,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteThingTypeResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -2245,7 +2045,26 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DescribeThingTypeResponse"
+         "properties": {
+          "thingTypeArn": {
+           "type": "string"
+          },
+          "thingTypeId": {
+           "type": "string"
+          },
+          "thingTypeMetadata": {
+           "$ref": "#/components/schemas/ThingTypeMetadata"
+          },
+          "thingTypeName": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "thingTypeProperties": {
+           "$ref": "#/components/schemas/ThingTypeProperties"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2311,7 +2130,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateThingTypeResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -2383,7 +2203,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateThingTypeResponse"
+         "properties": {
+          "thingTypeArn": {
+           "type": "string"
+          },
+          "thingTypeId": {
+           "type": "string"
+          },
+          "thingTypeName": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2475,7 +2308,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListThingsResponse"
+         "properties": {
+          "nextToken": {
+           "type": "string"
+          },
+          "things": {
+           "items": {
+            "$ref": "#/components/schemas/ThingAttribute"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2536,7 +2380,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteThingResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -2588,7 +2433,43 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DescribeThingResponse"
+         "properties": {
+          "attributes": {
+           "additionalProperties": {
+            "maxLength": 800,
+            "type": "string"
+           },
+           "type": "object"
+          },
+          "billingGroupName": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "defaultClientId": {
+           "type": "string"
+          },
+          "thingArn": {
+           "type": "string"
+          },
+          "thingId": {
+           "type": "string"
+          },
+          "thingName": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "thingTypeName": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "version": {
+           "type": "integer"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2665,7 +2546,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateThingResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -2741,7 +2623,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateThingResponse"
+         "properties": {
+          "thingArn": {
+           "type": "string"
+          },
+          "thingId": {
+           "type": "string"
+          },
+          "thingName": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2811,7 +2706,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },

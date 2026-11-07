@@ -106,189 +106,6 @@
     },
     "type": "object"
    },
-   "CreateBackupVaultOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "BackupVaultArn": {
-      "type": "string"
-     },
-     "BackupVaultName": {
-      "type": "string"
-     },
-     "CreationDate": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     }
-    },
-    "type": "object"
-   },
-   "CreateFrameworkOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "FrameworkArn": {
-      "type": "string"
-     },
-     "FrameworkName": {
-      "maxLength": 256,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "CreateReportPlanOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "CreationTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "ReportPlanArn": {
-      "type": "string"
-     },
-     "ReportPlanName": {
-      "maxLength": 256,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "DescribeBackupVaultOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "BackupVaultArn": {
-      "type": "string"
-     },
-     "BackupVaultName": {
-      "type": "string"
-     },
-     "CreationDate": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "CreatorRequestId": {
-      "type": "string"
-     },
-     "EncryptionKeyArn": {
-      "type": "string"
-     },
-     "EncryptionKeyType": {
-      "enum": [
-       "AWS_OWNED_KMS_KEY",
-       "CUSTOMER_MANAGED_KMS_KEY"
-      ],
-      "type": "string"
-     },
-     "LatestMpaApprovalTeamUpdate": {
-      "$ref": "#/components/schemas/LatestMpaApprovalTeamUpdate"
-     },
-     "LockDate": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "Locked": {
-      "type": "boolean"
-     },
-     "MaxRetentionDays": {
-      "type": "integer"
-     },
-     "MinRetentionDays": {
-      "type": "integer"
-     },
-     "MpaApprovalTeamArn": {
-      "type": "string"
-     },
-     "MpaSessionArn": {
-      "type": "string"
-     },
-     "NumberOfRecoveryPoints": {
-      "type": "integer"
-     },
-     "SourceBackupVaultArn": {
-      "type": "string"
-     },
-     "VaultState": {
-      "enum": [
-       "CREATING",
-       "AVAILABLE",
-       "FAILED"
-      ],
-      "type": "string"
-     },
-     "VaultType": {
-      "enum": [
-       "BACKUP_VAULT",
-       "LOGICALLY_AIR_GAPPED_BACKUP_VAULT",
-       "RESTORE_ACCESS_BACKUP_VAULT"
-      ],
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "DescribeFrameworkOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "CreationTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "DeploymentStatus": {
-      "type": "string"
-     },
-     "FrameworkArn": {
-      "type": "string"
-     },
-     "FrameworkControls": {
-      "items": {
-       "$ref": "#/components/schemas/FrameworkControl"
-      },
-      "type": "array"
-     },
-     "FrameworkDescription": {
-      "maxLength": 1024,
-      "minLength": 0,
-      "type": "string"
-     },
-     "FrameworkName": {
-      "maxLength": 256,
-      "minLength": 1,
-      "type": "string"
-     },
-     "FrameworkStatus": {
-      "type": "string"
-     },
-     "IdempotencyToken": {
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "DescribeReportPlanOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "ReportPlan": {
-      "$ref": "#/components/schemas/ReportPlan"
-     }
-    },
-    "type": "object"
-   },
    "Framework": {
     "additionalProperties": false,
     "properties": {
@@ -372,66 +189,6 @@
      },
      "StatusMessage": {
       "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListBackupVaultsOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "BackupVaultList": {
-      "items": {
-       "$ref": "#/components/schemas/BackupVaultListMember"
-      },
-      "type": "array"
-     },
-     "NextToken": {
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListFrameworksOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "Frameworks": {
-      "items": {
-       "$ref": "#/components/schemas/Framework"
-      },
-      "type": "array"
-     },
-     "NextToken": {
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListReportPlansOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "NextToken": {
-      "type": "string"
-     },
-     "ReportPlans": {
-      "items": {
-       "$ref": "#/components/schemas/ReportPlan"
-      },
-      "type": "array"
-     }
-    },
-    "type": "object"
-   },
-   "ListTagsOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "NextToken": {
-      "type": "string"
-     },
-     "Tags": {
-      "additionalProperties": {
-       "type": "string"
-      },
-      "type": "object"
      }
     },
     "type": "object"
@@ -544,48 +301,6 @@
      "ReportTemplate"
     ],
     "type": "object"
-   },
-   "UpdateFrameworkOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "CreationTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "FrameworkArn": {
-      "type": "string"
-     },
-     "FrameworkName": {
-      "maxLength": 256,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "UpdateReportPlanOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "CreationTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "ReportPlanArn": {
-      "type": "string"
-     },
-     "ReportPlanName": {
-      "maxLength": 256,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "type": "object"
    }
   }
  },
@@ -634,7 +349,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListFrameworksOutput"
+         "properties": {
+          "Frameworks": {
+           "items": {
+            "$ref": "#/components/schemas/Framework"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -716,7 +442,17 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateFrameworkOutput"
+         "properties": {
+          "FrameworkArn": {
+           "type": "string"
+          },
+          "FrameworkName": {
+           "maxLength": 256,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -815,7 +551,44 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DescribeFrameworkOutput"
+         "properties": {
+          "CreationTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "DeploymentStatus": {
+           "type": "string"
+          },
+          "FrameworkArn": {
+           "type": "string"
+          },
+          "FrameworkControls": {
+           "items": {
+            "$ref": "#/components/schemas/FrameworkControl"
+           },
+           "type": "array"
+          },
+          "FrameworkDescription": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          },
+          "FrameworkName": {
+           "maxLength": 256,
+           "minLength": 1,
+           "type": "string"
+          },
+          "FrameworkStatus": {
+           "type": "string"
+          },
+          "IdempotencyToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -892,7 +665,24 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateFrameworkOutput"
+         "properties": {
+          "CreationTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "FrameworkArn": {
+           "type": "string"
+          },
+          "FrameworkName": {
+           "maxLength": 256,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -952,7 +742,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListReportPlansOutput"
+         "properties": {
+          "NextToken": {
+           "type": "string"
+          },
+          "ReportPlans": {
+           "items": {
+            "$ref": "#/components/schemas/ReportPlan"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1035,7 +836,24 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateReportPlanOutput"
+         "properties": {
+          "CreationTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "ReportPlanArn": {
+           "type": "string"
+          },
+          "ReportPlanName": {
+           "maxLength": 256,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1134,7 +952,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DescribeReportPlanOutput"
+         "properties": {
+          "ReportPlan": {
+           "$ref": "#/components/schemas/ReportPlan"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1211,7 +1034,24 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateReportPlanOutput"
+         "properties": {
+          "CreationTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "ReportPlanArn": {
+           "type": "string"
+          },
+          "ReportPlanName": {
+           "maxLength": 256,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1290,7 +1130,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListBackupVaultsOutput"
+         "properties": {
+          "BackupVaultList": {
+           "items": {
+            "$ref": "#/components/schemas/BackupVaultListMember"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1392,7 +1243,82 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DescribeBackupVaultOutput"
+         "properties": {
+          "BackupVaultArn": {
+           "type": "string"
+          },
+          "BackupVaultName": {
+           "type": "string"
+          },
+          "CreationDate": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "CreatorRequestId": {
+           "type": "string"
+          },
+          "EncryptionKeyArn": {
+           "type": "string"
+          },
+          "EncryptionKeyType": {
+           "enum": [
+            "AWS_OWNED_KMS_KEY",
+            "CUSTOMER_MANAGED_KMS_KEY"
+           ],
+           "type": "string"
+          },
+          "LatestMpaApprovalTeamUpdate": {
+           "$ref": "#/components/schemas/LatestMpaApprovalTeamUpdate"
+          },
+          "LockDate": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "Locked": {
+           "type": "boolean"
+          },
+          "MaxRetentionDays": {
+           "type": "integer"
+          },
+          "MinRetentionDays": {
+           "type": "integer"
+          },
+          "MpaApprovalTeamArn": {
+           "type": "string"
+          },
+          "MpaSessionArn": {
+           "type": "string"
+          },
+          "NumberOfRecoveryPoints": {
+           "type": "integer"
+          },
+          "SourceBackupVaultArn": {
+           "type": "string"
+          },
+          "VaultState": {
+           "enum": [
+            "CREATING",
+            "AVAILABLE",
+            "FAILED"
+           ],
+           "type": "string"
+          },
+          "VaultType": {
+           "enum": [
+            "BACKUP_VAULT",
+            "LOGICALLY_AIR_GAPPED_BACKUP_VAULT",
+            "RESTORE_ACCESS_BACKUP_VAULT"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1465,7 +1391,22 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateBackupVaultOutput"
+         "properties": {
+          "BackupVaultArn": {
+           "type": "string"
+          },
+          "BackupVaultName": {
+           "type": "string"
+          },
+          "CreationDate": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1598,7 +1539,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsOutput"
+         "properties": {
+          "NextToken": {
+           "type": "string"
+          },
+          "Tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },

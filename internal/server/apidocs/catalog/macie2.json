@@ -82,43 +82,6 @@
     },
     "type": "object"
    },
-   "CreateAllowListResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "maxLength": 89,
-      "minLength": 71,
-      "type": "string"
-     },
-     "id": {
-      "maxLength": 22,
-      "minLength": 22,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "CreateCustomDataIdentifierResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "customDataIdentifierId": {
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "CreateFindingsFilterResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "type": "string"
-     },
-     "id": {
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
    "CriterionAdditionalProperties": {
     "additionalProperties": false,
     "properties": {
@@ -180,21 +143,6 @@
     },
     "type": "object"
    },
-   "DeleteAllowListResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "DeleteCustomDataIdentifierResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "DeleteFindingsFilterResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
    "FindingCriteria": {
     "additionalProperties": false,
     "properties": {
@@ -226,210 +174,6 @@
      "name": {
       "type": "string"
      },
-     "tags": {
-      "additionalProperties": {
-       "type": "string"
-      },
-      "type": "object"
-     }
-    },
-    "type": "object"
-   },
-   "GetAllowListResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "maxLength": 89,
-      "minLength": 71,
-      "type": "string"
-     },
-     "createdAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "criteria": {
-      "$ref": "#/components/schemas/AllowListCriteria"
-     },
-     "description": {
-      "maxLength": 512,
-      "minLength": 1,
-      "type": "string"
-     },
-     "id": {
-      "maxLength": 22,
-      "minLength": 22,
-      "type": "string"
-     },
-     "name": {
-      "maxLength": 128,
-      "minLength": 1,
-      "type": "string"
-     },
-     "status": {
-      "$ref": "#/components/schemas/AllowListStatus"
-     },
-     "tags": {
-      "additionalProperties": {
-       "type": "string"
-      },
-      "type": "object"
-     },
-     "updatedAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     }
-    },
-    "type": "object"
-   },
-   "GetCustomDataIdentifierResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "type": "string"
-     },
-     "createdAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "deleted": {
-      "type": "boolean"
-     },
-     "description": {
-      "type": "string"
-     },
-     "id": {
-      "type": "string"
-     },
-     "ignoreWords": {
-      "items": {
-       "type": "string"
-      },
-      "type": "array"
-     },
-     "keywords": {
-      "items": {
-       "type": "string"
-      },
-      "type": "array"
-     },
-     "maximumMatchDistance": {
-      "type": "integer"
-     },
-     "name": {
-      "type": "string"
-     },
-     "regex": {
-      "type": "string"
-     },
-     "severityLevels": {
-      "items": {
-       "$ref": "#/components/schemas/SeverityLevel"
-      },
-      "type": "array"
-     },
-     "tags": {
-      "additionalProperties": {
-       "type": "string"
-      },
-      "type": "object"
-     }
-    },
-    "type": "object"
-   },
-   "GetFindingsFilterResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "action": {
-      "enum": [
-       "ARCHIVE",
-       "NOOP"
-      ],
-      "type": "string"
-     },
-     "arn": {
-      "type": "string"
-     },
-     "description": {
-      "type": "string"
-     },
-     "findingCriteria": {
-      "$ref": "#/components/schemas/FindingCriteria"
-     },
-     "id": {
-      "type": "string"
-     },
-     "name": {
-      "type": "string"
-     },
-     "position": {
-      "type": "integer"
-     },
-     "tags": {
-      "additionalProperties": {
-       "type": "string"
-      },
-      "type": "object"
-     }
-    },
-    "type": "object"
-   },
-   "ListAllowListsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "allowLists": {
-      "items": {
-       "$ref": "#/components/schemas/AllowListSummary"
-      },
-      "type": "array"
-     },
-     "nextToken": {
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListCustomDataIdentifiersResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "items": {
-      "items": {
-       "$ref": "#/components/schemas/CustomDataIdentifierSummary"
-      },
-      "type": "array"
-     },
-     "nextToken": {
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListFindingsFiltersResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "findingsFilterListItems": {
-      "items": {
-       "$ref": "#/components/schemas/FindingsFilterListItem"
-      },
-      "type": "array"
-     },
-     "nextToken": {
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListTagsForResourceResponse": {
-    "additionalProperties": false,
-    "properties": {
      "tags": {
       "additionalProperties": {
        "type": "string"
@@ -479,44 +223,6 @@
      "severity"
     ],
     "type": "object"
-   },
-   "TagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UntagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UpdateAllowListResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "maxLength": 89,
-      "minLength": 71,
-      "type": "string"
-     },
-     "id": {
-      "maxLength": 22,
-      "minLength": 22,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "UpdateFindingsFilterResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "type": "string"
-     },
-     "id": {
-      "type": "string"
-     }
-    },
-    "type": "object"
    }
   }
  },
@@ -565,7 +271,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListAllowListsResponse"
+         "properties": {
+          "allowLists": {
+           "items": {
+            "$ref": "#/components/schemas/AllowListSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -645,7 +362,19 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateAllowListResponse"
+         "properties": {
+          "arn": {
+           "maxLength": 89,
+           "minLength": 71,
+           "type": "string"
+          },
+          "id": {
+           "maxLength": 22,
+           "minLength": 22,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -704,7 +433,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteAllowListResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -754,7 +484,55 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetAllowListResponse"
+         "properties": {
+          "arn": {
+           "maxLength": 89,
+           "minLength": 71,
+           "type": "string"
+          },
+          "createdAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "criteria": {
+           "$ref": "#/components/schemas/AllowListCriteria"
+          },
+          "description": {
+           "maxLength": 512,
+           "minLength": 1,
+           "type": "string"
+          },
+          "id": {
+           "maxLength": 22,
+           "minLength": 22,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "status": {
+           "$ref": "#/components/schemas/AllowListStatus"
+          },
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          },
+          "updatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -832,7 +610,19 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateAllowListResponse"
+         "properties": {
+          "arn": {
+           "maxLength": 89,
+           "minLength": 71,
+           "type": "string"
+          },
+          "id": {
+           "maxLength": 22,
+           "minLength": 22,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -930,7 +720,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateCustomDataIdentifierResponse"
+         "properties": {
+          "customDataIdentifierId": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -991,7 +786,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListCustomDataIdentifiersResponse"
+         "properties": {
+          "items": {
+           "items": {
+            "$ref": "#/components/schemas/CustomDataIdentifierSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1043,7 +849,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteCustomDataIdentifierResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1093,7 +900,61 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetCustomDataIdentifierResponse"
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "createdAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "deleted": {
+           "type": "boolean"
+          },
+          "description": {
+           "type": "string"
+          },
+          "id": {
+           "type": "string"
+          },
+          "ignoreWords": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "keywords": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "maximumMatchDistance": {
+           "type": "integer"
+          },
+          "name": {
+           "type": "string"
+          },
+          "regex": {
+           "type": "string"
+          },
+          "severityLevels": {
+           "items": {
+            "$ref": "#/components/schemas/SeverityLevel"
+           },
+           "type": "array"
+          },
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1153,7 +1014,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListFindingsFiltersResponse"
+         "properties": {
+          "findingsFilterListItems": {
+           "items": {
+            "$ref": "#/components/schemas/FindingsFilterListItem"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1239,7 +1111,15 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateFindingsFilterResponse"
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "id": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1291,7 +1171,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteFindingsFilterResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1341,7 +1222,40 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetFindingsFilterResponse"
+         "properties": {
+          "action": {
+           "enum": [
+            "ARCHIVE",
+            "NOOP"
+           ],
+           "type": "string"
+          },
+          "arn": {
+           "type": "string"
+          },
+          "description": {
+           "type": "string"
+          },
+          "findingCriteria": {
+           "$ref": "#/components/schemas/FindingCriteria"
+          },
+          "id": {
+           "type": "string"
+          },
+          "name": {
+           "type": "string"
+          },
+          "position": {
+           "type": "integer"
+          },
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1424,7 +1338,15 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateFindingsFilterResponse"
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "id": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1486,7 +1408,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1536,7 +1459,15 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1606,7 +1537,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },

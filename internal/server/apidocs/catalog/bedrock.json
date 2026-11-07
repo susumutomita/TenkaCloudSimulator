@@ -24,274 +24,6 @@
     ],
     "type": "object"
    },
-   "CreateGuardrailResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "createdAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "guardrailArn": {
-      "maxLength": 2048,
-      "minLength": 0,
-      "type": "string"
-     },
-     "guardrailId": {
-      "maxLength": 64,
-      "minLength": 0,
-      "type": "string"
-     },
-     "version": {
-      "maxLength": 5,
-      "minLength": 5,
-      "type": "string"
-     }
-    },
-    "required": [
-     "guardrailId",
-     "guardrailArn",
-     "version",
-     "createdAt"
-    ],
-    "type": "object"
-   },
-   "CreateInferenceProfileResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "inferenceProfileArn": {
-      "maxLength": 2048,
-      "minLength": 1,
-      "type": "string"
-     },
-     "status": {
-      "enum": [
-       "ACTIVE"
-      ],
-      "type": "string"
-     }
-    },
-    "required": [
-     "inferenceProfileArn"
-    ],
-    "type": "object"
-   },
-   "DeleteGuardrailResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "DeleteInferenceProfileResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "DeleteModelInvocationLoggingConfigurationResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "GetGuardrailResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "automatedReasoningPolicy": {
-      "$ref": "#/components/schemas/GuardrailAutomatedReasoningPolicy"
-     },
-     "blockedInputMessaging": {
-      "maxLength": 500,
-      "minLength": 1,
-      "type": "string"
-     },
-     "blockedOutputsMessaging": {
-      "maxLength": 500,
-      "minLength": 1,
-      "type": "string"
-     },
-     "contentPolicy": {
-      "$ref": "#/components/schemas/GuardrailContentPolicy"
-     },
-     "contextualGroundingPolicy": {
-      "$ref": "#/components/schemas/GuardrailContextualGroundingPolicy"
-     },
-     "createdAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "crossRegionDetails": {
-      "$ref": "#/components/schemas/GuardrailCrossRegionDetails"
-     },
-     "description": {
-      "maxLength": 200,
-      "minLength": 1,
-      "type": "string"
-     },
-     "failureRecommendations": {
-      "items": {
-       "maxLength": 200,
-       "minLength": 1,
-       "type": "string"
-      },
-      "maxItems": 100,
-      "minItems": 0,
-      "type": "array"
-     },
-     "guardrailArn": {
-      "maxLength": 2048,
-      "minLength": 0,
-      "type": "string"
-     },
-     "guardrailId": {
-      "maxLength": 64,
-      "minLength": 0,
-      "type": "string"
-     },
-     "kmsKeyArn": {
-      "maxLength": 2048,
-      "minLength": 1,
-      "type": "string"
-     },
-     "name": {
-      "maxLength": 50,
-      "minLength": 1,
-      "type": "string"
-     },
-     "sensitiveInformationPolicy": {
-      "$ref": "#/components/schemas/GuardrailSensitiveInformationPolicy"
-     },
-     "status": {
-      "enum": [
-       "CREATING",
-       "UPDATING",
-       "VERSIONING",
-       "READY",
-       "FAILED",
-       "DELETING"
-      ],
-      "type": "string"
-     },
-     "statusReasons": {
-      "items": {
-       "maxLength": 200,
-       "minLength": 1,
-       "type": "string"
-      },
-      "maxItems": 100,
-      "minItems": 0,
-      "type": "array"
-     },
-     "topicPolicy": {
-      "$ref": "#/components/schemas/GuardrailTopicPolicy"
-     },
-     "updatedAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "version": {
-      "type": "string"
-     },
-     "wordPolicy": {
-      "$ref": "#/components/schemas/GuardrailWordPolicy"
-     }
-    },
-    "required": [
-     "name",
-     "guardrailId",
-     "guardrailArn",
-     "version",
-     "status",
-     "createdAt",
-     "updatedAt",
-     "blockedInputMessaging",
-     "blockedOutputsMessaging"
-    ],
-    "type": "object"
-   },
-   "GetInferenceProfileResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "createdAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "description": {
-      "maxLength": 200,
-      "minLength": 1,
-      "type": "string"
-     },
-     "inferenceProfileArn": {
-      "maxLength": 2048,
-      "minLength": 1,
-      "type": "string"
-     },
-     "inferenceProfileId": {
-      "maxLength": 64,
-      "minLength": 1,
-      "type": "string"
-     },
-     "inferenceProfileName": {
-      "maxLength": 64,
-      "minLength": 1,
-      "type": "string"
-     },
-     "models": {
-      "items": {
-       "$ref": "#/components/schemas/InferenceProfileModel"
-      },
-      "maxItems": 5,
-      "minItems": 1,
-      "type": "array"
-     },
-     "status": {
-      "enum": [
-       "ACTIVE"
-      ],
-      "type": "string"
-     },
-     "type": {
-      "enum": [
-       "SYSTEM_DEFINED",
-       "APPLICATION"
-      ],
-      "type": "string"
-     },
-     "updatedAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     }
-    },
-    "required": [
-     "inferenceProfileName",
-     "inferenceProfileArn",
-     "models",
-     "inferenceProfileId",
-     "status",
-     "type"
-    ],
-    "type": "object"
-   },
-   "GetModelInvocationLoggingConfigurationResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "loggingConfig": {
-      "$ref": "#/components/schemas/LoggingConfig"
-     }
-    },
-    "type": "object"
-   },
    "GuardrailAutomatedReasoningPolicy": {
     "additionalProperties": false,
     "properties": {
@@ -1525,59 +1257,6 @@
     ],
     "type": "object"
    },
-   "ListGuardrailsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "guardrails": {
-      "items": {
-       "$ref": "#/components/schemas/GuardrailSummary"
-      },
-      "maxItems": 1000,
-      "minItems": 0,
-      "type": "array"
-     },
-     "nextToken": {
-      "maxLength": 2048,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "required": [
-     "guardrails"
-    ],
-    "type": "object"
-   },
-   "ListInferenceProfilesResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "inferenceProfileSummaries": {
-      "items": {
-       "$ref": "#/components/schemas/InferenceProfileSummary"
-      },
-      "type": "array"
-     },
-     "nextToken": {
-      "maxLength": 2048,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListTagsForResourceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "tags": {
-      "items": {
-       "$ref": "#/components/schemas/Tag"
-      },
-      "maxItems": 200,
-      "minItems": 0,
-      "type": "array"
-     }
-    },
-    "type": "object"
-   },
    "LoggingConfig": {
     "additionalProperties": false,
     "properties": {
@@ -1600,11 +1279,6 @@
       "type": "boolean"
      }
     },
-    "type": "object"
-   },
-   "PutModelInvocationLoggingConfigurationResponse": {
-    "additionalProperties": false,
-    "properties": {},
     "type": "object"
    },
    "S3Config": {
@@ -1643,50 +1317,6 @@
     "required": [
      "key",
      "value"
-    ],
-    "type": "object"
-   },
-   "TagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UntagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UpdateGuardrailResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "guardrailArn": {
-      "maxLength": 2048,
-      "minLength": 0,
-      "type": "string"
-     },
-     "guardrailId": {
-      "maxLength": 64,
-      "minLength": 0,
-      "type": "string"
-     },
-     "updatedAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "version": {
-      "maxLength": 5,
-      "minLength": 5,
-      "type": "string"
-     }
-    },
-    "required": [
-     "guardrailId",
-     "guardrailArn",
-     "version",
-     "updatedAt"
     ],
     "type": "object"
    }
@@ -1748,7 +1378,22 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListGuardrailsResponse"
+         "properties": {
+          "guardrails": {
+           "items": {
+            "$ref": "#/components/schemas/GuardrailSummary"
+           },
+           "maxItems": 1000,
+           "minItems": 0,
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1865,7 +1510,31 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateGuardrailResponse"
+         "properties": {
+          "createdAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "guardrailArn": {
+           "maxLength": 2048,
+           "minLength": 0,
+           "type": "string"
+          },
+          "guardrailId": {
+           "maxLength": 64,
+           "minLength": 0,
+           "type": "string"
+          },
+          "version": {
+           "maxLength": 5,
+           "minLength": 5,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1926,7 +1595,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteGuardrailResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1985,7 +1655,113 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetGuardrailResponse"
+         "properties": {
+          "automatedReasoningPolicy": {
+           "$ref": "#/components/schemas/GuardrailAutomatedReasoningPolicy"
+          },
+          "blockedInputMessaging": {
+           "maxLength": 500,
+           "minLength": 1,
+           "type": "string"
+          },
+          "blockedOutputsMessaging": {
+           "maxLength": 500,
+           "minLength": 1,
+           "type": "string"
+          },
+          "contentPolicy": {
+           "$ref": "#/components/schemas/GuardrailContentPolicy"
+          },
+          "contextualGroundingPolicy": {
+           "$ref": "#/components/schemas/GuardrailContextualGroundingPolicy"
+          },
+          "createdAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "crossRegionDetails": {
+           "$ref": "#/components/schemas/GuardrailCrossRegionDetails"
+          },
+          "description": {
+           "maxLength": 200,
+           "minLength": 1,
+           "type": "string"
+          },
+          "failureRecommendations": {
+           "items": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+           },
+           "maxItems": 100,
+           "minItems": 0,
+           "type": "array"
+          },
+          "guardrailArn": {
+           "maxLength": 2048,
+           "minLength": 0,
+           "type": "string"
+          },
+          "guardrailId": {
+           "maxLength": 64,
+           "minLength": 0,
+           "type": "string"
+          },
+          "kmsKeyArn": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 50,
+           "minLength": 1,
+           "type": "string"
+          },
+          "sensitiveInformationPolicy": {
+           "$ref": "#/components/schemas/GuardrailSensitiveInformationPolicy"
+          },
+          "status": {
+           "enum": [
+            "CREATING",
+            "UPDATING",
+            "VERSIONING",
+            "READY",
+            "FAILED",
+            "DELETING"
+           ],
+           "type": "string"
+          },
+          "statusReasons": {
+           "items": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+           },
+           "maxItems": 100,
+           "minItems": 0,
+           "type": "array"
+          },
+          "topicPolicy": {
+           "$ref": "#/components/schemas/GuardrailTopicPolicy"
+          },
+          "updatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "version": {
+           "type": "string"
+          },
+          "wordPolicy": {
+           "$ref": "#/components/schemas/GuardrailWordPolicy"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2099,7 +1875,31 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateGuardrailResponse"
+         "properties": {
+          "guardrailArn": {
+           "maxLength": 2048,
+           "minLength": 0,
+           "type": "string"
+          },
+          "guardrailId": {
+           "maxLength": 64,
+           "minLength": 0,
+           "type": "string"
+          },
+          "updatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "version": {
+           "maxLength": 5,
+           "minLength": 5,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2172,7 +1972,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListInferenceProfilesResponse"
+         "properties": {
+          "inferenceProfileSummaries": {
+           "items": {
+            "$ref": "#/components/schemas/InferenceProfileSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2255,7 +2068,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateInferenceProfileResponse"
+         "properties": {
+          "inferenceProfileArn": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "ACTIVE"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2309,7 +2135,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteInferenceProfileResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -2361,7 +2188,64 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetInferenceProfileResponse"
+         "properties": {
+          "createdAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "description": {
+           "maxLength": 200,
+           "minLength": 1,
+           "type": "string"
+          },
+          "inferenceProfileArn": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          },
+          "inferenceProfileId": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "inferenceProfileName": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "models": {
+           "items": {
+            "$ref": "#/components/schemas/InferenceProfileModel"
+           },
+           "maxItems": 5,
+           "minItems": 1,
+           "type": "array"
+          },
+          "status": {
+           "enum": [
+            "ACTIVE"
+           ],
+           "type": "string"
+          },
+          "type": {
+           "enum": [
+            "SYSTEM_DEFINED",
+            "APPLICATION"
+           ],
+           "type": "string"
+          },
+          "updatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2424,7 +2308,17 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+         "properties": {
+          "tags": {
+           "items": {
+            "$ref": "#/components/schemas/Tag"
+           },
+           "maxItems": 200,
+           "minItems": 0,
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2468,7 +2362,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteModelInvocationLoggingConfigurationResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -2510,7 +2405,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetModelInvocationLoggingConfigurationResponse"
+         "properties": {
+          "loggingConfig": {
+           "$ref": "#/components/schemas/LoggingConfig"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2569,7 +2469,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/PutModelInvocationLoggingConfigurationResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -2641,7 +2542,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -2715,7 +2617,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },

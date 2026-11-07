@@ -1,42 +1,6 @@
 {
  "components": {
   "schemas": {
-   "DescribeAccountPreferencesResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "NextToken": {
-      "maxLength": 128,
-      "minLength": 1,
-      "type": "string"
-     },
-     "ResourceIdPreference": {
-      "$ref": "#/components/schemas/ResourceIdPreference"
-     }
-    },
-    "type": "object"
-   },
-   "DescribeFileSystemsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "FileSystems": {
-      "items": {
-       "$ref": "#/components/schemas/FileSystemDescription"
-      },
-      "type": "array"
-     },
-     "Marker": {
-      "maxLength": 128,
-      "minLength": 1,
-      "type": "string"
-     },
-     "NextMarker": {
-      "maxLength": 128,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
    "FileSystemDescription": {
     "additionalProperties": false,
     "properties": {
@@ -188,32 +152,6 @@
     ],
     "type": "object"
    },
-   "ListTagsForResourceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "NextToken": {
-      "maxLength": 128,
-      "minLength": 1,
-      "type": "string"
-     },
-     "Tags": {
-      "items": {
-       "$ref": "#/components/schemas/Tag"
-      },
-      "type": "array"
-     }
-    },
-    "type": "object"
-   },
-   "PutAccountPreferencesResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "ResourceIdPreference": {
-      "$ref": "#/components/schemas/ResourceIdPreference"
-     }
-    },
-    "type": "object"
-   },
    "ResourceIdPreference": {
     "additionalProperties": false,
     "properties": {
@@ -307,7 +245,17 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DescribeAccountPreferencesResponse"
+         "properties": {
+          "NextToken": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "ResourceIdPreference": {
+           "$ref": "#/components/schemas/ResourceIdPreference"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -370,7 +318,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/PutAccountPreferencesResponse"
+         "properties": {
+          "ResourceIdPreference": {
+           "$ref": "#/components/schemas/ResourceIdPreference"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -448,7 +401,25 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DescribeFileSystemsResponse"
+         "properties": {
+          "FileSystems": {
+           "items": {
+            "$ref": "#/components/schemas/FileSystemDescription"
+           },
+           "type": "array"
+          },
+          "Marker": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "NextMarker": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -549,7 +520,97 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/FileSystemDescription"
+         "properties": {
+          "AvailabilityZoneId": {
+           "type": "string"
+          },
+          "AvailabilityZoneName": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "CreationTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "CreationToken": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "Encrypted": {
+           "type": "boolean"
+          },
+          "FileSystemArn": {
+           "type": "string"
+          },
+          "FileSystemId": {
+           "maxLength": 128,
+           "type": "string"
+          },
+          "FileSystemProtection": {
+           "$ref": "#/components/schemas/FileSystemProtectionDescription"
+          },
+          "KmsKeyId": {
+           "maxLength": 2048,
+           "type": "string"
+          },
+          "LifeCycleState": {
+           "enum": [
+            "creating",
+            "available",
+            "updating",
+            "deleting",
+            "deleted",
+            "error"
+           ],
+           "type": "string"
+          },
+          "Name": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "NumberOfMountTargets": {
+           "minimum": 0,
+           "type": "integer"
+          },
+          "OwnerId": {
+           "maxLength": 14,
+           "type": "string"
+          },
+          "PerformanceMode": {
+           "enum": [
+            "generalPurpose",
+            "maxIO"
+           ],
+           "type": "string"
+          },
+          "ProvisionedThroughputInMibps": {
+           "minimum": 1,
+           "type": "number"
+          },
+          "SizeInBytes": {
+           "$ref": "#/components/schemas/FileSystemSize"
+          },
+          "Tags": {
+           "items": {
+            "$ref": "#/components/schemas/Tag"
+           },
+           "type": "array"
+          },
+          "ThroughputMode": {
+           "enum": [
+            "bursting",
+            "provisioned",
+            "elastic"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -669,7 +730,97 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/FileSystemDescription"
+         "properties": {
+          "AvailabilityZoneId": {
+           "type": "string"
+          },
+          "AvailabilityZoneName": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "CreationTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "CreationToken": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "Encrypted": {
+           "type": "boolean"
+          },
+          "FileSystemArn": {
+           "type": "string"
+          },
+          "FileSystemId": {
+           "maxLength": 128,
+           "type": "string"
+          },
+          "FileSystemProtection": {
+           "$ref": "#/components/schemas/FileSystemProtectionDescription"
+          },
+          "KmsKeyId": {
+           "maxLength": 2048,
+           "type": "string"
+          },
+          "LifeCycleState": {
+           "enum": [
+            "creating",
+            "available",
+            "updating",
+            "deleting",
+            "deleted",
+            "error"
+           ],
+           "type": "string"
+          },
+          "Name": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "NumberOfMountTargets": {
+           "minimum": 0,
+           "type": "integer"
+          },
+          "OwnerId": {
+           "maxLength": 14,
+           "type": "string"
+          },
+          "PerformanceMode": {
+           "enum": [
+            "generalPurpose",
+            "maxIO"
+           ],
+           "type": "string"
+          },
+          "ProvisionedThroughputInMibps": {
+           "minimum": 1,
+           "type": "number"
+          },
+          "SizeInBytes": {
+           "$ref": "#/components/schemas/FileSystemSize"
+          },
+          "Tags": {
+           "items": {
+            "$ref": "#/components/schemas/Tag"
+           },
+           "type": "array"
+          },
+          "ThroughputMode": {
+           "enum": [
+            "bursting",
+            "provisioned",
+            "elastic"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -797,7 +948,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+         "properties": {
+          "NextToken": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "Tags": {
+           "items": {
+            "$ref": "#/components/schemas/Tag"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },

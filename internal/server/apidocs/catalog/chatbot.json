@@ -70,29 +70,6 @@
     ],
     "type": "object"
    },
-   "CreateChimeWebhookConfigurationResult": {
-    "additionalProperties": false,
-    "properties": {
-     "WebhookConfiguration": {
-      "$ref": "#/components/schemas/ChimeWebhookConfiguration"
-     }
-    },
-    "type": "object"
-   },
-   "CreateCustomActionResult": {
-    "additionalProperties": false,
-    "properties": {
-     "CustomActionArn": {
-      "maxLength": 1011,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "required": [
-     "CustomActionArn"
-    ],
-    "type": "object"
-   },
    "CustomAction": {
     "additionalProperties": false,
     "properties": {
@@ -202,87 +179,6 @@
     ],
     "type": "object"
    },
-   "DeleteChimeWebhookConfigurationResult": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "DeleteCustomActionResult": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "DescribeChimeWebhookConfigurationsResult": {
-    "additionalProperties": false,
-    "properties": {
-     "NextToken": {
-      "maxLength": 1276,
-      "minLength": 1,
-      "type": "string"
-     },
-     "WebhookConfigurations": {
-      "items": {
-       "$ref": "#/components/schemas/ChimeWebhookConfiguration"
-      },
-      "type": "array"
-     }
-    },
-    "type": "object"
-   },
-   "GetAccountPreferencesResult": {
-    "additionalProperties": false,
-    "properties": {
-     "AccountPreferences": {
-      "$ref": "#/components/schemas/AccountPreferences"
-     }
-    },
-    "type": "object"
-   },
-   "GetCustomActionResult": {
-    "additionalProperties": false,
-    "properties": {
-     "CustomAction": {
-      "$ref": "#/components/schemas/CustomAction"
-     }
-    },
-    "type": "object"
-   },
-   "ListCustomActionsResult": {
-    "additionalProperties": false,
-    "properties": {
-     "CustomActions": {
-      "items": {
-       "maxLength": 1011,
-       "minLength": 1,
-       "type": "string"
-      },
-      "type": "array"
-     },
-     "NextToken": {
-      "maxLength": 1024,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "required": [
-     "CustomActions"
-    ],
-    "type": "object"
-   },
-   "ListTagsForResourceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "Tags": {
-      "items": {
-       "$ref": "#/components/schemas/Tag"
-      },
-      "maxItems": 200,
-      "minItems": 0,
-      "type": "array"
-     }
-    },
-    "type": "object"
-   },
    "Tag": {
     "additionalProperties": false,
     "properties": {
@@ -300,48 +196,6 @@
     "required": [
      "TagKey",
      "TagValue"
-    ],
-    "type": "object"
-   },
-   "TagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UntagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UpdateAccountPreferencesResult": {
-    "additionalProperties": false,
-    "properties": {
-     "AccountPreferences": {
-      "$ref": "#/components/schemas/AccountPreferences"
-     }
-    },
-    "type": "object"
-   },
-   "UpdateChimeWebhookConfigurationResult": {
-    "additionalProperties": false,
-    "properties": {
-     "WebhookConfiguration": {
-      "$ref": "#/components/schemas/ChimeWebhookConfiguration"
-     }
-    },
-    "type": "object"
-   },
-   "UpdateCustomActionResult": {
-    "additionalProperties": false,
-    "properties": {
-     "CustomActionArn": {
-      "maxLength": 1011,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "required": [
-     "CustomActionArn"
     ],
     "type": "object"
    }
@@ -433,7 +287,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateChimeWebhookConfigurationResult"
+         "properties": {
+          "WebhookConfiguration": {
+           "$ref": "#/components/schemas/ChimeWebhookConfiguration"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -524,7 +383,14 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateCustomActionResult"
+         "properties": {
+          "CustomActionArn": {
+           "maxLength": 1011,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -587,7 +453,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteChimeWebhookConfigurationResult"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -650,7 +517,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteCustomActionResult"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -720,7 +588,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DescribeChimeWebhookConfigurationsResult"
+         "properties": {
+          "NextToken": {
+           "maxLength": 1276,
+           "minLength": 1,
+           "type": "string"
+          },
+          "WebhookConfigurations": {
+           "items": {
+            "$ref": "#/components/schemas/ChimeWebhookConfiguration"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -764,7 +645,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetAccountPreferencesResult"
+         "properties": {
+          "AccountPreferences": {
+           "$ref": "#/components/schemas/AccountPreferences"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -827,7 +713,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetCustomActionResult"
+         "properties": {
+          "CustomAction": {
+           "$ref": "#/components/schemas/CustomAction"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -892,7 +783,22 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListCustomActionsResult"
+         "properties": {
+          "CustomActions": {
+           "items": {
+            "maxLength": 1011,
+            "minLength": 1,
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "maxLength": 1024,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -955,7 +861,17 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+         "properties": {
+          "Tags": {
+           "items": {
+            "$ref": "#/components/schemas/Tag"
+           },
+           "maxItems": 200,
+           "minItems": 0,
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1027,7 +943,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1101,7 +1018,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1162,7 +1080,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateAccountPreferencesResult"
+         "properties": {
+          "AccountPreferences": {
+           "$ref": "#/components/schemas/AccountPreferences"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1253,7 +1176,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateChimeWebhookConfigurationResult"
+         "properties": {
+          "WebhookConfiguration": {
+           "$ref": "#/components/schemas/ChimeWebhookConfiguration"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1331,7 +1259,14 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateCustomActionResult"
+         "properties": {
+          "CustomActionArn": {
+           "maxLength": 1011,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },

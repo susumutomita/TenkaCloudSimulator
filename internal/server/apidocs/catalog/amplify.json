@@ -419,30 +419,6 @@
     ],
     "type": "object"
    },
-   "CreateAppResult": {
-    "additionalProperties": false,
-    "properties": {
-     "app": {
-      "$ref": "#/components/schemas/App"
-     }
-    },
-    "required": [
-     "app"
-    ],
-    "type": "object"
-   },
-   "CreateBranchResult": {
-    "additionalProperties": false,
-    "properties": {
-     "branch": {
-      "$ref": "#/components/schemas/Branch"
-     }
-    },
-    "required": [
-     "branch"
-    ],
-    "type": "object"
-   },
    "CustomRule": {
     "additionalProperties": false,
     "properties": {
@@ -473,54 +449,6 @@
     ],
     "type": "object"
    },
-   "DeleteAppResult": {
-    "additionalProperties": false,
-    "properties": {
-     "app": {
-      "$ref": "#/components/schemas/App"
-     }
-    },
-    "required": [
-     "app"
-    ],
-    "type": "object"
-   },
-   "DeleteBranchResult": {
-    "additionalProperties": false,
-    "properties": {
-     "branch": {
-      "$ref": "#/components/schemas/Branch"
-     }
-    },
-    "required": [
-     "branch"
-    ],
-    "type": "object"
-   },
-   "GetAppResult": {
-    "additionalProperties": false,
-    "properties": {
-     "app": {
-      "$ref": "#/components/schemas/App"
-     }
-    },
-    "required": [
-     "app"
-    ],
-    "type": "object"
-   },
-   "GetBranchResult": {
-    "additionalProperties": false,
-    "properties": {
-     "branch": {
-      "$ref": "#/components/schemas/Branch"
-     }
-    },
-    "required": [
-     "branch"
-    ],
-    "type": "object"
-   },
    "JobConfig": {
     "additionalProperties": false,
     "properties": {
@@ -536,60 +464,6 @@
     "required": [
      "buildComputeType"
     ],
-    "type": "object"
-   },
-   "ListAppsResult": {
-    "additionalProperties": false,
-    "properties": {
-     "apps": {
-      "items": {
-       "$ref": "#/components/schemas/App"
-      },
-      "type": "array"
-     },
-     "nextToken": {
-      "maxLength": 2000,
-      "type": "string"
-     }
-    },
-    "required": [
-     "apps"
-    ],
-    "type": "object"
-   },
-   "ListBranchesResult": {
-    "additionalProperties": false,
-    "properties": {
-     "branches": {
-      "items": {
-       "$ref": "#/components/schemas/Branch"
-      },
-      "maxItems": 255,
-      "type": "array"
-     },
-     "nextToken": {
-      "maxLength": 2000,
-      "type": "string"
-     }
-    },
-    "required": [
-     "branches"
-    ],
-    "type": "object"
-   },
-   "ListTagsForResourceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "type": "string"
-      },
-      "maxProperties": 50,
-      "minProperties": 0,
-      "type": "object"
-     }
-    },
     "type": "object"
    },
    "ProductionBranch": {
@@ -618,40 +492,6 @@
       "type": "string"
      }
     },
-    "type": "object"
-   },
-   "TagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UntagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UpdateAppResult": {
-    "additionalProperties": false,
-    "properties": {
-     "app": {
-      "$ref": "#/components/schemas/App"
-     }
-    },
-    "required": [
-     "app"
-    ],
-    "type": "object"
-   },
-   "UpdateBranchResult": {
-    "additionalProperties": false,
-    "properties": {
-     "branch": {
-      "$ref": "#/components/schemas/Branch"
-     }
-    },
-    "required": [
-     "branch"
-    ],
     "type": "object"
    },
    "WafConfiguration": {
@@ -727,7 +567,19 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListAppsResult"
+         "properties": {
+          "apps": {
+           "items": {
+            "$ref": "#/components/schemas/App"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 2000,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -888,7 +740,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateAppResult"
+         "properties": {
+          "app": {
+           "$ref": "#/components/schemas/App"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -942,7 +799,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteAppResult"
+         "properties": {
+          "app": {
+           "$ref": "#/components/schemas/App"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -994,7 +856,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetAppResult"
+         "properties": {
+          "app": {
+           "$ref": "#/components/schemas/App"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1153,7 +1020,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateAppResult"
+         "properties": {
+          "app": {
+           "$ref": "#/components/schemas/App"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1224,7 +1096,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListBranchesResult"
+         "properties": {
+          "branches": {
+           "items": {
+            "$ref": "#/components/schemas/Branch"
+           },
+           "maxItems": 255,
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 2000,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1382,7 +1267,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateBranchResult"
+         "properties": {
+          "branch": {
+           "$ref": "#/components/schemas/Branch"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1446,7 +1336,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteBranchResult"
+         "properties": {
+          "branch": {
+           "$ref": "#/components/schemas/Branch"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1508,7 +1403,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetBranchResult"
+         "properties": {
+          "branch": {
+           "$ref": "#/components/schemas/Branch"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1659,7 +1559,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateBranchResult"
+         "properties": {
+          "branch": {
+           "$ref": "#/components/schemas/Branch"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1727,7 +1632,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1779,7 +1685,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1854,7 +1771,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },

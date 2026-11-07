@@ -1,15 +1,6 @@
 {
  "components": {
   "schemas": {
-   "CreateVaultOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "location": {
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
    "DataRetrievalPolicy": {
     "additionalProperties": false,
     "properties": {
@@ -57,30 +48,6 @@
      }
     },
     "type": "object"
-   },
-   "GetDataRetrievalPolicyOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "Policy": {
-      "$ref": "#/components/schemas/DataRetrievalPolicy"
-     }
-    },
-    "type": "object"
-   },
-   "ListVaultsOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "Marker": {
-      "type": "string"
-     },
-     "VaultList": {
-      "items": {
-       "$ref": "#/components/schemas/DescribeVaultOutput"
-      },
-      "type": "array"
-     }
-    },
-    "type": "object"
    }
   }
  },
@@ -121,7 +88,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetDataRetrievalPolicyOutput"
+         "properties": {
+          "Policy": {
+           "$ref": "#/components/schemas/DataRetrievalPolicy"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -244,7 +216,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListVaultsOutput"
+         "properties": {
+          "Marker": {
+           "type": "string"
+          },
+          "VaultList": {
+           "items": {
+            "$ref": "#/components/schemas/DescribeVaultOutput"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -355,7 +338,27 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DescribeVaultOutput"
+         "properties": {
+          "CreationDate": {
+           "type": "string"
+          },
+          "LastInventoryDate": {
+           "type": "string"
+          },
+          "NumberOfArchives": {
+           "type": "integer"
+          },
+          "SizeInBytes": {
+           "type": "integer"
+          },
+          "VaultARN": {
+           "type": "string"
+          },
+          "VaultName": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -413,7 +416,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateVaultOutput"
+         "properties": {},
+         "type": "object"
         }
        }
       },

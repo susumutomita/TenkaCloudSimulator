@@ -1,22 +1,6 @@
 {
  "components": {
   "schemas": {
-   "CreateEnvironmentOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "Arn": {
-      "maxLength": 1224,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "DeleteEnvironmentOutput": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
    "Environment": {
     "additionalProperties": false,
     "properties": {
@@ -204,15 +188,6 @@
     },
     "type": "object"
    },
-   "GetEnvironmentOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "Environment": {
-      "$ref": "#/components/schemas/Environment"
-     }
-    },
-    "type": "object"
-   },
    "LastUpdate": {
     "additionalProperties": false,
     "properties": {
@@ -245,44 +220,6 @@
        "GRACEFUL"
       ],
       "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListEnvironmentsOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "Environments": {
-      "items": {
-       "maxLength": 80,
-       "minLength": 1,
-       "type": "string"
-      },
-      "type": "array"
-     },
-     "NextToken": {
-      "maxLength": 2048,
-      "minLength": 0,
-      "type": "string"
-     }
-    },
-    "required": [
-     "Environments"
-    ],
-    "type": "object"
-   },
-   "ListTagsForResourceOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "Tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "minLength": 1,
-       "type": "string"
-      },
-      "maxProperties": 50,
-      "minProperties": 1,
-      "type": "object"
      }
     },
     "type": "object"
@@ -402,27 +339,6 @@
     },
     "type": "object"
    },
-   "TagResourceOutput": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UntagResourceOutput": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UpdateEnvironmentOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "Arn": {
-      "maxLength": 1224,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
    "UpdateError": {
     "additionalProperties": false,
     "properties": {
@@ -505,7 +421,22 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListEnvironmentsOutput"
+         "properties": {
+          "Environments": {
+           "items": {
+            "maxLength": 80,
+            "minLength": 1,
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "maxLength": 2048,
+           "minLength": 0,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -559,7 +490,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteEnvironmentOutput"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -611,7 +543,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetEnvironmentOutput"
+         "properties": {
+          "Environment": {
+           "$ref": "#/components/schemas/Environment"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -782,7 +719,14 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateEnvironmentOutput"
+         "properties": {
+          "Arn": {
+           "maxLength": 1224,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -974,7 +918,14 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateEnvironmentOutput"
+         "properties": {
+          "Arn": {
+           "maxLength": 1224,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1042,7 +993,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceOutput"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1094,7 +1046,19 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceOutput"
+         "properties": {
+          "Tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 1,
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1170,7 +1134,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceOutput"
+         "properties": {},
+         "type": "object"
         }
        }
       },

@@ -1,15 +1,6 @@
 {
  "components": {
   "schemas": {
-   "CreateGraphResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "GraphArn": {
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
    "Graph": {
     "additionalProperties": false,
     "properties": {
@@ -24,48 +15,6 @@
       ]
      }
     },
-    "type": "object"
-   },
-   "ListGraphsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "GraphList": {
-      "items": {
-       "$ref": "#/components/schemas/Graph"
-      },
-      "type": "array"
-     },
-     "NextToken": {
-      "maxLength": 1024,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListTagsForResourceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "Tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "type": "string"
-      },
-      "maxProperties": 50,
-      "minProperties": 1,
-      "type": "object"
-     }
-    },
-    "type": "object"
-   },
-   "TagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UntagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
     "type": "object"
    }
   }
@@ -119,7 +68,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateGraphResponse"
+         "properties": {
+          "GraphArn": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -238,7 +192,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListGraphsResponse"
+         "properties": {
+          "GraphList": {
+           "items": {
+            "$ref": "#/components/schemas/Graph"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "maxLength": 1024,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -304,7 +271,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -354,7 +322,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+         "properties": {
+          "Tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 1,
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -427,7 +406,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },

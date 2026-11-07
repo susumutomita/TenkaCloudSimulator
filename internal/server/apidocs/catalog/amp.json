@@ -1,187 +1,6 @@
 {
  "components": {
   "schemas": {
-   "CreateRuleGroupsNamespaceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "type": "string"
-     },
-     "name": {
-      "maxLength": 128,
-      "minLength": 1,
-      "type": "string"
-     },
-     "status": {
-      "$ref": "#/components/schemas/RuleGroupsNamespaceStatus"
-     },
-     "tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxProperties": 50,
-      "minProperties": 0,
-      "type": "object"
-     }
-    },
-    "required": [
-     "name",
-     "arn",
-     "status"
-    ],
-    "type": "object"
-   },
-   "CreateWorkspaceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "type": "string"
-     },
-     "kmsKeyArn": {
-      "maxLength": 2048,
-      "minLength": 20,
-      "type": "string"
-     },
-     "status": {
-      "$ref": "#/components/schemas/WorkspaceStatus"
-     },
-     "tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxProperties": 50,
-      "minProperties": 0,
-      "type": "object"
-     },
-     "workspaceId": {
-      "maxLength": 64,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "required": [
-     "workspaceId",
-     "arn",
-     "status"
-    ],
-    "type": "object"
-   },
-   "DescribeRuleGroupsNamespaceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "ruleGroupsNamespace": {
-      "$ref": "#/components/schemas/RuleGroupsNamespaceDescription"
-     }
-    },
-    "required": [
-     "ruleGroupsNamespace"
-    ],
-    "type": "object"
-   },
-   "DescribeWorkspaceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "workspace": {
-      "$ref": "#/components/schemas/WorkspaceDescription"
-     }
-    },
-    "required": [
-     "workspace"
-    ],
-    "type": "object"
-   },
-   "ListRuleGroupsNamespacesResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "nextToken": {
-      "maxLength": 1000,
-      "minLength": 0,
-      "type": "string"
-     },
-     "ruleGroupsNamespaces": {
-      "items": {
-       "$ref": "#/components/schemas/RuleGroupsNamespaceSummary"
-      },
-      "type": "array"
-     }
-    },
-    "required": [
-     "ruleGroupsNamespaces"
-    ],
-    "type": "object"
-   },
-   "ListTagsForResourceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxProperties": 50,
-      "minProperties": 0,
-      "type": "object"
-     }
-    },
-    "type": "object"
-   },
-   "ListWorkspacesResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "nextToken": {
-      "maxLength": 1000,
-      "minLength": 0,
-      "type": "string"
-     },
-     "workspaces": {
-      "items": {
-       "$ref": "#/components/schemas/WorkspaceSummary"
-      },
-      "type": "array"
-     }
-    },
-    "required": [
-     "workspaces"
-    ],
-    "type": "object"
-   },
-   "PutRuleGroupsNamespaceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "type": "string"
-     },
-     "name": {
-      "maxLength": 128,
-      "minLength": 1,
-      "type": "string"
-     },
-     "status": {
-      "$ref": "#/components/schemas/RuleGroupsNamespaceStatus"
-     },
-     "tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxProperties": 50,
-      "minProperties": 0,
-      "type": "object"
-     }
-    },
-    "required": [
-     "name",
-     "arn",
-     "status"
-    ],
-    "type": "object"
-   },
    "RuleGroupsNamespaceDescription": {
     "additionalProperties": false,
     "properties": {
@@ -304,16 +123,6 @@
      "createdAt",
      "modifiedAt"
     ],
-    "type": "object"
-   },
-   "TagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UntagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
     "type": "object"
    },
    "WorkspaceDescription": {
@@ -491,7 +300,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -541,7 +351,19 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -615,7 +437,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -686,7 +509,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListWorkspacesResponse"
+         "properties": {
+          "nextToken": {
+           "maxLength": 1000,
+           "minLength": 0,
+           "type": "string"
+          },
+          "workspaces": {
+           "items": {
+            "$ref": "#/components/schemas/WorkspaceSummary"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -764,7 +600,35 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateWorkspaceResponse"
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "kmsKeyArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "status": {
+           "$ref": "#/components/schemas/WorkspaceStatus"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "workspaceId": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -872,7 +736,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DescribeWorkspaceResponse"
+         "properties": {
+          "workspace": {
+           "$ref": "#/components/schemas/WorkspaceDescription"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1021,7 +890,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListRuleGroupsNamespacesResponse"
+         "properties": {
+          "nextToken": {
+           "maxLength": 1000,
+           "minLength": 0,
+           "type": "string"
+          },
+          "ruleGroupsNamespaces": {
+           "items": {
+            "$ref": "#/components/schemas/RuleGroupsNamespaceSummary"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1112,7 +994,30 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateRuleGroupsNamespaceResponse"
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "status": {
+           "$ref": "#/components/schemas/RuleGroupsNamespaceStatus"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1240,7 +1145,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DescribeRuleGroupsNamespaceResponse"
+         "properties": {
+          "ruleGroupsNamespace": {
+           "$ref": "#/components/schemas/RuleGroupsNamespaceDescription"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1325,7 +1235,30 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/PutRuleGroupsNamespaceResponse"
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "status": {
+           "$ref": "#/components/schemas/RuleGroupsNamespaceStatus"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },

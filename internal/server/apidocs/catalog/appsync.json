@@ -254,42 +254,6 @@
     ],
     "type": "object"
    },
-   "CreateApiResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "api": {
-      "$ref": "#/components/schemas/Api"
-     }
-    },
-    "type": "object"
-   },
-   "CreateChannelNamespaceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "channelNamespace": {
-      "$ref": "#/components/schemas/ChannelNamespace"
-     }
-    },
-    "type": "object"
-   },
-   "CreateDataSourceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "dataSource": {
-      "$ref": "#/components/schemas/DataSource"
-     }
-    },
-    "type": "object"
-   },
-   "CreateGraphqlApiResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "graphqlApi": {
-      "$ref": "#/components/schemas/GraphqlApi"
-     }
-    },
-    "type": "object"
-   },
    "DataSource": {
     "additionalProperties": false,
     "properties": {
@@ -350,26 +314,6 @@
       "type": "string"
      }
     },
-    "type": "object"
-   },
-   "DeleteApiResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "DeleteChannelNamespaceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "DeleteDataSourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "DeleteGraphqlApiResponse": {
-    "additionalProperties": false,
-    "properties": {},
     "type": "object"
    },
    "DeltaSyncConfig": {
@@ -532,42 +476,6 @@
      "logLevel",
      "cloudWatchLogsRoleArn"
     ],
-    "type": "object"
-   },
-   "GetApiResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "api": {
-      "$ref": "#/components/schemas/Api"
-     }
-    },
-    "type": "object"
-   },
-   "GetChannelNamespaceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "channelNamespace": {
-      "$ref": "#/components/schemas/ChannelNamespace"
-     }
-    },
-    "type": "object"
-   },
-   "GetDataSourceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "dataSource": {
-      "$ref": "#/components/schemas/DataSource"
-     }
-    },
-    "type": "object"
-   },
-   "GetGraphqlApiResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "graphqlApi": {
-      "$ref": "#/components/schemas/GraphqlApi"
-     }
-    },
     "type": "object"
    },
    "GraphqlApi": {
@@ -789,89 +697,6 @@
     ],
     "type": "object"
    },
-   "ListApisResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "apis": {
-      "items": {
-       "$ref": "#/components/schemas/Api"
-      },
-      "type": "array"
-     },
-     "nextToken": {
-      "maxLength": 65536,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListChannelNamespacesResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "channelNamespaces": {
-      "items": {
-       "$ref": "#/components/schemas/ChannelNamespace"
-      },
-      "type": "array"
-     },
-     "nextToken": {
-      "maxLength": 65536,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListDataSourcesResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "dataSources": {
-      "items": {
-       "$ref": "#/components/schemas/DataSource"
-      },
-      "type": "array"
-     },
-     "nextToken": {
-      "maxLength": 65536,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListGraphqlApisResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "graphqlApis": {
-      "items": {
-       "$ref": "#/components/schemas/GraphqlApi"
-      },
-      "type": "array"
-     },
-     "nextToken": {
-      "maxLength": 65536,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListTagsForResourceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "type": "string"
-      },
-      "maxProperties": 50,
-      "minProperties": 1,
-      "type": "object"
-     }
-    },
-    "type": "object"
-   },
    "LogConfig": {
     "additionalProperties": false,
     "properties": {
@@ -967,43 +792,6 @@
        "RDS_HTTP_ENDPOINT"
       ],
       "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "TagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UntagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UpdateApiResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "api": {
-      "$ref": "#/components/schemas/Api"
-     }
-    },
-    "type": "object"
-   },
-   "UpdateChannelNamespaceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "channelNamespace": {
-      "$ref": "#/components/schemas/ChannelNamespace"
-     }
-    },
-    "type": "object"
-   },
-   "UpdateGraphqlApiResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "graphqlApi": {
-      "$ref": "#/components/schemas/GraphqlApi"
      }
     },
     "type": "object"
@@ -1106,7 +894,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListGraphqlApisResponse"
+         "properties": {
+          "graphqlApis": {
+           "items": {
+            "$ref": "#/components/schemas/GraphqlApi"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 65536,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1246,7 +1047,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateGraphqlApiResponse"
+         "properties": {
+          "graphqlApi": {
+           "$ref": "#/components/schemas/GraphqlApi"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1298,7 +1104,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteGraphqlApiResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1348,7 +1155,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetGraphqlApiResponse"
+         "properties": {
+          "graphqlApi": {
+           "$ref": "#/components/schemas/GraphqlApi"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1473,7 +1285,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateGraphqlApiResponse"
+         "properties": {
+          "graphqlApi": {
+           "$ref": "#/components/schemas/GraphqlApi"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1543,7 +1360,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListDataSourcesResponse"
+         "properties": {
+          "dataSources": {
+           "items": {
+            "$ref": "#/components/schemas/DataSource"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 65536,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1661,7 +1491,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateDataSourceResponse"
+         "properties": {
+          "dataSource": {
+           "$ref": "#/components/schemas/DataSource"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1723,7 +1558,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteDataSourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1783,7 +1619,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetDataSourceResponse"
+         "properties": {
+          "dataSource": {
+           "$ref": "#/components/schemas/DataSource"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1851,7 +1692,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1903,7 +1745,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 1,
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1978,7 +1831,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -2040,7 +1894,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListApisResponse"
+         "properties": {
+          "apis": {
+           "items": {
+            "$ref": "#/components/schemas/Api"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 65536,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2116,7 +1983,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateApiResponse"
+         "properties": {
+          "api": {
+           "$ref": "#/components/schemas/Api"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2168,7 +2040,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteApiResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -2218,7 +2091,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetApiResponse"
+         "properties": {
+          "api": {
+           "$ref": "#/components/schemas/Api"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2293,7 +2171,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateApiResponse"
+         "properties": {
+          "api": {
+           "$ref": "#/components/schemas/Api"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2363,7 +2246,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListChannelNamespacesResponse"
+         "properties": {
+          "channelNamespaces": {
+           "items": {
+            "$ref": "#/components/schemas/ChannelNamespace"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 65536,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2461,7 +2357,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateChannelNamespaceResponse"
+         "properties": {
+          "channelNamespace": {
+           "$ref": "#/components/schemas/ChannelNamespace"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2523,7 +2424,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteChannelNamespaceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -2583,7 +2485,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetChannelNamespaceResponse"
+         "properties": {
+          "channelNamespace": {
+           "$ref": "#/components/schemas/ChannelNamespace"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2674,7 +2581,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateChannelNamespaceResponse"
+         "properties": {
+          "channelNamespace": {
+           "$ref": "#/components/schemas/ChannelNamespace"
+          }
+         },
+         "type": "object"
         }
        }
       },

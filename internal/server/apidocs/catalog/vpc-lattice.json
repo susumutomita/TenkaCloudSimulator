@@ -1,245 +1,6 @@
 {
  "components": {
   "schemas": {
-   "CreateListenerResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "maxLength": 2048,
-      "minLength": 20,
-      "type": "string"
-     },
-     "defaultAction": {
-      "$ref": "#/components/schemas/RuleAction"
-     },
-     "id": {
-      "maxLength": 26,
-      "minLength": 26,
-      "type": "string"
-     },
-     "name": {
-      "maxLength": 63,
-      "minLength": 3,
-      "type": "string"
-     },
-     "port": {
-      "maximum": 65535,
-      "minimum": 1,
-      "type": "integer"
-     },
-     "protocol": {
-      "enum": [
-       "HTTP",
-       "HTTPS",
-       "TLS_PASSTHROUGH"
-      ],
-      "type": "string"
-     },
-     "serviceArn": {
-      "maxLength": 2048,
-      "minLength": 20,
-      "type": "string"
-     },
-     "serviceId": {
-      "maxLength": 21,
-      "minLength": 21,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "CreateServiceNetworkResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "maxLength": 2048,
-      "minLength": 32,
-      "type": "string"
-     },
-     "authType": {
-      "enum": [
-       "NONE",
-       "AWS_IAM"
-      ],
-      "type": "string"
-     },
-     "id": {
-      "maxLength": 20,
-      "minLength": 20,
-      "type": "string"
-     },
-     "name": {
-      "maxLength": 63,
-      "minLength": 3,
-      "type": "string"
-     },
-     "sharingConfig": {
-      "$ref": "#/components/schemas/SharingConfig"
-     }
-    },
-    "type": "object"
-   },
-   "CreateServiceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "maxLength": 2048,
-      "minLength": 20,
-      "type": "string"
-     },
-     "authType": {
-      "enum": [
-       "NONE",
-       "AWS_IAM"
-      ],
-      "type": "string"
-     },
-     "certificateArn": {
-      "maxLength": 2048,
-      "minLength": 0,
-      "type": "string"
-     },
-     "customDomainName": {
-      "maxLength": 255,
-      "minLength": 3,
-      "type": "string"
-     },
-     "dnsEntry": {
-      "$ref": "#/components/schemas/DnsEntry"
-     },
-     "id": {
-      "maxLength": 21,
-      "minLength": 21,
-      "type": "string"
-     },
-     "name": {
-      "maxLength": 40,
-      "minLength": 3,
-      "type": "string"
-     },
-     "status": {
-      "enum": [
-       "ACTIVE",
-       "CREATE_IN_PROGRESS",
-       "DELETE_IN_PROGRESS",
-       "CREATE_FAILED",
-       "DELETE_FAILED"
-      ],
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "CreateTargetGroupResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "maxLength": 2048,
-      "minLength": 20,
-      "type": "string"
-     },
-     "config": {
-      "$ref": "#/components/schemas/TargetGroupConfig"
-     },
-     "id": {
-      "maxLength": 20,
-      "minLength": 20,
-      "type": "string"
-     },
-     "name": {
-      "maxLength": 128,
-      "minLength": 3,
-      "type": "string"
-     },
-     "status": {
-      "enum": [
-       "CREATE_IN_PROGRESS",
-       "ACTIVE",
-       "DELETE_IN_PROGRESS",
-       "CREATE_FAILED",
-       "DELETE_FAILED"
-      ],
-      "type": "string"
-     },
-     "type": {
-      "enum": [
-       "IP",
-       "LAMBDA",
-       "INSTANCE",
-       "ALB"
-      ],
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "DeleteListenerResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "DeleteServiceNetworkResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "DeleteServiceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "maxLength": 2048,
-      "minLength": 20,
-      "type": "string"
-     },
-     "id": {
-      "maxLength": 21,
-      "minLength": 21,
-      "type": "string"
-     },
-     "name": {
-      "maxLength": 40,
-      "minLength": 3,
-      "type": "string"
-     },
-     "status": {
-      "enum": [
-       "ACTIVE",
-       "CREATE_IN_PROGRESS",
-       "DELETE_IN_PROGRESS",
-       "CREATE_FAILED",
-       "DELETE_FAILED"
-      ],
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "DeleteTargetGroupResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "maxLength": 2048,
-      "minLength": 20,
-      "type": "string"
-     },
-     "id": {
-      "maxLength": 20,
-      "minLength": 20,
-      "type": "string"
-     },
-     "status": {
-      "enum": [
-       "CREATE_IN_PROGRESS",
-       "ACTIVE",
-       "DELETE_IN_PROGRESS",
-       "CREATE_FAILED",
-       "DELETE_FAILED"
-      ],
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
    "DnsEntry": {
     "additionalProperties": false,
     "properties": {
@@ -281,260 +42,6 @@
     "required": [
      "targetGroups"
     ],
-    "type": "object"
-   },
-   "GetListenerResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "maxLength": 2048,
-      "minLength": 20,
-      "type": "string"
-     },
-     "createdAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "defaultAction": {
-      "$ref": "#/components/schemas/RuleAction"
-     },
-     "id": {
-      "maxLength": 26,
-      "minLength": 26,
-      "type": "string"
-     },
-     "lastUpdatedAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "name": {
-      "maxLength": 63,
-      "minLength": 3,
-      "type": "string"
-     },
-     "port": {
-      "maximum": 65535,
-      "minimum": 1,
-      "type": "integer"
-     },
-     "protocol": {
-      "enum": [
-       "HTTP",
-       "HTTPS",
-       "TLS_PASSTHROUGH"
-      ],
-      "type": "string"
-     },
-     "serviceArn": {
-      "maxLength": 2048,
-      "minLength": 20,
-      "type": "string"
-     },
-     "serviceId": {
-      "maxLength": 21,
-      "minLength": 21,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "GetServiceNetworkResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "maxLength": 2048,
-      "minLength": 32,
-      "type": "string"
-     },
-     "authType": {
-      "enum": [
-       "NONE",
-       "AWS_IAM"
-      ],
-      "type": "string"
-     },
-     "createdAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "id": {
-      "maxLength": 20,
-      "minLength": 20,
-      "type": "string"
-     },
-     "lastUpdatedAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "name": {
-      "maxLength": 63,
-      "minLength": 3,
-      "type": "string"
-     },
-     "numberOfAssociatedServices": {
-      "type": "integer"
-     },
-     "numberOfAssociatedVPCs": {
-      "type": "integer"
-     },
-     "sharingConfig": {
-      "$ref": "#/components/schemas/SharingConfig"
-     }
-    },
-    "type": "object"
-   },
-   "GetServiceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "maxLength": 2048,
-      "minLength": 20,
-      "type": "string"
-     },
-     "authType": {
-      "enum": [
-       "NONE",
-       "AWS_IAM"
-      ],
-      "type": "string"
-     },
-     "certificateArn": {
-      "maxLength": 2048,
-      "minLength": 0,
-      "type": "string"
-     },
-     "createdAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "customDomainName": {
-      "maxLength": 255,
-      "minLength": 3,
-      "type": "string"
-     },
-     "dnsEntry": {
-      "$ref": "#/components/schemas/DnsEntry"
-     },
-     "failureCode": {
-      "type": "string"
-     },
-     "failureMessage": {
-      "type": "string"
-     },
-     "id": {
-      "maxLength": 21,
-      "minLength": 21,
-      "type": "string"
-     },
-     "lastUpdatedAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "name": {
-      "maxLength": 40,
-      "minLength": 3,
-      "type": "string"
-     },
-     "status": {
-      "enum": [
-       "ACTIVE",
-       "CREATE_IN_PROGRESS",
-       "DELETE_IN_PROGRESS",
-       "CREATE_FAILED",
-       "DELETE_FAILED"
-      ],
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "GetTargetGroupResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "maxLength": 2048,
-      "minLength": 20,
-      "type": "string"
-     },
-     "config": {
-      "$ref": "#/components/schemas/TargetGroupConfig"
-     },
-     "createdAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "failureCode": {
-      "type": "string"
-     },
-     "failureMessage": {
-      "type": "string"
-     },
-     "id": {
-      "maxLength": 20,
-      "minLength": 20,
-      "type": "string"
-     },
-     "lastUpdatedAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "name": {
-      "maxLength": 128,
-      "minLength": 3,
-      "type": "string"
-     },
-     "serviceArns": {
-      "items": {
-       "maxLength": 2048,
-       "minLength": 20,
-       "type": "string"
-      },
-      "type": "array"
-     },
-     "status": {
-      "enum": [
-       "CREATE_IN_PROGRESS",
-       "ACTIVE",
-       "DELETE_IN_PROGRESS",
-       "CREATE_FAILED",
-       "DELETE_FAILED"
-      ],
-      "type": "string"
-     },
-     "type": {
-      "enum": [
-       "IP",
-       "LAMBDA",
-       "INSTANCE",
-       "ALB"
-      ],
-      "type": "string"
-     }
-    },
     "type": "object"
    },
    "HealthCheckConfig": {
@@ -590,96 +97,6 @@
       "maximum": 10,
       "minimum": 0,
       "type": "integer"
-     }
-    },
-    "type": "object"
-   },
-   "ListListenersResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "items": {
-      "items": {
-       "$ref": "#/components/schemas/ListenerSummary"
-      },
-      "type": "array"
-     },
-     "nextToken": {
-      "maxLength": 2048,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "required": [
-     "items"
-    ],
-    "type": "object"
-   },
-   "ListServiceNetworksResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "items": {
-      "items": {
-       "$ref": "#/components/schemas/ServiceNetworkSummary"
-      },
-      "type": "array"
-     },
-     "nextToken": {
-      "maxLength": 2048,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "required": [
-     "items"
-    ],
-    "type": "object"
-   },
-   "ListServicesResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "items": {
-      "items": {
-       "$ref": "#/components/schemas/ServiceSummary"
-      },
-      "type": "array"
-     },
-     "nextToken": {
-      "maxLength": 2048,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListTagsForResourceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxProperties": 200,
-      "minProperties": 0,
-      "type": "object"
-     }
-    },
-    "type": "object"
-   },
-   "ListTargetGroupsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "items": {
-      "items": {
-       "$ref": "#/components/schemas/TargetGroupSummary"
-      },
-      "type": "array"
-     },
-     "nextToken": {
-      "maxLength": 2048,
-      "minLength": 1,
-      "type": "string"
      }
     },
     "type": "object"
@@ -865,11 +282,6 @@
     },
     "type": "object"
    },
-   "TagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
    "TargetGroupConfig": {
     "additionalProperties": false,
     "properties": {
@@ -1013,124 +425,6 @@
     },
     "type": "object"
    },
-   "UntagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UpdateListenerResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "maxLength": 2048,
-      "minLength": 20,
-      "type": "string"
-     },
-     "defaultAction": {
-      "$ref": "#/components/schemas/RuleAction"
-     },
-     "id": {
-      "maxLength": 26,
-      "minLength": 26,
-      "type": "string"
-     },
-     "name": {
-      "maxLength": 63,
-      "minLength": 3,
-      "type": "string"
-     },
-     "port": {
-      "maximum": 65535,
-      "minimum": 1,
-      "type": "integer"
-     },
-     "protocol": {
-      "enum": [
-       "HTTP",
-       "HTTPS",
-       "TLS_PASSTHROUGH"
-      ],
-      "type": "string"
-     },
-     "serviceArn": {
-      "maxLength": 2048,
-      "minLength": 20,
-      "type": "string"
-     },
-     "serviceId": {
-      "maxLength": 21,
-      "minLength": 21,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "UpdateServiceNetworkResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "maxLength": 2048,
-      "minLength": 32,
-      "type": "string"
-     },
-     "authType": {
-      "enum": [
-       "NONE",
-       "AWS_IAM"
-      ],
-      "type": "string"
-     },
-     "id": {
-      "maxLength": 20,
-      "minLength": 20,
-      "type": "string"
-     },
-     "name": {
-      "maxLength": 63,
-      "minLength": 3,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "UpdateServiceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "maxLength": 2048,
-      "minLength": 20,
-      "type": "string"
-     },
-     "authType": {
-      "enum": [
-       "NONE",
-       "AWS_IAM"
-      ],
-      "type": "string"
-     },
-     "certificateArn": {
-      "maxLength": 2048,
-      "minLength": 0,
-      "type": "string"
-     },
-     "customDomainName": {
-      "maxLength": 255,
-      "minLength": 3,
-      "type": "string"
-     },
-     "id": {
-      "maxLength": 21,
-      "minLength": 21,
-      "type": "string"
-     },
-     "name": {
-      "maxLength": 40,
-      "minLength": 3,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
    "WeightedTargetGroup": {
     "additionalProperties": false,
     "properties": {
@@ -1199,7 +493,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListServiceNetworksResponse"
+         "properties": {
+          "items": {
+           "items": {
+            "$ref": "#/components/schemas/ServiceNetworkSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1285,7 +592,34 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateServiceNetworkResponse"
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 32,
+           "type": "string"
+          },
+          "authType": {
+           "enum": [
+            "NONE",
+            "AWS_IAM"
+           ],
+           "type": "string"
+          },
+          "id": {
+           "maxLength": 20,
+           "minLength": 20,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 63,
+           "minLength": 3,
+           "type": "string"
+          },
+          "sharingConfig": {
+           "$ref": "#/components/schemas/SharingConfig"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1339,7 +673,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteServiceNetworkResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1391,7 +726,54 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetServiceNetworkResponse"
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 32,
+           "type": "string"
+          },
+          "authType": {
+           "enum": [
+            "NONE",
+            "AWS_IAM"
+           ],
+           "type": "string"
+          },
+          "createdAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "id": {
+           "maxLength": 20,
+           "minLength": 20,
+           "type": "string"
+          },
+          "lastUpdatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "name": {
+           "maxLength": 63,
+           "minLength": 3,
+           "type": "string"
+          },
+          "numberOfAssociatedServices": {
+           "type": "integer"
+          },
+          "numberOfAssociatedVPCs": {
+           "type": "integer"
+          },
+          "sharingConfig": {
+           "$ref": "#/components/schemas/SharingConfig"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1464,7 +846,31 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateServiceNetworkResponse"
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 32,
+           "type": "string"
+          },
+          "authType": {
+           "enum": [
+            "NONE",
+            "AWS_IAM"
+           ],
+           "type": "string"
+          },
+          "id": {
+           "maxLength": 20,
+           "minLength": 20,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 63,
+           "minLength": 3,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1526,7 +932,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListServicesResponse"
+         "properties": {
+          "items": {
+           "items": {
+            "$ref": "#/components/schemas/ServiceSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1619,7 +1038,54 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateServiceResponse"
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "authType": {
+           "enum": [
+            "NONE",
+            "AWS_IAM"
+           ],
+           "type": "string"
+          },
+          "certificateArn": {
+           "maxLength": 2048,
+           "minLength": 0,
+           "type": "string"
+          },
+          "customDomainName": {
+           "maxLength": 255,
+           "minLength": 3,
+           "type": "string"
+          },
+          "dnsEntry": {
+           "$ref": "#/components/schemas/DnsEntry"
+          },
+          "id": {
+           "maxLength": 21,
+           "minLength": 21,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 40,
+           "minLength": 3,
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "ACTIVE",
+            "CREATE_IN_PROGRESS",
+            "DELETE_IN_PROGRESS",
+            "CREATE_FAILED",
+            "DELETE_FAILED"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1673,7 +1139,34 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteServiceResponse"
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "id": {
+           "maxLength": 21,
+           "minLength": 21,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 40,
+           "minLength": 3,
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "ACTIVE",
+            "CREATE_IN_PROGRESS",
+            "DELETE_IN_PROGRESS",
+            "CREATE_FAILED",
+            "DELETE_FAILED"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1725,7 +1218,74 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetServiceResponse"
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "authType": {
+           "enum": [
+            "NONE",
+            "AWS_IAM"
+           ],
+           "type": "string"
+          },
+          "certificateArn": {
+           "maxLength": 2048,
+           "minLength": 0,
+           "type": "string"
+          },
+          "createdAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "customDomainName": {
+           "maxLength": 255,
+           "minLength": 3,
+           "type": "string"
+          },
+          "dnsEntry": {
+           "$ref": "#/components/schemas/DnsEntry"
+          },
+          "failureCode": {
+           "type": "string"
+          },
+          "failureMessage": {
+           "type": "string"
+          },
+          "id": {
+           "maxLength": 21,
+           "minLength": 21,
+           "type": "string"
+          },
+          "lastUpdatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "name": {
+           "maxLength": 40,
+           "minLength": 3,
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "ACTIVE",
+            "CREATE_IN_PROGRESS",
+            "DELETE_IN_PROGRESS",
+            "CREATE_FAILED",
+            "DELETE_FAILED"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1800,7 +1360,41 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateServiceResponse"
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "authType": {
+           "enum": [
+            "NONE",
+            "AWS_IAM"
+           ],
+           "type": "string"
+          },
+          "certificateArn": {
+           "maxLength": 2048,
+           "minLength": 0,
+           "type": "string"
+          },
+          "customDomainName": {
+           "maxLength": 255,
+           "minLength": 3,
+           "type": "string"
+          },
+          "id": {
+           "maxLength": 21,
+           "minLength": 21,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 40,
+           "minLength": 3,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1872,7 +1466,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListListenersResponse"
+         "properties": {
+          "items": {
+           "items": {
+            "$ref": "#/components/schemas/ListenerSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1976,7 +1583,50 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateListenerResponse"
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "defaultAction": {
+           "$ref": "#/components/schemas/RuleAction"
+          },
+          "id": {
+           "maxLength": 26,
+           "minLength": 26,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 63,
+           "minLength": 3,
+           "type": "string"
+          },
+          "port": {
+           "maximum": 65535,
+           "minimum": 1,
+           "type": "integer"
+          },
+          "protocol": {
+           "enum": [
+            "HTTP",
+            "HTTPS",
+            "TLS_PASSTHROUGH"
+           ],
+           "type": "string"
+          },
+          "serviceArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "serviceId": {
+           "maxLength": 21,
+           "minLength": 21,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2040,7 +1690,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteListenerResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -2102,7 +1753,64 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetListenerResponse"
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "createdAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "defaultAction": {
+           "$ref": "#/components/schemas/RuleAction"
+          },
+          "id": {
+           "maxLength": 26,
+           "minLength": 26,
+           "type": "string"
+          },
+          "lastUpdatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "name": {
+           "maxLength": 63,
+           "minLength": 3,
+           "type": "string"
+          },
+          "port": {
+           "maximum": 65535,
+           "minimum": 1,
+           "type": "integer"
+          },
+          "protocol": {
+           "enum": [
+            "HTTP",
+            "HTTPS",
+            "TLS_PASSTHROUGH"
+           ],
+           "type": "string"
+          },
+          "serviceArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "serviceId": {
+           "maxLength": 21,
+           "minLength": 21,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2181,7 +1889,50 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateListenerResponse"
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "defaultAction": {
+           "$ref": "#/components/schemas/RuleAction"
+          },
+          "id": {
+           "maxLength": 26,
+           "minLength": 26,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 63,
+           "minLength": 3,
+           "type": "string"
+          },
+          "port": {
+           "maximum": 65535,
+           "minimum": 1,
+           "type": "integer"
+          },
+          "protocol": {
+           "enum": [
+            "HTTP",
+            "HTTPS",
+            "TLS_PASSTHROUGH"
+           ],
+           "type": "string"
+          },
+          "serviceArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "serviceId": {
+           "maxLength": 21,
+           "minLength": 21,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2249,7 +2000,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -2301,7 +2053,19 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2377,7 +2141,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -2461,7 +2226,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTargetGroupsResponse"
+         "properties": {
+          "items": {
+           "items": {
+            "$ref": "#/components/schemas/TargetGroupSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2550,7 +2328,46 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateTargetGroupResponse"
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "config": {
+           "$ref": "#/components/schemas/TargetGroupConfig"
+          },
+          "id": {
+           "maxLength": 20,
+           "minLength": 20,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 128,
+           "minLength": 3,
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "CREATE_IN_PROGRESS",
+            "ACTIVE",
+            "DELETE_IN_PROGRESS",
+            "CREATE_FAILED",
+            "DELETE_FAILED"
+           ],
+           "type": "string"
+          },
+          "type": {
+           "enum": [
+            "IP",
+            "LAMBDA",
+            "INSTANCE",
+            "ALB"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2604,7 +2421,29 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteTargetGroupResponse"
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "id": {
+           "maxLength": 20,
+           "minLength": 20,
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "CREATE_IN_PROGRESS",
+            "ACTIVE",
+            "DELETE_IN_PROGRESS",
+            "CREATE_FAILED",
+            "DELETE_FAILED"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2656,7 +2495,74 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetTargetGroupResponse"
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "config": {
+           "$ref": "#/components/schemas/TargetGroupConfig"
+          },
+          "createdAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "failureCode": {
+           "type": "string"
+          },
+          "failureMessage": {
+           "type": "string"
+          },
+          "id": {
+           "maxLength": 20,
+           "minLength": 20,
+           "type": "string"
+          },
+          "lastUpdatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "name": {
+           "maxLength": 128,
+           "minLength": 3,
+           "type": "string"
+          },
+          "serviceArns": {
+           "items": {
+            "maxLength": 2048,
+            "minLength": 20,
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "status": {
+           "enum": [
+            "CREATE_IN_PROGRESS",
+            "ACTIVE",
+            "DELETE_IN_PROGRESS",
+            "CREATE_FAILED",
+            "DELETE_FAILED"
+           ],
+           "type": "string"
+          },
+          "type": {
+           "enum": [
+            "IP",
+            "LAMBDA",
+            "INSTANCE",
+            "ALB"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },

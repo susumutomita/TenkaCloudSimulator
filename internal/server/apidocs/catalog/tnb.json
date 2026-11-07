@@ -1,108 +1,6 @@
 {
  "components": {
   "schemas": {
-   "CreateSolFunctionPackageOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "type": "string"
-     },
-     "id": {
-      "type": "string"
-     },
-     "onboardingState": {
-      "enum": [
-       "CREATED",
-       "ONBOARDED",
-       "ERROR"
-      ],
-      "type": "string"
-     },
-     "operationalState": {
-      "enum": [
-       "ENABLED",
-       "DISABLED"
-      ],
-      "type": "string"
-     },
-     "tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxProperties": 200,
-      "minProperties": 0,
-      "type": "object"
-     },
-     "usageState": {
-      "enum": [
-       "IN_USE",
-       "NOT_IN_USE"
-      ],
-      "type": "string"
-     }
-    },
-    "required": [
-     "arn",
-     "id",
-     "onboardingState",
-     "operationalState",
-     "usageState"
-    ],
-    "type": "object"
-   },
-   "CreateSolNetworkPackageOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "type": "string"
-     },
-     "id": {
-      "type": "string"
-     },
-     "nsdOnboardingState": {
-      "enum": [
-       "CREATED",
-       "ONBOARDED",
-       "ERROR"
-      ],
-      "type": "string"
-     },
-     "nsdOperationalState": {
-      "enum": [
-       "ENABLED",
-       "DISABLED"
-      ],
-      "type": "string"
-     },
-     "nsdUsageState": {
-      "enum": [
-       "IN_USE",
-       "NOT_IN_USE"
-      ],
-      "type": "string"
-     },
-     "tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxProperties": 200,
-      "minProperties": 0,
-      "type": "object"
-     }
-    },
-    "required": [
-     "arn",
-     "id",
-     "nsdOnboardingState",
-     "nsdOperationalState",
-     "nsdUsageState"
-    ],
-    "type": "object"
-   },
    "FunctionArtifactMeta": {
     "additionalProperties": false,
     "properties": {
@@ -142,72 +40,6 @@
     ],
     "type": "object"
    },
-   "GetSolFunctionPackageOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "type": "string"
-     },
-     "id": {
-      "type": "string"
-     },
-     "metadata": {
-      "$ref": "#/components/schemas/GetSolFunctionPackageMetadata"
-     },
-     "onboardingState": {
-      "enum": [
-       "CREATED",
-       "ONBOARDED",
-       "ERROR"
-      ],
-      "type": "string"
-     },
-     "operationalState": {
-      "enum": [
-       "ENABLED",
-       "DISABLED"
-      ],
-      "type": "string"
-     },
-     "tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxProperties": 200,
-      "minProperties": 0,
-      "type": "object"
-     },
-     "usageState": {
-      "enum": [
-       "IN_USE",
-       "NOT_IN_USE"
-      ],
-      "type": "string"
-     },
-     "vnfProductName": {
-      "type": "string"
-     },
-     "vnfProvider": {
-      "type": "string"
-     },
-     "vnfdId": {
-      "type": "string"
-     },
-     "vnfdVersion": {
-      "type": "string"
-     }
-    },
-    "required": [
-     "arn",
-     "id",
-     "onboardingState",
-     "operationalState",
-     "usageState"
-    ],
-    "type": "object"
-   },
    "GetSolNetworkPackageMetadata": {
     "additionalProperties": false,
     "properties": {
@@ -232,80 +64,6 @@
     "required": [
      "createdAt",
      "lastModified"
-    ],
-    "type": "object"
-   },
-   "GetSolNetworkPackageOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "type": "string"
-     },
-     "id": {
-      "type": "string"
-     },
-     "metadata": {
-      "$ref": "#/components/schemas/GetSolNetworkPackageMetadata"
-     },
-     "nsdId": {
-      "type": "string"
-     },
-     "nsdName": {
-      "type": "string"
-     },
-     "nsdOnboardingState": {
-      "enum": [
-       "CREATED",
-       "ONBOARDED",
-       "ERROR"
-      ],
-      "type": "string"
-     },
-     "nsdOperationalState": {
-      "enum": [
-       "ENABLED",
-       "DISABLED"
-      ],
-      "type": "string"
-     },
-     "nsdUsageState": {
-      "enum": [
-       "IN_USE",
-       "NOT_IN_USE"
-      ],
-      "type": "string"
-     },
-     "nsdVersion": {
-      "type": "string"
-     },
-     "tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxProperties": 200,
-      "minProperties": 0,
-      "type": "object"
-     },
-     "vnfPkgIds": {
-      "items": {
-       "type": "string"
-      },
-      "type": "array"
-     }
-    },
-    "required": [
-     "arn",
-     "id",
-     "metadata",
-     "nsdId",
-     "nsdName",
-     "nsdOnboardingState",
-     "nsdOperationalState",
-     "nsdUsageState",
-     "nsdVersion",
-     "vnfPkgIds"
     ],
     "type": "object"
    },
@@ -386,24 +144,6 @@
     "required": [
      "createdAt",
      "lastModified"
-    ],
-    "type": "object"
-   },
-   "ListSolFunctionPackagesOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "functionPackages": {
-      "items": {
-       "$ref": "#/components/schemas/ListSolFunctionPackageInfo"
-      },
-      "type": "array"
-     },
-     "nextToken": {
-      "type": "string"
-     }
-    },
-    "required": [
-     "functionPackages"
     ],
     "type": "object"
    },
@@ -497,43 +237,6 @@
     ],
     "type": "object"
    },
-   "ListSolNetworkPackagesOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "networkPackages": {
-      "items": {
-       "$ref": "#/components/schemas/ListSolNetworkPackageInfo"
-      },
-      "type": "array"
-     },
-     "nextToken": {
-      "type": "string"
-     }
-    },
-    "required": [
-     "networkPackages"
-    ],
-    "type": "object"
-   },
-   "ListTagsForResourceOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxProperties": 200,
-      "minProperties": 0,
-      "type": "object"
-     }
-    },
-    "required": [
-     "tags"
-    ],
-    "type": "object"
-   },
    "NetworkArtifactMeta": {
     "additionalProperties": false,
     "properties": {
@@ -546,11 +249,6 @@
     },
     "type": "object"
    },
-   "TagResourceOutput": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
    "ToscaOverride": {
     "additionalProperties": false,
     "properties": {
@@ -561,43 +259,6 @@
       "type": "string"
      }
     },
-    "type": "object"
-   },
-   "UntagResourceOutput": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UpdateSolFunctionPackageOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "operationalState": {
-      "enum": [
-       "ENABLED",
-       "DISABLED"
-      ],
-      "type": "string"
-     }
-    },
-    "required": [
-     "operationalState"
-    ],
-    "type": "object"
-   },
-   "UpdateSolNetworkPackageOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "nsdOperationalState": {
-      "enum": [
-       "ENABLED",
-       "DISABLED"
-      ],
-      "type": "string"
-     }
-    },
-    "required": [
-     "nsdOperationalState"
-    ],
     "type": "object"
    }
   }
@@ -647,7 +308,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListSolNetworkPackagesOutput"
+         "properties": {
+          "networkPackages": {
+           "items": {
+            "$ref": "#/components/schemas/ListSolNetworkPackageInfo"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -710,7 +382,47 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateSolNetworkPackageOutput"
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "id": {
+           "type": "string"
+          },
+          "nsdOnboardingState": {
+           "enum": [
+            "CREATED",
+            "ONBOARDED",
+            "ERROR"
+           ],
+           "type": "string"
+          },
+          "nsdOperationalState": {
+           "enum": [
+            "ENABLED",
+            "DISABLED"
+           ],
+           "type": "string"
+          },
+          "nsdUsageState": {
+           "enum": [
+            "IN_USE",
+            "NOT_IN_USE"
+           ],
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -805,7 +517,65 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetSolNetworkPackageOutput"
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "id": {
+           "type": "string"
+          },
+          "metadata": {
+           "$ref": "#/components/schemas/GetSolNetworkPackageMetadata"
+          },
+          "nsdId": {
+           "type": "string"
+          },
+          "nsdName": {
+           "type": "string"
+          },
+          "nsdOnboardingState": {
+           "enum": [
+            "CREATED",
+            "ONBOARDED",
+            "ERROR"
+           ],
+           "type": "string"
+          },
+          "nsdOperationalState": {
+           "enum": [
+            "ENABLED",
+            "DISABLED"
+           ],
+           "type": "string"
+          },
+          "nsdUsageState": {
+           "enum": [
+            "IN_USE",
+            "NOT_IN_USE"
+           ],
+           "type": "string"
+          },
+          "nsdVersion": {
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "vnfPkgIds": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -876,7 +646,16 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateSolNetworkPackageOutput"
+         "properties": {
+          "nsdOperationalState": {
+           "enum": [
+            "ENABLED",
+            "DISABLED"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -936,7 +715,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListSolFunctionPackagesOutput"
+         "properties": {
+          "functionPackages": {
+           "items": {
+            "$ref": "#/components/schemas/ListSolFunctionPackageInfo"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -999,7 +789,47 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateSolFunctionPackageOutput"
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "id": {
+           "type": "string"
+          },
+          "onboardingState": {
+           "enum": [
+            "CREATED",
+            "ONBOARDED",
+            "ERROR"
+           ],
+           "type": "string"
+          },
+          "operationalState": {
+           "enum": [
+            "ENABLED",
+            "DISABLED"
+           ],
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "usageState": {
+           "enum": [
+            "IN_USE",
+            "NOT_IN_USE"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1094,7 +924,62 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetSolFunctionPackageOutput"
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "id": {
+           "type": "string"
+          },
+          "metadata": {
+           "$ref": "#/components/schemas/GetSolFunctionPackageMetadata"
+          },
+          "onboardingState": {
+           "enum": [
+            "CREATED",
+            "ONBOARDED",
+            "ERROR"
+           ],
+           "type": "string"
+          },
+          "operationalState": {
+           "enum": [
+            "ENABLED",
+            "DISABLED"
+           ],
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "usageState": {
+           "enum": [
+            "IN_USE",
+            "NOT_IN_USE"
+           ],
+           "type": "string"
+          },
+          "vnfProductName": {
+           "type": "string"
+          },
+          "vnfProvider": {
+           "type": "string"
+          },
+          "vnfdId": {
+           "type": "string"
+          },
+          "vnfdVersion": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1165,7 +1050,16 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateSolFunctionPackageOutput"
+         "properties": {
+          "operationalState": {
+           "enum": [
+            "ENABLED",
+            "DISABLED"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1229,7 +1123,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceOutput"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1279,7 +1174,19 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceOutput"
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1353,7 +1260,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceOutput"
+         "properties": {},
+         "type": "object"
         }
        }
       },

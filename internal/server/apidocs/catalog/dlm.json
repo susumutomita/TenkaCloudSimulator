@@ -48,17 +48,6 @@
     ],
     "type": "object"
    },
-   "CreateLifecyclePolicyResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "PolicyId": {
-      "maxLength": 64,
-      "minLength": 0,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
    "CreateRule": {
     "additionalProperties": false,
     "properties": {
@@ -209,11 +198,6 @@
       "type": "string"
      }
     },
-    "type": "object"
-   },
-   "DeleteLifecyclePolicyResponse": {
-    "additionalProperties": false,
-    "properties": {},
     "type": "object"
    },
    "DeprecateRule": {
@@ -369,27 +353,6 @@
     ],
     "type": "object"
    },
-   "GetLifecyclePoliciesResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "Policies": {
-      "items": {
-       "$ref": "#/components/schemas/LifecyclePolicySummary"
-      },
-      "type": "array"
-     }
-    },
-    "type": "object"
-   },
-   "GetLifecyclePolicyResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "Policy": {
-      "$ref": "#/components/schemas/LifecyclePolicy"
-     }
-    },
-    "type": "object"
-   },
    "LifecyclePolicy": {
     "additionalProperties": false,
     "properties": {
@@ -490,21 +453,6 @@
       ],
       "type": "string"
      },
-     "Tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "type": "string"
-      },
-      "maxProperties": 200,
-      "minProperties": 1,
-      "type": "object"
-     }
-    },
-    "type": "object"
-   },
-   "ListTagsForResourceResponse": {
-    "additionalProperties": false,
-    "properties": {
      "Tags": {
       "additionalProperties": {
        "maxLength": 256,
@@ -849,21 +797,6 @@
      "Value"
     ],
     "type": "object"
-   },
-   "TagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UntagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UpdateLifecyclePolicyResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
    }
   }
  },
@@ -976,7 +909,15 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetLifecyclePoliciesResponse"
+         "properties": {
+          "Policies": {
+           "items": {
+            "$ref": "#/components/schemas/LifecyclePolicySummary"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1095,7 +1036,14 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateLifecyclePolicyResponse"
+         "properties": {
+          "PolicyId": {
+           "maxLength": 64,
+           "minLength": 0,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1149,7 +1097,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteLifecyclePolicyResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1201,7 +1150,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetLifecyclePolicyResponse"
+         "properties": {
+          "Policy": {
+           "$ref": "#/components/schemas/LifecyclePolicy"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1309,7 +1263,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateLifecyclePolicyResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1377,7 +1332,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1429,7 +1385,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+         "properties": {
+          "Tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 1,
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1504,7 +1471,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },

@@ -31,6 +31,12 @@ type OpDescriptor struct {
 	// ValueMember the serialized resource key those identifiers fill.
 	ValueItems  string `json:"valueItems,omitempty"`
 	ValueMember string `json:"valueMember,omitempty"`
+	// ItemName, ItemARN and ItemID are the serialized identity keys of
+	// this list's items, which may differ from the read shape's keys (for
+	// example Athena DataCatalogSummary.CatalogName versus DataCatalog.Name).
+	ItemName string `json:"itemName,omitempty"`
+	ItemARN  string `json:"itemArn,omitempty"`
+	ItemID   string `json:"itemId,omitempty"`
 	// Names is the input member of a list that describes named resources
 	// (for example ECS DescribeClusters "clusters"); clients use it to
 	// describe one resource when no read operation exists.
@@ -163,6 +169,8 @@ func (b *binding) describeOp(op *Op, res *Resource) OpDescriptor {
 			}
 			if shape := b.model.shape(member.Shape); shape.Type == "list" && (shape.Member.Shape == res.Shape || shape.Member.Shape == res.Summary) {
 				od.Items = member.wire(name)
+				item := b.model.shape(shape.Member.Shape)
+				od.ItemName, od.ItemARN, od.ItemID = itemKey(item, res, res.NameMember, "$name"), itemKey(item, res, res.ARNMember, "$arn"), itemKey(item, res, res.IDMember, "$id")
 			}
 		}
 	}
@@ -217,4 +225,29 @@ func listRank(spec *Service, od OpDescriptor) int {
 		return 1
 	}
 	return 0
+}
+
+// itemKey is the serialized key of a resource identity member within a list
+// item shape: the member itself, or the item member the resource generates
+// from the same identity (CatalogName: $name).
+func itemKey(item *Shape, res *Resource, member, generator string) string {
+	if member == "" {
+		return ""
+	}
+	if m, ok := item.Members[member]; ok {
+		return m.wire(member)
+	}
+	keys := make([]string, 0, len(res.Generate))
+	for key := range res.Generate {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	for _, key := range keys {
+		if res.Generate[key] == generator {
+			if m, ok := item.Members[key]; ok {
+				return m.wire(key)
+			}
+		}
+	}
+	return ""
 }

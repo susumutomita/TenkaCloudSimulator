@@ -86,130 +86,6 @@
      "created"
     ],
     "type": "object"
-   },
-   "CreateConfigurationResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "type": "string"
-     },
-     "authenticationStrategy": {
-      "enum": [
-       "SIMPLE",
-       "LDAP",
-       "CONFIG_MANAGED"
-      ],
-      "type": "string"
-     },
-     "created": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "id": {
-      "type": "string"
-     },
-     "latestRevision": {
-      "$ref": "#/components/schemas/ConfigurationRevision"
-     },
-     "name": {
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "DeleteConfigurationResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "configurationId": {
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "DescribeConfigurationResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "type": "string"
-     },
-     "authenticationStrategy": {
-      "enum": [
-       "SIMPLE",
-       "LDAP",
-       "CONFIG_MANAGED"
-      ],
-      "type": "string"
-     },
-     "created": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "description": {
-      "type": "string"
-     },
-     "engineType": {
-      "enum": [
-       "ACTIVEMQ",
-       "RABBITMQ"
-      ],
-      "type": "string"
-     },
-     "engineVersion": {
-      "type": "string"
-     },
-     "id": {
-      "type": "string"
-     },
-     "latestRevision": {
-      "$ref": "#/components/schemas/ConfigurationRevision"
-     },
-     "name": {
-      "type": "string"
-     },
-     "tags": {
-      "additionalProperties": {
-       "type": "string"
-      },
-      "type": "object"
-     }
-    },
-    "type": "object"
-   },
-   "ListConfigurationsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "configurations": {
-      "items": {
-       "$ref": "#/components/schemas/Configuration"
-      },
-      "type": "array"
-     },
-     "maxResults": {
-      "type": "integer"
-     },
-     "nextToken": {
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListTagsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "tags": {
-      "additionalProperties": {
-       "type": "string"
-      },
-      "type": "object"
-     }
-    },
-    "type": "object"
    }
   }
  },
@@ -258,7 +134,21 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListConfigurationsResponse"
+         "properties": {
+          "configurations": {
+           "items": {
+            "$ref": "#/components/schemas/Configuration"
+           },
+           "type": "array"
+          },
+          "maxResults": {
+           "type": "integer"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -342,7 +232,36 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateConfigurationResponse"
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "authenticationStrategy": {
+           "enum": [
+            "SIMPLE",
+            "LDAP",
+            "CONFIG_MANAGED"
+           ],
+           "type": "string"
+          },
+          "created": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "id": {
+           "type": "string"
+          },
+          "latestRevision": {
+           "$ref": "#/components/schemas/ConfigurationRevision"
+          },
+          "name": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -394,7 +313,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteConfigurationResponse"
+         "properties": {
+          "configurationId": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -444,7 +368,55 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DescribeConfigurationResponse"
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "authenticationStrategy": {
+           "enum": [
+            "SIMPLE",
+            "LDAP",
+            "CONFIG_MANAGED"
+           ],
+           "type": "string"
+          },
+          "created": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "description": {
+           "type": "string"
+          },
+          "engineType": {
+           "enum": [
+            "ACTIVEMQ",
+            "RABBITMQ"
+           ],
+           "type": "string"
+          },
+          "engineVersion": {
+           "type": "string"
+          },
+          "id": {
+           "type": "string"
+          },
+          "latestRevision": {
+           "$ref": "#/components/schemas/ConfigurationRevision"
+          },
+          "name": {
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -549,7 +521,15 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsResponse"
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },

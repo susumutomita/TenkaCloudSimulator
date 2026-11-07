@@ -259,15 +259,6 @@
     },
     "type": "object"
    },
-   "CreateControlResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "control": {
-      "$ref": "#/components/schemas/Control"
-     }
-    },
-    "type": "object"
-   },
    "DefaultExportDestination": {
     "additionalProperties": false,
     "properties": {
@@ -283,11 +274,6 @@
       "type": "string"
      }
     },
-    "type": "object"
-   },
-   "DeleteControlResponse": {
-    "additionalProperties": false,
-    "properties": {},
     "type": "object"
    },
    "DeregistrationPolicy": {
@@ -331,57 +317,6 @@
       "maxLength": 2048,
       "minLength": 20,
       "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "GetControlResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "control": {
-      "$ref": "#/components/schemas/Control"
-     }
-    },
-    "type": "object"
-   },
-   "GetSettingsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "settings": {
-      "$ref": "#/components/schemas/Settings"
-     }
-    },
-    "type": "object"
-   },
-   "ListControlsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "controlMetadataList": {
-      "items": {
-       "$ref": "#/components/schemas/ControlMetadata"
-      },
-      "type": "array"
-     },
-     "nextToken": {
-      "maxLength": 1000,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListTagsForResourceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxProperties": 50,
-      "minProperties": 0,
-      "type": "object"
      }
     },
     "type": "object"
@@ -463,34 +398,6 @@
      }
     },
     "type": "object"
-   },
-   "TagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UntagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UpdateControlResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "control": {
-      "$ref": "#/components/schemas/Control"
-     }
-    },
-    "type": "object"
-   },
-   "UpdateSettingsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "settings": {
-      "$ref": "#/components/schemas/Settings"
-     }
-    },
-    "type": "object"
    }
   }
  },
@@ -562,7 +469,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListControlsResponse"
+         "properties": {
+          "controlMetadataList": {
+           "items": {
+            "$ref": "#/components/schemas/ControlMetadata"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 1000,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -657,7 +577,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateControlResponse"
+         "properties": {
+          "control": {
+           "$ref": "#/components/schemas/Control"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -711,7 +636,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteControlResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -763,7 +689,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetControlResponse"
+         "properties": {
+          "control": {
+           "$ref": "#/components/schemas/Control"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -858,7 +789,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateControlResponse"
+         "properties": {
+          "control": {
+           "$ref": "#/components/schemas/Control"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -941,7 +877,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateSettingsResponse"
+         "properties": {
+          "settings": {
+           "$ref": "#/components/schemas/Settings"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1003,7 +944,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetSettingsResponse"
+         "properties": {
+          "settings": {
+           "$ref": "#/components/schemas/Settings"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1071,7 +1017,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1123,7 +1070,19 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1199,7 +1158,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },

@@ -1,128 +1,6 @@
 {
  "components": {
   "schemas": {
-   "CreateDataSetResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "Arn": {
-      "type": "string"
-     },
-     "AssetType": {
-      "enum": [
-       "S3_SNAPSHOT",
-       "REDSHIFT_DATA_SHARE",
-       "API_GATEWAY_API",
-       "S3_DATA_ACCESS",
-       "LAKE_FORMATION_DATA_PERMISSION"
-      ],
-      "type": "string"
-     },
-     "CreatedAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "Description": {
-      "type": "string"
-     },
-     "Id": {
-      "type": "string"
-     },
-     "Name": {
-      "type": "string"
-     },
-     "Origin": {
-      "enum": [
-       "OWNED",
-       "ENTITLED"
-      ],
-      "type": "string"
-     },
-     "OriginDetails": {
-      "$ref": "#/components/schemas/OriginDetails"
-     },
-     "SourceId": {
-      "type": "string"
-     },
-     "Tags": {
-      "additionalProperties": {
-       "type": "string"
-      },
-      "type": "object"
-     },
-     "UpdatedAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     }
-    },
-    "type": "object"
-   },
-   "CreateRevisionResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "Arn": {
-      "type": "string"
-     },
-     "Comment": {
-      "maxLength": 16384,
-      "minLength": 0,
-      "type": "string"
-     },
-     "CreatedAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "DataSetId": {
-      "type": "string"
-     },
-     "Finalized": {
-      "type": "boolean"
-     },
-     "Id": {
-      "type": "string"
-     },
-     "RevocationComment": {
-      "maxLength": 512,
-      "minLength": 10,
-      "type": "string"
-     },
-     "Revoked": {
-      "type": "boolean"
-     },
-     "RevokedAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "SourceId": {
-      "type": "string"
-     },
-     "Tags": {
-      "additionalProperties": {
-       "type": "string"
-      },
-      "type": "object"
-     },
-     "UpdatedAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     }
-    },
-    "type": "object"
-   },
    "DataSetEntry": {
     "additionalProperties": false,
     "properties": {
@@ -186,158 +64,6 @@
      "Origin",
      "UpdatedAt"
     ],
-    "type": "object"
-   },
-   "GetDataSetResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "Arn": {
-      "type": "string"
-     },
-     "AssetType": {
-      "enum": [
-       "S3_SNAPSHOT",
-       "REDSHIFT_DATA_SHARE",
-       "API_GATEWAY_API",
-       "S3_DATA_ACCESS",
-       "LAKE_FORMATION_DATA_PERMISSION"
-      ],
-      "type": "string"
-     },
-     "CreatedAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "Description": {
-      "type": "string"
-     },
-     "Id": {
-      "type": "string"
-     },
-     "Name": {
-      "type": "string"
-     },
-     "Origin": {
-      "enum": [
-       "OWNED",
-       "ENTITLED"
-      ],
-      "type": "string"
-     },
-     "OriginDetails": {
-      "$ref": "#/components/schemas/OriginDetails"
-     },
-     "SourceId": {
-      "type": "string"
-     },
-     "Tags": {
-      "additionalProperties": {
-       "type": "string"
-      },
-      "type": "object"
-     },
-     "UpdatedAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     }
-    },
-    "type": "object"
-   },
-   "GetRevisionResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "Arn": {
-      "type": "string"
-     },
-     "Comment": {
-      "maxLength": 16384,
-      "minLength": 0,
-      "type": "string"
-     },
-     "CreatedAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "DataSetId": {
-      "type": "string"
-     },
-     "Finalized": {
-      "type": "boolean"
-     },
-     "Id": {
-      "type": "string"
-     },
-     "RevocationComment": {
-      "maxLength": 512,
-      "minLength": 10,
-      "type": "string"
-     },
-     "Revoked": {
-      "type": "boolean"
-     },
-     "RevokedAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "SourceId": {
-      "type": "string"
-     },
-     "Tags": {
-      "additionalProperties": {
-       "type": "string"
-      },
-      "type": "object"
-     },
-     "UpdatedAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     }
-    },
-    "type": "object"
-   },
-   "ListDataSetRevisionsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "NextToken": {
-      "type": "string"
-     },
-     "Revisions": {
-      "items": {
-       "$ref": "#/components/schemas/RevisionEntry"
-      },
-      "type": "array"
-     }
-    },
-    "type": "object"
-   },
-   "ListDataSetsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "DataSets": {
-      "items": {
-       "$ref": "#/components/schemas/DataSetEntry"
-      },
-      "type": "array"
-     },
-     "NextToken": {
-      "type": "string"
-     }
-    },
     "type": "object"
    },
    "OriginDetails": {
@@ -413,116 +139,6 @@
      "UpdatedAt"
     ],
     "type": "object"
-   },
-   "UpdateDataSetResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "Arn": {
-      "type": "string"
-     },
-     "AssetType": {
-      "enum": [
-       "S3_SNAPSHOT",
-       "REDSHIFT_DATA_SHARE",
-       "API_GATEWAY_API",
-       "S3_DATA_ACCESS",
-       "LAKE_FORMATION_DATA_PERMISSION"
-      ],
-      "type": "string"
-     },
-     "CreatedAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "Description": {
-      "type": "string"
-     },
-     "Id": {
-      "type": "string"
-     },
-     "Name": {
-      "type": "string"
-     },
-     "Origin": {
-      "enum": [
-       "OWNED",
-       "ENTITLED"
-      ],
-      "type": "string"
-     },
-     "OriginDetails": {
-      "$ref": "#/components/schemas/OriginDetails"
-     },
-     "SourceId": {
-      "type": "string"
-     },
-     "UpdatedAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     }
-    },
-    "type": "object"
-   },
-   "UpdateRevisionResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "Arn": {
-      "type": "string"
-     },
-     "Comment": {
-      "maxLength": 16384,
-      "minLength": 0,
-      "type": "string"
-     },
-     "CreatedAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "DataSetId": {
-      "type": "string"
-     },
-     "Finalized": {
-      "type": "boolean"
-     },
-     "Id": {
-      "type": "string"
-     },
-     "RevocationComment": {
-      "maxLength": 512,
-      "minLength": 10,
-      "type": "string"
-     },
-     "Revoked": {
-      "type": "boolean"
-     },
-     "RevokedAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "SourceId": {
-      "type": "string"
-     },
-     "UpdatedAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     }
-    },
-    "type": "object"
    }
   }
  },
@@ -578,7 +194,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListDataSetsResponse"
+         "properties": {
+          "DataSets": {
+           "items": {
+            "$ref": "#/components/schemas/DataSetEntry"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -658,7 +285,64 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateDataSetResponse"
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "AssetType": {
+           "enum": [
+            "S3_SNAPSHOT",
+            "REDSHIFT_DATA_SHARE",
+            "API_GATEWAY_API",
+            "S3_DATA_ACCESS",
+            "LAKE_FORMATION_DATA_PERMISSION"
+           ],
+           "type": "string"
+          },
+          "CreatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "Description": {
+           "type": "string"
+          },
+          "Id": {
+           "type": "string"
+          },
+          "Name": {
+           "type": "string"
+          },
+          "Origin": {
+           "enum": [
+            "OWNED",
+            "ENTITLED"
+           ],
+           "type": "string"
+          },
+          "OriginDetails": {
+           "$ref": "#/components/schemas/OriginDetails"
+          },
+          "SourceId": {
+           "type": "string"
+          },
+          "Tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          },
+          "UpdatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -753,7 +437,64 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetDataSetResponse"
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "AssetType": {
+           "enum": [
+            "S3_SNAPSHOT",
+            "REDSHIFT_DATA_SHARE",
+            "API_GATEWAY_API",
+            "S3_DATA_ACCESS",
+            "LAKE_FORMATION_DATA_PERMISSION"
+           ],
+           "type": "string"
+          },
+          "CreatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "Description": {
+           "type": "string"
+          },
+          "Id": {
+           "type": "string"
+          },
+          "Name": {
+           "type": "string"
+          },
+          "Origin": {
+           "enum": [
+            "OWNED",
+            "ENTITLED"
+           ],
+           "type": "string"
+          },
+          "OriginDetails": {
+           "$ref": "#/components/schemas/OriginDetails"
+          },
+          "SourceId": {
+           "type": "string"
+          },
+          "Tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          },
+          "UpdatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -820,7 +561,58 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateDataSetResponse"
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "AssetType": {
+           "enum": [
+            "S3_SNAPSHOT",
+            "REDSHIFT_DATA_SHARE",
+            "API_GATEWAY_API",
+            "S3_DATA_ACCESS",
+            "LAKE_FORMATION_DATA_PERMISSION"
+           ],
+           "type": "string"
+          },
+          "CreatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "Description": {
+           "type": "string"
+          },
+          "Id": {
+           "type": "string"
+          },
+          "Name": {
+           "type": "string"
+          },
+          "Origin": {
+           "enum": [
+            "OWNED",
+            "ENTITLED"
+           ],
+           "type": "string"
+          },
+          "OriginDetails": {
+           "$ref": "#/components/schemas/OriginDetails"
+          },
+          "SourceId": {
+           "type": "string"
+          },
+          "UpdatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -888,7 +680,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListDataSetRevisionsResponse"
+         "properties": {
+          "NextToken": {
+           "type": "string"
+          },
+          "Revisions": {
+           "items": {
+            "$ref": "#/components/schemas/RevisionEntry"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -960,7 +763,64 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateRevisionResponse"
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "Comment": {
+           "maxLength": 16384,
+           "minLength": 0,
+           "type": "string"
+          },
+          "CreatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "DataSetId": {
+           "type": "string"
+          },
+          "Finalized": {
+           "type": "boolean"
+          },
+          "Id": {
+           "type": "string"
+          },
+          "RevocationComment": {
+           "maxLength": 512,
+           "minLength": 10,
+           "type": "string"
+          },
+          "Revoked": {
+           "type": "boolean"
+          },
+          "RevokedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "SourceId": {
+           "type": "string"
+          },
+          "Tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          },
+          "UpdatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1071,7 +931,64 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetRevisionResponse"
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "Comment": {
+           "maxLength": 16384,
+           "minLength": 0,
+           "type": "string"
+          },
+          "CreatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "DataSetId": {
+           "type": "string"
+          },
+          "Finalized": {
+           "type": "boolean"
+          },
+          "Id": {
+           "type": "string"
+          },
+          "RevocationComment": {
+           "maxLength": 512,
+           "minLength": 10,
+           "type": "string"
+          },
+          "Revoked": {
+           "type": "boolean"
+          },
+          "RevokedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "SourceId": {
+           "type": "string"
+          },
+          "Tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          },
+          "UpdatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1148,7 +1065,58 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateRevisionResponse"
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "Comment": {
+           "maxLength": 16384,
+           "minLength": 0,
+           "type": "string"
+          },
+          "CreatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "DataSetId": {
+           "type": "string"
+          },
+          "Finalized": {
+           "type": "boolean"
+          },
+          "Id": {
+           "type": "string"
+          },
+          "RevocationComment": {
+           "maxLength": 512,
+           "minLength": 10,
+           "type": "string"
+          },
+          "Revoked": {
+           "type": "boolean"
+          },
+          "RevokedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "SourceId": {
+           "type": "string"
+          },
+          "UpdatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
         }
        }
       },

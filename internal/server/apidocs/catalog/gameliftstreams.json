@@ -52,231 +52,6 @@
     ],
     "type": "object"
    },
-   "CreateApplicationOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "ApplicationLogOutputUri": {
-      "maxLength": 1024,
-      "minLength": 0,
-      "type": "string"
-     },
-     "ApplicationLogPaths": {
-      "items": {
-       "maxLength": 1024,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxItems": 10,
-      "minItems": 0,
-      "type": "array"
-     },
-     "ApplicationSourceUri": {
-      "maxLength": 1024,
-      "minLength": 1,
-      "type": "string"
-     },
-     "Arn": {
-      "maxLength": 128,
-      "minLength": 1,
-      "type": "string"
-     },
-     "AssociatedStreamGroups": {
-      "items": {
-       "maxLength": 128,
-       "minLength": 1,
-       "type": "string"
-      },
-      "type": "array"
-     },
-     "CreatedAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "Description": {
-      "maxLength": 80,
-      "minLength": 1,
-      "type": "string"
-     },
-     "ExecutablePath": {
-      "maxLength": 1024,
-      "minLength": 1,
-      "type": "string"
-     },
-     "Id": {
-      "maxLength": 32,
-      "minLength": 1,
-      "type": "string"
-     },
-     "LastUpdatedAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "ReplicationStatuses": {
-      "items": {
-       "$ref": "#/components/schemas/ReplicationStatus"
-      },
-      "type": "array"
-     },
-     "RuntimeEnvironment": {
-      "$ref": "#/components/schemas/RuntimeEnvironment"
-     },
-     "Status": {
-      "enum": [
-       "INITIALIZED",
-       "PROCESSING",
-       "READY",
-       "DELETING",
-       "ERROR"
-      ],
-      "type": "string"
-     },
-     "StatusReason": {
-      "enum": [
-       "internalError",
-       "accessDenied"
-      ],
-      "type": "string"
-     }
-    },
-    "required": [
-     "Arn"
-    ],
-    "type": "object"
-   },
-   "GetApplicationOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "ApplicationLogOutputUri": {
-      "maxLength": 1024,
-      "minLength": 0,
-      "type": "string"
-     },
-     "ApplicationLogPaths": {
-      "items": {
-       "maxLength": 1024,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxItems": 10,
-      "minItems": 0,
-      "type": "array"
-     },
-     "ApplicationSourceUri": {
-      "maxLength": 1024,
-      "minLength": 1,
-      "type": "string"
-     },
-     "Arn": {
-      "maxLength": 128,
-      "minLength": 1,
-      "type": "string"
-     },
-     "AssociatedStreamGroups": {
-      "items": {
-       "maxLength": 128,
-       "minLength": 1,
-       "type": "string"
-      },
-      "type": "array"
-     },
-     "CreatedAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "Description": {
-      "maxLength": 80,
-      "minLength": 1,
-      "type": "string"
-     },
-     "ExecutablePath": {
-      "maxLength": 1024,
-      "minLength": 1,
-      "type": "string"
-     },
-     "Id": {
-      "maxLength": 32,
-      "minLength": 1,
-      "type": "string"
-     },
-     "LastUpdatedAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "ReplicationStatuses": {
-      "items": {
-       "$ref": "#/components/schemas/ReplicationStatus"
-      },
-      "type": "array"
-     },
-     "RuntimeEnvironment": {
-      "$ref": "#/components/schemas/RuntimeEnvironment"
-     },
-     "Status": {
-      "enum": [
-       "INITIALIZED",
-       "PROCESSING",
-       "READY",
-       "DELETING",
-       "ERROR"
-      ],
-      "type": "string"
-     },
-     "StatusReason": {
-      "enum": [
-       "internalError",
-       "accessDenied"
-      ],
-      "type": "string"
-     }
-    },
-    "required": [
-     "Arn"
-    ],
-    "type": "object"
-   },
-   "ListApplicationsOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "Items": {
-      "items": {
-       "$ref": "#/components/schemas/ApplicationSummary"
-      },
-      "type": "array"
-     },
-     "NextToken": {
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListTagsForResourceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "Tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxProperties": 50,
-      "minProperties": 1,
-      "type": "object"
-     }
-    },
-    "type": "object"
-   },
    "ReplicationStatus": {
     "additionalProperties": false,
     "properties": {
@@ -315,113 +90,6 @@
     "required": [
      "Type",
      "Version"
-    ],
-    "type": "object"
-   },
-   "TagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UntagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UpdateApplicationOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "ApplicationLogOutputUri": {
-      "maxLength": 1024,
-      "minLength": 0,
-      "type": "string"
-     },
-     "ApplicationLogPaths": {
-      "items": {
-       "maxLength": 1024,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxItems": 10,
-      "minItems": 0,
-      "type": "array"
-     },
-     "ApplicationSourceUri": {
-      "maxLength": 1024,
-      "minLength": 1,
-      "type": "string"
-     },
-     "Arn": {
-      "maxLength": 128,
-      "minLength": 1,
-      "type": "string"
-     },
-     "AssociatedStreamGroups": {
-      "items": {
-       "maxLength": 128,
-       "minLength": 1,
-       "type": "string"
-      },
-      "type": "array"
-     },
-     "CreatedAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "Description": {
-      "maxLength": 80,
-      "minLength": 1,
-      "type": "string"
-     },
-     "ExecutablePath": {
-      "maxLength": 1024,
-      "minLength": 1,
-      "type": "string"
-     },
-     "Id": {
-      "maxLength": 32,
-      "minLength": 1,
-      "type": "string"
-     },
-     "LastUpdatedAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "ReplicationStatuses": {
-      "items": {
-       "$ref": "#/components/schemas/ReplicationStatus"
-      },
-      "type": "array"
-     },
-     "RuntimeEnvironment": {
-      "$ref": "#/components/schemas/RuntimeEnvironment"
-     },
-     "Status": {
-      "enum": [
-       "INITIALIZED",
-       "PROCESSING",
-       "READY",
-       "DELETING",
-       "ERROR"
-      ],
-      "type": "string"
-     },
-     "StatusReason": {
-      "enum": [
-       "internalError",
-       "accessDenied"
-      ],
-      "type": "string"
-     }
-    },
-    "required": [
-     "Arn"
     ],
     "type": "object"
    }
@@ -472,7 +140,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListApplicationsOutput"
+         "properties": {
+          "Items": {
+           "items": {
+            "$ref": "#/components/schemas/ApplicationSummary"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -579,7 +258,97 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateApplicationOutput"
+         "properties": {
+          "ApplicationLogOutputUri": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          },
+          "ApplicationLogPaths": {
+           "items": {
+            "maxLength": 1024,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxItems": 10,
+           "minItems": 0,
+           "type": "array"
+          },
+          "ApplicationSourceUri": {
+           "maxLength": 1024,
+           "minLength": 1,
+           "type": "string"
+          },
+          "Arn": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "AssociatedStreamGroups": {
+           "items": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "CreatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "Description": {
+           "maxLength": 80,
+           "minLength": 1,
+           "type": "string"
+          },
+          "ExecutablePath": {
+           "maxLength": 1024,
+           "minLength": 1,
+           "type": "string"
+          },
+          "Id": {
+           "maxLength": 32,
+           "minLength": 1,
+           "type": "string"
+          },
+          "LastUpdatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "ReplicationStatuses": {
+           "items": {
+            "$ref": "#/components/schemas/ReplicationStatus"
+           },
+           "type": "array"
+          },
+          "RuntimeEnvironment": {
+           "$ref": "#/components/schemas/RuntimeEnvironment"
+          },
+          "Status": {
+           "enum": [
+            "INITIALIZED",
+            "PROCESSING",
+            "READY",
+            "DELETING",
+            "ERROR"
+           ],
+           "type": "string"
+          },
+          "StatusReason": {
+           "enum": [
+            "internalError",
+            "accessDenied"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -678,7 +447,97 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetApplicationOutput"
+         "properties": {
+          "ApplicationLogOutputUri": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          },
+          "ApplicationLogPaths": {
+           "items": {
+            "maxLength": 1024,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxItems": 10,
+           "minItems": 0,
+           "type": "array"
+          },
+          "ApplicationSourceUri": {
+           "maxLength": 1024,
+           "minLength": 1,
+           "type": "string"
+          },
+          "Arn": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "AssociatedStreamGroups": {
+           "items": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "CreatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "Description": {
+           "maxLength": 80,
+           "minLength": 1,
+           "type": "string"
+          },
+          "ExecutablePath": {
+           "maxLength": 1024,
+           "minLength": 1,
+           "type": "string"
+          },
+          "Id": {
+           "maxLength": 32,
+           "minLength": 1,
+           "type": "string"
+          },
+          "LastUpdatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "ReplicationStatuses": {
+           "items": {
+            "$ref": "#/components/schemas/ReplicationStatus"
+           },
+           "type": "array"
+          },
+          "RuntimeEnvironment": {
+           "$ref": "#/components/schemas/RuntimeEnvironment"
+          },
+          "Status": {
+           "enum": [
+            "INITIALIZED",
+            "PROCESSING",
+            "READY",
+            "DELETING",
+            "ERROR"
+           ],
+           "type": "string"
+          },
+          "StatusReason": {
+           "enum": [
+            "internalError",
+            "accessDenied"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -761,7 +620,97 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateApplicationOutput"
+         "properties": {
+          "ApplicationLogOutputUri": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          },
+          "ApplicationLogPaths": {
+           "items": {
+            "maxLength": 1024,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxItems": 10,
+           "minItems": 0,
+           "type": "array"
+          },
+          "ApplicationSourceUri": {
+           "maxLength": 1024,
+           "minLength": 1,
+           "type": "string"
+          },
+          "Arn": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "AssociatedStreamGroups": {
+           "items": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "CreatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "Description": {
+           "maxLength": 80,
+           "minLength": 1,
+           "type": "string"
+          },
+          "ExecutablePath": {
+           "maxLength": 1024,
+           "minLength": 1,
+           "type": "string"
+          },
+          "Id": {
+           "maxLength": 32,
+           "minLength": 1,
+           "type": "string"
+          },
+          "LastUpdatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "ReplicationStatuses": {
+           "items": {
+            "$ref": "#/components/schemas/ReplicationStatus"
+           },
+           "type": "array"
+          },
+          "RuntimeEnvironment": {
+           "$ref": "#/components/schemas/RuntimeEnvironment"
+          },
+          "Status": {
+           "enum": [
+            "INITIALIZED",
+            "PROCESSING",
+            "READY",
+            "DELETING",
+            "ERROR"
+           ],
+           "type": "string"
+          },
+          "StatusReason": {
+           "enum": [
+            "internalError",
+            "accessDenied"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -829,7 +778,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -881,7 +831,19 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+         "properties": {
+          "Tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 1,
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -957,7 +919,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },

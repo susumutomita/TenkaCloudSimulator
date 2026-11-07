@@ -1,126 +1,6 @@
 {
  "components": {
   "schemas": {
-   "CreateNotificationConfigurationResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "type": "string"
-     },
-     "status": {
-      "enum": [
-       "ACTIVE",
-       "PARTIALLY_ACTIVE",
-       "INACTIVE",
-       "DELETING"
-      ],
-      "type": "string"
-     }
-    },
-    "required": [
-     "arn",
-     "status"
-    ],
-    "type": "object"
-   },
-   "DeleteNotificationConfigurationResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "GetNotificationConfigurationResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "aggregationDuration": {
-      "enum": [
-       "LONG",
-       "SHORT",
-       "NONE"
-      ],
-      "type": "string"
-     },
-     "arn": {
-      "type": "string"
-     },
-     "creationTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "description": {
-      "maxLength": 256,
-      "minLength": 0,
-      "type": "string"
-     },
-     "name": {
-      "maxLength": 64,
-      "minLength": 1,
-      "type": "string"
-     },
-     "status": {
-      "enum": [
-       "ACTIVE",
-       "PARTIALLY_ACTIVE",
-       "INACTIVE",
-       "DELETING"
-      ],
-      "type": "string"
-     },
-     "subtype": {
-      "enum": [
-       "ACCOUNT",
-       "ADMIN_MANAGED"
-      ],
-      "type": "string"
-     }
-    },
-    "required": [
-     "arn",
-     "name",
-     "description",
-     "status",
-     "creationTime"
-    ],
-    "type": "object"
-   },
-   "ListNotificationConfigurationsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "nextToken": {
-      "maxLength": 4096,
-      "minLength": 1,
-      "type": "string"
-     },
-     "notificationConfigurations": {
-      "items": {
-       "$ref": "#/components/schemas/NotificationConfigurationStructure"
-      },
-      "type": "array"
-     }
-    },
-    "required": [
-     "notificationConfigurations"
-    ],
-    "type": "object"
-   },
-   "ListTagsForResourceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxProperties": 200,
-      "minProperties": 0,
-      "type": "object"
-     }
-    },
-    "type": "object"
-   },
    "NotificationConfigurationStructure": {
     "additionalProperties": false,
     "properties": {
@@ -175,28 +55,6 @@
      "description",
      "status",
      "creationTime"
-    ],
-    "type": "object"
-   },
-   "TagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UntagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UpdateNotificationConfigurationResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "type": "string"
-     }
-    },
-    "required": [
-     "arn"
     ],
     "type": "object"
    }
@@ -289,7 +147,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListNotificationConfigurationsResponse"
+         "properties": {
+          "nextToken": {
+           "maxLength": 4096,
+           "minLength": 1,
+           "type": "string"
+          },
+          "notificationConfigurations": {
+           "items": {
+            "$ref": "#/components/schemas/NotificationConfigurationStructure"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -374,7 +245,21 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateNotificationConfigurationResponse"
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "ACTIVE",
+            "PARTIALLY_ACTIVE",
+            "INACTIVE",
+            "DELETING"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -426,7 +311,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteNotificationConfigurationResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -476,7 +362,53 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetNotificationConfigurationResponse"
+         "properties": {
+          "aggregationDuration": {
+           "enum": [
+            "LONG",
+            "SHORT",
+            "NONE"
+           ],
+           "type": "string"
+          },
+          "arn": {
+           "type": "string"
+          },
+          "creationTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "description": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "ACTIVE",
+            "PARTIALLY_ACTIVE",
+            "INACTIVE",
+            "DELETING"
+           ],
+           "type": "string"
+          },
+          "subtype": {
+           "enum": [
+            "ACCOUNT",
+            "ADMIN_MANAGED"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -555,7 +487,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateNotificationConfigurationResponse"
+         "properties": {
+          "arn": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -619,7 +556,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -669,7 +607,19 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -743,7 +693,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },

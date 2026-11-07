@@ -457,7 +457,7 @@ var billingConductor = &Service{
 	Ops: []Op{
 		{Name: "CreatePricingRule", Kind: Create, Resource: "pricingRule", Check: pricingRuleScope},
 		{Name: "ListPricingRules", Kind: List, Resource: "pricingRule"},
-		{Name: "UpdatePricingRule", Kind: Update, Resource: "pricingRule", Lookup: "Arn", Check: pricingRuleModifier,
+		{Name: "UpdatePricingRule", Kind: Update, Resource: "pricingRule", Lookup: "Arn", Check: pricingRuleModifier, Merged: pricingRuleMerged,
 			Fields: []string{"Name", "Description", "Type", "ModifierPercentage", "Tiering"}},
 		{Name: "DeletePricingRule", Kind: Delete, Resource: "pricingRule", Lookup: "Arn"},
 		{Name: "TagResource", Kind: Tag, Lookup: "ResourceArn"},
@@ -489,6 +489,23 @@ func pricingRuleScope(input map[string]any) error {
 	_, tiering := input["Tiering"]
 	if input["Type"] == "TIERING" && (!tiering || modifier) || input["Type"] != "TIERING" && (!modifier || tiering) {
 		return Failure("ValidationException", "TIERING pricing rules need Tiering; MARKUP and DISCOUNT pricing rules need ModifierPercentage.")
+	}
+	return nil
+}
+
+// pricingRuleMerged keeps an updated rule consistent with its type: a type
+// change drops the other type's configuration, and the resulting rule must
+// carry its own (Tiering for TIERING, ModifierPercentage otherwise).
+func pricingRuleMerged(document map[string]any) error {
+	if document["Type"] == "TIERING" {
+		delete(document, "ModifierPercentage")
+	} else {
+		delete(document, "Tiering")
+	}
+	_, modifier := document["ModifierPercentage"]
+	_, tiering := document["Tiering"]
+	if document["Type"] == "TIERING" && !tiering || document["Type"] != "TIERING" && !modifier {
+		return Failure("ValidationException", "A TIERING pricing rule needs Tiering; a MARKUP or DISCOUNT pricing rule needs ModifierPercentage.")
 	}
 	return nil
 }

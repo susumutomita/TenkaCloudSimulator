@@ -72,6 +72,7 @@ func (b *binding) openAPI() map[string]any {
 				params := operation["parameters"].([]any)
 				body := map[string]any{"type": "object", "properties": map[string]any{}}
 				var required []any
+				var payload map[string]any
 				for _, name := range shape.sortedMembers() {
 					member := shape.Members[name]
 					wire := member.LocationName
@@ -86,6 +87,11 @@ func (b *binding) openAPI() map[string]any {
 					case "header":
 						params = append(params, map[string]any{"name": wire, "in": "header", "schema": b.schema(member.Shape, schemas, 0)})
 					case "", "body":
+						// A payload member is the whole HTTP body, not an envelope key.
+						if name == shape.Payload {
+							payload = b.payloadSchema(member.Shape, schemas)
+							continue
+						}
 						body["properties"].(map[string]any)[wire] = b.schema(member.Shape, schemas, 0)
 						for _, r := range shape.Required {
 							if r == name {
@@ -95,7 +101,9 @@ func (b *binding) openAPI() map[string]any {
 					}
 				}
 				operation["parameters"] = params
-				if len(body["properties"].(map[string]any)) > 0 {
+				if payload != nil {
+					operation["requestBody"] = map[string]any{"content": payload}
+				} else if len(body["properties"].(map[string]any)) > 0 {
 					if required != nil {
 						body["required"] = required
 					}
@@ -103,8 +111,7 @@ func (b *binding) openAPI() map[string]any {
 				}
 			}
 			if official.Output != "" {
-				operation["responses"].(map[string]any)["200"] = map[string]any{"description": "Projected official output shape.",
-					"content": map[string]any{"application/json": map[string]any{"schema": b.schema(official.Output, schemas, 0)}}}
+				operation["responses"].(map[string]any)["200"] = map[string]any{"description": "Projected official output shape.", "content": b.outputContent(official.Output, schemas)}
 			}
 			entry[strings.ToLower(official.HTTP.Method)] = operation
 		}
@@ -203,4 +210,32 @@ func bounds(out map[string]any, shape *Shape, minKey, maxKey string) {
 	if shape.Max != nil {
 		out[maxKey] = *shape.Max
 	}
+}
+
+// payloadSchema describes a payload member as the entire HTTP body.
+func (b *binding) payloadSchema(shapeName string, schemas map[string]any) map[string]any {
+	switch b.model.shape(shapeName).Type {
+	case "blob":
+		return map[string]any{"application/octet-stream": map[string]any{"schema": map[string]any{"type": "string", "format": "binary"}}}
+	case "string":
+		return map[string]any{"text/plain": map[string]any{"schema": map[string]any{"type": "string"}}}
+	}
+	return map[string]any{"application/json": map[string]any{"schema": b.schema(shapeName, schemas, 0)}}
+}
+
+// outputContent describes a REST response body: the payload member's shape
+// when the output declares one, otherwise only the members carried in the
+// body (header and status-code members are not body keys).
+func (b *binding) outputContent(shapeName string, schemas map[string]any) map[string]any {
+	shape := b.model.shape(shapeName)
+	if shape.Payload != "" {
+		return b.payloadSchema(shape.Members[shape.Payload].Shape, schemas)
+	}
+	props := map[string]any{}
+	for _, name := range shape.sortedMembers() {
+		if member := shape.Members[name]; member.Location == "" || member.Location == "body" {
+			props[member.wire(name)] = b.schema(member.Shape, schemas, 1)
+		}
+	}
+	return map[string]any{"application/json": map[string]any{"schema": map[string]any{"type": "object", "properties": props}}}
 }

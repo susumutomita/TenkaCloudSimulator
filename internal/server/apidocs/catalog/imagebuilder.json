@@ -67,64 +67,6 @@
     ],
     "type": "object"
    },
-   "CreateDistributionConfigurationResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "clientToken": {
-      "maxLength": 36,
-      "minLength": 1,
-      "type": "string"
-     },
-     "distributionConfigurationArn": {
-      "type": "string"
-     },
-     "requestId": {
-      "maxLength": 1024,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "CreateLifecyclePolicyResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "clientToken": {
-      "maxLength": 36,
-      "minLength": 1,
-      "type": "string"
-     },
-     "lifecyclePolicyArn": {
-      "maxLength": 1024,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "DeleteDistributionConfigurationResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "distributionConfigurationArn": {
-      "type": "string"
-     },
-     "requestId": {
-      "maxLength": 1024,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "DeleteLifecyclePolicyResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "lifecyclePolicyArn": {
-      "maxLength": 1024,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
    "Distribution": {
     "additionalProperties": false,
     "properties": {
@@ -332,29 +274,6 @@
       "maxItems": 10,
       "minItems": 1,
       "type": "array"
-     }
-    },
-    "type": "object"
-   },
-   "GetDistributionConfigurationResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "distributionConfiguration": {
-      "$ref": "#/components/schemas/DistributionConfiguration"
-     },
-     "requestId": {
-      "maxLength": 1024,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "GetLifecyclePolicyResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "lifecyclePolicy": {
-      "$ref": "#/components/schemas/LifecyclePolicy"
      }
     },
     "type": "object"
@@ -768,60 +687,6 @@
     },
     "type": "object"
    },
-   "ListDistributionConfigurationsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "distributionConfigurationSummaryList": {
-      "items": {
-       "$ref": "#/components/schemas/DistributionConfigurationSummary"
-      },
-      "type": "array"
-     },
-     "nextToken": {
-      "maxLength": 65535,
-      "minLength": 1,
-      "type": "string"
-     },
-     "requestId": {
-      "maxLength": 1024,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListLifecyclePoliciesResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "lifecyclePolicySummaryList": {
-      "items": {
-       "$ref": "#/components/schemas/LifecyclePolicySummary"
-      },
-      "type": "array"
-     },
-     "nextToken": {
-      "maxLength": 65535,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListTagsForResourceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "type": "string"
-      },
-      "maxProperties": 50,
-      "minProperties": 1,
-      "type": "object"
-     }
-    },
-    "type": "object"
-   },
    "S3ExportConfiguration": {
     "additionalProperties": false,
     "properties": {
@@ -880,11 +745,6 @@
     ],
     "type": "object"
    },
-   "TagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
    "TargetContainerRepository": {
     "additionalProperties": false,
     "properties": {
@@ -904,40 +764,6 @@
      "service",
      "repositoryName"
     ],
-    "type": "object"
-   },
-   "UntagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UpdateDistributionConfigurationResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "clientToken": {
-      "maxLength": 36,
-      "minLength": 1,
-      "type": "string"
-     },
-     "distributionConfigurationArn": {
-      "type": "string"
-     },
-     "requestId": {
-      "maxLength": 1024,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "UpdateLifecyclePolicyResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "lifecyclePolicyArn": {
-      "maxLength": 1024,
-      "type": "string"
-     }
-    },
     "type": "object"
    }
   }
@@ -1015,7 +841,22 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateDistributionConfigurationResponse"
+         "properties": {
+          "clientToken": {
+           "maxLength": 36,
+           "minLength": 1,
+           "type": "string"
+          },
+          "distributionConfigurationArn": {
+           "type": "string"
+          },
+          "requestId": {
+           "maxLength": 1024,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1130,7 +971,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateLifecyclePolicyResponse"
+         "properties": {
+          "clientToken": {
+           "maxLength": 36,
+           "minLength": 1,
+           "type": "string"
+          },
+          "lifecyclePolicyArn": {
+           "maxLength": 1024,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1181,7 +1033,17 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteDistributionConfigurationResponse"
+         "properties": {
+          "distributionConfigurationArn": {
+           "type": "string"
+          },
+          "requestId": {
+           "maxLength": 1024,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1233,7 +1095,13 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteLifecyclePolicyResponse"
+         "properties": {
+          "lifecyclePolicyArn": {
+           "maxLength": 1024,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1284,7 +1152,17 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetDistributionConfigurationResponse"
+         "properties": {
+          "distributionConfiguration": {
+           "$ref": "#/components/schemas/DistributionConfiguration"
+          },
+          "requestId": {
+           "maxLength": 1024,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1336,7 +1214,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetLifecyclePolicyResponse"
+         "properties": {
+          "lifecyclePolicy": {
+           "$ref": "#/components/schemas/LifecyclePolicy"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1409,7 +1292,25 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListDistributionConfigurationsResponse"
+         "properties": {
+          "distributionConfigurationSummaryList": {
+           "items": {
+            "$ref": "#/components/schemas/DistributionConfigurationSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 65535,
+           "minLength": 1,
+           "type": "string"
+          },
+          "requestId": {
+           "maxLength": 1024,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1482,7 +1383,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListLifecyclePoliciesResponse"
+         "properties": {
+          "lifecyclePolicySummaryList": {
+           "items": {
+            "$ref": "#/components/schemas/LifecyclePolicySummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 65535,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1561,7 +1475,22 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateDistributionConfigurationResponse"
+         "properties": {
+          "clientToken": {
+           "maxLength": 36,
+           "minLength": 1,
+           "type": "string"
+          },
+          "distributionConfigurationArn": {
+           "type": "string"
+          },
+          "requestId": {
+           "maxLength": 1024,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1668,7 +1597,13 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateLifecyclePolicyResponse"
+         "properties": {
+          "lifecyclePolicyArn": {
+           "maxLength": 1024,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1734,7 +1669,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1784,7 +1720,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 1,
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1857,7 +1804,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },

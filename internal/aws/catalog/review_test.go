@@ -179,3 +179,61 @@ func TestDescriptorsServeStructuredAndIdentifierLists(t *testing.T) {
 		t.Fatalf("task definition list %+v", d)
 	}
 }
+
+// A REST payload member is documented as the whole body, as restInput and
+// writeOutput treat it (Pinpoint CreateApp sends CreateApplicationRequest).
+func TestReferenceDocumentsPayloadMembersAsWholeBodies(t *testing.T) {
+	h := newHarness(t, pinpoint)
+	doc := h.engine.OpenAPI()["pinpoint"]
+	create := doc["paths"].(map[string]any)["/v1/apps"].(map[string]any)["post"].(map[string]any)
+	schema := create["requestBody"].(map[string]any)["content"].(map[string]any)["application/json"].(map[string]any)["schema"].(map[string]any)
+	if schema["$ref"] != "#/components/schemas/CreateApplicationRequest" {
+		t.Fatalf("request body %v", schema)
+	}
+	response := create["responses"].(map[string]any)["200"].(map[string]any)["content"].(map[string]any)["application/json"].(map[string]any)["schema"].(map[string]any)
+	if response["$ref"] != "#/components/schemas/ApplicationResponse" {
+		t.Fatalf("response body %v", response)
+	}
+}
+
+// List descriptors name their own item identity keys: Athena summaries use
+// CatalogName and IoT thing-group summaries use groupName/groupArn.
+func TestListDescriptorsNameSummaryIdentityKeys(t *testing.T) {
+	h := newHarness(t, athena, iotCore)
+	lists := map[string]OpDescriptor{}
+	for _, d := range h.engine.Describe() {
+		for _, r := range d.Resources {
+			lists[d.Model+"/"+r.Kind] = r.Ops["list"]
+		}
+	}
+	if l := lists["athena/dataCatalog"]; l.ItemName != "CatalogName" {
+		t.Fatalf("athena list %+v", l)
+	}
+	if l := lists["iot/thingGroup"]; l.ItemName != "groupName" || l.ItemARN != "groupArn" {
+		t.Fatalf("thing group list %+v", l)
+	}
+	if l := lists["iot/securityProfile"]; l.ItemName != "name" || l.ItemARN != "arn" {
+		t.Fatalf("security profile list %+v", l)
+	}
+}
+
+// A pricing-rule type change keeps the stored rule consistent: the other
+// type's configuration is dropped and the new type's must be present.
+func TestPricingRuleUpdatesValidateTheMergedRule(t *testing.T) {
+	h := newHarness(t, billingConductor)
+	created := h.rest("billingconductor", "POST", "/create-pricing-rule", map[string]any{"Name": "markup", "Scope": "GLOBAL", "Type": "MARKUP", "ModifierPercentage": 10})
+	expect(t, created, 200, "")
+	arn := str(created.body["Arn"])
+	expect(t, h.rest("billingconductor", "PUT", "/update-pricing-rule", map[string]any{"Arn": arn, "Type": "TIERING"}), 400, "ValidationException")
+	tiered := h.rest("billingconductor", "PUT", "/update-pricing-rule", map[string]any{"Arn": arn, "Type": "TIERING", "Tiering": map[string]any{"FreeTier": map[string]any{"Activated": true}}})
+	expect(t, tiered, 200, "")
+	if _, stale := tiered.body["ModifierPercentage"]; stale || tiered.body["Tiering"] == nil {
+		t.Fatalf("type transition left %v", tiered.body)
+	}
+	listed := h.rest("billingconductor", "POST", "/list-pricing-rules", map[string]any{}).body["PricingRules"].([]any)[0].(map[string]any)
+	if _, stale := listed["ModifierPercentage"]; stale || listed["Type"] != "TIERING" {
+		t.Fatalf("stored rule %v", listed)
+	}
+	expect(t, h.rest("billingconductor", "PUT", "/update-pricing-rule", map[string]any{"Arn": arn, "Type": "DISCOUNT"}), 400, "ValidationException")
+	expect(t, h.rest("billingconductor", "PUT", "/update-pricing-rule", map[string]any{"Arn": arn, "Type": "DISCOUNT", "ModifierPercentage": 5}), 200, "")
+}

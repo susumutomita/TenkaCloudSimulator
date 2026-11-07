@@ -20,76 +20,6 @@
     },
     "type": "object"
    },
-   "Applications": {
-    "additionalProperties": false,
-    "properties": {
-     "Items": {
-      "items": {
-       "$ref": "#/components/schemas/Application"
-      },
-      "type": "array"
-     },
-     "NextToken": {
-      "maxLength": 2048,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ConfigurationProfile": {
-    "additionalProperties": false,
-    "properties": {
-     "ApplicationId": {
-      "type": "string"
-     },
-     "Description": {
-      "maxLength": 1024,
-      "minLength": 0,
-      "type": "string"
-     },
-     "Id": {
-      "type": "string"
-     },
-     "KmsKeyArn": {
-      "maxLength": 2048,
-      "minLength": 20,
-      "type": "string"
-     },
-     "KmsKeyIdentifier": {
-      "maxLength": 2048,
-      "minLength": 1,
-      "type": "string"
-     },
-     "LocationUri": {
-      "maxLength": 2048,
-      "minLength": 1,
-      "type": "string"
-     },
-     "Name": {
-      "maxLength": 128,
-      "minLength": 1,
-      "type": "string"
-     },
-     "RetrievalRoleArn": {
-      "maxLength": 2048,
-      "minLength": 20,
-      "type": "string"
-     },
-     "Type": {
-      "type": "string"
-     },
-     "Validators": {
-      "items": {
-       "$ref": "#/components/schemas/Validator"
-      },
-      "maxItems": 2,
-      "minItems": 0,
-      "type": "array"
-     }
-    },
-    "type": "object"
-   },
    "ConfigurationProfileSummary": {
     "additionalProperties": false,
     "properties": {
@@ -123,40 +53,6 @@
       "maxItems": 2,
       "minItems": 0,
       "type": "array"
-     }
-    },
-    "type": "object"
-   },
-   "ConfigurationProfiles": {
-    "additionalProperties": false,
-    "properties": {
-     "Items": {
-      "items": {
-       "$ref": "#/components/schemas/ConfigurationProfileSummary"
-      },
-      "type": "array"
-     },
-     "NextToken": {
-      "maxLength": 2048,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "DeploymentStrategies": {
-    "additionalProperties": false,
-    "properties": {
-     "Items": {
-      "items": {
-       "$ref": "#/components/schemas/DeploymentStrategy"
-      },
-      "type": "array"
-     },
-     "NextToken": {
-      "maxLength": 2048,
-      "minLength": 1,
-      "type": "string"
      }
     },
     "type": "object"
@@ -249,23 +145,6 @@
     },
     "type": "object"
    },
-   "Environments": {
-    "additionalProperties": false,
-    "properties": {
-     "Items": {
-      "items": {
-       "$ref": "#/components/schemas/Environment"
-      },
-      "type": "array"
-     },
-     "NextToken": {
-      "maxLength": 2048,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
    "Monitor": {
     "additionalProperties": false,
     "properties": {
@@ -283,21 +162,6 @@
     "required": [
      "AlarmArn"
     ],
-    "type": "object"
-   },
-   "ResourceTags": {
-    "additionalProperties": false,
-    "properties": {
-     "Tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "type": "string"
-      },
-      "maxProperties": 50,
-      "minProperties": 0,
-      "type": "object"
-     }
-    },
     "type": "object"
    },
    "Validator": {
@@ -371,7 +235,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/Applications"
+         "properties": {
+          "Items": {
+           "items": {
+            "$ref": "#/components/schemas/Application"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -446,7 +323,22 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/Application"
+         "properties": {
+          "Description": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          },
+          "Id": {
+           "type": "string"
+          },
+          "Name": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -541,7 +433,22 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/Application"
+         "properties": {
+          "Description": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          },
+          "Id": {
+           "type": "string"
+          },
+          "Name": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -612,7 +519,22 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/Application"
+         "properties": {
+          "Description": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          },
+          "Id": {
+           "type": "string"
+          },
+          "Name": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -689,7 +611,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ConfigurationProfiles"
+         "properties": {
+          "Items": {
+           "items": {
+            "$ref": "#/components/schemas/ConfigurationProfileSummary"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -799,7 +734,56 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ConfigurationProfile"
+         "properties": {
+          "ApplicationId": {
+           "type": "string"
+          },
+          "Description": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          },
+          "Id": {
+           "type": "string"
+          },
+          "KmsKeyArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "KmsKeyIdentifier": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          },
+          "LocationUri": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          },
+          "Name": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "RetrievalRoleArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "Type": {
+           "type": "string"
+          },
+          "Validators": {
+           "items": {
+            "$ref": "#/components/schemas/Validator"
+           },
+           "maxItems": 2,
+           "minItems": 0,
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -922,7 +906,56 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ConfigurationProfile"
+         "properties": {
+          "ApplicationId": {
+           "type": "string"
+          },
+          "Description": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          },
+          "Id": {
+           "type": "string"
+          },
+          "KmsKeyArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "KmsKeyIdentifier": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          },
+          "LocationUri": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          },
+          "Name": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "RetrievalRoleArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "Type": {
+           "type": "string"
+          },
+          "Validators": {
+           "items": {
+            "$ref": "#/components/schemas/Validator"
+           },
+           "maxItems": 2,
+           "minItems": 0,
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1019,7 +1052,56 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ConfigurationProfile"
+         "properties": {
+          "ApplicationId": {
+           "type": "string"
+          },
+          "Description": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          },
+          "Id": {
+           "type": "string"
+          },
+          "KmsKeyArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "KmsKeyIdentifier": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          },
+          "LocationUri": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          },
+          "Name": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "RetrievalRoleArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "Type": {
+           "type": "string"
+          },
+          "Validators": {
+           "items": {
+            "$ref": "#/components/schemas/Validator"
+           },
+           "maxItems": 2,
+           "minItems": 0,
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1089,7 +1171,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/Environments"
+         "properties": {
+          "Items": {
+           "items": {
+            "$ref": "#/components/schemas/Environment"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1180,7 +1275,43 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/Environment"
+         "properties": {
+          "ApplicationId": {
+           "type": "string"
+          },
+          "Description": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          },
+          "Id": {
+           "type": "string"
+          },
+          "Monitors": {
+           "items": {
+            "$ref": "#/components/schemas/Monitor"
+           },
+           "maxItems": 5,
+           "minItems": 0,
+           "type": "array"
+          },
+          "Name": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "State": {
+           "enum": [
+            "READY_FOR_DEPLOYMENT",
+            "DEPLOYING",
+            "ROLLING_BACK",
+            "ROLLED_BACK",
+            "REVERTED"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1303,7 +1434,43 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/Environment"
+         "properties": {
+          "ApplicationId": {
+           "type": "string"
+          },
+          "Description": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          },
+          "Id": {
+           "type": "string"
+          },
+          "Monitors": {
+           "items": {
+            "$ref": "#/components/schemas/Monitor"
+           },
+           "maxItems": 5,
+           "minItems": 0,
+           "type": "array"
+          },
+          "Name": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "State": {
+           "enum": [
+            "READY_FOR_DEPLOYMENT",
+            "DEPLOYING",
+            "ROLLING_BACK",
+            "ROLLED_BACK",
+            "REVERTED"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1390,7 +1557,43 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/Environment"
+         "properties": {
+          "ApplicationId": {
+           "type": "string"
+          },
+          "Description": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          },
+          "Id": {
+           "type": "string"
+          },
+          "Monitors": {
+           "items": {
+            "$ref": "#/components/schemas/Monitor"
+           },
+           "maxItems": 5,
+           "minItems": 0,
+           "type": "array"
+          },
+          "Name": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "State": {
+           "enum": [
+            "READY_FOR_DEPLOYMENT",
+            "DEPLOYING",
+            "ROLLING_BACK",
+            "ROLLED_BACK",
+            "REVERTED"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1497,7 +1700,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeploymentStrategies"
+         "properties": {
+          "Items": {
+           "items": {
+            "$ref": "#/components/schemas/DeploymentStrategy"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1603,7 +1819,51 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeploymentStrategy"
+         "properties": {
+          "DeploymentDurationInMinutes": {
+           "maximum": 1440,
+           "minimum": 0,
+           "type": "integer"
+          },
+          "Description": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          },
+          "FinalBakeTimeInMinutes": {
+           "maximum": 1440,
+           "minimum": 0,
+           "type": "integer"
+          },
+          "GrowthFactor": {
+           "maximum": 100,
+           "minimum": 1,
+           "type": "number"
+          },
+          "GrowthType": {
+           "enum": [
+            "LINEAR",
+            "EXPONENTIAL"
+           ],
+           "type": "string"
+          },
+          "Id": {
+           "type": "string"
+          },
+          "Name": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "ReplicateTo": {
+           "enum": [
+            "NONE",
+            "SSM_DOCUMENT"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1655,7 +1915,51 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeploymentStrategy"
+         "properties": {
+          "DeploymentDurationInMinutes": {
+           "maximum": 1440,
+           "minimum": 0,
+           "type": "integer"
+          },
+          "Description": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          },
+          "FinalBakeTimeInMinutes": {
+           "maximum": 1440,
+           "minimum": 0,
+           "type": "integer"
+          },
+          "GrowthFactor": {
+           "maximum": 100,
+           "minimum": 1,
+           "type": "number"
+          },
+          "GrowthType": {
+           "enum": [
+            "LINEAR",
+            "EXPONENTIAL"
+           ],
+           "type": "string"
+          },
+          "Id": {
+           "type": "string"
+          },
+          "Name": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "ReplicateTo": {
+           "enum": [
+            "NONE",
+            "SSM_DOCUMENT"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1743,7 +2047,51 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeploymentStrategy"
+         "properties": {
+          "DeploymentDurationInMinutes": {
+           "maximum": 1440,
+           "minimum": 0,
+           "type": "integer"
+          },
+          "Description": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          },
+          "FinalBakeTimeInMinutes": {
+           "maximum": 1440,
+           "minimum": 0,
+           "type": "integer"
+          },
+          "GrowthFactor": {
+           "maximum": 100,
+           "minimum": 1,
+           "type": "number"
+          },
+          "GrowthType": {
+           "enum": [
+            "LINEAR",
+            "EXPONENTIAL"
+           ],
+           "type": "string"
+          },
+          "Id": {
+           "type": "string"
+          },
+          "Name": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "ReplicateTo": {
+           "enum": [
+            "NONE",
+            "SSM_DOCUMENT"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1856,7 +2204,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ResourceTags"
+         "properties": {
+          "Tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },

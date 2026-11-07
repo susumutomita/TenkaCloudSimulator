@@ -73,34 +73,6 @@
     },
     "type": "object"
    },
-   "CreateDetectorResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "detectorId": {
-      "maxLength": 300,
-      "minLength": 1,
-      "type": "string"
-     },
-     "unprocessedDataSources": {
-      "$ref": "#/components/schemas/UnprocessedDataSourcesResult"
-     }
-    },
-    "type": "object"
-   },
-   "CreateFilterResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "name": {
-      "maxLength": 64,
-      "minLength": 3,
-      "type": "string"
-     }
-    },
-    "required": [
-     "name"
-    ],
-    "type": "object"
-   },
    "DNSLogsConfigurationResult": {
     "additionalProperties": false,
     "properties": {
@@ -162,16 +134,6 @@
      "flowLogs",
      "s3Logs"
     ],
-    "type": "object"
-   },
-   "DeleteDetectorResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "DeleteFilterResponse": {
-    "additionalProperties": false,
-    "properties": {},
     "type": "object"
    },
    "DetectorAdditionalConfiguration": {
@@ -343,107 +305,6 @@
     ],
     "type": "object"
    },
-   "GetDetectorResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "createdAt": {
-      "type": "string"
-     },
-     "dataSources": {
-      "$ref": "#/components/schemas/DataSourceConfigurationsResult"
-     },
-     "features": {
-      "items": {
-       "$ref": "#/components/schemas/DetectorFeatureConfigurationResult"
-      },
-      "type": "array"
-     },
-     "findingPublishingFrequency": {
-      "enum": [
-       "FIFTEEN_MINUTES",
-       "ONE_HOUR",
-       "SIX_HOURS"
-      ],
-      "type": "string"
-     },
-     "serviceRole": {
-      "type": "string"
-     },
-     "status": {
-      "enum": [
-       "ENABLED",
-       "DISABLED"
-      ],
-      "maxLength": 300,
-      "minLength": 1,
-      "type": "string"
-     },
-     "tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "type": "string"
-      },
-      "maxProperties": 200,
-      "minProperties": 1,
-      "type": "object"
-     },
-     "updatedAt": {
-      "type": "string"
-     }
-    },
-    "required": [
-     "serviceRole",
-     "status"
-    ],
-    "type": "object"
-   },
-   "GetFilterResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "action": {
-      "enum": [
-       "NOOP",
-       "ARCHIVE"
-      ],
-      "maxLength": 300,
-      "minLength": 1,
-      "type": "string"
-     },
-     "description": {
-      "maxLength": 512,
-      "minLength": 0,
-      "type": "string"
-     },
-     "findingCriteria": {
-      "$ref": "#/components/schemas/FindingCriteria"
-     },
-     "name": {
-      "maxLength": 64,
-      "minLength": 3,
-      "type": "string"
-     },
-     "rank": {
-      "maximum": 100,
-      "minimum": 1,
-      "type": "integer"
-     },
-     "tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "type": "string"
-      },
-      "maxProperties": 200,
-      "minProperties": 1,
-      "type": "object"
-     }
-    },
-    "required": [
-     "name",
-     "action",
-     "findingCriteria"
-    ],
-    "type": "object"
-   },
    "KubernetesAuditLogsConfiguration": {
     "additionalProperties": false,
     "properties": {
@@ -496,65 +357,6 @@
     "required": [
      "auditLogs"
     ],
-    "type": "object"
-   },
-   "ListDetectorsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "detectorIds": {
-      "items": {
-       "maxLength": 300,
-       "minLength": 1,
-       "type": "string"
-      },
-      "maxItems": 50,
-      "minItems": 0,
-      "type": "array"
-     },
-     "nextToken": {
-      "type": "string"
-     }
-    },
-    "required": [
-     "detectorIds"
-    ],
-    "type": "object"
-   },
-   "ListFiltersResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "filterNames": {
-      "items": {
-       "maxLength": 64,
-       "minLength": 3,
-       "type": "string"
-      },
-      "maxItems": 50,
-      "minItems": 0,
-      "type": "array"
-     },
-     "nextToken": {
-      "type": "string"
-     }
-    },
-    "required": [
-     "filterNames"
-    ],
-    "type": "object"
-   },
-   "ListTagsForResourceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "type": "string"
-      },
-      "maxProperties": 200,
-      "minProperties": 1,
-      "type": "object"
-     }
-    },
     "type": "object"
    },
    "MalwareProtectionConfiguration": {
@@ -626,11 +428,6 @@
     },
     "type": "object"
    },
-   "TagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
    "UnprocessedDataSourcesResult": {
     "additionalProperties": false,
     "properties": {
@@ -638,30 +435,6 @@
       "$ref": "#/components/schemas/MalwareProtectionConfigurationResult"
      }
     },
-    "type": "object"
-   },
-   "UntagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UpdateDetectorResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UpdateFilterResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "name": {
-      "maxLength": 64,
-      "minLength": 3,
-      "type": "string"
-     }
-    },
-    "required": [
-     "name"
-    ],
     "type": "object"
    }
   }
@@ -711,7 +484,22 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListDetectorsResponse"
+         "properties": {
+          "detectorIds": {
+           "items": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+           },
+           "maxItems": 50,
+           "minItems": 0,
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -801,7 +589,17 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateDetectorResponse"
+         "properties": {
+          "detectorId": {
+           "maxLength": 300,
+           "minLength": 1,
+           "type": "string"
+          },
+          "unprocessedDataSources": {
+           "$ref": "#/components/schemas/UnprocessedDataSourcesResult"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -855,7 +653,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteDetectorResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -907,7 +706,53 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetDetectorResponse"
+         "properties": {
+          "createdAt": {
+           "type": "string"
+          },
+          "dataSources": {
+           "$ref": "#/components/schemas/DataSourceConfigurationsResult"
+          },
+          "features": {
+           "items": {
+            "$ref": "#/components/schemas/DetectorFeatureConfigurationResult"
+           },
+           "type": "array"
+          },
+          "findingPublishingFrequency": {
+           "enum": [
+            "FIFTEEN_MINUTES",
+            "ONE_HOUR",
+            "SIX_HOURS"
+           ],
+           "type": "string"
+          },
+          "serviceRole": {
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "ENABLED",
+            "DISABLED"
+           ],
+           "maxLength": 300,
+           "minLength": 1,
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 1,
+           "type": "object"
+          },
+          "updatedAt": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -990,7 +835,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateDetectorResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1060,7 +906,22 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListFiltersResponse"
+         "properties": {
+          "filterNames": {
+           "items": {
+            "maxLength": 64,
+            "minLength": 3,
+            "type": "string"
+           },
+           "maxItems": 50,
+           "minItems": 0,
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1168,7 +1029,14 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateFilterResponse"
+         "properties": {
+          "name": {
+           "maxLength": 64,
+           "minLength": 3,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1230,7 +1098,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteFilterResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1290,7 +1159,45 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetFilterResponse"
+         "properties": {
+          "action": {
+           "enum": [
+            "NOOP",
+            "ARCHIVE"
+           ],
+           "maxLength": 300,
+           "minLength": 1,
+           "type": "string"
+          },
+          "description": {
+           "maxLength": 512,
+           "minLength": 0,
+           "type": "string"
+          },
+          "findingCriteria": {
+           "$ref": "#/components/schemas/FindingCriteria"
+          },
+          "name": {
+           "maxLength": 64,
+           "minLength": 3,
+           "type": "string"
+          },
+          "rank": {
+           "maximum": 100,
+           "minimum": 1,
+           "type": "integer"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 1,
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1383,7 +1290,14 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateFilterResponse"
+         "properties": {
+          "name": {
+           "maxLength": 64,
+           "minLength": 3,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1449,7 +1363,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1499,7 +1414,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 1,
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1572,7 +1498,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },

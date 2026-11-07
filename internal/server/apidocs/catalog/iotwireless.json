@@ -1,45 +1,6 @@
 {
  "components": {
   "schemas": {
-   "CreateDestinationResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "Arn": {
-      "type": "string"
-     },
-     "Name": {
-      "maxLength": 128,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "CreateDeviceProfileResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "Arn": {
-      "type": "string"
-     },
-     "Id": {
-      "maxLength": 256,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "CreateServiceProfileResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "Arn": {
-      "type": "string"
-     },
-     "Id": {
-      "maxLength": 256,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
    "DakCertificateMetadata": {
     "additionalProperties": false,
     "properties": {
@@ -65,21 +26,6 @@
     "required": [
      "CertificateId"
     ],
-    "type": "object"
-   },
-   "DeleteDestinationResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "DeleteDeviceProfileResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "DeleteServiceProfileResponse": {
-    "additionalProperties": false,
-    "properties": {},
     "type": "object"
    },
    "Destinations": {
@@ -128,144 +74,6 @@
      "Name": {
       "maxLength": 256,
       "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "GetDestinationResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "Arn": {
-      "type": "string"
-     },
-     "Description": {
-      "maxLength": 2048,
-      "type": "string"
-     },
-     "Expression": {
-      "maxLength": 2048,
-      "type": "string"
-     },
-     "ExpressionType": {
-      "enum": [
-       "RuleName",
-       "MqttTopic"
-      ],
-      "type": "string"
-     },
-     "Name": {
-      "maxLength": 128,
-      "type": "string"
-     },
-     "RoleArn": {
-      "maxLength": 2048,
-      "minLength": 20,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "GetDeviceProfileResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "Arn": {
-      "type": "string"
-     },
-     "Id": {
-      "maxLength": 256,
-      "type": "string"
-     },
-     "LoRaWAN": {
-      "$ref": "#/components/schemas/LoRaWANDeviceProfile"
-     },
-     "Name": {
-      "maxLength": 256,
-      "type": "string"
-     },
-     "Sidewalk": {
-      "$ref": "#/components/schemas/SidewalkGetDeviceProfile"
-     }
-    },
-    "type": "object"
-   },
-   "GetServiceProfileResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "Arn": {
-      "type": "string"
-     },
-     "Id": {
-      "maxLength": 256,
-      "type": "string"
-     },
-     "LoRaWAN": {
-      "$ref": "#/components/schemas/LoRaWANGetServiceProfileInfo"
-     },
-     "Name": {
-      "maxLength": 256,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListDestinationsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "DestinationList": {
-      "items": {
-       "$ref": "#/components/schemas/Destinations"
-      },
-      "type": "array"
-     },
-     "NextToken": {
-      "maxLength": 4096,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListDeviceProfilesResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "DeviceProfileList": {
-      "items": {
-       "$ref": "#/components/schemas/DeviceProfile"
-      },
-      "type": "array"
-     },
-     "NextToken": {
-      "maxLength": 4096,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListServiceProfilesResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "NextToken": {
-      "maxLength": 4096,
-      "type": "string"
-     },
-     "ServiceProfileList": {
-      "items": {
-       "$ref": "#/components/schemas/ServiceProfile"
-      },
-      "type": "array"
-     }
-    },
-    "type": "object"
-   },
-   "ListTagsForResourceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "Tags": {
-      "items": {
-       "$ref": "#/components/schemas/Tag"
-      },
-      "maxItems": 200,
-      "minItems": 0,
-      "type": "array"
      }
     },
     "type": "object"
@@ -575,21 +383,6 @@
      "Value"
     ],
     "type": "object"
-   },
-   "TagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UntagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UpdateDestinationResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
    }
   }
  },
@@ -639,7 +432,19 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListDestinationsResponse"
+         "properties": {
+          "DestinationList": {
+           "items": {
+            "$ref": "#/components/schemas/Destinations"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "maxLength": 4096,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -735,7 +540,16 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateDestinationResponse"
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "Name": {
+           "maxLength": 128,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -788,7 +602,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteDestinationResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -839,7 +654,36 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetDestinationResponse"
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "Description": {
+           "maxLength": 2048,
+           "type": "string"
+          },
+          "Expression": {
+           "maxLength": 2048,
+           "type": "string"
+          },
+          "ExpressionType": {
+           "enum": [
+            "RuleName",
+            "MqttTopic"
+           ],
+           "type": "string"
+          },
+          "Name": {
+           "maxLength": 128,
+           "type": "string"
+          },
+          "RoleArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -921,7 +765,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateDestinationResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -993,7 +838,19 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListDeviceProfilesResponse"
+         "properties": {
+          "DeviceProfileList": {
+           "items": {
+            "$ref": "#/components/schemas/DeviceProfile"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "maxLength": 4096,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1069,7 +926,16 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateDeviceProfileResponse"
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "Id": {
+           "maxLength": 256,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1122,7 +988,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteDeviceProfileResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1173,7 +1040,26 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetDeviceProfileResponse"
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "Id": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "LoRaWAN": {
+           "$ref": "#/components/schemas/LoRaWANDeviceProfile"
+          },
+          "Name": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "Sidewalk": {
+           "$ref": "#/components/schemas/SidewalkGetDeviceProfile"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1234,7 +1120,19 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListServiceProfilesResponse"
+         "properties": {
+          "NextToken": {
+           "maxLength": 4096,
+           "type": "string"
+          },
+          "ServiceProfileList": {
+           "items": {
+            "$ref": "#/components/schemas/ServiceProfile"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1307,7 +1205,16 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateServiceProfileResponse"
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "Id": {
+           "maxLength": 256,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1360,7 +1267,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteServiceProfileResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1411,7 +1319,23 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetServiceProfileResponse"
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "Id": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "LoRaWAN": {
+           "$ref": "#/components/schemas/LoRaWANGetServiceProfileInfo"
+          },
+          "Name": {
+           "maxLength": 256,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1478,7 +1402,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1529,7 +1454,17 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+         "properties": {
+          "Tags": {
+           "items": {
+            "$ref": "#/components/schemas/Tag"
+           },
+           "maxItems": 200,
+           "minItems": 0,
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1602,7 +1537,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },

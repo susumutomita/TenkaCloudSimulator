@@ -17,99 +17,6 @@
     ],
     "type": "object"
    },
-   "CreateClusterOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "type": "string"
-     },
-     "creationTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "deletionProtectionEnabled": {
-      "type": "boolean"
-     },
-     "encryptionDetails": {
-      "$ref": "#/components/schemas/EncryptionDetails"
-     },
-     "endpoint": {
-      "type": "string"
-     },
-     "identifier": {
-      "type": "string"
-     },
-     "multiRegionProperties": {
-      "$ref": "#/components/schemas/MultiRegionProperties"
-     },
-     "status": {
-      "enum": [
-       "CREATING",
-       "ACTIVE",
-       "IDLE",
-       "INACTIVE",
-       "UPDATING",
-       "DELETING",
-       "DELETED",
-       "FAILED",
-       "PENDING_SETUP",
-       "PENDING_DELETE"
-      ],
-      "type": "string"
-     }
-    },
-    "required": [
-     "identifier",
-     "arn",
-     "status",
-     "creationTime",
-     "deletionProtectionEnabled"
-    ],
-    "type": "object"
-   },
-   "DeleteClusterOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "type": "string"
-     },
-     "creationTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "identifier": {
-      "type": "string"
-     },
-     "status": {
-      "enum": [
-       "CREATING",
-       "ACTIVE",
-       "IDLE",
-       "INACTIVE",
-       "UPDATING",
-       "DELETING",
-       "DELETED",
-       "FAILED",
-       "PENDING_SETUP",
-       "PENDING_DELETE"
-      ],
-      "type": "string"
-     }
-    },
-    "required": [
-     "identifier",
-     "arn",
-     "status",
-     "creationTime"
-    ],
-    "type": "object"
-   },
    "EncryptionDetails": {
     "additionalProperties": false,
     "properties": {
@@ -139,103 +46,6 @@
     ],
     "type": "object"
    },
-   "GetClusterOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "type": "string"
-     },
-     "creationTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "deletionProtectionEnabled": {
-      "type": "boolean"
-     },
-     "encryptionDetails": {
-      "$ref": "#/components/schemas/EncryptionDetails"
-     },
-     "endpoint": {
-      "type": "string"
-     },
-     "identifier": {
-      "type": "string"
-     },
-     "multiRegionProperties": {
-      "$ref": "#/components/schemas/MultiRegionProperties"
-     },
-     "status": {
-      "enum": [
-       "CREATING",
-       "ACTIVE",
-       "IDLE",
-       "INACTIVE",
-       "UPDATING",
-       "DELETING",
-       "DELETED",
-       "FAILED",
-       "PENDING_SETUP",
-       "PENDING_DELETE"
-      ],
-      "type": "string"
-     },
-     "tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxProperties": 200,
-      "minProperties": 0,
-      "type": "object"
-     }
-    },
-    "required": [
-     "identifier",
-     "arn",
-     "status",
-     "creationTime",
-     "deletionProtectionEnabled"
-    ],
-    "type": "object"
-   },
-   "ListClustersOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "clusters": {
-      "items": {
-       "$ref": "#/components/schemas/ClusterSummary"
-      },
-      "type": "array"
-     },
-     "nextToken": {
-      "type": "string"
-     }
-    },
-    "required": [
-     "clusters"
-    ],
-    "type": "object"
-   },
-   "ListTagsForResourceOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxProperties": 200,
-      "minProperties": 0,
-      "type": "object"
-     }
-    },
-    "type": "object"
-   },
    "MultiRegionProperties": {
     "additionalProperties": false,
     "properties": {
@@ -251,46 +61,6 @@
       "type": "string"
      }
     },
-    "type": "object"
-   },
-   "UpdateClusterOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "type": "string"
-     },
-     "creationTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "identifier": {
-      "type": "string"
-     },
-     "status": {
-      "enum": [
-       "CREATING",
-       "ACTIVE",
-       "IDLE",
-       "INACTIVE",
-       "UPDATING",
-       "DELETING",
-       "DELETED",
-       "FAILED",
-       "PENDING_SETUP",
-       "PENDING_DELETE"
-      ],
-      "type": "string"
-     }
-    },
-    "required": [
-     "identifier",
-     "arn",
-     "status",
-     "creationTime"
-    ],
     "type": "object"
    }
   }
@@ -340,7 +110,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListClustersOutput"
+         "properties": {
+          "clusters": {
+           "items": {
+            "$ref": "#/components/schemas/ClusterSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -427,7 +208,49 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateClusterOutput"
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "creationTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "deletionProtectionEnabled": {
+           "type": "boolean"
+          },
+          "encryptionDetails": {
+           "$ref": "#/components/schemas/EncryptionDetails"
+          },
+          "endpoint": {
+           "type": "string"
+          },
+          "identifier": {
+           "type": "string"
+          },
+          "multiRegionProperties": {
+           "$ref": "#/components/schemas/MultiRegionProperties"
+          },
+          "status": {
+           "enum": [
+            "CREATING",
+            "ACTIVE",
+            "IDLE",
+            "INACTIVE",
+            "UPDATING",
+            "DELETING",
+            "DELETED",
+            "FAILED",
+            "PENDING_SETUP",
+            "PENDING_DELETE"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -488,7 +311,37 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteClusterOutput"
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "creationTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "identifier": {
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "CREATING",
+            "ACTIVE",
+            "IDLE",
+            "INACTIVE",
+            "UPDATING",
+            "DELETING",
+            "DELETED",
+            "FAILED",
+            "PENDING_SETUP",
+            "PENDING_DELETE"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -538,7 +391,59 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetClusterOutput"
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "creationTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "deletionProtectionEnabled": {
+           "type": "boolean"
+          },
+          "encryptionDetails": {
+           "$ref": "#/components/schemas/EncryptionDetails"
+          },
+          "endpoint": {
+           "type": "string"
+          },
+          "identifier": {
+           "type": "string"
+          },
+          "multiRegionProperties": {
+           "$ref": "#/components/schemas/MultiRegionProperties"
+          },
+          "status": {
+           "enum": [
+            "CREATING",
+            "ACTIVE",
+            "IDLE",
+            "INACTIVE",
+            "UPDATING",
+            "DELETING",
+            "DELETED",
+            "FAILED",
+            "PENDING_SETUP",
+            "PENDING_DELETE"
+           ],
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -615,7 +520,37 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateClusterOutput"
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "creationTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "identifier": {
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "CREATING",
+            "ACTIVE",
+            "IDLE",
+            "INACTIVE",
+            "UPDATING",
+            "DELETING",
+            "DELETED",
+            "FAILED",
+            "PENDING_SETUP",
+            "PENDING_DELETE"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -728,7 +663,19 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceOutput"
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },

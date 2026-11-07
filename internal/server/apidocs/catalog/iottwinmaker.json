@@ -1,264 +1,6 @@
 {
  "components": {
   "schemas": {
-   "CreateSceneResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "maxLength": 2048,
-      "minLength": 20,
-      "type": "string"
-     },
-     "creationDateTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     }
-    },
-    "required": [
-     "arn",
-     "creationDateTime"
-    ],
-    "type": "object"
-   },
-   "CreateWorkspaceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "maxLength": 2048,
-      "minLength": 20,
-      "type": "string"
-     },
-     "creationDateTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     }
-    },
-    "required": [
-     "arn",
-     "creationDateTime"
-    ],
-    "type": "object"
-   },
-   "DeleteSceneResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "DeleteWorkspaceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "message": {
-      "maxLength": 2048,
-      "minLength": 0,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "GetSceneResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "maxLength": 2048,
-      "minLength": 20,
-      "type": "string"
-     },
-     "capabilities": {
-      "items": {
-       "maxLength": 256,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxItems": 50,
-      "minItems": 0,
-      "type": "array"
-     },
-     "contentLocation": {
-      "maxLength": 256,
-      "minLength": 0,
-      "type": "string"
-     },
-     "creationDateTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "description": {
-      "maxLength": 2048,
-      "minLength": 0,
-      "type": "string"
-     },
-     "error": {
-      "$ref": "#/components/schemas/SceneError"
-     },
-     "generatedSceneMetadata": {
-      "additionalProperties": {
-       "maxLength": 2048,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxProperties": 50,
-      "minProperties": 0,
-      "type": "object"
-     },
-     "sceneId": {
-      "maxLength": 128,
-      "minLength": 1,
-      "type": "string"
-     },
-     "sceneMetadata": {
-      "additionalProperties": {
-       "maxLength": 2048,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxProperties": 50,
-      "minProperties": 0,
-      "type": "object"
-     },
-     "updateDateTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "workspaceId": {
-      "maxLength": 128,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "required": [
-     "workspaceId",
-     "sceneId",
-     "contentLocation",
-     "arn",
-     "creationDateTime",
-     "updateDateTime"
-    ],
-    "type": "object"
-   },
-   "GetWorkspaceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "maxLength": 2048,
-      "minLength": 20,
-      "type": "string"
-     },
-     "creationDateTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "description": {
-      "maxLength": 2048,
-      "minLength": 0,
-      "type": "string"
-     },
-     "linkedServices": {
-      "items": {
-       "type": "string"
-      },
-      "type": "array"
-     },
-     "role": {
-      "maxLength": 2048,
-      "minLength": 20,
-      "type": "string"
-     },
-     "s3Location": {
-      "maxLength": 1024,
-      "minLength": 0,
-      "type": "string"
-     },
-     "updateDateTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "workspaceId": {
-      "maxLength": 128,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "required": [
-     "workspaceId",
-     "arn",
-     "creationDateTime",
-     "updateDateTime"
-    ],
-    "type": "object"
-   },
-   "ListScenesResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "nextToken": {
-      "maxLength": 17880,
-      "minLength": 0,
-      "type": "string"
-     },
-     "sceneSummaries": {
-      "items": {
-       "$ref": "#/components/schemas/SceneSummary"
-      },
-      "type": "array"
-     }
-    },
-    "type": "object"
-   },
-   "ListTagsForResourceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "nextToken": {
-      "maxLength": 17880,
-      "minLength": 0,
-      "type": "string"
-     },
-     "tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "minLength": 1,
-       "type": "string"
-      },
-      "maxProperties": 50,
-      "minProperties": 0,
-      "type": "object"
-     }
-    },
-    "type": "object"
-   },
-   "ListWorkspacesResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "nextToken": {
-      "maxLength": 17880,
-      "minLength": 0,
-      "type": "string"
-     },
-     "workspaceSummaries": {
-      "items": {
-       "$ref": "#/components/schemas/WorkspaceSummary"
-      },
-      "type": "array"
-     }
-    },
-    "type": "object"
-   },
    "SceneError": {
     "additionalProperties": false,
     "properties": {
@@ -319,48 +61,6 @@
      "contentLocation",
      "arn",
      "creationDateTime",
-     "updateDateTime"
-    ],
-    "type": "object"
-   },
-   "TagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UntagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UpdateSceneResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "updateDateTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     }
-    },
-    "required": [
-     "updateDateTime"
-    ],
-    "type": "object"
-   },
-   "UpdateWorkspaceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "updateDateTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     }
-    },
-    "required": [
      "updateDateTime"
     ],
     "type": "object"
@@ -466,7 +166,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -538,7 +239,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -611,7 +313,24 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+         "properties": {
+          "nextToken": {
+           "maxLength": 17880,
+           "minLength": 0,
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -676,7 +395,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListWorkspacesResponse"
+         "properties": {
+          "nextToken": {
+           "maxLength": 17880,
+           "minLength": 0,
+           "type": "string"
+          },
+          "workspaceSummaries": {
+           "items": {
+            "$ref": "#/components/schemas/WorkspaceSummary"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -730,7 +462,14 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteWorkspaceResponse"
+         "properties": {
+          "message": {
+           "maxLength": 2048,
+           "minLength": 0,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -782,7 +521,54 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetWorkspaceResponse"
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "creationDateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "description": {
+           "maxLength": 2048,
+           "minLength": 0,
+           "type": "string"
+          },
+          "linkedServices": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "role": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "s3Location": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          },
+          "updateDateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "workspaceId": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -870,7 +656,21 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateWorkspaceResponse"
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "creationDateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -948,7 +748,16 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateWorkspaceResponse"
+         "properties": {
+          "updateDateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1062,7 +871,21 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateSceneResponse"
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "creationDateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1137,7 +960,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListScenesResponse"
+         "properties": {
+          "nextToken": {
+           "maxLength": 17880,
+           "minLength": 0,
+           "type": "string"
+          },
+          "sceneSummaries": {
+           "items": {
+            "$ref": "#/components/schemas/SceneSummary"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1201,7 +1037,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteSceneResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1263,7 +1100,81 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetSceneResponse"
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "capabilities": {
+           "items": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxItems": 50,
+           "minItems": 0,
+           "type": "array"
+          },
+          "contentLocation": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "creationDateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "description": {
+           "maxLength": 2048,
+           "minLength": 0,
+           "type": "string"
+          },
+          "error": {
+           "$ref": "#/components/schemas/SceneError"
+          },
+          "generatedSceneMetadata": {
+           "additionalProperties": {
+            "maxLength": 2048,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "sceneId": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "sceneMetadata": {
+           "additionalProperties": {
+            "maxLength": 2048,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "updateDateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "workspaceId": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1366,7 +1277,16 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateSceneResponse"
+         "properties": {
+          "updateDateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
         }
        }
       },

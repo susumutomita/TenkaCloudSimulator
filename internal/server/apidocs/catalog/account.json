@@ -34,15 +34,6 @@
      }
     },
     "type": "object"
-   },
-   "GetAlternateContactResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "AlternateContact": {
-      "$ref": "#/components/schemas/AlternateContact"
-     }
-    },
-    "type": "object"
    }
   }
  },
@@ -162,7 +153,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetAlternateContactResponse"
+         "properties": {
+          "AlternateContact": {
+           "$ref": "#/components/schemas/AlternateContact"
+          }
+         },
+         "type": "object"
         }
        }
       },

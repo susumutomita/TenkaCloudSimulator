@@ -1,149 +1,6 @@
 {
  "components": {
   "schemas": {
-   "CreateSchemaMappingOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "description": {
-      "maxLength": 255,
-      "minLength": 0,
-      "type": "string"
-     },
-     "mappedInputFields": {
-      "items": {
-       "$ref": "#/components/schemas/SchemaInputAttribute"
-      },
-      "maxItems": 35,
-      "minItems": 2,
-      "type": "array"
-     },
-     "schemaArn": {
-      "type": "string"
-     },
-     "schemaName": {
-      "maxLength": 255,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "required": [
-     "schemaName",
-     "schemaArn",
-     "description",
-     "mappedInputFields"
-    ],
-    "type": "object"
-   },
-   "DeleteSchemaMappingOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "message": {
-      "type": "string"
-     }
-    },
-    "required": [
-     "message"
-    ],
-    "type": "object"
-   },
-   "GetSchemaMappingOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "createdAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "description": {
-      "maxLength": 255,
-      "minLength": 0,
-      "type": "string"
-     },
-     "hasWorkflows": {
-      "type": "boolean"
-     },
-     "mappedInputFields": {
-      "items": {
-       "$ref": "#/components/schemas/SchemaInputAttribute"
-      },
-      "maxItems": 35,
-      "minItems": 2,
-      "type": "array"
-     },
-     "schemaArn": {
-      "type": "string"
-     },
-     "schemaName": {
-      "maxLength": 255,
-      "minLength": 1,
-      "type": "string"
-     },
-     "tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxProperties": 200,
-      "minProperties": 0,
-      "type": "object"
-     },
-     "updatedAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     }
-    },
-    "required": [
-     "schemaName",
-     "schemaArn",
-     "mappedInputFields",
-     "createdAt",
-     "updatedAt",
-     "hasWorkflows"
-    ],
-    "type": "object"
-   },
-   "ListSchemaMappingsOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "nextToken": {
-      "maxLength": 1024,
-      "minLength": 1,
-      "type": "string"
-     },
-     "schemaList": {
-      "items": {
-       "$ref": "#/components/schemas/SchemaMappingSummary"
-      },
-      "type": "array"
-     }
-    },
-    "type": "object"
-   },
-   "ListTagsForResourceOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxProperties": 200,
-      "minProperties": 0,
-      "type": "object"
-     }
-    },
-    "required": [
-     "tags"
-    ],
-    "type": "object"
-   },
    "SchemaInputAttribute": {
     "additionalProperties": false,
     "properties": {
@@ -242,48 +99,6 @@
      "hasWorkflows"
     ],
     "type": "object"
-   },
-   "TagResourceOutput": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UntagResourceOutput": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UpdateSchemaMappingOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "description": {
-      "maxLength": 255,
-      "minLength": 0,
-      "type": "string"
-     },
-     "mappedInputFields": {
-      "items": {
-       "$ref": "#/components/schemas/SchemaInputAttribute"
-      },
-      "maxItems": 35,
-      "minItems": 2,
-      "type": "array"
-     },
-     "schemaArn": {
-      "type": "string"
-     },
-     "schemaName": {
-      "maxLength": 255,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "required": [
-     "schemaName",
-     "schemaArn",
-     "mappedInputFields"
-    ],
-    "type": "object"
    }
   }
  },
@@ -333,7 +148,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListSchemaMappingsOutput"
+         "properties": {
+          "nextToken": {
+           "maxLength": 1024,
+           "minLength": 1,
+           "type": "string"
+          },
+          "schemaList": {
+           "items": {
+            "$ref": "#/components/schemas/SchemaMappingSummary"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -418,7 +246,30 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateSchemaMappingOutput"
+         "properties": {
+          "description": {
+           "maxLength": 255,
+           "minLength": 0,
+           "type": "string"
+          },
+          "mappedInputFields": {
+           "items": {
+            "$ref": "#/components/schemas/SchemaInputAttribute"
+           },
+           "maxItems": 35,
+           "minItems": 2,
+           "type": "array"
+          },
+          "schemaArn": {
+           "type": "string"
+          },
+          "schemaName": {
+           "maxLength": 255,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -472,7 +323,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteSchemaMappingOutput"
+         "properties": {
+          "message": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -524,7 +380,57 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetSchemaMappingOutput"
+         "properties": {
+          "createdAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "description": {
+           "maxLength": 255,
+           "minLength": 0,
+           "type": "string"
+          },
+          "hasWorkflows": {
+           "type": "boolean"
+          },
+          "mappedInputFields": {
+           "items": {
+            "$ref": "#/components/schemas/SchemaInputAttribute"
+           },
+           "maxItems": 35,
+           "minItems": 2,
+           "type": "array"
+          },
+          "schemaArn": {
+           "type": "string"
+          },
+          "schemaName": {
+           "maxLength": 255,
+           "minLength": 1,
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "updatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -603,7 +509,30 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateSchemaMappingOutput"
+         "properties": {
+          "description": {
+           "maxLength": 255,
+           "minLength": 0,
+           "type": "string"
+          },
+          "mappedInputFields": {
+           "items": {
+            "$ref": "#/components/schemas/SchemaInputAttribute"
+           },
+           "maxItems": 35,
+           "minItems": 2,
+           "type": "array"
+          },
+          "schemaArn": {
+           "type": "string"
+          },
+          "schemaName": {
+           "maxLength": 255,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -669,7 +598,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceOutput"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -719,7 +649,19 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceOutput"
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -793,7 +735,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceOutput"
+         "properties": {},
+         "type": "object"
         }
        }
       },

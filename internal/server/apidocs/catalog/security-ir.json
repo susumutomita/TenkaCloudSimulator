@@ -1,155 +1,6 @@
 {
  "components": {
   "schemas": {
-   "CancelMembershipResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "membershipId": {
-      "maxLength": 34,
-      "minLength": 12,
-      "type": "string"
-     }
-    },
-    "required": [
-     "membershipId"
-    ],
-    "type": "object"
-   },
-   "CreateMembershipResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "membershipId": {
-      "maxLength": 34,
-      "minLength": 12,
-      "type": "string"
-     }
-    },
-    "required": [
-     "membershipId"
-    ],
-    "type": "object"
-   },
-   "GetMembershipResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "accountId": {
-      "maxLength": 12,
-      "minLength": 12,
-      "type": "string"
-     },
-     "customerType": {
-      "enum": [
-       "Standalone",
-       "Organization"
-      ],
-      "type": "string"
-     },
-     "incidentResponseTeam": {
-      "items": {
-       "$ref": "#/components/schemas/IncidentResponder"
-      },
-      "maxItems": 10,
-      "minItems": 2,
-      "type": "array"
-     },
-     "membershipAccountsConfigurations": {
-      "$ref": "#/components/schemas/MembershipAccountsConfigurations"
-     },
-     "membershipActivationTimestamp": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "membershipArn": {
-      "maxLength": 80,
-      "minLength": 12,
-      "type": "string"
-     },
-     "membershipDeactivationTimestamp": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "membershipId": {
-      "maxLength": 34,
-      "minLength": 12,
-      "type": "string"
-     },
-     "membershipName": {
-      "maxLength": 50,
-      "minLength": 3,
-      "type": "string"
-     },
-     "membershipStatus": {
-      "enum": [
-       "Active",
-       "Cancelled",
-       "Terminated"
-      ],
-      "type": "string"
-     },
-     "numberOfAccountsCovered": {
-      "type": "integer"
-     },
-     "optInFeatures": {
-      "items": {
-       "$ref": "#/components/schemas/OptInFeature"
-      },
-      "maxItems": 2,
-      "minItems": 1,
-      "type": "array"
-     },
-     "region": {
-      "enum": [
-       "af-south-1",
-       "ap-east-1",
-       "ap-east-2",
-       "ap-northeast-1",
-       "ap-northeast-2",
-       "ap-northeast-3",
-       "ap-south-1",
-       "ap-south-2",
-       "ap-southeast-1",
-       "ap-southeast-2",
-       "ap-southeast-3",
-       "ap-southeast-4",
-       "ap-southeast-5",
-       "ap-southeast-6",
-       "ap-southeast-7",
-       "ca-central-1",
-       "ca-west-1",
-       "cn-north-1",
-       "cn-northwest-1",
-       "eu-central-1",
-       "eu-central-2",
-       "eu-north-1",
-       "eu-south-1",
-       "eu-south-2",
-       "eu-west-1",
-       "eu-west-2",
-       "eu-west-3",
-       "il-central-1",
-       "me-central-1",
-       "me-south-1",
-       "mx-central-1",
-       "sa-east-1",
-       "us-east-1",
-       "us-east-2",
-       "us-west-1",
-       "us-west-2"
-      ],
-      "type": "string"
-     }
-    },
-    "required": [
-     "membershipId"
-    ],
-    "type": "object"
-   },
    "IncidentResponder": {
     "additionalProperties": false,
     "properties": {
@@ -273,40 +124,6 @@
     ],
     "type": "object"
    },
-   "ListMembershipsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "items": {
-      "items": {
-       "$ref": "#/components/schemas/ListMembershipItem"
-      },
-      "type": "array"
-     },
-     "nextToken": {
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListTagsForResourceOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxProperties": 200,
-      "minProperties": 0,
-      "type": "object"
-     }
-    },
-    "required": [
-     "tags"
-    ],
-    "type": "object"
-   },
    "MembershipAccountsConfigurations": {
     "additionalProperties": false,
     "properties": {
@@ -364,21 +181,6 @@
      "featureName",
      "isEnabled"
     ],
-    "type": "object"
-   },
-   "TagResourceOutput": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UntagResourceOutput": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UpdateMembershipResponse": {
-    "additionalProperties": false,
-    "properties": {},
     "type": "object"
    }
   }
@@ -466,7 +268,14 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateMembershipResponse"
+         "properties": {
+          "membershipId": {
+           "maxLength": 34,
+           "minLength": 12,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -520,7 +329,121 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetMembershipResponse"
+         "properties": {
+          "accountId": {
+           "maxLength": 12,
+           "minLength": 12,
+           "type": "string"
+          },
+          "customerType": {
+           "enum": [
+            "Standalone",
+            "Organization"
+           ],
+           "type": "string"
+          },
+          "incidentResponseTeam": {
+           "items": {
+            "$ref": "#/components/schemas/IncidentResponder"
+           },
+           "maxItems": 10,
+           "minItems": 2,
+           "type": "array"
+          },
+          "membershipAccountsConfigurations": {
+           "$ref": "#/components/schemas/MembershipAccountsConfigurations"
+          },
+          "membershipActivationTimestamp": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "membershipArn": {
+           "maxLength": 80,
+           "minLength": 12,
+           "type": "string"
+          },
+          "membershipDeactivationTimestamp": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "membershipId": {
+           "maxLength": 34,
+           "minLength": 12,
+           "type": "string"
+          },
+          "membershipName": {
+           "maxLength": 50,
+           "minLength": 3,
+           "type": "string"
+          },
+          "membershipStatus": {
+           "enum": [
+            "Active",
+            "Cancelled",
+            "Terminated"
+           ],
+           "type": "string"
+          },
+          "numberOfAccountsCovered": {
+           "type": "integer"
+          },
+          "optInFeatures": {
+           "items": {
+            "$ref": "#/components/schemas/OptInFeature"
+           },
+           "maxItems": 2,
+           "minItems": 1,
+           "type": "array"
+          },
+          "region": {
+           "enum": [
+            "af-south-1",
+            "ap-east-1",
+            "ap-east-2",
+            "ap-northeast-1",
+            "ap-northeast-2",
+            "ap-northeast-3",
+            "ap-south-1",
+            "ap-south-2",
+            "ap-southeast-1",
+            "ap-southeast-2",
+            "ap-southeast-3",
+            "ap-southeast-4",
+            "ap-southeast-5",
+            "ap-southeast-6",
+            "ap-southeast-7",
+            "ca-central-1",
+            "ca-west-1",
+            "cn-north-1",
+            "cn-northwest-1",
+            "eu-central-1",
+            "eu-central-2",
+            "eu-north-1",
+            "eu-south-1",
+            "eu-south-2",
+            "eu-west-1",
+            "eu-west-2",
+            "eu-west-3",
+            "il-central-1",
+            "me-central-1",
+            "me-south-1",
+            "mx-central-1",
+            "sa-east-1",
+            "us-east-1",
+            "us-east-2",
+            "us-west-1",
+            "us-west-2"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -572,7 +495,14 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CancelMembershipResponse"
+         "properties": {
+          "membershipId": {
+           "maxLength": 34,
+           "minLength": 12,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -664,7 +594,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateMembershipResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -729,7 +660,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListMembershipsResponse"
+         "properties": {
+          "items": {
+           "items": {
+            "$ref": "#/components/schemas/ListMembershipItem"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -795,7 +737,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceOutput"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -847,7 +790,19 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceOutput"
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -923,7 +878,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceOutput"
+         "properties": {},
+         "type": "object"
         }
        }
       },

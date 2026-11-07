@@ -1,34 +1,6 @@
 {
  "components": {
   "schemas": {
-   "CreateFacetResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "CreateSchemaResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "SchemaArn": {
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "DeleteFacetResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "DeleteSchemaResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "SchemaArn": {
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
    "Facet": {
     "additionalProperties": false,
     "properties": {
@@ -151,47 +123,6 @@
     },
     "type": "object"
    },
-   "GetFacetResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "Facet": {
-      "$ref": "#/components/schemas/Facet"
-     }
-    },
-    "type": "object"
-   },
-   "ListDevelopmentSchemaArnsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "NextToken": {
-      "type": "string"
-     },
-     "SchemaArns": {
-      "items": {
-       "type": "string"
-      },
-      "type": "array"
-     }
-    },
-    "type": "object"
-   },
-   "ListFacetNamesResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "FacetNames": {
-      "items": {
-       "maxLength": 64,
-       "minLength": 1,
-       "type": "string"
-      },
-      "type": "array"
-     },
-     "NextToken": {
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
    "Rule": {
     "additionalProperties": false,
     "properties": {
@@ -237,11 +168,6 @@
       "type": "string"
      }
     },
-    "type": "object"
-   },
-   "UpdateFacetResponse": {
-    "additionalProperties": false,
-    "properties": {},
     "type": "object"
    }
   }
@@ -301,7 +227,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetFacetResponse"
+         "properties": {
+          "Facet": {
+           "$ref": "#/components/schemas/Facet"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -384,7 +315,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateFacetResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -476,7 +408,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateFacetResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -546,7 +479,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteFacetResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -615,7 +549,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListFacetNamesResponse"
+         "properties": {
+          "FacetNames": {
+           "items": {
+            "maxLength": 64,
+            "minLength": 1,
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -666,7 +613,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteSchemaResponse"
+         "properties": {
+          "SchemaArn": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -729,7 +681,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateSchemaResponse"
+         "properties": {
+          "SchemaArn": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -791,7 +748,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListDevelopmentSchemaArnsResponse"
+         "properties": {
+          "NextToken": {
+           "type": "string"
+          },
+          "SchemaArns": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },

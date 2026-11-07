@@ -1,95 +1,6 @@
 {
  "components": {
   "schemas": {
-   "CreateGatewayResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "gatewayArn": {
-      "maxLength": 1600,
-      "minLength": 1,
-      "type": "string"
-     },
-     "gatewayId": {
-      "maxLength": 36,
-      "minLength": 36,
-      "type": "string"
-     }
-    },
-    "required": [
-     "gatewayId",
-     "gatewayArn"
-    ],
-    "type": "object"
-   },
-   "DescribeGatewayResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "creationDate": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "gatewayArn": {
-      "maxLength": 1600,
-      "minLength": 1,
-      "type": "string"
-     },
-     "gatewayCapabilitySummaries": {
-      "items": {
-       "$ref": "#/components/schemas/GatewayCapabilitySummary"
-      },
-      "type": "array"
-     },
-     "gatewayId": {
-      "maxLength": 36,
-      "minLength": 36,
-      "type": "string"
-     },
-     "gatewayName": {
-      "maxLength": 256,
-      "minLength": 1,
-      "type": "string"
-     },
-     "gatewayPlatform": {
-      "$ref": "#/components/schemas/GatewayPlatform"
-     },
-     "gatewayVersion": {
-      "maxLength": 1024,
-      "minLength": 1,
-      "type": "string"
-     },
-     "lastUpdateDate": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     }
-    },
-    "required": [
-     "gatewayId",
-     "gatewayName",
-     "gatewayArn",
-     "gatewayCapabilitySummaries",
-     "creationDate",
-     "lastUpdateDate"
-    ],
-    "type": "object"
-   },
-   "DescribeLoggingOptionsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "loggingOptions": {
-      "$ref": "#/components/schemas/LoggingOptions"
-     }
-    },
-    "required": [
-     "loggingOptions"
-    ],
-    "type": "object"
-   },
    "GatewayCapabilitySummary": {
     "additionalProperties": false,
     "properties": {
@@ -216,42 +127,6 @@
     ],
     "type": "object"
    },
-   "ListGatewaysResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "gatewaySummaries": {
-      "items": {
-       "$ref": "#/components/schemas/GatewaySummary"
-      },
-      "type": "array"
-     },
-     "nextToken": {
-      "maxLength": 4096,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "required": [
-     "gatewaySummaries"
-    ],
-    "type": "object"
-   },
-   "ListTagsForResourceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxProperties": 50,
-      "minProperties": 1,
-      "type": "object"
-     }
-    },
-    "type": "object"
-   },
    "LoggingOptions": {
     "additionalProperties": false,
     "properties": {
@@ -269,11 +144,6 @@
     ],
     "type": "object"
    },
-   "PutLoggingOptionsResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
    "SiemensIE": {
     "additionalProperties": false,
     "properties": {
@@ -286,16 +156,6 @@
     "required": [
      "iotCoreThingName"
     ],
-    "type": "object"
-   },
-   "TagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UntagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
     "type": "object"
    }
   }
@@ -347,7 +207,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListGatewaysResponse"
+         "properties": {
+          "gatewaySummaries": {
+           "items": {
+            "$ref": "#/components/schemas/GatewaySummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 4096,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -427,7 +300,19 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateGatewayResponse"
+         "properties": {
+          "gatewayArn": {
+           "maxLength": 1600,
+           "minLength": 1,
+           "type": "string"
+          },
+          "gatewayId": {
+           "maxLength": 36,
+           "minLength": 36,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -526,7 +411,52 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DescribeGatewayResponse"
+         "properties": {
+          "creationDate": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "gatewayArn": {
+           "maxLength": 1600,
+           "minLength": 1,
+           "type": "string"
+          },
+          "gatewayCapabilitySummaries": {
+           "items": {
+            "$ref": "#/components/schemas/GatewayCapabilitySummary"
+           },
+           "type": "array"
+          },
+          "gatewayId": {
+           "maxLength": 36,
+           "minLength": 36,
+           "type": "string"
+          },
+          "gatewayName": {
+           "maxLength": 256,
+           "minLength": 1,
+           "type": "string"
+          },
+          "gatewayPlatform": {
+           "$ref": "#/components/schemas/GatewayPlatform"
+          },
+          "gatewayVersion": {
+           "maxLength": 1024,
+           "minLength": 1,
+           "type": "string"
+          },
+          "lastUpdateDate": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -634,7 +564,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DescribeLoggingOptionsResponse"
+         "properties": {
+          "loggingOptions": {
+           "$ref": "#/components/schemas/LoggingOptions"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -693,7 +628,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/PutLoggingOptionsResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -760,7 +696,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -811,7 +748,19 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 1,
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -886,7 +835,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },

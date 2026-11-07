@@ -20,120 +20,6 @@
     ],
     "type": "object"
    },
-   "CreateRequesterGatewayResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "domainName": {
-      "maxLength": 255,
-      "minLength": 1,
-      "type": "string"
-     },
-     "gatewayId": {
-      "type": "string"
-     },
-     "status": {
-      "enum": [
-       "PENDING_CREATION",
-       "ACTIVE",
-       "PENDING_DELETION",
-       "DELETED",
-       "ERROR",
-       "PENDING_UPDATE",
-       "ISOLATED",
-       "PENDING_ISOLATION",
-       "PENDING_RESTORATION"
-      ],
-      "type": "string"
-     }
-    },
-    "required": [
-     "gatewayId",
-     "domainName",
-     "status"
-    ],
-    "type": "object"
-   },
-   "CreateResponderGatewayResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "gatewayId": {
-      "type": "string"
-     },
-     "status": {
-      "enum": [
-       "PENDING_CREATION",
-       "ACTIVE",
-       "PENDING_DELETION",
-       "DELETED",
-       "ERROR",
-       "PENDING_UPDATE",
-       "ISOLATED",
-       "PENDING_ISOLATION",
-       "PENDING_RESTORATION"
-      ],
-      "type": "string"
-     }
-    },
-    "required": [
-     "gatewayId",
-     "status"
-    ],
-    "type": "object"
-   },
-   "DeleteRequesterGatewayResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "gatewayId": {
-      "type": "string"
-     },
-     "status": {
-      "enum": [
-       "PENDING_CREATION",
-       "ACTIVE",
-       "PENDING_DELETION",
-       "DELETED",
-       "ERROR",
-       "PENDING_UPDATE",
-       "ISOLATED",
-       "PENDING_ISOLATION",
-       "PENDING_RESTORATION"
-      ],
-      "type": "string"
-     }
-    },
-    "required": [
-     "gatewayId",
-     "status"
-    ],
-    "type": "object"
-   },
-   "DeleteResponderGatewayResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "gatewayId": {
-      "type": "string"
-     },
-     "status": {
-      "enum": [
-       "PENDING_CREATION",
-       "ACTIVE",
-       "PENDING_DELETION",
-       "DELETED",
-       "ERROR",
-       "PENDING_UPDATE",
-       "ISOLATED",
-       "PENDING_ISOLATION",
-       "PENDING_RESTORATION"
-      ],
-      "type": "string"
-     }
-    },
-    "required": [
-     "gatewayId",
-     "status"
-    ],
-    "type": "object"
-   },
    "EksEndpointsConfiguration": {
     "additionalProperties": false,
     "properties": {
@@ -170,240 +56,6 @@
     ],
     "type": "object"
    },
-   "GetRequesterGatewayResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "activeLinksCount": {
-      "type": "integer"
-     },
-     "createdAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "description": {
-      "type": "string"
-     },
-     "domainName": {
-      "maxLength": 255,
-      "minLength": 1,
-      "type": "string"
-     },
-     "gatewayId": {
-      "type": "string"
-     },
-     "securityGroupIds": {
-      "items": {
-       "type": "string"
-      },
-      "minItems": 1,
-      "type": "array"
-     },
-     "status": {
-      "enum": [
-       "PENDING_CREATION",
-       "ACTIVE",
-       "PENDING_DELETION",
-       "DELETED",
-       "ERROR",
-       "PENDING_UPDATE",
-       "ISOLATED",
-       "PENDING_ISOLATION",
-       "PENDING_RESTORATION"
-      ],
-      "type": "string"
-     },
-     "subnetIds": {
-      "items": {
-       "type": "string"
-      },
-      "minItems": 1,
-      "type": "array"
-     },
-     "tags": {
-      "additionalProperties": {
-       "maxLength": 1600,
-       "minLength": 0,
-       "type": "string"
-      },
-      "type": "object"
-     },
-     "totalLinksCount": {
-      "type": "integer"
-     },
-     "updatedAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "vpcId": {
-      "type": "string"
-     }
-    },
-    "required": [
-     "status",
-     "domainName",
-     "vpcId",
-     "subnetIds",
-     "securityGroupIds",
-     "gatewayId"
-    ],
-    "type": "object"
-   },
-   "GetResponderGatewayResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "activeLinksCount": {
-      "type": "integer"
-     },
-     "createdAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "description": {
-      "type": "string"
-     },
-     "domainName": {
-      "maxLength": 255,
-      "minLength": 1,
-      "type": "string"
-     },
-     "gatewayId": {
-      "type": "string"
-     },
-     "inboundLinksCount": {
-      "type": "integer"
-     },
-     "managedEndpointConfiguration": {
-      "$ref": "#/components/schemas/ManagedEndpointConfiguration"
-     },
-     "port": {
-      "maximum": 65535,
-      "minimum": 1,
-      "type": "integer"
-     },
-     "protocol": {
-      "enum": [
-       "HTTP",
-       "HTTPS"
-      ],
-      "type": "string"
-     },
-     "securityGroupIds": {
-      "items": {
-       "type": "string"
-      },
-      "minItems": 1,
-      "type": "array"
-     },
-     "status": {
-      "enum": [
-       "PENDING_CREATION",
-       "ACTIVE",
-       "PENDING_DELETION",
-       "DELETED",
-       "ERROR",
-       "PENDING_UPDATE",
-       "ISOLATED",
-       "PENDING_ISOLATION",
-       "PENDING_RESTORATION"
-      ],
-      "type": "string"
-     },
-     "subnetIds": {
-      "items": {
-       "type": "string"
-      },
-      "minItems": 1,
-      "type": "array"
-     },
-     "tags": {
-      "additionalProperties": {
-       "maxLength": 1600,
-       "minLength": 0,
-       "type": "string"
-      },
-      "type": "object"
-     },
-     "totalLinksCount": {
-      "type": "integer"
-     },
-     "trustStoreConfiguration": {
-      "$ref": "#/components/schemas/TrustStoreConfiguration"
-     },
-     "updatedAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "vpcId": {
-      "type": "string"
-     }
-    },
-    "required": [
-     "vpcId",
-     "subnetIds",
-     "securityGroupIds",
-     "status",
-     "port",
-     "protocol",
-     "gatewayId"
-    ],
-    "type": "object"
-   },
-   "ListRequesterGatewaysResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "gatewayIds": {
-      "items": {
-       "type": "string"
-      },
-      "type": "array"
-     },
-     "nextToken": {
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListResponderGatewaysResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "gatewayIds": {
-      "items": {
-       "type": "string"
-      },
-      "type": "array"
-     },
-     "nextToken": {
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListTagsForResourceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "tags": {
-      "additionalProperties": {
-       "maxLength": 1600,
-       "minLength": 0,
-       "type": "string"
-      },
-      "type": "object"
-     }
-    },
-    "type": "object"
-   },
    "ManagedEndpointConfiguration": {
     "additionalProperties": false,
     "maxProperties": 1,
@@ -416,11 +68,6 @@
       "$ref": "#/components/schemas/EksEndpointsConfiguration"
      }
     },
-    "type": "object"
-   },
-   "TagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
     "type": "object"
    },
    "TrustStoreConfiguration": {
@@ -439,65 +86,6 @@
     },
     "required": [
      "certificateAuthorityCertificates"
-    ],
-    "type": "object"
-   },
-   "UntagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UpdateRequesterGatewayResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "gatewayId": {
-      "type": "string"
-     },
-     "status": {
-      "enum": [
-       "PENDING_CREATION",
-       "ACTIVE",
-       "PENDING_DELETION",
-       "DELETED",
-       "ERROR",
-       "PENDING_UPDATE",
-       "ISOLATED",
-       "PENDING_ISOLATION",
-       "PENDING_RESTORATION"
-      ],
-      "type": "string"
-     }
-    },
-    "required": [
-     "gatewayId",
-     "status"
-    ],
-    "type": "object"
-   },
-   "UpdateResponderGatewayResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "gatewayId": {
-      "type": "string"
-     },
-     "status": {
-      "enum": [
-       "PENDING_CREATION",
-       "ACTIVE",
-       "PENDING_DELETION",
-       "DELETED",
-       "ERROR",
-       "PENDING_UPDATE",
-       "ISOLATED",
-       "PENDING_ISOLATION",
-       "PENDING_RESTORATION"
-      ],
-      "type": "string"
-     }
-    },
-    "required": [
-     "gatewayId",
-     "status"
     ],
     "type": "object"
    }
@@ -580,7 +168,31 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateRequesterGatewayResponse"
+         "properties": {
+          "domainName": {
+           "maxLength": 255,
+           "minLength": 1,
+           "type": "string"
+          },
+          "gatewayId": {
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "PENDING_CREATION",
+            "ACTIVE",
+            "PENDING_DELETION",
+            "DELETED",
+            "ERROR",
+            "PENDING_UPDATE",
+            "ISOLATED",
+            "PENDING_ISOLATION",
+            "PENDING_RESTORATION"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -632,7 +244,26 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteRequesterGatewayResponse"
+         "properties": {
+          "gatewayId": {
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "PENDING_CREATION",
+            "ACTIVE",
+            "PENDING_DELETION",
+            "DELETED",
+            "ERROR",
+            "PENDING_UPDATE",
+            "ISOLATED",
+            "PENDING_ISOLATION",
+            "PENDING_RESTORATION"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -682,7 +313,79 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetRequesterGatewayResponse"
+         "properties": {
+          "activeLinksCount": {
+           "type": "integer"
+          },
+          "createdAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "description": {
+           "type": "string"
+          },
+          "domainName": {
+           "maxLength": 255,
+           "minLength": 1,
+           "type": "string"
+          },
+          "gatewayId": {
+           "type": "string"
+          },
+          "securityGroupIds": {
+           "items": {
+            "type": "string"
+           },
+           "minItems": 1,
+           "type": "array"
+          },
+          "status": {
+           "enum": [
+            "PENDING_CREATION",
+            "ACTIVE",
+            "PENDING_DELETION",
+            "DELETED",
+            "ERROR",
+            "PENDING_UPDATE",
+            "ISOLATED",
+            "PENDING_ISOLATION",
+            "PENDING_RESTORATION"
+           ],
+           "type": "string"
+          },
+          "subnetIds": {
+           "items": {
+            "type": "string"
+           },
+           "minItems": 1,
+           "type": "array"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 1600,
+            "minLength": 0,
+            "type": "string"
+           },
+           "type": "object"
+          },
+          "totalLinksCount": {
+           "type": "integer"
+          },
+          "updatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "vpcId": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -754,7 +457,26 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateRequesterGatewayResponse"
+         "properties": {
+          "gatewayId": {
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "PENDING_CREATION",
+            "ACTIVE",
+            "PENDING_DELETION",
+            "DELETED",
+            "ERROR",
+            "PENDING_UPDATE",
+            "ISOLATED",
+            "PENDING_ISOLATION",
+            "PENDING_RESTORATION"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -814,7 +536,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListRequesterGatewaysResponse"
+         "properties": {
+          "gatewayIds": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -931,7 +664,26 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateResponderGatewayResponse"
+         "properties": {
+          "gatewayId": {
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "PENDING_CREATION",
+            "ACTIVE",
+            "PENDING_DELETION",
+            "DELETED",
+            "ERROR",
+            "PENDING_UPDATE",
+            "ISOLATED",
+            "PENDING_ISOLATION",
+            "PENDING_RESTORATION"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -983,7 +735,26 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteResponderGatewayResponse"
+         "properties": {
+          "gatewayId": {
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "PENDING_CREATION",
+            "ACTIVE",
+            "PENDING_DELETION",
+            "DELETED",
+            "ERROR",
+            "PENDING_UPDATE",
+            "ISOLATED",
+            "PENDING_ISOLATION",
+            "PENDING_RESTORATION"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1033,7 +804,100 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetResponderGatewayResponse"
+         "properties": {
+          "activeLinksCount": {
+           "type": "integer"
+          },
+          "createdAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "description": {
+           "type": "string"
+          },
+          "domainName": {
+           "maxLength": 255,
+           "minLength": 1,
+           "type": "string"
+          },
+          "gatewayId": {
+           "type": "string"
+          },
+          "inboundLinksCount": {
+           "type": "integer"
+          },
+          "managedEndpointConfiguration": {
+           "$ref": "#/components/schemas/ManagedEndpointConfiguration"
+          },
+          "port": {
+           "maximum": 65535,
+           "minimum": 1,
+           "type": "integer"
+          },
+          "protocol": {
+           "enum": [
+            "HTTP",
+            "HTTPS"
+           ],
+           "type": "string"
+          },
+          "securityGroupIds": {
+           "items": {
+            "type": "string"
+           },
+           "minItems": 1,
+           "type": "array"
+          },
+          "status": {
+           "enum": [
+            "PENDING_CREATION",
+            "ACTIVE",
+            "PENDING_DELETION",
+            "DELETED",
+            "ERROR",
+            "PENDING_UPDATE",
+            "ISOLATED",
+            "PENDING_ISOLATION",
+            "PENDING_RESTORATION"
+           ],
+           "type": "string"
+          },
+          "subnetIds": {
+           "items": {
+            "type": "string"
+           },
+           "minItems": 1,
+           "type": "array"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 1600,
+            "minLength": 0,
+            "type": "string"
+           },
+           "type": "object"
+          },
+          "totalLinksCount": {
+           "type": "integer"
+          },
+          "trustStoreConfiguration": {
+           "$ref": "#/components/schemas/TrustStoreConfiguration"
+          },
+          "updatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "vpcId": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1130,7 +994,26 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateResponderGatewayResponse"
+         "properties": {
+          "gatewayId": {
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "PENDING_CREATION",
+            "ACTIVE",
+            "PENDING_DELETION",
+            "DELETED",
+            "ERROR",
+            "PENDING_UPDATE",
+            "ISOLATED",
+            "PENDING_ISOLATION",
+            "PENDING_RESTORATION"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1190,7 +1073,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListResponderGatewaysResponse"
+         "properties": {
+          "gatewayIds": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1258,7 +1152,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1310,7 +1205,17 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 1600,
+            "minLength": 0,
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1384,7 +1289,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },

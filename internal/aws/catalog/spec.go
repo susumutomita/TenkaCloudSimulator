@@ -25,6 +25,11 @@ const (
 // rendered when the official list output is a list of strings.
 type Op struct {
 	Name string
+	// Merged runs on the merged stored document of an update before it is
+	// committed. It may normalize the document (for example drop settings a
+	// type transition makes inapplicable) and refuses invalid combinations
+	// that a Check on the request alone cannot see.
+	Merged func(document map[string]any) error
 	// Action is the documented IAM action when it differs from the
 	// operation name (for example budgets:ModifyBudget for CreateBudget).
 	Action    string

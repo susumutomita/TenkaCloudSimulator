@@ -1,146 +1,6 @@
 {
  "components": {
   "schemas": {
-   "CreateGeofenceCollectionResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "CollectionArn": {
-      "maxLength": 1600,
-      "minLength": 0,
-      "type": "string"
-     },
-     "CollectionName": {
-      "maxLength": 100,
-      "minLength": 1,
-      "type": "string"
-     },
-     "CreateTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     }
-    },
-    "required": [
-     "CollectionName",
-     "CollectionArn",
-     "CreateTime"
-    ],
-    "type": "object"
-   },
-   "CreateMapResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "CreateTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "MapArn": {
-      "maxLength": 1600,
-      "minLength": 0,
-      "type": "string"
-     },
-     "MapName": {
-      "maxLength": 100,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "required": [
-     "MapName",
-     "MapArn",
-     "CreateTime"
-    ],
-    "type": "object"
-   },
-   "CreatePlaceIndexResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "CreateTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "IndexArn": {
-      "maxLength": 1600,
-      "minLength": 0,
-      "type": "string"
-     },
-     "IndexName": {
-      "maxLength": 100,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "required": [
-     "IndexName",
-     "IndexArn",
-     "CreateTime"
-    ],
-    "type": "object"
-   },
-   "CreateRouteCalculatorResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "CalculatorArn": {
-      "maxLength": 1600,
-      "minLength": 0,
-      "type": "string"
-     },
-     "CalculatorName": {
-      "maxLength": 100,
-      "minLength": 1,
-      "type": "string"
-     },
-     "CreateTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     }
-    },
-    "required": [
-     "CalculatorName",
-     "CalculatorArn",
-     "CreateTime"
-    ],
-    "type": "object"
-   },
-   "CreateTrackerResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "CreateTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "TrackerArn": {
-      "maxLength": 1600,
-      "minLength": 0,
-      "type": "string"
-     },
-     "TrackerName": {
-      "maxLength": 100,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "required": [
-     "TrackerName",
-     "TrackerArn",
-     "CreateTime"
-    ],
-    "type": "object"
-   },
    "DataSourceConfiguration": {
     "additionalProperties": false,
     "properties": {
@@ -152,405 +12,6 @@
       "type": "string"
      }
     },
-    "type": "object"
-   },
-   "DeleteGeofenceCollectionResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "DeleteMapResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "DeletePlaceIndexResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "DeleteRouteCalculatorResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "DeleteTrackerResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "DescribeGeofenceCollectionResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "CollectionArn": {
-      "maxLength": 1600,
-      "minLength": 0,
-      "type": "string"
-     },
-     "CollectionName": {
-      "maxLength": 100,
-      "minLength": 1,
-      "type": "string"
-     },
-     "CreateTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "Description": {
-      "maxLength": 1000,
-      "minLength": 0,
-      "type": "string"
-     },
-     "GeofenceCount": {
-      "minimum": 0,
-      "type": "integer"
-     },
-     "KmsKeyId": {
-      "maxLength": 2048,
-      "minLength": 1,
-      "type": "string"
-     },
-     "PricingPlan": {
-      "enum": [
-       "RequestBasedUsage",
-       "MobileAssetTracking",
-       "MobileAssetManagement"
-      ],
-      "type": "string"
-     },
-     "PricingPlanDataSource": {
-      "type": "string"
-     },
-     "Tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxProperties": 50,
-      "minProperties": 0,
-      "type": "object"
-     },
-     "UpdateTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     }
-    },
-    "required": [
-     "CollectionName",
-     "CollectionArn",
-     "Description",
-     "CreateTime",
-     "UpdateTime"
-    ],
-    "type": "object"
-   },
-   "DescribeMapResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "Configuration": {
-      "$ref": "#/components/schemas/MapConfiguration"
-     },
-     "CreateTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "DataSource": {
-      "type": "string"
-     },
-     "Description": {
-      "maxLength": 1000,
-      "minLength": 0,
-      "type": "string"
-     },
-     "MapArn": {
-      "maxLength": 1600,
-      "minLength": 0,
-      "type": "string"
-     },
-     "MapName": {
-      "maxLength": 100,
-      "minLength": 1,
-      "type": "string"
-     },
-     "PricingPlan": {
-      "enum": [
-       "RequestBasedUsage",
-       "MobileAssetTracking",
-       "MobileAssetManagement"
-      ],
-      "type": "string"
-     },
-     "Tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxProperties": 50,
-      "minProperties": 0,
-      "type": "object"
-     },
-     "UpdateTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     }
-    },
-    "required": [
-     "MapName",
-     "MapArn",
-     "DataSource",
-     "Configuration",
-     "Description",
-     "CreateTime",
-     "UpdateTime"
-    ],
-    "type": "object"
-   },
-   "DescribePlaceIndexResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "CreateTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "DataSource": {
-      "type": "string"
-     },
-     "DataSourceConfiguration": {
-      "$ref": "#/components/schemas/DataSourceConfiguration"
-     },
-     "Description": {
-      "maxLength": 1000,
-      "minLength": 0,
-      "type": "string"
-     },
-     "IndexArn": {
-      "maxLength": 1600,
-      "minLength": 0,
-      "type": "string"
-     },
-     "IndexName": {
-      "maxLength": 100,
-      "minLength": 1,
-      "type": "string"
-     },
-     "PricingPlan": {
-      "enum": [
-       "RequestBasedUsage",
-       "MobileAssetTracking",
-       "MobileAssetManagement"
-      ],
-      "type": "string"
-     },
-     "Tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxProperties": 50,
-      "minProperties": 0,
-      "type": "object"
-     },
-     "UpdateTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     }
-    },
-    "required": [
-     "IndexName",
-     "IndexArn",
-     "Description",
-     "CreateTime",
-     "UpdateTime",
-     "DataSource",
-     "DataSourceConfiguration"
-    ],
-    "type": "object"
-   },
-   "DescribeRouteCalculatorResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "CalculatorArn": {
-      "maxLength": 1600,
-      "minLength": 0,
-      "type": "string"
-     },
-     "CalculatorName": {
-      "maxLength": 100,
-      "minLength": 1,
-      "type": "string"
-     },
-     "CreateTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "DataSource": {
-      "type": "string"
-     },
-     "Description": {
-      "maxLength": 1000,
-      "minLength": 0,
-      "type": "string"
-     },
-     "PricingPlan": {
-      "enum": [
-       "RequestBasedUsage",
-       "MobileAssetTracking",
-       "MobileAssetManagement"
-      ],
-      "type": "string"
-     },
-     "Tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxProperties": 50,
-      "minProperties": 0,
-      "type": "object"
-     },
-     "UpdateTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     }
-    },
-    "required": [
-     "CalculatorName",
-     "CalculatorArn",
-     "Description",
-     "CreateTime",
-     "UpdateTime",
-     "DataSource"
-    ],
-    "type": "object"
-   },
-   "DescribeTrackerResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "CreateTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "Description": {
-      "maxLength": 1000,
-      "minLength": 0,
-      "type": "string"
-     },
-     "EventBridgeEnabled": {
-      "type": "boolean"
-     },
-     "KmsKeyEnableGeospatialQueries": {
-      "type": "boolean"
-     },
-     "KmsKeyId": {
-      "maxLength": 2048,
-      "minLength": 1,
-      "type": "string"
-     },
-     "PositionFiltering": {
-      "enum": [
-       "TimeBased",
-       "DistanceBased",
-       "AccuracyBased"
-      ],
-      "type": "string"
-     },
-     "PricingPlan": {
-      "enum": [
-       "RequestBasedUsage",
-       "MobileAssetTracking",
-       "MobileAssetManagement"
-      ],
-      "type": "string"
-     },
-     "PricingPlanDataSource": {
-      "type": "string"
-     },
-     "Tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxProperties": 50,
-      "minProperties": 0,
-      "type": "object"
-     },
-     "TrackerArn": {
-      "maxLength": 1600,
-      "minLength": 0,
-      "type": "string"
-     },
-     "TrackerName": {
-      "maxLength": 100,
-      "minLength": 1,
-      "type": "string"
-     },
-     "UpdateTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     }
-    },
-    "required": [
-     "TrackerName",
-     "TrackerArn",
-     "Description",
-     "CreateTime",
-     "UpdateTime"
-    ],
-    "type": "object"
-   },
-   "ListGeofenceCollectionsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "Entries": {
-      "items": {
-       "$ref": "#/components/schemas/ListGeofenceCollectionsResponseEntry"
-      },
-      "type": "array"
-     },
-     "NextToken": {
-      "maxLength": 2000,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "required": [
-     "Entries"
-    ],
     "type": "object"
    },
    "ListGeofenceCollectionsResponseEntry": {
@@ -597,26 +58,6 @@
      "Description",
      "CreateTime",
      "UpdateTime"
-    ],
-    "type": "object"
-   },
-   "ListMapsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "Entries": {
-      "items": {
-       "$ref": "#/components/schemas/ListMapsResponseEntry"
-      },
-      "type": "array"
-     },
-     "NextToken": {
-      "maxLength": 2000,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "required": [
-     "Entries"
     ],
     "type": "object"
    },
@@ -668,26 +109,6 @@
     ],
     "type": "object"
    },
-   "ListPlaceIndexesResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "Entries": {
-      "items": {
-       "$ref": "#/components/schemas/ListPlaceIndexesResponseEntry"
-      },
-      "type": "array"
-     },
-     "NextToken": {
-      "maxLength": 2000,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "required": [
-     "Entries"
-    ],
-    "type": "object"
-   },
    "ListPlaceIndexesResponseEntry": {
     "additionalProperties": false,
     "properties": {
@@ -736,26 +157,6 @@
     ],
     "type": "object"
    },
-   "ListRouteCalculatorsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "Entries": {
-      "items": {
-       "$ref": "#/components/schemas/ListRouteCalculatorsResponseEntry"
-      },
-      "type": "array"
-     },
-     "NextToken": {
-      "maxLength": 2000,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "required": [
-     "Entries"
-    ],
-    "type": "object"
-   },
    "ListRouteCalculatorsResponseEntry": {
     "additionalProperties": false,
     "properties": {
@@ -801,42 +202,6 @@
      "DataSource",
      "CreateTime",
      "UpdateTime"
-    ],
-    "type": "object"
-   },
-   "ListTagsForResourceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "Tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxProperties": 50,
-      "minProperties": 0,
-      "type": "object"
-     }
-    },
-    "type": "object"
-   },
-   "ListTrackersResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "Entries": {
-      "items": {
-       "$ref": "#/components/schemas/ListTrackersResponseEntry"
-      },
-      "type": "array"
-     },
-     "NextToken": {
-      "maxLength": 2000,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "required": [
-     "Entries"
     ],
     "type": "object"
    },
@@ -936,156 +301,6 @@
      }
     },
     "type": "object"
-   },
-   "TagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UntagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UpdateGeofenceCollectionResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "CollectionArn": {
-      "maxLength": 1600,
-      "minLength": 0,
-      "type": "string"
-     },
-     "CollectionName": {
-      "maxLength": 100,
-      "minLength": 1,
-      "type": "string"
-     },
-     "UpdateTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     }
-    },
-    "required": [
-     "CollectionName",
-     "CollectionArn",
-     "UpdateTime"
-    ],
-    "type": "object"
-   },
-   "UpdateMapResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "MapArn": {
-      "maxLength": 1600,
-      "minLength": 0,
-      "type": "string"
-     },
-     "MapName": {
-      "maxLength": 100,
-      "minLength": 1,
-      "type": "string"
-     },
-     "UpdateTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     }
-    },
-    "required": [
-     "MapName",
-     "MapArn",
-     "UpdateTime"
-    ],
-    "type": "object"
-   },
-   "UpdatePlaceIndexResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "IndexArn": {
-      "maxLength": 1600,
-      "minLength": 0,
-      "type": "string"
-     },
-     "IndexName": {
-      "maxLength": 100,
-      "minLength": 1,
-      "type": "string"
-     },
-     "UpdateTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     }
-    },
-    "required": [
-     "IndexName",
-     "IndexArn",
-     "UpdateTime"
-    ],
-    "type": "object"
-   },
-   "UpdateRouteCalculatorResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "CalculatorArn": {
-      "maxLength": 1600,
-      "minLength": 0,
-      "type": "string"
-     },
-     "CalculatorName": {
-      "maxLength": 100,
-      "minLength": 1,
-      "type": "string"
-     },
-     "UpdateTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     }
-    },
-    "required": [
-     "CalculatorName",
-     "CalculatorArn",
-     "UpdateTime"
-    ],
-    "type": "object"
-   },
-   "UpdateTrackerResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "TrackerArn": {
-      "maxLength": 1600,
-      "minLength": 0,
-      "type": "string"
-     },
-     "TrackerName": {
-      "maxLength": 100,
-      "minLength": 1,
-      "type": "string"
-     },
-     "UpdateTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     }
-    },
-    "required": [
-     "TrackerName",
-     "TrackerArn",
-     "UpdateTime"
-    ],
-    "type": "object"
    }
   }
  },
@@ -1168,7 +383,26 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateGeofenceCollectionResponse"
+         "properties": {
+          "CollectionArn": {
+           "maxLength": 1600,
+           "minLength": 0,
+           "type": "string"
+          },
+          "CollectionName": {
+           "maxLength": 100,
+           "minLength": 1,
+           "type": "string"
+          },
+          "CreateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1222,7 +456,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteGeofenceCollectionResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1274,7 +509,68 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DescribeGeofenceCollectionResponse"
+         "properties": {
+          "CollectionArn": {
+           "maxLength": 1600,
+           "minLength": 0,
+           "type": "string"
+          },
+          "CollectionName": {
+           "maxLength": 100,
+           "minLength": 1,
+           "type": "string"
+          },
+          "CreateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "Description": {
+           "maxLength": 1000,
+           "minLength": 0,
+           "type": "string"
+          },
+          "GeofenceCount": {
+           "minimum": 0,
+           "type": "integer"
+          },
+          "KmsKeyId": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          },
+          "PricingPlan": {
+           "enum": [
+            "RequestBasedUsage",
+            "MobileAssetTracking",
+            "MobileAssetManagement"
+           ],
+           "type": "string"
+          },
+          "PricingPlanDataSource": {
+           "type": "string"
+          },
+          "Tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "UpdateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1353,7 +649,26 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateGeofenceCollectionResponse"
+         "properties": {
+          "CollectionArn": {
+           "maxLength": 1600,
+           "minLength": 0,
+           "type": "string"
+          },
+          "CollectionName": {
+           "maxLength": 100,
+           "minLength": 1,
+           "type": "string"
+          },
+          "UpdateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1418,7 +733,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListGeofenceCollectionsResponse"
+         "properties": {
+          "Entries": {
+           "items": {
+            "$ref": "#/components/schemas/ListGeofenceCollectionsResponseEntry"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "maxLength": 2000,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1483,7 +811,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListMapsResponse"
+         "properties": {
+          "Entries": {
+           "items": {
+            "$ref": "#/components/schemas/ListMapsResponseEntry"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "maxLength": 2000,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1573,7 +914,26 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateMapResponse"
+         "properties": {
+          "CreateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "MapArn": {
+           "maxLength": 1600,
+           "minLength": 0,
+           "type": "string"
+          },
+          "MapName": {
+           "maxLength": 100,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1627,7 +987,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteMapResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1679,7 +1040,62 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DescribeMapResponse"
+         "properties": {
+          "Configuration": {
+           "$ref": "#/components/schemas/MapConfiguration"
+          },
+          "CreateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "DataSource": {
+           "type": "string"
+          },
+          "Description": {
+           "maxLength": 1000,
+           "minLength": 0,
+           "type": "string"
+          },
+          "MapArn": {
+           "maxLength": 1600,
+           "minLength": 0,
+           "type": "string"
+          },
+          "MapName": {
+           "maxLength": 100,
+           "minLength": 1,
+           "type": "string"
+          },
+          "PricingPlan": {
+           "enum": [
+            "RequestBasedUsage",
+            "MobileAssetTracking",
+            "MobileAssetManagement"
+           ],
+           "type": "string"
+          },
+          "Tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "UpdateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1758,7 +1174,26 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateMapResponse"
+         "properties": {
+          "MapArn": {
+           "maxLength": 1600,
+           "minLength": 0,
+           "type": "string"
+          },
+          "MapName": {
+           "maxLength": 100,
+           "minLength": 1,
+           "type": "string"
+          },
+          "UpdateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1851,7 +1286,26 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreatePlaceIndexResponse"
+         "properties": {
+          "CreateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "IndexArn": {
+           "maxLength": 1600,
+           "minLength": 0,
+           "type": "string"
+          },
+          "IndexName": {
+           "maxLength": 100,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1905,7 +1359,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeletePlaceIndexResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1957,7 +1412,62 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DescribePlaceIndexResponse"
+         "properties": {
+          "CreateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "DataSource": {
+           "type": "string"
+          },
+          "DataSourceConfiguration": {
+           "$ref": "#/components/schemas/DataSourceConfiguration"
+          },
+          "Description": {
+           "maxLength": 1000,
+           "minLength": 0,
+           "type": "string"
+          },
+          "IndexArn": {
+           "maxLength": 1600,
+           "minLength": 0,
+           "type": "string"
+          },
+          "IndexName": {
+           "maxLength": 100,
+           "minLength": 1,
+           "type": "string"
+          },
+          "PricingPlan": {
+           "enum": [
+            "RequestBasedUsage",
+            "MobileAssetTracking",
+            "MobileAssetManagement"
+           ],
+           "type": "string"
+          },
+          "Tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "UpdateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2036,7 +1546,26 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdatePlaceIndexResponse"
+         "properties": {
+          "IndexArn": {
+           "maxLength": 1600,
+           "minLength": 0,
+           "type": "string"
+          },
+          "IndexName": {
+           "maxLength": 100,
+           "minLength": 1,
+           "type": "string"
+          },
+          "UpdateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2101,7 +1630,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListPlaceIndexesResponse"
+         "properties": {
+          "Entries": {
+           "items": {
+            "$ref": "#/components/schemas/ListPlaceIndexesResponseEntry"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "maxLength": 2000,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2191,7 +1733,26 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateRouteCalculatorResponse"
+         "properties": {
+          "CalculatorArn": {
+           "maxLength": 1600,
+           "minLength": 0,
+           "type": "string"
+          },
+          "CalculatorName": {
+           "maxLength": 100,
+           "minLength": 1,
+           "type": "string"
+          },
+          "CreateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2245,7 +1806,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteRouteCalculatorResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -2297,7 +1859,59 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DescribeRouteCalculatorResponse"
+         "properties": {
+          "CalculatorArn": {
+           "maxLength": 1600,
+           "minLength": 0,
+           "type": "string"
+          },
+          "CalculatorName": {
+           "maxLength": 100,
+           "minLength": 1,
+           "type": "string"
+          },
+          "CreateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "DataSource": {
+           "type": "string"
+          },
+          "Description": {
+           "maxLength": 1000,
+           "minLength": 0,
+           "type": "string"
+          },
+          "PricingPlan": {
+           "enum": [
+            "RequestBasedUsage",
+            "MobileAssetTracking",
+            "MobileAssetManagement"
+           ],
+           "type": "string"
+          },
+          "Tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "UpdateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2373,7 +1987,26 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateRouteCalculatorResponse"
+         "properties": {
+          "CalculatorArn": {
+           "maxLength": 1600,
+           "minLength": 0,
+           "type": "string"
+          },
+          "CalculatorName": {
+           "maxLength": 100,
+           "minLength": 1,
+           "type": "string"
+          },
+          "UpdateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2438,7 +2071,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListRouteCalculatorsResponse"
+         "properties": {
+          "Entries": {
+           "items": {
+            "$ref": "#/components/schemas/ListRouteCalculatorsResponseEntry"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "maxLength": 2000,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2504,7 +2150,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -2556,7 +2203,19 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+         "properties": {
+          "Tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2632,7 +2291,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -2697,7 +2357,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTrackersResponse"
+         "properties": {
+          "Entries": {
+           "items": {
+            "$ref": "#/components/schemas/ListTrackersResponseEntry"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "maxLength": 2000,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2805,7 +2478,26 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateTrackerResponse"
+         "properties": {
+          "CreateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "TrackerArn": {
+           "maxLength": 1600,
+           "minLength": 0,
+           "type": "string"
+          },
+          "TrackerName": {
+           "maxLength": 100,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2859,7 +2551,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteTrackerResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -2911,7 +2604,78 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DescribeTrackerResponse"
+         "properties": {
+          "CreateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "Description": {
+           "maxLength": 1000,
+           "minLength": 0,
+           "type": "string"
+          },
+          "EventBridgeEnabled": {
+           "type": "boolean"
+          },
+          "KmsKeyEnableGeospatialQueries": {
+           "type": "boolean"
+          },
+          "KmsKeyId": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          },
+          "PositionFiltering": {
+           "enum": [
+            "TimeBased",
+            "DistanceBased",
+            "AccuracyBased"
+           ],
+           "type": "string"
+          },
+          "PricingPlan": {
+           "enum": [
+            "RequestBasedUsage",
+            "MobileAssetTracking",
+            "MobileAssetManagement"
+           ],
+           "type": "string"
+          },
+          "PricingPlanDataSource": {
+           "type": "string"
+          },
+          "Tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "TrackerArn": {
+           "maxLength": 1600,
+           "minLength": 0,
+           "type": "string"
+          },
+          "TrackerName": {
+           "maxLength": 100,
+           "minLength": 1,
+           "type": "string"
+          },
+          "UpdateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -3004,7 +2768,26 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateTrackerResponse"
+         "properties": {
+          "TrackerArn": {
+           "maxLength": 1600,
+           "minLength": 0,
+           "type": "string"
+          },
+          "TrackerName": {
+           "maxLength": 100,
+           "minLength": 1,
+           "type": "string"
+          },
+          "UpdateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
         }
        }
       },

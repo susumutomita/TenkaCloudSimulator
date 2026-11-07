@@ -1,37 +1,6 @@
 {
  "components": {
-  "schemas": {
-   "AssociateServiceRoleToAccountResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "AssociatedAt": {
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "DisassociateServiceRoleFromAccountResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "DisassociatedAt": {
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "GetServiceRoleForAccountResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "AssociatedAt": {
-      "type": "string"
-     },
-     "RoleArn": {
-      "type": "string"
-     }
-    },
-    "type": "object"
-   }
-  }
+  "schemas": {}
  },
  "info": {
   "description": "Bounded simulator subset of the official AWS IoT Greengrass V2 API (2020-11-30). Every other official operation returns HTTP 501 UnknownOperationException. Only the Regional Greengrass service role association is implemented. The role is stored without checking that it exists or carries AWSGreengrassResourceAccessRolePolicy, and nothing assumes it. Components, deployments, core devices, client devices and connectivity information return UnknownOperationException with HTTP 501: deployments and core devices would reach devices, and component version ARNs combine the recipe's name and version, which the simulator does not derive. Disassociating when no role is associated fails with ResourceNotFoundException (HTTP 404) instead of succeeding.",
@@ -62,7 +31,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DisassociateServiceRoleFromAccountResponse"
+         "properties": {
+          "DisassociatedAt": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -104,7 +78,15 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetServiceRoleForAccountResponse"
+         "properties": {
+          "AssociatedAt": {
+           "type": "string"
+          },
+          "RoleArn": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -163,7 +145,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/AssociateServiceRoleToAccountResponse"
+         "properties": {
+          "AssociatedAt": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },

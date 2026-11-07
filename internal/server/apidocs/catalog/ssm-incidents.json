@@ -33,25 +33,6 @@
     },
     "type": "object"
    },
-   "CreateResponsePlanOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "maxLength": 1000,
-      "minLength": 0,
-      "type": "string"
-     }
-    },
-    "required": [
-     "arn"
-    ],
-    "type": "object"
-   },
-   "DeleteResponsePlanOutput": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
    "DynamicSsmParameterValue": {
     "additionalProperties": false,
     "maxProperties": 1,
@@ -70,64 +51,6 @@
    "EmptyChatChannel": {
     "additionalProperties": false,
     "properties": {},
-    "type": "object"
-   },
-   "GetResponsePlanOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "actions": {
-      "items": {
-       "$ref": "#/components/schemas/Action"
-      },
-      "maxItems": 1,
-      "minItems": 0,
-      "type": "array"
-     },
-     "arn": {
-      "maxLength": 1000,
-      "minLength": 0,
-      "type": "string"
-     },
-     "chatChannel": {
-      "$ref": "#/components/schemas/ChatChannel"
-     },
-     "displayName": {
-      "maxLength": 200,
-      "minLength": 0,
-      "type": "string"
-     },
-     "engagements": {
-      "items": {
-       "maxLength": 2048,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxItems": 5,
-      "minItems": 0,
-      "type": "array"
-     },
-     "incidentTemplate": {
-      "$ref": "#/components/schemas/IncidentTemplate"
-     },
-     "integrations": {
-      "items": {
-       "$ref": "#/components/schemas/Integration"
-      },
-      "maxItems": 1,
-      "minItems": 0,
-      "type": "array"
-     },
-     "name": {
-      "maxLength": 200,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "required": [
-     "arn",
-     "incidentTemplate",
-     "name"
-    ],
     "type": "object"
    },
    "IncidentTemplate": {
@@ -187,47 +110,6 @@
       "$ref": "#/components/schemas/PagerDutyConfiguration"
      }
     },
-    "type": "object"
-   },
-   "ListResponsePlansOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "nextToken": {
-      "maxLength": 2000,
-      "minLength": 0,
-      "type": "string"
-     },
-     "responsePlanSummaries": {
-      "items": {
-       "$ref": "#/components/schemas/ResponsePlanSummary"
-      },
-      "maxItems": 100,
-      "minItems": 0,
-      "type": "array"
-     }
-    },
-    "required": [
-     "responsePlanSummaries"
-    ],
-    "type": "object"
-   },
-   "ListTagsForResourceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxProperties": 50,
-      "minProperties": 1,
-      "type": "object"
-     }
-    },
-    "required": [
-     "tags"
-    ],
     "type": "object"
    },
    "NotificationTargetItem": {
@@ -358,21 +240,6 @@
      "roleArn"
     ],
     "type": "object"
-   },
-   "TagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UntagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UpdateResponsePlanOutput": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
    }
   }
  },
@@ -477,7 +344,14 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateResponsePlanOutput"
+         "properties": {
+          "arn": {
+           "maxLength": 1000,
+           "minLength": 0,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -540,7 +414,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteResponsePlanOutput"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -593,7 +468,56 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetResponsePlanOutput"
+         "properties": {
+          "actions": {
+           "items": {
+            "$ref": "#/components/schemas/Action"
+           },
+           "maxItems": 1,
+           "minItems": 0,
+           "type": "array"
+          },
+          "arn": {
+           "maxLength": 1000,
+           "minLength": 0,
+           "type": "string"
+          },
+          "chatChannel": {
+           "$ref": "#/components/schemas/ChatChannel"
+          },
+          "displayName": {
+           "maxLength": 200,
+           "minLength": 0,
+           "type": "string"
+          },
+          "engagements": {
+           "items": {
+            "maxLength": 2048,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxItems": 5,
+           "minItems": 0,
+           "type": "array"
+          },
+          "incidentTemplate": {
+           "$ref": "#/components/schemas/IncidentTemplate"
+          },
+          "integrations": {
+           "items": {
+            "$ref": "#/components/schemas/Integration"
+           },
+           "maxItems": 1,
+           "minItems": 0,
+           "type": "array"
+          },
+          "name": {
+           "maxLength": 200,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -658,7 +582,22 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListResponsePlansOutput"
+         "properties": {
+          "nextToken": {
+           "maxLength": 2000,
+           "minLength": 0,
+           "type": "string"
+          },
+          "responsePlanSummaries": {
+           "items": {
+            "$ref": "#/components/schemas/ResponsePlanSummary"
+           },
+           "maxItems": 100,
+           "minItems": 0,
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -724,7 +663,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -774,7 +714,19 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 1,
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -848,7 +800,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -988,7 +941,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateResponsePlanOutput"
+         "properties": {},
+         "type": "object"
         }
        }
       },

@@ -58,79 +58,6 @@
      }
     },
     "type": "object"
-   },
-   "CreateClusterResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "Cluster": {
-      "$ref": "#/components/schemas/Cluster"
-     }
-    },
-    "type": "object"
-   },
-   "DeleteClusterResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "DescribeClusterResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "Cluster": {
-      "$ref": "#/components/schemas/Cluster"
-     }
-    },
-    "type": "object"
-   },
-   "ListClustersResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "Clusters": {
-      "items": {
-       "$ref": "#/components/schemas/Cluster"
-      },
-      "type": "array"
-     },
-     "NextToken": {
-      "maxLength": 8096,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListTagsForResourceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "Tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "minLength": 0,
-       "type": "string"
-      },
-      "type": "object"
-     }
-    },
-    "type": "object"
-   },
-   "TagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UntagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UpdateClusterResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "Cluster": {
-      "$ref": "#/components/schemas/Cluster"
-     }
-    },
-    "type": "object"
    }
   }
  },
@@ -179,7 +106,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListClustersResponse"
+         "properties": {
+          "Clusters": {
+           "items": {
+            "$ref": "#/components/schemas/Cluster"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "maxLength": 8096,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -260,7 +200,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateClusterResponse"
+         "properties": {
+          "Cluster": {
+           "$ref": "#/components/schemas/Cluster"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -329,7 +274,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateClusterResponse"
+         "properties": {
+          "Cluster": {
+           "$ref": "#/components/schemas/Cluster"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -381,7 +331,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteClusterResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -431,7 +382,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DescribeClusterResponse"
+         "properties": {
+          "Cluster": {
+           "$ref": "#/components/schemas/Cluster"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -493,7 +449,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -543,7 +500,17 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+         "properties": {
+          "Tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -615,7 +582,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },

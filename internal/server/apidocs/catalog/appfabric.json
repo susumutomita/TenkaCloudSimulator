@@ -34,64 +34,6 @@
     ],
     "type": "object"
    },
-   "CreateAppBundleResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "appBundle": {
-      "$ref": "#/components/schemas/AppBundle"
-     }
-    },
-    "required": [
-     "appBundle"
-    ],
-    "type": "object"
-   },
-   "CreateIngestionResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "ingestion": {
-      "$ref": "#/components/schemas/Ingestion"
-     }
-    },
-    "required": [
-     "ingestion"
-    ],
-    "type": "object"
-   },
-   "DeleteAppBundleResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "DeleteIngestionResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "GetAppBundleResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "appBundle": {
-      "$ref": "#/components/schemas/AppBundle"
-     }
-    },
-    "required": [
-     "appBundle"
-    ],
-    "type": "object"
-   },
-   "GetIngestionResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "ingestion": {
-      "$ref": "#/components/schemas/Ingestion"
-     }
-    },
-    "required": [
-     "ingestion"
-    ],
-    "type": "object"
-   },
    "Ingestion": {
     "additionalProperties": false,
     "properties": {
@@ -189,58 +131,6 @@
     ],
     "type": "object"
    },
-   "ListAppBundlesResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "appBundleSummaryList": {
-      "items": {
-       "$ref": "#/components/schemas/AppBundleSummary"
-      },
-      "type": "array"
-     },
-     "nextToken": {
-      "maxLength": 2048,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "required": [
-     "appBundleSummaryList"
-    ],
-    "type": "object"
-   },
-   "ListIngestionsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "ingestions": {
-      "items": {
-       "$ref": "#/components/schemas/IngestionSummary"
-      },
-      "type": "array"
-     },
-     "nextToken": {
-      "type": "string"
-     }
-    },
-    "required": [
-     "ingestions"
-    ],
-    "type": "object"
-   },
-   "ListTagsForResourceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "tags": {
-      "items": {
-       "$ref": "#/components/schemas/Tag"
-      },
-      "maxItems": 50,
-      "minItems": 0,
-      "type": "array"
-     }
-    },
-    "type": "object"
-   },
    "Tag": {
     "additionalProperties": false,
     "properties": {
@@ -259,16 +149,6 @@
      "key",
      "value"
     ],
-    "type": "object"
-   },
-   "TagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UntagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
     "type": "object"
    }
   }
@@ -320,7 +200,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListAppBundlesResponse"
+         "properties": {
+          "appBundleSummaryList": {
+           "items": {
+            "$ref": "#/components/schemas/AppBundleSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -389,7 +282,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateAppBundleResponse"
+         "properties": {
+          "appBundle": {
+           "$ref": "#/components/schemas/AppBundle"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -443,7 +341,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteAppBundleResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -495,7 +394,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetAppBundleResponse"
+         "properties": {
+          "appBundle": {
+           "$ref": "#/components/schemas/AppBundle"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -565,7 +469,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListIngestionsResponse"
+         "properties": {
+          "ingestions": {
+           "items": {
+            "$ref": "#/components/schemas/IngestionSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -660,7 +575,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateIngestionResponse"
+         "properties": {
+          "ingestion": {
+           "$ref": "#/components/schemas/Ingestion"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -724,7 +644,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteIngestionResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -786,7 +707,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetIngestionResponse"
+         "properties": {
+          "ingestion": {
+           "$ref": "#/components/schemas/Ingestion"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -854,7 +780,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -906,7 +833,17 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+         "properties": {
+          "tags": {
+           "items": {
+            "$ref": "#/components/schemas/Tag"
+           },
+           "maxItems": 50,
+           "minItems": 0,
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -980,7 +917,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },

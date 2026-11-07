@@ -1,45 +1,6 @@
 {
  "components": {
   "schemas": {
-   "CreateResourceShareResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "clientToken": {
-      "type": "string"
-     },
-     "resourceShare": {
-      "$ref": "#/components/schemas/ResourceShare"
-     }
-    },
-    "type": "object"
-   },
-   "DeleteResourceShareResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "clientToken": {
-      "type": "string"
-     },
-     "returnValue": {
-      "type": "boolean"
-     }
-    },
-    "type": "object"
-   },
-   "GetResourceSharesResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "nextToken": {
-      "type": "string"
-     },
-     "resourceShares": {
-      "items": {
-       "$ref": "#/components/schemas/ResourceShare"
-      },
-      "type": "array"
-     }
-    },
-    "type": "object"
-   },
    "ResourceShare": {
     "additionalProperties": false,
     "properties": {
@@ -122,28 +83,6 @@
        "type": "string"
       },
       "type": "array"
-     }
-    },
-    "type": "object"
-   },
-   "TagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UntagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UpdateResourceShareResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "clientToken": {
-      "type": "string"
-     },
-     "resourceShare": {
-      "$ref": "#/components/schemas/ResourceShare"
      }
     },
     "type": "object"
@@ -232,7 +171,15 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateResourceShareResponse"
+         "properties": {
+          "clientToken": {
+           "type": "string"
+          },
+          "resourceShare": {
+           "$ref": "#/components/schemas/ResourceShare"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -290,7 +237,15 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteResourceShareResponse"
+         "properties": {
+          "clientToken": {
+           "type": "string"
+          },
+          "returnValue": {
+           "type": "boolean"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -394,7 +349,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetResourceSharesResponse"
+         "properties": {
+          "nextToken": {
+           "type": "string"
+          },
+          "resourceShares": {
+           "items": {
+            "$ref": "#/components/schemas/ResourceShare"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -464,7 +430,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -534,7 +501,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -604,7 +572,15 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateResourceShareResponse"
+         "properties": {
+          "clientToken": {
+           "type": "string"
+          },
+          "resourceShare": {
+           "$ref": "#/components/schemas/ResourceShare"
+          }
+         },
+         "type": "object"
         }
        }
       },

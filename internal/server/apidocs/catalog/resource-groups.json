@@ -1,66 +1,6 @@
 {
  "components": {
   "schemas": {
-   "CreateGroupOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "Group": {
-      "$ref": "#/components/schemas/Group"
-     },
-     "GroupConfiguration": {
-      "$ref": "#/components/schemas/GroupConfiguration"
-     },
-     "ResourceQuery": {
-      "$ref": "#/components/schemas/ResourceQuery"
-     },
-     "Tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "minLength": 0,
-       "type": "string"
-      },
-      "type": "object"
-     }
-    },
-    "type": "object"
-   },
-   "DeleteGroupOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "Group": {
-      "$ref": "#/components/schemas/Group"
-     }
-    },
-    "type": "object"
-   },
-   "GetGroupOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "Group": {
-      "$ref": "#/components/schemas/Group"
-     }
-    },
-    "type": "object"
-   },
-   "GetTagsOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "Arn": {
-      "maxLength": 1600,
-      "minLength": 12,
-      "type": "string"
-     },
-     "Tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "minLength": 0,
-       "type": "string"
-      },
-      "type": "object"
-     }
-    },
-    "type": "object"
-   },
    "Group": {
     "additionalProperties": false,
     "properties": {
@@ -245,29 +185,6 @@
     },
     "type": "object"
    },
-   "ListGroupsOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "GroupIdentifiers": {
-      "items": {
-       "$ref": "#/components/schemas/GroupIdentifier"
-      },
-      "type": "array"
-     },
-     "Groups": {
-      "items": {
-       "$ref": "#/components/schemas/Group"
-      },
-      "type": "array"
-     },
-     "NextToken": {
-      "maxLength": 8192,
-      "minLength": 0,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
    "ResourceQuery": {
     "additionalProperties": false,
     "properties": {
@@ -289,53 +206,6 @@
      "Type",
      "Query"
     ],
-    "type": "object"
-   },
-   "TagOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "Arn": {
-      "maxLength": 1600,
-      "minLength": 12,
-      "type": "string"
-     },
-     "Tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "minLength": 0,
-       "type": "string"
-      },
-      "type": "object"
-     }
-    },
-    "type": "object"
-   },
-   "UntagOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "Arn": {
-      "maxLength": 1600,
-      "minLength": 12,
-      "type": "string"
-     },
-     "Keys": {
-      "items": {
-       "maxLength": 128,
-       "minLength": 1,
-       "type": "string"
-      },
-      "type": "array"
-     }
-    },
-    "type": "object"
-   },
-   "UpdateGroupOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "Group": {
-      "$ref": "#/components/schemas/Group"
-     }
-    },
     "type": "object"
    }
   }
@@ -390,7 +260,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteGroupOutput"
+         "properties": {
+          "Group": {
+           "$ref": "#/components/schemas/Group"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -455,7 +330,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetGroupOutput"
+         "properties": {
+          "Group": {
+           "$ref": "#/components/schemas/Group"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -555,7 +435,26 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateGroupOutput"
+         "properties": {
+          "Group": {
+           "$ref": "#/components/schemas/Group"
+          },
+          "GroupConfiguration": {
+           "$ref": "#/components/schemas/GroupConfiguration"
+          },
+          "ResourceQuery": {
+           "$ref": "#/components/schemas/ResourceQuery"
+          },
+          "Tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -634,7 +533,26 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListGroupsOutput"
+         "properties": {
+          "GroupIdentifiers": {
+           "items": {
+            "$ref": "#/components/schemas/GroupIdentifier"
+           },
+           "type": "array"
+          },
+          "Groups": {
+           "items": {
+            "$ref": "#/components/schemas/Group"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "maxLength": 8192,
+           "minLength": 0,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -688,7 +606,22 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetTagsOutput"
+         "properties": {
+          "Arn": {
+           "maxLength": 1600,
+           "minLength": 12,
+           "type": "string"
+          },
+          "Tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -762,7 +695,22 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagOutput"
+         "properties": {
+          "Arn": {
+           "maxLength": 1600,
+           "minLength": 12,
+           "type": "string"
+          },
+          "Keys": {
+           "items": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -836,7 +784,22 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagOutput"
+         "properties": {
+          "Arn": {
+           "maxLength": 1600,
+           "minLength": 12,
+           "type": "string"
+          },
+          "Tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -920,7 +883,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateGroupOutput"
+         "properties": {
+          "Group": {
+           "$ref": "#/components/schemas/Group"
+          }
+         },
+         "type": "object"
         }
        }
       },

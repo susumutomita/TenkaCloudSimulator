@@ -1,123 +1,6 @@
 {
  "components": {
   "schemas": {
-   "GetSigningProfileResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "type": "string"
-     },
-     "overrides": {
-      "$ref": "#/components/schemas/SigningPlatformOverrides"
-     },
-     "platformDisplayName": {
-      "type": "string"
-     },
-     "platformId": {
-      "type": "string"
-     },
-     "profileName": {
-      "maxLength": 64,
-      "minLength": 2,
-      "type": "string"
-     },
-     "profileVersion": {
-      "maxLength": 10,
-      "minLength": 10,
-      "type": "string"
-     },
-     "profileVersionArn": {
-      "maxLength": 2048,
-      "minLength": 20,
-      "type": "string"
-     },
-     "revocationRecord": {
-      "$ref": "#/components/schemas/SigningProfileRevocationRecord"
-     },
-     "signatureValidityPeriod": {
-      "$ref": "#/components/schemas/SignatureValidityPeriod"
-     },
-     "signingMaterial": {
-      "$ref": "#/components/schemas/SigningMaterial"
-     },
-     "signingParameters": {
-      "additionalProperties": {
-       "type": "string"
-      },
-      "type": "object"
-     },
-     "status": {
-      "enum": [
-       "Active",
-       "Canceled",
-       "Revoked"
-      ],
-      "type": "string"
-     },
-     "statusReason": {
-      "type": "string"
-     },
-     "tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "type": "string"
-      },
-      "maxProperties": 200,
-      "minProperties": 1,
-      "type": "object"
-     }
-    },
-    "type": "object"
-   },
-   "ListSigningProfilesResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "nextToken": {
-      "type": "string"
-     },
-     "profiles": {
-      "items": {
-       "$ref": "#/components/schemas/SigningProfile"
-      },
-      "type": "array"
-     }
-    },
-    "type": "object"
-   },
-   "ListTagsForResourceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "type": "string"
-      },
-      "maxProperties": 200,
-      "minProperties": 1,
-      "type": "object"
-     }
-    },
-    "type": "object"
-   },
-   "PutSigningProfileResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "arn": {
-      "type": "string"
-     },
-     "profileVersion": {
-      "maxLength": 10,
-      "minLength": 10,
-      "type": "string"
-     },
-     "profileVersionArn": {
-      "maxLength": 2048,
-      "minLength": 20,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
    "SignatureValidityPeriod": {
     "additionalProperties": false,
     "properties": {
@@ -265,16 +148,6 @@
      }
     },
     "type": "object"
-   },
-   "TagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UntagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
    }
   }
  },
@@ -352,7 +225,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListSigningProfilesResponse"
+         "properties": {
+          "nextToken": {
+           "type": "string"
+          },
+          "profiles": {
+           "items": {
+            "$ref": "#/components/schemas/SigningProfile"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -460,7 +344,71 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetSigningProfileResponse"
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "overrides": {
+           "$ref": "#/components/schemas/SigningPlatformOverrides"
+          },
+          "platformDisplayName": {
+           "type": "string"
+          },
+          "platformId": {
+           "type": "string"
+          },
+          "profileName": {
+           "maxLength": 64,
+           "minLength": 2,
+           "type": "string"
+          },
+          "profileVersion": {
+           "maxLength": 10,
+           "minLength": 10,
+           "type": "string"
+          },
+          "profileVersionArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "revocationRecord": {
+           "$ref": "#/components/schemas/SigningProfileRevocationRecord"
+          },
+          "signatureValidityPeriod": {
+           "$ref": "#/components/schemas/SignatureValidityPeriod"
+          },
+          "signingMaterial": {
+           "$ref": "#/components/schemas/SigningMaterial"
+          },
+          "signingParameters": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          },
+          "status": {
+           "enum": [
+            "Active",
+            "Canceled",
+            "Revoked"
+           ],
+           "type": "string"
+          },
+          "statusReason": {
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 1,
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -553,7 +501,22 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/PutSigningProfileResponse"
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "profileVersion": {
+           "maxLength": 10,
+           "minLength": 10,
+           "type": "string"
+          },
+          "profileVersionArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -619,7 +582,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -669,7 +633,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 1,
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -742,7 +717,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },

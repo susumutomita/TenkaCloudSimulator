@@ -13,15 +13,6 @@
     ],
     "type": "object"
    },
-   "CreatePricingRuleOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "Arn": {
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
    "CreateTieringInput": {
     "additionalProperties": false,
     "properties": {
@@ -32,15 +23,6 @@
     "required": [
      "FreeTier"
     ],
-    "type": "object"
-   },
-   "DeletePricingRuleOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "Arn": {
-      "type": "string"
-     }
-    },
     "type": "object"
    },
    "FreeTierConfig": {
@@ -64,24 +46,6 @@
       },
       "maxItems": 100,
       "minItems": 1,
-      "type": "array"
-     }
-    },
-    "type": "object"
-   },
-   "ListPricingRulesOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "BillingPeriod": {
-      "type": "string"
-     },
-     "NextToken": {
-      "type": "string"
-     },
-     "PricingRules": {
-      "items": {
-       "$ref": "#/components/schemas/PricingRuleListElement"
-      },
       "type": "array"
      }
     },
@@ -158,11 +122,6 @@
     },
     "type": "object"
    },
-   "TagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
    "Tiering": {
     "additionalProperties": false,
     "properties": {
@@ -175,11 +134,6 @@
     ],
     "type": "object"
    },
-   "UntagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
    "UpdateFreeTierConfig": {
     "additionalProperties": false,
     "properties": {
@@ -190,74 +144,6 @@
     "required": [
      "Activated"
     ],
-    "type": "object"
-   },
-   "UpdatePricingRuleOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "Arn": {
-      "type": "string"
-     },
-     "AssociatedPricingPlanCount": {
-      "minimum": 0,
-      "type": "integer"
-     },
-     "BillingEntity": {
-      "type": "string"
-     },
-     "Description": {
-      "maxLength": 1024,
-      "minLength": 0,
-      "type": "string"
-     },
-     "LastModifiedTime": {
-      "type": "integer"
-     },
-     "ModifierPercentage": {
-      "minimum": 0,
-      "type": "number"
-     },
-     "Name": {
-      "maxLength": 128,
-      "minLength": 1,
-      "type": "string"
-     },
-     "Operation": {
-      "maxLength": 256,
-      "minLength": 1,
-      "type": "string"
-     },
-     "Scope": {
-      "enum": [
-       "GLOBAL",
-       "SERVICE",
-       "BILLING_ENTITY",
-       "SKU"
-      ],
-      "type": "string"
-     },
-     "Service": {
-      "maxLength": 128,
-      "minLength": 1,
-      "type": "string"
-     },
-     "Tiering": {
-      "$ref": "#/components/schemas/UpdateTieringInput"
-     },
-     "Type": {
-      "enum": [
-       "MARKUP",
-       "DISCOUNT",
-       "TIERING"
-      ],
-      "type": "string"
-     },
-     "UsageType": {
-      "maxLength": 256,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
     "type": "object"
    },
    "UpdateTieringInput": {
@@ -390,7 +276,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreatePricingRuleOutput"
+         "properties": {
+          "Arn": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -451,7 +342,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeletePricingRuleOutput"
+         "properties": {
+          "Arn": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -520,7 +416,21 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListPricingRulesOutput"
+         "properties": {
+          "BillingPeriod": {
+           "type": "string"
+          },
+          "NextToken": {
+           "type": "string"
+          },
+          "PricingRules": {
+           "items": {
+            "$ref": "#/components/schemas/PricingRuleListElement"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -588,7 +498,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -664,7 +575,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -750,7 +662,71 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdatePricingRuleOutput"
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "AssociatedPricingPlanCount": {
+           "minimum": 0,
+           "type": "integer"
+          },
+          "BillingEntity": {
+           "type": "string"
+          },
+          "Description": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          },
+          "LastModifiedTime": {
+           "type": "integer"
+          },
+          "ModifierPercentage": {
+           "minimum": 0,
+           "type": "number"
+          },
+          "Name": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "Operation": {
+           "maxLength": 256,
+           "minLength": 1,
+           "type": "string"
+          },
+          "Scope": {
+           "enum": [
+            "GLOBAL",
+            "SERVICE",
+            "BILLING_ENTITY",
+            "SKU"
+           ],
+           "type": "string"
+          },
+          "Service": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "Tiering": {
+           "$ref": "#/components/schemas/UpdateTieringInput"
+          },
+          "Type": {
+           "enum": [
+            "MARKUP",
+            "DISCOUNT",
+            "TIERING"
+           ],
+           "type": "string"
+          },
+          "UsageType": {
+           "maxLength": 256,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },

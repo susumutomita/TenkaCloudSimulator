@@ -17,109 +17,6 @@
     ],
     "type": "object"
    },
-   "BatchGetViewOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "Errors": {
-      "items": {
-       "$ref": "#/components/schemas/BatchGetViewError"
-      },
-      "type": "array"
-     },
-     "Views": {
-      "items": {
-       "$ref": "#/components/schemas/View"
-      },
-      "type": "array"
-     }
-    },
-    "type": "object"
-   },
-   "CreateIndexOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "Arn": {
-      "type": "string"
-     },
-     "CreatedAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "State": {
-      "enum": [
-       "CREATING",
-       "ACTIVE",
-       "DELETING",
-       "DELETED",
-       "UPDATING"
-      ],
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "CreateViewOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "View": {
-      "$ref": "#/components/schemas/View"
-     }
-    },
-    "type": "object"
-   },
-   "DeleteIndexOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "Arn": {
-      "type": "string"
-     },
-     "LastUpdatedAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "State": {
-      "enum": [
-       "CREATING",
-       "ACTIVE",
-       "DELETING",
-       "DELETED",
-       "UPDATING"
-      ],
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "DeleteViewOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "ViewArn": {
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "GetViewOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "Tags": {
-      "additionalProperties": {
-       "type": "string"
-      },
-      "type": "object"
-     },
-     "View": {
-      "$ref": "#/components/schemas/View"
-     }
-    },
-    "type": "object"
-   },
    "IncludedProperty": {
     "additionalProperties": false,
     "properties": {
@@ -153,48 +50,6 @@
     },
     "type": "object"
    },
-   "ListIndexesOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "Indexes": {
-      "items": {
-       "$ref": "#/components/schemas/Index"
-      },
-      "type": "array"
-     },
-     "NextToken": {
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListTagsForResourceOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "Tags": {
-      "additionalProperties": {
-       "type": "string"
-      },
-      "type": "object"
-     }
-    },
-    "type": "object"
-   },
-   "ListViewsOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "NextToken": {
-      "type": "string"
-     },
-     "Views": {
-      "items": {
-       "type": "string"
-      },
-      "type": "array"
-     }
-    },
-    "type": "object"
-   },
    "SearchFilter": {
     "additionalProperties": false,
     "properties": {
@@ -207,58 +62,6 @@
     "required": [
      "FilterString"
     ],
-    "type": "object"
-   },
-   "TagResourceOutput": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UntagResourceOutput": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UpdateIndexTypeOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "Arn": {
-      "type": "string"
-     },
-     "LastUpdatedAt": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "State": {
-      "enum": [
-       "CREATING",
-       "ACTIVE",
-       "DELETING",
-       "DELETED",
-       "UPDATING"
-      ],
-      "type": "string"
-     },
-     "Type": {
-      "enum": [
-       "LOCAL",
-       "AGGREGATOR"
-      ],
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "UpdateViewOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "View": {
-      "$ref": "#/components/schemas/View"
-     }
-    },
     "type": "object"
    },
    "View": {
@@ -342,7 +145,21 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/BatchGetViewOutput"
+         "properties": {
+          "Errors": {
+           "items": {
+            "$ref": "#/components/schemas/BatchGetViewError"
+           },
+           "type": "array"
+          },
+          "Views": {
+           "items": {
+            "$ref": "#/components/schemas/View"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -406,7 +223,29 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateIndexOutput"
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "CreatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "State": {
+           "enum": [
+            "CREATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "UPDATING"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -492,7 +331,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateViewOutput"
+         "properties": {
+          "View": {
+           "$ref": "#/components/schemas/View"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -553,7 +397,29 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteIndexOutput"
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "LastUpdatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "State": {
+           "enum": [
+            "CREATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "UPDATING"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -616,7 +482,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteViewOutput"
+         "properties": {
+          "ViewArn": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -679,7 +550,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetViewOutput"
+         "properties": {
+          "Tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          },
+          "View": {
+           "$ref": "#/components/schemas/View"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -759,7 +641,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListIndexesOutput"
+         "properties": {
+          "Indexes": {
+           "items": {
+            "$ref": "#/components/schemas/Index"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -822,7 +715,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListViewsOutput"
+         "properties": {
+          "NextToken": {
+           "type": "string"
+          },
+          "Views": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -891,7 +795,36 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateIndexTypeOutput"
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "LastUpdatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "State": {
+           "enum": [
+            "CREATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "UPDATING"
+           ],
+           "type": "string"
+          },
+          "Type": {
+           "enum": [
+            "LOCAL",
+            "AGGREGATOR"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -963,7 +896,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateViewOutput"
+         "properties": {
+          "View": {
+           "$ref": "#/components/schemas/View"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1025,7 +963,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceOutput"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1075,7 +1014,15 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceOutput"
+         "properties": {
+          "Tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1142,7 +1089,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceOutput"
+         "properties": {},
+         "type": "object"
         }
        }
       },

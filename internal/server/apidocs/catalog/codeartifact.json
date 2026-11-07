@@ -1,60 +1,6 @@
 {
  "components": {
   "schemas": {
-   "CreateDomainResult": {
-    "additionalProperties": false,
-    "properties": {
-     "domain": {
-      "$ref": "#/components/schemas/DomainDescription"
-     }
-    },
-    "type": "object"
-   },
-   "CreateRepositoryResult": {
-    "additionalProperties": false,
-    "properties": {
-     "repository": {
-      "$ref": "#/components/schemas/RepositoryDescription"
-     }
-    },
-    "type": "object"
-   },
-   "DeleteDomainResult": {
-    "additionalProperties": false,
-    "properties": {
-     "domain": {
-      "$ref": "#/components/schemas/DomainDescription"
-     }
-    },
-    "type": "object"
-   },
-   "DeleteRepositoryResult": {
-    "additionalProperties": false,
-    "properties": {
-     "repository": {
-      "$ref": "#/components/schemas/RepositoryDescription"
-     }
-    },
-    "type": "object"
-   },
-   "DescribeDomainResult": {
-    "additionalProperties": false,
-    "properties": {
-     "domain": {
-      "$ref": "#/components/schemas/DomainDescription"
-     }
-    },
-    "type": "object"
-   },
-   "DescribeRepositoryResult": {
-    "additionalProperties": false,
-    "properties": {
-     "repository": {
-      "$ref": "#/components/schemas/RepositoryDescription"
-     }
-    },
-    "type": "object"
-   },
    "DomainDescription": {
     "additionalProperties": false,
     "properties": {
@@ -142,54 +88,6 @@
        "Deleted"
       ],
       "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListDomainsResult": {
-    "additionalProperties": false,
-    "properties": {
-     "domains": {
-      "items": {
-       "$ref": "#/components/schemas/DomainSummary"
-      },
-      "type": "array"
-     },
-     "nextToken": {
-      "maxLength": 2000,
-      "minLength": 1,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListRepositoriesInDomainResult": {
-    "additionalProperties": false,
-    "properties": {
-     "nextToken": {
-      "maxLength": 2000,
-      "minLength": 1,
-      "type": "string"
-     },
-     "repositories": {
-      "items": {
-       "$ref": "#/components/schemas/RepositorySummary"
-      },
-      "type": "array"
-     }
-    },
-    "type": "object"
-   },
-   "ListTagsForResourceResult": {
-    "additionalProperties": false,
-    "properties": {
-     "tags": {
-      "items": {
-       "$ref": "#/components/schemas/Tag"
-      },
-      "maxItems": 200,
-      "minItems": 0,
-      "type": "array"
      }
     },
     "type": "object"
@@ -340,25 +238,6 @@
     ],
     "type": "object"
    },
-   "TagResourceResult": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UntagResourceResult": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UpdateRepositoryResult": {
-    "additionalProperties": false,
-    "properties": {
-     "repository": {
-      "$ref": "#/components/schemas/RepositoryDescription"
-     }
-    },
-    "type": "object"
-   },
    "UpstreamRepository": {
     "additionalProperties": false,
     "properties": {
@@ -433,7 +312,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteDomainResult"
+         "properties": {
+          "domain": {
+           "$ref": "#/components/schemas/DomainDescription"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -493,7 +377,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DescribeDomainResult"
+         "properties": {
+          "domain": {
+           "$ref": "#/components/schemas/DomainDescription"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -568,7 +457,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateDomainResult"
+         "properties": {
+          "domain": {
+           "$ref": "#/components/schemas/DomainDescription"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -666,7 +560,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListRepositoriesInDomainResult"
+         "properties": {
+          "nextToken": {
+           "maxLength": 2000,
+           "minLength": 1,
+           "type": "string"
+          },
+          "repositories": {
+           "items": {
+            "$ref": "#/components/schemas/RepositorySummary"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -731,7 +638,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListDomainsResult"
+         "properties": {
+          "domains": {
+           "items": {
+            "$ref": "#/components/schemas/DomainSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 2000,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -802,7 +722,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteRepositoryResult"
+         "properties": {
+          "repository": {
+           "$ref": "#/components/schemas/RepositoryDescription"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -871,7 +796,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DescribeRepositoryResult"
+         "properties": {
+          "repository": {
+           "$ref": "#/components/schemas/RepositoryDescription"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -969,7 +899,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateRepositoryResult"
+         "properties": {
+          "repository": {
+           "$ref": "#/components/schemas/RepositoryDescription"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1059,7 +994,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateRepositoryResult"
+         "properties": {
+          "repository": {
+           "$ref": "#/components/schemas/RepositoryDescription"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1134,7 +1074,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceResult"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1187,7 +1128,17 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceResult"
+         "properties": {
+          "tags": {
+           "items": {
+            "$ref": "#/components/schemas/Tag"
+           },
+           "maxItems": 200,
+           "minItems": 0,
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1264,7 +1215,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceResult"
+         "properties": {},
+         "type": "object"
         }
        }
       },

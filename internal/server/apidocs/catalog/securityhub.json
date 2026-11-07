@@ -660,30 +660,6 @@
     },
     "type": "object"
    },
-   "CreateActionTargetResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "ActionTargetArn": {
-      "type": "string"
-     }
-    },
-    "required": [
-     "ActionTargetArn"
-    ],
-    "type": "object"
-   },
-   "CreateInsightResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "InsightArn": {
-      "type": "string"
-     }
-    },
-    "required": [
-     "InsightArn"
-    ],
-    "type": "object"
-   },
    "DateFilter": {
     "additionalProperties": false,
     "properties": {
@@ -712,66 +688,6 @@
       "type": "integer"
      }
     },
-    "type": "object"
-   },
-   "DeleteActionTargetResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "ActionTargetArn": {
-      "type": "string"
-     }
-    },
-    "required": [
-     "ActionTargetArn"
-    ],
-    "type": "object"
-   },
-   "DeleteInsightResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "InsightArn": {
-      "type": "string"
-     }
-    },
-    "required": [
-     "InsightArn"
-    ],
-    "type": "object"
-   },
-   "DescribeActionTargetsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "ActionTargets": {
-      "items": {
-       "$ref": "#/components/schemas/ActionTarget"
-      },
-      "type": "array"
-     },
-     "NextToken": {
-      "type": "string"
-     }
-    },
-    "required": [
-     "ActionTargets"
-    ],
-    "type": "object"
-   },
-   "GetInsightsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "Insights": {
-      "items": {
-       "$ref": "#/components/schemas/Insight"
-      },
-      "type": "array"
-     },
-     "NextToken": {
-      "type": "string"
-     }
-    },
-    "required": [
-     "Insights"
-    ],
     "type": "object"
    },
    "Insight": {
@@ -878,16 +794,6 @@
      }
     },
     "type": "object"
-   },
-   "UpdateActionTargetResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UpdateInsightResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
    }
   }
  },
@@ -945,7 +851,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateActionTargetResponse"
+         "properties": {
+          "ActionTargetArn": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1014,7 +925,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DescribeActionTargetsResponse"
+         "properties": {
+          "ActionTargets": {
+           "items": {
+            "$ref": "#/components/schemas/ActionTarget"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1066,7 +988,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteActionTargetResponse"
+         "properties": {
+          "ActionTargetArn": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1133,7 +1060,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateActionTargetResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1202,7 +1130,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateInsightResponse"
+         "properties": {
+          "InsightArn": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1271,7 +1204,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetInsightsResponse"
+         "properties": {
+          "Insights": {
+           "items": {
+            "$ref": "#/components/schemas/Insight"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1323,7 +1267,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteInsightResponse"
+         "properties": {
+          "InsightArn": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1393,7 +1342,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateInsightResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },

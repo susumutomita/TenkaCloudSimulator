@@ -109,88 +109,6 @@
      }
     },
     "type": "object"
-   },
-   "CreateAccessorOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "AccessorId": {
-      "maxLength": 32,
-      "minLength": 1,
-      "type": "string"
-     },
-     "BillingToken": {
-      "maxLength": 42,
-      "minLength": 42,
-      "type": "string"
-     },
-     "NetworkType": {
-      "enum": [
-       "ETHEREUM_GOERLI",
-       "ETHEREUM_MAINNET",
-       "ETHEREUM_MAINNET_AND_GOERLI",
-       "POLYGON_MAINNET",
-       "POLYGON_MUMBAI"
-      ],
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "DeleteAccessorOutput": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "GetAccessorOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "Accessor": {
-      "$ref": "#/components/schemas/Accessor"
-     }
-    },
-    "type": "object"
-   },
-   "ListAccessorsOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "Accessors": {
-      "items": {
-       "$ref": "#/components/schemas/AccessorSummary"
-      },
-      "type": "array"
-     },
-     "NextToken": {
-      "maxLength": 128,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListTagsForResourceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "Tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxProperties": 200,
-      "minProperties": 0,
-      "type": "object"
-     }
-    },
-    "type": "object"
-   },
-   "TagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UntagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
    }
   }
  },
@@ -254,7 +172,19 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListAccessorsOutput"
+         "properties": {
+          "Accessors": {
+           "items": {
+            "$ref": "#/components/schemas/AccessorSummary"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "maxLength": 128,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -342,7 +272,29 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateAccessorOutput"
+         "properties": {
+          "AccessorId": {
+           "maxLength": 32,
+           "minLength": 1,
+           "type": "string"
+          },
+          "BillingToken": {
+           "maxLength": 42,
+           "minLength": 42,
+           "type": "string"
+          },
+          "NetworkType": {
+           "enum": [
+            "ETHEREUM_GOERLI",
+            "ETHEREUM_MAINNET",
+            "ETHEREUM_MAINNET_AND_GOERLI",
+            "POLYGON_MAINNET",
+            "POLYGON_MUMBAI"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -396,7 +348,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteAccessorOutput"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -448,7 +401,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetAccessorOutput"
+         "properties": {
+          "Accessor": {
+           "$ref": "#/components/schemas/Accessor"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -516,7 +474,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -568,7 +527,19 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+         "properties": {
+          "Tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -644,7 +615,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },

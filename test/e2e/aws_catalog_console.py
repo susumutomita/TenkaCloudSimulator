@@ -134,6 +134,17 @@ def run():
                 page.get_by_role('button', name='Back to list').click()
                 containers.deregister_task_definition(taskDefinition=task)
                 containers.delete_cluster(cluster='sdk-cluster')
+                # Summary identity keys: Athena lists DataCatalogSummary.CatalogName.
+                queries = team.client('athena')
+                queries.create_data_catalog(Name='sdk_catalog', Type='GLUE', Parameters={'catalog-id': '000000000000'})
+                page.get_by_role('button', name=re.compile('^Catalog service')).click()
+                page.get_by_role('option', name=re.compile('^Amazon Athena')).click()
+                page.get_by_role('tab', name='dataCatalog').click()
+                expect(page.get_by_role('link', name='sdk_catalog')).to_be_visible()
+                page.get_by_role('link', name='sdk_catalog').click()
+                expect(page.get_by_text('GLUE', exact=True).first).to_be_visible()
+                page.get_by_role('button', name='Back to list').click()
+                queries.delete_data_catalog(Name='sdk_catalog')
                 # A REST-JSON parent and child through the same generic view.
                 page.get_by_role('button', name=re.compile('^Catalog service')).click()
                 page.get_by_role('option', name=re.compile('^AWS Amplify')).click()

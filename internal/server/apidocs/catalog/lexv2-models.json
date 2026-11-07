@@ -330,171 +330,6 @@
     },
     "type": "object"
    },
-   "CreateBotLocaleResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "botId": {
-      "maxLength": 10,
-      "minLength": 10,
-      "type": "string"
-     },
-     "botLocaleStatus": {
-      "enum": [
-       "Creating",
-       "Building",
-       "Built",
-       "ReadyExpressTesting",
-       "Failed",
-       "Deleting",
-       "NotBuilt",
-       "Importing",
-       "Processing"
-      ],
-      "type": "string"
-     },
-     "botVersion": {
-      "maxLength": 5,
-      "minLength": 5,
-      "type": "string"
-     },
-     "creationDateTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "description": {
-      "maxLength": 2000,
-      "minLength": 0,
-      "type": "string"
-     },
-     "generativeAISettings": {
-      "$ref": "#/components/schemas/GenerativeAISettings"
-     },
-     "localeId": {
-      "type": "string"
-     },
-     "localeName": {
-      "type": "string"
-     },
-     "nluIntentConfidenceThreshold": {
-      "maximum": 1,
-      "minimum": 0,
-      "type": "number"
-     },
-     "speechDetectionSensitivity": {
-      "enum": [
-       "Default",
-       "HighNoiseTolerance",
-       "MaximumNoiseTolerance"
-      ],
-      "type": "string"
-     },
-     "speechRecognitionSettings": {
-      "$ref": "#/components/schemas/SpeechRecognitionSettings"
-     },
-     "unifiedSpeechSettings": {
-      "$ref": "#/components/schemas/UnifiedSpeechSettings"
-     },
-     "voiceSettings": {
-      "$ref": "#/components/schemas/VoiceSettings"
-     }
-    },
-    "type": "object"
-   },
-   "CreateBotResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "botId": {
-      "maxLength": 10,
-      "minLength": 10,
-      "type": "string"
-     },
-     "botMembers": {
-      "items": {
-       "$ref": "#/components/schemas/BotMember"
-      },
-      "maxItems": 10,
-      "minItems": 0,
-      "type": "array"
-     },
-     "botName": {
-      "maxLength": 100,
-      "minLength": 1,
-      "type": "string"
-     },
-     "botStatus": {
-      "enum": [
-       "Creating",
-       "Available",
-       "Inactive",
-       "Deleting",
-       "Failed",
-       "Versioning",
-       "Importing",
-       "Updating"
-      ],
-      "type": "string"
-     },
-     "botTags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxProperties": 200,
-      "minProperties": 0,
-      "type": "object"
-     },
-     "botType": {
-      "enum": [
-       "Bot",
-       "BotNetwork"
-      ],
-      "type": "string"
-     },
-     "creationDateTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "dataPrivacy": {
-      "$ref": "#/components/schemas/DataPrivacy"
-     },
-     "description": {
-      "maxLength": 2000,
-      "minLength": 0,
-      "type": "string"
-     },
-     "errorLogSettings": {
-      "$ref": "#/components/schemas/ErrorLogSettings"
-     },
-     "idleSessionTTLInSeconds": {
-      "maximum": 86400,
-      "minimum": 60,
-      "type": "integer"
-     },
-     "roleArn": {
-      "maxLength": 2048,
-      "minLength": 32,
-      "type": "string"
-     },
-     "testBotAliasTags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxProperties": 200,
-      "minProperties": 0,
-      "type": "object"
-     }
-    },
-    "type": "object"
-   },
    "DataPrivacy": {
     "additionalProperties": false,
     "properties": {
@@ -524,259 +359,6 @@
     "required": [
      "apiTokenSecretArn"
     ],
-    "type": "object"
-   },
-   "DeleteBotLocaleResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "botId": {
-      "maxLength": 10,
-      "minLength": 10,
-      "type": "string"
-     },
-     "botLocaleStatus": {
-      "enum": [
-       "Creating",
-       "Building",
-       "Built",
-       "ReadyExpressTesting",
-       "Failed",
-       "Deleting",
-       "NotBuilt",
-       "Importing",
-       "Processing"
-      ],
-      "type": "string"
-     },
-     "botVersion": {
-      "maxLength": 5,
-      "minLength": 5,
-      "type": "string"
-     },
-     "localeId": {
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "DeleteBotResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "botId": {
-      "maxLength": 10,
-      "minLength": 10,
-      "type": "string"
-     },
-     "botStatus": {
-      "enum": [
-       "Creating",
-       "Available",
-       "Inactive",
-       "Deleting",
-       "Failed",
-       "Versioning",
-       "Importing",
-       "Updating"
-      ],
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "DescribeBotLocaleResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "botId": {
-      "maxLength": 10,
-      "minLength": 10,
-      "type": "string"
-     },
-     "botLocaleHistoryEvents": {
-      "items": {
-       "$ref": "#/components/schemas/BotLocaleHistoryEvent"
-      },
-      "type": "array"
-     },
-     "botLocaleStatus": {
-      "enum": [
-       "Creating",
-       "Building",
-       "Built",
-       "ReadyExpressTesting",
-       "Failed",
-       "Deleting",
-       "NotBuilt",
-       "Importing",
-       "Processing"
-      ],
-      "type": "string"
-     },
-     "botVersion": {
-      "maxLength": 5,
-      "minLength": 1,
-      "type": "string"
-     },
-     "creationDateTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "description": {
-      "maxLength": 2000,
-      "minLength": 0,
-      "type": "string"
-     },
-     "failureReasons": {
-      "items": {
-       "type": "string"
-      },
-      "type": "array"
-     },
-     "generativeAISettings": {
-      "$ref": "#/components/schemas/GenerativeAISettings"
-     },
-     "intentsCount": {
-      "type": "integer"
-     },
-     "lastBuildSubmittedDateTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "lastUpdatedDateTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "localeId": {
-      "type": "string"
-     },
-     "localeName": {
-      "type": "string"
-     },
-     "nluIntentConfidenceThreshold": {
-      "maximum": 1,
-      "minimum": 0,
-      "type": "number"
-     },
-     "recommendedActions": {
-      "items": {
-       "type": "string"
-      },
-      "type": "array"
-     },
-     "slotTypesCount": {
-      "type": "integer"
-     },
-     "speechDetectionSensitivity": {
-      "enum": [
-       "Default",
-       "HighNoiseTolerance",
-       "MaximumNoiseTolerance"
-      ],
-      "type": "string"
-     },
-     "speechRecognitionSettings": {
-      "$ref": "#/components/schemas/SpeechRecognitionSettings"
-     },
-     "unifiedSpeechSettings": {
-      "$ref": "#/components/schemas/UnifiedSpeechSettings"
-     },
-     "voiceSettings": {
-      "$ref": "#/components/schemas/VoiceSettings"
-     }
-    },
-    "type": "object"
-   },
-   "DescribeBotResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "botId": {
-      "maxLength": 10,
-      "minLength": 10,
-      "type": "string"
-     },
-     "botMembers": {
-      "items": {
-       "$ref": "#/components/schemas/BotMember"
-      },
-      "maxItems": 10,
-      "minItems": 0,
-      "type": "array"
-     },
-     "botName": {
-      "maxLength": 100,
-      "minLength": 1,
-      "type": "string"
-     },
-     "botStatus": {
-      "enum": [
-       "Creating",
-       "Available",
-       "Inactive",
-       "Deleting",
-       "Failed",
-       "Versioning",
-       "Importing",
-       "Updating"
-      ],
-      "type": "string"
-     },
-     "botType": {
-      "enum": [
-       "Bot",
-       "BotNetwork"
-      ],
-      "type": "string"
-     },
-     "creationDateTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "dataPrivacy": {
-      "$ref": "#/components/schemas/DataPrivacy"
-     },
-     "description": {
-      "maxLength": 2000,
-      "minLength": 0,
-      "type": "string"
-     },
-     "errorLogSettings": {
-      "$ref": "#/components/schemas/ErrorLogSettings"
-     },
-     "failureReasons": {
-      "items": {
-       "type": "string"
-      },
-      "type": "array"
-     },
-     "idleSessionTTLInSeconds": {
-      "maximum": 86400,
-      "minimum": 60,
-      "type": "integer"
-     },
-     "lastUpdatedDateTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "roleArn": {
-      "maxLength": 2048,
-      "minLength": 32,
-      "type": "string"
-     }
-    },
     "type": "object"
    },
    "DescriptiveBotBuilderSpecification": {
@@ -838,62 +420,6 @@
     "required": [
      "enabled"
     ],
-    "type": "object"
-   },
-   "ListBotLocalesResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "botId": {
-      "maxLength": 10,
-      "minLength": 10,
-      "type": "string"
-     },
-     "botLocaleSummaries": {
-      "items": {
-       "$ref": "#/components/schemas/BotLocaleSummary"
-      },
-      "type": "array"
-     },
-     "botVersion": {
-      "maxLength": 5,
-      "minLength": 1,
-      "type": "string"
-     },
-     "nextToken": {
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListBotsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "botSummaries": {
-      "items": {
-       "$ref": "#/components/schemas/BotSummary"
-      },
-      "type": "array"
-     },
-     "nextToken": {
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListTagsForResourceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxProperties": 200,
-      "minProperties": 0,
-      "type": "object"
-     }
-    },
     "type": "object"
    },
    "NluImprovementSpecification": {
@@ -1001,11 +527,6 @@
     },
     "type": "object"
    },
-   "TagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
    "UnifiedSpeechSettings": {
     "additionalProperties": false,
     "properties": {
@@ -1016,182 +537,6 @@
     "required": [
      "speechFoundationModel"
     ],
-    "type": "object"
-   },
-   "UntagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UpdateBotLocaleResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "botId": {
-      "maxLength": 10,
-      "minLength": 10,
-      "type": "string"
-     },
-     "botLocaleStatus": {
-      "enum": [
-       "Creating",
-       "Building",
-       "Built",
-       "ReadyExpressTesting",
-       "Failed",
-       "Deleting",
-       "NotBuilt",
-       "Importing",
-       "Processing"
-      ],
-      "type": "string"
-     },
-     "botVersion": {
-      "maxLength": 5,
-      "minLength": 5,
-      "type": "string"
-     },
-     "creationDateTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "description": {
-      "maxLength": 2000,
-      "minLength": 0,
-      "type": "string"
-     },
-     "failureReasons": {
-      "items": {
-       "type": "string"
-      },
-      "type": "array"
-     },
-     "generativeAISettings": {
-      "$ref": "#/components/schemas/GenerativeAISettings"
-     },
-     "lastUpdatedDateTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "localeId": {
-      "type": "string"
-     },
-     "localeName": {
-      "type": "string"
-     },
-     "nluIntentConfidenceThreshold": {
-      "maximum": 1,
-      "minimum": 0,
-      "type": "number"
-     },
-     "recommendedActions": {
-      "items": {
-       "type": "string"
-      },
-      "type": "array"
-     },
-     "speechDetectionSensitivity": {
-      "enum": [
-       "Default",
-       "HighNoiseTolerance",
-       "MaximumNoiseTolerance"
-      ],
-      "type": "string"
-     },
-     "speechRecognitionSettings": {
-      "$ref": "#/components/schemas/SpeechRecognitionSettings"
-     },
-     "unifiedSpeechSettings": {
-      "$ref": "#/components/schemas/UnifiedSpeechSettings"
-     },
-     "voiceSettings": {
-      "$ref": "#/components/schemas/VoiceSettings"
-     }
-    },
-    "type": "object"
-   },
-   "UpdateBotResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "botId": {
-      "maxLength": 10,
-      "minLength": 10,
-      "type": "string"
-     },
-     "botMembers": {
-      "items": {
-       "$ref": "#/components/schemas/BotMember"
-      },
-      "maxItems": 10,
-      "minItems": 0,
-      "type": "array"
-     },
-     "botName": {
-      "maxLength": 100,
-      "minLength": 1,
-      "type": "string"
-     },
-     "botStatus": {
-      "enum": [
-       "Creating",
-       "Available",
-       "Inactive",
-       "Deleting",
-       "Failed",
-       "Versioning",
-       "Importing",
-       "Updating"
-      ],
-      "type": "string"
-     },
-     "botType": {
-      "enum": [
-       "Bot",
-       "BotNetwork"
-      ],
-      "type": "string"
-     },
-     "creationDateTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "dataPrivacy": {
-      "$ref": "#/components/schemas/DataPrivacy"
-     },
-     "description": {
-      "maxLength": 2000,
-      "minLength": 0,
-      "type": "string"
-     },
-     "errorLogSettings": {
-      "$ref": "#/components/schemas/ErrorLogSettings"
-     },
-     "idleSessionTTLInSeconds": {
-      "maximum": 86400,
-      "minimum": 60,
-      "type": "integer"
-     },
-     "lastUpdatedDateTime": {
-      "description": "Epoch seconds in JSON protocols",
-      "type": [
-       "number",
-       "string"
-      ]
-     },
-     "roleArn": {
-      "maxLength": 2048,
-      "minLength": 32,
-      "type": "string"
-     }
-    },
     "type": "object"
    },
    "VoiceSettings": {
@@ -1276,7 +621,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListBotsResponse"
+         "properties": {
+          "botSummaries": {
+           "items": {
+            "$ref": "#/components/schemas/BotSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1396,7 +752,95 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateBotResponse"
+         "properties": {
+          "botId": {
+           "maxLength": 10,
+           "minLength": 10,
+           "type": "string"
+          },
+          "botMembers": {
+           "items": {
+            "$ref": "#/components/schemas/BotMember"
+           },
+           "maxItems": 10,
+           "minItems": 0,
+           "type": "array"
+          },
+          "botName": {
+           "maxLength": 100,
+           "minLength": 1,
+           "type": "string"
+          },
+          "botStatus": {
+           "enum": [
+            "Creating",
+            "Available",
+            "Inactive",
+            "Deleting",
+            "Failed",
+            "Versioning",
+            "Importing",
+            "Updating"
+           ],
+           "type": "string"
+          },
+          "botTags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "botType": {
+           "enum": [
+            "Bot",
+            "BotNetwork"
+           ],
+           "type": "string"
+          },
+          "creationDateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "dataPrivacy": {
+           "$ref": "#/components/schemas/DataPrivacy"
+          },
+          "description": {
+           "maxLength": 2000,
+           "minLength": 0,
+           "type": "string"
+          },
+          "errorLogSettings": {
+           "$ref": "#/components/schemas/ErrorLogSettings"
+          },
+          "idleSessionTTLInSeconds": {
+           "maximum": 86400,
+           "minimum": 60,
+           "type": "integer"
+          },
+          "roleArn": {
+           "maxLength": 2048,
+           "minLength": 32,
+           "type": "string"
+          },
+          "testBotAliasTags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1457,7 +901,27 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteBotResponse"
+         "properties": {
+          "botId": {
+           "maxLength": 10,
+           "minLength": 10,
+           "type": "string"
+          },
+          "botStatus": {
+           "enum": [
+            "Creating",
+            "Available",
+            "Inactive",
+            "Deleting",
+            "Failed",
+            "Versioning",
+            "Importing",
+            "Updating"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1509,7 +973,88 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DescribeBotResponse"
+         "properties": {
+          "botId": {
+           "maxLength": 10,
+           "minLength": 10,
+           "type": "string"
+          },
+          "botMembers": {
+           "items": {
+            "$ref": "#/components/schemas/BotMember"
+           },
+           "maxItems": 10,
+           "minItems": 0,
+           "type": "array"
+          },
+          "botName": {
+           "maxLength": 100,
+           "minLength": 1,
+           "type": "string"
+          },
+          "botStatus": {
+           "enum": [
+            "Creating",
+            "Available",
+            "Inactive",
+            "Deleting",
+            "Failed",
+            "Versioning",
+            "Importing",
+            "Updating"
+           ],
+           "type": "string"
+          },
+          "botType": {
+           "enum": [
+            "Bot",
+            "BotNetwork"
+           ],
+           "type": "string"
+          },
+          "creationDateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "dataPrivacy": {
+           "$ref": "#/components/schemas/DataPrivacy"
+          },
+          "description": {
+           "maxLength": 2000,
+           "minLength": 0,
+           "type": "string"
+          },
+          "errorLogSettings": {
+           "$ref": "#/components/schemas/ErrorLogSettings"
+          },
+          "failureReasons": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "idleSessionTTLInSeconds": {
+           "maximum": 86400,
+           "minimum": 60,
+           "type": "integer"
+          },
+          "lastUpdatedDateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "roleArn": {
+           "maxLength": 2048,
+           "minLength": 32,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1619,7 +1164,82 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateBotResponse"
+         "properties": {
+          "botId": {
+           "maxLength": 10,
+           "minLength": 10,
+           "type": "string"
+          },
+          "botMembers": {
+           "items": {
+            "$ref": "#/components/schemas/BotMember"
+           },
+           "maxItems": 10,
+           "minItems": 0,
+           "type": "array"
+          },
+          "botName": {
+           "maxLength": 100,
+           "minLength": 1,
+           "type": "string"
+          },
+          "botStatus": {
+           "enum": [
+            "Creating",
+            "Available",
+            "Inactive",
+            "Deleting",
+            "Failed",
+            "Versioning",
+            "Importing",
+            "Updating"
+           ],
+           "type": "string"
+          },
+          "botType": {
+           "enum": [
+            "Bot",
+            "BotNetwork"
+           ],
+           "type": "string"
+          },
+          "creationDateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "dataPrivacy": {
+           "$ref": "#/components/schemas/DataPrivacy"
+          },
+          "description": {
+           "maxLength": 2000,
+           "minLength": 0,
+           "type": "string"
+          },
+          "errorLogSettings": {
+           "$ref": "#/components/schemas/ErrorLogSettings"
+          },
+          "idleSessionTTLInSeconds": {
+           "maximum": 86400,
+           "minimum": 60,
+           "type": "integer"
+          },
+          "lastUpdatedDateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "roleArn": {
+           "maxLength": 2048,
+           "minLength": 32,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1713,7 +1333,28 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListBotLocalesResponse"
+         "properties": {
+          "botId": {
+           "maxLength": 10,
+           "minLength": 10,
+           "type": "string"
+          },
+          "botLocaleSummaries": {
+           "items": {
+            "$ref": "#/components/schemas/BotLocaleSummary"
+           },
+           "type": "array"
+          },
+          "botVersion": {
+           "maxLength": 5,
+           "minLength": 1,
+           "type": "string"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1823,7 +1464,76 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateBotLocaleResponse"
+         "properties": {
+          "botId": {
+           "maxLength": 10,
+           "minLength": 10,
+           "type": "string"
+          },
+          "botLocaleStatus": {
+           "enum": [
+            "Creating",
+            "Building",
+            "Built",
+            "ReadyExpressTesting",
+            "Failed",
+            "Deleting",
+            "NotBuilt",
+            "Importing",
+            "Processing"
+           ],
+           "type": "string"
+          },
+          "botVersion": {
+           "maxLength": 5,
+           "minLength": 5,
+           "type": "string"
+          },
+          "creationDateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "description": {
+           "maxLength": 2000,
+           "minLength": 0,
+           "type": "string"
+          },
+          "generativeAISettings": {
+           "$ref": "#/components/schemas/GenerativeAISettings"
+          },
+          "localeId": {
+           "type": "string"
+          },
+          "localeName": {
+           "type": "string"
+          },
+          "nluIntentConfidenceThreshold": {
+           "maximum": 1,
+           "minimum": 0,
+           "type": "number"
+          },
+          "speechDetectionSensitivity": {
+           "enum": [
+            "Default",
+            "HighNoiseTolerance",
+            "MaximumNoiseTolerance"
+           ],
+           "type": "string"
+          },
+          "speechRecognitionSettings": {
+           "$ref": "#/components/schemas/SpeechRecognitionSettings"
+          },
+          "unifiedSpeechSettings": {
+           "$ref": "#/components/schemas/UnifiedSpeechSettings"
+          },
+          "voiceSettings": {
+           "$ref": "#/components/schemas/VoiceSettings"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1895,7 +1605,36 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteBotLocaleResponse"
+         "properties": {
+          "botId": {
+           "maxLength": 10,
+           "minLength": 10,
+           "type": "string"
+          },
+          "botLocaleStatus": {
+           "enum": [
+            "Creating",
+            "Building",
+            "Built",
+            "ReadyExpressTesting",
+            "Failed",
+            "Deleting",
+            "NotBuilt",
+            "Importing",
+            "Processing"
+           ],
+           "type": "string"
+          },
+          "botVersion": {
+           "maxLength": 5,
+           "minLength": 5,
+           "type": "string"
+          },
+          "localeId": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1965,7 +1704,114 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DescribeBotLocaleResponse"
+         "properties": {
+          "botId": {
+           "maxLength": 10,
+           "minLength": 10,
+           "type": "string"
+          },
+          "botLocaleHistoryEvents": {
+           "items": {
+            "$ref": "#/components/schemas/BotLocaleHistoryEvent"
+           },
+           "type": "array"
+          },
+          "botLocaleStatus": {
+           "enum": [
+            "Creating",
+            "Building",
+            "Built",
+            "ReadyExpressTesting",
+            "Failed",
+            "Deleting",
+            "NotBuilt",
+            "Importing",
+            "Processing"
+           ],
+           "type": "string"
+          },
+          "botVersion": {
+           "maxLength": 5,
+           "minLength": 1,
+           "type": "string"
+          },
+          "creationDateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "description": {
+           "maxLength": 2000,
+           "minLength": 0,
+           "type": "string"
+          },
+          "failureReasons": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "generativeAISettings": {
+           "$ref": "#/components/schemas/GenerativeAISettings"
+          },
+          "intentsCount": {
+           "type": "integer"
+          },
+          "lastBuildSubmittedDateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "lastUpdatedDateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "localeId": {
+           "type": "string"
+          },
+          "localeName": {
+           "type": "string"
+          },
+          "nluIntentConfidenceThreshold": {
+           "maximum": 1,
+           "minimum": 0,
+           "type": "number"
+          },
+          "recommendedActions": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "slotTypesCount": {
+           "type": "integer"
+          },
+          "speechDetectionSensitivity": {
+           "enum": [
+            "Default",
+            "HighNoiseTolerance",
+            "MaximumNoiseTolerance"
+           ],
+           "type": "string"
+          },
+          "speechRecognitionSettings": {
+           "$ref": "#/components/schemas/SpeechRecognitionSettings"
+          },
+          "unifiedSpeechSettings": {
+           "$ref": "#/components/schemas/UnifiedSpeechSettings"
+          },
+          "voiceSettings": {
+           "$ref": "#/components/schemas/VoiceSettings"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2079,7 +1925,95 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateBotLocaleResponse"
+         "properties": {
+          "botId": {
+           "maxLength": 10,
+           "minLength": 10,
+           "type": "string"
+          },
+          "botLocaleStatus": {
+           "enum": [
+            "Creating",
+            "Building",
+            "Built",
+            "ReadyExpressTesting",
+            "Failed",
+            "Deleting",
+            "NotBuilt",
+            "Importing",
+            "Processing"
+           ],
+           "type": "string"
+          },
+          "botVersion": {
+           "maxLength": 5,
+           "minLength": 5,
+           "type": "string"
+          },
+          "creationDateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "description": {
+           "maxLength": 2000,
+           "minLength": 0,
+           "type": "string"
+          },
+          "failureReasons": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "generativeAISettings": {
+           "$ref": "#/components/schemas/GenerativeAISettings"
+          },
+          "lastUpdatedDateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "localeId": {
+           "type": "string"
+          },
+          "localeName": {
+           "type": "string"
+          },
+          "nluIntentConfidenceThreshold": {
+           "maximum": 1,
+           "minimum": 0,
+           "type": "number"
+          },
+          "recommendedActions": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "speechDetectionSensitivity": {
+           "enum": [
+            "Default",
+            "HighNoiseTolerance",
+            "MaximumNoiseTolerance"
+           ],
+           "type": "string"
+          },
+          "speechRecognitionSettings": {
+           "$ref": "#/components/schemas/SpeechRecognitionSettings"
+          },
+          "unifiedSpeechSettings": {
+           "$ref": "#/components/schemas/UnifiedSpeechSettings"
+          },
+          "voiceSettings": {
+           "$ref": "#/components/schemas/VoiceSettings"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2147,7 +2081,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -2199,7 +2134,19 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -2275,7 +2222,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },

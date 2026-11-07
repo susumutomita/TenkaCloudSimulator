@@ -201,78 +201,6 @@
     ],
     "type": "object"
    },
-   "CreateAppResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "app": {
-      "$ref": "#/components/schemas/App"
-     }
-    },
-    "required": [
-     "app"
-    ],
-    "type": "object"
-   },
-   "CreateResiliencyPolicyResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "policy": {
-      "$ref": "#/components/schemas/ResiliencyPolicy"
-     }
-    },
-    "required": [
-     "policy"
-    ],
-    "type": "object"
-   },
-   "DeleteAppResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "appArn": {
-      "type": "string"
-     }
-    },
-    "required": [
-     "appArn"
-    ],
-    "type": "object"
-   },
-   "DeleteResiliencyPolicyResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "policyArn": {
-      "type": "string"
-     }
-    },
-    "required": [
-     "policyArn"
-    ],
-    "type": "object"
-   },
-   "DescribeAppResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "app": {
-      "$ref": "#/components/schemas/App"
-     }
-    },
-    "required": [
-     "app"
-    ],
-    "type": "object"
-   },
-   "DescribeResiliencyPolicyResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "policy": {
-      "$ref": "#/components/schemas/ResiliencyPolicy"
-     }
-    },
-    "required": [
-     "policy"
-    ],
-    "type": "object"
-   },
    "EventSubscription": {
     "additionalProperties": false,
     "properties": {
@@ -314,58 +242,6 @@
      "rpoInSecs",
      "rtoInSecs"
     ],
-    "type": "object"
-   },
-   "ListAppsResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "appSummaries": {
-      "items": {
-       "$ref": "#/components/schemas/AppSummary"
-      },
-      "type": "array"
-     },
-     "nextToken": {
-      "type": "string"
-     }
-    },
-    "required": [
-     "appSummaries"
-    ],
-    "type": "object"
-   },
-   "ListResiliencyPoliciesResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "nextToken": {
-      "type": "string"
-     },
-     "resiliencyPolicies": {
-      "items": {
-       "$ref": "#/components/schemas/ResiliencyPolicy"
-      },
-      "type": "array"
-     }
-    },
-    "required": [
-     "resiliencyPolicies"
-    ],
-    "type": "object"
-   },
-   "ListTagsForResourceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "tags": {
-      "additionalProperties": {
-       "maxLength": 256,
-       "minLength": 0,
-       "type": "string"
-      },
-      "maxProperties": 50,
-      "minProperties": 1,
-      "type": "object"
-     }
-    },
     "type": "object"
    },
    "PermissionModel": {
@@ -462,40 +338,6 @@
      }
     },
     "type": "object"
-   },
-   "TagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UntagResourceResponse": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "UpdateAppResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "app": {
-      "$ref": "#/components/schemas/App"
-     }
-    },
-    "required": [
-     "app"
-    ],
-    "type": "object"
-   },
-   "UpdateResiliencyPolicyResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "policy": {
-      "$ref": "#/components/schemas/ResiliencyPolicy"
-     }
-    },
-    "required": [
-     "policy"
-    ],
-    "type": "object"
    }
   }
  },
@@ -589,7 +431,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateAppResponse"
+         "properties": {
+          "app": {
+           "$ref": "#/components/schemas/App"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -697,7 +544,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateResiliencyPolicyResponse"
+         "properties": {
+          "policy": {
+           "$ref": "#/components/schemas/ResiliencyPolicy"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -766,7 +618,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteAppResponse"
+         "properties": {
+          "appArn": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -832,7 +689,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteResiliencyPolicyResponse"
+         "properties": {
+          "policyArn": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -893,7 +755,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DescribeAppResponse"
+         "properties": {
+          "app": {
+           "$ref": "#/components/schemas/App"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -954,7 +821,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DescribeResiliencyPolicyResponse"
+         "properties": {
+          "policy": {
+           "$ref": "#/components/schemas/ResiliencyPolicy"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1064,7 +936,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListAppsResponse"
+         "properties": {
+          "appSummaries": {
+           "items": {
+            "$ref": "#/components/schemas/AppSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1131,7 +1014,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListResiliencyPoliciesResponse"
+         "properties": {
+          "nextToken": {
+           "type": "string"
+          },
+          "resiliencyPolicies": {
+           "items": {
+            "$ref": "#/components/schemas/ResiliencyPolicy"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1197,7 +1091,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UntagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1247,7 +1142,19 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 1,
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1321,7 +1228,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/TagResourceResponse"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -1411,7 +1319,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateAppResponse"
+         "properties": {
+          "app": {
+           "$ref": "#/components/schemas/App"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1505,7 +1418,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/UpdateResiliencyPolicyResponse"
+         "properties": {
+          "policy": {
+           "$ref": "#/components/schemas/ResiliencyPolicy"
+          }
+         },
+         "type": "object"
         }
        }
       },

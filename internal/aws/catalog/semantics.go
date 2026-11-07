@@ -722,6 +722,11 @@ func (q *request) update() (map[string]any, error) {
 	for key, value := range q.op.Set {
 		r.Document[key] = q.generated(value, r, parent)
 	}
+	if q.op.Merged != nil {
+		if err := q.op.Merged(r.Document); err != nil {
+			return nil, err
+		}
+	}
 	if err := q.checkRefs(res, r.Document); err != nil {
 		return nil, err
 	}

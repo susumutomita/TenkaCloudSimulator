@@ -81,11 +81,16 @@ export default function CatalogView({region,request,catalog,onSaving}){
   const {path,options}=buildCatalogRequest(service,op,input,region);
   const response=await request(path,options);const text=await response.text();return text?JSON.parse(text):{};
  }
- // Responses carry serialized keys (nameWire/idWire/arnWire).
- const identity=item=>item?.[resource?.nameWire]||item?.[resource?.idWire]||item?.[resource?.arnWire]||'';
+ // List rows carry the list's own serialized identity keys, which may differ
+ // from the read shape's (nameWire/idWire/arnWire).
+ const rowKeys=(res)=>{const l=res?.operations.list;
+  if(l?.valueItems){const arn=l.valueMember===res.arnWire;return {name:arn?'':l.valueMember,id:'',arn:arn?l.valueMember:''}}
+  return {name:l?.itemName||res?.nameWire,id:l?.itemId||res?.idWire,arn:l?.itemArn||res?.arnWire}};
+ const keys=rowKeys(resource);
+ const identity=item=>item?.[keys.name]||item?.[keys.id]||item?.[keys.arn]||'';
  const lookupValue=(item,op)=>{
-  const member=op.lookup;if(member===resource.arnMember||/arn$/i.test(member))return item[resource.arnWire]||item[member];
-  if(member===resource.idMember)return item[resource.idWire];return item[resource.nameWire]||item[member]||item[resource.idWire]||item[resource.arnWire];
+  const member=op.lookup;if(member===resource.arnMember||/arn$/i.test(member))return item[keys.arn]||item[member];
+  if(member===resource.idMember)return item[keys.id];return item[keys.name]||item[member]||item[keys.id]||item[keys.arn]||identity(item);
  };
  const parentInput=op=>op?.parent&&parent?{[op.parent]:parent}:{};
  // Some official lists return plain ARNs or names; each becomes an item
@@ -95,7 +100,7 @@ export default function CatalogView({region,request,catalog,onSaving}){
   const list=parentResource?.operations.list;if(!list)return '';
   const page=await call(list,{});if(!valid(epoch))return '';
   const rows=listRows(list,page);setParents(rows);
-  const keep=rows.some(r=>(r[parentResource.idWire]||r[parentResource.nameWire])===preferred)?preferred:(rows[0]?.[parentResource.idWire]||rows[0]?.[parentResource.nameWire]||'');
+  const pk=rowKeys(parentResource);const keep=rows.some(r=>(r[pk.id]||r[pk.name])===preferred)?preferred:(rows[0]?.[pk.id]||rows[0]?.[pk.name]||'');
   setParent(keep);return keep;
  }
  // A selection passes its parent explicitly: the state update is not yet
@@ -154,8 +159,8 @@ export default function CatalogView({region,request,catalog,onSaving}){
  if(descriptorError)return <Alert type="error">{descriptorError}</Alert>;
  if(services===null)return <Box>{t('Loading','読み込み中')}</Box>;
  if(!services.length)return <Alert type="info">{t('No catalog services are enabled.','有効なカタログサービスはありません。')}</Alert>;
- const columns=[{id:'name',header:t('Name or identifier','名前または識別子'),cell:item=><Link onFollow={e=>{e.preventDefault();inspect(item)}} href="#">{item[resource.nameWire]||item[resource.idWire]||identity(item)}</Link>},
-  {id:'arn',header:'ARN',cell:item=>item[resource.arnWire]||'-'}];
+ const columns=[{id:'name',header:t('Name or identifier','名前または識別子'),cell:item=><Link onFollow={e=>{e.preventDefault();inspect(item)}} href="#">{identity(item)}</Link>},
+  {id:'arn',header:'ARN',cell:item=>item[keys.arn]||'-'}];
  return <ContentLayout header={<Header variant="h1" description={t('Bounded configuration metadata through each service\'s native API. Unlisted official operations return HTTP 501.','各サービスのネイティブ API で扱う、範囲を限定した設定メタデータです。一覧にない公式操作は HTTP 501 を返します。')}
    actions={<Link external href="/_simulator/docs/catalog.html">{t('API reference','API リファレンス')}</Link>}>{t('AWS service catalog','AWS サービスカタログ')}</Header>}>
   <SpaceBetween size="l">
@@ -165,7 +170,7 @@ export default function CatalogView({region,request,catalog,onSaving}){
    {notice&&<Alert type="success" dismissible onDismiss={()=>setNotice('')}>{notice}</Alert>}
    <Tabs activeTabId={resource.kind} onChange={e=>{if(!busy){setKind(e.detail.activeTabId);setParent('')}}} tabs={service.resources.map(r=>({id:r.kind,label:r.kind}))}/>
    {parentResource&&<FormField label={parentResource.kind}><Select selectedOption={parent?{value:parent,label:parent}:null} placeholder={t('Create a parent resource first','先に親リソースを作成してください')} disabled={busy||!parents.length}
-     onChange={e=>{const chosen=e.detail.selectedOption.value;setParent(chosen);load('',chosen)}} options={parents.map(p=>{const v=p[parentResource.idWire]||p[parentResource.nameWire];return {value:v,label:p[parentResource.nameWire]||v}})}/></FormField>}
+     onChange={e=>{const chosen=e.detail.selectedOption.value;setParent(chosen);load('',chosen)}} options={parents.map(p=>{const pk=rowKeys(parentResource);const v=p[pk.id]||p[pk.name];return {value:v,label:p[pk.name]||v}})}/></FormField>}
    {mode==='detail'?<Container header={<Header variant="h2" actions={<Button onClick={()=>load()}>{t('Back to list','一覧に戻る')}</Button>}>{t('Details','詳細')}</Header>}>
      {loading?<Box>{t('Loading','読み込み中')}</Box>:detail?<SpaceBetween size="m"><KeyValuePairs columns={2} items={Object.entries(detail).filter(([,v])=>isScalar(v)).map(([k,v])=>({label:k,value:display(v)}))}/>
       {Object.entries(detail).filter(([,v])=>!isScalar(v)).map(([k,v])=><FormField key={k} label={k}><pre className="catalog-json">{JSON.stringify(v,null,2)}</pre></FormField>)}

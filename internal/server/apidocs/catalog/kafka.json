@@ -235,62 +235,6 @@
     },
     "type": "object"
    },
-   "CreateClusterResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "clusterArn": {
-      "type": "string"
-     },
-     "clusterName": {
-      "type": "string"
-     },
-     "state": {
-      "enum": [
-       "ACTIVE",
-       "CREATING",
-       "DELETING",
-       "FAILED",
-       "HEALING",
-       "MAINTENANCE",
-       "REBOOTING_BROKER",
-       "UPDATING"
-      ],
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "DeleteClusterResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "clusterArn": {
-      "type": "string"
-     },
-     "state": {
-      "enum": [
-       "ACTIVE",
-       "CREATING",
-       "DELETING",
-       "FAILED",
-       "HEALING",
-       "MAINTENANCE",
-       "REBOOTING_BROKER",
-       "UPDATING"
-      ],
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "DescribeClusterResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "clusterInfo": {
-      "$ref": "#/components/schemas/ClusterInfo"
-     }
-    },
-    "type": "object"
-   },
    "EBSStorageInfo": {
     "additionalProperties": false,
     "properties": {
@@ -392,33 +336,6 @@
     "required": [
      "enabledInBroker"
     ],
-    "type": "object"
-   },
-   "ListClustersResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "clusterInfoList": {
-      "items": {
-       "$ref": "#/components/schemas/ClusterInfo"
-      },
-      "type": "array"
-     },
-     "nextToken": {
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "ListTagsForResourceResponse": {
-    "additionalProperties": false,
-    "properties": {
-     "tags": {
-      "additionalProperties": {
-       "type": "string"
-      },
-      "type": "object"
-     }
-    },
     "type": "object"
    },
    "LoggingInfo": {
@@ -737,7 +654,18 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListClustersResponse"
+         "properties": {
+          "clusterInfoList": {
+           "items": {
+            "$ref": "#/components/schemas/ClusterInfo"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -854,7 +782,28 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CreateClusterResponse"
+         "properties": {
+          "clusterArn": {
+           "type": "string"
+          },
+          "clusterName": {
+           "type": "string"
+          },
+          "state": {
+           "enum": [
+            "ACTIVE",
+            "CREATING",
+            "DELETING",
+            "FAILED",
+            "HEALING",
+            "MAINTENANCE",
+            "REBOOTING_BROKER",
+            "UPDATING"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -913,7 +862,25 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteClusterResponse"
+         "properties": {
+          "clusterArn": {
+           "type": "string"
+          },
+          "state": {
+           "enum": [
+            "ACTIVE",
+            "CREATING",
+            "DELETING",
+            "FAILED",
+            "HEALING",
+            "MAINTENANCE",
+            "REBOOTING_BROKER",
+            "UPDATING"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -963,7 +930,12 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DescribeClusterResponse"
+         "properties": {
+          "clusterInfo": {
+           "$ref": "#/components/schemas/ClusterInfo"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -1068,7 +1040,15 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
         }
        }
       },

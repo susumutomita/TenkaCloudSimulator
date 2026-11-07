@@ -1,23 +1,6 @@
 {
  "components": {
   "schemas": {
-   "DeleteLexiconOutput": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
-   },
-   "GetLexiconOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "Lexicon": {
-      "$ref": "#/components/schemas/Lexicon"
-     },
-     "LexiconAttributes": {
-      "$ref": "#/components/schemas/LexiconAttributes"
-     }
-    },
-    "type": "object"
-   },
    "Lexicon": {
     "additionalProperties": false,
     "properties": {
@@ -113,28 +96,6 @@
      }
     },
     "type": "object"
-   },
-   "ListLexiconsOutput": {
-    "additionalProperties": false,
-    "properties": {
-     "Lexicons": {
-      "items": {
-       "$ref": "#/components/schemas/LexiconDescription"
-      },
-      "type": "array"
-     },
-     "NextToken": {
-      "maxLength": 4096,
-      "minLength": 0,
-      "type": "string"
-     }
-    },
-    "type": "object"
-   },
-   "PutLexiconOutput": {
-    "additionalProperties": false,
-    "properties": {},
-    "type": "object"
    }
   }
  },
@@ -176,7 +137,20 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ListLexiconsOutput"
+         "properties": {
+          "Lexicons": {
+           "items": {
+            "$ref": "#/components/schemas/LexiconDescription"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "maxLength": 4096,
+           "minLength": 0,
+           "type": "string"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -228,7 +202,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/DeleteLexiconOutput"
+         "properties": {},
+         "type": "object"
         }
        }
       },
@@ -278,7 +253,15 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/GetLexiconOutput"
+         "properties": {
+          "Lexicon": {
+           "$ref": "#/components/schemas/Lexicon"
+          },
+          "LexiconAttributes": {
+           "$ref": "#/components/schemas/LexiconAttributes"
+          }
+         },
+         "type": "object"
         }
        }
       },
@@ -345,7 +328,8 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/PutLexiconOutput"
+         "properties": {},
+         "type": "object"
         }
        }
       },
