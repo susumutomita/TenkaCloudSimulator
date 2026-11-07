@@ -6623,6 +6623,330 @@
      "expect_invariant": "NoRejectedMutation"
     }
    ]
+  },
+  {
+   "id": "STSSessionLifecycle",
+   "model": "formal/STSSessionLifecycle.tla",
+   "config": "formal/STSSessionLifecycle.cfg",
+   "bounds": "Two session-token slots, one role with two generations, clock0..3, session lifetime1..2ticks, chaining limit1tick; independent Boolean admission, signature, selector, storage, tenant and permission checks.",
+   "properties": [
+    "TypeOK",
+    "IssueRequiresAllGuards",
+    "UseRequiresAllGuards"
+   ],
+   "limits": "Finite abstract guard/state correspondence only. Assumes coherent generation-and-policy authorization snapshot at use; SQL single-statement snapshots, Go concurrency, parser details, cryptographic SigV4, HTTP dispatch, real time, cross-process isolation and randomness require independent implementation tests. No liveness or Go refinement proof. Restart clears issued state; symbolic token slots may be reused after restart, not evidence of real credential uniqueness. Scoped baseline plus eight config-guard variants previously passed; source-edit registry variants need fresh exact-HEAD gate evidence.",
+   "source_scope": [
+    "internal/aws/sts.go",
+    "internal/aws/sts_roles.go",
+    "internal/aws/sts_credentials.go",
+    "internal/aws/sts_signature.go",
+    "internal/aws/iam_roles.go",
+    "internal/aws/ssm.go",
+    "internal/aws/iam_query.go",
+    "internal/aws/iam_managed_query.go",
+    "internal/aws/cloudformation.go",
+    "internal/server/access.go",
+    "internal/server/access_sdk.go"
+   ],
+   "mutants": [
+    {
+     "id": "SkipGeneration",
+     "edits": [
+      {
+       "old": "\\/ SkipGeneration)",
+       "new": "\\/ TRUE)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "UseRequiresAllGuards"
+    },
+    {
+     "id": "SkipExpiry",
+     "edits": [
+      {
+       "old": "\\/ SkipExpiry)",
+       "new": "\\/ TRUE)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "UseRequiresAllGuards"
+    },
+    {
+     "id": "SkipSignature",
+     "edits": [
+      {
+       "old": "\\/ SkipSignature)",
+       "new": "\\/ TRUE)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "UseRequiresAllGuards"
+    },
+    {
+     "id": "SkipTrust",
+     "edits": [
+      {
+       "old": "\\/ SkipTrust)",
+       "new": "\\/ TRUE)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "IssueRequiresAllGuards"
+    },
+    {
+     "id": "SkipExternal",
+     "edits": [
+      {
+       "old": "\\/ SkipExternal)",
+       "new": "\\/ TRUE)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "IssueRequiresAllGuards"
+    },
+    {
+     "id": "SkipPermission",
+     "edits": [
+      {
+       "old": "\\/ SkipPermission)",
+       "new": "\\/ TRUE)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "IssueRequiresAllGuards"
+    },
+    {
+     "id": "SkipTenant",
+     "edits": [
+      {
+       "old": "\\/ SkipTenant)",
+       "new": "\\/ TRUE)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "UseRequiresAllGuards"
+    },
+    {
+     "id": "SkipChain",
+     "edits": [
+      {
+       "old": "\\/ SkipChain)",
+       "new": "\\/ TRUE)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "IssueRequiresAllGuards"
+    }
+   ]
+  },
+  {
+   "id": "CFNEventHistory",
+   "model": "formal/CFNEventHistory.tla",
+   "config": "formal/CFNEventHistory.cfg",
+   "bounds": "Two canonical reachable create/delete history seeds; three generations (old/current same-name East and live West peer), one resource per stack, four events per operation, sequence1..20, deleted retention1, page size2; one write or one snapshot read with name/ID, two regions, authorization Boolean and cursor0..21.",
+   "properties": [
+    "TypeOK",
+    "PendingFrameUnchanged",
+    "FailureAtomic",
+    "LivePeerPreserved",
+    "EventParentExists",
+    "RetentionBound",
+    "LatestDeletedRetained",
+    "SuccessfulLifecycleExact",
+    "HistoryTracksLatest",
+    "CleanupAfterAllWrites",
+    "ReadSnapshotUnchanged",
+    "NoUnauthorizedDisclosure",
+    "ResolvedGenerationExact",
+    "CursorScoped",
+    "PageExact",
+    "NextCursorExact"
+   ],
+   "limits": "Finite event/history/transaction and snapshot-page correspondence only, not all reachable SQL histories. Assumes coherent read snapshot, unique opaque IDs, FK behavior, resource-handler effects and supplied IAM verdict. No SQL/Go/HTTP/XML/parser/cryptographic/concurrency/crash/restart refinement, event-payload privacy, actual100-row/100-generation quota proof, AWS asynchronous lifecycle or liveness proof. Existing final cleanup models remain unchanged; native ignored-write/late-reinsert/rollback/SDK tests are independent obligations.",
+   "source_scope": [
+    "internal/aws/cloudformation_events.go",
+    "internal/aws/cloudformation.go",
+    "internal/aws/cloudformation_events_test.go",
+    "internal/aws/cloudformation_events_cleanup_order_test.go"
+   ],
+   "mutants": [
+    {
+     "id": "PublishPending",
+     "edits": [
+      {
+       "old": "data' = data (* PendingPublicationBoundary *)",
+       "new": "data' = delivered (* PendingPublicationBoundary *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PendingFrameUnchanged"
+    },
+    {
+     "id": "PublishFailedTransaction",
+     "edits": [
+      {
+       "old": "data' = before (* RollbackAllTables *)",
+       "new": "data' = work (* RollbackAllTables *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "FailureAtomic"
+    },
+    {
+     "id": "SkipEventWriteACK",
+     "edits": [
+      {
+       "old": "eventWritten (* EventWriteACK *)",
+       "new": "TRUE (* EventWriteACK *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "SuccessfulLifecycleExact"
+    },
+    {
+     "id": "SkipHistoryWriteACK",
+     "edits": [
+      {
+       "old": "historyWritten (* HistoryWriteACK *)",
+       "new": "TRUE (* HistoryWriteACK *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "HistoryTracksLatest"
+    },
+    {
+     "id": "SkipDeletedCountACK",
+     "edits": [
+      {
+       "old": "Cardinality(work.deleted) <= 1 (* DeletedCountACK *)",
+       "new": "TRUE (* DeletedCountACK *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RetentionBound"
+    },
+    {
+     "id": "PruneLiveHistory",
+     "edits": [
+      {
+       "old": "ELSE oldest (* DeletedOnlyRetention *)",
+       "new": "ELSE oldest \\cup {\"Peer\"} (* DeletedOnlyRetention *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "LivePeerPreserved"
+    },
+    {
+     "id": "LeaveOrphanEvents",
+     "edits": [
+      {
+       "old": "{e \\in marked.events : e.gen \\notin removed} (* CascadeEvents *)",
+       "new": "marked.events (* CascadeEvents *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "EventParentExists"
+    },
+    {
+     "id": "SkipSelectedHistoryACK",
+     "edits": [
+      {
+       "old": "\"Current\" \\in work.deleted) (* SelectedHistoryACK *)",
+       "new": "TRUE) (* SelectedHistoryACK *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "LatestDeletedRetained"
+    },
+    {
+     "id": "AcknowledgeBeforeFinalWrites",
+     "edits": [
+      {
+       "old": "(\"Current\" \\notin work.live /\\ \"Current\" \\notin work.claims\n                   /\\ \"Current\" \\notin work.resources) (* FinalAfterAllWritesACK *)",
+       "new": "earlyAck (* FinalAfterAllWritesACK *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CleanupAfterAllWrites"
+    },
+    {
+     "id": "SkipAuthorization",
+     "edits": [
+      {
+       "old": "authorized (* ExplicitAuthorization *)",
+       "new": "TRUE (* ExplicitAuthorization *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoUnauthorizedDisclosure"
+    },
+    {
+     "id": "ResolveDeletedByName",
+     "edits": [
+      {
+       "old": "ELSE named (* LiveNameResolution *)",
+       "new": "ELSE IF wanted # \"Absent\" /\\ requestRegion = \"East\" THEN \"Old\" ELSE named (* LiveNameResolution *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ResolvedGenerationExact"
+    },
+    {
+     "id": "SkipRegion",
+     "edits": [
+      {
+       "old": "Region(wanted) = requestRegion (* ExactRegion *)",
+       "new": "TRUE (* ExactRegion *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ResolvedGenerationExact"
+    },
+    {
+     "id": "SkipCursorGeneration",
+     "edits": [
+      {
+       "old": "/\\ e.gen = resolved} (* CursorGenerationScope *)",
+       "new": "/\\ TRUE} (* CursorGenerationScope *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CursorScoped"
+    },
+    {
+     "id": "IgnoreCursorBound",
+     "edits": [
+      {
+       "old": "RowsBefore(before, resolved, cursorBound) (* StableCursorBound *)",
+       "new": "RowsBefore(before, resolved, 21) (* StableCursorBound *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PageExact"
+    },
+    {
+     "id": "ReversePageOrder",
+     "edits": [
+      {
+       "old": "FirstTwo(rows) (* DescendingPage *)",
+       "new": "(LET canonical == FirstTwo(rows) IN IF Len(canonical) = 2 THEN <<canonical[2], canonical[1]>> ELSE canonical) (* DescendingPage *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PageExact"
+    },
+    {
+     "id": "ReturnFirstRowCursor",
+     "edits": [
+      {
+       "old": "selected[Len(selected)] ELSE 0 (* LastReturnedCursor *)",
+       "new": "selected[1] ELSE 0 (* LastReturnedCursor *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NextCursorExact"
+    }
+   ]
   }
  ]
 }

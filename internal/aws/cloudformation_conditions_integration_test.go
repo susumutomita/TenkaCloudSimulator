@@ -40,6 +40,12 @@ func stackCryptoParameters(enabled bool) map[string]string {
 }
 
 func stackConditionalDBFrame(t *testing.T, db *sql.DB) string {
+	return stackConditionalFrameExceptHistory(t, db, "")
+}
+
+// Ignore only an explicitly verified completed generation when comparing a
+// successful lifecycle with its baseline. Failure/peer checks exclude nothing.
+func stackConditionalFrameExceptHistory(t *testing.T, db *sql.DB, completedID string) string {
 	t.Helper()
 	names, err := db.Query(`SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name`)
 	if err != nil {
@@ -59,7 +65,13 @@ func stackConditionalDBFrame(t *testing.T, db *sql.DB) string {
 	names.Close()
 	h := sha256.New()
 	for _, table := range tables {
-		rows, err := db.Query(`SELECT * FROM "` + strings.ReplaceAll(table, `"`, `""`) + `"`)
+		query := `SELECT * FROM "` + strings.ReplaceAll(table, `"`, `""`) + `"`
+		var args []any
+		if completedID != "" && (table == "aws_cfn_events" || table == "aws_cfn_event_history") {
+			query += " WHERE stack_id<>?"
+			args = append(args, completedID)
+		}
+		rows, err := db.Query(query, args...)
 		if err != nil {
 			t.Fatal(err)
 		}

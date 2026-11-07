@@ -15,8 +15,10 @@ machine-discovered semantic coverage. A newly added implementation file is not
 covered merely because an existing model passes: its exact path must have an
 appropriate reviewed scope mapping and property argument.
 
-The combined registry requires **55 baselines/450 required named mutation
-controls (505 executions)**. Main's 52/415 inventory is preserved: the earlier
+The combined registry requires **57 baselines/474 required named mutation
+controls (531 executions)**. All 55 public-base entries are unchanged. STS adds
+one baseline/eight issue-use guard controls, and [CFN event history](formal-cfn-event-history.md)
+adds one baseline/sixteen transaction, retention and scoped-read controls. Main's 52/415 inventory is preserved: the earlier
 50/398 plus CatalogResourceLifecycle (twelve controls) and CatalogConsoleEpoch
 (five). LoginInputIntent adds one model and fourteen controls. SNSAdmission/SNSLifecycle
 add two finite normalized-admission/local-record models and twenty-one controls,

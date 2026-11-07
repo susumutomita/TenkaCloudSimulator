@@ -960,6 +960,69 @@ REQUIRED_SOURCE_SCOPES.update({'SNSAdmission': {'internal/aws/s3.go',
                   'internal/server/server.go',
                   'internal/server/sns_test.go'}})
 
+# STS guard lifecycle requirements. Existing service requirements stay intact.
+BASE_MODELS.add('STSSessionLifecycle')
+BASE_INVARIANTS['STSSessionLifecycle'] = {'UseRequiresAllGuards', 'IssueRequiresAllGuards', 'TypeOK'}
+REQUIRED_MUTANTS['STSSessionLifecycle'] = {'SkipChain',
+ 'SkipExpiry',
+ 'SkipExternal',
+ 'SkipGeneration',
+ 'SkipPermission',
+ 'SkipSignature',
+ 'SkipTenant',
+ 'SkipTrust'}
+REQUIRED_SOURCE_SCOPES['STSSessionLifecycle'] = {'internal/aws/cloudformation.go',
+ 'internal/aws/iam_managed_query.go',
+ 'internal/aws/iam_query.go',
+ 'internal/aws/iam_roles.go',
+ 'internal/aws/ssm.go',
+ 'internal/aws/sts.go',
+ 'internal/aws/sts_credentials.go',
+ 'internal/aws/sts_roles.go',
+ 'internal/aws/sts_signature.go',
+ 'internal/server/access.go',
+ 'internal/server/access_sdk.go'}
+
+
+# Synchronous local CloudFormation event/history requirements.
+BASE_MODELS.add('CFNEventHistory')
+BASE_INVARIANTS['CFNEventHistory'] = {'CleanupAfterAllWrites',
+ 'CursorScoped',
+ 'EventParentExists',
+ 'FailureAtomic',
+ 'HistoryTracksLatest',
+ 'LatestDeletedRetained',
+ 'LivePeerPreserved',
+ 'NextCursorExact',
+ 'NoUnauthorizedDisclosure',
+ 'PageExact',
+ 'PendingFrameUnchanged',
+ 'ReadSnapshotUnchanged',
+ 'ResolvedGenerationExact',
+ 'RetentionBound',
+ 'SuccessfulLifecycleExact',
+ 'TypeOK'}
+REQUIRED_MUTANTS['CFNEventHistory'] = {'AcknowledgeBeforeFinalWrites',
+ 'IgnoreCursorBound',
+ 'LeaveOrphanEvents',
+ 'PruneLiveHistory',
+ 'PublishFailedTransaction',
+ 'PublishPending',
+ 'ResolveDeletedByName',
+ 'ReturnFirstRowCursor',
+ 'ReversePageOrder',
+ 'SkipAuthorization',
+ 'SkipCursorGeneration',
+ 'SkipDeletedCountACK',
+ 'SkipEventWriteACK',
+ 'SkipHistoryWriteACK',
+ 'SkipRegion',
+ 'SkipSelectedHistoryACK'}
+REQUIRED_SOURCE_SCOPES['CFNEventHistory'] = {'internal/aws/cloudformation.go',
+ 'internal/aws/cloudformation_events.go',
+ 'internal/aws/cloudformation_events_cleanup_order_test.go',
+ 'internal/aws/cloudformation_events_test.go'}
+
 IDENTIFIER = re.compile(r'^[A-Za-z][A-Za-z0-9_]*$')
 
 # TLC1.7.4 ModelConfig.ALL_KEYWORDS. A directive cannot masquerade as a

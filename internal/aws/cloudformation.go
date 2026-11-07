@@ -52,6 +52,9 @@ func NewStackStore(db *sql.DB) (*StackStore, error) {
 		return nil, err
 	}
 	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS aws_cfn_stacks(region TEXT NOT NULL,name TEXT NOT NULL,id TEXT NOT NULL UNIQUE,document TEXT NOT NULL,PRIMARY KEY(region,name)); CREATE TABLE IF NOT EXISTS aws_cfn_ownership(namespace TEXT NOT NULL,kind TEXT NOT NULL,physical_id TEXT NOT NULL,stack_id TEXT NOT NULL REFERENCES aws_cfn_stacks(id) ON DELETE RESTRICT,PRIMARY KEY(namespace,kind,physical_id));`)
+	if err == nil {
+		err = initStackEvents(db)
+	}
 	return &StackStore{db}, err
 }
 func taggedYAML(n *yaml.Node) (any, error) {
@@ -622,12 +625,24 @@ func (s *StackStore) Create(record StackRecord) error {
 	if _, err = tx.Exec("INSERT INTO aws_cfn_stacks VALUES(?,?,?,?)", record.Region, record.Name, record.ID, string(document)); err != nil {
 		return ssmFailure{"AlreadyExistsException", "Stack already exists."}
 	}
+	if err = beginStackEvents(tx, record); err != nil {
+		return err
+	}
+	if err = appendStackEvent(tx, record, nil, "CREATE_IN_PROGRESS"); err != nil {
+		return err
+	}
 	for _, r := range record.Resources {
+		if err = appendStackEvent(tx, record, &r, "CREATE_IN_PROGRESS"); err != nil {
+			return err
+		}
 		if stackAPIKind(r.Type) {
 			if err = claimStackAPI(tx, record, r); err != nil {
 				return err
 			}
 			if err = createStackAPI(context.Background(), tx, record, r); err != nil {
+				return err
+			}
+			if err = appendStackEvent(tx, record, &r, "CREATE_COMPLETE"); err != nil {
 				return err
 			}
 			continue
@@ -679,8 +694,14 @@ func (s *StackStore) Create(record StackRecord) error {
 		if err != nil {
 			return ssmFailure{"AlreadyExistsException", "A resource already exists or its creation was rejected."}
 		}
+		if err = appendStackEvent(tx, record, &r, "CREATE_COMPLETE"); err != nil {
+			return err
+		}
 	}
 	if err = saveStackAPIFingerprints(tx, &record); err != nil {
+		return err
+	}
+	if err = finishStackEvents(tx, record, false); err != nil {
 		return err
 	}
 	return tx.Commit()
@@ -748,8 +769,17 @@ func (s *StackStore) deleteChecked(region, name string, authorize func(StackReco
 	if err = checkStackAPIFingerprints(tx, records[0]); err != nil {
 		return err
 	}
+	if err = beginStackEvents(tx, records[0]); err != nil {
+		return err
+	}
+	if err = appendStackEvent(tx, records[0], nil, "DELETE_IN_PROGRESS"); err != nil {
+		return err
+	}
 	for i := len(records[0].Resources) - 1; i >= 0; i-- {
 		r := records[0].Resources[i]
+		if err = appendStackEvent(tx, records[0], &r, "DELETE_IN_PROGRESS"); err != nil {
+			return err
+		}
 		namespace := stackResourceNamespace(region, r.Type)
 		var owned int
 		if err = tx.QueryRow("SELECT count(*) FROM aws_cfn_ownership WHERE namespace=? AND kind=? AND physical_id=? AND stack_id=?", namespace, r.Type, r.PhysicalID, records[0].ID).Scan(&owned); err != nil {
@@ -779,6 +809,9 @@ func (s *StackStore) deleteChecked(region, name string, authorize func(StackReco
 		if err != nil {
 			return err
 		}
+		if err = appendStackEvent(tx, records[0], &r, "DELETE_COMPLETE"); err != nil {
+			return err
+		}
 	}
 	if _, err = tx.Exec("DELETE FROM aws_cfn_ownership WHERE stack_id=?", records[0].ID); err != nil {
 		return err
@@ -794,6 +827,11 @@ func (s *StackStore) deleteChecked(region, name string, authorize func(StackReco
 	if removed != 1 {
 		return errors.New("stack cleanup did not remove exactly the selected stack")
 	}
+	// Event completion and retention can trigger further writes. Finish them
+	// before the final acknowledgement checks; only commit may follow those.
+	if err = finishStackEvents(tx, records[0], true); err != nil {
+		return err
+	}
 	var remainingStack, remainingClaims int
 	if err = tx.QueryRow("SELECT (SELECT count(*) FROM aws_cfn_stacks WHERE id=?),(SELECT count(*) FROM aws_cfn_ownership WHERE stack_id=?)", records[0].ID, records[0].ID).Scan(&remainingStack, &remainingClaims); err != nil {
 		return err
@@ -802,7 +840,7 @@ func (s *StackStore) deleteChecked(region, name string, authorize func(StackReco
 		return errors.New("stack cleanup postcondition failed")
 	}
 	// Verify physical effects after every cleanup write. A trigger on a later
-	// resource/claim/stack deletion must not resurrect an acknowledged resource.
+	// resource/claim/stack/event/history write must not resurrect a resource.
 	for _, resource := range records[0].Resources {
 		var remaining int
 		switch resource.Type {
@@ -893,8 +931,8 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	action := form.Get("Action")
-	if action != "CreateStack" && action != "DescribeStacks" && action != "DeleteStack" {
-		cfnError(w, ssmFailure{"NotImplemented", "Only CreateStack, DescribeStacks and DeleteStack are supported."})
+	if action != "CreateStack" && action != "DescribeStacks" && action != "DeleteStack" && action != "DescribeStackEvents" {
+		cfnError(w, ssmFailure{"NotImplemented", "Only CreateStack, DescribeStacks, DescribeStackEvents and DeleteStack are supported."})
 		return
 	}
 	if form.Get("Version") != "2010-05-15" {
@@ -935,6 +973,11 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 				fail("CreateStack-only field.")
 				return
 			}
+		case "NextToken":
+			if action != "DescribeStackEvents" {
+				fail("NextToken is supported only by DescribeStackEvents.")
+				return
+			}
 		case "Action", "Version", "StackName":
 		default:
 			if action != "CreateStack" || !regexp.MustCompile(`^Parameters\.member\.[0-9]+\.(ParameterKey|ParameterValue)$|^Capabilities\.member\.[0-9]+$|^Tags\.member\.[0-9]+\.(Key|Value)$`).MatchString(key) {
@@ -944,7 +987,8 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	// Exercise IAM permission is not permission to read host-private answers.
-	if action == "DescribeStacks" && r.Header.Get("X-Simulator-Access-Role") == "participant" {
+	_, nativeSDK := SDKIdentityFromContext(r.Context())
+	if (action == "DescribeStacks" || action == "DescribeStackEvents") && r.Header.Get("X-Simulator-Access-Role") == "participant" && !nativeSDK {
 		cfnError(w, ssmFailure{"AccessDenied", "Stack outputs are reserved for the host."})
 		return
 	}
@@ -957,7 +1001,10 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 	var policy core.Policy
 	if principal != core.Administrator {
 		var found bool
-		policy, found, err = g.Identities.Policy(principal)
+		policy, found = SDKPolicyFromContext(r.Context())
+		if !found {
+			policy, found, err = g.Identities.Policy(principal)
+		}
 		if err != nil {
 			cfnError(w, err)
 			return
@@ -1036,6 +1083,18 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		cfnResponse(w, action, "<StackId>"+xmlText(record.ID)+"</StackId>")
+	case "DescribeStackEvents":
+		events, token, e := g.Stacks.Events(region, name, form.Get("NextToken"), authorize)
+		if e != nil {
+			cfnError(w, e)
+			return
+		}
+		result, e := stackEventsXML(events, token)
+		if e != nil {
+			cfnError(w, e)
+			return
+		}
+		cfnResponse(w, action, result)
 	case "DescribeStacks":
 		if name == "" {
 			if err = authorize("*"); err != nil {
