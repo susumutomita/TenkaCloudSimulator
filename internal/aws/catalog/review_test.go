@@ -400,3 +400,20 @@ func TestPageTokensFitEveryOfficialTokenMember(t *testing.T) {
 		}
 	}
 }
+
+// Fixed list inputs are published, so the console sends Bedrock's
+// typeEquals APPLICATION like SDK clients must.
+func TestDescriptorsPublishFixedListInputs(t *testing.T) {
+	h := newHarness(t, bedrock)
+	for _, d := range h.engine.Describe() {
+		for _, r := range d.Resources {
+			if r.Kind == "inferenceProfile" {
+				if got := r.Ops["list"].Fixed; got["typeEquals"] != "APPLICATION" {
+					t.Fatalf("inference profile list fixed inputs %v", got)
+				}
+				return
+			}
+		}
+	}
+	t.Fatal("no inference profile descriptor")
+}

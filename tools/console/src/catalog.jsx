@@ -77,8 +77,10 @@ export default function CatalogView({region,request,catalog,onSaving}){
    .catch(e=>{if(live){setServices([]);setDescriptorError(e.message)}});
   return ()=>{live=false};
  },[catalog?.descriptors]);
+ // Fixed members are the selection the bounded model serves; every request
+ // of the operation sends them, as SDK clients must.
  async function call(op,input){
-  const {path,options}=buildCatalogRequest(service,op,input,region);
+  const {path,options}=buildCatalogRequest(service,op,{...(op.fixed||{}),...input},region);
   const response=await request(path,options);const text=await response.text();return text?JSON.parse(text):{};
  }
  // List rows carry the list's own serialized identity keys, which may differ

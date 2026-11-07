@@ -54,6 +54,11 @@ type Op struct {
 	// Accept lists input members whose official effect is already implied by
 	// the bounded model (for example force on a resource without children).
 	Accept []string
+	// Fixed names input members a client must always send with these values,
+	// because the bounded model serves only that selection (for example
+	// Bedrock ListInferenceProfiles typeEquals APPLICATION). Descriptors
+	// publish them so first-party clients send the same request as SDKs.
+	Fixed map[string]any
 	// Names is a list input member of identifiers that must all exist; the
 	// list operation then returns exactly those resources in request order.
 	Names string

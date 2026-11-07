@@ -63,7 +63,7 @@ var bedrock = &Service{
 		{Name: "DeleteGuardrail", Kind: Delete, Resource: "guardrail", Lookup: "guardrailIdentifier", Accept: []string{"guardrailVersion"}, Check: guardrailDraft},
 		{Name: "CreateInferenceProfile", Kind: Create, Resource: "inferenceProfile", Check: inferenceProfileSource},
 		{Name: "GetInferenceProfile", Kind: Read, Resource: "inferenceProfile", Lookup: "inferenceProfileIdentifier"},
-		{Name: "ListInferenceProfiles", Kind: List, Resource: "inferenceProfile", Filters: map[string]string{"typeEquals": "type"}, Check: applicationProfiles},
+		{Name: "ListInferenceProfiles", Kind: List, Resource: "inferenceProfile", Filters: map[string]string{"typeEquals": "type"}, Check: applicationProfiles, Fixed: map[string]any{"typeEquals": "APPLICATION"}},
 		{Name: "DeleteInferenceProfile", Kind: Delete, Resource: "inferenceProfile", Lookup: "inferenceProfileIdentifier"},
 		{Name: "GetModelInvocationLoggingConfiguration", Kind: Read, Resource: "invocationLogging"},
 		{Name: "PutModelInvocationLoggingConfiguration", Kind: Put, Resource: "invocationLogging"},

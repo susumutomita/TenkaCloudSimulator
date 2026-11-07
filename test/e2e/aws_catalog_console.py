@@ -145,6 +145,17 @@ def run():
                 expect(page.get_by_text('GLUE', exact=True).first).to_be_visible()
                 page.get_by_role('button', name='Back to list').click()
                 queries.delete_data_catalog(Name='sdk_catalog')
+                # Fixed list inputs: Bedrock lists application profiles only.
+                models = team.client('bedrock')
+                profile = models.create_inference_profile(inferenceProfileName='sdk-profile', modelSource={'copyFrom': 'arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-v2'})['inferenceProfileArn']
+                page.get_by_role('button', name=re.compile('^Catalog service')).click()
+                page.get_by_role('option', name=re.compile('^Amazon Bedrock(?! AgentCore)')).click()
+                page.get_by_role('tab', name='inferenceProfile').click()
+                expect(page.get_by_role('link', name='sdk-profile')).to_be_visible()
+                page.get_by_role('link', name='sdk-profile').click()
+                expect(page.get_by_text(profile, exact=True).first).to_be_visible()
+                page.get_by_role('button', name='Back to list').click()
+                models.delete_inference_profile(inferenceProfileIdentifier=profile)
                 # ARN-only parents: Cloud Directory facets live under schema ARNs.
                 directory = team.client('clouddirectory')
                 schema = directory.create_schema(Name='sdk_org')['SchemaArn']
