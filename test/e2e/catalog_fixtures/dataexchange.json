@@ -1,0 +1,204 @@
+{
+ "client": "dataexchange",
+ "steps": [
+  {
+   "op": "create_data_set",
+   "args": {
+    "AssetType": "S3_SNAPSHOT",
+    "Name": "fixture-prices",
+    "Description": "Daily prices",
+    "Tags": {
+     "team": "a"
+    }
+   },
+   "save": {
+    "dataset": "Id",
+    "datasetArn": "Arn"
+   },
+   "expect": {
+    "Origin": "OWNED",
+    "Tags": {
+     "team": "a"
+    }
+   }
+  },
+  {
+   "op": "get_data_set",
+   "args": {
+    "DataSetId": "${dataset}"
+   },
+   "expect": {
+    "Name": "fixture-prices",
+    "AssetType": "S3_SNAPSHOT"
+   }
+  },
+  {
+   "op": "list_data_sets",
+   "args": {},
+   "expect": {
+    "DataSets#count": 1,
+    "DataSets[0].Id": "${dataset}"
+   }
+  },
+  {
+   "op": "list_data_sets",
+   "args": {
+    "Origin": "ENTITLED"
+   },
+   "expect": {
+    "DataSets#count": 0
+   }
+  },
+  {
+   "op": "update_data_set",
+   "args": {
+    "DataSetId": "${dataset}",
+    "Description": "Daily closing prices"
+   },
+   "expect": {
+    "Description": "Daily closing prices"
+   }
+  },
+  {
+   "op": "create_revision",
+   "args": {
+    "DataSetId": "${dataset}",
+    "Comment": "First drop"
+   },
+   "save": {
+    "revision": "Id"
+   },
+   "expect": {
+    "Finalized": false,
+    "DataSetId": "${dataset}"
+   }
+  },
+  {
+   "op": "get_revision",
+   "args": {
+    "DataSetId": "${dataset}",
+    "RevisionId": "${revision}"
+   },
+   "expect": {
+    "Comment": "First drop"
+   }
+  },
+  {
+   "op": "list_data_set_revisions",
+   "args": {
+    "DataSetId": "${dataset}"
+   },
+   "expect": {
+    "Revisions#count": 1
+   }
+  },
+  {
+   "op": "update_revision",
+   "args": {
+    "DataSetId": "${dataset}",
+    "RevisionId": "${revision}",
+    "Finalized": true
+   },
+   "expect": {
+    "Finalized": true
+   }
+  },
+  {
+   "op": "delete_data_set",
+   "args": {
+    "DataSetId": "${dataset}"
+   },
+   "error": "ConflictException"
+  },
+  {
+   "op": "list_tags_for_resource",
+   "args": {
+    "ResourceArn": "${datasetArn}"
+   },
+   "error": "UnknownOperationException",
+   "status": 501
+  },
+  {
+   "op": "create_job",
+   "args": {
+    "Type": "IMPORT_ASSETS_FROM_S3",
+    "Details": {
+     "ImportAssetsFromS3": {
+      "DataSetId": "${dataset}",
+      "RevisionId": "${revision}",
+      "AssetSources": [
+       {
+        "Bucket": "fixture-bucket",
+        "Key": "prices.csv"
+       }
+      ]
+     }
+    }
+   },
+   "error": "UnknownOperationException",
+   "status": 501
+  },
+  {
+   "op": "get_data_set",
+   "args": {
+    "DataSetId": "00000000000000000000000000000000"
+   },
+   "error": "ResourceNotFoundException"
+  }
+ ],
+ "isolation": [
+  {
+   "op": "list_data_sets",
+   "args": {},
+   "expect": {
+    "DataSets#count": 0
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "op": "get_data_set",
+   "args": {
+    "DataSetId": "${dataset}"
+   },
+   "expect": {
+    "Description": "Daily closing prices",
+    "Tags": {
+     "team": "a"
+    }
+   }
+  },
+  {
+   "op": "get_revision",
+   "args": {
+    "DataSetId": "${dataset}",
+    "RevisionId": "${revision}"
+   },
+   "expect": {
+    "Finalized": true
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "op": "delete_revision",
+   "args": {
+    "DataSetId": "${dataset}",
+    "RevisionId": "${revision}"
+   }
+  },
+  {
+   "op": "delete_data_set",
+   "args": {
+    "DataSetId": "${dataset}"
+   }
+  },
+  {
+   "op": "list_data_sets",
+   "args": {},
+   "expect": {
+    "DataSets#count": 0
+   }
+  }
+ ]
+}

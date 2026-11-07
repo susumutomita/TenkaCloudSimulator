@@ -206,9 +206,12 @@ def main():
         a.start()
         b.start()
         try:
-            capabilities = a.control('GET', '/_simulator/v1/capabilities')['services']['catalog']
+            summary = a.control('GET', '/_simulator/v1/capabilities')['services']['catalog']
+            capabilities = a.control('GET', summary['descriptors'])
+            assert {s['model'] for s in summary['services']} == {s['model'] for s in capabilities['services']}
             expected = {s['model']: set(s['operations']) for s in capabilities['services']}
-            assert set(expected) == {'amplify', 'codeconnections', 'ecr', 'stepfunctions'}, expected
+            expected = {model: ops for model, ops in expected.items() if model in {'amplify', 'codeconnections', 'ecr', 'stepfunctions'}}
+            assert len(expected) == 4, expected
             connection, host = codeconnections(a)
             machine = stepfunctions(a)
             repository = ecr(a)

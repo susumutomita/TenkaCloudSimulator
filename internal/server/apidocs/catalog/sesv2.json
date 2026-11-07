@@ -1,0 +1,1404 @@
+{
+ "components": {
+  "schemas": {
+   "ArchivingOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "ArchiveArn": {
+      "maxLength": 1011,
+      "minLength": 20,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ContactList": {
+    "additionalProperties": false,
+    "properties": {
+     "ContactListName": {
+      "type": "string"
+     },
+     "LastUpdatedTimestamp": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "type": "object"
+   },
+   "DashboardOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "EngagementMetrics": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DeliveryOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "MaxDeliverySeconds": {
+      "maximum": 50400,
+      "minimum": 300,
+      "type": "integer"
+     },
+     "SendingPoolName": {
+      "type": "string"
+     },
+     "TlsPolicy": {
+      "enum": [
+       "REQUIRE",
+       "OPTIONAL"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "EmailTemplateContent": {
+    "additionalProperties": false,
+    "properties": {
+     "Html": {
+      "type": "string"
+     },
+     "Subject": {
+      "type": "string"
+     },
+     "Text": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "EmailTemplateMetadata": {
+    "additionalProperties": false,
+    "properties": {
+     "CreatedTimestamp": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "TemplateName": {
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GuardianOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "OptimizedSharedDelivery": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ReputationOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "LastFreshStart": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "ReputationMetricsEnabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "SendingOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "SendingEnabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "SuppressionOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "SuppressedReasons": {
+      "items": {
+       "enum": [
+        "BOUNCE",
+        "COMPLAINT"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "Key": {
+      "type": "string"
+     },
+     "Value": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key",
+     "Value"
+    ],
+    "type": "object"
+   },
+   "Topic": {
+    "additionalProperties": false,
+    "properties": {
+     "DefaultSubscriptionStatus": {
+      "enum": [
+       "OPT_IN",
+       "OPT_OUT"
+      ],
+      "type": "string"
+     },
+     "Description": {
+      "type": "string"
+     },
+     "DisplayName": {
+      "type": "string"
+     },
+     "TopicName": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "TopicName",
+     "DisplayName",
+     "DefaultSubscriptionStatus"
+    ],
+    "type": "object"
+   },
+   "TrackingOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "CustomRedirectDomain": {
+      "type": "string"
+     },
+     "HttpsPolicy": {
+      "enum": [
+       "REQUIRE",
+       "REQUIRE_OPEN_ONLY",
+       "OPTIONAL"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "CustomRedirectDomain"
+    ],
+    "type": "object"
+   },
+   "VdmOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "DashboardOptions": {
+      "$ref": "#/components/schemas/DashboardOptions"
+     },
+     "GuardianOptions": {
+      "$ref": "#/components/schemas/GuardianOptions"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon Simple Email Service API (2019-09-27). Every other official operation returns HTTP 501 UnknownOperationException. Configuration sets, one contact list and email templates are stored as configuration metadata: no email is sent, rendered, tracked or archived, and SendEmail, SendBulkEmail and the other sending APIs return UnknownOperationException with HTTP 501. Email identities, DKIM, dedicated IPs, contacts, suppression lists, event destinations, the Put*Options operations and account settings are not implemented. Configuration sets keep the options given at creation, and the PageSize member is refused.",
+  "title": "Amazon Simple Email Service (simulator catalog)",
+  "version": "2019-09-27"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/v2/email/configuration-sets": {
+   "get": {
+    "operationId": "sesv2ListConfigurationSets",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ses"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "NextToken",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "PageSize",
+      "schema": {
+       "type": "integer"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "ConfigurationSets": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListConfigurationSets",
+    "tags": [
+     "Amazon Simple Email Service"
+    ]
+   },
+   "post": {
+    "operationId": "sesv2CreateConfigurationSet",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ses"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "ArchivingOptions": {
+          "$ref": "#/components/schemas/ArchivingOptions"
+         },
+         "ConfigurationSetName": {
+          "type": "string"
+         },
+         "DeliveryOptions": {
+          "$ref": "#/components/schemas/DeliveryOptions"
+         },
+         "ReputationOptions": {
+          "$ref": "#/components/schemas/ReputationOptions"
+         },
+         "SendingOptions": {
+          "$ref": "#/components/schemas/SendingOptions"
+         },
+         "SuppressionOptions": {
+          "$ref": "#/components/schemas/SuppressionOptions"
+         },
+         "Tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "type": "array"
+         },
+         "TrackingOptions": {
+          "$ref": "#/components/schemas/TrackingOptions"
+         },
+         "VdmOptions": {
+          "$ref": "#/components/schemas/VdmOptions"
+         }
+        },
+        "required": [
+         "ConfigurationSetName"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateConfigurationSet",
+    "tags": [
+     "Amazon Simple Email Service"
+    ]
+   }
+  },
+  "/v2/email/configuration-sets/{ConfigurationSetName}": {
+   "delete": {
+    "operationId": "sesv2DeleteConfigurationSet",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ses"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ConfigurationSetName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteConfigurationSet",
+    "tags": [
+     "Amazon Simple Email Service"
+    ]
+   },
+   "get": {
+    "operationId": "sesv2GetConfigurationSet",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ses"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ConfigurationSetName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "ArchivingOptions": {
+           "$ref": "#/components/schemas/ArchivingOptions"
+          },
+          "ConfigurationSetName": {
+           "type": "string"
+          },
+          "DeliveryOptions": {
+           "$ref": "#/components/schemas/DeliveryOptions"
+          },
+          "ReputationOptions": {
+           "$ref": "#/components/schemas/ReputationOptions"
+          },
+          "SendingOptions": {
+           "$ref": "#/components/schemas/SendingOptions"
+          },
+          "SuppressionOptions": {
+           "$ref": "#/components/schemas/SuppressionOptions"
+          },
+          "Tags": {
+           "items": {
+            "$ref": "#/components/schemas/Tag"
+           },
+           "type": "array"
+          },
+          "TrackingOptions": {
+           "$ref": "#/components/schemas/TrackingOptions"
+          },
+          "VdmOptions": {
+           "$ref": "#/components/schemas/VdmOptions"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetConfigurationSet",
+    "tags": [
+     "Amazon Simple Email Service"
+    ]
+   }
+  },
+  "/v2/email/contact-lists": {
+   "get": {
+    "operationId": "sesv2ListContactLists",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ses"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "NextToken",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "PageSize",
+      "schema": {
+       "type": "integer"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "ContactLists": {
+           "items": {
+            "$ref": "#/components/schemas/ContactList"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListContactLists",
+    "tags": [
+     "Amazon Simple Email Service"
+    ]
+   },
+   "post": {
+    "operationId": "sesv2CreateContactList",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ses"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "ContactListName": {
+          "type": "string"
+         },
+         "Description": {
+          "type": "string"
+         },
+         "Tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "type": "array"
+         },
+         "Topics": {
+          "items": {
+           "$ref": "#/components/schemas/Topic"
+          },
+          "type": "array"
+         }
+        },
+        "required": [
+         "ContactListName"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateContactList",
+    "tags": [
+     "Amazon Simple Email Service"
+    ]
+   }
+  },
+  "/v2/email/contact-lists/{ContactListName}": {
+   "delete": {
+    "operationId": "sesv2DeleteContactList",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ses"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ContactListName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteContactList",
+    "tags": [
+     "Amazon Simple Email Service"
+    ]
+   },
+   "get": {
+    "operationId": "sesv2GetContactList",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ses"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ContactListName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "ContactListName": {
+           "type": "string"
+          },
+          "CreatedTimestamp": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "Description": {
+           "type": "string"
+          },
+          "LastUpdatedTimestamp": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "Tags": {
+           "items": {
+            "$ref": "#/components/schemas/Tag"
+           },
+           "type": "array"
+          },
+          "Topics": {
+           "items": {
+            "$ref": "#/components/schemas/Topic"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetContactList",
+    "tags": [
+     "Amazon Simple Email Service"
+    ]
+   },
+   "put": {
+    "operationId": "sesv2UpdateContactList",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ses"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ContactListName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Description": {
+          "type": "string"
+         },
+         "Topics": {
+          "items": {
+           "$ref": "#/components/schemas/Topic"
+          },
+          "type": "array"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateContactList",
+    "tags": [
+     "Amazon Simple Email Service"
+    ]
+   }
+  },
+  "/v2/email/tags": {
+   "delete": {
+    "operationId": "sesv2UntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ses"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "ResourceArn",
+      "schema": {
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "TagKeys",
+      "schema": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "Amazon Simple Email Service"
+    ]
+   },
+   "get": {
+    "operationId": "sesv2ListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ses"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "ResourceArn",
+      "schema": {
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Tags": {
+           "items": {
+            "$ref": "#/components/schemas/Tag"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "Amazon Simple Email Service"
+    ]
+   },
+   "post": {
+    "operationId": "sesv2TagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ses"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "ResourceArn": {
+          "minLength": 1,
+          "type": "string"
+         },
+         "Tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "type": "array"
+         }
+        },
+        "required": [
+         "ResourceArn",
+         "Tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "Amazon Simple Email Service"
+    ]
+   }
+  },
+  "/v2/email/templates": {
+   "get": {
+    "operationId": "sesv2ListEmailTemplates",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ses"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "NextToken",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "PageSize",
+      "schema": {
+       "type": "integer"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "NextToken": {
+           "type": "string"
+          },
+          "TemplatesMetadata": {
+           "items": {
+            "$ref": "#/components/schemas/EmailTemplateMetadata"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListEmailTemplates",
+    "tags": [
+     "Amazon Simple Email Service"
+    ]
+   },
+   "post": {
+    "operationId": "sesv2CreateEmailTemplate",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ses"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "TemplateContent": {
+          "$ref": "#/components/schemas/EmailTemplateContent"
+         },
+         "TemplateName": {
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "TemplateContent",
+         "TemplateName"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateEmailTemplate",
+    "tags": [
+     "Amazon Simple Email Service"
+    ]
+   }
+  },
+  "/v2/email/templates/{TemplateName}": {
+   "delete": {
+    "operationId": "sesv2DeleteEmailTemplate",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ses"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "TemplateName",
+      "required": true,
+      "schema": {
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteEmailTemplate",
+    "tags": [
+     "Amazon Simple Email Service"
+    ]
+   },
+   "get": {
+    "operationId": "sesv2GetEmailTemplate",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ses"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "TemplateName",
+      "required": true,
+      "schema": {
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "TemplateContent": {
+           "$ref": "#/components/schemas/EmailTemplateContent"
+          },
+          "TemplateName": {
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetEmailTemplate",
+    "tags": [
+     "Amazon Simple Email Service"
+    ]
+   },
+   "put": {
+    "operationId": "sesv2UpdateEmailTemplate",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ses"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "TemplateName",
+      "required": true,
+      "schema": {
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "TemplateContent": {
+          "$ref": "#/components/schemas/EmailTemplateContent"
+         }
+        },
+        "required": [
+         "TemplateContent"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateEmailTemplate",
+    "tags": [
+     "Amazon Simple Email Service"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon Simple Email Service API (2019-09-27). Every other official operation returns HTTP 501 UnknownOperationException. Configuration sets, one contact list and email templates are stored as configuration metadata: no email is sent, rendered, tracked or archived, and SendEmail, SendBulkEmail and the other sending APIs return UnknownOperationException with HTTP 501. Email identities, DKIM, dedicated IPs, contacts, suppression lists, event destinations, the Put*Options operations and account settings are not implemented. Configuration sets keep the options given at creation, and the PageSize member is refused.",
+   "name": "Amazon Simple Email Service"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/sesv2/2019-09-27/service-2.json",
+  "sha256": "5a78307a831baa7f46132735d4b6eb56b10792a1596d342dfbe6586fca668f84",
+  "license": "Apache-2.0"
+ }
+}

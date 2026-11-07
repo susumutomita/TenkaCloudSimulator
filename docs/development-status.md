@@ -1,5 +1,27 @@
 # Development roster
 
+## Current integration snapshot: catalog backlog, 2026-11-07
+
+Root integrates the open backlog on branch `claude/adoring-noether-7fvwju`
+(PR #439, 112 AWS services). The user authorized implementing and merging it.
+Parallel local branches, merged by root only:
+
+| Scope | Branch | Status |
+|---|---|---|
+| AWS catalog round 3 (59 services) | `catalog-r3-integration` | Integration on top of PR #439 in progress |
+| AWS Query/EC2/REST-XML protocols and five services | `catalog-query` | Done locally; merged after round 3 |
+| AWS Query/EC2 services (RDS family, ElastiCache, Redshift, VPC, EBS, VPN, PrivateLink) | `catalog-qdb`, `catalog-qnet` | In progress |
+| AWS services needing engine features (Network Firewall, SWF, Application Auto Scaling, Organizations, Keyspaces and others) | `catalog-gaps` | In progress |
+| Google Cloud discovery catalog (about 47 APIs) | `gcp-wip` | Integration in progress |
+| Azure Resource Manager catalog (#316) | `azure-arm` | In progress |
+| Sakura Server, Switch/NIC and Object Storage (#423) | `sakura-iaas` | In progress |
+
+Native work owned elsewhere is not touched: S3 multipart (#51), the unpublished
+Route 53 (#241) and EC2 network interface (#57) implementations, and Firestore
+documents (#338). Products that cannot be served are recorded in the
+[coverage assessment](coverage-assessment.md).
+
+
 ## Current integration snapshot: login and published catalog, 2026-11-06
 
 PR [#437](https://github.com/susumutomita/TenkaCloudSimulator/pull/437) is being

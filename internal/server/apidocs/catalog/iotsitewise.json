@@ -1,0 +1,881 @@
+{
+ "components": {
+  "schemas": {
+   "GatewayCapabilitySummary": {
+    "additionalProperties": false,
+    "properties": {
+     "capabilityNamespace": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "capabilitySyncStatus": {
+      "enum": [
+       "IN_SYNC",
+       "OUT_OF_SYNC",
+       "SYNC_FAILED",
+       "UNKNOWN",
+       "NOT_APPLICABLE"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "capabilityNamespace",
+     "capabilitySyncStatus"
+    ],
+    "type": "object"
+   },
+   "GatewayPlatform": {
+    "additionalProperties": false,
+    "properties": {
+     "greengrass": {
+      "$ref": "#/components/schemas/Greengrass"
+     },
+     "greengrassV2": {
+      "$ref": "#/components/schemas/GreengrassV2"
+     },
+     "siemensIE": {
+      "$ref": "#/components/schemas/SiemensIE"
+     }
+    },
+    "type": "object"
+   },
+   "GatewaySummary": {
+    "additionalProperties": false,
+    "properties": {
+     "creationDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "gatewayCapabilitySummaries": {
+      "items": {
+       "$ref": "#/components/schemas/GatewayCapabilitySummary"
+      },
+      "type": "array"
+     },
+     "gatewayId": {
+      "maxLength": 36,
+      "minLength": 36,
+      "type": "string"
+     },
+     "gatewayName": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "gatewayPlatform": {
+      "$ref": "#/components/schemas/GatewayPlatform"
+     },
+     "gatewayVersion": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "lastUpdateDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "gatewayId",
+     "gatewayName",
+     "creationDate",
+     "lastUpdateDate"
+    ],
+    "type": "object"
+   },
+   "Greengrass": {
+    "additionalProperties": false,
+    "properties": {
+     "groupArn": {
+      "maxLength": 1600,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "groupArn"
+    ],
+    "type": "object"
+   },
+   "GreengrassV2": {
+    "additionalProperties": false,
+    "properties": {
+     "coreDeviceOperatingSystem": {
+      "enum": [
+       "LINUX_AARCH64",
+       "LINUX_AMD64",
+       "WINDOWS_AMD64"
+      ],
+      "type": "string"
+     },
+     "coreDeviceThingName": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "coreDeviceThingName"
+    ],
+    "type": "object"
+   },
+   "LoggingOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "level": {
+      "enum": [
+       "ERROR",
+       "INFO",
+       "OFF"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "level"
+    ],
+    "type": "object"
+   },
+   "SiemensIE": {
+    "additionalProperties": false,
+    "properties": {
+     "iotCoreThingName": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "iotCoreThingName"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS IoT SiteWise API (2019-12-02). Every other official operation returns HTTP 501 UnknownOperationException. Gateways are configuration metadata: no SiteWise Edge software, Greengrass core device or Siemens Industrial Edge device is contacted, no capability configuration is synchronized and no data is ingested. Asset models, assets, portals, projects, dashboards, access policies, datasets, computation models, time series and property values return UnknownOperationException with HTTP 501. Gateway platforms must name exactly one of greengrass, greengrassV2 or siemensIE; the referenced group, core device or thing is not checked. Logging options default to OFF and no log is written. SDK clients must disable host-prefix injection (botocore inject_host_prefix=False) because the official api. host prefix cannot address the loopback endpoint.",
+  "title": "AWS IoT SiteWise (simulator catalog)",
+  "version": "2019-12-02"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/20200301/gateways": {
+   "get": {
+    "operationId": "iotsitewiseListGateways",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iotsitewise"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 250,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 4096,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "gatewaySummaries": {
+           "items": {
+            "$ref": "#/components/schemas/GatewaySummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 4096,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListGateways",
+    "tags": [
+     "AWS IoT SiteWise"
+    ]
+   },
+   "post": {
+    "operationId": "iotsitewiseCreateGateway",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iotsitewise"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "gatewayName": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+         },
+         "gatewayPlatform": {
+          "$ref": "#/components/schemas/GatewayPlatform"
+         },
+         "gatewayVersion": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 1,
+          "type": "object"
+         }
+        },
+        "required": [
+         "gatewayName",
+         "gatewayPlatform"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "gatewayArn": {
+           "maxLength": 1600,
+           "minLength": 1,
+           "type": "string"
+          },
+          "gatewayId": {
+           "maxLength": 36,
+           "minLength": 36,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateGateway",
+    "tags": [
+     "AWS IoT SiteWise"
+    ]
+   }
+  },
+  "/20200301/gateways/{gatewayId}": {
+   "delete": {
+    "operationId": "iotsitewiseDeleteGateway",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iotsitewise"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "gatewayId",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 36,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteGateway",
+    "tags": [
+     "AWS IoT SiteWise"
+    ]
+   },
+   "get": {
+    "operationId": "iotsitewiseDescribeGateway",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iotsitewise"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "gatewayId",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 36,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "creationDate": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "gatewayArn": {
+           "maxLength": 1600,
+           "minLength": 1,
+           "type": "string"
+          },
+          "gatewayCapabilitySummaries": {
+           "items": {
+            "$ref": "#/components/schemas/GatewayCapabilitySummary"
+           },
+           "type": "array"
+          },
+          "gatewayId": {
+           "maxLength": 36,
+           "minLength": 36,
+           "type": "string"
+          },
+          "gatewayName": {
+           "maxLength": 256,
+           "minLength": 1,
+           "type": "string"
+          },
+          "gatewayPlatform": {
+           "$ref": "#/components/schemas/GatewayPlatform"
+          },
+          "gatewayVersion": {
+           "maxLength": 1024,
+           "minLength": 1,
+           "type": "string"
+          },
+          "lastUpdateDate": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeGateway",
+    "tags": [
+     "AWS IoT SiteWise"
+    ]
+   },
+   "put": {
+    "operationId": "iotsitewiseUpdateGateway",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iotsitewise"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "gatewayId",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 36,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "gatewayName": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "gatewayName"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateGateway",
+    "tags": [
+     "AWS IoT SiteWise"
+    ]
+   }
+  },
+  "/logging": {
+   "get": {
+    "operationId": "iotsitewiseDescribeLoggingOptions",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iotsitewise"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "loggingOptions": {
+           "$ref": "#/components/schemas/LoggingOptions"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeLoggingOptions",
+    "tags": [
+     "AWS IoT SiteWise"
+    ]
+   },
+   "put": {
+    "operationId": "iotsitewisePutLoggingOptions",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iotsitewise"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "loggingOptions": {
+          "$ref": "#/components/schemas/LoggingOptions"
+         }
+        },
+        "required": [
+         "loggingOptions"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "PutLoggingOptions",
+    "tags": [
+     "AWS IoT SiteWise"
+    ]
+   }
+  },
+  "/tags": {
+   "delete": {
+    "operationId": "iotsitewiseUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iotsitewise"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "resourceArn",
+      "schema": {
+       "maxLength": 1011,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 200,
+       "minItems": 0,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "AWS IoT SiteWise"
+    ]
+   },
+   "get": {
+    "operationId": "iotsitewiseListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iotsitewise"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "resourceArn",
+      "schema": {
+       "maxLength": 1011,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 1,
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "AWS IoT SiteWise"
+    ]
+   },
+   "post": {
+    "operationId": "iotsitewiseTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iotsitewise"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "resourceArn",
+      "schema": {
+       "maxLength": 1011,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 1,
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "AWS IoT SiteWise"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS IoT SiteWise API (2019-12-02). Every other official operation returns HTTP 501 UnknownOperationException. Gateways are configuration metadata: no SiteWise Edge software, Greengrass core device or Siemens Industrial Edge device is contacted, no capability configuration is synchronized and no data is ingested. Asset models, assets, portals, projects, dashboards, access policies, datasets, computation models, time series and property values return UnknownOperationException with HTTP 501. Gateway platforms must name exactly one of greengrass, greengrassV2 or siemensIE; the referenced group, core device or thing is not checked. Logging options default to OFF and no log is written. SDK clients must disable host-prefix injection (botocore inject_host_prefix=False) because the official api. host prefix cannot address the loopback endpoint.",
+   "name": "AWS IoT SiteWise"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/iotsitewise/2019-12-02/service-2.json",
+  "sha256": "32e637b07ab5da590d4eee9628b18cf5f34b87c62204e169329540bd880a9f00",
+  "license": "Apache-2.0"
+ }
+}

@@ -1,0 +1,26 @@
+{
+ "client": "pinpoint-sms-voice-v2",
+ "steps": [
+  {"op": "create_configuration_set", "args": {"ConfigurationSetName": "alerts", "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"set": "ConfigurationSetArn"}, "expect": {"ConfigurationSetName": "alerts", "Tags[0].Key": "team"}},
+  {"op": "describe_configuration_sets", "args": {"ConfigurationSetNames": ["alerts"]}, "expect": {"ConfigurationSets#count": 1, "ConfigurationSets[0].ConfigurationSetArn": "${set}", "ConfigurationSets[0].EventDestinations#count": 0}},
+  {"op": "create_opt_out_list", "args": {"OptOutListName": "marketing"}, "save": {"list": "OptOutListArn"}},
+  {"op": "describe_opt_out_lists", "args": {}, "expect": {"OptOutLists#count": 1, "OptOutLists[0].OptOutListArn": "${list}"}},
+  {"op": "tag_resource", "args": {"ResourceArn": "${list}", "Tags": [{"Key": "stage", "Value": "dev"}]}},
+  {"op": "untag_resource", "args": {"ResourceArn": "${set}", "TagKeys": ["team"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "${list}"}, "expect": {"Tags#count": 1, "Tags[0].Value": "dev"}},
+  {"op": "send_text_message", "args": {"DestinationPhoneNumber": "+15555550100", "MessageBody": "hello"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "describe_configuration_sets", "args": {"ConfigurationSetNames": ["missing"]}, "error": "ResourceNotFoundException"},
+  {"op": "create_opt_out_list", "args": {"OptOutListName": "Default"}, "error": "ValidationException"}
+ ],
+ "isolation": [
+  {"op": "describe_configuration_sets", "args": {}, "expect": {"ConfigurationSets#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_opt_out_lists", "args": {"OptOutListNames": ["marketing"]}, "expect": {"OptOutLists[0].OptOutListArn": "${list}"}}
+ ],
+ "cleanup": [
+  {"op": "delete_configuration_set", "args": {"ConfigurationSetName": "${set}"}, "expect": {"ConfigurationSetName": "alerts"}},
+  {"op": "delete_opt_out_list", "args": {"OptOutListName": "marketing"}, "expect": {"OptOutListArn": "${list}"}},
+  {"op": "describe_configuration_sets", "args": {}, "expect": {"ConfigurationSets#count": 0}}
+ ]
+}

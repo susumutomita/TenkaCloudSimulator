@@ -1,0 +1,885 @@
+{
+ "components": {
+  "schemas": {
+   "KmsConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "keyType": {
+      "enum": [
+       "CustomerManagedKey",
+       "ServiceManagedKey"
+      ],
+      "type": "string"
+     },
+     "kmsKeyArn": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "keyType"
+    ],
+    "type": "object"
+   },
+   "WorkloadIdentityType": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "maxLength": 255,
+      "minLength": 3,
+      "type": "string"
+     },
+     "workloadIdentityArn": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "workloadIdentityArn"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon Bedrock AgentCore Control API (2023-06-05). Every other official operation returns HTTP 501 UnknownOperationException. Workload identities are stored in the default workload identity directory: no workload access token, OAuth2 flow or credential exchange is ever performed, and the allowed OAuth2 return URLs are never contacted. Only the default token vault exists; SetTokenVaultCMK stores its KMS configuration without contacting AWS KMS or encrypting any credential, and another tokenVaultId returns ResourceNotFoundException. Agent runtimes and endpoints, gateways and targets, memories, browsers, code interpreters (whose identifiers derive from their names), API key and OAuth2 credential providers (which hold secrets) return UnknownOperationException with HTTP 501.",
+  "title": "Amazon Bedrock AgentCore Control (simulator catalog)",
+  "version": "2023-06-05"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/identities/CreateWorkloadIdentity": {
+   "post": {
+    "operationId": "bedrock-agentcore-controlCreateWorkloadIdentity",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "bedrock-agentcore"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "allowedResourceOauth2ReturnUrls": {
+          "items": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "name": {
+          "maxLength": 255,
+          "minLength": 3,
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "allowedResourceOauth2ReturnUrls": {
+           "items": {
+            "maxLength": 2048,
+            "minLength": 1,
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "name": {
+           "maxLength": 255,
+           "minLength": 3,
+           "type": "string"
+          },
+          "workloadIdentityArn": {
+           "maxLength": 1024,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateWorkloadIdentity",
+    "tags": [
+     "Amazon Bedrock AgentCore Control"
+    ]
+   }
+  },
+  "/identities/DeleteWorkloadIdentity": {
+   "post": {
+    "operationId": "bedrock-agentcore-controlDeleteWorkloadIdentity",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "bedrock-agentcore"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "name": {
+          "maxLength": 255,
+          "minLength": 3,
+          "type": "string"
+         }
+        },
+        "required": [
+         "name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteWorkloadIdentity",
+    "tags": [
+     "Amazon Bedrock AgentCore Control"
+    ]
+   }
+  },
+  "/identities/GetWorkloadIdentity": {
+   "post": {
+    "operationId": "bedrock-agentcore-controlGetWorkloadIdentity",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "bedrock-agentcore"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "name": {
+          "maxLength": 255,
+          "minLength": 3,
+          "type": "string"
+         }
+        },
+        "required": [
+         "name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "allowedResourceOauth2ReturnUrls": {
+           "items": {
+            "maxLength": 2048,
+            "minLength": 1,
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "createdTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "lastUpdatedTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "name": {
+           "maxLength": 255,
+           "minLength": 3,
+           "type": "string"
+          },
+          "workloadIdentityArn": {
+           "maxLength": 1024,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetWorkloadIdentity",
+    "tags": [
+     "Amazon Bedrock AgentCore Control"
+    ]
+   }
+  },
+  "/identities/ListWorkloadIdentities": {
+   "post": {
+    "operationId": "bedrock-agentcore-controlListWorkloadIdentities",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "bedrock-agentcore"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "maxResults": {
+          "maximum": 20,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "nextToken": {
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "nextToken": {
+           "type": "string"
+          },
+          "workloadIdentities": {
+           "items": {
+            "$ref": "#/components/schemas/WorkloadIdentityType"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListWorkloadIdentities",
+    "tags": [
+     "Amazon Bedrock AgentCore Control"
+    ]
+   }
+  },
+  "/identities/UpdateWorkloadIdentity": {
+   "post": {
+    "operationId": "bedrock-agentcore-controlUpdateWorkloadIdentity",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "bedrock-agentcore"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "allowedResourceOauth2ReturnUrls": {
+          "items": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "name": {
+          "maxLength": 255,
+          "minLength": 3,
+          "type": "string"
+         }
+        },
+        "required": [
+         "name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "allowedResourceOauth2ReturnUrls": {
+           "items": {
+            "maxLength": 2048,
+            "minLength": 1,
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "createdTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "lastUpdatedTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "name": {
+           "maxLength": 255,
+           "minLength": 3,
+           "type": "string"
+          },
+          "workloadIdentityArn": {
+           "maxLength": 1024,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateWorkloadIdentity",
+    "tags": [
+     "Amazon Bedrock AgentCore Control"
+    ]
+   }
+  },
+  "/identities/get-token-vault": {
+   "post": {
+    "operationId": "bedrock-agentcore-controlGetTokenVault",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "bedrock-agentcore"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tokenVaultId": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "kmsConfiguration": {
+           "$ref": "#/components/schemas/KmsConfiguration"
+          },
+          "lastModifiedDate": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "tokenVaultId": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetTokenVault",
+    "tags": [
+     "Amazon Bedrock AgentCore Control"
+    ]
+   }
+  },
+  "/identities/set-token-vault-cmk": {
+   "post": {
+    "operationId": "bedrock-agentcore-controlSetTokenVaultCMK",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "bedrock-agentcore"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "kmsConfiguration": {
+          "$ref": "#/components/schemas/KmsConfiguration"
+         },
+         "tokenVaultId": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "kmsConfiguration"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "kmsConfiguration": {
+           "$ref": "#/components/schemas/KmsConfiguration"
+          },
+          "lastModifiedDate": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "tokenVaultId": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "SetTokenVaultCMK",
+    "tags": [
+     "Amazon Bedrock AgentCore Control"
+    ]
+   }
+  },
+  "/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "bedrock-agentcore-controlUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "bedrock-agentcore"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1011,
+       "minLength": 20,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 200,
+       "minItems": 0,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "Amazon Bedrock AgentCore Control"
+    ]
+   },
+   "get": {
+    "operationId": "bedrock-agentcore-controlListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "bedrock-agentcore"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1011,
+       "minLength": 20,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "Amazon Bedrock AgentCore Control"
+    ]
+   },
+   "post": {
+    "operationId": "bedrock-agentcore-controlTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "bedrock-agentcore"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1011,
+       "minLength": 20,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "Amazon Bedrock AgentCore Control"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon Bedrock AgentCore Control API (2023-06-05). Every other official operation returns HTTP 501 UnknownOperationException. Workload identities are stored in the default workload identity directory: no workload access token, OAuth2 flow or credential exchange is ever performed, and the allowed OAuth2 return URLs are never contacted. Only the default token vault exists; SetTokenVaultCMK stores its KMS configuration without contacting AWS KMS or encrypting any credential, and another tokenVaultId returns ResourceNotFoundException. Agent runtimes and endpoints, gateways and targets, memories, browsers, code interpreters (whose identifiers derive from their names), API key and OAuth2 credential providers (which hold secrets) return UnknownOperationException with HTTP 501.",
+   "name": "Amazon Bedrock AgentCore Control"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/bedrock-agentcore-control/2023-06-05/service-2.json",
+  "sha256": "88e3115168875afb103d4cdea8a32ce6e0d41c728902d3a404ffa8c93ae7c16f",
+  "license": "Apache-2.0"
+ }
+}

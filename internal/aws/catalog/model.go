@@ -199,3 +199,25 @@ func (s *Shape) sortedMembers() []string {
 	sort.Strings(names)
 	return names
 }
+
+// wire is the serialized JSON key of a body member: its official
+// locationName when present, otherwise the member name.
+func (m Member) wire(name string) string {
+	if m.LocationName != "" && m.Location == "" {
+		return m.LocationName
+	}
+	return name
+}
+
+// memberForWire resolves a serialized body key to its member name.
+func (s *Shape) memberForWire(wire string) (string, bool) {
+	if member, ok := s.Members[wire]; ok && member.wire(wire) == wire {
+		return wire, true
+	}
+	for name, member := range s.Members {
+		if member.Location == "" && member.LocationName == wire {
+			return name, true
+		}
+	}
+	return "", false
+}

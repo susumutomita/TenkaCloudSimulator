@@ -1,0 +1,1975 @@
+{
+ "components": {
+  "schemas": {
+   "Attachment": {
+    "additionalProperties": false,
+    "properties": {
+     "details": {
+      "items": {
+       "$ref": "#/components/schemas/KeyValuePair"
+      },
+      "type": "array"
+     },
+     "id": {
+      "type": "string"
+     },
+     "status": {
+      "type": "string"
+     },
+     "type": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Attribute": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "type": "string"
+     },
+     "targetId": {
+      "type": "string"
+     },
+     "targetType": {
+      "enum": [
+       "container-instance"
+      ],
+      "type": "string"
+     },
+     "value": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "CapacityProviderStrategyItem": {
+    "additionalProperties": false,
+    "properties": {
+     "base": {
+      "maximum": 100000,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "capacityProvider": {
+      "type": "string"
+     },
+     "weight": {
+      "maximum": 1000,
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "capacityProvider"
+    ],
+    "type": "object"
+   },
+   "Cluster": {
+    "additionalProperties": false,
+    "properties": {
+     "activeServicesCount": {
+      "type": "integer"
+     },
+     "attachments": {
+      "items": {
+       "$ref": "#/components/schemas/Attachment"
+      },
+      "type": "array"
+     },
+     "attachmentsStatus": {
+      "type": "string"
+     },
+     "capacityProviders": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "clusterArn": {
+      "type": "string"
+     },
+     "clusterName": {
+      "type": "string"
+     },
+     "configuration": {
+      "$ref": "#/components/schemas/ClusterConfiguration"
+     },
+     "defaultCapacityProviderStrategy": {
+      "items": {
+       "$ref": "#/components/schemas/CapacityProviderStrategyItem"
+      },
+      "type": "array"
+     },
+     "pendingTasksCount": {
+      "type": "integer"
+     },
+     "registeredContainerInstancesCount": {
+      "type": "integer"
+     },
+     "runningTasksCount": {
+      "type": "integer"
+     },
+     "serviceConnectDefaults": {
+      "$ref": "#/components/schemas/ClusterServiceConnectDefaults"
+     },
+     "settings": {
+      "items": {
+       "$ref": "#/components/schemas/ClusterSetting"
+      },
+      "type": "array"
+     },
+     "statistics": {
+      "items": {
+       "$ref": "#/components/schemas/KeyValuePair"
+      },
+      "type": "array"
+     },
+     "status": {
+      "type": "string"
+     },
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ClusterConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "executeCommandConfiguration": {
+      "$ref": "#/components/schemas/ExecuteCommandConfiguration"
+     },
+     "managedStorageConfiguration": {
+      "$ref": "#/components/schemas/ManagedStorageConfiguration"
+     }
+    },
+    "type": "object"
+   },
+   "ClusterServiceConnectDefaults": {
+    "additionalProperties": false,
+    "properties": {
+     "namespace": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ClusterServiceConnectDefaultsRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "namespace": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "namespace"
+    ],
+    "type": "object"
+   },
+   "ClusterSetting": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "enum": [
+       "containerInsights"
+      ],
+      "type": "string"
+     },
+     "value": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ContainerDefinition": {
+    "additionalProperties": false,
+    "properties": {
+     "command": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "cpu": {
+      "type": "integer"
+     },
+     "credentialSpecs": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "dependsOn": {
+      "items": {
+       "$ref": "#/components/schemas/ContainerDependency"
+      },
+      "type": "array"
+     },
+     "disableNetworking": {
+      "type": "boolean"
+     },
+     "dnsSearchDomains": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "dnsServers": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "dockerLabels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "dockerSecurityOptions": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "entryPoint": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "environment": {
+      "items": {
+       "$ref": "#/components/schemas/KeyValuePair"
+      },
+      "type": "array"
+     },
+     "environmentFiles": {
+      "items": {
+       "$ref": "#/components/schemas/EnvironmentFile"
+      },
+      "type": "array"
+     },
+     "essential": {
+      "type": "boolean"
+     },
+     "extraHosts": {
+      "items": {
+       "$ref": "#/components/schemas/HostEntry"
+      },
+      "type": "array"
+     },
+     "firelensConfiguration": {
+      "$ref": "#/components/schemas/FirelensConfiguration"
+     },
+     "healthCheck": {
+      "$ref": "#/components/schemas/HealthCheck"
+     },
+     "hostname": {
+      "type": "string"
+     },
+     "image": {
+      "type": "string"
+     },
+     "interactive": {
+      "type": "boolean"
+     },
+     "links": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "linuxParameters": {
+      "$ref": "#/components/schemas/LinuxParameters"
+     },
+     "logConfiguration": {
+      "$ref": "#/components/schemas/LogConfiguration"
+     },
+     "memory": {
+      "type": "integer"
+     },
+     "memoryReservation": {
+      "type": "integer"
+     },
+     "mountPoints": {
+      "items": {
+       "$ref": "#/components/schemas/MountPoint"
+      },
+      "type": "array"
+     },
+     "name": {
+      "type": "string"
+     },
+     "portMappings": {
+      "items": {
+       "$ref": "#/components/schemas/PortMapping"
+      },
+      "type": "array"
+     },
+     "privileged": {
+      "type": "boolean"
+     },
+     "pseudoTerminal": {
+      "type": "boolean"
+     },
+     "readonlyRootFilesystem": {
+      "type": "boolean"
+     },
+     "repositoryCredentials": {
+      "$ref": "#/components/schemas/RepositoryCredentials"
+     },
+     "resourceRequirements": {
+      "items": {
+       "$ref": "#/components/schemas/ResourceRequirement"
+      },
+      "type": "array"
+     },
+     "restartPolicy": {
+      "$ref": "#/components/schemas/ContainerRestartPolicy"
+     },
+     "secrets": {
+      "items": {
+       "$ref": "#/components/schemas/Secret"
+      },
+      "type": "array"
+     },
+     "startTimeout": {
+      "type": "integer"
+     },
+     "stopTimeout": {
+      "type": "integer"
+     },
+     "systemControls": {
+      "items": {
+       "$ref": "#/components/schemas/SystemControl"
+      },
+      "type": "array"
+     },
+     "ulimits": {
+      "items": {
+       "$ref": "#/components/schemas/Ulimit"
+      },
+      "type": "array"
+     },
+     "user": {
+      "type": "string"
+     },
+     "versionConsistency": {
+      "enum": [
+       "enabled",
+       "disabled"
+      ],
+      "type": "string"
+     },
+     "volumesFrom": {
+      "items": {
+       "$ref": "#/components/schemas/VolumeFrom"
+      },
+      "type": "array"
+     },
+     "workingDirectory": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ContainerDependency": {
+    "additionalProperties": false,
+    "properties": {
+     "condition": {
+      "enum": [
+       "START",
+       "COMPLETE",
+       "SUCCESS",
+       "HEALTHY"
+      ],
+      "type": "string"
+     },
+     "containerName": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "containerName",
+     "condition"
+    ],
+    "type": "object"
+   },
+   "ContainerRestartPolicy": {
+    "additionalProperties": false,
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     },
+     "ignoredExitCodes": {
+      "items": {
+       "type": "integer"
+      },
+      "type": "array"
+     },
+     "restartAttemptPeriod": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "enabled"
+    ],
+    "type": "object"
+   },
+   "CreateClusterRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "capacityProviders": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "clusterName": {
+      "type": "string"
+     },
+     "configuration": {
+      "$ref": "#/components/schemas/ClusterConfiguration"
+     },
+     "defaultCapacityProviderStrategy": {
+      "items": {
+       "$ref": "#/components/schemas/CapacityProviderStrategyItem"
+      },
+      "type": "array"
+     },
+     "serviceConnectDefaults": {
+      "$ref": "#/components/schemas/ClusterServiceConnectDefaultsRequest"
+     },
+     "settings": {
+      "items": {
+       "$ref": "#/components/schemas/ClusterSetting"
+      },
+      "type": "array"
+     },
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "CreateClusterResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "cluster": {
+      "$ref": "#/components/schemas/Cluster"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteClusterRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "cluster": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "cluster"
+    ],
+    "type": "object"
+   },
+   "DeleteClusterResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "cluster": {
+      "$ref": "#/components/schemas/Cluster"
+     }
+    },
+    "type": "object"
+   },
+   "DeregisterTaskDefinitionRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "taskDefinition": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "taskDefinition"
+    ],
+    "type": "object"
+   },
+   "DeregisterTaskDefinitionResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "taskDefinition": {
+      "$ref": "#/components/schemas/TaskDefinition"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeClustersRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "clusters": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "include": {
+      "items": {
+       "enum": [
+        "ATTACHMENTS",
+        "CONFIGURATIONS",
+        "SETTINGS",
+        "STATISTICS",
+        "TAGS"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeClustersResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "clusters": {
+      "items": {
+       "$ref": "#/components/schemas/Cluster"
+      },
+      "type": "array"
+     },
+     "failures": {
+      "items": {
+       "$ref": "#/components/schemas/Failure"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeTaskDefinitionRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "include": {
+      "items": {
+       "enum": [
+        "TAGS"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "taskDefinition": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "taskDefinition"
+    ],
+    "type": "object"
+   },
+   "DescribeTaskDefinitionResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 0,
+      "type": "array"
+     },
+     "taskDefinition": {
+      "$ref": "#/components/schemas/TaskDefinition"
+     }
+    },
+    "type": "object"
+   },
+   "Device": {
+    "additionalProperties": false,
+    "properties": {
+     "containerPath": {
+      "type": "string"
+     },
+     "hostPath": {
+      "type": "string"
+     },
+     "permissions": {
+      "items": {
+       "enum": [
+        "read",
+        "write",
+        "mknod"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "hostPath"
+    ],
+    "type": "object"
+   },
+   "DockerVolumeConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "autoprovision": {
+      "type": "boolean"
+     },
+     "driver": {
+      "type": "string"
+     },
+     "driverOpts": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "scope": {
+      "enum": [
+       "task",
+       "shared"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "EFSAuthorizationConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "accessPointId": {
+      "type": "string"
+     },
+     "iam": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "EFSVolumeConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "authorizationConfig": {
+      "$ref": "#/components/schemas/EFSAuthorizationConfig"
+     },
+     "fileSystemId": {
+      "type": "string"
+     },
+     "rootDirectory": {
+      "type": "string"
+     },
+     "transitEncryption": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "transitEncryptionPort": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "fileSystemId"
+    ],
+    "type": "object"
+   },
+   "EnvironmentFile": {
+    "additionalProperties": false,
+    "properties": {
+     "type": {
+      "enum": [
+       "s3"
+      ],
+      "type": "string"
+     },
+     "value": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "value",
+     "type"
+    ],
+    "type": "object"
+   },
+   "EphemeralStorage": {
+    "additionalProperties": false,
+    "properties": {
+     "sizeInGiB": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "sizeInGiB"
+    ],
+    "type": "object"
+   },
+   "ExecuteCommandConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "kmsKeyId": {
+      "type": "string"
+     },
+     "logConfiguration": {
+      "$ref": "#/components/schemas/ExecuteCommandLogConfiguration"
+     },
+     "logging": {
+      "enum": [
+       "NONE",
+       "DEFAULT",
+       "OVERRIDE"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ExecuteCommandLogConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "cloudWatchEncryptionEnabled": {
+      "type": "boolean"
+     },
+     "cloudWatchLogGroupName": {
+      "type": "string"
+     },
+     "s3BucketName": {
+      "type": "string"
+     },
+     "s3EncryptionEnabled": {
+      "type": "boolean"
+     },
+     "s3KeyPrefix": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "FSxWindowsFileServerAuthorizationConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "credentialsParameter": {
+      "type": "string"
+     },
+     "domain": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "credentialsParameter",
+     "domain"
+    ],
+    "type": "object"
+   },
+   "FSxWindowsFileServerVolumeConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "authorizationConfig": {
+      "$ref": "#/components/schemas/FSxWindowsFileServerAuthorizationConfig"
+     },
+     "fileSystemId": {
+      "type": "string"
+     },
+     "rootDirectory": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "fileSystemId",
+     "rootDirectory",
+     "authorizationConfig"
+    ],
+    "type": "object"
+   },
+   "Failure": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "detail": {
+      "type": "string"
+     },
+     "reason": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "FirelensConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "options": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "type": {
+      "enum": [
+       "fluentd",
+       "fluentbit"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "type"
+    ],
+    "type": "object"
+   },
+   "HealthCheck": {
+    "additionalProperties": false,
+    "properties": {
+     "command": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "interval": {
+      "type": "integer"
+     },
+     "retries": {
+      "type": "integer"
+     },
+     "startPeriod": {
+      "type": "integer"
+     },
+     "timeout": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "command"
+    ],
+    "type": "object"
+   },
+   "HostEntry": {
+    "additionalProperties": false,
+    "properties": {
+     "hostname": {
+      "type": "string"
+     },
+     "ipAddress": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "hostname",
+     "ipAddress"
+    ],
+    "type": "object"
+   },
+   "HostVolumeProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "sourcePath": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "InferenceAccelerator": {
+    "additionalProperties": false,
+    "properties": {
+     "deviceName": {
+      "type": "string"
+     },
+     "deviceType": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "deviceName",
+     "deviceType"
+    ],
+    "type": "object"
+   },
+   "KernelCapabilities": {
+    "additionalProperties": false,
+    "properties": {
+     "add": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "drop": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "KeyValuePair": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "type": "string"
+     },
+     "value": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "LinuxParameters": {
+    "additionalProperties": false,
+    "properties": {
+     "capabilities": {
+      "$ref": "#/components/schemas/KernelCapabilities"
+     },
+     "devices": {
+      "items": {
+       "$ref": "#/components/schemas/Device"
+      },
+      "type": "array"
+     },
+     "initProcessEnabled": {
+      "type": "boolean"
+     },
+     "maxSwap": {
+      "type": "integer"
+     },
+     "sharedMemorySize": {
+      "type": "integer"
+     },
+     "swappiness": {
+      "type": "integer"
+     },
+     "tmpfs": {
+      "items": {
+       "$ref": "#/components/schemas/Tmpfs"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListClustersRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "maxResults": {
+      "type": "integer"
+     },
+     "nextToken": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListClustersResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "clusterArns": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "nextToken": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListTagsForResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "resourceArn": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "resourceArn"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListTaskDefinitionsRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "familyPrefix": {
+      "type": "string"
+     },
+     "maxResults": {
+      "type": "integer"
+     },
+     "nextToken": {
+      "type": "string"
+     },
+     "sort": {
+      "enum": [
+       "ASC",
+       "DESC"
+      ],
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "ACTIVE",
+       "INACTIVE",
+       "DELETE_IN_PROGRESS"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListTaskDefinitionsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextToken": {
+      "type": "string"
+     },
+     "taskDefinitionArns": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "LogConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "logDriver": {
+      "enum": [
+       "json-file",
+       "syslog",
+       "journald",
+       "gelf",
+       "fluentd",
+       "awslogs",
+       "splunk",
+       "awsfirelens"
+      ],
+      "type": "string"
+     },
+     "options": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "secretOptions": {
+      "items": {
+       "$ref": "#/components/schemas/Secret"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "logDriver"
+    ],
+    "type": "object"
+   },
+   "ManagedStorageConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "fargateEphemeralStorageKmsKeyId": {
+      "type": "string"
+     },
+     "kmsKeyId": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "MountPoint": {
+    "additionalProperties": false,
+    "properties": {
+     "containerPath": {
+      "type": "string"
+     },
+     "readOnly": {
+      "type": "boolean"
+     },
+     "sourceVolume": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PortMapping": {
+    "additionalProperties": false,
+    "properties": {
+     "appProtocol": {
+      "enum": [
+       "http",
+       "http2",
+       "grpc"
+      ],
+      "type": "string"
+     },
+     "containerPort": {
+      "type": "integer"
+     },
+     "containerPortRange": {
+      "type": "string"
+     },
+     "hostPort": {
+      "type": "integer"
+     },
+     "name": {
+      "type": "string"
+     },
+     "protocol": {
+      "enum": [
+       "tcp",
+       "udp"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ProxyConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "containerName": {
+      "type": "string"
+     },
+     "properties": {
+      "items": {
+       "$ref": "#/components/schemas/KeyValuePair"
+      },
+      "type": "array"
+     },
+     "type": {
+      "enum": [
+       "APPMESH"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "containerName"
+    ],
+    "type": "object"
+   },
+   "PutClusterCapacityProvidersRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "capacityProviders": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "cluster": {
+      "type": "string"
+     },
+     "defaultCapacityProviderStrategy": {
+      "items": {
+       "$ref": "#/components/schemas/CapacityProviderStrategyItem"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "cluster",
+     "capacityProviders",
+     "defaultCapacityProviderStrategy"
+    ],
+    "type": "object"
+   },
+   "PutClusterCapacityProvidersResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "cluster": {
+      "$ref": "#/components/schemas/Cluster"
+     }
+    },
+    "type": "object"
+   },
+   "RegisterTaskDefinitionRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "containerDefinitions": {
+      "items": {
+       "$ref": "#/components/schemas/ContainerDefinition"
+      },
+      "type": "array"
+     },
+     "cpu": {
+      "type": "string"
+     },
+     "enableFaultInjection": {
+      "type": "boolean"
+     },
+     "ephemeralStorage": {
+      "$ref": "#/components/schemas/EphemeralStorage"
+     },
+     "executionRoleArn": {
+      "type": "string"
+     },
+     "family": {
+      "type": "string"
+     },
+     "inferenceAccelerators": {
+      "items": {
+       "$ref": "#/components/schemas/InferenceAccelerator"
+      },
+      "type": "array"
+     },
+     "ipcMode": {
+      "enum": [
+       "host",
+       "task",
+       "none"
+      ],
+      "type": "string"
+     },
+     "memory": {
+      "type": "string"
+     },
+     "networkMode": {
+      "enum": [
+       "bridge",
+       "host",
+       "awsvpc",
+       "none"
+      ],
+      "type": "string"
+     },
+     "pidMode": {
+      "enum": [
+       "host",
+       "task"
+      ],
+      "type": "string"
+     },
+     "placementConstraints": {
+      "items": {
+       "$ref": "#/components/schemas/TaskDefinitionPlacementConstraint"
+      },
+      "type": "array"
+     },
+     "proxyConfiguration": {
+      "$ref": "#/components/schemas/ProxyConfiguration"
+     },
+     "requiresCompatibilities": {
+      "items": {
+       "enum": [
+        "EC2",
+        "FARGATE",
+        "EXTERNAL",
+        "MANAGED_INSTANCES"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "runtimePlatform": {
+      "$ref": "#/components/schemas/RuntimePlatform"
+     },
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 0,
+      "type": "array"
+     },
+     "taskRoleArn": {
+      "type": "string"
+     },
+     "volumes": {
+      "items": {
+       "$ref": "#/components/schemas/Volume"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "family",
+     "containerDefinitions"
+    ],
+    "type": "object"
+   },
+   "RegisterTaskDefinitionResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 0,
+      "type": "array"
+     },
+     "taskDefinition": {
+      "$ref": "#/components/schemas/TaskDefinition"
+     }
+    },
+    "type": "object"
+   },
+   "RepositoryCredentials": {
+    "additionalProperties": false,
+    "properties": {
+     "credentialsParameter": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "credentialsParameter"
+    ],
+    "type": "object"
+   },
+   "ResourceRequirement": {
+    "additionalProperties": false,
+    "properties": {
+     "type": {
+      "enum": [
+       "GPU",
+       "InferenceAccelerator"
+      ],
+      "type": "string"
+     },
+     "value": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "value",
+     "type"
+    ],
+    "type": "object"
+   },
+   "RuntimePlatform": {
+    "additionalProperties": false,
+    "properties": {
+     "cpuArchitecture": {
+      "enum": [
+       "X86_64",
+       "ARM64"
+      ],
+      "type": "string"
+     },
+     "operatingSystemFamily": {
+      "enum": [
+       "WINDOWS_SERVER_2019_FULL",
+       "WINDOWS_SERVER_2019_CORE",
+       "WINDOWS_SERVER_2016_FULL",
+       "WINDOWS_SERVER_2004_CORE",
+       "WINDOWS_SERVER_2022_CORE",
+       "WINDOWS_SERVER_2022_FULL",
+       "WINDOWS_SERVER_2025_CORE",
+       "WINDOWS_SERVER_2025_FULL",
+       "WINDOWS_SERVER_20H2_CORE",
+       "LINUX"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Secret": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "type": "string"
+     },
+     "valueFrom": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "valueFrom"
+    ],
+    "type": "object"
+   },
+   "SystemControl": {
+    "additionalProperties": false,
+    "properties": {
+     "namespace": {
+      "type": "string"
+     },
+     "value": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "key": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "value": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "resourceArn": {
+      "type": "string"
+     },
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "resourceArn",
+     "tags"
+    ],
+    "type": "object"
+   },
+   "TagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "TaskDefinition": {
+    "additionalProperties": false,
+    "properties": {
+     "compatibilities": {
+      "items": {
+       "enum": [
+        "EC2",
+        "FARGATE",
+        "EXTERNAL",
+        "MANAGED_INSTANCES"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "containerDefinitions": {
+      "items": {
+       "$ref": "#/components/schemas/ContainerDefinition"
+      },
+      "type": "array"
+     },
+     "cpu": {
+      "type": "string"
+     },
+     "deregisteredAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "enableFaultInjection": {
+      "type": "boolean"
+     },
+     "ephemeralStorage": {
+      "$ref": "#/components/schemas/EphemeralStorage"
+     },
+     "executionRoleArn": {
+      "type": "string"
+     },
+     "family": {
+      "type": "string"
+     },
+     "inferenceAccelerators": {
+      "items": {
+       "$ref": "#/components/schemas/InferenceAccelerator"
+      },
+      "type": "array"
+     },
+     "ipcMode": {
+      "enum": [
+       "host",
+       "task",
+       "none"
+      ],
+      "type": "string"
+     },
+     "memory": {
+      "type": "string"
+     },
+     "networkMode": {
+      "enum": [
+       "bridge",
+       "host",
+       "awsvpc",
+       "none"
+      ],
+      "type": "string"
+     },
+     "pidMode": {
+      "enum": [
+       "host",
+       "task"
+      ],
+      "type": "string"
+     },
+     "placementConstraints": {
+      "items": {
+       "$ref": "#/components/schemas/TaskDefinitionPlacementConstraint"
+      },
+      "type": "array"
+     },
+     "proxyConfiguration": {
+      "$ref": "#/components/schemas/ProxyConfiguration"
+     },
+     "registeredAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "registeredBy": {
+      "type": "string"
+     },
+     "requiresAttributes": {
+      "items": {
+       "$ref": "#/components/schemas/Attribute"
+      },
+      "type": "array"
+     },
+     "requiresCompatibilities": {
+      "items": {
+       "enum": [
+        "EC2",
+        "FARGATE",
+        "EXTERNAL",
+        "MANAGED_INSTANCES"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "revision": {
+      "type": "integer"
+     },
+     "runtimePlatform": {
+      "$ref": "#/components/schemas/RuntimePlatform"
+     },
+     "status": {
+      "enum": [
+       "ACTIVE",
+       "INACTIVE",
+       "DELETE_IN_PROGRESS"
+      ],
+      "type": "string"
+     },
+     "taskDefinitionArn": {
+      "type": "string"
+     },
+     "taskRoleArn": {
+      "type": "string"
+     },
+     "volumes": {
+      "items": {
+       "$ref": "#/components/schemas/Volume"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "TaskDefinitionPlacementConstraint": {
+    "additionalProperties": false,
+    "properties": {
+     "expression": {
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "memberOf"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Tmpfs": {
+    "additionalProperties": false,
+    "properties": {
+     "containerPath": {
+      "type": "string"
+     },
+     "mountOptions": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "size": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "containerPath",
+     "size"
+    ],
+    "type": "object"
+   },
+   "Ulimit": {
+    "additionalProperties": false,
+    "properties": {
+     "hardLimit": {
+      "type": "integer"
+     },
+     "name": {
+      "enum": [
+       "core",
+       "cpu",
+       "data",
+       "fsize",
+       "locks",
+       "memlock",
+       "msgqueue",
+       "nice",
+       "nofile",
+       "nproc",
+       "rss",
+       "rtprio",
+       "rttime",
+       "sigpending",
+       "stack"
+      ],
+      "type": "string"
+     },
+     "softLimit": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "name",
+     "softLimit",
+     "hardLimit"
+    ],
+    "type": "object"
+   },
+   "UntagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "resourceArn": {
+      "type": "string"
+     },
+     "tagKeys": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "resourceArn",
+     "tagKeys"
+    ],
+    "type": "object"
+   },
+   "UntagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UpdateClusterRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "cluster": {
+      "type": "string"
+     },
+     "configuration": {
+      "$ref": "#/components/schemas/ClusterConfiguration"
+     },
+     "serviceConnectDefaults": {
+      "$ref": "#/components/schemas/ClusterServiceConnectDefaultsRequest"
+     },
+     "settings": {
+      "items": {
+       "$ref": "#/components/schemas/ClusterSetting"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "cluster"
+    ],
+    "type": "object"
+   },
+   "UpdateClusterResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "cluster": {
+      "$ref": "#/components/schemas/Cluster"
+     }
+    },
+    "type": "object"
+   },
+   "UpdateClusterSettingsRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "cluster": {
+      "type": "string"
+     },
+     "settings": {
+      "items": {
+       "$ref": "#/components/schemas/ClusterSetting"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "cluster",
+     "settings"
+    ],
+    "type": "object"
+   },
+   "UpdateClusterSettingsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "cluster": {
+      "$ref": "#/components/schemas/Cluster"
+     }
+    },
+    "type": "object"
+   },
+   "Volume": {
+    "additionalProperties": false,
+    "properties": {
+     "configuredAtLaunch": {
+      "type": "boolean"
+     },
+     "dockerVolumeConfiguration": {
+      "$ref": "#/components/schemas/DockerVolumeConfiguration"
+     },
+     "efsVolumeConfiguration": {
+      "$ref": "#/components/schemas/EFSVolumeConfiguration"
+     },
+     "fsxWindowsFileServerVolumeConfiguration": {
+      "$ref": "#/components/schemas/FSxWindowsFileServerVolumeConfiguration"
+     },
+     "host": {
+      "$ref": "#/components/schemas/HostVolumeProperties"
+     },
+     "name": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "VolumeFrom": {
+    "additionalProperties": false,
+    "properties": {
+     "readOnly": {
+      "type": "boolean"
+     },
+     "sourceContainer": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon EC2 Container Service API (2014-11-13). Every other official operation returns HTTP 501 UnknownOperationException. Clusters and task definitions are configuration metadata: no container instance, task, service, task set or Fargate capacity is started, so cluster counts stay 0. RunTask, StartTask, CreateService and other workload APIs return UnknownOperationException with HTTP 501. Clusters accept only the AWS-managed FARGATE and FARGATE_SPOT capacity providers; Service Connect namespaces do not exist. A missing clusterName creates the default cluster and DescribeClusters without clusters describes it. Creating a live cluster name again is refused. DescribeClusters and DescribeTaskDefinition always return settings, configuration and tags, and failures name the identifier as supplied. Each task definition family holds one revision (1): registering a live family again is refused and other revisions do not exist. Deregistration deletes the revision after returning it INACTIVE. Fargate task definitions must use awsvpc networking and a documented Linux task CPU and memory combination. familyPrefix and sort are refused.",
+  "title": "Amazon Elastic Container Service (simulator catalog)",
+  "version": "2014-11-13"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/": {
+   "post": {
+    "description": "Choose the X-Amz-Target of one implemented operation. Request and response members follow the linked official input/output schemas.",
+    "operationId": "ecsJSONOperation",
+    "parameters": [
+     {
+      "in": "header",
+      "name": "X-Amz-Target",
+      "required": true,
+      "schema": {
+       "enum": [
+        "AmazonEC2ContainerServiceV20141113.CreateCluster",
+        "AmazonEC2ContainerServiceV20141113.DeleteCluster",
+        "AmazonEC2ContainerServiceV20141113.DeregisterTaskDefinition",
+        "AmazonEC2ContainerServiceV20141113.DescribeClusters",
+        "AmazonEC2ContainerServiceV20141113.DescribeTaskDefinition",
+        "AmazonEC2ContainerServiceV20141113.ListClusters",
+        "AmazonEC2ContainerServiceV20141113.ListTagsForResource",
+        "AmazonEC2ContainerServiceV20141113.ListTaskDefinitions",
+        "AmazonEC2ContainerServiceV20141113.PutClusterCapacityProviders",
+        "AmazonEC2ContainerServiceV20141113.RegisterTaskDefinition",
+        "AmazonEC2ContainerServiceV20141113.TagResource",
+        "AmazonEC2ContainerServiceV20141113.UntagResource",
+        "AmazonEC2ContainerServiceV20141113.UpdateCluster",
+        "AmazonEC2ContainerServiceV20141113.UpdateClusterSettings"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-amz-json-1.1": {
+       "examples": {
+        "CreateCluster": {
+         "summary": "X-Amz-Target: AmazonEC2ContainerServiceV20141113.CreateCluster",
+         "value": {}
+        },
+        "DeleteCluster": {
+         "summary": "X-Amz-Target: AmazonEC2ContainerServiceV20141113.DeleteCluster",
+         "value": {}
+        },
+        "DeregisterTaskDefinition": {
+         "summary": "X-Amz-Target: AmazonEC2ContainerServiceV20141113.DeregisterTaskDefinition",
+         "value": {}
+        },
+        "DescribeClusters": {
+         "summary": "X-Amz-Target: AmazonEC2ContainerServiceV20141113.DescribeClusters",
+         "value": {}
+        },
+        "DescribeTaskDefinition": {
+         "summary": "X-Amz-Target: AmazonEC2ContainerServiceV20141113.DescribeTaskDefinition",
+         "value": {}
+        },
+        "ListClusters": {
+         "summary": "X-Amz-Target: AmazonEC2ContainerServiceV20141113.ListClusters",
+         "value": {}
+        },
+        "ListTagsForResource": {
+         "summary": "X-Amz-Target: AmazonEC2ContainerServiceV20141113.ListTagsForResource",
+         "value": {}
+        },
+        "ListTaskDefinitions": {
+         "summary": "X-Amz-Target: AmazonEC2ContainerServiceV20141113.ListTaskDefinitions",
+         "value": {}
+        },
+        "PutClusterCapacityProviders": {
+         "summary": "X-Amz-Target: AmazonEC2ContainerServiceV20141113.PutClusterCapacityProviders",
+         "value": {}
+        },
+        "RegisterTaskDefinition": {
+         "summary": "X-Amz-Target: AmazonEC2ContainerServiceV20141113.RegisterTaskDefinition",
+         "value": {}
+        },
+        "TagResource": {
+         "summary": "X-Amz-Target: AmazonEC2ContainerServiceV20141113.TagResource",
+         "value": {}
+        },
+        "UntagResource": {
+         "summary": "X-Amz-Target: AmazonEC2ContainerServiceV20141113.UntagResource",
+         "value": {}
+        },
+        "UpdateCluster": {
+         "summary": "X-Amz-Target: AmazonEC2ContainerServiceV20141113.UpdateCluster",
+         "value": {}
+        },
+        "UpdateClusterSettings": {
+         "summary": "X-Amz-Target: AmazonEC2ContainerServiceV20141113.UpdateClusterSettings",
+         "value": {}
+        }
+       },
+       "schema": {
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/x-amz-json-1.1": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception in __type."
+     },
+     "403": {
+      "description": "AccessDeniedException from local identity policy evaluation."
+     },
+     "501": {
+      "description": "Official operation not implemented by the simulator."
+     }
+    },
+    "summary": "Amazon Elastic Container Service JSON 1.1 operations",
+    "tags": [
+     "Amazon Elastic Container Service"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon EC2 Container Service API (2014-11-13). Every other official operation returns HTTP 501 UnknownOperationException. Clusters and task definitions are configuration metadata: no container instance, task, service, task set or Fargate capacity is started, so cluster counts stay 0. RunTask, StartTask, CreateService and other workload APIs return UnknownOperationException with HTTP 501. Clusters accept only the AWS-managed FARGATE and FARGATE_SPOT capacity providers; Service Connect namespaces do not exist. A missing clusterName creates the default cluster and DescribeClusters without clusters describes it. Creating a live cluster name again is refused. DescribeClusters and DescribeTaskDefinition always return settings, configuration and tags, and failures name the identifier as supplied. Each task definition family holds one revision (1): registering a live family again is refused and other revisions do not exist. Deregistration deletes the revision after returning it INACTIVE. Fargate task definitions must use awsvpc networking and a documented Linux task CPU and memory combination. familyPrefix and sort are refused.",
+   "name": "Amazon Elastic Container Service"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/ecs/2014-11-13/service-2.json",
+  "sha256": "a14cdd24eb54f01caf4c4f815da3566a931a8022ae8db8ce9e283c7cb466aa95",
+  "license": "Apache-2.0"
+ }
+}

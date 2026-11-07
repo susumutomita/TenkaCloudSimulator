@@ -1,0 +1,289 @@
+{
+ "components": {
+  "schemas": {
+   "AlternateContact": {
+    "additionalProperties": false,
+    "properties": {
+     "AlternateContactType": {
+      "enum": [
+       "BILLING",
+       "OPERATIONS",
+       "SECURITY"
+      ],
+      "type": "string"
+     },
+     "EmailAddress": {
+      "maxLength": 254,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "PhoneNumber": {
+      "maxLength": 25,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Title": {
+      "maxLength": 50,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS Account API (2021-02-01). Every other official operation returns HTTP 501 UnknownOperationException. The BILLING, OPERATIONS and SECURITY alternate contacts of the standalone simulator account are stored metadata: no email, call or notification is ever sent to them and the address and phone number are not verified. Each contact type is authorized as arn:aws:account::000000000000:account/alternate-contact/\u003cTYPE\u003e because the engine stores one resource per contact, so IAM policies that name the official account ARN need a trailing wildcard to match. AccountId is refused because the simulator account is not in an organization; contact information, account names, primary email, Region opt-in and Region listing return UnknownOperationException with HTTP 501.",
+  "title": "AWS Account Management (simulator catalog)",
+  "version": "2021-02-01"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/deleteAlternateContact": {
+   "post": {
+    "operationId": "accountDeleteAlternateContact",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "account"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "AccountId": {
+          "type": "string"
+         },
+         "AlternateContactType": {
+          "enum": [
+           "BILLING",
+           "OPERATIONS",
+           "SECURITY"
+          ],
+          "type": "string"
+         }
+        },
+        "required": [
+         "AlternateContactType"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteAlternateContact",
+    "tags": [
+     "AWS Account Management"
+    ]
+   }
+  },
+  "/getAlternateContact": {
+   "post": {
+    "operationId": "accountGetAlternateContact",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "account"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "AccountId": {
+          "type": "string"
+         },
+         "AlternateContactType": {
+          "enum": [
+           "BILLING",
+           "OPERATIONS",
+           "SECURITY"
+          ],
+          "type": "string"
+         }
+        },
+        "required": [
+         "AlternateContactType"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "AlternateContact": {
+           "$ref": "#/components/schemas/AlternateContact"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetAlternateContact",
+    "tags": [
+     "AWS Account Management"
+    ]
+   }
+  },
+  "/putAlternateContact": {
+   "post": {
+    "operationId": "accountPutAlternateContact",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "account"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "AccountId": {
+          "type": "string"
+         },
+         "AlternateContactType": {
+          "enum": [
+           "BILLING",
+           "OPERATIONS",
+           "SECURITY"
+          ],
+          "type": "string"
+         },
+         "EmailAddress": {
+          "maxLength": 254,
+          "minLength": 1,
+          "type": "string"
+         },
+         "Name": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "PhoneNumber": {
+          "maxLength": 25,
+          "minLength": 1,
+          "type": "string"
+         },
+         "Title": {
+          "maxLength": 50,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "AlternateContactType",
+         "EmailAddress",
+         "Name",
+         "PhoneNumber",
+         "Title"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "PutAlternateContact",
+    "tags": [
+     "AWS Account Management"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS Account API (2021-02-01). Every other official operation returns HTTP 501 UnknownOperationException. The BILLING, OPERATIONS and SECURITY alternate contacts of the standalone simulator account are stored metadata: no email, call or notification is ever sent to them and the address and phone number are not verified. Each contact type is authorized as arn:aws:account::000000000000:account/alternate-contact/\u003cTYPE\u003e because the engine stores one resource per contact, so IAM policies that name the official account ARN need a trailing wildcard to match. AccountId is refused because the simulator account is not in an organization; contact information, account names, primary email, Region opt-in and Region listing return UnknownOperationException with HTTP 501.",
+   "name": "AWS Account Management"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/account/2021-02-01/service-2.json",
+  "sha256": "7f98674ee01f558e5b4c687841585b2b0392d4451c004725a88c94aed6b80456",
+  "license": "Apache-2.0"
+ }
+}

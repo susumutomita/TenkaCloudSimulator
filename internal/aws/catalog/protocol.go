@@ -35,6 +35,10 @@ func parseRoute(op string, h HTTP) route {
 			r.literals++
 		}
 	}
+	// An official trailing slash is part of the path: "/tags/" ≠ "/tags".
+	if len(pathPart) > 1 && strings.HasSuffix(pathPart, "/") {
+		r.segments = append(r.segments, "")
+	}
 	if queryPart != "" {
 		for _, item := range strings.Split(queryPart, "&") {
 			key, value, _ := strings.Cut(item, "=")
@@ -60,15 +64,26 @@ func (r route) match(method string, escaped []string, query url.Values) (map[str
 	i := 0
 	for si, segment := range r.segments {
 		if strings.HasPrefix(segment, "{") && strings.HasSuffix(segment, "+}") {
-			if si != len(r.segments)-1 || i >= len(escaped) {
+			// A greedy label takes every segment except those the rest of
+			// the route needs, so "/portals/{arn+}/browserSettings" matches.
+			suffix := r.segments[si+1:]
+			end := len(escaped) - len(suffix)
+			if end <= i {
 				return nil, false
 			}
-			rest := strings.Join(escaped[i:], "/")
-			decoded, err := url.PathUnescape(rest)
+			decoded, err := url.PathUnescape(strings.Join(escaped[i:end], "/"))
 			if err != nil || decoded == "" {
 				return nil, false
 			}
 			labels[strings.TrimSuffix(strings.TrimPrefix(segment, "{"), "+}")] = decoded
+			tail := route{method: r.method, segments: suffix}
+			rest, ok := tail.match(method, escaped[end:], nil)
+			if !ok {
+				return nil, false
+			}
+			for k, v := range rest {
+				labels[k] = v
+			}
 			return labels, true
 		}
 		if i >= len(escaped) {
@@ -259,7 +274,7 @@ func restInput(model *Model, op *Operation, r *http.Request, labels map[string]s
 	}
 	allowed := map[string]bool{}
 	for _, name := range bodyMembers {
-		allowed[name] = true
+		allowed[shape.Members[name].wire(name)] = true
 	}
 	for key, value := range object {
 		if !allowed[key] {
@@ -268,6 +283,7 @@ func restInput(model *Model, op *Operation, r *http.Request, labels map[string]s
 			}
 			return nil, invalid("Unknown member %s is not part of the official input shape.", key)
 		}
+		// The decoder maps official wire names back to member names.
 		raw[key] = value
 	}
 	return raw, nil
@@ -291,7 +307,7 @@ func writeOutput(w http.ResponseWriter, model *Model, op *Operation, output map[
 		for name, value := range output {
 			member := shape.Members[name]
 			if protocol != "rest-json" {
-				body[name] = value
+				body[member.wire(name)] = value
 				continue
 			}
 			switch member.Location {
@@ -314,7 +330,7 @@ func writeOutput(w http.ResponseWriter, model *Model, op *Operation, output map[
 						raw = encoded
 					}
 				} else {
-					body[name] = value
+					body[member.wire(name)] = value
 				}
 			}
 		}

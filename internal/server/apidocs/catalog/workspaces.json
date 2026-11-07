@@ -1,0 +1,452 @@
+{
+ "components": {
+  "schemas": {
+   "ConnectionAlias": {
+    "additionalProperties": false,
+    "properties": {
+     "AliasId": {
+      "maxLength": 68,
+      "minLength": 13,
+      "type": "string"
+     },
+     "Associations": {
+      "items": {
+       "$ref": "#/components/schemas/ConnectionAliasAssociation"
+      },
+      "maxItems": 25,
+      "minItems": 1,
+      "type": "array"
+     },
+     "ConnectionString": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "OwnerAccountId": {
+      "type": "string"
+     },
+     "State": {
+      "enum": [
+       "CREATING",
+       "CREATED",
+       "DELETING"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ConnectionAliasAssociation": {
+    "additionalProperties": false,
+    "properties": {
+     "AssociatedAccountId": {
+      "type": "string"
+     },
+     "AssociationStatus": {
+      "enum": [
+       "NOT_ASSOCIATED",
+       "ASSOCIATED_WITH_OWNER_ACCOUNT",
+       "ASSOCIATED_WITH_SHARED_ACCOUNT",
+       "PENDING_ASSOCIATION",
+       "PENDING_DISASSOCIATION"
+      ],
+      "type": "string"
+     },
+     "ConnectionIdentifier": {
+      "maxLength": 20,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ResourceId": {
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CreateConnectionAliasRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ConnectionString": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "ConnectionString"
+    ],
+    "type": "object"
+   },
+   "CreateConnectionAliasResult": {
+    "additionalProperties": false,
+    "properties": {
+     "AliasId": {
+      "maxLength": 68,
+      "minLength": 13,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CreateIpGroupRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "GroupDesc": {
+      "type": "string"
+     },
+     "GroupName": {
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     },
+     "UserRules": {
+      "items": {
+       "$ref": "#/components/schemas/IpRuleItem"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "GroupName"
+    ],
+    "type": "object"
+   },
+   "CreateIpGroupResult": {
+    "additionalProperties": false,
+    "properties": {
+     "GroupId": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteConnectionAliasRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "AliasId": {
+      "maxLength": 68,
+      "minLength": 13,
+      "type": "string"
+     }
+    },
+    "required": [
+     "AliasId"
+    ],
+    "type": "object"
+   },
+   "DeleteConnectionAliasResult": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DeleteIpGroupRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "GroupId": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "GroupId"
+    ],
+    "type": "object"
+   },
+   "DeleteIpGroupResult": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DescribeConnectionAliasesRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "AliasIds": {
+      "items": {
+       "maxLength": 68,
+       "minLength": 13,
+       "type": "string"
+      },
+      "maxItems": 25,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Limit": {
+      "maximum": 25,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ResourceId": {
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeConnectionAliasesResult": {
+    "additionalProperties": false,
+    "properties": {
+     "ConnectionAliases": {
+      "items": {
+       "$ref": "#/components/schemas/ConnectionAlias"
+      },
+      "maxItems": 25,
+      "minItems": 1,
+      "type": "array"
+     },
+     "NextToken": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeIpGroupsRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "GroupIds": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "MaxResults": {
+      "maximum": 25,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeIpGroupsResult": {
+    "additionalProperties": false,
+    "properties": {
+     "NextToken": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Result": {
+      "items": {
+       "$ref": "#/components/schemas/WorkspacesIpGroup"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "IpRuleItem": {
+    "additionalProperties": false,
+    "properties": {
+     "ipRule": {
+      "type": "string"
+     },
+     "ruleDesc": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "Key": {
+      "maxLength": 127,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Value": {
+      "maxLength": 255,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key"
+    ],
+    "type": "object"
+   },
+   "UpdateRulesOfIpGroupRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "GroupId": {
+      "type": "string"
+     },
+     "UserRules": {
+      "items": {
+       "$ref": "#/components/schemas/IpRuleItem"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "GroupId",
+     "UserRules"
+    ],
+    "type": "object"
+   },
+   "UpdateRulesOfIpGroupResult": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "WorkspacesIpGroup": {
+    "additionalProperties": false,
+    "properties": {
+     "groupDesc": {
+      "type": "string"
+     },
+     "groupId": {
+      "type": "string"
+     },
+     "groupName": {
+      "type": "string"
+     },
+     "userRules": {
+      "items": {
+       "$ref": "#/components/schemas/IpRuleItem"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon WorkSpaces API (2015-04-08). Every other official operation returns HTTP 501 UnknownOperationException. IP access control groups and connection aliases are configuration metadata: no WorkSpace, WorkSpaces Core instance, directory, bundle, image or pool is provisioned, no client traffic is filtered and no connection string is resolved. CreateWorkspaces, RegisterWorkspaceDirectory, CreateWorkspacesPool, ImportWorkspaceImage and the other provisioning and streaming APIs return UnknownOperationException with HTTP 501. Connection aliases are CREATED at once and cannot be associated, shared or redirected; DescribeConnectionAliases ResourceId is refused. UpdateRulesOfIpGroup replaces the whole rule list, every rule must be an IPv4 address or CIDR range, and AuthorizeIpRules, RevokeIpRules and AssociateIpGroups return HTTP 501. CreateTags, DeleteTags and DescribeTags address resources by identifier rather than ARN and are not implemented, so Tags at creation are refused instead of being stored unreadable. DescribeIpGroups and DescribeConnectionAliases fail with ResourceNotFoundException (HTTP 400), which they do not model, when a requested identifier does not exist; generic input validation failures use ValidationException because InvalidParameterValuesException is not a catalog validation name.",
+  "title": "Amazon WorkSpaces (simulator catalog)",
+  "version": "2015-04-08"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/": {
+   "post": {
+    "description": "Choose the X-Amz-Target of one implemented operation. Request and response members follow the linked official input/output schemas.",
+    "operationId": "workspacesJSONOperation",
+    "parameters": [
+     {
+      "in": "header",
+      "name": "X-Amz-Target",
+      "required": true,
+      "schema": {
+       "enum": [
+        "WorkspacesService.CreateConnectionAlias",
+        "WorkspacesService.CreateIpGroup",
+        "WorkspacesService.DeleteConnectionAlias",
+        "WorkspacesService.DeleteIpGroup",
+        "WorkspacesService.DescribeConnectionAliases",
+        "WorkspacesService.DescribeIpGroups",
+        "WorkspacesService.UpdateRulesOfIpGroup"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-amz-json-1.1": {
+       "examples": {
+        "CreateConnectionAlias": {
+         "summary": "X-Amz-Target: WorkspacesService.CreateConnectionAlias",
+         "value": {}
+        },
+        "CreateIpGroup": {
+         "summary": "X-Amz-Target: WorkspacesService.CreateIpGroup",
+         "value": {}
+        },
+        "DeleteConnectionAlias": {
+         "summary": "X-Amz-Target: WorkspacesService.DeleteConnectionAlias",
+         "value": {}
+        },
+        "DeleteIpGroup": {
+         "summary": "X-Amz-Target: WorkspacesService.DeleteIpGroup",
+         "value": {}
+        },
+        "DescribeConnectionAliases": {
+         "summary": "X-Amz-Target: WorkspacesService.DescribeConnectionAliases",
+         "value": {}
+        },
+        "DescribeIpGroups": {
+         "summary": "X-Amz-Target: WorkspacesService.DescribeIpGroups",
+         "value": {}
+        },
+        "UpdateRulesOfIpGroup": {
+         "summary": "X-Amz-Target: WorkspacesService.UpdateRulesOfIpGroup",
+         "value": {}
+        }
+       },
+       "schema": {
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/x-amz-json-1.1": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception in __type."
+     },
+     "403": {
+      "description": "AccessDeniedException from local identity policy evaluation."
+     },
+     "501": {
+      "description": "Official operation not implemented by the simulator."
+     }
+    },
+    "summary": "Amazon WorkSpaces JSON 1.1 operations",
+    "tags": [
+     "Amazon WorkSpaces"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon WorkSpaces API (2015-04-08). Every other official operation returns HTTP 501 UnknownOperationException. IP access control groups and connection aliases are configuration metadata: no WorkSpace, WorkSpaces Core instance, directory, bundle, image or pool is provisioned, no client traffic is filtered and no connection string is resolved. CreateWorkspaces, RegisterWorkspaceDirectory, CreateWorkspacesPool, ImportWorkspaceImage and the other provisioning and streaming APIs return UnknownOperationException with HTTP 501. Connection aliases are CREATED at once and cannot be associated, shared or redirected; DescribeConnectionAliases ResourceId is refused. UpdateRulesOfIpGroup replaces the whole rule list, every rule must be an IPv4 address or CIDR range, and AuthorizeIpRules, RevokeIpRules and AssociateIpGroups return HTTP 501. CreateTags, DeleteTags and DescribeTags address resources by identifier rather than ARN and are not implemented, so Tags at creation are refused instead of being stored unreadable. DescribeIpGroups and DescribeConnectionAliases fail with ResourceNotFoundException (HTTP 400), which they do not model, when a requested identifier does not exist; generic input validation failures use ValidationException because InvalidParameterValuesException is not a catalog validation name.",
+   "name": "Amazon WorkSpaces"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/workspaces/2015-04-08/service-2.json",
+  "sha256": "0bd4d0a76bad85f7f7dee83814f677e72706b6f9dfe7ad7e7b06abbf94dd027b",
+  "license": "Apache-2.0"
+ }
+}

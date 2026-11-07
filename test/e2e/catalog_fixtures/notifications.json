@@ -1,0 +1,24 @@
+{
+ "client": "notifications",
+ "steps": [
+  {"op": "create_notification_configuration", "args": {"name": "fixture-ops", "description": "Operations alerts", "aggregationDuration": "NONE", "tags": {"team": "a"}}, "save": {"config": "arn"}, "expect": {"status": "INACTIVE"}},
+  {"op": "get_notification_configuration", "args": {"arn": "${config}"}, "expect": {"name": "fixture-ops", "subtype": "ACCOUNT"}},
+  {"op": "list_notification_configurations", "args": {}, "expect": {"notificationConfigurations#count": 1}},
+  {"op": "update_notification_configuration", "args": {"arn": "${config}", "description": "Operations alerts v2", "aggregationDuration": "SHORT"}, "expect": {"arn": "${config}"}},
+  {"op": "tag_resource", "args": {"arn": "${config}", "tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"arn": "${config}", "tagKeys": ["team"]}},
+  {"op": "list_tags_for_resource", "args": {"arn": "${config}"}, "expect": {"tags": {"k": "v"}}},
+  {"op": "list_event_rules", "args": {"notificationConfigurationArn": "${config}"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_notification_configuration", "args": {"arn": "arn:aws:notifications::000000000000:configuration/000000000000000000000000000"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_notification_configurations", "args": {}, "expect": {"notificationConfigurations#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_notification_configuration", "args": {"arn": "${config}"}, "expect": {"description": "Operations alerts v2", "aggregationDuration": "SHORT"}}
+ ],
+ "cleanup": [
+  {"op": "delete_notification_configuration", "args": {"arn": "${config}"}},
+  {"op": "list_notification_configurations", "args": {}, "expect": {"notificationConfigurations#count": 0}}
+ ]
+}

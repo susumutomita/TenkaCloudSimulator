@@ -1,0 +1,28 @@
+{
+ "client": "securityhub",
+ "steps": [
+  {"op": "create_action_target", "args": {"Name": "Send to ticketing", "Description": "Fixture custom action", "Id": "fixtureaction"}, "save": {"target": "ActionTargetArn"}, "expect": {"ActionTargetArn": "arn:aws:securityhub:us-east-1:000000000000:action/custom/fixtureaction"}},
+  {"op": "describe_action_targets", "args": {}, "expect": {"ActionTargets#count": 1}},
+  {"op": "update_action_target", "args": {"ActionTargetArn": "${target}", "Description": "Updated custom action"}},
+  {"op": "describe_action_targets", "args": {"ActionTargetArns": ["${target}"]}, "expect": {"ActionTargets[0].Name": "Send to ticketing", "ActionTargets[0].Description": "Updated custom action"}},
+  {"op": "create_insight", "args": {"Name": "Critical findings", "Filters": {"SeverityLabel": [{"Value": "CRITICAL", "Comparison": "EQUALS"}]}, "GroupByAttribute": "ResourceId"}, "save": {"insight": "InsightArn"}},
+  {"op": "get_insights", "args": {}, "expect": {"Insights#count": 1, "Insights[0].GroupByAttribute": "ResourceId"}},
+  {"op": "update_insight", "args": {"InsightArn": "${insight}", "Name": "Critical findings by resource"}},
+  {"op": "create_action_target", "args": {"Name": "Duplicate", "Description": "Duplicate", "Id": "fixtureaction"}, "error": "ResourceConflictException"},
+  {"op": "get_insight_results", "args": {"InsightArn": "${insight}"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "describe_action_targets", "args": {"ActionTargetArns": ["arn:aws:securityhub:us-east-1:000000000000:action/custom/missing"]}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "get_insights", "args": {}, "expect": {"Insights#count": 0}},
+  {"op": "describe_action_targets", "args": {}, "expect": {"ActionTargets#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_insights", "args": {"InsightArns": ["${insight}"]}, "expect": {"Insights[0].Name": "Critical findings by resource"}},
+  {"op": "describe_action_targets", "args": {"ActionTargetArns": ["${target}"]}, "expect": {"ActionTargets[0].Description": "Updated custom action"}}
+ ],
+ "cleanup": [
+  {"op": "delete_insight", "args": {"InsightArn": "${insight}"}, "expect": {"InsightArn": "${insight}"}},
+  {"op": "delete_action_target", "args": {"ActionTargetArn": "${target}"}, "expect": {"ActionTargetArn": "${target}"}},
+  {"op": "get_insights", "args": {}, "expect": {"Insights#count": 0}}
+ ]
+}

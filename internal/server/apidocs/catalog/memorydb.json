@@ -1,0 +1,762 @@
+{
+ "components": {
+  "schemas": {
+   "Authentication": {
+    "additionalProperties": false,
+    "properties": {
+     "PasswordCount": {
+      "type": "integer"
+     },
+     "Type": {
+      "enum": [
+       "password",
+       "no-password",
+       "iam"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "AuthenticationMode": {
+    "additionalProperties": false,
+    "properties": {
+     "Passwords": {
+      "items": {
+       "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+     },
+     "Type": {
+      "enum": [
+       "password",
+       "iam"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "AvailabilityZone": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CreateParameterGroupRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Description": {
+      "type": "string"
+     },
+     "Family": {
+      "type": "string"
+     },
+     "ParameterGroupName": {
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 200,
+      "type": "array"
+     }
+    },
+    "required": [
+     "ParameterGroupName",
+     "Family"
+    ],
+    "type": "object"
+   },
+   "CreateParameterGroupResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "ParameterGroup": {
+      "$ref": "#/components/schemas/ParameterGroup"
+     }
+    },
+    "type": "object"
+   },
+   "CreateSubnetGroupRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Description": {
+      "type": "string"
+     },
+     "SubnetGroupName": {
+      "type": "string"
+     },
+     "SubnetIds": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 200,
+      "type": "array"
+     }
+    },
+    "required": [
+     "SubnetGroupName",
+     "SubnetIds"
+    ],
+    "type": "object"
+   },
+   "CreateSubnetGroupResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "SubnetGroup": {
+      "$ref": "#/components/schemas/SubnetGroup"
+     }
+    },
+    "type": "object"
+   },
+   "CreateUserRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "AccessString": {
+      "type": "string"
+     },
+     "AuthenticationMode": {
+      "$ref": "#/components/schemas/AuthenticationMode"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 200,
+      "type": "array"
+     },
+     "UserName": {
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "UserName",
+     "AuthenticationMode",
+     "AccessString"
+    ],
+    "type": "object"
+   },
+   "CreateUserResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "User": {
+      "$ref": "#/components/schemas/User"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteParameterGroupRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ParameterGroupName": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "ParameterGroupName"
+    ],
+    "type": "object"
+   },
+   "DeleteParameterGroupResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "ParameterGroup": {
+      "$ref": "#/components/schemas/ParameterGroup"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteSubnetGroupRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "SubnetGroupName": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "SubnetGroupName"
+    ],
+    "type": "object"
+   },
+   "DeleteSubnetGroupResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "SubnetGroup": {
+      "$ref": "#/components/schemas/SubnetGroup"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteUserRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "UserName": {
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "UserName"
+    ],
+    "type": "object"
+   },
+   "DeleteUserResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "User": {
+      "$ref": "#/components/schemas/User"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeParameterGroupsRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "MaxResults": {
+      "type": "integer"
+     },
+     "NextToken": {
+      "type": "string"
+     },
+     "ParameterGroupName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeParameterGroupsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "NextToken": {
+      "type": "string"
+     },
+     "ParameterGroups": {
+      "items": {
+       "$ref": "#/components/schemas/ParameterGroup"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeSubnetGroupsRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "MaxResults": {
+      "type": "integer"
+     },
+     "NextToken": {
+      "type": "string"
+     },
+     "SubnetGroupName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeSubnetGroupsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "NextToken": {
+      "type": "string"
+     },
+     "SubnetGroups": {
+      "items": {
+       "$ref": "#/components/schemas/SubnetGroup"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeUsersRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Filters": {
+      "items": {
+       "$ref": "#/components/schemas/Filter"
+      },
+      "type": "array"
+     },
+     "MaxResults": {
+      "type": "integer"
+     },
+     "NextToken": {
+      "type": "string"
+     },
+     "UserName": {
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeUsersResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "NextToken": {
+      "type": "string"
+     },
+     "Users": {
+      "items": {
+       "$ref": "#/components/schemas/User"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Filter": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "type": "string"
+     },
+     "Values": {
+      "items": {
+       "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "Name",
+     "Values"
+    ],
+    "type": "object"
+   },
+   "ListTagsRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceArn": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "ResourceArn"
+    ],
+    "type": "object"
+   },
+   "ListTagsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "TagList": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 200,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ParameterGroup": {
+    "additionalProperties": false,
+    "properties": {
+     "ARN": {
+      "type": "string"
+     },
+     "Description": {
+      "type": "string"
+     },
+     "Family": {
+      "type": "string"
+     },
+     "Name": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Subnet": {
+    "additionalProperties": false,
+    "properties": {
+     "AvailabilityZone": {
+      "$ref": "#/components/schemas/AvailabilityZone"
+     },
+     "Identifier": {
+      "type": "string"
+     },
+     "SupportedNetworkTypes": {
+      "items": {
+       "enum": [
+        "ipv4",
+        "ipv6",
+        "dual_stack"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "SubnetGroup": {
+    "additionalProperties": false,
+    "properties": {
+     "ARN": {
+      "type": "string"
+     },
+     "Description": {
+      "type": "string"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "Subnets": {
+      "items": {
+       "$ref": "#/components/schemas/Subnet"
+      },
+      "type": "array"
+     },
+     "SupportedNetworkTypes": {
+      "items": {
+       "enum": [
+        "ipv4",
+        "ipv6",
+        "dual_stack"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "VpcId": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "Key": {
+      "type": "string"
+     },
+     "Value": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceArn": {
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 200,
+      "type": "array"
+     }
+    },
+    "required": [
+     "ResourceArn",
+     "Tags"
+    ],
+    "type": "object"
+   },
+   "TagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "TagList": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 200,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "UntagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceArn": {
+      "type": "string"
+     },
+     "TagKeys": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "ResourceArn",
+     "TagKeys"
+    ],
+    "type": "object"
+   },
+   "UntagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "TagList": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 200,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "UpdateSubnetGroupRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Description": {
+      "type": "string"
+     },
+     "SubnetGroupName": {
+      "type": "string"
+     },
+     "SubnetIds": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "SubnetGroupName"
+    ],
+    "type": "object"
+   },
+   "UpdateSubnetGroupResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "SubnetGroup": {
+      "$ref": "#/components/schemas/SubnetGroup"
+     }
+    },
+    "type": "object"
+   },
+   "UpdateUserRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "AccessString": {
+      "type": "string"
+     },
+     "AuthenticationMode": {
+      "$ref": "#/components/schemas/AuthenticationMode"
+     },
+     "UserName": {
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "UserName"
+    ],
+    "type": "object"
+   },
+   "UpdateUserResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "User": {
+      "$ref": "#/components/schemas/User"
+     }
+    },
+    "type": "object"
+   },
+   "User": {
+    "additionalProperties": false,
+    "properties": {
+     "ACLNames": {
+      "items": {
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "ARN": {
+      "type": "string"
+     },
+     "AccessString": {
+      "type": "string"
+     },
+     "Authentication": {
+      "$ref": "#/components/schemas/Authentication"
+     },
+     "MinimumEngineVersion": {
+      "type": "string"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "Status": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon MemoryDB API (2021-01-01). Every other official operation returns HTTP 501 UnknownOperationException. Parameter groups, subnet groups and IAM-authenticated users are stored configuration: no cluster, shard, node, snapshot, ACL or multi-Region cluster exists, and CreateCluster, CreateACL, CreateSnapshot and the other data-plane APIs return UnknownOperationException with HTTP 501. Users must use iam authentication; password authentication is refused so no password is stored. The default user, default parameter groups and the open-access ACL are not pre-created, and parameter values (DescribeParameters, UpdateParameterGroup, ResetParameterGroup) are not implemented. Parameter group families, subnet IDs and access strings are stored without validation; subnet groups report no VPC or Availability Zone. Describe filters by name return an empty list for an unknown name instead of a not-found fault, and the Filters member is refused. TagResource and UntagResource return no TagList, and removing a missing tag key succeeds.",
+  "title": "Amazon MemoryDB (simulator catalog)",
+  "version": "2021-01-01"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/": {
+   "post": {
+    "description": "Choose the X-Amz-Target of one implemented operation. Request and response members follow the linked official input/output schemas.",
+    "operationId": "memorydbJSONOperation",
+    "parameters": [
+     {
+      "in": "header",
+      "name": "X-Amz-Target",
+      "required": true,
+      "schema": {
+       "enum": [
+        "AmazonMemoryDB.CreateParameterGroup",
+        "AmazonMemoryDB.CreateSubnetGroup",
+        "AmazonMemoryDB.CreateUser",
+        "AmazonMemoryDB.DeleteParameterGroup",
+        "AmazonMemoryDB.DeleteSubnetGroup",
+        "AmazonMemoryDB.DeleteUser",
+        "AmazonMemoryDB.DescribeParameterGroups",
+        "AmazonMemoryDB.DescribeSubnetGroups",
+        "AmazonMemoryDB.DescribeUsers",
+        "AmazonMemoryDB.ListTags",
+        "AmazonMemoryDB.TagResource",
+        "AmazonMemoryDB.UntagResource",
+        "AmazonMemoryDB.UpdateSubnetGroup",
+        "AmazonMemoryDB.UpdateUser"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-amz-json-1.1": {
+       "examples": {
+        "CreateParameterGroup": {
+         "summary": "X-Amz-Target: AmazonMemoryDB.CreateParameterGroup",
+         "value": {}
+        },
+        "CreateSubnetGroup": {
+         "summary": "X-Amz-Target: AmazonMemoryDB.CreateSubnetGroup",
+         "value": {}
+        },
+        "CreateUser": {
+         "summary": "X-Amz-Target: AmazonMemoryDB.CreateUser",
+         "value": {}
+        },
+        "DeleteParameterGroup": {
+         "summary": "X-Amz-Target: AmazonMemoryDB.DeleteParameterGroup",
+         "value": {}
+        },
+        "DeleteSubnetGroup": {
+         "summary": "X-Amz-Target: AmazonMemoryDB.DeleteSubnetGroup",
+         "value": {}
+        },
+        "DeleteUser": {
+         "summary": "X-Amz-Target: AmazonMemoryDB.DeleteUser",
+         "value": {}
+        },
+        "DescribeParameterGroups": {
+         "summary": "X-Amz-Target: AmazonMemoryDB.DescribeParameterGroups",
+         "value": {}
+        },
+        "DescribeSubnetGroups": {
+         "summary": "X-Amz-Target: AmazonMemoryDB.DescribeSubnetGroups",
+         "value": {}
+        },
+        "DescribeUsers": {
+         "summary": "X-Amz-Target: AmazonMemoryDB.DescribeUsers",
+         "value": {}
+        },
+        "ListTags": {
+         "summary": "X-Amz-Target: AmazonMemoryDB.ListTags",
+         "value": {}
+        },
+        "TagResource": {
+         "summary": "X-Amz-Target: AmazonMemoryDB.TagResource",
+         "value": {}
+        },
+        "UntagResource": {
+         "summary": "X-Amz-Target: AmazonMemoryDB.UntagResource",
+         "value": {}
+        },
+        "UpdateSubnetGroup": {
+         "summary": "X-Amz-Target: AmazonMemoryDB.UpdateSubnetGroup",
+         "value": {}
+        },
+        "UpdateUser": {
+         "summary": "X-Amz-Target: AmazonMemoryDB.UpdateUser",
+         "value": {}
+        }
+       },
+       "schema": {
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/x-amz-json-1.1": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception in __type."
+     },
+     "403": {
+      "description": "AccessDeniedException from local identity policy evaluation."
+     },
+     "501": {
+      "description": "Official operation not implemented by the simulator."
+     }
+    },
+    "summary": "Amazon MemoryDB JSON 1.1 operations",
+    "tags": [
+     "Amazon MemoryDB"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon MemoryDB API (2021-01-01). Every other official operation returns HTTP 501 UnknownOperationException. Parameter groups, subnet groups and IAM-authenticated users are stored configuration: no cluster, shard, node, snapshot, ACL or multi-Region cluster exists, and CreateCluster, CreateACL, CreateSnapshot and the other data-plane APIs return UnknownOperationException with HTTP 501. Users must use iam authentication; password authentication is refused so no password is stored. The default user, default parameter groups and the open-access ACL are not pre-created, and parameter values (DescribeParameters, UpdateParameterGroup, ResetParameterGroup) are not implemented. Parameter group families, subnet IDs and access strings are stored without validation; subnet groups report no VPC or Availability Zone. Describe filters by name return an empty list for an unknown name instead of a not-found fault, and the Filters member is refused. TagResource and UntagResource return no TagList, and removing a missing tag key succeeds.",
+   "name": "Amazon MemoryDB"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/memorydb/2021-01-01/service-2.json",
+  "sha256": "f873dbcdcc745d031046e810add6b6177de4fd3618428be46fc2aa1add65aef3",
+  "license": "Apache-2.0"
+ }
+}

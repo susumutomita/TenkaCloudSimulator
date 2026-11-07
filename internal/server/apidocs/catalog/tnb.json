@@ -1,0 +1,1306 @@
+{
+ "components": {
+  "schemas": {
+   "FunctionArtifactMeta": {
+    "additionalProperties": false,
+    "properties": {
+     "overrides": {
+      "items": {
+       "$ref": "#/components/schemas/ToscaOverride"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "GetSolFunctionPackageMetadata": {
+    "additionalProperties": false,
+    "properties": {
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "lastModified": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "vnfd": {
+      "$ref": "#/components/schemas/FunctionArtifactMeta"
+     }
+    },
+    "required": [
+     "createdAt",
+     "lastModified"
+    ],
+    "type": "object"
+   },
+   "GetSolNetworkPackageMetadata": {
+    "additionalProperties": false,
+    "properties": {
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "lastModified": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "nsd": {
+      "$ref": "#/components/schemas/NetworkArtifactMeta"
+     }
+    },
+    "required": [
+     "createdAt",
+     "lastModified"
+    ],
+    "type": "object"
+   },
+   "ListSolFunctionPackageInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "id": {
+      "type": "string"
+     },
+     "metadata": {
+      "$ref": "#/components/schemas/ListSolFunctionPackageMetadata"
+     },
+     "onboardingState": {
+      "enum": [
+       "CREATED",
+       "ONBOARDED",
+       "ERROR"
+      ],
+      "type": "string"
+     },
+     "operationalState": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "usageState": {
+      "enum": [
+       "IN_USE",
+       "NOT_IN_USE"
+      ],
+      "type": "string"
+     },
+     "vnfProductName": {
+      "type": "string"
+     },
+     "vnfProvider": {
+      "type": "string"
+     },
+     "vnfdId": {
+      "type": "string"
+     },
+     "vnfdVersion": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "arn",
+     "id",
+     "onboardingState",
+     "operationalState",
+     "usageState"
+    ],
+    "type": "object"
+   },
+   "ListSolFunctionPackageMetadata": {
+    "additionalProperties": false,
+    "properties": {
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "lastModified": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "createdAt",
+     "lastModified"
+    ],
+    "type": "object"
+   },
+   "ListSolNetworkPackageInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "id": {
+      "type": "string"
+     },
+     "metadata": {
+      "$ref": "#/components/schemas/ListSolNetworkPackageMetadata"
+     },
+     "nsdDesigner": {
+      "type": "string"
+     },
+     "nsdId": {
+      "type": "string"
+     },
+     "nsdInvariantId": {
+      "type": "string"
+     },
+     "nsdName": {
+      "type": "string"
+     },
+     "nsdOnboardingState": {
+      "enum": [
+       "CREATED",
+       "ONBOARDED",
+       "ERROR"
+      ],
+      "type": "string"
+     },
+     "nsdOperationalState": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "nsdUsageState": {
+      "enum": [
+       "IN_USE",
+       "NOT_IN_USE"
+      ],
+      "type": "string"
+     },
+     "nsdVersion": {
+      "type": "string"
+     },
+     "vnfPkgIds": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "arn",
+     "id",
+     "metadata",
+     "nsdOnboardingState",
+     "nsdOperationalState",
+     "nsdUsageState"
+    ],
+    "type": "object"
+   },
+   "ListSolNetworkPackageMetadata": {
+    "additionalProperties": false,
+    "properties": {
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "lastModified": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "createdAt",
+     "lastModified"
+    ],
+    "type": "object"
+   },
+   "NetworkArtifactMeta": {
+    "additionalProperties": false,
+    "properties": {
+     "overrides": {
+      "items": {
+       "$ref": "#/components/schemas/ToscaOverride"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ToscaOverride": {
+    "additionalProperties": false,
+    "properties": {
+     "defaultValue": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS Telco Network Builder API (2008-10-21). Every other official operation returns HTTP 501 UnknownOperationException. Function and network packages are empty CREATED metadata: package content upload, validation and descriptor retrieval return UnknownOperationException with HTTP 501, so no CSAR archive, VNFD or NSD is parsed and descriptor members stay absent. Packages stay DISABLED and NOT_IN_USE because their content is never onboarded; enabling one is refused, so every package can be deleted. Package updates do not change metadata.lastModified. Network instances, function instances and network operations (instantiate, update, terminate, cancel) return UnknownOperationException with HTTP 501, so no network or infrastructure is deployed.",
+  "title": "AWS Telco Network Builder (simulator catalog)",
+  "version": "2008-10-21"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/sol/nsd/v1/ns_descriptors": {
+   "get": {
+    "operationId": "tnbListSolNetworkPackages",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "tnb"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "max_results",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextpage_opaque_marker",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "networkPackages": {
+           "items": {
+            "$ref": "#/components/schemas/ListSolNetworkPackageInfo"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListSolNetworkPackages",
+    "tags": [
+     "AWS Telco Network Builder"
+    ]
+   },
+   "post": {
+    "operationId": "tnbCreateSolNetworkPackage",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "tnb"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 200,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "id": {
+           "type": "string"
+          },
+          "nsdOnboardingState": {
+           "enum": [
+            "CREATED",
+            "ONBOARDED",
+            "ERROR"
+           ],
+           "type": "string"
+          },
+          "nsdOperationalState": {
+           "enum": [
+            "ENABLED",
+            "DISABLED"
+           ],
+           "type": "string"
+          },
+          "nsdUsageState": {
+           "enum": [
+            "IN_USE",
+            "NOT_IN_USE"
+           ],
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateSolNetworkPackage",
+    "tags": [
+     "AWS Telco Network Builder"
+    ]
+   }
+  },
+  "/sol/nsd/v1/ns_descriptors/{nsdInfoId}": {
+   "delete": {
+    "operationId": "tnbDeleteSolNetworkPackage",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "tnb"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "nsdInfoId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteSolNetworkPackage",
+    "tags": [
+     "AWS Telco Network Builder"
+    ]
+   },
+   "get": {
+    "operationId": "tnbGetSolNetworkPackage",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "tnb"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "nsdInfoId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "id": {
+           "type": "string"
+          },
+          "metadata": {
+           "$ref": "#/components/schemas/GetSolNetworkPackageMetadata"
+          },
+          "nsdId": {
+           "type": "string"
+          },
+          "nsdName": {
+           "type": "string"
+          },
+          "nsdOnboardingState": {
+           "enum": [
+            "CREATED",
+            "ONBOARDED",
+            "ERROR"
+           ],
+           "type": "string"
+          },
+          "nsdOperationalState": {
+           "enum": [
+            "ENABLED",
+            "DISABLED"
+           ],
+           "type": "string"
+          },
+          "nsdUsageState": {
+           "enum": [
+            "IN_USE",
+            "NOT_IN_USE"
+           ],
+           "type": "string"
+          },
+          "nsdVersion": {
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "vnfPkgIds": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetSolNetworkPackage",
+    "tags": [
+     "AWS Telco Network Builder"
+    ]
+   },
+   "patch": {
+    "operationId": "tnbUpdateSolNetworkPackage",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "tnb"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "nsdInfoId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "nsdOperationalState": {
+          "enum": [
+           "ENABLED",
+           "DISABLED"
+          ],
+          "type": "string"
+         }
+        },
+        "required": [
+         "nsdOperationalState"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "nsdOperationalState": {
+           "enum": [
+            "ENABLED",
+            "DISABLED"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateSolNetworkPackage",
+    "tags": [
+     "AWS Telco Network Builder"
+    ]
+   }
+  },
+  "/sol/vnfpkgm/v1/vnf_packages": {
+   "get": {
+    "operationId": "tnbListSolFunctionPackages",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "tnb"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "max_results",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextpage_opaque_marker",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "functionPackages": {
+           "items": {
+            "$ref": "#/components/schemas/ListSolFunctionPackageInfo"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListSolFunctionPackages",
+    "tags": [
+     "AWS Telco Network Builder"
+    ]
+   },
+   "post": {
+    "operationId": "tnbCreateSolFunctionPackage",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "tnb"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 200,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "id": {
+           "type": "string"
+          },
+          "onboardingState": {
+           "enum": [
+            "CREATED",
+            "ONBOARDED",
+            "ERROR"
+           ],
+           "type": "string"
+          },
+          "operationalState": {
+           "enum": [
+            "ENABLED",
+            "DISABLED"
+           ],
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "usageState": {
+           "enum": [
+            "IN_USE",
+            "NOT_IN_USE"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateSolFunctionPackage",
+    "tags": [
+     "AWS Telco Network Builder"
+    ]
+   }
+  },
+  "/sol/vnfpkgm/v1/vnf_packages/{vnfPkgId}": {
+   "delete": {
+    "operationId": "tnbDeleteSolFunctionPackage",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "tnb"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "vnfPkgId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteSolFunctionPackage",
+    "tags": [
+     "AWS Telco Network Builder"
+    ]
+   },
+   "get": {
+    "operationId": "tnbGetSolFunctionPackage",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "tnb"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "vnfPkgId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "id": {
+           "type": "string"
+          },
+          "metadata": {
+           "$ref": "#/components/schemas/GetSolFunctionPackageMetadata"
+          },
+          "onboardingState": {
+           "enum": [
+            "CREATED",
+            "ONBOARDED",
+            "ERROR"
+           ],
+           "type": "string"
+          },
+          "operationalState": {
+           "enum": [
+            "ENABLED",
+            "DISABLED"
+           ],
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "usageState": {
+           "enum": [
+            "IN_USE",
+            "NOT_IN_USE"
+           ],
+           "type": "string"
+          },
+          "vnfProductName": {
+           "type": "string"
+          },
+          "vnfProvider": {
+           "type": "string"
+          },
+          "vnfdId": {
+           "type": "string"
+          },
+          "vnfdVersion": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetSolFunctionPackage",
+    "tags": [
+     "AWS Telco Network Builder"
+    ]
+   },
+   "patch": {
+    "operationId": "tnbUpdateSolFunctionPackage",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "tnb"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "vnfPkgId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "operationalState": {
+          "enum": [
+           "ENABLED",
+           "DISABLED"
+          ],
+          "type": "string"
+         }
+        },
+        "required": [
+         "operationalState"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "operationalState": {
+           "enum": [
+            "ENABLED",
+            "DISABLED"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateSolFunctionPackage",
+    "tags": [
+     "AWS Telco Network Builder"
+    ]
+   }
+  },
+  "/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "tnbUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "tnb"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "type": "string"
+       },
+       "maxItems": 200,
+       "minItems": 0,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "AWS Telco Network Builder"
+    ]
+   },
+   "get": {
+    "operationId": "tnbListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "tnb"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "AWS Telco Network Builder"
+    ]
+   },
+   "post": {
+    "operationId": "tnbTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "tnb"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 200,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "AWS Telco Network Builder"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS Telco Network Builder API (2008-10-21). Every other official operation returns HTTP 501 UnknownOperationException. Function and network packages are empty CREATED metadata: package content upload, validation and descriptor retrieval return UnknownOperationException with HTTP 501, so no CSAR archive, VNFD or NSD is parsed and descriptor members stay absent. Packages stay DISABLED and NOT_IN_USE because their content is never onboarded; enabling one is refused, so every package can be deleted. Package updates do not change metadata.lastModified. Network instances, function instances and network operations (instantiate, update, terminate, cancel) return UnknownOperationException with HTTP 501, so no network or infrastructure is deployed.",
+   "name": "AWS Telco Network Builder"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/tnb/2008-10-21/service-2.json",
+  "sha256": "097edad7182acfe062e306948e7d7d03c6450aa69554603dc437629d2e51f2c9",
+  "license": "Apache-2.0"
+ }
+}

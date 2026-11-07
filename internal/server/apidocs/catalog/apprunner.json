@@ -1,0 +1,1102 @@
+{
+ "components": {
+  "schemas": {
+   "AutoScalingConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "AutoScalingConfigurationArn": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     },
+     "AutoScalingConfigurationName": {
+      "maxLength": 32,
+      "minLength": 4,
+      "type": "string"
+     },
+     "AutoScalingConfigurationRevision": {
+      "type": "integer"
+     },
+     "CreatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "DeletedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "HasAssociatedService": {
+      "type": "boolean"
+     },
+     "IsDefault": {
+      "type": "boolean"
+     },
+     "Latest": {
+      "type": "boolean"
+     },
+     "MaxConcurrency": {
+      "type": "integer"
+     },
+     "MaxSize": {
+      "type": "integer"
+     },
+     "MinSize": {
+      "type": "integer"
+     },
+     "Status": {
+      "enum": [
+       "ACTIVE",
+       "INACTIVE"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "AutoScalingConfigurationSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "AutoScalingConfigurationArn": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     },
+     "AutoScalingConfigurationName": {
+      "maxLength": 32,
+      "minLength": 4,
+      "type": "string"
+     },
+     "AutoScalingConfigurationRevision": {
+      "type": "integer"
+     },
+     "CreatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "HasAssociatedService": {
+      "type": "boolean"
+     },
+     "IsDefault": {
+      "type": "boolean"
+     },
+     "Status": {
+      "enum": [
+       "ACTIVE",
+       "INACTIVE"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Connection": {
+    "additionalProperties": false,
+    "properties": {
+     "ConnectionArn": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ConnectionName": {
+      "maxLength": 32,
+      "minLength": 4,
+      "type": "string"
+     },
+     "CreatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "ProviderType": {
+      "enum": [
+       "GITHUB",
+       "BITBUCKET"
+      ],
+      "type": "string"
+     },
+     "Status": {
+      "enum": [
+       "PENDING_HANDSHAKE",
+       "AVAILABLE",
+       "ERROR",
+       "DELETED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ConnectionSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "ConnectionArn": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ConnectionName": {
+      "maxLength": 32,
+      "minLength": 4,
+      "type": "string"
+     },
+     "CreatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "ProviderType": {
+      "enum": [
+       "GITHUB",
+       "BITBUCKET"
+      ],
+      "type": "string"
+     },
+     "Status": {
+      "enum": [
+       "PENDING_HANDSHAKE",
+       "AVAILABLE",
+       "ERROR",
+       "DELETED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CreateAutoScalingConfigurationRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "AutoScalingConfigurationName": {
+      "maxLength": 32,
+      "minLength": 4,
+      "type": "string"
+     },
+     "MaxConcurrency": {
+      "maximum": 200,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "MaxSize": {
+      "minimum": 1,
+      "type": "integer"
+     },
+     "MinSize": {
+      "maximum": 25,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "AutoScalingConfigurationName"
+    ],
+    "type": "object"
+   },
+   "CreateAutoScalingConfigurationResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "AutoScalingConfiguration": {
+      "$ref": "#/components/schemas/AutoScalingConfiguration"
+     }
+    },
+    "required": [
+     "AutoScalingConfiguration"
+    ],
+    "type": "object"
+   },
+   "CreateConnectionRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ConnectionName": {
+      "maxLength": 32,
+      "minLength": 4,
+      "type": "string"
+     },
+     "ProviderType": {
+      "enum": [
+       "GITHUB",
+       "BITBUCKET"
+      ],
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "ConnectionName",
+     "ProviderType"
+    ],
+    "type": "object"
+   },
+   "CreateConnectionResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Connection": {
+      "$ref": "#/components/schemas/Connection"
+     }
+    },
+    "required": [
+     "Connection"
+    ],
+    "type": "object"
+   },
+   "CreateObservabilityConfigurationRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ObservabilityConfigurationName": {
+      "maxLength": 32,
+      "minLength": 4,
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     },
+     "TraceConfiguration": {
+      "$ref": "#/components/schemas/TraceConfiguration"
+     }
+    },
+    "required": [
+     "ObservabilityConfigurationName"
+    ],
+    "type": "object"
+   },
+   "CreateObservabilityConfigurationResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "ObservabilityConfiguration": {
+      "$ref": "#/components/schemas/ObservabilityConfiguration"
+     }
+    },
+    "required": [
+     "ObservabilityConfiguration"
+    ],
+    "type": "object"
+   },
+   "CreateVpcConnectorRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "SecurityGroups": {
+      "items": {
+       "maxLength": 51200,
+       "minLength": 0,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "Subnets": {
+      "items": {
+       "maxLength": 51200,
+       "minLength": 0,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     },
+     "VpcConnectorName": {
+      "maxLength": 40,
+      "minLength": 4,
+      "type": "string"
+     }
+    },
+    "required": [
+     "VpcConnectorName",
+     "Subnets"
+    ],
+    "type": "object"
+   },
+   "CreateVpcConnectorResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "VpcConnector": {
+      "$ref": "#/components/schemas/VpcConnector"
+     }
+    },
+    "required": [
+     "VpcConnector"
+    ],
+    "type": "object"
+   },
+   "DeleteAutoScalingConfigurationRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "AutoScalingConfigurationArn": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DeleteAllRevisions": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "AutoScalingConfigurationArn"
+    ],
+    "type": "object"
+   },
+   "DeleteAutoScalingConfigurationResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "AutoScalingConfiguration": {
+      "$ref": "#/components/schemas/AutoScalingConfiguration"
+     }
+    },
+    "required": [
+     "AutoScalingConfiguration"
+    ],
+    "type": "object"
+   },
+   "DeleteConnectionRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ConnectionArn": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ConnectionArn"
+    ],
+    "type": "object"
+   },
+   "DeleteConnectionResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Connection": {
+      "$ref": "#/components/schemas/Connection"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteObservabilityConfigurationRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ObservabilityConfigurationArn": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ObservabilityConfigurationArn"
+    ],
+    "type": "object"
+   },
+   "DeleteObservabilityConfigurationResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "ObservabilityConfiguration": {
+      "$ref": "#/components/schemas/ObservabilityConfiguration"
+     }
+    },
+    "required": [
+     "ObservabilityConfiguration"
+    ],
+    "type": "object"
+   },
+   "DeleteVpcConnectorRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "VpcConnectorArn": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "VpcConnectorArn"
+    ],
+    "type": "object"
+   },
+   "DeleteVpcConnectorResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "VpcConnector": {
+      "$ref": "#/components/schemas/VpcConnector"
+     }
+    },
+    "required": [
+     "VpcConnector"
+    ],
+    "type": "object"
+   },
+   "DescribeAutoScalingConfigurationRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "AutoScalingConfigurationArn": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "AutoScalingConfigurationArn"
+    ],
+    "type": "object"
+   },
+   "DescribeAutoScalingConfigurationResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "AutoScalingConfiguration": {
+      "$ref": "#/components/schemas/AutoScalingConfiguration"
+     }
+    },
+    "required": [
+     "AutoScalingConfiguration"
+    ],
+    "type": "object"
+   },
+   "DescribeObservabilityConfigurationRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ObservabilityConfigurationArn": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ObservabilityConfigurationArn"
+    ],
+    "type": "object"
+   },
+   "DescribeObservabilityConfigurationResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "ObservabilityConfiguration": {
+      "$ref": "#/components/schemas/ObservabilityConfiguration"
+     }
+    },
+    "required": [
+     "ObservabilityConfiguration"
+    ],
+    "type": "object"
+   },
+   "DescribeVpcConnectorRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "VpcConnectorArn": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "VpcConnectorArn"
+    ],
+    "type": "object"
+   },
+   "DescribeVpcConnectorResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "VpcConnector": {
+      "$ref": "#/components/schemas/VpcConnector"
+     }
+    },
+    "required": [
+     "VpcConnector"
+    ],
+    "type": "object"
+   },
+   "ListAutoScalingConfigurationsRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "AutoScalingConfigurationName": {
+      "maxLength": 32,
+      "minLength": 4,
+      "type": "string"
+     },
+     "LatestOnly": {
+      "type": "boolean"
+     },
+     "MaxResults": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListAutoScalingConfigurationsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "AutoScalingConfigurationSummaryList": {
+      "items": {
+       "$ref": "#/components/schemas/AutoScalingConfigurationSummary"
+      },
+      "type": "array"
+     },
+     "NextToken": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "AutoScalingConfigurationSummaryList"
+    ],
+    "type": "object"
+   },
+   "ListConnectionsRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ConnectionName": {
+      "maxLength": 32,
+      "minLength": 4,
+      "type": "string"
+     },
+     "MaxResults": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListConnectionsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "ConnectionSummaryList": {
+      "items": {
+       "$ref": "#/components/schemas/ConnectionSummary"
+      },
+      "type": "array"
+     },
+     "NextToken": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ConnectionSummaryList"
+    ],
+    "type": "object"
+   },
+   "ListObservabilityConfigurationsRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "LatestOnly": {
+      "type": "boolean"
+     },
+     "MaxResults": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ObservabilityConfigurationName": {
+      "maxLength": 32,
+      "minLength": 4,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListObservabilityConfigurationsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "NextToken": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ObservabilityConfigurationSummaryList": {
+      "items": {
+       "$ref": "#/components/schemas/ObservabilityConfigurationSummary"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "ObservabilityConfigurationSummaryList"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceArn": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ResourceArn"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListVpcConnectorsRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "MaxResults": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListVpcConnectorsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "NextToken": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "VpcConnectors": {
+      "items": {
+       "$ref": "#/components/schemas/VpcConnector"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "VpcConnectors"
+    ],
+    "type": "object"
+   },
+   "ObservabilityConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "CreatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "DeletedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Latest": {
+      "type": "boolean"
+     },
+     "ObservabilityConfigurationArn": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ObservabilityConfigurationName": {
+      "maxLength": 32,
+      "minLength": 4,
+      "type": "string"
+     },
+     "ObservabilityConfigurationRevision": {
+      "type": "integer"
+     },
+     "Status": {
+      "enum": [
+       "ACTIVE",
+       "INACTIVE"
+      ],
+      "type": "string"
+     },
+     "TraceConfiguration": {
+      "$ref": "#/components/schemas/TraceConfiguration"
+     }
+    },
+    "type": "object"
+   },
+   "ObservabilityConfigurationSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "ObservabilityConfigurationArn": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ObservabilityConfigurationName": {
+      "maxLength": 32,
+      "minLength": 4,
+      "type": "string"
+     },
+     "ObservabilityConfigurationRevision": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "Key": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Value": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceArn": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "ResourceArn",
+     "Tags"
+    ],
+    "type": "object"
+   },
+   "TagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "TraceConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "Vendor": {
+      "enum": [
+       "AWSXRAY"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "Vendor"
+    ],
+    "type": "object"
+   },
+   "UntagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceArn": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     },
+     "TagKeys": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "ResourceArn",
+     "TagKeys"
+    ],
+    "type": "object"
+   },
+   "UntagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "VpcConnector": {
+    "additionalProperties": false,
+    "properties": {
+     "CreatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "DeletedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "SecurityGroups": {
+      "items": {
+       "maxLength": 51200,
+       "minLength": 0,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "Status": {
+      "enum": [
+       "ACTIVE",
+       "INACTIVE"
+      ],
+      "type": "string"
+     },
+     "Subnets": {
+      "items": {
+       "maxLength": 51200,
+       "minLength": 0,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "VpcConnectorArn": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     },
+     "VpcConnectorName": {
+      "maxLength": 40,
+      "minLength": 4,
+      "type": "string"
+     },
+     "VpcConnectorRevision": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS App Runner API (2020-05-15). Every other official operation returns HTTP 501 UnknownOperationException. Auto scaling configurations, observability configurations, connections and VPC connectors are configuration metadata. Each name holds exactly one revision (1); creating another revision of a live name is refused, so LatestOnly and DeleteAllRevisions have no further effect. The AWS-provided DefaultConfiguration is not listed. Connections stay PENDING_HANDSHAKE: no GitHub or Bitbucket handshake is performed. VPC connectors store subnet and security group identifiers without checking them or creating network interfaces. Services, custom domains, deployments, VPC ingress connections and operations are not implemented: CreateService, StartDeployment, PauseService and other workload APIs return UnknownOperationException with HTTP 501.",
+  "title": "AWS App Runner (simulator catalog)",
+  "version": "2020-05-15"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/": {
+   "post": {
+    "description": "Choose the X-Amz-Target of one implemented operation. Request and response members follow the linked official input/output schemas.",
+    "operationId": "apprunnerJSONOperation",
+    "parameters": [
+     {
+      "in": "header",
+      "name": "X-Amz-Target",
+      "required": true,
+      "schema": {
+       "enum": [
+        "AppRunner.CreateAutoScalingConfiguration",
+        "AppRunner.CreateConnection",
+        "AppRunner.CreateObservabilityConfiguration",
+        "AppRunner.CreateVpcConnector",
+        "AppRunner.DeleteAutoScalingConfiguration",
+        "AppRunner.DeleteConnection",
+        "AppRunner.DeleteObservabilityConfiguration",
+        "AppRunner.DeleteVpcConnector",
+        "AppRunner.DescribeAutoScalingConfiguration",
+        "AppRunner.DescribeObservabilityConfiguration",
+        "AppRunner.DescribeVpcConnector",
+        "AppRunner.ListAutoScalingConfigurations",
+        "AppRunner.ListConnections",
+        "AppRunner.ListObservabilityConfigurations",
+        "AppRunner.ListTagsForResource",
+        "AppRunner.ListVpcConnectors",
+        "AppRunner.TagResource",
+        "AppRunner.UntagResource"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-amz-json-1.0": {
+       "examples": {
+        "CreateAutoScalingConfiguration": {
+         "summary": "X-Amz-Target: AppRunner.CreateAutoScalingConfiguration",
+         "value": {}
+        },
+        "CreateConnection": {
+         "summary": "X-Amz-Target: AppRunner.CreateConnection",
+         "value": {}
+        },
+        "CreateObservabilityConfiguration": {
+         "summary": "X-Amz-Target: AppRunner.CreateObservabilityConfiguration",
+         "value": {}
+        },
+        "CreateVpcConnector": {
+         "summary": "X-Amz-Target: AppRunner.CreateVpcConnector",
+         "value": {}
+        },
+        "DeleteAutoScalingConfiguration": {
+         "summary": "X-Amz-Target: AppRunner.DeleteAutoScalingConfiguration",
+         "value": {}
+        },
+        "DeleteConnection": {
+         "summary": "X-Amz-Target: AppRunner.DeleteConnection",
+         "value": {}
+        },
+        "DeleteObservabilityConfiguration": {
+         "summary": "X-Amz-Target: AppRunner.DeleteObservabilityConfiguration",
+         "value": {}
+        },
+        "DeleteVpcConnector": {
+         "summary": "X-Amz-Target: AppRunner.DeleteVpcConnector",
+         "value": {}
+        },
+        "DescribeAutoScalingConfiguration": {
+         "summary": "X-Amz-Target: AppRunner.DescribeAutoScalingConfiguration",
+         "value": {}
+        },
+        "DescribeObservabilityConfiguration": {
+         "summary": "X-Amz-Target: AppRunner.DescribeObservabilityConfiguration",
+         "value": {}
+        },
+        "DescribeVpcConnector": {
+         "summary": "X-Amz-Target: AppRunner.DescribeVpcConnector",
+         "value": {}
+        },
+        "ListAutoScalingConfigurations": {
+         "summary": "X-Amz-Target: AppRunner.ListAutoScalingConfigurations",
+         "value": {}
+        },
+        "ListConnections": {
+         "summary": "X-Amz-Target: AppRunner.ListConnections",
+         "value": {}
+        },
+        "ListObservabilityConfigurations": {
+         "summary": "X-Amz-Target: AppRunner.ListObservabilityConfigurations",
+         "value": {}
+        },
+        "ListTagsForResource": {
+         "summary": "X-Amz-Target: AppRunner.ListTagsForResource",
+         "value": {}
+        },
+        "ListVpcConnectors": {
+         "summary": "X-Amz-Target: AppRunner.ListVpcConnectors",
+         "value": {}
+        },
+        "TagResource": {
+         "summary": "X-Amz-Target: AppRunner.TagResource",
+         "value": {}
+        },
+        "UntagResource": {
+         "summary": "X-Amz-Target: AppRunner.UntagResource",
+         "value": {}
+        }
+       },
+       "schema": {
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/x-amz-json-1.0": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception in __type."
+     },
+     "403": {
+      "description": "AccessDeniedException from local identity policy evaluation."
+     },
+     "501": {
+      "description": "Official operation not implemented by the simulator."
+     }
+    },
+    "summary": "AWS App Runner JSON 1.0 operations",
+    "tags": [
+     "AWS App Runner"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS App Runner API (2020-05-15). Every other official operation returns HTTP 501 UnknownOperationException. Auto scaling configurations, observability configurations, connections and VPC connectors are configuration metadata. Each name holds exactly one revision (1); creating another revision of a live name is refused, so LatestOnly and DeleteAllRevisions have no further effect. The AWS-provided DefaultConfiguration is not listed. Connections stay PENDING_HANDSHAKE: no GitHub or Bitbucket handshake is performed. VPC connectors store subnet and security group identifiers without checking them or creating network interfaces. Services, custom domains, deployments, VPC ingress connections and operations are not implemented: CreateService, StartDeployment, PauseService and other workload APIs return UnknownOperationException with HTTP 501.",
+   "name": "AWS App Runner"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/apprunner/2020-05-15/service-2.json",
+  "sha256": "38683aba7b851715118f6bac7c0550e30f3b79853c949d5e49593ea56bcc1f8a",
+  "license": "Apache-2.0"
+ }
+}

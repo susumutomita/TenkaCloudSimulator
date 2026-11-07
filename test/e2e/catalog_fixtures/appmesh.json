@@ -1,0 +1,48 @@
+{
+ "client": "appmesh",
+ "steps": [
+  {"op": "create_mesh", "args": {"meshName": "fixture-mesh", "spec": {"egressFilter": {"type": "ALLOW_ALL"}}, "tags": [{"key": "team", "value": "a"}]}, "save": {"mesh": "mesh.metadata.arn"}, "expect": {"mesh.meshName": "fixture-mesh", "mesh.status.status": "ACTIVE", "mesh.metadata.version": 1, "mesh.metadata.meshOwner": "000000000000"}},
+  {"op": "describe_mesh", "args": {"meshName": "fixture-mesh", "meshOwner": "000000000000"}, "expect": {"mesh.spec.egressFilter.type": "ALLOW_ALL", "mesh.metadata.arn": "arn:aws:appmesh:us-east-1:000000000000:mesh/fixture-mesh"}},
+  {"op": "list_meshes", "args": {}, "expect": {"meshes#count": 1, "meshes[0].arn": "${mesh}", "meshes[0].version": 1}},
+  {"op": "update_mesh", "args": {"meshName": "fixture-mesh", "spec": {"egressFilter": {"type": "DROP_ALL"}}}, "expect": {"mesh.spec.egressFilter.type": "DROP_ALL"}},
+  {"op": "create_mesh", "args": {"meshName": "fixture-mesh"}, "error": "ConflictException"},
+  {"op": "create_virtual_node", "args": {"meshName": "fixture-mesh", "virtualNodeName": "web", "spec": {"listeners": [{"portMapping": {"port": 8080, "protocol": "http"}}], "serviceDiscovery": {"dns": {"hostname": "web.local"}}}}, "save": {"node": "virtualNode.metadata.arn"}, "expect": {"virtualNode.meshName": "fixture-mesh", "virtualNode.status.status": "ACTIVE"}},
+  {"op": "describe_virtual_node", "args": {"meshName": "fixture-mesh", "virtualNodeName": "web"}, "expect": {"virtualNode.spec.listeners[0].portMapping.port": 8080, "virtualNode.metadata.arn": "arn:aws:appmesh:us-east-1:000000000000:mesh/fixture-mesh/virtualNode/web"}},
+  {"op": "list_virtual_nodes", "args": {"meshName": "fixture-mesh"}, "expect": {"virtualNodes#count": 1, "virtualNodes[0].virtualNodeName": "web"}},
+  {"op": "update_virtual_node", "args": {"meshName": "fixture-mesh", "virtualNodeName": "web", "spec": {"listeners": [{"portMapping": {"port": 9090, "protocol": "http"}}]}}, "expect": {"virtualNode.spec.listeners[0].portMapping.port": 9090}},
+  {"op": "create_virtual_router", "args": {"meshName": "fixture-mesh", "virtualRouterName": "router", "spec": {"listeners": [{"portMapping": {"port": 8080, "protocol": "http"}}]}}, "expect": {"virtualRouter.virtualRouterName": "router"}},
+  {"op": "describe_virtual_router", "args": {"meshName": "fixture-mesh", "virtualRouterName": "router"}, "expect": {"virtualRouter.spec.listeners[0].portMapping.protocol": "http"}},
+  {"op": "list_virtual_routers", "args": {"meshName": "fixture-mesh"}, "expect": {"virtualRouters#count": 1}},
+  {"op": "update_virtual_router", "args": {"meshName": "fixture-mesh", "virtualRouterName": "router", "spec": {"listeners": [{"portMapping": {"port": 8081, "protocol": "http2"}}]}}, "expect": {"virtualRouter.spec.listeners[0].portMapping.port": 8081}},
+  {"op": "create_virtual_service", "args": {"meshName": "fixture-mesh", "virtualServiceName": "web.local", "spec": {}}, "expect": {"virtualService.virtualServiceName": "web.local"}},
+  {"op": "create_virtual_service", "args": {"meshName": "fixture-mesh", "virtualServiceName": "api.local", "spec": {"provider": {"virtualNode": {"virtualNodeName": "web"}}}}, "error": "BadRequestException"},
+  {"op": "describe_virtual_service", "args": {"meshName": "fixture-mesh", "virtualServiceName": "web.local"}, "expect": {"virtualService.status.status": "ACTIVE"}},
+  {"op": "list_virtual_services", "args": {"meshName": "fixture-mesh"}, "expect": {"virtualServices#count": 1}},
+  {"op": "update_virtual_service", "args": {"meshName": "fixture-mesh", "virtualServiceName": "web.local", "spec": {}}, "expect": {"virtualService.virtualServiceName": "web.local"}},
+  {"op": "create_virtual_gateway", "args": {"meshName": "fixture-mesh", "virtualGatewayName": "ingress", "spec": {"listeners": [{"portMapping": {"port": 443, "protocol": "http"}}]}}, "expect": {"virtualGateway.virtualGatewayName": "ingress"}},
+  {"op": "describe_virtual_gateway", "args": {"meshName": "fixture-mesh", "virtualGatewayName": "ingress"}, "expect": {"virtualGateway.spec.listeners[0].portMapping.port": 443}},
+  {"op": "list_virtual_gateways", "args": {"meshName": "fixture-mesh"}, "expect": {"virtualGateways#count": 1}},
+  {"op": "update_virtual_gateway", "args": {"meshName": "fixture-mesh", "virtualGatewayName": "ingress", "spec": {"listeners": [{"portMapping": {"port": 8443, "protocol": "http"}}]}}, "expect": {"virtualGateway.spec.listeners[0].portMapping.port": 8443}},
+  {"op": "tag_resource", "args": {"resourceArn": "${mesh}", "tags": [{"key": "k", "value": "v"}]}},
+  {"op": "untag_resource", "args": {"resourceArn": "${mesh}", "tagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${mesh}"}, "expect": {"tags#count": 1, "tags[0].key": "team"}},
+  {"op": "create_route", "args": {"meshName": "fixture-mesh", "virtualRouterName": "router", "routeName": "r", "spec": {"httpRoute": {"match": {"prefix": "/"}, "action": {"weightedTargets": [{"virtualNode": "web", "weight": 1}]}}}}, "error": "UnknownOperationException", "status": 501},
+  {"op": "delete_mesh", "args": {"meshName": "fixture-mesh"}, "error": "ResourceInUseException"},
+  {"op": "describe_virtual_node", "args": {"meshName": "fixture-mesh", "virtualNodeName": "ghost"}, "error": "NotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_meshes", "args": {}, "expect": {"meshes#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_virtual_node", "args": {"meshName": "fixture-mesh", "virtualNodeName": "web"}, "expect": {"virtualNode.spec.listeners[0].portMapping.port": 9090}},
+  {"op": "describe_mesh", "args": {"meshName": "fixture-mesh"}, "expect": {"mesh.spec.egressFilter.type": "DROP_ALL"}}
+ ],
+ "cleanup": [
+  {"op": "delete_virtual_service", "args": {"meshName": "fixture-mesh", "virtualServiceName": "web.local"}, "expect": {"virtualService.status.status": "DELETED"}},
+  {"op": "delete_virtual_node", "args": {"meshName": "fixture-mesh", "virtualNodeName": "web"}},
+  {"op": "delete_virtual_router", "args": {"meshName": "fixture-mesh", "virtualRouterName": "router"}},
+  {"op": "delete_virtual_gateway", "args": {"meshName": "fixture-mesh", "virtualGatewayName": "ingress"}},
+  {"op": "delete_mesh", "args": {"meshName": "fixture-mesh"}, "expect": {"mesh.status.status": "DELETED"}},
+  {"op": "list_meshes", "args": {}, "expect": {"meshes#count": 0}}
+ ]
+}

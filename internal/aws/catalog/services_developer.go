@@ -187,5 +187,9 @@ func noBasicAuth(input map[string]any) error {
 	if enabled, _ := input["enableBasicAuth"].(bool); enabled {
 		return Failure("BadRequestException", "Basic authentication requires hosting, which the simulator does not provide.")
 	}
+	// Auto-branch settings would copy the same credentials into new branches.
+	if nested, ok := input["autoBranchCreationConfig"].(map[string]any); ok {
+		return noBasicAuth(nested)
+	}
 	return nil
 }

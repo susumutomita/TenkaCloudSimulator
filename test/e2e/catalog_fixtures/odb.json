@@ -1,0 +1,31 @@
+{
+ "client": "odb",
+ "steps": [
+  {"op": "create_odb_network", "args": {"displayName": "fixture_network", "availabilityZone": "us-east-1a", "clientSubnetCidr": "10.0.0.0/24", "backupSubnetCidr": "10.0.1.0/24", "tags": {"team": "a"}}, "save": {"network": "odbNetworkId"}, "expect": {"status": "PROVISIONING", "displayName": "fixture_network"}},
+  {"op": "get_odb_network", "args": {"odbNetworkId": "${network}"}, "save": {"networkArn": "odbNetwork.odbNetworkArn"}, "expect": {"odbNetwork.clientSubnetCidr": "10.0.0.0/24", "odbNetwork.availabilityZone": "us-east-1a"}},
+  {"op": "update_odb_network", "args": {"odbNetworkId": "${network}", "displayName": "fixture_renamed"}, "expect": {"displayName": "fixture_renamed"}},
+  {"op": "list_odb_networks", "args": {}, "expect": {"odbNetworks#count": 1, "odbNetworks[0].displayName": "fixture_renamed"}},
+  {"op": "create_odb_network", "args": {"displayName": "fixture_reserved", "availabilityZone": "us-east-1a", "clientSubnetCidr": "169.254.0.0/24"}, "error": "ValidationException"},
+  {"op": "create_cloud_exadata_infrastructure", "args": {"displayName": "fixture_exa", "shape": "Exadata.X9M", "availabilityZoneId": "use1-az4", "computeCount": 2, "storageCount": 3}, "save": {"exa": "cloudExadataInfrastructureId"}},
+  {"op": "get_cloud_exadata_infrastructure", "args": {"cloudExadataInfrastructureId": "${exa}"}, "save": {"exaArn": "cloudExadataInfrastructure.cloudExadataInfrastructureArn"}, "expect": {"cloudExadataInfrastructure.computeCount": 2, "cloudExadataInfrastructure.status": "PROVISIONING"}},
+  {"op": "update_cloud_exadata_infrastructure", "args": {"cloudExadataInfrastructureId": "${exa}", "maintenanceWindow": {"preference": "NO_PREFERENCE"}}, "expect": {"cloudExadataInfrastructureId": "${exa}"}},
+  {"op": "list_cloud_exadata_infrastructures", "args": {}, "expect": {"cloudExadataInfrastructures#count": 1}},
+  {"op": "tag_resource", "args": {"resourceArn": "${exaArn}", "tags": {"stage": "dev"}}},
+  {"op": "untag_resource", "args": {"resourceArn": "${exaArn}", "tagKeys": ["stage"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${networkArn}"}, "expect": {"tags": {"team": "a"}}},
+  {"op": "list_db_system_shapes", "args": {}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_odb_network", "args": {"odbNetworkId": "odbnet_missing000"}, "error": "ResourceNotFoundException"}
+ ],
+ "isolation": [
+  {"op": "list_odb_networks", "args": {}, "expect": {"odbNetworks#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_cloud_exadata_infrastructure", "args": {"cloudExadataInfrastructureId": "${exa}"}, "expect": {"cloudExadataInfrastructure.maintenanceWindow.preference": "NO_PREFERENCE"}}
+ ],
+ "cleanup": [
+  {"op": "delete_cloud_exadata_infrastructure", "args": {"cloudExadataInfrastructureId": "${exa}"}},
+  {"op": "delete_odb_network", "args": {"odbNetworkId": "${network}", "deleteAssociatedResources": true}},
+  {"op": "list_odb_networks", "args": {}, "expect": {"odbNetworks#count": 0}},
+  {"op": "list_cloud_exadata_infrastructures", "args": {}, "expect": {"cloudExadataInfrastructures#count": 0}}
+ ]
+}

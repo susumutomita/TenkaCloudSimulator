@@ -1,0 +1,35 @@
+{
+ "client": "sesv2",
+ "steps": [
+  {"op": "create_configuration_set", "args": {"ConfigurationSetName": "transactional", "SendingOptions": {"SendingEnabled": true}, "Tags": [{"Key": "team", "Value": "a"}]}},
+  {"op": "get_configuration_set", "args": {"ConfigurationSetName": "transactional"}, "expect": {"SendingOptions.SendingEnabled": true, "Tags[0].Key": "team"}},
+  {"op": "list_configuration_sets", "args": {}, "expect": {"ConfigurationSets": ["transactional"]}},
+  {"op": "create_contact_list", "args": {"ContactListName": "newsletter", "Topics": [{"TopicName": "weekly", "DisplayName": "Weekly", "DefaultSubscriptionStatus": "OPT_OUT"}]}},
+  {"op": "get_contact_list", "args": {"ContactListName": "newsletter"}, "expect": {"Topics[0].TopicName": "weekly"}},
+  {"op": "update_contact_list", "args": {"ContactListName": "newsletter", "Description": "Weekly news"}},
+  {"op": "list_contact_lists", "args": {}, "expect": {"ContactLists#count": 1, "ContactLists[0].ContactListName": "newsletter"}},
+  {"op": "create_contact_list", "args": {"ContactListName": "second"}, "error": "LimitExceededException"},
+  {"op": "create_email_template", "args": {"TemplateName": "welcome", "TemplateContent": {"Subject": "Hi {{name}}", "Text": "Hello"}}},
+  {"op": "get_email_template", "args": {"TemplateName": "welcome"}, "expect": {"TemplateContent.Subject": "Hi {{name}}"}},
+  {"op": "update_email_template", "args": {"TemplateName": "welcome", "TemplateContent": {"Subject": "Welcome", "Html": "<p>Hello</p>"}}},
+  {"op": "list_email_templates", "args": {}, "expect": {"TemplatesMetadata#count": 1, "TemplatesMetadata[0].TemplateName": "welcome"}},
+  {"op": "tag_resource", "args": {"ResourceArn": "arn:aws:ses:us-east-1:000000000000:contact-list/newsletter", "Tags": [{"Key": "stage", "Value": "dev"}]}},
+  {"op": "untag_resource", "args": {"ResourceArn": "arn:aws:ses:us-east-1:000000000000:contact-list/newsletter", "TagKeys": ["stage"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "arn:aws:ses:us-east-1:000000000000:configuration-set/transactional"}, "expect": {"Tags#count": 1, "Tags[0].Value": "a"}},
+  {"op": "send_email", "args": {"FromEmailAddress": "sender@example.invalid", "Destination": {"ToAddresses": ["to@example.invalid"]}, "Content": {"Simple": {"Subject": {"Data": "Hi"}, "Body": {"Text": {"Data": "Hello"}}}}}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_email_template", "args": {"TemplateName": "missing"}, "error": "NotFoundException"}
+ ],
+ "isolation": [
+  {"op": "list_configuration_sets", "args": {}, "expect": {"ConfigurationSets#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_email_template", "args": {"TemplateName": "welcome"}, "expect": {"TemplateContent.Subject": "Welcome"}},
+  {"op": "get_contact_list", "args": {"ContactListName": "newsletter"}, "expect": {"Description": "Weekly news"}}
+ ],
+ "cleanup": [
+  {"op": "delete_configuration_set", "args": {"ConfigurationSetName": "transactional"}},
+  {"op": "delete_contact_list", "args": {"ContactListName": "newsletter"}},
+  {"op": "delete_email_template", "args": {"TemplateName": "welcome"}},
+  {"op": "list_email_templates", "args": {}, "expect": {"TemplatesMetadata#count": 0}}
+ ]
+}

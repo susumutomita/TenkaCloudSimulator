@@ -1,0 +1,1663 @@
+{
+ "components": {
+  "schemas": {
+   "BatchGetProjectsInput": {
+    "additionalProperties": false,
+    "properties": {
+     "names": {
+      "items": {
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "names"
+    ],
+    "type": "object"
+   },
+   "BatchGetProjectsOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "projects": {
+      "items": {
+       "$ref": "#/components/schemas/Project"
+      },
+      "type": "array"
+     },
+     "projectsNotFound": {
+      "items": {
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "BatchGetReportGroupsInput": {
+    "additionalProperties": false,
+    "properties": {
+     "reportGroupArns": {
+      "items": {
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "reportGroupArns"
+    ],
+    "type": "object"
+   },
+   "BatchGetReportGroupsOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "reportGroups": {
+      "items": {
+       "$ref": "#/components/schemas/ReportGroup"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "type": "array"
+     },
+     "reportGroupsNotFound": {
+      "items": {
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "BatchRestrictions": {
+    "additionalProperties": false,
+    "properties": {
+     "computeTypesAllowed": {
+      "items": {
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "fleetsAllowed": {
+      "items": {
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "maximumBuildsAllowed": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "BuildStatusConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "context": {
+      "type": "string"
+     },
+     "targetUrl": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CloudWatchLogsConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "groupName": {
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "streamName": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "status"
+    ],
+    "type": "object"
+   },
+   "ComputeConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "disk": {
+      "type": "integer"
+     },
+     "instanceType": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "machineType": {
+      "enum": [
+       "GENERAL",
+       "NVME"
+      ],
+      "type": "string"
+     },
+     "memory": {
+      "type": "integer"
+     },
+     "vCpu": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "CreateProjectInput": {
+    "additionalProperties": false,
+    "properties": {
+     "artifacts": {
+      "$ref": "#/components/schemas/ProjectArtifacts"
+     },
+     "autoRetryLimit": {
+      "type": "integer"
+     },
+     "badgeEnabled": {
+      "type": "boolean"
+     },
+     "buildBatchConfig": {
+      "$ref": "#/components/schemas/ProjectBuildBatchConfig"
+     },
+     "cache": {
+      "$ref": "#/components/schemas/ProjectCache"
+     },
+     "concurrentBuildLimit": {
+      "type": "integer"
+     },
+     "description": {
+      "maxLength": 255,
+      "minLength": 0,
+      "type": "string"
+     },
+     "encryptionKey": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "environment": {
+      "$ref": "#/components/schemas/ProjectEnvironment"
+     },
+     "fileSystemLocations": {
+      "items": {
+       "$ref": "#/components/schemas/ProjectFileSystemLocation"
+      },
+      "type": "array"
+     },
+     "logsConfig": {
+      "$ref": "#/components/schemas/LogsConfig"
+     },
+     "name": {
+      "maxLength": 150,
+      "minLength": 2,
+      "type": "string"
+     },
+     "queuedTimeoutInMinutes": {
+      "maximum": 480,
+      "minimum": 5,
+      "type": "integer"
+     },
+     "secondaryArtifacts": {
+      "items": {
+       "$ref": "#/components/schemas/ProjectArtifacts"
+      },
+      "maxItems": 12,
+      "minItems": 0,
+      "type": "array"
+     },
+     "secondarySourceVersions": {
+      "items": {
+       "$ref": "#/components/schemas/ProjectSourceVersion"
+      },
+      "maxItems": 12,
+      "minItems": 0,
+      "type": "array"
+     },
+     "secondarySources": {
+      "items": {
+       "$ref": "#/components/schemas/ProjectSource"
+      },
+      "maxItems": 12,
+      "minItems": 0,
+      "type": "array"
+     },
+     "serviceRole": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "source": {
+      "$ref": "#/components/schemas/ProjectSource"
+     },
+     "sourceVersion": {
+      "type": "string"
+     },
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 0,
+      "type": "array"
+     },
+     "timeoutInMinutes": {
+      "maximum": 2160,
+      "minimum": 5,
+      "type": "integer"
+     },
+     "vpcConfig": {
+      "$ref": "#/components/schemas/VpcConfig"
+     }
+    },
+    "required": [
+     "name",
+     "source",
+     "artifacts",
+     "environment",
+     "serviceRole"
+    ],
+    "type": "object"
+   },
+   "CreateProjectOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "project": {
+      "$ref": "#/components/schemas/Project"
+     }
+    },
+    "type": "object"
+   },
+   "CreateReportGroupInput": {
+    "additionalProperties": false,
+    "properties": {
+     "exportConfig": {
+      "$ref": "#/components/schemas/ReportExportConfig"
+     },
+     "name": {
+      "maxLength": 128,
+      "minLength": 2,
+      "type": "string"
+     },
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 0,
+      "type": "array"
+     },
+     "type": {
+      "enum": [
+       "TEST",
+       "CODE_COVERAGE"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "type",
+     "exportConfig"
+    ],
+    "type": "object"
+   },
+   "CreateReportGroupOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "reportGroup": {
+      "$ref": "#/components/schemas/ReportGroup"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteProjectInput": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "DeleteProjectOutput": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DeleteReportGroupInput": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "deleteReports": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "arn"
+    ],
+    "type": "object"
+   },
+   "DeleteReportGroupOutput": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DockerServer": {
+    "additionalProperties": false,
+    "properties": {
+     "computeType": {
+      "enum": [
+       "BUILD_GENERAL1_SMALL",
+       "BUILD_GENERAL1_MEDIUM",
+       "BUILD_GENERAL1_LARGE",
+       "BUILD_GENERAL1_XLARGE",
+       "BUILD_GENERAL1_2XLARGE",
+       "BUILD_LAMBDA_1GB",
+       "BUILD_LAMBDA_2GB",
+       "BUILD_LAMBDA_4GB",
+       "BUILD_LAMBDA_8GB",
+       "BUILD_LAMBDA_10GB",
+       "ATTRIBUTE_BASED_COMPUTE",
+       "CUSTOM_INSTANCE_TYPE"
+      ],
+      "type": "string"
+     },
+     "securityGroupIds": {
+      "items": {
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 5,
+      "type": "array"
+     },
+     "status": {
+      "$ref": "#/components/schemas/DockerServerStatus"
+     }
+    },
+    "required": [
+     "computeType"
+    ],
+    "type": "object"
+   },
+   "DockerServerStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "message": {
+      "type": "string"
+     },
+     "status": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "EnvironmentVariable": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "PLAINTEXT",
+       "PARAMETER_STORE",
+       "SECRETS_MANAGER"
+      ],
+      "type": "string"
+     },
+     "value": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "value"
+    ],
+    "type": "object"
+   },
+   "GitSubmodulesConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "fetchSubmodules": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "fetchSubmodules"
+    ],
+    "type": "object"
+   },
+   "ListProjectsInput": {
+    "additionalProperties": false,
+    "properties": {
+     "nextToken": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "sortBy": {
+      "enum": [
+       "NAME",
+       "CREATED_TIME",
+       "LAST_MODIFIED_TIME"
+      ],
+      "type": "string"
+     },
+     "sortOrder": {
+      "enum": [
+       "ASCENDING",
+       "DESCENDING"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListProjectsOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "nextToken": {
+      "type": "string"
+     },
+     "projects": {
+      "items": {
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListReportGroupsInput": {
+    "additionalProperties": false,
+    "properties": {
+     "maxResults": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "nextToken": {
+      "type": "string"
+     },
+     "sortBy": {
+      "enum": [
+       "NAME",
+       "CREATED_TIME",
+       "LAST_MODIFIED_TIME"
+      ],
+      "type": "string"
+     },
+     "sortOrder": {
+      "enum": [
+       "ASCENDING",
+       "DESCENDING"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListReportGroupsOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "nextToken": {
+      "type": "string"
+     },
+     "reportGroups": {
+      "items": {
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "LogsConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "cloudWatchLogs": {
+      "$ref": "#/components/schemas/CloudWatchLogsConfig"
+     },
+     "s3Logs": {
+      "$ref": "#/components/schemas/S3LogsConfig"
+     }
+    },
+    "type": "object"
+   },
+   "Project": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "artifacts": {
+      "$ref": "#/components/schemas/ProjectArtifacts"
+     },
+     "autoRetryLimit": {
+      "type": "integer"
+     },
+     "badge": {
+      "$ref": "#/components/schemas/ProjectBadge"
+     },
+     "buildBatchConfig": {
+      "$ref": "#/components/schemas/ProjectBuildBatchConfig"
+     },
+     "cache": {
+      "$ref": "#/components/schemas/ProjectCache"
+     },
+     "concurrentBuildLimit": {
+      "type": "integer"
+     },
+     "created": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "description": {
+      "maxLength": 255,
+      "minLength": 0,
+      "type": "string"
+     },
+     "encryptionKey": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "environment": {
+      "$ref": "#/components/schemas/ProjectEnvironment"
+     },
+     "fileSystemLocations": {
+      "items": {
+       "$ref": "#/components/schemas/ProjectFileSystemLocation"
+      },
+      "type": "array"
+     },
+     "lastModified": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "logsConfig": {
+      "$ref": "#/components/schemas/LogsConfig"
+     },
+     "name": {
+      "maxLength": 150,
+      "minLength": 2,
+      "type": "string"
+     },
+     "projectVisibility": {
+      "enum": [
+       "PUBLIC_READ",
+       "PRIVATE"
+      ],
+      "type": "string"
+     },
+     "publicProjectAlias": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "queuedTimeoutInMinutes": {
+      "maximum": 480,
+      "minimum": 5,
+      "type": "integer"
+     },
+     "resourceAccessRole": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "secondaryArtifacts": {
+      "items": {
+       "$ref": "#/components/schemas/ProjectArtifacts"
+      },
+      "maxItems": 12,
+      "minItems": 0,
+      "type": "array"
+     },
+     "secondarySourceVersions": {
+      "items": {
+       "$ref": "#/components/schemas/ProjectSourceVersion"
+      },
+      "maxItems": 12,
+      "minItems": 0,
+      "type": "array"
+     },
+     "secondarySources": {
+      "items": {
+       "$ref": "#/components/schemas/ProjectSource"
+      },
+      "maxItems": 12,
+      "minItems": 0,
+      "type": "array"
+     },
+     "serviceRole": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "source": {
+      "$ref": "#/components/schemas/ProjectSource"
+     },
+     "sourceVersion": {
+      "type": "string"
+     },
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 0,
+      "type": "array"
+     },
+     "timeoutInMinutes": {
+      "maximum": 2160,
+      "minimum": 5,
+      "type": "integer"
+     },
+     "vpcConfig": {
+      "$ref": "#/components/schemas/VpcConfig"
+     },
+     "webhook": {
+      "$ref": "#/components/schemas/Webhook"
+     }
+    },
+    "type": "object"
+   },
+   "ProjectArtifacts": {
+    "additionalProperties": false,
+    "properties": {
+     "artifactIdentifier": {
+      "type": "string"
+     },
+     "bucketOwnerAccess": {
+      "enum": [
+       "NONE",
+       "READ_ONLY",
+       "FULL"
+      ],
+      "type": "string"
+     },
+     "encryptionDisabled": {
+      "type": "boolean"
+     },
+     "location": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "namespaceType": {
+      "enum": [
+       "NONE",
+       "BUILD_ID"
+      ],
+      "type": "string"
+     },
+     "overrideArtifactName": {
+      "type": "boolean"
+     },
+     "packaging": {
+      "enum": [
+       "NONE",
+       "ZIP"
+      ],
+      "type": "string"
+     },
+     "path": {
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "CODEPIPELINE",
+       "S3",
+       "NO_ARTIFACTS"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "type"
+    ],
+    "type": "object"
+   },
+   "ProjectBadge": {
+    "additionalProperties": false,
+    "properties": {
+     "badgeEnabled": {
+      "type": "boolean"
+     },
+     "badgeRequestUrl": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ProjectBuildBatchConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "batchReportMode": {
+      "enum": [
+       "REPORT_INDIVIDUAL_BUILDS",
+       "REPORT_AGGREGATED_BATCH"
+      ],
+      "type": "string"
+     },
+     "combineArtifacts": {
+      "type": "boolean"
+     },
+     "restrictions": {
+      "$ref": "#/components/schemas/BatchRestrictions"
+     },
+     "serviceRole": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "timeoutInMins": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "ProjectCache": {
+    "additionalProperties": false,
+    "properties": {
+     "cacheNamespace": {
+      "type": "string"
+     },
+     "location": {
+      "type": "string"
+     },
+     "modes": {
+      "items": {
+       "enum": [
+        "LOCAL_DOCKER_LAYER_CACHE",
+        "LOCAL_SOURCE_CACHE",
+        "LOCAL_CUSTOM_CACHE"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "type": {
+      "enum": [
+       "NO_CACHE",
+       "S3",
+       "LOCAL"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "type"
+    ],
+    "type": "object"
+   },
+   "ProjectEnvironment": {
+    "additionalProperties": false,
+    "properties": {
+     "certificate": {
+      "type": "string"
+     },
+     "computeConfiguration": {
+      "$ref": "#/components/schemas/ComputeConfiguration"
+     },
+     "computeType": {
+      "enum": [
+       "BUILD_GENERAL1_SMALL",
+       "BUILD_GENERAL1_MEDIUM",
+       "BUILD_GENERAL1_LARGE",
+       "BUILD_GENERAL1_XLARGE",
+       "BUILD_GENERAL1_2XLARGE",
+       "BUILD_LAMBDA_1GB",
+       "BUILD_LAMBDA_2GB",
+       "BUILD_LAMBDA_4GB",
+       "BUILD_LAMBDA_8GB",
+       "BUILD_LAMBDA_10GB",
+       "ATTRIBUTE_BASED_COMPUTE",
+       "CUSTOM_INSTANCE_TYPE"
+      ],
+      "type": "string"
+     },
+     "dockerServer": {
+      "$ref": "#/components/schemas/DockerServer"
+     },
+     "environmentVariables": {
+      "items": {
+       "$ref": "#/components/schemas/EnvironmentVariable"
+      },
+      "type": "array"
+     },
+     "fleet": {
+      "$ref": "#/components/schemas/ProjectFleet"
+     },
+     "image": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "imagePullCredentialsType": {
+      "enum": [
+       "CODEBUILD",
+       "SERVICE_ROLE"
+      ],
+      "type": "string"
+     },
+     "privilegedMode": {
+      "type": "boolean"
+     },
+     "registryCredential": {
+      "$ref": "#/components/schemas/RegistryCredential"
+     },
+     "type": {
+      "enum": [
+       "WINDOWS_CONTAINER",
+       "LINUX_CONTAINER",
+       "LINUX_GPU_CONTAINER",
+       "ARM_CONTAINER",
+       "WINDOWS_SERVER_2019_CONTAINER",
+       "WINDOWS_SERVER_2022_CONTAINER",
+       "LINUX_LAMBDA_CONTAINER",
+       "ARM_LAMBDA_CONTAINER",
+       "LINUX_EC2",
+       "ARM_EC2",
+       "WINDOWS_EC2",
+       "MAC_ARM"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "type",
+     "image",
+     "computeType"
+    ],
+    "type": "object"
+   },
+   "ProjectFileSystemLocation": {
+    "additionalProperties": false,
+    "properties": {
+     "identifier": {
+      "type": "string"
+     },
+     "location": {
+      "type": "string"
+     },
+     "mountOptions": {
+      "type": "string"
+     },
+     "mountPoint": {
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "EFS"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ProjectFleet": {
+    "additionalProperties": false,
+    "properties": {
+     "fleetArn": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ProjectSource": {
+    "additionalProperties": false,
+    "properties": {
+     "auth": {
+      "$ref": "#/components/schemas/SourceAuth"
+     },
+     "buildStatusConfig": {
+      "$ref": "#/components/schemas/BuildStatusConfig"
+     },
+     "buildspec": {
+      "type": "string"
+     },
+     "gitCloneDepth": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "gitSubmodulesConfig": {
+      "$ref": "#/components/schemas/GitSubmodulesConfig"
+     },
+     "insecureSsl": {
+      "type": "boolean"
+     },
+     "location": {
+      "type": "string"
+     },
+     "reportBuildStatus": {
+      "type": "boolean"
+     },
+     "sourceIdentifier": {
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "CODECOMMIT",
+       "CODEPIPELINE",
+       "GITHUB",
+       "GITLAB",
+       "GITLAB_SELF_MANAGED",
+       "S3",
+       "BITBUCKET",
+       "GITHUB_ENTERPRISE",
+       "NO_SOURCE"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "type"
+    ],
+    "type": "object"
+   },
+   "ProjectSourceVersion": {
+    "additionalProperties": false,
+    "properties": {
+     "sourceIdentifier": {
+      "type": "string"
+     },
+     "sourceVersion": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "sourceIdentifier",
+     "sourceVersion"
+    ],
+    "type": "object"
+   },
+   "PullRequestBuildPolicy": {
+    "additionalProperties": false,
+    "properties": {
+     "approverRoles": {
+      "items": {
+       "enum": [
+        "GITHUB_READ",
+        "GITHUB_TRIAGE",
+        "GITHUB_WRITE",
+        "GITHUB_MAINTAIN",
+        "GITHUB_ADMIN",
+        "GITLAB_GUEST",
+        "GITLAB_PLANNER",
+        "GITLAB_REPORTER",
+        "GITLAB_DEVELOPER",
+        "GITLAB_MAINTAINER",
+        "GITLAB_OWNER",
+        "BITBUCKET_READ",
+        "BITBUCKET_WRITE",
+        "BITBUCKET_ADMIN"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "requiresCommentApproval": {
+      "enum": [
+       "DISABLED",
+       "ALL_PULL_REQUESTS",
+       "FORK_PULL_REQUESTS"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "requiresCommentApproval"
+    ],
+    "type": "object"
+   },
+   "RegistryCredential": {
+    "additionalProperties": false,
+    "properties": {
+     "credential": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "credentialProvider": {
+      "enum": [
+       "SECRETS_MANAGER"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "credential",
+     "credentialProvider"
+    ],
+    "type": "object"
+   },
+   "ReportExportConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "exportConfigType": {
+      "enum": [
+       "S3",
+       "NO_EXPORT"
+      ],
+      "type": "string"
+     },
+     "s3Destination": {
+      "$ref": "#/components/schemas/S3ReportExportConfig"
+     }
+    },
+    "type": "object"
+   },
+   "ReportGroup": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "created": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "exportConfig": {
+      "$ref": "#/components/schemas/ReportExportConfig"
+     },
+     "lastModified": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "name": {
+      "maxLength": 128,
+      "minLength": 2,
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "ACTIVE",
+       "DELETING"
+      ],
+      "type": "string"
+     },
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 0,
+      "type": "array"
+     },
+     "type": {
+      "enum": [
+       "TEST",
+       "CODE_COVERAGE"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "S3LogsConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "bucketOwnerAccess": {
+      "enum": [
+       "NONE",
+       "READ_ONLY",
+       "FULL"
+      ],
+      "type": "string"
+     },
+     "encryptionDisabled": {
+      "type": "boolean"
+     },
+     "location": {
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "status"
+    ],
+    "type": "object"
+   },
+   "S3ReportExportConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "bucket": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "bucketOwner": {
+      "type": "string"
+     },
+     "encryptionDisabled": {
+      "type": "boolean"
+     },
+     "encryptionKey": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "packaging": {
+      "enum": [
+       "ZIP",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "path": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ScopeConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "domain": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "scope": {
+      "enum": [
+       "GITHUB_ORGANIZATION",
+       "GITHUB_GLOBAL",
+       "GITLAB_GROUP"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "scope"
+    ],
+    "type": "object"
+   },
+   "SourceAuth": {
+    "additionalProperties": false,
+    "properties": {
+     "resource": {
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "OAUTH",
+       "CODECONNECTIONS",
+       "SECRETS_MANAGER"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "type"
+    ],
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "key": {
+      "maxLength": 127,
+      "minLength": 1,
+      "type": "string"
+     },
+     "value": {
+      "maxLength": 255,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "UpdateProjectInput": {
+    "additionalProperties": false,
+    "properties": {
+     "artifacts": {
+      "$ref": "#/components/schemas/ProjectArtifacts"
+     },
+     "autoRetryLimit": {
+      "type": "integer"
+     },
+     "badgeEnabled": {
+      "type": "boolean"
+     },
+     "buildBatchConfig": {
+      "$ref": "#/components/schemas/ProjectBuildBatchConfig"
+     },
+     "cache": {
+      "$ref": "#/components/schemas/ProjectCache"
+     },
+     "concurrentBuildLimit": {
+      "type": "integer"
+     },
+     "description": {
+      "maxLength": 255,
+      "minLength": 0,
+      "type": "string"
+     },
+     "encryptionKey": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "environment": {
+      "$ref": "#/components/schemas/ProjectEnvironment"
+     },
+     "fileSystemLocations": {
+      "items": {
+       "$ref": "#/components/schemas/ProjectFileSystemLocation"
+      },
+      "type": "array"
+     },
+     "logsConfig": {
+      "$ref": "#/components/schemas/LogsConfig"
+     },
+     "name": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "queuedTimeoutInMinutes": {
+      "maximum": 480,
+      "minimum": 5,
+      "type": "integer"
+     },
+     "secondaryArtifacts": {
+      "items": {
+       "$ref": "#/components/schemas/ProjectArtifacts"
+      },
+      "maxItems": 12,
+      "minItems": 0,
+      "type": "array"
+     },
+     "secondarySourceVersions": {
+      "items": {
+       "$ref": "#/components/schemas/ProjectSourceVersion"
+      },
+      "maxItems": 12,
+      "minItems": 0,
+      "type": "array"
+     },
+     "secondarySources": {
+      "items": {
+       "$ref": "#/components/schemas/ProjectSource"
+      },
+      "maxItems": 12,
+      "minItems": 0,
+      "type": "array"
+     },
+     "serviceRole": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "source": {
+      "$ref": "#/components/schemas/ProjectSource"
+     },
+     "sourceVersion": {
+      "type": "string"
+     },
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 0,
+      "type": "array"
+     },
+     "timeoutInMinutes": {
+      "maximum": 2160,
+      "minimum": 5,
+      "type": "integer"
+     },
+     "vpcConfig": {
+      "$ref": "#/components/schemas/VpcConfig"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "UpdateProjectOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "project": {
+      "$ref": "#/components/schemas/Project"
+     }
+    },
+    "type": "object"
+   },
+   "UpdateReportGroupInput": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "exportConfig": {
+      "$ref": "#/components/schemas/ReportExportConfig"
+     },
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "arn"
+    ],
+    "type": "object"
+   },
+   "UpdateReportGroupOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "reportGroup": {
+      "$ref": "#/components/schemas/ReportGroup"
+     }
+    },
+    "type": "object"
+   },
+   "VpcConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "securityGroupIds": {
+      "items": {
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 5,
+      "type": "array"
+     },
+     "subnets": {
+      "items": {
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 16,
+      "type": "array"
+     },
+     "vpcId": {
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Webhook": {
+    "additionalProperties": false,
+    "properties": {
+     "branchFilter": {
+      "type": "string"
+     },
+     "buildType": {
+      "enum": [
+       "BUILD",
+       "BUILD_BATCH",
+       "RUNNER_BUILDKITE_BUILD"
+      ],
+      "type": "string"
+     },
+     "filterGroups": {
+      "items": {
+       "items": {
+        "$ref": "#/components/schemas/WebhookFilter"
+       },
+       "type": "array"
+      },
+      "type": "array"
+     },
+     "lastModifiedSecret": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "manualCreation": {
+      "type": "boolean"
+     },
+     "payloadUrl": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "pullRequestBuildPolicy": {
+      "$ref": "#/components/schemas/PullRequestBuildPolicy"
+     },
+     "scopeConfiguration": {
+      "$ref": "#/components/schemas/ScopeConfiguration"
+     },
+     "secret": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "CREATING",
+       "CREATE_FAILED",
+       "ACTIVE",
+       "DELETING"
+      ],
+      "type": "string"
+     },
+     "statusMessage": {
+      "type": "string"
+     },
+     "url": {
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "WebhookFilter": {
+    "additionalProperties": false,
+    "properties": {
+     "excludeMatchedPattern": {
+      "type": "boolean"
+     },
+     "pattern": {
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "EVENT",
+       "BASE_REF",
+       "HEAD_REF",
+       "ACTOR_ACCOUNT_ID",
+       "FILE_PATH",
+       "COMMIT_MESSAGE",
+       "WORKFLOW_NAME",
+       "TAG_NAME",
+       "RELEASE_NAME",
+       "REPOSITORY_NAME",
+       "ORGANIZATION_NAME"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "type",
+     "pattern"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS CodeBuild API (2016-10-06). Every other official operation returns HTTP 501 UnknownOperationException. Projects and report groups are configuration metadata: no build, batch, sandbox, report, webhook, fleet or source credential exists, and sources, roles and keys are stored without contacting them. StartBuild and other build APIs return UnknownOperationException with HTTP 501. BatchGetProjects and BatchGetReportGroups fail with ResourceNotFoundException when any identifier is missing instead of listing it as not found. Tags are set at creation only; tags and badgeEnabled in updates and sortBy/sortOrder are refused. Report groups hold no reports, so deleteReports has no further effect.",
+  "title": "AWS CodeBuild (simulator catalog)",
+  "version": "2016-10-06"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/": {
+   "post": {
+    "description": "Choose the X-Amz-Target of one implemented operation. Request and response members follow the linked official input/output schemas.",
+    "operationId": "codebuildJSONOperation",
+    "parameters": [
+     {
+      "in": "header",
+      "name": "X-Amz-Target",
+      "required": true,
+      "schema": {
+       "enum": [
+        "CodeBuild_20161006.BatchGetProjects",
+        "CodeBuild_20161006.BatchGetReportGroups",
+        "CodeBuild_20161006.CreateProject",
+        "CodeBuild_20161006.CreateReportGroup",
+        "CodeBuild_20161006.DeleteProject",
+        "CodeBuild_20161006.DeleteReportGroup",
+        "CodeBuild_20161006.ListProjects",
+        "CodeBuild_20161006.ListReportGroups",
+        "CodeBuild_20161006.UpdateProject",
+        "CodeBuild_20161006.UpdateReportGroup"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-amz-json-1.1": {
+       "examples": {
+        "BatchGetProjects": {
+         "summary": "X-Amz-Target: CodeBuild_20161006.BatchGetProjects",
+         "value": {}
+        },
+        "BatchGetReportGroups": {
+         "summary": "X-Amz-Target: CodeBuild_20161006.BatchGetReportGroups",
+         "value": {}
+        },
+        "CreateProject": {
+         "summary": "X-Amz-Target: CodeBuild_20161006.CreateProject",
+         "value": {}
+        },
+        "CreateReportGroup": {
+         "summary": "X-Amz-Target: CodeBuild_20161006.CreateReportGroup",
+         "value": {}
+        },
+        "DeleteProject": {
+         "summary": "X-Amz-Target: CodeBuild_20161006.DeleteProject",
+         "value": {}
+        },
+        "DeleteReportGroup": {
+         "summary": "X-Amz-Target: CodeBuild_20161006.DeleteReportGroup",
+         "value": {}
+        },
+        "ListProjects": {
+         "summary": "X-Amz-Target: CodeBuild_20161006.ListProjects",
+         "value": {}
+        },
+        "ListReportGroups": {
+         "summary": "X-Amz-Target: CodeBuild_20161006.ListReportGroups",
+         "value": {}
+        },
+        "UpdateProject": {
+         "summary": "X-Amz-Target: CodeBuild_20161006.UpdateProject",
+         "value": {}
+        },
+        "UpdateReportGroup": {
+         "summary": "X-Amz-Target: CodeBuild_20161006.UpdateReportGroup",
+         "value": {}
+        }
+       },
+       "schema": {
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/x-amz-json-1.1": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception in __type."
+     },
+     "403": {
+      "description": "AccessDeniedException from local identity policy evaluation."
+     },
+     "501": {
+      "description": "Official operation not implemented by the simulator."
+     }
+    },
+    "summary": "AWS CodeBuild JSON 1.1 operations",
+    "tags": [
+     "AWS CodeBuild"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS CodeBuild API (2016-10-06). Every other official operation returns HTTP 501 UnknownOperationException. Projects and report groups are configuration metadata: no build, batch, sandbox, report, webhook, fleet or source credential exists, and sources, roles and keys are stored without contacting them. StartBuild and other build APIs return UnknownOperationException with HTTP 501. BatchGetProjects and BatchGetReportGroups fail with ResourceNotFoundException when any identifier is missing instead of listing it as not found. Tags are set at creation only; tags and badgeEnabled in updates and sortBy/sortOrder are refused. Report groups hold no reports, so deleteReports has no further effect.",
+   "name": "AWS CodeBuild"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/codebuild/2016-10-06/service-2.json",
+  "sha256": "f49bebbacfbdbe89a2298c6c235738a0fe54b62c775b4a5f7aebb5ae2f8d1e7d",
+  "license": "Apache-2.0"
+ }
+}

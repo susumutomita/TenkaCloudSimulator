@@ -1,0 +1,221 @@
+{
+ "client": "iotfleetwise",
+ "steps": [
+  {
+   "op": "create_signal_catalog",
+   "args": {
+    "name": "vehicle-signals",
+    "description": "Base",
+    "tags": [
+     {
+      "Key": "team",
+      "Value": "a"
+     }
+    ]
+   },
+   "save": {
+    "catalog": "arn"
+   },
+   "expect": {
+    "arn": "arn:aws:iotfleetwise:us-east-1:000000000000:signal-catalog/vehicle-signals"
+   }
+  },
+  {
+   "op": "get_signal_catalog",
+   "args": {
+    "name": "vehicle-signals"
+   },
+   "expect": {
+    "nodeCounts.totalNodes": 0,
+    "description": "Base"
+   }
+  },
+  {
+   "op": "list_signal_catalogs",
+   "args": {},
+   "expect": {
+    "summaries#count": 1
+   }
+  },
+  {
+   "op": "update_signal_catalog",
+   "args": {
+    "name": "vehicle-signals",
+    "description": "Base signals"
+   },
+   "expect": {
+    "arn": "${catalog}"
+   }
+  },
+  {
+   "op": "create_signal_catalog",
+   "args": {
+    "name": "second"
+   },
+   "error": "LimitExceededException"
+  },
+  {
+   "op": "create_fleet",
+   "args": {
+    "fleetId": "fleet-a",
+    "signalCatalogArn": "${catalog}",
+    "description": "Test fleet"
+   },
+   "save": {
+    "fleet": "arn"
+   },
+   "expect": {
+    "id": "fleet-a"
+   }
+  },
+  {
+   "op": "create_fleet",
+   "args": {
+    "fleetId": "fleet-b",
+    "signalCatalogArn": "arn:aws:iotfleetwise:us-east-1:000000000000:signal-catalog/missing"
+   },
+   "error": "ResourceNotFoundException"
+  },
+  {
+   "op": "get_fleet",
+   "args": {
+    "fleetId": "fleet-a"
+   },
+   "expect": {
+    "signalCatalogArn": "${catalog}",
+    "arn": "${fleet}"
+   }
+  },
+  {
+   "op": "list_fleets",
+   "args": {},
+   "expect": {
+    "fleetSummaries#count": 1
+   }
+  },
+  {
+   "op": "update_fleet",
+   "args": {
+    "fleetId": "fleet-a",
+    "description": "Fleet A"
+   },
+   "expect": {
+    "id": "fleet-a"
+   }
+  },
+  {
+   "op": "tag_resource",
+   "args": {
+    "ResourceARN": "${fleet}",
+    "Tags": [
+     {
+      "Key": "stage",
+      "Value": "dev"
+     }
+    ]
+   }
+  },
+  {
+   "op": "untag_resource",
+   "args": {
+    "ResourceARN": "${fleet}",
+    "TagKeys": [
+     "stage"
+    ]
+   }
+  },
+  {
+   "op": "list_tags_for_resource",
+   "args": {
+    "ResourceARN": "${catalog}"
+   },
+   "expect": {
+    "Tags[0].Key": "team"
+   }
+  },
+  {
+   "op": "create_vehicle",
+   "args": {
+    "vehicleName": "car",
+    "modelManifestArn": "arn:aws:iotfleetwise:us-east-1:000000000000:model-manifest/m",
+    "decoderManifestArn": "arn:aws:iotfleetwise:us-east-1:000000000000:decoder-manifest/d"
+   },
+   "error": "UnknownOperationException",
+   "status": 501
+  },
+  {
+   "op": "get_fleet",
+   "args": {
+    "fleetId": "missing"
+   },
+   "error": "ResourceNotFoundException"
+  }
+ ],
+ "isolation": [
+  {
+   "op": "list_signal_catalogs",
+   "args": {},
+   "expect": {
+    "summaries#count": 0
+   }
+  },
+  {
+   "op": "list_fleets",
+   "args": {},
+   "expect": {
+    "fleetSummaries#count": 0
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "op": "get_fleet",
+   "args": {
+    "fleetId": "fleet-a"
+   },
+   "expect": {
+    "description": "Fleet A"
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "op": "delete_fleet",
+   "args": {
+    "fleetId": "fleet-a"
+   },
+   "expect": {
+    "id": "fleet-a"
+   }
+  },
+  {
+   "op": "delete_fleet",
+   "args": {
+    "fleetId": "fleet-a"
+   }
+  },
+  {
+   "op": "delete_signal_catalog",
+   "args": {
+    "name": "vehicle-signals"
+   },
+   "expect": {
+    "arn": "${catalog}"
+   }
+  },
+  {
+   "op": "list_signal_catalogs",
+   "args": {},
+   "expect": {
+    "summaries#count": 0
+   }
+  },
+  {
+   "op": "list_fleets",
+   "args": {},
+   "expect": {
+    "fleetSummaries#count": 0
+   }
+  }
+ ]
+}

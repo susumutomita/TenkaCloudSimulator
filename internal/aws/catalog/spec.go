@@ -1,5 +1,7 @@
 package catalog
 
+import "encoding/json"
+
 // Kind is the reviewed semantic role of one implemented official operation.
 type Kind string
 
@@ -24,7 +26,15 @@ const (
 // resource members compared for equality. ListValue selects the stored member
 // rendered when the official list output is a list of strings.
 type Op struct {
-	Name      string
+	Name string
+	// Merged runs on the merged stored document of an update before it is
+	// committed, with the members the request supplied. It may normalize the
+	// document (for example drop settings a transition makes inapplicable)
+	// and refuses invalid combinations a Check on the request cannot see.
+	Merged func(document, supplied map[string]any) error
+	// Action is the documented IAM action when it differs from the
+	// operation name (for example budgets:ModifyBudget for CreateBudget).
+	Action    string
 	Kind      Kind
 	Resource  string
 	Lookup    string
@@ -44,6 +54,11 @@ type Op struct {
 	// Accept lists input members whose official effect is already implied by
 	// the bounded model (for example force on a resource without children).
 	Accept []string
+	// Fixed names input members a client must always send with these values,
+	// because the bounded model serves only that selection (for example
+	// Bedrock ListInferenceProfiles typeEquals APPLICATION). Descriptors
+	// publish them so first-party clients send the same request as SDKs.
+	Fixed map[string]any
 	// Names is a list input member of identifiers that must all exist; the
 	// list operation then returns exactly those resources in request order.
 	Names string
@@ -51,9 +66,19 @@ type Op struct {
 	Check func(input map[string]any) error
 	// Failures names the output list that reports identifiers of Names that do
 	// not exist, instead of failing the whole request; FailureItem builds
-	// each element, replacing "$name" with the missing identifier.
+	// each element, replacing "$name" with the missing identifier. Without
+	// FailureItem the list holds the missing identifiers themselves.
 	Failures    string
 	FailureItem map[string]any
+	// LookupAlt lists alternative identifying members (for example a name
+	// or an ARN); the first one supplied identifies the resource. Lookup may
+	// also be a dotted path into a structure member.
+	LookupAlt []string
+	// IdempotentDelete makes deleting a missing resource succeed, as the
+	// official operation documents.
+	IdempotentDelete bool
+	// HasMore names a boolean output member that reports a further page.
+	HasMore string
 }
 
 // Failure returns a semantic validation error with a modeled exception code
@@ -133,4 +158,20 @@ func (s *Service) resource(kind string) *Resource {
 		}
 	}
 	return nil
+}
+
+// Number reads a numeric member as a request decodes it (int64, float64)
+// or as a stored document holds it (json.Number), so Check and Merged
+// hooks compare request and stored values alike.
+func Number(value any) (float64, bool) {
+	switch v := value.(type) {
+	case int64:
+		return float64(v), true
+	case float64:
+		return v, true
+	case json.Number:
+		n, err := v.Float64()
+		return n, err == nil
+	}
+	return 0, false
 }

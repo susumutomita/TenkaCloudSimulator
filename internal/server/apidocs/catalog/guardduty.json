@@ -1,0 +1,1544 @@
+{
+ "components": {
+  "schemas": {
+   "CloudTrailConfigurationResult": {
+    "additionalProperties": false,
+    "properties": {
+     "status": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "maxLength": 300,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "status"
+    ],
+    "type": "object"
+   },
+   "Condition": {
+    "additionalProperties": false,
+    "properties": {
+     "eq": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "equals": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "greaterThan": {
+      "type": "integer"
+     },
+     "greaterThanOrEqual": {
+      "type": "integer"
+     },
+     "gt": {
+      "type": "integer"
+     },
+     "gte": {
+      "type": "integer"
+     },
+     "lessThan": {
+      "type": "integer"
+     },
+     "lessThanOrEqual": {
+      "type": "integer"
+     },
+     "lt": {
+      "type": "integer"
+     },
+     "lte": {
+      "type": "integer"
+     },
+     "neq": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "notEquals": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "DNSLogsConfigurationResult": {
+    "additionalProperties": false,
+    "properties": {
+     "status": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "maxLength": 300,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "status"
+    ],
+    "type": "object"
+   },
+   "DataSourceConfigurations": {
+    "additionalProperties": false,
+    "properties": {
+     "kubernetes": {
+      "$ref": "#/components/schemas/KubernetesConfiguration"
+     },
+     "malwareProtection": {
+      "$ref": "#/components/schemas/MalwareProtectionConfiguration"
+     },
+     "s3Logs": {
+      "$ref": "#/components/schemas/S3LogsConfiguration"
+     }
+    },
+    "type": "object"
+   },
+   "DataSourceConfigurationsResult": {
+    "additionalProperties": false,
+    "properties": {
+     "cloudTrail": {
+      "$ref": "#/components/schemas/CloudTrailConfigurationResult"
+     },
+     "dnsLogs": {
+      "$ref": "#/components/schemas/DNSLogsConfigurationResult"
+     },
+     "flowLogs": {
+      "$ref": "#/components/schemas/FlowLogsConfigurationResult"
+     },
+     "kubernetes": {
+      "$ref": "#/components/schemas/KubernetesConfigurationResult"
+     },
+     "malwareProtection": {
+      "$ref": "#/components/schemas/MalwareProtectionConfigurationResult"
+     },
+     "s3Logs": {
+      "$ref": "#/components/schemas/S3LogsConfigurationResult"
+     }
+    },
+    "required": [
+     "cloudTrail",
+     "dnsLogs",
+     "flowLogs",
+     "s3Logs"
+    ],
+    "type": "object"
+   },
+   "DetectorAdditionalConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "enum": [
+       "EKS_ADDON_MANAGEMENT",
+       "ECS_FARGATE_AGENT_MANAGEMENT",
+       "EC2_AGENT_MANAGEMENT"
+      ],
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DetectorAdditionalConfigurationResult": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "enum": [
+       "EKS_ADDON_MANAGEMENT",
+       "ECS_FARGATE_AGENT_MANAGEMENT",
+       "EC2_AGENT_MANAGEMENT"
+      ],
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "updatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "type": "object"
+   },
+   "DetectorFeatureConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "additionalConfiguration": {
+      "items": {
+       "$ref": "#/components/schemas/DetectorAdditionalConfiguration"
+      },
+      "type": "array"
+     },
+     "name": {
+      "enum": [
+       "S3_DATA_EVENTS",
+       "EKS_AUDIT_LOGS",
+       "EBS_MALWARE_PROTECTION",
+       "RDS_LOGIN_EVENTS",
+       "EKS_RUNTIME_MONITORING",
+       "LAMBDA_NETWORK_LOGS",
+       "RUNTIME_MONITORING"
+      ],
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DetectorFeatureConfigurationResult": {
+    "additionalProperties": false,
+    "properties": {
+     "additionalConfiguration": {
+      "items": {
+       "$ref": "#/components/schemas/DetectorAdditionalConfigurationResult"
+      },
+      "type": "array"
+     },
+     "name": {
+      "enum": [
+       "FLOW_LOGS",
+       "CLOUD_TRAIL",
+       "DNS_LOGS",
+       "S3_DATA_EVENTS",
+       "EKS_AUDIT_LOGS",
+       "EBS_MALWARE_PROTECTION",
+       "RDS_LOGIN_EVENTS",
+       "EKS_RUNTIME_MONITORING",
+       "LAMBDA_NETWORK_LOGS",
+       "RUNTIME_MONITORING"
+      ],
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "updatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "type": "object"
+   },
+   "EbsVolumesResult": {
+    "additionalProperties": false,
+    "properties": {
+     "reason": {
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "maxLength": 300,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "FindingCriteria": {
+    "additionalProperties": false,
+    "properties": {
+     "criterion": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/Condition"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "FlowLogsConfigurationResult": {
+    "additionalProperties": false,
+    "properties": {
+     "status": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "maxLength": 300,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "status"
+    ],
+    "type": "object"
+   },
+   "KubernetesAuditLogsConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "enable": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "enable"
+    ],
+    "type": "object"
+   },
+   "KubernetesAuditLogsConfigurationResult": {
+    "additionalProperties": false,
+    "properties": {
+     "status": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "maxLength": 300,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "status"
+    ],
+    "type": "object"
+   },
+   "KubernetesConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "auditLogs": {
+      "$ref": "#/components/schemas/KubernetesAuditLogsConfiguration"
+     }
+    },
+    "required": [
+     "auditLogs"
+    ],
+    "type": "object"
+   },
+   "KubernetesConfigurationResult": {
+    "additionalProperties": false,
+    "properties": {
+     "auditLogs": {
+      "$ref": "#/components/schemas/KubernetesAuditLogsConfigurationResult"
+     }
+    },
+    "required": [
+     "auditLogs"
+    ],
+    "type": "object"
+   },
+   "MalwareProtectionConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "scanEc2InstanceWithFindings": {
+      "$ref": "#/components/schemas/ScanEc2InstanceWithFindings"
+     }
+    },
+    "type": "object"
+   },
+   "MalwareProtectionConfigurationResult": {
+    "additionalProperties": false,
+    "properties": {
+     "scanEc2InstanceWithFindings": {
+      "$ref": "#/components/schemas/ScanEc2InstanceWithFindingsResult"
+     },
+     "serviceRole": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "S3LogsConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "enable": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "enable"
+    ],
+    "type": "object"
+   },
+   "S3LogsConfigurationResult": {
+    "additionalProperties": false,
+    "properties": {
+     "status": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "maxLength": 300,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "status"
+    ],
+    "type": "object"
+   },
+   "ScanEc2InstanceWithFindings": {
+    "additionalProperties": false,
+    "properties": {
+     "ebsVolumes": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "ScanEc2InstanceWithFindingsResult": {
+    "additionalProperties": false,
+    "properties": {
+     "ebsVolumes": {
+      "$ref": "#/components/schemas/EbsVolumesResult"
+     }
+    },
+    "type": "object"
+   },
+   "UnprocessedDataSourcesResult": {
+    "additionalProperties": false,
+    "properties": {
+     "malwareProtection": {
+      "$ref": "#/components/schemas/MalwareProtectionConfigurationResult"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon GuardDuty API (2017-11-28). Every other official operation returns HTTP 501 UnknownOperationException. Detectors and findings filters are configuration metadata: no CloudTrail, VPC Flow Logs, DNS, runtime or other data source is read, no finding is generated, archived or published, and no service-linked role is created. Each Region holds one enabled detector: a second CreateDetector is refused with LimitExceededException rather than BadRequestException, disabling (Enable false), DataSources and Features are refused, and deleting a detector deletes its filters. Missing detectors and filters are reported as BadRequestException, the only client error the official model defines. Filter Rank is stored only when supplied and never renumbered, and Action defaults to NOOP. Findings, sample findings, IP sets, threat intel and threat entity sets, malware protection plans and scans, publishing destinations, members, invitations, coverage, usage statistics and organization APIs return UnknownOperationException with HTTP 501.",
+  "title": "Amazon GuardDuty (simulator catalog)",
+  "version": "2017-11-28"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/detector": {
+   "get": {
+    "operationId": "guarddutyListDetectors",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "guardduty"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 50,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "detectorIds": {
+           "items": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+           },
+           "maxItems": 50,
+           "minItems": 0,
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListDetectors",
+    "tags": [
+     "Amazon GuardDuty"
+    ]
+   },
+   "post": {
+    "operationId": "guarddutyCreateDetector",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "guardduty"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "maxLength": 64,
+          "minLength": 0,
+          "type": "string"
+         },
+         "dataSources": {
+          "$ref": "#/components/schemas/DataSourceConfigurations"
+         },
+         "enable": {
+          "type": "boolean"
+         },
+         "features": {
+          "items": {
+           "$ref": "#/components/schemas/DetectorFeatureConfiguration"
+          },
+          "type": "array"
+         },
+         "findingPublishingFrequency": {
+          "enum": [
+           "FIFTEEN_MINUTES",
+           "ONE_HOUR",
+           "SIX_HOURS"
+          ],
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "maxProperties": 200,
+          "minProperties": 1,
+          "type": "object"
+         }
+        },
+        "required": [
+         "enable"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "detectorId": {
+           "maxLength": 300,
+           "minLength": 1,
+           "type": "string"
+          },
+          "unprocessedDataSources": {
+           "$ref": "#/components/schemas/UnprocessedDataSourcesResult"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateDetector",
+    "tags": [
+     "Amazon GuardDuty"
+    ]
+   }
+  },
+  "/detector/{detectorId}": {
+   "delete": {
+    "operationId": "guarddutyDeleteDetector",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "guardduty"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "detectorId",
+      "required": true,
+      "schema": {
+       "maxLength": 300,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteDetector",
+    "tags": [
+     "Amazon GuardDuty"
+    ]
+   },
+   "get": {
+    "operationId": "guarddutyGetDetector",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "guardduty"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "detectorId",
+      "required": true,
+      "schema": {
+       "maxLength": 300,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "createdAt": {
+           "type": "string"
+          },
+          "dataSources": {
+           "$ref": "#/components/schemas/DataSourceConfigurationsResult"
+          },
+          "features": {
+           "items": {
+            "$ref": "#/components/schemas/DetectorFeatureConfigurationResult"
+           },
+           "type": "array"
+          },
+          "findingPublishingFrequency": {
+           "enum": [
+            "FIFTEEN_MINUTES",
+            "ONE_HOUR",
+            "SIX_HOURS"
+           ],
+           "type": "string"
+          },
+          "serviceRole": {
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "ENABLED",
+            "DISABLED"
+           ],
+           "maxLength": 300,
+           "minLength": 1,
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 1,
+           "type": "object"
+          },
+          "updatedAt": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetDetector",
+    "tags": [
+     "Amazon GuardDuty"
+    ]
+   },
+   "post": {
+    "operationId": "guarddutyUpdateDetector",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "guardduty"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "detectorId",
+      "required": true,
+      "schema": {
+       "maxLength": 300,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "dataSources": {
+          "$ref": "#/components/schemas/DataSourceConfigurations"
+         },
+         "enable": {
+          "type": "boolean"
+         },
+         "features": {
+          "items": {
+           "$ref": "#/components/schemas/DetectorFeatureConfiguration"
+          },
+          "type": "array"
+         },
+         "findingPublishingFrequency": {
+          "enum": [
+           "FIFTEEN_MINUTES",
+           "ONE_HOUR",
+           "SIX_HOURS"
+          ],
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateDetector",
+    "tags": [
+     "Amazon GuardDuty"
+    ]
+   }
+  },
+  "/detector/{detectorId}/filter": {
+   "get": {
+    "operationId": "guarddutyListFilters",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "guardduty"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "detectorId",
+      "required": true,
+      "schema": {
+       "maxLength": 300,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 50,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "filterNames": {
+           "items": {
+            "maxLength": 64,
+            "minLength": 3,
+            "type": "string"
+           },
+           "maxItems": 50,
+           "minItems": 0,
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListFilters",
+    "tags": [
+     "Amazon GuardDuty"
+    ]
+   },
+   "post": {
+    "operationId": "guarddutyCreateFilter",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "guardduty"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "detectorId",
+      "required": true,
+      "schema": {
+       "maxLength": 300,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "action": {
+          "enum": [
+           "NOOP",
+           "ARCHIVE"
+          ],
+          "maxLength": 300,
+          "minLength": 1,
+          "type": "string"
+         },
+         "clientToken": {
+          "maxLength": 64,
+          "minLength": 0,
+          "type": "string"
+         },
+         "description": {
+          "maxLength": 512,
+          "minLength": 0,
+          "type": "string"
+         },
+         "findingCriteria": {
+          "$ref": "#/components/schemas/FindingCriteria"
+         },
+         "name": {
+          "maxLength": 64,
+          "minLength": 3,
+          "type": "string"
+         },
+         "rank": {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "maxProperties": 200,
+          "minProperties": 1,
+          "type": "object"
+         }
+        },
+        "required": [
+         "findingCriteria",
+         "name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "name": {
+           "maxLength": 64,
+           "minLength": 3,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateFilter",
+    "tags": [
+     "Amazon GuardDuty"
+    ]
+   }
+  },
+  "/detector/{detectorId}/filter/{filterName}": {
+   "delete": {
+    "operationId": "guarddutyDeleteFilter",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "guardduty"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "detectorId",
+      "required": true,
+      "schema": {
+       "maxLength": 300,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "filterName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteFilter",
+    "tags": [
+     "Amazon GuardDuty"
+    ]
+   },
+   "get": {
+    "operationId": "guarddutyGetFilter",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "guardduty"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "detectorId",
+      "required": true,
+      "schema": {
+       "maxLength": 300,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "filterName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "action": {
+           "enum": [
+            "NOOP",
+            "ARCHIVE"
+           ],
+           "maxLength": 300,
+           "minLength": 1,
+           "type": "string"
+          },
+          "description": {
+           "maxLength": 512,
+           "minLength": 0,
+           "type": "string"
+          },
+          "findingCriteria": {
+           "$ref": "#/components/schemas/FindingCriteria"
+          },
+          "name": {
+           "maxLength": 64,
+           "minLength": 3,
+           "type": "string"
+          },
+          "rank": {
+           "maximum": 100,
+           "minimum": 1,
+           "type": "integer"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 1,
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetFilter",
+    "tags": [
+     "Amazon GuardDuty"
+    ]
+   },
+   "post": {
+    "operationId": "guarddutyUpdateFilter",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "guardduty"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "detectorId",
+      "required": true,
+      "schema": {
+       "maxLength": 300,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "filterName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "action": {
+          "enum": [
+           "NOOP",
+           "ARCHIVE"
+          ],
+          "maxLength": 300,
+          "minLength": 1,
+          "type": "string"
+         },
+         "description": {
+          "maxLength": 512,
+          "minLength": 0,
+          "type": "string"
+         },
+         "findingCriteria": {
+          "$ref": "#/components/schemas/FindingCriteria"
+         },
+         "rank": {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "name": {
+           "maxLength": 64,
+           "minLength": 3,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateFilter",
+    "tags": [
+     "Amazon GuardDuty"
+    ]
+   }
+  },
+  "/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "guarddutyUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "guardduty"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 200,
+       "minItems": 1,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "Amazon GuardDuty"
+    ]
+   },
+   "get": {
+    "operationId": "guarddutyListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "guardduty"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 1,
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "Amazon GuardDuty"
+    ]
+   },
+   "post": {
+    "operationId": "guarddutyTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "guardduty"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "maxProperties": 200,
+          "minProperties": 1,
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "Amazon GuardDuty"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon GuardDuty API (2017-11-28). Every other official operation returns HTTP 501 UnknownOperationException. Detectors and findings filters are configuration metadata: no CloudTrail, VPC Flow Logs, DNS, runtime or other data source is read, no finding is generated, archived or published, and no service-linked role is created. Each Region holds one enabled detector: a second CreateDetector is refused with LimitExceededException rather than BadRequestException, disabling (Enable false), DataSources and Features are refused, and deleting a detector deletes its filters. Missing detectors and filters are reported as BadRequestException, the only client error the official model defines. Filter Rank is stored only when supplied and never renumbered, and Action defaults to NOOP. Findings, sample findings, IP sets, threat intel and threat entity sets, malware protection plans and scans, publishing destinations, members, invitations, coverage, usage statistics and organization APIs return UnknownOperationException with HTTP 501.",
+   "name": "Amazon GuardDuty"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/guardduty/2017-11-28/service-2.json",
+  "sha256": "ffe2c3438fd19079171b8e3e7d2be3c2289ac25f6200887897fd352848b9549d",
+  "license": "Apache-2.0"
+ }
+}

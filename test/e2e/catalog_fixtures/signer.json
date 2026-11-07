@@ -1,0 +1,28 @@
+{
+ "client": "signer",
+ "steps": [
+  {"op": "put_signing_profile", "args": {"profileName": "fixture_profile", "platformId": "AWSLambda-SHA384-ECDSA", "tags": {"team": "a"}}, "save": {"profile": "arn", "version": "profileVersion"}},
+  {"op": "get_signing_profile", "args": {"profileName": "fixture_profile"}, "expect": {"status": "Active", "platformId": "AWSLambda-SHA384-ECDSA", "profileVersion": "${version}", "signatureValidityPeriod.value": 135, "tags.team": "a"}},
+  {"op": "get_signing_profile", "args": {"profileName": "fixture_profile", "profileOwner": "000000000000"}, "expect": {"arn": "${profile}"}},
+  {"op": "list_signing_profiles", "args": {}, "expect": {"profiles#count": 1, "profiles[0].profileName": "fixture_profile"}},
+  {"op": "list_signing_profiles", "args": {"platformId": "Notation-OCI-SHA384-ECDSA"}, "expect": {"profiles#count": 0}},
+  {"op": "tag_resource", "args": {"resourceArn": "${profile}", "tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"resourceArn": "${profile}", "tagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${profile}"}, "expect": {"tags": {"team": "a"}}},
+  {"op": "put_signing_profile", "args": {"profileName": "fixture_profile", "platformId": "AWSLambda-SHA384-ECDSA"}, "error": "ValidationException", "status": 400},
+  {"op": "put_signing_profile", "args": {"profileName": "device_profile", "platformId": "AWSIoTDeviceManagement-SHA256-ECDSA", "signingMaterial": {"certificateArn": "arn:aws:acm:us-east-1:000000000000:certificate/00000000-0000-0000-0000-000000000000"}}, "error": "ValidationException", "status": 400},
+  {"op": "get_signing_platform", "args": {"platformId": "AWSLambda-SHA384-ECDSA"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_signing_profile", "args": {"profileName": "missing_profile"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_signing_profiles", "args": {}, "expect": {"profiles#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_signing_profile", "args": {"profileName": "fixture_profile"}, "expect": {"status": "Active", "profileVersion": "${version}"}}
+ ],
+ "cleanup": [
+  {"op": "cancel_signing_profile", "args": {"profileName": "fixture_profile"}},
+  {"op": "get_signing_profile", "args": {"profileName": "fixture_profile"}, "expect": {"status": "Canceled"}},
+  {"op": "put_signing_profile", "args": {"profileName": "fixture_profile", "platformId": "AWSLambda-SHA384-ECDSA"}, "error": "ValidationException", "status": 400}
+ ]
+}

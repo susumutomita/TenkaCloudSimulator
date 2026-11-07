@@ -1,0 +1,924 @@
+{
+ "components": {
+  "schemas": {
+   "IncidentResponder": {
+    "additionalProperties": false,
+    "properties": {
+     "communicationPreferences": {
+      "items": {
+       "enum": [
+        "Case Created",
+        "Case Updated",
+        "Case Acknowledged",
+        "Case Closed",
+        "Case Updated To Service Managed",
+        "Case Status Updated",
+        "Case Pending Customer Action Reminder",
+        "Case Attachment Url Uploaded",
+        "Case Comment Added",
+        "Case Comment Updated",
+        "Membership Created",
+        "Membership Updated",
+        "Membership Cancelled",
+        "Register Delegated Administrator",
+        "Deregister Delegated Administrator",
+        "Disable AWS Service Access"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "email": {
+      "maxLength": 254,
+      "minLength": 6,
+      "type": "string"
+     },
+     "jobTitle": {
+      "maxLength": 50,
+      "minLength": 1,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 50,
+      "minLength": 3,
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "jobTitle",
+     "email"
+    ],
+    "type": "object"
+   },
+   "ListMembershipItem": {
+    "additionalProperties": false,
+    "properties": {
+     "accountId": {
+      "maxLength": 12,
+      "minLength": 12,
+      "type": "string"
+     },
+     "membershipArn": {
+      "maxLength": 80,
+      "minLength": 12,
+      "type": "string"
+     },
+     "membershipId": {
+      "maxLength": 34,
+      "minLength": 12,
+      "type": "string"
+     },
+     "membershipStatus": {
+      "enum": [
+       "Active",
+       "Cancelled",
+       "Terminated"
+      ],
+      "type": "string"
+     },
+     "region": {
+      "enum": [
+       "af-south-1",
+       "ap-east-1",
+       "ap-east-2",
+       "ap-northeast-1",
+       "ap-northeast-2",
+       "ap-northeast-3",
+       "ap-south-1",
+       "ap-south-2",
+       "ap-southeast-1",
+       "ap-southeast-2",
+       "ap-southeast-3",
+       "ap-southeast-4",
+       "ap-southeast-5",
+       "ap-southeast-6",
+       "ap-southeast-7",
+       "ca-central-1",
+       "ca-west-1",
+       "cn-north-1",
+       "cn-northwest-1",
+       "eu-central-1",
+       "eu-central-2",
+       "eu-north-1",
+       "eu-south-1",
+       "eu-south-2",
+       "eu-west-1",
+       "eu-west-2",
+       "eu-west-3",
+       "il-central-1",
+       "me-central-1",
+       "me-south-1",
+       "mx-central-1",
+       "sa-east-1",
+       "us-east-1",
+       "us-east-2",
+       "us-west-1",
+       "us-west-2"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "membershipId"
+    ],
+    "type": "object"
+   },
+   "MembershipAccountsConfigurations": {
+    "additionalProperties": false,
+    "properties": {
+     "coverEntireOrganization": {
+      "type": "boolean"
+     },
+     "organizationalUnits": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "MembershipAccountsConfigurationsUpdate": {
+    "additionalProperties": false,
+    "properties": {
+     "coverEntireOrganization": {
+      "type": "boolean"
+     },
+     "organizationalUnitsToAdd": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 5,
+      "minItems": 1,
+      "type": "array"
+     },
+     "organizationalUnitsToRemove": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 5,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "OptInFeature": {
+    "additionalProperties": false,
+    "properties": {
+     "featureName": {
+      "enum": [
+       "Triage"
+      ],
+      "type": "string"
+     },
+     "isEnabled": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "featureName",
+     "isEnabled"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Security Incident Response API (2018-05-10). Every other official operation returns HTTP 501 UnknownOperationException. Memberships are configuration metadata: no subscription or billing starts, no AWS Customer Incident Response Team or responder is engaged, and no email or other notification is sent to the incident response team. Each Region holds one standalone membership that covers the simulator account only; coverEntireOrganization true, organizational units and enabling the Triage opt-in feature (which monitors findings) are refused. CancelMembership keeps the membership readable with status Cancelled and it cannot be undone; memberships are never deleted, so a cancelled membership still counts toward the one-membership limit. Cases, case comments, attachments, edits, investigations, feedback and BatchGetMemberAccountDetails return UnknownOperationException with HTTP 501.",
+  "title": "AWS Security Incident Response (simulator catalog)",
+  "version": "2018-05-10"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/v1/membership": {
+   "post": {
+    "operationId": "security-irCreateMembership",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "security-ir"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         },
+         "coverEntireOrganization": {
+          "type": "boolean"
+         },
+         "incidentResponseTeam": {
+          "items": {
+           "$ref": "#/components/schemas/IncidentResponder"
+          },
+          "maxItems": 10,
+          "minItems": 2,
+          "type": "array"
+         },
+         "membershipName": {
+          "maxLength": 50,
+          "minLength": 3,
+          "type": "string"
+         },
+         "optInFeatures": {
+          "items": {
+           "$ref": "#/components/schemas/OptInFeature"
+          },
+          "maxItems": 2,
+          "minItems": 1,
+          "type": "array"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 200,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "incidentResponseTeam",
+         "membershipName"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "membershipId": {
+           "maxLength": 34,
+           "minLength": 12,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateMembership",
+    "tags": [
+     "AWS Security Incident Response"
+    ]
+   }
+  },
+  "/v1/membership/{membershipId}": {
+   "get": {
+    "operationId": "security-irGetMembership",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "security-ir"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "membershipId",
+      "required": true,
+      "schema": {
+       "maxLength": 34,
+       "minLength": 12,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "accountId": {
+           "maxLength": 12,
+           "minLength": 12,
+           "type": "string"
+          },
+          "customerType": {
+           "enum": [
+            "Standalone",
+            "Organization"
+           ],
+           "type": "string"
+          },
+          "incidentResponseTeam": {
+           "items": {
+            "$ref": "#/components/schemas/IncidentResponder"
+           },
+           "maxItems": 10,
+           "minItems": 2,
+           "type": "array"
+          },
+          "membershipAccountsConfigurations": {
+           "$ref": "#/components/schemas/MembershipAccountsConfigurations"
+          },
+          "membershipActivationTimestamp": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "membershipArn": {
+           "maxLength": 80,
+           "minLength": 12,
+           "type": "string"
+          },
+          "membershipDeactivationTimestamp": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "membershipId": {
+           "maxLength": 34,
+           "minLength": 12,
+           "type": "string"
+          },
+          "membershipName": {
+           "maxLength": 50,
+           "minLength": 3,
+           "type": "string"
+          },
+          "membershipStatus": {
+           "enum": [
+            "Active",
+            "Cancelled",
+            "Terminated"
+           ],
+           "type": "string"
+          },
+          "numberOfAccountsCovered": {
+           "type": "integer"
+          },
+          "optInFeatures": {
+           "items": {
+            "$ref": "#/components/schemas/OptInFeature"
+           },
+           "maxItems": 2,
+           "minItems": 1,
+           "type": "array"
+          },
+          "region": {
+           "enum": [
+            "af-south-1",
+            "ap-east-1",
+            "ap-east-2",
+            "ap-northeast-1",
+            "ap-northeast-2",
+            "ap-northeast-3",
+            "ap-south-1",
+            "ap-south-2",
+            "ap-southeast-1",
+            "ap-southeast-2",
+            "ap-southeast-3",
+            "ap-southeast-4",
+            "ap-southeast-5",
+            "ap-southeast-6",
+            "ap-southeast-7",
+            "ca-central-1",
+            "ca-west-1",
+            "cn-north-1",
+            "cn-northwest-1",
+            "eu-central-1",
+            "eu-central-2",
+            "eu-north-1",
+            "eu-south-1",
+            "eu-south-2",
+            "eu-west-1",
+            "eu-west-2",
+            "eu-west-3",
+            "il-central-1",
+            "me-central-1",
+            "me-south-1",
+            "mx-central-1",
+            "sa-east-1",
+            "us-east-1",
+            "us-east-2",
+            "us-west-1",
+            "us-west-2"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetMembership",
+    "tags": [
+     "AWS Security Incident Response"
+    ]
+   },
+   "put": {
+    "operationId": "security-irCancelMembership",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "security-ir"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "membershipId",
+      "required": true,
+      "schema": {
+       "maxLength": 34,
+       "minLength": 12,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "membershipId": {
+           "maxLength": 34,
+           "minLength": 12,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CancelMembership",
+    "tags": [
+     "AWS Security Incident Response"
+    ]
+   }
+  },
+  "/v1/membership/{membershipId}/update-membership": {
+   "put": {
+    "operationId": "security-irUpdateMembership",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "security-ir"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "membershipId",
+      "required": true,
+      "schema": {
+       "maxLength": 34,
+       "minLength": 12,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "incidentResponseTeam": {
+          "items": {
+           "$ref": "#/components/schemas/IncidentResponder"
+          },
+          "maxItems": 10,
+          "minItems": 2,
+          "type": "array"
+         },
+         "membershipAccountsConfigurationsUpdate": {
+          "$ref": "#/components/schemas/MembershipAccountsConfigurationsUpdate"
+         },
+         "membershipName": {
+          "maxLength": 50,
+          "minLength": 3,
+          "type": "string"
+         },
+         "optInFeatures": {
+          "items": {
+           "$ref": "#/components/schemas/OptInFeature"
+          },
+          "maxItems": 2,
+          "minItems": 1,
+          "type": "array"
+         },
+         "undoMembershipCancellation": {
+          "type": "boolean"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateMembership",
+    "tags": [
+     "AWS Security Incident Response"
+    ]
+   }
+  },
+  "/v1/memberships": {
+   "post": {
+    "operationId": "security-irListMemberships",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "security-ir"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "maxResults": {
+          "maximum": 25,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "nextToken": {
+          "maxLength": 2000,
+          "minLength": 0,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "items": {
+           "items": {
+            "$ref": "#/components/schemas/ListMembershipItem"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListMemberships",
+    "tags": [
+     "AWS Security Incident Response"
+    ]
+   }
+  },
+  "/v1/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "security-irUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "security-ir"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1010,
+       "minLength": 12,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "AWS Security Incident Response"
+    ]
+   },
+   "get": {
+    "operationId": "security-irListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "security-ir"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1010,
+       "minLength": 12,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "AWS Security Incident Response"
+    ]
+   },
+   "post": {
+    "operationId": "security-irTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "security-ir"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1010,
+       "minLength": 12,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 200,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "AWS Security Incident Response"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Security Incident Response API (2018-05-10). Every other official operation returns HTTP 501 UnknownOperationException. Memberships are configuration metadata: no subscription or billing starts, no AWS Customer Incident Response Team or responder is engaged, and no email or other notification is sent to the incident response team. Each Region holds one standalone membership that covers the simulator account only; coverEntireOrganization true, organizational units and enabling the Triage opt-in feature (which monitors findings) are refused. CancelMembership keeps the membership readable with status Cancelled and it cannot be undone; memberships are never deleted, so a cancelled membership still counts toward the one-membership limit. Cases, case comments, attachments, edits, investigations, feedback and BatchGetMemberAccountDetails return UnknownOperationException with HTTP 501.",
+   "name": "AWS Security Incident Response"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/security-ir/2018-05-10/service-2.json",
+  "sha256": "1a0546011b342d9c5e9555262a5d3e763f2dba962f52af13ab727126d086a57f",
+  "license": "Apache-2.0"
+ }
+}

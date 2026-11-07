@@ -1,0 +1,235 @@
+{
+ "components": {
+  "schemas": {
+   "ApplicationResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "type": "string"
+     },
+     "CreationDate": {
+      "type": "string"
+     },
+     "Id": {
+      "type": "string"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "required": [
+     "Id",
+     "Arn",
+     "Name"
+    ],
+    "type": "object"
+   },
+   "CreateApplicationRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "required": [
+     "Name"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon Pinpoint API (2016-12-01). Every other official operation returns HTTP 501 UnknownOperationException. Only projects (apps) are stored: no message, campaign, journey, segment, endpoint, template or event is sent, scheduled or recorded, and SendMessages and the other sending APIs return UnknownOperationException with HTTP 501. Push, email, SMS and voice channels are not implemented, so no APNs, FCM, Baidu or ADM credential is accepted. GetApps and the tagging APIs are not implemented, and CreateApp refuses tags.",
+  "title": "Amazon Pinpoint (simulator catalog)",
+  "version": "2016-12-01"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/v1/apps": {
+   "post": {
+    "operationId": "pinpointCreateApp",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mobiletargeting"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/CreateApplicationRequest"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ApplicationResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateApp",
+    "tags": [
+     "Amazon Pinpoint"
+    ]
+   }
+  },
+  "/v1/apps/{application-id}": {
+   "delete": {
+    "operationId": "pinpointDeleteApp",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mobiletargeting"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "application-id",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ApplicationResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteApp",
+    "tags": [
+     "Amazon Pinpoint"
+    ]
+   },
+   "get": {
+    "operationId": "pinpointGetApp",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mobiletargeting"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "application-id",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ApplicationResponse"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetApp",
+    "tags": [
+     "Amazon Pinpoint"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon Pinpoint API (2016-12-01). Every other official operation returns HTTP 501 UnknownOperationException. Only projects (apps) are stored: no message, campaign, journey, segment, endpoint, template or event is sent, scheduled or recorded, and SendMessages and the other sending APIs return UnknownOperationException with HTTP 501. Push, email, SMS and voice channels are not implemented, so no APNs, FCM, Baidu or ADM credential is accepted. GetApps and the tagging APIs are not implemented, and CreateApp refuses tags.",
+   "name": "Amazon Pinpoint"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/pinpoint/2016-12-01/service-2.json",
+  "sha256": "795eebf2c63f444bc943002de700f1982905896740a2878eab0c3803ed364390",
+  "license": "Apache-2.0"
+ }
+}

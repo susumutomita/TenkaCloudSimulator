@@ -1,0 +1,24 @@
+{
+ "client": "route53-recovery-control-config",
+ "steps": [
+  {"op": "create_cluster", "args": {"ClusterName": "fixture-cluster", "Tags": {"team": "a"}}, "save": {"cluster": "Cluster.ClusterArn"}, "expect": {"Cluster.Name": "fixture-cluster", "Cluster.Status": "DEPLOYED", "Cluster.Owner": "000000000000", "Cluster.NetworkType": "IPV4", "Cluster.ClusterEndpoints#count": 0}},
+  {"op": "describe_cluster", "args": {"ClusterArn": "${cluster}"}, "expect": {"Cluster.Name": "fixture-cluster"}},
+  {"op": "list_clusters", "args": {}, "expect": {"Clusters#count": 1, "Clusters[0].ClusterArn": "${cluster}"}},
+  {"op": "update_cluster", "args": {"ClusterArn": "${cluster}", "NetworkType": "DUALSTACK"}, "expect": {"Cluster.NetworkType": "DUALSTACK"}},
+  {"op": "tag_resource", "args": {"ResourceArn": "${cluster}", "Tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"ResourceArn": "${cluster}", "TagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "${cluster}"}, "expect": {"Tags": {"team": "a"}}},
+  {"op": "create_control_panel", "args": {"ClusterArn": "${cluster}", "ControlPanelName": "panel"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "describe_cluster", "args": {"ClusterArn": "arn:aws:route53-recovery-control::000000000000:cluster/00000000-0000-4000-8000-000000000000"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_clusters", "args": {}, "expect": {"Clusters#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_cluster", "args": {"ClusterArn": "${cluster}"}, "expect": {"Cluster.NetworkType": "DUALSTACK"}}
+ ],
+ "cleanup": [
+  {"op": "delete_cluster", "args": {"ClusterArn": "${cluster}"}},
+  {"op": "list_clusters", "args": {}, "expect": {"Clusters#count": 0}}
+ ]
+}

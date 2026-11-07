@@ -1,0 +1,2607 @@
+{
+ "components": {
+  "schemas": {
+   "DnsEntry": {
+    "additionalProperties": false,
+    "properties": {
+     "domainName": {
+      "type": "string"
+     },
+     "hostedZoneId": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "FixedResponseAction": {
+    "additionalProperties": false,
+    "properties": {
+     "statusCode": {
+      "maximum": 599,
+      "minimum": 100,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "statusCode"
+    ],
+    "type": "object"
+   },
+   "ForwardAction": {
+    "additionalProperties": false,
+    "properties": {
+     "targetGroups": {
+      "items": {
+       "$ref": "#/components/schemas/WeightedTargetGroup"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "targetGroups"
+    ],
+    "type": "object"
+   },
+   "HealthCheckConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     },
+     "healthCheckIntervalSeconds": {
+      "maximum": 300,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "healthCheckTimeoutSeconds": {
+      "maximum": 120,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "healthyThresholdCount": {
+      "maximum": 10,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "matcher": {
+      "$ref": "#/components/schemas/Matcher"
+     },
+     "path": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "port": {
+      "maximum": 65535,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "protocol": {
+      "enum": [
+       "HTTP",
+       "HTTPS",
+       "TCP"
+      ],
+      "type": "string"
+     },
+     "protocolVersion": {
+      "enum": [
+       "HTTP1",
+       "HTTP2"
+      ],
+      "type": "string"
+     },
+     "unhealthyThresholdCount": {
+      "maximum": 10,
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "ListenerSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "id": {
+      "maxLength": 26,
+      "minLength": 26,
+      "type": "string"
+     },
+     "lastUpdatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "name": {
+      "maxLength": 63,
+      "minLength": 3,
+      "type": "string"
+     },
+     "port": {
+      "maximum": 65535,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "protocol": {
+      "enum": [
+       "HTTP",
+       "HTTPS",
+       "TLS_PASSTHROUGH"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Matcher": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "httpCode": {
+      "maxLength": 2000,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "RuleAction": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "fixedResponse": {
+      "$ref": "#/components/schemas/FixedResponseAction"
+     },
+     "forward": {
+      "$ref": "#/components/schemas/ForwardAction"
+     }
+    },
+    "type": "object"
+   },
+   "ServiceNetworkSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 2048,
+      "minLength": 32,
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "id": {
+      "maxLength": 20,
+      "minLength": 20,
+      "type": "string"
+     },
+     "lastUpdatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "name": {
+      "maxLength": 63,
+      "minLength": 3,
+      "type": "string"
+     },
+     "numberOfAssociatedResourceConfigurations": {
+      "type": "integer"
+     },
+     "numberOfAssociatedServices": {
+      "type": "integer"
+     },
+     "numberOfAssociatedVPCs": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "ServiceSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "customDomainName": {
+      "maxLength": 255,
+      "minLength": 3,
+      "type": "string"
+     },
+     "dnsEntry": {
+      "$ref": "#/components/schemas/DnsEntry"
+     },
+     "id": {
+      "maxLength": 21,
+      "minLength": 21,
+      "type": "string"
+     },
+     "lastUpdatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "name": {
+      "maxLength": 40,
+      "minLength": 3,
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "ACTIVE",
+       "CREATE_IN_PROGRESS",
+       "DELETE_IN_PROGRESS",
+       "CREATE_FAILED",
+       "DELETE_FAILED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SharingConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "TargetGroupConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "healthCheck": {
+      "$ref": "#/components/schemas/HealthCheckConfig"
+     },
+     "ipAddressType": {
+      "enum": [
+       "IPV4",
+       "IPV6"
+      ],
+      "type": "string"
+     },
+     "lambdaEventStructureVersion": {
+      "enum": [
+       "V1",
+       "V2"
+      ],
+      "type": "string"
+     },
+     "port": {
+      "maximum": 65535,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "protocol": {
+      "enum": [
+       "HTTP",
+       "HTTPS",
+       "TCP"
+      ],
+      "type": "string"
+     },
+     "protocolVersion": {
+      "enum": [
+       "HTTP1",
+       "HTTP2",
+       "GRPC"
+      ],
+      "type": "string"
+     },
+     "vpcIdentifier": {
+      "maxLength": 50,
+      "minLength": 5,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TargetGroupSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "id": {
+      "maxLength": 20,
+      "minLength": 20,
+      "type": "string"
+     },
+     "ipAddressType": {
+      "enum": [
+       "IPV4",
+       "IPV6"
+      ],
+      "type": "string"
+     },
+     "lambdaEventStructureVersion": {
+      "enum": [
+       "V1",
+       "V2"
+      ],
+      "type": "string"
+     },
+     "lastUpdatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "name": {
+      "maxLength": 128,
+      "minLength": 3,
+      "type": "string"
+     },
+     "port": {
+      "maximum": 65535,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "protocol": {
+      "enum": [
+       "HTTP",
+       "HTTPS",
+       "TCP"
+      ],
+      "type": "string"
+     },
+     "serviceArns": {
+      "items": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "status": {
+      "enum": [
+       "CREATE_IN_PROGRESS",
+       "ACTIVE",
+       "DELETE_IN_PROGRESS",
+       "CREATE_FAILED",
+       "DELETE_FAILED"
+      ],
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "IP",
+       "LAMBDA",
+       "INSTANCE",
+       "ALB"
+      ],
+      "type": "string"
+     },
+     "vpcIdentifier": {
+      "maxLength": 50,
+      "minLength": 5,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "WeightedTargetGroup": {
+    "additionalProperties": false,
+    "properties": {
+     "targetGroupIdentifier": {
+      "maxLength": 2048,
+      "minLength": 17,
+      "type": "string"
+     },
+     "weight": {
+      "maximum": 999,
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "targetGroupIdentifier"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon VPC Lattice API (2022-11-30). Every other official operation returns HTTP 501 UnknownOperationException. Service networks, services, listeners and target groups are configuration metadata: no DNS entry is assigned, no request is accepted, routed or authenticated, custom domain names and certificates are stored without checks, and no target is registered or health-checked. Listeners are HTTP or HTTPS listeners whose default action is a fixed 404 or 500 response; forward actions and TLS_PASSTHROUGH listeners are refused because target group references are not tracked. A missing port defaults to 80 for HTTP and 443 for HTTPS. Listener rules, auth and resource policies, access log subscriptions, targets and associations with VPCs, services and resource configurations return UnknownOperationException with HTTP 501, so association counts stay 0. Deleting a service also deletes its listeners. Target groups cannot be updated, and ListTargetGroups refuses vpcIdentifier and returns summaries without port, protocol, ipAddressType and vpcIdentifier, which GetTargetGroup reports inside config.",
+  "title": "Amazon VPC Lattice (simulator catalog)",
+  "version": "2022-11-30"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/servicenetworks": {
+   "get": {
+    "operationId": "vpc-latticeListServiceNetworks",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "vpc-lattice"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "items": {
+           "items": {
+            "$ref": "#/components/schemas/ServiceNetworkSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListServiceNetworks",
+    "tags": [
+     "Amazon VPC Lattice"
+    ]
+   },
+   "post": {
+    "operationId": "vpc-latticeCreateServiceNetwork",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "vpc-lattice"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "authType": {
+          "enum": [
+           "NONE",
+           "AWS_IAM"
+          ],
+          "type": "string"
+         },
+         "clientToken": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "name": {
+          "maxLength": 63,
+          "minLength": 3,
+          "type": "string"
+         },
+         "sharingConfig": {
+          "$ref": "#/components/schemas/SharingConfig"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 200,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 32,
+           "type": "string"
+          },
+          "authType": {
+           "enum": [
+            "NONE",
+            "AWS_IAM"
+           ],
+           "type": "string"
+          },
+          "id": {
+           "maxLength": 20,
+           "minLength": 20,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 63,
+           "minLength": 3,
+           "type": "string"
+          },
+          "sharingConfig": {
+           "$ref": "#/components/schemas/SharingConfig"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateServiceNetwork",
+    "tags": [
+     "Amazon VPC Lattice"
+    ]
+   }
+  },
+  "/servicenetworks/{serviceNetworkIdentifier}": {
+   "delete": {
+    "operationId": "vpc-latticeDeleteServiceNetwork",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "vpc-lattice"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "serviceNetworkIdentifier",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 3,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteServiceNetwork",
+    "tags": [
+     "Amazon VPC Lattice"
+    ]
+   },
+   "get": {
+    "operationId": "vpc-latticeGetServiceNetwork",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "vpc-lattice"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "serviceNetworkIdentifier",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 3,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 32,
+           "type": "string"
+          },
+          "authType": {
+           "enum": [
+            "NONE",
+            "AWS_IAM"
+           ],
+           "type": "string"
+          },
+          "createdAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "id": {
+           "maxLength": 20,
+           "minLength": 20,
+           "type": "string"
+          },
+          "lastUpdatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "name": {
+           "maxLength": 63,
+           "minLength": 3,
+           "type": "string"
+          },
+          "numberOfAssociatedServices": {
+           "type": "integer"
+          },
+          "numberOfAssociatedVPCs": {
+           "type": "integer"
+          },
+          "sharingConfig": {
+           "$ref": "#/components/schemas/SharingConfig"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetServiceNetwork",
+    "tags": [
+     "Amazon VPC Lattice"
+    ]
+   },
+   "patch": {
+    "operationId": "vpc-latticeUpdateServiceNetwork",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "vpc-lattice"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "serviceNetworkIdentifier",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 3,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "authType": {
+          "enum": [
+           "NONE",
+           "AWS_IAM"
+          ],
+          "type": "string"
+         }
+        },
+        "required": [
+         "authType"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 32,
+           "type": "string"
+          },
+          "authType": {
+           "enum": [
+            "NONE",
+            "AWS_IAM"
+           ],
+           "type": "string"
+          },
+          "id": {
+           "maxLength": 20,
+           "minLength": 20,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 63,
+           "minLength": 3,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateServiceNetwork",
+    "tags": [
+     "Amazon VPC Lattice"
+    ]
+   }
+  },
+  "/services": {
+   "get": {
+    "operationId": "vpc-latticeListServices",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "vpc-lattice"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "items": {
+           "items": {
+            "$ref": "#/components/schemas/ServiceSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListServices",
+    "tags": [
+     "Amazon VPC Lattice"
+    ]
+   },
+   "post": {
+    "operationId": "vpc-latticeCreateService",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "vpc-lattice"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "authType": {
+          "enum": [
+           "NONE",
+           "AWS_IAM"
+          ],
+          "type": "string"
+         },
+         "certificateArn": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+         },
+         "clientToken": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "customDomainName": {
+          "maxLength": 255,
+          "minLength": 3,
+          "type": "string"
+         },
+         "name": {
+          "maxLength": 40,
+          "minLength": 3,
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 200,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "authType": {
+           "enum": [
+            "NONE",
+            "AWS_IAM"
+           ],
+           "type": "string"
+          },
+          "certificateArn": {
+           "maxLength": 2048,
+           "minLength": 0,
+           "type": "string"
+          },
+          "customDomainName": {
+           "maxLength": 255,
+           "minLength": 3,
+           "type": "string"
+          },
+          "dnsEntry": {
+           "$ref": "#/components/schemas/DnsEntry"
+          },
+          "id": {
+           "maxLength": 21,
+           "minLength": 21,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 40,
+           "minLength": 3,
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "ACTIVE",
+            "CREATE_IN_PROGRESS",
+            "DELETE_IN_PROGRESS",
+            "CREATE_FAILED",
+            "DELETE_FAILED"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateService",
+    "tags": [
+     "Amazon VPC Lattice"
+    ]
+   }
+  },
+  "/services/{serviceIdentifier}": {
+   "delete": {
+    "operationId": "vpc-latticeDeleteService",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "vpc-lattice"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "serviceIdentifier",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 17,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "id": {
+           "maxLength": 21,
+           "minLength": 21,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 40,
+           "minLength": 3,
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "ACTIVE",
+            "CREATE_IN_PROGRESS",
+            "DELETE_IN_PROGRESS",
+            "CREATE_FAILED",
+            "DELETE_FAILED"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteService",
+    "tags": [
+     "Amazon VPC Lattice"
+    ]
+   },
+   "get": {
+    "operationId": "vpc-latticeGetService",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "vpc-lattice"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "serviceIdentifier",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 17,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "authType": {
+           "enum": [
+            "NONE",
+            "AWS_IAM"
+           ],
+           "type": "string"
+          },
+          "certificateArn": {
+           "maxLength": 2048,
+           "minLength": 0,
+           "type": "string"
+          },
+          "createdAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "customDomainName": {
+           "maxLength": 255,
+           "minLength": 3,
+           "type": "string"
+          },
+          "dnsEntry": {
+           "$ref": "#/components/schemas/DnsEntry"
+          },
+          "failureCode": {
+           "type": "string"
+          },
+          "failureMessage": {
+           "type": "string"
+          },
+          "id": {
+           "maxLength": 21,
+           "minLength": 21,
+           "type": "string"
+          },
+          "lastUpdatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "name": {
+           "maxLength": 40,
+           "minLength": 3,
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "ACTIVE",
+            "CREATE_IN_PROGRESS",
+            "DELETE_IN_PROGRESS",
+            "CREATE_FAILED",
+            "DELETE_FAILED"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetService",
+    "tags": [
+     "Amazon VPC Lattice"
+    ]
+   },
+   "patch": {
+    "operationId": "vpc-latticeUpdateService",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "vpc-lattice"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "serviceIdentifier",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 17,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "authType": {
+          "enum": [
+           "NONE",
+           "AWS_IAM"
+          ],
+          "type": "string"
+         },
+         "certificateArn": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "authType": {
+           "enum": [
+            "NONE",
+            "AWS_IAM"
+           ],
+           "type": "string"
+          },
+          "certificateArn": {
+           "maxLength": 2048,
+           "minLength": 0,
+           "type": "string"
+          },
+          "customDomainName": {
+           "maxLength": 255,
+           "minLength": 3,
+           "type": "string"
+          },
+          "id": {
+           "maxLength": 21,
+           "minLength": 21,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 40,
+           "minLength": 3,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateService",
+    "tags": [
+     "Amazon VPC Lattice"
+    ]
+   }
+  },
+  "/services/{serviceIdentifier}/listeners": {
+   "get": {
+    "operationId": "vpc-latticeListListeners",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "vpc-lattice"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "serviceIdentifier",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 17,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "items": {
+           "items": {
+            "$ref": "#/components/schemas/ListenerSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListListeners",
+    "tags": [
+     "Amazon VPC Lattice"
+    ]
+   },
+   "post": {
+    "operationId": "vpc-latticeCreateListener",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "vpc-lattice"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "serviceIdentifier",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 17,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "defaultAction": {
+          "$ref": "#/components/schemas/RuleAction"
+         },
+         "name": {
+          "maxLength": 63,
+          "minLength": 3,
+          "type": "string"
+         },
+         "port": {
+          "maximum": 65535,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "protocol": {
+          "enum": [
+           "HTTP",
+           "HTTPS",
+           "TLS_PASSTHROUGH"
+          ],
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 200,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "defaultAction",
+         "name",
+         "protocol"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "defaultAction": {
+           "$ref": "#/components/schemas/RuleAction"
+          },
+          "id": {
+           "maxLength": 26,
+           "minLength": 26,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 63,
+           "minLength": 3,
+           "type": "string"
+          },
+          "port": {
+           "maximum": 65535,
+           "minimum": 1,
+           "type": "integer"
+          },
+          "protocol": {
+           "enum": [
+            "HTTP",
+            "HTTPS",
+            "TLS_PASSTHROUGH"
+           ],
+           "type": "string"
+          },
+          "serviceArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "serviceId": {
+           "maxLength": 21,
+           "minLength": 21,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateListener",
+    "tags": [
+     "Amazon VPC Lattice"
+    ]
+   }
+  },
+  "/services/{serviceIdentifier}/listeners/{listenerIdentifier}": {
+   "delete": {
+    "operationId": "vpc-latticeDeleteListener",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "vpc-lattice"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "listenerIdentifier",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "serviceIdentifier",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 17,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteListener",
+    "tags": [
+     "Amazon VPC Lattice"
+    ]
+   },
+   "get": {
+    "operationId": "vpc-latticeGetListener",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "vpc-lattice"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "listenerIdentifier",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "serviceIdentifier",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 17,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "createdAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "defaultAction": {
+           "$ref": "#/components/schemas/RuleAction"
+          },
+          "id": {
+           "maxLength": 26,
+           "minLength": 26,
+           "type": "string"
+          },
+          "lastUpdatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "name": {
+           "maxLength": 63,
+           "minLength": 3,
+           "type": "string"
+          },
+          "port": {
+           "maximum": 65535,
+           "minimum": 1,
+           "type": "integer"
+          },
+          "protocol": {
+           "enum": [
+            "HTTP",
+            "HTTPS",
+            "TLS_PASSTHROUGH"
+           ],
+           "type": "string"
+          },
+          "serviceArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "serviceId": {
+           "maxLength": 21,
+           "minLength": 21,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetListener",
+    "tags": [
+     "Amazon VPC Lattice"
+    ]
+   },
+   "patch": {
+    "operationId": "vpc-latticeUpdateListener",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "vpc-lattice"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "listenerIdentifier",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "serviceIdentifier",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 17,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "defaultAction": {
+          "$ref": "#/components/schemas/RuleAction"
+         }
+        },
+        "required": [
+         "defaultAction"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "defaultAction": {
+           "$ref": "#/components/schemas/RuleAction"
+          },
+          "id": {
+           "maxLength": 26,
+           "minLength": 26,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 63,
+           "minLength": 3,
+           "type": "string"
+          },
+          "port": {
+           "maximum": 65535,
+           "minimum": 1,
+           "type": "integer"
+          },
+          "protocol": {
+           "enum": [
+            "HTTP",
+            "HTTPS",
+            "TLS_PASSTHROUGH"
+           ],
+           "type": "string"
+          },
+          "serviceArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "serviceId": {
+           "maxLength": 21,
+           "minLength": 21,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateListener",
+    "tags": [
+     "Amazon VPC Lattice"
+    ]
+   }
+  },
+  "/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "vpc-latticeUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "vpc-lattice"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1224,
+       "minLength": 0,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 200,
+       "minItems": 0,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "Amazon VPC Lattice"
+    ]
+   },
+   "get": {
+    "operationId": "vpc-latticeListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "vpc-lattice"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1224,
+       "minLength": 0,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "Amazon VPC Lattice"
+    ]
+   },
+   "post": {
+    "operationId": "vpc-latticeTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "vpc-lattice"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1224,
+       "minLength": 0,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 200,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "Amazon VPC Lattice"
+    ]
+   }
+  },
+  "/targetgroups": {
+   "get": {
+    "operationId": "vpc-latticeListTargetGroups",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "vpc-lattice"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "targetGroupType",
+      "schema": {
+       "enum": [
+        "IP",
+        "LAMBDA",
+        "INSTANCE",
+        "ALB"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "vpcIdentifier",
+      "schema": {
+       "maxLength": 50,
+       "minLength": 5,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "items": {
+           "items": {
+            "$ref": "#/components/schemas/TargetGroupSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTargetGroups",
+    "tags": [
+     "Amazon VPC Lattice"
+    ]
+   },
+   "post": {
+    "operationId": "vpc-latticeCreateTargetGroup",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "vpc-lattice"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "config": {
+          "$ref": "#/components/schemas/TargetGroupConfig"
+         },
+         "name": {
+          "maxLength": 128,
+          "minLength": 3,
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 200,
+          "minProperties": 0,
+          "type": "object"
+         },
+         "type": {
+          "enum": [
+           "IP",
+           "LAMBDA",
+           "INSTANCE",
+           "ALB"
+          ],
+          "type": "string"
+         }
+        },
+        "required": [
+         "name",
+         "type"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "config": {
+           "$ref": "#/components/schemas/TargetGroupConfig"
+          },
+          "id": {
+           "maxLength": 20,
+           "minLength": 20,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 128,
+           "minLength": 3,
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "CREATE_IN_PROGRESS",
+            "ACTIVE",
+            "DELETE_IN_PROGRESS",
+            "CREATE_FAILED",
+            "DELETE_FAILED"
+           ],
+           "type": "string"
+          },
+          "type": {
+           "enum": [
+            "IP",
+            "LAMBDA",
+            "INSTANCE",
+            "ALB"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateTargetGroup",
+    "tags": [
+     "Amazon VPC Lattice"
+    ]
+   }
+  },
+  "/targetgroups/{targetGroupIdentifier}": {
+   "delete": {
+    "operationId": "vpc-latticeDeleteTargetGroup",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "vpc-lattice"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "targetGroupIdentifier",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 17,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "id": {
+           "maxLength": 20,
+           "minLength": 20,
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "CREATE_IN_PROGRESS",
+            "ACTIVE",
+            "DELETE_IN_PROGRESS",
+            "CREATE_FAILED",
+            "DELETE_FAILED"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteTargetGroup",
+    "tags": [
+     "Amazon VPC Lattice"
+    ]
+   },
+   "get": {
+    "operationId": "vpc-latticeGetTargetGroup",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "vpc-lattice"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "targetGroupIdentifier",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 17,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "config": {
+           "$ref": "#/components/schemas/TargetGroupConfig"
+          },
+          "createdAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "failureCode": {
+           "type": "string"
+          },
+          "failureMessage": {
+           "type": "string"
+          },
+          "id": {
+           "maxLength": 20,
+           "minLength": 20,
+           "type": "string"
+          },
+          "lastUpdatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "name": {
+           "maxLength": 128,
+           "minLength": 3,
+           "type": "string"
+          },
+          "serviceArns": {
+           "items": {
+            "maxLength": 2048,
+            "minLength": 20,
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "status": {
+           "enum": [
+            "CREATE_IN_PROGRESS",
+            "ACTIVE",
+            "DELETE_IN_PROGRESS",
+            "CREATE_FAILED",
+            "DELETE_FAILED"
+           ],
+           "type": "string"
+          },
+          "type": {
+           "enum": [
+            "IP",
+            "LAMBDA",
+            "INSTANCE",
+            "ALB"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetTargetGroup",
+    "tags": [
+     "Amazon VPC Lattice"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon VPC Lattice API (2022-11-30). Every other official operation returns HTTP 501 UnknownOperationException. Service networks, services, listeners and target groups are configuration metadata: no DNS entry is assigned, no request is accepted, routed or authenticated, custom domain names and certificates are stored without checks, and no target is registered or health-checked. Listeners are HTTP or HTTPS listeners whose default action is a fixed 404 or 500 response; forward actions and TLS_PASSTHROUGH listeners are refused because target group references are not tracked. A missing port defaults to 80 for HTTP and 443 for HTTPS. Listener rules, auth and resource policies, access log subscriptions, targets and associations with VPCs, services and resource configurations return UnknownOperationException with HTTP 501, so association counts stay 0. Deleting a service also deletes its listeners. Target groups cannot be updated, and ListTargetGroups refuses vpcIdentifier and returns summaries without port, protocol, ipAddressType and vpcIdentifier, which GetTargetGroup reports inside config.",
+   "name": "Amazon VPC Lattice"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/vpc-lattice/2022-11-30/service-2.json",
+  "sha256": "96156d796df10d3b37c623379b4a9c50c45399fb537da5f2e97b208d1d88a6ff",
+  "license": "Apache-2.0"
+ }
+}
