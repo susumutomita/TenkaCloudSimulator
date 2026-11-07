@@ -1,0 +1,1578 @@
+{
+ "components": {
+  "schemas": {
+   "ConfidentialCompute": {
+    "properties": {
+     "mode": {
+      "$ref": "#/components/schemas/Mode"
+     }
+    },
+    "type": "object"
+   },
+   "ConnectionState": {
+    "properties": {
+     "description": {
+      "type": "string"
+     },
+     "status": {
+      "$ref": "#/components/schemas/PrivateLinkConnectionStatus"
+     }
+    },
+    "type": "object"
+   },
+   "Encryption": {
+    "properties": {
+     "keySource": {
+      "enum": [
+       "Microsoft.KeyVault"
+      ],
+      "type": "string"
+     },
+     "keyVaultProperties": {
+      "items": {
+       "$ref": "#/components/schemas/KeyVaultProperties"
+      },
+      "type": "array"
+     },
+     "requireInfrastructureEncryption": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "EndPointProvisioningState": {
+    "enum": [
+     "Creating",
+     "Updating",
+     "Deleting",
+     "Succeeded",
+     "Canceled",
+     "Failed"
+    ],
+    "type": "string"
+   },
+   "EntityStatus": {
+    "enum": [
+     "Active",
+     "Disabled",
+     "Restoring",
+     "SendDisabled",
+     "ReceiveDisabled",
+     "Creating",
+     "Deleting",
+     "Renaming",
+     "Unknown"
+    ],
+    "type": "string"
+   },
+   "GeoDRRoleType": {
+    "enum": [
+     "Primary",
+     "Secondary"
+    ],
+    "type": "string"
+   },
+   "GeoDataReplicationProperties": {
+    "properties": {
+     "locations": {
+      "items": {
+       "$ref": "#/components/schemas/NamespaceReplicaLocation"
+      },
+      "type": "array"
+     },
+     "maxReplicationLagDurationInSeconds": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "Identity": {
+    "properties": {
+     "principalId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "tenantId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "type": {
+      "$ref": "#/components/schemas/ManagedServiceIdentityType"
+     },
+     "userAssignedIdentities": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/UserAssignedIdentity"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "IpAddressType": {
+    "enum": [
+     "IPv4",
+     "DualStack"
+    ],
+    "type": "string"
+   },
+   "KeyVaultProperties": {
+    "properties": {
+     "identity": {
+      "$ref": "#/components/schemas/UserAssignedIdentityProperties"
+     },
+     "keyName": {
+      "type": "string"
+     },
+     "keyVaultUri": {
+      "type": "string"
+     },
+     "keyVersion": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ManagedServiceIdentityType": {
+    "enum": [
+     "SystemAssigned",
+     "UserAssigned",
+     "SystemAssigned, UserAssigned",
+     "None"
+    ],
+    "type": "string"
+   },
+   "MessageCountDetails": {
+    "properties": {
+     "activeMessageCount": {
+      "format": "int64",
+      "readOnly": true,
+      "type": "integer"
+     },
+     "deadLetterMessageCount": {
+      "format": "int64",
+      "readOnly": true,
+      "type": "integer"
+     },
+     "scheduledMessageCount": {
+      "format": "int64",
+      "readOnly": true,
+      "type": "integer"
+     },
+     "transferDeadLetterMessageCount": {
+      "format": "int64",
+      "readOnly": true,
+      "type": "integer"
+     },
+     "transferMessageCount": {
+      "format": "int64",
+      "readOnly": true,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "Mode": {
+    "enum": [
+     "Disabled",
+     "Enabled"
+    ],
+    "type": "string"
+   },
+   "NamespaceReplicaLocation": {
+    "properties": {
+     "locationName": {
+      "type": "string"
+     },
+     "roleType": {
+      "$ref": "#/components/schemas/GeoDRRoleType"
+     }
+    },
+    "type": "object"
+   },
+   "PlatformCapabilities": {
+    "properties": {
+     "confidentialCompute": {
+      "$ref": "#/components/schemas/ConfidentialCompute"
+     }
+    },
+    "type": "object"
+   },
+   "PrivateEndpoint": {
+    "properties": {
+     "id": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PrivateEndpointConnection": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/ProxyResource"
+     }
+    ],
+    "properties": {
+     "location": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/PrivateEndpointConnectionProperties"
+     }
+    },
+    "type": "object"
+   },
+   "PrivateEndpointConnectionProperties": {
+    "properties": {
+     "privateEndpoint": {
+      "$ref": "#/components/schemas/PrivateEndpoint"
+     },
+     "privateLinkServiceConnectionState": {
+      "$ref": "#/components/schemas/ConnectionState"
+     },
+     "provisioningState": {
+      "$ref": "#/components/schemas/EndPointProvisioningState"
+     }
+    },
+    "type": "object"
+   },
+   "PrivateLinkConnectionStatus": {
+    "enum": [
+     "Pending",
+     "Approved",
+     "Rejected",
+     "Disconnected"
+    ],
+    "type": "string"
+   },
+   "ProxyResource": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/Resource"
+     }
+    ],
+    "type": "object"
+   },
+   "Resource": {
+    "properties": {
+     "id": {
+      "format": "arm-id",
+      "readOnly": true,
+      "type": "string"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "systemData": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/systemData"
+       }
+      ],
+      "readOnly": true
+     },
+     "type": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ResourceNamespacePatch": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/Resource"
+     }
+    ],
+    "properties": {
+     "location": {
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "SBNamespace": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/TrackedResource"
+     }
+    ],
+    "properties": {
+     "identity": {
+      "$ref": "#/components/schemas/Identity"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/SBNamespaceProperties"
+     },
+     "sku": {
+      "$ref": "#/components/schemas/SBSku"
+     }
+    },
+    "type": "object"
+   },
+   "SBNamespaceListResult": {
+    "properties": {
+     "nextLink": {
+      "format": "uri",
+      "type": "string"
+     },
+     "value": {
+      "items": {
+       "$ref": "#/components/schemas/SBNamespace"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "value"
+    ],
+    "type": "object"
+   },
+   "SBNamespaceProperties": {
+    "properties": {
+     "alternateName": {
+      "type": "string"
+     },
+     "createdAt": {
+      "format": "date-time",
+      "readOnly": true,
+      "type": "string"
+     },
+     "disableLocalAuth": {
+      "type": "boolean"
+     },
+     "encryption": {
+      "$ref": "#/components/schemas/Encryption"
+     },
+     "geoDataReplication": {
+      "$ref": "#/components/schemas/GeoDataReplicationProperties"
+     },
+     "ipAddressType": {
+      "$ref": "#/components/schemas/IpAddressType"
+     },
+     "metricId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "minimumTlsVersion": {
+      "$ref": "#/components/schemas/TlsVersion"
+     },
+     "platformCapabilities": {
+      "$ref": "#/components/schemas/PlatformCapabilities"
+     },
+     "premiumMessagingPartitions": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "privateEndpointConnections": {
+      "items": {
+       "$ref": "#/components/schemas/PrivateEndpointConnection"
+      },
+      "type": "array"
+     },
+     "provisioningState": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "publicNetworkAccess": {
+      "enum": [
+       "Enabled",
+       "Disabled",
+       "SecuredByPerimeter"
+      ],
+      "type": "string"
+     },
+     "serviceBusEndpoint": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "status": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "updatedAt": {
+      "format": "date-time",
+      "readOnly": true,
+      "type": "string"
+     },
+     "zoneRedundant": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "SBNamespaceUpdateParameters": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/ResourceNamespacePatch"
+     }
+    ],
+    "properties": {
+     "identity": {
+      "$ref": "#/components/schemas/Identity"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/SBNamespaceUpdateProperties"
+     },
+     "sku": {
+      "$ref": "#/components/schemas/SBSku"
+     }
+    },
+    "type": "object"
+   },
+   "SBNamespaceUpdateProperties": {
+    "properties": {
+     "alternateName": {
+      "type": "string"
+     },
+     "createdAt": {
+      "format": "date-time",
+      "readOnly": true,
+      "type": "string"
+     },
+     "disableLocalAuth": {
+      "type": "boolean"
+     },
+     "encryption": {
+      "$ref": "#/components/schemas/Encryption"
+     },
+     "metricId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "privateEndpointConnections": {
+      "items": {
+       "$ref": "#/components/schemas/PrivateEndpointConnection"
+      },
+      "type": "array"
+     },
+     "provisioningState": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "serviceBusEndpoint": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "status": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "updatedAt": {
+      "format": "date-time",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SBQueue": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/ProxyResource"
+     }
+    ],
+    "properties": {
+     "location": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/SBQueueProperties"
+     }
+    },
+    "type": "object"
+   },
+   "SBQueueListResult": {
+    "properties": {
+     "nextLink": {
+      "format": "uri",
+      "type": "string"
+     },
+     "value": {
+      "items": {
+       "$ref": "#/components/schemas/SBQueue"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "value"
+    ],
+    "type": "object"
+   },
+   "SBQueueProperties": {
+    "properties": {
+     "accessedAt": {
+      "format": "date-time",
+      "readOnly": true,
+      "type": "string"
+     },
+     "autoDeleteOnIdle": {
+      "format": "duration",
+      "type": "string"
+     },
+     "countDetails": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/MessageCountDetails"
+       }
+      ],
+      "readOnly": true
+     },
+     "createdAt": {
+      "format": "date-time",
+      "readOnly": true,
+      "type": "string"
+     },
+     "deadLetteringOnMessageExpiration": {
+      "type": "boolean"
+     },
+     "defaultMessageTimeToLive": {
+      "format": "duration",
+      "type": "string"
+     },
+     "duplicateDetectionHistoryTimeWindow": {
+      "format": "duration",
+      "type": "string"
+     },
+     "enableBatchedOperations": {
+      "type": "boolean"
+     },
+     "enableExpress": {
+      "type": "boolean"
+     },
+     "enablePartitioning": {
+      "type": "boolean"
+     },
+     "forwardDeadLetteredMessagesTo": {
+      "type": "string"
+     },
+     "forwardTo": {
+      "type": "string"
+     },
+     "lockDuration": {
+      "format": "duration",
+      "type": "string"
+     },
+     "maxDeliveryCount": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "maxMessageSizeInKilobytes": {
+      "format": "int64",
+      "type": "integer"
+     },
+     "maxSizeInMegabytes": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "messageCount": {
+      "format": "int64",
+      "readOnly": true,
+      "type": "integer"
+     },
+     "requiresDuplicateDetection": {
+      "type": "boolean"
+     },
+     "requiresSession": {
+      "type": "boolean"
+     },
+     "sizeInBytes": {
+      "format": "int64",
+      "readOnly": true,
+      "type": "integer"
+     },
+     "status": {
+      "$ref": "#/components/schemas/EntityStatus"
+     },
+     "updatedAt": {
+      "format": "date-time",
+      "readOnly": true,
+      "type": "string"
+     },
+     "userMetadata": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SBSku": {
+    "properties": {
+     "capacity": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "name": {
+      "$ref": "#/components/schemas/SkuName"
+     },
+     "tier": {
+      "$ref": "#/components/schemas/SkuTier"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "SkuName": {
+    "enum": [
+     "Basic",
+     "Standard",
+     "Premium"
+    ],
+    "type": "string"
+   },
+   "SkuTier": {
+    "enum": [
+     "Basic",
+     "Standard",
+     "Premium"
+    ],
+    "type": "string"
+   },
+   "TlsVersion": {
+    "enum": [
+     "1.0",
+     "1.1",
+     "1.2",
+     "1.3"
+    ],
+    "type": "string"
+   },
+   "TrackedResource": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/Resource"
+     }
+    ],
+    "properties": {
+     "location": {
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "required": [
+     "location"
+    ],
+    "type": "object"
+   },
+   "UserAssignedIdentity": {
+    "properties": {
+     "clientId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "principalId": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "UserAssignedIdentityProperties": {
+    "properties": {
+     "userAssignedIdentity": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "systemData": {
+    "properties": {
+     "createdAt": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "createdBy": {
+      "type": "string"
+     },
+     "createdByType": {
+      "enum": [
+       "User",
+       "Application",
+       "ManagedIdentity",
+       "Key"
+      ],
+      "type": "string"
+     },
+     "lastModifiedAt": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "lastModifiedBy": {
+      "type": "string"
+     },
+     "lastModifiedByType": {
+      "enum": [
+       "User",
+       "Application",
+       "ManagedIdentity",
+       "Key"
+      ],
+      "type": "string"
+     }
+    },
+    "readOnly": true,
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Microsoft.ServiceBus api-version 2026-01-01 swagger. Every other official operation of this api-version returns HTTP 501 NotImplemented. Namespace and queue metadata only: no endpoint, message, session, topic, authorization rule, SAS key or connection string exists; message counts stay 0. Queue forwarding must name another existing queue in the same namespace; partitioning cannot change after creation. Deleting a namespace deletes its queues; every other operation is not implemented (HTTP 501).",
+  "title": "Service Bus (Microsoft.ServiceBus, simulator catalog)",
+  "version": "2026-01-01"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/subscriptions/{subscriptionId}/providers/Microsoft.ServiceBus/namespaces": {
+   "get": {
+    "operationId": "Namespaces_List",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-01-01",
+       "enum": [
+        "2026-01-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SBNamespaceListResult"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "Namespaces_List",
+    "tags": [
+     "Service Bus"
+    ]
+   }
+  },
+  "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceBus/namespaces": {
+   "get": {
+    "operationId": "Namespaces_ListByResourceGroup",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-01-01",
+       "enum": [
+        "2026-01-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SBNamespaceListResult"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "Namespaces_ListByResourceGroup",
+    "tags": [
+     "Service Bus"
+    ]
+   }
+  },
+  "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceBus/namespaces/{namespaceName}": {
+   "delete": {
+    "description": "Long-running in Azure; the simulator completes it synchronously with provisioningState Succeeded.",
+    "operationId": "Namespaces_Delete",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-01-01",
+       "enum": [
+        "2026-01-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "namespaceName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Official 200 response."
+     },
+     "202": {
+      "description": "Official 202 response."
+     },
+     "204": {
+      "description": "Official 204 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "Namespaces_Delete",
+    "tags": [
+     "Service Bus"
+    ]
+   },
+   "get": {
+    "operationId": "Namespaces_Get",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-01-01",
+       "enum": [
+        "2026-01-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "namespaceName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SBNamespace"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "Namespaces_Get",
+    "tags": [
+     "Service Bus"
+    ]
+   },
+   "patch": {
+    "operationId": "Namespaces_Update",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-01-01",
+       "enum": [
+        "2026-01-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "namespaceName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SBNamespaceUpdateParameters"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SBNamespace"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "201": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SBNamespace"
+        }
+       }
+      },
+      "description": "Official 201 response."
+     },
+     "202": {
+      "description": "Official 202 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "Namespaces_Update",
+    "tags": [
+     "Service Bus"
+    ]
+   },
+   "put": {
+    "description": "Long-running in Azure; the simulator completes it synchronously with provisioningState Succeeded.",
+    "operationId": "Namespaces_CreateOrUpdate",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-01-01",
+       "enum": [
+        "2026-01-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "namespaceName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SBNamespace"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SBNamespace"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "201": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SBNamespace"
+        }
+       }
+      },
+      "description": "Official 201 response."
+     },
+     "202": {
+      "description": "Official 202 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "Namespaces_CreateOrUpdate",
+    "tags": [
+     "Service Bus"
+    ]
+   }
+  },
+  "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceBus/namespaces/{namespaceName}/queues": {
+   "get": {
+    "operationId": "Queues_ListByNamespace",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-01-01",
+       "enum": [
+        "2026-01-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "namespaceName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "$skip",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "$top",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SBQueueListResult"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "Queues_ListByNamespace",
+    "tags": [
+     "Service Bus"
+    ]
+   }
+  },
+  "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceBus/namespaces/{namespaceName}/queues/{queueName}": {
+   "delete": {
+    "operationId": "Queues_Delete",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-01-01",
+       "enum": [
+        "2026-01-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "namespaceName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "queueName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Official 200 response."
+     },
+     "204": {
+      "description": "Official 204 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "Queues_Delete",
+    "tags": [
+     "Service Bus"
+    ]
+   },
+   "get": {
+    "operationId": "Queues_Get",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-01-01",
+       "enum": [
+        "2026-01-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "namespaceName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "queueName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SBQueue"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "Queues_Get",
+    "tags": [
+     "Service Bus"
+    ]
+   },
+   "put": {
+    "operationId": "Queues_CreateOrUpdate",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-01-01",
+       "enum": [
+        "2026-01-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "namespaceName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "queueName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SBQueue"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SBQueue"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "Queues_CreateOrUpdate",
+    "tags": [
+     "Service Bus"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/_simulator/providers/azure-arm"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Microsoft.ServiceBus api-version 2026-01-01 swagger. Every other official operation of this api-version returns HTTP 501 NotImplemented. Namespace and queue metadata only: no endpoint, message, session, topic, authorization rule, SAS key or connection string exists; message counts stay 0. Queue forwarding must name another existing queue in the same namespace; partitioning cannot change after creation. Deleting a namespace deletes its queues; every other operation is not implemented (HTTP 501).",
+   "name": "Service Bus"
+  }
+ ],
+ "x-simulator-source": {
+  "repository": "github.com/Azure/azure-rest-api-specs",
+  "commit": "8254fa29b6360b48084554122a7c49f6c4237d84",
+  "license": "MIT",
+  "files": [
+   {
+    "path": "specification/common-types/resource-management/v6/types.json",
+    "sha256": "5bdcf9b5ed1ea563367452e265e7ad60b411b1fbbbc20b8ba3ab7854d1ca624f"
+   },
+   {
+    "path": "specification/servicebus/resource-manager/Microsoft.ServiceBus/ServiceBus/stable/2026-01-01/servicebus.json",
+    "sha256": "caa6b9b8c9afb745f59abb76fb9a255cade1779eda76f466a02e70fcda7b6a0d"
+   }
+  ]
+ }
+}
