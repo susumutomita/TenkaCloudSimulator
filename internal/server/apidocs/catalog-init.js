@@ -1,11 +1,12 @@
 "use strict";
 // One OpenAPI document per catalog service, generated from the embedded
-// official botocore or Google discovery subsets. The page names its catalog
-// directory; requests stay on this simulator origin.
-const catalogDirectory =
-  document.getElementById("reference").dataset.catalog === "gcp-catalog"
-    ? "gcp-catalog"
-    : "catalog";
+// official botocore, Google discovery or Azure REST API specification subsets. The page names its catalog directory from a fixed
+// allowlist; requests stay on this simulator origin.
+const catalogDirectory = ["gcp-catalog", "azure-catalog"].includes(
+  document.getElementById("reference").dataset.catalog,
+)
+  ? document.getElementById("reference").dataset.catalog
+  : "catalog";
 fetch("/_simulator/docs/" + catalogDirectory + "/index.json", {
   credentials: "same-origin",
 })

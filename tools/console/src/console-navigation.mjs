@@ -21,6 +21,7 @@ export const SERVICES = Object.freeze([
   {id: 'gcp-storage', provider: 'gcp', label: 'Cloud Storage', route: '/gcp-storage', keywords: 'google bucket object バケット オブジェクト ストレージ クラウドストレージ'},
   {id: 'gcp-catalog', provider: 'gcp', label: 'Service catalog', route: '/gcp-catalog', keywords: 'google catalog api metadata カタログ サービス'},
   {id: 'azure-blob', provider: 'azure', label: 'Blob Storage', route: '/azure-blob', keywords: 'container blob コンテナー コンテナ ブロブ ストレージ ブロブストレージ'},
+  {id: 'azure-arm', provider: 'azure', label: 'Resource Manager', route: '/azure-arm', keywords: 'arm resource group subscription リソース グループ リソースグループ サブスクリプション リソースマネージャー'},
   {id: 'sakura-disks', provider: 'sakura', label: 'Disks', route: '/sakura-disks', keywords: 'sakura cloud disk configuration storage さくらのクラウド さくら ディスク 構成 ストレージ'},
 ]);
 export function serviceDescriptor(id) { return SERVICES.find(service => service.id === id); }
@@ -46,6 +47,8 @@ export function serviceAvailable(id, capabilities) {
   if (service.provider === 'aws') return !!capabilities.services?.[service.capability];
   if (service.provider === 'sakura') return sakuraConfiguration(capabilities) !== null;
   if (service.id === 'gcp-catalog') return Array.isArray(capabilities.gcpCatalog?.apis) && capabilities.gcpCatalog.apis.length > 0;
+  if (service.id === 'azure-arm') return Array.isArray(capabilities.azureCatalog?.providers) && capabilities.azureCatalog.providers.length > 0
+    && typeof capabilities.azureCatalog.descriptors === 'string';
   const scope = capabilities.cloudStorage?.[service.provider];
   return service.provider === 'gcp' ? typeof scope?.project === 'string' && scope.project.length > 0
     : typeof scope?.account === 'string' && scope.account.length > 0;
@@ -55,7 +58,10 @@ function searchText(service, capabilities) {
   const titles = service.id === 'catalog' && Array.isArray(capabilities?.services?.catalog?.services)
     ? capabilities.services.catalog.services.map(entry => entry.title + ' ' + entry.serviceId).join(' ')
     : service.id === 'gcp-catalog' && Array.isArray(capabilities?.gcpCatalog?.apis)
-      ? capabilities.gcpCatalog.apis.map(entry => entry.title + ' ' + entry.name).join(' ') : '';
+      ? capabilities.gcpCatalog.apis.map(entry => entry.title + ' ' + entry.name).join(' ')
+    : service.id === 'azure-arm' && Array.isArray(capabilities?.azureCatalog?.providers)
+      ? capabilities.azureCatalog.providers.map(entry => entry.title + ' ' + entry.namespace + ' '
+        + (Array.isArray(entry.types) ? entry.types.map(type => type.title).join(' ') : '')).join(' ') : '';
   return (service.label + ' ' + service.keywords + ' ' + titles).normalize('NFKC').toLocaleLowerCase('en');
 }
 export function servicesForProvider(provider, capabilities, query = '') {

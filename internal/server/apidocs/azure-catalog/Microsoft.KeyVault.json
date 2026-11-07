@@ -1,0 +1,1111 @@
+{
+ "components": {
+  "schemas": {
+   "AccessPolicyEntry": {
+    "properties": {
+     "applicationId": {
+      "$ref": "#/components/schemas/Azure.Core.uuid"
+     },
+     "objectId": {
+      "type": "string"
+     },
+     "permissions": {
+      "$ref": "#/components/schemas/Permissions"
+     },
+     "tenantId": {
+      "$ref": "#/components/schemas/Azure.Core.uuid"
+     }
+    },
+    "required": [
+     "objectId",
+     "permissions",
+     "tenantId"
+    ],
+    "type": "object"
+   },
+   "ActionsRequired": {
+    "enum": [
+     "None"
+    ],
+    "type": "string"
+   },
+   "Azure.Core.azureLocation": {
+    "type": "string"
+   },
+   "Azure.Core.eTag": {
+    "type": "string"
+   },
+   "Azure.Core.uuid": {
+    "format": "uuid",
+    "type": "string"
+   },
+   "CertificatePermissions": {
+    "enum": [
+     "all",
+     "get",
+     "list",
+     "delete",
+     "create",
+     "import",
+     "update",
+     "managecontacts",
+     "getissuers",
+     "listissuers",
+     "setissuers",
+     "deleteissuers",
+     "manageissuers",
+     "recover",
+     "purge",
+     "backup",
+     "restore"
+    ],
+    "type": "string"
+   },
+   "CreateMode": {
+    "enum": [
+     "recover",
+     "default"
+    ],
+    "type": "string"
+   },
+   "IPRule": {
+    "properties": {
+     "value": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "value"
+    ],
+    "type": "object"
+   },
+   "KeyPermissions": {
+    "enum": [
+     "all",
+     "encrypt",
+     "decrypt",
+     "wrapKey",
+     "unwrapKey",
+     "sign",
+     "verify",
+     "get",
+     "list",
+     "create",
+     "update",
+     "import",
+     "delete",
+     "backup",
+     "restore",
+     "recover",
+     "purge",
+     "release",
+     "rotate",
+     "getrotationpolicy",
+     "setrotationpolicy"
+    ],
+    "type": "string"
+   },
+   "NetworkRuleAction": {
+    "enum": [
+     "Allow",
+     "Deny"
+    ],
+    "type": "string"
+   },
+   "NetworkRuleBypassOptions": {
+    "enum": [
+     "AzureServices",
+     "None"
+    ],
+    "type": "string"
+   },
+   "NetworkRuleSet": {
+    "properties": {
+     "bypass": {
+      "$ref": "#/components/schemas/NetworkRuleBypassOptions"
+     },
+     "defaultAction": {
+      "$ref": "#/components/schemas/NetworkRuleAction"
+     },
+     "ipRules": {
+      "items": {
+       "$ref": "#/components/schemas/IPRule"
+      },
+      "type": "array"
+     },
+     "virtualNetworkRules": {
+      "items": {
+       "$ref": "#/components/schemas/VirtualNetworkRule"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Permissions": {
+    "properties": {
+     "certificates": {
+      "items": {
+       "$ref": "#/components/schemas/CertificatePermissions"
+      },
+      "type": "array"
+     },
+     "keys": {
+      "items": {
+       "$ref": "#/components/schemas/KeyPermissions"
+      },
+      "type": "array"
+     },
+     "secrets": {
+      "items": {
+       "$ref": "#/components/schemas/SecretPermissions"
+      },
+      "type": "array"
+     },
+     "storage": {
+      "items": {
+       "$ref": "#/components/schemas/StoragePermissions"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "PrivateEndpoint": {
+    "properties": {
+     "id": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PrivateEndpointConnectionItem": {
+    "properties": {
+     "etag": {
+      "$ref": "#/components/schemas/Azure.Core.eTag"
+     },
+     "id": {
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/PrivateEndpointConnectionProperties"
+     }
+    },
+    "type": "object"
+   },
+   "PrivateEndpointConnectionProperties": {
+    "properties": {
+     "privateEndpoint": {
+      "$ref": "#/components/schemas/PrivateEndpoint"
+     },
+     "privateLinkServiceConnectionState": {
+      "$ref": "#/components/schemas/PrivateLinkServiceConnectionState"
+     },
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/PrivateEndpointConnectionProvisioningState"
+       }
+      ],
+      "readOnly": true
+     }
+    },
+    "type": "object"
+   },
+   "PrivateEndpointConnectionProvisioningState": {
+    "enum": [
+     "Succeeded",
+     "Creating",
+     "Updating",
+     "Deleting",
+     "Failed",
+     "Disconnected"
+    ],
+    "readOnly": true,
+    "type": "string"
+   },
+   "PrivateEndpointServiceConnectionStatus": {
+    "enum": [
+     "Pending",
+     "Approved",
+     "Rejected",
+     "Disconnected"
+    ],
+    "type": "string"
+   },
+   "PrivateLinkServiceConnectionState": {
+    "properties": {
+     "actionsRequired": {
+      "$ref": "#/components/schemas/ActionsRequired"
+     },
+     "description": {
+      "type": "string"
+     },
+     "status": {
+      "$ref": "#/components/schemas/PrivateEndpointServiceConnectionStatus"
+     }
+    },
+    "type": "object"
+   },
+   "ProxyResource": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/Resource"
+     }
+    ],
+    "type": "object"
+   },
+   "Resource": {
+    "properties": {
+     "id": {
+      "format": "arm-id",
+      "readOnly": true,
+      "type": "string"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "systemData": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/systemData"
+       }
+      ],
+      "readOnly": true
+     },
+     "type": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SecretPermissions": {
+    "enum": [
+     "all",
+     "get",
+     "list",
+     "set",
+     "delete",
+     "backup",
+     "restore",
+     "recover",
+     "purge"
+    ],
+    "type": "string"
+   },
+   "Sku": {
+    "properties": {
+     "family": {
+      "$ref": "#/components/schemas/SkuFamily"
+     },
+     "name": {
+      "$ref": "#/components/schemas/SkuName"
+     }
+    },
+    "required": [
+     "family",
+     "name"
+    ],
+    "type": "object"
+   },
+   "SkuFamily": {
+    "enum": [
+     "A"
+    ],
+    "type": "string"
+   },
+   "SkuName": {
+    "enum": [
+     "standard",
+     "premium"
+    ],
+    "type": "string"
+   },
+   "StoragePermissions": {
+    "enum": [
+     "all",
+     "get",
+     "list",
+     "delete",
+     "set",
+     "update",
+     "regeneratekey",
+     "recover",
+     "purge",
+     "backup",
+     "restore",
+     "setsas",
+     "listsas",
+     "getsas",
+     "deletesas"
+    ],
+    "type": "string"
+   },
+   "Vault": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/ProxyResource"
+     }
+    ],
+    "properties": {
+     "location": {
+      "$ref": "#/components/schemas/Azure.Core.azureLocation"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/VaultProperties"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "required": [
+     "properties"
+    ],
+    "type": "object"
+   },
+   "VaultCreateOrUpdateParameters": {
+    "properties": {
+     "location": {
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/VaultProperties"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "required": [
+     "location",
+     "properties"
+    ],
+    "type": "object"
+   },
+   "VaultListResult": {
+    "properties": {
+     "nextLink": {
+      "format": "uri",
+      "type": "string"
+     },
+     "value": {
+      "items": {
+       "$ref": "#/components/schemas/Vault"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "value"
+    ],
+    "type": "object"
+   },
+   "VaultPatchParameters": {
+    "properties": {
+     "properties": {
+      "$ref": "#/components/schemas/VaultPatchProperties"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "VaultPatchProperties": {
+    "properties": {
+     "accessPolicies": {
+      "items": {
+       "$ref": "#/components/schemas/AccessPolicyEntry"
+      },
+      "type": "array"
+     },
+     "createMode": {
+      "$ref": "#/components/schemas/CreateMode"
+     },
+     "enablePurgeProtection": {
+      "type": "boolean"
+     },
+     "enableRbacAuthorization": {
+      "type": "boolean"
+     },
+     "enableSoftDelete": {
+      "type": "boolean"
+     },
+     "enabledForDeployment": {
+      "type": "boolean"
+     },
+     "enabledForDiskEncryption": {
+      "type": "boolean"
+     },
+     "enabledForTemplateDeployment": {
+      "type": "boolean"
+     },
+     "networkAcls": {
+      "$ref": "#/components/schemas/NetworkRuleSet"
+     },
+     "publicNetworkAccess": {
+      "type": "string"
+     },
+     "sku": {
+      "$ref": "#/components/schemas/Sku"
+     },
+     "softDeleteRetentionInDays": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "tenantId": {
+      "$ref": "#/components/schemas/Azure.Core.uuid"
+     }
+    },
+    "type": "object"
+   },
+   "VaultProperties": {
+    "properties": {
+     "accessPolicies": {
+      "items": {
+       "$ref": "#/components/schemas/AccessPolicyEntry"
+      },
+      "type": "array"
+     },
+     "createMode": {
+      "$ref": "#/components/schemas/CreateMode"
+     },
+     "enablePurgeProtection": {
+      "type": "boolean"
+     },
+     "enableRbacAuthorization": {
+      "type": "boolean"
+     },
+     "enableSoftDelete": {
+      "type": "boolean"
+     },
+     "enabledForDeployment": {
+      "type": "boolean"
+     },
+     "enabledForDiskEncryption": {
+      "type": "boolean"
+     },
+     "enabledForTemplateDeployment": {
+      "type": "boolean"
+     },
+     "hsmPoolResourceId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "networkAcls": {
+      "$ref": "#/components/schemas/NetworkRuleSet"
+     },
+     "privateEndpointConnections": {
+      "items": {
+       "$ref": "#/components/schemas/PrivateEndpointConnectionItem"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "provisioningState": {
+      "$ref": "#/components/schemas/VaultProvisioningState"
+     },
+     "publicNetworkAccess": {
+      "type": "string"
+     },
+     "sku": {
+      "$ref": "#/components/schemas/Sku"
+     },
+     "softDeleteRetentionInDays": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "tenantId": {
+      "$ref": "#/components/schemas/Azure.Core.uuid"
+     },
+     "vaultUri": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "sku",
+     "tenantId"
+    ],
+    "type": "object"
+   },
+   "VaultProvisioningState": {
+    "enum": [
+     "Succeeded",
+     "RegisteringDns"
+    ],
+    "type": "string"
+   },
+   "VirtualNetworkRule": {
+    "properties": {
+     "id": {
+      "type": "string"
+     },
+     "ignoreMissingVnetServiceEndpoint": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "id"
+    ],
+    "type": "object"
+   },
+   "systemData": {
+    "properties": {
+     "createdAt": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "createdBy": {
+      "type": "string"
+     },
+     "createdByType": {
+      "enum": [
+       "User",
+       "Application",
+       "ManagedIdentity",
+       "Key"
+      ],
+      "type": "string"
+     },
+     "lastModifiedAt": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "lastModifiedBy": {
+      "type": "string"
+     },
+     "lastModifiedByType": {
+      "enum": [
+       "User",
+       "Application",
+       "ManagedIdentity",
+       "Key"
+      ],
+      "type": "string"
+     }
+    },
+    "readOnly": true,
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Microsoft.KeyVault api-version 2026-05-15 swagger. Every other official operation of this api-version returns HTTP 501 NotImplemented. Vault metadata only: no vault data plane, keys, secrets, certificates or vaultUri endpoint exists. tenantId and access-policy tenants must be the simulator tenant; createMode recover is refused because deleted vaults are not retained. Deletion is immediate and permanent; soft-delete, purge, deleted-vault and access-policy operations are not implemented (HTTP 501).",
+  "title": "Key Vault (Microsoft.KeyVault, simulator catalog)",
+  "version": "2026-05-15"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/subscriptions/{subscriptionId}/providers/Microsoft.KeyVault/vaults": {
+   "get": {
+    "operationId": "Vaults_ListBySubscription",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-05-15",
+       "enum": [
+        "2026-05-15"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "$top",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/VaultListResult"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "Vaults_ListBySubscription",
+    "tags": [
+     "Key Vault"
+    ]
+   }
+  },
+  "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.KeyVault/vaults": {
+   "get": {
+    "operationId": "Vaults_ListByResourceGroup",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-05-15",
+       "enum": [
+        "2026-05-15"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "$top",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/VaultListResult"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "Vaults_ListByResourceGroup",
+    "tags": [
+     "Key Vault"
+    ]
+   }
+  },
+  "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.KeyVault/vaults/{vaultName}": {
+   "delete": {
+    "operationId": "Vaults_Delete",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-05-15",
+       "enum": [
+        "2026-05-15"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "vaultName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Official 200 response."
+     },
+     "204": {
+      "description": "Official 204 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "Vaults_Delete",
+    "tags": [
+     "Key Vault"
+    ]
+   },
+   "get": {
+    "operationId": "Vaults_Get",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-05-15",
+       "enum": [
+        "2026-05-15"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "vaultName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Vault"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "Vaults_Get",
+    "tags": [
+     "Key Vault"
+    ]
+   },
+   "patch": {
+    "operationId": "Vaults_Update",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-05-15",
+       "enum": [
+        "2026-05-15"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "vaultName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/VaultPatchParameters"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Vault"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "201": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Vault"
+        }
+       }
+      },
+      "description": "Official 201 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "Vaults_Update",
+    "tags": [
+     "Key Vault"
+    ]
+   },
+   "put": {
+    "description": "Long-running in Azure; the simulator completes it synchronously with provisioningState Succeeded.",
+    "operationId": "Vaults_CreateOrUpdate",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-05-15",
+       "enum": [
+        "2026-05-15"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "vaultName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/VaultCreateOrUpdateParameters"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Vault"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "201": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Vault"
+        }
+       }
+      },
+      "description": "Official 201 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "Vaults_CreateOrUpdate",
+    "tags": [
+     "Key Vault"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/_simulator/providers/azure-arm"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Microsoft.KeyVault api-version 2026-05-15 swagger. Every other official operation of this api-version returns HTTP 501 NotImplemented. Vault metadata only: no vault data plane, keys, secrets, certificates or vaultUri endpoint exists. tenantId and access-policy tenants must be the simulator tenant; createMode recover is refused because deleted vaults are not retained. Deletion is immediate and permanent; soft-delete, purge, deleted-vault and access-policy operations are not implemented (HTTP 501).",
+   "name": "Key Vault"
+  }
+ ],
+ "x-simulator-source": {
+  "repository": "github.com/Azure/azure-rest-api-specs",
+  "commit": "8254fa29b6360b48084554122a7c49f6c4237d84",
+  "license": "MIT",
+  "files": [
+   {
+    "path": "specification/common-types/resource-management/v5/types.json",
+    "sha256": "66767620b8edfbc04093c76b78d168cc59822cd9da1e726d35a9d45b73e642c1"
+   },
+   {
+    "path": "specification/keyvault/resource-manager/Microsoft.KeyVault/KeyVault/stable/2026-05-15/openapi.json",
+    "sha256": "bd7abd994935675571c030ecb531d39f1eb7b83a3505a5ba8594a25847bdc07e"
+   }
+  ]
+ }
+}

@@ -640,5 +640,11 @@ def handler(event,context):
  def test_gcp_catalog_console_reference_and_shared_native_state(self):
   subprocess.run([sys.executable, str(Path(__file__).with_name('gcp_catalog_console.py'))], check=True, timeout=300)
 
+ def test_azure_catalog_official_sdks_two_teams_owner_restart_and_cleanup(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('azure_catalog_fixtures.py'))], check=True, timeout=600)
+
+ def test_azure_catalog_console_reference_and_shared_native_state(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('azure_catalog_console.py'))], check=True, timeout=300)
+
 
 if __name__=='__main__':unittest.main(verbosity=2)

@@ -244,6 +244,9 @@ func (a *Access) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// contract; the legacy control/AWS response remains unchanged.
 		if strings.HasPrefix(r.URL.Path, provider.Prefix+"gcp/") {
 			_, _ = fmt.Fprint(w, `{"error":{"code":401,"message":"A valid simulator access token is required","status":"UNAUTHENTICATED"}}`)
+		} else if strings.HasPrefix(r.URL.Path, provider.Prefix+"azure-arm/") {
+			// Azure management clients parse the ARM error envelope.
+			_, _ = fmt.Fprint(w, `{"error":{"code":"AuthenticationFailed","message":"A valid simulator access token is required"}}`)
 		} else {
 			_, _ = fmt.Fprint(w, `{"error":"A valid simulator access token is required"}`)
 		}

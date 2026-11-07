@@ -4,7 +4,8 @@ English | [日本語](README.ja.md)
 
 Practice cloud APIs and console workflows locally, without a cloud account.
 TenkaCloud Simulator is an independent, AWS-first learning simulator with bounded
-Google Cloud Storage and Azure Blob Storage support, plus an optional local
+Google Cloud Storage, Azure Blob Storage and Azure Resource Manager catalog
+support, plus an optional local
 [Sakura Disk configuration API](docs/sakura.md). One Go binary embeds the
 AWS-style console built with Cloudscape, local Google Cloud and Azure consoles, a
 Scalar API reference, SQLite, and a pinned CPython/WASI runtime for Python Lambda.
@@ -102,6 +103,7 @@ adapter, or Challenge integration.
 | [CloudFormation](docs/cloudformation-rest.md) | CreateStack, DescribeStacks, DeleteStack; S3 Bucket, SSM Parameter, inline Python Lambda, bounded IAM Role, 5 API Gateway resource types and Lambda Permission; bounded Ref/Sub/GetAtt/DependsOn, String/Number constraints, Equals/condition aliases, resource/output Condition and If/NoValue selection | UpdateStack, And/Or/Not, NoEcho secrecy, general resource types, full AWS asynchronous lifecycle, dedicated CloudFormation service roles |
 | [API Gateway](docs/apigateway.md) | 16 Regional REST management operations, resources/methods/integrations, immutable deployments, new stages and local Lambda proxy execution | HTTP/WebSocket APIs, authorizers, API keys, editing existing stages, public endpoints |
 | [Service catalog](docs/aws-catalog.md) | Model-driven configuration metadata for 112 further AWS services ([generated table](docs/aws-catalog-services.md)) through their native JSON or REST-JSON protocols, with one generic console view and per-service reference | Workloads, executions, data planes, delivery, OAuth and every unlisted official operation (HTTP 501). Products assessed as not servable are listed with evidence in the [coverage assessment](docs/coverage-assessment.md) |
+| [Azure Resource Manager catalog](docs/azure-catalog.md) | Resource groups and configuration metadata for Key Vault, virtual networks/subnets/NSGs/public IPs, user-assigned identities, Log Analytics, App Configuration, Container Registry, Event Hubs, Service Bus, Cosmos DB and App Service plans through official ARM paths and api-versions, with an Azure-styled console view and per-provider reference | Data planes, keys, secrets, connection strings, routing, Azure RBAC and every unlisted official operation (HTTP 501) |
 
 AWS regions are `us-east-1`, `us-west-2`, `ap-northeast-1`, and `eu-west-1`.
 Local limits include 8 MiB per S3 object, 64 MiB across retained object versions,
@@ -122,13 +124,22 @@ collected. This is not the SQLite file size, process-memory usage, or AWS billin
 size. The [Google Cloud service catalog](docs/gcp-catalog.md) serves
 configuration metadata for 40 Google Cloud APIs, such as AlloyDB, Compute
 Engine networking and Cloud Logging, through their official discovery-document
-paths and the Google Cloud console. Other Google Cloud/Azure services are not
-implemented. An explicit opt-in
+paths and the Google Cloud console. Other Google Cloud services are not implemented; Azure adds only the bounded
+[Resource Manager catalog](docs/azure-catalog.md) metadata. An explicit opt-in
 [Sakura Disk configuration API and console](docs/sakura.md) support local metadata only,
 without VM or block storage. The provider is disabled by default; explicit
 host scope enables Sakura Cloud → Disks alongside the other cloud selectors. Using
 Cloudscape does not establish full AWS console fidelity or completed comparison
 against authenticated cloud consoles.
+
+## Azure Resource Manager catalog
+
+Azure management SDKs can set `base_url` to
+`http://127.0.0.1:4566/_simulator/providers/azure-arm` and send official
+`/subscriptions/...` requests to one synthetic subscription. Choose
+**Azure → Services → Resource Manager** for the matching console view. The
+configured Azure owner below is the only authority; this is not Azure RBAC.
+See the [products, semantics and limits](docs/azure-catalog.md).
 
 ## Google Cloud Storage and Azure Blob Storage
 

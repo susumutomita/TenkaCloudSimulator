@@ -1,0 +1,202 @@
+{
+  "commit": "8254fa29b6360b48084554122a7c49f6c4237d84",
+  "providers": {
+    "Microsoft.AppConfiguration": {
+      "apiVersion": "2024-06-01",
+      "files": [
+        "specification/appconfiguration/resource-manager/Microsoft.AppConfiguration/AppConfiguration/stable/2024-06-01/appconfiguration.json"
+      ],
+      "operations": [
+        "ConfigurationStores_Create",
+        "ConfigurationStores_Delete",
+        "ConfigurationStores_Get",
+        "ConfigurationStores_List",
+        "ConfigurationStores_ListByResourceGroup",
+        "ConfigurationStores_Update"
+      ]
+    },
+    "Microsoft.ContainerRegistry": {
+      "apiVersion": "2025-11-01",
+      "files": [
+        "specification/containerregistry/resource-manager/Microsoft.ContainerRegistry/Registry/stable/2025-11-01/containerregistry.json"
+      ],
+      "operations": [
+        "Registries_Create",
+        "Registries_Delete",
+        "Registries_Get",
+        "Registries_List",
+        "Registries_ListByResourceGroup",
+        "Registries_Update"
+      ]
+    },
+    "Microsoft.DocumentDB": {
+      "apiVersion": "2026-03-15",
+      "files": [
+        "specification/cosmos-db/resource-manager/Microsoft.DocumentDB/DocumentDB/stable/2026-03-15/openapi.json"
+      ],
+      "operations": [
+        "DatabaseAccounts_CreateOrUpdate",
+        "DatabaseAccounts_Delete",
+        "DatabaseAccounts_Get",
+        "DatabaseAccounts_List",
+        "DatabaseAccounts_ListByResourceGroup",
+        "DatabaseAccounts_Update"
+      ]
+    },
+    "Microsoft.EventHub": {
+      "apiVersion": "2026-01-01",
+      "files": [
+        "specification/eventhub/resource-manager/Microsoft.EventHub/Eventhub/stable/2026-01-01/openapi.json"
+      ],
+      "operations": [
+        "EventHubs_CreateOrUpdate",
+        "EventHubs_Delete",
+        "EventHubs_Get",
+        "EventHubs_ListByNamespace",
+        "Namespaces_CreateOrUpdate",
+        "Namespaces_Delete",
+        "Namespaces_Get",
+        "Namespaces_List",
+        "Namespaces_ListByResourceGroup",
+        "Namespaces_Update"
+      ]
+    },
+    "Microsoft.KeyVault": {
+      "apiVersion": "2026-05-15",
+      "files": [
+        "specification/keyvault/resource-manager/Microsoft.KeyVault/KeyVault/stable/2026-05-15/openapi.json"
+      ],
+      "operations": [
+        "Vaults_CreateOrUpdate",
+        "Vaults_Delete",
+        "Vaults_Get",
+        "Vaults_ListByResourceGroup",
+        "Vaults_ListBySubscription",
+        "Vaults_Update"
+      ]
+    },
+    "Microsoft.ManagedIdentity": {
+      "apiVersion": "2024-11-30",
+      "files": [
+        "specification/msi/resource-manager/Microsoft.ManagedIdentity/ManagedIdentity/stable/2024-11-30/ManagedIdentity.json"
+      ],
+      "operations": [
+        "UserAssignedIdentities_CreateOrUpdate",
+        "UserAssignedIdentities_Delete",
+        "UserAssignedIdentities_Get",
+        "UserAssignedIdentities_ListByResourceGroup",
+        "UserAssignedIdentities_ListBySubscription",
+        "UserAssignedIdentities_Update"
+      ]
+    },
+    "Microsoft.Network": {
+      "apiVersion": "2026-03-01",
+      "files": [
+        "specification/network/resource-manager/Microsoft.Network/Network/stable/2026-03-01/applicationGateway.json",
+        "specification/network/resource-manager/Microsoft.Network/Network/stable/2026-03-01/authenticationPolicy.json",
+        "specification/network/resource-manager/Microsoft.Network/Network/stable/2026-03-01/azureWebCategory.json",
+        "specification/network/resource-manager/Microsoft.Network/Network/stable/2026-03-01/common.json",
+        "specification/network/resource-manager/Microsoft.Network/Network/stable/2026-03-01/expressRoute.json",
+        "specification/network/resource-manager/Microsoft.Network/Network/stable/2026-03-01/firewall.json",
+        "specification/network/resource-manager/Microsoft.Network/Network/stable/2026-03-01/firewallPolicy.json",
+        "specification/network/resource-manager/Microsoft.Network/Network/stable/2026-03-01/firstPartyServiceTag.json",
+        "specification/network/resource-manager/Microsoft.Network/Network/stable/2026-03-01/interconnectGroup.json",
+        "specification/network/resource-manager/Microsoft.Network/Network/stable/2026-03-01/loadBalancer.json",
+        "specification/network/resource-manager/Microsoft.Network/Network/stable/2026-03-01/networkGateway.json",
+        "specification/network/resource-manager/Microsoft.Network/Network/stable/2026-03-01/networkManager.json",
+        "specification/network/resource-manager/Microsoft.Network/Network/stable/2026-03-01/networkSecurityPerimeter.json",
+        "specification/network/resource-manager/Microsoft.Network/Network/stable/2026-03-01/networkWatcher.json",
+        "specification/network/resource-manager/Microsoft.Network/Network/stable/2026-03-01/networkingOperations.json",
+        "specification/network/resource-manager/Microsoft.Network/Network/stable/2026-03-01/serviceGateway.json",
+        "specification/network/resource-manager/Microsoft.Network/Network/stable/2026-03-01/virtualNetwork.json",
+        "specification/network/resource-manager/Microsoft.Network/Network/stable/2026-03-01/virtualNetworkAppliance.json",
+        "specification/network/resource-manager/Microsoft.Network/Network/stable/2026-03-01/virtualWan.json"
+      ],
+      "operations": [
+        "NetworkSecurityGroups_CreateOrUpdate",
+        "NetworkSecurityGroups_Delete",
+        "NetworkSecurityGroups_Get",
+        "NetworkSecurityGroups_List",
+        "NetworkSecurityGroups_ListAll",
+        "NetworkSecurityGroups_UpdateTags",
+        "PublicIPAddresses_CreateOrUpdate",
+        "PublicIPAddresses_Delete",
+        "PublicIPAddresses_Get",
+        "PublicIPAddresses_List",
+        "PublicIPAddresses_ListAll",
+        "PublicIPAddresses_UpdateTags",
+        "Subnets_CreateOrUpdate",
+        "Subnets_Delete",
+        "Subnets_Get",
+        "Subnets_List",
+        "VirtualNetworks_CreateOrUpdate",
+        "VirtualNetworks_Delete",
+        "VirtualNetworks_Get",
+        "VirtualNetworks_List",
+        "VirtualNetworks_ListAll",
+        "VirtualNetworks_UpdateTags"
+      ]
+    },
+    "Microsoft.OperationalInsights": {
+      "apiVersion": "2025-07-01",
+      "files": [
+        "specification/operationalinsights/resource-manager/Microsoft.OperationalInsights/OperationalInsights/stable/2025-07-01/openapi.json"
+      ],
+      "operations": [
+        "Workspaces_CreateOrUpdate",
+        "Workspaces_Delete",
+        "Workspaces_Get",
+        "Workspaces_List",
+        "Workspaces_ListByResourceGroup",
+        "Workspaces_Update"
+      ]
+    },
+    "Microsoft.Resources": {
+      "apiVersion": "2025-04-01",
+      "files": [
+        "specification/resources/resource-manager/Microsoft.Resources/deployments/stable/2025-04-01/deployments.json",
+        "specification/resources/resource-manager/Microsoft.Resources/resources/stable/2025-04-01/resources.json"
+      ],
+      "operations": [
+        "ResourceGroups_CheckExistence",
+        "ResourceGroups_CreateOrUpdate",
+        "ResourceGroups_Delete",
+        "ResourceGroups_Get",
+        "ResourceGroups_List",
+        "ResourceGroups_Update"
+      ]
+    },
+    "Microsoft.ServiceBus": {
+      "apiVersion": "2026-01-01",
+      "files": [
+        "specification/servicebus/resource-manager/Microsoft.ServiceBus/ServiceBus/stable/2026-01-01/servicebus.json"
+      ],
+      "operations": [
+        "Namespaces_CreateOrUpdate",
+        "Namespaces_Delete",
+        "Namespaces_Get",
+        "Namespaces_List",
+        "Namespaces_ListByResourceGroup",
+        "Namespaces_Update",
+        "Queues_CreateOrUpdate",
+        "Queues_Delete",
+        "Queues_Get",
+        "Queues_ListByNamespace"
+      ]
+    },
+    "Microsoft.Web": {
+      "apiVersion": "2025-05-01",
+      "files": [
+        "specification/web/resource-manager/Microsoft.Web/AppService/stable/2025-05-01/openapi.json"
+      ],
+      "operations": [
+        "AppServicePlans_CreateOrUpdate",
+        "AppServicePlans_Delete",
+        "AppServicePlans_Get",
+        "AppServicePlans_List",
+        "AppServicePlans_ListByResourceGroup",
+        "AppServicePlans_Update"
+      ]
+    }
+  }
+}

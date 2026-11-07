@@ -138,6 +138,12 @@ func NewWithProviders(path string, options ProviderConfig) (http.Handler, func()
 		_ = store.Close()
 		return nil, nil, err
 	}
+	azureCatalog, err := registerAzureARM(store.Database(), registry, cloudConfig)
+	if err != nil {
+		_ = lambdas.Close()
+		_ = store.Close()
+		return nil, nil, err
+	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/_simulator/", serveLanding)
 	mux.Handle("/_simulator/licenses/", http.StripPrefix("/_simulator/licenses/", legal.Handler()))
@@ -160,7 +166,7 @@ func NewWithProviders(path string, options ProviderConfig) (http.Handler, func()
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(addSakuraCapabilities(map[string]any{"protocolVersion": "2026-11-03", "principal": r.Header.Get("X-Simulator-Principal"), "identitySelection": r.Header.Get("X-Simulator-Access-Role") != "participant", "simulatorVersion": "0.1.0", "providers": registry.Names(), "cloudStorage": cloudStorageCapabilities(cloudConfig), "gcpCatalog": gcpCatalogCapabilities(gcpCatalog, cloudConfig), "persistence": func() string {
+		_ = json.NewEncoder(w).Encode(addSakuraCapabilities(map[string]any{"protocolVersion": "2026-11-03", "principal": r.Header.Get("X-Simulator-Principal"), "identitySelection": r.Header.Get("X-Simulator-Access-Role") != "participant", "simulatorVersion": "0.1.0", "providers": registry.Names(), "cloudStorage": cloudStorageCapabilities(cloudConfig), "gcpCatalog": gcpCatalogCapabilities(gcpCatalog, cloudConfig), "azureCatalog": azureCatalogCapabilities(azureCatalog), "persistence": func() string {
 			if path == "" || path == ":memory:" {
 				return "memory"
 			}
@@ -169,6 +175,7 @@ func NewWithProviders(path string, options ProviderConfig) (http.Handler, func()
 	})
 	mux.HandleFunc(catalogDescriptorsPath, catalogDescriptors(catalogEngine))
 	mux.HandleFunc(gcpCatalogDescriptorsPath, gcpCatalogDescriptors(gcpCatalog))
+	mux.HandleFunc(azureCatalogDescriptorsPath, azureCatalogDescriptors(azureCatalog))
 	mux.Handle("/_simulator/v1/iam/", identityAPI(identities, roles))
 	mux.Handle("/", registry)
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -191,7 +198,7 @@ func NewWithProviders(path string, options ProviderConfig) (http.Handler, func()
 			http.Error(w, "Cross-site requests are not allowed", 403)
 			return
 		}
-		if strings.HasPrefix(r.URL.Path, "/_simulator/v1/") && r.URL.Path != "/_simulator/v1/capabilities" && r.URL.Path != catalogDescriptorsPath && r.URL.Path != gcpCatalogDescriptorsPath && !strings.HasPrefix(r.URL.Path, "/_simulator/v1/iam/") {
+		if strings.HasPrefix(r.URL.Path, "/_simulator/v1/") && r.URL.Path != "/_simulator/v1/capabilities" && r.URL.Path != catalogDescriptorsPath && r.URL.Path != gcpCatalogDescriptorsPath && r.URL.Path != azureCatalogDescriptorsPath && !strings.HasPrefix(r.URL.Path, "/_simulator/v1/iam/") {
 			http.NotFound(w, r)
 			return
 		}
