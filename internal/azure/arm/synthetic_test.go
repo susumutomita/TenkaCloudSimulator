@@ -11,7 +11,9 @@ const synthPrefix = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGro
 // syntheticModel is a minimal official-shaped model for fail-closed tests.
 func syntheticModel() *Model {
 	source := Source{Repository: "github.com/Azure/azure-rest-api-specs", Commit: strings.Repeat("a", 40), License: "MIT", Files: []SourceFile{{Path: "specification/x.json", SHA256: strings.Repeat("b", 64)}}}
-	path := func(name, in string) *Parameter { return &Parameter{Name: name, In: in, Required: true, Type: "string"} }
+	path := func(name, in string) *Parameter {
+		return &Parameter{Name: name, In: in, Required: true, Type: "string"}
+	}
 	common := []*Parameter{path("subscriptionId", "path"), path("resourceGroupName", "path"), {Name: "api-version", In: "query", Required: true}}
 	item := append(append([]*Parameter{}, common...), path("widgetName", "path"))
 	ops := map[string]*Operation{
@@ -71,34 +73,62 @@ func TestSyntheticProviderServesWithoutNextLinks(t *testing.T) {
 func TestSpecificationsAndModelsFailClosed(t *testing.T) {
 	h := newHarness(t)
 	broken := map[string]func(*Provider, *Model){
-		"title":           func(p *Provider, m *Model) { p.Title = "" },
-		"api-version":     func(p *Provider, m *Model) { p.APIVersion = "2020-01-01" },
-		"type title":      func(p *Provider, m *Model) { p.Types[0].Title = "" },
-		"type limit":      func(p *Provider, m *Model) { p.Types[0].Limit = 0 },
-		"duplicate type":  func(p *Provider, m *Model) { p.Types = append(p.Types, p.Types[0]) },
-		"orphan child":    func(p *Provider, m *Model) { p.Types = append(p.Types, &ResourceType{Name: "gadgets/parts", Title: "x", Limit: 1}) },
-		"unknown op":      func(p *Provider, m *Model) { p.Bindings[0].Operation = "Widgets_Missing" },
-		"unknown type":    func(p *Provider, m *Model) { p.Bindings[0].Type = "gadgets" },
-		"twice":           func(p *Provider, m *Model) { p.Bindings = append(p.Bindings, p.Bindings[0]) },
-		"unbound":         func(p *Provider, m *Model) { p.Bindings = p.Bindings[1:] },
-		"no get":          func(p *Provider, m *Model) { p.Bindings = p.Bindings[:1]; delete(m.Operations, "Widgets_Get"); delete(m.Operations, "Widgets_List"); delete(m.Operations, "Widgets_Delete") },
-		"no 200":          func(p *Provider, m *Model) { m.Operations["Widgets_Put"].Responses = map[string]string{"201": "Widget"} },
-		"bad ref":         func(p *Provider, m *Model) { p.Types[0].Refs = []Ref{{Path: "x", Type: "nope"}} },
-		"bad form":        func(p *Provider, m *Model) { p.Types[0].Form = []string{"properties.missing"} },
-		"kind":            func(p *Provider, m *Model) { p.Bindings[1].Kind = "destroy" },
-		"method":          func(p *Provider, m *Model) { p.Bindings[1].Kind = Delete },
-		"list shape":      func(p *Provider, m *Model) { p.Bindings[1].Kind = List },
-		"item shape":      func(p *Provider, m *Model) { p.Bindings[2].Kind = Get },
-		"pageable":        func(p *Provider, m *Model) { m.Operations["Widgets_List"].Pageable = nil },
-		"body":            func(p *Provider, m *Model) { m.Operations["Widgets_Put"].Parameters = m.Operations["Widgets_Get"].Parameters },
-		"query":           func(p *Provider, m *Model) { p.Bindings[1].Query = []string{"$expand"} },
-		"no subscription": func(p *Provider, m *Model) { setPath(m, "Widgets_Get", "/tenants/{t}/providers/Test.Widgets/widgets/{widgetName}") },
-		"namespace":       func(p *Provider, m *Model) { setPath(m, "Widgets_Get", "/subscriptions/{s}/resourceGroups/{g}/providers/Other.Ns/widgets/{widgetName}") },
-		"variable type":   func(p *Provider, m *Model) { setPath(m, "Widgets_Get", "/subscriptions/{s}/resourceGroups/{g}/providers/Test.Widgets/{type}/{widgetName}") },
-		"double type":     func(p *Provider, m *Model) { setPath(m, "Widgets_Get", "/subscriptions/{s}/resourceGroups/{g}/providers/Test.Widgets/widgets/parts/{widgetName}") },
-		"other type":      func(p *Provider, m *Model) { setPath(m, "Widgets_Get", "/subscriptions/{s}/resourceGroups/{g}/providers/Test.Widgets/gadgets/{widgetName}") },
-		"subscription":    func(p *Provider, m *Model) { setPath(m, "Widgets_Get", "/subscriptions/{s}/providers/Test.Widgets/widgets/{widgetName}") },
-		"group path":      func(p *Provider, m *Model) { p.Namespace = "Microsoft.Resources"; m.Namespace = "Microsoft.Resources"; p.Types[0].Name = "resourceGroups"; retype(p, "resourceGroups") },
+		"title":          func(p *Provider, m *Model) { p.Title = "" },
+		"api-version":    func(p *Provider, m *Model) { p.APIVersion = "2020-01-01" },
+		"type title":     func(p *Provider, m *Model) { p.Types[0].Title = "" },
+		"type limit":     func(p *Provider, m *Model) { p.Types[0].Limit = 0 },
+		"duplicate type": func(p *Provider, m *Model) { p.Types = append(p.Types, p.Types[0]) },
+		"orphan child": func(p *Provider, m *Model) {
+			p.Types = append(p.Types, &ResourceType{Name: "gadgets/parts", Title: "x", Limit: 1})
+		},
+		"unknown op":   func(p *Provider, m *Model) { p.Bindings[0].Operation = "Widgets_Missing" },
+		"unknown type": func(p *Provider, m *Model) { p.Bindings[0].Type = "gadgets" },
+		"twice":        func(p *Provider, m *Model) { p.Bindings = append(p.Bindings, p.Bindings[0]) },
+		"unbound":      func(p *Provider, m *Model) { p.Bindings = p.Bindings[1:] },
+		"no get": func(p *Provider, m *Model) {
+			p.Bindings = p.Bindings[:1]
+			delete(m.Operations, "Widgets_Get")
+			delete(m.Operations, "Widgets_List")
+			delete(m.Operations, "Widgets_Delete")
+		},
+		"no 200": func(p *Provider, m *Model) {
+			m.Operations["Widgets_Put"].Responses = map[string]string{"201": "Widget"}
+		},
+		"bad ref":    func(p *Provider, m *Model) { p.Types[0].Refs = []Ref{{Path: "x", Type: "nope"}} },
+		"bad form":   func(p *Provider, m *Model) { p.Types[0].Form = []string{"properties.missing"} },
+		"kind":       func(p *Provider, m *Model) { p.Bindings[1].Kind = "destroy" },
+		"method":     func(p *Provider, m *Model) { p.Bindings[1].Kind = Delete },
+		"list shape": func(p *Provider, m *Model) { p.Bindings[1].Kind = List },
+		"item shape": func(p *Provider, m *Model) { p.Bindings[2].Kind = Get },
+		"pageable":   func(p *Provider, m *Model) { m.Operations["Widgets_List"].Pageable = nil },
+		"body": func(p *Provider, m *Model) {
+			m.Operations["Widgets_Put"].Parameters = m.Operations["Widgets_Get"].Parameters
+		},
+		"query": func(p *Provider, m *Model) { p.Bindings[1].Query = []string{"$expand"} },
+		"no subscription": func(p *Provider, m *Model) {
+			setPath(m, "Widgets_Get", "/tenants/{t}/providers/Test.Widgets/widgets/{widgetName}")
+		},
+		"namespace": func(p *Provider, m *Model) {
+			setPath(m, "Widgets_Get", "/subscriptions/{s}/resourceGroups/{g}/providers/Other.Ns/widgets/{widgetName}")
+		},
+		"variable type": func(p *Provider, m *Model) {
+			setPath(m, "Widgets_Get", "/subscriptions/{s}/resourceGroups/{g}/providers/Test.Widgets/{type}/{widgetName}")
+		},
+		"double type": func(p *Provider, m *Model) {
+			setPath(m, "Widgets_Get", "/subscriptions/{s}/resourceGroups/{g}/providers/Test.Widgets/widgets/parts/{widgetName}")
+		},
+		"other type": func(p *Provider, m *Model) {
+			setPath(m, "Widgets_Get", "/subscriptions/{s}/resourceGroups/{g}/providers/Test.Widgets/gadgets/{widgetName}")
+		},
+		"subscription": func(p *Provider, m *Model) {
+			setPath(m, "Widgets_Get", "/subscriptions/{s}/providers/Test.Widgets/widgets/{widgetName}")
+		},
+		"group path": func(p *Provider, m *Model) {
+			p.Namespace = "Microsoft.Resources"
+			m.Namespace = "Microsoft.Resources"
+			p.Types[0].Name = "resourceGroups"
+			retype(p, "resourceGroups")
+		},
 	}
 	for name, mutate := range broken {
 		p, m := syntheticProvider(), syntheticModel()
@@ -115,9 +145,11 @@ func TestSpecificationsAndModelsFailClosed(t *testing.T) {
 		"response":        func(m *Model) { m.Operations["Widgets_Get"].Responses["200"] = "Missing" },
 		"parameter":       func(m *Model) { m.Operations["Widgets_Get"].Parameters[3].Pattern = "(?<=x)" },
 		"reference":       func(m *Model) { m.Definitions["X"] = &Schema{Ref: "Missing"} },
-		"subtype":         func(m *Model) { m.Definitions["X"] = &Schema{Discriminator: "k", Subtypes: map[string]string{"a": "Missing"}} },
-		"pattern":         func(m *Model) { m.Definitions["X"] = &Schema{Type: "string", Pattern: "(?<=x)"} },
-		"additional":      func(m *Model) { m.Definitions["X"] = &Schema{Type: "object", Additional: json.RawMessage(`"x"`)} },
+		"subtype": func(m *Model) {
+			m.Definitions["X"] = &Schema{Discriminator: "k", Subtypes: map[string]string{"a": "Missing"}}
+		},
+		"pattern":    func(m *Model) { m.Definitions["X"] = &Schema{Type: "string", Pattern: "(?<=x)"} },
+		"additional": func(m *Model) { m.Definitions["X"] = &Schema{Type: "object", Additional: json.RawMessage(`"x"`)} },
 	}
 	for name, mutate := range models {
 		m := syntheticModel()
