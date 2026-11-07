@@ -289,7 +289,7 @@ var efs = &Service{
 	Ops: []Op{
 		{Name: "CreateFileSystem", Kind: Create, Resource: "fileSystem", Check: efsFileSystem},
 		{Name: "DescribeFileSystems", Kind: List, Resource: "fileSystem", Filters: map[string]string{"FileSystemId": "FileSystemId"}, Check: efsFileSystemFilter},
-		{Name: "UpdateFileSystem", Kind: Update, Resource: "fileSystem", Lookup: "FileSystemId", Fields: []string{"ThroughputMode", "ProvisionedThroughputInMibps"}, Check: efsThroughput},
+		{Name: "UpdateFileSystem", Kind: Update, Resource: "fileSystem", Lookup: "FileSystemId", Fields: []string{"ThroughputMode", "ProvisionedThroughputInMibps"}, Check: efsThroughput, Merged: efsMergedThroughput},
 		{Name: "DeleteFileSystem", Kind: Delete, Resource: "fileSystem", Lookup: "FileSystemId"},
 		{Name: "PutAccountPreferences", Kind: Put, Resource: "accountPreferences", Check: efsPreferences},
 		{Name: "DescribeAccountPreferences", Kind: Read, Resource: "accountPreferences"},
@@ -307,6 +307,20 @@ var efs = &Service{
 func efsThroughput(input map[string]any) error {
 	_, provisioned := input["ProvisionedThroughputInMibps"]
 	if mode, ok := input["ThroughputMode"]; ok && (mode == "provisioned") != provisioned {
+		return Failure("BadRequest", "ProvisionedThroughputInMibps is required with, and only with, the provisioned throughput mode.")
+	}
+	return nil
+}
+
+// efsMergedThroughput keeps the stored throughput consistent: leaving the
+// provisioned mode drops the provisioned throughput, and the resulting file
+// system carries ProvisionedThroughputInMibps only in the provisioned mode.
+func efsMergedThroughput(document, supplied map[string]any) error {
+	if mode, ok := supplied["ThroughputMode"]; ok && mode != "provisioned" {
+		delete(document, "ProvisionedThroughputInMibps")
+	}
+	_, provisioned := document["ProvisionedThroughputInMibps"]
+	if (document["ThroughputMode"] == "provisioned") != provisioned {
 		return Failure("BadRequest", "ProvisionedThroughputInMibps is required with, and only with, the provisioned throughput mode.")
 	}
 	return nil
