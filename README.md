@@ -90,6 +90,7 @@ adapter, or Challenge integration.
 | Service | Implemented subset | Main exclusions |
 | --- | --- | --- |
 | [S3](docs/s3.md) | Bucket create/list/head/location/delete; object PUT/GET/HEAD/DELETE and ListObjectsV2; versioning and ListObjectVersions; public access block and tags | Multipart uploads, ACLs, general bucket policies, encryption settings; path-style addressing only |
+| [SNS](docs/sns.md) | Nine Query/XML operations for Standard-topic metadata, subscriptions and bounded local publish/delivery records; native SDK support | No outbound delivery, SQS adapter, console, CloudFormation or FIFO publication; local immediate confirmation |
 | [SQS](docs/sqs.md) | Standard queues, a Cloudscape console, and 9 JSON 1.0 operations: CreateQueue, GetQueueUrl, ListQueues, GetQueueAttributes, DeleteQueue, SendMessage, ReceiveMessage, DeleteMessage, ChangeMessageVisibility | FIFO, batches, DLQ, SNS integration, CloudFormation, function SDK bridge, Challenge integration |
 | [CloudWatch Logs](docs/cloudwatch-logs.md) | Log groups/streams, group deletion, PutLogEvents/GetLogEvents; 7 APIs and a console sharing their state | Metrics, alarms, retention settings, automatic Lambda delivery, CloudFormation, Logs Insights |
 | [Secrets Manager](docs/secrets-manager.md) | CreateSecret, DescribeSecret, ListSecrets, ListSecretVersionIds (metadata only), PutSecretValue, GetSecretValue, UpdateSecretVersionStage, immediate DeleteSecret; versions and explicit reveal in the console | Real-secret storage, KMS encryption, rotation, replicas, SecretBinary, scheduled deletion, CloudFormation; dummy values are plaintext in SQLite |
@@ -263,11 +264,13 @@ not binary runtime dependencies. Regeneration must preserve locks and original
 rights: [console](tools/console/README.md), [Scalar](tools/scalar/README.md),
 [Python/WASI runtime](tools/python/README.md).
 
-The combined catalog/login inventory requires **53 finite models and 429
-intentional defect controls (482 required executions)**; exact-HEAD whole-gate
+The combined catalog/login inventory requires **55 finite models and 450
+intentional defect controls (505 required executions)**; exact-HEAD whole-gate
 validation after this main integration is pending. Main's 52/415 inventory is
 preserved: the earlier 50/398 plus CatalogResourceLifecycle (12 controls) and
-CatalogConsoleEpoch (5). LoginInputIntent adds one model and 14 controls.
+CatalogConsoleEpoch (5). LoginInputIntent adds one model and 14 controls. SNSAdmission/SNSLifecycle
+add two finite normalized-admission/local-record models and twenty-one controls;
+these do not prove Go/SQL refinement or external delivery.
 The earlier landing, Sakura, Secrets metadata and DynamoDB console models remain
 registered. Any 463-execution or 102-pure-test receipt at `8149cac` belongs to
 that pre-merge base and does not validate this combined revision. Registration

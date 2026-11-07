@@ -911,6 +911,55 @@ REQUIRED_SOURCE_SCOPES = {'CFNConditionAdmission': {'internal/aws/cloudformation
                           'internal/server/landing/topology-canvas.mjs',
                           'internal/server/landing/topology-data.mjs'},
  'LoginInputIntent': {'tools/console/src/login.jsx', 'test/e2e/login_paste.py', 'test/console/login-native-input.test.mjs', 'internal/server/web/app.js', 'test/e2e/login_token_file.py'}}
+# SNS obligations are fixed policy, not inferred from a mutable registry.
+BASE_MODELS.update({'SNSLifecycle', 'SNSAdmission'})
+BASE_INVARIANTS.update({'SNSAdmission': {'NoFIFOPublish',
+                  'NoRegionMismatch',
+                  'NoRejectedMutation',
+                  'NoSuccessOnRefusal',
+                  'NoUnauthorizedEffect',
+                  'TypeOK'},
+ 'SNSLifecycle': {'DeleteRetryAcknowledged', 'ByteBudgetBounded',
+                  'DeleteAckEmpty',
+                  'DeliveryBudgetBounded',
+                  'DurableAck',
+                  'MessageCountBounded',
+                  'NoDanglingDeliveredMessage',
+                  'NoOrphans',
+                  'PeerFrame',
+                  'PublishRecipientsExact',
+                  'TypeOK'}})
+REQUIRED_MUTANTS.update({'SNSAdmission': {'AcceptUnknownOperation',
+                  'BypassAuthorization',
+                  'IgnoreAttributeAdmission',
+                  'IgnoreDuplicateFields',
+                  'IgnoreInitialization',
+                  'IgnoreRegionBinding',
+                  'IgnoreSigningScope',
+                  'IgnoreValueAdmission',
+                  'MutateAfterRejection',
+                  'PermitFIFOPublication'},
+ 'SNSLifecycle': {'RejectAbsentDelete', 'AcknowledgeWithoutCleanup',
+                  'DeletePeerSubscriptions',
+                  'IgnoreByteBudget',
+                  'IgnoreDeliveryBudget',
+                  'IgnoreMessageCount',
+                  'IgnoreWriteAcknowledgement',
+                  'KeepDeletedDeliveries',
+                  'KeepDeletedMessages',
+                  'MissingTopicGuard',
+                  'OmitDeliveryRows'}})
+REQUIRED_SOURCE_SCOPES.update({'SNSAdmission': {'internal/aws/s3.go',
+                  'internal/aws/sns.go',
+                  'internal/aws/sns_admission_regression_test.go',
+                  'internal/aws/ssm.go',
+                  'internal/server/server.go'},
+ 'SNSLifecycle': {'internal/aws/sns_storage_regression_test.go',
+                  'internal/aws/sns_store.go',
+                  'internal/aws/sns_test.go',
+                  'internal/server/server.go',
+                  'internal/server/sns_test.go'}})
+
 IDENTIFIER = re.compile(r'^[A-Za-z][A-Za-z0-9_]*$')
 
 # TLC1.7.4 ModelConfig.ALL_KEYWORDS. A directive cannot masquerade as a

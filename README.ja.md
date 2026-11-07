@@ -51,6 +51,7 @@ make build
 | サービス | 実装済みの操作・状態 | 主な未対応 |
 | --- | --- | --- |
 | [S3](docs/s3.md) | bucket作成・一覧・存在確認・region取得・削除、object PUT/GET/HEAD/DELETE・ListObjectsV2、bucket versioning・ListObjectVersions、public access block・tags | multipart、ACL、一般bucket policy、暗号化設定。path-styleのみ |
+| [SNS](docs/sns.md) | Topic／購読／ローカルPublish記録の9 Query/XML操作。SQLite保存・native SDK・有限quota | 外部配信・SQS連携・コンソール・CFN・FIFO Publishなし。ローカル即時確認 |
 | [SQS](docs/sqs.md) | Cloudscape操作画面とStandard queue JSON 1.0 API 9操作：CreateQueue、GetQueueUrl、ListQueues、GetQueueAttributes、DeleteQueue、SendMessage、ReceiveMessage、DeleteMessage、ChangeMessageVisibility | CloudFormation、function SDK bridge、Challenge連携、FIFO、batch、DLQ、SNS連携 |
 | [CloudWatch Logs](docs/cloudwatch-logs.md) | ロググループ／ストリームの作成・一覧、グループ削除、PutLogEvents・GetLogEvents。7 APIと同一状態の操作画面 | メトリクス、アラーム、保持期間、Lambda自動配送、CFN、Insights |
 | [Secrets Manager](docs/secrets-manager.md) | Create/Describe/ListSecret、値を返さないListSecretVersionIds、Put/GetSecretValue、UpdateSecretVersionStage、即時DeleteSecret。8 APIとバージョン／明示表示付き操作画面 | KMS暗号化、実秘密情報の保管、rotation、replica、SecretBinary、scheduled deletion、CFN。ダミー値はSQLiteに平文保存 |
@@ -125,10 +126,11 @@ SDK、操作画面、再起動、チーム分離の受入検証は `make e2e` �
 
 CIはstatementと未フィルターsource-line coverageを両方90%以上に強制します。`make before-commit`単独のcoverage判定はstatementのみで、source-line判定はCIのCobertura生成後ステージと上記の2コマンドで行います。SDK/browser、license、依存security、埋込asset、形式検査も行います。cross compileは他OSでの実行成功を意味しません。開発用Python/Node/Javaはruntime依存ではありません。UI・Scalarの再生成は権利表記とlockを保持する[各build手順](tools/console/README.md)・[Scalar手順](tools/scalar/README.md)・[Python runtimeの権利・再生成手順](tools/python/README.md)に従います。
 
-統合後のregistryは**53有限モデル・429制御（482実行）**を必須とし、新しいmainを取り込んだ
+統合後のregistryは**55有限モデル・450制御（505実行）**を必須とし、新しいmainを取り込んだ
 固定HEADでの全体検証は未完了です。mainの52モデル・415制御を保持します。従来の50/398に
 サービスカタログの保存状態モデルCatalogResourceLifecycle（12制御）と画面モデル
-CatalogConsoleEpoch（5制御）を加え、LoginInputIntentの1モデル・14制御を統合します。
+CatalogConsoleEpoch（5制御）を加え、LoginInputIntentの1モデル・14制御と、SNSの有限受理・保存モデル2本・21制御を統合します。
+SNSの検査はGo/SQLのrefinementや外部配信を証明しません。
 以前の48/381に追加したLPの2モデル・17制御や、Sakura、DynamoDB画面、Secretsメタデータ画面も保持します。
 LPモデルは信頼済みのhost/origin/認証判定や閉じたノード入力を前提とし、URL解析、フォーカス、
 レイアウト、SVG線の位置、ブラウザー描画、Go/JavaScriptのrefinementは証明しません。
@@ -191,5 +193,5 @@ API資料ではクラウドを分け、Sakura Cloudの任意有効化するDisk�
 全Go race/build、同一profileのstatement94.94%・未除外source90.32%が成功しました。
 資料のみを変えた後続`414c902`では全61 E2E（980.726秒）・reflow・startが成功しました。
 「資料のみの追補」「実行コード等が同一」はその過去の版の説明であり、現在のLP実装を指しません。
-当時のhosted検査の留保もその版に属します。現在の全482実行の成功や、ホスト採点・SQL/Go refinement・
+当時のhosted検査の留保もその版に属します。現在の全505実行の成功や、ホスト採点・SQL/Go refinement・
 秘匿出力・全リソース物理削除の証明へ読み替えないでください。
