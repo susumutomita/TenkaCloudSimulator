@@ -293,19 +293,34 @@ func computeSecrets(body map[string]any) error {
 	return computeRefuse("resource manager tags are not simulated.", "params")(body)
 }
 
-// computeMerged validates a patch or custom method against the resulting top-level
-// fields.
+// computeMerged validates a patch or custom method against the document it
+// would store: a copy of the current resource with the body applied by the
+// same recursive merge the patch uses.
 func computeMerged(check func(map[string]any) error) func(current, body map[string]any) error {
 	return func(current, body map[string]any) error {
-		out := map[string]any{}
-		for k, v := range current {
-			out[k] = v
-		}
-		for k, v := range body {
-			out[k] = v
-		}
+		out := copyJSON(current).(map[string]any)
+		mergePatch(out, copyJSON(body).(map[string]any))
 		return check(out)
 	}
+}
+
+// copyJSON deep-copies decoded JSON objects and arrays.
+func copyJSON(value any) any {
+	switch v := value.(type) {
+	case map[string]any:
+		out := make(map[string]any, len(v))
+		for k, item := range v {
+			out[k] = copyJSON(item)
+		}
+		return out
+	case []any:
+		out := make([]any, len(v))
+		for i, item := range v {
+			out[i] = copyJSON(item)
+		}
+		return out
+	}
+	return value
 }
 
 func computeText(body map[string]any, field string) string {

@@ -63,3 +63,23 @@ func TestAlloyDBClusterInitialUserPasswordIsRefused(t *testing.T) {
 		t.Fatalf("initialUser without password: %v", err)
 	}
 }
+
+// A Compute patch is checked against the recursively merged document it
+// would store, without changing the current resource.
+func TestComputeTransitionsValidateTheRecursivelyMergedDocument(t *testing.T) {
+	current := map[string]any{"name": "r", "bgp": map[string]any{"asn": int64(64512)}}
+	body := map[string]any{"bgp": map[string]any{"advertiseMode": "CUSTOM"}}
+	if err := computeMerged(computeRouter)(current, body); err != nil {
+		t.Fatalf("advertiseMode-only patch: %v", err)
+	}
+	if _, ok := current["bgp"].(map[string]any)["advertiseMode"]; ok {
+		t.Fatal("the current resource was changed")
+	}
+	if err := computeMerged(computeRouter)(current, map[string]any{"bgp": map[string]any{"asn": int64(1)}}); err == nil {
+		t.Fatal("a public ASN was accepted")
+	}
+	list := []any{"a"}
+	if copied := copyJSON(list).([]any); &copied[0] == &list[0] {
+		t.Fatal("arrays are not copied")
+	}
+}
