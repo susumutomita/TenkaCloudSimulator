@@ -72,6 +72,7 @@ Pinned sources:
 | #213 | AWS Trusted Advisor | Checks and recommendations are AWS-owned data. |
 | #198 | AWS Health | Events and entities are AWS-owned data; the rest is organization-level. |
 | #217 | AWS Marketplace | Catalog change sets are listing requests reviewed by AWS; agreements and entitlements are purchases. |
+| #210 | Service Quotas | Quotas, AWS default values and the service list are AWS-owned data. Increase requests and support cases are sent to AWS, request templates need an AWS Organizations management account, and automatic management starts AWS-side utilization monitoring and notifications. |
 | #301 | AWS Support | Cases are real support requests to AWS. |
 | #195 | AWS Control Tower | Landing zones, controls and baselines deploy across an AWS Organizations organization; catalogs are AWS-owned. |
 | #199 | AWS Launch Wizard | Deployments provision workloads; workloads and patterns are AWS-owned catalogs. |
