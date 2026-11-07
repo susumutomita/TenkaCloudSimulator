@@ -1,11 +1,12 @@
 # Google Cloud service catalog
 
-The Google API catalog serves bounded configuration metadata for additional
-Google Cloud services through each API's own REST paths. Contracts come from
-documentation-free subsets of the discovery documents pinned by
-google-api-python-client 2.199.0 (`googleapiclient/discovery_cache/documents`).
-The extraction tool is `tools/gcpmodels/extract.py`, and the reviewed method
-list is `internal/gcp/catalog/selection.json`. The original license ships as
+The Google API catalog serves bounded configuration metadata for 40 Google
+Cloud APIs through each API's own REST paths, from one engine and one
+provider-owned SQLite store. Contracts come from documentation-free subsets
+of the discovery documents pinned by google-api-python-client 2.199.0
+(`googleapiclient/discovery_cache/documents`). The extraction tool is
+`tools/gcpmodels/extract.py`, and the reviewed method list is
+`internal/gcp/catalog/selection.json`. The original license ships as
 [`third_party/GOOGLE-DISCOVERY-NOTICES.txt`](../third_party/GOOGLE-DISCOVERY-NOTICES.txt)
 and is served at `/_simulator/licenses/GOOGLE-DISCOVERY-NOTICES.txt`.
 
@@ -14,7 +15,10 @@ other official method of the same API returns HTTP 501 `UNIMPLEMENTED`.
 Request fields that are not in the official schema are refused with
 `INVALID_ARGUMENT`; output-only fields sent by a client are dropped, as
 AIP-203 requires of servers. No database engine, network, workload or real
-Google Cloud call is executed or simulated.
+Google Cloud call is executed or simulated. Each API is one of two styles:
+AIP resource-name APIs (`projects/{project}/locations/{location}/...`) and
+flat APIs, currently Compute Engine (`projects/{project}/global/...`,
+`.../regions/{region}/...`, `.../zones/{zone}/...`).
 
 ## APIs
 
@@ -61,10 +65,14 @@ Google Cloud call is executed or simulated.
 | Service Directory (`servicedirectory.v1`) | #368 | `projects.locations.namespaces.{create,get,list,patch,delete}`, `namespaces.services.{create,get,list,patch,delete}`, `services.endpoints.{create,get,list,patch,delete}` | Registry metadata. No DNS or resolution (`services.resolve`) exists. Endpoint addresses must be literal IP addresses. Deleting a namespace or service deletes its children, as the official API does |
 | Compute Engine (`compute.v1`): Virtual Private Cloud, Persistent Disk, instance templates, Cloud Router and Cloud NAT, Cloud VPN, Google Cloud Armor (and Enterprise policy settings), Cloud Load Balancing, Cloud CDN, Partner Interconnect, Network Service Tiers on forwarding rules | #371, #322, #332, #355, #351, #356, #358, #359, #350, #342, #345, #347, #365 | `networks.{insert,get,list,patch,delete}`, `subnetworks.{insert,get,list,patch,delete,expandIpCidrRange,setPrivateIpGoogleAccess}`, `firewalls.{insert,get,list,patch,delete}`, `routes.{insert,get,list,delete}`, `disks.{insert,get,list,delete,setLabels,resize}`, `snapshots.{insert,get,list,delete,setLabels}`, `instanceTemplates.{insert,get,list,delete}`, `routers.{insert,get,list,patch,delete}`, `vpnGateways`/`externalVpnGateways`/`vpnTunnels` `.{insert,get,list,delete,setLabels}`, `securityPolicies.{insert,get,list,patch,delete,setLabels}`, `healthChecks.{insert,get,list,patch,delete}`, `backendServices.{insert,get,list,patch,delete,setSecurityPolicy}`, `backendBuckets.{insert,get,list,patch,delete}`, `urlMaps.{insert,get,list,patch,delete}`, `targetHttpProxies.{insert,get,list,patch,delete}`, `globalForwardingRules.{insert,get,list,patch,delete,setTarget,setLabels}`, `interconnectAttachments.{insert,get,list,patch,delete,setLabels}`, `globalOperations`/`regionOperations`/`zoneOperations` `.{get,list,wait}` | Configuration metadata only: no packet is routed, filtered, translated or load balanced, no VM runs, no BGP or IKE session exists, no probe runs and no block storage or cache exists. Only custom mode networks; no default network or system routes. References must exist, and a referenced resource cannot be deleted. No address is allocated: forwarding rules state `IPAddress`, NAT uses `AUTO_ONLY`, HA VPN interfaces carry no IP. Customer-supplied encryption keys, VPN shared secrets, router MD5 keys and IAP client secrets are refused and never stored. Security policy rules are fixed at creation (`addRule`/`patchRule`/`removeRule` return `UNIMPLEMENTED`). Partner attachments stay `PENDING_PARTNER`. Instances, Dedicated/Cross-Cloud/Cross-Site Interconnect and the project default network tier are not simulated |
 
-The capability document lists the same APIs under `gcpCatalog.apis`. Each
-entry includes every implemented method, the number of official methods,
-collections, create fields, the discovery revision and source hash, and the
-bounds above.
+`/_simulator/v1/capabilities` lists the same APIs under `gcpCatalog.apis` as
+compact summaries: name, version, title, Issues, the number of implemented
+and official methods, the client endpoint and the per-API OpenAPI document.
+It also names the project, locations and zones. The full descriptors
+(methods, collections, ID sources, create fields, discovery revision and
+source hash, and the bounds above) are served by
+`GET /_simulator/v1/catalog/gcp`, which needs the same access token. This
+keeps the capability document under 128 KiB as APIs are added.
 
 ## Routing and authorization
 
@@ -75,63 +83,105 @@ bounds above.
   example `/_simulator/providers/gcp/alloydb/` or
   `/_simulator/providers/gcp/compute/compute/v1/` (the official client
   replaces both the root URL and the service path with it).
-  When several official bindings match one path, the one with the most
+- When several official bindings match one path, the one with the most
   literal segments serves it, such as Cloud Logging's `projects.*` methods
   over their `{+parent}` aliases and Compute Engine
-  `backendServices/listUsable` over `backendServices/{name}`.
-- The configured project ID or project number is accepted. Only the
-  configured project owner (`--cloud-storage-owner`, default
-  `simulator-admin`) may call a method. Any other subject or project receives
-  `PERMISSION_DENIED`, and the response does not reveal whether the resource
-  exists. This local ownership check is not Google IAM, and AWS identity
-  policies grant nothing here.
+  `backendServices/listUsable` over `backendServices/{name}`. Among equally
+  literal templates, the one whose literals come first wins.
+- The configured project ID or project number is accepted; stored names and
+  references use the project ID. Only the configured project owner
+  (`--cloud-storage-owner`, default `simulator-admin`) may call a method. Any
+  other subject or project receives `PERMISSION_DENIED`, and the response
+  does not reveal whether the resource exists. This local ownership check is
+  not Google IAM, and AWS identity policies grant nothing here.
 - Supported locations are `global`, `us-central1`, `us-east1`, `us-west1`,
   `europe-west1` and `asia-northeast1`. Each location is a separate scope.
-  Zonal collections, such as Cloud IDS endpoints and Cloud NGFW firewall
-  endpoints, use zones of those regions (`us-central1-a` to `us-central1-z`).
+- Zones are the published zones of the supported regions: `us-central1-a`,
+  `-b`, `-c`, `-f`; `us-east1-b`, `-c`, `-d`; `us-west1-a`, `-b`, `-c`;
+  `europe-west1-b`, `-c`, `-d`; and `asia-northeast1-a`, `-b`, `-c`. Zonal
+  AIP collections, such as Cloud IDS endpoints and Cloud NGFW firewall
+  endpoints, take a zone as their location, and Compute Engine
+  `zones/{zone}` paths take the same zones. Their operations are listed
+  under the zone. Any other zone, and a region where a zone is expected, is
+  refused with `INVALID_ARGUMENT`.
+- A collection's parent is the scope its official path names: for
+  `location` APIs `projects/{project}/locations/{location}`, for `project`
+  APIs `projects/{project}`, or `projects/{project}/locations/{location}`
+  when the path names a location (Cloud Logging buckets), and for flat APIs
+  `global`, `regions/{region}` or `zones/{zone}`. Literal locations in an
+  official path, such as Network Connectivity Center `locations/global`
+  hubs, stay literal.
 
 ## Request semantics
 
 - Methods that return `google.longrunning.Operation` complete synchronously.
   The operation is stored with `done: true` and the resource (or `Empty`) as
-  its response, and remains readable through `operations.get/list`.
+  its response, and remains readable through `operations.get/list`. The
+  response `@type` uses the protobuf message name, which may differ from the
+  discovery schema name (Dataplex `Lake` for `GoogleCloudDataplexV1Lake`).
+- Operations are named under the scope the official operations methods use,
+  such as `projects/{project}/locations/{location}/operations` or, for APIs
+  that keep them per resource, `projects/{project}/databases/{database}/operations`.
+- New resource IDs come from a create query parameter (`clusterId`), from a
+  body field (Cloud Logging sink `name`, Dataproc autoscaling policy `id`),
+  or from a wrapped request (Spanner `instanceId`, or the `CREATE DATABASE`
+  statement). Where the body field carries the full resource name, as for
+  Cloud Composer environments, it must name the request parent. Short-name
+  APIs, such as Cloud Logging sinks and Compute Engine, store the bare ID in
+  `name`. Other IDs are server-generated. Client-chosen IDs follow AIP-122
+  unless the API documents other rules.
+- Implicit parent segments, such as Firestore `collectionGroups/{id}`, are
+  validated but not stored; their children are deleted with the stored
+  parent.
+- The parent is read again inside the write transaction, so a concurrent
+  delete cannot orphan a new child.
 - `requestId` replays the stored operation of an identical request for 24
   hours. A different request with the same `requestId` is refused.
   `validateOnly=true` validates and stores nothing.
 - `etag` guards patch and delete (`ABORTED` on mismatch). `updateMask`
-  restricts a patch to the reviewed mutable fields. Full-replacement
-  updates (Dataproc `PUT` and mask-less `PATCH`) keep the ID and output
-  fields, clear the writable fields the body omits and refuse an update
-  mask.
+  restricts a patch to the reviewed mutable fields; a mask-less patch updates
+  the supplied fields. Wrapped updates, such as Spanner's
+  `UpdateInstanceRequest`, carry the mask in the body.
+- Full-replacement updates (Dataproc `PUT` and mask-less `PATCH`) keep the
+  ID and output fields, clear the writable fields the body omits, check the
+  resource's required fields and refuse an update mask, as a parameter or a
+  wrapped field.
 - Relative resource names are scoped per API, as full resource names are, so
   an AlloyDB cluster and a Cluster Director cluster can share a name. A
   delete whose official response is the resource, as in BigLake, returns the
   deleted resource.
 - An official query parameter that a reviewed method does not implement, such
   as `allowMissing` on a delete or a list filter by `instance`, is refused
-  with `INVALID_ARGUMENT` when set instead of being ignored.
-- Operations are named under the scope the official operations methods use,
-  such as `projects/{project}/locations/{location}/operations` or, for APIs
-  that keep them per resource, `projects/{project}/databases/{database}/operations`.
-- Reviewed reference fields must name an existing resource of the same API
-  (`NOT_FOUND` otherwise). Where the official service refuses it, a resource
-  that is still referenced cannot be deleted (`FAILED_PRECONDITION`).
-  Deletion protection fields block delete with `FAILED_PRECONDITION` until a
-  patch clears them.
+  with `INVALID_ARGUMENT` when set to anything but its default value.
+- Reviewed reference fields, including nested and list paths such as
+  `nats[].subnetworks[].name`, must name an existing resource of the
+  collections they allow in the same API and project. They are checked at
+  creation and whenever an update writes the field, inside the write
+  transaction, and stored with the project ID (or as a `selfLink` in flat
+  APIs). A missing resource is `NOT_FOUND`. A blocking reference keeps the
+  named resource from being deleted (`FAILED_PRECONDITION`) unless the
+  official override parameter, such as `ignoreBackupPlanReferences=true`,
+  is set; references from the resource's own subtree do not block. Other
+  references do not block, as a snapshot outlives its source disk.
+- Reviewed conflict rules, such as overlapping subnetwork ranges in one
+  network, are checked against every other resource of the collection on
+  create and update.
+- Deletion protection fields block delete with `FAILED_PRECONDITION` until a
+  patch clears them. Deleting a parent with children fails with
+  `FAILED_PRECONDITION` unless the API cascades: with `force=true` where the
+  official delete has a `force` parameter, and always where it has none
+  (as in Spanner, Firestore and Service Directory). A cascade is refused
+  while a child is protected.
 - Errors use `google.rpc.Status` with the canonical HTTP mapping, for example
   `ALREADY_EXISTS` 409 and `FAILED_PRECONDITION` 400.
 
 ### Flat APIs (Compute Engine style)
 
-APIs such as Compute Engine (`compute.v1`) address resources with separate
-path parameters (`projects/{project}/zones/{zone}/disks/{disk}`,
-`.../regions/{region}/...`, `.../global/...`) and take the resource name in
+Compute Engine (`compute.v1`) addresses resources with separate path
+parameters (`projects/{project}/zones/{zone}/disks/{disk}`,
+`.../regions/{region}/...`, `.../global/...`) and takes the resource name in
 the request body.
 
-- Zones are the published zones of the supported regions: `us-central1-a`,
-  `-b`, `-c`, `-f`; `us-east1-b`, `-c`, `-d`; `us-west1-a`, `-b`, `-c`;
-  `europe-west1-b`, `-c`, `-d`; and `asia-northeast1-a`, `-b`, `-c`. Other
-  zones and regions are refused with `INVALID_ARGUMENT`.
 - Created resources carry their official `kind`, a server-assigned 19-digit
   `id`, `selfLink` (`https://www.googleapis.com/compute/v1/...`),
   `creationTimestamp` and, where the schema has them, `zone` or `region`
@@ -145,7 +195,8 @@ the request body.
   `clientOperationId` and replays the stored operation.
 - `patch` without `updateMask` applies a JSON merge patch (RFC 7396): nested
   objects merge and arrays replace. `null` members are refused. Sending the
-  unchanged `name` back is accepted; a different `name` is refused.
+  unchanged `name` back, or restating an immutable field with its stored
+  value, is accepted; a different `name` is refused.
 - Custom methods that set fields (for example `setLabels` or `resize`) write
   every field of their request; an omitted field is cleared. A supplied
   `fingerprint` or `labelFingerprint` must match the stored value
@@ -153,55 +204,108 @@ the request body.
   regenerated after the change.
 - Lists page with `maxResults` (default 50, capped at 1,000) and
   `pageToken`; `filter` and `orderBy` are refused when non-empty.
-- Reviewed reference fields (for example a subnetwork's `network`) must name
-  an existing resource of the same API in the configured project, as a full
-  URL, a partial URL such as `global/networks/default`, or a resource name.
-  The value is stored as the `selfLink`. A missing resource is `NOT_FOUND`,
-  another collection or a malformed value is `INVALID_ARGUMENT`, and a
-  resource that another one still references cannot be deleted
-  (`FAILED_PRECONDITION` 400, as Compute Engine's
-  `resourceInUseByAnotherResource`).
-- Some references are checked only at creation and do not block deletion,
-  as a snapshot outlives its source disk. Reviewed conflict rules, such as
-  overlapping subnetwork ranges in one network, are checked against every
-  other resource of the collection on create and update.
-- A merge patch may restate an immutable field with its stored value.
+- References accept a full URL, a partial URL such as
+  `global/networks/default`, or a resource name, and are stored as the
+  `selfLink`. A reference to another collection or a malformed value is
+  `INVALID_ARGUMENT`, and deleting a resource that another one still uses is
+  `FAILED_PRECONDITION` 400, as Compute Engine's
+  `resourceInUseByAnotherResource`.
 
 ## Limits
 
 Requests are limited to 256 KiB, stored resource documents to 64 KiB and all
-Google API catalog metadata to 32 MiB. The 10,000 most recent operations are
-kept across all APIs; older ones are pruned and then return `NOT_FOUND`.
+Google API catalog metadata to 32 MiB; the metadata budget is checked after
+every insert and update, inside the write. The 10,000 most recent operations
+are kept across all APIs; older ones are pruned and then return `NOT_FOUND`.
 Each collection also has its own resource limit, such as 20 AlloyDB clusters
-per location. Pages default to 50 items and are capped at 1,000. These are
-local limits, not Google Cloud quotas.
+per location. Pages default to 50 items and are capped at 1,000. Requests
+nest at most 24 levels and 4,096 JSON values. These are local limits, not
+Google Cloud quotas.
 
 ## Console and API reference
 
 In the Google Cloud console, choose **Services → Service catalog**. The view
-lists, creates, inspects and deletes resources with the same native requests,
-including child collections under a selected parent. Deletion asks for an
-inline confirmation. Complex official fields remain available through SDKs and
-the API reference.
+loads the descriptors from `/_simulator/v1/catalog/gcp`, then lists,
+creates, inspects and deletes resources with the same native requests. It
+builds each parent from the collection's official path: the project, a
+location, region or zone selector where the path has one, and one selector
+per parent level. Body IDs are sent in the create body (as the full name
+where the API expects it), and short names resolve under the listed parent.
+Collections under an implicit parent, such as Firestore indexes, are listed
+under an ID you type and are read-only, as are collections whose create
+request needs nested fields (for example Spanner instances); the view says
+so. Deletion asks for an inline confirmation. Complex official fields remain
+available through SDKs and the API reference.
 
 The [Google Cloud catalog API reference](/_simulator/docs/gcp-catalog.html)
 serves one OpenAPI document per API, generated from the same embedded
 discovery subsets.
 
+## Not served
+
+These open Google Cloud Issues have no catalog API. The reason is either the
+pinned corpus or the service itself.
+
+| Issue | Service | Reason |
+| --- | --- | --- |
+| #318 | App Engine | `apps.create` creates the project's single application, which has no delete method, and `services.versions.create` deploys code |
+| #319 | Batch | The only create method, `jobs.create`, runs a workload |
+| #323 | Google Cloud Universal Ledger | No discovery document in the pinned corpus |
+| #325 | License Manager | No discovery document in the pinned corpus (`licensing.v1` is Workspace license assignment) |
+| #330 | Cloud Managed Lustre | No discovery document in the pinned corpus |
+| #331 | Cloud Storage | Served by the native Cloud Storage provider ([guide](gcp-storage.md)), not the catalog |
+| #334 | Cloud Storage for Firebase | `firebasestorage.v1beta` only links Cloud Storage buckets to Firebase; those buckets belong to the native Cloud Storage provider |
+| #337 | Bigtable | `instances.create` creates an instance and its map of clusters in one request, which the one-resource create cannot represent |
+| #341 | Cloud SQL | `sqladmin.v1` flat paths have no `global`, `regions` or `zones` scope, which the flat conventions require, and many instance methods are lifecycle actions (`restart`, `failover`, `clone`, `import`, `executeSql`) |
+| #343 | Cloud DNS | `dns.v1` flat paths have no `global`, `regions` or `zones` scope, and a record set is named by two segments (`rrsets/{name}/{type}`) |
+| #346, #348, #349 | Dedicated, Cross-Cloud and Cross-Site Interconnect | `interconnects.insert` orders a physical circuit at an interconnect location, and Cross-Site Interconnect uses wire groups; only Partner Interconnect attachments are served |
+| #352 | Cloud Network Insights | No discovery document in the pinned corpus |
+| #360 | Media CDN | The `edgeCache*` resources of `networkservices.v1` expose only IAM policy methods |
+| #366 | Private Service Connect | Endpoints are regional forwarding rules and producers use `serviceAttachments`; neither is bound (only global forwarding rules are) |
+| #369 | Spectrum Access System | `sasportal.v1alpha1` names resources under `customers/` and `nodes/`, not `projects/` |
+| #370 | Telecom Network Automation | No discovery document in the pinned corpus |
+| #373 | Error Reporting | No create method: groups come from reported events (`events.report`), and `groups.update` only changes their tracking state |
+| #375 | Cloud Profiler | `profiles.create` and `createOffline` collect profile data from a profiling agent; there is no configuration resource |
+| #376 | Cloud Trace | The only writes, `traces.batchWrite` and `spans.createSpan`, record trace data |
+| #378 | Android Device Streaming | `testing.v1` `deviceSessions.create` opens a streaming session on a test device |
+| #380 | Assured Open Source Software | No discovery document in the pinned corpus |
+| #383 | Cloud Source Repositories | The pinned discovery document marks the service end of sales from June 17, 2024 |
+| #386 | Firebase Test Lab | `testMatrices.create` creates and runs a matrix of tests on devices |
+| #387 | Google Device Cloud | No discovery document in the pinned corpus |
+| #389 | BigQuery | Datasets and tables hold row data (`tabledata.insertAll`) and jobs run queries (`jobs.insert`, `jobs.query`) |
+| #391 | Cloud Life Sciences | The only resource method, `pipelines.run`, runs a workload, and operations exist only for runs |
+| #392, #393 | Data Studio, Data Studio Pro | No discovery document in the pinned corpus |
+| #395 | Dataflow | Every resource-creating method runs or launches a pipeline, and the paths use `{projectId}` and `{location}` without AIP resource names |
+| #398 | Earth Engine | No discovery document in the pinned corpus |
+
+Served Issues also leave parts out: Cloud Build v2 (#381; the engine serves
+one version per API name, so v1 is served), VMware Engine private clouds
+(#324) and OS policy assignments (#326), which live in zone locations,
+Compute Engine instances (#322; `instances.insert` boots a VM, so instance
+templates carry the configuration), Firestore documents (#338), and the
+methods each row's bounds name.
+
 ## Verification
 
 - `go test ./internal/gcp/catalog` covers every reviewed method, discovery
   model consistency, type conversion, authorization, `requestId` replay,
-  `validateOnly`, `etag` and `updateMask` handling, cascade deletion, budgets,
-  pagination and the regenerated reference documents.
+  `validateOnly`, `etag` and `updateMask` handling, full replacement, body
+  and wrapped IDs, references, conflicts, zones, route choice, cascade
+  deletion, budgets, pagination and the regenerated reference documents.
+- `go test ./internal/server` keeps the capability document under 128 KiB
+  with every API registered and checks the descriptor endpoint.
 - `test/e2e/gcp_catalog_fixtures.py` drives every reviewed method through the
   official google-api-python-client with its static discovery documents. It
   runs against two real binaries with separate databases and token
   authorities. Another subject and another project are refused, a second team
   stays empty, state survives restart, and cleanup removes everything.
-- `test/e2e/gcp_catalog_console.py` checks the console and the served reference
-  in a real browser at 1440 px and 390 px with axe, and confirms that the
-  discovery client sees the same state.
+- `test/e2e/gcp_catalog_console.py` checks the console and the served
+  reference in a real browser at 1440 px and 390 px with axe, for AlloyDB
+  parents and children, Cloud Logging sinks (body IDs and short names) and
+  buckets (a location in a project-scope path), Cloud IDS endpoints (zones),
+  Compute Engine networks, and the read-only notes for Firestore indexes and
+  Spanner instances, and confirms that the discovery client sees the same
+  state.
 - The formal `CatalogResourceLifecycle` and `CatalogConsoleEpoch` models
   declare these sources in scope. They cover only the store and view
   projections described in [formal validation](formal-validation.md).

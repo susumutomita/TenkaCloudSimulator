@@ -108,8 +108,9 @@ need both stack permissions and underlying resource permissions;
 SQS permits at most 10,000 physical message rows and 64 MiB of UTF-8 bodies plus
 serialized attribute JSON across the process, including expired rows not yet
 collected. This is not the SQLite file size, process-memory usage, or AWS billing
-size. The [Google Cloud service catalog](docs/gcp-catalog.md) serves AlloyDB
-cluster, instance and user metadata through the official discovery-document
+size. The [Google Cloud service catalog](docs/gcp-catalog.md) serves
+configuration metadata for 40 Google Cloud APIs, such as AlloyDB, Compute
+Engine networking and Cloud Logging, through their official discovery-document
 paths and the Google Cloud console. Other Google Cloud/Azure services are not
 implemented. An explicit opt-in
 [Sakura Disk configuration API and console](docs/sakura.md) support local metadata only,
