@@ -15,17 +15,56 @@ machine-discovered semantic coverage. A newly added implementation file is not
 covered merely because an existing model passes: its exact path must have an
 appropriate reviewed scope mapping and property argument.
 
-The current registry has 33 baselines/197 required named mutation controls
-(230 required executions). The previous30/175 entries and controls are preserved;
-RESTRouteMatching, RESTProxyEventBoundary and NativeWireProjection add three
-bounded contracts and22 semantic defect controls.
-The new IAM scope is four API-reachable seeds and at most two subsequent requests;
+The combined registry requires **55 baselines/450 required named mutation
+controls (505 executions)**. Main's 52/415 inventory is preserved: the earlier
+50/398 plus CatalogResourceLifecycle (twelve controls) and CatalogConsoleEpoch
+(five). LoginInputIntent adds one model and fourteen controls. SNSAdmission/SNSLifecycle
+add two finite normalized-admission/local-record models and twenty-one controls,
+not Go/SQL, parser, cryptography or external-delivery refinement. The earlier
+pre-landing 48/381 inventory gained LandingAccessAdmission (six controls) and
+LandingTopologyState (eleven). Exact-HEAD whole-gate validation after this main
+integration is pending; pre-merge `8149cac` receipts for 463 executions or 102
+pure tests do not establish acceptance of the new combined base.
+
+Historical `28d37d1` checked 13 input cases/73 distinct states before focus
+capture; scoped `5b270e9` checked 14 cases/77 distinct states (94 generated,
+empty queue) and all 13 declared noninitial counterexamples, including the focus
+control at state 3. Scoped keyboard source `7bd15bf` checked 15 cases, 83 distinct
+baseline states (101 generated, empty queue) and all fourteen required noninitial
+counterexamples; the keyboard control first violated AdoptedValueExact at state 5.
+The controlled reset on focus/keydown is an explicit assumption, not an
+established browser cause or implementation refinement proof.
+[Input correspondence](login-token-file.md#bounded-input-intent-model) and the
+[dated login CI failure](login-token-file.md#dated-validation-and-current-candidate)
+remain distinct from combined acceptance. SecretMetadataViewEpoch and the existing
+CFN, Sakura and DynamoDB scopes remain. Numeric/regex/parser correctness, actual
+resource provisioning and NoEcho/output secrecy are not proved by registration.
+The IAM scope is four API-reachable seeds and at most two subsequent requests;
 the broader four-request exploratory candidate timed out and is not claimed.
 Registration and Python guards are not a successful immutable TLC execution.
 
+New models must be registered in `formal/models.json` **and** added to the
+mandatory `BASE_MODELS`, `BASE_INVARIANTS`, `REQUIRED_MUTANTS` and
+`REQUIRED_SOURCE_SCOPES` policy in `scripts/formal_model_gate.py`. Preserve the
+established entries and add removal/scope detector tests. Merely listing a model
+without protecting its identity, properties, controls and implementation paths
+does not establish the intended mandatory merge check.
+
+Historical receipts are separate: the 429-case gate at `c298972` and its
+documentation-only successor `414c902` (61 E2E/start checks) describe those
+revisions, not this landing implementation. On 2026-11-06, the two landing models
+passed scoped 19-case checking at `4382ec4`, but that revision's full 448-case
+attempt failed at DynamoDBAdmission. The eight landing browser cases passed at
+`fad3b8a` on Chromium 154; its missing current canvas API means this is HTML and
+fallback evidence, not native Chrome 157 rendering or successful full-gate CI.
+
 | Model | Finite contract | Important exclusions |
 |---|---|---|
+| [CatalogResourceLifecycle](aws-catalog.md) | two service/region scopes, three IDs/names, quota two, two child slots, one client token and three steps; twelve controls | official shape/wire validation, pagination/tag/ARN encoding, SQL/locking/crashes and Go refinement |
+| [CatalogConsoleEpoch](aws-catalog.md) | two services, epochs 0..3, one mounted view with unmount and defective overlapping writes; five controls | native requests, DOM/focus/accessibility, form conversion and React scheduling |
 | ObjectStore | two buckets/two keys; parent integrity, abstract allow/deny | concrete IAM, HTTP, SQL, crashes |
+| CFNConditionAdmission | 234 finite input witnesses; defaults/supplied admission, all conditions/declarations, branch choice, NoValue pruning, pure resource/output plan | real parser/numeric/regex/graph evaluation, exact error ordering, raw-link/dependency completeness, SQL, resource mutation, grants, privacy and host grading |
+| [LoginInputIntent](login-token-file.md#bounded-input-intent-model) | 18 scheduled input/focus/keyboard/paste/file/submit/locale scenarios, revision 0..3, at most six events and two POST snapshots; eight invariant families | arbitrary interleavings, React/DOM refinement, clipboard/extension behavior, file parser, server authentication and liveness |
 | StackOwnership | two owners/two names; retained drift reservations | authentication, callback recovery, full CFN |
 | S3Versions | one bucket/two keys; at most three history entries per key | suspended versions, byte quotas, SQL |
 | NativeIAMOwnership | two case-folded names; native/legacy exclusivity | trust parsing, full IAM, process isolation |
@@ -34,6 +73,8 @@ Registration and Python guards are not a successful immutable TLC execution.
 | RESTRouteMatching | finite template/carrier choices; arity, captures and literal specificity | concrete byte scanner, general paths, method selection, Go refinement |
 | RESTProxyEventBoundary | fixed input samples, projected application data, excluded transport authority and abstract event budget | concrete HTTP authentication, UTF-8/JSON parser, case-fold implementation, real memory bounds |
 | NativeWireProjection | three ordered fields, six value kinds and provider-selected omission; complete output or error | JSON escaping/parser, XML, exact AWS schemas, Go refinement |
+| LandingAccessAdmission | ten literal paths, GET/HEAD/POST and trusted host/origin/auth verdicts; one request/response transition | concrete middleware/token/session/URL/HTTP/ServeMux implementation, service authority |
+| LandingTopologyState | nine nodes/three providers; known or absent initial fragment; two selections/two callbacks, one mount/retirement | URL parsing/history, focus/Tab, DOM/layout/SVG geometry, native canvas rendering, JavaScript refinement or liveness |
 
 All registered models run even for documentation-only changes. The supported CFG
 grammar is deliberately restricted to named invariants, init/next/specification,
@@ -57,6 +98,17 @@ and verified jar. Reports under `reports/formal/`
 include actual process logs, input/config hashes, bounds, limitations and a JSON
 success/failure result. Controlled-process Python unit tests validate failure
 handling; they are not TLC/model evidence.
+
+For a process exception, `<case>.failure.json` and `evidence.json` retain the
+model/case, exception type, errno when available, deadline/timeout, elapsed time,
+model/config hashes and explicit unavailable exit code (`null`). Partial stdout
+and stderr are retained as separate `.failure.stdout.bin` and
+`.failure.stderr.bin` files with availability/type/byte-count/SHA256 metadata.
+Missing output is distinguished from an empty stream. A diagnostic write failure
+is recorded without replacing the original failure. Exception messages,
+environment values and commands are not copied into this metadata. A timeout or
+partial progress remains a failed check, never an invariant counterexample;
+models, bounds, the 60-second default and all required executions stay unchanged.
 
 No Poteto configuration/toolchain was found in the tracked baseline instructions
 or files. No Poteto, proof-assistant, implementation-refinement or complete
@@ -213,3 +265,5 @@ semantic counterexamples. Registration plus this scoped result is not a full
 [Source correspondence and limits](formal-azure-properties-target.md) explain
 ghost capture provenance, the separately checked lifecycle/epoch assumptions and
 concrete native/browser obligations.
+
+The physical-row model is limited to the selected SSM/S3 SQLite rows after all cleanup writes. It is distinct from the final stack/claim model, which assumes physical handler success. Canonical CFG formatting preserves its five properties and nine fault modes; both combined 429-case and fresh scoped execution passed at `c298972`; later revisions require their own immutable checks.

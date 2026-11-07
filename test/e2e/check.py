@@ -71,6 +71,17 @@ def submit(page):
  if dialog.is_visible():dialog.get_by_role('button').last.click()
  else:page.get_by_role('button',name=re.compile('^(Create bucket|Upload|Create parameter|Save changes)$')).last.click()
 class Conformance(unittest.TestCase):
+ def test_sns_native_admission_persistence_and_isolation(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name("sns_admission.py"))], check=True, timeout=180)
+
+ def test_landing_topology_html_fallback_keyboard_and_public_navigation(self):
+  from landing_topology import run_landing_topology
+  # The fixture owns fresh dummy credentials for readiness only. The helper
+  # receives no token, browser authentication, native API state or user keys.
+  with running(authenticated=True) as (endpoint,_):
+   result=run_landing_topology(endpoint,REPORTS/'landing-topology')
+  self.assertEqual(result['cases'],8)
+  self.assertEqual(result['strictAxeStates'],6)
  def test_sakura_reference_real_examples_and_scalar_send(self):
   subprocess.run([sys.executable, str(Path(__file__).with_name('sakura_reference_live.py')), '--root', str(Path(__file__).resolve().parents[2]), '--binary', str(BINARY), '--reports', str(REPORTS/'sakura-reference-live'), '--browser'], check=True, timeout=180)
  def test_sakura_disk_console_real_native_state_and_scope(self):
@@ -610,5 +621,18 @@ def handler(event,context):
 
  def test_dynamodb_console_native_state_keys_context_locale_and_cancellation(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('dynamodb_console.py'))],check=True,timeout=240)
+
+ def test_cloudformation_original_crypto_template_native_sdk_lifecycle(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('cloudformation_crypto.py'))], check=True, timeout=180)
+
+ def test_aws_catalog_native_sdk_two_teams_policy_restart_and_cleanup(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('aws_catalog.py'))], check=True, timeout=240)
+
+ def test_aws_catalog_console_reference_and_shared_native_state(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('aws_catalog_console.py'))], check=True, timeout=300)
+
+ def test_aws_catalog_fixture_lifecycles_cover_every_bound_operation(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('aws_catalog_fixtures.py'))], check=True, timeout=900)
+
 
 if __name__=='__main__':unittest.main(verbosity=2)

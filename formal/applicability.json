@@ -1,19 +1,19 @@
 {
   "version": 1,
-  "base_sha": "139eb82bec2bb19ee40276b88a80548ab2828045",
+  "base_sha": "4d2330cb543e895a551f53d584fab6355196256f",
   "changes": [
     {
       "path": ".github/workflows/ci.yml",
-      "sha256": "91665815ab0965aa72feb27d52024ac517224b8193e21af36579f3fdddd9167b",
+      "sha256": "398ece370c16fdc612a58f35da5ee6a4867bf96aebaf0b8a1f063c6b30440986",
       "disposition": "formal-infrastructure",
-      "reason": "Split the original complete pinned Python/Chromium acquisition into three mandatory bounded steps (3/12/5 minutes), and give focused Japanese acquisition plus unchanged acceptance a30-minute wholejob budget. All acceptance shell commands, action SHAs, permissions, events, dependency inputs, formal models and per-case60-second deadlines unchanged. No model/runtime semantic change.",
+      "reason": "Separate unchanged complete Python and Chromium acquisition into mandatory 3/12/5-minute steps and give the focused Japanese job 30 minutes. Preserve every other workflow byte, including checks, dependency inputs, Action pins, permissions and formal gates. No runtime or model semantic change.",
       "models": []
     },
     {
       "path": "docs/ci.md",
-      "sha256": "583da73a0c1a93e68f3b33a23a0aabf0fbf8f4f581c4454a0562f0703d14c9f2",
+      "sha256": "f1eb44294c43043eb832676e114da838c7b6bb1902c5063300b8ea2fb0032450",
       "disposition": "documentation",
-      "reason": "Describe acquisition budgets and failure handling; qualify unresolved ObjectStore process failure. No claim skipped UI establishes acceptance or JVM cause.",
+      "reason": "Describe acquisition budgets and fail-closed handling without claiming skipped acceptance or changing runtime/model behavior.",
       "models": []
     }
   ]

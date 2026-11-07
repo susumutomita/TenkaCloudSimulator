@@ -35,6 +35,11 @@ describes the reviewed scope; it is not a clean-room or legal certification.
 
 ## Start locally
 
+The embedded [interactive architecture page](docs/landing.md) is available at
+`http://127.0.0.1:4566/_simulator/` after startup. Its HTML descriptions explain
+the supported local subsets; optional HTML-in-Canvas drawing requires a browser
+with the current API. The SDK endpoint `/` remains unchanged.
+
 Building from source requires Go 1.26; CI pins Go 1.26.10.
 
 ```sh
@@ -58,6 +63,16 @@ Git, logs, terminal recordings, and screen sharing. If paste is unavailable, use
 **Choose token file**: the browser reads a bounded local file without uploading
 it, and the server authenticates when you submit. See the
 [token-file format and unverified browser boundaries](docs/login-token-file.md).
+The masked field includes per-field password-manager ignore hints. It adopts a
+connected native value during input/focus/keyboard capture or blur, and snapshots it at
+submission, including an intentional clear. Submission flushes a current explicit
+paste first; adoption is a new intent that cancels older asynchronous input work.
+These are compatibility measures, not proof of an extension cause or a confirmed
+Dia/1Password repair. At `339c264`, the first native-input browser case passed,
+but the native-clear/Enter case failed. The keyboard-capture follow-up passed both
+complete 62-test browser suites at `8149cac`. The later catalog integration still requires its own complete CI.
+Actual Dia/1Password and user-device clipboard behavior remain unverified.
+See the [dated login CI result and remaining checks](docs/login-token-file.md#dated-validation-and-current-candidate).
 
 Press Ctrl+C to stop. Restarting with the same state and token files reuses them.
 Omitting `--state` when invoking the CLI creates a fresh in-memory database.
@@ -75,6 +90,7 @@ adapter, or Challenge integration.
 | Service | Implemented subset | Main exclusions |
 | --- | --- | --- |
 | [S3](docs/s3.md) | Bucket create/list/head/location/delete; object PUT/GET/HEAD/DELETE and ListObjectsV2; versioning and ListObjectVersions; public access block and tags | Multipart uploads, ACLs, general bucket policies, encryption settings; path-style addressing only |
+| [SNS](docs/sns.md) | Nine Query/XML operations for Standard-topic metadata, subscriptions and bounded local publish/delivery records; native SDK support | No outbound delivery, SQS adapter, console, CloudFormation or FIFO publication; local immediate confirmation |
 | [SQS](docs/sqs.md) | Standard queues, a Cloudscape console, and 9 JSON 1.0 operations: CreateQueue, GetQueueUrl, ListQueues, GetQueueAttributes, DeleteQueue, SendMessage, ReceiveMessage, DeleteMessage, ChangeMessageVisibility | FIFO, batches, DLQ, SNS integration, CloudFormation, function SDK bridge, Challenge integration |
 | [CloudWatch Logs](docs/cloudwatch-logs.md) | Log groups/streams, group deletion, PutLogEvents/GetLogEvents; 7 APIs and a console sharing their state | Metrics, alarms, retention settings, automatic Lambda delivery, CloudFormation, Logs Insights |
 | [Secrets Manager](docs/secrets-manager.md) | CreateSecret, DescribeSecret, ListSecrets, ListSecretVersionIds (metadata only), PutSecretValue, GetSecretValue, UpdateSecretVersionStage, immediate DeleteSecret; versions and explicit reveal in the console | Real-secret storage, KMS encryption, rotation, replicas, SecretBinary, scheduled deletion, CloudFormation; dummy values are plaintext in SQLite |
@@ -83,8 +99,9 @@ adapter, or Challenge integration.
 | [DynamoDB](docs/dynamodb.md) | Seven JSON 1.0 APIs: CreateTable, ListTables, DescribeTable, DeleteTable, PutItem, GetItem, DeleteItem; Cloudscape table list/create/details/delete and exact-key item writes/reads/deletes. S/N/B keys, optional sort key, partition-key attribute_exists/attribute_not_exists conditions | Query, Scan, item listing, indexes, Streams, CloudFormation, Challenge integration |
 | [IAM](docs/iam.md) | 21 role/inline/trust and customer-managed policy/version/role-attachment Query operations; shared permission union with Deny priority | AWS-managed catalog, user/group attachments, STS, general Conditions, permissions boundaries, SCPs |
 | [Lambda](docs/lambda.md) | CreateFunction, ListFunctions, GetFunctionConfiguration, UpdateFunctionCode, Invoke, DeleteFunction, AddPermission/GetPolicy/RemovePermission; Python ZIP execution through CPython 3.12.16/WASI and a bounded S3/SSM SDK bridge | Other languages, asynchronous invocation, Function URLs, arbitrary networking; 128 MiB and 1–30 second timeout |
-| [CloudFormation](docs/cloudformation-rest.md) | CreateStack, DescribeStacks, DeleteStack; S3 Bucket, SSM Parameter, inline Python Lambda, bounded IAM Role, 5 API Gateway resource types and Lambda Permission; bounded Ref/Sub/GetAtt/DependsOn | UpdateStack, general resource types, full AWS asynchronous lifecycle, dedicated CloudFormation service roles |
+| [CloudFormation](docs/cloudformation-rest.md) | CreateStack, DescribeStacks, DeleteStack; S3 Bucket, SSM Parameter, inline Python Lambda, bounded IAM Role, 5 API Gateway resource types and Lambda Permission; bounded Ref/Sub/GetAtt/DependsOn, String/Number constraints, Equals/condition aliases, resource/output Condition and If/NoValue selection | UpdateStack, And/Or/Not, NoEcho secrecy, general resource types, full AWS asynchronous lifecycle, dedicated CloudFormation service roles |
 | [API Gateway](docs/apigateway.md) | 16 Regional REST management operations, resources/methods/integrations, immutable deployments, new stages and local Lambda proxy execution | HTTP/WebSocket APIs, authorizers, API keys, editing existing stages, public endpoints |
+| [Service catalog](docs/aws-catalog.md) | Model-driven configuration metadata for CodeConnections, Step Functions, ECR and Amplify through their native JSON or REST-JSON protocols, with one generic console view and per-service reference | Executions, images, builds, hosting, OAuth and every unlisted official operation (HTTP 501) |
 
 AWS regions are `us-east-1`, `us-west-2`, `ap-northeast-1`, and `eu-west-1`.
 Local limits include 8 MiB per S3 object, 64 MiB across retained object versions,
@@ -247,9 +264,17 @@ not binary runtime dependencies. Regeneration must preserve locks and original
 rights: [console](tools/console/README.md), [Scalar](tools/scalar/README.md),
 [Python/WASI runtime](tools/python/README.md).
 
-The registry contains 44 finite models and 347 deliberate defect controls
-(391 required model/check executions), including four Sakura metadata/admission/startup/view
-models, the Secrets metadata view and the preserved DynamoDB console model. Registration is not an integrated-revision execution receipt. The new IAM scenario checks two requests
+The combined catalog/login inventory requires **55 finite models and 450
+intentional defect controls (505 required executions)**; exact-HEAD whole-gate
+validation after this main integration is pending. Main's 52/415 inventory is
+preserved: the earlier 50/398 plus CatalogResourceLifecycle (12 controls) and
+CatalogConsoleEpoch (5). LoginInputIntent adds one model and 14 controls. SNSAdmission/SNSLifecycle
+add two finite normalized-admission/local-record models and twenty-one controls;
+these do not prove Go/SQL refinement or external delivery.
+The earlier landing, Sakura, Secrets metadata and DynamoDB console models remain
+registered. Any 463-execution or 102-pure-test receipt at `8149cac` belongs to
+that pre-merge base and does not validate this combined revision. Registration
+is not an execution receipt. The IAM scenario checks two requests
 from each of four reachable seeds. A broader four-request trial timed out and
 is not claimed as verified. TLC examines bounded safety properties and checks
 that targeted mutants produce real counterexamples. It does not prove Go/JS
@@ -258,6 +283,28 @@ parity. Historical receipts and combined exact-revision results are separate.
 See [formal validation](formal/README.md), [CI](docs/ci.md),
 [backlog acceptance](docs/acceptance/backlog-services.md), and the
 [standalone architecture](docs/design/0001-go-standalone.md).
+
+On 2026-11-06, the two landing models passed their scoped 19 executions at
+`4382ec4`; the full 448-case attempt at that revision failed at DynamoDBAdmission.
+The embedded landing page passed eight desktop/mobile HTML and fallback browser
+cases at `fad3b8a`, including six strict accessibility audits. Installed Chromium
+154 lacks the current HTML-in-Canvas API: this verifies ordinary HTML/fallback,
+not Chrome 157 drawing, other engines or a complete simulator release. These
+dated results do not replace later exact-head Go, E2E, formal or hosted checks.
+The admission model trusts host/origin/authentication verdicts; the selection
+model excludes URL parsing, focus, layout, SVG geometry and JavaScript refinement.
+
+Historical CFN evidence: the isolated condition SANY/baseline/fourteen controls
+passed at `f69fb46`; its 365-case source preparation is historical. At `c298972`,
+all 48 models/381 controls (429 executions), full Go race/build and one-profile
+statement/source coverage of 94.94%/90.32% passed. Its documentation-only successor
+`414c902` passed all 61 E2E cases in 980.726 seconds, reflow and start checks.
+“Documentation-only” describes that historical successor, not the current landing
+implementation. These receipts and their then-pending hosted checks belong to
+those revisions. The original crypto fixture also passed the two-CLI SDK helper
+at `2d76646` (73 SDK calls/responses and nine auxiliary HTTP pairs across four CLI
+incarnations). None proves host scoring, output secrecy, every physical resource
+deletion, Go/SQL refinement or success of the current 482-case combined gate.
 
 ## License and attribution
 

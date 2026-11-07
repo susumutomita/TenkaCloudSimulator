@@ -26,6 +26,15 @@ func validParameterName(name string) bool {
 	return len(name) <= 1011 && parameterName.MatchString(name) && strings.Count(name, "/") <= 15 && !strings.HasPrefix(strings.ToLower(trimParameterSlash(name)), "aws") && !strings.HasPrefix(strings.ToLower(trimParameterSlash(name)), "ssm")
 }
 func (g *Gateway) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if isSNS(r) {
+		g.serveSNS(w, r)
+		return
+	}
+
+	if g.CatalogOwns != nil && g.CatalogOwns(r) {
+		g.Catalog.ServeHTTP(w, r)
+		return
+	}
 	if isSecretRequest(r) {
 		serveSecretGateway(w, r, g.Secrets, g.Identities)
 		return

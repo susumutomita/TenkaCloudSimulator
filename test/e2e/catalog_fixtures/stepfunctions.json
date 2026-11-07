@@ -1,0 +1,28 @@
+{
+ "client": "stepfunctions",
+ "steps": [
+  {"op": "create_activity", "args": {"name": "fixture-worker", "tags": [{"key": "team", "value": "a"}]}, "save": {"activity": "activityArn"}},
+  {"op": "describe_activity", "args": {"activityArn": "${activity}"}, "expect": {"name": "fixture-worker"}},
+  {"op": "list_activities", "args": {}, "expect": {"activities#count": 1}},
+  {"op": "create_state_machine", "args": {"name": "fixture-flow", "definition": "{\"StartAt\":\"Wait\",\"States\":{\"Wait\":{\"Type\":\"Wait\",\"Seconds\":1,\"End\":true}}}", "roleArn": "arn:aws:iam::000000000000:role/fixture"}, "save": {"machine": "stateMachineArn"}},
+  {"op": "describe_state_machine", "args": {"stateMachineArn": "${machine}"}, "expect": {"status": "ACTIVE"}},
+  {"op": "update_state_machine", "args": {"stateMachineArn": "${machine}", "roleArn": "arn:aws:iam::000000000000:role/fixture-2"}},
+  {"op": "list_state_machines", "args": {}, "expect": {"stateMachines[0].name": "fixture-flow"}},
+  {"op": "tag_resource", "args": {"resourceArn": "${machine}", "tags": [{"key": "k", "value": "v"}]}},
+  {"op": "untag_resource", "args": {"resourceArn": "${machine}", "tagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${activity}"}, "expect": {"tags[0].key": "team"}},
+  {"op": "start_execution", "args": {"stateMachineArn": "${machine}"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "describe_activity", "args": {"activityArn": "arn:aws:states:us-east-1:000000000000:activity:missing"}, "error": "ActivityDoesNotExist"}
+ ],
+ "isolation": [
+  {"op": "list_state_machines", "args": {}, "expect": {"stateMachines#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_state_machine", "args": {"stateMachineArn": "${machine}"}, "expect": {"roleArn": "arn:aws:iam::000000000000:role/fixture-2"}}
+ ],
+ "cleanup": [
+  {"op": "delete_state_machine", "args": {"stateMachineArn": "${machine}"}},
+  {"op": "delete_activity", "args": {"activityArn": "${activity}"}},
+  {"op": "list_activities", "args": {}, "expect": {"activities#count": 0}}
+ ]
+}

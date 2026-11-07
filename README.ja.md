@@ -22,6 +22,10 @@ AWS の公開仕様に基づく独自実装へ置き換えています。歴史�
 
 ## 起動する
 
+起動後の <http://127.0.0.1:4566/_simulator/> には、対応範囲を説明する
+[触れる構成図の紹介ページ](docs/landing.md)があります。基本の説明と操作は通常のHTMLで使えます。
+HTML-in-Canvasの装飾は対応ブラウザーだけで追加し、SDKのルート `/` とコンソールの認証は維持します。
+
 ソースからの起動にはGo 1.26が必要です（CIは1.26.10）。
 
 ```sh
@@ -47,6 +51,7 @@ make build
 | サービス | 実装済みの操作・状態 | 主な未対応 |
 | --- | --- | --- |
 | [S3](docs/s3.md) | bucket作成・一覧・存在確認・region取得・削除、object PUT/GET/HEAD/DELETE・ListObjectsV2、bucket versioning・ListObjectVersions、public access block・tags | multipart、ACL、一般bucket policy、暗号化設定。path-styleのみ |
+| [SNS](docs/sns.md) | Topic／購読／ローカルPublish記録の9 Query/XML操作。SQLite保存・native SDK・有限quota | 外部配信・SQS連携・コンソール・CFN・FIFO Publishなし。ローカル即時確認 |
 | [SQS](docs/sqs.md) | Cloudscape操作画面とStandard queue JSON 1.0 API 9操作：CreateQueue、GetQueueUrl、ListQueues、GetQueueAttributes、DeleteQueue、SendMessage、ReceiveMessage、DeleteMessage、ChangeMessageVisibility | CloudFormation、function SDK bridge、Challenge連携、FIFO、batch、DLQ、SNS連携 |
 | [CloudWatch Logs](docs/cloudwatch-logs.md) | ロググループ／ストリームの作成・一覧、グループ削除、PutLogEvents・GetLogEvents。7 APIと同一状態の操作画面 | メトリクス、アラーム、保持期間、Lambda自動配送、CFN、Insights |
 | [Secrets Manager](docs/secrets-manager.md) | Create/Describe/ListSecret、値を返さないListSecretVersionIds、Put/GetSecretValue、UpdateSecretVersionStage、即時DeleteSecret。8 APIとバージョン／明示表示付き操作画面 | KMS暗号化、実秘密情報の保管、rotation、replica、SecretBinary、scheduled deletion、CFN。ダミー値はSQLiteに平文保存 |
@@ -55,8 +60,9 @@ make build
 | [DynamoDB](docs/dynamodb.md) | JSON 1.0 の7操作: CreateTable/ListTables/DescribeTable/DeleteTable、PutItem/GetItem/DeleteItem。Cloudscapeでテーブル一覧・作成・詳細・削除、完全キーによる項目の書き込み・取得・削除 | S/N/Bキーと任意sort key、条件はpartition-key attribute_(not_)existsのみ。Query/Scan・項目一覧・indexes・Streams・CFN・Challenge連携は未対応 |
 | [IAM](docs/iam.md) | Create/Get/List/DeleteRole、inline/trust、customer policy CRUD・version/default・ロールへのAttach/Detach。inlineと既定managed policyを合成、Deny優先 | AWS-managed catalog、STS、user/group attachments、一般Condition・permissions boundary・SCP |
 | [Lambda](docs/lambda.md) | CreateFunction、ListFunctions、GetFunctionConfiguration、UpdateFunctionCode、Invoke、DeleteFunction、AddPermission/GetPolicy/RemovePermission。固定CPython 3.12.16/WASIによるPython ZIP実行、限定S3/SSM SDK bridge | 他言語、非同期実行、Function URL、任意network。128 MiB・timeout 1–30秒 |
-| [CloudFormation](docs/cloudformation-rest.md) | CreateStack、DescribeStacks、DeleteStack。S3 Bucket、SSM Parameter、inline Python Lambda、限定IAM Role、API Gateway 5 resource types・Lambda Permission、限定Ref/Sub/GetAtt/DependsOn | UpdateStack、一般resource types、実AWS相当の非同期lifecycle、CFN専用service role |
+| [CloudFormation](docs/cloudformation-rest.md) | CreateStack、DescribeStacks、DeleteStack。S3 Bucket、SSM Parameter、inline Python Lambda、限定IAM Role、API Gateway 5 resource types・Lambda Permission、限定Ref/Sub/GetAtt/DependsOn、String/Number制約、Equals/条件alias、resource/outputのCondition、If/NoValue選択 | UpdateStack、And/Or/Not、NoEcho秘匿、一般resource types、実AWS相当の非同期lifecycle、CFN専用service role |
 | [API Gateway](docs/apigateway.md) | Regional REST管理16操作。API/resource/method/integration、immutable deployment、新規stage、ローカルLambda proxy実行 | HTTP/WebSocket API、authorizer、API key、既存stage編集、public endpoint |
+| [サービスカタログ](docs/aws-catalog.md) | CodeConnections、Step Functions、ECR、Amplify の設定メタデータを、各サービスのネイティブ JSON または REST-JSON で扱います。汎用コンソール画面とサービス別 API リファレンスを含みます | 実行、イメージ、ビルド、ホスティング、OAuth、一覧にない公式操作（HTTP 501） |
 
 対応regionは`us-east-1`、`us-west-2`、`ap-northeast-1`、`eu-west-1`。S3 objectは8 MiB、保持version合計64 MiB、SSM値4096 UTF-8 bytes、CFN TemplateBody51200 bytesなどの上限があります。全フィールド・エラー・quotaの範囲は各サービス資料を確認してください。 1プロセスの上限は1000 buckets、10000 objects/versions/delete markers、1000 parameters/identities、100 stacks、100 resources/stackです。これらはプロセスメモリ全体の上限ではありません。
 
@@ -120,13 +126,25 @@ SDK、操作画面、再起動、チーム分離の受入検証は `make e2e` �
 
 CIはstatementと未フィルターsource-line coverageを両方90%以上に強制します。`make before-commit`単独のcoverage判定はstatementのみで、source-line判定はCIのCobertura生成後ステージと上記の2コマンドで行います。SDK/browser、license、依存security、埋込asset、形式検査も行います。cross compileは他OSでの実行成功を意味しません。開発用Python/Node/Javaはruntime依存ではありません。UI・Scalarの再生成は権利表記とlockを保持する[各build手順](tools/console/README.md)・[Scalar手順](tools/scalar/README.md)・[Python runtimeの権利・再生成手順](tools/python/README.md)に従います。
 
-形式検査はregistryに44有限モデル・347の意図した欠陥検出を登録しています（基準モデルと陰性検査で391ケース）。Sakuraの4つの限定モデル、DynamoDB画面、Secretsメタデータ画面の登録を保持します。SecretVersionListingは保存済みARNの認可後に行うメタデータ一覧と限定的なcursor境界を対象とし、値の読取許可や完全な履歴画面を追加しません。追加モデルの有限検査結果と統合後の固定HEAD検査は区別します。TLCは限定した状態空間の安全条件と意図したmutantの反例を検査し、Go実装のrefinement、暗号、全AWS仕様・実AWSとの一致を証明するものではありません。[形式検査](formal/README.md)、[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)。
+統合後のregistryは**55有限モデル・450制御（505実行）**を必須とし、新しいmainを取り込んだ
+固定HEADでの全体検証は未完了です。mainの52モデル・415制御を保持します。従来の50/398に
+サービスカタログの保存状態モデルCatalogResourceLifecycle（12制御）と画面モデル
+CatalogConsoleEpoch（5制御）を加え、LoginInputIntentの1モデル・14制御と、SNSの有限受理・保存モデル2本・21制御を統合します。
+SNSの検査はGo/SQLのrefinementや外部配信を証明しません。
+以前の48/381に追加したLPの2モデル・17制御や、Sakura、DynamoDB画面、Secretsメタデータ画面も保持します。
+LPモデルは信頼済みのhost/origin/認証判定や閉じたノード入力を前提とし、URL解析、フォーカス、
+レイアウト、SVG線の位置、ブラウザー描画、Go/JavaScriptのrefinementは証明しません。
+LoginInputIntentのfocus／keydown時の制御値リセットは限定モデルの仮定であり、実ブラウザーの原因や
+拡張機能の修復を証明しません。SecretVersionListingは認可後のメタデータ一覧と限定cursor境界を対象とし、
+値の読取権限や完全な履歴画面を追加しません。有限モデル検査、実コード試験、固定HEADの全体検査は別の結果です。
+`8149cac`の463実行や102件のpure検査の受領証は統合前の版に属し、新しい482実行の成功を意味しません。
+[形式検査](formal/README.md)、[CI](docs/ci.md)、[設計](docs/design/0001-go-standalone.md)。
 
 ## ライセンス
 
 本体は[MIT](LICENSE)。`/_simulator/licenses/`にGo・Cloudscape・Scalar・CPython/WASI等の原文LICENSE/NOTICEを同梱しています。再配布時も保持してください。AWS公式サービスではなく、AWSロゴは使用しません。[設計・引継ぎ資料](docs/handoff/README.md)。
 
-貼り付けが動かない場合はログイン画面の「トークンファイルを選択」で、主催者から受け取った小さなファイルを明示選択できます。値は隠したまま読み込み、サインイン操作時にサーバーが認証します。[形式・制限とDia未確認の境界](docs/login-token-file.md)。
+貼り付けが動かない場合はログイン画面の「トークンファイルを選択」で、主催者から受け取った小さなファイルを明示選択できます。値は隠したまま読み込み、サインイン操作時にサーバーが認証します。[形式・制限とDia未確認の境界](docs/login-token-file.md)。入力欄にはフィールド単位のパスワードマネージャー向け無視ヒントを付け、input／focus／keydownのcaptureとblurで接続中のnative入力値を取り込み、送信時にも現在値を確認します。意図的な空欄を尊重し、送信時には現在の明示的な貼り付けを先に処理します。取り込みは新しい入力意図として古い非同期処理を無効にします。拡張機能が原因という診断や、Dia／1Passwordでの修復確認ではありません。339c264では最初のnative入力ケースは成功しましたが、native clear後のEnterで空欄説明が出ないケースは失敗しました。keydown同期を追加した8149cacでは、62件のブラウザ試験が2回とも成功しました。その後のサービスカタログ統合版は別途、全体CIの確認が必要です。実際のDia／1Passwordや利用者のOSクリップボード動作は引き続き未確認です。[過去のCI結果と残検証](docs/login-token-file.md#dated-validation-and-current-candidate)を区別してください。
 
 
 ## Secrets Manager contract
@@ -161,4 +179,19 @@ combined 29-model/164-control formal gate (193 executions). These receipts apply
 to that revision. Every later change still requires its exact-HEAD CI, including
 the 45-case E2E suite; focused results do not replace whole-suite verification.
 
-現在の形式検査の登録は44モデル・347制御（391実行）です。IAMの追加モデルは4つの到達可能な初期状態から各2要求の範囲で、4要求の試案はタイムアウトし未成功です。上の過去の受領証とは区別し、最新HEADで全ゲートを実行してください。API資料はAWS・Google Cloud・Azureを分け、Sakura Cloudでは任意有効化するDisk構成の画面と5つのnative APIを扱います。他のSakuraサービスや実ストレージに対応したという意味ではありません。[ナビゲーション](docs/api-reference.md)を参照してください。
+現在のカタログ・ログイン統合で必要な形式検査は53モデル・429制御（482実行）で、新しい統合HEADの全体成功は未確認です。IAMモデルは4つの到達可能な初期状態から
+各2要求の範囲で、4要求の試案はタイムアウトし未成功です。2026-11-06にLPの限定19実行が
+`4382ec4`で成功しましたが、その版の全448実行はDynamoDBAdmissionで失敗しました。
+`fad3b8a`のLPはPC・スマートフォンの8ブラウザーケースと6状態の厳格なアクセシビリティ検査に成功。
+使用したChromium 154には現行HTML-in-Canvas APIがなく、通常HTMLとフォールバックの結果です。
+Chrome 157の描画や他エンジン、後続HEADのGo・E2E・形式検査・hosted CIの成功を意味しません。
+API資料ではクラウドを分け、Sakura Cloudの任意有効化するDisk構成画面と5つのnative APIを扱います。
+他のSakuraサービスや実ストレージへの対応ではありません。[ナビゲーション](docs/api-reference.md)。
+
+過去のCFN受領証：`c298972`では44の旧mainモデルを保持して、条件の受理・メモ化グラフ高さ・
+最終スタック／所有権行ACK・選択したSSM/S3物理行ACKを検査し、全48モデル・381制御（429実行）、
+全Go race/build、同一profileのstatement94.94%・未除外source90.32%が成功しました。
+資料のみを変えた後続`414c902`では全61 E2E（980.726秒）・reflow・startが成功しました。
+「資料のみの追補」「実行コード等が同一」はその過去の版の説明であり、現在のLP実装を指しません。
+当時のhosted検査の留保もその版に属します。現在の全505実行の成功や、ホスト採点・SQL/Go refinement・
+秘匿出力・全リソース物理削除の証明へ読み替えないでください。

@@ -1,0 +1,837 @@
+{
+ "components": {
+  "schemas": {
+   "ActivityListItem": {
+    "additionalProperties": false,
+    "properties": {
+     "activityArn": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "creationDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "name": {
+      "maxLength": 80,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "activityArn",
+     "name",
+     "creationDate"
+    ],
+    "type": "object"
+   },
+   "CloudWatchLogsLogGroup": {
+    "additionalProperties": false,
+    "properties": {
+     "logGroupArn": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CreateActivityInput": {
+    "additionalProperties": false,
+    "properties": {
+     "encryptionConfiguration": {
+      "$ref": "#/components/schemas/EncryptionConfiguration"
+     },
+     "name": {
+      "maxLength": 80,
+      "minLength": 1,
+      "type": "string"
+     },
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "CreateActivityOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "activityArn": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "creationDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "activityArn",
+     "creationDate"
+    ],
+    "type": "object"
+   },
+   "CreateStateMachineInput": {
+    "additionalProperties": false,
+    "properties": {
+     "definition": {
+      "maxLength": 1048576,
+      "minLength": 1,
+      "type": "string"
+     },
+     "encryptionConfiguration": {
+      "$ref": "#/components/schemas/EncryptionConfiguration"
+     },
+     "loggingConfiguration": {
+      "$ref": "#/components/schemas/LoggingConfiguration"
+     },
+     "name": {
+      "maxLength": 80,
+      "minLength": 1,
+      "type": "string"
+     },
+     "publish": {
+      "type": "boolean"
+     },
+     "roleArn": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     },
+     "tracingConfiguration": {
+      "$ref": "#/components/schemas/TracingConfiguration"
+     },
+     "type": {
+      "enum": [
+       "STANDARD",
+       "EXPRESS"
+      ],
+      "type": "string"
+     },
+     "versionDescription": {
+      "maxLength": 256,
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "definition",
+     "roleArn"
+    ],
+    "type": "object"
+   },
+   "CreateStateMachineOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "creationDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "stateMachineArn": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "stateMachineVersionArn": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "stateMachineArn",
+     "creationDate"
+    ],
+    "type": "object"
+   },
+   "DeleteActivityInput": {
+    "additionalProperties": false,
+    "properties": {
+     "activityArn": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "activityArn"
+    ],
+    "type": "object"
+   },
+   "DeleteActivityOutput": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DeleteStateMachineInput": {
+    "additionalProperties": false,
+    "properties": {
+     "stateMachineArn": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "stateMachineArn"
+    ],
+    "type": "object"
+   },
+   "DeleteStateMachineOutput": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DescribeActivityInput": {
+    "additionalProperties": false,
+    "properties": {
+     "activityArn": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "activityArn"
+    ],
+    "type": "object"
+   },
+   "DescribeActivityOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "activityArn": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "creationDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "encryptionConfiguration": {
+      "$ref": "#/components/schemas/EncryptionConfiguration"
+     },
+     "name": {
+      "maxLength": 80,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "activityArn",
+     "name",
+     "creationDate"
+    ],
+    "type": "object"
+   },
+   "DescribeStateMachineInput": {
+    "additionalProperties": false,
+    "properties": {
+     "includedData": {
+      "enum": [
+       "ALL_DATA",
+       "METADATA_ONLY"
+      ],
+      "type": "string"
+     },
+     "stateMachineArn": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "stateMachineArn"
+    ],
+    "type": "object"
+   },
+   "DescribeStateMachineOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "creationDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "definition": {
+      "maxLength": 1048576,
+      "minLength": 1,
+      "type": "string"
+     },
+     "description": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "encryptionConfiguration": {
+      "$ref": "#/components/schemas/EncryptionConfiguration"
+     },
+     "label": {
+      "type": "string"
+     },
+     "loggingConfiguration": {
+      "$ref": "#/components/schemas/LoggingConfiguration"
+     },
+     "name": {
+      "maxLength": 80,
+      "minLength": 1,
+      "type": "string"
+     },
+     "revisionId": {
+      "type": "string"
+     },
+     "roleArn": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "stateMachineArn": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "ACTIVE",
+       "DELETING"
+      ],
+      "type": "string"
+     },
+     "tracingConfiguration": {
+      "$ref": "#/components/schemas/TracingConfiguration"
+     },
+     "type": {
+      "enum": [
+       "STANDARD",
+       "EXPRESS"
+      ],
+      "type": "string"
+     },
+     "variableReferences": {
+      "additionalProperties": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "type": "object"
+     }
+    },
+    "required": [
+     "stateMachineArn",
+     "name",
+     "definition",
+     "roleArn",
+     "type",
+     "creationDate"
+    ],
+    "type": "object"
+   },
+   "EncryptionConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "kmsDataKeyReusePeriodSeconds": {
+      "maximum": 900,
+      "minimum": 60,
+      "type": "integer"
+     },
+     "kmsKeyId": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "AWS_OWNED_KEY",
+       "CUSTOMER_MANAGED_KMS_KEY"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "type"
+    ],
+    "type": "object"
+   },
+   "ListActivitiesInput": {
+    "additionalProperties": false,
+    "properties": {
+     "maxResults": {
+      "maximum": 1000,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "nextToken": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListActivitiesOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "activities": {
+      "items": {
+       "$ref": "#/components/schemas/ActivityListItem"
+      },
+      "type": "array"
+     },
+     "nextToken": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "activities"
+    ],
+    "type": "object"
+   },
+   "ListStateMachinesInput": {
+    "additionalProperties": false,
+    "properties": {
+     "maxResults": {
+      "maximum": 1000,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "nextToken": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListStateMachinesOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "nextToken": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "stateMachines": {
+      "items": {
+       "$ref": "#/components/schemas/StateMachineListItem"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "stateMachines"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceInput": {
+    "additionalProperties": false,
+    "properties": {
+     "resourceArn": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "resourceArn"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "LogDestination": {
+    "additionalProperties": false,
+    "properties": {
+     "cloudWatchLogsLogGroup": {
+      "$ref": "#/components/schemas/CloudWatchLogsLogGroup"
+     }
+    },
+    "type": "object"
+   },
+   "LoggingConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "destinations": {
+      "items": {
+       "$ref": "#/components/schemas/LogDestination"
+      },
+      "type": "array"
+     },
+     "includeExecutionData": {
+      "type": "boolean"
+     },
+     "level": {
+      "enum": [
+       "ALL",
+       "ERROR",
+       "FATAL",
+       "OFF"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "StateMachineListItem": {
+    "additionalProperties": false,
+    "properties": {
+     "creationDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "name": {
+      "maxLength": 80,
+      "minLength": 1,
+      "type": "string"
+     },
+     "stateMachineArn": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "STANDARD",
+       "EXPRESS"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "stateMachineArn",
+     "name",
+     "type",
+     "creationDate"
+    ],
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "key": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "value": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TagResourceInput": {
+    "additionalProperties": false,
+    "properties": {
+     "resourceArn": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "resourceArn",
+     "tags"
+    ],
+    "type": "object"
+   },
+   "TagResourceOutput": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "TracingConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "UntagResourceInput": {
+    "additionalProperties": false,
+    "properties": {
+     "resourceArn": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "tagKeys": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "resourceArn",
+     "tagKeys"
+    ],
+    "type": "object"
+   },
+   "UntagResourceOutput": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UpdateStateMachineInput": {
+    "additionalProperties": false,
+    "properties": {
+     "definition": {
+      "maxLength": 1048576,
+      "minLength": 1,
+      "type": "string"
+     },
+     "encryptionConfiguration": {
+      "$ref": "#/components/schemas/EncryptionConfiguration"
+     },
+     "loggingConfiguration": {
+      "$ref": "#/components/schemas/LoggingConfiguration"
+     },
+     "publish": {
+      "type": "boolean"
+     },
+     "roleArn": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "stateMachineArn": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "tracingConfiguration": {
+      "$ref": "#/components/schemas/TracingConfiguration"
+     },
+     "versionDescription": {
+      "maxLength": 256,
+      "type": "string"
+     }
+    },
+    "required": [
+     "stateMachineArn"
+    ],
+    "type": "object"
+   },
+   "UpdateStateMachineOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "revisionId": {
+      "type": "string"
+     },
+     "stateMachineVersionArn": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "updateDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "updateDate"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS Step Functions API (2016-11-23). Every other official operation returns HTTP 501 UnknownOperationException. State machine definitions are stored after a structural Amazon States Language check; executions, versions, aliases and activity tasks are not run. StartExecution, StartSyncExecution and other execution APIs return UnknownOperationException with HTTP 501.",
+  "title": "AWS Step Functions (simulator catalog)",
+  "version": "2016-11-23"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/": {
+   "post": {
+    "description": "Choose the X-Amz-Target of one implemented operation. Request and response members follow the linked official input/output schemas.",
+    "operationId": "stepfunctionsJSONOperation",
+    "parameters": [
+     {
+      "in": "header",
+      "name": "X-Amz-Target",
+      "required": true,
+      "schema": {
+       "enum": [
+        "AWSStepFunctions.CreateActivity",
+        "AWSStepFunctions.CreateStateMachine",
+        "AWSStepFunctions.DeleteActivity",
+        "AWSStepFunctions.DeleteStateMachine",
+        "AWSStepFunctions.DescribeActivity",
+        "AWSStepFunctions.DescribeStateMachine",
+        "AWSStepFunctions.ListActivities",
+        "AWSStepFunctions.ListStateMachines",
+        "AWSStepFunctions.ListTagsForResource",
+        "AWSStepFunctions.TagResource",
+        "AWSStepFunctions.UntagResource",
+        "AWSStepFunctions.UpdateStateMachine"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-amz-json-1.0": {
+       "examples": {
+        "CreateActivity": {
+         "summary": "X-Amz-Target: AWSStepFunctions.CreateActivity",
+         "value": {}
+        },
+        "CreateStateMachine": {
+         "summary": "X-Amz-Target: AWSStepFunctions.CreateStateMachine",
+         "value": {}
+        },
+        "DeleteActivity": {
+         "summary": "X-Amz-Target: AWSStepFunctions.DeleteActivity",
+         "value": {}
+        },
+        "DeleteStateMachine": {
+         "summary": "X-Amz-Target: AWSStepFunctions.DeleteStateMachine",
+         "value": {}
+        },
+        "DescribeActivity": {
+         "summary": "X-Amz-Target: AWSStepFunctions.DescribeActivity",
+         "value": {}
+        },
+        "DescribeStateMachine": {
+         "summary": "X-Amz-Target: AWSStepFunctions.DescribeStateMachine",
+         "value": {}
+        },
+        "ListActivities": {
+         "summary": "X-Amz-Target: AWSStepFunctions.ListActivities",
+         "value": {}
+        },
+        "ListStateMachines": {
+         "summary": "X-Amz-Target: AWSStepFunctions.ListStateMachines",
+         "value": {}
+        },
+        "ListTagsForResource": {
+         "summary": "X-Amz-Target: AWSStepFunctions.ListTagsForResource",
+         "value": {}
+        },
+        "TagResource": {
+         "summary": "X-Amz-Target: AWSStepFunctions.TagResource",
+         "value": {}
+        },
+        "UntagResource": {
+         "summary": "X-Amz-Target: AWSStepFunctions.UntagResource",
+         "value": {}
+        },
+        "UpdateStateMachine": {
+         "summary": "X-Amz-Target: AWSStepFunctions.UpdateStateMachine",
+         "value": {}
+        }
+       },
+       "schema": {
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/x-amz-json-1.0": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception in __type."
+     },
+     "403": {
+      "description": "AccessDeniedException from local identity policy evaluation."
+     },
+     "501": {
+      "description": "Official operation not implemented by the simulator."
+     }
+    },
+    "summary": "AWS Step Functions JSON 1.0 operations",
+    "tags": [
+     "AWS Step Functions"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS Step Functions API (2016-11-23). Every other official operation returns HTTP 501 UnknownOperationException. State machine definitions are stored after a structural Amazon States Language check; executions, versions, aliases and activity tasks are not run. StartExecution, StartSyncExecution and other execution APIs return UnknownOperationException with HTTP 501.",
+   "name": "AWS Step Functions"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/stepfunctions/2016-11-23/service-2.json",
+  "sha256": "bfb8c218406d881b3f5287ff6c98d51b048dfae2622b45a7f7ba0a14729b36af",
+  "license": "Apache-2.0"
+ }
+}

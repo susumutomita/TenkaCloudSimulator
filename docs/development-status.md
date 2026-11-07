@@ -1,5 +1,47 @@
 # Development roster
 
+## Current integration snapshot: login and published catalog, 2026-11-06
+
+PR [#437](https://github.com/susumutomita/TenkaCloudSimulator/pull/437) is being
+integrated with published main `b81496f73e31be6150fc237f4641d6369446cc38`
+(catalog PR #438). The catalog's Go code, model data, tests and notices are kept;
+the login input-capture fix and its original browser assertions are also kept.
+The combined inventory is **53 models / 429 controls / 482 executions**.
+
+| Owner / handoff | Exclusive scope and observed status |
+|---|---|
+| root | Merge coordination, applicability record, final commits and serialized execution; combined validation is pending |
+| lp_quality | Registry and formal-gate/test union resolved; source handoff complete |
+| formal_review | Independent model/policy union review complete; no combined runtime acceptance claimed |
+| docs_merge_b8 | Four documentation conflicts recovered and verified; source handoff complete |
+| assets_merge_b8 | Merged-source console rebuilt in local commit `5219eb1`; 1353 inputs and unchanged original package notices verified; combined CI remains pending |
+| catalog_compat_b8 | Read-only routing/authentication intersection review complete; Go and catalog fixtures kept byte-identical to incoming main |
+| ci_watch_b8 | Exact-SHA monitoring for prior login `8149cac` and incoming main; these results do not validate the combined tree |
+
+These are ownership and handoff entries, not a claim that seven workers are
+currently running. The ceiling remains seven including root. Completed reviewers
+can take the next independent task; heavy checks use one explicit local runtime
+lane. The prior login's 102 focused checks and all eleven hosted checks passed,
+but its base was `03060d4`. Actual Dia/1Password behavior remains unverified.
+The new combined HEAD must pass its own quality, browser and formal gates.
+
+The following catalog and IAM sections retain their original dated evidence.
+
+## Current integration snapshot: AWS service catalog, 2026-11-06
+
+Root integrates the model-driven AWS catalog on branch
+`claude/adoring-noether-7fvwju` from main `03060d44f2c7c6e52aaf8799f4bacf21a22cd6bc`.
+The user authorized implementing and merging the open backlog. This slice adds
+the [catalog engine and four services](aws-catalog.md) (#297, #83, #111, #147);
+later slices add further backlog services to the same engine. No other agent
+writes these files; existing open PRs and their owners are untouched.
+
+| Scope | Status and evidence boundary |
+|---|---|
+| `internal/aws/catalog` engine, specifications and embedded official subsets | Focused package tests, real-binary boto3 two-team flow and console/reference browser flow pass locally |
+| Formal `CatalogResourceLifecycle` | Baseline and all 12 controls produce their expected counterexamples locally |
+| Whole gates | `make before-commit`, `make e2e`, `make formal` and hosted CI are required before merge |
+
 ## Current integration snapshot: IAM53, 2026-11-05
 
 Root integrates `feat/iam-managed-policy-53-20261105` from main
