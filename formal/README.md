@@ -1,8 +1,13 @@
 # Finite state models
 
-Combined catalog/login inventory: **55 models / 450 literal-protected controls
-(505 required executions)**. Exact-HEAD whole-gate validation after this main
-integration is pending. Main's 52/415 inventory is preserved: the previous
+STS/event integration inventory: **57 models / 474 literal-protected controls
+(531 required executions)**. The 55 public-base model entries are preserved
+unchanged. STSSessionLifecycle adds eight guard-removal controls for issuance and
+generation-bound session use. CFNEventHistory adds sixteen controls for local
+transactional event/history publication, retention and generation-scoped reads.
+Neither is cryptographic, SQL/Go refinement or full cloud-behavior proof.
+Exact-HEAD whole-gate validation for this candidate is pending. See the
+[event model scope](../docs/formal-cfn-event-history.md). Main's 52/415 inventory is preserved: the previous
 50/398 plus CatalogResourceLifecycle (twelve controls) and CatalogConsoleEpoch
 (five). LoginInputIntent adds one baseline and fourteen controls. SNSAdmission/SNSLifecycle
 add two finite admission/local-record models and twenty-one controls, not Go/SQL refinement. The two landing
@@ -121,8 +126,9 @@ CFNPhysicalResourceACK adds five properties and seven controls for selected SSM/
 The required `Formal validation` job reserves 30 minutes for checkout, the gate
 negative controls, exact-blob applicability and the complete serial registry.
 Each TLC case retains its 60-second default deadline and existing per-model
-settings; all 505 combined baseline/counterexample runs and failure requirements
-remain mandatory, including the preserved 467 catalog/main checks,15 login checks and23 SNS checks. This is an aggregate execution budget, not a model-bound,
+settings; all 531 combined baseline/counterexample runs and failure requirements
+remain mandatory: the preserved 505 public-base checks, nine STS checks and
+seventeen event/history checks. This is an aggregate execution budget, not a model-bound,
 acceptance, permission or per-case timeout change.
 
 The earlier 15-minute job on `8bb8a3d` ended cancelled after roughly 15 minutes;
