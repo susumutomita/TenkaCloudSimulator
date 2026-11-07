@@ -23,6 +23,11 @@ from gcp_catalog_fixtures import client
 REPORTS = Path(os.environ.get('SIMULATOR_REPORTS', 'reports')).resolve()
 PROJECT = 'projects/tenkacloud-local/locations/us-central1'
 NETWORK = 'projects/tenkacloud-local/global/networks/default'
+SINK_DESTINATION = 'logging.googleapis.com/projects/tenkacloud-local/locations/global/buckets/app'
+
+
+def descriptors_of(team):
+    return team.control('GET', team.control('GET', '/_simulator/v1/capabilities')['gcpCatalog']['descriptors'])['apis']
 
 
 def run():
@@ -128,6 +133,73 @@ def run():
                 page.get_by_role('button', name='Confirm delete ui-cluster').click()
                 expect(page.get_by_role('status')).to_have_text('Resource deleted.')
                 assert [c['name'].rsplit('/', 1)[1] for c in alloydb.clusters().list(parent=PROJECT).execute(num_retries=0)['clusters']] == ['sdk-cluster']
+                # A body-ID, short-name collection: the ID travels in the
+                # create body and listed names are bare IDs under the project.
+                logging = client(team, {'api': 'logging.v2'}).projects()
+                page.get_by_label('API', exact=True).select_option(label='Cloud Logging')
+                expect(page.get_by_label('Resource type')).to_have_value('sinks')
+                expect(page.get_by_label('Location', exact=True)).to_have_count(0)
+                page.get_by_label('name', exact=True).fill('ui-sink')
+                page.get_by_label(re.compile('^destination')).fill(SINK_DESTINATION)
+                page.get_by_role('button', name='Create', exact=True).click()
+                expect(page.get_by_role('status')).to_have_text('Resource created.')
+                sinks = logging.sinks().list(parent='projects/tenkacloud-local').execute(num_retries=0)['sinks']
+                assert [(s['name'], s['destination']) for s in sinks] == [('ui-sink', SINK_DESTINATION)], sinks
+                page.get_by_role('button', name='ui-sink', exact=True).click()
+                expect(page.locator('pre')).to_contain_text(SINK_DESTINATION)
+                page.get_by_role('button', name='Back to list').click()
+                audit('logging-sinks')
+                page.get_by_role('button', name='Delete ui-sink').click()
+                page.get_by_role('button', name='Confirm delete ui-sink').click()
+                expect(page.get_by_role('status')).to_have_text('Resource deleted.')
+                assert not logging.sinks().list(parent='projects/tenkacloud-local').execute(num_retries=0).get('sinks')
+                # A project-scope collection whose official path names a location.
+                page.get_by_label('Resource type').select_option('buckets')
+                page.get_by_label('Location', exact=True).select_option('global')
+                page.get_by_label('bucketId', exact=True).fill('ui-logs')
+                page.get_by_role('button', name='Create', exact=True).click()
+                expect(page.get_by_role('button', name='ui-logs', exact=True)).to_be_visible()
+                buckets = logging.locations().buckets().list(parent='projects/tenkacloud-local/locations/global').execute(num_retries=0)['buckets']
+                assert [b['name'] for b in buckets] == ['projects/tenkacloud-local/locations/global/buckets/ui-logs'], buckets
+                # A zonal collection lists and creates in the chosen zone.
+                ids = client(team, {'api': 'ids.v1'}).projects().locations()
+                page.get_by_label('API', exact=True).select_option(label='Cloud IDS')
+                expect(page.get_by_label('Zone', exact=True)).to_have_value('us-central1-a')
+                page.get_by_label('Zone', exact=True).select_option('us-central1-b')
+                page.get_by_label('endpointId', exact=True).fill('ui-ids')
+                page.get_by_label(re.compile('^network')).fill(NETWORK)
+                page.get_by_label(re.compile('^severity')).select_option('HIGH')
+                page.get_by_role('button', name='Create', exact=True).click()
+                expect(page.get_by_role('button', name='ui-ids', exact=True)).to_be_visible()
+                endpoints = ids.endpoints().list(parent='projects/tenkacloud-local/locations/us-central1-b').execute(num_retries=0)['endpoints']
+                assert [e['name'] for e in endpoints] == ['projects/tenkacloud-local/locations/us-central1-b/endpoints/ui-ids'], endpoints
+                assert not ids.endpoints().list(parent='projects/tenkacloud-local/locations/us-central1-a').execute(num_retries=0).get('endpoints')
+                audit('ids-endpoints')
+                # A flat API: global paths without a location, a body ID and an
+                # explicit false boolean.
+                compute_api = next(a for a in descriptors_of(team) if a['name'] == 'compute')
+                compute = client(team, {'api': 'compute.v1', 'endpoint': compute_api['endpoint']})
+                page.get_by_label('API', exact=True).select_option(label='Compute Engine')
+                expect(page.get_by_label('Resource type')).to_have_value('networks')
+                page.get_by_label('name', exact=True).fill('ui-vpc')
+                page.get_by_label(re.compile('^autoCreateSubnetworks')).select_option('false')
+                page.get_by_role('button', name='Create', exact=True).click()
+                expect(page.get_by_role('button', name='ui-vpc', exact=True)).to_be_visible()
+                assert [n['name'] for n in compute.networks().list(project='tenkacloud-local').execute(num_retries=0)['items']] == ['ui-vpc']
+                page.get_by_label('Resource type').select_option('disks')
+                expect(page.get_by_label('Zone', exact=True)).to_be_visible()
+                # Implicit parents and wrapped creates are listed, with a note
+                # where the form cannot create them.
+                page.get_by_label('API', exact=True).select_option(label='Firestore')
+                page.get_by_label('Resource type').select_option('indexes')
+                expect(page.get_by_text(re.compile('cannot create them'))).to_be_visible()
+                expect(page.get_by_label('collectionGroups ID', exact=True)).to_be_visible()
+                page.get_by_label('API', exact=True).select_option(label='Spanner')
+                expect(page.get_by_text(re.compile('needs instance, which the form cannot collect'))).to_be_visible()
+                expect(page.get_by_role('button', name='Create', exact=True)).to_have_count(0)
+                audit('spanner-read-only')
+                page.get_by_label('API', exact=True).select_option(label='AlloyDB for PostgreSQL')
+                expect(page.get_by_role('button', name='sdk-cluster', exact=True)).to_be_visible()
                 # Japanese presentation keeps identifiers and native state.
                 page.get_by_role('combobox', name='Language', exact=True).select_option('ja')
                 expect(page.get_by_role('heading', level=1, name='Google Cloud サービスカタログ')).to_be_visible()
@@ -139,7 +211,8 @@ def run():
                 expect(docs.get_by_text('AlloyDB for PostgreSQL (simulator catalog)').first).to_be_visible(timeout=20000)
                 index = docs.evaluate("fetch('/_simulator/docs/gcp-catalog/index.json').then(r=>r.json())")
                 capabilities = team.control('GET', '/_simulator/v1/capabilities')['gcpCatalog']
-                assert {s['model'] for s in index} == {f"{a['name']}.{a['version']}" for a in capabilities['apis']}
+                descriptors = team.control('GET', capabilities['descriptors'])['apis']
+                assert {s['model'] for s in index} == {f"{a['name']}.{a['version']}" for a in capabilities['apis']} == {f"{a['name']}.{a['version']}" for a in descriptors}
                 assert capabilities['reference'] == '/_simulator/docs/gcp-catalog.html'
                 document = docs.evaluate("fetch('/_simulator/docs/gcp-catalog/alloydb.v1.json').then(r=>r.json())")
                 assert document['servers'][0]['url'] == '/_simulator/providers/gcp/alloydb'

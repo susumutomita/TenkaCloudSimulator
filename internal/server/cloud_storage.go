@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"net/http"
 
 	azureblob "github.com/susumutomita/TenkaCloudSimulator/internal/azure/blob"
@@ -78,10 +79,36 @@ func registerCloudStorage(db *sql.DB, registry *provider.Registry, cfg CloudStor
 	return catalog, nil
 }
 
+// gcpCatalogDescriptorsPath serves the full descriptors of every reviewed
+// Google API, apart from the bounded capability document.
+const gcpCatalogDescriptorsPath = "/_simulator/v1/catalog/gcp"
+
+// gcpCatalogDescriptors serves the full Google API catalog descriptors that
+// first-party clients use to build native requests.
+func gcpCatalogDescriptors(engine *gcpcatalog.Engine) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]any{"apis": engine.Describe()})
+	}
+}
+
 // gcpCatalogCapabilities advertises the reviewed Google APIs. Every other
-// official method of these APIs returns UNIMPLEMENTED.
+// official method of these APIs returns UNIMPLEMENTED. The capability
+// document carries compact summaries; full descriptors (methods,
+// collections, fields) are served by gcpCatalogDescriptorsPath so the
+// capability document stays bounded as APIs are added.
 func gcpCatalogCapabilities(engine *gcpcatalog.Engine, cfg CloudStorageConfig) map[string]any {
-	return map[string]any{"apis": engine.Describe(), "project": cfg.GCPProject, "projectNumber": cfg.GCPProjectNumber, "locations": gcpLocations,
+	summaries := []map[string]any{}
+	for _, d := range engine.Describe() {
+		summaries = append(summaries, map[string]any{"name": d.Name, "version": d.Version, "title": d.Title, "issues": d.Issues,
+			"methods": len(d.Methods), "officialMethods": d.Official, "endpoint": d.Endpoint, "reference": "/_simulator/docs/gcp-catalog/" + d.Name + "." + d.Version + ".json"})
+	}
+	return map[string]any{"apis": summaries, "descriptors": gcpCatalogDescriptorsPath, "project": cfg.GCPProject, "projectNumber": cfg.GCPProjectNumber,
+		"locations": gcpLocations, "zones": gcpcatalog.Zones(gcpLocations),
 		"endpoint": "/_simulator/providers/gcp/{api}/", "reference": "/_simulator/docs/gcp-catalog.html",
 		"authorization": "Local configured project owner only; not Google IAM", "operations": "long-running operations complete synchronously and stay readable through operations.get/list",
 		"state": "configuration metadata in provider-owned SQLite; no workload, network, data plane or real Google Cloud call"}

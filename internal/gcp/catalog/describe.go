@@ -24,18 +24,25 @@ type FieldDescriptor struct {
 
 // CollectionDescriptor describes one reviewed collection.
 type CollectionDescriptor struct {
-	ID         string                      `json:"id"`
-	Schema     string                      `json:"schema"`
-	Parent     string                      `json:"parent,omitempty"`
-	Implicit   string                      `json:"implicit,omitempty"`
-	IDParam    string                      `json:"idParam,omitempty"`
-	IDField    string                      `json:"idField,omitempty"`
+	ID       string `json:"id"`
+	Schema   string `json:"schema"`
+	Parent   string `json:"parent,omitempty"`
+	Implicit string `json:"implicit,omitempty"`
+	IDParam  string `json:"idParam,omitempty"`
+	IDField  string `json:"idField,omitempty"`
+	// FullName says the IDField carries parent/collection/ID; ShortName
+	// says listed and stored names are the bare ID.
+	FullName   bool                        `json:"fullName,omitempty"`
+	ShortName  bool                        `json:"shortName,omitempty"`
 	Limit      int                         `json:"limit"`
 	Mutable    []string                    `json:"mutable,omitempty"`
 	Zonal      bool                        `json:"zonal,omitempty"`
 	Permission string                      `json:"permission"`
 	Methods    map[string]MethodDescriptor `json:"methods"`
 	Fields     []FieldDescriptor           `json:"fields,omitempty"`
+	// Unformed lists required create request fields that are objects or
+	// lists, which a generic scalar form cannot collect.
+	Unformed []string `json:"unformed,omitempty"`
 }
 
 // Descriptor is the capability entry of one Google API.
@@ -64,7 +71,7 @@ func (e *Engine) Describe() []Descriptor {
 		}
 		sort.Strings(d.Methods)
 		for _, c := range b.api.Collections {
-			cd := CollectionDescriptor{ID: c.ID, Schema: c.Schema, Parent: c.Parent, Implicit: c.Implicit, IDParam: c.IDParam, IDField: c.IDField, Limit: c.Limit, Mutable: c.Mutable, Zonal: c.Zonal, Permission: c.Permission, Methods: map[string]MethodDescriptor{}}
+			cd := CollectionDescriptor{ID: c.ID, Schema: c.Schema, Parent: c.Parent, Implicit: c.Implicit, IDParam: c.IDParam, IDField: c.IDField, FullName: c.FullName, ShortName: c.ShortName, Limit: c.Limit, Mutable: c.Mutable, Zonal: c.Zonal, Permission: c.Permission, Methods: map[string]MethodDescriptor{}}
 			if cd.Limit == 0 {
 				cd.Limit = defaultLimit
 			}
@@ -88,7 +95,7 @@ func (e *Engine) Describe() []Descriptor {
 					}
 				}
 				if bound.Kind == Create {
-					cd.Fields = b.fields(m, c)
+					cd.Fields, cd.Unformed = b.fields(m, c)
 				}
 				key := string(bound.Kind)
 				if bound.Kind == Set {
@@ -104,8 +111,9 @@ func (e *Engine) Describe() []Descriptor {
 	return out
 }
 
-// fields lists writable scalar fields a generic form can collect.
-func (b *binding) fields(m *Method, c *Collection) []FieldDescriptor {
+// fields lists the writable scalar fields a generic form can collect, other
+// than the body ID field, and the required fields it cannot collect.
+func (b *binding) fields(m *Method, c *Collection) ([]FieldDescriptor, []string) {
 	relaxed := map[string]bool{}
 	for _, f := range c.Relax {
 		relaxed[f] = true
@@ -116,17 +124,20 @@ func (b *binding) fields(m *Method, c *Collection) []FieldDescriptor {
 		names = append(names, name)
 	}
 	sort.Strings(names)
-	out := []FieldDescriptor{}
+	out, unformed := []FieldDescriptor{}, []string(nil)
 	for _, name := range names {
 		p := b.model.resolve(s.Properties[name])
-		if s.Properties[name].ReadOnly || name == "name" || p == nil {
+		if s.Properties[name].ReadOnly || name == "name" || name == c.IDField || p == nil {
 			continue
 		}
+		required := b.requiredFor(s.Properties[name], m.ID) && !relaxed[name]
 		if p.Type == "string" || p.Type == "boolean" || p.Type == "integer" {
-			out = append(out, FieldDescriptor{Name: name, Type: p.Type, Required: b.requiredFor(s.Properties[name], m.ID) && !relaxed[name], Enum: withoutUnspecified(p.Enum)})
+			out = append(out, FieldDescriptor{Name: name, Type: p.Type, Required: required, Enum: withoutUnspecified(p.Enum)})
+		} else if required {
+			unformed = append(unformed, name)
 		}
 	}
-	return out
+	return out, unformed
 }
 
 func withoutUnspecified(values []string) []string {

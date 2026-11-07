@@ -106,7 +106,11 @@ def main(selected=None):
         a.start()
         b.start()
         try:
-            apis = {f"{api['name']}.{api['version']}": api for api in a.control('GET', '/_simulator/v1/capabilities')['gcpCatalog']['apis']}
+            # Capabilities carry compact summaries; full descriptors have their own path.
+            summary = a.control('GET', '/_simulator/v1/capabilities')['gcpCatalog']
+            apis = {f"{api['name']}.{api['version']}": api for api in a.control('GET', summary['descriptors'])['apis']}
+            assert sorted(apis) == sorted(f"{api['name']}.{api['version']}" for api in summary['apis']), 'descriptors and summaries differ'
+            assert all(len(api['methods']) == s['methods'] for api, s in zip(sorted(apis.values(), key=lambda x: x['name']), sorted(summary['apis'], key=lambda x: x['name'])))
             a.control('PUT', '/_simulator/v1/iam/principals/gcp-outsider/policy',
                       {'Version': '2012-10-17', 'Statement': [{'Effect': 'Allow', 'Action': '*', 'Resource': '*'}]})
             outsider = a.control('POST', '/_simulator/v1/access', {'Principal': 'gcp-outsider'})['AccessToken']

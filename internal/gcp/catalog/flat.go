@@ -22,6 +22,17 @@ var zones = map[string][]string{
 	"europe-west1": {"b", "c", "d"}, "asia-northeast1": {"a", "b", "c"},
 }
 
+// Zones lists the published zones of the given regions, in region order.
+func Zones(regions []string) []string {
+	out := []string{}
+	for _, region := range regions {
+		for _, suffix := range zones[region] {
+			out = append(out, region+"-"+suffix)
+		}
+	}
+	return out
+}
+
 // zoneRegion returns the region of a published zone.
 func zoneRegion(zone string) (string, bool) {
 	i := strings.LastIndex(zone, "-")

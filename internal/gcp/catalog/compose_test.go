@@ -327,3 +327,46 @@ func TestRouteTiesPreferEarlierLiterals(t *testing.T) {
 		t.Fatalf("single match %v", rt)
 	}
 }
+
+// Descriptors tell the console how to name and create resources: full and
+// short body names, zonal collections, and required fields a scalar form
+// cannot collect. The body ID field is not offered twice.
+func TestDescriptorsCarryNamingAndFormShapes(t *testing.T) {
+	h := newHarness(t)
+	for _, b := range []*binding{zonalAPI(t)} {
+		if err := h.engine.add(b); err != nil {
+			t.Fatal(err)
+		}
+	}
+	want := map[string]func(CollectionDescriptor) bool{
+		"composer/environments": func(c CollectionDescriptor) bool { return c.IDField == "name" && c.FullName && !c.ShortName },
+		"logging/sinks":         func(c CollectionDescriptor) bool { return c.IDField == "name" && c.ShortName && !c.FullName },
+		"ids/endpoints":         func(c CollectionDescriptor) bool { return c.Zonal && c.IDParam == "endpointId" },
+		"spanner/instances":     func(c CollectionDescriptor) bool { return len(c.Unformed) == 1 && c.Unformed[0] == "instance" },
+		"mix/nodes":             func(c CollectionDescriptor) bool { return c.FullName && c.Zonal },
+		"dataproc/autoscalingPolicies": func(c CollectionDescriptor) bool {
+			for _, f := range c.Fields {
+				if f.Name == c.IDField {
+					return false
+				}
+			}
+			return c.IDField == "id"
+		},
+	}
+	for _, d := range h.engine.Describe() {
+		for _, c := range d.Collections {
+			if check, ok := want[d.Name+"/"+c.ID]; ok {
+				if !check(c) {
+					t.Fatalf("descriptor %s/%s: %+v", d.Name, c.ID, c)
+				}
+				delete(want, d.Name+"/"+c.ID)
+			}
+		}
+	}
+	if len(want) != 0 {
+		t.Fatalf("missing descriptors %v", want)
+	}
+	if zones := Zones([]string{"global", "us-east1"}); len(zones) != 3 || zones[0] != "us-east1-b" {
+		t.Fatalf("zones %v", zones)
+	}
+}
